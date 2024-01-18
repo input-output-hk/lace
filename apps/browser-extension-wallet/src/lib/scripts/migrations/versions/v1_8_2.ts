@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs';
 const MIGRATION_VERSION = '1.8.2';
 const LOCK_STORAGE = 'lock';
 const KEY_AGENT_DATA_STORAGE = 'keyAgentData';
+const WALLET_METADATA_STORAGE = 'wallet';
 
 const provider = { type: Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER, options: {} };
 
@@ -75,6 +76,7 @@ export const v_1_8_2: Migration = {
     return false;
   },
   upgrade: async (password) => {
+    const walletMetadata = getWalletFromStorage();
     const lock = getItemFromLocalStorage<any>(LOCK_STORAGE);
     const keyAgentData =
       getItemFromLocalStorage<any>(KEY_AGENT_DATA_STORAGE) || (await decryptLock(lock.data, password)).keyAgentData;
@@ -116,6 +118,7 @@ export const v_1_8_2: Migration = {
         }
 
         removeItemFromLocalStorage(KEY_AGENT_DATA_STORAGE);
+        removeItemFromLocalStorage(WALLET_METADATA_STORAGE);
       },
       rollback: () => {
         console.info(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
@@ -124,6 +127,9 @@ export const v_1_8_2: Migration = {
         }
         if (lock) {
           setItemInLocalStorage(LOCK_STORAGE, lock);
+        }
+        if (walletMetadata) {
+          setItemInLocalStorage(WALLET_METADATA_STORAGE, walletMetadata);
         }
       }
     };
