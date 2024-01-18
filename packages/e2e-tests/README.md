@@ -79,7 +79,8 @@ UI-mapped gherkin tests for the Lace browser extension
 ## Running tests locally in debug mode using IntelliJ IDEA/WebStorm
 
 - create new run configuration
-- create config and fill it in as per attached screenshots, create a new script in package.json or use one of the existing ones
+- create config and fill it in as per attached screenshots, create a new script in package.json or use one of the existing ones\
+  example: CI=true;ENV=preprod;TEST_DAPP_URL=>yourUrl<;WALLET_1_PASSWORD=>walletPassword<
   ![img.png](src/images/readme/img.png) ![img_2.png](src/images/readme/img_2.png)
 - add required environment variables as per screenshot
   ![img_1.png](src/images/readme/img_1.png)!
