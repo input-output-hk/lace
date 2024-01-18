@@ -8,7 +8,16 @@ export default {
   title: 'StakePoolsGrid/StakePoolCard',
 } as Meta;
 
-const metricTypeOptions: MetricType[] = ['blocks', 'cost', 'margin', 'pledge', 'saturation', 'live-stake', 'ticker'];
+const metricTypeOptions: MetricType[] = [
+  'ticker',
+  'saturation',
+  'ros',
+  'cost',
+  'margin',
+  'blocks',
+  'pledge',
+  'live-stake',
+];
 
 const CardsGroup = (props: StakePoolCardProps) => (
   <Flex
