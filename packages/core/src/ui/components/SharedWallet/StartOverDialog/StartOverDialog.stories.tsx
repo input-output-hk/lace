@@ -20,8 +20,8 @@ export const Overview: Story = {
     translations: {
       title: 'Are you sure you want to cancel adding a shared wallet?',
       description: 'You’ll have to start over.',
-      cancelButton: 'Go Back',
-      confirmButton: 'Proceed'
+      cancel: 'Go Back',
+      confirm: 'Proceed'
     },
     events: {
       onCancel: noop,
