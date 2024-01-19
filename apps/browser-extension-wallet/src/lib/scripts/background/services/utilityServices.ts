@@ -39,12 +39,9 @@ const coinPrices: CoinPrices = {
   })
 };
 interface TokenAPIResponse {
-  price: {
-    price: number;
-    quoteDecimalPlaces: number;
-    baseDecimalPlaces: number;
-    quoteAddress: { policyId: string; name: string };
-    priceChange: { '24h': string; '7d': string };
+  [key: string]: {
+    price: number; // price in ADA
+    priceChange: { '24h': string };
   };
 }
 
@@ -94,28 +91,17 @@ const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION, TOKEN_PRICE_CHECK_INTERVAL } = config();
 const fetchTokenPrices = () => {
-  // `base-policy-id=&base-tokenname=` for ADA as base token
-  fetch('https://muesliswap.live-mainnet.eks.lw.iog.io/list?base-policy-id=&base-tokenname=')
+  fetch('https://muesliswap.live-mainnet.eks.lw.iog.io/lace/prices')
     .then(async (response) => {
-      const tokens: TokenAPIResponse[] = await response.json();
+      const tokens: TokenAPIResponse = await response.json();
       const tokenPrices: TokenPrices = new Map();
-      for (const token of tokens) {
+      for (const [key, token] of Object.entries(tokens)) {
+        const [policyId, name] = key.split('.');
         try {
-          const assetId = Cardano.AssetId.fromParts(
-            Cardano.PolicyId(token.price.quoteAddress.policyId),
-            Cardano.AssetName(token.price.quoteAddress.name)
-          );
-          // Base token is ADA, quote token is the one we are fetching the price
-          // According to muesliswap API, ADA decimal places (baseDecimalPlaces) is 6
-          // The token price returned by this endpoint is not based on ADA, even when ADA is specified as the base
-          // If the token and ADA decimal places differ, we need to do the following to calculate the price in ADA properly:
-          //   priceInAda = token price / (10 ^ (ADA decimal places - token decimal places))
-          const priceInAda =
-            // eslint-disable-next-line no-magic-numbers
-            token.price.price / Math.pow(10, token.price.baseDecimalPlaces - token.price.quoteDecimalPlaces);
+          const assetId = Cardano.AssetId.fromParts(Cardano.PolicyId(policyId), Cardano.AssetName(name));
           tokenPrices.set(assetId, {
-            priceInAda,
-            priceVariationPercentage24h: Number(token.price.priceChange['24h'])
+            priceInAda: token.price,
+            priceVariationPercentage24h: Number(token.priceChange['24h'])
           });
         } catch {
           // If a token couldn't be parsed then skip it

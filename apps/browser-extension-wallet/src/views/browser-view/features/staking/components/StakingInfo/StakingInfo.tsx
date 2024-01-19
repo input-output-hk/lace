@@ -104,7 +104,7 @@ export const StakingInfo = ({
               <Stats
                 text={t('browserView.staking.stakingInfo.totalStaked.title')}
                 value={
-                  <Tooltip title={`$ ${Wallet.util.convertAdaToFiat({ ada: coinBalance.toString(), fiat })}`}>
+                  <Tooltip title={Wallet.util.convertAdaToFiat({ ada: coinBalance.toString(), fiat })}>
                     <span>{coinBalance}</span>
                     <span className={styles.suffix}>{cardanoCoin.symbol}</span>
                   </Tooltip>
