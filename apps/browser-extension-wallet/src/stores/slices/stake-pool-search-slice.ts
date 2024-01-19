@@ -12,7 +12,7 @@ const fetchStakePools =
     get
   }: ZustandHandlers<StakePoolSearchSlice & BlockchainProviderSlice>): StakePoolSearchSlice['fetchStakePools'] =>
   async ({ searchString, skip = 0, limit = defaultFetchLimit, sort }) => {
-    const { totalResultCount: prevTotalCount, pageResults: prevPageResults } = get().stakePoolSearchResults;
+    const { totalResultCount: prevTotalCount, pageResults: prevPageResults } = get().stakePoolSearchResults || {};
     set({ stakePoolSearchResultsStatus: StateStatus.LOADING });
 
     let filtersValues = [];
