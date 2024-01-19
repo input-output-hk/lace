@@ -10849,6 +10849,7 @@ __metadata:
     react-dom: 17.0.2
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
+    react-virtuoso: ^4.6.2
     recharts: ^2.9.2
     storybook: ^7.6.7
     tsup: ^6.7.0
@@ -45232,6 +45233,16 @@ __metadata:
     react: ">=15.0.0"
     react-dom: ">=15.0.0"
   checksum: d8c9e50aabdc2cfc324e5cdb0ad1c6eecb02e1c0cd007b26d5b30ccf49015e900683dd489348c71fba4055858308d9ba7019e0d37d0e8d37bd46ed098788f670
+  languageName: node
+  linkType: hard
+
+"react-virtuoso@npm:^4.6.2":
+  version: 4.6.2
+  resolution: "react-virtuoso@npm:4.6.2"
+  peerDependencies:
+    react: ">=16 || >=17 || >= 18"
+    react-dom: ">=16 || >=17 || >= 18"
+  checksum: 97daa55b68bb36c25a4a4d2fdd7a60418a019113551018e899f0f5689be57cdadd539e2f10d4d6cd96aa79105e6a5dc03ba6af9856cca168d0ec8e74b231f8fd
   languageName: node
   linkType: hard
 
