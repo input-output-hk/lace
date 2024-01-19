@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
 import BigNumber from 'bignumber.js';
@@ -26,10 +27,10 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
     activeStake: metrics?.stake.active
       ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.active.toString()))
-      : { number: '-' },
+      : { number: '-', unit: '' },
     liveStake: metrics?.stake.live
       ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.live.toString()))
-      : { number: '-' },
+      : { number: '-', unit: '' },
     name: metadata?.name || '-',
     owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
     pledge: `${formattedPledge.number}${formattedPledge.unit}`,

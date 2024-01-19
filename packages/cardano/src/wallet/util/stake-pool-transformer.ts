@@ -48,7 +48,7 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
     cost: `${formattedCost.number}${formattedCost.unit}`,
     liveStake: metrics?.stake.live
       ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
-      : { number: '-' },
+      : { number: '-', unit: '' },
     ...(metrics && {
       ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
       saturation: formatPercentages(metrics.saturation.valueOf()),
