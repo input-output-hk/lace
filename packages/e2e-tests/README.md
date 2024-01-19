@@ -80,10 +80,10 @@ UI-mapped gherkin tests for the Lace browser extension
 
 - create new run configuration
 - create config and fill it in as per attached screenshots, create a new script in package.json or use one of the existing ones\
-  example: CI=true;ENV=preprod;TEST_DAPP_URL=>yourUrl<;WALLET_1_PASSWORD=>walletPassword<
-  ![img.png](src/images/readme/img.png) ![img_2.png](src/images/readme/img_2.png)
+  `example: CI=true;ENV=preprod;TEST_DAPP_URL=<yourUrl>;WALLET_1_PASSWORD=<walletPassword>`
+  ![debug.png](src/images/readme/debug.png) ![debug2.png](src/images/readme/debug2.png)
 - add required environment variables as per screenshot
-  ![img_1.png](src/images/readme/img_1.png)!
+  ![debug1.png](src/images/readme/debug1.png)!
 - make sure you have a chromedriver running on port 4444
 - start debug run configuration just created\
-  ![img_3.png](src/images/readme/img_3.png)
+  ![debug3.png](src/images/readme/debug3.png)
