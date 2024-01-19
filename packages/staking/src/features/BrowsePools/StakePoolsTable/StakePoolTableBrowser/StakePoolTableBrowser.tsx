@@ -45,9 +45,6 @@ export const StakePoolTableBrowser = ({
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
     },
   }));
-  const availableStakePools = pools.filter(
-    (item): item is StakePoolTableItemBrowserProps => !item || !selectedStakePools.some((pool) => pool.id === item.id)
-  );
 
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
@@ -60,13 +57,13 @@ export const StakePoolTableBrowser = ({
         </div>
       )}
       {emptyPlaceholder}
-      <TableBody<StakePoolTableItemBrowserProps>
+      <TableBody<StakePoolTableItemBrowserProps | undefined>
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}
-        items={availableStakePools}
+        items={pools}
         itemContent={(_index, data) =>
           data ? (
-            <StakePoolTableItemBrowser {...data} />
+            <StakePoolTableItemBrowser {...data} hideSelected />
           ) : (
             <StakePoolPlaceholder columns={config.columns} withSelection />
           )

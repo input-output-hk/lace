@@ -43,6 +43,7 @@ const fetchStakePools =
       sort
     };
     const { totalResultCount, pageResults } = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
+
     const stakePools: (Wallet.Cardano.StakePool | undefined)[] =
       isNumber(prevTotalCount) && totalResultCount === prevTotalCount
         ? [...prevPageResults]

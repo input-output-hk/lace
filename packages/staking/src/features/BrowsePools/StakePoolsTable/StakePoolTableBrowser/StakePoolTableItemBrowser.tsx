@@ -9,10 +9,11 @@ import { config } from '../utils';
 import { StakePoolTableItemBrowserProps } from './types';
 
 export const StakePoolTableItemBrowser = ({
+  hideSelected,
   stakePool,
   hexId,
   ...data
-}: StakePoolTableItemBrowserProps): React.ReactElement => {
+}: StakePoolTableItemBrowserProps & { hideSelected?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
 
@@ -37,7 +38,10 @@ export const StakePoolTableItemBrowser = ({
     }
   };
 
-  return (
+  return hideSelected && poolAlreadySelected ? (
+    // TODO: this would throw an error but would cause no harm for the table/proper data fetching
+    <div />
+  ) : (
     <TableRow<Columns>
       columns={config.columns}
       cellRenderers={config.renderer}

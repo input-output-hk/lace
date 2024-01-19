@@ -130,7 +130,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         data-testid="search-input"
         loading={fetchingPools}
       />
-      <Box mt="$10">
+      <Box mt="$10" mb="$112">
         <StakePoolTableBrowser
           emptyPlaceholder={!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
           selectedPools={selectedList}
