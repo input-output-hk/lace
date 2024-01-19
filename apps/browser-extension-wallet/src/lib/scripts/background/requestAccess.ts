@@ -15,20 +15,20 @@ const DEBOUNCE_THROTTLE = 500;
 export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
 
 export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender) => {
-  const launchingTab = await getLastActiveTab();
-  const { logo, name } = await getDappInfoFromLastActiveTab();
-  dappInfo$.next({ logo, name, url: origin });
+  const launchingTab = await getLastActiveTab(sender.url);
+  const { logo, name, url } = await getDappInfoFromLastActiveTab(sender.url);
+  dappInfo$.next({ logo, name, url: new URL(sender.url).origin });
   await ensureUiIsOpenAndLoaded('#/dapp/connect', false);
-  const isAllowed = await userPromptService.allowOrigin(origin);
+  const isAllowed = await userPromptService.allowOrigin(sender.url);
   if (isAllowed === 'deny') return Promise.reject();
   if (isAllowed === 'allow') {
     const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
     if (authorizedDapps) {
-      await webStorage.local.set({ authorizedDapps: [...authorizedDapps, { logo, name, url: origin }] });
-      authorizedDappsList.next([...authorizedDapps, { logo, name, url: origin }]);
+      await webStorage.local.set({ authorizedDapps: [...authorizedDapps, { logo, name, url }] });
+      authorizedDappsList.next([...authorizedDapps, { logo, name, url }]);
     } else {
-      await webStorage.local.set({ authorizedDapps: [{ logo, name, url: origin }] });
-      authorizedDappsList.next([{ logo, name, url: origin }]);
+      await webStorage.local.set({ authorizedDapps: [{ logo, name, url }] });
+      authorizedDappsList.next([{ logo, name, url }]);
     }
   } else {
     tabs.onRemoved.addListener((t) => {
