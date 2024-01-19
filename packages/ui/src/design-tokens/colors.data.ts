@@ -234,6 +234,15 @@ export const colors = {
   $educational_card_item_icon_container_bgColor: '',
   $educational_card_item_icon_container_borderColor: '',
 
+  $file_upload_container_bgColor: '',
+  $file_upload_container_bgColor_hover: '',
+  $file_upload_container_bgColor_pressed: '',
+  $file_upload_container_bgColor_focused: '',
+  $file_upload_container_outlineColor: '',
+  $file_upload_container_borderColor: '',
+  $file_upload_icon_container_bgColor: '',
+  $file_upload_icon_container_borderColor: '',
+
   $checkbox_check_color: '',
   $checkbox_checked_backgroundColor: '',
   $checkbox_unchecked_backgroundColor: '',
@@ -259,6 +268,15 @@ export const colors = {
   $select_input_value_color: '',
   $select_input_background_data_highlighted: '',
   $select_input_focus_color: '',
+
+  $action_card_container_bgColor: '',
+  $action_card_container_bgColor_hover: '',
+  $action_card_container_bgColor_pressed: '',
+  $action_card_container_bgColor_focused: '',
+  $action_card_container_outlineColor: '',
+  $action_card_container_borderColor: '',
+  $action_card_icon_container_bgColor: '',
+  $action_card_icon_container_borderColor: '',
 };
 
 export type Colors = typeof colors;

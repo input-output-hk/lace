@@ -326,6 +326,17 @@ const colors: Colors = {
     darkColorScheme.$primary_dark_grey_plus,
   $educational_card_item_icon_container_borderColor: colorTransparent,
 
+  $file_upload_container_bgColor: darkColorScheme.$primary_mid_black,
+  $file_upload_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $file_upload_container_bgColor_pressed: darkColorScheme.$primary_dark_grey,
+  $file_upload_container_bgColor_focused: darkColorScheme.$primary_mid_black,
+  $file_upload_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $file_upload_container_borderColor: colorTransparent,
+
+  $file_upload_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
+  $file_upload_icon_container_borderColor: colorTransparent,
+
   $checkbox_check_color: darkColorScheme.$primary_black,
   $checkbox_checked_backgroundColor: darkColorScheme.$primary_accent_purple,
   $checkbox_unchecked_backgroundColor: colorTransparent,
@@ -355,6 +366,16 @@ const colors: Colors = {
   $select_input_background_data_highlighted:
     darkColorScheme.$primary_light_grey_plus_0_56,
   $select_input_focus_color: darkColorScheme.$primary_accent_purple_0_3,
+
+  $action_card_container_bgColor: darkColorScheme.$primary_mid_black,
+  $action_card_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $action_card_container_bgColor_pressed: darkColorScheme.$primary_dark_grey,
+  $action_card_container_bgColor_focused: darkColorScheme.$primary_mid_black,
+  $action_card_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $action_card_container_borderColor: colorTransparent,
+  $action_card_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
+  $action_card_icon_container_borderColor: colorTransparent,
 };
 
 const elevation: Elevation = {
