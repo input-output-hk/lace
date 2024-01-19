@@ -59,6 +59,10 @@ export const cellInner = style([
   },
 ]);
 
+export const checkBoxWrapper = style({
+  display: 'flex',
+});
+
 // header styles
 export const header = style([
   {

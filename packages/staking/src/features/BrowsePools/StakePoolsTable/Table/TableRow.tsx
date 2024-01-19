@@ -56,7 +56,7 @@ export const TableRow = function TableRow<E extends string>({
       {withSelection && (
         <div className={styles.cell} data-testid={`${dataTestId}-list-checkbox`}>
           <ConditionalTooltipWrapper message={(!selectable && !selected && selectionDisabledMessage) || ''}>
-            <span>
+            <span className={styles.checkBoxWrapper}>
               <Checkbox
                 key={key}
                 onClick={(event) => {
