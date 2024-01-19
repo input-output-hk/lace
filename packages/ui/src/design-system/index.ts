@@ -30,5 +30,8 @@ export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
 export { Variants, Section } from './decorators';
 export * as EducationalCard from './educational-card';
+export { FileUpload } from './file-upload';
 export { Checkbox } from './checkbox';
 export * as Dialog from './dialog';
+export { ActionCard } from './action-card';
+export { Loader } from './loader';
