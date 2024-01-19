@@ -1,7 +1,7 @@
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../../store';
@@ -22,6 +22,7 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 const searchDebounce = 300;
 
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
+  const isMounted = useRef(false);
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
@@ -51,19 +52,30 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
+  const debouncedResetStakePools = useMemo(
+    () => resetStakePools && debounce(resetStakePools, searchDebounce),
+    [resetStakePools]
+  );
 
   useEffect(() => {
-    // Fetch pools on mount, network switching, searchValue change and sort change
-    debouncedSearch({ searchString: searchValue, sort });
-    // TODO: debounce in the same way as fetchStakePools
-    resetStakePools?.();
-  }, [currentChain, searchValue, sort, debouncedSearch, resetStakePools]);
-
-  const loadMoreData = ({ startIndex, endIndex }: Parameters<StakePoolTableBrowserProps['loadMoreData']>[0]) => {
-    if (startIndex !== endIndex) {
-      debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
+    if (isMounted?.current) {
+      // reset pools on network switching, searchValue change and sort change
+      debouncedResetStakePools?.();
     }
-  };
+  }, [currentChain, searchValue, sort, debouncedSearch, debouncedResetStakePools]);
+
+  useEffect(() => {
+    isMounted.current = true;
+  }, []);
+
+  const loadMoreData = useCallback(
+    ({ startIndex, endIndex }: Parameters<StakePoolTableBrowserProps['loadMoreData']>[0]) => {
+      if (startIndex !== endIndex) {
+        debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
+      }
+    },
+    [debouncedSearch, searchValue, sort]
+  );
 
   const onSearch = (searchString: string) => {
     const startedTyping = searchValue === '' && searchString !== '';

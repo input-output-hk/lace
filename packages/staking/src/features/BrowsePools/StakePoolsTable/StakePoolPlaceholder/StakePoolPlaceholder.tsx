@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import cn from 'classnames';
-// TODO: remove replaced with new pool skeleton
+// TODO: remove once replaced with new pool skeleton
 import React from 'react';
 import * as styles from './StakePoolPlaceholder.css';
 import { stakePoolCellPlaceholderRenderer } from './StakePoolPlaceholderCellRenderer';

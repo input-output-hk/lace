@@ -1,6 +1,6 @@
 import { PostHogAction } from '@lace/common';
-import React, { useLayoutEffect, useRef } from 'react';
-import { ListRange, Virtuoso } from 'react-virtuoso';
+import React from 'react';
+import { ListRange } from 'react-virtuoso';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../../store';
 import { StakePoolPlaceholder } from '../StakePoolPlaceholder/StakePoolPlaceholder';
@@ -25,15 +25,14 @@ export type StakePoolTableBrowserProps = {
 
 export const StakePoolTableBrowser = ({
   emptyPlaceholder,
-  scrollableTargetId,
   loadMoreData,
   pools,
   selectedPools,
   translations,
   activeSort,
   setActiveSort,
+  scrollableTargetId,
 }: StakePoolTableBrowserProps): React.ReactElement => {
-  const scrollableTargetRef = useRef<Parameters<typeof Virtuoso>[0]['customScrollParent']>();
   const { analytics } = useOutsideHandles();
 
   const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
@@ -50,10 +49,6 @@ export const StakePoolTableBrowser = ({
     (item): item is StakePoolTableItemBrowserProps => !item || !selectedStakePools.some((pool) => pool.id === item.id)
   );
 
-  useLayoutEffect(() => {
-    scrollableTargetRef.current = document.getElementById(scrollableTargetId) || undefined;
-  }, [scrollableTargetId]);
-
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
       <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
@@ -66,7 +61,7 @@ export const StakePoolTableBrowser = ({
       )}
       {emptyPlaceholder}
       <TableBody<StakePoolTableItemBrowserProps>
-        scrollableTargetRef={scrollableTargetRef.current}
+        scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}
         items={availableStakePools}
         itemContent={(_index, data) =>

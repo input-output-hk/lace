@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
 import { Wallet } from '@lace/cardano';
 import {
@@ -49,13 +49,13 @@ const searchDebounce = 300;
 const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
 
 export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTableProps): React.ReactElement => {
+  const isMounted = useRef(false);
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const { setSelectedStakePool } = useDelegationStore();
   const { setIsDrawerVisible } = useStakePoolDetails();
   const analytics = useAnalyticsContext();
-  const scrollableTargetRef = useRef<TableBodyProps<Wallet.Cardano.StakePool>['scrollableTargetRef']>();
 
   const {
     stakePoolSearchResults: { pageResults, totalResultCount },
@@ -97,13 +97,15 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
     }
   };
 
+  const debouncedResetStakePools = useMemo(() => debounce(resetStakePools, searchDebounce), [resetStakePools]);
+
   useEffect(() => {
-    // Fetch pools on mount, network switching, searchValue change and sort change
-    setIsDrawerVisible(false);
-    debouncedSearch({ searchString: searchValue, sort });
-    // TODO: add debounce
-    resetStakePools();
-  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible, resetStakePools]);
+    if (isMounted?.current) {
+      // Fetch pools on network switching, searchValue change and sort change
+      setIsDrawerVisible(false);
+      debouncedResetStakePools();
+    }
+  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible, debouncedResetStakePools]);
 
   const onSearch = (searchString: string) => {
     setSearchValue(searchString);
@@ -163,10 +165,6 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
 
   const isActiveSortItem = (value: string) => value === sort?.field;
 
-  useLayoutEffect(() => {
-    scrollableTargetRef.current = document.querySelector(`#${scrollableTargetId}`) || undefined;
-  }, [scrollableTargetId]);
-
   return (
     <div data-testid="stake-pool-table" className={styles.table}>
       <div className={styles.header}>
@@ -196,8 +194,8 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
         />
         {!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
         <TableBody<StakePoolTableItemBrowserProps>
-          loadMoreData={loadMoreData}
           scrollableTargetId={scrollableTargetId}
+          loadMoreData={loadMoreData}
           items={list}
           itemContent={(_index, props) => {
             if (!props) {

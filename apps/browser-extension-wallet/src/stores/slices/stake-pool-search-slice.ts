@@ -3,7 +3,6 @@ import isNumber from 'lodash/isNumber';
 import { Wallet } from '@lace/cardano';
 import { StateStatus, StakePoolSearchSlice, BlockchainProviderSlice, ZustandHandlers, SliceCreator } from '../types';
 
-// TODO: calculate proper initial count
 const defaultFetchLimit = 10;
 
 const fetchStakePools =
@@ -45,9 +44,11 @@ const fetchStakePools =
     };
     const { totalResultCount, pageResults } = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
     const stakePools: (Wallet.Cardano.StakePool | undefined)[] =
-      isNumber(prevTotalCount) && totalResultCount ? [...prevPageResults] : Array.from({ length: totalResultCount });
+      isNumber(prevTotalCount) && totalResultCount === prevTotalCount
+        ? [...prevPageResults]
+        : Array.from({ length: totalResultCount });
 
-    if (isNumber(totalResultCount) && pageResults.length > 0) {
+    if (pageResults.length > 0) {
       stakePools.splice(skip, pageResults?.length, ...pageResults);
     }
 

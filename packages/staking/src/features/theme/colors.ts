@@ -32,7 +32,7 @@ export const colorsContract = {
   $sliderFillSecondary: '',
   $sliderKnobFill: '',
   $sliderRailFill: '',
-  // TODO: remove replaced with new pool skeleton
+  // TODO: remove once replaced with new pool skeleton
   $stakePoolCellPlaceholder: '',
   $stakePoolHeaderTextColor: '',
   $stakePoolItemBgHover: '',
@@ -77,7 +77,7 @@ export const lightThemeColors: typeof colorsContract = {
   $sliderFillSecondary: lightColorScheme.$primary_dark_grey,
   $sliderKnobFill: lightColorScheme.$primary_white,
   $sliderRailFill: lightColorScheme.$primary_light_grey_plus,
-  // TODO: remove replaced with new pool skeleton
+  // TODO: remove once replaced with new pool skeleton
   $stakePoolCellPlaceholder: lightColorScheme.$primary_light_grey,
   $stakePoolHeaderTextColor: lightColorScheme.$primary_dark_grey,
   $stakePoolItemBgHover: lightColorScheme.$primary_light_grey,
@@ -126,7 +126,7 @@ export const darkThemeColors: typeof colorsContract = {
   $sliderFillSecondary: darkColorScheme.$primary_light_grey,
   $sliderKnobFill: lightColorScheme.$primary_black,
   $sliderRailFill: darkColorScheme.$primary_dark_grey_plus,
-  // TODO: remove replaced with new pool skeleton
+  // TODO: remove once replaced with new pool skeleton
   $stakePoolCellPlaceholder: darkColorScheme.$primary_mid_grey,
   $stakePoolHeaderTextColor: darkColorScheme.$primary_white,
   $stakePoolItemBgHover: darkColorScheme.$primary_dark_grey_plus,
