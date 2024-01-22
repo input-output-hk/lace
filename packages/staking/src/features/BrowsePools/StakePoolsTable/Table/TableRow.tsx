@@ -49,7 +49,7 @@ export const TableRow = function TableRow<E extends string>({
     <div
       data-testid={`${dataTestId}-item`}
       className={cn(styles.row, {
-        [styles.selectable!]: withSelection,
+        [styles.selectable]: withSelection,
       })}
       onClick={() => onClick?.()}
     >
@@ -70,8 +70,8 @@ export const TableRow = function TableRow<E extends string>({
           </ConditionalTooltipWrapper>
         </div>
       )}
-      {columns.map((cell, index) => (
-        <div key={`${cell}-${index}`} className={styles.cell} data-testid={`${dataTestId}-list-${cell}`}>
+      {columns.map((cell) => (
+        <div key={cell} className={styles.cell} data-testid={`${dataTestId}-list-${cell}`}>
           <span className={styles.cellInner}>
             {cellRenderers?.[cell]?.({ value: data[cell] }) || data[cell] || '-'}
           </span>

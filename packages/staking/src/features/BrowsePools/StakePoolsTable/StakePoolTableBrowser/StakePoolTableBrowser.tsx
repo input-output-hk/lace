@@ -66,11 +66,11 @@ export const StakePoolTableBrowser = ({
       <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
       {selectedStakePools?.length > 0 && (
         <div className={styles.selectedPools}>
-          {selectedStakePools.map((pool, index) => (
+          {selectedStakePools.map((pool) => (
             <StakePoolTableItemBrowser
               // highlight proper selected checkbox
               focused={pool.hexId === lastSelectedPoolId}
-              key={`${pool.id}-${index}`}
+              key={pool.id}
               {...{ ...pool, selected: true }}
             />
           ))}

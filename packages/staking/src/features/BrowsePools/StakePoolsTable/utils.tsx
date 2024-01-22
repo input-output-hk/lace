@@ -28,9 +28,7 @@ export const getSaturationLevel = (saturation: number): SaturationLevels => {
   return result;
 };
 
-export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && Columns.apy].filter(
-  (c) => !!c
-) as Columns[];
+export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && Columns.apy].filter((c) => !!c);
 
 export const config = {
   columns: (Object.keys(Columns).filter((v) => Number.isNaN(Number(v))) as Columns[]).filter(
