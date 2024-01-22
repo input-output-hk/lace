@@ -12,6 +12,8 @@ import * as Typography from '../typography';
 import * as cx from './dapp-transaction-summary.css';
 
 import type { OmitClassName } from '../../types';
+import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-variant';
+import { ThemeColorScheme } from '../../design-tokens';
 
 type Props = OmitClassName<'div'> & {
   transactionAmount: string;
@@ -30,7 +32,8 @@ export const TransactionSummary = ({
   items,
   ...props
 }: Readonly<Props>): JSX.Element => {
-  // const getImageSrc = 
+  const { theme } = useThemeVariant();
+  console.log("color theme", theme)
   return (
     <>
       <Flex justifyContent="flex-start">
