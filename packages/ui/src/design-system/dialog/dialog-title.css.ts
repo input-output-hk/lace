@@ -2,6 +2,7 @@ import { style, sx } from '../../design-tokens';
 
 export const dialogTitle = style([
   sx({
+    color: '$dialog_title_color',
     fontWeight: '$bold',
   }),
   {
