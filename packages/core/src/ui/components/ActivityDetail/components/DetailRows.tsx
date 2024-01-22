@@ -5,91 +5,27 @@ import { DetailRow } from './DetailRow';
 import { TxDetails } from '../types';
 import { TranslationsFor } from '@src/ui/utils/types';
 
-type DetailRowsCertificatesProps = {
-  list: TxDetails<
-    'certificateType' | 'drep' | 'anchor' | 'coldCredential' | 'hotCredential' | 'drepCredential' | 'depositPaid'
-  >;
+type DetailRowsProps<T extends string> = {
+  list: TxDetails<T>;
   testId: string;
-  translations: TranslationsFor<
-    'certificateType' | 'drep' | 'anchor' | 'coldCredential' | 'hotCredential' | 'drepCredential' | 'depositPaid'
-  >;
+  translations: TranslationsFor<T>;
 };
 
-export const DetailRowsCertificates = ({
+export const DetailRows = function DetailRows<T extends string>({
   list,
   testId,
   translations
-}: DetailRowsCertificatesProps): React.ReactElement => (
-  <>
-    {list.map(({ title, details }) => (
-      <DetailRow
-        key={`${testId}-${title}`}
-        data-testid={`${testId}-${title}`}
-        title={translations[title]}
-        details={details}
-      />
-    ))}
-  </>
-);
-
-type DetailRowsVotesProps = {
-  list: TxDetails<'voterType' | 'voterCredential' | 'vote' | 'anchor' | 'proposalTxHash'>;
-  testId: string;
-  translations: TranslationsFor<'voterType' | 'voterCredential' | 'vote' | 'anchor' | 'proposalTxHash'>;
+}: DetailRowsProps<T>): React.ReactElement {
+  return (
+    <>
+      {list.map(({ title, details }) => (
+        <DetailRow
+          key={`${testId}-${title}`}
+          dataTestId={`${testId}-${title}`}
+          title={translations[title]}
+          details={details}
+        />
+      ))}
+    </>
+  );
 };
-
-export const DetailRowsVotes = ({ list, testId, translations }: DetailRowsVotesProps): React.ReactElement => (
-  <>
-    {list.map(({ title, details }) => (
-      <DetailRow
-        key={`${testId}-${title}`}
-        data-testid={`${testId}-${title}`}
-        title={translations[title]}
-        details={details}
-      />
-    ))}
-  </>
-);
-
-type DetailRowsProposalsProps = {
-  list: TxDetails<
-    | 'type'
-    | 'governanceActionId'
-    | 'rewardAccount'
-    | 'anchor'
-    | 'protocolParamUpdate'
-    | 'protocolVersion'
-    | 'withdrawals'
-    | 'membersToBeRemoved'
-    | 'membersToBeAdded'
-    | 'newQuorumThreshold'
-    | 'constitutionAnchor'
-  >;
-  testId: string;
-  translations: TranslationsFor<
-    | 'type'
-    | 'governanceActionId'
-    | 'rewardAccount'
-    | 'anchor'
-    | 'protocolParamUpdate'
-    | 'protocolVersion'
-    | 'withdrawals'
-    | 'membersToBeRemoved'
-    | 'membersToBeAdded'
-    | 'newQuorumThreshold'
-    | 'constitutionAnchor'
-  >;
-};
-
-export const DetailRowsProposals = ({ list, testId, translations }: DetailRowsProposalsProps): React.ReactElement => (
-  <>
-    {list.map(({ title, details }) => (
-      <DetailRow
-        key={`${testId}-${title}`}
-        data-testid={`${testId}-${title}`}
-        title={translations[title]}
-        details={details}
-      />
-    ))}
-  </>
-);

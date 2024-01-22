@@ -1,16 +1,13 @@
-/* eslint-disable no-magic-numbers */
-import React, { useState } from 'react';
 import { Tooltip } from 'antd';
 import cn from 'classnames';
+import React, { useState } from 'react';
+import { DownOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button } from '@lace/common';
-
-import { InfoCircleOutlined, DownOutlined } from '@ant-design/icons';
-
-import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
-import styles from './TransactionInputOutput.module.scss';
-import { DetailRowsProposals } from './components';
 import { TranslationsFor } from '@src/ui/utils/types';
-import { TxDetails, TxDetailsProposalProceduresTitles } from './types';
+import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
+import { DetailRows } from './components';
+import styles from './TransactionInputOutput.module.scss';
+import { TxDetails } from './types';
 
 const rotateOpen: React.CSSProperties = {
   transform: 'rotate(180deg)',
@@ -22,23 +19,23 @@ const rotateClose: React.CSSProperties = {
   transition: 'transform .2s linear'
 };
 
-export interface TxDetailListProposalsProps {
+interface TxDetailListProps<T extends string> {
   testId: string;
   title: string;
-  lists: TxDetails<TxDetailsProposalProceduresTitles>[]; // make strongly typed with generic to tie to the translations ??
-  translations: TranslationsFor<TxDetailsProposalProceduresTitles>;
+  lists: TxDetails<T>[];
+  translations: TranslationsFor<T>;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
 
-export const TxDetailListProposals = ({
+export const TxDetailList = function TxDetailList<T extends string>({
   testId,
   title,
   lists,
   tooltipContent,
   withSeparatorLine,
   translations
-}: TxDetailListProposalsProps): React.ReactElement => {
+}: TxDetailListProps<T>): React.ReactElement {
   const [isVisible, setIsVisible] = useState<boolean>();
 
   const animation = isVisible ? rotateOpen : rotateClose;
@@ -68,8 +65,8 @@ export const TxDetailListProposals = ({
       {isVisible && (
         <div className={styles.txInOutContent} data-testid={`${testId}-lists`}>
           {lists.map((list, idx) => (
-            <div key={`${testId}-list-${idx}`} className={idx > 0 && styles.topBorderContent}>
-              <DetailRowsProposals translations={translations} testId={testId} list={list} />
+            <div key={`${testId}-list-${idx}`} className={cn({ [styles.topBorderContent]: idx > 0 })}>
+              <DetailRows<T> translations={translations} testId={testId} list={list} />
             </div>
           ))}
         </div>

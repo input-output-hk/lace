@@ -11,9 +11,7 @@ import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { TransactionFee } from './TransactionFee';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
-import { TxDetailListCertificates } from './TxDetailsListCertificates';
-import { TxDetailListProposals } from './TxDetailsListProposals';
-import { TxDetailListVotes } from './TxDetailsListVotes';
+import { TxDetailList } from './TxDetailsList';
 import {
   TxDetailsVotingProceduresTitles,
   TxDetailsProposalProceduresTitles,
@@ -314,7 +312,7 @@ export const TransactionDetails = ({
         </div>
 
         {votingProcedures?.length > 0 && (
-          <TxDetailListVotes
+          <TxDetailList<TxDetailsVotingProceduresTitles>
             testId="voting-procedures"
             title={t('package.core.activityDetails.votingProcedures')}
             lists={votingProcedures}
@@ -329,7 +327,7 @@ export const TransactionDetails = ({
           />
         )}
         {proposalProcedures?.length > 0 && (
-          <TxDetailListProposals
+          <TxDetailList<TxDetailsProposalProceduresTitles>
             testId="proposal-procedures"
             title={t('package.core.activityDetails.proposalProcedures')}
             lists={translatedProposalProcedures}
@@ -350,7 +348,7 @@ export const TransactionDetails = ({
           />
         )}
         {certificates?.length > 0 && (
-          <TxDetailListCertificates
+          <TxDetailList<TxDetailsCertificateTitles>
             title={t('package.core.activityDetails.certificates')}
             testId="certificates"
             lists={translatedCertificates}
