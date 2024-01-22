@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
-import { sectionTitle, DAPP_VIEWS } from '../config';
+// import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
