@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { ListProps } from 'antd';
@@ -41,7 +42,8 @@ export const StakePoolTableBrowser = ({
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const { analytics } = useOutsideHandles();
 
-  const { portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
+  const { lastSelectedPoolId, portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
+    lastSelectedPoolId: store.lastSelectedPoolId,
     portfolioMutators: store.mutators,
     portfolioPools: store.selectedPortfolio.map(({ id }) => ({
       // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
@@ -64,8 +66,13 @@ export const StakePoolTableBrowser = ({
       <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
       {selectedStakePools?.length > 0 && (
         <div className={styles.selectedPools}>
-          {selectedStakePools.map((pool) => (
-            <StakePoolTableItemBrowser key={pool.id} {...{ ...pool, selected: true }} />
+          {selectedStakePools.map((pool, index) => (
+            <StakePoolTableItemBrowser
+              // highlight proper selected checkbox
+              focused={pool.hexId === lastSelectedPoolId}
+              key={`${pool.id}-${index}`}
+              {...{ ...pool, selected: true }}
+            />
           ))}
         </div>
       )}

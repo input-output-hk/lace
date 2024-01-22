@@ -11,8 +11,9 @@ import { StakePoolTableItemBrowserProps } from './types';
 export const StakePoolTableItemBrowser = ({
   stakePool,
   hexId,
+  focused,
   ...data
-}: StakePoolTableItemBrowserProps): React.ReactElement => {
+}: StakePoolTableItemBrowserProps & { focused?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
 
@@ -49,6 +50,7 @@ export const StakePoolTableItemBrowser = ({
       selectionDisabledMessage={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
       dataTestId="stake-pool"
       withSelection
+      focused={!!focused}
     />
   );
 };

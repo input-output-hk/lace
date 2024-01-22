@@ -16,6 +16,7 @@ export type TableRowProps<E extends string> = {
   onClick?: () => void;
   cellRenderers?: Partial<Record<E, React.FunctionComponent<{ value?: string }>>>;
   dataTestId?: string;
+  focused?: boolean;
 };
 
 const ConditionalTooltipWrapper = ({ message = '', children }: { message?: string; children: React.ReactNode }) => (
@@ -42,6 +43,7 @@ export const TableRow = function TableRow<E extends string>({
   selected,
   selectionDisabledMessage = '',
   dataTestId = 'table',
+  focused,
 }: TableRowProps<E>): React.ReactElement {
   return (
     <div
@@ -56,6 +58,7 @@ export const TableRow = function TableRow<E extends string>({
           <ConditionalTooltipWrapper message={(!selectable && !selected && selectionDisabledMessage) || ''}>
             <span>
               <Checkbox
+                autoFocus={!!focused}
                 onClick={(event) => {
                   event.stopPropagation();
                   onSelect?.();

@@ -2,8 +2,8 @@ import { Wallet } from '@lace/cardano';
 
 export enum Columns {
   ticker = 'ticker',
-  apy = 'apy',
   saturation = 'saturation',
+  apy = 'apy',
   cost = 'cost',
   margin = 'margin',
   blocks = 'blocks',

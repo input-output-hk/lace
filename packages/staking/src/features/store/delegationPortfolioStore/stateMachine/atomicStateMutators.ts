@@ -71,6 +71,7 @@ export const atomicStateMutators = {
 
     return {
       // placing new pool at the top of the list for better UX
+      lastSelectedPoolId: newPool.id,
       selectedPortfolio: [newPool, ...state.selectedPortfolio],
     };
   },
@@ -99,6 +100,7 @@ export const atomicStateMutators = {
     } as const),
   unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) =>
     ({
+      lastSelectedPoolId: null,
       selectedPortfolio: state.selectedPortfolio.filter((pool) => pool.id !== id),
     } as const),
   updateStakePercentage: ({
