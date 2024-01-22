@@ -23,7 +23,6 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  // PostHogAction,
   postHogOnboardingActions,
   UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';

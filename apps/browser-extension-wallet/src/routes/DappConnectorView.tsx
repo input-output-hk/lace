@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
 import { useRedirection, useWalletManager, useAppInit } from '@src/hooks';
@@ -76,6 +76,10 @@ export const DappConnectorView = (): React.ReactElement => {
     setIsLoadingWallet(true);
   }, [walletInfo, inMemoryWallet, isLoadingWallet, loadWallet, redirectToSignFailure, redirectToSignSuccess]);
 
+  const onCloseClick = useCallback(() => {
+    tabs.create({ url: 'app.html#/setup' });
+  }, []);
+
   if (hasNoAvailableWallet) {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
@@ -83,9 +87,7 @@ export const DappConnectorView = (): React.ReactElement => {
           title={t('dapp.noWallet.heading')}
           description={t('dapp.noWallet.description')}
           closeButtonLabel={t('dapp.noWallet.closeButton')}
-          onCloseClick={() => {
-            tabs.create({ url: 'app.html#/setup' });
-          }}
+          onCloseClick={onCloseClick}
           containerTestId="no-wallet-container"
           imageTestId="no-wallet-image"
           titleTestId="no-wallet-heading"

@@ -31,12 +31,12 @@ export const DappError = ({
 }: DappErrorProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleClose = useCallback(() => {
-    if (onCloseClick) onCloseClick();
+    onCloseClick?.();
     window.close();
   }, [onCloseClick]);
 
   useEffect(() => {
-    if (onMount) onMount();
+    onMount?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -1,11 +1,15 @@
-import { style } from '@vanilla-extract/css';
+import { style, sx } from '@lace/ui';
 import { theme } from '../theme';
 
-export const tooltip = style({
-  background: theme.colors.$tooltipBgColor,
-  borderRadius: theme.radius.$small,
-  boxShadow: theme.elevation.$tooltip,
-  margin: theme.spacing.$10,
-  maxWidth: theme.spacing.$214,
-  padding: theme.spacing.$16,
-});
+export const tooltip = style([
+  sx({
+    borderRadius: '$small',
+    boxShadow: '$tooltip',
+    margin: '$10',
+    maxWidth: '$214',
+    padding: '$16',
+  }),
+  {
+    background: theme.colors.$tooltipBgColor,
+  },
+]);

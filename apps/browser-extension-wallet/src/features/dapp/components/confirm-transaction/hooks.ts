@@ -1,3 +1,4 @@
+import isPlainObject from 'lodash/isPlainObject';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AssetProvider,
@@ -66,7 +67,7 @@ export const useCreateAssetList = ({
 const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const item of arr) {
-    if (typeof item === 'object' && !Array.isArray(item) && item !== null) {
+    if (isPlainObject(item)) {
       Object.assign(result, item);
     }
   }
