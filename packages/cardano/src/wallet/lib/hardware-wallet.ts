@@ -107,7 +107,7 @@ export const createHardwareWalletsByChain = async (
       .filter(([chainName]) => chainName !== activeChainName)
       .map(async ([chainName, chainId]) => {
         // Create a key agent for each chain id to save in storage
-        const { keyAgent } = await await setup({ chainId, connectedDevice });
+        const { keyAgent } = await setup({ chainId, connectedDevice });
 
         // Build object with key agents for all chains to be able to switch to eventually
         keyAgentsByChain[chainName as ChainName] = { keyAgentData: keyAgent.serializableData };
