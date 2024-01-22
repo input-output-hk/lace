@@ -8,7 +8,7 @@ import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
 import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
-import { TransactionFee } from '@ui/components/ActivityDetail';
+import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
 type TransactionDetails = {
   fee: string;
@@ -16,6 +16,7 @@ type TransactionDetails = {
   type: 'Send' | 'Mint';
   mintedAssets?: DappTxAssetProps[];
   burnedAssets?: DappTxAssetProps[];
+  collateral?: string;
 };
 
 export interface DappTransactionProps {
@@ -31,7 +32,7 @@ export interface DappTransactionProps {
 }
 
 export const DappTransaction = ({
-  transaction: { type, outputs, fee, mintedAssets, burnedAssets },
+  transaction: { type, outputs, fee, mintedAssets, burnedAssets, collateral },
   dappInfo,
   errorMessage,
   fiatCurrencyCode,
@@ -76,6 +77,15 @@ export const DappTransaction = ({
               <DappTxOutput key={output.recipient} {...output} />
             ))}
           </>
+        )}
+        {collateral && (
+          <Collateral
+            collateral={collateral}
+            amountTransformer={(ada: string) =>
+              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+            }
+            coinSymbol={coinSymbol}
+          />
         )}
         {fee && fee !== '-' && (
           <TransactionFee
