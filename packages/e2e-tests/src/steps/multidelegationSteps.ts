@@ -6,7 +6,7 @@ import { parseSearchTerm } from '../utils/multiDelegationUtils';
 import testContext from '../utils/testContext';
 import { getStakePoolById, getStakePoolByName } from '../data/expectedStakePoolsData';
 import extensionUtils from '../utils/utils';
-import stakePoolDetailsAssert from '../assert/multidelegation/StakePoolDetailsAssert';
+import StakePoolDetailsAssert from '../assert/multidelegation/StakePoolDetailsAssert';
 import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetailsDrawer';
 import ChangingStakingPreferencesModal from '../elements/multidelegation/ChangingStakingPreferencesModal';
 import ManageStakingDrawer from '../elements/multidelegation/ManageStakingDrawer';
@@ -25,6 +25,9 @@ import TokensPageObject from '../pageobject/tokensPageObject';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
+import PortfolioBar from '../elements/multidelegation/PortfolioBar';
+import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
+import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -50,10 +53,37 @@ Then(
   }
 );
 
-Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
+Then(
+  /^I see stake pool details buttons for (delegated|non-delegated) pool$/,
+  async (typeOfPool: 'delegated' | 'non-delegated') => {
+    await StakePoolDetailsAssert.assertSeeDrawerButtons(typeOfPool === 'delegated');
+  }
+);
+
+Then(/^I click "Next" button on staking (manage staking|confirmation)$/, async (section: string) => {
   await MultidelegationPage.clickNextButtonOnDrawerSection(section);
 });
 
+Then(/^I click "(Next|Clear)" button on staking portfolio bar$/, async (button: 'Next' | 'Clear') => {
+  switch (button) {
+    case 'Next':
+      await PortfolioBar.clickNextButton();
+      break;
+    case 'Clear':
+      await PortfolioBar.clickNextButton();
+      break;
+    default:
+      throw new Error(`Unsupported button: ${button}`);
+  }
+});
+
+When(/^I see portfolio bar with "([^"]*)" selected pools$/, async (selectedPools: string) => {
+  await PortfolioBarAssert.assertSeePortfolioBar(selectedPools);
+});
+
+Then(/^I see Changing Staking Preferences modal$/, async () => {
+  await ChangingStakingPreferencesModalAssert.assertSeeModal();
+});
 Then(/^I see Delegation card displaying correct data$/, async () => {
   await MultidelegationPageAssert.assertSeeDelegationCardDetailsInfo();
 });
@@ -89,17 +119,17 @@ Then(/^I see stake pool details drawer for "([^"]*)" stake pool$/, async (stakeP
     const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
     stakePool = getStakePoolByName(stakePoolName, network);
   }
-  await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
+  await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
 });
 
 Then(/^I see stake pool details drawer for stake pool without metadata$/, async () => {
   const stakePool = getStakePoolById(testContext.load('currentStakePoolId'));
-  await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false, true);
+  await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false, true);
 });
 
 When(
-  /^I click on "(Stake all on this pool|Select pool for multi-staking)" button on stake pool details drawer$/,
-  async (button: 'Stake all on this pool' | 'Select pool for multi-staking') => {
+  /^I click on "(Stake all on this pool|Select pool for multi-staking|Manage delegation)" button on stake pool details drawer$/,
+  async (button: 'Stake all on this pool' | 'Select pool for multi-staking' | 'Manage delegation') => {
     switch (button) {
       case 'Select pool for multi-staking':
         await StakePoolDetailsDrawer.selectPoolForMultiStakingButton.waitForClickable();
@@ -108,6 +138,10 @@ When(
       case 'Stake all on this pool':
         await StakePoolDetailsDrawer.stakeAllOnThisPoolButton.waitForClickable();
         await StakePoolDetailsDrawer.stakeAllOnThisPoolButton.click();
+        break;
+      case 'Manage delegation':
+        await StakePoolDetailsDrawer.manageDelegationButton.waitForClickable();
+        await StakePoolDetailsDrawer.manageDelegationButton.click();
         break;
       default:
         throw new Error(`Unsupported button name: ${button}`);
@@ -234,7 +268,7 @@ Then(/^staking password drawer is displayed$/, async () => {
 });
 
 Then(/^Stake pool details drawer (is|is not) opened$/, async (shouldBeDisplayed: 'is' | 'is not') => {
-  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed === 'is');
+  await StakePoolDetailsAssert.assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed === 'is');
 });
 
 When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {

@@ -30,16 +30,9 @@ class StakePoolDetailsAssert {
       await StakePoolDetails.delegatedBadge.moveTo();
       await StakePoolDetails.tooltip.waitForDisplayed();
       expect(await StakePoolDetails.tooltip.getText()).to.equal(await t('drawer.details.status.delegating', 'staking'));
-      await StakePoolDetails.manageDelegationButton.waitForDisplayed();
-      expect(await StakePoolDetails.manageDelegationButton.getText()).to.equal(
-        await t('drawer.details.manageDelegation', 'staking')
-      );
-    } else {
-      await StakePoolDetails.stakeAllOnThisPoolButton.waitForDisplayed();
-      expect(await StakePoolDetails.stakeAllOnThisPoolButton.getText()).to.equal(
-        await t('drawer.details.stakeOnPoolButton', 'staking')
-      );
     }
+
+    await this.assertSeeDrawerButtons(staked);
 
     await StakePoolDetails.selectPoolForMultiStakingButton.waitForDisplayed();
     expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
@@ -161,6 +154,24 @@ class StakePoolDetailsAssert {
   async assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed = true) {
     await StakePoolDetails.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
+
+  assertSeeDrawerButtons = async (staked: boolean) => {
+    if (staked) {
+      await StakePoolDetails.manageDelegationButton.waitForClickable();
+      expect(await StakePoolDetails.manageDelegationButton.getText()).to.equal(
+        await t('drawer.details.manageDelegation', 'staking')
+      );
+    } else {
+      await StakePoolDetails.stakeAllOnThisPoolButton.waitForClickable();
+      expect(await StakePoolDetails.stakeAllOnThisPoolButton.getText()).to.equal(
+        await t('drawer.details.stakeOnPoolButton', 'staking')
+      );
+    }
+    await StakePoolDetails.selectPoolForMultiStakingButton.waitForClickable();
+    expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
+      await t('drawer.details.selectForMultiStaking', 'staking')
+    );
+  };
 }
 
 export default new StakePoolDetailsAssert();
