@@ -20,6 +20,7 @@ export type Props = Readonly<{
   open?: boolean;
   disabled?: boolean;
   showArrow?: boolean;
+  withOutline?: boolean;
 
   onValueChange: (value: string) => void;
 }>;
@@ -31,6 +32,7 @@ export const SelectGroup = ({
   onValueChange,
   selectedValue,
   showArrow = false,
+  withOutline = false,
   ...props
 }: Props): JSX.Element => (
   <Box className={cn(className, cx.root)}>
@@ -39,7 +41,12 @@ export const SelectGroup = ({
       value={selectedValue}
       {...props}
     >
-      <RadixSelectGroup.Trigger className={cx.selectTrigger} aria-label="Food">
+      <RadixSelectGroup.Trigger
+        className={
+          cx.selectTriggerVariants[withOutline ? 'outlined' : 'notOutlined']
+        }
+        aria-label="Food"
+      >
         <RadixSelectGroup.Value placeholder={placeholder} />
         {showArrow && (
           <RadixSelectGroup.Icon className={cx.selectIcon}>

@@ -1,4 +1,7 @@
+import { styleVariants } from '@vanilla-extract/css';
+
 import { style, vars, sx, createVar } from '../../design-tokens';
+
 export const focusBoxShadow = createVar();
 
 export const root = style([
@@ -26,7 +29,7 @@ export const root = style([
   },
 ]);
 
-export const selectTrigger = style([
+export const selectTriggerBase = style([
   sx({
     display: 'inline-flex',
     alignItems: 'center',
@@ -72,8 +75,31 @@ export const selectTrigger = style([
   },
 ]);
 
+export const selectTriggerVariants = styleVariants({
+  outlined: [
+    selectTriggerBase,
+    {
+      border: `1px solid ${vars.colors.$select_input_rest_border_color}`,
+      ':hover': {
+        border: `1px solid ${vars.colors.$select_input_hover_border_color}`,
+      },
+    },
+  ],
+  notOutlined: [
+    selectTriggerBase,
+    {
+      border: 0,
+      ':hover': {
+        border: 0,
+      },
+    },
+  ],
+});
+
 export const selectIcon = style({
   color: vars.colors.$select_icon_color,
+  display: 'flex',
+  alignContent: 'center',
 });
 
 export const selectContent = style([

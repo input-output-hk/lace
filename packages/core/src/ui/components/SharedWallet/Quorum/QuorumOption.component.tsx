@@ -73,6 +73,7 @@ export const QuorumOption = ({
             selectedValue={cosignerSelection}
             onValueChange={onSelectValueChange}
             showArrow
+            withOutline
           />
           <Text.Body.Small className={styles.dropdownCopy}>
             {cosignersSentence.start} {cosignerValue.length} {cosignersSentence.end}

@@ -268,6 +268,8 @@ export const colors = {
   $select_input_value_color: '',
   $select_input_background_data_highlighted: '',
   $select_input_focus_color: '',
+  $select_input_rest_border_color: '',
+  $select_input_hover_border_color: '',
 
   $action_card_container_bgColor: '',
   $action_card_container_bgColor_hover: '',

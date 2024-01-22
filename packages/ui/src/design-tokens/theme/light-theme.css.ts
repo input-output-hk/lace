@@ -389,6 +389,8 @@ const colors: Colors = {
   $select_input_background_data_highlighted:
     lightColorScheme.$primary_light_grey_plus_0_56,
   $select_input_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $select_input_rest_border_color: lightColorScheme.$primary_light_grey_plus,
+  $select_input_hover_border_color: lightColorScheme.$primary_light_grey,
 
   $action_card_container_bgColor: lightColorScheme.$primary_white,
   $action_card_container_bgColor_hover: lightColorScheme.$primary_light_grey,

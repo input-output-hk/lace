@@ -4,7 +4,7 @@ export const radioGroupRoot = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    gap: '$10',
+    gap: '$20',
     margin: '$0',
   }),
   {
@@ -15,8 +15,8 @@ export const radioGroupRoot = style([
 
 export const radioGroupItem = style([
   sx({
-    width: '$24',
-    height: '$24',
+    width: '$16',
+    height: '$16',
     padding: '$0',
     borderRadius: '$circle',
   }),
@@ -53,9 +53,10 @@ export const radioGroupIndicator = style([
 
     '::after': {
       content: '',
-      display: 'block',
-      width: '11px',
-      height: '11px',
+      display: 'flex',
+      alignSelf: 'center',
+      width: '8px',
+      height: '8px',
       borderRadius: '50%',
       backgroundColor: vars.colors.$radiobutton_indicator_check_color,
     },
@@ -64,7 +65,7 @@ export const radioGroupIndicator = style([
 
 export const icon = style([
   sx({
-    borderRadius: '$tiny',
+    borderRadius: '$small',
     ml: '$24',
     color: '$radiobutton_icon_color',
   }),
@@ -100,7 +101,7 @@ export const root = style([
   sx({
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '$tiny',
+    borderRadius: '$small',
   }),
   {
     display: 'inline-flex',
@@ -115,6 +116,7 @@ export const label = style({
   fontSize: '15px',
   lineHeight: '1',
   paddingLeft: '15px',
+  display: 'flex',
 });
 
 export const disabled = style([

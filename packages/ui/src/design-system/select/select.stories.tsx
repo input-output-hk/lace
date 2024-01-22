@@ -39,6 +39,7 @@ const MainComponentsIcon = (): JSX.Element => (
         options={options}
         placeholder={placeholder}
         showArrow={true}
+        withOutline={true}
       />
     </Variants.Cell>
     <Variants.Cell>
@@ -48,6 +49,7 @@ const MainComponentsIcon = (): JSX.Element => (
         options={options}
         placeholder={placeholder}
         showArrow={true}
+        withOutline={true}
       />
     </Variants.Cell>
     <Variants.Cell>
@@ -58,6 +60,7 @@ const MainComponentsIcon = (): JSX.Element => (
         options={options}
         placeholder={placeholder}
         showArrow={true}
+        withOutline={true}
       />
     </Variants.Cell>
   </Variants.Row>

@@ -359,13 +359,15 @@ const colors: Colors = {
     darkColorScheme.$primary_light_grey_plus,
 
   $select_border: darkColorScheme.$primary_grey,
-  $select_icon_color: darkColorScheme.$primary_dark_grey,
-  $select_background_color: darkColorScheme.$primary_white,
-  $select_hover_background_color: darkColorScheme.$primary_light_grey_plus,
-  $select_input_value_color: darkColorScheme.$primary_black,
+  $select_icon_color: darkColorScheme.$primary_light_grey_plus_0_56,
+  $select_background_color: darkColorScheme.$primary_mid_grey,
+  $select_hover_background_color: darkColorScheme.$primary_dark_grey,
+  $select_input_value_color: darkColorScheme.$primary_white,
   $select_input_background_data_highlighted:
     darkColorScheme.$primary_light_grey_plus_0_56,
   $select_input_focus_color: darkColorScheme.$primary_accent_purple_0_3,
+  $select_input_rest_border_color: darkColorScheme.$primary_mid_grey,
+  $select_input_hover_border_color: darkColorScheme.$primary_mid_grey,
 
   $action_card_container_bgColor: darkColorScheme.$primary_mid_black,
   $action_card_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
