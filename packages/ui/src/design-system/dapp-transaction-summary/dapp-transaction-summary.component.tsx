@@ -2,9 +2,11 @@ import React from 'react';
 
 import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
 import * as RadixUIAvatar from '@radix-ui/react-avatar';
-import DarkFallBack from '../../assets/images/fallback-dark-mode.png';
-import LighFallBack from '../../assets/images/fallback-light-mode.png';
 
+import DarkFallBack from '../../assets/images/dark-mode-fallback.png';
+import LightFallBack from '../../assets/images/light-mode-fallback.png';
+import { ThemeColorScheme } from '../../design-tokens';
+import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-variant';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import * as Typography from '../typography';
@@ -12,8 +14,6 @@ import * as Typography from '../typography';
 import * as cx from './dapp-transaction-summary.css';
 
 import type { OmitClassName } from '../../types';
-import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-variant';
-import { ThemeColorScheme } from '../../design-tokens';
 
 type Props = OmitClassName<'div'> & {
   transactionAmount: string;
@@ -33,7 +33,13 @@ export const TransactionSummary = ({
   ...props
 }: Readonly<Props>): JSX.Element => {
   const { theme } = useThemeVariant();
-  console.log("color theme", theme)
+
+  const setThemeFallbackImagine =
+    theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
+
+  const getImageSource = (value: string | undefined): string =>
+    value === '' || value === undefined ? setThemeFallbackImagine : value;
+
   return (
     <>
       <Flex justifyContent="flex-start">
@@ -43,9 +49,7 @@ export const TransactionSummary = ({
       </Flex>
       <Grid {...props} columns="$2">
         <Cell>
-          <div className={cx.adaIcon}>
-            <AdaComponent />
-          </div>
+          <AdaComponent className={cx.adaIcon} />
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
@@ -59,16 +63,13 @@ export const TransactionSummary = ({
         {items.map(value => (
           <>
             <Cell>
-              {value.imageSrc !== undefined && (
-                <RadixUIAvatar.Root className={cx.avatarRoot}>
-                  <RadixUIAvatar.Image
-                    className={cx.avatarImage}
-                    src={value.imageSrc ?? }
-                    alt={value.tokenName}
-                  />
-                  {/* <RadixUIAvatar.Fallback>{fallback}</RadixUIAvatar.Fallback> */}
-                </RadixUIAvatar.Root>
-              )}
+              <RadixUIAvatar.Root className={cx.avatarRoot}>
+                <RadixUIAvatar.Image
+                  className={cx.avatarImage}
+                  src={getImageSource(value.imageSrc)}
+                  alt={value.tokenName}
+                />
+              </RadixUIAvatar.Root>
             </Cell>
             <Cell>
               <Flex justifyContent="flex-end" alignItems="center">

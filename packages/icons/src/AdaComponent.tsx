@@ -7,10 +7,10 @@ const SvgAdacomponent = (props: SVGProps<SVGSVGElement>) => (
     width="1em"
     height="1em"
     fill="none"
-    viewBox="0 0 25 24"
+    viewBox="0 0 50 50"
     {...props}
   >
-    <rect width={24} height={24} x={0.591} fill="url(#ada_component_svg__a)" rx={4} />
+    <rect width={50} height={50} x={0.591} fill="url(#ada_component_svg__a)" rx={4} />
     <defs>
       <pattern id="ada_component_svg__a" width={1} height={1} patternContentUnits="objectBoundingBox">
         <use xlinkHref="#ada_component_svg__b" transform="scale(.00444)" />

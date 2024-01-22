@@ -7,9 +7,5 @@ import type { ThemeColorScheme } from '../theme.context';
 export const useThemeVariant = (): { theme: ThemeColorScheme } => {
   const themeContext = useContext(ThemeContext);
 
-  // if (!themeContext) {
-  //   return '';
-  // }
-
   return { theme: themeContext.colorScheme };
 };

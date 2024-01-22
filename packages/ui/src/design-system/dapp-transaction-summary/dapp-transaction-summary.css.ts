@@ -1,5 +1,5 @@
 import { sx, style } from '../../design-tokens';
-import { flex } from '../flex/flex.css';
+// import { flex } from '../flex/flex.css';
 
 export const label = sx({
   color: '$dapp_transaction_summary_label',
@@ -39,9 +39,13 @@ export const secondaryText = style([
 export const adaIcon = style([
   sx({
     display: 'flex',
-    ml: '$12',
-    mb: '$28',
+    m: ['$10', '$0'],
+    p: ['$0', '$10'],
   }),
+  {
+    width: '25px',
+    height: '25px',
+  },
 ]);
 
 export const avatarRoot = style({
