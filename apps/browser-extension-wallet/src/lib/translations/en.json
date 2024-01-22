@@ -56,7 +56,9 @@
       "to": "To",
       "multipleAddresses": "Multiple addresses",
       "pools": "Pool(s)",
-      "epoch": "Epoch"
+      "epoch": "Epoch",
+      "collateral": "Collateral",
+      "collateralInfo": "Amount set as Collateral. Since this Tx was successful collateral was not used"
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",

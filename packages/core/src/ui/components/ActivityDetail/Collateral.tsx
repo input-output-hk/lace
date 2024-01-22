@@ -3,21 +3,21 @@ import React from 'react';
 import { useTranslate } from '@src/ui/hooks';
 import { Amount } from './Amount';
 
-export interface TransactionFeeProps {
-  fee: string;
+export interface Props {
+  collateral: string;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
 }
-export const TransactionFee = ({ fee, amountTransformer, coinSymbol }: TransactionFeeProps): React.ReactElement => {
+export const Collateral = ({ collateral, amountTransformer, coinSymbol }: Props): React.ReactElement => {
   const { t } = useTranslate();
 
   return (
     <Amount
-      amount={fee}
+      amount={collateral}
       amountTransformer={amountTransformer}
       coinSymbol={coinSymbol}
-      label={t('package.core.activityDetails.transactionFee')}
-      tooltip={t('package.core.activityDetails.transactionFeeInfo')}
+      label={t('package.core.activityDetails.collateral')}
+      tooltip={t('package.core.activityDetails.collateralInfo')}
     />
   );
 };

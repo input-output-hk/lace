@@ -1,14 +1,14 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/typography';
 
-.txFeeContainer {
+.txAmountContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: size_unit(1);
 }
 
-.txfee {
+.txAmount {
   color: var(--text-color-primary);
   font-size: var(--body, 16px);
   font-weight: 600;
