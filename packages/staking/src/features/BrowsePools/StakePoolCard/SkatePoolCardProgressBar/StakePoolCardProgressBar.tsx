@@ -5,11 +5,12 @@ import inRange from 'lodash/inRange';
 import * as styles from './StakePoolCardProgressBar.css';
 
 interface Props {
-  percentage: number;
+  percentage: string;
 }
 
 export const StakePoolCardProgressBar = ({ percentage }: Props) => {
-  const progressWidth = percentage > 100 ? 100 : percentage;
+  const percentageNumber = Number(percentage);
+  const progressWidth = percentageNumber > 100 ? 100 : percentageNumber;
 
   return (
     <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>
@@ -18,18 +19,18 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
           className={cn([
             styles.progress,
             {
-              [styles.progressLow]: inRange(percentage, 0, 21),
-              [styles.progressMedium]: inRange(percentage, 21, 70),
-              [styles.progressHigh]: inRange(percentage, 70, 90),
-              [styles.progressVeryHigh]: inRange(percentage, 90, 100) || percentage === 100,
-              [styles.progressOversaturated]: percentage > 100,
+              [styles.progressLow]: inRange(percentageNumber, 0, 21),
+              [styles.progressMedium]: inRange(percentageNumber, 21, 70),
+              [styles.progressHigh]: inRange(percentageNumber, 70, 90),
+              [styles.progressVeryHigh]: inRange(percentageNumber, 90, 100) || percentageNumber === 100,
+              [styles.progressOversaturated]: percentageNumber > 100,
             },
           ])}
           style={{ width: `${progressWidth}%` }}
         />
       </div>
       <Text.Body.Small weight="$medium" className={styles.progressValue}>
-        {percentage.toFixed(2)}%
+        {percentage}%
       </Text.Body.Small>
     </Flex>
   );

@@ -9,7 +9,7 @@ export interface StakePoolCardProps {
   title?: string;
   metricType: MetricType;
   metricValue?: number;
-  saturation: number;
+  saturation: string;
   selected?: boolean;
   onClick?: () => void;
 }
