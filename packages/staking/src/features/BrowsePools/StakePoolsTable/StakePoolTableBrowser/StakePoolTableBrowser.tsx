@@ -42,8 +42,7 @@ export const StakePoolTableBrowser = ({
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const { analytics } = useOutsideHandles();
 
-  const { lastSelectedPoolId, portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
-    lastSelectedPoolId: store.lastSelectedPoolId,
+  const { portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
     portfolioPools: store.selectedPortfolio.map(({ id }) => ({
       // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
@@ -67,12 +66,7 @@ export const StakePoolTableBrowser = ({
       {selectedStakePools?.length > 0 && (
         <div className={styles.selectedPools}>
           {selectedStakePools.map((pool) => (
-            <StakePoolTableItemBrowser
-              // highlight proper selected checkbox
-              focused={pool.hexId === lastSelectedPoolId}
-              key={pool.id}
-              {...{ ...pool, selected: true }}
-            />
+            <StakePoolTableItemBrowser key={pool.id} {...{ ...pool, selected: true }} />
           ))}
         </div>
       )}

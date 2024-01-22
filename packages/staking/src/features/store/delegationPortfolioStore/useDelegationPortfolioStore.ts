@@ -22,7 +22,6 @@ const defaultState: DelegationPortfolioState = {
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,
-  lastSelectedPoolId: null,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   view: undefined,

@@ -72,7 +72,6 @@ export type CrossStateData = {
   cardanoCoinSymbol: AdaSymbol;
   currentPortfolio: CurrentPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
-  lastSelectedPoolId: string | null;
 };
 
 type StateMachineSpecificState = BaseState & SupportingData;
