@@ -188,7 +188,8 @@ const colors: Colors = {
     lightColorScheme.$secondary_data_pink,
 
   $dialog_container_bgColor: lightColorScheme.$primary_white,
-  $dialog_description_color: lightColorScheme.$primary_dark_grey,
+  $dialog_title_color: lightColorScheme.$primary_black,
+  $dialog_description_color: lightColorScheme.$primary_black,
 
   $side_drawer_container_bgColor: lightColorScheme.$primary_white,
   $side_drawer_separator_bgColor: lightColorScheme.$primary_light_grey_plus,
