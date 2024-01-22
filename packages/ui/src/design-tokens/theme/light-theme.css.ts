@@ -371,6 +371,28 @@ const colors: Colors = {
   $checkbox_hover_checked_backgroundColor:
     lightColorScheme.$primary_hover_purple,
 
+  $radiobutton_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $radiobutton_hover_color: lightColorScheme.$primary_dark_grey_plus,
+  $radiobutton_indicator_backgroundColor:
+    lightColorScheme.$primary_accent_purple,
+  $radiobutton_indicator_check_color: lightColorScheme.$primary_white,
+  $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $radiobutton_icon_color: lightColorScheme.$primary_grey,
+  $radiobutton_icon_hover_color: lightColorScheme.$primary_light_grey,
+  $radiobutton_icon_hover_border_color:
+    lightColorScheme.$primary_light_grey_plus,
+
+  $select_border: lightColorScheme.$primary_grey,
+  $select_icon_color: lightColorScheme.$primary_black,
+  $select_background_color: lightColorScheme.$primary_white,
+  $select_hover_background_color: lightColorScheme.$primary_light_grey_plus,
+  $select_input_value_color: lightColorScheme.$primary_black,
+  $select_input_background_data_highlighted:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $select_input_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $select_input_rest_border_color: lightColorScheme.$primary_light_grey_plus,
+  $select_input_hover_border_color: lightColorScheme.$primary_light_grey,
+
   $action_card_container_bgColor: lightColorScheme.$primary_white,
   $action_card_container_bgColor_hover: lightColorScheme.$primary_light_grey,
   $action_card_container_bgColor_pressed:

@@ -33,5 +33,7 @@ export * as EducationalCard from './educational-card';
 export { FileUpload } from './file-upload';
 export { Checkbox } from './checkbox';
 export * as Dialog from './dialog';
+export { RadioButtonGroup } from './radio-button';
+export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
