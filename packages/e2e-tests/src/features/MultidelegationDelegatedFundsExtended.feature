@@ -270,7 +270,6 @@ Feature: Staking Page - Extended View
     When I input 250% ratio for pool 1
     Then I see input ratio field showing 100% for pool 1
 
-
   @LW-9086
   Scenario Outline: Extended View - button <button> click on stake pool details drawer for delegated pool
     When I navigate to Staking extended page
@@ -287,14 +286,16 @@ Feature: Staking Page - Extended View
 
   @LW-9086
   Scenario Outline: Extended View - button <button> click on stake pool details drawer for non-delegated pool
+    And I open wallet: "MultidelegationDelegatedMulti" in: extended mode
     When I navigate to Staking extended page
     And I open Browse pools tab
-    And I input "ADA Capital" into stake pool search bar
-    And I click on the stake pool with name "ADA Capital"
+    And I input "AzureADA" into stake pool search bar
+    And I click on the stake pool with name "AzureADA"
     Then I see stake pool details buttons for non-delegated pool
     When I click on "<button>" button on stake pool details drawer
     Then <expected>
     Examples:
       | button                        | expected                                    |
+      | Manage delegation             | I see Manage delegation drawer              |
       | Stake all on this pool        | I see Changing Staking Preferences modal    |
       | Select pool for multi-staking | I see portfolio bar with "1" selected pools |

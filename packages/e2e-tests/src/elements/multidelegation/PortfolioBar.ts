@@ -4,6 +4,7 @@ class PortfolioBar {
   private MAX_POOLS_COUNTER = '[data-testid="portfoliobar-max-pools"]';
   private NEXT_BUTTON = '[data-testid="portfoliobar-btn-next"]';
   private CLEAR_BUTTON = '[data-testid="portfoliobar-btn-clear"]';
+
   get container() {
     return $(this.CONTAINER);
   }

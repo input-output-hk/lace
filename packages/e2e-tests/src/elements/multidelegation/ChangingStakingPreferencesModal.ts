@@ -8,6 +8,7 @@ class ChangingStakingPreferencesModal {
   get container() {
     return $(this.CONTAINER);
   }
+
   get title() {
     return $(this.TITLE);
   }
