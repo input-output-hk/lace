@@ -30,7 +30,7 @@ export const TransactionSummary = ({
   items,
   ...props
 }: Readonly<Props>): JSX.Element => {
-  const getImageSrc = 
+  // const getImageSrc = 
   return (
     <>
       <Flex justifyContent="flex-start">
