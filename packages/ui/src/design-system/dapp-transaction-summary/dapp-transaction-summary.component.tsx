@@ -2,6 +2,8 @@ import React from 'react';
 
 import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
 import * as RadixUIAvatar from '@radix-ui/react-avatar';
+import DarkFallBack from '../../assets/images/fallback-dark-mode.png';
+import LighFallBack from '../../assets/images/fallback-light-mode.png';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
@@ -28,7 +30,7 @@ export const TransactionSummary = ({
   items,
   ...props
 }: Readonly<Props>): JSX.Element => {
-  console.log('items', items);
+  const getImageSrc = 
   return (
     <>
       <Flex justifyContent="flex-start">
@@ -58,7 +60,7 @@ export const TransactionSummary = ({
                 <RadixUIAvatar.Root className={cx.avatarRoot}>
                   <RadixUIAvatar.Image
                     className={cx.avatarImage}
-                    src={value.imageSrc}
+                    src={value.imageSrc ?? }
                     alt={value.tokenName}
                   />
                   {/* <RadixUIAvatar.Fallback>{fallback}</RadixUIAvatar.Fallback> */}
