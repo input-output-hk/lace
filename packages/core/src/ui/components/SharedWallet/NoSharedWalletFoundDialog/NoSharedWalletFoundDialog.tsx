@@ -6,7 +6,7 @@ interface Props {
   translations: {
     title: string;
     description: string;
-    confirmButton: string;
+    confirm: string;
   };
   events: {
     handleOnConfirm: () => void;
@@ -20,14 +20,14 @@ export const NoSharedWalletFoundDialog = ({
   open,
   zIndex,
   closeAutoFocusRef,
-  translations,
+  translations: { title, description, confirm },
   events
 }: Props): JSX.Element => (
   <Dialog.Root open={open} setOpen={events.onOpenChanged} zIndex={zIndex} onCloseAutoFocusRef={closeAutoFocusRef}>
-    <Dialog.Title>{translations.title}</Dialog.Title>
-    <Dialog.Description>{translations.description}</Dialog.Description>
+    <Dialog.Title>{title}</Dialog.Title>
+    <Dialog.Description>{description}</Dialog.Description>
     <Dialog.Actions>
-      <Dialog.Action label={translations.confirmButton} onClick={events.handleOnConfirm} />
+      <Dialog.Action label={confirm} onClick={events.handleOnConfirm} />
     </Dialog.Actions>
   </Dialog.Root>
 );

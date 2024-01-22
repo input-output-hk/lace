@@ -20,7 +20,7 @@ export const Overview: Story = {
     translations: {
       title: 'No shared wallet found',
       description: 'Please try again',
-      confirmButton: 'Proceed'
+      confirm: 'Proceed'
     },
     events: {
       onCancel: noop,
