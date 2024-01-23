@@ -394,6 +394,22 @@
   },
   "expandPopup": "Expand",
   "browserView": {
+    "sharedWallet": {
+      "setup": {
+        "title": "Hello Web 3",
+        "subTitle": "Choose an option to get started",
+        "createSharedWalletOption": {
+          "title": "New shared wallet",
+          "description": "Create a new shared wallet",
+          "button": "Create"
+        },
+        "importSharedWalletOption": {
+          "title": "Import shared wallet",
+          "description": "Join a shared wallet from JSON file or chain sync",
+          "button": "Connect"
+        }
+      }
+    },
     "welcome": "Welcome!",
     "addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
     "sidePanel.aboutYourWallet": "About your wallet",
@@ -425,6 +441,7 @@
     "sideMenu.links.dappStore": "Dapp Store",
     "sideMenu.links.voting": "Voting",
     "sideMenu.links.addNewWallet": "Add new wallet",
+    "sideMenu.links.addSharedWallet": "Add shared wallet",
     "sideMenu.links.addressBook": "Address Book",
     "sideMenu.dapps.header": "Open Dapps",
     "sideMenu.mode.light": "Light mode",
