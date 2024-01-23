@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { NavigationButton } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
-import { useEditAccountDrawer } from '@src/features/account/components/EditAccount/hooks';
-import { EditAccountDrawer } from '@src/features/account/components/EditAccount/EditAccountDrawer';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
+import { EditAccountDrawer, useEditAccountDrawer } from '@lace/core';
 
 const exampleAccountData = [
   {
@@ -107,6 +106,13 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         name={editAccountDrawer.accountData?.label}
         index={editAccountDrawer.accountData?.accountNumber}
         isPopup={isPopup}
+        translations={{
+          title: t('account.edit.title'),
+          subtitle: t('account.edit.subtitle'),
+          inputLabel: t('account.edit.input.label'),
+          save: t('account.edit.footer.save'),
+          cancel: t('account.edit.footer.cancel')
+        }}
       />
     </>
   );
