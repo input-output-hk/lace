@@ -1,5 +1,4 @@
 import { sx, style } from '../../design-tokens';
-// import { flex } from '../flex/flex.css';
 
 export const label = sx({
   color: '$dapp_transaction_summary_label',
@@ -67,16 +66,3 @@ export const avatarImage = style({
   objectFit: 'cover',
   borderRadius: 'inherit',
 });
-
-export const AvatarFallback = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: 'white',
-  color: '$transaction_summary_secondary_label_color',
-  fontSize: '15px',
-  lineHeight: '1',
-  fontWeight: '500',
-};

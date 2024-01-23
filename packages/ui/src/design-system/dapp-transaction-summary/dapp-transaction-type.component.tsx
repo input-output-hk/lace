@@ -13,7 +13,9 @@ export const TransactionTypes = {
   Withdrawal: 'withdrawal' as const,
   Received: 'incoming' as const,
   Sent: 'outgoing' as const,
+  Send: 'send' as const,
   Sending: 'sending' as const,
+  Mint: 'mint' as const,
   'Self Transaction': 'self' as const,
 };
 

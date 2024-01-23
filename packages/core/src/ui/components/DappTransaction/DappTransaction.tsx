@@ -2,13 +2,18 @@
 import React from 'react';
 import { ErrorPane } from '@lace/common';
 import { Wallet } from '@lace/cardano';
-import { DappInfo, DappInfoProps } from '../DappInfo';
-import { DappTxHeader } from './DappTxHeader/DappTxHeader';
+import {
+  // DappInfo,
+  DappInfoProps
+} from '../DappInfo';
+
+// import { DappTxHeader } from './DappTxHeader/DappTxHeader';
 import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
 import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
-import { useTranslate } from '@src/ui/hooks';
+// import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee } from '@ui/components/ActivityDetail';
+import { TransactionType, TransactionOrigin } from '@lace/ui';
 
 type TransactionDetails = {
   fee: string;
@@ -32,25 +37,29 @@ export interface DappTransactionProps {
 
 export const DappTransaction = ({
   transaction: { type, outputs, fee, mintedAssets, burnedAssets },
-  dappInfo,
+  // dappInfo,
   errorMessage,
   fiatCurrencyCode,
   fiatCurrencyPrice,
   coinSymbol
 }: DappTransactionProps): React.ReactElement => {
-  const { t } = useTranslate();
+  // const { t } = useTranslate();
+  console.log('dapp transaction', outputs);
   return (
     <div>
-      <div>Dapp information</div>
-      <DappInfo {...dappInfo} className={styles.dappInfo} />
+      {/* <div>Dapp information</div> */}
+      {/* <DappInfo {...dappInfo} className={styles.dappInfo} /> */}
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
         {type === 'Mint' && mintedAssets?.length > 0 && (
           <>
-            <DappTxHeader
+            {/* <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
               subtitle={t('package.core.dappTransaction.mint')}
-            />
+            /> */}
+            <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
+            <TransactionOrigin label="Origin" origin="Wingriders" />
+
             {mintedAssets.map((asset) => (
               <DappTxAsset key={asset.name} {...asset} />
             ))}
@@ -58,10 +67,13 @@ export const DappTransaction = ({
         )}
         {type === 'Mint' && burnedAssets?.length > 0 && (
           <>
-            <DappTxHeader
+            {/* <DappTxHeader
               title={mintedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
               subtitle={t('package.core.dappTransaction.burn')}
-            />
+            /> */}
+            <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
+            <TransactionOrigin label="Origin" origin="Wingriders" />
+
             {burnedAssets.map((asset) => (
               <DappTxAsset key={asset.name} {...asset} />
             ))}
@@ -69,11 +81,12 @@ export const DappTransaction = ({
         )}
         {type === 'Send' && (
           <>
-            ${'dapp transaction'}
-            <DappTxHeader
+            {/* <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
               subtitle={t('package.core.dappTransaction.send')}
-            />
+            /> */}
+            <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
+            <TransactionOrigin label="Origin" origin="Wingriders" />
             {outputs.map((output) => (
               <DappTxOutput key={output.recipient} {...output} />
             ))}

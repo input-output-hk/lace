@@ -307,7 +307,16 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
-  console.log('Transactions here:', tx);
+  // eslint-disable-next-line no-console
+  console.log(
+    'transaction details here:',
+    txSummary,
+    dappInfo,
+    errorMessage,
+    fiatCurrency?.code,
+    priceResult?.cardano?.price,
+    cardanoCoin.symbol
+  );
 
   return (
     // <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>

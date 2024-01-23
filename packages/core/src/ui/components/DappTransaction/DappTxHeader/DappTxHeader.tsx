@@ -10,7 +10,6 @@ export interface DappTxHeaderProps {
 export const DappTxHeader = (props: DappTxHeaderProps): React.ReactElement => (
   <div className={styles.header}>
     <div data-testid="dapp-transaction-title" className={styles.title}>
-      ${'dapp header: '}${props?.title}${props?.subtitle}
       {props?.title ?? ''}
     </div>
     {props?.subtitle && (
