@@ -356,7 +356,7 @@
     "sign.data.success.description": "Data signed",
     "sign.data.failure.description": "Signing failed. Please try again",
     "list.title": "Authorized DApps",
-    "list.subTitle": "This is the list of the dApps you have authorized to interact with your wallet. You can remove them at anytime.",
+    "list.subTitle": "You have authorized these DApps to interact with all your wallets & accounts. You can modify this at any time.",
     "list.subTitleEmpty": "This is where you'll find any DApps you authorize to interact with your wallet.",
     "list.removedSuccess": "DApp disconnected",
     "list.removedFailure": "DApp disconnection unsuccessful",
