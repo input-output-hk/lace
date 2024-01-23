@@ -102,7 +102,7 @@ export const getDappInfoFromLastActiveTab: (url?: string) => Promise<Wallet.Dapp
   return {
     logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),
     name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
-    url: lastActiveTab.url.replace(/\/$/, '')
+    url: url ? new URL(url).origin : lastActiveTab.url.replace(/\/$/, '')
   };
 };
 

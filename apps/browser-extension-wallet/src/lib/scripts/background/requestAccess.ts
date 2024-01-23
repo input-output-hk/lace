@@ -17,9 +17,9 @@ export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
 export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender) => {
   const launchingTab = await getLastActiveTab(sender.url);
   const { logo, name, url } = await getDappInfoFromLastActiveTab(sender.url);
-  dappInfo$.next({ logo, name, url: new URL(sender.url).origin });
+  dappInfo$.next({ logo, name, url });
   await ensureUiIsOpenAndLoaded('#/dapp/connect', false);
-  const isAllowed = await userPromptService.allowOrigin(sender.url);
+  const isAllowed = await userPromptService.allowOrigin(url);
   if (isAllowed === 'deny') return Promise.reject();
   if (isAllowed === 'allow') {
     const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
