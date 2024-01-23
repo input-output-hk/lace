@@ -16,7 +16,7 @@ const metricTypeOptions: MetricType[] = [
   'margin',
   'blocks',
   'pledge',
-  'live-stake',
+  'liveStake',
 ];
 
 const CardsGroup = (props: StakePoolCardProps) => (
@@ -45,8 +45,8 @@ const CardsGroup = (props: StakePoolCardProps) => (
 
 const overviewCardProps: StakePoolCardProps = {
   metricType: 'blocks',
-  metricValue: 123_456,
-  saturation: 51.75,
+  metricValue: '123_456',
+  saturation: '51.75',
   selected: false,
   title: 'TIKRNM',
 };
@@ -135,7 +135,7 @@ export const Overview = () => (
             <StakePoolCard {...overviewCardProps} metricType="pledge" />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="live-stake" />
+            <StakePoolCard {...overviewCardProps} metricType="liveStake" />
           </Variants.Cell>
         </Variants.Row>
       </Variants.Table>
@@ -204,7 +204,7 @@ export const Overview = () => (
               </Cell>
               <Cell>
                 <Box w="$214">
-                  <StakePoolCard title="MDS" metricType="cost" metricValue={30_000_000} saturation={51.75} />
+                  <StakePoolCard title="MDS" metricType="cost" metricValue="30_000_000" saturation="51.75" />
                 </Box>
               </Cell>
               <Cell>
@@ -220,8 +220,8 @@ export const Overview = () => (
                   <StakePoolCard
                     title="Medusa Development Support"
                     metricType="cost"
-                    metricValue={30_000_000}
-                    saturation={51.75}
+                    metricValue="30_000_000"
+                    saturation="51.75"
                   />
                 </Box>
               </Cell>
@@ -233,7 +233,7 @@ export const Overview = () => (
               </Cell>
               <Cell>
                 <Box w="$214">
-                  <StakePoolCard metricType="cost" metricValue={30_000_000} saturation={51.75} />
+                  <StakePoolCard metricType="cost" metricValue="30_000_000" saturation="51.75" />
                 </Box>
               </Cell>
               <Cell>
@@ -244,7 +244,7 @@ export const Overview = () => (
               </Cell>
               <Cell>
                 <Box w="$214">
-                  <StakePoolCard metricType="cost" saturation={51.75} />
+                  <StakePoolCard metricType="cost" saturation="51.75" />
                 </Box>
               </Cell>
             </Grid>
@@ -264,8 +264,8 @@ export const Controls = {
   },
   args: {
     metricType: 'blocks',
-    metricValue: 123_456,
-    saturation: 51.75,
+    metricValue: '123_456',
+    saturation: '51.75',
     selected: false,
     title: 'TIKRNM',
   } as StakePoolCardProps,
