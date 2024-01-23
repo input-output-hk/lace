@@ -789,7 +789,7 @@
         },
         "accounts": {
           "title": "Accounts",
-          "description": "Select your preferred account.",
+          "description": "Activate your preferred account.",
           "unlockLabel": "Enable"
         },
         "general": {
