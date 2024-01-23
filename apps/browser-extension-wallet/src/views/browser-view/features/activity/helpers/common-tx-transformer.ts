@@ -322,7 +322,8 @@ export const votingProceduresTransformer = (
         },
         { title: 'vote', details: [getVote(vote.votingProcedure.vote)] },
         { ...(!!vote.votingProcedure.anchor && { title: 'anchor', details: [vote.votingProcedure.anchor.url] }) },
-        { title: 'proposalTxHash', details: [vote.actionId.id, vote.actionId.actionIndex.toString()] }
+        { title: 'proposalTxHash', details: [vote.actionId.id] },
+        { title: 'actionIndex', details: [vote.actionId.actionIndex.toString()] }
       ];
 
       votingProcedureDetails.push(detail.filter((el: TxDetail<TxDetailsVotingProceduresTitles>) => !isEmpty(el)));

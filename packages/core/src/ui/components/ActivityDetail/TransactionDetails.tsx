@@ -321,7 +321,8 @@ export const TransactionDetails = ({
               voterCredential: t('package.core.activityDetails.votingProcedureTitles.voterCredential'),
               vote: t('package.core.activityDetails.votingProcedureTitles.vote'),
               anchor: t('package.core.activityDetails.votingProcedureTitles.anchor'),
-              proposalTxHash: t('package.core.activityDetails.votingProcedureTitles.proposalTxHash')
+              proposalTxHash: t('package.core.activityDetails.votingProcedureTitles.proposalTxHash'),
+              actionIndex: t('package.core.activityDetails.votingProcedureTitles.actionIndex')
             }}
             withSeparatorLine
           />

@@ -145,7 +145,8 @@
         "voterCredential": "Voter Credential",
         "vote": "Vote",
         "anchor": "Anchor",
-        "proposalTxHash": "Proposal Tx hash"
+        "proposalTxHash": "Proposal Tx hash",
+        "actionIndex": "Governance action index"
       },
       "proposalProcedures": "Proposal Procedures",
       "proposalProcedureTitles": {

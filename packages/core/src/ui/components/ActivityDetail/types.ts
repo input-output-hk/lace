@@ -54,7 +54,13 @@ export type TxDetailsProposalProceduresTitles =
   | 'newQuorumThreshold'
   | 'constitutionAnchor';
 
-export type TxDetailsVotingProceduresTitles = 'voterType' | 'voterCredential' | 'vote' | 'anchor' | 'proposalTxHash';
+export type TxDetailsVotingProceduresTitles =
+  | 'voterType'
+  | 'voterCredential'
+  | 'vote'
+  | 'anchor'
+  | 'proposalTxHash'
+  | 'actionIndex';
 
 export type TxDetail<T> = {
   title: T;
