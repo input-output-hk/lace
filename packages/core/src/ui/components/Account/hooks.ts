@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
 
-export const useEditAccountDrawer = (): {
+export const useAccountEdit = (): {
   accountData: AccountData | undefined;
   isOpen: boolean;
   open: (data: AccountData) => void;

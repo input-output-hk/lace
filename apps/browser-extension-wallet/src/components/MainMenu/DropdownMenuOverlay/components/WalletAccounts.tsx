@@ -4,7 +4,7 @@ import { NavigationButton } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
-import { EditAccountDrawer, useEditAccountDrawer } from '@lace/core';
+import { EditAccountDrawer, useAccountEdit } from '@lace/core';
 
 const exampleAccountData = [
   {
@@ -61,7 +61,7 @@ const exampleAccountData = [
 
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
-  const editAccountDrawer = useEditAccountDrawer();
+  const editAccountDrawer = useAccountEdit();
   const [mockAccountData, setMockAccountData] = useState<AccountData[]>(exampleAccountData);
 
   return (
