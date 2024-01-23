@@ -118,7 +118,7 @@ export const StakingInfo = ({
               <Stats
                 text={t('browserView.staking.stakingInfo.totalRewards.title')}
                 value={
-                  <Tooltip title={`$ ${Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}`}>
+                  <Tooltip title={Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}>
                     <span>{totalRewards}</span>
                     <span className={styles.suffix}>{cardanoCoin.symbol}</span>
                   </Tooltip>
@@ -131,7 +131,7 @@ export const StakingInfo = ({
             <Stats
               text={t('browserView.staking.stakingInfo.lastReward.title')}
               value={
-                <Tooltip title={`$ ${Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}`}>
+                <Tooltip title={Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}>
                   <span>{lastReward}</span>
                   <span className={styles.suffix}>{cardanoCoin.symbol}</span>
                 </Tooltip>
