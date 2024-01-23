@@ -290,7 +290,9 @@ export const certificateTransformer = (
       if (conwayEraCertificate.deposit) {
         transformedCertificate.push({
           title: 'depositPaid',
-          details: [Wallet.util.lovelacesToAdaString(conwayEraCertificate.deposit.toString()) + cardanoCoin.symbol]
+          details: [
+            `${Wallet.util.lovelacesToAdaString(conwayEraCertificate.deposit.toString())} ${cardanoCoin.symbol}`
+          ]
         });
       }
 
