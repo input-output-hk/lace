@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { ListProps } from 'antd';

@@ -14,6 +14,8 @@ const COUNTER_REGEX = /\(\d+\)/;
 const PERCENT_DOUBLE_REGEX = /(\d*\.)?\d+\s?%|-%/;
 const STAKE_POOL_LIST_COST_REGEX = /(\d*\.)?\d+\s?%(\s\+\s\d*ADA)?/;
 const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2}/;
+const PLEDGE_REGEX = /(0|\d{1,50}\s[BKM])/;
+const BLOCKS_REGEX = /^(-|\d*)$/;
 
 export const TestnetPatterns = {
   TESTNET_ADDR_REGEX,
@@ -31,5 +33,7 @@ export const TestnetPatterns = {
   PERCENT_DOUBLE_REGEX,
   NUMBER_DOUBLE_REGEX,
   STAKE_POOL_LIST_COST_REGEX,
-  TIMESTAMP_REGEX
+  TIMESTAMP_REGEX,
+  PLEDGE_REGEX,
+  BLOCKS_REGEX
 };

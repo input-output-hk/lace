@@ -31,11 +31,15 @@ export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
 export * as EducationalCard from './educational-card';
+export { FileUpload } from './file-upload';
 export { Checkbox } from './checkbox';
 export * as Dialog from './dialog';
-
 export * as ToggleButtonGroup from './toggle-button-group';
 export type {
   ToggleButtonGroupRootProps,
   ToggleButtonGroupItemProps,
 } from './toggle-button-group';
+export { RadioButtonGroup } from './radio-button';
+export { SelectGroup } from './select';
+export { ActionCard } from './action-card';
+export { Loader } from './loader';

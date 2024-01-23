@@ -1,4 +1,5 @@
 import { Tooltip as AntdTooltip } from 'antd';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './Stats.module.scss';
@@ -13,12 +14,17 @@ export const Tooltip = ({
   content?: React.ReactNode;
 }): React.ReactElement => {
   const { t } = useTranslation();
+  const { currencyStoreFiatCurrency } = useOutsideHandles();
   const body =
     content ||
     (title && (
       <>
-        <div data-testid="tooltip-label">{t('overview.stakingInfoCard.tooltipFiatLabel')}</div>
-        <div data-testid="tooltip-value">{title}</div>
+        <div data-testid="tooltip-label">
+          {t('overview.stakingInfoCard.tooltipFiatLabel', { currencyCode: currencyStoreFiatCurrency.code })}
+        </div>
+        <div data-testid="tooltip-value">
+          {currencyStoreFiatCurrency.symbol} {title}
+        </div>
       </>
     ));
 

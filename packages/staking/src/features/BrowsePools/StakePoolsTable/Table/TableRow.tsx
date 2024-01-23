@@ -16,6 +16,7 @@ export type TableRowProps<E extends string> = {
   onClick?: () => void;
   cellRenderers?: Partial<Record<E, React.FunctionComponent<{ value?: string }>>>;
   dataTestId?: string;
+  key?: string;
 };
 
 const ConditionalTooltipWrapper = ({ message = '', children }: { message?: string; children: React.ReactNode }) => (
@@ -42,12 +43,13 @@ export const TableRow = function TableRow<E extends string>({
   selected,
   selectionDisabledMessage = '',
   dataTestId = 'table',
+  key,
 }: TableRowProps<E>): React.ReactElement {
   return (
     <div
       data-testid={`${dataTestId}-item`}
       className={cn(styles.row, {
-        [styles.selectable!]: withSelection,
+        [styles.selectable]: withSelection,
       })}
       onClick={() => onClick?.()}
     >
@@ -56,6 +58,7 @@ export const TableRow = function TableRow<E extends string>({
           <ConditionalTooltipWrapper message={(!selectable && !selected && selectionDisabledMessage) || ''}>
             <span>
               <Checkbox
+                key={key}
                 onClick={(event) => {
                   event.stopPropagation();
                   onSelect?.();
@@ -67,8 +70,8 @@ export const TableRow = function TableRow<E extends string>({
           </ConditionalTooltipWrapper>
         </div>
       )}
-      {columns.map((cell, index) => (
-        <div key={`${cell}-${index}`} className={styles.cell} data-testid={`${dataTestId}-list-${cell}`}>
+      {columns.map((cell) => (
+        <div key={cell} className={styles.cell} data-testid={`${dataTestId}-list-${cell}`}>
           <span className={styles.cellInner}>
             {cellRenderers?.[cell]?.({ value: data[cell] }) || data[cell] || '-'}
           </span>

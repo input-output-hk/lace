@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import React, { useEffect, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
 import { Wallet } from '@lace/cardano';
@@ -10,7 +11,8 @@ import {
   stakePooltableConfig,
   TableHeader,
   TableRow,
-  TranslationsFor
+  TranslationsFor,
+  StakePoolTableItemBrowserProps
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { getRandomIcon, Search } from '@lace/common';
@@ -44,6 +46,17 @@ const searchDebounce = 300;
 const defaultFetchLimit = 10;
 
 const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
+
+const ItemRenderer = ({ selectionDisabledMessage, onClick, ...data }: StakePoolTableItemBrowserProps) => (
+  <TableRow<Columns>
+    onClick={onClick}
+    columns={stakePooltableConfig.columns}
+    cellRenderers={stakePooltableConfig.renderer}
+    dataTestId="stake-pool"
+    data={data as unknown as Parameters<typeof TableRow>[0]['data']}
+    selectionDisabledMessage={selectionDisabledMessage}
+  />
+);
 
 export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTableProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -207,17 +220,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           // Show skeleton if it's loading the list while a search is not being performed
           showSkeleton={isLoadingList && !isSearching}
           scrollableTargetId={scrollableTargetId}
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          ItemRenderer={({ stakePool, hexId, id, selectionDisabledMessage, onClick, ...data }) => (
-            <TableRow<Columns>
-              onClick={onClick}
-              columns={stakePooltableConfig.columns}
-              cellRenderers={stakePooltableConfig.renderer}
-              dataTestId="stake-pool"
-              data={data as unknown as Parameters<typeof TableRow>[0]['data']}
-              selectionDisabledMessage={selectionDisabledMessage}
-            />
-          )}
+          ItemRenderer={ItemRenderer}
         />
       </div>
     </div>

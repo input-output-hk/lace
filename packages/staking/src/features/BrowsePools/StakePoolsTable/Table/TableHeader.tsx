@@ -32,15 +32,15 @@ export const TableHeader = function TableHeader<T extends string>({
   return (
     <div
       data-testid={`${dataTestId}-list-header`}
-      className={cn(styles.row, styles.header, { [styles.selectable!]: withSelection })}
+      className={cn(styles.row, styles.header, { [styles.selectable]: withSelection })}
     >
       {/* checkbox placeholder */}
       {withSelection && <div />}
       {headers.map(({ label, value, tooltipText }) => (
         <div
           className={cn(styles.cell, styles.headerItem, {
-            [styles.withAction!]: isSortingAvailable(value),
-            [styles.active!]: isActiveSortItem(value),
+            [styles.withAction]: isSortingAvailable(value),
+            [styles.active]: isActiveSortItem(value),
           })}
           key={value}
           onClick={() => onSortChange(value)}

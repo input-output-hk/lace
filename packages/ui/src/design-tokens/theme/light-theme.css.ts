@@ -348,6 +348,18 @@ const colors: Colors = {
   $educational_card_item_icon_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
 
+  $file_upload_container_bgColor: lightColorScheme.$primary_white,
+  $file_upload_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $file_upload_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $file_upload_container_bgColor_focused: lightColorScheme.$primary_white,
+  $file_upload_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $file_upload_container_borderColor: lightColorScheme.$primary_light_grey_plus,
+
+  $file_upload_icon_container_bgColor: lightColorScheme.$primary_white,
+  $file_upload_icon_container_borderColor: lightColorScheme.$primary_light_grey,
+
   $checkbox_check_color: lightColorScheme.$primary_white,
   $checkbox_checked_backgroundColor: lightColorScheme.$primary_accent_purple,
   $checkbox_unchecked_backgroundColor: colorTransparent,
@@ -357,6 +369,40 @@ const colors: Colors = {
   $checkbox_hover_unchecked_backgroundColor: colorTransparent,
   $checkbox_hover_checked_backgroundColor:
     lightColorScheme.$primary_hover_purple,
+
+  $radiobutton_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $radiobutton_hover_color: lightColorScheme.$primary_dark_grey_plus,
+  $radiobutton_indicator_backgroundColor:
+    lightColorScheme.$primary_accent_purple,
+  $radiobutton_indicator_check_color: lightColorScheme.$primary_white,
+  $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $radiobutton_icon_color: lightColorScheme.$primary_grey,
+  $radiobutton_icon_hover_color: lightColorScheme.$primary_light_grey,
+  $radiobutton_icon_hover_border_color:
+    lightColorScheme.$primary_light_grey_plus,
+
+  $select_border: lightColorScheme.$primary_grey,
+  $select_icon_color: lightColorScheme.$primary_black,
+  $select_background_color: lightColorScheme.$primary_white,
+  $select_hover_background_color: lightColorScheme.$primary_light_grey_plus,
+  $select_input_value_color: lightColorScheme.$primary_black,
+  $select_input_background_data_highlighted:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $select_input_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $select_input_rest_border_color: lightColorScheme.$primary_light_grey_plus,
+  $select_input_hover_border_color: lightColorScheme.$primary_light_grey,
+
+  $action_card_container_bgColor: lightColorScheme.$primary_white,
+  $action_card_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $action_card_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $action_card_container_bgColor_focused: lightColorScheme.$primary_white,
+  $action_card_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $action_card_container_borderColor: lightColorScheme.$primary_light_grey_plus,
+
+  $action_card_icon_container_bgColor: lightColorScheme.$primary_white,
+  $action_card_icon_container_borderColor: lightColorScheme.$primary_light_grey,
 };
 
 export const elevation: Elevation = {
