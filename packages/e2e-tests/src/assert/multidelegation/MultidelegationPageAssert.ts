@@ -236,9 +236,9 @@ class MultidelegationPageAssert {
     }
   };
 
-  assertSeeCurrentlyStakingTooltip = async () => {
+  assertSeeCurrentlyStakingTooltip = async (currencyCode = 'USD') => {
     await Tooltip.component.waitForDisplayed();
-    expect(await Tooltip.label.getText()).contains(await t('overview.stakingInfoCard.tooltipFiatLabel', 'staking'));
+    expect(await Tooltip.label.getText()).contains(`${currencyCode} Value`);
     expect(await Tooltip.value.getText()).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX); // TODO: update when LW-8935 is resolved
   };
 }
