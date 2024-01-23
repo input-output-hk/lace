@@ -1,10 +1,11 @@
+/* eslint-disable react/jsx-handler-names */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavigationButton } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
-import { EditAccountDrawer, useAccountEdit } from '@lace/core';
+import { DisableAccountConfirmation, EditAccountDrawer, useAccountEdit } from '@lace/core';
 
 const exampleAccountData = [
   {
@@ -62,6 +63,7 @@ const exampleAccountData = [
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
   const editAccountDrawer = useAccountEdit();
+  const deleteAccountConfirmation = useAccountEdit();
   const [mockAccountData, setMockAccountData] = useState<AccountData[]>(exampleAccountData);
 
   return (
@@ -87,6 +89,9 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
             onAccountEditClick={(accountNumber) =>
               editAccountDrawer.open(mockAccountData.find((a) => a.accountNumber === accountNumber))
             }
+            onAccountDeleteClick={(accountNumber) => {
+              deleteAccountConfirmation.open(mockAccountData.find((a) => a.accountNumber === accountNumber));
+            }}
             accounts={mockAccountData}
           />
         </div>
@@ -112,6 +117,26 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           inputLabel: t('account.edit.input.label'),
           save: t('account.edit.footer.save'),
           cancel: t('account.edit.footer.cancel')
+        }}
+      />
+      <DisableAccountConfirmation
+        zIndex={10_000}
+        open={deleteAccountConfirmation.isOpen}
+        onCancel={deleteAccountConfirmation.hide}
+        onConfirm={() => {
+          const newAccountData = [...mockAccountData];
+          const modifiedAccount = newAccountData.find(
+            (a) => a.accountNumber === deleteAccountConfirmation.accountData?.accountNumber
+          );
+          modifiedAccount.isUnlocked = false;
+          setMockAccountData(newAccountData);
+          deleteAccountConfirmation.hide();
+        }}
+        translations={{
+          title: t('account.disable.title'),
+          description: t('account.disable.description'),
+          cancel: t('account.disable.cancel'),
+          confirm: t('account.disable.confirm')
         }}
       />
     </>
