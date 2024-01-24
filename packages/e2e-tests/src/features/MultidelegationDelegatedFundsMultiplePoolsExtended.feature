@@ -124,14 +124,14 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I input "<pool>" into stake pool search bar
-    And I click on the stake pool with name "<pool>"
+    And I click on the stake pool with ticker "<pool>"
     Then I see "<numberOfButtons>" stake pool details buttons for <delegation> pool
     When I click on "<button>" button on stake pool details drawer
     Then <expected>
     Examples:
-      | pool     | numberOfButtons | delegation    | button                        | expected                                    |
-      | AzureADA | 3               | delegated     | Manage delegation             | I see Manage delegation drawer              |
-      | AzureADA | 3               | delegated     | Stake all on this pool        | I see Changing Staking Preferences modal    |
-      | AzureADA | 3               | delegated     | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
-      | 8BETA    | 2               | non-delegated | Stake all on this pool        | I see Changing Staking Preferences modal    |
-      | 8BETA    | 2               | non-delegated | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
+      | pool  | numberOfButtons | delegation    | button                        | expected                                    |
+      | AZUR  | 3               | delegated     | Manage delegation             | I see Manage delegation drawer              |
+      | AZUR  | 3               | delegated     | Stake all on this pool        | I see Changing Staking Preferences modal    |
+      | AZUR  | 3               | delegated     | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
+      | 8BETA | 2               | non-delegated | Stake all on this pool        | I see Changing Staking Preferences modal    |
+      | 8BETA | 2               | non-delegated | Select pool for multi-staking | I see portfolio bar with "1" selected pools |

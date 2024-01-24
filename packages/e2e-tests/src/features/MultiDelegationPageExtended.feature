@@ -31,36 +31,36 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I input "<stake_pool_search_term>" into stake pool search bar
-    Then there are <number_of_results> stake pools returned for "<stake_pool_search_term>" search term
-    And (if applicable) first stake pool search result has "<stake_pool_name>" name and "<stake_pool_ticker>" ticker
+    Then there are <number_of_results> stake pools returned
+    And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
     Examples:
-      | stake_pool_search_term | number_of_results | stake_pool_name                  | stake_pool_ticker |
-      | a Ocean                | 1                 | ADA Ocean                        | OCEAN             |
-      | a ocean                | 1                 | ADA Ocean                        | OCEAN             |
-      | NED#                   | 0                 |                                  |                   |
-      | PAN                    | 1                 | PANL Stake Pool (Pre-Production) | PANL              |
-      | 123456                 | 0                 |                                  |                   |
-      | AZ                     | 2                 | AzureADA                         | AZUR              |
-      | £££                    | 0                 |                                  |                   |
-      | Amso                   | 0                 |                                  |                   |
+      | stake_pool_search_term | number_of_results | stake_pool_ticker |
+      | a Ocean                | 1                 | OCEAN             |
+      | a ocean                | 1                 | OCEAN             |
+      | NED#                   | 0                 |                   |
+      | PAN                    | 1                 | PANL              |
+      | 123456                 | 0                 |                   |
+      | AZ                     | 2                 | BAZAR             |
+      | £££                    | 0                 |                   |
+      | Amso                   | 0                 |                   |
 
   @LW-8448 @Mainnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I input "<stake_pool_search_term>" into stake pool search bar
-    Then there are <number_of_results> stake pools returned for "<stake_pool_search_term>" search term
-    And (if applicable) first stake pool search result has "<stake_pool_name>" name and "<stake_pool_ticker>" ticker
+    Then there are <number_of_results> stake pools returned
+    And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
     Examples:
-      | stake_pool_search_term | number_of_results | stake_pool_name | stake_pool_ticker |
-      | a Capital              | 1                 | ADA Capital     | ADACT             |
-      | a capital              | 1                 | ADA Capital     | ADACT             |
-      | NED#                   | 0                 |                 |                   |
-      | PANL                   | 1                 | PANL Stake Pool | PANL              |
-      | 123456                 | 0                 |                 |                   |
-      | DPo                    | 3                 | HKZDPool        | HKZD              |
-      | £££                    | 0                 |                 |                   |
-      | Amso                   | 0                 |                 |                   |
+      | stake_pool_search_term | number_of_results | stake_pool_ticker |
+      | a Capital              | 1                 | ADACT             |
+      | a capital              | 1                 | ADACT             |
+      | NED#                   | 0                 |                   |
+      | PANL                   | 1                 | PANL              |
+      | 123456                 | 0                 |                   |
+      | DPo                    | 3                 | OMWCP             |
+      | £££                    | 0                 |                   |
+      | Amso                   | 0                 |                   |
 
   @LW-8466 @Testnet @Mainnet
   Scenario: Extended View - "About staking" widget
@@ -84,7 +84,7 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     Then I see the Network Info component with the expected content
 
-  @LW-8499 @Testnet @Mainnet
+  @LW-8499 @Testnet @Mainnet @test
   Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
     When I navigate to Staking extended page
     And I open Browse pools tab
@@ -92,8 +92,14 @@ Feature: Staking Page - Extended View
     Then tooltip for "<column_name>" column is displayed
     Examples:
       | column_name |
-      | ROS         |
       | Saturation  |
+#     TODO: Update when LW-9634 is completed
+#      | ROS         |
+#      | Cost        |
+      | Margin      |
+      | Blocks      |
+      | Pledge      |
+#      | Live stake  |
 
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details
@@ -101,7 +107,7 @@ Feature: Staking Page - Extended View
     And I open Overview tab
     And I open Browse pools tab
     And I input "ADA Ocean" into stake pool search bar
-    And I click on the stake pool with name "ADA Ocean"
+    And I click on the stake pool with ticker "OCEAN"
     And I click on "Stake all on this pool" button on stake pool details drawer
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
@@ -112,7 +118,7 @@ Feature: Staking Page - Extended View
     And I am on Staking extended page
     And I open Browse pools tab
     And I input "ADA Ocean" into stake pool search bar
-    And I click on the stake pool with name "ADA Ocean"
+    And I click on the stake pool with ticker "OCEAN"
     Then I see stake pool details drawer for "ADA Ocean" stake pool
 
   @LW-8438 @Testnet
@@ -120,7 +126,7 @@ Feature: Staking Page - Extended View
     And I am on Staking extended page
     And I open Browse pools tab
     And I input "ADA Ocean" into stake pool search bar
-    And I click on the stake pool with name "ADA Ocean"
+    And I click on the stake pool with ticker "OCEAN"
     And Stake pool details drawer is opened
     When I close the drawer by clicking close button
     Then Stake pool details drawer is not opened
@@ -130,4 +136,4 @@ Feature: Staking Page - Extended View
     And I am on Staking extended page
     And I open Browse pools tab
     And I wait for stake pool list to be populated
-    Then Each stake pool list item contains: logo, name, ticker, ROS and saturation
+    Then each stake pool list item contains: checkbox, ticker, saturation, ROS, cost, margin, blocks, pledge and live stake
