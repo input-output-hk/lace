@@ -5,6 +5,7 @@ import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import * as cx from './toggle-button-group-item.css';
 
 import type { ToggleGroupItemProps } from '@radix-ui/react-toggle-group';
+import * as Typography from '../typography';
 
 export type ToggleButtonGroupItemProps = Pick<
   ToggleGroupItemProps,
@@ -20,7 +21,7 @@ export const Item = forwardRef<HTMLButtonElement, ToggleButtonGroupItemProps>(
   ): JSX.Element => (
     <ToggleGroup.Item className={cx.root} ref={forwardReference} {...props}>
       {IconComponent && <IconComponent className={cx.icon} />}
-      {children}
+      <Typography.Button weight="$semibold">{children}</Typography.Button>
     </ToggleGroup.Item>
   ),
 );

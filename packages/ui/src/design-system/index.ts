@@ -37,3 +37,8 @@ export { RadioButtonGroup } from './radio-button';
 export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
+export * as ToggleButtonGroup from './toggle-button-group';
+export type {
+  ToggleButtonGroupRootProps,
+  ToggleButtonGroupItemProps,
+} from './toggle-button-group';
