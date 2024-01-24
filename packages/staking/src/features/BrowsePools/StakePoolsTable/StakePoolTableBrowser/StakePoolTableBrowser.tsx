@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { ListProps } from 'antd';
@@ -74,7 +73,8 @@ export const StakePoolTableBrowser = ({
         {...{
           ItemRenderer: StakePoolTableItemBrowser,
           className,
-          emptyPlaceholder,
+          emptyPlaceholder:
+            selectedStakePools.length > 0 && selectedStakePools.length === items.length ? '' : emptyPlaceholder,
           emptyText,
           items: availableStakePools,
           listProps: props,
