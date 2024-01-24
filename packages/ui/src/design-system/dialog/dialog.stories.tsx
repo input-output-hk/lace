@@ -95,7 +95,10 @@ export const Overview = (): JSX.Element => (
                   <Variants.Cell>
                     <Flex justifyContent="center">
                       <Content>
-                        <Dialog.Title>Title</Dialog.Title>
+                        <Dialog.Title>
+                          Here is a really long multiline Dialog title that
+                          showcases the line height
+                        </Dialog.Title>
                         <Dialog.Description>
                           Amet, malesuada aliquet tortor varius faucibus. Etiam
                           natoque blandit nunc congue.
