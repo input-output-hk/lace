@@ -13,8 +13,6 @@ export const container = style([
   {
     border: 'none',
     outline: 'none',
-    position: 'relative',
-    zIndex: 1,
     cursor: 'pointer',
 
     vars: {

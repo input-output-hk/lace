@@ -2,9 +2,7 @@
 import React, { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslate } from '@src/ui/hooks';
 import { BehaviorSubject } from 'rxjs';
-import { Modal } from 'antd';
-import { Button } from '@lace/common';
-import styles from './WalletSetupConfirmationDialogProvider.module.scss';
+import { StartOverDialog } from '@ui/components/SharedWallet/StartOverDialog';
 
 interface Props {
   children: React.ReactNode;
@@ -67,25 +65,20 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
 
   return (
     <WalletSetupConfirmationDialogContext.Provider value={value}>
-      <Modal
-        centered
-        className={styles.modal}
-        onCancel={() => setIsDialogOpen(false)}
-        footer={null}
-        visible={isDialogOpen}
-      >
-        <div className={styles.header}>{t('multiWallet.confirmationDialog.title')}</div>
-        <div className={styles.content}>{t('multiWallet.confirmationDialog.description')}</div>
-        <div className={styles.footer}>
-          <Button block onClick={() => setIsDialogOpen(false)} color="secondary">
-            {t('multiWallet.confirmationDialog.cancel')}
-          </Button>
-
-          <Button block onClick={handleOnConfirmRef.current}>
-            {t('multiWallet.confirmationDialog.confirm')}
-          </Button>
-        </div>
-      </Modal>
+      <StartOverDialog
+        open={isDialogOpen}
+        translations={{
+          title: t('multiWallet.confirmationDialog.title'),
+          description: t('multiWallet.confirmationDialog.description'),
+          cancel: t('multiWallet.confirmationDialog.cancel'),
+          confirm: t('multiWallet.confirmationDialog.confirm')
+        }}
+        events={{
+          onConfirm: handleOnConfirmRef.current,
+          onCancel: () => setIsDialogOpen(false),
+          onOpenChanged: setIsDialogOpen
+        }}
+      />
       {children}
     </WalletSetupConfirmationDialogContext.Provider>
   );

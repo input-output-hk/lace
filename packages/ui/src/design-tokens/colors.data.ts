@@ -115,6 +115,7 @@ export const colors = {
   $assets_table_market_price_trend_down_label_color: '',
 
   $dialog_container_bgColor: '',
+  $dialog_title_color: '',
   $dialog_description_color: '',
 
   $side_drawer_container_bgColor: '',
@@ -234,6 +235,15 @@ export const colors = {
   $educational_card_item_icon_container_bgColor: '',
   $educational_card_item_icon_container_borderColor: '',
 
+  $file_upload_container_bgColor: '',
+  $file_upload_container_bgColor_hover: '',
+  $file_upload_container_bgColor_pressed: '',
+  $file_upload_container_bgColor_focused: '',
+  $file_upload_container_outlineColor: '',
+  $file_upload_container_borderColor: '',
+  $file_upload_icon_container_bgColor: '',
+  $file_upload_icon_container_borderColor: '',
+
   $checkbox_check_color: '',
   $checkbox_checked_backgroundColor: '',
   $checkbox_unchecked_backgroundColor: '',
@@ -242,6 +252,34 @@ export const colors = {
   $checkbox_hover_checked_backgroundColor: '',
   $checkbox_hover_unchecked_borderColor: '',
   $checkbox_hover_unchecked_backgroundColor: '',
+
+  $radiobutton_focus_color: '',
+  $radiobutton_hover_color: '',
+  $radiobutton_indicator_backgroundColor: '',
+  $radiobutton_indicator_check_color: '',
+  $radiobutton_unchecked_borderColor: '',
+  $radiobutton_icon_color: '',
+  $radiobutton_icon_hover_color: '',
+  $radiobutton_icon_hover_border_color: '',
+
+  $select_border: '',
+  $select_icon_color: '',
+  $select_background_color: '',
+  $select_hover_background_color: '',
+  $select_input_value_color: '',
+  $select_input_background_data_highlighted: '',
+  $select_input_focus_color: '',
+  $select_input_rest_border_color: '',
+  $select_input_hover_border_color: '',
+
+  $action_card_container_bgColor: '',
+  $action_card_container_bgColor_hover: '',
+  $action_card_container_bgColor_pressed: '',
+  $action_card_container_bgColor_focused: '',
+  $action_card_container_outlineColor: '',
+  $action_card_container_borderColor: '',
+  $action_card_icon_container_bgColor: '',
+  $action_card_icon_container_borderColor: '',
 };
 
 export type Colors = typeof colors;
@@ -280,6 +318,7 @@ export const darkColorScheme = {
   $primary_hover_purple: 'rgba(116, 82, 219, 1)',
   $primary_accent_purple_0_3: 'rgba(127, 90, 240, 0.3)',
   $primary_light_grey: '#a9a9a9',
+  $primary_light_grey_plus_0_56: 'rgba(239, 239, 239, 0.56)',
   $primary_light_grey_plus: '#f9f9f9',
   $primary_white: '#FFFFFF',
   $primary_grey: '#383838',

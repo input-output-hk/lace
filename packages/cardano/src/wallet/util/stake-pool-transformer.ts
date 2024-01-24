@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { formatPercentages, getRandomIcon, getNumberWithUnit } from '@lace/common';
 import { Cardano } from '@cardano-sdk/core';
 import { CoinId } from '@src/wallet';
