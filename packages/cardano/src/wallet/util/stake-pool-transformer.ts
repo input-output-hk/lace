@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Required } from 'utility-types';
 import { formatPercentages, getRandomIcon, getNumberWithUnit } from '@lace/common';
 import { Cardano } from '@cardano-sdk/core';
@@ -34,7 +33,7 @@ type StakePoolTransformerProp = {
 export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
   const formattedPledge = getNumberWithUnit(lovelacesToAdaString(pledge.toString()));
-  const formattedCost = cost && getNumberWithUnit(lovelacesToAdaString(cost.toString()));
+  const formattedCost = getNumberWithUnit(lovelacesToAdaString(cost.toString()));
 
   return {
     id: id.toString(),
@@ -42,11 +41,11 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
     name: metadata?.name,
     ticker: metadata?.ticker,
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
-    owners: owners ? owners.map((owner: Cardano.RewardAccount) => owner.toString()) : [],
+    owners: owners?.map((owner: Cardano.RewardAccount) => owner.toString()) || [],
     retired: status === Cardano.StakePoolStatus.Retired,
     fee: lovelacesToAdaString(cost.toString()),
     description: metadata?.description,
-    ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
+    margin: `${formatPercentages(margin.numerator / margin.denominator)}`,
     cost: `${formattedCost.number}${formattedCost.unit}`,
     liveStake: getNumberWithUnit(lovelacesToAdaString(metrics.stake.live.toString())),
     ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),

@@ -2,6 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { Box, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
+import get from 'lodash/get';
 import { useTranslation } from 'react-i18next';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useOutsideHandles } from '../../outside-handles-provider';
@@ -27,24 +28,6 @@ const metricTypesBySortField: Record<Wallet.SortField, MetricType> = {
   cost: 'cost',
   name: 'ticker',
   saturation: 'saturation',
-};
-
-const getMetricValueByType = (pool: StakePoolTableItemBrowserProps, metricType: MetricType) => {
-  switch (metricType) {
-    case 'liveStake':
-      return pool.liveStake;
-    case 'pledge':
-      return pool.pledge;
-    case 'blocks':
-      return pool.blocks;
-    case 'cost':
-      return pool.cost;
-    case 'margin':
-      return pool.margin;
-    default:
-      // eslint-disable-next-line unicorn/no-useless-undefined, consistent-return
-      return undefined;
-  }
 };
 
 export const StakePoolsGrid = ({
@@ -100,7 +83,7 @@ export const StakePoolsGrid = ({
               <StakePoolCard
                 key={pool.ticker}
                 metricType={metricType}
-                metricValue={getMetricValueByType(pool, metricType)}
+                metricValue={get(pool, metricType)}
                 saturation={pool.saturation}
                 title={pool.ticker}
                 onClick={createHandleClick(pool)}
@@ -124,7 +107,7 @@ export const StakePoolsGrid = ({
             <StakePoolCard
               key={pool.ticker}
               metricType={metricType}
-              metricValue={getMetricValueByType(pool, metricType)}
+              metricValue={get(pool, metricType)}
               saturation={pool.saturation}
               title={pool.ticker}
               onClick={createHandleClick(pool)}
