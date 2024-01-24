@@ -55,9 +55,6 @@ export const EditAccountDrawer = ({
         <Box mb="$16">
           <Text.SubHeading weight="$bold">{t('account.edit.title')}</Text.SubHeading>
         </Box>
-        <Box mb="$64">
-          <Text.Body.Normal>{t('account.edit.subtitle')}</Text.Body.Normal>
-        </Box>
         <TextBox
           data-testid="edit-account-name-input"
           containerStyle={{ width: '100%' }}
