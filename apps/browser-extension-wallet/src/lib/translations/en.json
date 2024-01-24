@@ -23,7 +23,41 @@
           "incoming": "Received",
           "outgoing": "Sent",
           "sending": "Sending",
-          "self": "Self Transaction"
+          "self": "Self Transaction",
+          "RegisterDelegateRepresentativeCertificate": "DRep Registration",
+          "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
+          "UpdateDelegateRepresentativeCertificate": "DRep Update",
+          "ResignCommitteeColdCertificate": "Resign Committee",
+          "StakeRegistrationDelegationCertificate": "Stake Key Registration & Delgation",
+          "StakeVoteDelegationCertificate": "Stake Key Registration & DRep Delegation",
+          "StakeVoteRegistrationDelegationCertificate": "Stake Key Registration, Delegation, & DRep Delegation",
+          "VoteRegistrationDelegationCertificate": "Stake Key Registration & DRep Delegation",
+          "AuthorizeCommitteeHotCertificate": "Authorize Committee",
+          "VoteDelegationCertificate": "Vote Delegation",
+          "vote": "Vote Signing",
+          "submitProposal": "Governance Proposal"
+        },
+        "certificates": {
+          "headings": {
+            "typename": "Certificate Type",
+            "anchor": "Anchor",
+            "drep": "DRep",
+            "deposit": "Deposit paid",
+            "coldCredential": "Cold credential",
+            "hotCredential": "Hot credential"
+          },
+          "typenames": {
+            "VoteDelegationCertificate": "Vote Delegation",
+            "StakeVoteDelegationCertificate": "Stake Vote Delegation",
+            "StakeRegistrationDelegationCertificate": "Stake Registration Delegate",
+            "VoteRegistrationDelegationCertificate": "Vote Registration Delegate",
+            "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation",
+            "AuthorizeCommitteeHotCertificate": "Authorize Committee",
+            "ResignCommitteeColdCertificate": "Resign Committee",
+            "RegisterDelegateRepresentativeCertificate": "Register Delegate Representative",
+            "UnregisterDelegateRepresentativeCertificate": "Unregister Delegate Representative",
+            "UpdateDelegateRepresentativeCertificate": "Update Delegate Representative"
+          }
         }
       }
     },

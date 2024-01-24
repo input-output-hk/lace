@@ -17,7 +17,43 @@
           "incoming": "Received",
           "outgoing": "Sent",
           "sending": "Sending",
-          "self": "Self Transaction"
+          "self": "Self Transaction",
+          "RegisterDelegateRepresentativeCertificate": "DRep Registration",
+          "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
+          "UpdateDelegateRepresentativeCertificate": "DRep Update",
+          "ResignCommitteeColdCertificate": "Resign Committee",
+          "StakeRegistrationDelegationCertificate": "Stake Key Registration & Delgation",
+          "StakeVoteDelegationCertificate": "Stake Key Registration & DRep Delegation",
+          "StakeVoteRegistrationDelegationCertificate": "Stake Key Registration, Delegation, & DRep Delegation",
+          "VoteRegistrationDelegationCertificate": "Stake Key Registration & DRep Delegation",
+          "AuthorizeCommitteeHotCertificate": "Authorize Committee",
+          "VoteDelegationCertificate": "Vote Delegation",
+          "vote": "Vote Signing",
+          "submitProposal": "Governance Proposal"
+        },
+        "certificates": {
+          "headings": {
+            "certificates": "Certificates",
+            "typename": "Certificate Type",
+            "anchor": "Anchor",
+            "drep": "DRep",
+            "depositPaid": "Deposit paid",
+            "coldCredential": "Cold credential",
+            "hotCredential": "Hot credential",
+            "drepCredential": "DRep credential"
+          },
+          "typenames": {
+            "VoteDelegationCertificate": "Vote Delegation",
+            "StakeVoteDelegationCertificate": "Stake Vote Delegation",
+            "StakeRegistrationDelegationCertificate": "Stake Registration Delegate",
+            "VoteRegistrationDelegationCertificate": "Vote Registration Delegate",
+            "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation",
+            "AuthorizeCommitteeHotCertificate": "Authorize Committee",
+            "ResignCommitteeColdCertificate": "Resign Committee",
+            "RegisterDelegateRepresentativeCertificate": "Register Delegate Representative",
+            "UnregisterDelegateRepresentativeCertificate": "Unregister Delegate Representative",
+            "UpdateDelegateRepresentativeCertificate": "Update Delegate Representative"
+          }
         }
       }
     },
@@ -80,7 +116,61 @@
       "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
       "copiedToClipboard": "Copied to clipboard",
       "pools": "Pool(s)",
-      "epoch": "Epoch"
+      "self": "Self Transaction",
+      "RegisterDelegateRepresentativeCertificate": "DRep Registration",
+      "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
+      "UpdateDelegateRepresentativeCertificate": "DRep Update",
+      "ResignCommitteeColdCertificate": "Resign Committee",
+      "StakeRegistrationDelegationCertificate": "Stake Key Registration & Delgation",
+      "StakeVoteDelegationCertificate": "Stake Key Registration & DRep Delegation",
+      "StakeVoteRegistrationDelegationCertificate": "Stake Key Registration, Delegation, & DRep Delegation",
+      "VoteRegistrationDelegationCertificate": "Stake Key Registration & DRep Delegation",
+      "AuthorizeCommitteeHotCertificate": "Authorize Committee",
+      "VoteDelegationCertificate": "Vote Delegation",
+      "vote": "Vote Signing",
+      "submitProposal": "Governance Proposal",
+      "certificates": "Certificates",
+      "certificateTitles": {
+        "certificateType": "Certificate type",
+        "drep": "DRep",
+        "anchor": "Anchor",
+        "coldCredential": "Cold credential",
+        "hotCredential": "Hot credential",
+        "drepCredential": "DRep credential",
+        "depositPaid": "Deposit paid"
+      },
+      "votingProcedures": "Voting Procedures",
+      "votingProcedureTitles": {
+        "voterType": "Voter type",
+        "voterCredential": "Voter Credential",
+        "vote": "Vote",
+        "anchor": "Anchor",
+        "proposalTxHash": "Proposal Tx hash",
+        "actionIndex": "Governance action index"
+      },
+      "proposalProcedures": "Proposal Procedures",
+      "proposalProcedureTitles": {
+        "type": "Procedure type",
+        "governanceActionId": "Governance action ID",
+        "rewardAccount": "Reward account",
+        "anchor": "Anchor",
+        "protocolParamUpdate": "Protocol parameter update(s)",
+        "protocolVersion": "Protocol version",
+        "withdrawals": "Withdrawals",
+        "membersToBeRemoved": "Members to remove",
+        "membersToBeAdded": "Members to add",
+        "newQuorumThreshold": "New quorum threshold",
+        "constitutionAnchor": "Constitution anchor"
+      },
+      "governanceActions": {
+        "info_action": "Info Action",
+        "hard_fork_initiation_action": "Hard Fork Initiation",
+        "parameter_change_action": "Parameter Change",
+        "treasury_withdrawals_action": "Treasury Withdrawals",
+        "no_confidence": "No Confidence",
+        "update_committee": "Update Committee",
+        "new_constitution": "New Constitution"
+      }
     },
     "authorizeDapp": {
       "title": "Allow this site to",

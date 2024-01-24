@@ -1,21 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { BlockchainProviderSlice, ActivityDetailSlice, WalletInfoSlice } from '../../types';
+import { BlockchainProviderSlice, ActivityDetailSlice, WalletInfoSlice, UISlice } from '../../types';
 import { transactionMock } from '../../../utils/mocks/test-helpers';
 import { activityDetailSlice } from '../activity-detail-slice';
 import '@testing-library/jest-dom';
 import create, { GetState, SetState } from 'zustand';
 import { mockBlockchainProviders } from '@src/utils/mocks/blockchain-providers';
-import { ActivityStatus } from '@lace/core';
+import { ActivityStatus, TransactionActivityType } from '@lace/core';
 
 const mockActivityDetailSlice = (
   set: SetState<ActivityDetailSlice>,
-  get: GetState<BlockchainProviderSlice & ActivityDetailSlice & WalletInfoSlice>
+  get: GetState<BlockchainProviderSlice & ActivityDetailSlice & WalletInfoSlice & UISlice>
 ): ActivityDetailSlice => {
   get = () =>
     ({ blockchainProvider: mockBlockchainProviders() } as BlockchainProviderSlice &
       ActivityDetailSlice &
-      WalletInfoSlice);
+      WalletInfoSlice &
+      UISlice);
   return activityDetailSlice({ set, get });
 };
 
@@ -45,7 +46,7 @@ describe('Testing createStoreHook slice', () => {
 
     act(() => {
       result.current.setTransactionActivityDetail({
-        type: 'incoming',
+        type: TransactionActivityType.incoming,
         status: ActivityStatus.SUCCESS,
         activity: transactionMock.tx,
         direction: transactionMock.direction

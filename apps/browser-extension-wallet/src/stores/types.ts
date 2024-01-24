@@ -1,12 +1,7 @@
 import { SetState, State, GetState, StoreApi } from 'zustand';
 import { Wallet, StakePoolSortOptions } from '@lace/cardano';
-import {
-  AssetActivityListProps,
-  ActivityStatus,
-  RewardsActivityType,
-  TransactionActivityType,
-  ActivityType
-} from '@lace/core';
+import { AssetActivityListProps, ActivityStatus, TransactionActivityType } from '@lace/core';
+import type { ActivityType } from '@lace/core';
 import { PriceResult } from '../hooks';
 import {
   NetworkInformation,
@@ -140,13 +135,13 @@ export interface ActivityDetailSlice {
     direction?: TxDirection;
   } & (
     | {
-        type: RewardsActivityType;
+        type: TransactionActivityType.rewards;
         status: ActivityStatus.SPENDABLE;
         direction?: never;
         activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
       }
     | {
-        type: TransactionActivityType;
+        type: Exclude<ActivityType, TransactionActivityType.rewards>;
         activity: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
         direction: TxDirection;
       }
@@ -156,7 +151,7 @@ export interface ActivityDetailSlice {
     activity: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
     direction: TxDirection;
     status: ActivityStatus;
-    type: TransactionActivityType;
+    type: Exclude<ActivityType, TransactionActivityType.rewards>;
   }) => void;
   setRewardsActivityDetail: (params: {
     activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };

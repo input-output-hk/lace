@@ -3,13 +3,14 @@ import * as React from 'react';
 import { render, within, fireEvent, queryByTestId } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssetActivityItem, AssetActivityItemProps, ActivityStatus } from '../AssetActivityItem';
+import { TransactionActivityType } from '../../ActivityDetail/types';
 
 const assetsAmountTestId = 'asset-amount';
 
 describe('Testing AssetActivityItem component', () => {
   const props: AssetActivityItemProps = {
     id: '1',
-    type: 'outgoing',
+    type: TransactionActivityType.outgoing,
     amount: '100',
     fiatAmount: '300 $',
     formattedTimestamp: 'Timestamp',

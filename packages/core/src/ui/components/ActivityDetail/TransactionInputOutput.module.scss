@@ -110,3 +110,8 @@
 .separatorLine {
   border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
 }
+
+.topBorderContent {
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  padding-top: size_unit(3);
+}

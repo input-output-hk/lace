@@ -1,7 +1,14 @@
 /* eslint-disable complexity */
 /* eslint-disable unicorn/no-array-reduce */
 import isEmpty from 'lodash/isEmpty';
-import { ActivityDetailSlice, ZustandHandlers, BlockchainProviderSlice, WalletInfoSlice, SliceCreator } from '../types';
+import {
+  ActivityDetailSlice,
+  ZustandHandlers,
+  BlockchainProviderSlice,
+  WalletInfoSlice,
+  SliceCreator,
+  UISlice
+} from '../types';
 import { CardanoTxOut, Transaction, ActivityDetail, TransactionActivityDetail } from '../../types';
 import { blockTransformer, inputOutputTransformer } from '../../api/transformers';
 import { Wallet } from '@lace/cardano';
@@ -10,8 +17,14 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import { ActivityStatus, ActivityType } from '@lace/core';
+import { ActivityStatus, DelegationTransactionType, TransactionActivityType } from '@lace/core';
+import type { ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
+import {
+  certificateTransformer,
+  governanceProposalsTransformer,
+  votingProceduresTransformer
+} from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
 
 /**
  * validates if the transaction is confirmed
@@ -52,11 +65,11 @@ const shouldIncludeFee = (
   delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
 ) =>
   !(
-    type === 'delegationRegistration' ||
+    type === DelegationTransactionType.delegationRegistration ||
     // Existence of any (new) delegationInfo means that this "de-registration"
     // activity is accompanied by a "delegation" activity, which carries the fees.
     // However, fees should be shown if de-registration activity is standalone.
-    (type === 'delegationDeregistration' && !!delegationInfo?.length)
+    (type === DelegationTransactionType.delegationDeregistration && !!delegationInfo?.length)
   );
 
 const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
@@ -85,20 +98,21 @@ const buildGetActivityDetail =
     set,
     get
   }: ZustandHandlers<
-    ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice
+    ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice & UISlice
   >): ActivityDetailSlice['getActivityDetail'] =>
   // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
+      walletUI: { cardanoCoin },
       activityDetail,
       walletInfo
     } = get();
 
     set({ fetchingActivityInfo: true });
 
-    if (activityDetail.type === 'rewards') {
+    if (activityDetail.type === TransactionActivityType.rewards) {
       const { activity, status, type } = activityDetail;
       const poolInfos = await getPoolInfos(
         activity.rewards.map(({ poolId }) => poolId),
@@ -177,14 +191,14 @@ const buildGetActivityDetail =
     const deposit =
       // since one tx can be split into two (delegation, registration) actions,
       // ensure only the registration tx carries the deposit
-      implicitCoin.deposit && type === 'delegationRegistration'
+      implicitCoin.deposit && type === DelegationTransactionType.delegationRegistration
         ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
         : undefined;
     const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
     const depositReclaim =
       // since one tx can be split into two (delegation, de-registration) actions,
       // ensure only the de-registration tx carries the reclaimed deposit
-      depositReclaimValue && type === 'delegationDeregistration'
+      depositReclaimValue && type === DelegationTransactionType.delegationDeregistration
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
@@ -192,7 +206,7 @@ const buildGetActivityDetail =
     // Delegation tx additional data (LW-3324)
 
     const delegationInfo = tx.body.certificates?.filter(
-      (certificate) => certificate.__typename === 'StakeDelegationCertificate'
+      (certificate) => certificate.__typename === Wallet.Cardano.CertificateType.StakeDelegation
     ) as Wallet.Cardano.StakeDelegationCertificate[];
 
     let transaction: ActivityDetail['activity'] = {
@@ -205,10 +219,14 @@ const buildGetActivityDetail =
       addrOutputs: outputs,
       metadata: txMetadata,
       includedUtcDate: blocks?.utcDate,
-      includedUtcTime: blocks?.utcTime
+      includedUtcTime: blocks?.utcTime,
+      // TODO: store the raw data here and transform it later so we always have the raw data when needed.(LW-9570)
+      votingProcedures: votingProceduresTransformer(tx.body.votingProcedures),
+      proposalProcedures: governanceProposalsTransformer(cardanoCoin, tx.body.proposalProcedures),
+      certificates: certificateTransformer(cardanoCoin, tx.body.certificates)
     };
 
-    if (type === 'delegation' && delegationInfo) {
+    if (type === DelegationTransactionType.delegation && delegationInfo) {
       const pools = await getPoolInfos(
         delegationInfo.map(({ poolId }) => poolId),
         stakePoolProvider
@@ -236,7 +254,7 @@ const buildGetActivityDetail =
  * has all transactions search related actions and states
  */
 export const activityDetailSlice: SliceCreator<
-  ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice,
+  ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice & UISlice,
   ActivityDetailSlice
 > = ({ set, get }) => ({
   activityDetail: undefined,
@@ -245,6 +263,6 @@ export const activityDetailSlice: SliceCreator<
   setTransactionActivityDetail: ({ activity, direction, status, type }) =>
     set({ activityDetail: { activity, direction, status, type } }),
   setRewardsActivityDetail: ({ activity }) =>
-    set({ activityDetail: { activity, status: ActivityStatus.SPENDABLE, type: 'rewards' } }),
+    set({ activityDetail: { activity, status: ActivityStatus.SPENDABLE, type: TransactionActivityType.rewards } }),
   resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })
 });

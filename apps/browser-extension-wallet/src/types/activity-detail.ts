@@ -4,7 +4,11 @@ import type {
   ActivityStatus,
   RewardsInfo,
   TransactionActivityType,
-  RewardsActivityType
+  ActivityType,
+  TxDetailsVotingProceduresTitles,
+  TxDetailsProposalProceduresTitles,
+  TxDetailsCertificateTitles,
+  TxDetails
 } from '@lace/core';
 
 export enum TxDirections {
@@ -33,6 +37,9 @@ type TransactionActivity = {
   addrOutputs?: TxOutputInput[];
   metadata?: TransactionMetadataProps['metadata'];
   pools?: TransactionPool[];
+  votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
+  proposalProcedures?: TxDetails<TxDetailsProposalProceduresTitles>[];
+  certificates?: TxDetails<TxDetailsCertificateTitles>[];
 };
 
 type RewardsActivity = {
@@ -58,7 +65,7 @@ type BlocksInfo = {
 };
 
 export type TransactionActivityDetail = {
-  type: TransactionActivityType;
+  type: Exclude<ActivityType, TransactionActivityType.rewards>;
   status: ActivityStatus;
   activity: TransactionActivity;
   blocks?: BlocksInfo;
@@ -66,7 +73,7 @@ export type TransactionActivityDetail = {
 };
 
 export type RewardsActivityDetail = {
-  type: RewardsActivityType;
+  type: TransactionActivityType.rewards;
   status: ActivityStatus.SPENDABLE;
   activity: RewardsActivity;
 };

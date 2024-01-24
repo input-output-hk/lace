@@ -4,6 +4,7 @@ import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssetActivityList, AssetActivityListProps } from '../AssetActivityList';
 import { ActivityStatus } from '../AssetActivityItem';
+import { TransactionActivityType } from '../../ActivityDetail';
 
 const activityTranslations = {
   asset: 'asset',
@@ -22,7 +23,7 @@ describe('Testing AssetActivityList component', () => {
   const props: AssetActivityListProps = {
     onExpand: jest.fn(),
     items: Array.from({ length: 12 }, () => ({
-      type: 'outgoing',
+      type: TransactionActivityType.outgoing,
       name: 'Sent',
       description: 'ADA',
       date: new Date('2021-01-01'),
