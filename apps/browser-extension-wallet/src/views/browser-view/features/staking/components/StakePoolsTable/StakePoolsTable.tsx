@@ -1,17 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
+import { Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
 import {
   Columns,
   SortDirection,
   SortField,
-  TableRow,
-  TableHeader,
   StakePoolSortOptions,
   TranslationsFor,
   stakePooltableConfig,
-  TableBody,
-  TableBodyProps,
   StakePoolTableItemBrowserProps,
   StakePoolPlaceholder
 } from '@lace/staking';
@@ -38,6 +35,8 @@ type stakePoolsTableProps = {
   onStake?: (id: string) => void;
   scrollableTargetId: string;
 };
+
+type LoadMoreDataParam = Parameters<typeof Table.TableBody>[0]['loadMoreData'];
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
   field: SortField.name,
@@ -88,10 +87,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
 
-  const loadMoreData = ({
-    startIndex,
-    endIndex
-  }: Parameters<TableBodyProps<StakePoolTableItemBrowserProps>['loadMoreData']>[0]) => {
+  const loadMoreData = ({ startIndex, endIndex }: Parameters<LoadMoreDataParam>[0]) => {
     if (startIndex !== endIndex) {
       debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
     }
@@ -184,7 +180,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
         />
       </div>
       <div style={{ marginTop: '16px' }} data-testid="stake-pool-list-container">
-        <TableHeader
+        <Table.TableHeader
           dataTestId="stake-pool"
           headers={headers}
           isActiveSortItem={isActiveSortItem}
@@ -193,7 +189,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           order={sort?.order}
         />
         {!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
-        <TableBody<StakePoolTableItemBrowserProps>
+        <Table.TableBody<StakePoolTableItemBrowserProps>
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
           items={list}
@@ -204,16 +200,17 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { stakePool, hexId, id, selectionDisabledMessage, onClick, ...data } = props;
             return (
-              <TableRow<Columns>
+              <Table.TableRow<Columns>
                 onClick={onClick}
                 columns={stakePooltableConfig.columns}
                 cellRenderers={stakePooltableConfig.renderer}
                 dataTestId="stake-pool"
-                data={data as unknown as Parameters<typeof TableRow>[0]['data']}
+                data={data as unknown as Parameters<typeof Table.TableRow>[0]['data']}
                 selectionDisabledMessage={selectionDisabledMessage}
               />
             );
           }}
+          increaseViewportBy={{ bottom: 100, top: 0 }}
         />
       </div>
     </div>

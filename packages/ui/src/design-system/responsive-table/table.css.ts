@@ -1,5 +1,4 @@
-import { style, vars } from '@lace/ui';
-import { theme } from 'features/theme';
+import { vars, style } from '../../design-tokens';
 
 export const row = style([
   {
@@ -14,7 +13,7 @@ export const row = style([
     minHeight: vars.spacing.$44,
     selectors: {
       '&:hover': {
-        background: theme.colors.$stakePoolItemBgHover,
+        background: vars.colors.$stake_pool_item_bg_hover,
         height: '50px',
         margin: '-3px 0',
         minHeight: '50px',
@@ -35,7 +34,7 @@ export const selectable = style([
 
 export const cell = style([
   {
-    color: theme.colors.$stakePoolItemTextColor,
+    color: vars.colors.$stake_pool_item_text_color,
     display: 'flex',
     fontSize: vars.fontSizes.$16,
     fontWeight: vars.fontWeights.$medium,
@@ -63,7 +62,6 @@ export const checkBoxWrapper = style({
   display: 'flex',
 });
 
-// header styles
 export const header = style([
   {
     cursor: 'default',
@@ -80,7 +78,7 @@ export const header = style([
 
 export const headerItem = style([
   {
-    color: theme.colors.$stakePoolHeaderTextColor,
+    color: vars.colors.$stake_pool_header_text_color,
     padding: '0',
   },
 ]);

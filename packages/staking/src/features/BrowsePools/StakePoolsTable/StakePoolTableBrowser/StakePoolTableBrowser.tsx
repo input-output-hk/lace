@@ -1,10 +1,10 @@
 import { PostHogAction } from '@lace/common';
+import { Table } from '@lace/ui';
 import React from 'react';
 import { ListRange } from 'react-virtuoso';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../../store';
 import { StakePoolPlaceholder } from '../StakePoolPlaceholder/StakePoolPlaceholder';
-import { TableBody } from '../Table/Table';
 import { Columns, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from '../utils';
 import * as styles from './StakePoolTableBrowser.css';
@@ -57,7 +57,7 @@ export const StakePoolTableBrowser = ({
         </div>
       )}
       {!(selectedStakePools.length > 0 && selectedStakePools.length === pools.length) && emptyPlaceholder}
-      <TableBody<StakePoolTableItemBrowserProps | undefined>
+      <Table.TableBody<StakePoolTableItemBrowserProps | undefined>
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}
         items={pools}
@@ -68,6 +68,7 @@ export const StakePoolTableBrowser = ({
             <StakePoolPlaceholder columns={config.columns} withSelection />
           )
         }
+        increaseViewportBy={{ bottom: 100, top: 0 }}
       />
     </div>
   );

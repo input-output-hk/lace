@@ -34,14 +34,6 @@ export const colorsContract = {
   $sliderRailFill: '',
   // TODO: remove once replaced with new pool skeleton
   $stakePoolCellPlaceholder: '',
-  $stakePoolHeaderTextColor: '',
-  $stakePoolItemBgHover: '',
-  $stakePoolItemCheckboxBgColor: '',
-  $stakePoolItemCheckboxColor: '',
-  $stakePoolItemCheckboxHoverBgColor: '',
-  $stakePoolItemCheckboxHoverColor: '',
-  $stakePoolItemCheckboxSelectedColor: '',
-  $stakePoolItemTextColor: '',
   $tooltipBgColor: '',
 };
 
@@ -79,14 +71,6 @@ export const lightThemeColors: typeof colorsContract = {
   $sliderRailFill: lightColorScheme.$primary_light_grey_plus,
   // TODO: remove once replaced with new pool skeleton
   $stakePoolCellPlaceholder: lightColorScheme.$primary_light_grey,
-  $stakePoolHeaderTextColor: lightColorScheme.$primary_dark_grey,
-  $stakePoolItemBgHover: lightColorScheme.$primary_light_grey,
-  $stakePoolItemCheckboxBgColor: 'transparent',
-  $stakePoolItemCheckboxColor: lightColorScheme.$primary_grey,
-  $stakePoolItemCheckboxHoverBgColor: 'transparent',
-  $stakePoolItemCheckboxHoverColor: darkColorScheme.$primary_dark_grey,
-  $stakePoolItemCheckboxSelectedColor: lightColorScheme.$primary_white,
-  $stakePoolItemTextColor: lightColorScheme.$primary_black,
   $tooltipBgColor: lightColorScheme.$primary_white,
 };
 
@@ -128,13 +112,5 @@ export const darkThemeColors: typeof colorsContract = {
   $sliderRailFill: darkColorScheme.$primary_dark_grey_plus,
   // TODO: remove once replaced with new pool skeleton
   $stakePoolCellPlaceholder: darkColorScheme.$primary_mid_grey,
-  $stakePoolHeaderTextColor: darkColorScheme.$primary_white,
-  $stakePoolItemBgHover: darkColorScheme.$primary_dark_grey_plus,
-  $stakePoolItemCheckboxBgColor: 'transparent',
-  $stakePoolItemCheckboxColor: darkColorScheme.$primary_light_grey,
-  $stakePoolItemCheckboxHoverBgColor: darkColorScheme.$primary_grey,
-  $stakePoolItemCheckboxHoverColor: darkColorScheme.$primary_light_grey,
-  $stakePoolItemCheckboxSelectedColor: darkColorScheme.$primary_bg_black,
-  $stakePoolItemTextColor: darkColorScheme.$primary_light_grey,
   $tooltipBgColor: darkColorScheme.$primary_mid_grey,
 };

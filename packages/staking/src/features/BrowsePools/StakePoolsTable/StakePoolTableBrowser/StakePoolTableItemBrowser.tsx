@@ -1,9 +1,9 @@
 import { PostHogAction } from '@lace/common';
+import { Table } from '@lace/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
-import { TableRow } from '../Table';
 import { Columns } from '../types';
 import { config } from '../utils';
 import { StakePoolTableItemBrowserProps } from './types';
@@ -42,7 +42,7 @@ export const StakePoolTableItemBrowser = ({
     // TODO: this would throw an error but would cause no harm for the table/proper data fetching
     <div />
   ) : (
-    <TableRow<Columns>
+    <Table.TableRow<Columns>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}

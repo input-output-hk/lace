@@ -1,9 +1,9 @@
+import { Table } from '@lace/ui';
 import { TranslationKey } from 'features/i18n';
 import { en } from 'features/i18n/translations';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
-import { TableHeader } from '../Table/TableHeader';
 import { Columns, SortDirection, SortField, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from '../utils';
 
@@ -51,7 +51,7 @@ export const StakePoolTableHeaderBrowser = ({
   const isActiveSortItem = (value: string) => value === activeSort?.field;
 
   return (
-    <TableHeader
+    <Table.TableHeader<Columns>
       dataTestId="stake-pool"
       headers={headers}
       isActiveSortItem={isActiveSortItem}
