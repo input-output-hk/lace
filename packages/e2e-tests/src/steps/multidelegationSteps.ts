@@ -54,9 +54,9 @@ Then(
 );
 
 Then(
-  /^I see stake pool details buttons for (delegated|non-delegated) pool$/,
-  async (typeOfPool: 'delegated' | 'non-delegated') => {
-    await StakePoolDetailsAssert.assertSeeDrawerButtons(typeOfPool === 'delegated');
+  /^I see "(\d+)" stake pool details buttons for (delegated|non-delegated) pool$/,
+  async (numberOfButtons: number, typeOfPool: 'delegated' | 'non-delegated') => {
+    await StakePoolDetailsAssert.assertSeeDrawerButtons(typeOfPool === 'delegated', numberOfButtons);
   }
 );
 

@@ -1,32 +1,21 @@
-@Multidelegation-DelegatedFunds-Popup @Testnet @Mainnet
-Feature: Staking Page - Popup View
+@Multidelegation-DelegatedFunds-SinglePool-Popup @Testnet
+Feature: Staking Page - Delegated funds - Single pool - Popup View
 
   Background:
     Given Lace is ready for test
 
   @LW-8330
-  Scenario Outline: Popup View - Delegation card displays correct data
-    Given I open wallet: "<walletName>" in: popup mode
+  Scenario: Popup View - Delegation card displays correct data
     And I disable showing Multidelegation persistence banner
     When I navigate to Staking popup page
     Then I see Delegation title displayed for multidelegation
     And I see Delegation card displaying correct data
-    Examples:
-      | walletName                     |
-      | MultidelegationDelegatedSingle |
-      | MultidelegationDelegatedMulti  |
 
   @LW-8338
-  Scenario Outline: Popup View - Delegated pools cards are present
-    Given I open wallet: "<walletName>" in: popup mode
-    And I disable showing Multidelegation beta banner
+  Scenario: Popup View - Delegated pools cards are present
     And I disable showing Multidelegation persistence banner
     When I navigate to Staking popup page
     And I see Delegation pool cards are displayed
-    Examples:
-      | walletName                     |
-      | MultidelegationDelegatedSingle |
-      | MultidelegationDelegatedMulti  |
 
   @LW-8480
   Scenario Outline: Popup View - Staking - Hover over currently staking element: <element>
@@ -37,7 +26,6 @@ Feature: Staking Page - Popup View
       | element      |
       | total staked |
       | last reward  |
-
 
   @Pending @LW-9446 @Testnet
     # BUG LW-9152

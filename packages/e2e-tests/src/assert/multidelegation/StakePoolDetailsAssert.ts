@@ -155,22 +155,36 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
-  assertSeeDrawerButtons = async (staked: boolean) => {
-    if (staked) {
-      await StakePoolDetails.manageDelegationButton.waitForClickable();
-      expect(await StakePoolDetails.manageDelegationButton.getText()).to.equal(
-        await t('drawer.details.manageDelegation', 'staking')
-      );
-    } else {
-      await StakePoolDetails.stakeAllOnThisPoolButton.waitForClickable();
-      expect(await StakePoolDetails.stakeAllOnThisPoolButton.getText()).to.equal(
-        await t('drawer.details.stakeOnPoolButton', 'staking')
-      );
-    }
+  assertSeeStakeAllOnThisPoolButton = async () => {
+    await StakePoolDetails.stakeAllOnThisPoolButton.waitForClickable();
+    expect(await StakePoolDetails.stakeAllOnThisPoolButton.getText()).to.equal(
+      await t('drawer.details.stakeOnPoolButton', 'staking')
+    );
+  };
+
+  assertSeeManageDelegationButton = async () => {
+    await StakePoolDetails.manageDelegationButton.waitForClickable();
+    expect(await StakePoolDetails.manageDelegationButton.getText()).to.equal(
+      await t('drawer.details.manageDelegation', 'staking')
+    );
+  };
+
+  assertSeeSelectPoolForMultiStakingButton = async () => {
     await StakePoolDetails.selectPoolForMultiStakingButton.waitForClickable();
     expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
       await t('drawer.details.selectForMultiStaking', 'staking')
     );
+  };
+  assertSeeDrawerButtons = async (delegated: boolean, numberOfButtons = 2) => {
+    if (delegated) {
+      await this.assertSeeManageDelegationButton();
+      if (numberOfButtons === 3) {
+        await this.assertSeeStakeAllOnThisPoolButton();
+      }
+    } else {
+      await this.assertSeeStakeAllOnThisPoolButton();
+    }
+    await this.assertSeeSelectPoolForMultiStakingButton();
   };
 }
 
