@@ -1358,7 +1358,6 @@
   "account": {
     "edit": {
       "title": "Edit account name",
-      "subtitle": "Choose a name to identify your account",
       "input.label": "Account name",
       "footer.save": "Save",
       "footer.cancel": "Cancel"
