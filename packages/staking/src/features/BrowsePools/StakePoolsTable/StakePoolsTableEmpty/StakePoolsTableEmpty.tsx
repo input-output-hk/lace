@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Empty from './empty.svg';
-import styles from './StakePoolsTableEmpty.module.scss';
+import Empty from '../../../../assets/images/empty.svg';
+import * as styles from './StakePoolsTableEmpty.css';
 
 export type StakePoolsTableEmptyProps = {
   title?: string | React.ReactElement;

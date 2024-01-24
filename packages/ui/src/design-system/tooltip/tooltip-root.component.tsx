@@ -6,17 +6,22 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { TooltipContent } from './tooltip-content.component';
 
 export type Props = PropsWithChildren<
-  typeof Tooltip.Root & {
-    label: string;
-  }
+  Pick<Tooltip.PopperContentProps, 'side'> &
+    typeof Tooltip.Root & {
+      label: string;
+    }
 >;
 
-export const Root = ({ label, children }: Readonly<Props>): JSX.Element => {
+export const Root = ({
+  label,
+  side = 'top',
+  children,
+}: Readonly<Props>): JSX.Element => {
   return (
     <Tooltip.Root>
       {children}
       <Tooltip.Portal>
-        <Tooltip.Content>
+        <Tooltip.Content side={side}>
           <TooltipContent label={label} />
         </Tooltip.Content>
       </Tooltip.Portal>
