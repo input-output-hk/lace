@@ -4,7 +4,7 @@ import MultidelegationPageAssert from '../assert/multidelegation/Multidelegation
 import MultidelegationPage from '../elements/multidelegation/MultidelegationPage';
 import { parseSearchTerm } from '../utils/multiDelegationUtils';
 import testContext from '../utils/testContext';
-import { getStakePoolById, getStakePoolByName } from '../data/expectedStakePoolsData';
+import { getStakePoolById, getStakePoolByName, getStakePoolByTicker } from '../data/expectedStakePoolsData';
 import extensionUtils from '../utils/utils';
 import StakePoolDetailsAssert from '../assert/multidelegation/StakePoolDetailsAssert';
 import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetailsDrawer';
@@ -43,7 +43,7 @@ Then(/^I wait until delegation info card shows staking to "(\d+)" pool\(s\)$/, a
 });
 
 When(/^I wait until "([^"]*)" pool is on "Your pools" list$/, async (poolName: string) => {
-  poolName = poolName === 'OtherStakePool' ? testContext.load('currentStakePoolName') : poolName;
+  poolName = poolName === 'OtherStakePool' ? testContext.load('poolName') : poolName;
   await MultidelegationPageAssert.assertSeeStakingPoolOnYourPoolsList(poolName);
 });
 
@@ -115,7 +115,9 @@ When(/^I click on the stake pool with ticker "([^"]*)"$/, async (poolTicker: str
 Then(/^I see stake pool details drawer for "([^"]*)" stake pool$/, async (stakePoolName: string) => {
   let stakePool;
   if (stakePoolName === 'OtherStakePool') {
-    stakePool = getStakePoolByName(testContext.load('currentStakePoolName'));
+    stakePool = testContext.has('currentStakePoolName')
+      ? getStakePoolByName(testContext.load('currentStakePoolName'))
+      : getStakePoolByTicker(testContext.load('currentStakePoolTicker'));
   } else {
     const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
     stakePool = getStakePoolByName(stakePoolName, network);
