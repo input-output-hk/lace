@@ -2,6 +2,8 @@ import React, { useLayoutEffect, useRef } from 'react';
 
 import { Virtuoso } from 'react-virtuoso';
 
+import * as cx from './table.css';
+
 import type { ListRange, VirtuosoProps } from 'react-virtuoso';
 
 const DEFAULT_ROW_HIGHT = 44;
@@ -45,7 +47,11 @@ export const TableBody = <E extends object | undefined>({
   }, [loadMoreData, rowHeight, scrollableTargetId]);
 
   return (
-    <div ref={tableReference} data-testid="stake-pool-list-scroll-wrapper">
+    <div
+      className={cx.body}
+      ref={tableReference}
+      data-testid="stake-pool-list-scroll-wrapper"
+    >
       <Virtuoso
         customScrollParent={scrollableTargetReference.current}
         totalCount={items.length}

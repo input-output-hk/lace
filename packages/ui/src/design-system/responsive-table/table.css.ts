@@ -2,6 +2,12 @@ import { vars, style } from '../../design-tokens';
 
 export const row = style([
   {
+    ':hover': {
+      background: vars.colors.$stake_pool_item_bg_hover,
+      height: '50px',
+      margin: '-3px 0',
+      minHeight: '50px',
+    },
     alignItems: 'center',
     borderRadius: vars.radius.$medium,
     cursor: 'pointer',
@@ -11,14 +17,6 @@ export const row = style([
     gridTemplateColumns: 'repeat(auto-fit, minmax(0px, 1fr))',
     height: vars.spacing.$44,
     minHeight: vars.spacing.$44,
-    selectors: {
-      '&:hover': {
-        background: vars.colors.$stake_pool_item_bg_hover,
-        height: '50px',
-        margin: '-3px 0',
-        minHeight: '50px',
-      },
-    },
   },
 ]);
 
@@ -51,6 +49,7 @@ export const cell = style([
 
 export const cellInner = style([
   {
+    fontFamily: vars.fontFamily.$nova,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -80,6 +79,7 @@ export const headerItem = style([
   {
     color: vars.colors.$stake_pool_header_text_color,
     padding: '0',
+    fontFamily: vars.fontFamily.$nova,
   },
 ]);
 
@@ -101,5 +101,11 @@ export const withAction = style([
         cursor: 'pointer',
       },
     },
+  },
+]);
+
+export const body = style([
+  {
+    height: vars.spacing.$fill,
   },
 ]);
