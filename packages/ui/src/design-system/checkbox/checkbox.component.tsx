@@ -17,7 +17,7 @@ export type Props = Readonly<
     disabled?: boolean;
     label?: ReactNode;
     className?: string;
-    onClick: () => void;
+    onClick: (event: Readonly<MouseEvent>) => void;
   }
 >;
 

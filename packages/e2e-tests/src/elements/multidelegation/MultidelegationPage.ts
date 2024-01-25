@@ -27,7 +27,6 @@ class MultidelegationPage {
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
-  private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfoliobar-btn-next"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
   private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
@@ -124,10 +123,6 @@ class MultidelegationPage {
 
   get stakeButton() {
     return $(this.STAKE_BUTTON);
-  }
-
-  get portfolioBarBtnNext() {
-    return $(this.PORTFOLIO_BAR_BTN_NEXT);
   }
 
   get manageStakingBtnNext() {
@@ -240,7 +235,7 @@ class MultidelegationPage {
 
   async openTab(tab: 'Overview' | 'Browse pools') {
     await browser.waitUntil(async () => (await this.clickAndGetTabStateAttribute(tab)) === 'active', {
-      timeout: 5000,
+      timeout: 8000,
       interval: 1000
     });
   }
@@ -281,10 +276,6 @@ class MultidelegationPage {
 
   async clickNextButtonOnDrawerSection(section: string) {
     switch (section) {
-      case 'portfolio bar':
-        await this.portfolioBarBtnNext.waitForClickable();
-        await this.portfolioBarBtnNext.click();
-        break;
       case 'manage staking':
         await this.manageStakingBtnNext.waitForClickable();
         await this.manageStakingBtnNext.click();

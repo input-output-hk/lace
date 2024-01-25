@@ -1,55 +1,29 @@
-/* eslint-disable react/no-multi-comp */
-import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
-import { List, ListProps, Tooltip } from 'antd';
-import cn from 'classnames';
-import isNumber from 'lodash/isNumber';
+import { ListProps } from 'antd';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import InfoIcon from '../../../../assets/icons/info-icon.svg';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../../store';
-import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
-import Arrow from './arrow.svg';
-import styles from './StakePoolTableBrowser.module.scss';
-
-type TranslationsFor<T extends string> = Record<T, string>;
-type SortKey = 'name' | 'ros' | 'saturation';
-type SortDirection = 'asc' | 'desc';
-
-export type StakePoolSortOptions = {
-  field: Wallet.SortField;
-  order: SortDirection;
-};
+import { Columns, StakePoolSortOptions, TranslationsFor } from '../types';
+import { StakePoolTableBodyBrowser } from './StakePoolTableBodyBrowser';
+import * as styles from './StakePoolTableBrowser.css';
+import { StakePoolTableHeaderBrowser } from './StakePoolTableHeaderBrowser';
+import { StakePoolTableItemBrowser } from './StakePoolTableItemBrowser';
+import { StakePoolTableItemBrowserProps } from './types';
 
 export type StakePoolTableBrowserProps = {
   scrollableTargetId: string;
   className?: string;
   emptyText?: React.ReactNode | (() => React.ReactNode);
-  items: StakePoolItemBrowserProps[];
+  items: StakePoolTableItemBrowserProps[];
   loadMoreData: () => void;
   total: number;
   emptyPlaceholder?: React.ReactNode | string;
-  translations: TranslationsFor<'poolName' | 'apy' | 'saturation'>;
+  translations: TranslationsFor<Columns>;
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
   showSkeleton?: boolean;
-} & ListProps<StakePoolItemBrowserProps>;
-
-interface TableHeaders {
-  label: string;
-  value: SortKey;
-  tooltipText?: string;
-}
-
-const PoolSkeleton = () => (
-  <div className={styles.skeleton} data-testid="stake-pool-skeleton">
-    <div className={styles.skeletonAvatar} />
-    <div className={styles.skeletonTitle} />
-  </div>
-);
+} & ListProps<StakePoolTableItemBrowserProps>;
 
 export const StakePoolTableBrowser = ({
   scrollableTargetId,
@@ -66,118 +40,50 @@ export const StakePoolTableBrowser = ({
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const { analytics } = useOutsideHandles();
-  const portfolioPools = useDelegationPortfolioStore((state) =>
-    state.selectedPortfolio.map(({ id }) => ({
+
+  const { portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+    portfolioPools: store.selectedPortfolio.map(({ id }) => ({
       // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
       id: Wallet.Cardano.PoolId.fromKeyHash(id as unknown as Wallet.Crypto.Ed25519KeyHashHex),
-    }))
-  );
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
-  const { t } = useTranslation();
-  const headers: TableHeaders[] = [
-    { label: translations.poolName, value: 'name' },
-    {
-      label: translations.apy,
-      tooltipText: t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip'),
-      value: 'ros',
-    },
-    {
-      label: translations.saturation,
-      tooltipText: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
-      value: 'saturation',
-    },
-  ];
-
-  const onSortChange = (field: SortKey) => {
-    const order =
-      field === activeSort?.field ? ((activeSort?.order === 'asc' ? 'desc' : 'asc') as SortDirection) : 'asc';
-    if (field === 'name') {
-      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsPoolNameClick);
-    } else if (field === 'ros') {
-      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsRosClick);
-    } else {
-      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSaturationClick);
-    }
-
-    setActiveSort({ field, order });
-  };
-
+    })),
+  }));
   const selectedStakePools = items
     .filter((item) => portfolioPools.find((pool) => pool.id.toString() === item.id))
     .map((pool) => ({
       ...pool,
-      onUnselect: () => portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' }),
+      onSelect: () => {
+        portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' });
+        analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
+      },
     }));
   const availableStakePools = items.filter((item) => !selectedStakePools.some((pool) => pool.id === item.id));
 
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
-      <div data-testid="stake-pool-list-header" className={styles.header}>
-        {headers.map(({ label, value, tooltipText }) => (
-          <div key={value} onClick={() => onSortChange(value)} data-testid={`stake-pool-list-header-${value}`}>
-            <p>
-              <span>{label}</span>
-              {tooltipText && (
-                <Tooltip placement="topLeft" title={tooltipText}>
-                  <span className={styles.iconWrapper} data-testid={`browse-pools-${value}-column-info`}>
-                    <InfoIcon className={styles.icon} />
-                  </span>
-                </Tooltip>
-              )}
-              <Icon
-                component={Arrow}
-                className={cn(
-                  styles.triangle,
-                  value === activeSort?.field && activeSort?.order === 'desc' ? styles.down : styles.up,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  { [styles.active!]: value === activeSort?.field }
-                )}
-                data-testid={`stake-pool-sort-order-${activeSort?.order}`}
-              />
-            </p>
-          </div>
-        ))}
-      </div>
+      <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
       {selectedStakePools?.length > 0 && (
-        <>
-          <div className={styles.selectedPools}>
-            {selectedStakePools.map((pool) => (
-              <StakePoolItemBrowser key={pool.id} {...pool} />
-            ))}
-          </div>
-          <div className={styles.poolsSeparator} />
-        </>
+        <div className={styles.selectedPools}>
+          {selectedStakePools.map((pool) => (
+            <StakePoolTableItemBrowser key={pool.id} {...{ ...pool, selected: true }} />
+          ))}
+        </div>
       )}
-      <div data-testid="stake-pool-list-scroll-wrapper" className={styles.wrapper}>
-        {isNumber(total) && !total && emptyPlaceholder}
-        <InfiniteScroll
-          dataLength={items?.length || 0}
-          next={loadMoreData}
-          hasMore={items?.length < (total || 0)}
-          loader={<PoolSkeleton />}
-          scrollableTarget={scrollableTargetId}
-        >
-          {showSkeleton || !isNumber(total) ? (
-            <PoolSkeleton />
-          ) : (
-            <>
-              <List
-                className={className}
-                data-testid="stake-pool-list"
-                dataSource={availableStakePools}
-                itemLayout="horizontal"
-                locale={{ emptyText }}
-                renderItem={(item: StakePoolItemBrowserProps) => (
-                  <List.Item className={styles.listItemWrapper}>
-                    <StakePoolItemBrowser {...item} />
-                  </List.Item>
-                )}
-                {...props}
-              />
-            </>
-          )}
-        </InfiniteScroll>
-      </div>
+      <StakePoolTableBodyBrowser
+        {...{
+          ItemRenderer: StakePoolTableItemBrowser,
+          className,
+          emptyPlaceholder:
+            selectedStakePools.length > 0 && selectedStakePools.length === items.length ? '' : emptyPlaceholder,
+          emptyText,
+          items: availableStakePools,
+          listProps: props,
+          loadMoreData,
+          scrollableTargetId,
+          showSkeleton,
+          total: total - selectedStakePools?.length,
+        }}
+      />
     </div>
   );
 };

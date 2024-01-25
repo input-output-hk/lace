@@ -109,7 +109,7 @@ export const useDelegationPortfolioStore = create(
 
             return {
               displayData: {
-                ...mapStakePoolToDisplayData({ cardanoCoinSymbol: get().cardanoCoinSymbol, stakePool }),
+                ...mapStakePoolToDisplayData({ stakePool }),
                 lastReward: confirmedPoolRewards[confirmedPoolRewards.length - 1] || BigInt(0),
                 totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
               },
