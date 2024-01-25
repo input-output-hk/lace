@@ -10826,6 +10826,7 @@ __metadata:
     "@tsconfig/create-react-app": ^1.0.3
     "@vanilla-extract/css": ^1.11.1
     "@vanilla-extract/esbuild-plugin": ^2.2.2
+    "@vanilla-extract/recipes": ^0.5.1
     "@vanilla-extract/vite-plugin": ^3.9.3
     "@vitest/coverage-c8": ^0.31.0
     antd: ^4.17.3
@@ -20556,6 +20557,15 @@ __metadata:
   peerDependencies:
     "@vanilla-extract/css": ^1.0.0
   checksum: 9e7d989bf6e16d11fd6c972bec5d8d6c4efee5fe84070108db87570992e596dc937a6c5f9061fe10b564c1c64f53abf77a41bd589b1da5993c7f8d7b7811acfd
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/recipes@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@vanilla-extract/recipes@npm:0.5.1"
+  peerDependencies:
+    "@vanilla-extract/css": ^1.0.0
+  checksum: 20936fd318fe005b1a637bd1459d5ce596c14e3e73402fe6f130007619bf3d2765cd1f3e260a45d141f9c62f2c274f85378d004d03a9f68c328f5f98df7b9ec8
   languageName: node
   linkType: hard
 

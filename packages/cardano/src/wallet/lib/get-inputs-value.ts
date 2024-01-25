@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Cardano, ChainHistoryProvider } from '@cardano-sdk/core';
 import { createWalletUtil, ObservableWallet } from '@cardano-sdk/wallet';
 import flattenDeep from 'lodash/flattenDeep';

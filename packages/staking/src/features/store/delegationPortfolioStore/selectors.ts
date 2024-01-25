@@ -12,12 +12,11 @@ export const isDrawerVisible = ({ activeDelegationFlow }: DelegationPortfolioSto
   ].includes(activeDelegationFlow);
 
 export const stakePoolDetailsSelector = ({
-  cardanoCoinSymbol,
   viewedStakePool,
 }: DelegationPortfolioStore): StakePoolDetails | undefined => {
   if (!viewedStakePool) return undefined;
   // eslint-disable-next-line consistent-return
-  return mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool: viewedStakePool });
+  return mapStakePoolToDisplayData({ stakePool: viewedStakePool });
 };
 
 export const isPoolSelectedSelector = (poolHexId: Wallet.Cardano.PoolIdHex) => (store: DelegationPortfolioStore) =>

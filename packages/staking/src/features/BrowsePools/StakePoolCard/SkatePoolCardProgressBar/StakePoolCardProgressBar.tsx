@@ -4,11 +4,12 @@ import cn from 'classnames';
 import * as styles from './StakePoolCardProgressBar.css';
 
 interface Props {
-  percentage: number;
+  percentage: string;
 }
 
 export const StakePoolCardProgressBar = ({ percentage }: Props) => {
-  const progressWidth = percentage > 100 ? 100 : percentage;
+  const percentageNumber = Number(percentage);
+  const progressWidth = Math.min(100, percentageNumber);
 
   return (
     <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>
@@ -17,16 +18,16 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
           className={cn([
             styles.progress,
             {
-              [styles.progressMedium]: percentage < 90,
-              [styles.progressHigh]: percentage >= 90 && percentage <= 95,
-              [styles.progressVeryHigh]: percentage > 95,
+              [styles.progressMedium]: percentageNumber < 90,
+              [styles.progressHigh]: percentageNumber >= 90 && percentageNumber <= 95,
+              [styles.progressVeryHigh]: percentageNumber > 95,
             },
           ])}
           style={{ width: `${progressWidth}%` }}
         />
       </div>
       <Text.Body.Small weight="$medium" className={styles.progressValue}>
-        {percentage.toFixed(2)}%
+        {percentage}%
       </Text.Body.Small>
     </Flex>
   );

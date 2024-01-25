@@ -10,8 +10,8 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
 
 export interface StakePoolMetricsBrowserProps {
   data: {
-    value: number | string;
-    unit?: number | string;
+    value?: number | string;
+    unit?: string;
     t: string;
     testId: string;
   }[];
