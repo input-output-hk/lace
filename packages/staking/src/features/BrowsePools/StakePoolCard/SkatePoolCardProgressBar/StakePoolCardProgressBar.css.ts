@@ -25,18 +25,12 @@ export const progressValue = style({
   color: theme.colors.$poolCardProgressBarValue,
 });
 
-export const progressLow = sx({
-  backgroundColor: '$data_blue',
-});
 export const progressMedium = sx({
   backgroundColor: '$data_green',
 });
 export const progressHigh = sx({
-  backgroundColor: '$data_yellow',
-});
-export const progressVeryHigh = sx({
   backgroundColor: '$data_orange',
 });
-export const progressOversaturated = sx({
+export const progressVeryHigh = sx({
   backgroundColor: '$data_pink',
 });
