@@ -1,9 +1,11 @@
 import { style, sx } from '@lace/ui';
+import { keyframes } from '@vanilla-extract/css';
 import { theme } from '../../theme';
 
 export const card = style([
   sx({
     boxSizing: 'border-box',
+    height: '$84',
     padding: '$20',
     width: '$fill',
   }),
@@ -28,3 +30,17 @@ export const title = style([
 export const cardSelected = style({
   borderColor: theme.colors.$poolCardSelectedBorderColor,
 });
+
+const opacity = keyframes({
+  '0%': { opacity: 0.5 },
+  '50%': { opacity: 1 },
+  '100%': { opacity: 0.5 },
+});
+
+export const skeleton = style([
+  {
+    animationDuration: '1s',
+    animationIterationCount: 'infinite',
+    animationName: opacity,
+  },
+]);
