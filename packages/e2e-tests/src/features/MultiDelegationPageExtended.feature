@@ -84,7 +84,7 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     Then I see the Network Info component with the expected content
 
-  @LW-8499 @Testnet @Mainnet @test
+  @LW-8499 @Testnet @Mainnet
   Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
     When I navigate to Staking extended page
     And I open Browse pools tab
