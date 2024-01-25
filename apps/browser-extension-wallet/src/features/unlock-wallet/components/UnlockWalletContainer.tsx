@@ -19,8 +19,7 @@ export interface UnlockWalletContainerProps {
 export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContainerProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
-  const { environmentName, setKeyAgentData, setDeletingWallet, inMemoryWallet, setAddressesDiscoveryCompleted } =
-    useWalletStore();
+  const { environmentName, setKeyAgentData, setDeletingWallet, setAddressesDiscoveryCompleted } = useWalletStore();
   const backgroundService = useBackgroundServiceAPIContext();
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
@@ -67,10 +66,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       setIsValidPassword(true);
       analytics.sendEventToPostHog(PostHogAction.UnlockWalletWelcomeBackUnlockClick);
       if (decrypted) setUnlocked(decrypted);
-      inMemoryWallet
-        .discoverAddresses()
-        .then(() => setAddressesDiscoveryCompleted(true))
-        .catch(() => setAddressesDiscoveryCompleted(false));
+      setAddressesDiscoveryCompleted(true);
     } catch {
       setIsValidPassword(false);
     }
