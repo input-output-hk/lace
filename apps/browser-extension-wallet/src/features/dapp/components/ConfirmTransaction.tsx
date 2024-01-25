@@ -1,9 +1,11 @@
+/* eslint-disable max-statements */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
+
 // import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
@@ -31,6 +33,7 @@ import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/har
 import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
+import { transactionSummaryInspector } from '../mock_data/transactionSummaryInspector';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -113,6 +116,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   );
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+
+  // Get all NFT assets
 
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
@@ -307,16 +312,9 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
-  // eslint-disable-next-line no-console
-  console.log(
-    'transaction details here:',
-    txSummary,
-    dappInfo,
-    errorMessage,
-    fiatCurrency?.code,
-    priceResult?.cardano?.price,
-    cardanoCoin.symbol
-  );
+  const newTxData = transactionSummaryInspector();
+
+  console.log('mock data:', newTxData);
 
   return (
     // <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
@@ -325,6 +323,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       {tx && txSummary ? (
         <DappTransaction
           transaction={txSummary}
+          newTxSummary={newTxData}
           dappInfo={dappInfo}
           errorMessage={errorMessage}
           fiatCurrencyCode={fiatCurrency?.code}

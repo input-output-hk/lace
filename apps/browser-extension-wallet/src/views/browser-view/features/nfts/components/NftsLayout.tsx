@@ -112,6 +112,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
       environmentName,
       fiatCurrency
     });
+
     return nftList.map((nft) => ({
       ...nft,
       type: NftsItemsTypes.NFT,
@@ -122,6 +123,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, [onSelectNft, assetsBalance?.assets, assetsInfo, environmentName, fiatCurrency]);
 
   const { list: nftFolders } = useNftsFoldersContext();
+
   const folders: NftFolderItemProps[] = useMemo(
     () =>
       nftFolders?.map(({ name, assets, id }: NftFoldersRecordParams) => ({
@@ -144,6 +146,8 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
 
   const usedNftsIds = flatten(nftFolders?.map(({ assets }: NftFoldersRecordParams) => assets));
   const nftsNotInFolders = nfts.filter(({ assetId }) => !usedNftsIds.includes(assetId));
+
+  // items here
   const items: NftListProps['items'] = [...folders, ...nftsNotInFolders];
 
   const titles = {
@@ -201,7 +205,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, []);
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
-
+  console.log("NFT's layout", items, assetsInfo);
   return (
     <>
       <Layout>

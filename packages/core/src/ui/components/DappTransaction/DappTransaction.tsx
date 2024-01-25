@@ -9,11 +9,28 @@ import {
 
 // import { DappTxHeader } from './DappTxHeader/DappTxHeader';
 import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
-import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
+import {
+  // DappTxOutput,
+  DappTxOutputProps
+} from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
 // import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee } from '@ui/components/ActivityDetail';
-import { TransactionType, TransactionOrigin } from '@lace/ui';
+import { TransactionType, TransactionOrigin, DappTransactionSummary, SummaryExpander } from '@lace/ui';
+import { Cardano } from '@cardano-sdk/core';
+
+export type TransactionSummaryInspection = {
+  assets: Cardano.TokenMap;
+  coins: Cardano.Lovelace;
+  collateral: Cardano.Lovelace;
+  deposit: Cardano.Lovelace;
+  returnedDeposit: Cardano.Lovelace;
+  fee: Cardano.Lovelace;
+  unresolved: {
+    inputs: Cardano.TxIn[];
+    value: Cardano.Value;
+  };
+};
 
 type TransactionDetails = {
   fee: string;
@@ -26,6 +43,7 @@ type TransactionDetails = {
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
   transaction: TransactionDetails;
+  newTxSummary: TransactionSummaryInspection;
   /** dApp information such as logo, name and url */
   dappInfo: Omit<DappInfoProps, 'className'>;
   /** Optional error message */
@@ -37,6 +55,7 @@ export interface DappTransactionProps {
 
 export const DappTransaction = ({
   transaction: { type, outputs, fee, mintedAssets, burnedAssets },
+  newTxSummary: { assets, coins, collateral, deposit, returnedDeposit, fee: sumFee, unresolved },
   // dappInfo,
   errorMessage,
   fiatCurrencyCode,
@@ -44,7 +63,7 @@ export const DappTransaction = ({
   coinSymbol
 }: DappTransactionProps): React.ReactElement => {
   // const { t } = useTranslate();
-  console.log('dapp transaction', outputs);
+  console.log('dapp transaction', assets, coins, sumFee, collateral, deposit, returnedDeposit, unresolved);
   return (
     <div>
       {/* <div>Dapp information</div> */}
@@ -87,11 +106,27 @@ export const DappTransaction = ({
             /> */}
             <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
             <TransactionOrigin label="Origin" origin="Wingriders" />
-            {outputs.map((output) => (
+            {/* {outputs.map((output) => (
               <DappTxOutput key={output.recipient} {...output} />
-            ))}
+            ))} */}
+            <DappTransactionSummary
+              title="Transaction Summary"
+              cardanoSymbol={coinSymbol}
+              transactionAmount={coins}
+              assets={assets}
+            />
+            <SummaryExpander title="To address">
+              <DappTransactionSummary
+                title="to address"
+                transactionAmount={coins}
+                items={outputs}
+                cardanoSymbol={coinSymbol}
+              />
+            </SummaryExpander>
           </>
         )}
+
+        {/* Add new fee */}
         {fee && fee !== '-' && (
           <TransactionFee
             fee={fee}

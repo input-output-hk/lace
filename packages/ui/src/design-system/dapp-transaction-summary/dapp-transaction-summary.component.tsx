@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
 import React from 'react';
 
 import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
@@ -16,20 +17,25 @@ import * as cx from './dapp-transaction-summary.css';
 import type { OmitClassName } from '../../types';
 
 type Props = OmitClassName<'div'> & {
-  transactionAmount: string;
+  transactionAmount: bigint;
   title: string;
-  items: {
+  items?: {
     imageSrc?: string;
-    balance: string;
-    tokenName: string;
-    metadataHash: string;
+    balance?: string;
+    tokenName?: string;
+    metadataHash?: string;
+    coins?: string;
+    recipient: string;
   }[];
+  assets?: Map<string, bigint>;
+  cardanoSymbol: string;
 };
 
 export const TransactionSummary = ({
   transactionAmount,
   title,
   items,
+  cardanoSymbol,
   ...props
 }: Readonly<Props>): JSX.Element => {
   const { theme } = useThemeVariant();
@@ -54,32 +60,33 @@ export const TransactionSummary = ({
         <Cell>
           <Flex justifyContent="flex-end">
             <Typography.Body.Normal className={cx.label}>
-              {transactionAmount} ADA
+              {transactionAmount} {cardanoSymbol}
             </Typography.Body.Normal>
           </Flex>
         </Cell>
       </Grid>
       <Grid {...props} columns="$2">
-        {items.map(value => (
-          <>
-            <Cell>
-              <RadixUIAvatar.Root className={cx.avatarRoot}>
-                <RadixUIAvatar.Image
-                  className={cx.avatarImage}
-                  src={getImageSource(value.imageSrc)}
-                  alt={value.tokenName}
-                />
-              </RadixUIAvatar.Root>
-            </Cell>
-            <Cell>
-              <Flex justifyContent="flex-end" alignItems="center">
-                <Typography.Body.Normal className={cx.label}>
-                  {value.balance} {value.tokenName} {value.metadataHash}
-                </Typography.Body.Normal>
-              </Flex>
-            </Cell>
-          </>
-        ))}
+        {items &&
+          items.map(value => (
+            <>
+              <Cell>
+                <RadixUIAvatar.Root className={cx.avatarRoot}>
+                  <RadixUIAvatar.Image
+                    className={cx.avatarImage}
+                    src={getImageSource(value.imageSrc)}
+                    alt={value.tokenName}
+                  />
+                </RadixUIAvatar.Root>
+              </Cell>
+              <Cell>
+                <Flex justifyContent="flex-end" alignItems="center">
+                  <Typography.Body.Normal className={cx.label}>
+                    {value.balance} {value.tokenName} {value.metadataHash}
+                  </Typography.Body.Normal>
+                </Flex>
+              </Cell>
+            </>
+          ))}
       </Grid>
     </>
   );
