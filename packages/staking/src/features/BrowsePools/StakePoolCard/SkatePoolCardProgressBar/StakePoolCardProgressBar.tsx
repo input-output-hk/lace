@@ -1,7 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Flex, Text } from '@lace/ui';
 import cn from 'classnames';
-import inRange from 'lodash/inRange';
 import * as styles from './StakePoolCardProgressBar.css';
 
 interface Props {
@@ -19,11 +18,9 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
           className={cn([
             styles.progress,
             {
-              [styles.progressLow]: inRange(percentageNumber, 0, 21),
-              [styles.progressMedium]: inRange(percentageNumber, 21, 70),
-              [styles.progressHigh]: inRange(percentageNumber, 70, 90),
-              [styles.progressVeryHigh]: inRange(percentageNumber, 90, 100) || percentageNumber === 100,
-              [styles.progressOversaturated]: percentageNumber > 100,
+              [styles.progressMedium]: percentageNumber < 90,
+              [styles.progressHigh]: percentageNumber >= 90 && percentageNumber <= 95,
+              [styles.progressVeryHigh]: percentageNumber > 95,
             },
           ])}
           style={{ width: `${progressWidth}%` }}
