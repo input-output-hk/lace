@@ -136,7 +136,7 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.totalStaked')}
               value={
-                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: totalStaked.toString(), fiat })}`}>
+                <Tooltip title={fiat && Wallet.util.convertAdaToFiat({ ada: totalStaked.toString(), fiat })}>
                   <span>{totalStaked}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
@@ -163,7 +163,7 @@ export const StakingInfoCard = ({
           <Stats
             text={t('overview.stakingInfoCard.lastReward')}
             value={
-              <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}`}>
+              <Tooltip title={fiat && Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}>
                 <span>{lastReward}</span>
                 <span className={styles.suffix}>{cardanoCoinSymbol}</span>
               </Tooltip>

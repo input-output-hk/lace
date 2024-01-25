@@ -10,7 +10,7 @@ interface Props {
 
 export const StakePoolCardProgressBar = ({ percentage }: Props) => {
   const percentageNumber = Number(percentage);
-  const progressWidth = percentageNumber > 100 ? 100 : percentageNumber;
+  const progressWidth = Math.min(100, percentageNumber);
 
   return (
     <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>

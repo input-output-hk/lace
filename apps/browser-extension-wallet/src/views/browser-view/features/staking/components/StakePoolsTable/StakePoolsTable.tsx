@@ -6,13 +6,13 @@ import {
   Columns,
   SortDirection,
   SortField,
+  TableRow,
+  TableHeader,
   StakePoolSortOptions,
   StakePoolTableBodyBrowser,
-  stakePooltableConfig,
-  TableHeader,
-  TableRow,
+  StakePoolTableItemBrowserProps,
   TranslationsFor,
-  StakePoolTableItemBrowserProps
+  stakePooltableConfig
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { getRandomIcon, Search } from '@lace/common';

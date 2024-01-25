@@ -18,6 +18,7 @@ export type StakePoolTableBrowserProps = {
   items: StakePoolTableItemBrowserProps[];
   loadMoreData: () => void;
   total: number;
+  emptyPlaceholder?: React.ReactNode | string;
   translations: TranslationsFor<Columns>;
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
@@ -35,6 +36,7 @@ export const StakePoolTableBrowser = ({
   activeSort,
   setActiveSort,
   showSkeleton,
+  emptyPlaceholder,
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const { analytics } = useOutsideHandles();
@@ -71,6 +73,8 @@ export const StakePoolTableBrowser = ({
         {...{
           ItemRenderer: StakePoolTableItemBrowser,
           className,
+          emptyPlaceholder:
+            selectedStakePools.length > 0 && selectedStakePools.length === items.length ? '' : emptyPlaceholder,
           emptyText,
           items: availableStakePools,
           listProps: props,

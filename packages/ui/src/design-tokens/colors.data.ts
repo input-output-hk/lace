@@ -115,6 +115,7 @@ export const colors = {
   $assets_table_market_price_trend_down_label_color: '',
 
   $dialog_container_bgColor: '',
+  $dialog_title_color: '',
   $dialog_description_color: '',
 
   $side_drawer_container_bgColor: '',
