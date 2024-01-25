@@ -29,6 +29,7 @@ import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnType } from '../types/staking';
+import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -176,7 +177,7 @@ When(/^I click on "Next" button on staking preferences drawer$/, async () => {
 });
 
 When(/^I click on "Next" button on staking confirmation drawer$/, async () => {
-  await StakingConfirmationDrawer.nextButton.waitForClickable();
+  await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 120_000 });
   await StakingConfirmationDrawer.nextButton.click();
 });
 
@@ -465,4 +466,10 @@ When(/^I input (\d+)% ratio for pool (\d+)$/, async (ratio: number, poolNo: numb
 
 Then(/^I see input ratio field showing (\d+)% for pool (\d+)$/, async (ratio: number, poolNo: number) => {
   await ManageStakingDrawerAssert.assertSeeRatioForPool(ratio, poolNo);
+});
+
+When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
+  if (await SwitchingStakePoolModal.title.isDisplayed()) {
+    await SwitchingStakePoolModal.fineByMeButton.click();
+  }
 });
