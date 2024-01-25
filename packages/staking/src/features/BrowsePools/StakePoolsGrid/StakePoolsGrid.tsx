@@ -1,13 +1,12 @@
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
-import { Box, Text } from '@lace/ui';
+import { Box, Flex } from '@lace/ui';
 import { Skeleton } from 'antd';
 import get from 'lodash/get';
-import { useTranslation } from 'react-i18next';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';
-import { StakePoolCard } from '../StakePoolCard';
+import { StakePoolCard, StakePoolCardSkeleton } from '../StakePoolCard';
 import { MetricType } from '../StakePoolCard/types';
 import { StakePoolsTableEmpty } from '../StakePoolsTable/StakePoolsTableEmpty/StakePoolsTableEmpty';
 import { StakePoolTableItemBrowserProps } from '../StakePoolsTable/StakePoolTableBrowser/types';
@@ -41,7 +40,6 @@ export const StakePoolsGrid = ({
 }: StakePoolsGridProps) => {
   // TODO duplication - should be lifted to Browse Pools
   const { analytics } = useOutsideHandles();
-  const { t } = useTranslation();
   const { portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
     portfolioPools: store.selectedPortfolio.map(({ id }) => ({
@@ -61,8 +59,19 @@ export const StakePoolsGrid = ({
   const metricType = metricTypesBySortField[sortField];
 
   if (loading) {
-    // TODO: replace with StakePoolCard Skeletons
-    return <Skeleton active avatar />;
+    return (
+      <Flex
+        style={{
+          flexWrap: 'wrap',
+        }}
+      >
+        {[...Array.from({ length: 3 }).keys()].map((key, index) => (
+          <Flex w="$214" alignItems="center" justifyContent="center" key={key} gap="$20">
+            <StakePoolCardSkeleton index={index} />
+          </Flex>
+        ))}
+      </Flex>
+    );
   }
 
   if (totalResultCount === 0) {
@@ -73,11 +82,6 @@ export const StakePoolsGrid = ({
     <div>
       {selectedStakePools.length > 0 && (
         <>
-          <Box my="$16">
-            <Text.Body.Normal weight="$bold">
-              {t('browsePools.header.poolsCount', { poolsCount: selectedStakePools.length })}
-            </Text.Body.Normal>
-          </Box>
           <Box className={styles.grid}>
             {selectedStakePools.map((pool) => (
               <StakePoolCard

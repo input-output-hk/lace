@@ -31,12 +31,12 @@ export type StakePoolDetails = {
   id: string;
   logo?: string;
   margin: number | string;
-  name: string;
+  name?: string;
   owners: string[];
   saturation?: string;
   liveStake: { number: string; unit?: string };
   activeStake: { number: string; unit?: string };
-  ticker: string;
+  ticker?: string;
   apy?: string;
   status: Wallet.Cardano.StakePool['status'];
   fee: string;
