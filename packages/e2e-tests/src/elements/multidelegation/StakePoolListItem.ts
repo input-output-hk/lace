@@ -2,12 +2,16 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 export class StakePoolListItem {
-  private LIST_ITEM = '[data-testid="stake-pool-table-item"]';
-  private LOGO = '[data-testid="stake-pool-list-logo"]';
-  private NAME = '[data-testid="stake-pool-list-name"]';
+  private LIST_ITEM = '[data-testid="stake-pool-item"]';
+  private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private TICKER = '[data-testid="stake-pool-list-ticker"]';
   private ROS = '[data-testid="stake-pool-list-apy"]';
   private SATURATION = '[data-testid="stake-pool-list-saturation"]';
+  private COST = '[data-testid="stake-pool-list-cost"]';
+  private MARGIN = '[data-testid="stake-pool-list-margin"]';
+  private BLOCKS = '[data-testid="stake-pool-list-blocks"]';
+  private PLEDGE = '[data-testid="stake-pool-list-pledge"]';
+  private LIVE_STAKE = '[data-testid="stake-pool-list-liveStake"]';
 
   protected listItem;
 
@@ -19,12 +23,8 @@ export class StakePoolListItem {
     return this.listItem;
   }
 
-  get logo(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.listItem.$(this.LOGO);
-  }
-
-  get name(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.listItem.$(this.NAME);
+  get checkbox(): ChainablePromiseElement<WebdriverIO.Element | undefined> {
+    return this.listItem.$(this.CHECKBOX);
   }
 
   get ticker(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -37,5 +37,25 @@ export class StakePoolListItem {
 
   get saturation(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.listItem.$(this.SATURATION);
+  }
+
+  get cost(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.listItem.$(this.COST);
+  }
+
+  get margin(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.listItem.$(this.MARGIN);
+  }
+
+  get blocks(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.listItem.$(this.BLOCKS);
+  }
+
+  get pledge(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.listItem.$(this.PLEDGE);
+  }
+
+  get liveStake(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.listItem.$(this.LIVE_STAKE);
   }
 }

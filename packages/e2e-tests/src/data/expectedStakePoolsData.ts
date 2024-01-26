@@ -73,3 +73,13 @@ export const getStakePoolById = (id: string, network?: 'testnet' | 'mainnet'): S
   }
   throw new Error(`StakePool with id ${id} not found`);
 };
+
+export const getStakePoolByTicker = (ticker: string, network?: 'testnet' | 'mainnet'): StakePool => {
+  const expectedPools = network === 'mainnet' ? StakePoolsMainnetArray : StakePoolsArray;
+  for (const pool of expectedPools) {
+    if (pool.ticker === ticker) {
+      return pool;
+    }
+  }
+  throw new Error(`StakePool with ticker ${ticker} not found`);
+};

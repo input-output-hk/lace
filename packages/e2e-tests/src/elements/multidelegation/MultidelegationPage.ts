@@ -8,6 +8,7 @@ import StakePoolDetails from '../staking/stakePoolDetails';
 import testContext from '../../utils/testContext';
 import { isPopupMode } from '../../utils/pageUtils';
 import CommonDrawerElements from '../CommonDrawerElements';
+import { StakePoolListColumnType } from '../../types/staking';
 
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
@@ -24,9 +25,16 @@ class MultidelegationPage {
   private SEARCH_LOADER = '[data-testid="search-loader"]';
   private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
   private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
-  private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
-  private POOL_NAME = '[data-testid="stake-pool-list-name"]';
-  private STAKE_BUTTON = '[data-testid="stake-button"]';
+  private POOL_ITEM = '[data-testid="stake-pool-item"]';
+  private POOL_TICKER = '[data-testid="stake-pool-list-ticker"]';
+  private COLUMN_HEADER_TICKER = '[data-testid="stake-pool-list-header-ticker"]';
+  private COLUMN_HEADER_SATURATION = '[data-testid="stake-pool-list-header-saturation"]';
+  private COLUMN_HEADER_ROS = '[data-testid="stake-pool-list-header-apy"]';
+  private COLUMN_HEADER_COST = '[data-testid="stake-pool-list-header-cost"]';
+  private COLUMN_HEADER_MARGIN = '[data-testid="stake-pool-list-header-margin"]';
+  private COLUMN_HEADER_BLOCKS = '[data-testid="stake-pool-list-header-blocks"]';
+  private COLUMN_HEADER_PLEDGE = '[data-testid="stake-pool-list-header-pledge"]';
+  private COLUMN_HEADER_LIVE_STAKE = '[data-testid="stake-pool-list-header-liveStake"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
   private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
@@ -48,9 +56,8 @@ class MultidelegationPage {
   private DELEGATED_POOL_LAST_REWARDS_TITLE = '[data-testid="stats-last-reward-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
   private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
-  private ROS_COLUMN_INFO = '[data-testid="browse-pools-apy-column-info"]';
-  private SATURATION_COLUMN_INFO = '[data-testid="browse-pools-saturation-column-info"]';
   private TOOLTIP = 'div.ant-tooltip-inner';
+  private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private MANAGE_BTN = '[data-testid="manage-btn"]';
 
   get title() {
@@ -121,8 +128,36 @@ class MultidelegationPage {
     return $$(this.POOL_ITEM);
   }
 
-  get stakeButton() {
-    return $(this.STAKE_BUTTON);
+  get columnHeaderTicker() {
+    return $(this.COLUMN_HEADER_TICKER);
+  }
+
+  get columnHeaderSaturation() {
+    return $(this.COLUMN_HEADER_SATURATION);
+  }
+
+  get columnHeaderROS() {
+    return $(this.COLUMN_HEADER_ROS);
+  }
+
+  get columnHeaderCost() {
+    return $(this.COLUMN_HEADER_COST);
+  }
+
+  get columnHeaderMargin() {
+    return $(this.COLUMN_HEADER_MARGIN);
+  }
+
+  get columnHeaderBlocks() {
+    return $(this.COLUMN_HEADER_BLOCKS);
+  }
+
+  get columnHeaderPledge() {
+    return $(this.COLUMN_HEADER_PLEDGE);
+  }
+
+  get columnHeaderLiveStake() {
+    return $(this.COLUMN_HEADER_LIVE_STAKE);
   }
 
   get manageStakingBtnNext() {
@@ -135,14 +170,6 @@ class MultidelegationPage {
 
   get stakingPoolInfoItems() {
     return $$(this.STAKING_POOL_INFO);
-  }
-
-  get rosColumnInfo() {
-    return $(this.ROS_COLUMN_INFO);
-  }
-
-  get saturationColumnInfo() {
-    return $(this.SATURATION_COLUMN_INFO);
   }
 
   get tooltip() {
@@ -213,9 +240,9 @@ class MultidelegationPage {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_VALUE);
   }
 
-  async getPoolByName(name: string) {
+  async getPoolByTicker(ticker: string) {
     return (await this.poolsItems.find(
-      async (item) => (await item.$(this.POOL_NAME).getText()) === name
+      async (item) => (await item.$(this.POOL_TICKER).getText()) === ticker
     )) as WebdriverIO.Element;
   }
 
@@ -242,36 +269,31 @@ class MultidelegationPage {
 
   async markPoolsForDelegation(poolsToStake: string) {
     const poolsToMark: string[] = [];
-    poolsToStake.split(',').forEach((poolName) => {
-      poolsToMark.push(poolName.trim());
+    poolsToStake.split(',').forEach((ticker) => {
+      poolsToMark.push(ticker.trim());
     });
-    for (const poolName of poolsToMark) {
-      await this.fillSearch(poolName);
+    for (const ticker of poolsToMark) {
+      await this.fillSearch(ticker);
       await MultidelegationPageAssert.assertSeeSearchResultsCountExact(1);
-      await this.markStakePoolWithName(poolName);
+      await this.markStakePoolWithTicker(ticker);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);
       await MultidelegationPageAssert.assertSeeSearchResultsCountMinimum(6);
     }
   }
 
-  async fillSearch(poolName: string) {
+  async fillSearch(searchTerm: string) {
     await this.stakingPageSearchInput.waitForClickable();
     await this.stakingPageSearchInput.scrollIntoView();
     await this.stakingPageSearchInput.click();
-    await browser.keys([...poolName]);
+    await browser.keys([...searchTerm]);
     await browser.pause(500);
   }
 
-  async markStakePoolWithName(poolName: string) {
-    await this.hoverOverPoolWithName(poolName);
-    await this.stakeButton.waitForClickable();
-    await this.stakeButton.click();
-  }
-
-  private async hoverOverPoolWithName(poolName: string) {
-    const poolItem = await this.getPoolByName(poolName);
+  async markStakePoolWithTicker(ticker: string) {
+    const poolItem = await this.getPoolByTicker(ticker);
     await poolItem.moveTo();
+    await poolItem.$(this.CHECKBOX).click();
   }
 
   async clickNextButtonOnDrawerSection(section: string) {
@@ -306,18 +328,36 @@ class MultidelegationPage {
     testContext.save('stakePoolsInUse', poolIDsToBeSaved);
   }
 
-  async clickOnStakePoolWithName(poolName: string) {
-    const poolItem = await this.getPoolByName(poolName);
+  async clickOnStakePoolWithTicker(poolTicker: string) {
+    const poolItem = await this.getPoolByTicker(poolTicker);
     await poolItem.click();
   }
 
-  async hoverOverColumnWithName(columnName: 'ROS' | 'Saturation') {
+  async hoverOverColumnWithName(columnName: StakePoolListColumnType) {
     switch (columnName) {
-      case 'ROS':
-        await this.rosColumnInfo.moveTo();
+      case 'Ticker':
+        await this.columnHeaderTicker.moveTo();
         break;
       case 'Saturation':
-        await this.saturationColumnInfo.moveTo();
+        await this.columnHeaderSaturation.moveTo();
+        break;
+      case 'ROS':
+        await this.columnHeaderROS.moveTo();
+        break;
+      case 'Cost':
+        await this.columnHeaderCost.moveTo();
+        break;
+      case 'Margin':
+        await this.columnHeaderMargin.moveTo({ xOffset: 1, yOffset: 1 });
+        break;
+      case 'Blocks':
+        await this.columnHeaderBlocks.moveTo({ xOffset: 1, yOffset: 1 });
+        break;
+      case 'Pledge':
+        await this.columnHeaderPledge.moveTo({ xOffset: 1, yOffset: 1 });
+        break;
+      case 'Live stake':
+        await this.columnHeaderLiveStake.moveTo();
         break;
       default:
         throw new Error(`Unsupported column name: ${columnName}`);
