@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
 import BigNumber from 'bignumber.js';

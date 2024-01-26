@@ -37,7 +37,7 @@ export const TableHeader = <T extends string>({
       [cx.selectable]: withSelection,
     })}
   >
-    {/* checkbox placeholder */}
+    {/* +1 column in case all the rows have selection available (checkbox as an additional first column) */}
     {withSelection && <div />}
     {headers.map(({ label, value, tooltipText }) => (
       <div

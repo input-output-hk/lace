@@ -1,5 +1,5 @@
-import React from 'react';
-import type { PropsWithChildren } from 'react';
+import React, { forwardRef } from 'react';
+import type { PropsWithChildren, Ref } from 'react';
 
 import classNames from 'classnames';
 
@@ -16,15 +16,18 @@ export type FlexProps = BoxProps &
 
 export type Props = PropsWithChildren<Readonly<FlexProps>>;
 
-export const Flex = ({
-  children,
-  alignItems = 'flex-start',
-  flexDirection = 'row',
-  gap = '$0',
-  justifyContent = 'flex-start',
-  className,
-  ...props
-}: Readonly<Props>): JSX.Element => (
+const PureFlex = (
+  {
+    children,
+    alignItems = 'flex-start',
+    flexDirection = 'row',
+    gap = '$0',
+    justifyContent = 'flex-start',
+    className,
+    ...props
+  }: Readonly<Props>,
+  ref: Ref<HTMLDivElement> | undefined,
+): JSX.Element => (
   <Box
     {...props}
     className={classNames(
@@ -32,7 +35,10 @@ export const Flex = ({
       className,
       cx.flex,
     )}
+    ref={ref}
   >
     {children}
   </Box>
 );
+
+export const Flex = forwardRef(PureFlex);

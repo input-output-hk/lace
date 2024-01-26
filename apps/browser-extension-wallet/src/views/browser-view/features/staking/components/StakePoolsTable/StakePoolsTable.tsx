@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
-import { Table } from '@lace/ui';
+import { Box, Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
 import {
   Columns,
@@ -22,12 +22,7 @@ import { useStakePoolDetails } from '../../store';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import styles from './StakePoolsTable.modules.scss';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
 
@@ -121,11 +116,6 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
               hexId: pool.hexId,
               liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
               onClick: (): void => {
-                analytics.sendEventToMatomo({
-                  category: MatomoEventCategories.STAKING,
-                  action: MatomoEventActions.CLICK_EVENT,
-                  name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_BROWSER
-                });
                 analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
                 setSelectedStakePool({ logo, ...pool });
                 setIsDrawerVisible(true);
@@ -179,7 +169,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           loading={fetchingPools}
         />
       </div>
-      <div style={{ marginTop: '16px' }} data-testid="stake-pool-list-container">
+      <Box mt="$16" data-testid="stake-pool-list-container">
         <Table.TableHeader
           dataTestId="stake-pool"
           headers={headers}
@@ -205,14 +195,14 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
                 columns={stakePooltableConfig.columns}
                 cellRenderers={stakePooltableConfig.renderer}
                 dataTestId="stake-pool"
-                data={data as unknown as Parameters<typeof Table.TableRow>[0]['data']}
+                data={data}
                 selectionDisabledMessage={selectionDisabledMessage}
               />
             );
           }}
           increaseViewportBy={{ bottom: 100, top: 0 }}
         />
-      </div>
+      </Box>
     </div>
   );
 };

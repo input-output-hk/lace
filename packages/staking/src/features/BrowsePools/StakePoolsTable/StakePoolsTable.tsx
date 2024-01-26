@@ -1,7 +1,7 @@
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../../store';
@@ -22,7 +22,7 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 const searchDebounce = 300;
 
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
-  const isMounted = useRef(false);
+  const componentRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
@@ -57,16 +57,12 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     [resetStakePools]
   );
 
-  useEffect(() => {
-    if (isMounted?.current) {
+  useLayoutEffect(() => {
+    if (componentRef?.current) {
       // reset pools on network switching, searchValue change and sort change
       debouncedResetStakePools?.();
     }
   }, [currentChain, searchValue, sort, debouncedSearch, debouncedResetStakePools]);
-
-  useEffect(() => {
-    isMounted.current = true;
-  }, []);
 
   const loadMoreData = useCallback(
     ({ startIndex, endIndex }: Parameters<StakePoolTableBrowserProps['loadMoreData']>[0]) => {
@@ -122,7 +118,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   );
 
   return (
-    <Box className={styles.stakePoolsTable} data-testid="stake-pool-table">
+    <Box ref={componentRef} className={styles.stakePoolsTable} data-testid="stake-pool-table">
       <Search
         withSearchIcon
         inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}

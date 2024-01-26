@@ -2,6 +2,8 @@ import React, { useLayoutEffect, useRef } from 'react';
 
 import { Virtuoso } from 'react-virtuoso';
 
+import { Flex } from '../flex';
+
 import * as cx from './table.css';
 
 import type { ListRange, VirtuosoProps } from 'react-virtuoso';
@@ -47,7 +49,7 @@ export const TableBody = <E extends object | undefined>({
   }, [loadMoreData, rowHeight, scrollableTargetId]);
 
   return (
-    <div
+    <Flex
       className={cx.body}
       ref={tableReference}
       data-testid="stake-pool-list-scroll-wrapper"
@@ -61,6 +63,6 @@ export const TableBody = <E extends object | undefined>({
         itemContent={itemContent}
         {...props}
       />
-    </div>
+    </Flex>
   );
 };

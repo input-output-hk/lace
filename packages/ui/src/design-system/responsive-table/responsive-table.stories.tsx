@@ -175,7 +175,6 @@ const MainComponents = ({
                       console.log(data);
                     }}
                     columns={columns}
-                    // cellRenderers={stakePooltableConfig.renderer}
                     dataTestId="stake-pool"
                     data={props}
                     onSelect={(): void => {

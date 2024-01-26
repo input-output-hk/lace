@@ -1,4 +1,4 @@
-// TODO: remove once replaced with new pool skeleton
+// TODO: remove once replaced with new pool skeleton (LW-9659)
 import { style, vars } from '@lace/ui';
 
 export const row = style([
