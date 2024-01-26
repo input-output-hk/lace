@@ -1,15 +1,15 @@
 /* eslint-disable no-magic-numbers */
 import { Flex, Text } from '@lace/ui';
 import cn from 'classnames';
-import inRange from 'lodash/inRange';
 import * as styles from './StakePoolCardProgressBar.css';
 
 interface Props {
-  percentage: number;
+  percentage: string;
 }
 
 export const StakePoolCardProgressBar = ({ percentage }: Props) => {
-  const progressWidth = percentage > 100 ? 100 : percentage;
+  const percentageNumber = Number(percentage);
+  const progressWidth = Math.min(100, percentageNumber);
 
   return (
     <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>
@@ -18,18 +18,16 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
           className={cn([
             styles.progress,
             {
-              [styles.progressLow]: inRange(percentage, 0, 21),
-              [styles.progressMedium]: inRange(percentage, 21, 70),
-              [styles.progressHigh]: inRange(percentage, 70, 90),
-              [styles.progressVeryHigh]: inRange(percentage, 90, 100) || percentage === 100,
-              [styles.progressOversaturated]: percentage > 100,
+              [styles.progressMedium]: percentageNumber < 90,
+              [styles.progressHigh]: percentageNumber >= 90 && percentageNumber <= 95,
+              [styles.progressVeryHigh]: percentageNumber > 95,
             },
           ])}
           style={{ width: `${progressWidth}%` }}
         />
       </div>
       <Text.Body.Small weight="$medium" className={styles.progressValue}>
-        {percentage.toFixed(2)}%
+        {percentage}%
       </Text.Body.Small>
     </Flex>
   );
