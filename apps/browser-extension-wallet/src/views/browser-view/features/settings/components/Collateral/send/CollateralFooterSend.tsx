@@ -3,11 +3,11 @@ import { Button } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from '../Collateral.module.scss';
 import { useTranslation } from 'react-i18next';
-import { useWalletManager } from '@hooks';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { Sections } from '../types';
 import { SectionConfig } from '@src/views/browser-view/stores';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 interface CollateralFooterProps {
   onClose: () => void;
@@ -37,13 +37,10 @@ export const CollateralFooterSend = ({
   setCurrentStep
 }: CollateralFooterProps): JSX.Element => {
   const { t } = useTranslation();
-  const { executeWithPassword } = useWalletManager();
   const backgroundServices = useBackgroundServiceAPIContext();
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
 
-  const submitTx = async () => {
-    await (isInMemory ? executeWithPassword(password, submitCollateralTx) : submitCollateralTx());
-  };
+  const submitTx = async () => withSignTxConfirmation(submitCollateralTx, password);
 
   const handleClick = async () => {
     onClaim();

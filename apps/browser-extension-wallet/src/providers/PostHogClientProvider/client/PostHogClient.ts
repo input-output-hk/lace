@@ -185,7 +185,7 @@ export class PostHogClient {
     // if the variant does not exist, we need to check for out cache
     if (!variant) {
       const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-      return (backgroundStorage?.experimentsConfiguration[key] as string) || experiments[key].defaultVariant;
+      return (backgroundStorage?.experimentsConfiguration?.[key] as string) || experiments[key].defaultVariant;
     }
 
     return variant;

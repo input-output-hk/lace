@@ -34,20 +34,22 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
   }
 };
 
-const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => (tx: Wallet.Cardano.HydratedTx) => {
+const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => async (tx: Wallet.Cardano.HydratedTx) => {
   const notOwnInputs = tx.body.inputs.some((input) => !addresses.includes(input.address));
   if (notOwnInputs) return false;
   const notOwnOutputs = tx.body.outputs.some((output) => !addresses.includes(output.address));
   return !notOwnOutputs;
 };
 
-export const inspectTxType = ({
+export const inspectTxType = async ({
   walletAddresses,
-  tx
+  tx,
+  inputResolver
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
-}): TransactionActivityType => {
+  inputResolver: Wallet.Cardano.InputResolver;
+}): Promise<TransactionActivityType> => {
   const { paymentAddresses, rewardAccounts } = walletAddresses.reduce(
     (acc, curr) => ({
       paymentAddresses: [...acc.paymentAddresses, curr.address],
@@ -56,10 +58,11 @@ export const inspectTxType = ({
     { paymentAddresses: [], rewardAccounts: [] }
   );
 
-  const inspectionProperties = createTxInspector({
+  const inspectionProperties = await createTxInspector({
     sent: sentInspector({
       addresses: paymentAddresses,
-      rewardAccounts
+      rewardAccounts,
+      inputResolver
     }),
     totalWithdrawals: withdrawalInspector,
     delegation: delegationInspector,
@@ -90,7 +93,7 @@ export const inspectTxType = ({
   return 'incoming';
 };
 
-export const inspectTxValues = ({
+export const inspectTxValues = async ({
   addresses,
   tx,
   direction
@@ -98,7 +101,7 @@ export const inspectTxValues = ({
   addresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
   direction: TxDirection;
-}): Wallet.Cardano.Value => {
+}): Promise<Wallet.Cardano.Value> => {
   const paymentAddresses = addresses.map((addr) => addr.address);
 
   const targetAddresses =
@@ -106,7 +109,7 @@ export const inspectTxValues = ({
       ? tx.body.outputs.filter((item) => !paymentAddresses.includes(item.address)).map((item) => item.address)
       : paymentAddresses;
 
-  const inspectionProperties = createTxInspector({
+  const inspectionProperties = await createTxInspector({
     totalOutputsValue: totalAddressOutputsValueInspector(targetAddresses)
   })(tx);
 

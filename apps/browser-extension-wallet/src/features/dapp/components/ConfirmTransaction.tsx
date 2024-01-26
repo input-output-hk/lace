@@ -10,8 +10,7 @@ import { Wallet } from '@lace/cardano';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
 import { AddressListType } from '@views/browser/features/activity';
-import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { DappDataService } from '@lib/scripts/types';
+import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { useFetchCoinPrice, useRedirection } from '@hooks';
@@ -24,25 +23,16 @@ import {
 } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
-import { UserPromptService } from '@lib/scripts/background/services';
+import type { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
-import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
+import { signingCoordinator } from '@lib/wallet-api-ui';
+import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 
 const DAPP_TOAST_DURATION = 50;
-
-const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
-  {
-    baseChannel: DAPP_CHANNELS.dappData,
-    properties: {
-      getSignTxData: RemoteApiPropertyType.MethodReturningPromise
-    }
-  },
-  { logger: console, runtime }
-);
 
 const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
@@ -86,7 +76,8 @@ const getAssetNameFromMintMetadata = (asset: MintedAsset, metadata: Wallet.Carda
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const ConfirmTransaction = withAddressBookContext((): React.ReactElement => {
   const {
-    utils: { setNextView }
+    utils: { setNextView },
+    signTxRequest: { request: req, set: setSignTxRequest }
   } = useViewsFlowContext();
   const { t } = useTranslation();
   const {
@@ -101,10 +92,10 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const { priceResult } = useFetchCoinPrice();
   const analytics = useAnalyticsContext();
 
-  const [tx, setTx] = useState<Wallet.Cardano.Tx>();
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
-  const [errorMessage, setErrorMessage] = useState<string>();
+  // const [errorMessage, setErrorMessage] = useState<string>();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const keyAgentType = getKeyAgentType();
   const isUsingHardwareWallet = useMemo(
@@ -116,10 +107,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
+    if (!req) return [];
+    const tx = req.transaction.toCore();
     const uniqueAssetIds = new Set<Wallet.Cardano.AssetId>();
     // Merge all assets (TokenMaps) from the tx outputs and mint
-    const assetMaps = tx?.body?.outputs?.map((output) => output.value.assets) ?? [];
-    if (tx?.body?.mint?.size > 0) assetMaps.push(tx.body.mint);
+    const assetMaps = tx.body?.outputs?.map((output) => output.value.assets) ?? [];
+    if (tx.body?.mint?.size > 0) assetMaps.push(tx.body.mint);
 
     // Extract all unique asset ids from the array of TokenMaps
     for (const asset of assetMaps) {
@@ -130,7 +123,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       }
     }
     return [...uniqueAssetIds.values()];
-  }, [tx]);
+  }, [req]);
 
   useEffect(() => {
     if (assetIds?.length > 0) {
@@ -145,45 +138,24 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     }
   }, [assetIds, assetProvider, assets]);
 
-  const cancelTransaction = useCallback((close = false) => {
-    exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-      {
-        api$: of({
-          async allowSignTx(): Promise<boolean> {
-            return Promise.reject();
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
-    close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
-  }, []);
+  const cancelTransaction = useCallback(
+    async (close = false) => {
+      await req.reject('User rejected to sign');
+      close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+    },
+    [req]
+  );
 
   window.addEventListener('beforeunload', cancelTransaction);
 
   const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
     try {
-      HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
-        .then(() => {
-          exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-            {
-              api$: of({
-                async allowSignTx(): Promise<boolean> {
-                  return Promise.resolve(true);
-                }
-              }),
-              baseChannel: DAPP_CHANNELS.userPrompt,
-              properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-            },
-            { logger: console, runtime }
-          );
-        })
-        .catch((error) => {
-          throw error;
-        });
+      if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
+        throw new Error('Invalid state: expected hw wallet');
+      }
+      await req.sign();
+      redirectToSignSuccess();
     } catch (error) {
       console.error('error', error);
       cancelTransaction(false);
@@ -192,17 +164,34 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   };
 
   useEffect(() => {
-    dappDataApi
-      .getSignTxData()
-      .then(({ dappInfo: backgroundDappInfo, tx: backgroundTx }) => {
-        setDappInfo(backgroundDappInfo);
-        setTx(backgroundTx);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-        console.error(error);
-      });
-  }, []);
+    console.warn('e2e-debug', 'subscribe');
+    const subscription = signingCoordinator.transactionWitnessRequest$.subscribe(async (r) => {
+      console.warn('e2e-debug', 'got req', r);
+      setDappInfo(await senderToDappInfo(r.signContext.sender));
+      setSignTxRequest(r);
+    });
+
+    console.warn('e2e-debug', 'expose allowSignTx');
+    const api = exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+      {
+        api$: of({
+          async allowSignTx(): Promise<boolean> {
+            console.warn('e2e-debug', 'call allowSignTx');
+            return Promise.resolve(true);
+          }
+        }),
+        baseChannel: DAPP_CHANNELS.userPrompt,
+        properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+      },
+      { logger: console, runtime }
+    );
+
+    return () => {
+      console.warn('e2e-debug', 'cleanup');
+      subscription.unsubscribe();
+      api.shutdown();
+    };
+  }, [setSignTxRequest]);
 
   const createMintedList = useCallback(
     (mintedAssets: AssetsMintedInspection) => {
@@ -211,7 +200,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         const assetId = Wallet.Cardano.AssetId.fromParts(asset.policyId, asset.assetName);
         const assetInfo = assets.get(assetId) || assetsInfo?.get(assetId);
         // If it's a new asset or the name is being updated we should be getting it from the tx metadata
-        const metadataName = getAssetNameFromMintMetadata(asset, tx?.auxiliaryData?.blob);
+        const metadataName = getAssetNameFromMintMetadata(asset, req.transaction.toCore()?.auxiliaryData?.blob);
         return {
           name: assetInfo?.name.toString() || asset.fingerprint || assetId,
           ticker:
@@ -224,7 +213,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         };
       });
     },
-    [assets, assetsInfo, tx]
+    [assets, assetsInfo, req]
   );
 
   const createAssetList = useCallback(
@@ -249,49 +238,58 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [addressList]
   );
 
-  const txSummary: Wallet.Cip30SignTxSummary | undefined = useMemo(() => {
-    if (!tx) return;
-    const inspector = createTxInspector({
-      minted: assetsMintedInspector,
-      burned: assetsBurnedInspector
-    });
+  const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
 
-    const { minted, burned } = inspector(tx as Wallet.Cardano.HydratedTx);
-    const isMintTransaction = minted.length > 0 || burned.length > 0;
+  useEffect(() => {
+    if (!req) {
+      setTxSummary(void 0);
+      return;
+    }
+    const getTxSummary = async () => {
+      const inspector = createTxInspector({
+        minted: assetsMintedInspector,
+        burned: assetsBurnedInspector
+      });
 
-    const txType = isMintTransaction ? 'Mint' : 'Send';
+      const tx = req.transaction.toCore();
+      const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
+      const isMintTransaction = minted.length > 0 || burned.length > 0;
 
-    const externalOutputs = tx.body.outputs.filter((output) => {
-      if (txType === 'Send') {
-        return walletInfo.addresses.every((addr) => output.address !== addr.address);
-      }
-      return true;
-    });
+      const txType = isMintTransaction ? 'Mint' : 'Send';
 
-    // eslint-disable-next-line unicorn/no-array-reduce
-    const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
-      // Don't show withdrawl tx's etc
-      if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-
-      return [
-        ...acc,
-        {
-          coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
-          recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
-          ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+      const externalOutputs = tx.body.outputs.filter((output) => {
+        if (txType === 'Send') {
+          return walletInfo.addresses.every((addr) => output.address !== addr.address);
         }
-      ];
-    }, []);
+        return true;
+      });
 
-    // eslint-disable-next-line consistent-return
-    return {
-      fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-      outputs: txSummaryOutputs,
-      type: txType,
-      mintedAssets: createMintedList(minted),
-      burnedAssets: createMintedList(burned)
+      // eslint-disable-next-line unicorn/no-array-reduce
+      const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
+        // Don't show withdrawl tx's etc
+        if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
+
+        return [
+          ...acc,
+          {
+            coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
+            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
+            ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+          }
+        ];
+      }, []);
+
+      // eslint-disable-next-line consistent-return
+      setTxSummary({
+        fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
+        outputs: txSummaryOutputs,
+        type: txType,
+        mintedAssets: createMintedList(minted),
+        burnedAssets: createMintedList(burned)
+      });
     };
-  }, [tx, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap]);
+    getTxSummary();
+  }, [req, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap, setTxSummary]);
 
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
@@ -299,7 +297,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     });
 
     txSubmitted$.next({
-      id: tx?.id.toString(),
+      id: req.transaction.getId().toString(),
       date: new Date().toString(),
       creationType: TxCreationType.External
     });
@@ -309,11 +307,10 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   return (
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
-      {tx && txSummary ? (
+      {req && txSummary ? (
         <DappTransaction
           transaction={txSummary}
           dappInfo={dappInfo}
-          errorMessage={errorMessage}
           fiatCurrencyCode={fiatCurrency?.code}
           fiatCurrencyPrice={priceResult?.cardano?.price}
           coinSymbol={cardanoCoin.symbol}
@@ -324,7 +321,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       <div className={styles.actions}>
         <Button
           onClick={onConfirm}
-          disabled={!!errorMessage}
           loading={isUsingHardwareWallet && isConfirmingTx}
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}

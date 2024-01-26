@@ -1,6 +1,6 @@
 import { Cardano, Paginated } from '@cardano-sdk/core';
 import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
-import * as KeyManagement from '../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
+import * as KeyManagement from '@cardano-sdk/key-management';
 
 export type DeviceConnection = LedgerKeyAgent['deviceConnection'] | boolean;
 

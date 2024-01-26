@@ -41,7 +41,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
     const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
+    await inMemoryWallet.submitTx(signedTx);
   }, [delegationTxBuilder, inMemoryWallet]);
 
   const handleSubmission = useCallback(async () => {

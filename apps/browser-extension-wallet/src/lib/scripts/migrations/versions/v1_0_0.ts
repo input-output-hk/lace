@@ -1,10 +1,10 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import isEqual from 'lodash/isEqual';
-import { getBackgroundStorage } from '@lib/scripts/background/util';
 import { InvalidMigrationData } from '../errors';
 import { Migration } from '../migrations';
 import { getItemFromLocalStorage, removeItemFromLocalStorage, setItemInLocalStorage } from '../util';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
 
 const MIGRATION_VERSION = '1.0.0';
 const throwInvalidDataError = (reason?: string) => {

@@ -310,7 +310,7 @@ describe('Testing useCollateral hook', () => {
         });
 
         await waitFor(() => {
-          expect(mockSubmitTx).toBeCalledWith(signedTx.tx);
+          expect(mockSubmitTx).toBeCalledWith(signedTx);
           expect(mockToastNotify).toBeCalledWith({ text: 'Collateral added' });
           expect(mockSetUnspendable).toBeCalledWith([utxo]);
           expect(mockSetBuiltTxData).not.toBeCalled();
@@ -332,7 +332,7 @@ describe('Testing useCollateral hook', () => {
         });
 
         await waitFor(() => {
-          expect(mockSubmitTx).toBeCalledWith(signedTx.tx);
+          expect(mockSubmitTx).toBeCalledWith(signedTx);
           expect(mockToastNotify).toBeCalledWith({ text: 'Collateral added' });
           expect(mockSetUnspendable).toBeCalledWith([utxo]);
           expect(mockSetBuiltTxData).toBeCalledWith({

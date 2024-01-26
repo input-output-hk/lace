@@ -65,11 +65,13 @@ export const useCollateral = (): UseCollateralReturn => {
     setIsSubmitting(true);
     try {
       const txBuilt = txBuilder.build();
-      const { tx } = await txBuilt.sign();
-      await inMemoryWallet.submitTx(tx);
+      const signedTx = await txBuilt.sign();
+      await inMemoryWallet.submitTx(signedTx);
       const utxo = await firstValueFrom(
         inMemoryWallet.utxo.available$.pipe(
-          map((utxos) => utxos.find((o) => o[0].txId === tx.id && o[1].value.coins === COLLATERAL_AMOUNT_LOVELACES)),
+          map((utxos) =>
+            utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === COLLATERAL_AMOUNT_LOVELACES)
+          ),
           filter(isNotNil),
           take(1)
         )

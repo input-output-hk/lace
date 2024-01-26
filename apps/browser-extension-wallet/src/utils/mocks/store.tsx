@@ -1,14 +1,14 @@
 import React from 'react';
 import create, { GetState, SetState } from 'zustand';
 import { Wallet } from '@lace/cardano';
-import { mockKeyAgentDataTestnet, mockWalletInfoTestnet } from './test-helpers';
+import { mockWalletInfoTestnet } from './test-helpers';
 import { APP_MODE_BROWSER, cardanoCoin } from '@utils/constants';
 import { StateStatus, WalletStore } from '@stores/types';
 import { StoreProvider } from '@stores';
-import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import { NetworkConnectionStates } from '@src/types';
 import { mockBlockchainProviders } from './blockchain-providers';
-import { AddressesDiscoveryStatus } from '@lib/communication';
+import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
+import { WalletManager } from '@cardano-sdk/web-extension';
 
 interface StoreProviderProps {
   children: React.ReactNode;
@@ -63,8 +63,6 @@ export const walletStoreMock = async (
     getAssets: jest.fn(),
     setAssetDetails: jest.fn(),
     walletInfo: mockWalletInfoTestnet,
-    keyAgentData: mockKeyAgentDataTestnet,
-    setKeyAgentData: jest.fn(),
     setWalletInfo: jest.fn(),
     setCardanoCoin: jest.fn(),
     setNetworkConnection: jest.fn(),
@@ -77,8 +75,10 @@ export const walletStoreMock = async (
       getHiddenBalancePlaceholder: jest.fn()
     },
     setBalancesVisibility: jest.fn(),
-    setWalletManagerUi: jest.fn(),
-    walletManagerUi: { wallet, activate: jest.fn() } as unknown as WalletManagerUi,
+    walletManager: { wallet, activate: jest.fn() } as unknown as WalletManager<
+      Wallet.WalletMetadata,
+      Wallet.AccountMetadata
+    >,
     blockchainProvider: mockBlockchainProviders(),
     setBlockchainProvider: jest.fn(),
     initialHdDiscoveryCompleted: false,

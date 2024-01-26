@@ -4,7 +4,7 @@ import { Observable, combineLatest, firstValueFrom, map } from 'rxjs';
 
 interface Args {
   transactionsHistory$: Observable<Wallet.Cardano.HydratedTx[]>;
-  addresses$: Observable<Wallet.KeyManagement.GroupedAddress[]>;
+  addresses$: Observable<Wallet.WalletAddress[]>;
 }
 
 export const createHistoricalOwnInputResolver = ({

@@ -6,10 +6,12 @@ import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
-import { useAnalyticsContext, useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { Wallet } from '@lace/cardano';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Title } = Typography;
 interface SettingsSecurityProps {
@@ -27,7 +29,7 @@ export const SettingsSecurity = ({
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const { t } = useTranslation();
-  const { walletLock } = useWalletStore();
+  const { isWalletLocked, getKeyAgentType } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -35,7 +37,6 @@ export const SettingsSecurity = ({
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
-  const backgroundService = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
@@ -55,17 +56,8 @@ export const SettingsSecurity = ({
   };
 
   const isMnemonicAvailable = useCallback(async () => {
-    if (!walletLock) {
-      setHideShowPassphraseSetting(true);
-      return;
-    }
-    const backgroundStorage = await backgroundService.getBackgroundStorage();
-    if (!backgroundStorage?.mnemonic) {
-      setHideShowPassphraseSetting(true);
-      return;
-    }
-    setHideShowPassphraseSetting(false);
-  }, [backgroundService, walletLock]);
+    setHideShowPassphraseSetting(isWalletLocked() || getKeyAgentType() !== WalletType.InMemory);
+  }, [getKeyAgentType, isWalletLocked]);
 
   const handleCloseShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(false);
@@ -112,7 +104,7 @@ export const SettingsSecurity = ({
           </>
         )}
         {/* TODO: find better way to check if using a hardware wallet or not */}
-        {showPassphraseVerification && walletLock && (
+        {showPassphraseVerification && getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory && (
           <SettingsLink
             onClick={() => setIsPassphraseSettingsDrawerOpen(true)}
             description={t('browserView.settings.security.passphrasePeriodicVerification.description')}

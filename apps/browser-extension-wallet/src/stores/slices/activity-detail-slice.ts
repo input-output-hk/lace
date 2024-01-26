@@ -138,9 +138,12 @@ const buildGetActivityDetail =
       assetProvider,
       extraData: { nftMetadata: true, tokenMetadata: true }
     });
-    const tokensSize =
-      inspectTxValues({ addresses: walletInfo.addresses, tx: tx as unknown as Wallet.Cardano.HydratedTx, direction })
-        ?.assets?.size || 0;
+    const value = await inspectTxValues({
+      addresses: walletInfo.addresses,
+      tx: tx as unknown as Wallet.Cardano.HydratedTx,
+      direction
+    });
+    const tokensSize = value?.assets?.size || 0;
     const assetAmount = tokensSize + 1;
 
     // Inputs

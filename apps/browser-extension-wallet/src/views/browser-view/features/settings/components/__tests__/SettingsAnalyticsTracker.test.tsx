@@ -32,7 +32,10 @@ jest.mock('@providers/PostHogClientProvider/client', () => ({
 
 jest.mock('@stores', () => ({
   ...jest.requireActual<any>('@stores'),
-  useWalletStore: jest.fn().mockReturnValue({})
+  useWalletStore: jest.fn().mockReturnValue({
+    isWalletLocked: jest.fn(),
+    getKeyAgentType: jest.fn()
+  })
 }));
 
 jest.mock('@hooks/useWalletManager', () => ({

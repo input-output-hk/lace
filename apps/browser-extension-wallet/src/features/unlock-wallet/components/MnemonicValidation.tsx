@@ -10,23 +10,17 @@ import { config } from '@src/config';
 import { useTranslation } from 'react-i18next';
 
 interface MnemonicValidationProps {
-  /** Plain wallet password used by key agent */
-  plainPassword: string;
   /** Function to execute when validation is successful */
   onValidationSuccess: () => void;
-  /** Wallet key agent obtained after unlock step */
-  walletKeyAgent: Wallet.KeyManagement.SerializableKeyAgentData;
+  /** Wallet account public key */
+  publicKey: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
 // Validate only amount of words entered
 const validateInputs = (mnemonicInput: string[], MNEMONIC_LENGTH: number) =>
   mnemonicInput.filter((word) => word !== '').length === MNEMONIC_LENGTH;
 
-export const MnemonicValidation = ({
-  plainPassword,
-  walletKeyAgent,
-  onValidationSuccess
-}: MnemonicValidationProps): React.ReactElement => {
+export const MnemonicValidation = ({ publicKey, onValidationSuccess }: MnemonicValidationProps): React.ReactElement => {
   const [settings, updateAppSettings] = useAppSettingsContext();
   const { t } = useTranslation();
   const { goBack } = useHistory();
@@ -34,7 +28,7 @@ export const MnemonicValidation = ({
 
   const handleConfirmClick = async (inputMnemonic: string[]): Promise<void> => {
     try {
-      const valid = await Wallet.validateWalletMnemonic(walletKeyAgent, inputMnemonic, plainPassword);
+      const valid = await Wallet.validateWalletMnemonic(inputMnemonic, publicKey);
       if (valid) {
         updateAppSettings({
           ...settings,

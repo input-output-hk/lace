@@ -18,9 +18,7 @@ import { Lock } from '../components/Lock';
 import { useWalletManager } from '@src/hooks/useWalletManager';
 import { NftsLayout } from '../features/nfts';
 import { getValueFromLocalStorage, onStorageChangeEvent } from '@src/utils/local-storage';
-import { WalletManagerUi } from '@cardano-sdk/web-extension';
-import { runtime, tabs } from 'webextension-polyfill';
-import debounce from 'lodash/debounce';
+import { tabs } from 'webextension-polyfill';
 import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
@@ -93,14 +91,12 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     walletInfo,
     isWalletLocked,
     inMemoryWallet,
-    setWalletManagerUi,
-    setKeyAgentData,
-    keyAgentData,
     setCardanoCoin,
     currentChain,
     setCurrentChain,
     getKeyAgentType,
     deletingWallet,
+    cardanoWallet,
     initialHdDiscoveryCompleted
   } = useWalletStore();
   const { loadWallet } = useWalletManager();
@@ -125,12 +121,12 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   // Register event listeners
   useEffect(() => {
     // This allows locking/unlocking the browser view when locked from the popup.
-    onStorageChangeEvent(['keyAgentData'], 'reload', 'delete');
-    onStorageChangeEvent(['keyAgentData'], 'reload', 'create');
+    onStorageChangeEvent(['lock'], 'reload', 'delete');
+    onStorageChangeEvent(['lock'], 'reload', 'create');
 
     // This allows updating the browser view current chain when changed from the popup without reloading
     onStorageChangeEvent(
-      ['keyAgentData'],
+      ['appSettings'],
       () => {
         const appSettings = getValueFromLocalStorage('appSettings');
         setCurrentChain(appSettings?.chainName || CHAIN);
@@ -140,33 +136,9 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   }, [setCurrentChain]);
 
   useEffect(() => {
-    setIsLoadingWalletInfo(true);
-    // try to get key agent data from local storage if exist and initialize state
-    const keyAgentFromStorage = getValueFromLocalStorage('keyAgentData');
-    setKeyAgentData(keyAgentFromStorage);
     setCardanoCoin(currentChain || Wallet.Cardano.ChainIds[chainName]);
     setIsLoadingWalletInfo(false);
-  }, [currentChain, chainName, setKeyAgentData, setCardanoCoin]);
-
-  useEffect(() => {
-    let time: NodeJS.Timeout;
-    const resetTimer = debounce(() => {
-      clearTimeout(time);
-      time = setTimeout(() => {
-        window.addEventListener('focus', () => {
-          const walletManager = new WalletManagerUi(
-            { walletName: process.env.WALLET_NAME },
-            { logger: console, runtime }
-          );
-          setWalletManagerUi(walletManager);
-        });
-      }, 600_000);
-    }, 500);
-    window.addEventListener('load', resetTimer);
-    document.addEventListener('onmousemove', resetTimer);
-    document.addEventListener('onkeydown', resetTimer);
-    () => resetTimer();
-  }, [setWalletManagerUi]);
+  }, [currentChain, chainName, setCardanoCoin]);
 
   useEffect(() => {
     loadWallet();
@@ -193,7 +165,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!keyAgentData && !isLoadingWalletInfo && !deletingWallet) {
+  if (!isLoadingWalletInfo && !deletingWallet && cardanoWallet === null) {
     return (
       <Switch>
         <Route path={'/setup'} component={WalletSetup} />
@@ -202,7 +174,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
+  if (!isLoadingWalletInfo && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
       <>
         <Switch location={page || location}>

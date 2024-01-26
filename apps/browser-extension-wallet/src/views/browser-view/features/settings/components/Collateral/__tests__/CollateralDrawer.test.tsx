@@ -34,10 +34,8 @@ import {
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps,
-  CardanoWalletManagerProvider,
   CurrencyStoreProvider,
-  DatabaseProvider,
-  ICardanoWalletManager
+  DatabaseProvider
 } from '@providers';
 import { BehaviorSubject } from 'rxjs';
 import * as sendTx from '@src/views/browser-view/features/send-transaction';
@@ -131,25 +129,23 @@ const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
   ({ children }: { children: React.ReactNode }) =>
     (
-      <CardanoWalletManagerProvider value={{} as unknown as ICardanoWalletManager}>
-        <AppSettingsProvider>
-          <DatabaseProvider>
-            <StoreProvider appMode={APP_MODE_BROWSER}>
-              <I18nextProvider i18n={i18n}>
-                <CurrencyStoreProvider>
-                  <BackgroundServiceAPIProvider value={backgroundService}>
-                    <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                      <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                        {children}
-                      </AnalyticsProvider>
-                    </PostHogClientProvider>
-                  </BackgroundServiceAPIProvider>
-                </CurrencyStoreProvider>
-              </I18nextProvider>
-            </StoreProvider>
-          </DatabaseProvider>
-        </AppSettingsProvider>
-      </CardanoWalletManagerProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <I18nextProvider i18n={i18n}>
+              <CurrencyStoreProvider>
+                <BackgroundServiceAPIProvider value={backgroundService}>
+                  <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                    <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                      {children}
+                    </AnalyticsProvider>
+                  </PostHogClientProvider>
+                </BackgroundServiceAPIProvider>
+              </CurrencyStoreProvider>
+            </I18nextProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
 describe('Testing CollateralDrawer component', () => {

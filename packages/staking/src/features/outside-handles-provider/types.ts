@@ -52,6 +52,7 @@ export interface IBlockchainProvider {
 
 export type OutsideHandlesContextValue = {
   analytics: IAnalyticsTracker;
+  walletManagerExecuteWithPassword: (action: () => Promise<unknown>, password?: string) => Promise<unknown>;
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
   balancesBalance?: Balance;
@@ -73,11 +74,6 @@ export type OutsideHandlesContextValue = {
   walletStoreWalletActivities: AssetActivityListProps[];
   walletStoreWalletActivitiesStatus: StateStatus;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
-  walletManagerExecuteWithPassword: <T>(
-    password: string,
-    promiseFn: () => Promise<T>,
-    cleanPassword?: boolean
-  ) => Promise<T>;
   walletStoreStakePoolSearchResults: Wallet.StakePoolSearchResults & {
     skip?: number;
     limit?: number;
