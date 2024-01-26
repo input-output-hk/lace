@@ -1,7 +1,7 @@
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../../store';
@@ -57,7 +57,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     [resetStakePools]
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (componentRef?.current) {
       // reset pools on network switching, searchValue change and sort change
       debouncedResetStakePools?.();
