@@ -291,13 +291,13 @@ export const WalletSetupWizard = ({
       await analytics.setOptedInForEnhancedAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
-      const addressDiscoverySubscriber = wallet.wallet.asyncKeyAgent.knownAddresses$.subscribe((addresses) => {
+
+      wallet.wallet.wallet.addresses$.subscribe((addresses) => {
         if (addresses.length === 0) return;
         const hdWalletDiscovered = addresses.some((addr) => addr.index > 0);
         if (setupType === SetupType.RESTORE && hdWalletDiscovered) {
           analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         }
-        addressDiscoverySubscriber.unsubscribe();
       });
 
       if (setupType === SetupType.FORGOT_PASSWORD) {

@@ -5,7 +5,7 @@ import { buildMockTx } from '../mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { TxDirections } from '@src/types';
 import { StakeDelegationCertificate } from '@cardano-sdk/core/dist/cjs/Cardano';
-
+import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 const ADDRESS_1 = Wallet.Cardano.PaymentAddress(
   'addr_test1qq585l3hyxgj3nas2v3xymd23vvartfhceme6gv98aaeg9muzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q2g7k3g'
 );
@@ -102,7 +102,10 @@ describe('testing tx-inspection utils', () => {
         certificates: [
           {
             __typename: Wallet.Cardano.CertificateType.StakeDelegation,
-            stakeKeyHash: STAKE_KEY_HASH,
+            stakeCredential: {
+              hash: Hash28ByteBase16.fromEd25519KeyHashHex(STAKE_KEY_HASH),
+              type: Wallet.Cardano.CredentialType.KeyHash
+            },
             poolId: POOL_ID
           }
         ]
@@ -152,8 +155,11 @@ describe('testing tx-inspection utils', () => {
       const stakeKeyRegistrationTX = buildMockTx({
         certificates: [
           {
-            __typename: Wallet.Cardano.CertificateType.StakeKeyRegistration,
-            stakeKeyHash: STAKE_KEY_HASH
+            __typename: Wallet.Cardano.CertificateType.StakeRegistration,
+            stakeCredential: {
+              hash: Hash28ByteBase16.fromEd25519KeyHashHex(STAKE_KEY_HASH),
+              type: Wallet.Cardano.CredentialType.KeyHash
+            }
           }
         ]
       });
@@ -172,8 +178,11 @@ describe('testing tx-inspection utils', () => {
       const stakeKeyDeregistrationTX = buildMockTx({
         certificates: [
           {
-            __typename: Wallet.Cardano.CertificateType.StakeKeyDeregistration,
-            stakeKeyHash: STAKE_KEY_HASH
+            __typename: Wallet.Cardano.CertificateType.StakeDeregistration,
+            stakeCredential: {
+              hash: Hash28ByteBase16.fromEd25519KeyHashHex(STAKE_KEY_HASH),
+              type: Wallet.Cardano.CredentialType.KeyHash
+            }
           }
         ]
       });

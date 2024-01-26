@@ -21,11 +21,8 @@ export const testKeyAgent = ({
       mnemonicWords: mnemonicWords ?? KeyManagement.util.generateMnemonicWords(),
       chainId
     },
-    // eslint-disable-next-line unicorn/no-null
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
-      // eslint-disable-next-line unicorn/no-null
-      inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) }
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
     }
   );
