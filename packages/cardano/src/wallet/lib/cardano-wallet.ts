@@ -11,18 +11,15 @@ import {
   UtxoProvider
 } from '@cardano-sdk/core';
 import {
-  setupWallet,
   ObservableWallet,
   PersonalWalletDependencies,
   storage,
-  SetupWalletProps,
   restoreKeyAgent
 } from '../../../../../node_modules/@cardano-sdk/wallet/dist/cjs';
 import * as KeyManagement from '../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import { WalletManagerActivateProps, WalletManagerUi } from '@cardano-sdk/web-extension';
 import { ChainName, WalletManagerProviderTypes } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
-import { createWalletUtil } from '@cardano-sdk/wallet';
 // Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
 import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 
@@ -76,34 +73,27 @@ export const activateWallet = async (
 export const createCardanoWalletsByChain = async (
   mnemonicWords: string[],
   getPassword: () => Promise<Uint8Array>,
-  activeChainId: Cardano.ChainId,
-  createWallet: SetupWalletProps<ObservableWallet, KeyManagement.KeyAgent>['createWallet']
-): Promise<Pick<CardanoWalletByChain, 'wallet' | 'keyAgent' | 'keyAgentsByChain'>> => {
+  activeChainId: Cardano.ChainId
+): Promise<Pick<CardanoWalletByChain, 'keyAgent' | 'keyAgentsByChain'>> => {
   const keyAgentsByChain: KeyAgentsByChain = {} as KeyAgentsByChain;
   let activeChainName: ChainName;
 
   const setup = async ({ chainId }: { chainId: Cardano.ChainId }) => {
-    const { keyAgent, ...rest } = await setupWallet({
-      createKeyAgent: async (dependencies) =>
-        await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-          {
-            mnemonicWords,
-            getPassphrase: getPassword,
-            chainId
-          },
-          { ...dependencies }
-        ),
-      createWallet,
-      logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
-    });
+    const keyAgent = await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+      {
+        mnemonicWords,
+        getPassphrase: getPassword,
+        chainId
+      },
+      { logger: console, bip32Ed25519: new Crypto.CmlBip32Ed25519(CML) }
+    );
 
-    return { keyAgent, ...rest };
+    return { keyAgent };
   };
 
   // Key agent for wallet to activate
   // getPassphrase referrs to user's spending password. Change introduced in https://github.com/input-output-hk/cardano-js-sdk/releases/tag/%40cardano-sdk%2Fwallet%400.8.0
-  const { keyAgent: activeKeyAgent, wallet } = await setup({ chainId: activeChainId });
+  const { keyAgent: activeKeyAgent } = await setup({ chainId: activeChainId });
   for (const [chainName, chainId] of Object.entries(Cardano.ChainIds)) {
     if (chainId.networkId === activeChainId.networkId && chainId.networkMagic === activeChainId.networkMagic)
       activeChainName = chainName as ChainName;
@@ -124,7 +114,7 @@ export const createCardanoWalletsByChain = async (
       })
   );
 
-  return { wallet, keyAgent: activeKeyAgent, keyAgentsByChain };
+  return { keyAgent: activeKeyAgent, keyAgentsByChain };
 };
 
 const executeSigningCallbackIfExists = (signCallback?: (result: boolean) => void, response?: boolean) => {
@@ -180,13 +170,7 @@ export const createCardanoWallet = async (
 ): Promise<CardanoWalletByChain> => {
   const { wallet } = walletManagerUi;
 
-  const createWallet = async () => wallet;
-  const { keyAgent, keyAgentsByChain } = await createCardanoWalletsByChain(
-    mnemonicWords,
-    getPassword,
-    activeChainId,
-    createWallet
-  );
+  const { keyAgent, keyAgentsByChain } = await createCardanoWalletsByChain(mnemonicWords, getPassword, activeChainId);
 
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
   await walletManagerUi.activate({ keyAgent: asyncKeyAgent, observableWalletName: name });
@@ -199,16 +183,14 @@ export const createCardanoWallet = async (
  */
 export const restoreWallet = async (
   keyAgentData: KeyManagement.SerializableKeyAgentData,
-  getPassword: () => Promise<Uint8Array>,
-  createWallet: SetupWalletProps<ObservableWallet, KeyManagement.KeyAgent>['createWallet']
-): Promise<{ keyAgent: KeyManagement.KeyAgent; wallet: ObservableWallet }> => {
-  const { keyAgent, wallet } = await setupWallet({
-    createKeyAgent: async (dependencies) => await restoreKeyAgent(keyAgentData, dependencies, getPassword),
-    createWallet,
-    logger: console,
-    bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
-  });
-  return { keyAgent, wallet };
+  getPassword: () => Promise<Uint8Array>
+): Promise<{ keyAgent: KeyManagement.KeyAgent }> => {
+  const keyAgent = await restoreKeyAgent(
+    keyAgentData,
+    { logger: console, bip32Ed25519: new Crypto.CmlBip32Ed25519(CML) },
+    getPassword
+  );
+  return { keyAgent };
 };
 
 /**
@@ -226,8 +208,7 @@ export const restoreWalletFromKeyAgent = async (
 ): Promise<CardanoWallet> => {
   const { wallet } = walletManagerUi;
 
-  const createWallet = async () => wallet;
-  const { keyAgent } = await restoreWallet(keyAgentData, getPassword, createWallet);
+  const { keyAgent } = await restoreWallet(keyAgentData, getPassword);
   // TODO: LW-7807 revise the sdk cip30 implementation
   const asyncKeyAgent = createAsyncKeyAgentWithCallback(keyAgent, callback);
 
@@ -273,8 +254,7 @@ export const validateWalletPassword = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
-      inputResolver: { resolveInput: () => null }
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
     },
     getPassword
   );
@@ -300,8 +280,7 @@ export const validateWalletMnemonic = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
-      inputResolver: { resolveInput: () => null }
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
     },
     getPassword
   );
@@ -316,8 +295,7 @@ export const validateWalletMnemonic = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
-      inputResolver: { resolveInput: () => null }
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
     }
   );
   const validatingChallenge = await Challenge.sign(validatingKeyAgent);
@@ -351,18 +329,14 @@ export const switchKeyAgents = async (
 };
 
 export const createKeyAgent = (
-  walletManagerUi: WalletManagerUi,
   keyAgentData: KeyManagement.SerializableKeyAgentData,
   getPassword: () => Promise<Uint8Array>
-): Promise<KeyManagement.KeyAgent> => {
-  const walletUtil = createWalletUtil(walletManagerUi.wallet);
-  return restoreKeyAgent(
+): Promise<KeyManagement.KeyAgent> =>
+  restoreKeyAgent(
     keyAgentData,
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
-      inputResolver: walletUtil
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
     },
     getPassword
   );
-};

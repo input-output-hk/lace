@@ -5,7 +5,6 @@ export const isKeyAgentDataValid = (keyAgentData: Wallet.KeyManagement.Serializa
   '__typename' in keyAgentData &&
   'chainId' in keyAgentData &&
   'accountIndex' in keyAgentData &&
-  'knownAddresses' in keyAgentData &&
   'extendedAccountPublicKey' in keyAgentData;
 
 export const isKeyAgentsByChainValid = (keyAgentsByChain: Wallet.KeyAgentsByChain): boolean =>

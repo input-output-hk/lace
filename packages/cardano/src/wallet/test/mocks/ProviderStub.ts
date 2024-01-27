@@ -102,7 +102,7 @@ export const queryTransactionsResult: Cardano.HydratedTx[] = [
     body: {
       certificates: [
         {
-          __typename: Cardano.CertificateType.StakeKeyRegistration
+          __typename: Cardano.CertificateType.StakeRegistration
         },
         {
           __typename: Cardano.CertificateType.StakeDelegation,
