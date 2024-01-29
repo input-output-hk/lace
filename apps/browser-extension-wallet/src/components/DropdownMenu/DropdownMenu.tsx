@@ -14,6 +14,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@lace/ui';
 import { useGetHandles } from '@hooks';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
+import { getActiveWalletSubtitle } from '@src/utils/get-wallet-subtitle';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -21,7 +22,7 @@ export interface DropdownMenuProps {
 
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
-  const { walletInfo } = useWalletStore();
+  const { cardanoWallet } = useWalletStore();
   const [open, setOpen] = useState(false);
   const [handle] = useGetHandles();
   const handleImage = handle?.profilePic;
@@ -38,6 +39,8 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
     }
   };
 
+  const walletName = cardanoWallet.source.wallet.metadata.name;
+
   return (
     <Dropdown
       destroyPopupOnHide
@@ -49,12 +52,12 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       {process.env.USE_MULTI_WALLET === 'true' ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
-            title={walletInfo.name}
-            subtitle="Account #0"
+            title={walletName}
+            subtitle={getActiveWalletSubtitle(cardanoWallet.source.account)}
             profile={
               handleImage
                 ? {
-                    fallback: walletInfo.name,
+                    fallback: walletName,
                     imageSrc: getAssetImageUrl(handleImage)
                   }
                 : undefined
@@ -71,7 +74,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
           data-testid="header-menu-button"
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
-            <UserAvatar walletName={walletInfo.name} isPopup={isPopup} />
+            <UserAvatar walletName={walletName} isPopup={isPopup} />
             <Chevron
               className={cn(styles.chevron, { [styles.open]: open })}
               data-testid={`chevron-${open ? 'up' : 'down'}`}

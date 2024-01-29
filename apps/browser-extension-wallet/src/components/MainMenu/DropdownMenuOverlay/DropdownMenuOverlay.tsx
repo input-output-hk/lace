@@ -19,6 +19,8 @@ import { WalletAccounts } from './components/WalletAccounts';
 import { AddSharedWalletLink } from '@components/MainMenu/DropdownMenuOverlay/components/AddSharedWalletLink';
 import { useWalletStore } from '@stores';
 import classNames from 'classnames';
+import { AnyBip32Wallet } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -35,9 +37,10 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   ...props
 }): React.ReactElement => {
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName } = useWalletStore();
+  const { environmentName, setManageAccountsWallet } = useWalletStore();
 
-  const openWalletAccounts = () => {
+  const openWalletAccounts = (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
+    setManageAccountsWallet(wallet);
     setCurrentSection(Sections.WalletAccounts);
   };
 

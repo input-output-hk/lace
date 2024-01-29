@@ -26,6 +26,7 @@ export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.S
 export interface WalletMetadata {
   name: string;
   lockValue?: HexBlob;
+  lastActiveAccountIndex?: number;
 }
 
 export interface AccountMetadata {
