@@ -12,6 +12,7 @@ import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useSyncingTheFirstTime } from '@hooks/useSyncingTheFirstTime';
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const COLLATERAL_ADA_AMOUNT = 5;
 export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
@@ -29,8 +30,8 @@ export const useCollateral = (): UseCollateralReturn => {
   const { t } = useTranslation();
   const [txFee, setTxFee] = useState<Cardano.Lovelace>();
   const [txBuilder, setTxBuilder] = useState<TxBuilder | undefined>();
-  const { inMemoryWallet, getKeyAgentType } = useWalletStore();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const { inMemoryWallet, getWalletType } = useWalletStore();
+  const isInMemory = getWalletType() === WalletType.InMemory;
   const { setBuiltTxData } = useBuiltTxState();
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);

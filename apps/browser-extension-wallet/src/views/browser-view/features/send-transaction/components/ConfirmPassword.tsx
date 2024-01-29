@@ -1,14 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { inputProps, Password } from '@lace/common';
 import styles from './ConfirmPassword.module.scss';
-import { Wallet } from '@lace/cardano';
 import { useSubmitingState, usePassword } from '../store';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
 import cn from 'classnames';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const ConfirmPassword = (): React.ReactElement => {
-  const { getKeyAgentType } = useWalletStore();
+  const { getWalletType } = useWalletStore();
   const { t } = useTranslation();
 
   const { isPasswordValid, setSubmitingTxState } = useSubmitingState();
@@ -19,7 +19,7 @@ export const ConfirmPassword = (): React.ReactElement => {
     setSubmitingTxState({ isPasswordValid: true });
   };
 
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
 
   return (
     isInMemory && (

@@ -34,7 +34,7 @@ jest.mock('@stores', () => ({
   ...jest.requireActual<any>('@stores'),
   useWalletStore: jest.fn().mockReturnValue({
     isWalletLocked: jest.fn(),
-    getKeyAgentType: jest.fn()
+    getWalletType: jest.fn()
   })
 }));
 

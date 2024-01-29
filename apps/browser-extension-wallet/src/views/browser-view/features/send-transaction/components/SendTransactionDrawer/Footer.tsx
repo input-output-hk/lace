@@ -45,6 +45,7 @@ import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { SendTransaction: Events, AddressBook } = AnalyticsEventNames;
 
@@ -81,7 +82,7 @@ export const Footer = withAddressBookContext(
     const { builtTxData } = useBuiltTxState();
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
-    const { inMemoryWallet, getKeyAgentType } = useWalletStore();
+    const { inMemoryWallet, getWalletType } = useWalletStore();
     const { password, removePassword } = usePassword();
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
@@ -192,9 +193,9 @@ export const Footer = withAddressBookContext(
       onHandleChangeConfirm(action);
     };
 
-    const keyAgentType = getKeyAgentType();
-    const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
-    const isHwSummary = useMemo(() => isSummaryStep && !isInMemory, [isSummaryStep, isInMemory]);
+    const walletType = getWalletType();
+    const isInMemory = walletType === WalletType.InMemory;
+    const isHwSummary = isSummaryStep && !isInMemory;
 
     const signAndSubmitTransaction = useCallback(async () => {
       const signedTx = await builtTxData.tx.sign();
@@ -333,12 +334,12 @@ export const Footer = withAddressBookContext(
       if (isHwSummary) {
         const staleLabels = isPopupView
           ? t('browserView.transaction.send.footer.continueInAdvancedView')
-          : t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: keyAgentType });
+          : t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType });
         return isSubmitingTx ? t('browserView.transaction.send.footer.signing') : staleLabels;
       }
 
       return t(nextStepBtnLabels[currentSection.currentSection]);
-    }, [isHwSummary, t, currentSection.currentSection, isPopupView, isSubmitingTx, keyAgentType]);
+    }, [isHwSummary, t, currentSection.currentSection, isPopupView, isSubmitingTx, walletType]);
 
     const cancelButtonLabel = useMemo(() => {
       if (currentSection.currentSection === Sections.SUCCESS_TX) {

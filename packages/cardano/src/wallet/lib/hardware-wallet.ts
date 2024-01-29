@@ -3,15 +3,14 @@ import * as KeyManagement from '@cardano-sdk/key-management';
 import { DeviceConnection, HardwareWallets } from '../types';
 import * as HardwareLedger from '../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import * as HardwareTrezor from '../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
+import { WalletType } from '@cardano-sdk/web-extension';
 // Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
 
 const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
 const createEnumObject = <T extends string>(o: Array<T>) => o;
 export const AVAILABLE_WALLETS = createEnumObject<HardwareWallets>(
-  isTrezorHWSupported()
-    ? [KeyManagement.KeyAgentType.Ledger, KeyManagement.KeyAgentType.Trezor]
-    : [KeyManagement.KeyAgentType.Ledger]
+  isTrezorHWSupported() ? [WalletType.Ledger, WalletType.Trezor] : [WalletType.Ledger]
 );
 const DEFAULT_COMMUNICATION_TYPE = KeyManagement.CommunicationType.Web;
 
@@ -22,10 +21,10 @@ export const manifest: KeyManagement.TrezorConfig['manifest'] = {
 };
 
 const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> = {
-  [KeyManagement.KeyAgentType.Ledger]: async () =>
+  [WalletType.Ledger]: async () =>
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
-  ...(AVAILABLE_WALLETS.includes(KeyManagement.KeyAgentType.Trezor) && {
-    [KeyManagement.KeyAgentType.Trezor]: async () => {
+  ...(AVAILABLE_WALLETS.includes(WalletType.Trezor) && {
+    [WalletType.Trezor]: async () => {
       const isTrezorInitialized = await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
         manifest,
         communicationType: DEFAULT_COMMUNICATION_TYPE

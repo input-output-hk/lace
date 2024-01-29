@@ -7,6 +7,7 @@ import { Wallet } from '@lace/cardano';
 import { useHardwareWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 import { ErrorHandling } from './ErrorHandling';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 interface State {
   error?: 'notDetectedLedger' | 'notDetectedTrezor';
@@ -38,7 +39,7 @@ export const Connect = (): JSX.Element => {
       })
       .catch(() => {
         setState({
-          error: model === Wallet.KeyManagement.KeyAgentType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger'
+          error: model === WalletType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger'
         });
       });
   };

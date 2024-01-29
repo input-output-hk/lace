@@ -21,7 +21,7 @@ import {
 import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainProvider } from './slices';
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
-import { WalletManagerApi } from '@cardano-sdk/web-extension';
+import { WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { Reward } from '@cardano-sdk/core';
 import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
@@ -112,7 +112,7 @@ export interface WalletInfoSlice {
   currentChain?: Wallet.Cardano.ChainId;
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;
-  getKeyAgentType: () => string;
+  getWalletType: () => WalletType;
   deletingWallet?: boolean;
   setDeletingWallet: (deletingWallet: boolean) => void;
 }

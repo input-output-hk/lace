@@ -10,7 +10,6 @@ import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
-import { Wallet } from '@lace/cardano';
 import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Title } = Typography;
@@ -29,7 +28,7 @@ export const SettingsSecurity = ({
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const { t } = useTranslation();
-  const { isWalletLocked, getKeyAgentType } = useWalletStore();
+  const { isWalletLocked, getWalletType } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -56,8 +55,8 @@ export const SettingsSecurity = ({
   };
 
   const isMnemonicAvailable = useCallback(async () => {
-    setHideShowPassphraseSetting(isWalletLocked() || getKeyAgentType() !== WalletType.InMemory);
-  }, [getKeyAgentType, isWalletLocked]);
+    setHideShowPassphraseSetting(isWalletLocked() || getWalletType() !== WalletType.InMemory);
+  }, [getWalletType, isWalletLocked]);
 
   const handleCloseShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(false);
@@ -104,7 +103,7 @@ export const SettingsSecurity = ({
           </>
         )}
         {/* TODO: find better way to check if using a hardware wallet or not */}
-        {showPassphraseVerification && getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory && (
+        {showPassphraseVerification && getWalletType() === WalletType.InMemory && (
           <SettingsLink
             onClick={() => setIsPassphraseSettingsDrawerOpen(true)}
             description={t('browserView.settings.security.passphrasePeriodicVerification.description')}

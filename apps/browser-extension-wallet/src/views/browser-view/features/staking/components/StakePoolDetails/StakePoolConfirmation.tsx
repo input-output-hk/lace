@@ -31,6 +31,7 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 type statRendererProps = {
   img?: string;
@@ -199,7 +200,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { t } = useTranslation();
   const { isBuildingTx, stakingError } = useStakePoolDetails();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const { getKeyAgentType, inMemoryWallet } = useWalletStore();
+  const { getWalletType, inMemoryWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
 
   const { setIsRestaking } = useSubmitingState();
@@ -221,8 +222,8 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     },
     [backgroundServices]
   );
-  const keyAgentType = getKeyAgentType();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
+  const walletType = getWalletType();
+  const isInMemory = walletType === WalletType.InMemory;
 
   const { setSection } = useStakePoolDetails();
   const { id: poolId } = useDelegationStore(stakePoolDetailsSelector);
@@ -274,13 +275,13 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     if (!isInMemory) {
       const staleLabels = popupView
         ? t('browserView.staking.details.confirmation.button.continueInAdvancedView')
-        : t('browserView.staking.details.confirmation.button.confirmWithDevice', { hardwareWallet: keyAgentType });
+        : t('browserView.staking.details.confirmation.button.confirmWithDevice', { hardwareWallet: walletType });
       return isConfirmingTx ? t('browserView.staking.details.confirmation.button.signing') : staleLabels;
     }
     return popupView
       ? t('staking.details.confirmation.button.confirm')
       : t('browserView.staking.details.confirmation.button.confirm');
-  }, [isConfirmingTx, isInMemory, t, popupView, keyAgentType]);
+  }, [isConfirmingTx, isInMemory, t, popupView, walletType]);
 
   return (
     <>

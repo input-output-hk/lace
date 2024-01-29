@@ -25,6 +25,6 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
     set({ currentChain: Wallet.Cardano.ChainIds[chain], environmentName: chain });
     get().setBlockchainProvider(chain);
   },
-  getKeyAgentType: () => get()?.cardanoWallet?.source.wallet.type,
+  getWalletType: () => get()?.cardanoWallet?.source.wallet.type,
   setDeletingWallet: (deletingWallet: boolean) => set({ deletingWallet })
 });

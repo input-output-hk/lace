@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { CollateralStepSend, CollateralStepReclaim, CollateralFooterReclaim } from './';
 import { useCollateral, useSyncingTheFirstTime } from '@hooks';
@@ -16,6 +15,7 @@ import { TransactionFail } from '@src/views/browser-view/features/send-transacti
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
 import { FooterHW } from './hardware-wallet/FooterHW';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 interface CollateralDrawerProps {
   visible: boolean;
@@ -35,17 +35,12 @@ export const CollateralDrawer = ({
   const { t } = useTranslation();
   const { currentSection: section, setSection } = useSections();
   const {
-    getKeyAgentType,
+    getWalletType,
     walletUI: { appMode }
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
-  const { keyAgentType, isInMemory } = useMemo(() => {
-    const agentType = getKeyAgentType();
-    return {
-      keyAgentType: agentType,
-      isInMemory: getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory
-    };
-  }, [getKeyAgentType]);
+  const walletType = getWalletType();
+  const isInMemory = walletType === WalletType.InMemory;
   const [password, setPassword] = useState<string>();
   const clearPassword = () => setPassword('');
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
@@ -140,7 +135,7 @@ export const CollateralDrawer = ({
         setCurrentStep={setSection}
         onClose={handleConfirmCollateral}
         onClaim={clearPassword}
-        keyAgentType={keyAgentType}
+        walletType={walletType}
         setIsPasswordValid={setIsPasswordValid}
         popupView={popupView}
         password={password}

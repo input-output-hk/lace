@@ -205,7 +205,7 @@ const createHardwareWallet = async ({
   connectedDevice
 }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> => {
   const keyAgent =
-    connectedDevice === Wallet.KeyManagement.KeyAgentType.Ledger
+    connectedDevice === WalletType.Ledger
       ? await Wallet.Ledger.LedgerKeyAgent.createWithDevice(
           {
             chainId,

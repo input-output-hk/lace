@@ -1,8 +1,8 @@
 /* eslint-disable react/no-multi-comp */
-import { Wallet } from '@lace/cardano';
+import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, PostHogAction } from '@lace/common';
 import cn from 'classnames';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -40,12 +40,12 @@ export const TransactionSuccessFooter = (): React.ReactElement => {
   const {
     analytics,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
-    walletStoreGetKeyAgentType: getKeyAgentType,
+    walletStoreGetWalletType: getWalletType,
   } = useOutsideHandles();
   const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
   }));
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
 
   const closeDrawer = () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);

@@ -94,7 +94,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     setCardanoCoin,
     currentChain,
     setCurrentChain,
-    getKeyAgentType,
+    getWalletType,
     deletingWallet,
     cardanoWallet,
     initialHdDiscoveryCompleted
@@ -145,8 +145,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   }, [loadWallet]);
 
   useEffect(() => {
-    const keyAgentType = getKeyAgentType();
-    const isHardwareWallet = Wallet.AVAILABLE_WALLETS.includes(keyAgentType as Wallet.HardwareWallets);
+    const walletType = getWalletType();
+    const isHardwareWallet = Wallet.AVAILABLE_WALLETS.includes(walletType as Wallet.HardwareWallets);
     if (isHardwareWallet) {
       tabs.onActivated.addListener(tabsOnActivatedCallback);
     }

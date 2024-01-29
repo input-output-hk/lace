@@ -69,7 +69,7 @@ export type OutsideHandlesContextValue = {
   openExternalLink: (href: string) => void;
   password: PasswordHook;
   submittingState: SubmittingState;
-  walletStoreGetKeyAgentType: () => string;
+  walletStoreGetWalletType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletActivities: AssetActivityListProps[];
   walletStoreWalletActivitiesStatus: StateStatus;

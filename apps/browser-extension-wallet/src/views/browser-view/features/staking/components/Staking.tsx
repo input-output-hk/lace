@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
@@ -22,6 +22,7 @@ import { useStakePoolDetails } from '../store';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useObservable } from '@lace/common';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -33,7 +34,7 @@ export const Staking = (): React.ReactElement => {
   const { networkInfo, fetchNetworkInfo } = useWalletStore(stakingInfoSelector);
   const { setSelectedStakePool } = useDelegationStore();
   const {
-    getKeyAgentType,
+    getWalletType,
     blockchainProvider,
     walletInfo,
     inMemoryWallet,
@@ -47,7 +48,7 @@ export const Staking = (): React.ReactElement => {
   const delegationDetails = useDelegationDetails();
   const { totalRewards, lastReward } = useStakingRewards();
 
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
 
   useEffect(() => {

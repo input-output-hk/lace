@@ -7,8 +7,8 @@ import { FormLayout } from './FormLayout';
 import { TransitionAcknowledgmentDialog } from '@components/TransitionAcknowledgmentDialog';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks';
-import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const STORAGE_MEMO_ENTRY_NAME = 'hideSendHwDialog';
 
@@ -18,9 +18,9 @@ interface TransactionFormProps {
 
 export const TransactionForm = ({ isPopupView }: TransactionFormProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { getKeyAgentType, inMemoryWallet } = useWalletStore();
+  const { getWalletType, inMemoryWallet } = useWalletStore();
   const { priceResult, status } = useFetchCoinPrice();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
   const dialogHiddenByUser = localStorage.getItem(STORAGE_MEMO_ENTRY_NAME) === 'true';
   const shouldShowAcknowledgmentDialog = !dialogHiddenByUser && isPopupView && !isInMemory;
   const [isTransitionAcknowledgmentDialogVisible, setIsTransitionAcknowledgmentDialogVisible] =

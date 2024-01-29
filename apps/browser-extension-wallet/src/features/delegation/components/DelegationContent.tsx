@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-nested-ternary */
 /* eslint-disable complexity */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import isNumber from 'lodash/isNumber';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
@@ -25,6 +25,7 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useObservable } from '@lace/common';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const STORAGE_MEMO_ENTRY_NAME = 'hideStakingHwDialog';
 const MIN_CHARS_TO_SEARCH = 3;
@@ -41,11 +42,11 @@ const PoolDetailsStepsWithBackBtn = new Set([Sections.DETAIL, Sections.CONFIRMAT
 export const DelegationContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    getKeyAgentType,
+    getWalletType,
     walletUI: { cardanoCoin },
     blockchainProvider
   } = useWalletStore();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
   const [searchValue, setSearchValue] = useState<string | undefined>();
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const dialogHiddenByUser = localStorage.getItem(STORAGE_MEMO_ENTRY_NAME) === 'true';

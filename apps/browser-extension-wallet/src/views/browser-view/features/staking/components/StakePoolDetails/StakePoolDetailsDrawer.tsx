@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
 import { Sections } from '../../types';
 import { useWalletStore } from '@stores';
@@ -10,6 +9,7 @@ import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI'
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -39,9 +39,9 @@ export const StakePoolDetailsDrawer = ({
   } = useStakePoolDetails();
   const { t } = useTranslation();
   const { setIsRestaking } = useSubmitingState();
-  const { getKeyAgentType } = useWalletStore();
+  const { getWalletType } = useWalletStore();
   const { password, removePassword } = usePassword();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
   // const isSuccessSection = useMemo(
   //   () => simpleSendConfig.currentSection === Sections.SUCCESS_TX,
   //   [simpleSendConfig.currentSection]

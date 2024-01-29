@@ -108,15 +108,15 @@ export const ensureUiIsOpenAndLoaded = async (
   url?: string,
   checkKeyAgent = true
 ): Promise<Tabs.Tab> => {
-  const keyAgentTypeIsHardwareWallet = checkKeyAgent
+  const isHardwareWallet = checkKeyAgent
     ? await (async () => {
         const activeWallet = await getActiveWallet(services);
         return activeWallet?.type === WalletType.Ledger || activeWallet?.type === WalletType.Trezor;
       })()
     : undefined;
 
-  const windowType: Windows.CreateType = keyAgentTypeIsHardwareWallet ? 'normal' : 'popup';
-  if (keyAgentTypeIsHardwareWallet) {
+  const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
+  if (isHardwareWallet) {
     const openTabs = await tabs.query({ title: 'Lace' });
     // Close all previously opened lace windows
     for (const tab of openTabs) {

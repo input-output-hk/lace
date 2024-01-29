@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable react/no-multi-comp */
+import { WalletType } from '@cardano-sdk/web-extension';
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { Ellipsis, PostHogAction, ProgressBar, getNumberWithUnit } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
@@ -353,7 +354,7 @@ const makeActionButtons = (
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
-  const { walletStoreGetKeyAgentType } = useOutsideHandles();
+  const { walletStoreGetWalletType } = useOutsideHandles();
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
     portfolioMutators: store.mutators,
@@ -362,10 +363,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
     useDelegationPortfolioStore(makeSelector(openPoolDetails));
 
-  const isInMemory = useMemo(
-    () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
-    [walletStoreGetKeyAgentType]
-  );
+  const isInMemory = useMemo(() => walletStoreGetWalletType() === WalletType.InMemory, [walletStoreGetWalletType]);
 
   const onStakeOnThisPool = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);

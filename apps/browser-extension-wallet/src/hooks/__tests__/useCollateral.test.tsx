@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const mockUseMaxAda = jest.fn();
-const mockGetKeyAgentType = jest.fn();
+const mockGetWalletType = jest.fn();
 const mockUseBuitTxState = jest.fn();
 const mockToastNotify = jest.fn();
 const mockUseSyncingTheFirstTime = jest.fn();
@@ -24,6 +24,7 @@ import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 import { SignedTx, TxInspection } from '@cardano-sdk/tx-construction';
 import { Cardano, HandleResolution, TxCBOR } from '@cardano-sdk/core';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const txHash = 'e6eb1c8c806ae7f4d9fe148e9c23853607ffba692ef0a464688911ad3374a932';
 const address =
@@ -89,7 +90,7 @@ const getWrapper =
 
 describe('Testing useCollateral hook', () => {
   beforeEach(() => {
-    mockUseWalletStore.mockReturnValue({ inMemoryWallet, getKeyAgentType: mockGetKeyAgentType });
+    mockUseWalletStore.mockReturnValue({ inMemoryWallet, getWalletType: mockGetWalletType });
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -177,7 +178,7 @@ describe('Testing useCollateral hook', () => {
             available$
           }
         },
-        getKeyAgentType: mockGetKeyAgentType
+        getWalletType: mockGetWalletType
       });
     });
 
@@ -285,7 +286,7 @@ describe('Testing useCollateral hook', () => {
       });
 
       test('should submit the tx and set the colateral for inMemory wallet', async () => {
-        mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
+        mockGetWalletType.mockReturnValue(WalletType.InMemory);
         mockSubmitTx.mockReset();
         mockUseWalletStore.mockReturnValue({
           inMemoryWallet: {
@@ -297,7 +298,7 @@ describe('Testing useCollateral hook', () => {
               available$
             }
           },
-          getKeyAgentType: mockGetKeyAgentType
+          getWalletType: mockGetWalletType
         });
 
         mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));

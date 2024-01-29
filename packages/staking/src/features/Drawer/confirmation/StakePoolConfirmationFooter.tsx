@@ -1,4 +1,4 @@
-import { Wallet } from '@lace/cardano';
+import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, PostHogAction } from '@lace/common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { analytics } = useOutsideHandles();
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
-    walletStoreGetKeyAgentType: getKeyAgentType,
+    walletStoreGetWalletType: getWalletType,
     submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
   } = useOutsideHandles();
@@ -34,8 +34,8 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const [openPoolsManagementConfirmationModal, setOpenPoolsManagementConfirmationModal] =
     useState<PoolsManagementModalType | null>(null);
 
-  const keyAgentType = getKeyAgentType();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
+  const walletType = getWalletType();
+  const isInMemory = walletType === WalletType.InMemory;
 
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
@@ -88,11 +88,11 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     if (!isInMemory) {
       const staleLabels = popupView
         ? t('drawer.confirmation.button.continueInAdvancedView')
-        : t('drawer.confirmation.button.confirmWithDevice', { hardwareWallet: keyAgentType });
+        : t('drawer.confirmation.button.confirmWithDevice', { hardwareWallet: walletType });
       return isConfirmingTx ? t('drawer.confirmation.button.signing') : staleLabels;
     }
     return t('drawer.confirmation.button.confirm');
-  }, [isConfirmingTx, isInMemory, keyAgentType, popupView, t]);
+  }, [isConfirmingTx, isInMemory, walletType, popupView, t]);
 
   return (
     <>

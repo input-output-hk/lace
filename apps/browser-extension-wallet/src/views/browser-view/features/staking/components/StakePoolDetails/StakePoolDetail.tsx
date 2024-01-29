@@ -20,6 +20,7 @@ import {
   AnalyticsEventNames,
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 // TODO: remove duplication once lw-9270 is merged (lw-9552)
 export enum SaturationLevels {
@@ -312,12 +313,12 @@ export const StakePoolDetailFooter = ({
   const { setNoFundsVisible } = useStakePoolDetails();
   const { id } = useDelegationStore(stakePoolDetailsSelector) || {};
   const {
-    getKeyAgentType,
+    getWalletType,
     walletUI: { cardanoCoin }
   } = useWalletStore();
   const analytics = useAnalyticsContext();
 
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
 
   const onStakeClick = useCallback(() => {
     if (canDelegate) {

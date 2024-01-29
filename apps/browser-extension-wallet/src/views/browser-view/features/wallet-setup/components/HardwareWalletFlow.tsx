@@ -31,14 +31,14 @@ import { getHWPersonProperties, isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { SendOnboardingAnalyticsEvent } from '../types';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
 const { CHAIN } = config();
 const {
   Cardano: { ChainIds },
-  AVAILABLE_WALLETS,
-  KeyManagement
+  AVAILABLE_WALLETS
 } = Wallet;
 const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 
@@ -196,9 +196,7 @@ export const HardwareWalletFlow = ({
       if (error.innerError?.innerError?.message === 'The device is already open.') {
         setDeviceConnection(deviceConnection);
       } else {
-        showHardwareWalletError(
-          model === KeyManagement.KeyAgentType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger'
-        );
+        showHardwareWalletError(model === WalletType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger');
       }
     }
   };

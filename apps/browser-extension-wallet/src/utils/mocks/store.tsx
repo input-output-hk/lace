@@ -8,7 +8,7 @@ import { StoreProvider } from '@stores';
 import { NetworkConnectionStates } from '@src/types';
 import { mockBlockchainProviders } from './blockchain-providers';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
-import { WalletManager } from '@cardano-sdk/web-extension';
+import { WalletManager, WalletType } from '@cardano-sdk/web-extension';
 
 interface StoreProviderProps {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ export const walletStoreMock = async (
     fetchingActivityInfo: false,
     getActivityDetail: jest.fn(),
     inMemoryWallet: wallet as Wallet.ObservableWallet,
-    getKeyAgentType: jest.fn(() => Wallet.KeyManagement.KeyAgentType.InMemory),
+    getWalletType: jest.fn(() => WalletType.InMemory),
     // TODO: mock [LW-5454]
     cardanoWallet: undefined,
     isWalletLocked: jest.fn(() => false),

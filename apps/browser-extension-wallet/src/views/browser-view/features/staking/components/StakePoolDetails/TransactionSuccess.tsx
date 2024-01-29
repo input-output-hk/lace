@@ -1,9 +1,8 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { ResultMessage } from '@components/ResultMessage';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useStakePoolDetails } from '../../store';
@@ -19,6 +18,7 @@ import { useAnalyticsContext } from '@providers';
 
 import { useWalletStore } from '@src/stores';
 import { useSubmitingState } from '../../../send-transaction';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 type TransactionSuccessProps = {
   popupView?: boolean;
@@ -59,8 +59,8 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
   const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
-  const { getKeyAgentType } = useWalletStore();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const { getWalletType } = useWalletStore();
+  const isInMemory = getWalletType() === WalletType.InMemory;
 
   const closeDrawer = () => {
     analytics.sendEventToMatomo({

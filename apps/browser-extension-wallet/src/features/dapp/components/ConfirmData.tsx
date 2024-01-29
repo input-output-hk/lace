@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -43,17 +43,15 @@ export const DappConfirmData = (): React.ReactElement => {
     utils: { setNextView },
     signDataRequest: { request: req, set: setSignDataRequest }
   } = useViewsFlowContext();
-  const { getKeyAgentType } = useWalletStore();
+  const { getWalletType } = useWalletStore();
   const { t } = useTranslation();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const analytics = useAnalyticsContext();
-  const isUsingHardwareWallet = useMemo(
-    () => getKeyAgentType() !== Wallet.KeyManagement.KeyAgentType.InMemory,
-    [getKeyAgentType]
-  );
+  const walletType = getWalletType();
+  const isUsingHardwareWallet = walletType === WalletType.Ledger || walletType === WalletType.Trezor;
 
   const [formattedData, setFormattedData] = useState<{
     address: string;

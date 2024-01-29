@@ -17,6 +17,7 @@ import { cardanoCoin } from '@src/utils/constants';
 import { Spin, Typography } from 'antd';
 import styles from './styles.module.scss';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Text } = Typography;
 
@@ -28,7 +29,7 @@ export const CreateCollateral = ({
 }: DappCreateCollateralProps): React.ReactElement => {
   const { t } = useTranslation();
 
-  const { inMemoryWallet, getKeyAgentType } = useWalletStore();
+  const { inMemoryWallet, getWalletType } = useWalletStore();
   const addresses = useObservable(inMemoryWallet.addresses$);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [password, setPassword] = useState('');
@@ -40,8 +41,8 @@ export const CreateCollateral = ({
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
-  const keyAgentType = getKeyAgentType();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
+  const walletType = getWalletType();
+  const isInMemory = walletType === WalletType.InMemory;
   const [collateralTx, setCollateralTx] = useState<{ fee: bigint; tx: Wallet.UnsignedTx }>();
 
   useEffect(() => {
@@ -92,8 +93,8 @@ export const CreateCollateral = ({
     if (isInMemory) {
       return t('browserView.settings.wallet.collateral.confirm');
     }
-    return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: keyAgentType });
-  }, [isInMemory, keyAgentType, t]);
+    return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: walletType });
+  }, [isInMemory, walletType, t]);
 
   return (
     <Layout

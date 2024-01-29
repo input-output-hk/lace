@@ -4,11 +4,10 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-nested-ternary */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styles from './Header.module.scss';
 import { BrowserViewSections } from '@src/lib/scripts/types';
 import { NavigationButton, Button, DrawerNavigation, DrawerHeader } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { Sections } from '../../types';
 import {
   useSections,
@@ -44,6 +43,7 @@ import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokens
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { SendTransaction: Events } = AnalyticsEventNames;
 
@@ -53,7 +53,7 @@ export const useHandleClose = (): {
 } => {
   const {
     walletUI: { appMode },
-    getKeyAgentType
+    getWalletType
   } = useWalletStore();
   const isPopup = appMode === APP_MODE_POPUP;
   const [, setWarnigModalVisibility] = useWarningModal();
@@ -64,7 +64,7 @@ export const useHandleClose = (): {
   const { currentSection: section, resetSection } = useSections();
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isInMemory = getWalletType() === WalletType.InMemory;
 
   const resetStates = useCallback(() => {
     reset();

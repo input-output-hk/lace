@@ -29,7 +29,7 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
   openExternalLink: undefined,
   password: undefined,
   submittingState: undefined,
-  walletStoreGetKeyAgentType: undefined,
+  walletStoreGetWalletType: undefined,
   walletStoreInMemoryWallet: undefined,
   walletStoreWalletActivities: undefined,
   walletStoreWalletActivitiesStatus: undefined,

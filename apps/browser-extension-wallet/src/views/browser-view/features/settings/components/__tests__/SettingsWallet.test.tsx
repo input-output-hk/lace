@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const useLocationMock = jest.fn();
-const mockGetKeyAgentType = jest.fn();
+const mockGetWalletType = jest.fn();
 const mockUseWalletStore = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseCollateral = jest.fn();
@@ -15,7 +15,6 @@ import '@testing-library/jest-dom';
 import { I18nextProvider } from 'react-i18next';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
-import { Wallet } from '@lace/cardano';
 import i18n from '@lib/i18n';
 import {
   AnalyticsProvider,
@@ -34,6 +33,7 @@ import * as common from '@lace/common';
 import { walletRoutePaths } from '@routes';
 import { SettingsDrawer } from '../SettingsWalletBase';
 import { mockAnalyticsTracker } from '@src/utils/mocks/test-helpers';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const OLD_ENV = process.env;
 
@@ -155,9 +155,9 @@ describe('Testing SettingsWalletBase component', () => {
         txFee: 0
       });
       useLocationMock.mockReturnValue({ search: '' });
-      mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
+      mockGetWalletType.mockReturnValue(WalletType.InMemory);
       mockUseWalletStore.mockImplementation(() => ({
-        getKeyAgentType: mockGetKeyAgentType,
+        getWalletType: mockGetWalletType,
         inMemoryWallet,
         walletUI: {},
         walletInfo: {}

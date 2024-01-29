@@ -21,6 +21,7 @@ import {
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
 import { useObservable, Banner } from '@lace/common';
 import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Text } = Typography;
 
@@ -107,14 +108,12 @@ export const SendTransactionSummary = withAddressBookContext(
     const { inMemoryWallet } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
     const {
-      getKeyAgentType,
+      getWalletType,
       walletUI: { cardanoCoin }
     } = useWalletStore();
-    const isInMemory = useMemo(
-      () => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
-      [getKeyAgentType]
-    );
-    const isTrezor = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.Trezor, [getKeyAgentType]);
+    const walletType = getWalletType();
+    const isInMemory = walletType === WalletType.InMemory;
+    const isTrezor = walletType === WalletType.Trezor;
 
     const { list: addressList } = useAddressBookContext();
     const analytics = useAnalyticsContext();
