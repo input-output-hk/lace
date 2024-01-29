@@ -124,6 +124,7 @@ Feature: Analytics - Settings - Popup View
     And I set up request interception for posthog analytics request(s)
     And I click on "Cookie policy" setting
     Then I validate latest analytics single event "settings | cookie policy | click"
+    And I wait 1000 milliseconds
     When I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | cookie policy | x | click"
     And I validate that 2 analytics event(s) have been sent
