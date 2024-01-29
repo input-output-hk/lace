@@ -68,22 +68,6 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
 
   useKeyboardShortcut(['Enter'], onUnlock);
 
-  // LW-9500
-  // Setting this will trigger the wallet loading in PopupView
-  // const loadWallet = useCallback(async () => {
-  //   unlocked;
-  // if (unlocked) {
-  //   const keyAgentData = unlocked[environmentName]?.keyAgentData;
-  //   // eslint-disable-next-line unicorn/no-null
-  //   saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
-  //   await backgroundService.setBackgroundStorage({ keyAgentsByChain: unlocked });
-  //   setKeyAgentData(keyAgentData);
-  // }
-  // }, [unlocked]);
-  // return validateMnemonic && unlocked ? (
-  //   <MnemonicValidation publicKey={getPublicKey(cardanoWallet.source.wallet)} onValidationSuccess={loadWallet} />
-  // ) : (
-
   return (
     <UnlockWallet
       isLoading={isVerifyingPassword}
