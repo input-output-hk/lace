@@ -38,9 +38,17 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
         delegators: 20,
         livePledge: BigInt('2000000000'),
         saturation: Percent(0.0512),
-        stake: undefined,
-        size: undefined,
-        apy: Percent(0.013)
+        apy: Percent(0.013),
+        ros: Percent(0.69),
+        lastRos: Percent(0.88),
+        size: {
+          active: Percent(0.0578),
+          live: Percent(0.0211)
+        },
+        stake: {
+          live: BigInt('201000000'),
+          active: BigInt('101000000')
+        }
       },
       owners: [
         Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
@@ -58,11 +66,15 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
 
 const transformedStakePool = {
   apy: '1.30',
-  cost: '2.00% + 6ADA',
+  cost: '6.04',
   description: 'This is the STTST description',
   fee: '6.04',
   hexId: 'a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab',
   id: 'pool1syqhydhdzcuqhwtt6q4m63f9g8e7262wzsvk7e0r0njsyjyd0yn',
+  liveStake: {
+    number: '201',
+    unit: ''
+  },
   logo: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e3e3e3%22%20d%3D%22M15%209L9%209L9%206ZM15%209L15%203L18%203ZM15%2021L21%2021L21%2024ZM15%2021L15%2027L12%2027ZM9%2015L3%2015L3%2012ZM21%2015L21%209L24%209ZM21%2015L27%2015L27%2018ZM9%2015L9%2021L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23464646%22%20d%3D%22M3%206L6%203L9%206L6%209ZM24%203L27%206L24%209L21%206ZM27%2024L24%2027L21%2024L24%2021ZM6%2027L3%2024L6%2021L9%2024Z%22%2F%3E%3Cpath%20fill%3D%22%23599ec7%22%20d%3D%22M11%2011L15%2011L15%2015L11%2015ZM19%2011L19%2015L15%2015L15%2011ZM19%2019L15%2019L15%2015L19%2015ZM11%2019L11%2015L15%2015L15%2019Z%22%2F%3E%3C%2Fsvg%3E',
   margin: '2.00',
   name: 'StakedTestPool',
@@ -70,11 +82,11 @@ const transformedStakePool = {
     'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
     'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
   ],
-  pledge: '2000.00ADA',
+  pledge: '2K',
   retired: false,
   saturation: '5.12',
-  size: '- %',
-  ticker: 'STTST'
+  ticker: 'STTST',
+  blocks: '20'
 };
 
 describe('Testing transformers', () => {

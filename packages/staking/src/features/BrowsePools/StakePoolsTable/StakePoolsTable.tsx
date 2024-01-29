@@ -6,22 +6,23 @@ import uniqBy from 'lodash/uniqBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../../store';
-import styles from './StakePoolsTable.module.scss';
-import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
-import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
+import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../../store';
+import * as styles from './StakePoolsTable.css';
+import { StakePoolsTableEmpty } from './StakePoolsTableEmpty/StakePoolsTableEmpty';
+import { StakePoolTableBrowser } from './StakePoolTableBrowser/StakePoolTableBrowser';
+import { SortDirection, SortField, StakePoolSortOptions } from './types';
 
 type StakePoolsTableProps = {
   scrollableTargetId: string;
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'apy',
-  order: 'desc',
+  field: SortField.name,
+  order: SortDirection.desc,
 };
 
 const searchDebounce = 300;
-const defaultFetchLimit = 10;
+const defaultFetchLimit = 100;
 
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
   const { t } = useTranslation();
@@ -35,7 +36,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     store.selectedPortfolio.map(({ stakePool }) => stakePool)
   );
   const {
-    walletStoreWalletUICardanoCoin: cardanoCoin,
     currentChain,
     walletStoreStakePoolSearchResults: {
       pageResults,
@@ -53,9 +53,13 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
 
   const tableHeaderTranslations = {
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
+    blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
-    poolName: t('browsePools.stakePoolTableBrowser.tableHeader.poolName'),
+    liveStake: t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.title'),
+    margin: t('browsePools.stakePoolTableBrowser.tableHeader.margin.title'),
+    pledge: t('browsePools.stakePoolTableBrowser.tableHeader.pledge.title'),
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
+    ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker'),
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
@@ -117,17 +121,18 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const list = useMemo(
     () =>
       combinedUnique.map((pool) => {
-        const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
+        const stakePool = mapStakePoolToDisplayData({ stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return {
-          logo,
           ...stakePool,
           hexId: pool.hexId,
+          liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
+          logo: stakePool.logo || logo,
           stakePool: pool,
         };
       }) || [],
-    [combinedUnique, cardanoCoin]
+    [combinedUnique]
   );
 
   return (
@@ -139,7 +144,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         data-testid="search-input"
         loading={fetchingPools}
       />
-      <Box mt="$32">
+      <Box mt="$10">
         <StakePoolTableBrowser
           items={list}
           loadMoreData={loadMoreData}

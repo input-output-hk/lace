@@ -31,11 +31,11 @@ const walletFactory: WalletFactory = {
         ? (props.provider.options as { chainName: Wallet.ChainName }).chainName
         : config().CHAIN;
     const providers = getProviders(chainName);
+    const bip32Account = await Wallet.KeyManagement.Bip32Account.fromAsyncKeyAgent(dependencies.keyAgent);
 
     return new PersonalWallet(
       { name: props.observableWalletName },
       {
-        keyAgent: dependencies.keyAgent,
         logger,
         ...providers,
         stores: dependencies.stores,
@@ -51,7 +51,9 @@ const walletFactory: WalletFactory = {
           adapter: axiosFetchAdapter,
           policyId: ADA_HANDLE_POLICY_ID
         }),
-        addressDiscovery: getDiscovererInstance({ chainName })
+        addressDiscovery: getDiscovererInstance({ chainName }),
+        witnesser: Wallet.KeyManagement.util.createBip32Ed25519Witnesser(dependencies.keyAgent),
+        bip32Account
       }
     );
   }

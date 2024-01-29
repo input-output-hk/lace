@@ -1,0 +1,1 @@
+export { FindYourSharedWallet } from './FindYourSharedWallet';

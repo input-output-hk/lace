@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { ReactComponent as ChevronRight } from '../../assets/icons/chevron-right.component.svg';
+import { ReactComponent as ChevronRight } from '@lace/icons/dist/ChevronRightComponent';
+
 import * as Text from '../typography';
 
 import * as cx from './ticker-button.css';

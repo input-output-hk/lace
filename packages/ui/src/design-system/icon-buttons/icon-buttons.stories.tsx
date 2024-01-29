@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { ReactComponent as PlainCircle } from '@lace/icons/dist/PlainCircleComponent';
+import { ReactComponent as PlusCircleIcon } from '@lace/icons/dist/PlusCircleComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as PlainCircle } from '../../assets/icons/plain-circle.component.svg';
-import { ReactComponent as PlusCircleIcon } from '../../assets/icons/plus-circle.component.svg';
 import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
@@ -76,6 +76,23 @@ const Buttons = (): JSX.Element => (
       </Variants.Cell>
       <Variants.Cell>
         <Caret id="focused" />
+      </Variants.Cell>
+    </Variants.Row>
+    <Variants.Row>
+      <Variants.Cell>
+        <Caret direction="desc" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" id="hover" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" id="pressed" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" disabled />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" id="focused" />
       </Variants.Cell>
     </Variants.Row>
   </>
