@@ -157,26 +157,22 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       await req.sign();
       redirectToSignSuccess();
     } catch (error) {
-      console.error('error', error);
+      console.error('signWithHardwareWallet error', error);
       cancelTransaction(false);
       redirectToSignFailure();
     }
   };
 
   useEffect(() => {
-    console.warn('e2e-debug', 'subscribe');
     const subscription = signingCoordinator.transactionWitnessRequest$.subscribe(async (r) => {
-      console.warn('e2e-debug', 'got req', r);
       setDappInfo(await senderToDappInfo(r.signContext.sender));
       setSignTxRequest(r);
     });
 
-    console.warn('e2e-debug', 'expose allowSignTx');
     const api = exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
       {
         api$: of({
           async allowSignTx(): Promise<boolean> {
-            console.warn('e2e-debug', 'call allowSignTx');
             return Promise.resolve(true);
           }
         }),
@@ -187,7 +183,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     );
 
     return () => {
-      console.warn('e2e-debug', 'cleanup');
       subscription.unsubscribe();
       api.shutdown();
     };
