@@ -6,7 +6,6 @@ import { RewardsChartTooltip } from './RewardsChartTooltip';
 
 export const RewardsChart = ({ chartData }: { chartData: RewardsByEpoch }) => {
   const poolColorMapper = useRewardsChartPoolsColorMapper(chartData);
-  // eslint-disable-next-line unicorn/no-array-reduce
   const maxPoolsPerEpochCount = chartData.reduce((acc, epochRewards) => Math.max(acc, epochRewards.rewards.length), 0);
 
   return (

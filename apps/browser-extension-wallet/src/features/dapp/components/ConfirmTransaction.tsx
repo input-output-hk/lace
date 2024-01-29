@@ -93,7 +93,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const analytics = useAnalyticsContext();
 
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
-  // const [errorMessage, setErrorMessage] = useState<string>();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
@@ -256,7 +255,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         return true;
       });
 
-      // eslint-disable-next-line unicorn/no-array-reduce
       const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
         // Don't show withdrawl tx's etc
         if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;

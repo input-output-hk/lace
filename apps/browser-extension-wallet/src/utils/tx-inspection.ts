@@ -1,4 +1,4 @@
-/* eslint-disable consistent-return, unicorn/no-array-reduce */
+/* eslint-disable consistent-return */
 import {
   createTxInspector,
   delegationInspector,

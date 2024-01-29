@@ -1,5 +1,4 @@
 /* eslint-disable complexity */
-/* eslint-disable unicorn/no-array-reduce */
 import isEmpty from 'lodash/isEmpty';
 import { ActivityDetailSlice, ZustandHandlers, BlockchainProviderSlice, WalletInfoSlice, SliceCreator } from '../types';
 import { CardanoTxOut, Transaction, ActivityDetail, TransactionActivityDetail } from '../../types';
