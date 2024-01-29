@@ -38,3 +38,4 @@ export * from '@ui/components/ConfirmStakeVoteRegistrationDelegation';
 export * from '@ui/components/ConfirmVoteRegistrationDelegation';
 export * from '@ui/components/VotingProcedures';
 export * from '@ui/components/ProposalProcedures';
+export * from '@ui/components/SharedWallet';

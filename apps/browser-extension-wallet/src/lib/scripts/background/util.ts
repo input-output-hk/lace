@@ -84,22 +84,25 @@ export const initMigrationState = async (): Promise<void> => {
   await webStorage.local.set(INITIAL_STORAGE);
 };
 
-export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
+export const getLastActiveTab: (url?: string) => Promise<Tabs.Tab> = async (url?: string) =>
   await (
-    await tabs.query({ currentWindow: true, active: true })
+    await tabs.query({ currentWindow: true, active: true, url })
   )[0];
 
 /**
  * getDappInfoFromLastActiveTab
  * @returns {Promise<Wallet.DappInfo>}
  */
-export const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () => {
-  const lastActiveTab = await getLastActiveTab();
+export const getDappInfoFromLastActiveTab: (url?: string) => Promise<Wallet.DappInfo> = async (url?: string) => {
+  const lastActiveTab = await getLastActiveTab(url);
   if (!lastActiveTab) throw new Error('could not find DApp');
+  if (url && url !== lastActiveTab.url) {
+    throw new Error('unable to match dApp URL');
+  }
   return {
     logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),
     name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
-    url: lastActiveTab.url.replace(/\/$/, '')
+    url: url ? new URL(url).origin : lastActiveTab.url.replace(/\/$/, '')
   };
 };
 

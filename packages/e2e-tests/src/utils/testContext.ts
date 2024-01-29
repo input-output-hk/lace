@@ -7,6 +7,10 @@ export class TestContext {
     this.context = new Map();
   }
 
+  has(key: string): boolean {
+    return this.context.has(key);
+  }
+
   save<T>(key: string, value: T): void {
     if (this.context.has(key)) {
       throw new Error(`You tried to override "${key}" property. This is not allowed`);

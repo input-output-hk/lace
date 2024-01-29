@@ -37,6 +37,9 @@ jobs:
       - name: 💽 Install dependencies
         run: yarn --immutable --inline-builds
 
+      - name: 🧑‍🔬 Build
+        run: yarn workspaces foreach -Rpt -v --from '@lace/ui' run build
+
       - name: 🧑‍🔬 Linter
         working-directory: ./packages/ui
         run: yarn lint

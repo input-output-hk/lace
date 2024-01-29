@@ -128,6 +128,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/cli@npm:^7.22.10":
+  version: 7.23.4
+  resolution: "@babel/cli@npm:7.23.4"
+  dependencies:
+    "@jridgewell/trace-mapping": ^0.3.17
+    "@nicolo-ribaudo/chokidar-2": 2.1.8-no-fsevents.3
+    chokidar: ^3.4.0
+    commander: ^4.0.1
+    convert-source-map: ^2.0.0
+    fs-readdir-recursive: ^1.1.0
+    glob: ^7.2.0
+    make-dir: ^2.1.0
+    slash: ^2.0.0
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  dependenciesMeta:
+    "@nicolo-ribaudo/chokidar-2":
+      optional: true
+    chokidar:
+      optional: true
+  bin:
+    babel: ./bin/babel.js
+    babel-external-helpers: ./bin/babel-external-helpers.js
+  checksum: 5a4f296cdf0b15a8578a860ad42675a358d888e11088c91ee5e510b48598d1dd88d83686d6fe6744c0a9cbcddfd34e79bc75ea425ced8ec9a2531e08c2655279
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:7.12.11":
   version: 7.12.11
   resolution: "@babel/code-frame@npm:7.12.11"
@@ -5457,6 +5484,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/plugin-transform-react-display-name@npm:^7.23.3":
+  version: 7.23.3
+  resolution: "@babel/plugin-transform-react-display-name@npm:7.23.3"
+  dependencies:
+    "@babel/helper-plugin-utils": ^7.22.5
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 7f86964e8434d3ddbd3c81d2690c9b66dbf1cd8bd9512e2e24500e9fa8cf378bc52c0853270b3b82143aba5965aec04721df7abdb768f952b44f5c6e0b198779
+  languageName: node
+  linkType: hard
+
 "@babel/plugin-transform-react-jsx-development@npm:^7.14.5":
   version: 7.14.5
   resolution: "@babel/plugin-transform-react-jsx-development@npm:7.14.5"
@@ -5628,6 +5666,18 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 092021c4f404e267002099ec20b3f12dd730cb90b0d83c5feed3dc00dbe43b9c42c795a18e7c6c7d7bddea20c7dd56221b146aec81b37f2e7eb5137331c61120
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-transform-react-pure-annotations@npm:^7.23.3":
+  version: 7.23.3
+  resolution: "@babel/plugin-transform-react-pure-annotations@npm:7.23.3"
+  dependencies:
+    "@babel/helper-annotate-as-pure": ^7.22.5
+    "@babel/helper-plugin-utils": ^7.22.5
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 9ea3698b1d422561d93c0187ac1ed8f2367e4250b10e259785ead5aa643c265830fd0f4cf5087a5bedbc4007444c06da2f2006686613220acf0949895f453666
   languageName: node
   linkType: hard
 
@@ -6933,6 +6983,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/preset-react@npm:^7.23.3":
+  version: 7.23.3
+  resolution: "@babel/preset-react@npm:7.23.3"
+  dependencies:
+    "@babel/helper-plugin-utils": ^7.22.5
+    "@babel/helper-validator-option": ^7.22.15
+    "@babel/plugin-transform-react-display-name": ^7.23.3
+    "@babel/plugin-transform-react-jsx": ^7.22.15
+    "@babel/plugin-transform-react-jsx-development": ^7.22.5
+    "@babel/plugin-transform-react-pure-annotations": ^7.23.3
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 2d90961e7e627a74b44551e88ad36a440579e283e8dc27972bf2f50682152bbc77228673a3ea22c0e0d005b70cbc487eccd64897c5e5e0384e5ce18f300b21eb
+  languageName: node
+  linkType: hard
+
 "@babel/preset-typescript@npm:7.15.0, @babel/preset-typescript@npm:^7.12.7":
   version: 7.15.0
   resolution: "@babel/preset-typescript@npm:7.15.0"
@@ -6987,7 +7053,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-typescript@npm:^7.23.0":
+"@babel/preset-typescript@npm:^7.22.5, @babel/preset-typescript@npm:^7.23.0":
   version: 7.23.3
   resolution: "@babel/preset-typescript@npm:7.23.3"
   dependencies:
@@ -7615,27 +7681,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/cardano-services-client@npm:0.16.0":
-  version: 0.16.0
-  resolution: "@cardano-sdk/cardano-services-client@npm:0.16.0"
+"@cardano-sdk/cardano-services-client@npm:0.16.4":
+  version: 0.16.4
+  resolution: "@cardano-sdk/cardano-services-client@npm:0.16.4"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
+    "@cardano-sdk/core": ~0.23.1
     "@cardano-sdk/util": ~0.14.5
     axios: ^0.27.2
     class-validator: ^0.14.0
     json-bigint: ~1.0.0
     ts-log: ^2.2.4
-  checksum: a0e8f607b729ad7931f03f1b5b1c0083f8c3954120372de17d37025b7ddf07df43a7ef7db2d84b9787efb52f0e9115461a99d9db7051448abf7e6980f782752c
+  checksum: 35f6f537c9a9469aa275b0a2e236b8c530165e4a8c06f6c8ce65e1a96c04f3fbf9905409b0050c42a3d5b25a4cb92ed7f6ed9e23da4eef02dc4b46643906ab63
   languageName: node
   linkType: hard
 
-"@cardano-sdk/core@npm:0.22.2, @cardano-sdk/core@npm:~0.22.2":
-  version: 0.22.2
-  resolution: "@cardano-sdk/core@npm:0.22.2"
+"@cardano-sdk/core@npm:0.23.0, @cardano-sdk/core@npm:~0.23.0":
+  version: 0.23.0
+  resolution: "@cardano-sdk/core@npm:0.23.0"
   dependencies:
     "@cardano-ogmios/client": 5.6.0
     "@cardano-ogmios/schema": 5.6.0
-    "@cardano-sdk/crypto": ~0.1.18
+    "@cardano-sdk/crypto": ~0.1.19
     "@cardano-sdk/util": ~0.14.5
     "@foxglove/crc": ^0.0.3
     "@scure/base": ^1.1.1
@@ -7650,17 +7716,41 @@ __metadata:
   peerDependenciesMeta:
     rxjs:
       optional: true
-  checksum: ad4bef7f6dcd54664cd83172cf613312387ed85a7a6ac849de6d909c4462c68749db33d72be91d54ab7e97e062634e53896cff6baa97588cbab9dce7ac816b78
+  checksum: 80f6b22bc598a1c75a2f7e042e7c79d04e814945893234f9c9075dbe4cafbad8226978e603822ea4c934ae6551f8bfacb85baf12cfe3fc74eacf41645970b524
   languageName: node
   linkType: hard
 
-"@cardano-sdk/crypto@npm:0.1.18, @cardano-sdk/crypto@npm:~0.1.18":
-  version: 0.1.18
-  resolution: "@cardano-sdk/crypto@npm:0.1.18"
+"@cardano-sdk/core@npm:~0.23.1":
+  version: 0.23.1
+  resolution: "@cardano-sdk/core@npm:0.23.1"
+  dependencies:
+    "@cardano-ogmios/client": 5.6.0
+    "@cardano-ogmios/schema": 5.6.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/util": ~0.14.5
+    "@foxglove/crc": ^0.0.3
+    "@scure/base": ^1.1.1
+    fraction.js: 4.0.1
+    ip-address: ^8.1.0
+    lodash: ^4.17.21
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+    web-encoding: ^1.1.5
+  peerDependencies:
+    rxjs: ^7.4.0
+  peerDependenciesMeta:
+    rxjs:
+      optional: true
+  checksum: bd23ad1f16cfaeb8327cbbdf76cfa181eb38f56e6b0616e93bfcce9c339eb6e265c71d585afd9542306a25faf7586beaabbf29505a897cec4f4d6513750fef4c
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/crypto@npm:0.1.19, @cardano-sdk/crypto@npm:~0.1.19":
+  version: 0.1.19
+  resolution: "@cardano-sdk/crypto@npm:0.1.19"
   dependencies:
     "@cardano-sdk/util": ~0.14.5
     blake2b: ^2.1.4
-    bn.js: ^5.2.1
     i: ^0.3.7
     libsodium-wrappers-sumo: ^0.7.5
     lodash: ^4.17.21
@@ -7679,83 +7769,83 @@ __metadata:
       optional: true
     "@dcspark/cardano-multiplatform-lib-nodejs":
       optional: true
-  checksum: c1acde4d22b47a38f4de3eaf9af4c242e92615ca60c605942e5d82eaa516fc9b241111aa1664ca7307b52865aae258f2e1d48e4dae7600714bda5aa67ceb7928
+  checksum: 557356767665d6191c6a8a0e5a8a5faa14b6be27c54f5e34bad0fbaccf75aad1c4d3ce635a2f19a212399e55dcd0f41c8fde598bdc243d65b5e86c3cdd924579
   languageName: node
   linkType: hard
 
-"@cardano-sdk/dapp-connector@npm:0.11.4, @cardano-sdk/dapp-connector@npm:~0.11.4":
-  version: 0.11.4
-  resolution: "@cardano-sdk/dapp-connector@npm:0.11.4"
+"@cardano-sdk/dapp-connector@npm:0.12.1, @cardano-sdk/dapp-connector@npm:~0.12.1":
+  version: 0.12.1
+  resolution: "@cardano-sdk/dapp-connector@npm:0.12.1"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
     "@cardano-sdk/util": ~0.14.5
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
     webextension-polyfill: ^0.8.0
-  checksum: efc16b59070d5a8923809ef1413ca9e29ff86aa5cebe37becb2752515717199bdeec6f16e65a12fea4521bf25bcdc0cb463784843af2dd2e00b197a609d4cc3b
+  checksum: 91f5c6e9b778f9da785566000dc54646d3a6f7367da2641b013a8de2a32ba3c1fa23d897d5d141781e6f5688b6997e40717e8b7cbf091b51177e8f5152e79ff0
   languageName: node
   linkType: hard
 
-"@cardano-sdk/hardware-ledger@npm:0.8.0, @cardano-sdk/hardware-ledger@npm:~0.8.0":
-  version: 0.8.0
-  resolution: "@cardano-sdk/hardware-ledger@npm:0.8.0"
+"@cardano-sdk/hardware-ledger@npm:0.8.2, @cardano-sdk/hardware-ledger@npm:~0.8.2":
+  version: 0.8.2
+  resolution: "@cardano-sdk/hardware-ledger@npm:0.8.2"
   dependencies:
     "@cardano-foundation/ledgerjs-hw-app-cardano": ^6.0.0
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/key-management": ~0.16.0
-    "@cardano-sdk/tx-construction": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/key-management": ~0.17.1
+    "@cardano-sdk/tx-construction": ~0.16.2
     "@cardano-sdk/util": ~0.14.5
     "@ledgerhq/hw-transport": ^6.28.1
     "@ledgerhq/hw-transport-node-hid-noevents": ^6.27.12
     "@ledgerhq/hw-transport-webhid": ^6.27.12
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: e7cd826f0774bc70359ec3092b98a15507c3d4ce3e1e64bad4f492aa53b7be20c796e06979b31803775730701915afc5051fa9c728c98ca23f28b317d430418c
+  checksum: b3e5e17eacfebf3c09d640b6b790e56fed8fdee4fd4903b2696edaeae3b48ebb4f09fc64d70c370754060d12f179c393ac83bedf1aa64f04ac831abce54cd471
   languageName: node
   linkType: hard
 
-"@cardano-sdk/hardware-trezor@npm:0.4.0, @cardano-sdk/hardware-trezor@npm:~0.4.0":
-  version: 0.4.0
-  resolution: "@cardano-sdk/hardware-trezor@npm:0.4.0"
+"@cardano-sdk/hardware-trezor@npm:0.4.2, @cardano-sdk/hardware-trezor@npm:~0.4.2":
+  version: 0.4.2
+  resolution: "@cardano-sdk/hardware-trezor@npm:0.4.2"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/key-management": ~0.16.0
-    "@cardano-sdk/tx-construction": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/key-management": ~0.17.1
+    "@cardano-sdk/tx-construction": ~0.16.2
     "@cardano-sdk/util": ~0.14.5
     "@trezor/connect": 9.0.11
     "@trezor/connect-web": 9.0.11
     lodash: ^4.17.21
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: 7aa33ccb67e4987147c5b40f1027671bcff1545f0e0718059a15e4a4192d32c6397baf6ebfff170690b99a42fd87b96cf87641d15c7da9c99b8a6d196e1aeebc
+  checksum: 1fa7443ab3ce1313598b89880d6fb409ac6b93b00a4d8a5cbf5d5b7208452fd9c0d6b0021c849fc41e014d6bfbab746c4d303542136dd9aabe05c959596080c0
   languageName: node
   linkType: hard
 
-"@cardano-sdk/input-selection@npm:0.12.7, @cardano-sdk/input-selection@npm:~0.12.7":
-  version: 0.12.7
-  resolution: "@cardano-sdk/input-selection@npm:0.12.7"
+"@cardano-sdk/input-selection@npm:0.12.9, @cardano-sdk/input-selection@npm:~0.12.9":
+  version: 0.12.9
+  resolution: "@cardano-sdk/input-selection@npm:0.12.9"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/key-management": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/key-management": ~0.17.1
     "@cardano-sdk/util": ~0.14.5
     bignumber.js: ^9.1.1
     lodash: ^4.17.21
     ts-custom-error: ^3.2.0
-  checksum: f92a0dda185c32020739260da9d78e4eccb243e30c82fbf82db4c2cd15ab4780100cacbea7f6a57e69d53e2161d7cacbed8229a4f3e99b04738523850b94f950
+  checksum: 0b3157d3b192078e497f169f1ee5fe25e06db1c48f854a4194643472ab44e9911d0a6922905794078fbf528f47f2f28c9eef8bcb38cb5f42d01f13ce1d963bbe
   languageName: node
   linkType: hard
 
-"@cardano-sdk/key-management@npm:0.16.0, @cardano-sdk/key-management@npm:~0.16.0":
-  version: 0.16.0
-  resolution: "@cardano-sdk/key-management@npm:0.16.0"
+"@cardano-sdk/key-management@npm:0.17.1, @cardano-sdk/key-management@npm:~0.17.1":
+  version: 0.17.1
+  resolution: "@cardano-sdk/key-management@npm:0.17.1"
   dependencies:
     "@cardano-foundation/ledgerjs-hw-app-cardano": ^6.0.0
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/dapp-connector": ~0.11.4
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/dapp-connector": ~0.12.1
     "@cardano-sdk/util": ~0.14.5
     "@emurgo/cardano-message-signing-nodejs": ^1.0.1
     "@trezor/connect": 9.0.11
@@ -7768,36 +7858,36 @@ __metadata:
     rxjs: ^7.4.0
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: c4f5d0b791a9aee1348ef9048cdd41aec1ce89827516ae819e62c8b85f98e01b78a1b14b0a44792b8787e4bf270c3429f15eab3c666744e920181466fda3122e
+  checksum: 6cd32159023ff96f1b367a777964e0a166a13259c89614408b77e664e1a7bf325467d2311dc5e4468fae141c87022d68042a38b1f04b65d2ce7ddf1bcd3f2401
   languageName: node
   linkType: hard
 
-"@cardano-sdk/tx-construction@npm:0.16.0, @cardano-sdk/tx-construction@npm:~0.16.0":
-  version: 0.16.0
-  resolution: "@cardano-sdk/tx-construction@npm:0.16.0"
+"@cardano-sdk/tx-construction@npm:0.16.2, @cardano-sdk/tx-construction@npm:~0.16.2":
+  version: 0.16.2
+  resolution: "@cardano-sdk/tx-construction@npm:0.16.2"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/input-selection": ~0.12.7
-    "@cardano-sdk/key-management": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/input-selection": ~0.12.9
+    "@cardano-sdk/key-management": ~0.17.1
     "@cardano-sdk/util": ~0.14.5
-    "@cardano-sdk/util-rxjs": ~0.6.3
+    "@cardano-sdk/util-rxjs": ~0.6.5
     lodash: ^4.17.21
     npm: ^9.3.0
     rxjs: ^7.4.0
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: 4a71c775f853a9bde3f99f63d9fae890cdc729058e0c103a29eac498e5ba97460babdc6c07c54fcbb8b18388c2ff859f5598926034dcea9d2d5ff5da4c92e804
+  checksum: 112f2db405fded6e9eda1966dd088308b05eef14e674ff63655f9042da3fd0a66fcc58e15c12542795da43ac8c02eb274f4bd1a41fec567d8dbe077c8167e0bb
   languageName: node
   linkType: hard
 
-"@cardano-sdk/util-dev@npm:0.19.0":
-  version: 0.19.0
-  resolution: "@cardano-sdk/util-dev@npm:0.19.0"
+"@cardano-sdk/util-dev@npm:0.19.2":
+  version: 0.19.2
+  resolution: "@cardano-sdk/util-dev@npm:0.19.2"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/key-management": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/key-management": ~0.17.1
     "@cardano-sdk/util": ~0.14.5
     "@types/dockerode": ^3.3.8
     axios: ^0.27.2
@@ -7810,18 +7900,18 @@ __metadata:
     lodash: ^4.17.21
     rxjs: ^7.4.0
     ts-log: ^2.2.4
-  checksum: 4fffa1826590ce4a40d9be5f0b88e3e10ed01deff7f16f261dee7200a64ea77758326bef25aef9c3f46901984e78be5703d19213cd5d9c6f422ce15c91e6a654
+  checksum: 251395a6f99ac28935e6a911c393ea30633c14a4f32f8e3103416b168eeac86c8b9937fd6c6da8722b2ad0061fa827c1e661cbe3cc23fb7c6c3378f72cad5ca7
   languageName: node
   linkType: hard
 
-"@cardano-sdk/util-rxjs@npm:~0.6.3":
-  version: 0.6.3
-  resolution: "@cardano-sdk/util-rxjs@npm:0.6.3"
+"@cardano-sdk/util-rxjs@npm:~0.6.5":
+  version: 0.6.5
+  resolution: "@cardano-sdk/util-rxjs@npm:0.6.5"
   dependencies:
     "@cardano-sdk/util": ~0.14.5
     backoff-rxjs: ^7.0.0
     rxjs: ^7.4.0
-  checksum: a939c81e8c147b8951d5882e135ffa9ae01f52fce6e1559efabcbf9817e48fa6ee2bc73cf882f4005121a3b79d012682386d62a9619c6e650b4cb98d80f8aee9
+  checksum: 5865367f493fa91123f10db1d7e3d1880fc9404123ebcd940f7539f1618bd7f22b1ac95f16a72e2e38b22b38e2329d8ec6347c33eded8efa243d053a0d79003c
   languageName: node
   linkType: hard
 
@@ -7839,20 +7929,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/wallet@npm:0.27.1, @cardano-sdk/wallet@npm:~0.27.1":
-  version: 0.27.1
-  resolution: "@cardano-sdk/wallet@npm:0.27.1"
+"@cardano-sdk/wallet@npm:0.28.1, @cardano-sdk/wallet@npm:~0.28.1":
+  version: 0.28.1
+  resolution: "@cardano-sdk/wallet@npm:0.28.1"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/dapp-connector": ~0.11.4
-    "@cardano-sdk/hardware-ledger": ~0.8.0
-    "@cardano-sdk/hardware-trezor": ~0.4.0
-    "@cardano-sdk/input-selection": ~0.12.7
-    "@cardano-sdk/key-management": ~0.16.0
-    "@cardano-sdk/tx-construction": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/dapp-connector": ~0.12.1
+    "@cardano-sdk/hardware-ledger": ~0.8.2
+    "@cardano-sdk/hardware-trezor": ~0.4.2
+    "@cardano-sdk/input-selection": ~0.12.9
+    "@cardano-sdk/key-management": ~0.17.1
+    "@cardano-sdk/tx-construction": ~0.16.2
     "@cardano-sdk/util": ~0.14.5
-    "@cardano-sdk/util-rxjs": ~0.6.3
+    "@cardano-sdk/util-rxjs": ~0.6.5
     backoff-rxjs: ^7.0.0
     bignumber.js: ^9.1.1
     delay: ^5.0.0
@@ -7862,22 +7952,24 @@ __metadata:
     rxjs: ^7.4.0
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.3
-  checksum: c8ae069c699a385f664ddd2e0a1b49f702f54889baba29cce81d32fbc16f2d5ee9cdbf7d4eb7c1a8210653d3f2a3f241685d23ae216fe3735e5d2b60e433a4d3
+  checksum: 6c3ab376d83d57f433e6e3835e71bb483f434b6a6f512f9d2ec5d62527a363cb7f156927a1864b27144798240d9bf4d75ca419e902a2740a9694c3cd39becdd1
   languageName: node
   linkType: hard
 
-"@cardano-sdk/web-extension@npm:0.17.1":
-  version: 0.17.1
-  resolution: "@cardano-sdk/web-extension@npm:0.17.1"
+"@cardano-sdk/web-extension@npm:0.19.0":
+  version: 0.19.0
+  resolution: "@cardano-sdk/web-extension@npm:0.19.0"
   dependencies:
-    "@cardano-sdk/core": ~0.22.2
-    "@cardano-sdk/crypto": ~0.1.18
-    "@cardano-sdk/dapp-connector": ~0.11.4
-    "@cardano-sdk/key-management": ~0.16.0
-    "@cardano-sdk/tx-construction": ~0.16.0
+    "@cardano-sdk/core": ~0.23.0
+    "@cardano-sdk/crypto": ~0.1.19
+    "@cardano-sdk/dapp-connector": ~0.12.1
+    "@cardano-sdk/hardware-ledger": ~0.8.2
+    "@cardano-sdk/hardware-trezor": ~0.4.2
+    "@cardano-sdk/key-management": ~0.17.1
+    "@cardano-sdk/tx-construction": ~0.16.2
     "@cardano-sdk/util": ~0.14.5
-    "@cardano-sdk/util-rxjs": ~0.6.3
-    "@cardano-sdk/wallet": ~0.27.1
+    "@cardano-sdk/util-rxjs": ~0.6.5
+    "@cardano-sdk/wallet": ~0.28.1
     backoff-rxjs: ^7.0.0
     lodash: ^4.17.21
     rxjs: ^7.4.0
@@ -7885,7 +7977,7 @@ __metadata:
     ts-log: ^2.2.3
     uuid: ^8.3.2
     webextension-polyfill: ^0.8.0
-  checksum: 48f05a5a49bfdf9aaaabb3f79afbca39283217fa5b501e6bd89b422fbe583ee37c4a92afaae80e01420a23613c5eeddae8172440ceb0479d5f491231f64d699c
+  checksum: 69837693b5ee1f5ce2169e282d415be305b7beba9edaf297f48b481cc54222609eabc2acde5b1a390f49db55e71cb4a58a28cd4bd8a6bb0d016e452dd0467f1c
   languageName: node
   linkType: hard
 
@@ -10494,14 +10586,14 @@ __metadata:
   resolution: "@lace/browser-extension-wallet@workspace:apps/browser-extension-wallet"
   dependencies:
     "@ant-design/icons": ^4.7.0
-    "@cardano-sdk/cardano-services-client": 0.16.0
-    "@cardano-sdk/core": 0.22.2
-    "@cardano-sdk/dapp-connector": 0.11.4
-    "@cardano-sdk/input-selection": 0.12.7
-    "@cardano-sdk/tx-construction": 0.16.0
+    "@cardano-sdk/cardano-services-client": 0.16.4
+    "@cardano-sdk/core": 0.23.0
+    "@cardano-sdk/dapp-connector": 0.12.1
+    "@cardano-sdk/input-selection": 0.12.9
+    "@cardano-sdk/tx-construction": 0.16.2
     "@cardano-sdk/util": 0.14.5
-    "@cardano-sdk/wallet": 0.27.1
-    "@cardano-sdk/web-extension": 0.17.1
+    "@cardano-sdk/wallet": 0.28.1
+    "@cardano-sdk/web-extension": 0.19.0
     "@dcspark/cardano-multiplatform-lib-asmjs": ^3.1.0
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
@@ -10566,16 +10658,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lace/cardano@workspace:packages/cardano"
   dependencies:
-    "@cardano-sdk/cardano-services-client": 0.16.0
-    "@cardano-sdk/core": 0.22.2
-    "@cardano-sdk/crypto": 0.1.18
-    "@cardano-sdk/hardware-ledger": 0.8.0
-    "@cardano-sdk/hardware-trezor": 0.4.0
-    "@cardano-sdk/key-management": 0.16.0
+    "@cardano-sdk/cardano-services-client": 0.16.4
+    "@cardano-sdk/core": 0.23.0
+    "@cardano-sdk/crypto": 0.1.19
+    "@cardano-sdk/hardware-ledger": 0.8.2
+    "@cardano-sdk/hardware-trezor": 0.4.2
+    "@cardano-sdk/key-management": 0.17.1
     "@cardano-sdk/util": 0.14.5
-    "@cardano-sdk/util-dev": 0.19.0
-    "@cardano-sdk/wallet": 0.27.1
-    "@cardano-sdk/web-extension": 0.17.1
+    "@cardano-sdk/util-dev": 0.19.2
+    "@cardano-sdk/wallet": 0.28.1
+    "@cardano-sdk/web-extension": 0.19.0
     "@dcspark/cardano-multiplatform-lib-browser": ^3.1.1
     "@dcspark/cardano-multiplatform-lib-nodejs": ^3.1.1
     "@emurgo/cardano-message-signing-browser": 1.0.1
@@ -10636,6 +10728,7 @@ __metadata:
     "@babel/preset-typescript": ^7.22.15
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
+    "@lace/icons": 0.1.0
     "@lace/ui": ^0.1.0
     "@storybook/addon-actions": ^6.5.16
     "@storybook/addon-essentials": ^6.5.16
@@ -10712,19 +10805,35 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lace/icons@0.1.0, @lace/icons@^0.1.0, @lace/icons@workspace:packages/icons":
+  version: 0.0.0-use.local
+  resolution: "@lace/icons@workspace:packages/icons"
+  dependencies:
+    "@babel/cli": ^7.22.10
+    "@babel/core": ^7.21.0
+    "@babel/plugin-proposal-export-namespace-from": ^7.18.9
+    "@babel/plugin-transform-modules-commonjs": ^7.23.3
+    "@babel/preset-react": ^7.23.3
+    "@babel/preset-typescript": ^7.22.5
+    "@svgr/cli": ^8.1.0
+    typescript: ^4.9.5
+  languageName: unknown
+  linkType: soft
+
 "@lace/staking@0.1.0, @lace/staking@workspace:packages/staking":
   version: 0.0.0-use.local
   resolution: "@lace/staking@workspace:packages/staking"
   dependencies:
     "@ant-design/icons": ^4.7.0
     "@babel/core": ^7.21.0
-    "@cardano-sdk/core": 0.22.2
-    "@cardano-sdk/input-selection": 0.12.7
-    "@cardano-sdk/tx-construction": 0.16.0
+    "@cardano-sdk/core": 0.23.0
+    "@cardano-sdk/input-selection": 0.12.9
+    "@cardano-sdk/tx-construction": 0.16.2
     "@cardano-sdk/util": 0.14.5
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
+    "@lace/icons": 0.1.0
     "@lace/ui": ^0.1.0
     "@radix-ui/react-slider": ^1.1.2
     "@storybook/addon-actions": ^7.6.7
@@ -10743,6 +10852,7 @@ __metadata:
     "@tsconfig/create-react-app": ^1.0.3
     "@vanilla-extract/css": ^1.11.1
     "@vanilla-extract/esbuild-plugin": ^2.2.2
+    "@vanilla-extract/recipes": ^0.5.1
     "@vanilla-extract/vite-plugin": ^3.9.3
     "@vitest/coverage-c8": ^0.31.0
     antd: ^4.17.3
@@ -10769,6 +10879,7 @@ __metadata:
     storybook: ^7.6.7
     tsup: ^6.7.0
     typescript: ^4.9.5
+    vite-plugin-commonjs: ^0.10.1
     vite-plugin-node-polyfills: ^0.19.0
     vite-plugin-svgr: ^4.2.0
     vite-tsconfig-paths: ^4.2.3
@@ -10776,10 +10887,10 @@ __metadata:
     wait-on: ^7.0.1
     zustand: ^4.4.1
   peerDependencies:
-    "@cardano-sdk/input-selection": 0.12.7
-    "@cardano-sdk/tx-construction": 0.16.0
+    "@cardano-sdk/input-selection": 0.12.9
+    "@cardano-sdk/tx-construction": 0.16.2
     "@cardano-sdk/util": 0.14.5
-    "@cardano-sdk/wallet": 0.27.1
+    "@cardano-sdk/wallet": 0.28.1
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
@@ -10798,6 +10909,7 @@ __metadata:
   resolution: "@lace/ui@workspace:packages/ui"
   dependencies:
     "@babel/core": ^7.21.0
+    "@lace/icons": ^0.1.0
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
     "@radix-ui/react-checkbox": ^1.0.4
@@ -10805,7 +10917,9 @@ __metadata:
     "@radix-ui/react-dialog": ^1.0.4
     "@radix-ui/react-form": ^0.0.3
     "@radix-ui/react-progress": ^1.0.3
+    "@radix-ui/react-radio-group": ^1.1.3
     "@radix-ui/react-scroll-area": ^0.1.3
+    "@radix-ui/react-select": 1.2.2
     "@radix-ui/react-switch": ^1.0.3
     "@radix-ui/react-tabs": ^1.0.3
     "@radix-ui/react-toast": ^1.0.3
@@ -11027,6 +11141,13 @@ __metadata:
     pump: ^3.0.0
     tar-fs: ^2.1.1
   checksum: 7fa8ac40b4e85738a4ee6bf891bc27fce2445b65b4477e0ec86aed0fa62ab18bdf5d193ce04553ad9bfa639e1eef33b8b30da4ef3e7218f12bf95f24c8786e5b
+  languageName: node
+  linkType: hard
+
+"@nicolo-ribaudo/chokidar-2@npm:2.1.8-no-fsevents.3":
+  version: 2.1.8-no-fsevents.3
+  resolution: "@nicolo-ribaudo/chokidar-2@npm:2.1.8-no-fsevents.3"
+  checksum: ee55cc9241aeea7eb94b8a8551bfa4246c56c53bc71ecda0a2104018fcc328ba5723b33686bdf9cc65d4df4ae65e8016b89e0bbdeb94e0309fe91bb9ced42344
   languageName: node
   linkType: hard
 
@@ -12112,6 +12233,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-radio-group@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "@radix-ui/react-radio-group@npm:1.1.3"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/primitive": 1.0.1
+    "@radix-ui/react-compose-refs": 1.0.1
+    "@radix-ui/react-context": 1.0.1
+    "@radix-ui/react-direction": 1.0.1
+    "@radix-ui/react-presence": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-roving-focus": 1.0.4
+    "@radix-ui/react-use-controllable-state": 1.0.1
+    "@radix-ui/react-use-previous": 1.0.1
+    "@radix-ui/react-use-size": 1.0.1
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 88f7007610817ab30f471a7e1f6605e94cc507a31fb4bb218116d65cc48c9b3149fce500f386716a3ed5fb0089d65faf32d3e01971322cd4a14b51003ec82bc2
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-roving-focus@npm:1.0.3":
   version: 1.0.3
   resolution: "@radix-ui/react-roving-focus@npm:1.0.3"
@@ -12181,7 +12331,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-select@npm:^1.2.2":
+"@radix-ui/react-select@npm:1.2.2, @radix-ui/react-select@npm:^1.2.2":
   version: 1.2.2
   resolution: "@radix-ui/react-select@npm:1.2.2"
   dependencies:
@@ -17357,6 +17507,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@svgr/cli@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "@svgr/cli@npm:8.1.0"
+  dependencies:
+    "@svgr/core": 8.1.0
+    "@svgr/plugin-jsx": 8.1.0
+    "@svgr/plugin-prettier": 8.1.0
+    "@svgr/plugin-svgo": 8.1.0
+    camelcase: ^6.2.0
+    chalk: ^4.1.2
+    commander: ^9.4.1
+    dashify: ^2.0.0
+    glob: ^8.0.3
+    snake-case: ^3.0.4
+  bin:
+    svgr: bin/svgr
+  checksum: 43c73c9a6e7d18813f7f3ec692b0cdc42df0231ff7be40ff8c16accf7dd3a63527539819117b41f1e70963897fbc7e63e77a903fbc766aafbeaa3a7c5839289d
+  languageName: node
+  linkType: hard
+
+"@svgr/core@npm:8.1.0, @svgr/core@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "@svgr/core@npm:8.1.0"
+  dependencies:
+    "@babel/core": ^7.21.3
+    "@svgr/babel-preset": 8.1.0
+    camelcase: ^6.2.0
+    cosmiconfig: ^8.1.3
+    snake-case: ^3.0.4
+  checksum: da4a12865c7dc59829d58df8bd232d6c85b7115fda40da0d2f844a1a51886e2e945560596ecfc0345d37837ac457de86a931e8b8d8550e729e0c688c02250d8a
+  languageName: node
+  linkType: hard
+
 "@svgr/core@npm:^6.1.2":
   version: 6.1.2
   resolution: "@svgr/core@npm:6.1.2"
@@ -17394,19 +17577,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@svgr/core@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@svgr/core@npm:8.1.0"
-  dependencies:
-    "@babel/core": ^7.21.3
-    "@svgr/babel-preset": 8.1.0
-    camelcase: ^6.2.0
-    cosmiconfig: ^8.1.3
-    snake-case: ^3.0.4
-  checksum: da4a12865c7dc59829d58df8bd232d6c85b7115fda40da0d2f844a1a51886e2e945560596ecfc0345d37837ac457de86a931e8b8d8550e729e0c688c02250d8a
-  languageName: node
-  linkType: hard
-
 "@svgr/hast-util-to-babel-ast@npm:8.0.0":
   version: 8.0.0
   resolution: "@svgr/hast-util-to-babel-ast@npm:8.0.0"
@@ -17434,6 +17604,20 @@ __metadata:
     "@babel/types": ^7.20.0
     entities: ^4.4.0
   checksum: 37923cce1b3f4e2039077b0c570b6edbabe37d1cf1a6ee35e71e0fe00f9cffac450eec45e9720b1010418131a999cb0047331ba1b6d1d2c69af1b92ac785aacf
+  languageName: node
+  linkType: hard
+
+"@svgr/plugin-jsx@npm:8.1.0, @svgr/plugin-jsx@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "@svgr/plugin-jsx@npm:8.1.0"
+  dependencies:
+    "@babel/core": ^7.21.3
+    "@svgr/babel-preset": 8.1.0
+    "@svgr/hast-util-to-babel-ast": 8.0.0
+    svg-parser: ^2.0.4
+  peerDependencies:
+    "@svgr/core": "*"
+  checksum: 0418a9780753d3544912ee2dad5d2cf8d12e1ba74df8053651b3886aeda54d5f0f7d2dece0af5e0d838332c4f139a57f0dabaa3ca1afa4d1a765efce6a7656f2
   languageName: node
   linkType: hard
 
@@ -17479,17 +17663,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@svgr/plugin-jsx@npm:^8.1.0":
+"@svgr/plugin-prettier@npm:8.1.0":
   version: 8.1.0
-  resolution: "@svgr/plugin-jsx@npm:8.1.0"
+  resolution: "@svgr/plugin-prettier@npm:8.1.0"
   dependencies:
-    "@babel/core": ^7.21.3
-    "@svgr/babel-preset": 8.1.0
-    "@svgr/hast-util-to-babel-ast": 8.0.0
-    svg-parser: ^2.0.4
+    deepmerge: ^4.3.1
+    prettier: ^2.8.7
   peerDependencies:
     "@svgr/core": "*"
-  checksum: 0418a9780753d3544912ee2dad5d2cf8d12e1ba74df8053651b3886aeda54d5f0f7d2dece0af5e0d838332c4f139a57f0dabaa3ca1afa4d1a765efce6a7656f2
+  checksum: 660bbfe63add9b855e8269411857f4b23ee3ed86b11ba16d7c1b704c47a934f267649587f9e0c7a3a0841b4ae70d8b844439f3f6c8d4df75efd9590ede0784f2
+  languageName: node
+  linkType: hard
+
+"@svgr/plugin-svgo@npm:8.1.0":
+  version: 8.1.0
+  resolution: "@svgr/plugin-svgo@npm:8.1.0"
+  dependencies:
+    cosmiconfig: ^8.1.3
+    deepmerge: ^4.3.1
+    svgo: ^3.0.2
+  peerDependencies:
+    "@svgr/core": "*"
+  checksum: 59d9d214cebaacca9ca71a561f463d8b7e5a68ca9443e4792a42d903acd52259b1790c0680bc6afecc3f00a255a6cbd7ea278a9f625bac443620ea58a590c2d0
   languageName: node
   linkType: hard
 
@@ -20388,6 +20583,15 @@ __metadata:
   peerDependencies:
     "@vanilla-extract/css": ^1.0.0
   checksum: 9e7d989bf6e16d11fd6c972bec5d8d6c4efee5fe84070108db87570992e596dc937a6c5f9061fe10b564c1c64f53abf77a41bd589b1da5993c7f8d7b7811acfd
+  languageName: node
+  linkType: hard
+
+"@vanilla-extract/recipes@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@vanilla-extract/recipes@npm:0.5.1"
+  peerDependencies:
+    "@vanilla-extract/css": ^1.0.0
+  checksum: 20936fd318fe005b1a637bd1459d5ce596c14e3e73402fe6f130007619bf3d2765cd1f3e260a45d141f9c62f2c274f85378d004d03a9f68c328f5f98df7b9ec8
   languageName: node
   linkType: hard
 
@@ -24920,7 +25124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.5.1, chokidar@npm:^3.5.3":
+"chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.4.0, chokidar@npm:^3.5.1, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
   dependencies:
@@ -25589,7 +25793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^4.0.0, commander@npm:^4.1.1":
+"commander@npm:^4.0.0, commander@npm:^4.0.1, commander@npm:^4.1.1":
   version: 4.1.1
   resolution: "commander@npm:4.1.1"
   checksum: d7b9913ff92cae20cb577a4ac6fcc121bd6223319e54a40f51a14740a681ad5c574fd29a57da478a5f234a6fa6c52cbf0b7c641353e03c648b1ae85ba670b977
@@ -25624,7 +25828,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^9.3.0":
+"commander@npm:^9.3.0, commander@npm:^9.4.1":
   version: 9.5.0
   resolution: "commander@npm:9.5.0"
   checksum: c7a3e27aa59e913b54a1bafd366b88650bc41d6651f0cbe258d4ff09d43d6a7394232a4dadd0bf518b3e696fdf595db1028a0d82c785b88bd61f8a440cecfade
@@ -26759,6 +26963,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"css-select@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "css-select@npm:5.1.0"
+  dependencies:
+    boolbase: ^1.0.0
+    css-what: ^6.1.0
+    domhandler: ^5.0.2
+    domutils: ^3.0.1
+    nth-check: ^2.0.1
+  checksum: 2772c049b188d3b8a8159907192e926e11824aea525b8282981f72ba3f349cf9ecd523fdf7734875ee2cb772246c22117fc062da105b6d59afe8dcd5c99c9bda
+  languageName: node
+  linkType: hard
+
 "css-shorthand-properties@npm:^1.1.1":
   version: 1.1.1
   resolution: "css-shorthand-properties@npm:1.1.1"
@@ -26783,6 +27000,16 @@ __metadata:
     mdn-data: 2.0.30
     source-map-js: ^1.0.1
   checksum: 493cc24b5c22b05ee5314b8a0d72d8a5869491c1458017ae5ed75aeb6c3596637dbe1b11dac2548974624adec9f7a1f3a6cf40593dc1f9185eb0e8279543fbc0
+  languageName: node
+  linkType: hard
+
+"css-tree@npm:~2.2.0":
+  version: 2.2.1
+  resolution: "css-tree@npm:2.2.1"
+  dependencies:
+    mdn-data: 2.0.28
+    source-map-js: ^1.0.1
+  checksum: b94aa8cc2f09e6f66c91548411fcf74badcbad3e150345074715012d16333ce573596ff5dfca03c2a87edf1924716db765120f94247e919d72753628ba3aba27
   languageName: node
   linkType: hard
 
@@ -26923,6 +27150,15 @@ __metadata:
   dependencies:
     css-tree: ^1.1.2
   checksum: 380ba9663da3bcea58dee358a0d8c4468bb6539be3c439dc266ac41c047217f52fd698fb7e4b6b6ccdfb8cf53ef4ceed8cc8ceccb8dfca2aa628319826b5b998
+  languageName: node
+  linkType: hard
+
+"csso@npm:^5.0.5":
+  version: 5.0.5
+  resolution: "csso@npm:5.0.5"
+  dependencies:
+    css-tree: ~2.2.0
+  checksum: 0ad858d36bf5012ed243e9ec69962a867509061986d2ee07cc040a4b26e4d062c00d4c07e5ba8d430706ceb02dd87edd30a52b5937fd45b1b6f2119c4993d59a
   languageName: node
   linkType: hard
 
@@ -27118,6 +27354,13 @@ __metadata:
   dependencies:
     assert-plus: ^1.0.0
   checksum: 3634c249570f7f34e3d34f866c93f866c5b417f0dd616275decae08147dcdf8fccfaa5947380ccfb0473998ea3a8057c0b4cd90c875740ee685d0624b2983598
+  languageName: node
+  linkType: hard
+
+"dashify@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "dashify@npm:2.0.0"
+  checksum: f13233f38fc39ea8dabe3a5bef51421906aa8a52e4403fcb56e3e6464428f5c0bdd75562706929a245c698bceccf68a82e30e9e327a0c582469868522a163f8c
   languageName: node
   linkType: hard
 
@@ -27369,6 +27612,13 @@ __metadata:
   version: 4.2.2
   resolution: "deepmerge@npm:4.2.2"
   checksum: a8c43a1ed8d6d1ed2b5bf569fa4c8eb9f0924034baf75d5d406e47e157a451075c4db353efea7b6bcc56ec48116a8ce72fccf867b6e078e7c561904b5897530b
+  languageName: node
+  linkType: hard
+
+"deepmerge@npm:^4.3.1":
+  version: 4.3.1
+  resolution: "deepmerge@npm:4.3.1"
+  checksum: 2024c6a980a1b7128084170c4cf56b0fd58a63f2da1660dcfe977415f27b17dbe5888668b59d0b063753f3220719d5e400b7f113609489c90160bb9a5518d052
   languageName: node
   linkType: hard
 
@@ -28005,6 +28255,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dom-serializer@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "dom-serializer@npm:2.0.0"
+  dependencies:
+    domelementtype: ^2.3.0
+    domhandler: ^5.0.2
+    entities: ^4.2.0
+  checksum: cd1810544fd8cdfbd51fa2c0c1128ec3a13ba92f14e61b7650b5de421b88205fd2e3f0cc6ace82f13334114addb90ed1c2f23074a51770a8e9c1273acbc7f3e6
+  languageName: node
+  linkType: hard
+
 "dom-walk@npm:^0.1.0":
   version: 0.1.2
   resolution: "dom-walk@npm:0.1.2"
@@ -28037,6 +28298,13 @@ __metadata:
   version: 2.2.0
   resolution: "domelementtype@npm:2.2.0"
   checksum: 24cb386198640cd58aa36f8c987f2ea61859929106d06ffcc8f547e70cb2ed82a6dc56dcb8252b21fba1f1ea07df6e4356d60bfe57f77114ca1aed6828362629
+  languageName: node
+  linkType: hard
+
+"domelementtype@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "domelementtype@npm:2.3.0"
+  checksum: ee837a318ff702622f383409d1f5b25dd1024b692ef64d3096ff702e26339f8e345820f29a68bcdcea8cfee3531776b3382651232fbeae95612d6f0a75efb4f6
   languageName: node
   linkType: hard
 
@@ -28076,6 +28344,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"domhandler@npm:^5.0.2, domhandler@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "domhandler@npm:5.0.3"
+  dependencies:
+    domelementtype: ^2.3.0
+  checksum: 0f58f4a6af63e6f3a4320aa446d28b5790a009018707bce2859dcb1d21144c7876482b5188395a188dfa974238c019e0a1e610d2fc269a12b2c192ea2b0b131c
+  languageName: node
+  linkType: hard
+
 "domutils@npm:^1.5.1":
   version: 1.7.0
   resolution: "domutils@npm:1.7.0"
@@ -28094,6 +28371,17 @@ __metadata:
     domelementtype: ^2.2.0
     domhandler: ^4.2.0
   checksum: a4da0fcc4c54f6b338111caa11c672e18968d6280e7a1ed5e01b8b09b7dc0829ab5e03821349f5b57e34811f7e96e89b8dddbe06bb8e395cf117342424667b7d
+  languageName: node
+  linkType: hard
+
+"domutils@npm:^3.0.1":
+  version: 3.1.0
+  resolution: "domutils@npm:3.1.0"
+  dependencies:
+    dom-serializer: ^2.0.0
+    domelementtype: ^2.3.0
+    domhandler: ^5.0.3
+  checksum: e5757456ddd173caa411cfc02c2bb64133c65546d2c4081381a3bafc8a57411a41eed70494551aa58030be9e58574fcc489828bebd673863d39924fb4878f416
   languageName: node
   linkType: hard
 
@@ -28547,17 +28835,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"entities@npm:^4.2.0, entities@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "entities@npm:4.5.0"
+  checksum: 853f8ebd5b425d350bffa97dd6958143179a5938352ccae092c62d1267c4e392a039be1bae7d51b6e4ffad25f51f9617531fedf5237f15df302ccfb452cbf2d7
+  languageName: node
+  linkType: hard
+
 "entities@npm:^4.4.0":
   version: 4.4.0
   resolution: "entities@npm:4.4.0"
   checksum: 84d250329f4b56b40fa93ed067b194db21e8815e4eb9b59f43a086f0ecd342814f6bc483de8a77da5d64e0f626033192b1b4f1792232a7ea6b970ebe0f3187c2
-  languageName: node
-  linkType: hard
-
-"entities@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "entities@npm:4.5.0"
-  checksum: 853f8ebd5b425d350bffa97dd6958143179a5938352ccae092c62d1267c4e392a039be1bae7d51b6e4ffad25f51f9617531fedf5237f15df302ccfb452cbf2d7
   languageName: node
   linkType: hard
 
@@ -31468,6 +31756,13 @@ __metadata:
   version: 1.0.3
   resolution: "fs-monkey@npm:1.0.3"
   checksum: cf50804833f9b88a476911ae911fe50f61a98d986df52f890bd97e7262796d023698cb2309fa9b74fdd8974f04315b648748a0a8ee059e7d5257b293bfc409c0
+  languageName: node
+  linkType: hard
+
+"fs-readdir-recursive@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "fs-readdir-recursive@npm:1.1.0"
+  checksum: 29d50f3d2128391c7fc9fd051c8b7ea45bcc8aa84daf31ef52b17218e20bfd2bd34d02382742801954cc8d1905832b68227f6b680a666ce525d8b6b75068ad1e
   languageName: node
   linkType: hard
 
@@ -38294,7 +38589,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.3":
+"magic-string@npm:^0.30.1, magic-string@npm:^0.30.3":
   version: 0.30.5
   resolution: "magic-string@npm:0.30.5"
   dependencies:
@@ -38655,6 +38950,13 @@ __metadata:
   version: 2.0.14
   resolution: "mdn-data@npm:2.0.14"
   checksum: 9d0128ed425a89f4cba8f787dca27ad9408b5cb1b220af2d938e2a0629d17d879a34d2cb19318bdb26c3f14c77dd5dfbae67211f5caaf07b61b1f2c5c8c7dc16
+  languageName: node
+  linkType: hard
+
+"mdn-data@npm:2.0.28":
+  version: 2.0.28
+  resolution: "mdn-data@npm:2.0.28"
+  checksum: f51d587a6ebe8e426c3376c74ea6df3e19ec8241ed8e2466c9c8a3904d5d04397199ea4f15b8d34d14524b5de926d8724ae85207984be47e165817c26e49e0aa
   languageName: node
   linkType: hard
 
@@ -42658,7 +42960,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.8.0":
+"prettier@npm:^2.8.0, prettier@npm:^2.8.7":
   version: 2.8.8
   resolution: "prettier@npm:2.8.8"
   bin:
@@ -49005,6 +49307,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"svgo@npm:^3.0.2":
+  version: 3.2.0
+  resolution: "svgo@npm:3.2.0"
+  dependencies:
+    "@trysound/sax": 0.2.0
+    commander: ^7.2.0
+    css-select: ^5.1.0
+    css-tree: ^2.3.1
+    css-what: ^6.1.0
+    csso: ^5.0.5
+    picocolors: ^1.0.0
+  bin:
+    svgo: ./bin/svgo
+  checksum: 42168748a5586d85d447bec2867bc19814a4897f973ff023e6aad4ff19ba7408be37cf3736e982bb78e3f1e52df8785da5dca77a8ebc64c0ebd6fcf9915d2895
+  languageName: node
+  linkType: hard
+
 "swc-loader@npm:0.2.3":
   version: 0.2.3
   resolution: "swc-loader@npm:0.2.3"
@@ -51444,6 +51763,30 @@ __metadata:
   bin:
     vite-node: vite-node.mjs
   checksum: b3813b784f551613e561bf85e64ceb8e869d760d34f135dc3351b093618c6fc3c64f23839ac530ddc49724beb83c3f70ee6392e62676c78141ed04c7ab1e0aa0
+  languageName: node
+  linkType: hard
+
+"vite-plugin-commonjs@npm:^0.10.1":
+  version: 0.10.1
+  resolution: "vite-plugin-commonjs@npm:0.10.1"
+  dependencies:
+    acorn: ^8.8.2
+    fast-glob: ^3.2.12
+    magic-string: ^0.30.1
+    vite-plugin-dynamic-import: ^1.5.0
+  checksum: 64e4a995bcf598d443e484bb3063251ba6c1ca4a45b383fe8c303ad5a35cd480632d74eb1e1107a4ecb90afb6b7ce28fa90817a63447736c336442cb49605c40
+  languageName: node
+  linkType: hard
+
+"vite-plugin-dynamic-import@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "vite-plugin-dynamic-import@npm:1.5.0"
+  dependencies:
+    acorn: ^8.8.2
+    es-module-lexer: ^1.2.1
+    fast-glob: ^3.2.12
+    magic-string: ^0.30.1
+  checksum: 68efd897daa0c72a9f9d3481095dd3f7ec9a822be5a15eef60413734a4c894c5bbd1c1762f02daeef5df59cef212c9f1e7e056315e2a7780816ccafe5c74da6e
   languageName: node
   linkType: hard
 

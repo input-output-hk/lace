@@ -23,11 +23,15 @@ export const PortfolioBar = () => {
   }
 
   return (
-    <Card.Elevated className={styles.barContainer}>
+    <Card.Elevated className={styles.barContainer} data-testid="portfoliobar-container">
       <Text.Body.Normal>
-        <span className={styles.selectedPoolsLabel}>{t('portfolioBar.selectedPools', { selectedPoolsCount })}</span>
+        <span className={styles.selectedPoolsLabel} data-testid="portfoliobar-selected-pools">
+          {t('portfolioBar.selectedPools', { selectedPoolsCount })}
+        </span>
         &nbsp;
-        <span>{t('portfolioBar.maxPools', { maxPoolsCount: MAX_POOLS_COUNT })}</span>
+        <span data-testid="portfoliobar-max-pools">
+          {t('portfolioBar.maxPools', { maxPoolsCount: MAX_POOLS_COUNT })}
+        </span>
       </Text.Body.Normal>
       <Flex className={styles.buttons}>
         <Button.Secondary

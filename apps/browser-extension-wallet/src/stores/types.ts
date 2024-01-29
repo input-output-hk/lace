@@ -1,7 +1,7 @@
 import { SetState, State, GetState, StoreApi } from 'zustand';
-import { Wallet, StakePoolSortOptions } from '@lace/cardano';
-import { AssetActivityListProps, ActivityStatus, TransactionActivityType } from '@lace/core';
-import type { ActivityType } from '@lace/core';
+import { Wallet } from '@lace/cardano';
+import { AssetActivityListProps, ActivityStatus, TransactionActivityType, ActivityType } from '@lace/core';
+
 import { PriceResult } from '../hooks';
 import {
   NetworkInformation,
@@ -20,6 +20,7 @@ import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import { AddressesDiscoveryStatus } from '@lib/communication';
 import { Reward } from '@cardano-sdk/core';
 import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
+import { StakePoolSortOptions } from '@lace/staking';
 
 export enum StateStatus {
   IDLE = 'idle',

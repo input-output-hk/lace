@@ -44,6 +44,8 @@ $btn-gradient-color-hover: var(--text-color-primary, #ffffff);
 $btn-gradient-color-active: var(--text-color-primary, #ffffff);
 $btn-gradient-color-disabled: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
 
+$btn-gradient-focused-outline-color: var(--primary-accent, rgba(127, 90, 240, 0.3));
+
 // ==== Outlined button ====
 $btn-outlined-bg: transparent;
 $btn-outlined-bg-hover: var(--light-mode-light-grey, var(--dark-mode-dark-grey-plus, #ffffff));
@@ -295,6 +297,10 @@ $btn-gap: var(--btn-gap, size_unit(1));
   &:active:not(.loading) {
     background: linear-gradient($btn-gradient-bg-active, $btn-gradient-bg-active) padding-box,
       var(--lace-gradient) border-box;
+  }
+
+  &:focus:not(:active) {
+    outline: $btn-gradient-focused-outline-color solid 4px;
   }
 
   &:disabled:not(.loading) {

@@ -23,6 +23,7 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
+  PostHogAction,
   postHogOnboardingActions,
   UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -290,6 +291,14 @@ export const WalletSetupWizard = ({
       await analytics.setOptedInForEnhancedAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
+
+      wallet.wallet.wallet.addresses$.subscribe((addresses) => {
+        if (addresses.length === 0) return;
+        const hdWalletDiscovered = addresses.some((addr) => addr.index > 0);
+        if (setupType === SetupType.RESTORE && hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        }
+      });
 
       if (setupType === SetupType.FORGOT_PASSWORD) {
         deleteFromLocalStorage('isForgotPasswordFlow');

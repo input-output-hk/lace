@@ -1,9 +1,9 @@
 import type { ComponentPropsWithoutRef } from 'react';
 import React from 'react';
 
+import { ReactComponent as ChevronRight } from '@lace/icons/dist/ChevronRightThinComponent';
 import classNames from 'classnames';
 
-import { ReactComponent as ChevronRight } from '../../assets/icons/chevron-right-thin.component.svg';
 import { Box } from '../box';
 import { Icon as IconButton } from '../control-buttons';
 import { Flex } from '../flex';
@@ -63,22 +63,24 @@ export const WalletOption = ({
           type={type}
           testId={makeTestId(id)}
         />
-        <Box ml="$10">
-          <Flex
-            className={cx.icon}
-            w="$24"
-            h="$24"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <IconButton
-              onClick={onOpenAccountsMenu}
-              icon={<ChevronRight />}
-              size="extraSmall"
-              as="div"
-            />
-          </Flex>
-        </Box>
+        {type !== 'shared' && (
+          <Box ml="$10">
+            <Flex
+              className={cx.icon}
+              w="$24"
+              h="$24"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <IconButton
+                onClick={onOpenAccountsMenu}
+                icon={<ChevronRight />}
+                size="extraSmall"
+                as="div"
+              />
+            </Flex>
+          </Box>
+        )}
       </Flex>
     </button>
   );
