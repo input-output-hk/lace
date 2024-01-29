@@ -302,3 +302,7 @@ When(/^I (enable|disable) console logs collection$/, async (action: 'enable' | '
 Then(/^I verify there are no errors in console logs$/, async () => {
   await consoleAssert.assertNoErrorsInConsole();
 });
+
+Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
+  await browser.pause(delay);
+});
