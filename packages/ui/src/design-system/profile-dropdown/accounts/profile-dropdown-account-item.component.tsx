@@ -56,7 +56,7 @@ export const AccountItem = ({
           className={cx.derivationPath}
           data-testid="wallet-account-item-path"
         >
-          m/1842`/1841/{accountNumber}
+          m/1852&apos;/1815&apos;/{accountNumber}&apos;
         </Text.Body.Small>
       </Flex>
     </Flex>
