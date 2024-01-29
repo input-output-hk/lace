@@ -27,7 +27,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Examples:
       | pools_before | pools_after | pool_tickers                                                    | tx_type                   |
       | 1            | 2           | OCEAN, 8BETA                                                    | Delegation                |
-      | 2            | 10          | OCEAN, 8BETA, WOOF, PIANO, SMAUG, ZZZZX, ZZZG3, YATP, XSP, XSEC | Delegation                |
+      | 2            | 10          | OCEAN, 8BETA, WOOF, PIANO, SMAUG, ZZZZX, ZZZG3, YATP, XSP, CENT | Delegation                |
       | 10           | 1           | OCEAN                                                           | Stake Key De-Registration |
 
   @LW-8434 @Testnet
