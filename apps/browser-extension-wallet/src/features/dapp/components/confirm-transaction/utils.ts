@@ -10,8 +10,6 @@ import { sectionTitle, DAPP_VIEWS } from '../../config';
 
 const { CertificateType } = Wallet.Cardano;
 
-const DAPP_TOAST_DURATION = 50;
-
 export enum TxType {
   Send = 'Send',
   Mint = 'Mint',
@@ -42,32 +40,23 @@ export const getTitleKey = (txType: TxType): string => {
   return sectionTitle[DAPP_VIEWS.CONFIRM_TX];
 };
 
-export const disallowSignTx = (close = false): void => {
-  exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+/**
+ * Signing with dapp connector is a 2 step process:
+ * 1. Open UI window and expose a SigningCoordinator
+ * 2. Sign
+ *
+ * This function notifies service worker that UI is ready to sign.
+ */
+export const readyToSign = (): void => {
+  exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
     {
       api$: of({
-        async allowSignTx(): Promise<boolean> {
-          return Promise.reject(new Error('Transaction rejected'));
-        }
-      }),
-      baseChannel: DAPP_CHANNELS.userPrompt,
-      properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-    },
-    { logger: console, runtime }
-  );
-  close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
-};
-
-export const allowSignTx = (): void => {
-  exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-    {
-      api$: of({
-        async allowSignTx(): Promise<boolean> {
+        async readyToSignTx(): Promise<boolean> {
           return Promise.resolve(true);
         }
       }),
       baseChannel: DAPP_CHANNELS.userPrompt,
-      properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+      properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
     },
     { logger: console, runtime }
   );

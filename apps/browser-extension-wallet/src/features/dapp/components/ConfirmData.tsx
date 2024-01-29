@@ -71,15 +71,15 @@ export const DappConfirmData = (): React.ReactElement => {
       setSignDataRequest(r);
     });
 
-    const api = exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+    const api = exposeApi<Pick<UserPromptService, 'readyToSignData'>>(
       {
         api$: of({
-          async allowSignTx(): Promise<boolean> {
+          async readyToSignData(): Promise<boolean> {
             return Promise.resolve(true);
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+        properties: { readyToSignData: RemoteApiPropertyType.MethodReturningPromise }
       },
       { logger: console, runtime }
     );

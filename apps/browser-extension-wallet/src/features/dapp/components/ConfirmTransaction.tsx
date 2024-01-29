@@ -165,15 +165,15 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       setSignTxRequest(r);
     });
 
-    const api = exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+    const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
       {
         api$: of({
-          async allowSignTx(): Promise<boolean> {
+          async readyToSignTx(): Promise<boolean> {
             return Promise.resolve(true);
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
       },
       { logger: console, runtime }
     );

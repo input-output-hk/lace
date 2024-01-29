@@ -32,7 +32,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     try {
       await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-tx');
 
-      return userPromptService.allowSignTx();
+      return userPromptService.readyToSignTx();
     } catch (error) {
       console.error(error);
       return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
@@ -42,7 +42,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     try {
       await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
 
-      return userPromptService.allowSignData();
+      return userPromptService.readyToSignData();
     } catch (error) {
       console.error(error);
       // eslint-disable-next-line unicorn/no-useless-undefined
