@@ -28,9 +28,11 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
+import * as HardwareTrezor from '../../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
 import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
+import * as KeyManagement from '@cardano-sdk/key-management';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -166,24 +168,22 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
     try {
-      HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
-        .then(() => {
-          exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-            {
-              api$: of({
-                async allowSignTx(): Promise<boolean> {
-                  return Promise.resolve(true);
-                }
-              }),
-              baseChannel: DAPP_CHANNELS.userPrompt,
-              properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-            },
-            { logger: console, runtime }
-          );
-        })
-        .catch((error) => {
-          throw error;
-        });
+      await (keyAgentType === KeyManagement.KeyAgentType.Trezor
+        ? HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(KeyManagement.CommunicationType.Web)
+        : HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web));
+
+      exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+        {
+          api$: of({
+            async allowSignTx(): Promise<boolean> {
+              return Promise.resolve(true);
+            }
+          }),
+          baseChannel: DAPP_CHANNELS.userPrompt,
+          properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+        },
+        { logger: console, runtime }
+      );
     } catch (error) {
       console.error('error', error);
       cancelTransaction(false);
