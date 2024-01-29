@@ -2,7 +2,7 @@ import React from 'react';
 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
-import { Button } from '../';
+import * as Button from '../buttons';
 
 export interface DialogActionProps {
   onClick: () => void;

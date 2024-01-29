@@ -303,7 +303,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const drawers = (
     <>
       <AssetActivityDetails
-        afterVisibleChange={onActivityDetailsVisibleChange}
+        afterOpenChange={onActivityDetailsVisibleChange}
         appMode={appMode}
         isVisible={isActivityDetailsOpen}
         onClose={closeActivityDetailsDrawer}
