@@ -94,10 +94,7 @@ export const DappConfirmData = (): React.ReactElement => {
 
   useEffect(() => {
     const dataFromHex = fromHex(req.blob);
-    // TODO: address is currently not available in sign request,
-    // only the derivation path of key to sign with.
-    // We can probably add it to sign request, or we can match it against wallet addresses$
-    const txDataAddress = `${req.derivationPath.role}/${req.derivationPath.index}`;
+    const txDataAddress = req.signContext.address || `${req.derivationPath.role}/${req.derivationPath.index}`;
     const jsonStructureOrHexString = {
       address: txDataAddress,
       dataToSign: hasJsonStructure(dataFromHex)
