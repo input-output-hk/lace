@@ -51,15 +51,19 @@ export const TableHeader = <T extends string>({
         }}
         data-testid={`${dataTestId}-list-header-${value}`}
       >
-        <Tooltip destroyTooltipOnHide title={tooltipText}>
-          {label}
-        </Tooltip>
-        {isSortingAvailable(value) && isActiveSortItem(value) && (
-          <IconButton.Caret
-            direction={order}
-            data-testid={`${dataTestId}-sort-order-${order}`}
-          />
-        )}
+        <span className={cx.cellInner}>
+          <span className={cx.headerItemInner}>
+            <Tooltip destroyTooltipOnHide title={tooltipText}>
+              {label}
+            </Tooltip>
+          </span>
+          {isSortingAvailable(value) && isActiveSortItem(value) && (
+            <IconButton.Caret
+              direction={order}
+              data-testid={`${dataTestId}-sort-order-${order}`}
+            />
+          )}
+        </span>
       </div>
     ))}
   </div>

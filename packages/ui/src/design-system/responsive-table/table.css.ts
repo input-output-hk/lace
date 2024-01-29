@@ -1,4 +1,4 @@
-import { vars, style } from '../../design-tokens';
+import { sx, vars, style } from '../../design-tokens';
 
 export const row = style([
   {
@@ -48,12 +48,12 @@ export const cell = style([
 ]);
 
 export const cellInner = style([
+  sx({ width: '$fill' }),
   {
     fontFamily: vars.fontFamily.$nova,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    width: '100%',
+    display: 'flex',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
   },
 ]);
 
@@ -80,6 +80,15 @@ export const headerItem = style([
     color: vars.colors.$stake_pool_header_text_color,
     padding: '0',
     fontFamily: vars.fontFamily.$nova,
+  },
+]);
+
+export const headerItemInner = style([
+  {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    width: '100%',
   },
 ]);
 
