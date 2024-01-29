@@ -17,7 +17,7 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import { ActivityStatus, DelegationTransactionType, TransactionActivityType } from '@lace/core';
+import { ActivityStatus, DelegationActivityType, TransactionActivityType } from '@lace/core';
 import type { ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import {
@@ -65,11 +65,11 @@ const shouldIncludeFee = (
   delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
 ) =>
   !(
-    type === DelegationTransactionType.delegationRegistration ||
+    type === DelegationActivityType.delegationRegistration ||
     // Existence of any (new) delegationInfo means that this "de-registration"
     // activity is accompanied by a "delegation" activity, which carries the fees.
     // However, fees should be shown if de-registration activity is standalone.
-    (type === DelegationTransactionType.delegationDeregistration && !!delegationInfo?.length)
+    (type === DelegationActivityType.delegationDeregistration && !!delegationInfo?.length)
   );
 
 const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
@@ -191,14 +191,14 @@ const buildGetActivityDetail =
     const deposit =
       // since one tx can be split into two (delegation, registration) actions,
       // ensure only the registration tx carries the deposit
-      implicitCoin.deposit && type === DelegationTransactionType.delegationRegistration
+      implicitCoin.deposit && type === DelegationActivityType.delegationRegistration
         ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
         : undefined;
     const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
     const depositReclaim =
       // since one tx can be split into two (delegation, de-registration) actions,
       // ensure only the de-registration tx carries the reclaimed deposit
-      depositReclaimValue && type === DelegationTransactionType.delegationDeregistration
+      depositReclaimValue && type === DelegationActivityType.delegationDeregistration
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
@@ -226,7 +226,7 @@ const buildGetActivityDetail =
       certificates: certificateTransformer(cardanoCoin, tx.body.certificates)
     };
 
-    if (type === DelegationTransactionType.delegation && delegationInfo) {
+    if (type === DelegationActivityType.delegation && delegationInfo) {
       const pools = await getPoolInfos(
         delegationInfo.map(({ poolId }) => poolId),
         stakePoolProvider

@@ -11,7 +11,7 @@ import {
   useTranslate,
   RewardsDetails,
   TransactionActivityType,
-  DelegationTransactionType
+  DelegationActivityType
 } from '@lace/core';
 import type { ActivityType } from '@lace/core';
 import { PriceResult } from '@hooks';
@@ -80,9 +80,8 @@ interface ActivityDetailProps {
 }
 
 const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
-  if (type === DelegationTransactionType.delegationRegistration) return t('package.core.activityDetails.registration');
-  if (type === DelegationTransactionType.delegationDeregistration)
-    return t('package.core.activityDetails.deregistration');
+  if (type === DelegationActivityType.delegationRegistration) return t('package.core.activityDetails.registration');
+  if (type === DelegationActivityType.delegationDeregistration) return t('package.core.activityDetails.deregistration');
   if (type === TransactionActivityType.incoming) return t('package.core.activityDetails.received');
   if (type === TransactionActivityType.outgoing) return t('package.core.activityDetails.sent');
   return t(`package.core.activityDetails.${type}`);
