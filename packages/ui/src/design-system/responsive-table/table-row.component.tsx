@@ -19,7 +19,7 @@ export interface TableRowProps<E extends string> {
     Record<E, React.FunctionComponent<{ value?: string }>>
   >;
   dataTestId?: string;
-  key?: string;
+  keyProp?: string;
 }
 
 const ConditionalTooltipWrapper = ({
@@ -51,7 +51,7 @@ export const TableRow = <E extends string>({
   selected = false,
   selectionDisabledMessage = '',
   dataTestId = 'table',
-  key,
+  keyProp,
 }: Readonly<TableRowProps<E>>): JSX.Element => (
   <div
     data-testid={`${dataTestId}-item`}
@@ -67,7 +67,7 @@ export const TableRow = <E extends string>({
         >
           <span className={cx.checkBoxWrapper}>
             <Checkbox
-              key={key}
+              key={keyProp}
               onClick={(event): void => {
                 event.stopPropagation();
                 onSelect?.();

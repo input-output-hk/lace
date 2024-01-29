@@ -56,7 +56,7 @@ export const StakePoolTableItemBrowser = ({
       selectionDisabledMessage={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
       dataTestId="stake-pool"
       withSelection
-      key={data?.id}
+      keyProp={data?.id}
     />
   );
 };
