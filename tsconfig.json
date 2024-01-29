@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "declaration": true,
     "declarationMap": true,
-    "noEmitOnError": false,
+    "noEmitOnError": true,
     "noImplicitAny": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
