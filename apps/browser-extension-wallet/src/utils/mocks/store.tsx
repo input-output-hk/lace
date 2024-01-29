@@ -31,6 +31,8 @@ export const walletStoreMock = async (
 
   // TODO: If possible use real methods/states and mock only needed ones, like inMemoryWallet [LW-5454]
   return {
+    setManageAccountsWallet: jest.fn(),
+    manageAccountsWallet: undefined,
     walletState: undefined,
     setWalletState: jest.fn(),
     fetchNetworkInfo: jest.fn(),

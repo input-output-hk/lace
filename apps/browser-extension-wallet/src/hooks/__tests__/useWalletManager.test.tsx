@@ -15,6 +15,8 @@ const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
+const mockLedgerGetXpub = jest.fn();
+const mockTrezorGetXpub = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 import React from 'react';
@@ -32,7 +34,7 @@ import * as localStorage from '@src/utils/local-storage';
 import * as AppSettings from '@providers/AppSettings';
 import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
-import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, AnyWallet, Bip32Wallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
 jest.mock('@providers/AppSettings', () => ({
@@ -60,7 +62,13 @@ jest.mock('@lace/cardano', () => {
       ...actual.Wallet,
       Ledger: {
         LedgerKeyAgent: {
-          createWithDevice: mockLedgerCreateWithDevice
+          createWithDevice: mockLedgerCreateWithDevice,
+          getXpub: mockLedgerGetXpub
+        }
+      },
+      Trezor: {
+        TrezorKeyAgent: {
+          getXpub: mockTrezorGetXpub
         }
       },
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
@@ -95,6 +103,11 @@ const getWrapper =
         </DatabaseProvider>
       </AppSettingsProvider>
     );
+
+const render = () =>
+  renderHook(() => useWalletManager(), {
+    wrapper: getWrapper({})
+  }).result.current;
 
 describe('Testing useWalletManager hook', () => {
   beforeEach(() => {
@@ -484,6 +497,7 @@ describe('Testing useWalletManager hook', () => {
       (walletApiUi.walletManager as any).deactivate = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletRepository as any).removeWallet = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.walletRepository as any).wallets$ = of([]);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
         settings: {},
@@ -630,6 +644,124 @@ describe('Testing useWalletManager hook', () => {
 
       await switchNetwork('Preprod');
       expect(setAddressesDiscoveryCompleted).toBeCalledWith(false);
+    });
+  });
+
+  describe('addAccount', () => {
+    it('throws an error when wallet with specified id does not exist', async () => {
+      (walletApiUi.walletRepository as any).wallets$ = of([]);
+      const { addAccount } = render();
+      await expect(
+        addAccount({ walletId: 'walletid', accountIndex: 1, metadata: { name: 'new account' } })
+      ).rejects.toThrowError('Wallet not found: walletid');
+    });
+
+    it('throws an error when wallet with specified id is not a bip32 wallet', async () => {
+      const walletId = 'script-wallet-id';
+      (walletApiUi.walletRepository as any).wallets$ = of([
+        {
+          walletId,
+          type: WalletType.Script
+        }
+      ]);
+      const { addAccount } = render();
+      await expect(addAccount({ walletId, accountIndex: 1, metadata: { name: 'new account' } })).rejects.toThrowError(
+        'Cannot add account to a script wallet'
+      );
+    });
+
+    describe('for existing bip32 wallet', () => {
+      const extendedAccountPublicKey =
+        '12b608b67a743891656d6463f72aa6e5f0e62ba6dc47e32edfebafab1acf0fa9f3033c2daefa3cb2ac16916b08c7e7424d4e1aafae2206d23c4d002299c07128';
+      const walletTypes = [
+        {
+          type: WalletType.InMemory,
+          walletProps: {
+            encryptedSecrets: {
+              rootPrivateKeyBytes:
+                '8403cf9d8267a7169381dd476f4fda48e1926fec8942ec51892e428e152fbed4835711cccb7efcae379627f477abb46c883f6b0c221f3aea40f9d931d2e8fdc69f85f16eb91ca380fc2e1edc2543e4dd71c1866208ea6c6960bca99f974e25776067e9a242b0e4066b96bd4d89ca99db5bd77bb65573b9cbeef85222ceed6d5a4dc516213ace986f03b183365505119b9a0abdc4375bfdf2363d7433'
+            }
+          },
+          prepare: () => {
+            global.prompt = jest.fn(() => 'passphrase1');
+            mockEmip3decrypt.mockImplementationOnce(
+              jest.requireActual('@lace/cardano').Wallet.KeyManagement.emip3decrypt
+            );
+          }
+        },
+        {
+          type: WalletType.Trezor,
+          prepare: () => mockTrezorGetXpub.mockResolvedValueOnce(extendedAccountPublicKey)
+        },
+        {
+          type: WalletType.Ledger,
+          prepare: () => mockLedgerGetXpub.mockResolvedValueOnce(extendedAccountPublicKey)
+        }
+      ];
+
+      beforeEach(() => {
+        walletApiUi.walletRepository.addAccount = jest.fn().mockResolvedValueOnce(void 0);
+      });
+
+      it.each(walletTypes)(
+        'derives extended account public key for $type wallet and adds new account into the repository',
+        async ({ type, walletProps, prepare }) => {
+          prepare();
+          const walletId = 'bip32-wallet-id';
+          (walletApiUi.walletRepository as any).wallets$ = of([
+            {
+              walletId,
+              type,
+              accounts: [],
+              ...walletProps
+            } as unknown as Bip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+          ]);
+          const addAccountProps = { walletId, accountIndex: 0, metadata: { name: 'new account' } };
+
+          const { addAccount } = render();
+          await addAccount(addAccountProps);
+          expect(walletApiUi.walletRepository.addAccount).toBeCalledWith({
+            ...addAccountProps,
+            extendedAccountPublicKey
+          });
+        }
+      );
+    });
+  });
+
+  describe('activateWallet', () => {
+    it('stores lastActiveAccountIndex in wallet metadata and activates wallet via WalletManager', async () => {
+      const walletId = 'walletId';
+      const accountIndex = 1;
+      const originalMetadata = { name: 'wallet' };
+      walletApiUi.walletRepository.wallets$ = of([
+        {
+          walletId,
+          metadata: originalMetadata
+        } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+      ]);
+      walletApiUi.walletRepository.updateWalletMetadata = jest.fn().mockResolvedValueOnce(void 0);
+      walletApiUi.walletManager.activate = jest.fn().mockResolvedValueOnce(void 0);
+
+      const { activateWallet } = render();
+      await activateWallet({ walletId, accountIndex });
+
+      expect(walletApiUi.walletRepository.updateWalletMetadata).toBeCalledWith({
+        walletId,
+        metadata: {
+          ...originalMetadata,
+          lastActiveAccountIndex: accountIndex
+        }
+      });
+
+      expect(walletApiUi.walletManager.activate).toBeCalledWith({
+        walletId,
+        accountIndex,
+        chainId: expect.objectContaining({
+          networkMagic: expect.anything(),
+          networkId: expect.anything()
+        })
+      });
     });
   });
 });

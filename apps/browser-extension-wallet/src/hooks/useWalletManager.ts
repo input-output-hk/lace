@@ -21,7 +21,9 @@ import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsPro
 import { ILocalStorage } from '@src/types';
 import { firstValueFrom } from 'rxjs';
 import {
+  AddAccountProps,
   AddWalletProps,
+  AnyBip32Wallet,
   AnyWallet,
   WalletManagerActivateProps,
   WalletManagerApi,
@@ -57,6 +59,9 @@ export interface CreateHardwareWallet {
   connectedDevice: Wallet.HardwareWallets;
 }
 
+type WalletManagerAddAccountProps = Omit<AddAccountProps<Wallet.AccountMetadata>, 'extendedAccountPublicKey'>;
+type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
+
 export interface UseWalletManager {
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -67,14 +72,72 @@ export interface UseWalletManager {
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
+  activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
   saveHardwareWallet: (wallet: Wallet.CardanoWallet, chainName?: Wallet.ChainName) => Promise<void>;
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<void>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
+  addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
 }
 
-const provider = { type: Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER, options: {} };
+const clearBytes = (bytes: Uint8Array) => {
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = 0;
+  }
+};
+
+const getHwExtendedAccountPublicKey = async (
+  walletType: Wallet.HardwareWallets,
+  accountIndex: number,
+  deviceConnection?: Wallet.DeviceConnection
+) => {
+  switch (walletType) {
+    case WalletType.Ledger:
+      return Wallet.Ledger.LedgerKeyAgent.getXpub({
+        communicationType: Wallet.KeyManagement.CommunicationType.Web,
+        deviceConnection: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined,
+        accountIndex
+      });
+    case WalletType.Trezor:
+      return Wallet.Trezor.TrezorKeyAgent.getXpub({
+        communicationType: Wallet.KeyManagement.CommunicationType.Web,
+        accountIndex
+      });
+  }
+};
+
+const getExtendedAccountPublicKey = async (
+  wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+  accountIndex: number
+) => {
+  // eslint-disable-next-line sonarjs/no-small-switch
+  switch (wallet.type) {
+    case WalletType.InMemory: {
+      // eslint-disable-next-line no-alert
+      const passphrase = Buffer.from(prompt('Please enter your passphrase'));
+      const rootPrivateKeyBytes = await Wallet.KeyManagement.emip3decrypt(
+        Buffer.from(wallet.encryptedSecrets.rootPrivateKeyBytes, 'hex'),
+        passphrase
+      );
+      const rootPrivateKeyBuffer = Buffer.from(rootPrivateKeyBytes);
+      const accountPrivateKey = await Wallet.KeyManagement.util.deriveAccountPrivateKey({
+        bip32Ed25519: Wallet.bip32Ed25519,
+        accountIndex,
+        rootPrivateKey: Wallet.Crypto.Bip32PrivateKeyHex(rootPrivateKeyBuffer.toString('hex'))
+      });
+      const accountPublicKey = await Wallet.bip32Ed25519.getBip32PublicKey(accountPrivateKey);
+      clearBytes(passphrase);
+      clearBytes(rootPrivateKeyBytes);
+      clearBytes(rootPrivateKeyBuffer);
+      return accountPublicKey;
+    }
+    case WalletType.Ledger:
+    case WalletType.Trezor:
+      return getHwExtendedAccountPublicKey(wallet.type, accountIndex);
+  }
+};
+
 const chainIdFromName = (chainName: Wallet.ChainName) => {
   const chainId = Wallet.Cardano.ChainIds[chainName];
   if (!chainId || !AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
@@ -86,8 +149,7 @@ const defaultAccountName = (accountIndex: number) => `Account #${accountIndex}`;
 const keyAgentDataToAddWalletProps = async (
   data: Wallet.KeyManagement.SerializableKeyAgentData,
   backgroundService: BackgroundService,
-  name: string,
-  lockValue: Wallet.HexBlob | undefined
+  metadata: Wallet.WalletMetadata
 ): Promise<AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>> => {
   const accounts = [
     {
@@ -102,7 +164,7 @@ const keyAgentDataToAddWalletProps = async (
       if (!mnemonic) throw new Error('Inconsistent state: mnemonic not found for in-memory wallet');
       return {
         type: WalletType.InMemory,
-        metadata: { name, lockValue },
+        metadata,
         encryptedSecrets: {
           rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
           keyMaterial: HexBlob.fromBytes(Buffer.from(JSON.parse(mnemonic).data))
@@ -113,13 +175,13 @@ const keyAgentDataToAddWalletProps = async (
     case Wallet.KeyManagement.KeyAgentType.Ledger:
       return {
         type: WalletType.Ledger,
-        metadata: { name },
+        metadata,
         accounts
       };
     case Wallet.KeyManagement.KeyAgentType.Trezor:
       return {
         type: WalletType.Trezor,
-        metadata: { name },
+        metadata,
         accounts
       };
     default:
@@ -170,7 +232,7 @@ const createHardwareWallet = async ({
         );
 
   const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-    metadata: { name },
+    metadata: { name, lastActiveAccountIndex: accountIndex },
     type: connectedDevice,
     accounts: [
       {
@@ -184,8 +246,7 @@ const createHardwareWallet = async ({
   await walletManager.activate({
     walletId,
     chainId: DEFAULT_CHAIN_ID,
-    accountIndex,
-    provider
+    accountIndex
   });
 
   return {
@@ -216,7 +277,9 @@ export const useWalletManager = (): UseWalletManager => {
     currentChain,
     setCurrentChain,
     setCardanoCoin,
-    setAddressesDiscoveryCompleted
+    setAddressesDiscoveryCompleted,
+    manageAccountsWallet,
+    setManageAccountsWallet
   } = useWalletStore();
   const [settings, updateAppSettings] = useAppSettingsContext();
   const {
@@ -267,15 +330,18 @@ export const useWalletManager = (): UseWalletManager => {
     // deleteFromLocalStorage('wallet');
 
     const walletId = await walletRepository.addWallet(
-      await keyAgentDataToAddWalletProps(keyAgentData, backgroundService, walletName, lockValue)
+      await keyAgentDataToAddWalletProps(keyAgentData, backgroundService, {
+        name: walletName,
+        lockValue,
+        lastActiveAccountIndex: keyAgentData.accountIndex
+      })
     );
 
     await walletManager.activate({
       // when wallet is locked before migration, keyAgentData.chainId is the default one instead of last active one
       chainId: getCurrentChainId(),
       walletId,
-      accountIndex: keyAgentData.accountIndex,
-      provider
+      accountIndex: keyAgentData.accountIndex
     });
 
     return firstValueFrom(walletRepository.wallets$);
@@ -338,9 +404,30 @@ export const useWalletManager = (): UseWalletManager => {
       ) {
         setCardanoWallet(newCardanoWallet);
       }
+
+      // Synchronize the currently managed wallet UI state with service worker
+      if (manageAccountsWallet) {
+        const managedWallet = wallets.find(
+          (w): w is AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata> =>
+            w.walletId === manageAccountsWallet.walletId && w.type !== WalletType.Script
+        );
+        if (!deepEquals(managedWallet, manageAccountsWallet)) {
+          setManageAccountsWallet(managedWallet);
+        }
+      }
+
       return newCardanoWallet;
     },
-    [setCardanoWallet, setCurrentChain, tryMigrateToWalletRepository, cardanoWallet, currentChain, setCardanoCoin]
+    [
+      setCardanoWallet,
+      setCurrentChain,
+      tryMigrateToWalletRepository,
+      cardanoWallet,
+      currentChain,
+      manageAccountsWallet,
+      setCardanoCoin,
+      setManageAccountsWallet
+    ]
   );
 
   /**
@@ -382,7 +469,7 @@ export const useWalletManager = (): UseWalletManager => {
 
       const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lockValue },
+        metadata: { name, lockValue, lastActiveAccountIndex: accountIndex },
         encryptedSecrets: {
           keyMaterial: await encryptMnemonic(mnemonic, passphrase),
           rootPrivateKeyBytes: HexBlob.fromBytes(
@@ -406,8 +493,7 @@ export const useWalletManager = (): UseWalletManager => {
       await walletManager.activate({
         walletId,
         chainId: getCurrentChainId(),
-        accountIndex,
-        provider
+        accountIndex
       });
 
       // Needed for reset password flow
@@ -430,6 +516,24 @@ export const useWalletManager = (): UseWalletManager => {
           account: addWalletProps.accounts[0]
         }
       };
+    },
+    [getCurrentChainId]
+  );
+
+  const activateWallet = useCallback(
+    async (props: ActivateWalletProps): Promise<void> => {
+      const wallets = await firstValueFrom(walletRepository.wallets$);
+      await walletRepository.updateWalletMetadata({
+        walletId: props.walletId,
+        metadata: {
+          ...wallets.find(({ walletId }) => walletId === props.walletId).metadata,
+          lastActiveAccountIndex: props.accountIndex
+        }
+      });
+      await walletManager.activate({
+        ...props,
+        chainId: getCurrentChainId()
+      });
     },
     [getCurrentChainId]
   );
@@ -548,7 +652,23 @@ export const useWalletManager = (): UseWalletManager => {
     [walletLock, loadWallet]
   );
 
+  const addAccount = async ({ walletId, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
+    const wallets = await firstValueFrom(walletRepository.wallets$);
+    const wallet = wallets.find((w) => w.walletId === walletId);
+    if (!wallet) throw new Error(`Wallet not found: ${walletId}`);
+    if (wallet.type === WalletType.Script) throw new Error('Cannot add account to a script wallet');
+    const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
+    await walletRepository.addAccount({
+      accountIndex,
+      extendedAccountPublicKey,
+      metadata,
+      walletId
+    });
+  };
+
   return {
+    activateWallet,
+    addAccount,
     lockWallet,
     unlockWallet,
     loadWallet,
