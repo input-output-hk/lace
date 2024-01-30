@@ -36,8 +36,12 @@ export const OutputSummary = ({
       {renderLabel({ label: translations.recipientAddress, dataTestId: 'output-summary-recipient-title' })}
       {recipientName ? (
         <div className={styles.recipient}>
-          <Text className={styles.name}>{recipientName}</Text>
-          <Text className={styles.address}>{recipientAddress}</Text>
+          <Text className={styles.name} data-testid="output-summary-recipient-name">
+            {recipientName}
+          </Text>
+          <Text className={styles.address} data-testid="output-summary-recipient-address">
+            {recipientAddress}
+          </Text>
         </div>
       ) : (
         <Text className={styles.recipientAddress} data-testid="output-summary-recipient-address">
