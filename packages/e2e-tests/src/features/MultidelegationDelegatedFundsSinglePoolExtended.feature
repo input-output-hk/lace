@@ -104,8 +104,8 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see selected pools counter is showing "<pools_after>"
     And I see "Add stake pool" button is disabled
     Examples:
-      | pools_after | pool_tickers                                            |
-      | 10          | 8BETA, ADACT, WOOF, CTURT, ADV, BAZAR, SQRL, ASHA, ALFA |
+      | pools_after | pool_tickers                                        |
+      | 10          | 8BETA, ADACT, WOOF, TEKO, ADV, MOC, SQRL, SEA, ALFA |
 
   @LW-9493
   Scenario: Extended View - Staking - Manage staking remove button disabled when staking to 1 pool
