@@ -1,8 +1,8 @@
 import { Wallet } from '@lace/cardano';
-import { getTxCollateral } from '@src/utils/get-tx-collateral';
 import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import { useState, useEffect } from 'react';
 import { firstValueFrom } from 'rxjs';
+import { getCollateral } from '@cardano-sdk/core';
 
 export const useComputeTxCollateral = (wallet: Wallet.ObservableWallet, tx?: Wallet.Cardano.Tx) => {
   const [txCollateral, setTxCollateral] = useState<bigint>();
@@ -18,7 +18,7 @@ export const useComputeTxCollateral = (wallet: Wallet.ObservableWallet, tx?: Wal
         transactionsHistory$: wallet.transactions.history$
       });
 
-      const collateral = await getTxCollateral(
+      const collateral = await getCollateral(
         tx,
         inputResolver,
         addresses.map((addr) => addr.address)
