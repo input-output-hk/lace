@@ -170,7 +170,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     try {
       await (keyAgentType === KeyManagement.KeyAgentType.Trezor
         ? HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(KeyManagement.CommunicationType.Web)
-        : HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web));
+        : HardwareLedger.LedgerKeyAgent.establishDeviceConnection(KeyManagement.CommunicationType.Web));
 
       exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
         {
