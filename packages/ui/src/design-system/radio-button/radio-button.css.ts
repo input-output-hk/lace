@@ -4,13 +4,20 @@ export const radioGroupRoot = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    gap: '$20',
+    width: '$fill',
+    gap: '$0',
     margin: '$0',
   }),
   {
     fontFamily: vars.fontFamily.$nova,
     fontWeight: vars.fontWeights.$semibold,
   },
+]);
+
+export const noGap = style([
+  sx({
+    gap: '$0',
+  }),
 ]);
 
 export const radioGroupItem = style([
@@ -89,6 +96,10 @@ export const icon = style([
   },
 ]);
 
+export const iconWrapper = style({
+  flexGrow: 1,
+});
+
 export const unchecked = style({
   border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
 });
@@ -102,6 +113,7 @@ export const root = style([
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '$small',
+    w: '$fill',
   }),
   {
     display: 'inline-flex',
@@ -118,6 +130,15 @@ export const label = style({
   paddingLeft: '15px',
   display: 'flex',
 });
+
+export const withIcon = style([
+  {
+    minHeight: 36,
+  },
+  sx({
+    margin: '$0',
+  }),
+]);
 
 export const disabled = style([
   sx({
