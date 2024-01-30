@@ -8,9 +8,6 @@ inputs:
   LACE_EXTENSION_KEY:
     description: 'Public extended manifest key'
     required: true
-  CARDANO_SERVICES_URL_MAINNET:
-    description: 'URL to mainnet cardano-services provider server'
-    required: false
   POSTHOG_PRODUCTION_TOKEN_MAINNET:
     description: 'Post hog production mainnet token'
     required: false
@@ -50,7 +47,6 @@ runs:
       env:
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
-        CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
         POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
         POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
