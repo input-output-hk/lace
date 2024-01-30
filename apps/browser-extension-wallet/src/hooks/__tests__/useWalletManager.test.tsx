@@ -219,6 +219,7 @@ describe('Testing useWalletManager hook', () => {
     });
 
     test('should return true when walletLock is successfully decrypted using the wallet password', async () => {
+      (walletApiUi.walletRepository as any).wallets$ = of([{}]);
       const passphrase = 'passphrase';
       const emip3decryptResultMocked = '{}';
       const walletLock = {};

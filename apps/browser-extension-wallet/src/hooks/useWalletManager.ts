@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable unicorn/no-null */
 import { useCallback } from 'react';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
@@ -18,7 +20,7 @@ import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService'
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { ILocalStorage } from '@src/types';
 import { firstValueFrom } from 'rxjs';
-import { AddWalletProps, WalletType } from '@cardano-sdk/web-extension';
+import { AddWalletProps, AnyWallet, WalletType } from '@cardano-sdk/web-extension';
 import { HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
 
@@ -298,82 +300,66 @@ export const useWalletManager = (): UseWalletManager => {
     backgroundService.setWalletPassword();
   }, [backgroundService]);
 
-  /**
-   * Deletes wallet lock in storage, which should be stored encrypted with the wallet password
-   */
-  const lockWallet = useCallback(async (): Promise<void> => {
-    const lockValue = cardanoWallet.source.wallet.metadata.lockValue;
-    if (!lockValue) return;
-    setWalletLock(Buffer.from(lockValue, 'hex'));
-    setCardanoWallet();
-    setAddressesDiscoveryCompleted(false);
-  }, [setCardanoWallet, cardanoWallet, setWalletLock, setAddressesDiscoveryCompleted]);
+  const tryMigrateToWalletRepository = useCallback(async (): Promise<
+    AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] | undefined
+  > => {
+    const walletName = getWalletFromStorage()?.name;
+    const keyAgentData = getValueFromLocalStorage('keyAgentData');
+    const lock = getValueFromLocalStorage('lock');
 
-  /**
-   * Recovers wallet info from encrypted lock using the wallet password
-   */
-  const unlockWallet = useCallback(
-    async (password: string): Promise<boolean> => {
-      if (!walletLock) return true;
-      try {
-        const walletDecrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, Buffer.from(password));
-        // If JSON.parse succeeds, it means it was successfully decrypted
-        JSON.parse(walletDecrypted.toString());
-        return true;
-      } catch {
-        return false;
+    // Wallet is locked: we don't have access to decrypted keyAgentData until it's unlocked
+    if (!keyAgentData) {
+      if (lock) {
+        setWalletLock(lock);
       }
-    },
-    [walletLock]
-  );
+      setCardanoWallet(null);
+      return;
+    }
+
+    // Wallet info for current network
+    if (!walletName) {
+      setCardanoWallet(null);
+      return;
+    }
+
+    const lockValue =
+      lock && keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory
+        ? HexBlob.fromBytes(lock)
+        : undefined;
+    resetWalletLock();
+    deleteFromLocalStorage('keyAgentData');
+    // this is needed for reset password flow
+    // deleteFromLocalStorage('wallet');
+
+    const walletId = await walletRepository.addWallet(
+      await keyAgentDataToAddWalletProps(keyAgentData, backgroundService, walletName, lockValue)
+    );
+
+    await walletRepository.addAccount({
+      accountIndex: keyAgentData.accountIndex,
+      metadata: { name: defaultAccountName(keyAgentData.accountIndex) },
+      walletId
+    });
+    await walletManager.activate({
+      chainId: keyAgentData.chainId,
+      walletId,
+      accountIndex: keyAgentData.accountIndex,
+      provider
+    });
+
+    return firstValueFrom(walletRepository.wallets$);
+  }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock]);
 
   /**
    * Loads wallet from storage.
    * @returns resolves with wallet information or null when no wallet is found
    */
-  // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   const loadWallet = useCallback(async (): Promise<Wallet.CardanoWallet | undefined> => {
-    let wallets = await firstValueFrom(walletRepository.wallets$);
+    const wallets = await firstValueFrom(walletRepository.wallets$);
 
     // LW-9499 to convert this to proper migration
-    if (wallets.length === 0) {
-      const walletName = getWalletFromStorage()?.name;
-      const keyAgentData = getValueFromLocalStorage('keyAgentData');
-      const lock = getValueFromLocalStorage('lock');
-      // Wallet info for current network
-      if (!keyAgentData || !walletName) {
-        // eslint-disable-next-line unicorn/no-null
-        setCardanoWallet(null);
-        return;
-      }
-
-      const lockValue =
-        lock && keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory
-          ? HexBlob.fromBytes(lock)
-          : undefined;
-      // lock behavior changed a little bit, it is only in local storage while actually locked
-      // REVIEW: it is likely that Lace update/migration would unlock a locked wallet. Is that ok?
-      resetWalletLock();
-      deleteFromLocalStorage('keyAgentData');
-      // this is needed for reset password flow
-      // deleteFromLocalStorage('wallet');
-
-      const walletId = await walletRepository.addWallet(
-        await keyAgentDataToAddWalletProps(keyAgentData, backgroundService, walletName, lockValue)
-      );
-
-      await walletRepository.addAccount({
-        accountIndex: keyAgentData.accountIndex,
-        metadata: { name: defaultAccountName(keyAgentData.accountIndex) },
-        walletId
-      });
-      await walletManager.activate({
-        chainId: keyAgentData.chainId,
-        walletId,
-        accountIndex: keyAgentData.accountIndex,
-        provider
-      });
-      wallets = await firstValueFrom(walletRepository.wallets$);
+    if (wallets.length === 0 && !(await tryMigrateToWalletRepository())) {
+      return;
     }
 
     let activeWalletId = await firstValueFrom(walletManager.activeWalletId$);
@@ -424,10 +410,8 @@ export const useWalletManager = (): UseWalletManager => {
       wallet: observableWallet
     };
     setCardanoWallet(result);
-    // REVIEW: why "Async arrow function expected no return value."?
-    // eslint-disable-next-line consistent-return
     return result;
-  }, [backgroundService, setCardanoWallet, resetWalletLock, setCurrentChain]);
+  }, [setCardanoWallet, setCurrentChain, tryMigrateToWalletRepository]);
 
   const activateWallet = useCallback(
     async ({ walletInstance, mnemonicVerificationFrequency = '', chainName = CHAIN }: SetWallet): Promise<void> => {
@@ -542,6 +526,44 @@ export const useWalletManager = (): UseWalletManager => {
       setCardanoCoin(chainId);
     },
     [setAddressesDiscoveryCompleted, updateAppSettings, settings, setCurrentChain, setCardanoCoin]
+  );
+
+  /**
+   * Deletes wallet lock in storage, which should be stored encrypted with the wallet password
+   */
+  const lockWallet = useCallback(async (): Promise<void> => {
+    const lockValue = cardanoWallet.source.wallet.metadata.lockValue;
+    if (!lockValue) return;
+    setWalletLock(Buffer.from(lockValue, 'hex'));
+    setCardanoWallet();
+    setAddressesDiscoveryCompleted(false);
+  }, [setCardanoWallet, cardanoWallet, setWalletLock, setAddressesDiscoveryCompleted]);
+
+  /**
+   * Recovers wallet info from encrypted lock using the wallet password
+   */
+  const unlockWallet = useCallback(
+    async (password: string): Promise<boolean> => {
+      if (!walletLock) return true;
+      try {
+        const decrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, Buffer.from(password));
+        // If JSON.parse succeeds, it means it was successfully decrypted
+        const parsed = JSON.parse(decrypted.toString());
+
+        if ((await firstValueFrom(walletRepository.wallets$)).length === 0) {
+          // set value in local storage for data migration to wallet repository
+          const keyAgentData = parsed.Mainnet?.keyAgentData;
+          if (keyAgentData) {
+            saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
+            await loadWallet();
+          }
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [walletLock, loadWallet]
   );
 
   return {
