@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import { Tooltip } from 'antd';
 import cn from 'classnames';
 import React, { useState } from 'react';
@@ -22,20 +23,22 @@ const rotateClose: React.CSSProperties = {
 interface TxDetailListProps<T extends string> {
   testId: string;
   title: string;
+  subTitle: string;
   lists: TxDetails<T>[];
   translations: TranslationsFor<T>;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
 
-export const TxDetailList = function TxDetailList<T extends string>({
+export const TxDetailList = <T extends string>({
   testId,
   title,
+  subTitle,
   lists,
   tooltipContent,
   withSeparatorLine,
   translations
-}: TxDetailListProps<T>): React.ReactElement {
+}: TxDetailListProps<T>): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
   const animation = isVisible ? rotateOpen : rotateClose;
@@ -66,6 +69,11 @@ export const TxDetailList = function TxDetailList<T extends string>({
         <div className={styles.txInOutContent} data-testid={`${testId}-lists`}>
           {lists.map((list, idx) => (
             <div key={`${testId}-list-${idx}`} className={cn({ [styles.topBorderContent]: idx > 0 })}>
+              {lists.length > 1 && (
+                <div key={`${testId}-list-header`} className={cn(styles.listHeader, styles.separatorLine)}>
+                  <div className={styles.listHeaderTitle}>{`${subTitle} ${idx + 1}`}</div>
+                </div>
+              )}
               <DetailRows<T> translations={translations} testId={testId} list={list} />
             </div>
           ))}

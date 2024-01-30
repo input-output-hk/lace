@@ -231,6 +231,22 @@ export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterTypeEnum
   }
 };
 
+export enum CredentialTypeEnum {
+  KeyHash = 'KeyHash',
+  ScriptHash = 'ScriptHash'
+}
+
+export const getCredentialType = (credentialType: Wallet.Cardano.CredentialType): CredentialTypeEnum => {
+  switch (credentialType) {
+    case Wallet.Cardano.CredentialType.KeyHash:
+      return CredentialTypeEnum.KeyHash;
+    case Wallet.Cardano.CredentialType.ScriptHash:
+      return CredentialTypeEnum.ScriptHash;
+    default:
+      return CredentialTypeEnum.ScriptHash;
+  }
+};
+
 export enum VotesEnum {
   YES = 'yes',
   NO = 'no',

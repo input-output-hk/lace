@@ -16,7 +16,8 @@ import {
   TxDetailsVotingProceduresTitles,
   TxDetailsProposalProceduresTitles,
   TxDetailsCertificateTitles,
-  TxDetails
+  TxDetails,
+  TxDetail
 } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,22 +130,44 @@ export const TransactionDetails = ({
 
   // Translate certificate typenames
   const translatedCertificates = certificates?.map((certificate) =>
-    certificate?.map((detail) => ({
-      ...detail,
-      ...(detail.title === 'certificateType' && {
-        details: [t(`package.core.assetActivityItem.entry.certificates.typenames.${detail.details[0]}`)]
-      })
-    }))
+    certificate?.map(
+      (detail) =>
+        ({
+          ...detail,
+          ...('title' in detail &&
+            detail.title === 'certificateType' && {
+              details: [t(`package.core.assetActivityItem.entry.certificates.typenames.${detail.details[0]}`)]
+            })
+        } as TxDetail<TxDetailsCertificateTitles>)
+    )
   );
 
   // Translate governance proposal typenames
   const translatedProposalProcedures = proposalProcedures?.map((proposal) =>
-    proposal?.map((p) => ({
-      ...p,
-      ...(p.title === 'type' && {
-        details: [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)]
-      })
-    }))
+    proposal?.map(
+      (p) =>
+        ({
+          ...p,
+          ...('title' in p &&
+            p.title === 'type' && {
+              details: [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)]
+            })
+        } as TxDetail<TxDetailsProposalProceduresTitles>)
+    )
+  );
+
+  // Translate voting procedure typenames
+  const translatedVotingProcedures = votingProcedures?.map((proposal) =>
+    proposal?.map(
+      (p) =>
+        ({
+          ...p,
+          ...('title' in p &&
+            ['voterType', 'credentialType', 'voteTypes'].includes(p.title) && {
+              details: [t(`package.core.activityDetails.${p.title}.${p.details[0]}`)]
+            })
+        } as TxDetail<TxDetailsVotingProceduresTitles>)
+    )
   );
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
@@ -169,7 +192,7 @@ export const TransactionDetails = ({
         <div className={styles.block}>
           <div data-testid="tx-hash" className={styles.hashContainer}>
             <div className={cn(styles.title, styles.labelWidth)}>
-              <div className={styles.hashLabel}>{t('package.core.activityDetails.transactionHash')}</div>
+              <div className={styles.hashLabel}>{t('package.core.activityDetails.transactionID')}</div>
             </div>
             <div
               data-testid="tx-hash-detail"
@@ -315,14 +338,14 @@ export const TransactionDetails = ({
           <TxDetailList<TxDetailsVotingProceduresTitles>
             testId="voting-procedures"
             title={t('package.core.activityDetails.votingProcedures')}
-            lists={votingProcedures}
+            subTitle={t('package.core.activityDetails.votingProcedure')}
+            lists={translatedVotingProcedures}
             translations={{
               voterType: t('package.core.activityDetails.votingProcedureTitles.voterType'),
-              voterCredential: t('package.core.activityDetails.votingProcedureTitles.voterCredential'),
-              vote: t('package.core.activityDetails.votingProcedureTitles.vote'),
-              anchor: t('package.core.activityDetails.votingProcedureTitles.anchor'),
-              proposalTxHash: t('package.core.activityDetails.votingProcedureTitles.proposalTxHash'),
-              actionIndex: t('package.core.activityDetails.votingProcedureTitles.actionIndex')
+              credentialType: t('package.core.activityDetails.votingProcedureTitles.credentialType'),
+              voteTypes: t('package.core.activityDetails.votingProcedureTitles.voteTypes'),
+              anchorHash: t('package.core.activityDetails.votingProcedureTitles.anchorHash'),
+              anchorURL: t('package.core.activityDetails.votingProcedureTitles.proposalTxHash')
             }}
             withSeparatorLine
           />
@@ -331,36 +354,51 @@ export const TransactionDetails = ({
           <TxDetailList<TxDetailsProposalProceduresTitles>
             testId="proposal-procedures"
             title={t('package.core.activityDetails.proposalProcedures')}
+            subTitle={t('package.core.activityDetails.proposalProcedure')}
             lists={translatedProposalProcedures}
             withSeparatorLine
             translations={{
               type: t('package.core.activityDetails.proposalProcedureTitles.type'),
-              governanceActionId: t('package.core.activityDetails.proposalProcedureTitles.governanceActionId'),
-              rewardAccount: t('package.core.activityDetails.proposalProcedureTitles.rewardAccount'),
-              anchor: t('package.core.activityDetails.proposalProcedureTitles.anchor'),
-              protocolParamUpdate: t('package.core.activityDetails.proposalProcedureTitles.protocolParamUpdate'),
-              protocolVersion: t('package.core.activityDetails.proposalProcedureTitles.protocolVersion'),
-              withdrawals: t('package.core.activityDetails.proposalProcedureTitles.withdrawals'),
-              membersToBeRemoved: t('package.core.activityDetails.proposalProcedureTitles.membersToBeRemoved'),
+              deposit: t('package.core.activityDetails.proposalProcedureTitles.deposit'),
+              anchorHash: t('package.core.activityDetails.proposalProcedureTitles.anchorHash'),
+              anchorURL: t('package.core.activityDetails.proposalProcedureTitles.anchorURL'),
+              governanceActionIndex: t('package.core.activityDetails.proposalProcedureTitles.governanceActionIndex'),
+              withdrawal: t('package.core.activityDetails.proposalProcedureTitles.withdrawal'),
+              withdrawalRewardAccount: t(
+                'package.core.activityDetails.proposalProcedureTitles.withdrawalRewardAccount'
+              ),
+              withdrawalAmount: t('package.core.activityDetails.proposalProcedureTitles.withdrawalAmount'),
+              constitutionAnchorURL: t('package.core.activityDetails.proposalProcedureTitles.constitutionAnchorURL'),
+              constitutionScriptHash: t('package.core.activityDetails.proposalProcedureTitles.constitutionScriptHash'),
+              coldCredentialHash: t('package.core.activityDetails.proposalProcedureTitles.coldCredentialHash'),
+              epoch: t('package.core.activityDetails.proposalProcedureTitles.epoch'),
               membersToBeAdded: t('package.core.activityDetails.proposalProcedureTitles.membersToBeAdded'),
-              newQuorumThreshold: t('package.core.activityDetails.proposalProcedureTitles.newQuorumThreshold'),
-              constitutionAnchor: t('package.core.activityDetails.proposalProcedureTitles.constitutionAnchor')
+              hash: t('package.core.activityDetails.proposalProcedureTitles.hash'),
+              membersToBeRemoved: t('package.core.activityDetails.proposalProcedureTitles.membersToBeRemoved'),
+              protocolVersionMajor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMajor'),
+              protocolVersionMinor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMinor'),
+              protocolVersionPatch: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionPatch')
             }}
           />
         )}
         {certificates?.length > 0 && (
           <TxDetailList<TxDetailsCertificateTitles>
             title={t('package.core.activityDetails.certificates')}
+            subTitle={t('package.core.activityDetails.certificate')}
             testId="certificates"
             lists={translatedCertificates}
             withSeparatorLine
             translations={{
+              certificate: t('package.core.activityDetails.certificateTitles.certificate'),
               certificateType: t('package.core.activityDetails.certificateTitles.certificateType'),
-              drep: t('package.core.activityDetails.certificateTitles.drep'),
-              anchor: t('package.core.activityDetails.certificateTitles.anchor'),
               coldCredential: t('package.core.activityDetails.certificateTitles.coldCredential'),
               hotCredential: t('package.core.activityDetails.certificateTitles.hotCredential'),
-              drepCredential: t('package.core.activityDetails.certificateTitles.drepCredential'),
+              stakeKey: t('package.core.activityDetails.certificateTitles.stakeKey'),
+              drepId: t('package.core.activityDetails.certificateTitles.drepId'),
+              anchorUrl: t('package.core.activityDetails.certificateTitles.anchorUrl'),
+              anchorHash: t('package.core.activityDetails.certificateTitles.anchorHash'),
+              poolId: t('package.core.activityDetails.certificateTitles.poolId'),
+              drep: t('package.core.activityDetails.certificateTitles.drep'),
               depositPaid: t('package.core.activityDetails.certificateTitles.depositPaid')
             }}
           />

@@ -115,3 +115,20 @@
   border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
   padding-top: size_unit(3);
 }
+
+
+.listHeader {
+  color: var(--text-color-primary, #ffffff);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: size_unit(4);
+  width: 100%;
+
+  .listHeaderTitle {
+    display: flex;
+    flex: 0 0 50%;
+    align-self: baseline;
+    color: var(--text-color-primary, #ffffff);
+    @include text-body-bold;
+  }
+}

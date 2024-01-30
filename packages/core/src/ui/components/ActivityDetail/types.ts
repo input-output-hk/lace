@@ -43,40 +43,50 @@ export enum TransactionActivityType {
 
 export type TxDetailsCertificateTitles =
   | 'certificateType'
-  | 'drep'
-  | 'anchor'
   | 'coldCredential'
   | 'hotCredential'
-  | 'drepCredential'
-  | 'depositPaid';
+  | 'stakeKey'
+  | 'drepId'
+  | 'anchorUrl'
+  | 'anchorHash'
+  | 'poolId'
+  | 'drep'
+  | 'depositPaid'
+  | 'certificate';
 
 export type TxDetailsProposalProceduresTitles =
   | 'type'
-  | 'governanceActionId'
-  | 'rewardAccount'
-  | 'anchor'
-  | 'protocolParamUpdate'
-  | 'protocolVersion'
-  | 'withdrawals'
-  | 'membersToBeRemoved'
+  | 'deposit'
+  | 'anchorHash'
+  | 'anchorURL'
+  | 'governanceActionIndex'
+  | 'withdrawal'
+  | 'withdrawalRewardAccount'
+  | 'withdrawalAmount'
+  | 'constitutionAnchorURL'
+  | 'constitutionScriptHash'
+  | 'coldCredentialHash'
+  | 'epoch'
   | 'membersToBeAdded'
-  | 'newQuorumThreshold'
-  | 'constitutionAnchor';
+  | 'hash'
+  | 'membersToBeRemoved'
+  | 'protocolVersionMajor'
+  | 'protocolVersionMinor'
+  | 'protocolVersionPatch';
 
-export type TxDetailsVotingProceduresTitles =
-  | 'voterType'
-  | 'voterCredential'
-  | 'vote'
-  | 'anchor'
-  | 'proposalTxHash'
-  | 'actionIndex';
+export type TxDetailsVotingProceduresTitles = 'voterType' | 'credentialType' | 'voteTypes' | 'anchorHash' | 'anchorURL';
 
 export type TxDetail<T> = {
   title: T;
   details: string[];
 };
 
-export type TxDetails<T> = TxDetail<T>[];
+export type TxDetaisList<T> = {
+  header: T;
+  details: TxDetail<T>[];
+};
+
+export type TxDetails<T> = (TxDetail<T> | TxDetaisList<T>)[];
 
 export type GovernanceTransactionTypes =
   | ConwayEraCertificatesTypes

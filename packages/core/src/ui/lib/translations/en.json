@@ -101,7 +101,7 @@
       "sent": "Sent",
       "sending": "Sending",
       "header": "Summary of your activity",
-      "transactionHash": "Transaction Hash",
+      "transactionID": "Transaction ID",
       "status": "Status",
       "timestamp": "Timestamp",
       "inputs": "Inputs",
@@ -136,37 +136,48 @@
       "vote": "Vote Signing",
       "submitProposal": "Governance Proposal",
       "certificates": "Certificates",
+      "certificate": "Certificate",
       "certificateTitles": {
-        "certificateType": "Certificate type",
+        "certificateType": "Type",
+        "stakeKey": "Stake Key",
+        "poolId": "Pool ID",
         "drep": "DRep",
-        "anchor": "Anchor",
+        "drepId": "Drep ID",
+        "depositPaid": "Deposit paid",
+        "anchorUrl": "Anchor URL",
+        "anchorHash": "Anchor Hash",
         "coldCredential": "Cold credential",
-        "hotCredential": "Hot credential",
-        "drepCredential": "DRep credential",
-        "depositPaid": "Deposit paid"
+        "hotCredential": "Hot credential"
       },
       "votingProcedures": "Voting Procedures",
       "votingProcedureTitles": {
-        "voterType": "Voter type",
-        "voterCredential": "Voter Credential",
         "vote": "Vote",
-        "anchor": "Anchor",
-        "proposalTxHash": "Proposal Tx hash",
-        "actionIndex": "Governance action index"
+        "voterType": "Voter type",
+        "credentialType": "Credential Type",
+        "anchorUrl": "Anchor URL",
+        "anchorHash": "Anchor Hash",
+        "voteTypes": "Vote"
       },
       "proposalProcedures": "Proposal Procedures",
+      "proposalProcedure": "Procedure",
       "proposalProcedureTitles": {
-        "type": "Procedure type",
-        "governanceActionId": "Governance action ID",
-        "rewardAccount": "Reward account",
-        "anchor": "Anchor",
-        "protocolParamUpdate": "Protocol parameter update(s)",
-        "protocolVersion": "Protocol version",
-        "withdrawals": "Withdrawals",
-        "membersToBeRemoved": "Members to remove",
-        "membersToBeAdded": "Members to add",
-        "newQuorumThreshold": "New quorum threshold",
-        "constitutionAnchor": "Constitution anchor"
+        "deposit": "Deposit",
+        "anchorHash": "Anchor Hash",
+        "anchorURL": "Anchor URL",
+        "governanceActionIndex": "Governance Action Index",
+        "withdrawal": "Withdrawal",
+        "withdrawalRewardAccount": "Withdrawal Reward Account",
+        "withdrawalAmount": "Withdrawal Amount",
+        "constitutionAnchorURL": "Constitution Anchor URL",
+        "constitutionScriptHash": "Constitution Script Hash",
+        "coldCredentialHash": "Cold Credential Hash",
+        "epoch": "Epoch",
+        "membersToBeAdded": "Members To Be Added",
+        "hash": "Hash",
+        "membersToBeRemoved": "Members To Be Removed",
+        "protocolVersionMajor": "Protocol Version Major",
+        "protocolVersionMinor": "Protocol Version Minor",
+        "protocolVersionPatch": "Protocol Version Patch"
       },
       "governanceActions": {
         "info_action": "Info Action",
@@ -176,6 +187,20 @@
         "no_confidence": "No Confidence",
         "update_committee": "Update Committee",
         "new_constitution": "New Constitution"
+      },
+      "voterType": {
+        "constitutionalCommittee": "Constitutional Committee",
+        "spo": "SPO",
+        "drep": "DRep"
+      },
+      "voteTypes": {
+        "yes": "Yes",
+        "no": "No",
+        "abstain": "Abstain"
+      },
+      "credentialType": {
+        "KeyHash": "Keyhash",
+        "ScriptHash": "Scripthash"
       }
     },
     "authorizeDapp": {
