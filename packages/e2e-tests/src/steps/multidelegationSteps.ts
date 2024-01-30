@@ -473,3 +473,7 @@ When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
     await SwitchingStakePoolModal.fineByMeButton.click();
   }
 });
+
+Then(/^I see Expanded View banner$/, async () => {
+  await StartStakingPageAssert.assertSeeExpandedViewBanner();
+});
