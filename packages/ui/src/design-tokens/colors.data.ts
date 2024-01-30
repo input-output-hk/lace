@@ -163,6 +163,9 @@ export const colors = {
   $transaction_summary_label_color: '',
   $transaction_summary_secondary_label_color: '',
 
+  $dapp_transaction_summary_type_label_color: '',
+  $dapp_transaction_summary_label: '',
+
   $toast_bar_container_bgColor: '',
   $toast_bar_label_color: '',
   $toast_bar_icon_container_bgColor: '',

@@ -1,14 +1,17 @@
+/* eslint-disable no-console */
+/* eslint-disable max-statements */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
-import { Layout } from './Layout';
+// import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
-import { sectionTitle, DAPP_VIEWS } from '../config';
+
+// import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
-import { useWalletStore } from '@stores';
+import { networkInfoStatusSelector, useWalletStore } from '@stores';
 import { AddressListType } from '@views/browser/features/activity';
 import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '@src/utils/constants';
@@ -19,7 +22,11 @@ import {
   assetsMintedInspector,
   createTxInspector,
   AssetsMintedInspection,
-  MintedAsset
+  MintedAsset,
+  TransactionSummaryInspection,
+  transactionSummaryInspector,
+  TokenTransferInspection,
+  tokenTransferInspector
 } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
@@ -31,6 +38,8 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { createInputResolver } from '@cardano-sdk/wallet';
+import { transactionSummaryInspector as mock } from '../mock_data/transactionSummaryInspector';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -86,8 +95,21 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     walletType,
     isHardwareWallet,
     blockchainProvider: { assetProvider },
-    walletUI: { cardanoCoin }
-  } = useWalletStore();
+    walletUI: { cardanoCoin },
+    fetchNetworkInfo,
+    networkInfo
+  } = useWalletStore((state) => ({
+    networkInfo: state.networkInfo,
+    fetchNetworkInfo: state.fetchNetworkInfo,
+    walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
+    blockchainProvider: state.blockchainProvider,
+    getKeyAgentType: state.getKeyAgentType,
+    inMemoryWallet: state.inMemoryWallet,
+    walletInfo: state.walletInfo
+  }));
+
+  const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
+
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
   const { priceResult } = useFetchCoinPrice();
@@ -98,7 +120,21 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
-  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+  const [_, setDappInfo] = useState<Wallet.DappInfo>();
+
+  const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
+
+  const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
+    TransactionSummaryInspection | undefined
+  >();
+  // const [toAddressDetails, setToAddressDetails] = useState();
+  // const [fromAddressDetails, setFromAddressDetails] = useState();
+
+  const txInputResolver = createInputResolver({ utxo: inMemoryWallet.utxo });
+  console.log('transactioninspecion details:', transactionInspectionDetails);
+  useEffect(() => {
+    fetchNetworkInfo();
+  }, [fetchNetworkInfo]);
 
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
@@ -228,25 +264,40 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [addressList]
   );
 
-  const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
+  const userAddresses = walletInfo.addresses.map((v) => v.address);
+
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const rAccounts = rewardAccounts && rewardAccounts.map((key) => key.address);
+
+  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+
+  console.log('userAddress and rewards', userAddresses, rewardAccounts, rAccounts);
 
   useEffect(() => {
     if (!req) {
       setTxSummary(void 0);
+      setTransactionInspectionDetails(void 0);
       return;
     }
     const getTxSummary = async () => {
       const inspector = createTxInspector({
         minted: assetsMintedInspector,
-        burned: assetsBurnedInspector
+        burned: assetsBurnedInspector,
+        summary: transactionSummaryInspector({
+          addresses: userAddresses,
+          rewardAccounts: rAccounts,
+          inputResolver: txInputResolver,
+          protocolParameters
+        })
       });
 
       const tx = req.transaction.toCore();
-      const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
+      const { minted, burned, summary } = await inspector(tx as Wallet.Cardano.HydratedTx);
       const isMintTransaction = minted.length > 0 || burned.length > 0;
 
-      const txType = isMintTransaction ? 'Mint' : 'Send';
+      console.log('summary???', summary);
 
+      const txType = isMintTransaction ? 'Mint' : 'Send';
       const externalOutputs = tx.body.outputs.filter((output) => {
         if (txType === 'Send') {
           return walletInfo.addresses.every((addr) => output.address !== addr.address);
@@ -276,9 +327,22 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         mintedAssets: createMintedList(minted),
         burnedAssets: createMintedList(burned)
       });
+
+      setTransactionInspectionDetails(summary);
     };
     getTxSummary();
-  }, [req, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap, setTxSummary]);
+  }, [
+    req,
+    walletInfo.addresses,
+    createAssetList,
+    createMintedList,
+    addressToNameMap,
+    setTxSummary,
+    userAddresses,
+    rAccounts,
+    txInputResolver,
+    protocolParameters
+  ]);
 
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
@@ -293,16 +357,21 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
+  const newTxData = mock();
+
+  // console.log('request data:', req);
+  // console.log('txSummarydata:', txSummary);
 
   return (
-    <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
+    <>
       {req && txSummary ? (
         <DappTransaction
           transaction={txSummary}
-          dappInfo={dappInfo}
+          // dappInfo={dappInfo}
           fiatCurrencyCode={fiatCurrency?.code}
           fiatCurrencyPrice={priceResult?.cardano?.price}
           coinSymbol={cardanoCoin.symbol}
+          newTxSummary={newTxData}
         />
       ) : (
         <Skeleton loading />
@@ -311,6 +380,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         <Button
           onClick={onConfirm}
           loading={isHardwareWallet && isConfirmingTx}
+          // loading={(isUsingHardwareWallet && isConfirmingTx) || isLoadingNetworkInfo}
+
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}
         >
@@ -327,6 +398,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>
-    </Layout>
+    </>
   );
 });
