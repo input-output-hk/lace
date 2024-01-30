@@ -40,7 +40,7 @@ Feature: Staking Page - Extended View
       | NED#                   | 0                 |                   |
       | PAN                    | 1                 | PANL              |
       | 123456                 | 0                 |                   |
-      | AZ                     | 2                 | BAZAR             |
+      | WO                     | 2                 | WOTA              |
       | £££                    | 0                 |                   |
       | Amso                   | 0                 |                   |
 

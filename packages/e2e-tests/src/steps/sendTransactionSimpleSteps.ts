@@ -26,13 +26,12 @@ import testContext from '../utils/testContext';
 import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
-import transactionsPageObject from '../pageobject/transactionsPageObject';
 import { Asset } from '../data/Asset';
 import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
 import Modal from '../elements/modal';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
+import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
@@ -371,7 +370,7 @@ Then(/^the selected contact is added in the bundle recipient's address$/, async 
 });
 
 When(/^I save fee value$/, async () => {
-  await transactionsPageObject.saveFeeValue();
+  await TransactionSummaryPage.saveFeeValue();
 });
 
 Then(
@@ -559,9 +558,8 @@ When(
 );
 
 When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
-  const transactionSummaryPage = new TransactionSummaryPage();
-  await transactionSummaryPage.confirmButton.waitForEnabled();
-  await transactionSummaryPage.confirmButton.click();
+  await TransactionSummaryPage.confirmButton.waitForEnabled();
+  await TransactionSummaryPage.confirmButton.click();
 });
 
 When(/^I click "(Save|Cancel)" button on "Add address" drawer in send flow$/, async (button: 'Save' | 'Cancel') => {
