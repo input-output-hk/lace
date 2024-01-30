@@ -20,7 +20,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { analytics } = useOutsideHandles();
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
-    walletStoreGetWalletType: getWalletType,
+    walletStoreWalletType: walletType,
     submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
   } = useOutsideHandles();
@@ -34,7 +34,6 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const [openPoolsManagementConfirmationModal, setOpenPoolsManagementConfirmationModal] =
     useState<PoolsManagementModalType | null>(null);
 
-  const walletType = getWalletType();
   const isInMemory = walletType === WalletType.InMemory;
 
   // TODO unify

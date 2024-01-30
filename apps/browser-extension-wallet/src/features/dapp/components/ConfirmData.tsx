@@ -43,15 +43,13 @@ export const DappConfirmData = (): React.ReactElement => {
     utils: { setNextView },
     signDataRequest: { request: req, set: setSignDataRequest }
   } = useViewsFlowContext();
-  const { getWalletType } = useWalletStore();
+  const { isHardwareWallet } = useWalletStore();
   const { t } = useTranslation();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const analytics = useAnalyticsContext();
-  const walletType = getWalletType();
-  const isUsingHardwareWallet = walletType === WalletType.Ledger || walletType === WalletType.Trezor;
 
   const [formattedData, setFormattedData] = useState<{
     address: string;
@@ -123,8 +121,8 @@ export const DappConfirmData = (): React.ReactElement => {
     analytics?.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
-    isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
-  }, [isUsingHardwareWallet, signWithHardwareWallet, setNextView, analytics]);
+    isHardwareWallet ? signWithHardwareWallet() : setNextView();
+  }, [isHardwareWallet, signWithHardwareWallet, setNextView, analytics]);
 
   return (
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_DATA])}>

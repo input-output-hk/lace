@@ -22,7 +22,6 @@ import { useStakePoolDetails } from '../store';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useObservable } from '@lace/common';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -34,7 +33,7 @@ export const Staking = (): React.ReactElement => {
   const { networkInfo, fetchNetworkInfo } = useWalletStore(stakingInfoSelector);
   const { setSelectedStakePool } = useDelegationStore();
   const {
-    getWalletType,
+    isInMemoryWallet,
     blockchainProvider,
     walletInfo,
     inMemoryWallet,
@@ -48,7 +47,6 @@ export const Staking = (): React.ReactElement => {
   const delegationDetails = useDelegationDetails();
   const { totalRewards, lastReward } = useStakingRewards();
 
-  const isInMemory = getWalletType() === WalletType.InMemory;
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
 
   useEffect(() => {
@@ -82,7 +80,7 @@ export const Staking = (): React.ReactElement => {
 
   useEffect(() => {
     const fetchSelectedStakePool = async () => {
-      if (isInMemory || !networkInfo) return;
+      if (isInMemoryWallet || !networkInfo) return;
       const stakePoolId = localStorage.getItem('TEMP_POOLID');
       if (!stakePoolId) return;
       const searchString = String(stakePoolId);
@@ -102,7 +100,7 @@ export const Staking = (): React.ReactElement => {
     stakePoolSearchResults,
     networkInfo,
     isSearching,
-    isInMemory,
+    isInMemoryWallet,
     fetchStakePools
   ]);
 

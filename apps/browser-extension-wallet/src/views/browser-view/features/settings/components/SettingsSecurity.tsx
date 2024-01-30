@@ -10,7 +10,6 @@ import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Title } = Typography;
 interface SettingsSecurityProps {
@@ -28,7 +27,7 @@ export const SettingsSecurity = ({
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const { t } = useTranslation();
-  const { isWalletLocked, getWalletType } = useWalletStore();
+  const { isWalletLocked, isInMemoryWallet } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -55,8 +54,8 @@ export const SettingsSecurity = ({
   };
 
   const isMnemonicAvailable = useCallback(async () => {
-    setHideShowPassphraseSetting(isWalletLocked() || getWalletType() !== WalletType.InMemory);
-  }, [getWalletType, isWalletLocked]);
+    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet);
+  }, [isInMemoryWallet, isWalletLocked]);
 
   const handleCloseShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(false);
@@ -102,8 +101,7 @@ export const SettingsSecurity = ({
             </SettingsLink>
           </>
         )}
-        {/* TODO: find better way to check if using a hardware wallet or not */}
-        {showPassphraseVerification && getWalletType() === WalletType.InMemory && (
+        {showPassphraseVerification && isInMemoryWallet && (
           <SettingsLink
             onClick={() => setIsPassphraseSettingsDrawerOpen(true)}
             description={t('browserView.settings.security.passphrasePeriodicVerification.description')}

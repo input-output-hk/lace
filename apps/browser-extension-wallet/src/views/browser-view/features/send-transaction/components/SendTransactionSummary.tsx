@@ -105,14 +105,13 @@ export const SendTransactionSummary = withAddressBookContext(
     const { t } = useTranslation();
     const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
-    const { inMemoryWallet } = useWalletStore();
-    const { priceResult } = useFetchCoinPrice();
     const {
-      getWalletType,
+      inMemoryWallet,
+      isHardwareWallet,
+      walletType,
       walletUI: { cardanoCoin }
     } = useWalletStore();
-    const walletType = getWalletType();
-    const isInMemory = walletType === WalletType.InMemory;
+    const { priceResult } = useFetchCoinPrice();
     const isTrezor = walletType === WalletType.Trezor;
 
     const { list: addressList } = useAddressBookContext();
@@ -168,7 +167,7 @@ export const SendTransactionSummary = withAddressBookContext(
             })
           }
         />
-        {!isInMemory && !isPopupView && (
+        {isHardwareWallet && !isPopupView && (
           <Text className={styles.connectLedgerText}>
             {isTrezor ? t('send.connectYourTrezor') : t('send.connectYourLedger')}
           </Text>

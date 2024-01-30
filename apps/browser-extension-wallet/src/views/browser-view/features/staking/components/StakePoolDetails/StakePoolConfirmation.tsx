@@ -31,7 +31,6 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 type statRendererProps = {
   img?: string;
@@ -200,7 +199,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { t } = useTranslation();
   const { isBuildingTx, stakingError } = useStakePoolDetails();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const { getWalletType, inMemoryWallet } = useWalletStore();
+  const { isInMemoryWallet, inMemoryWallet, walletType } = useWalletStore();
   const analytics = useAnalyticsContext();
 
   const { setIsRestaking } = useSubmitingState();
@@ -222,8 +221,6 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     },
     [backgroundServices]
   );
-  const walletType = getWalletType();
-  const isInMemory = walletType === WalletType.InMemory;
 
   const { setSection } = useStakePoolDetails();
   const { id: poolId } = useDelegationStore(stakePoolDetailsSelector);
@@ -244,7 +241,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const handleConfirmation = useCallback(async () => {
     sendAnalytics();
     setIsConfirmingTx(false);
-    if (!isInMemory) {
+    if (!isInMemoryWallet) {
       setIsConfirmingTx(true);
       try {
         if (popupView) return toggleContinueDialog();
@@ -261,7 +258,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     return setSection(sectionsConfig[Sections.SIGN]);
   }, [
     sendAnalytics,
-    isInMemory,
+    isInMemoryWallet,
     setSection,
     popupView,
     toggleContinueDialog,
@@ -272,7 +269,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   ]);
 
   const confirmLabel = useMemo(() => {
-    if (!isInMemory) {
+    if (!isInMemoryWallet) {
       const staleLabels = popupView
         ? t('browserView.staking.details.confirmation.button.continueInAdvancedView')
         : t('browserView.staking.details.confirmation.button.confirmWithDevice', { hardwareWallet: walletType });
@@ -281,7 +278,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     return popupView
       ? t('staking.details.confirmation.button.confirm')
       : t('browserView.staking.details.confirmation.button.confirm');
-  }, [isConfirmingTx, isInMemory, t, popupView, walletType]);
+  }, [isConfirmingTx, isInMemoryWallet, t, popupView, walletType]);
 
   return (
     <>

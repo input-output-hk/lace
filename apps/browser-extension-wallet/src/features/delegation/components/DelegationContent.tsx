@@ -25,7 +25,6 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useObservable } from '@lace/common';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 const STORAGE_MEMO_ENTRY_NAME = 'hideStakingHwDialog';
 const MIN_CHARS_TO_SEARCH = 3;
@@ -42,15 +41,14 @@ const PoolDetailsStepsWithBackBtn = new Set([Sections.DETAIL, Sections.CONFIRMAT
 export const DelegationContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    getWalletType,
+    isInMemoryWallet,
     walletUI: { cardanoCoin },
     blockchainProvider
   } = useWalletStore();
-  const isInMemory = getWalletType() === WalletType.InMemory;
   const [searchValue, setSearchValue] = useState<string | undefined>();
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const dialogHiddenByUser = localStorage.getItem(STORAGE_MEMO_ENTRY_NAME) === 'true';
-  const shouldShowAcknowledgmentDialog = !dialogHiddenByUser && !isInMemory;
+  const shouldShowAcknowledgmentDialog = !dialogHiddenByUser && !isInMemoryWallet;
   const [isTransitionAcknowledgmentDialogVisible, setIsTransitionAcknowledgmentDialogVisible] =
     useState(shouldShowAcknowledgmentDialog);
   const toggleisTransitionAcknowledgmentDialog = () =>
@@ -97,12 +95,12 @@ export const DelegationContent = (): React.ReactElement => {
 
   useEffect(() => {
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
-    const isHardwareWalletPopupTransition = !isInMemory && hasPersistedHwStakepool;
+    const isHardwareWalletPopupTransition = !isInMemoryWallet && hasPersistedHwStakepool;
     // `hasPersistedHwStakepool` will get immidiately unset once the HW transition is over.
     if (isHardwareWalletPopupTransition) return;
     if (searchValue?.length !== 0 && searchValue?.length < MIN_CHARS_TO_SEARCH) return;
     fetchStakePools({ searchString: searchValue || '', limit: MAX_ITEMS_TO_SHOW });
-  }, [searchValue, fetchStakePools, isInMemory, blockchainProvider]);
+  }, [searchValue, fetchStakePools, isInMemoryWallet, blockchainProvider]);
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();

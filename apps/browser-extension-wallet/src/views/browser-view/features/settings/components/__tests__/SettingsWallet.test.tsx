@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const useLocationMock = jest.fn();
-const mockGetWalletType = jest.fn();
 const mockUseWalletStore = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseCollateral = jest.fn();
@@ -155,9 +154,10 @@ describe('Testing SettingsWalletBase component', () => {
         txFee: 0
       });
       useLocationMock.mockReturnValue({ search: '' });
-      mockGetWalletType.mockReturnValue(WalletType.InMemory);
       mockUseWalletStore.mockImplementation(() => ({
-        getWalletType: mockGetWalletType,
+        walletType: WalletType.InMemory,
+        isInMemoryWallet: true,
+        isHardwareWallet: false,
         inMemoryWallet,
         walletUI: {},
         walletInfo: {}

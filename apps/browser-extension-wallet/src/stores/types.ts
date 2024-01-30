@@ -112,7 +112,9 @@ export interface WalletInfoSlice {
   currentChain?: Wallet.Cardano.ChainId;
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;
-  getWalletType: () => WalletType;
+  walletType: WalletType;
+  isInMemoryWallet: boolean;
+  isHardwareWallet: boolean;
   deletingWallet?: boolean;
   setDeletingWallet: (deletingWallet: boolean) => void;
 }

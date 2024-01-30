@@ -1,3 +1,4 @@
+import { WalletType } from '@cardano-sdk/web-extension';
 import { BlockchainProviderSlice, SliceCreator, WalletInfoSlice } from '../types';
 import { Wallet } from '@lace/cardano';
 
@@ -15,16 +16,25 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   cardanoWallet: undefined,
   walletManager: undefined,
   initialHdDiscoveryCompleted: false,
+  isInMemoryWallet: undefined,
+  isHardwareWallet: undefined,
+  walletType: undefined,
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) =>
     set({ initialHdDiscoveryCompleted: addressesDiscoveryCompleted }),
   // eslint-disable-next-line unicorn/no-null
   hdDiscoveryStatus: null,
   setHdDiscoveryStatus: (hdDiscoveryStatus) => set({ hdDiscoveryStatus }),
-  setCardanoWallet: (wallet?: Wallet.CardanoWallet) => set({ inMemoryWallet: wallet?.wallet, cardanoWallet: wallet }),
+  setCardanoWallet: (wallet?: Wallet.CardanoWallet) =>
+    set({
+      inMemoryWallet: wallet?.wallet,
+      cardanoWallet: wallet,
+      walletType: wallet?.source.wallet.type,
+      isInMemoryWallet: wallet?.source.wallet.type === WalletType.InMemory,
+      isHardwareWallet: [WalletType.Ledger, WalletType.Trezor].includes(wallet?.source.wallet.type)
+    }),
   setCurrentChain: (chain: Wallet.ChainName) => {
     set({ currentChain: Wallet.Cardano.ChainIds[chain], environmentName: chain });
     get().setBlockchainProvider(chain);
   },
-  getWalletType: () => get()?.cardanoWallet?.source.wallet.type,
   setDeletingWallet: (deletingWallet: boolean) => set({ deletingWallet })
 });

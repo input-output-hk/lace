@@ -5,10 +5,9 @@ import { useSubmitingState, usePassword } from '../store';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
 import cn from 'classnames';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 export const ConfirmPassword = (): React.ReactElement => {
-  const { getWalletType } = useWalletStore();
+  const { isInMemoryWallet } = useWalletStore();
   const { t } = useTranslation();
 
   const { isPasswordValid, setSubmitingTxState } = useSubmitingState();
@@ -19,10 +18,8 @@ export const ConfirmPassword = (): React.ReactElement => {
     setSubmitingTxState({ isPasswordValid: true });
   };
 
-  const isInMemory = getWalletType() === WalletType.InMemory;
-
   return (
-    isInMemory && (
+    isInMemoryWallet && (
       <div className={cn(styles.container)}>
         <div className={styles.password}>
           <Password

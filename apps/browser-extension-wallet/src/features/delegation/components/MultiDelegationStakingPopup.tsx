@@ -36,7 +36,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
   const {
-    getWalletType,
+    walletType,
     inMemoryWallet,
     walletUI: { cardanoCoin },
     stakePoolSearchResults,
@@ -48,7 +48,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     walletInfo,
     currentChain
   } = useWalletStore((state) => ({
-    getWalletType: state.getWalletType,
+    walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
     walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
     stakePoolSearchResults: state.stakePoolSearchResults,
@@ -116,7 +116,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         stakingRewards,
         submittingState,
         walletManagerExecuteWithPassword: withSignTxConfirmation,
-        walletStoreGetWalletType: getWalletType,
+        walletStoreWalletType: walletType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,

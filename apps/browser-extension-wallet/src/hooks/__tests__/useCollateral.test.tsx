@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const mockUseMaxAda = jest.fn();
-const mockGetWalletType = jest.fn();
 const mockUseBuitTxState = jest.fn();
 const mockToastNotify = jest.fn();
 const mockUseSyncingTheFirstTime = jest.fn();
@@ -90,7 +89,7 @@ const getWrapper =
 
 describe('Testing useCollateral hook', () => {
   beforeEach(() => {
-    mockUseWalletStore.mockReturnValue({ inMemoryWallet, getWalletType: mockGetWalletType });
+    mockUseWalletStore.mockReturnValue({ inMemoryWallet });
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -177,8 +176,7 @@ describe('Testing useCollateral hook', () => {
             setUnspendable: mockSetUnspendable,
             available$
           }
-        },
-        getWalletType: mockGetWalletType
+        }
       });
     });
 
@@ -286,7 +284,6 @@ describe('Testing useCollateral hook', () => {
       });
 
       test('should submit the tx and set the colateral for inMemory wallet', async () => {
-        mockGetWalletType.mockReturnValue(WalletType.InMemory);
         mockSubmitTx.mockReset();
         mockUseWalletStore.mockReturnValue({
           inMemoryWallet: {
@@ -298,7 +295,8 @@ describe('Testing useCollateral hook', () => {
               available$
             }
           },
-          getWalletType: mockGetWalletType
+          walletType: WalletType.InMemory,
+          isInMemoryWallet: true
         });
 
         mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));

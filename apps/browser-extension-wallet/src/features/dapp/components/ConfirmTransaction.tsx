@@ -83,7 +83,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const {
     walletInfo,
     inMemoryWallet,
-    getWalletType,
+    walletType,
+    isHardwareWallet,
     blockchainProvider: { assetProvider },
     walletUI: { cardanoCoin }
   } = useWalletStore();
@@ -96,8 +97,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
-  const walletType = getWalletType();
-  const isUsingHardwareWallet = walletType === WalletType.Ledger || walletType === WalletType.Trezor;
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
@@ -292,7 +291,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       creationType: TxCreationType.External
     });
 
-    isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
+    isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
   return (
@@ -311,11 +310,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       <div className={styles.actions}>
         <Button
           onClick={onConfirm}
-          loading={isUsingHardwareWallet && isConfirmingTx}
+          loading={isHardwareWallet && isConfirmingTx}
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}
         >
-          {isUsingHardwareWallet
+          {isHardwareWallet
             ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
             : t('dapp.confirm.btn.confirm')}
         </Button>

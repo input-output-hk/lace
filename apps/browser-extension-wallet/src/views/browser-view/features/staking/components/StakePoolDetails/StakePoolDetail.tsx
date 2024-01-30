@@ -20,7 +20,6 @@ import {
   AnalyticsEventNames,
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 // TODO: remove duplication once lw-9270 is merged (lw-9552)
 export enum SaturationLevels {
@@ -313,12 +312,10 @@ export const StakePoolDetailFooter = ({
   const { setNoFundsVisible } = useStakePoolDetails();
   const { id } = useDelegationStore(stakePoolDetailsSelector) || {};
   const {
-    getWalletType,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    isInMemoryWallet
   } = useWalletStore();
   const analytics = useAnalyticsContext();
-
-  const isInMemory = getWalletType() === WalletType.InMemory;
 
   const onStakeClick = useCallback(() => {
     if (canDelegate) {
@@ -342,13 +339,13 @@ export const StakePoolDetailFooter = ({
   const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
 
   useEffect(() => {
-    if (isInMemory) return;
+    if (isInMemoryWallet) return;
     if (popupView) return;
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
     if (!hasPersistedHwStakepool) return;
     onStakeClick();
     localStorage.removeItem('TEMP_POOLID');
-  }, [isInMemory, onStakeClick, popupView]);
+  }, [isInMemoryWallet, onStakeClick, popupView]);
 
   return (
     <div className={cn(styles.footer, { [styles.popupView]: popupView })}>

@@ -43,7 +43,6 @@ import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokens
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 const { SendTransaction: Events } = AnalyticsEventNames;
 
@@ -53,7 +52,7 @@ export const useHandleClose = (): {
 } => {
   const {
     walletUI: { appMode },
-    getWalletType
+    isInMemoryWallet
   } = useWalletStore();
   const isPopup = appMode === APP_MODE_POPUP;
   const [, setWarnigModalVisibility] = useWarningModal();
@@ -64,7 +63,6 @@ export const useHandleClose = (): {
   const { currentSection: section, resetSection } = useSections();
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
-  const isInMemory = getWalletType() === WalletType.InMemory;
 
   const resetStates = useCallback(() => {
     reset();
@@ -91,8 +89,8 @@ export const useHandleClose = (): {
       redirectToTransactions();
     }
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to sign tx multiple times without reloading).
-    if (!isInMemory) window.location.reload();
-  }, [closeDrawer, isInMemory, isPopup, redirectToTransactions, resetStates]);
+    if (!isInMemoryWallet) window.location.reload();
+  }, [closeDrawer, isInMemoryWallet, isPopup, redirectToTransactions, resetStates]);
 
   const onCloseWhileCreating = useCallback(() => {
     if (hasOutput) {
@@ -105,11 +103,11 @@ export const useHandleClose = (): {
   const onClose = useCallback(() => {
     if (section.currentSection === Sections.SUCCESS_TX) {
       isPopup ? redirect() : closeDrawer();
-      if (!isInMemory) window.location.reload();
+      if (!isInMemoryWallet) window.location.reload();
     } else {
       onCloseWhileCreating();
     }
-  }, [section.currentSection, isPopup, redirect, closeDrawer, isInMemory, onCloseWhileCreating]);
+  }, [section.currentSection, isPopup, redirect, closeDrawer, isInMemoryWallet, onCloseWhileCreating]);
 
   return { onClose, onCloseSubmitedTransaction };
 };

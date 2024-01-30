@@ -12,7 +12,6 @@ import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useSyncingTheFirstTime } from '@hooks/useSyncingTheFirstTime';
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 export const COLLATERAL_ADA_AMOUNT = 5;
 export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
@@ -30,8 +29,7 @@ export const useCollateral = (): UseCollateralReturn => {
   const { t } = useTranslation();
   const [txFee, setTxFee] = useState<Cardano.Lovelace>();
   const [txBuilder, setTxBuilder] = useState<TxBuilder | undefined>();
-  const { inMemoryWallet, getWalletType } = useWalletStore();
-  const isInMemory = getWalletType() === WalletType.InMemory;
+  const { inMemoryWallet, isInMemoryWallet } = useWalletStore();
   const { setBuiltTxData } = useBuiltTxState();
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -79,7 +77,7 @@ export const useCollateral = (): UseCollateralReturn => {
       );
       await inMemoryWallet.utxo.setUnspendable([utxo]);
       // set tx data in case of hw for tx success/fail steps
-      if (!isInMemory) {
+      if (!isInMemoryWallet) {
         const txInspection = await txBuilt.inspect();
         setBuiltTxData({
           uiTx: {
@@ -92,7 +90,7 @@ export const useCollateral = (): UseCollateralReturn => {
       toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
     } catch (error) {
       // redirect to tx fail screen in case of hw
-      if (!isInMemory) {
+      if (!isInMemoryWallet) {
         console.error('submitCollateralTx fails with:', error?.message);
         setBuiltTxData({
           uiTx: undefined,
@@ -104,7 +102,7 @@ export const useCollateral = (): UseCollateralReturn => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [txBuilder, inMemoryWallet, isInMemory, t, setBuiltTxData]);
+  }, [txBuilder, inMemoryWallet, isInMemoryWallet, t, setBuiltTxData]);
   return {
     initializeCollateralTx,
     submitCollateralTx,

@@ -45,7 +45,6 @@ import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 const { SendTransaction: Events, AddressBook } = AnalyticsEventNames;
 
@@ -82,7 +81,7 @@ export const Footer = withAddressBookContext(
     const { builtTxData } = useBuiltTxState();
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
-    const { inMemoryWallet, getWalletType } = useWalletStore();
+    const { inMemoryWallet, isInMemoryWallet, walletType } = useWalletStore();
     const { password, removePassword } = usePassword();
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
@@ -193,9 +192,7 @@ export const Footer = withAddressBookContext(
       onHandleChangeConfirm(action);
     };
 
-    const walletType = getWalletType();
-    const isInMemory = walletType === WalletType.InMemory;
-    const isHwSummary = isSummaryStep && !isInMemory;
+    const isHwSummary = isSummaryStep && !isInMemoryWallet;
 
     const signAndSubmitTransaction = useCallback(async () => {
       const signedTx = await builtTxData.tx.sign();
@@ -281,7 +278,7 @@ export const Footer = withAddressBookContext(
       switch (true) {
         case isReviewingAddress:
           return handleReviewAddress('UPDATE');
-        case isSummaryStep && !isInMemory:
+        case isSummaryStep && !isInMemoryWallet:
           if (isPopupView) {
             return openContinueDialog();
           }
@@ -299,7 +296,7 @@ export const Footer = withAddressBookContext(
     }, [
       currentSection.currentSection,
       isSummaryStep,
-      isInMemory,
+      isInMemoryWallet,
       isPopupView,
       handleVerifyPass,
       onCloseSubmitedTransaction,

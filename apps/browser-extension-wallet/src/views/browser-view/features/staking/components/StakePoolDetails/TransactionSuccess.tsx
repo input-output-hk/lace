@@ -18,7 +18,6 @@ import { useAnalyticsContext } from '@providers';
 
 import { useWalletStore } from '@src/stores';
 import { useSubmitingState } from '../../../send-transaction';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 type TransactionSuccessProps = {
   popupView?: boolean;
@@ -59,8 +58,7 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
   const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
-  const { getWalletType } = useWalletStore();
-  const isInMemory = getWalletType() === WalletType.InMemory;
+  const { isInMemoryWallet } = useWalletStore();
 
   const closeDrawer = () => {
     analytics.sendEventToMatomo({
@@ -75,7 +73,7 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
     setIsDrawerVisible(false);
     resetStates();
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
-    if (!isInMemory) window.location.reload();
+    if (!isInMemoryWallet) window.location.reload();
   };
 
   return (

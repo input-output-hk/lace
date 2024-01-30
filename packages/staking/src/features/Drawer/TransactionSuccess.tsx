@@ -40,12 +40,12 @@ export const TransactionSuccessFooter = (): React.ReactElement => {
   const {
     analytics,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
-    walletStoreGetWalletType: getWalletType,
+    walletStoreWalletType: walletType,
   } = useOutsideHandles();
   const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
   }));
-  const isInMemory = getWalletType() === WalletType.InMemory;
+  const isInMemory = walletType === WalletType.InMemory;
 
   const closeDrawer = () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);

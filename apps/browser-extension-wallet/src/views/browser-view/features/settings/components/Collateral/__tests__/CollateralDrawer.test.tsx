@@ -4,7 +4,6 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
-const mockGetWalletType = jest.fn();
 const mockUseWalletStore = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseCollateral = jest.fn();
@@ -25,7 +24,7 @@ import { screen, cleanup, fireEvent, render, within, waitFor } from '@testing-li
 import { CollateralDrawer } from '../CollateralDrawer';
 import '@testing-library/jest-dom';
 import { I18nextProvider } from 'react-i18next';
-import { StoreProvider } from '@src/stores';
+import { StoreProvider, WalletStore } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import i18n from '@lib/i18n';
 import {
@@ -160,6 +159,7 @@ describe('Testing CollateralDrawer component', () => {
     hasEnoughAda: true,
     txFee: 0
   };
+  let walletStore: WalletStore;
   beforeEach(() => {
     mockUseBuitTxState.mockReturnValue({
       clearBuiltTxData,
@@ -169,14 +169,14 @@ describe('Testing CollateralDrawer component', () => {
     mockUseAnalyticsSendFlowTriggerPoint.mockReturnValue({ triggerPoint: '', setTriggerPoint: jest.fn() });
     mockUseOutputs.mockReturnValue({ uiOutputs: {} });
     mockUseCollateral.mockReturnValue(useCollateral);
-    mockGetWalletType.mockReturnValue(WalletType.InMemory);
-    mockUseWalletStore.mockImplementation(() => ({
-      getWalletType: mockGetWalletType,
-      walletUI: {},
-      inMemoryWallet: {
-        assetInfo$
-      }
-    }));
+    walletStore = {
+      walletType: WalletType.InMemory,
+      isInMemoryWallet: true,
+      isHardwareWallet: false,
+      walletUI: {} as WalletStore['walletUI'],
+      inMemoryWallet: { assetInfo$ } as unknown as WalletStore['inMemoryWallet']
+    } as WalletStore;
+    mockUseWalletStore.mockImplementation(() => walletStore);
     mockUseSections.mockReturnValue({
       setSection,
       currentSection: {}
@@ -266,7 +266,6 @@ describe('Testing CollateralDrawer component', () => {
   test('should set RECLAIM as current section for in memory wallet when wallet is syncing for the first time or unspendable are not loaded', async () => {
     mockUseSyncingTheFirstTime.mockReset();
     mockUseSyncingTheFirstTime.mockReturnValue(true);
-    mockGetWalletType.mockReset();
     const { rerender } = render(
       <CollateralDrawer visible={false} unspendableLoaded onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />,
       {
@@ -328,8 +327,9 @@ describe('Testing CollateralDrawer component', () => {
     async (walletType) => {
       mockUseSyncingTheFirstTime.mockReset();
       mockUseSyncingTheFirstTime.mockReturnValue(false);
-      mockGetWalletType.mockReset();
-      mockGetWalletType.mockReturnValue(walletType);
+      walletStore.walletType = walletType;
+      walletStore.isHardwareWallet = true;
+      walletStore.isInMemoryWallet = false;
       mockUseSections.mockReset();
       mockUseSections.mockReturnValue({
         setSection,
@@ -365,8 +365,9 @@ describe('Testing CollateralDrawer component', () => {
   test.each([WalletType.Ledger, WalletType.Trezor])(
     'should switch to SUCCESS_TX for %s HW wallet when there is build tx',
     async (walletType) => {
-      mockGetWalletType.mockReset();
-      mockGetWalletType.mockReturnValue(walletType);
+      walletStore.walletType = walletType;
+      walletStore.isHardwareWallet = true;
+      walletStore.isInMemoryWallet = false;
       mockUseBuitTxState.mockReset();
       mockUseBuitTxState.mockReturnValue({
         clearBuiltTxData,
@@ -415,7 +416,7 @@ describe('Testing CollateralDrawer component', () => {
       const setUnspendable = jest.fn();
       mockUseWalletStore.mockReset();
       mockUseWalletStore.mockImplementation(() => ({
-        getWalletType: mockGetWalletType,
+        walletType: WalletType.InMemory,
         walletUI: {},
         inMemoryWallet: {
           utxo: {
@@ -457,8 +458,9 @@ describe('Testing CollateralDrawer component', () => {
         setSection,
         currentSection: { currentSection: Sections.SEND }
       });
-      mockGetWalletType.mockReset();
-      mockGetWalletType.mockReturnValue(walletType);
+      walletStore.walletType = walletType;
+      walletStore.isHardwareWallet = true;
+      walletStore.isInMemoryWallet = false;
       mockUseBuitTxState.mockReset();
       mockUseBuitTxState.mockReturnValue({
         setBuiltTxData,
@@ -593,8 +595,9 @@ describe('Testing CollateralDrawer component', () => {
       });
 
       beforeEach(() => {
-        mockGetWalletType.mockReset();
-        mockGetWalletType.mockReturnValue(WalletType.Ledger);
+        walletStore.walletType = WalletType.Ledger;
+        walletStore.isInMemoryWallet = false;
+        walletStore.isHardwareWallet = true;
         mockUseSections.mockReset();
         mockUseSections.mockReturnValue({
           setSection,
@@ -736,8 +739,9 @@ describe('Testing CollateralDrawer component', () => {
       });
 
       beforeEach(() => {
-        mockGetWalletType.mockReset();
-        mockGetWalletType.mockReturnValue(WalletType.Ledger);
+        walletStore.walletType = WalletType.Ledger;
+        walletStore.isHardwareWallet = true;
+        walletStore.isInMemoryWallet = false;
         mockUseSections.mockReset();
         mockUseSections.mockReturnValue({
           setSection,

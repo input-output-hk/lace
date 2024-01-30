@@ -17,7 +17,6 @@ import { cardanoCoin } from '@src/utils/constants';
 import { Spin, Typography } from 'antd';
 import styles from './styles.module.scss';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Text } = Typography;
 
@@ -29,7 +28,7 @@ export const CreateCollateral = ({
 }: DappCreateCollateralProps): React.ReactElement => {
   const { t } = useTranslation();
 
-  const { inMemoryWallet, getWalletType } = useWalletStore();
+  const { inMemoryWallet, walletType, isInMemoryWallet } = useWalletStore();
   const addresses = useObservable(inMemoryWallet.addresses$);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [password, setPassword] = useState('');
@@ -41,8 +40,6 @@ export const CreateCollateral = ({
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
-  const walletType = getWalletType();
-  const isInMemory = walletType === WalletType.InMemory;
   const [collateralTx, setCollateralTx] = useState<{ fee: bigint; tx: Wallet.UnsignedTx }>();
 
   useEffect(() => {
@@ -90,11 +87,11 @@ export const CreateCollateral = ({
   }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm]);
 
   const confirmButtonLabel = useMemo(() => {
-    if (isInMemory) {
+    if (isInMemoryWallet) {
       return t('browserView.settings.wallet.collateral.confirm');
     }
     return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: walletType });
-  }, [isInMemory, walletType, t]);
+  }, [isInMemoryWallet, walletType, t]);
 
   return (
     <Layout
@@ -108,7 +105,7 @@ export const CreateCollateral = ({
           <Text className={styles.collateralDescription} data-testid="collateral-description">
             {t('browserView.settings.wallet.collateral.amountDescription')}
           </Text>
-          {isInMemory && (
+          {isInMemoryWallet && (
             <div data-testid="collateral-password">
               <Spin spinning={false}>
                 <Password

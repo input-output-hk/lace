@@ -38,7 +38,9 @@ export const walletStoreMock = async (
     fetchingActivityInfo: false,
     getActivityDetail: jest.fn(),
     inMemoryWallet: wallet as Wallet.ObservableWallet,
-    getWalletType: jest.fn(() => WalletType.InMemory),
+    walletType: WalletType.InMemory,
+    isInMemoryWallet: true,
+    isHardwareWallet: false,
     // TODO: mock [LW-5454]
     cardanoWallet: undefined,
     isWalletLocked: jest.fn(() => false),

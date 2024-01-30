@@ -354,7 +354,7 @@ const makeActionButtons = (
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
-  const { walletStoreGetWalletType } = useOutsideHandles();
+  const { walletStoreWalletType } = useOutsideHandles();
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
     portfolioMutators: store.mutators,
@@ -363,7 +363,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
     useDelegationPortfolioStore(makeSelector(openPoolDetails));
 
-  const isInMemory = useMemo(() => walletStoreGetWalletType() === WalletType.InMemory, [walletStoreGetWalletType]);
+  const isInMemory = walletStoreWalletType === WalletType.InMemory;
 
   const onStakeOnThisPool = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);

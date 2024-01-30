@@ -9,7 +9,6 @@ import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI'
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { WalletType } from '@cardano-sdk/web-extension';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -39,9 +38,8 @@ export const StakePoolDetailsDrawer = ({
   } = useStakePoolDetails();
   const { t } = useTranslation();
   const { setIsRestaking } = useSubmitingState();
-  const { getWalletType } = useWalletStore();
+  const { isInMemoryWallet } = useWalletStore();
   const { password, removePassword } = usePassword();
-  const isInMemory = getWalletType() === WalletType.InMemory;
   // const isSuccessSection = useMemo(
   //   () => simpleSendConfig.currentSection === Sections.SUCCESS_TX,
   //   [simpleSendConfig.currentSection]
@@ -91,7 +89,7 @@ export const StakePoolDetailsDrawer = ({
       backgroundService.setWalletPassword();
       removePassword();
     }
-    if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
+    if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemoryWallet) {
       return setSection(sectionsConfig[Sections.DETAIL]);
     }
     if (simpleSendConfig?.prevSection) {
@@ -100,7 +98,7 @@ export const StakePoolDetailsDrawer = ({
     return closeDrawer();
   }, [
     closeDrawer,
-    isInMemory,
+    isInMemoryWallet,
     password,
     removePassword,
     setPrevSection,
