@@ -22,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  PostHogAction,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -164,21 +163,19 @@ export const HardwareWalletFlow = ({
 
   const handleCreateWallet = async (name: string) => {
     try {
-      const wallet = await createHardwareWallet({
+      const cardanoWallet = await createHardwareWallet({
         accountIndex,
         deviceConnection,
         name,
         chainId: DEFAULT_CHAIN_ID,
         connectedDevice
       });
-      setWalletCreated(wallet);
-      setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
-      analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-      await analytics.setOptedInForEnhancedAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
+      setWalletCreated(cardanoWallet);
+      const analyticsOptInStatus = isAnalyticsAccepted
+        ? EnhancedAnalyticsOptInStatus.OptedIn
+        : EnhancedAnalyticsOptInStatus.OptedOut;
+      setDoesUserAllowAnalytics(analyticsOptInStatus);
+      await analytics.setOptedInForEnhancedAnalytics(analyticsOptInStatus);
       navigateTo('finish');
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });

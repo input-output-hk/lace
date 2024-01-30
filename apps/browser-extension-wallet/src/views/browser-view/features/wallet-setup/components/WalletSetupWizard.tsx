@@ -42,6 +42,7 @@ import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
 import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/ExperimentsProvider/types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
+import { filter, firstValueFrom } from 'rxjs';
 
 const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
 const walletSetupWizardForABTest = {
@@ -268,10 +269,15 @@ export const WalletSetupWizard = ({
   };
 
   const goToMyWallet = useCallback(
-    async (wallet?: Wallet.CardanoWallet) => {
-      await activateWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
+    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
+      await activateWallet({ walletInstance: cardanoWallet, chainName: CHAIN });
       if (isAnalyticsAccepted) {
         analytics.sendAliasEvent();
+        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
+        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+        if (hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        }
       }
     },
     [analytics, isAnalyticsAccepted, activateWallet, walletInstance]
