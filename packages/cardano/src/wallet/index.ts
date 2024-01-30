@@ -59,7 +59,6 @@ export {
   CardanoWallet,
   CreateStores,
   WalletProvidersDependencies,
-  shutdownWallet,
   validateWalletMnemonic,
   validateWalletPassword,
   restoreWallet,

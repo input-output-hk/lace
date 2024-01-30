@@ -13,7 +13,6 @@ import SpyInstance = jest.SpyInstance;
 const mockEmip3decrypt = jest.fn();
 const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
-const mockShutdownWallet = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
@@ -67,7 +66,6 @@ jest.mock('@lace/cardano', () => {
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
       switchKeyAgents: mockSwitchKeyAgents,
       connectDevice: mockConnectDevice,
-      shutdownWallet: mockShutdownWallet,
       KeyManagement: {
         ...actual.Wallet.KeyManagement,
         emip3decrypt: mockEmip3decrypt,

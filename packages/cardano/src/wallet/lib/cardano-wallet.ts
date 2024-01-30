@@ -13,12 +13,7 @@ import {
 } from '@cardano-sdk/core';
 import { ObservableWallet, PersonalWalletDependencies, storage, restoreKeyAgent } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
-import {
-  AnyWallet,
-  Bip32WalletAccount,
-  WalletManagerApi,
-  SigningCoordinatorConfirmationApi
-} from '@cardano-sdk/web-extension';
+import { AnyWallet, Bip32WalletAccount, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
 // Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
@@ -122,6 +117,9 @@ export const validateWalletPassword = async (
   return true;
 };
 
+/**
+ * Compare extended account public key derived from the mnemonic with the provided one.
+ */
 export const validateWalletMnemonic = async (
   mnemonicWords: string[],
   expectedExtendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex
@@ -130,6 +128,8 @@ export const validateWalletMnemonic = async (
   const validatingKeyAgent = await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
     {
       mnemonicWords,
+      // XPUB is the same for all networks, but we're deriving it by creating a key agent which has chainId as a required parameter.
+      // Ideally we would have a util that just derives the xpub without the redundant parameters.
       chainId: Cardano.ChainIds.Mainnet, // does not matter
       getPassphrase: async () => Buffer.from('doesnt matter')
     },
@@ -139,19 +139,10 @@ export const validateWalletMnemonic = async (
     }
   );
 
-  // REVIEW: I think this is redundant, because if it derives the same xpub then it's the same mnemonic
-  // const validatingChallenge = await Challenge.sign(validatingKeyAgent);
-
   const originalPublicKey = expectedExtendedAccountPublicKey;
   const validatingPublicKey = validatingKeyAgent.extendedAccountPublicKey;
 
   return originalPublicKey === validatingPublicKey;
-};
-
-export const shutdownWallet = async (walletManager: WalletManagerApi): Promise<void> => {
-  // Use wallet manager UI to shutdown the wallet
-  // REVIEW: do we want to clear all wallet data here?
-  await walletManager.deactivate();
 };
 
 export const createKeyAgent = (
