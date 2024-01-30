@@ -45,7 +45,8 @@ export const getTitleKey = (txType: TxType): string => {
  * 1. Open UI window and expose a SigningCoordinator
  * 2. Sign
  *
- * This function notifies service worker that UI is ready to sign.
+ * This function exposes an `allowSignTx` observable, which emits a single `true` value to
+ * the service worker to indicate that the UI has loaded and `SigningCoordinator` is ready to sign
  */
 export const readyToSign = (): void => {
   exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
