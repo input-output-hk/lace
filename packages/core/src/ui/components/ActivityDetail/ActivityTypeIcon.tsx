@@ -37,8 +37,6 @@ import {
 import styles from './ActivityTypeIcon.module.scss';
 import { Flex } from '@lace/ui';
 
-const BRAKEPOINT_POPUP = 360;
-
 export interface ActivityTypeIconProps {
   type: ActivityType;
 }
@@ -74,7 +72,6 @@ const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEleme
 export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactElement => {
   const icon = type && activityTypeIcon[type];
   const iconStyle = { fontSize: txIconSize() };
-  const isPopup = window.innerWidth <= BRAKEPOINT_POPUP;
 
   const isGovernanceTx =
     Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
@@ -82,7 +79,7 @@ export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactEl
 
   return (
     <Flex
-      className={cn(styles.iconWrapper, { [styles.isPopup]: isPopup, [styles.governance]: isGovernanceTx })}
+      className={cn(styles.iconWrapper, { [styles.governance]: isGovernanceTx })}
       justifyContent="center"
       alignItems="center"
     >
@@ -90,7 +87,6 @@ export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactEl
         <Icon
           // Override fill color for governance related transactions
           className={cn(styles.icon, {
-            [styles.isPopup]: isPopup,
             [styles.governance]: isGovernanceTx
           })}
           component={icon}
