@@ -255,6 +255,10 @@ const colors: Colors = {
   $transaction_summary_secondary_label_color:
     lightColorScheme.$primary_dark_grey,
 
+  $dapp_transaction_summary_type_label_color:
+    lightColorScheme.$primary_accent_purple,
+  $dapp_transaction_summary_label: lightColorScheme.$primary_dark_grey,
+
   $toast_bar_container_bgColor: lightColorScheme.$primary_white,
   $toast_bar_label_color: lightColorScheme.$primary_black,
   $toast_bar_icon_container_bgColor: lightColorScheme.$primary_light_grey,

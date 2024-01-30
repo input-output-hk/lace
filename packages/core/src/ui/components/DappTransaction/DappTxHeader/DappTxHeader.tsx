@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import React from 'react';
 import styles from './DappTxHeader.module.scss';
 

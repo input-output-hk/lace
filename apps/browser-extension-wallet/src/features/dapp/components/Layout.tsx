@@ -3,7 +3,7 @@ import React from 'react';
 import styles from './Layout.module.scss';
 
 type layoutProps = {
-  title: string | React.ReactElement;
+  title?: string | React.ReactElement;
   children?: React.ReactElement | React.ReactNode;
   layoutClassname?: string;
   pageClassname?: string;

@@ -37,3 +37,7 @@ export { RadioButtonGroup } from './radio-button';
 export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
+export { TransactionType } from './dapp-transaction-summary';
+export { TransactionSummary as DappTransactionSummary } from './dapp-transaction-summary';
+export { TransactionOrigin } from './dapp-transaction-summary';
+export { SummaryExpander } from './summary-expander';
