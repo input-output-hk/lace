@@ -25,15 +25,14 @@ import {
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
 import type { UserPromptService } from '@lib/scripts/background/services';
-import { firstValueFrom, of, take } from 'rxjs';
+import { of, take } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { getTxCollateral } from '@src/utils/get-tx-collateral';
-import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
+import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -102,7 +101,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
-  const [txCollateral, setTxCollateral] = useState<bigint>();
+  const txCollateral = useComputeTxCollateral(inMemoryWallet, req?.transaction.toCore());
 
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
@@ -186,29 +185,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       api.shutdown();
     };
   }, [setSignTxRequest]);
-
-  useEffect(() => {
-    if (!req) return;
-
-    const computeCollateral = async () => {
-      const addresses = await firstValueFrom(inMemoryWallet.addresses$);
-
-      const inputResolver = createHistoricalOwnInputResolver({
-        addresses$: inMemoryWallet.addresses$,
-        transactionsHistory$: inMemoryWallet.transactions.history$
-      });
-
-      const collateral = await getTxCollateral(
-        req.transaction.toCore(),
-        inputResolver,
-        addresses.map((addr) => addr.address)
-      );
-
-      setTxCollateral(collateral);
-    };
-
-    computeCollateral();
-  }, [req, inMemoryWallet]);
 
   const createMintedList = useCallback(
     (mintedAssets: AssetsMintedInspection) => {
@@ -306,7 +282,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       });
     };
     getTxSummary();
-  }, [req, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap, setTxSummary]);
+  }, [req, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap, setTxSummary, txCollateral]);
 
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
