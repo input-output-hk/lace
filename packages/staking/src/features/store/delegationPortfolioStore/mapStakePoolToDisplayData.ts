@@ -20,7 +20,7 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
     delegators: metrics?.delegators || '-',
     description: metadata?.description || '-',
     fee,
-    hexId: hexId.toString(),
+    hexId,
     id: id.toString(),
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),

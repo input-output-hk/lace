@@ -1,4 +1,4 @@
-import { PostHogAction, Search, getRandomIcon } from '@lace/common';
+import { PostHogAction, Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -85,14 +85,11 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     () =>
       pageResults.map((pool) => {
         const stakePool = pool && mapStakePoolToDisplayData({ stakePool: pool });
-        const logo = pool && getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return pool
           ? {
               ...stakePool,
-              hexId: pool.hexId,
               liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
-              logo: stakePool.logo || logo,
               stakePool: pool,
             }
           : undefined;
@@ -104,13 +101,10 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     () =>
       selectedPortfolioStakePools.map((pool) => {
         const stakePool = pool && mapStakePoolToDisplayData({ stakePool: pool });
-        const logo = pool && getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return {
           ...stakePool,
-          hexId: pool.hexId,
           liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
-          logo: stakePool.logo || logo,
           stakePool: pool,
         };
       }) || [],
