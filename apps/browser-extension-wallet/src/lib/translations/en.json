@@ -58,7 +58,7 @@
       "pools": "Pool(s)",
       "epoch": "Epoch",
       "collateral": "Collateral",
-      "collateralInfo": "Amount set as Collateral. Since this Tx was successful collateral was not used"
+      "collateralInfo": "Amount set as collateral to cover contract execution failure. In case of no failure collateral remains unspent."
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",
