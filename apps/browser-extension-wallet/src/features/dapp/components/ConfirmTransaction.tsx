@@ -266,12 +266,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   const userAddresses = walletInfo.addresses.map((v) => v.address);
 
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rAccounts = rewardAccounts && rewardAccounts.map((key) => key.address);
+  const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const rewardAccountsAddresses = userRewardAccounts && userRewardAccounts.map((key) => key.address);
 
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
 
-  console.log('userAddress and rewards', userAddresses, rewardAccounts, rAccounts);
+  console.log('userAddress and rewards', userAddresses, rewardAccountsAddresses);
 
   useEffect(() => {
     if (!req) {
@@ -285,7 +285,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         burned: assetsBurnedInspector,
         summary: transactionSummaryInspector({
           addresses: userAddresses,
-          rewardAccounts: rAccounts,
+          rewardAccounts: rewardAccountsAddresses,
           inputResolver: txInputResolver,
           protocolParameters
         })
@@ -294,8 +294,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       const tx = req.transaction.toCore();
       const { minted, burned, summary } = await inspector(tx as Wallet.Cardano.HydratedTx);
       const isMintTransaction = minted.length > 0 || burned.length > 0;
-
-      console.log('summary???', summary);
 
       const txType = isMintTransaction ? 'Mint' : 'Send';
       const externalOutputs = tx.body.outputs.filter((output) => {
@@ -339,7 +337,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     addressToNameMap,
     setTxSummary,
     userAddresses,
-    rAccounts,
+    rewardAccountsAddresses,
     txInputResolver,
     protocolParameters
   ]);
@@ -358,9 +356,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
   const newTxData = mock();
-
-  // console.log('request data:', req);
-  // console.log('txSummarydata:', txSummary);
 
   return (
     <>
