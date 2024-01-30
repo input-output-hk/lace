@@ -355,11 +355,15 @@ export const useWalletManager = (): UseWalletManager => {
    * @returns resolves with wallet information or null when no wallet is found
    */
   const loadWallet = useCallback(async (): Promise<Wallet.CardanoWallet | undefined> => {
-    const wallets = await firstValueFrom(walletRepository.wallets$);
+    let wallets = await firstValueFrom(walletRepository.wallets$);
 
     // LW-9499 to convert this to proper migration
-    if (wallets.length === 0 && !(await tryMigrateToWalletRepository())) {
-      return;
+    if (wallets.length === 0) {
+      wallets = await tryMigrateToWalletRepository();
+      if (!wallets) {
+        // Either no wallet data found in local storage, or wallet is locked
+        return;
+      }
     }
 
     let activeWalletId = await firstValueFrom(walletManager.activeWalletId$);
