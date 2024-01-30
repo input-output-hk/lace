@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import { useTranslate } from '@src/ui/hooks';
-import { Amount } from './Amount';
+import { TransactionSummary } from '@lace/ui';
 
 export interface Props {
   collateral: string;
@@ -12,10 +12,9 @@ export const Collateral = ({ collateral, amountTransformer, coinSymbol }: Props)
   const { t } = useTranslate();
 
   return (
-    <Amount
-      amount={collateral}
-      amountTransformer={amountTransformer}
-      coinSymbol={coinSymbol}
+    <TransactionSummary.Amount
+      amount={`${collateral} ${coinSymbol}`}
+      fiatPrice={amountTransformer(collateral)}
       label={t('package.core.activityDetails.collateral')}
       tooltip={t('package.core.activityDetails.collateralInfo')}
     />

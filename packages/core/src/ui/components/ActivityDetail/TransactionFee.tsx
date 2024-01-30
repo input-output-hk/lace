@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import { useTranslate } from '@src/ui/hooks';
-import { Amount } from './Amount';
+import { TransactionSummary } from '@lace/ui';
 
 export interface TransactionFeeProps {
   fee: string;
@@ -12,10 +12,9 @@ export const TransactionFee = ({ fee, amountTransformer, coinSymbol }: Transacti
   const { t } = useTranslate();
 
   return (
-    <Amount
-      amount={fee}
-      amountTransformer={amountTransformer}
-      coinSymbol={coinSymbol}
+    <TransactionSummary.Amount
+      amount={`${fee} ${coinSymbol}`}
+      fiatPrice={amountTransformer(fee)}
       label={t('package.core.activityDetails.transactionFee')}
       tooltip={t('package.core.activityDetails.transactionFeeInfo')}
     />
