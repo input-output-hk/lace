@@ -75,6 +75,7 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
     return await action();
   } finally {
     subscription.unsubscribe();
+    password = '';
   }
 };
 
