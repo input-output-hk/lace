@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 import React from 'react';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionSummary } from '@lace/ui';
