@@ -31,7 +31,7 @@ type stakePoolsTableProps = {
   scrollableTargetId: string;
 };
 
-type LoadMoreDataParam = Parameters<typeof Table.TableBody>[0]['loadMoreData'];
+type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
   field: SortField.name,
@@ -170,7 +170,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
         />
       </div>
       <Box mt="$16" data-testid="stake-pool-list-container">
-        <Table.TableHeader
+        <Table.Header
           dataTestId="stake-pool"
           headers={headers}
           isActiveSortItem={isActiveSortItem}
@@ -179,7 +179,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           order={sort?.order}
         />
         {!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
-        <Table.TableBody<StakePoolTableItemBrowserProps>
+        <Table.Body<StakePoolTableItemBrowserProps>
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
           items={list}
@@ -190,7 +190,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { stakePool, hexId, id, selectionDisabledMessage, onClick, ...data } = props;
             return (
-              <Table.TableRow<Columns>
+              <Table.Row<Columns>
                 onClick={onClick}
                 columns={stakePooltableConfig.columns}
                 cellRenderers={stakePooltableConfig.renderer}

@@ -45,18 +45,17 @@ export const StakePoolTableItemBrowser = ({
     // that would allow us to calculate proper skip, limit that we pass in as a payload into the fetch pools util.
     <></>
   ) : (
-    <Table.TableRow<Columns>
+    <Table.Row<Columns>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}
       selected={poolAlreadySelected}
       onClick={onClick}
-      onSelect={onSelect}
-      selectable={!selectionsFull}
       selectionDisabledMessage={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
       dataTestId="stake-pool"
       withSelection
       keyProp={data?.id}
+      {...(!selectionsFull && { onSelect })}
     />
   );
 };

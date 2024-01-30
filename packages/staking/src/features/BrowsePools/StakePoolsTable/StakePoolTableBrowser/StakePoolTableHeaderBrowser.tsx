@@ -51,7 +51,7 @@ export const StakePoolTableHeaderBrowser = ({
   const isActiveSortItem = (value: string) => value === activeSort?.field;
 
   return (
-    <Table.TableHeader<Columns>
+    <Table.Header<Columns>
       dataTestId="stake-pool"
       headers={headers}
       isActiveSortItem={isActiveSortItem}

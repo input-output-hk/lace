@@ -6,23 +6,23 @@ import cn from 'classnames';
 
 import * as cx from './table.css';
 
-export interface TableHeaders<Columns> {
+export interface Headers<Columns> {
   label: string;
   value: Columns;
   tooltipText?: string;
 }
 
-export interface TableHeaderProps<Columns> {
+export interface HeaderProps<Columns> {
   isActiveSortItem: (value: string) => boolean;
   isSortingAvailable: (value: string) => boolean;
   onSortChange: (field: Columns) => void;
   order: 'asc' | 'desc';
   withSelection?: boolean;
   dataTestId?: string;
-  headers: TableHeaders<Columns>[];
+  headers: Headers<Columns>[];
 }
 
-export const TableHeader = <T extends string>({
+export const Header = <T extends string>({
   headers,
   isActiveSortItem,
   isSortingAvailable,
@@ -30,7 +30,7 @@ export const TableHeader = <T extends string>({
   order,
   withSelection = false,
   dataTestId = 'table',
-}: Readonly<TableHeaderProps<T>>): React.ReactElement => (
+}: Readonly<HeaderProps<T>>): React.ReactElement => (
   <div
     data-testid={`${dataTestId}-list-header`}
     className={cn(cx.row, cx.header, {

@@ -57,7 +57,7 @@ export const StakePoolTableBrowser = ({
         </div>
       )}
       {!(selectedStakePools.length > 0 && selectedStakePools.length === pools.length) && emptyPlaceholder}
-      <Table.TableBody<StakePoolTableItemBrowserProps | undefined>
+      <Table.Body<StakePoolTableItemBrowserProps | undefined>
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}
         items={pools}

@@ -10,7 +10,7 @@ import type { ListRange, VirtuosoProps } from 'react-virtuoso';
 
 const DEFAULT_ROW_HIGHT = 44;
 
-export type TableBodyProps<ItemProps> = VirtuosoProps<ItemProps, null> & {
+export type BodyProps<ItemProps> = VirtuosoProps<ItemProps, null> & {
   items: ItemProps[];
   loadMoreData: (range: Readonly<ListRange>) => void;
   itemContent: (index: number, item: ItemProps) => React.ReactElement;
@@ -18,17 +18,17 @@ export type TableBodyProps<ItemProps> = VirtuosoProps<ItemProps, null> & {
   scrollableTargetId?: string;
 };
 
-export const TableBody = <E extends object | undefined>({
+export const Body = <E extends object | undefined>({
   itemContent,
   items,
   loadMoreData,
   rowHeight = DEFAULT_ROW_HIGHT,
   scrollableTargetId = '',
   ...props
-}: Readonly<TableBodyProps<E>>): React.ReactElement => {
+}: Readonly<BodyProps<E>>): React.ReactElement => {
   const tableReference = useRef<HTMLDivElement | null>(null);
   const scrollableTargetReference =
-    useRef<Parameters<typeof Virtuoso>[0]['customScrollParent']>();
+    useRef<VirtuosoProps<E, undefined>['customScrollParent']>();
 
   useLayoutEffect(() => {
     if (tableReference.current) {
@@ -50,7 +50,7 @@ export const TableBody = <E extends object | undefined>({
 
   return (
     <Flex
-      className={cx.body}
+      className={cx.bodyWrapper}
       ref={tableReference}
       data-testid="stake-pool-list-scroll-wrapper"
     >
@@ -59,7 +59,7 @@ export const TableBody = <E extends object | undefined>({
         totalCount={items.length}
         data={items}
         rangeChanged={loadMoreData}
-        style={{ flex: 1 }}
+        className={cx.body}
         itemContent={itemContent}
         {...props}
       />

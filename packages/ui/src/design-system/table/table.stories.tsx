@@ -14,16 +14,14 @@ import { Table } from './index';
 
 import './responsive-table.stories.css';
 
-const subtitle = 'TBD';
-
 export default {
-  title: 'List & tables/Responsive table',
+  title: 'List & tables/Table',
   subcomponents: {
-    TableBody: Table.TableBody,
-    TableHeader: Table.TableHeader,
-    TableRow: Table.TableRow,
+    Body: Table.Body,
+    Header: Table.Header,
+    Row: Table.Row,
   },
-  decorators: [page({ title: 'Responsive table', subtitle })],
+  decorators: [page({ title: 'Responsive table' })],
 } as Meta;
 
 const Layout = ({
@@ -148,7 +146,7 @@ const MainComponents = ({
       <Variants.Row>
         <Variants.Cell>
           <Layout maxWidth={maxWidth}>
-            <Table.TableHeader
+            <Table.Header
               dataTestId="stake-pool"
               headers={headers}
               isActiveSortItem={isActiveSortItem}
@@ -164,13 +162,13 @@ const MainComponents = ({
                 height: '100px',
               }}
             >
-              <Table.TableBody<Record<string, string>>
+              <Table.Body<Record<string, string>>
                 loadMoreData={(): void => {
                   console.log('load more');
                 }}
                 items={list}
                 itemContent={(index, props): JSX.Element => (
-                  <Table.TableRow<Columns>
+                  <Table.Row<Columns>
                     onClick={(...data): void => {
                       console.log(data);
                     }}
