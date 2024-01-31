@@ -2,7 +2,7 @@ import { CSSProperties } from 'react';
 
 // can this be done with sprinkles?
 export const groupedTextBoxStyle = (length: number, idx: number): CSSProperties => ({
-  ...(length > 0 && {
+  ...(length > 1 && {
     ...(idx === 0 && {
       borderBottomLeftRadius: 16,
       borderBottomRightRadius: 0,

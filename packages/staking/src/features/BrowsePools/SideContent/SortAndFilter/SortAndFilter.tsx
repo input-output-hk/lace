@@ -106,7 +106,7 @@ export const SortAndFilter = ({
       {
         key: PoolsFilter.Saturation,
         opts: ['From', 'To'],
-        title: 'Ctrl. Stake',
+        title: 'Saturation',
         type: 'input',
       },
       {

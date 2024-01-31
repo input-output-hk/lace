@@ -4,6 +4,7 @@ export const groupedInputContainer = style([
   sx({
     borderBottomLeftRadius: '$medium',
     borderTopLeftRadius: '$medium',
+    width: '$fill',
   }),
 ]);
 
