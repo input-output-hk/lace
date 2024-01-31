@@ -36,7 +36,6 @@ export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentD
   encryptedRootPrivateKeyBytes: [],
   // eslint-disable-next-line no-magic-numbers
   extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex('0'.repeat(128)),
-  knownAddresses: [],
   chainId: Wallet.Cardano.ChainIds.Preprod
 };
 
@@ -262,7 +261,9 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         saturation: Percent(0.0512),
         stake: undefined,
         size: undefined,
-        apy: Percent(0.013)
+        apy: Percent(0.013),
+        ros: Percent(0.69),
+        lastRos: Percent(0.88)
       },
       owners: [
         Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
@@ -531,7 +532,7 @@ export const cardanoStakePoolSelectedDetails = {
   contact: {
     primary: 'http://www.sttst.com'
   },
-  delegators: 20,
+  delegators: '20',
   description: 'This is the STTST description',
   fee: '6.04',
   hexId: 'a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab',
@@ -545,11 +546,16 @@ export const cardanoStakePoolSelectedDetails = {
   ],
   saturation: '5.12',
   apy: '1.30',
-  stake: {
+  activeStake: {
+    number: '-'
+  },
+  liveStake: {
     number: '-'
   },
   status: 'active',
-  ticker: 'STTST'
+  ticker: 'STTST',
+  blocks: '20',
+  pledge: '2000.00'
 };
 
 export const transformedStakePool = {

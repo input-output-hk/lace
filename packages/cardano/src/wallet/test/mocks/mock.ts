@@ -32,7 +32,9 @@ export const stakePoolMock: Cardano.StakePool = {
     livePledge: BigInt('2000000000'),
     saturation: Percent(0.5),
     stake: undefined,
-    size: undefined
+    size: undefined,
+    ros: Percent(0.69),
+    lastRos: Percent(0.88)
   },
   owners: [
     Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),

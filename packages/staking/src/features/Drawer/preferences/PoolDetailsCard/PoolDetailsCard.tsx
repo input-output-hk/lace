@@ -1,7 +1,7 @@
 import { PostHogAction } from '@lace/common';
+import { ReactComponent as ChevronDownIcon } from '@lace/icons/dist/ChevronDownComponent';
+import { ReactComponent as ChevronUpIcon } from '@lace/icons/dist/ChevronUpComponent';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
-import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
-import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

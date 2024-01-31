@@ -1,4 +1,5 @@
 /* eslint-disable no-magic-numbers */
+import BigNumber from 'bignumber.js';
 import create, { StateSelector } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
@@ -16,17 +17,18 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       cost,
       hexId,
       metadata: { description = '', name = '', ticker = '', homepage, ext } = {},
-      metrics: { apy, delegators, stake, saturation },
+      metrics: { apy, delegators, stake, saturation, blocksCreated } = {},
       margin,
       owners,
       logo,
-      status
+      status,
+      pledge
     } = selectedStakePool;
     const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
 
     return {
       // TODO: a lot of this is repeated in `stakePoolTransformer`. Have only one place to parse this info
-      delegators: delegators || '-',
+      delegators: new BigNumber(delegators).toFormat() || '-',
       description,
       hexId: hexId.toString(),
       id: id.toString(),
@@ -35,8 +37,11 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       name,
       owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
       saturation: saturation && formatPercentages(saturation),
-      stake: stake?.active
+      activeStake: stake?.active
         ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.active?.toString()))
+        : { number: '-' },
+      liveStake: stake?.live
+        ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.live?.toString()))
         : { number: '-' },
       ticker,
       status,
@@ -45,7 +50,9 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       contact: {
         primary: homepage,
         ...ext?.pool.contact
-      }
+      },
+      blocks: new BigNumber(blocksCreated).toFormat() || '-',
+      pledge: Wallet.util.lovelacesToAdaString(pledge.toString())
     };
   }
 };

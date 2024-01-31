@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
@@ -282,8 +283,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state, command: { data } }) => ({
                   ...state,
                   ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
+                  ...atomicStateMutators.unselectPool({ id: data, state }),
                 })
               ),
+
               UpdateStakePercentage: handler<UpdateStakePercentage, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state, command: { data } }) => ({
                   ...state,
@@ -299,7 +302,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Confirmation]: cases<PortfolioManagementConfirmationCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
@@ -339,7 +341,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Sign]: cases<PortfolioManagementSignCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
@@ -367,7 +368,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Success]: cases<PortfolioManagementSuccessCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
@@ -379,7 +379,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Failure]: cases<PortfolioManagementFailureCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
@@ -464,10 +463,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state, command: { data } }) => ({
                   ...state,
                   ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
+                  ...atomicStateMutators.unselectPool({ id: data, state }),
                 })
               ),
               UpdateStakePercentage: handler<UpdateStakePercentage, StateNewPortfolio, StateNewPortfolio>(
-                // eslint-disable-next-line sonarjs/no-identical-functions
                 ({ state, command: { data } }) => ({
                   ...state,
                   ...atomicStateMutators.updateStakePercentage({
@@ -482,7 +481,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Confirmation]: cases<NewPortfolioConfirmationCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
@@ -516,7 +514,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Sign]: cases<NewPortfolioSignCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
@@ -552,7 +549,6 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Failure]: cases<NewPortfolioFailureCommand['type']>(
             {
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),

@@ -1,1 +1,1 @@
-export * from './StakePoolTableBrowser';
+export { StakePoolTableBrowser } from './StakePoolTableBrowser';

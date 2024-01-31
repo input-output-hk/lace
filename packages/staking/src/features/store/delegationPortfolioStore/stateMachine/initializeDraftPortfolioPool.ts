@@ -1,18 +1,15 @@
 import { Wallet } from '@lace/cardano';
 import { mapStakePoolToDisplayData } from '../mapStakePoolToDisplayData';
-import { AdaSymbol } from '../types';
 import { DraftPortfolioStakePool, State } from './types';
 
 const mapStakePoolToPortfolioPool = ({
-  cardanoCoinSymbol,
   stakePool,
   sliderIntegerPercentage,
 }: {
-  cardanoCoinSymbol: AdaSymbol;
   stakePool: Wallet.Cardano.StakePool;
   sliderIntegerPercentage: number;
 }): DraftPortfolioStakePool => ({
-  displayData: mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool }),
+  displayData: mapStakePoolToDisplayData({ stakePool }),
   id: stakePool.hexId,
   sliderIntegerPercentage,
   stakePool,
@@ -32,7 +29,6 @@ export const initializeDraftPortfolioPool = ({
   return matchingCurrentPortfolioPool
     ? { ...matchingCurrentPortfolioPool, sliderIntegerPercentage: initialPercentage }
     : mapStakePoolToPortfolioPool({
-        cardanoCoinSymbol: state.cardanoCoinSymbol,
         sliderIntegerPercentage: initialPercentage,
         stakePool,
       });

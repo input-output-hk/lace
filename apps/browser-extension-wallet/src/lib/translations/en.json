@@ -394,6 +394,22 @@
   },
   "expandPopup": "Expand",
   "browserView": {
+    "sharedWallet": {
+      "setup": {
+        "title": "Hello Web 3",
+        "subTitle": "Choose an option to get started",
+        "createSharedWalletOption": {
+          "title": "New shared wallet",
+          "description": "Create a new shared wallet",
+          "button": "Create"
+        },
+        "importSharedWalletOption": {
+          "title": "Import shared wallet",
+          "description": "Join a shared wallet from JSON file or chain sync",
+          "button": "Connect"
+        }
+      }
+    },
     "welcome": "Welcome!",
     "addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
     "sidePanel.aboutYourWallet": "About your wallet",
@@ -425,6 +441,7 @@
     "sideMenu.links.dappStore": "Dapp Store",
     "sideMenu.links.voting": "Voting",
     "sideMenu.links.addNewWallet": "Add new wallet",
+    "sideMenu.links.addSharedWallet": "Add shared wallet",
     "sideMenu.links.addressBook": "Address Book",
     "sideMenu.dapps.header": "Open Dapps",
     "sideMenu.mode.light": "Light mode",
@@ -1039,9 +1056,14 @@
     },
     "stakePoolMetricsBrowser": {
       "activeStake": "Active stake",
+      "liveStake": "Live stake",
       "saturation": "Saturation",
       "delegators": "Delegators",
-      "ros": "ROS"
+      "ros": "ROS",
+      "blocks": "Blocks",
+      "cost": "Cost p/ epoch",
+      "margin": "Pool margin",
+      "pledge": "Pledge"
     },
     "stakePoolSearch": {
       "gettingSaturated": "This pool starts to be saturated",
@@ -1057,10 +1079,31 @@
       "saturated": "This pool is too saturated. Stake on another pool to avoid losing rewards"
     },
     "stakePoolTableBrowser": {
-      "tableHeader.poolName": "Pool name",
-      "tableHeader.ros": "ROS",
-      "tableHeader.cost": "Cost",
-      "tableHeader.saturation": "Saturation"
+      "tableHeader": {
+        "ticker": "Ticker",
+        "cost": "Cost",
+        "ros": {
+          "title": "ROS",
+          "tooltip": "Estimated 'Return On Stake' based on previous pool performance"
+        },
+        "saturation": {
+          "title": "Saturation",
+          "tooltip": "Once a pool reaches the point of saturation, it will offer diminishing rewards"
+        },
+        "margin": {
+          "title": "Margin",
+          "tooltip": "The percentage of rewards taken by the stake pool operator after the fixed cost but before rewards are distributed"
+        },
+        "blocks": {
+          "title": "Blocks",
+          "tooltip": "Total blocks created by the pool."
+        },
+        "pledge": {
+          "title": "Pledge",
+          "tooltip": "An amount of self‐bonded assets intended to remain staked to the pool for as long as it operates"
+        },
+        "liveStake": "Live Stake"
+      }
     },
     "stakingConfirmationInfo": {
       "delegateTo": "Delegate to",

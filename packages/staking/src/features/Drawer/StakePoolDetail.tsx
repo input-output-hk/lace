@@ -1,9 +1,11 @@
+/* eslint-disable no-magic-numbers */
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis, PostHogAction } from '@lace/common';
+import { Ellipsis, PostHogAction, ProgressBar, getNumberWithUnit } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
+import inRange from 'lodash/inRange';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -17,11 +19,44 @@ import {
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
 
-const SATURATION_UPPER_BOUND = 100;
+// TODO: remove duplication once lw-9270 is merged (lw-9552)
+export enum SaturationLevels {
+  Low = 'low',
+  Medium = 'medium',
+  High = 'high',
+  Veryhigh = 'veryHigh',
+  Oversaturated = 'oversaturated',
+}
+
+const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
+  [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
+  [SaturationLevels.Veryhigh]: [90, 100],
+  [SaturationLevels.High]: [70, 90],
+  [SaturationLevels.Medium]: [21, 70],
+  [SaturationLevels.Low]: [0, 21],
+};
+
+type Entries<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T][];
+
+export const getSaturationLevel = (saturation: number): SaturationLevels => {
+  let result = SaturationLevels.Low;
+  for (const [level, [min, max]] of Object.entries(saturationLevelsRangeMap) as Entries<
+    typeof saturationLevelsRangeMap
+  >) {
+    if (inRange(saturation, min, max)) {
+      result = level;
+      return result;
+    }
+  }
+  return result;
+};
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
   const { openExternalLink } = useOutsideHandles();
+
   const {
     delegatingToThisPool,
     details: {
@@ -32,12 +67,17 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       owners = [],
       apy,
       saturation,
-      stake,
+      activeStake,
+      liveStake,
       logo,
       name,
       ticker,
       status,
       contact,
+      blocks,
+      fee,
+      pledge,
+      margin,
     },
   } = useDelegationPortfolioStore((store) => ({
     delegatingToThisPool:
@@ -60,7 +100,12 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
   const metricsTranslations = {
     activeStake: t('drawer.details.metrics.activeStake'),
     apy: t('drawer.details.metrics.apy'),
+    blocks: t('drawer.details.metrics.blocks'),
+    cost: t('drawer.details.metrics.cost'),
     delegators: t('drawer.details.metrics.delegators'),
+    liveStake: t('drawer.details.metrics.liveStake'),
+    margin: t('drawer.details.metrics.margin'),
+    pledge: t('drawer.details.metrics.pledge'),
     saturation: t('drawer.details.metrics.saturation'),
   };
 
@@ -70,16 +115,62 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     retiring: t('drawer.details.status.retiring'),
     saturated: t('drawer.details.status.saturated'),
   };
+  const formattedPledge = getNumberWithUnit(pledge);
+  const formattedCost = getNumberWithUnit(fee);
+
+  const metricsData = useMemo(() => {
+    const metrics = [
+      { t: metricsTranslations.activeStake, testId: 'active-stake', unit: activeStake.unit, value: activeStake.number },
+      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake.unit, value: liveStake.number },
+      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
+      { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
+      { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
+      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
+      { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
+      { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin },
+    ];
+
+    if (popupView) {
+      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' });
+    }
+
+    return metrics;
+  }, [
+    activeStake.number,
+    activeStake.unit,
+    apy,
+    blocks,
+    delegators,
+    formattedCost.number,
+    formattedCost.unit,
+    formattedPledge.number,
+    formattedPledge.unit,
+    liveStake.number,
+    liveStake.unit,
+    margin,
+    metricsTranslations.activeStake,
+    metricsTranslations.apy,
+    metricsTranslations.blocks,
+    metricsTranslations.cost,
+    metricsTranslations.delegators,
+    metricsTranslations.liveStake,
+    metricsTranslations.margin,
+    metricsTranslations.pledge,
+    metricsTranslations.saturation,
+    popupView,
+    saturation,
+  ]);
 
   return (
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-      <div className={cn(styles.contentWrapper, { [styles.popupView!]: popupView })}>
+      <div className={cn(styles.contentWrapper, styles.nameWrapper, { [styles.popupView!]: popupView })}>
         <StakePoolNameBrowser
           {...{
             id,
             isDelegated: delegatingToThisPool,
-            isOversaturated: saturation !== undefined && Number(saturation) > SATURATION_UPPER_BOUND,
+            isOversaturated:
+              saturation !== undefined && getSaturationLevel(Number(saturation)) === SaturationLevels.Oversaturated,
             logo,
             name,
             status,
@@ -87,6 +178,27 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
           }}
           translations={statusLogoTranslations}
         />
+        {!popupView && (
+          <div className={styles.saturationContainer}>
+            <div className={styles.saturationTitle} data-testid="saturation-title">
+              {metricsTranslations.saturation}
+            </div>
+            <div className={styles.saturationProgressContainer}>
+              <div className={styles.saturationProgress}>
+                {/* TODO: fix colors once lw-9270 is merged (lw-9552) */}
+                <ProgressBar
+                  className={styles[getSaturationLevel(Number(saturation))]}
+                  duration={0}
+                  width={`${Math.min(Number(saturation), 100)}%`}
+                  dataTestId="saturation-progress-bar"
+                />
+              </div>
+              <span className={styles.saturation} data-testid="saturation-value">
+                {saturation}%
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
       <div className={cn(styles.container, { [styles.popupView!]: popupView })} data-testid="stake-pool-details">
@@ -96,11 +208,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
             <div className={styles.title} data-testid="stake-pool-details-title">
               {t('drawer.details.statistics')}
             </div>
-            <StakePoolMetricsBrowser
-              {...{ apy: apy || '-', delegators: delegators || '-', saturation: saturation || '-', stake }}
-              translations={metricsTranslations}
-              popupView={popupView}
-            />
+            <StakePoolMetricsBrowser data={metricsData} popupView={popupView} />
           </div>
           <div className={styles.row} data-testid="stake-pool-details-information">
             <div

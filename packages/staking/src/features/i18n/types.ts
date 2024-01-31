@@ -33,7 +33,7 @@ type KeysStructure = {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
       tableHeader: {
-        poolName: '';
+        ticker: '';
         ros: {
           title: '';
           tooltip: '';
@@ -42,6 +42,21 @@ type KeysStructure = {
         saturation: {
           title: '';
           tooltip: '';
+        };
+        margin: {
+          title: '';
+          tooltip: '';
+        };
+        blocks: {
+          title: '';
+          tooltip: '';
+        };
+        pledge: {
+          title: '';
+          tooltip: '';
+        };
+        liveStake: {
+          title: '';
         };
       };
       emptyMessage: '';
@@ -90,9 +105,14 @@ type KeysStructure = {
     details: {
       metrics: {
         activeStake: '';
+        liveStake: '';
         apy: '';
         delegators: '';
         saturation: '';
+        blocks: '';
+        cost: '';
+        pledge: '';
+        margin: '';
       };
       status: {
         delegating: '';

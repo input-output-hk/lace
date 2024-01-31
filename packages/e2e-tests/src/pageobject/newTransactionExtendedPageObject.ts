@@ -10,7 +10,7 @@ import { Asset } from '../data/Asset';
 import { Logger } from '../support/logger';
 import testContext from '../utils/testContext';
 import extensionUtils from '../utils/utils';
-import { shelley } from '../data/AddressData';
+import { byron, shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import AddressForm from '../elements/addressbook/AddressForm';
@@ -195,7 +195,7 @@ export default new (class NewTransactionExtendedPageObject {
   };
 
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
-    await this.fillAddress(shelley.getAddress(), bundleIndex);
+    await this.fillAddress(byron.getAddress(), bundleIndex);
     await new AssetInput(bundleIndex).clickAddAssetButton();
     await this.clickCoinConfigureTokenSearchResult(
       extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name

@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as InfoIcon } from '../../assets/icons/info.component.svg';
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
