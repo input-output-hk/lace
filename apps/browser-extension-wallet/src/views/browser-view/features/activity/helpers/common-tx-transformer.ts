@@ -228,12 +228,16 @@ type TransactionGovernanceProposal = {
 };
 
 const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
-  if (Wallet.Cardano.isDRepAlwaysAbstain(drep)) {
-    return 'alwaysAbstain';
-  } else if (Wallet.Cardano.isDRepAlwaysNoConfidence(drep)) {
-    return 'alwaysNoConfidence';
+  switch (true) {
+    case Wallet.Cardano.isDRepAlwaysAbstain(drep):
+      return 'alwaysAbstain';
+    case Wallet.Cardano.isDRepAlwaysNoConfidence(drep):
+      return 'alwaysNoConfidence';
+    case Wallet.Cardano.isDRepCredential(drep):
+      return Wallet.Cardano.DRepID(drep.hash);
+    default:
+      throw new Error('incorrect drep supplied');
   }
-  return Wallet.Cardano.DRepID(drep.hash);
 };
 
 export const certificateTransformer = (
