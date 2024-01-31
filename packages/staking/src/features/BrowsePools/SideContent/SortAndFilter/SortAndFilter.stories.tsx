@@ -2,7 +2,7 @@ import { Cell, Flex, Grid, LocalThemeProvider, ThemeColorScheme, Variants } from
 
 import { Section } from '@lace/ui/src/design-system/decorators';
 import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import type { Meta } from '@storybook/react';
 
 import { SortAndFilter } from './SortAndFilter';
@@ -24,16 +24,6 @@ const CardsGroup = () => {
 
   console.debug({ filters });
 
-  const onFilterChange = useCallback((key: PoolsFilter, optIndex: number, value: string) => {
-    setFilters((old) => {
-      const newFilters = {
-        ...old,
-      };
-      newFilters[key][optIndex] = value;
-      return newFilters;
-    });
-  }, []);
-
   return (
     <Flex
       style={{
@@ -45,7 +35,7 @@ const CardsGroup = () => {
       <div style={{ width: 340 }}>
         <SortAndFilter
           onSortChange={setSortedBy}
-          onFilterChange={onFilterChange}
+          onFiltersChange={(newFilters) => setFilters(newFilters)}
           onDirectionChange={setDirection}
           sortedBy={sortedBy}
           direction={direction}

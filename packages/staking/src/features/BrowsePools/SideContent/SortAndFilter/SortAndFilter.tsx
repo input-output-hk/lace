@@ -1,8 +1,10 @@
 /* eslint-disable no-magic-numbers */
-import { ReactComponent as SortDirectionIcon } from '@lace/icons/dist/SortDirectionComponent';
+import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
+import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
 import { Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
 import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
-import { useMemo, useState } from 'react';
+import debounce from 'lodash/debounce';
+import { useCallback, useMemo, useState } from 'react';
 import * as styles from './SortAndFilter.css';
 import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortOption, VisibleSection } from './types';
 import { groupedTextBoxStyle } from './utils';
@@ -13,7 +15,7 @@ export interface SortAndFilterProps {
   filters: FilterValues;
   onSortChange: (sortBy: SortField) => void;
   onDirectionChange: (direction: SortDirection) => void;
-  onFilterChange: (key: PoolsFilter, optIndex: number, value: string) => void;
+  onFiltersChange: (filters: FilterValues) => void;
 }
 
 export const SortAndFilter = ({
@@ -22,13 +24,24 @@ export const SortAndFilter = ({
   sortedBy,
   onDirectionChange,
   onSortChange,
-  onFilterChange,
+  onFiltersChange,
 }: SortAndFilterProps) => {
   const [visibleSection, setVisibleSection] = useState<VisibleSection>('sorting');
+  const [localFilters, setLocalFilters] = useState<FilterValues>(filters);
 
-  const onIconClick = () => {
-    onDirectionChange(direction === SortDirection.desc ? SortDirection.asc : SortDirection.desc);
+  const debouncedFilterChange = useMemo(() => debounce(onFiltersChange, 400), [onFiltersChange]);
+  const onLocalFilterChange = (key: PoolsFilter, optIndex: number, value: string) => {
+    const newFilters = {
+      ...localFilters,
+    };
+    newFilters[key][optIndex] = value;
+    setLocalFilters(newFilters);
+    debouncedFilterChange(newFilters);
   };
+
+  const onIconClick = useCallback(() => {
+    onDirectionChange(direction === SortDirection.desc ? SortDirection.asc : SortDirection.desc);
+  }, [direction, onDirectionChange]);
 
   const getFilters = (filter: FilterOption): React.ReactElement => {
     if (filter.type === 'input') {
@@ -40,8 +53,8 @@ export const SortAndFilter = ({
               containerStyle={groupedTextBoxStyle(filter.opts.length, idx)}
               containerClassName={styles.groupedInputContainer}
               label={opt}
-              value={filters[filter.key][idx]}
-              onChange={(e) => onFilterChange(filter.key, idx, e.target.value)}
+              value={localFilters[filter.key][idx]}
+              onChange={(e) => onLocalFilterChange(filter.key, idx, e.target.value)}
             />
           ))}
         </>
@@ -49,13 +62,14 @@ export const SortAndFilter = ({
     }
 
     const selectedValue =
-      (filter.opts as SelectOption[]).find((opt) => opt.value === filters[filter.key][0])?.value ?? '';
+      (filter.opts as SelectOption[]).find((opt) => opt.value === localFilters[filter.key][0])?.value ?? '';
 
     return (
       <SelectGroup
-        onValueChange={(value) => onFilterChange(filter.key, 0, value)}
+        onValueChange={(value) => onLocalFilterChange(filter.key, 0, value)}
         showArrow
         withOutline
+        className={styles.selectGroup}
         placeholder=""
         options={filter.opts as SelectOption[]}
         selectedValue={selectedValue}
@@ -63,21 +77,26 @@ export const SortAndFilter = ({
     );
   };
 
-  const sortingOptions: SortOption[] = [
-    {
-      icon: SortDirectionIcon,
-      label: 'Ticker name',
-      onIconClick,
-      value: 'ticker',
-    },
-    { icon: SortDirectionIcon, label: 'Saturation', onIconClick, value: 'saturation' },
-    { icon: SortDirectionIcon, label: 'ROS', onIconClick, value: 'ros' },
-    { icon: SortDirectionIcon, label: 'Cost', onIconClick, value: 'cost' },
-    { icon: SortDirectionIcon, label: 'Margin', onIconClick, value: 'margin' },
-    { icon: SortDirectionIcon, label: 'Blocks produced', onIconClick, value: 'blocks' },
-    { icon: SortDirectionIcon, label: 'Pledge', onIconClick, value: 'pledge' },
-    { icon: SortDirectionIcon, label: 'Live stake', onIconClick, value: 'livestake' },
-  ];
+  const icon = direction === SortDirection.asc ? SortDirectionAscIcon : SortDirectionDescIcon;
+
+  const sortingOptions: SortOption[] = useMemo(
+    () => [
+      {
+        icon,
+        label: 'Ticker name',
+        onIconClick,
+        value: 'ticker',
+      },
+      { icon, label: 'Saturation', onIconClick, value: 'saturation' },
+      { icon, label: 'ROS', onIconClick, value: 'ros' },
+      { icon, label: 'Cost', onIconClick, value: 'cost' },
+      { icon, label: 'Margin', onIconClick, value: 'margin' },
+      { icon, label: 'Blocks produced', onIconClick, value: 'blocks' },
+      { icon, label: 'Pledge', onIconClick, value: 'pledge' },
+      { icon, label: 'Live stake', onIconClick, value: 'livestake' },
+    ],
+    [icon, onIconClick]
+  );
 
   const filterOptions: FilterOption[] = useMemo(
     () => [
@@ -102,14 +121,14 @@ export const SortAndFilter = ({
       {
         key: PoolsFilter.Ros,
         opts: [
-          { label: 'Last epoch', selected: filters[PoolsFilter.Ros][0] === 'lastepoch', value: 'lastepoch' },
-          { label: 'other', selected: filters[PoolsFilter.Ros][0] === 'lastepoch', value: 'other' },
+          { label: 'Last epoch', selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch', value: 'lastepoch' },
+          { label: 'other', selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch', value: 'other' },
         ],
         title: 'ROS',
         type: 'select',
       },
     ],
-    [filters]
+    [localFilters]
   );
 
   console.debug({ filterOptions });
@@ -145,7 +164,7 @@ export const SortAndFilter = ({
                 key={filter.title}
               >
                 <Flex>
-                  <Text.Body.Large weight="$medium">{filter.title}</Text.Body.Large>
+                  <Text.Body.Small weight="$medium">{filter.title}</Text.Body.Small>
                 </Flex>
                 <Flex>{getFilters(filter)}</Flex>
               </Flex>

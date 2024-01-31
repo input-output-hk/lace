@@ -6,3 +6,12 @@ export const groupedInputContainer = style([
     borderTopLeftRadius: '$medium',
   }),
 ]);
+
+export const selectGroup = style([
+  sx({
+    w: '$fill',
+  }),
+  {
+    backgroundColor: 'F9F9F9',
+  },
+]);
