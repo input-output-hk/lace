@@ -4,7 +4,6 @@ import * as Form from '@radix-ui/react-form';
 import cn from 'classnames';
 
 import { Flex } from '../flex';
-import * as Text from '../typography';
 
 import { Button } from './auto-suggest-box-button.component';
 import * as cx from './auto-suggest-box-input.css';
