@@ -1,4 +1,4 @@
-import { Cell, Flex, Grid, LocalThemeProvider, ThemeColorScheme, Variants } from '@lace/ui';
+import { Box, Cell, Flex, Grid, LocalThemeProvider, ThemeColorScheme, Variants } from '@lace/ui';
 
 import { Section } from '@lace/ui/src/design-system/decorators';
 import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
@@ -6,13 +6,14 @@ import { useState } from 'react';
 import type { Meta } from '@storybook/react';
 
 import { SortAndFilter } from './SortAndFilter';
-import { FilterValues, PoolsFilter } from './types';
+import { FilterValues, PoolsFilter, VisibleSection } from './types';
 
 export default {
   title: 'Cards/Stake Pool Sorting & Filter',
 } as Meta;
 
-const CardsGroup = () => {
+const Wrapper = ({ visibleSection: inVisibleSection }: { visibleSection: VisibleSection }) => {
+  const [visibleSection, setVisibleSection] = useState(inVisibleSection);
   const [sortedBy, setSortedBy] = useState(SortField.saturation);
   const [filters, setFilters] = useState<FilterValues>({
     [PoolsFilter.Saturation]: ['', ''],
@@ -22,30 +23,36 @@ const CardsGroup = () => {
   });
   const [direction, setDirection] = useState(SortDirection.asc);
 
-  console.debug({ filters });
-
   return (
-    <Flex
-      style={{
-        flexWrap: 'wrap',
-        rowGap: 10,
-      }}
-      gap="$20"
-    >
-      <div style={{ width: 340 }}>
-        <SortAndFilter
-          onSortChange={setSortedBy}
-          onFiltersChange={(newFilters) => setFilters(newFilters)}
-          onDirectionChange={setDirection}
-          sortedBy={sortedBy}
-          direction={direction}
-          filters={filters}
-        />
-      </div>
-      <div style={{ width: 340 }}>{/* <SortAndFilter toggleSection="filtering" /> */}</div>
-    </Flex>
+    <SortAndFilter
+      onSortChange={setSortedBy}
+      onFiltersChange={setFilters}
+      onDirectionChange={setDirection}
+      onVisibleSectionChange={setVisibleSection}
+      sortedBy={sortedBy}
+      direction={direction}
+      filters={filters}
+      visibleSection={visibleSection}
+    />
   );
 };
+
+const CardsGroup = () => (
+  <Flex
+    style={{
+      flexWrap: 'wrap',
+      rowGap: 10,
+    }}
+    gap="$20"
+  >
+    <Box w="$342">
+      <Wrapper visibleSection="sorting" />{' '}
+    </Box>
+    <Box w="$342">
+      <Wrapper visibleSection="filtering" />{' '}
+    </Box>
+  </Flex>
+);
 
 export const Overview = (): JSX.Element => (
   <>
@@ -84,14 +91,3 @@ export const Overview = (): JSX.Element => (
     </Section>
   </>
 );
-
-// export const Controls = {
-//   args: {
-//     toggleSection: 'sorting',
-//   } as SortAndFilterProps,
-//   render: (props: SortAndFilterProps) => (
-//     <div style={{ width: 220 }}>
-//       <SortAndFilter {...props} />
-//     </div>
-//   ),
-// };

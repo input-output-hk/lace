@@ -10,23 +10,26 @@ import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortOption, Visi
 import { groupedTextBoxStyle } from './utils';
 
 export interface SortAndFilterProps {
+  visibleSection: VisibleSection;
   sortedBy: SortField;
   direction: SortDirection;
   filters: FilterValues;
   onSortChange: (sortBy: SortField) => void;
   onDirectionChange: (direction: SortDirection) => void;
   onFiltersChange: (filters: FilterValues) => void;
+  onVisibleSectionChange: (section: VisibleSection) => void;
 }
 
 export const SortAndFilter = ({
+  visibleSection,
   direction,
   filters,
   sortedBy,
   onDirectionChange,
   onSortChange,
   onFiltersChange,
+  onVisibleSectionChange,
 }: SortAndFilterProps) => {
-  const [visibleSection, setVisibleSection] = useState<VisibleSection>('sorting');
   const [localFilters, setLocalFilters] = useState<FilterValues>(filters);
 
   const debouncedFilterChange = useMemo(() => debounce(onFiltersChange, 400), [onFiltersChange]);
@@ -131,15 +134,13 @@ export const SortAndFilter = ({
     [localFilters]
   );
 
-  console.debug({ filterOptions });
-
   return (
     <Card.Outlined style={{ width: 340 }}>
       <Flex flexDirection="column" justifyContent="flex-start" alignItems="stretch" my="$32" mx="$32" gap="$20">
         <Text.SubHeading weight="$bold">More options</Text.SubHeading>
         <ToggleButtonGroup.Root
           value={visibleSection}
-          onValueChange={(value) => setVisibleSection(value as VisibleSection)}
+          onValueChange={(value) => onVisibleSectionChange(value as VisibleSection)}
         >
           <ToggleButtonGroup.Item value="sorting">Sorting</ToggleButtonGroup.Item>
           <ToggleButtonGroup.Item value="filtering">Filters</ToggleButtonGroup.Item>
