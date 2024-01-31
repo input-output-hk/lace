@@ -7,7 +7,7 @@ import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amou
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
 import {
   ActivityStatus,
-  DelegationTransactionType,
+  DelegationActivityType,
   TxDetails,
   TxDetailsCertificateTitles,
   TxDetailsVotingProceduresTitles,
@@ -54,13 +54,13 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
     return [
       {
         ...tx,
-        type: DelegationTransactionType.delegation,
+        type: DelegationActivityType.delegation,
         // Deposit already shown in the delegationRegistration
         deposit: undefined
       },
       {
         ...tx,
-        type: DelegationTransactionType.delegationRegistration,
+        type: DelegationActivityType.delegationRegistration,
         // Let registration show just the deposit,
         // and the other transaction show fee to avoid duplicity
         fee: '0'
@@ -70,13 +70,13 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
     return [
       {
         ...tx,
-        type: DelegationTransactionType.delegation,
+        type: DelegationActivityType.delegation,
         // Reclaimed deposit already shown in the delegationDeregistration
         depositReclaim: undefined
       },
       {
         ...tx,
-        type: DelegationTransactionType.delegationDeregistration,
+        type: DelegationActivityType.delegationDeregistration,
         // Let de-registration show just the returned deposit,
         // and the other transaction show fee to avoid duplicity
         fee: '0'
@@ -87,7 +87,7 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
   return [
     {
       ...tx,
-      type: DelegationTransactionType.delegation
+      type: DelegationActivityType.delegation
     }
   ];
 };
@@ -184,7 +184,7 @@ export const txTransformer = async ({
   // SDK Ticket LW-8767 should fix the type of Input in TxInFlight to contain the address
   const type = inspectTxType({ walletAddresses, tx: tx as unknown as Wallet.Cardano.HydratedTx });
 
-  if (type === DelegationTransactionType.delegation) {
+  if (type === DelegationActivityType.delegation) {
     return splitDelegationTx(baseTransformedActivity);
   }
 

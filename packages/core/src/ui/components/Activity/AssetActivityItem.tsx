@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable react/no-multi-comp */
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
@@ -9,12 +10,7 @@ import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { useTranslate } from '@src/ui/hooks';
-import {
-  DelegationTransactionType,
-  TransactionActivityType,
-  ConwayEraGovernanceActions,
-  ConwayEraCertificatesTypes
-} from '../ActivityDetail/types';
+import { DelegationActivityType, TransactionActivityType } from '../ActivityDetail/types';
 import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
@@ -71,7 +67,7 @@ export interface AssetActivityItemProps {
 const DELEGATION_ASSET_NUMBER = 1;
 
 interface ActivityStatusIconProps {
-  status: string;
+  status: ActivityStatus;
   type: ActivityType;
 }
 
@@ -105,47 +101,12 @@ export const AssetActivityItem = ({
   formattedTimestamp
 }: AssetActivityItemProps): React.ReactElement => {
   const { t } = useTranslate();
-
-  const translationTypes: Record<ActivityType, string> = {
-    [TransactionActivityType.rewards]: 'package.core.assetActivityItem.entry.name.rewards',
-    [TransactionActivityType.incoming]: 'package.core.assetActivityItem.entry.name.incoming',
-    [TransactionActivityType.outgoing]: 'package.core.assetActivityItem.entry.name.outgoing',
-    [TransactionActivityType.self]: 'package.core.assetActivityItem.entry.name.self',
-    [DelegationTransactionType.delegation]: 'package.core.assetActivityItem.entry.name.delegation',
-    [DelegationTransactionType.delegationDeregistration]:
-      'package.core.assetActivityItem.entry.name.delegationDeregistration',
-    [DelegationTransactionType.delegationRegistration]:
-      'package.core.assetActivityItem.entry.name.delegationRegistration',
-    [ConwayEraGovernanceActions.vote]: 'package.core.assetActivityItem.entry.name.vote',
-    [ConwayEraGovernanceActions.submitProposal]: 'package.core.assetActivityItem.entry.name.submitProposal',
-    [ConwayEraCertificatesTypes.RegisterDelegateRepresentative]:
-      'package.core.assetActivityItem.entry.name.RegisterDelegateRepresentativeCertificate',
-    [ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]:
-      'package.core.assetActivityItem.entry.name.UnregisterDelegateRepresentativeCertificate',
-    [ConwayEraCertificatesTypes.UpdateDelegateRepresentative]:
-      'package.core.assetActivityItem.entry.name.UpdateDelegateRepresentativeCertificate',
-    [ConwayEraCertificatesTypes.StakeVoteDelegation]:
-      'package.core.assetActivityItem.entry.name.StakeVoteDelegationCertificate',
-    [ConwayEraCertificatesTypes.StakeRegistrationDelegation]:
-      'package.core.assetActivityItem.entry.name.StakeRegistrationDelegateCertificate',
-    [ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation]:
-      'package.core.assetActivityItem.entry.name.StakeVoteRegistrationDelegateCertificate',
-    [ConwayEraCertificatesTypes.VoteDelegation]: 'package.core.assetActivityItem.entry.name.VoteDelegationCertificate',
-    [ConwayEraCertificatesTypes.VoteRegistrationDelegation]:
-      'package.core.assetActivityItem.entry.name.VoteRegistrationDelegateCertificate',
-    [ConwayEraCertificatesTypes.ResignCommitteeCold]:
-      'package.core.assetActivityItem.entry.name.ResignCommitteeColdCertificate',
-    [ConwayEraCertificatesTypes.AuthorizeCommitteeHot]:
-      'package.core.assetActivityItem.entry.name.AuthorizeCommitteeHotCertificate'
-  };
-
   const ref = useRef<HTMLHeadingElement>(null);
   const [assetsToShow, setAssetsToShow] = React.useState<number>(0);
 
   const getText = useCallback(
     (items: number): { text: string; suffix: string } => {
-      if (type in DelegationTransactionType || type === TransactionActivityType.self)
-        return { text: amount, suffix: '' };
+      if (type in DelegationActivityType || type === TransactionActivityType.self) return { text: amount, suffix: '' };
 
       const assetsIdsText = assets
         ?.slice(0, items)
@@ -191,7 +152,7 @@ export const AssetActivityItem = ({
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
-    type in DelegationTransactionType ? (
+    type in DelegationActivityType ? (
       <p data-testid="tokens-amount" className={styles.description}>
         {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
       </p>
@@ -220,9 +181,9 @@ export const AssetActivityItem = ({
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
-            {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationTransactionType)
+            {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationActivityType)
               ? t('package.core.assetActivityItem.entry.name.sending')
-              : t(translationTypes[type])}
+              : t(`package.core.assetActivityItem.entry.name.${type}`)}
           </h6>
           {descriptionContent}
         </div>

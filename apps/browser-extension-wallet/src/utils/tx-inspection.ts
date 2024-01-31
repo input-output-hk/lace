@@ -12,10 +12,11 @@ import {
 import { Wallet } from '@lace/cardano';
 import {
   ActivityType,
-  DelegationTransactionType,
+  DelegationActivityType,
   TransactionActivityType,
   ConwayEraGovernanceActions,
-  ConwayEraCertificatesTypes
+  ConwayEraCertificatesTypes,
+  Cip1694GovernanceActivityType
 } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
@@ -60,8 +61,6 @@ const governanceCertificateInspection = (
       return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;
     case signedCertificateTypenames.includes(CertificateType.UpdateDelegateRepresentative):
       return ConwayEraCertificatesTypes.UpdateDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.VoteDelegation):
-      return ConwayEraCertificatesTypes.VoteDelegation;
     case signedCertificateTypenames.includes(CertificateType.StakeVoteDelegation):
       return ConwayEraCertificatesTypes.StakeVoteDelegation;
     case signedCertificateTypenames.includes(CertificateType.StakeRegistrationDelegation):
@@ -74,6 +73,28 @@ const governanceCertificateInspection = (
       return ConwayEraCertificatesTypes.AuthorizeCommitteeHot;
     case signedCertificateTypenames.includes(CertificateType.ResignCommitteeCold):
       return ConwayEraCertificatesTypes.ResignCommitteeCold;
+  }
+};
+
+// Assumes single procedure only
+export const cip1694GovernanceActionsInspection = (
+  procedure: Wallet.Cardano.ProposalProcedure
+): Cip1694GovernanceActivityType => {
+  switch (procedure.governanceAction.__typename) {
+    case Wallet.Cardano.GovernanceActionType.parameter_change_action:
+      return Cip1694GovernanceActivityType.ParameterChangeAction;
+    case Wallet.Cardano.GovernanceActionType.hard_fork_initiation_action:
+      return Cip1694GovernanceActivityType.HardForkInitiationAction;
+    case Wallet.Cardano.GovernanceActionType.treasury_withdrawals_action:
+      return Cip1694GovernanceActivityType.TreasuryWithdrawalsAction;
+    case Wallet.Cardano.GovernanceActionType.no_confidence:
+      return Cip1694GovernanceActivityType.NoConfidence;
+    case Wallet.Cardano.GovernanceActionType.update_committee:
+      return Cip1694GovernanceActivityType.UpdateCommittee;
+    case Wallet.Cardano.GovernanceActionType.new_constitution:
+      return Cip1694GovernanceActivityType.NewConstitution;
+    case Wallet.Cardano.GovernanceActionType.info_action:
+      return Cip1694GovernanceActivityType.InfoAction;
   }
 };
 
@@ -145,17 +166,17 @@ export const inspectTxType = ({
   if (inspectionProperties.sent.inputs.length > 0 || withRewardsWithdrawal) {
     switch (true) {
       case !!inspectionProperties.delegation[0]?.poolId:
-        return DelegationTransactionType.delegation;
+        return DelegationActivityType.delegation;
       case inspectionProperties.stakeKeyRegistration.length > 0:
-        return DelegationTransactionType.delegationRegistration;
+        return DelegationActivityType.delegationRegistration;
       case inspectionProperties.stakeKeyDeregistration.length > 0:
-        return DelegationTransactionType.delegationDeregistration;
+        return DelegationActivityType.delegationDeregistration;
       // Voting procedures take priority over proposals
       // TODO: use proper inspector when available on sdk side (LW-9569)
       case tx.body.votingProcedures?.length > 0:
         return ConwayEraGovernanceActions.vote;
       case tx.body.proposalProcedures?.length > 0:
-        return ConwayEraGovernanceActions.submitProposal;
+        return cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]);
       case inspectionProperties.selfTransaction:
         return TransactionActivityType.self;
       default:
