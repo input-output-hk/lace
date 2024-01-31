@@ -31,13 +31,15 @@ export const selectable = style([
 ]);
 
 export const cell = style([
+  sx({
+    color: '$stake_pool_item_text_color',
+    fontSize: '$16',
+    fontWeight: '$medium',
+    lineHeight: '$24',
+    px: '$8',
+  }),
   {
-    color: vars.colors.$stake_pool_item_text_color,
     display: 'flex',
-    fontSize: vars.fontSizes.$16,
-    fontWeight: vars.fontWeights.$medium,
-    lineHeight: vars.spacing.$24,
-    padding: `0 ${vars.spacing.$8}`,
     selectors: {
       [`${selectable} &:first-child`]: {
         justifyContent: 'flex-end',
@@ -48,9 +50,11 @@ export const cell = style([
 ]);
 
 export const cellInner = style([
-  sx({ width: '$fill' }),
+  sx({
+    width: '$fill',
+    fontFamily: '$nova',
+  }),
   {
-    fontFamily: vars.fontFamily.$nova,
     display: 'flex',
     flexWrap: 'nowrap',
     alignItems: 'center',
@@ -84,11 +88,13 @@ export const headerItem = style([
 ]);
 
 export const headerItemInner = style([
+  sx({
+    width: '$fill',
+  }),
   {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    width: '100%',
   },
 ]);
 
