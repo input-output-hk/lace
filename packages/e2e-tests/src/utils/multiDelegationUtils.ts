@@ -9,12 +9,26 @@ const isStakePoolInUse = async (stakePoolID: string): Promise<boolean> => {
   return stakePoolIDsInUse.includes(stakePoolID);
 };
 
-const getPoolIdOrName = async (stakePools: StakePool[], field: 'id' | 'name') => {
+const getPoolFieldValue = async (stakePools: StakePool[], field: 'id' | 'name' | 'ticker') => {
   let result;
   for (const pool of stakePools) {
     if (!(await isStakePoolInUse(pool.poolId))) {
-      result = field === 'id' ? pool.poolId : pool.name;
-      testContext.save(field === 'id' ? 'currentStakePoolId' : 'currentStakePoolName', result);
+      switch (field) {
+        case 'id':
+          result = pool.poolId;
+          testContext.save('currentStakePoolId', result);
+          break;
+        case 'name':
+          result = pool.name;
+          testContext.save('currentStakePoolName', result);
+          break;
+        case 'ticker':
+          result = pool.ticker;
+          testContext.save('currentStakePoolTicker', result);
+          break;
+        default:
+          throw new Error(`Unsupported field: ${field}`);
+      }
       break;
     }
   }
@@ -25,13 +39,13 @@ const getPoolIdOrName = async (stakePools: StakePool[], field: 'id' | 'name') =>
 };
 
 export const parseSearchTerm = async (term: string): Promise<string> => {
-  let parsedSearchTerm = '';
+  let parsedSearchTerm;
   switch (term) {
     case 'OtherStakePool':
-      parsedSearchTerm = (await getPoolIdOrName(stakePoolsWithMetadata, 'name')) as unknown as string;
+      parsedSearchTerm = (await getPoolFieldValue(stakePoolsWithMetadata, 'ticker')) as unknown as string;
       break;
     case 'OtherNoMetadataStakePool':
-      parsedSearchTerm = (await getPoolIdOrName(stakePoolsWithoutMetadata, 'id')) as unknown as string;
+      parsedSearchTerm = (await getPoolFieldValue(stakePoolsWithoutMetadata, 'id')) as unknown as string;
       break;
     default:
       parsedSearchTerm = term;

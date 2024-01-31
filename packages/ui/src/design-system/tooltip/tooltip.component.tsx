@@ -21,6 +21,7 @@ export const Tooltip = ({
   skipDelayDuration = 0,
   label,
   children,
+  side,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
@@ -28,7 +29,7 @@ export const Tooltip = ({
       skipDelayDuration={skipDelayDuration}
       delayDuration={delayDuration}
     >
-      <Root label={label} {...props}>
+      <Root side={side} label={label} {...props}>
         <Trigger asChild>{children}</Trigger>
       </Root>
     </Provider>

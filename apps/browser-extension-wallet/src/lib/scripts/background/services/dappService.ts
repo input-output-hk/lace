@@ -20,7 +20,7 @@ const authorizedDappsApi: AuthorizedDappService = {
   removeAuthorizedDapp: async (origin: Origin): Promise<boolean> => {
     const originUrl = new URL(origin).origin;
     console.debug(`revoking access for ${originUrl}`);
-    const accessRevoked = await authenticator.revokeAccess(originUrl);
+    const accessRevoked = await authenticator.revokeAccess({ url: originUrl });
     if (accessRevoked) {
       const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
       const updated = authorizedDapps.filter((d) => new URL(d.url).origin !== originUrl);

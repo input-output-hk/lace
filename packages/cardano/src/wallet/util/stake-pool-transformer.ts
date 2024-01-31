@@ -1,5 +1,4 @@
-/* eslint-disable no-magic-numbers */
-import { formatPercentages, getRandomIcon } from '@lace/common';
+import { formatPercentages, getRandomIcon, getNumberWithUnit } from '@lace/common';
 import { Cardano } from '@cardano-sdk/core';
 import { CoinId } from '@src/wallet';
 import { lovelacesToAdaString } from './unit-converters';
@@ -16,9 +15,9 @@ export interface StakePool {
   ticker?: string;
   logo?: string;
   retired?: boolean;
-  apy?: number | string;
-  size?: string;
-  saturation?: number | string;
+  apy?: string;
+  liveStake?: { number: string; unit?: string };
+  saturation?: string;
   fee?: number | string;
   isStakingPool?: boolean;
 }
@@ -26,35 +25,35 @@ export interface StakePool {
 type StakePoolTransformerProp = {
   stakePool: Cardano.StakePool;
   delegatingPoolId?: string;
-  cardanoCoin: CoinId;
+  cardanoCoin?: CoinId;
 };
 
-export const stakePoolTransformer = ({
-  stakePool,
-  delegatingPoolId,
-  cardanoCoin
-}: StakePoolTransformerProp): StakePool => {
+export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
-  const { size, apy, saturation } = metrics;
-  const calcCost = cost ? ` + ${lovelacesToAdaString(cost.toString(), 0)}${cardanoCoin.symbol}` : '';
-  const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
+  const formattedPledge = getNumberWithUnit(lovelacesToAdaString(pledge.toString()));
+  const formattedCost = cost && getNumberWithUnit(lovelacesToAdaString(cost.toString()));
 
   return {
-    hexId: hexId.toString(),
-    margin: calcMargin,
-    pledge: pledge ? `${lovelacesToAdaString(pledge.toString())}${cardanoCoin.symbol}` : '-',
-    owners: owners ? owners.map((owner: Cardano.RewardAccount) => owner.toString()) : [],
-    retired: status === Cardano.StakePoolStatus.Retired,
-    description: metadata?.description,
-    size: `${size?.live ?? '-'} %`,
     id: id.toString(),
-    cost: `${calcMargin}%${calcCost}`,
+    hexId: hexId.toString(),
     name: metadata?.name,
     ticker: metadata?.ticker,
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
-    apy: apy && formatPercentages(apy.valueOf()),
-    saturation: saturation && formatPercentages(saturation.valueOf()),
+    owners: owners ? owners.map((owner: Cardano.RewardAccount) => owner.toString()) : [],
+    retired: status === Cardano.StakePoolStatus.Retired,
     fee: lovelacesToAdaString(cost.toString()),
-    isStakingPool: delegatingPoolId ? delegatingPoolId === id.toString() : undefined
+    description: metadata?.description,
+    ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
+    cost: `${formattedCost.number}${formattedCost.unit}`,
+    liveStake: metrics?.stake.live
+      ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
+      : { number: '-', unit: '' },
+    ...(metrics && {
+      ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
+      saturation: formatPercentages(metrics.saturation.valueOf()),
+      blocks: metrics?.blocksCreated?.toString()
+    }),
+    pledge: `${formattedPledge.number}${formattedPledge.unit}`,
+    ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() })
   };
 };

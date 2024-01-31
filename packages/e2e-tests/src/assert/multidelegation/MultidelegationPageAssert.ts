@@ -158,7 +158,7 @@ class MultidelegationPageAssert {
     );
   };
 
-  assertSeeSearchResults = async (expectedResultsCount: number, searchTerm: string) => {
+  assertSeeSearchResults = async (expectedResultsCount: number) => {
     const rowsNumber = (await MultidelegationPage.poolsItems).length;
     expect(rowsNumber).to.equal(expectedResultsCount);
     await MultidelegationPage.emptySearchResultsImage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
@@ -170,62 +170,81 @@ class MultidelegationPageAssert {
     } else {
       for (let index = 0; index < expectedResultsCount; index++) {
         const stakePoolListItem = new StakePoolListItem(index);
-        await stakePoolListItem.logo.waitForDisplayed();
-        await stakePoolListItem.name.waitForDisplayed();
+        await stakePoolListItem.checkbox.waitForDisplayed();
         await stakePoolListItem.ticker.waitForDisplayed();
-        await stakePoolListItem.ros.waitForDisplayed();
         await stakePoolListItem.saturation.waitForDisplayed();
-
-        const name = (await stakePoolListItem.name.getText()).toLowerCase();
-        const ticker = (await stakePoolListItem.ticker.getText()).toLowerCase();
-        expect(
-          name.includes(searchTerm.toLowerCase()) || ticker.includes(searchTerm.toLowerCase()),
-          `Stake pool name and ticker does not contain "${searchTerm}"`
-        ).to.be.true;
+        if (process.env.USE_ROS_STAKING_COLUMN) {
+          await stakePoolListItem.ros.waitForDisplayed();
+        }
+        await stakePoolListItem.cost.waitForDisplayed();
+        await stakePoolListItem.margin.waitForDisplayed();
+        await stakePoolListItem.blocks.waitForDisplayed();
+        await stakePoolListItem.pledge.waitForDisplayed();
+        await stakePoolListItem.liveStake.waitForDisplayed();
       }
     }
   };
 
-  assertSeeFirstSearchResultWithNameAndTicker = async (expectedName: string, expectedTicker: string) => {
+  assertSeeFirstSearchResultWithTicker = async (expectedTicker: string) => {
     const firstStakePool = new StakePoolListItem(0);
-    await firstStakePool.name.waitForDisplayed();
-    expect(await firstStakePool.name.getText()).to.equal(expectedName);
     await firstStakePool.ticker.waitForDisplayed();
     expect(await firstStakePool.ticker.getText()).to.equal(expectedTicker);
   };
 
   assertSeeTooltipForColumn = async (columnName: string) => {
+    await MultidelegationPage.tooltip.waitForDisplayed();
+    let expectedTooltipText;
     switch (columnName) {
-      case 'ROS':
-        await MultidelegationPage.tooltip.waitForDisplayed();
-        expect(await MultidelegationPage.tooltip.getText()).to.equal(
-          await t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip', 'staking')
-        );
-        break;
       case 'Saturation':
-        await MultidelegationPage.tooltip.waitForDisplayed();
-        expect(await MultidelegationPage.tooltip.getText()).to.equal(
-          await t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip', 'staking')
-        );
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip', 'staking');
+        break;
+      case 'ROS':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip', 'staking');
+        break;
+      case 'Cost':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.cost.tooltip', 'staking');
+        break;
+      case 'Margin':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.margin.tooltip', 'staking');
+        break;
+      case 'Blocks':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.blocks.tooltip', 'staking');
+        break;
+      case 'Pledge':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.pledge.tooltip', 'staking');
+        break;
+      case 'Live stake':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.tooltip', 'staking');
         break;
       default:
         throw new Error(`Unsupported column name: ${columnName}`);
     }
+    expect(await MultidelegationPage.tooltip.getText()).to.equal(expectedTooltipText);
   };
 
   assertSeeStakePoolRow = async (index?: number) => {
     const stakePoolListItem = new StakePoolListItem(index);
     await stakePoolListItem.container.scrollIntoView();
-    await stakePoolListItem.logo.waitForDisplayed();
-    await stakePoolListItem.name.waitForDisplayed();
+    await stakePoolListItem.checkbox.waitForDisplayed();
     await stakePoolListItem.ticker.waitForDisplayed();
-    await stakePoolListItem.ros.waitForDisplayed();
-    await stakePoolListItem.saturation.waitForDisplayed();
-    expect(await stakePoolListItem.name.getText()).to.not.be.empty;
     expect(await stakePoolListItem.ticker.getText()).to.not.be.empty;
-    expect(await stakePoolListItem.ros.getText()).to.equal('-');
-    // expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX); // TODO: update when issue with ROS not returned is resolved
+    await stakePoolListItem.saturation.waitForDisplayed();
     expect(await stakePoolListItem.saturation.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    if (process.env.USE_ROS_STAKING_COLUMN) {
+      await stakePoolListItem.ros.waitForDisplayed();
+      expect(await stakePoolListItem.ros.getText()).to.equal('-');
+      // expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX); // TODO: update when issue with ROS not returned is resolved
+    }
+    await stakePoolListItem.cost.waitForDisplayed();
+    expect(await stakePoolListItem.cost.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await stakePoolListItem.margin.waitForDisplayed();
+    expect(await stakePoolListItem.margin.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    await stakePoolListItem.blocks.waitForDisplayed();
+    expect((await stakePoolListItem.blocks.getText()).replaceAll(',', '')).to.match(TestnetPatterns.BLOCKS_REGEX);
+    await stakePoolListItem.pledge.waitForDisplayed();
+    expect(await stakePoolListItem.pledge.getText()).to.match(TestnetPatterns.PLEDGE_REGEX);
+    await stakePoolListItem.liveStake.waitForDisplayed();
+    expect((await stakePoolListItem.liveStake.getText()).slice(0, -1)).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
   };
 
   assertSeeStakePoolRows = async () => {
