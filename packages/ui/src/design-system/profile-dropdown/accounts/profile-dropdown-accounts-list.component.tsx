@@ -8,6 +8,7 @@ export interface AccountData {
   label: string;
   accountNumber: number;
   isUnlocked: boolean;
+  isActive: boolean;
 }
 
 export interface Props {
@@ -24,19 +25,24 @@ export const AccountsList = ({
   onAccountUnlockClick,
   onAccountEditClick,
   onAccountDeleteClick,
-}: Readonly<Props>): JSX.Element => (
-  <Flex gap="$16" flexDirection="column" data-testid="wallet-accounts-list">
-    {accounts.map(a => (
-      <AccountItem
-        key={a.accountNumber}
-        accountNumber={a.accountNumber}
-        isUnlocked={a.isUnlocked}
-        label={a.label}
-        unlockLabel={unlockLabel}
-        onUnlockClick={onAccountUnlockClick}
-        onEditClick={onAccountEditClick}
-        onDeleteClick={onAccountDeleteClick}
-      />
-    ))}
-  </Flex>
-);
+}: Readonly<Props>): JSX.Element => {
+  const hasMultipleUnlockedAccounts =
+    accounts.filter(a => a.isUnlocked).length > 1;
+  return (
+    <Flex gap="$16" flexDirection="column" data-testid="wallet-accounts-list">
+      {accounts.map(a => (
+        <AccountItem
+          key={a.accountNumber}
+          accountNumber={a.accountNumber}
+          isUnlocked={a.isUnlocked}
+          label={a.label}
+          isDeletable={!a.isActive && hasMultipleUnlockedAccounts}
+          unlockLabel={unlockLabel}
+          onUnlockClick={onAccountUnlockClick}
+          onEditClick={onAccountEditClick}
+          onDeleteClick={onAccountDeleteClick}
+        />
+      ))}
+    </Flex>
+  );
+};

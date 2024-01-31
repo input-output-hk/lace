@@ -35,26 +35,31 @@ export const Overview = (): JSX.Element => (
                         accountNumber: 1,
                         label: 'Account #1',
                         isUnlocked: true,
+                        isActive: false,
                       },
                       {
                         accountNumber: 2,
                         label: 'Account #2',
                         isUnlocked: true,
+                        isActive: true,
                       },
                       {
                         accountNumber: 3,
                         label: 'Account #3',
                         isUnlocked: false,
+                        isActive: false,
                       },
                       {
                         accountNumber: 4,
                         label: 'Account with a long name',
                         isUnlocked: false,
+                        isActive: false,
                       },
                       {
                         accountNumber: 10,
                         label: 'Account #10',
                         isUnlocked: false,
+                        isActive: false,
                       },
                     ]}
                   />
