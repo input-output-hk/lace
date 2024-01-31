@@ -1,12 +1,11 @@
 import { Wallet } from '@lace/cardano';
 
-// TODO: use Cip30TxType instead?
+// supported certificates actions
 export enum ConwayEraCertificatesTypes {
   'AuthorizeCommitteeHot' = Wallet.Cardano.CertificateType.AuthorizeCommitteeHot,
   'RegisterDelegateRepresentative' = Wallet.Cardano.CertificateType.RegisterDelegateRepresentative,
   'ResignCommitteeCold' = Wallet.Cardano.CertificateType.ResignCommitteeCold,
   'VoteRegistrationDelegation' = Wallet.Cardano.CertificateType.VoteRegistrationDelegation,
-  'VoteDelegation' = Wallet.Cardano.CertificateType.VoteDelegation,
   'UpdateDelegateRepresentative' = Wallet.Cardano.CertificateType.UpdateDelegateRepresentative,
   'UnregisterDelegateRepresentative' = Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative,
   'StakeVoteRegistrationDelegation' = Wallet.Cardano.CertificateType.StakeVoteRegistrationDelegation,
@@ -14,12 +13,22 @@ export enum ConwayEraCertificatesTypes {
   'StakeRegistrationDelegation' = Wallet.Cardano.CertificateType.StakeRegistrationDelegation
 }
 
-export enum ConwayEraGovernanceActions {
-  'vote' = 'vote',
-  'submitProposal' = 'submitProposal'
+// cip 1694 governance actions
+export enum Cip1694GovernanceActivityType {
+  ParameterChangeAction = 'ParameterChangeAction',
+  HardForkInitiationAction = 'HardForkInitiationAction',
+  TreasuryWithdrawalsAction = 'TreasuryWithdrawalsAction',
+  NoConfidence = 'NoConfidence',
+  UpdateCommittee = 'UpdateCommittee',
+  NewConstitution = 'NewConstitution',
+  InfoAction = 'InfoAction'
 }
 
-export enum DelegationTransactionType {
+export enum ConwayEraGovernanceActions {
+  'vote' = 'vote'
+}
+
+export enum DelegationActivityType {
   'delegation' = 'delegation',
   'delegationRegistration' = 'delegationRegistration',
   'delegationDeregistration' = 'delegationDeregistration'
@@ -69,5 +78,8 @@ export type TxDetail<T> = {
 
 export type TxDetails<T> = TxDetail<T>[];
 
-export type GovernanceTransactionTypes = ConwayEraCertificatesTypes | ConwayEraGovernanceActions;
-export type ActivityType = DelegationTransactionType | TransactionActivityType | GovernanceTransactionTypes;
+export type GovernanceTransactionTypes =
+  | ConwayEraCertificatesTypes
+  | ConwayEraGovernanceActions
+  | Cip1694GovernanceActivityType;
+export type ActivityType = DelegationActivityType | TransactionActivityType | GovernanceTransactionTypes;

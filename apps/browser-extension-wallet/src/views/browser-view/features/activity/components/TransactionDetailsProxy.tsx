@@ -1,5 +1,5 @@
 import React, { ReactElement, useMemo } from 'react';
-import { ActivityStatus, DelegationTransactionType, TransactionDetails } from '@lace/core';
+import { ActivityStatus, DelegationActivityType, TransactionDetails } from '@lace/core';
 import { AddressListType, getTransactionData } from './ActivityDetail';
 import { useWalletStore } from '@src/stores';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
@@ -37,7 +37,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
       return `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
     }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]);
     const getHeaderDescription = () => {
-      if (activityInfo.type === DelegationTransactionType.delegation) return '1 token';
+      if (activityInfo.type === DelegationActivityType.delegation) return '1 token';
       return ` (${activityInfo?.assetAmount})`;
     };
     const isIncomingTransaction = direction === TxDirections.Incoming;

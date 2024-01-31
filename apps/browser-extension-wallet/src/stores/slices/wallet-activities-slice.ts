@@ -20,7 +20,7 @@ import {
   ActivityStatus,
   AssetActivityItemProps,
   AssetActivityListProps,
-  DelegationTransactionType,
+  DelegationActivityType,
   TransactionActivityType
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
@@ -66,20 +66,20 @@ type MappedActivityListProps = Omit<AssetActivityListProps, 'items'> & {
 export type FetchWalletActivitiesReturn = Observable<Promise<MappedActivityListProps[]>>;
 
 type DelegationActivityItemProps = Omit<ExtendedActivityProps, 'type'> & {
-  type: DelegationTransactionType;
+  type: DelegationActivityType;
 };
 
 const isDelegationActivity = (activity: ExtendedActivityProps): activity is DelegationActivityItemProps =>
-  activity.type in DelegationTransactionType;
+  activity.type in DelegationActivityType;
 
 const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
 
-  if (activity.type === DelegationTransactionType.delegationRegistration) {
+  if (activity.type === DelegationActivityType.delegationRegistration) {
     return fee.plus(activity.deposit);
   }
 
-  if (activity.type === DelegationTransactionType.delegationDeregistration) {
+  if (activity.type === DelegationActivityType.delegationDeregistration) {
     return new BigNumber(activity.depositReclaim).minus(fee);
   }
 

@@ -428,7 +428,9 @@ describe('testing tx-inspection utils', () => {
                     rewardAccount: REWARD_ACCOUNT,
                     // eslint-disable-next-line unicorn/no-null
                     anchor: null,
-                    governanceAction: {} as Wallet.Cardano.GovernanceAction,
+                    governanceAction: {
+                      __typename: Wallet.Cardano.GovernanceActionType.parameter_change_action
+                    } as Wallet.Cardano.GovernanceAction,
                     deposit: BigInt(1)
                   }
                 ]
@@ -438,7 +440,7 @@ describe('testing tx-inspection utils', () => {
               { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
             ] as Wallet.KeyManagement.GroupedAddress[]
           });
-          expect(result).toEqual('submitProposal');
+          expect(result).toEqual('ParameterChangeAction');
         });
       });
     });
