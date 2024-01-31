@@ -24,7 +24,7 @@ import {
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
 import type { UserPromptService } from '@lib/scripts/background/services';
-import { of } from 'rxjs';
+import { of, take } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -159,7 +159,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   };
 
   useEffect(() => {
-    const subscription = signingCoordinator.transactionWitnessRequest$.subscribe(async (r) => {
+    const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
       setDappInfo(await senderToDappInfo(r.signContext.sender));
       setSignTxRequest(r);
     });

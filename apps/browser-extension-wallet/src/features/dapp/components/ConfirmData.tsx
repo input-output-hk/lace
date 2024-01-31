@@ -11,7 +11,7 @@ import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-e
 import { runtime } from 'webextension-polyfill';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import type { UserPromptService } from '@lib/scripts/background/services/dappService';
-import { of } from 'rxjs';
+import { of, take } from 'rxjs';
 import { HexBlob } from '@cardano-sdk/util';
 import { Skeleton } from 'antd';
 import { useRedirection } from '@hooks';
@@ -64,7 +64,7 @@ export const DappConfirmData = (): React.ReactElement => {
   window.addEventListener('beforeunload', cancelTransaction);
 
   useEffect(() => {
-    const subscription = signingCoordinator.signDataRequest$.subscribe(async (r) => {
+    const subscription = signingCoordinator.signDataRequest$.pipe(take(1)).subscribe(async (r) => {
       setDappInfo(await senderToDappInfo(r.signContext.sender));
       setSignDataRequest(r);
     });
