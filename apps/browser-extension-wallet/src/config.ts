@@ -32,13 +32,11 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
   if (
     !process.env.CARDANO_SERVICES_URL_MAINNET ||
     !process.env.CARDANO_SERVICES_URL_PREPROD ||
-    !process.env.CARDANO_SERVICES_URL_PREVIEW ||
-    !process.env.CARDANO_SERVICES_URL_SANCHONET
+    !process.env.CARDANO_SERVICES_URL_PREVIEW
   ) {
     throw new Error('env vars not complete');
   }
 
-  // TODO Update if sanchonet explorer becomes available
   if (!process.env.CEXPLORER_URL_MAINNET || !process.env.CEXPLORER_URL_PREVIEW || !process.env.CEXPLORER_URL_PREPROD) {
     throw new Error('explorer vars not complete');
   }
