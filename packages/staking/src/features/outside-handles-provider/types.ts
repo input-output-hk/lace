@@ -108,4 +108,5 @@ export type OutsideHandlesContextValue = {
   triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
   currentChain: Wallet.Cardano.ChainId;
+  isMultidelegationSupportedByDevice: (keyAgentType: string) => Promise<boolean>;
 };
