@@ -11,14 +11,19 @@ interface Props {
 }
 
 export const Button = ({ disabled }: Readonly<Props>): JSX.Element => {
-  const { isSuggesting, setIsSuggesting } = useAutoSuggestBoxContext();
-  const Icon = isSuggesting ? CloseIcon : BookIcon;
+  const { value, setValue, isSuggesting, setIsSuggesting } =
+    useAutoSuggestBoxContext();
+  const isCloseButton = isSuggesting || Boolean(value);
+  const Icon = isCloseButton ? CloseIcon : BookIcon;
   return (
     <button
       className={cx.button}
       onClick={(event): void => {
         event.preventDefault();
-        setIsSuggesting(!isSuggesting);
+        if (isCloseButton) {
+          setValue('');
+        }
+        setIsSuggesting(!isCloseButton);
       }}
       disabled={disabled}
     >
