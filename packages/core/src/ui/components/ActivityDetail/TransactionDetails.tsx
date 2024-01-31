@@ -377,7 +377,80 @@ export const TransactionDetails = ({
               membersToBeRemoved: t('package.core.activityDetails.proposalProcedureTitles.membersToBeRemoved'),
               protocolVersionMajor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMajor'),
               protocolVersionMinor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMinor'),
-              protocolVersionPatch: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionPatch')
+              protocolVersionPatch: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionPatch'),
+              maxTxExUnits: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'),
+              maxBlockExUnits: t(
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
+              ),
+              networkGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
+              economicGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'),
+              technicalGroup: t('core.ProposalProcedure.governanceAction.technicalGroup.title'),
+              costModels: t('core.ProposalProcedure.governanceAction.technicalGroup.costModels'),
+              PlutusV1: t('core.ProposalProcedure.governanceAction.technicalGroup.PlutusV1'),
+              PlutusV2: t('core.ProposalProcedure.governanceAction.technicalGroup.PlutusV2'),
+              governanceGroup: t('core.ProposalProcedure.governanceAction.governanceGroup.title'),
+              dRepVotingThresholds: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.title'
+              ),
+              memory: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
+              step: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
+              maxBBSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'),
+              maxTxSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'),
+              maxBHSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'),
+              maxValSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'),
+              maxCollateralInputs: t(
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
+              ),
+              minFeeA: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
+              minFeeB: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
+              keyDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'),
+              poolDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'),
+              rho: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
+              tau: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
+              minPoolCost: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'),
+              coinsPerUTxOByte: t(
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
+              ),
+              a0: t('core.ProposalProcedure.governanceAction.technicalGroup.a0'),
+              eMax: t('core.ProposalProcedure.governanceAction.technicalGroup.eMax'),
+              nOpt: t('core.ProposalProcedure.governanceAction.technicalGroup.nOpt'),
+              collateralPercentage: t('core.ProposalProcedure.governanceAction.technicalGroup.collateralPercentage'),
+              govActionLifetime: t('core.ProposalProcedure.governanceAction.governanceGroup.govActionLifetime'),
+              govActionDeposit: t('core.ProposalProcedure.governanceAction.governanceGroup.govActionDeposit'),
+              drepDeposit: t('core.ProposalProcedure.governanceAction.governanceGroup.drepDeposit'),
+              drepActivity: t('core.ProposalProcedure.governanceAction.governanceGroup.drepActivity'),
+              ccMinSize: t('core.ProposalProcedure.governanceAction.governanceGroup.ccMinSize'),
+              ccMaxTermLength: t('core.ProposalProcedure.governanceAction.governanceGroup.ccMaxTermLength'),
+              motionNoConfidence: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.motionNoConfidence'
+              ),
+              committeeNormal: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.committeeNormal'
+              ),
+              committeeNoConfidence: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
+              ),
+              updateConstitution: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.updateConstitution'
+              ),
+              hardForkInitiation: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.hardForkInitiation'
+              ),
+              ppNetworkGroup: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
+              ),
+              ppEconomicGroup: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
+              ),
+              ppTechnicalGroup: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
+              ),
+              ppGovernanceGroup: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
+              ),
+              treasuryWithdrawal: t(
+                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
+              )
             }}
           />
         )}

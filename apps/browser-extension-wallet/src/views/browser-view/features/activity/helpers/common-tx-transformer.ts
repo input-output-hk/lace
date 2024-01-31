@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
@@ -19,10 +20,10 @@ import {
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
-import { drepIDasBech32FromHash } from '@src/features/dapp/components/confirm-transaction/utils';
 import { PriceResult } from '@hooks';
+import { formatPercentages } from '@lace/common';
 
-const { util, GovernanceActionType } = Wallet.Cardano;
+const { util, GovernanceActionType, PlutusLanguageVersion } = Wallet.Cardano;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -217,7 +218,6 @@ export const certificateTransformer = (
   fiatCurrency: CurrencyInfo,
   certificates?: Wallet.Cardano.Certificate[]
 ): TxDetails<TxDetailsCertificateTitles>[] =>
-  // Currently only show enhanced certificate info for conway era certificates pending further discussion
   certificates
     ?.filter((certificate) =>
       Object.values(ConwayEraCertificatesTypes).includes(
@@ -342,7 +342,6 @@ export const governanceProposalsTransformer = (
   proposalProcedures?: Wallet.Cardano.ProposalProcedure[]
 ): TxDetails<TxDetailsProposalProceduresTitles>[] =>
   proposalProcedures?.map((procedure) => {
-    // Default details across all proposals
     const transformedProposal: TxDetails<TxDetailsProposalProceduresTitles> = [
       { title: 'type', details: [procedure.governanceAction.__typename] },
       {
@@ -452,16 +451,252 @@ export const governanceProposalsTransformer = (
       }
     }
 
-    // Proposal-specific properties
-    //   case GovernanceActionType.parameter_change_action: {
-    //     transformedProposal.push({
-    //       title: 'protocolParamUpdate',
-    //       details: Object.entries(protocolParamUpdate).map(
-    //         ([parameter, proposedValue]) => `${parameter}: ${proposedValue.toString()}`
-    //       )
-    //     });
-    //     break;
-    //   }
+    if (procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action) {
+      const {
+        protocolParamUpdate: {
+          maxExecutionUnitsPerTransaction,
+          maxExecutionUnitsPerBlock,
+          maxBlockBodySize,
+          maxTxSize,
+          maxBlockHeaderSize,
+          maxValueSize,
+          maxCollateralInputs,
+          minFeeCoefficient,
+          minFeeConstant,
+          stakeKeyDeposit,
+          poolDeposit,
+          monetaryExpansion,
+          treasuryExpansion,
+          minPoolCost,
+          coinsPerUtxoByte,
+          poolInfluence,
+          poolRetirementEpochBound,
+          desiredNumberOfPools,
+          collateralPercentage,
+          costModels,
+          governanceActionValidityPeriod,
+          governanceActionDeposit,
+          dRepDeposit,
+          dRepInactivityPeriod,
+          minCommitteeSize,
+          committeeTermLimit,
+          dRepVotingThresholds
+        }
+      } = procedure.governanceAction;
+      transformedProposal.push(
+        {
+          header: 'maxTxExUnits',
+          details: [
+            {
+              title: 'memory',
+              details: [maxExecutionUnitsPerTransaction.memory.toString()]
+            },
+            {
+              title: 'step',
+              details: [maxExecutionUnitsPerTransaction.steps.toString()]
+            }
+          ]
+        },
+        {
+          header: 'maxBlockExUnits',
+          details: [
+            {
+              title: 'memory',
+              details: [maxExecutionUnitsPerBlock.memory.toString()]
+            },
+            {
+              title: 'step',
+              details: [maxExecutionUnitsPerBlock.steps.toString()]
+            }
+          ]
+        },
+        {
+          header: 'networkGroup',
+          details: [
+            {
+              title: 'maxBBSize',
+              details: [maxBlockBodySize?.toString()]
+            },
+            {
+              title: 'maxTxSize',
+              details: [maxTxSize?.toString()]
+            },
+            {
+              title: 'maxBHSize',
+              details: [maxBlockHeaderSize?.toString()]
+            },
+            {
+              title: 'maxValSize',
+              details: [maxValueSize?.toString()]
+            },
+            {
+              title: 'maxCollateralInputs',
+              details: [maxCollateralInputs?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'economicGroup',
+          details: [
+            {
+              title: 'minFeeA',
+              details: [minFeeCoefficient?.toString()]
+            },
+            {
+              title: 'minFeeB',
+              details: [minFeeConstant?.toString()]
+            },
+            {
+              title: 'keyDeposit',
+              details: [stakeKeyDeposit?.toString()]
+            },
+            {
+              title: 'poolDeposit',
+              details: [poolDeposit?.toString()]
+            },
+            {
+              title: 'rho',
+              details: [monetaryExpansion?.toString()]
+            },
+            {
+              title: 'tau',
+              details: [treasuryExpansion?.toString()]
+            },
+            {
+              title: 'minPoolCost',
+              details: [minPoolCost?.toString()]
+            },
+            {
+              title: 'coinsPerUTxOByte',
+              details: [coinsPerUtxoByte?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'technicalGroup',
+          details: [
+            {
+              title: 'a0',
+              details: [poolInfluence?.toString()]
+            },
+            {
+              title: 'eMax',
+              details: [poolRetirementEpochBound?.toString()]
+            },
+            {
+              title: 'nOpt',
+              details: [desiredNumberOfPools?.toString()]
+            },
+            {
+              title: 'collateralPercentage',
+              details: [collateralPercentage?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'costModels',
+          details: [
+            {
+              title: 'PlutusV1',
+              details: costModels.get(PlutusLanguageVersion.V1).map((model) => model.toString())
+            },
+            {
+              title: 'PlutusV2',
+              details: costModels.get(PlutusLanguageVersion.V2).map((model) => model.toString())
+            }
+          ]
+        },
+        {
+          header: 'governanceGroup',
+          details: [
+            {
+              title: 'govActionLifetime',
+              details: [governanceActionValidityPeriod?.toString()]
+            },
+            {
+              title: 'govActionDeposit',
+              details: [governanceActionDeposit?.toString()]
+            },
+            {
+              title: 'drepDeposit',
+              details: [dRepDeposit?.toString()]
+            },
+            {
+              title: 'drepActivity',
+              details: [dRepInactivityPeriod?.toString()]
+            },
+            {
+              title: 'ccMinSize',
+              details: [minCommitteeSize?.toString()]
+            },
+            {
+              title: 'ccMaxTermLength',
+              details: [committeeTermLimit?.toString()]
+            }
+          ]
+        }
+      );
+
+      if (dRepVotingThresholds) {
+        const {
+          motionNoConfidence,
+          committeeNormal,
+          commiteeNoConfidence,
+          hardForkInitiation,
+          ppNetworkGroup,
+          ppEconomicGroup,
+          ppTechnicalGroup,
+          ppGovernanceGroup,
+          treasuryWithdrawal,
+          updateConstitution
+        } = dRepVotingThresholds;
+        transformedProposal.push({
+          header: 'dRepVotingThresholds',
+          details: [
+            {
+              title: 'motionNoConfidence',
+              details: [formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator)]
+            },
+            {
+              title: 'committeeNormal',
+              details: [formatPercentages(committeeNormal.numerator / committeeNormal.denominator)]
+            },
+            {
+              title: 'committeeNoConfidence',
+              details: [formatPercentages(commiteeNoConfidence.numerator / commiteeNoConfidence.denominator)]
+            },
+            {
+              title: 'updateConstitution',
+              details: [formatPercentages(updateConstitution.numerator / updateConstitution.denominator)]
+            },
+            {
+              title: 'hardForkInitiation',
+              details: [formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator)]
+            },
+            {
+              title: 'ppNetworkGroup',
+              details: [formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator)]
+            },
+            {
+              title: 'ppEconomicGroup',
+              details: [formatPercentages(ppEconomicGroup.numerator / ppEconomicGroup.denominator)]
+            },
+            {
+              title: 'ppTechnicalGroup',
+              details: [formatPercentages(ppTechnicalGroup.numerator / ppTechnicalGroup.denominator)]
+            },
+            {
+              title: 'ppGovernanceGroup',
+              details: [formatPercentages(ppGovernanceGroup.numerator / ppGovernanceGroup.denominator)]
+            },
+            {
+              title: 'treasuryWithdrawal',
+              details: [formatPercentages(treasuryWithdrawal.numerator / treasuryWithdrawal.denominator)]
+            }
+          ]
+        });
+      }
+    }
 
     return transformedProposal;
   });

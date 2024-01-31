@@ -68,14 +68,15 @@ export const TxDetailList = <T extends string>({
       {isVisible && (
         <div className={styles.txInOutContent} data-testid={`${testId}-lists`}>
           {lists.map((list, idx) => (
-            <div key={`${testId}-list-${idx}`} className={cn({ [styles.topBorderContent]: idx > 0 })}>
+            <React.Fragment key={`${testId}-list-${idx}`}>
+              <div className={cn({ [styles.topBorderContent]: idx > 0 })} />
               {lists.length > 1 && (
-                <div key={`${testId}-list-header`} className={cn(styles.listHeader, styles.separatorLine)}>
+                <div key={`${testId}-list-header`} className={styles.listHeader}>
                   <div className={styles.listHeaderTitle}>{`${subTitle} ${idx + 1}`}</div>
                 </div>
               )}
               <DetailRows<T> translations={translations} testId={testId} list={list} />
-            </div>
+            </React.Fragment>
           ))}
         </div>
       )}

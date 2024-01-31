@@ -1319,6 +1319,8 @@
             "eMax": "EMax",
             "nOpt": "NOpt",
             "costModels": "Cost Models",
+            "PlutusV1": "PlutusV1",
+            "PlutusV2": "PlutusV2",
             "collateralPercentage": "Coll Percentage",
             "tooltip": {
               "a0": "Pool pledge influence",

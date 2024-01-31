@@ -151,6 +151,7 @@
         "hotCredential": "Hot credential"
       },
       "votingProcedures": "Voting Procedures",
+      "votingProcedure": "Voting Procedure",
       "votingProcedureTitles": {
         "vote": "Vote",
         "voterType": "Voter type",
