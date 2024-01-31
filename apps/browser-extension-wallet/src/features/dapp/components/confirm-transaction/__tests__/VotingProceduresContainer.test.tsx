@@ -18,6 +18,7 @@ import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
 import { getVoterType, getVote, VoterTypeEnum, VotesEnum } from '@src/utils/tx-inspection';
+import { drepIDasBech32FromHash } from '../utils';
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -168,9 +169,7 @@ describe('Testing VotingProceduresContainer component', () => {
     expect(queryByTestId('VotingProcedures')).toBeInTheDocument();
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const getExpectedDrepId = (type: string) => (hash: Wallet.Crypto.Hash28ByteBase16) =>
-      type === VoterTypeEnum.DREP
-        ? Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(hash)))
-        : hash.toString();
+      type === VoterTypeEnum.DREP ? drepIDasBech32FromHash(hash) : hash.toString();
     expect(mockVotingProcedures).toHaveBeenLastCalledWith(
       {
         dappInfo,

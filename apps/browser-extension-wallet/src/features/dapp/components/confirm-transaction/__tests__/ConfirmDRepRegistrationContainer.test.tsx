@@ -15,11 +15,12 @@ import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
 import { getWrapper } from '../testing.utils';
+import { drepIDasBech32FromHash } from '../utils';
 
 const LOVELACE_VALUE = 1_000_000;
 const DEFAULT_DECIMALS = 2;
 
-const { Cardano, Crypto, HexBlob } = Wallet;
+const { Cardano, Crypto } = Wallet;
 
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
@@ -120,7 +121,7 @@ describe('Testing ConfirmDRepRegistrationContainer component', () => {
           depositPaid: `${new BigNumber(certificate.deposit.toString())
             .dividedBy(LOVELACE_VALUE)
             .toFixed(DEFAULT_DECIMALS)} ${cardanoCoinMock.symbol}`,
-          drepId: Cardano.DRepID(HexBlob.toTypedBech32('drep', Wallet.HexBlob(certificate.dRepCredential.hash))),
+          drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),
           hash: certificate.anchor?.dataHash,
           url: certificate.anchor?.url
         },

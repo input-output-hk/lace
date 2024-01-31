@@ -14,6 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
+import { drepIDasBech32FromHash } from '../utils';
 
 const REWARD_ACCOUNT = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
 const STAKE_KEY_HASH = Wallet.Cardano.RewardAccount.toHash(REWARD_ACCOUNT);
@@ -117,9 +118,7 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
         metadata: {
           alwaysAbstain: false,
           alwaysNoConfidence: false,
-          drepId: Wallet.Cardano.DRepID(
-            Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob((dRep as unknown as Wallet.Cardano.Credential).hash))
-          )
+          drepId: drepIDasBech32FromHash((dRep as unknown as Wallet.Cardano.Credential).hash)
         },
         translations: {
           metadata: t('core.VoteDelegation.metadata'),

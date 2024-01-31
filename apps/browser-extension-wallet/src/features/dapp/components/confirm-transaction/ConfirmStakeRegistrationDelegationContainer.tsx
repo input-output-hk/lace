@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmStakeRegistrationDelegation } from '@lace/core';
 import { SignTxData } from './types';
-import { certificateInspectorFactory } from './utils';
+import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 
@@ -32,7 +32,7 @@ export const ConfirmStakeRegistrationDelegationContainer = ({
       dappInfo={signTxData.dappInfo}
       metadata={{
         poolId: certificate.poolId,
-        stakeKeyHash: certificate.stakeCredential.hash,
+        stakeKeyHash: drepIDasBech32FromHash(certificate.stakeCredential.hash),
         depositPaid: depositPaidWithCardanoSymbol
       }}
       translations={{

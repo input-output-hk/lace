@@ -14,8 +14,9 @@ import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
+import { drepIDasBech32FromHash } from '../utils';
 
-const { Cardano, Crypto, HexBlob } = Wallet;
+const { Cardano, Crypto } = Wallet;
 
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
@@ -112,7 +113,7 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
       {
         dappInfo,
         metadata: {
-          drepId: Cardano.DRepID(HexBlob.toTypedBech32('drep', Wallet.HexBlob(certificate.dRepCredential.hash))),
+          drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),
           hash: certificate.anchor?.dataHash,
           url: certificate.anchor?.url
         },

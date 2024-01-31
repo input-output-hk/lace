@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmStakeVoteDelegation } from '@lace/core';
 import { SignTxData } from './types';
-import { certificateInspectorFactory } from './utils';
+import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 
 const { CertificateType } = Wallet.Cardano;
@@ -24,10 +24,10 @@ export const ConfirmStakeVoteDelegationContainer = ({ signTxData, errorMessage }
       dappInfo={signTxData.dappInfo}
       metadata={{
         poolId: certificate.poolId,
-        stakeKeyHash: certificate.stakeCredential.hash,
+        stakeKeyHash: drepIDasBech32FromHash(certificate.stakeCredential.hash),
         alwaysAbstain: Wallet.Cardano.isDRepAlwaysAbstain(dRep),
         alwaysNoConfidence: Wallet.Cardano.isDRepAlwaysNoConfidence(dRep),
-        ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: dRep.hash } : {})
+        ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: drepIDasBech32FromHash(dRep.hash) } : {})
       }}
       translations={{
         metadata: t('core.StakeVoteDelegation.metadata'),

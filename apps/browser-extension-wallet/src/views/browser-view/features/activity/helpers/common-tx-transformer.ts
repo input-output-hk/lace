@@ -18,6 +18,7 @@ import {
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
+import { drepIDasBech32FromHash } from '@src/features/dapp/components/confirm-transaction/utils';
 
 const { util, GovernanceActionType } = Wallet.Cardano;
 
@@ -285,7 +286,7 @@ export const certificateTransformer = (
       if (conwayEraCertificate.dRepCredential) {
         transformedCertificate.push({
           title: 'drepCredential',
-          details: [conwayEraCertificate.dRepCredential.hash]
+          details: [drepIDasBech32FromHash(conwayEraCertificate.dRepCredential.hash)]
         });
       }
 
@@ -311,7 +312,7 @@ export const votingProceduresTransformer = (
       const voterType = getVoterType(procedure.voter.__typename);
       const voterCredential =
         voterType === VoterTypeEnum.DREP
-          ? Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(procedure.voter.credential.hash)))
+          ? drepIDasBech32FromHash(procedure.voter.credential.hash)
           : procedure.voter.credential.hash;
       const detail: TxDetails<TxDetailsVotingProceduresTitles> = [
         {
