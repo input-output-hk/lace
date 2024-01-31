@@ -379,6 +379,9 @@ const colors: Colors = {
   $action_card_container_borderColor: colorTransparent,
   $action_card_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
   $action_card_icon_container_borderColor: colorTransparent,
+
+  $auto_suggest_container_background_color: darkColorScheme.$primary_dark_grey,
+  $auto_suggest_border_color: darkColorScheme.$primary_grey,
 };
 
 const elevation: Elevation = {

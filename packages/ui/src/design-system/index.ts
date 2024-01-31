@@ -37,3 +37,4 @@ export { RadioButtonGroup } from './radio-button';
 export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
+export { AutoSuggestBox } from './auto-suggest-box';

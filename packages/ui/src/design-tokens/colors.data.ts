@@ -280,6 +280,9 @@ export const colors = {
   $action_card_container_borderColor: '',
   $action_card_icon_container_bgColor: '',
   $action_card_icon_container_borderColor: '',
+
+  $auto_suggest_container_background_color: '',
+  $auto_suggest_border_color: '',
 };
 
 export type Colors = typeof colors;

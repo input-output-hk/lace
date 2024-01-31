@@ -404,6 +404,10 @@ const colors: Colors = {
 
   $action_card_icon_container_bgColor: lightColorScheme.$primary_white,
   $action_card_icon_container_borderColor: lightColorScheme.$primary_light_grey,
+
+  $auto_suggest_container_background_color:
+    lightColorScheme.$primary_light_grey,
+  $auto_suggest_border_color: lightColorScheme.$primary_light_grey_plus,
 };
 
 export const elevation: Elevation = {
