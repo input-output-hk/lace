@@ -1,10 +1,4 @@
-import { vars, style, sx } from '../../design-tokens';
-
-export const scrollAreaViewport = style({
-  width: '100%',
-  height: '100%',
-  borderRadius: 'inherit',
-});
+import { vars, style, sx, globalStyle } from '../../design-tokens';
 
 export const disabledContainer = style({
   ':hover': {
@@ -30,13 +24,21 @@ export const scrollArea = style({
   padding: vars.spacing.$6,
   width: 'var(--radix-popover-trigger-width)',
   boxSizing: 'border-box',
-  overflowY: 'auto',
-  maxHeight: '180px',
   borderBottomRightRadius: vars.radius.$medium,
   borderBottomLeftRadius: vars.radius.$medium,
 });
 
+export const scrollAreaViewport = style({
+  maxHeight: '180px',
+});
+
+export const scrollBar = style({});
+
 export const errorMessage = style({
   color: vars.colors.$input_error_message_color,
   marginLeft: vars.spacing.$20,
+});
+
+globalStyle(`${scrollArea}:has(${scrollBar})`, {
+  paddingRight: vars.spacing.$16,
 });

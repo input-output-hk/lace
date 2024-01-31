@@ -2,11 +2,11 @@
 import React from 'react';
 
 import * as Popover from '@radix-ui/react-popover';
-import * as ScrollArea from '@radix-ui/react-scroll-area';
 import cn from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
+import { ScrollArea } from '../scroll-area';
 import * as Text from '../typography';
 
 import { Input } from './auto-suggest-box-input.component';
@@ -56,34 +56,34 @@ export const AutoSuggestBoxBase = ({
         </Flex>
       </Popover.Anchor>
       <Popover.Content
-        asChild
         avoidCollisions={false}
         onOpenAutoFocus={(event): void => {
           event.preventDefault();
         }}
       >
-        <ScrollArea.Root className={cx.scrollArea}>
-          <ScrollArea.Viewport className={cx.scrollAreaViewport}>
-            <ScrollArea.Scrollbar orientation="vertical">
-              <ScrollArea.Thumb />
-            </ScrollArea.Scrollbar>
-            {suggestions.map(item => (
-              <div
-                key={item.value}
-                onClick={(): void => {
-                  setIsSuggesting(false);
-                  setValue(item.value);
-                }}
-              >
-                <Box className={cn(cx.item)}>
-                  <Text.Body.Large weight="$semibold">
-                    {item.label ?? item.value}
-                  </Text.Body.Large>
-                </Box>
-              </div>
-            ))}
-          </ScrollArea.Viewport>
-        </ScrollArea.Root>
+        <ScrollArea
+          classNames={{
+            root: cx.scrollArea,
+            viewport: cx.scrollAreaViewport,
+            bar: cx.scrollBar,
+          }}
+        >
+          {suggestions.map(item => (
+            <div
+              key={item.value}
+              onClick={(): void => {
+                setIsSuggesting(false);
+                setValue(item.value);
+              }}
+            >
+              <Box className={cn(cx.item)}>
+                <Text.Body.Large weight="$semibold">
+                  {item.label ?? item.value}
+                </Text.Body.Large>
+              </Box>
+            </div>
+          ))}
+        </ScrollArea>
       </Popover.Content>
     </Popover.Root>
   );
