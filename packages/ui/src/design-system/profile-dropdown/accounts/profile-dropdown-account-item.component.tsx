@@ -15,6 +15,7 @@ export interface Props {
   label: string;
   unlockLabel: string;
   isUnlocked: boolean;
+  isDeletable: boolean;
   onEditClick?: (accountNumber: number) => void;
   onDeleteClick?: (accountNumber: number) => void;
   onUnlockClick?: (accountNumber: number) => void;
@@ -25,6 +26,7 @@ export const AccountItem = ({
   label,
   unlockLabel,
   isUnlocked,
+  isDeletable,
   onEditClick,
   onDeleteClick,
   onUnlockClick,
@@ -74,6 +76,7 @@ export const AccountItem = ({
           icon={<TrashIcon className={cx.deleteIcon} />}
           size="extraSmall"
           data-testid="wallet-account-item-delete-btn"
+          disabled={!isDeletable}
           onClick={(): void => {
             onDeleteClick?.(accountNumber);
           }}
