@@ -52,6 +52,7 @@ export type TxDetailsCertificateTitles =
   | 'poolId'
   | 'drep'
   | 'depositPaid'
+  | 'depositPaidInfo'
   | 'certificate';
 
 export type TxDetailsProposalProceduresTitles =
@@ -78,7 +79,8 @@ export type TxDetailsVotingProceduresTitles = 'voterType' | 'credentialType' | '
 
 export type TxDetail<T> = {
   title: T;
-  details: string[];
+  info?: T;
+  details: (string | [string, string])[];
 };
 
 export type TxDetaisList<T> = {

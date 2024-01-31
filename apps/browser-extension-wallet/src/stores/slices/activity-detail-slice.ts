@@ -223,7 +223,7 @@ const buildGetActivityDetail =
       // TODO: store the raw data here and transform it later so we always have the raw data when needed.(LW-9570)
       votingProcedures: votingProceduresTransformer(tx.body.votingProcedures),
       proposalProcedures: governanceProposalsTransformer(cardanoCoin, tx.body.proposalProcedures),
-      certificates: certificateTransformer(cardanoCoin, tx.body.certificates)
+      certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates)
     };
 
     if (type === DelegationActivityType.delegation && delegationInfo) {

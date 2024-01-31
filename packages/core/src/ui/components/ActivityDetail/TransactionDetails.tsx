@@ -399,7 +399,8 @@ export const TransactionDetails = ({
               anchorHash: t('package.core.activityDetails.certificateTitles.anchorHash'),
               poolId: t('package.core.activityDetails.certificateTitles.poolId'),
               drep: t('package.core.activityDetails.certificateTitles.drep'),
-              depositPaid: t('package.core.activityDetails.certificateTitles.depositPaid')
+              depositPaid: t('package.core.activityDetails.certificateTitles.depositPaid'),
+              depositPaidInfo: t('package.core.activityDetails.certificateTitles.depositPaidInfo')
             }}
           />
         )}

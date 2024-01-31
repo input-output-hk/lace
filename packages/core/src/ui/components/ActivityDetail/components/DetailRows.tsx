@@ -24,6 +24,7 @@ export const DetailRows = function DetailRows<T extends string>({
             key={`${testId}-${item.title}`}
             dataTestId={`${testId}-${item.title}`}
             title={translations[item.title]}
+            info={translations[item.info]}
             details={item.details}
           />
         ) : (

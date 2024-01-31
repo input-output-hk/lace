@@ -9,6 +9,8 @@
   width: 100%;
 
   .title {
+    align-items: center;
+    gap: 8px;
     display: flex;
     flex: 0 0 50%;
     align-self: baseline;
@@ -28,6 +30,16 @@
 
     @media (max-width: $breakpoint-popup) {
       flex-direction: column;
+    }
+
+    .subitems {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      align-items: flex-end;
+      .subitem {
+        color: var(--text-color-secondary, #878e9e);
+      }
     }
   }
 }

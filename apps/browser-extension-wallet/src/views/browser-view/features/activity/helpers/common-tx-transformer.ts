@@ -20,6 +20,7 @@ import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import { drepIDasBech32FromHash } from '@src/features/dapp/components/confirm-transaction/utils';
+import { PriceResult } from '@hooks';
 
 const { util, GovernanceActionType } = Wallet.Cardano;
 
@@ -212,6 +213,8 @@ const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
 
 export const certificateTransformer = (
   cardanoCoin: Wallet.CoinId,
+  coinPrices: PriceResult,
+  fiatCurrency: CurrencyInfo,
   certificates?: Wallet.Cardano.Certificate[]
 ): TxDetails<TxDetailsCertificateTitles>[] =>
   // Currently only show enhanced certificate info for conway era certificates pending further discussion
@@ -281,32 +284,18 @@ export const certificateTransformer = (
         });
       }
 
-      if (conwayEraCertificate.coldCredential) {
-        transformedCertificate.push({
-          title: 'coldCredential',
-          details: [conwayEraCertificate.coldCredential.hash]
-        });
-      }
-
-      if (conwayEraCertificate.hotCredential) {
-        transformedCertificate.push({
-          title: 'hotCredential',
-          details: [conwayEraCertificate.hotCredential.hash]
-        });
-      }
-
-      if (conwayEraCertificate.dRepCredential) {
-        transformedCertificate.push({
-          title: 'drepCredential',
-          details: [drepIDasBech32FromHash(conwayEraCertificate.dRepCredential.hash)]
-        });
-      }
-
-      if (conwayEraCertificate.deposit) {
+      if ('deposit' in conwayEraCertificate) {
+        const depositPaidInAda = Wallet.util.lovelacesToAdaString(conwayEraCertificate.deposit.toString());
         transformedCertificate.push({
           title: 'depositPaid',
+          info: 'depositPaidInfo',
           details: [
-            `${Wallet.util.lovelacesToAdaString(conwayEraCertificate.deposit.toString())} ${cardanoCoin.symbol}`
+            [
+              `${depositPaidInAda} ${cardanoCoin.symbol}`,
+              `${Wallet.util.convertAdaToFiat({ ada: depositPaidInAda, fiat: coinPrices?.cardano?.price })} ${
+                fiatCurrency?.code
+              }`
+            ]
           ]
         });
       }
