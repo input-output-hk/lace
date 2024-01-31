@@ -286,7 +286,7 @@ export const certificateTransformer = (
       if (conwayEraCertificate.dRepCredential) {
         transformedCertificate.push({
           title: 'drepCredential',
-          details: [drepIDasBech32FromHash(conwayEraCertificate.dRepCredential.hash)]
+          details: [conwayEraCertificate.dRepCredential.hash]
         });
       }
 
