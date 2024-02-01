@@ -80,6 +80,11 @@ export const StepPreferencesContent = () => {
       data: poolId,
       type: 'RemoveStakePool',
     });
+    portfolioMutators.executeCommand({
+      data: Wallet.Cardano.PoolIdHex(poolId),
+      type: 'UnselectPoolFromDetails',
+    });
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailUnselectPoolClick);
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {

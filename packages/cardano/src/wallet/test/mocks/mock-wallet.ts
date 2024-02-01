@@ -40,15 +40,14 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
     address,
     rewardAccount
   });
-  keyAgent.knownAddresses = [knownAddresses];
   const utxoProvider = utxoProviderStub();
   const chainHistoryProvider = chainHistoryProviderStub();
   const rewardsProvider = rewardsHistoryProviderStub();
+  const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
   const wallet = new PersonalWallet(
     { name },
     {
       assetProvider,
-      keyAgent: KeyManagement.util.createAsyncKeyAgent(keyAgent),
       stakePoolProvider,
       networkInfoProvider,
       stores: storage.createInMemoryWalletStores(),
@@ -56,7 +55,9 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
       rewardsProvider,
       chainHistoryProvider,
       utxoProvider,
-      logger
+      logger,
+      witnesser: KeyManagement.util.createBip32Ed25519Witnesser(asyncKeyAgent),
+      bip32Account: new KeyManagement.Bip32Account(keyAgent)
     }
   );
 

@@ -72,7 +72,7 @@ Then(/^The Tx summary screen is displayed for 2 bundles with multiple assets$/, 
 
 Then(/^The Tx summary screen is displayed for 1 bundle with multiple assets$/, async () => {
   const bundle1 = {
-    recipientAddress: byron.getAddress(),
+    recipientAddress: shelley.getAddress(),
     valueToBeSent: [
       { value: extensionUtils.isMainnet() ? '1.39' : '1.41', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true },
       {

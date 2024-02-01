@@ -43,7 +43,10 @@ export const getDiscovererInstance = ({ chainName }: { chainName: Wallet.ChainNa
 
 const addressesDiscoverer: AddressesDiscoverer = {
   status$,
-  discover: async () => getDiscovererInstance({ chainName: currentChainName }).discover(currentAsyncKeyAgent),
+  discover: async () => {
+    const bip32Account = await Wallet.KeyManagement.Bip32Account.fromAsyncKeyAgent(currentAsyncKeyAgent);
+    return getDiscovererInstance({ chainName: currentChainName }).discover(bip32Account);
+  },
   setup: ({ chainName, keyAgentChannelName }) => {
     currentChainName = chainName;
     currentAsyncKeyAgent = consumeKeyAgent(keyAgentChannelName);
