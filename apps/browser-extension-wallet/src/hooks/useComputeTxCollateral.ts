@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { getCollateral } from '@cardano-sdk/core';
 
-export const useComputeTxCollateral = (wallet: Wallet.ObservableWallet, tx?: Wallet.Cardano.Tx) => {
+export const useComputeTxCollateral = (wallet: Wallet.ObservableWallet, tx?: Wallet.Cardano.Tx): bigint | undefined => {
   const [txCollateral, setTxCollateral] = useState<bigint>();
 
   useEffect(() => {
