@@ -1,4 +1,3 @@
-/* eslint-disable max-statements */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
