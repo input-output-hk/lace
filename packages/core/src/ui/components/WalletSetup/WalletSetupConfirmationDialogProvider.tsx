@@ -67,7 +67,7 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
     <WalletSetupConfirmationDialogContext.Provider value={value}>
       <StartOverDialog
         open={isDialogOpen}
-        zkIndex={300}
+        zIndex={300}
         translations={{
           title: t('multiWallet.confirmationDialog.title'),
           description: t('multiWallet.confirmationDialog.description'),
