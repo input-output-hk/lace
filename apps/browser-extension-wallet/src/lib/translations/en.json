@@ -38,12 +38,10 @@
           "VoteRegistrationDelegationCertificate": "Vote Registration Delegation Certificate",
           "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation Certificate",
           "ResignCommitteeColdCertificate": "Resign Committee",
-          "AuthorizeCommitteeHotCertificate": "Authorise Committee",
+          "AuthorizeCommitteeHotCertificate": "Authorize Committee",
           "RegisterDelegateRepresentativeCertificate": "DRep Registration",
           "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
-          "VoteDelegationCertificate": "Vote Delegation",
-
-          "submitProposal": "Confirm Vote"
+          "VoteDelegationCertificate": "Vote Delegation"
         },
         "certificates": {
           "headings": {
