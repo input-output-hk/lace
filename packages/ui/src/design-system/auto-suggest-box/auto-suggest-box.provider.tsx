@@ -50,6 +50,9 @@ export const AutoSuggestBoxProvider = ({
 }: Readonly<PropsWithChildren<Props>>): ReactElement => {
   const [value, setValue] = useState(initialValue);
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const filtered = suggestions.filter(item =>
+    item.value.toLowerCase().includes(value.toLowerCase()),
+  );
 
   useEffect(() => {
     onChange?.(value);
@@ -59,11 +62,9 @@ export const AutoSuggestBoxProvider = ({
     () => ({
       value,
       setValue,
-      isSuggesting: suggestions.length > 0 && isSuggesting,
+      isSuggesting: filtered.length > 0 && isSuggesting,
       setIsSuggesting,
-      suggestions: suggestions.filter(item =>
-        item.value.toLowerCase().includes(value.toLowerCase()),
-      ),
+      suggestions: filtered,
     }),
     [value, setValue, isSuggesting, setIsSuggesting],
   );
