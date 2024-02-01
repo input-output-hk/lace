@@ -7,7 +7,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: jest.fn() })
 }));
 
-const translations = { cancel: '', inputLabel: '', save: '', subtitle: '', title: '' };
+const translations = { cancel: '', inputLabel: '', save: '', title: '' };
 
 describe('EditAccountDrawer', () => {
   const onSaveMock = jest.fn();

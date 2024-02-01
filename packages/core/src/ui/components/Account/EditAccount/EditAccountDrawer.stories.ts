@@ -22,7 +22,6 @@ const data: ComponentProps<typeof EditAccountDrawer> = {
   visible: true,
   translations: {
     title: 'Edit account name',
-    subtitle: 'Choose a name to identify your account',
     inputLabel: 'Account name',
     save: 'Save',
     cancel: 'Cancel'

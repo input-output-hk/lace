@@ -12,7 +12,6 @@ export type Props = {
   index: number;
   translations: {
     title: string;
-    subtitle: string;
     inputLabel: string;
     save: string;
     cancel: string;

@@ -113,7 +113,6 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         isPopup={isPopup}
         translations={{
           title: t('account.edit.title'),
-          subtitle: t('account.edit.subtitle'),
           inputLabel: t('account.edit.input.label'),
           save: t('account.edit.footer.save'),
           cancel: t('account.edit.footer.cancel')
