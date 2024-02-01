@@ -50,7 +50,9 @@ export const AutoSuggestBoxProvider = ({
 }: Readonly<PropsWithChildren<Props>>): ReactElement => {
   const [value, setValue] = useState(initialValue);
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const suggestions = items.filter(item => item.value.includes(value));
+  const suggestions = items.filter(item =>
+    item.value.toLowerCase().includes(value.toLowerCase()),
+  );
 
   useEffect(() => {
     onChange?.(value);
