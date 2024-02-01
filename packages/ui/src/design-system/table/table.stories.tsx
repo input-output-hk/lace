@@ -12,7 +12,7 @@ import { TooltipStorybookContextProvider } from '../tooltip/tooltip-storybook-co
 
 import { Table } from './index';
 
-import './responsive-table.stories.css';
+import './table.stories.css';
 
 export default {
   title: 'List & tables/Table',
