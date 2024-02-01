@@ -14,6 +14,7 @@ export interface AccountData {
 export interface Props {
   accounts: AccountData[];
   unlockLabel: string;
+  onAccountActivateClick?: (accountNumber: number) => void;
   onAccountUnlockClick?: (accountNumber: number) => void;
   onAccountEditClick?: (accountNumber: number) => void;
   onAccountDeleteClick?: (accountNumber: number) => void;
@@ -22,6 +23,7 @@ export interface Props {
 export const AccountsList = ({
   accounts,
   unlockLabel,
+  onAccountActivateClick,
   onAccountUnlockClick,
   onAccountEditClick,
   onAccountDeleteClick,
@@ -38,6 +40,11 @@ export const AccountsList = ({
           label={a.label}
           isDeletable={!a.isActive && hasMultipleUnlockedAccounts}
           unlockLabel={unlockLabel}
+          onActivateClick={(accountNumber: number): void => {
+            if (!a.isActive && a.isUnlocked) {
+              onAccountActivateClick?.(accountNumber);
+            }
+          }}
           onUnlockClick={onAccountUnlockClick}
           onEditClick={onAccountEditClick}
           onDeleteClick={onAccountDeleteClick}

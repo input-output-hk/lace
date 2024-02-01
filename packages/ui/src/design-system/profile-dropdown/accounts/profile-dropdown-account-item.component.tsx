@@ -16,6 +16,7 @@ export interface Props {
   unlockLabel: string;
   isUnlocked: boolean;
   isDeletable: boolean;
+  onActivateClick?: (accountNumber: number) => void;
   onEditClick?: (accountNumber: number) => void;
   onDeleteClick?: (accountNumber: number) => void;
   onUnlockClick?: (accountNumber: number) => void;
@@ -27,6 +28,7 @@ export const AccountItem = ({
   unlockLabel,
   isUnlocked,
   isDeletable,
+  onActivateClick,
   onEditClick,
   onDeleteClick,
   onUnlockClick,
@@ -38,30 +40,38 @@ export const AccountItem = ({
     className={cx.root}
     data-testid="wallet-account-item"
   >
-    <Flex alignItems="center" gap="$8">
-      <ProfilePicture.UserProfile
-        imageSrc=""
-        fallback={accountNumber.toString()}
-        delayMs={0}
-        data-testid="wallet-account-item-icon"
-      />
-      <Flex flexDirection="column">
-        <Text.Label
-          weight="$medium"
-          className={cx.accountLabel}
-          data-testid="wallet-account-item-label"
-        >
-          {label}
-        </Text.Label>
-        <Text.Body.Small
-          weight="$semibold"
-          className={cx.derivationPath}
-          data-testid="wallet-account-item-path"
-        >
-          m/1852&apos;/1815&apos;/{accountNumber}&apos;
-        </Text.Body.Small>
+    <div
+      style={{ display: 'contents' }}
+      role="button"
+      onClick={(): void => {
+        onActivateClick?.(accountNumber);
+      }}
+    >
+      <Flex alignItems="center" gap="$8">
+        <ProfilePicture.UserProfile
+          imageSrc=""
+          fallback={accountNumber.toString()}
+          delayMs={0}
+          data-testid="wallet-account-item-icon"
+        />
+        <Flex flexDirection="column">
+          <Text.Label
+            weight="$medium"
+            className={cx.accountLabel}
+            data-testid="wallet-account-item-label"
+          >
+            {label}
+          </Text.Label>
+          <Text.Body.Small
+            weight="$semibold"
+            className={cx.derivationPath}
+            data-testid="wallet-account-item-path"
+          >
+            m/1852&apos;/1815&apos;/{accountNumber}&apos;
+          </Text.Body.Small>
+        </Flex>
       </Flex>
-    </Flex>
+    </div>
     {isUnlocked ? (
       <Flex gap="$8">
         <ControlButtons.Icon
