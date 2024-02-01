@@ -19,6 +19,9 @@ type TransactionDetails = {
   collateral?: string;
 };
 
+const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
+  `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
+
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
   transaction: TransactionDetails;
@@ -81,18 +84,20 @@ export const DappTransaction = ({
         {collateral && (
           <Collateral
             collateral={collateral}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
+            amountTransformer={amountTransformer({
+              price: fiatCurrencyPrice,
+              code: fiatCurrencyCode
+            })}
             coinSymbol={coinSymbol}
           />
         )}
         {fee && fee !== '-' && (
           <TransactionFee
             fee={fee}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
+            amountTransformer={amountTransformer({
+              price: fiatCurrencyPrice,
+              code: fiatCurrencyCode
+            })}
             coinSymbol={coinSymbol}
           />
         )}
