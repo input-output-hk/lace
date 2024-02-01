@@ -49,9 +49,9 @@ export const useAppInit = (): void => {
     useCallback(
       async (addresses) => {
         if (!addresses) return;
-        const { name } = getValueFromLocalStorage('wallet');
+        const { name } = getValueFromLocalStorage('wallet', { name: 'Lace' });
         setWalletInfo({
-          name: name ?? 'Lace',
+          name,
           addresses
         });
       },
