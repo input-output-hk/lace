@@ -52,17 +52,13 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
-  const debouncedResetStakePools = useMemo(
-    () => resetStakePools && debounce(resetStakePools, searchDebounce),
-    [resetStakePools]
-  );
 
   useEffect(() => {
     if (componentRef?.current) {
       // reset pools on network switching, searchValue change and sort change
-      debouncedResetStakePools?.();
+      resetStakePools?.();
     }
-  }, [currentChain, searchValue, sort, debouncedSearch, debouncedResetStakePools]);
+  }, [currentChain, searchValue, sort, debouncedSearch, resetStakePools]);
 
   const loadMoreData = useCallback(
     ({ startIndex, endIndex }: Parameters<StakePoolTableBrowserProps['loadMoreData']>[0]) => {
@@ -82,32 +78,13 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   };
 
   const list = useMemo(
-    () =>
-      pageResults.map((pool) => {
-        const stakePool = pool && mapStakePoolToDisplayData({ stakePool: pool });
+    () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
 
-        return pool
-          ? {
-              ...stakePool,
-              liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
-              stakePool: pool,
-            }
-          : undefined;
-      }) || [],
     [pageResults]
   );
 
   const selectedList = useMemo(
-    () =>
-      selectedPortfolioStakePools.map((pool) => {
-        const stakePool = pool && mapStakePoolToDisplayData({ stakePool: pool });
-
-        return {
-          ...stakePool,
-          liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
-          stakePool: pool,
-        };
-      }) || [],
+    () => selectedPortfolioStakePools.map((pool) => mapStakePoolToDisplayData({ stakePool: pool })),
     [selectedPortfolioStakePools]
   );
 

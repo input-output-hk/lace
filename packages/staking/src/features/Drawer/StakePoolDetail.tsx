@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis, PostHogAction, ProgressBar, getNumberWithUnit } from '@lace/common';
+import { Ellipsis, PostHogAction, ProgressBar } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
@@ -75,7 +75,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       status,
       contact,
       blocks,
-      fee,
+      cost,
       pledge,
       margin,
     },
@@ -115,8 +115,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     retiring: t('drawer.details.status.retiring'),
     saturated: t('drawer.details.status.saturated'),
   };
-  const formattedPledge = getNumberWithUnit(pledge);
-  const formattedCost = getNumberWithUnit(fee);
 
   const metricsData = useMemo(() => {
     const metrics = [
@@ -125,8 +123,8 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
       { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
       { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
-      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
-      { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
+      { t: metricsTranslations.cost, testId: 'cost', unit: cost.unit, value: cost.number },
+      { t: metricsTranslations.pledge, testId: 'pledge', unit: pledge.unit, value: pledge.number },
       { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin },
     ];
 
@@ -141,10 +139,8 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     apy,
     blocks,
     delegators,
-    formattedCost.number,
-    formattedCost.unit,
-    formattedPledge.number,
-    formattedPledge.unit,
+    cost.number,
+    cost.unit,
     liveStake.number,
     liveStake.unit,
     margin,
@@ -157,6 +153,8 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     metricsTranslations.margin,
     metricsTranslations.pledge,
     metricsTranslations.saturation,
+    pledge.number,
+    pledge.unit,
     popupView,
     saturation,
   ]);

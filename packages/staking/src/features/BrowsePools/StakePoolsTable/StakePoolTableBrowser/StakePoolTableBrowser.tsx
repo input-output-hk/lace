@@ -1,9 +1,6 @@
-import { PostHogAction } from '@lace/common';
 import { Table } from '@lace/ui';
 import React from 'react';
 import { ListRange } from 'react-virtuoso';
-import { useOutsideHandles } from '../../../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../../../store';
 import { StakePoolPlaceholder } from '../StakePoolPlaceholder/StakePoolPlaceholder';
 import { Columns, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from '../utils';
@@ -32,44 +29,29 @@ export const StakePoolTableBrowser = ({
   activeSort,
   setActiveSort,
   scrollableTargetId,
-}: StakePoolTableBrowserProps): React.ReactElement => {
-  const { analytics } = useOutsideHandles();
-
-  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
-    portfolioMutators: store.mutators,
-  }));
-  const selectedStakePools: StakePoolTableItemBrowserProps[] = selectedPools.map((pool) => ({
-    ...pool,
-    onSelect: () => {
-      portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' });
-      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
-    },
-  }));
-
-  return (
-    <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
-      <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
-      {selectedStakePools?.length > 0 && (
-        <div className={styles.selectedPools}>
-          {selectedStakePools.map((pool) => (
-            <StakePoolTableItemBrowser key={pool.id} {...{ ...pool, selected: true }} />
-          ))}
-        </div>
-      )}
-      {!(selectedStakePools.length > 0 && selectedStakePools.length === pools.length) && emptyPlaceholder}
-      <Table.Body<StakePoolTableItemBrowserProps | undefined>
-        scrollableTargetId={scrollableTargetId}
-        loadMoreData={loadMoreData}
-        items={pools}
-        itemContent={(_index, data) =>
-          data ? (
-            <StakePoolTableItemBrowser {...data} hideSelected />
-          ) : (
-            <StakePoolPlaceholder columns={config.columns} withSelection />
-          )
-        }
-        increaseViewportBy={{ bottom: 100, top: 0 }}
-      />
-    </div>
-  );
-};
+}: StakePoolTableBrowserProps): React.ReactElement => (
+  <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
+    <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
+    {selectedPools?.length > 0 && (
+      <div className={styles.selectedPools}>
+        {selectedPools.map((pool) => (
+          <StakePoolTableItemBrowser key={pool.id} {...{ ...pool, selected: true }} />
+        ))}
+      </div>
+    )}
+    {!(selectedPools.length > 0 && selectedPools.length === pools.length) && emptyPlaceholder}
+    <Table.Body<StakePoolTableItemBrowserProps | undefined>
+      scrollableTargetId={scrollableTargetId}
+      loadMoreData={loadMoreData}
+      items={pools}
+      itemContent={(_index, data) =>
+        data ? (
+          <StakePoolTableItemBrowser {...data} hideSelected />
+        ) : (
+          <StakePoolPlaceholder columns={config.columns} withSelection />
+        )
+      }
+      increaseViewportBy={{ bottom: 100, top: 0 }}
+    />
+  </div>
+);

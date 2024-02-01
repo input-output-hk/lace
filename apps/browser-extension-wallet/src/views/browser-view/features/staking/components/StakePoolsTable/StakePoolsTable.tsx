@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
 import { Box, Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
@@ -13,7 +13,7 @@ import {
   StakePoolPlaceholder
 } from '@lace/staking';
 import { Typography } from 'antd';
-import { Search, getRandomIcon } from '@lace/common';
+import { Search } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { stakePoolResultsSelector } from '@stores/selectors/staking-selectors';
 import { useDelegationStore } from '@src/features/delegation/stores';
@@ -27,7 +27,6 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 const { Text } = Typography;
 
 type stakePoolsTableProps = {
-  onStake?: (id: string) => void;
   scrollableTargetId: string;
 };
 
@@ -42,8 +41,8 @@ const searchDebounce = 300;
 
 const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
 
-export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTableProps): React.ReactElement => {
-  const isMounted = useRef(false);
+export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): React.ReactElement => {
+  const componentRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
@@ -82,54 +81,39 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
 
-  const loadMoreData = ({ startIndex, endIndex }: Parameters<LoadMoreDataParam>[0]) => {
-    if (startIndex !== endIndex) {
-      debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
-    }
-  };
-
-  const debouncedResetStakePools = useMemo(() => debounce(resetStakePools, searchDebounce), [resetStakePools]);
+  const loadMoreData = useCallback(
+    ({ startIndex, endIndex }: Parameters<LoadMoreDataParam>[0]) => {
+      if (startIndex !== endIndex) {
+        debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
+      }
+    },
+    [debouncedSearch, searchValue, sort]
+  );
 
   useEffect(() => {
-    if (isMounted?.current) {
+    if (componentRef?.current) {
       // Fetch pools on network switching, searchValue change and sort change
       setIsDrawerVisible(false);
-      debouncedResetStakePools();
+      resetStakePools();
     }
-  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible, debouncedResetStakePools]);
+  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible, resetStakePools]);
 
   const onSearch = (searchString: string) => {
     setSearchValue(searchString);
   };
-
   const list = useMemo(
     () =>
-      pageResults?.map((pool) => {
-        const stakePool = pool && Wallet.util.stakePoolTransformer({ stakePool: pool, cardanoCoin });
-        const logo = pool && getRandomIcon({ id: pool.id.toString(), size: 30 });
-
-        return pool
-          ? {
-              logo,
-              stakePool: pool,
-              ...stakePool,
-              hexId: pool.hexId,
-              liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
-              onClick: (): void => {
-                analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
-                setSelectedStakePool({ logo, ...pool });
-                setIsDrawerVisible(true);
-              },
-              onStake: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, poolId: string) => {
-                e.stopPropagation();
-                setSelectedStakePool(pool);
-                onStake(poolId);
-              }
-            }
-          : undefined;
-      }) || [],
-    [analytics, cardanoCoin, onStake, pageResults, setIsDrawerVisible, setSelectedStakePool]
+      pageResults?.map((pool) =>
+        pool ? Wallet.util.stakePoolTransformer({ stakePool: pool, cardanoCoin }) : undefined
+      ),
+    [cardanoCoin, pageResults]
   );
+
+  const onPoolClick = (pool: Wallet.Cardano.StakePool) => {
+    analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
+    setSelectedStakePool(pool);
+    setIsDrawerVisible(true);
+  };
 
   const onSortChange = (field: Columns) => {
     // TODO: remove once updated on sdk side (LW-9530)
@@ -152,7 +136,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
   const isActiveSortItem = (value: string) => value === sort?.field;
 
   return (
-    <div data-testid="stake-pool-table" className={styles.table}>
+    <div ref={componentRef} data-testid="stake-pool-table" className={styles.table}>
       <div className={styles.header}>
         <div className={styles.title}>
           <span>{t('browserView.staking.stakePoolsTable.title')}</span>
@@ -188,15 +172,14 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
               return <StakePoolPlaceholder columns={stakePooltableConfig.columns} />;
             }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { stakePool, hexId, id, selectionDisabledMessage, onClick, ...data } = props;
+            const { stakePool, hexId, id, ...data } = props;
             return (
-              <Table.Row<Columns>
-                onClick={onClick}
+              <Table.Row<typeof data, Columns>
+                onClick={() => onPoolClick(stakePool)}
                 columns={stakePooltableConfig.columns}
                 cellRenderers={stakePooltableConfig.renderer}
                 dataTestId="stake-pool"
                 data={data}
-                selectionDisabledMessage={selectionDisabledMessage}
               />
             );
           }}

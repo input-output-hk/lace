@@ -12,8 +12,9 @@ export const StakePoolTableItemBrowser = ({
   hideSelected,
   stakePool,
   hexId,
+  id,
   ...data
-}: StakePoolTableItemBrowserProps & { hideSelected?: boolean }): React.ReactElement => {
+}: StakePoolTableItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
 
@@ -45,7 +46,7 @@ export const StakePoolTableItemBrowser = ({
     // that would allow us to calculate proper skip, limit that we pass in as a payload into the fetch pools util.
     <></>
   ) : (
-    <Table.Row<Columns>
+    <Table.Row<Partial<typeof data>, Columns>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}
@@ -54,7 +55,7 @@ export const StakePoolTableItemBrowser = ({
       selectionDisabledMessage={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
       dataTestId="stake-pool"
       withSelection
-      keyProp={data?.id}
+      keyProp={id}
       {...(!selectionsFull && { onSelect })}
     />
   );

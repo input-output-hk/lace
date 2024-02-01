@@ -6,16 +6,24 @@ import cn from 'classnames';
 
 import * as cx from './table.css';
 
-export interface RowProps<T extends string> {
-  columns: T[];
-  data: Partial<Record<T, string | undefined>>;
+export interface RowProps<
+  T extends object,
+  K extends Extract<keyof Partial<T>, string>,
+> {
+  columns: K[];
+  data: T;
   selectionDisabledMessage?: string;
   withSelection?: boolean;
   selected?: boolean;
   onSelect?: () => void;
   onClick?: () => void;
   cellRenderers?: Partial<
-    Record<T, React.FunctionComponent<{ value?: string }>>
+    Record<
+      K,
+      React.FunctionComponent<{
+        value?: T[K];
+      }>
+    >
   >;
   dataTestId?: string;
   keyProp?: string;
@@ -39,7 +47,10 @@ const ConditionalTooltipWrapper = ({
   </>
 );
 
-export const Row = <T extends string>({
+export const Row = <
+  T extends object,
+  K extends Extract<keyof Partial<T>, string>,
+>({
   columns,
   cellRenderers,
   data,
@@ -50,7 +61,7 @@ export const Row = <T extends string>({
   selectionDisabledMessage = '',
   dataTestId = 'table',
   keyProp,
-}: Readonly<RowProps<T>>): JSX.Element => {
+}: Readonly<RowProps<T, K>>): JSX.Element => {
   const isSelectionAllowed = typeof onSelect === 'function';
 
   return (
@@ -90,9 +101,9 @@ export const Row = <T extends string>({
           data-testid={`${dataTestId}-list-${cell}`}
         >
           <span className={cx.cellInner}>
-            {typeof cellRenderers?.[cell] === 'function'
+            {(typeof cellRenderers?.[cell] === 'function'
               ? cellRenderers[cell]?.({ value: data[cell] })
-              : data[cell] ?? '-'}
+              : data[cell]) ?? '-'}
           </span>
         </div>
       ))}

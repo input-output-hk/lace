@@ -7,19 +7,14 @@ import BigNumber from 'bignumber.js';
 export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Cardano.StakePool }) => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
 
-  const fee = Wallet.util.lovelacesToAdaString(cost.toString());
-  const formattedCost = getNumberWithUnit(Wallet.util.lovelacesToAdaString(cost.toString()));
-  const formattedPledge = getNumberWithUnit(Wallet.util.lovelacesToAdaString(pledge.toString()));
-
   return {
     contact: {
       primary: metadata?.homepage,
       ...metadata?.ext?.pool.contact,
     },
-    cost: `${formattedCost.number}${formattedCost.unit}`,
+    cost: cost ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(cost.toString())) : { number: '-', unit: '' },
     delegators: metrics?.delegators || '-',
     description: metadata?.description || '-',
-    fee,
     hexId,
     id: id.toString(),
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
@@ -32,7 +27,7 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
       : { number: '-', unit: '' },
     name: metadata?.name || '-',
     owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
-    pledge: `${formattedPledge.number}${formattedPledge.unit}`,
+    pledge: pledge ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(pledge.toString())) : { number: '-', unit: '' },
     retired: status === Wallet.Cardano.StakePoolStatus.Retired,
     status,
     ticker: metadata?.ticker || '-',
@@ -42,5 +37,6 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
       delegators: new BigNumber(metrics.delegators).toFormat(),
       saturation: formatPercentages(metrics.saturation),
     }),
+    stakePool,
   };
 };
