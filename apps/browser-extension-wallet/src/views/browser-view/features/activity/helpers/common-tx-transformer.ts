@@ -285,16 +285,16 @@ export const certificateTransformer = (
       }
 
       if ('deposit' in conwayEraCertificate) {
-        const depositPaidInAda = Wallet.util.lovelacesToAdaString(conwayEraCertificate.deposit.toString());
         transformedCertificate.push({
           title: 'depositPaid',
           info: 'depositPaidInfo',
           details: [
             [
-              `${depositPaidInAda} ${cardanoCoin.symbol}`,
-              `${Wallet.util.convertAdaToFiat({ ada: depositPaidInAda, fiat: coinPrices?.cardano?.price })} ${
-                fiatCurrency?.code
-              }`
+              Wallet.util.getFormattedAmount({ amount: conwayEraCertificate.deposit.toString(), cardanoCoin }),
+              `${Wallet.util.convertLovelaceToFiat({
+                lovelaces: conwayEraCertificate.deposit.toString(),
+                fiat: coinPrices?.cardano?.price
+              })} ${fiatCurrency?.code}`
             ]
           ]
         });
