@@ -187,7 +187,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
                 <ProgressBar
                   className={styles[getSaturationLevel(Number(saturation))]}
                   duration={0}
-                  width={`${Number(saturation)}%`}
+                  width={`${Math.min(Number(saturation), 100)}%`}
                   dataTestId="saturation-progress-bar"
                 />
               </div>
