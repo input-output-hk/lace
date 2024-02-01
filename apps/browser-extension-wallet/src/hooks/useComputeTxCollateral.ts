@@ -28,7 +28,7 @@ export const useComputeTxCollateral = (wallet: Wallet.ObservableWallet, tx?: Wal
     };
 
     computeCollateral();
-  }, [tx?.id, wallet]);
+  }, [tx, wallet]);
 
   return txCollateral;
 };
