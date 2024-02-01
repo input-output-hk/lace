@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react';
-import type { PropsWithChildren } from 'react';
+import React from 'react';
+import type { Ref, PropsWithChildren } from 'react';
 
 import classNames from 'classnames';
 
@@ -16,32 +16,29 @@ export type FlexProps = BoxProps &
 
 export type Props = PropsWithChildren<Readonly<FlexProps>>;
 
-export const Flex = forwardRef<HTMLDivElement | null, Readonly<Props>>(
-  (
-    {
-      children,
-      alignItems = 'flex-start',
-      flexDirection = 'row',
-      gap = '$0',
-      justifyContent = 'flex-start',
+export const FlexComponent = (
+  {
+    children,
+    alignItems = 'flex-start',
+    flexDirection = 'row',
+    gap = '$0',
+    justifyContent = 'flex-start',
+    className,
+    ...props
+  }: Readonly<Props>,
+  ref: Ref<HTMLDivElement | null>,
+): React.ReactElement => (
+  <Box
+    {...props}
+    className={classNames(
+      sx({ alignItems, flexDirection, gap, justifyContent }),
       className,
-      ...props
-    },
-    ref,
-  ) => (
-    <Box
-      {...props}
-      className={classNames(
-        sx({ alignItems, flexDirection, gap, justifyContent }),
-        className,
-        cx.flex,
-      )}
-      ref={ref}
-    >
-      {children}
-    </Box>
-  ),
+      cx.flex,
+    )}
+    ref={ref}
+  >
+    {children}
+  </Box>
 );
 
-// eslint-disable-next-line functional/immutable-data
-Flex.displayName = 'Flex';
+export const Flex = React.forwardRef(FlexComponent);
