@@ -1,9 +1,13 @@
-import type { ReactChildren } from 'react';
+/* eslint-disable functional/no-loop-statements */
+/* eslint-disable react/display-name */
 import React from 'react';
 
-import type { Meta } from '@storybook/react';
+import { expect } from '@storybook/jest';
+import type { ComponentStory, Meta } from '@storybook/react';
+import { userEvent, within } from '@storybook/testing-library';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { sleep } from '../../test';
 import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
@@ -18,8 +22,16 @@ import { AutoSuggestBoxContext } from './auto-suggest-box.provider';
 
 const subtitle = 'Input with auto suggestions';
 
+const SUGGESTIONS = [
+  { value: 'apple' },
+  { value: 'orange' },
+  { value: 'grape' },
+  { value: 'banana' },
+  { value: 'pear' },
+];
+
 export default {
-  title: 'Input Fields/AutoSuggestBox',
+  title: 'Input Fields/Auto Suggest Box',
   component: AutoSuggestBox,
   decorators: [page({ title: 'Auto Suggest Box', subtitle })],
 } as Meta;
@@ -31,11 +43,7 @@ const Provider = ({
     value={{
       setValue: () => void 0,
       setIsSuggesting: () => void 0,
-      suggestions: [
-        { value: 'apple' },
-        { value: 'orange' },
-        { value: 'grape' },
-      ],
+      suggestions: SUGGESTIONS.slice(0, 3),
       value: '',
       isSuggesting: true,
     }}
@@ -104,13 +112,7 @@ export const Overview = (): JSX.Element => {
           <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
             <Box w="$312">
               <AutoSuggestBox
-                items={[
-                  { value: 'apple' },
-                  { value: 'orange' },
-                  { value: 'grape' },
-                  { value: 'banana' },
-                  { value: 'pear' },
-                ]}
+                suggestions={SUGGESTIONS}
                 label="Auto suggest box"
               />
             </Box>
@@ -148,4 +150,138 @@ Overview.parameters = {
     hover: '#hover',
     focus: '#focus',
   },
+};
+
+type Interactions = ComponentStory<typeof AutoSuggestBox>;
+
+const createInteraction: () => Interactions = () => (): JSX.Element =>
+  (
+    <Flex
+      flexDirection="column"
+      alignItems="center"
+      w="$fill"
+      my="$32"
+      mb="$312"
+    >
+      <Box w="$312">
+        <AutoSuggestBox suggestions={SUGGESTIONS} label="Auto suggest box" />
+      </Box>
+    </Flex>
+  );
+
+export const SuggestAndErase = createInteraction();
+export const SuggestAndPick = createInteraction();
+
+SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
+  const canvas = within(canvasElement);
+
+  await sleep();
+
+  userEvent.click(canvas.getByTestId('auto-suggest-box-button-open'));
+
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-apple'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-orange'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-grape'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-banana'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
+  ).toBeInTheDocument();
+
+  await sleep();
+
+  await userEvent.type(canvas.getByTestId('auto-suggest-box-input'), 'ra', {
+    delay: 100,
+  });
+
+  await sleep();
+
+  expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('ra');
+
+  expect(
+    canvas.queryByTestId('auto-suggest-box-suggestion-apple'),
+  ).not.toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-orange'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-grape'),
+  ).toBeInTheDocument();
+  expect(
+    canvas.queryByTestId('auto-suggest-box-suggestion-banana'),
+  ).not.toBeInTheDocument();
+  expect(
+    canvas.queryByTestId('auto-suggest-box-suggestion-pear'),
+  ).not.toBeInTheDocument();
+
+  await sleep();
+
+  userEvent.click(canvas.getByTestId('auto-suggest-box-button-close'));
+
+  expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('');
+};
+
+SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
+  const canvas = within(canvasElement);
+
+  await sleep();
+
+  userEvent.click(canvas.getByTestId('auto-suggest-box-button-open'));
+
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-apple'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-orange'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-grape'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-banana'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
+  ).toBeInTheDocument();
+
+  await sleep();
+
+  await userEvent.type(canvas.getByTestId('auto-suggest-box-input'), 'ra', {
+    delay: 100,
+  });
+
+  await sleep();
+
+  expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('ra');
+
+  expect(
+    canvas.queryByTestId('auto-suggest-box-suggestion-apple'),
+  ).not.toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-orange'),
+  ).toBeInTheDocument();
+  expect(
+    await canvas.findByTestId('auto-suggest-box-suggestion-grape'),
+  ).toBeInTheDocument();
+  expect(
+    canvas.queryByTestId('auto-suggest-box-suggestion-banana'),
+  ).not.toBeInTheDocument();
+  expect(
+    canvas.queryByTestId('auto-suggest-box-suggestion-pear'),
+  ).not.toBeInTheDocument();
+
+  await sleep();
+
+  userEvent.click(canvas.getByTestId('auto-suggest-box-suggestion-orange'));
+
+  expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue(
+    'orange',
+  );
 };

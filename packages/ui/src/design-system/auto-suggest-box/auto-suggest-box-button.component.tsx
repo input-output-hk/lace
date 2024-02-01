@@ -17,6 +17,9 @@ export const Button = ({ disabled }: Readonly<Props>): JSX.Element => {
   const Icon = isCloseButton ? CloseIcon : BookIcon;
   return (
     <button
+      data-testid={`auto-suggest-box-button-${
+        isCloseButton ? 'close' : 'open'
+      }`}
       className={cx.button}
       onClick={(event): void => {
         event.preventDefault();

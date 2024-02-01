@@ -6,7 +6,7 @@ export const disabledContainer = style({
   },
 });
 
-export const item = style([
+export const suggestion = style([
   sx({
     p: '$16',
   }),

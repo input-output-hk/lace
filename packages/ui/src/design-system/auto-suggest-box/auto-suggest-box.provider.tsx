@@ -14,7 +14,7 @@ import React, {
   useState,
 } from 'react';
 
-interface Item {
+interface Suggestion {
   label?: string;
   value: string;
 }
@@ -22,7 +22,7 @@ interface Item {
 interface Props {
   onChange?: (value: string) => void;
   initialValue?: string;
-  items?: Item[];
+  suggestions?: Suggestion[];
 }
 
 interface AutoSuggestBoxContextType {
@@ -30,7 +30,7 @@ interface AutoSuggestBoxContextType {
   setIsSuggesting: Dispatch<SetStateAction<boolean>>;
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
-  suggestions: Item[];
+  suggestions: Suggestion[];
 }
 
 export const AutoSuggestBoxContext =
@@ -46,13 +46,10 @@ export const AutoSuggestBoxProvider = ({
   children,
   onChange,
   initialValue = '',
-  items = [],
+  suggestions = [],
 }: Readonly<PropsWithChildren<Props>>): ReactElement => {
   const [value, setValue] = useState(initialValue);
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const suggestions = items.filter(item =>
-    item.value.toLowerCase().includes(value.toLowerCase()),
-  );
 
   useEffect(() => {
     onChange?.(value);
@@ -64,7 +61,9 @@ export const AutoSuggestBoxProvider = ({
       setValue,
       isSuggesting: suggestions.length > 0 && isSuggesting,
       setIsSuggesting,
-      suggestions,
+      suggestions: suggestions.filter(item =>
+        item.value.toLowerCase().includes(value.toLowerCase()),
+      ),
     }),
     [value, setValue, isSuggesting, setIsSuggesting],
   );

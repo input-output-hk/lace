@@ -39,6 +39,7 @@ export const Input = ({
         >
           <Form.Control asChild>
             <input
+              data-testid="auto-suggest-box-input"
               id={id}
               type="text"
               required={required}

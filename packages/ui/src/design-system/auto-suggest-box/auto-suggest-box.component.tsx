@@ -22,7 +22,7 @@ export interface AutoSuggestBoxProps {
   id?: string;
   label: string;
   name?: string;
-  items?: { value: string; label?: string }[];
+  suggestions?: { value: string; label?: string }[];
   errorMessage?: string;
   onChange?: (value: string) => void;
   initialValue?: string;
@@ -68,21 +68,23 @@ export const AutoSuggestBoxBase = ({
             bar: cx.scrollBar,
           }}
         >
-          {suggestions.map(item => (
-            <div
-              key={item.value}
-              onClick={(): void => {
-                setIsSuggesting(false);
-                setValue(item.value);
-              }}
-            >
-              <Box className={cn(cx.item)}>
+          <Box data-testid="auto-suggest-box-suggestions">
+            {suggestions.map(suggestion => (
+              <div
+                data-testid={`auto-suggest-box-suggestion-${suggestion.value}`}
+                className={cn(cx.suggestion)}
+                key={suggestion.value}
+                onClick={(): void => {
+                  setIsSuggesting(false);
+                  setValue(suggestion.value);
+                }}
+              >
                 <Text.Body.Large weight="$semibold">
-                  {item.label ?? item.value}
+                  {suggestion.label ?? suggestion.value}
                 </Text.Body.Large>
-              </Box>
-            </div>
-          ))}
+              </div>
+            ))}
+          </Box>
         </ScrollArea>
       </Popover.Content>
     </Popover.Root>
@@ -90,13 +92,13 @@ export const AutoSuggestBoxBase = ({
 };
 
 export const AutoSuggestBox = ({
-  items = [],
+  suggestions = [],
   ...props
 }: Readonly<AutoSuggestBoxProps>): JSX.Element => (
   <AutoSuggestBoxProvider
     onChange={props.onChange}
     initialValue={props.initialValue}
-    items={items}
+    suggestions={suggestions}
   >
     <AutoSuggestBoxBase {...props} />
   </AutoSuggestBoxProvider>
