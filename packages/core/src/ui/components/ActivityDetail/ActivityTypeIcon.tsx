@@ -24,6 +24,7 @@ import { ReactComponent as ResignCommitteeColdIcon } from '../../assets/icons/ba
 import { ReactComponent as AuthorizeCommitteeHotIcon } from '../../assets/icons/feather-outline.component.svg';
 import { ReactComponent as RegisterDelegateRepresentativeIcon } from '../../assets/icons/briefcase-outline.component.svg';
 import { ReactComponent as UnregisterDelegateRepresentativeIcon } from '../../assets/icons/briefcase-back-icon.component.svg';
+import { ReactComponent as VoteDelegationIcon } from '../../assets/icons/ticket-arrow-right-outline.component.svg';
 
 import {
   ActivityType,
@@ -59,7 +60,7 @@ const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEleme
   [ConwayEraCertificatesTypes.AuthorizeCommitteeHot]: AuthorizeCommitteeHotIcon,
   [ConwayEraCertificatesTypes.RegisterDelegateRepresentative]: RegisterDelegateRepresentativeIcon,
   [ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]: UnregisterDelegateRepresentativeIcon,
-
+  [ConwayEraCertificatesTypes.VoteDelegation]: VoteDelegationIcon,
   [TransactionActivityType.rewards]: RewardsIcon,
   [TransactionActivityType.incoming]: IncomingIcon,
   [TransactionActivityType.outgoing]: OutgoingIcon,
