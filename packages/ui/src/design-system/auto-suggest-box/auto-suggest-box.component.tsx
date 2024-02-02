@@ -46,21 +46,26 @@ export const AutoSuggestBoxBase = ({
   return (
     <Popover.Root open={isSuggesting}>
       <Popover.Anchor>
-        <Flex justifyContent="space-between" flexDirection="column">
+        <Flex flexDirection="column">
           <Flex
+            justifyContent="space-between"
             className={cn(cx.container, {
               [cx.isSuggesting]: isSuggesting,
             })}
           >
-            <Input
-              id={id}
-              label={label}
-              required={required}
-              disabled={disabled}
-              name={name}
-            />
-            <Loader isValidating={isValidating} />
-            <Button disabled={disabled} />
+            <Box>
+              <Input
+                id={id}
+                label={label}
+                required={required}
+                disabled={disabled}
+                name={name}
+              />
+            </Box>
+            <Flex alignItems="center">
+              <Loader isValidating={isValidating} />
+              <Button disabled={disabled} />
+            </Flex>
           </Flex>
 
           {Boolean(errorMessage) && (

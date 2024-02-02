@@ -18,6 +18,7 @@ export const container = style({
   fontFamily: vars.fontFamily.$nova,
   alignItems: 'center',
   position: 'relative',
+  width: '100%',
 });
 
 export const isSuggesting = style({
