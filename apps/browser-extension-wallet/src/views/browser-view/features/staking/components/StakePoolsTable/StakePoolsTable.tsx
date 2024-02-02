@@ -141,6 +141,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           logo,
           stakePool: pool,
           ...stakePool,
+          liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
           hexId: pool.hexId,
           onClick: (): void => {
             analytics.sendEventToMatomo({
