@@ -142,52 +142,50 @@ const MainComponents = ({
   ];
 
   return (
-    <>
-      <Variants.Row>
-        <Variants.Cell>
-          <Layout maxWidth={maxWidth}>
-            <Table.Header
-              dataTestId="stake-pool"
-              headers={headers}
-              isActiveSortItem={isActiveSortItem}
-              isSortingAvailable={isSortingAvailable}
-              onSortChange={onSortChange}
-              order={sort.order}
-              withSelection
-            />
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100px',
+    <Variants.Row>
+      <Variants.Cell>
+        <Layout maxWidth={maxWidth}>
+          <Table.Header
+            dataTestId="stake-pool"
+            headers={headers}
+            isActiveSortItem={isActiveSortItem}
+            isSortingAvailable={isSortingAvailable}
+            onSortChange={onSortChange}
+            order={sort.order}
+            withSelection
+          />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100px',
+            }}
+          >
+            <Table.Body<Record<string, string>>
+              loadMoreData={(): void => {
+                console.log('load more');
               }}
-            >
-              <Table.Body<Record<string, string>>
-                loadMoreData={(): void => {
-                  console.log('load more');
-                }}
-                items={list}
-                itemContent={(index, props): JSX.Element => (
-                  <Table.Row<Columns>
-                    onClick={(...data): void => {
-                      console.log(data);
-                    }}
-                    columns={columns}
-                    dataTestId="stake-pool"
-                    data={props}
-                    onSelect={(): void => {
-                      onSelect(index);
-                    }}
-                    selected={selected.has(index)}
-                    withSelection
-                  />
-                )}
-              />
-            </div>
-          </Layout>
-        </Variants.Cell>
-      </Variants.Row>
-    </>
+              items={list}
+              itemContent={(index, props): JSX.Element => (
+                <Table.Row<typeof props, Columns>
+                  onClick={(...data): void => {
+                    console.log(data);
+                  }}
+                  columns={columns}
+                  dataTestId="stake-pool"
+                  data={props}
+                  onSelect={(): void => {
+                    onSelect(index);
+                  }}
+                  selected={selected.has(index)}
+                  withSelection
+                />
+              )}
+            />
+          </div>
+        </Layout>
+      </Variants.Cell>
+    </Variants.Row>
   );
 };
 

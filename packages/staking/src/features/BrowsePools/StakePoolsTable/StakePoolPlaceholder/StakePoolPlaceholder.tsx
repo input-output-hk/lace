@@ -20,12 +20,12 @@ export const StakePoolPlaceholder = function StakePoolPlaceholder<E extends stri
     <div
       data-testid={`${dataTestId}-placeholder-item`}
       className={cn(styles.row, {
-        [styles.selectable!]: withSelection,
+        [styles.selectable]: withSelection,
       })}
     >
       {withSelection && <div />}
-      {columns.map((cell, index) => (
-        <div key={`${cell}-${index}`} className={styles.cell} data-testid={`${dataTestId}-placeholder-list-${cell}`}>
+      {columns.map((cell) => (
+        <div key={cell} className={styles.cell} data-testid={`${dataTestId}-placeholder-list-${cell}`}>
           {stakePoolCellPlaceholderRenderer()}
         </div>
       ))}
