@@ -3,6 +3,7 @@ import { useWalletStore } from '@stores';
 import { useEffect } from 'react';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
+import { useWalletManager } from './useWalletManager';
 
 export const useAppInit = (): void => {
   const {
@@ -11,8 +12,10 @@ export const useAppInit = (): void => {
     initialHdDiscoveryCompleted,
     cardanoWallet,
     setAddressesDiscoveryCompleted,
-    setHdDiscoveryStatus
+    setHdDiscoveryStatus,
+    deletingWallet
   } = useWalletStore();
+  const { loadWallet, walletManager, walletRepository } = useWalletManager();
 
   const addresses = useObservable(cardanoWallet?.wallet?.addresses$);
   useEffect(() => {
@@ -35,4 +38,11 @@ export const useAppInit = (): void => {
       setAddressesDiscoveryCompleted(true);
     }
   }, [walletInfo, initialHdDiscoveryCompleted, setAddressesDiscoveryCompleted]);
+
+  const wallets = useObservable(walletRepository.wallets$);
+  const activeWalletProps = useObservable(walletManager.activeWalletId$);
+  useEffect(() => {
+    if (deletingWallet || typeof wallets === 'undefined' || typeof activeWalletProps === 'undefined') return;
+    void loadWallet(wallets, activeWalletProps);
+  }, [loadWallet, activeWalletProps, wallets, deletingWallet]);
 };

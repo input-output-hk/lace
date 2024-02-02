@@ -15,7 +15,6 @@ import { WalletSetup } from '../features/wallet-setup';
 import { AssetsView } from '../features/assets';
 import { SettingsLayout } from '../features/settings';
 import { Lock } from '../components/Lock';
-import { useWalletManager } from '@src/hooks/useWalletManager';
 import { NftsLayout } from '../features/nfts';
 import { getValueFromLocalStorage, onStorageChangeEvent } from '@src/utils/local-storage';
 import { tabs } from 'webextension-polyfill';
@@ -96,10 +95,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     setCurrentChain,
     walletType,
     deletingWallet,
+    stayOnAllDonePage,
     cardanoWallet,
     initialHdDiscoveryCompleted
   } = useWalletStore();
-  const { loadWallet } = useWalletManager();
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
@@ -141,10 +140,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   }, [currentChain, chainName, setCardanoCoin]);
 
   useEffect(() => {
-    loadWallet();
-  }, [loadWallet]);
-
-  useEffect(() => {
     const isHardwareWallet = Wallet.AVAILABLE_WALLETS.includes(walletType as Wallet.HardwareWallets);
     if (isHardwareWallet) {
       tabs.onActivated.addListener(tabsOnActivatedCallback);
@@ -164,7 +159,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && !deletingWallet && cardanoWallet === null) {
+  if (!isLoadingWalletInfo && !deletingWallet && (cardanoWallet === null || stayOnAllDonePage)) {
     return (
       <Switch>
         <Route path={'/setup'} component={WalletSetup} />

@@ -53,6 +53,8 @@ export const walletStoreMock = async (
     setRewardsActivityDetail: jest.fn(),
     setTransactionActivityDetail: jest.fn(),
     setWalletLock: jest.fn(),
+    setStayOnAllDonePage: jest.fn(),
+    stayOnAllDonePage: false,
     stakePoolSearchResults: { pageResults: [], totalResultCount: 0 },
     stakePoolSearchResultsStatus: StateStatus.LOADED,
     walletActivitiesStatus: StateStatus.LOADED,

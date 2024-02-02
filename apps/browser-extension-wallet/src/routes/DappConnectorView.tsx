@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useWalletManager, useAppInit } from '@src/hooks';
+import { useAppInit } from '@src/hooks';
 import { dAppRoutePaths } from '@routes';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
@@ -37,7 +37,6 @@ export const DappConnectorView = (): React.ReactElement => {
   const { inMemoryWallet, cardanoWallet, walletInfo, initialHdDiscoveryCompleted } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
-  const { loadWallet } = useWalletManager();
   useAppInit();
 
   useEffect(() => {
@@ -50,10 +49,6 @@ export const DappConnectorView = (): React.ReactElement => {
     };
     load();
   }, [isWalletLocked, cardanoWallet]);
-
-  useEffect(() => {
-    loadWallet();
-  }, [loadWallet]);
 
   if (hasNoAvailableWallet) {
     return (

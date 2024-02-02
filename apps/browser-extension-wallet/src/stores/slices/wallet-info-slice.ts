@@ -19,6 +19,7 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   isInMemoryWallet: undefined,
   isHardwareWallet: undefined,
   walletType: undefined,
+  stayOnAllDonePage: false,
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) =>
     set({ initialHdDiscoveryCompleted: addressesDiscoveryCompleted }),
   // eslint-disable-next-line unicorn/no-null
@@ -36,5 +37,6 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
     set({ currentChain: Wallet.Cardano.ChainIds[chain], environmentName: chain });
     get().setBlockchainProvider(chain);
   },
-  setDeletingWallet: (deletingWallet: boolean) => set({ deletingWallet })
+  setDeletingWallet: (deletingWallet: boolean) => set({ deletingWallet }),
+  setStayOnAllDonePage: (stayOnAllDonePage: boolean) => set({ stayOnAllDonePage })
 });

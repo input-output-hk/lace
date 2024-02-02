@@ -43,6 +43,7 @@ import { useExperimentsContext } from '@providers/ExperimentsProvider';
 import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/ExperimentsProvider/types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
+import { useWalletStore } from '@src/stores';
 
 const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
 const walletSetupWizardForABTest = {
@@ -107,7 +108,8 @@ export const WalletSetupWizard = ({
   const { getExperimentVariant } = useExperimentsContext();
   const [shouldDisplayTestVariantForExperiment, setShouldDisplayTestVariantForExperiment] = useState<boolean>();
 
-  const { createWallet, activateWallet } = useWalletManager();
+  const { createWallet } = useWalletManager();
+  const { setStayOnAllDonePage } = useWalletStore();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -270,7 +272,7 @@ export const WalletSetupWizard = ({
 
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
-      await activateWallet({ walletInstance: cardanoWallet, chainName: CHAIN });
+      setStayOnAllDonePage(false);
       if (isAnalyticsAccepted) {
         analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
@@ -280,11 +282,12 @@ export const WalletSetupWizard = ({
         }
       }
     },
-    [analytics, isAnalyticsAccepted, activateWallet, walletInstance]
+    [analytics, isAnalyticsAccepted, setStayOnAllDonePage, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {
     try {
+      setStayOnAllDonePage(true);
       const wallet = await createWallet({
         name: walletName,
         mnemonic,
@@ -319,6 +322,7 @@ export const WalletSetupWizard = ({
     }
   }, [
     createWallet,
+    setStayOnAllDonePage,
     walletName,
     mnemonic,
     password,

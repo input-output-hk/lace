@@ -31,6 +31,7 @@ import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { SendOnboardingAnalyticsEvent } from '../types';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { useWalletStore } from '@src/stores';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -71,6 +72,7 @@ export const HardwareWalletFlow = ({
   const [connectedDevice, setConnectedDevice] = useState<Wallet.HardwareWallets | undefined>();
   const [accountIndex, setAccountIndex] = useState<number>(0);
   const { createHardwareWallet, connectHardwareWallet, saveHardwareWallet } = useWalletManager();
+  const { setStayOnAllDonePage } = useWalletStore();
   const { calculateTimeSpentOnPage, updateEnteredAtTime } = useTimeSpentOnPage();
   const analytics = useAnalyticsContext();
 
@@ -163,6 +165,7 @@ export const HardwareWalletFlow = ({
 
   const handleCreateWallet = async (name: string) => {
     try {
+      setStayOnAllDonePage(true);
       const cardanoWallet = await createHardwareWallet({
         accountIndex,
         deviceConnection,
@@ -202,6 +205,7 @@ export const HardwareWalletFlow = ({
 
   const handleGoToMyWalletClick = async () => {
     try {
+      setStayOnAllDonePage(false);
       const posthogProperties = await getHWPersonProperties(connectedDevice, deviceConnection);
       await sendAnalytics(
         Events.SETUP_FINISHED_NEXT,

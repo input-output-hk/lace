@@ -116,7 +116,9 @@ export interface WalletInfoSlice {
   isInMemoryWallet: boolean;
   isHardwareWallet: boolean;
   deletingWallet?: boolean;
+  stayOnAllDonePage?: boolean;
   setDeletingWallet: (deletingWallet: boolean) => void;
+  setStayOnAllDonePage: (deletingWallet: boolean) => void;
 }
 
 export interface LockSlice {

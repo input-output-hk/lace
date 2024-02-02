@@ -31,8 +31,8 @@ import * as stores from '@stores';
 import * as localStorage from '@src/utils/local-storage';
 import * as AppSettings from '@providers/AppSettings';
 import * as walletApiUi from '@src/lib/wallet-api-ui';
-import { ReplaySubject, of } from 'rxjs';
-import { AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
+import { of } from 'rxjs';
+import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
 jest.mock('@providers/AppSettings', () => ({
@@ -243,14 +243,7 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('loadWallet', () => {
-    let wallets$: ReplaySubject<AnyWallet<unknown, unknown>[]>;
-    let activeWallet$: ReplaySubject<WalletManagerActivateProps>;
-    beforeEach(() => {
-      (walletApiUi.walletRepository as any).wallets$ = wallets$ = new ReplaySubject(1);
-      (walletApiUi.walletManager as any).activeWalletId$ = activeWallet$ = new ReplaySubject(1);
-    });
     test('should set cardano wallet to null when there are no wallets in the repository or local storage', async () => {
-      wallets$.next([]);
       const setCardanoWallet = jest.fn();
       const setCurrentChain = jest.fn();
       jest.spyOn(localStorage, 'getValueFromLocalStorage').mockReturnValue(undefined);
@@ -267,7 +260,7 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(loadWallet).toBeDefined();
-      expect(await loadWallet()).toEqual(undefined);
+      expect(await loadWallet([], null)).toEqual(undefined);
       expect(setCardanoWallet).toBeCalledWith(null);
     });
 
@@ -275,7 +268,7 @@ describe('Testing useWalletManager hook', () => {
       const walletId = 'walletId';
       const accountIndex = 0;
       const name = 'wally';
-      wallets$.next([
+      const wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [
         {
           walletId,
           type: WalletType.Ledger,
@@ -288,18 +281,20 @@ describe('Testing useWalletManager hook', () => {
             }
           ]
         }
-      ]);
-      activeWallet$.next({
+      ];
+      const activeWalletProps = {
         chainId: Wallet.Cardano.ChainIds.Preprod,
         walletId,
         accountIndex
-      });
+      };
       const setCardanoWallet = jest.fn();
       const setCurrentChain = jest.fn();
+      const setCardanoCoin = jest.fn();
 
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         setCardanoWallet,
-        setCurrentChain
+        setCurrentChain,
+        setCardanoCoin
       }));
 
       const {
@@ -311,8 +306,9 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(loadWallet).toBeDefined();
-      expect(await loadWallet()).toMatchObject({ name, source: expect.anything() });
+      expect(await loadWallet(wallets, activeWalletProps)).toMatchObject({ name, source: expect.anything() });
       expect(setCardanoWallet).toBeCalledWith(expect.objectContaining({ name, source: expect.anything() }));
+      expect(setCardanoCoin).toBeCalled();
     });
   });
 

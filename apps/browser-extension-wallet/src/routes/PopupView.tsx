@@ -3,7 +3,6 @@ import { ExtensionRoutes } from './ExtensionRoutes';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useWalletManager } from '@src/hooks/useWalletManager';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
@@ -34,7 +33,6 @@ export const PopupView = (): React.ReactElement => {
     initialHdDiscoveryCompleted
   } = useWalletStore();
 
-  const { loadWallet } = useWalletManager();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
@@ -55,10 +53,6 @@ export const PopupView = (): React.ReactElement => {
     // chainName is not being used but it's needed here for this to work like the browser view when switching networks
     // (see useEffect in browser-view routes index)
   }, [isWalletLocked, backgroundServices, currentChain, chainName, cardanoWallet]);
-
-  useEffect(() => {
-    loadWallet();
-  }, [loadWallet]);
 
   const checkMnemonicVerificationFrequency = () =>
     mnemonicVerificationFrequency && isLastValidationExpired(lastMnemonicVerification, mnemonicVerificationFrequency);

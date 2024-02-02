@@ -20,11 +20,19 @@ import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService'
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { ILocalStorage } from '@src/types';
 import { firstValueFrom } from 'rxjs';
-import { AddWalletProps, AnyWallet, WalletType } from '@cardano-sdk/web-extension';
-import { HexBlob } from '@cardano-sdk/util';
+import {
+  AddWalletProps,
+  AnyWallet,
+  WalletManagerActivateProps,
+  WalletManagerApi,
+  WalletRepositoryApi,
+  WalletType
+} from '@cardano-sdk/web-extension';
+import { deepEquals, HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
+const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
 export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
 
 export interface CreateWallet {
@@ -49,9 +57,14 @@ export interface CreateHardwareWallet {
 }
 
 export interface UseWalletManager {
+  walletManager: WalletManagerApi;
+  walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   lockWallet: () => void;
   unlockWallet: (password: string) => Promise<boolean>;
-  loadWallet: () => Promise<Wallet.CardanoWallet | null>;
+  loadWallet: (
+    wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
+    activeWalletProps: WalletManagerActivateProps | null
+  ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: SetWallet) => Promise<void>;
   getPassword: () => Promise<Uint8Array>;
@@ -273,6 +286,7 @@ export const useWalletManager = (): UseWalletManager => {
     cardanoWallet,
     setCardanoWallet,
     resetWalletLock,
+    currentChain,
     setCurrentChain,
     setCardanoCoin,
     setAddressesDiscoveryCompleted
@@ -354,68 +368,77 @@ export const useWalletManager = (): UseWalletManager => {
    * Loads wallet from storage.
    * @returns resolves with wallet information or null when no wallet is found
    */
-  const loadWallet = useCallback(async (): Promise<Wallet.CardanoWallet | undefined> => {
-    let wallets = await firstValueFrom(walletRepository.wallets$);
-
-    // LW-9499 to convert this to proper migration
-    if (wallets.length === 0) {
-      wallets = await tryMigrateToWalletRepository();
-      if (!wallets) {
-        // Either no wallet data found in local storage, or wallet is locked
+  const loadWallet = useCallback(
+    // eslint-disable-next-line complexity
+    async (
+      wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
+      activeWalletProps: WalletManagerActivateProps | null
+    ): Promise<Wallet.CardanoWallet | undefined> => {
+      // If there are no wallets, attempt to migrate local storage data to wallet repository
+      if (wallets.length === 0) {
+        if (!(await tryMigrateToWalletRepository())) {
+          setCardanoWallet(null);
+        }
         return;
       }
-    }
 
-    let activeWalletId = await firstValueFrom(walletManager.activeWalletId$);
-
-    const activateFirstWallet = async () => {
-      if (wallets.length > 0) {
-        const chainId = chainIdFromName(process.env.DEFAULT_CHAIN as Wallet.ChainName);
-        activeWalletId = {
-          provider,
-          chainId,
-          walletId: wallets[0].walletId,
-          accountIndex: wallets[0].type !== WalletType.Script ? wallets[0].accounts[0].accountIndex : undefined
-        };
-
-        await walletManager.activate(activeWalletId);
-        return true;
+      // If there is no active wallet, activate the 1st one
+      if (!activeWalletProps) {
+        const firstWallet = wallets[0];
+        const accountIndex = firstWallet.type === WalletType.Script ? undefined : firstWallet.accounts[0]?.accountIndex;
+        await walletManager.activate({
+          chainId: currentChain || DEFAULT_CHAIN_ID,
+          walletId: firstWallet.walletId,
+          accountIndex,
+          provider
+        });
+        return;
       }
-      return false;
-    };
 
-    if (!activeWalletId) {
-      await activateFirstWallet();
-    }
+      // Synchronize active chain UI state with service worker
+      if (activeWalletProps.chainId.networkMagic !== currentChain?.networkMagic) {
+        setCurrentChain(getChainName(activeWalletProps.chainId));
+        setCardanoCoin(activeWalletProps.chainId);
+      }
 
-    setCurrentChain(getChainName(activeWalletId.chainId));
-
-    const activeWallet = wallets.find((wallet) => wallet.walletId === activeWalletId.walletId);
-    if (!activeWallet && !(await activateFirstWallet())) {
-      // eslint-disable-next-line unicorn/no-null
-      setCardanoWallet(null);
-      return;
-    }
-    if (activeWallet.type === WalletType.Script) throw new Error('Script wallet support is not implemented');
-    const activeAccount = activeWallet.accounts.find((account) => account.accountIndex === activeWalletId.accountIndex);
-    if (!activeAccount) {
-      // eslint-disable-next-line unicorn/no-null
-      setCardanoWallet(null);
-      return;
-    }
-
-    const result = {
-      name: activeWallet.metadata.name,
-      signingCoordinator,
-      source: {
-        wallet: activeWallet,
-        account: activeAccount
-      },
-      wallet: observableWallet
-    };
-    setCardanoWallet(result);
-    return result;
-  }, [setCardanoWallet, setCurrentChain, tryMigrateToWalletRepository]);
+      // Synchronize active wallet UI state with service worker
+      const activeWallet = wallets.find((w) => w.walletId === activeWalletProps.walletId);
+      // deleting a wallet calls deactivateWallet(),
+      // which currently does not delete it from wallet manager's stored last activate props
+      if (!activeWallet) {
+        await walletManager.activate({
+          walletId: wallets[0].walletId,
+          accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0]?.accountIndex,
+          chainId: currentChain || DEFAULT_CHAIN_ID,
+          provider
+        });
+        return;
+      }
+      const activeAccount =
+        activeWallet.type !== WalletType.Script
+          ? activeWallet.accounts.find((a) => a.accountIndex === activeWalletProps.accountIndex)
+          : undefined;
+      const newCardanoWallet = {
+        name: activeWallet.metadata.name,
+        signingCoordinator,
+        source: {
+          wallet: activeWallet,
+          account: activeAccount
+        },
+        wallet: observableWallet
+      };
+      if (
+        !cardanoWallet ||
+        cardanoWallet.name !== activeWallet.metadata.name ||
+        !deepEquals(cardanoWallet.source.wallet, activeWallet) ||
+        !deepEquals(cardanoWallet.source.account, activeAccount)
+      ) {
+        setCardanoWallet(newCardanoWallet);
+      }
+      return newCardanoWallet;
+    },
+    [setCardanoWallet, setCurrentChain, tryMigrateToWalletRepository, cardanoWallet, currentChain, setCardanoCoin]
+  );
 
   const activateWallet = useCallback(
     async ({ walletInstance, mnemonicVerificationFrequency = '', chainName = CHAIN }: SetWallet): Promise<void> => {
@@ -559,7 +582,9 @@ export const useWalletManager = (): UseWalletManager => {
           const keyAgentData = parsed.Mainnet?.keyAgentData;
           if (keyAgentData) {
             saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
-            await loadWallet();
+            const wallets = await firstValueFrom(walletRepository.wallets$);
+            const activeWalletProps = await firstValueFrom(walletManager.activeWalletId$);
+            await loadWallet(wallets, activeWalletProps);
           }
         }
         return true;
@@ -582,6 +607,8 @@ export const useWalletManager = (): UseWalletManager => {
     saveHardwareWallet,
     deleteWallet,
     clearPassword,
-    switchNetwork
+    switchNetwork,
+    walletManager,
+    walletRepository
   };
 };
