@@ -16,7 +16,7 @@ const useWalletInformation = () =>
         ? (() => {
             throw new Error('Script wallet support is not implemented');
           })()
-        : state?.cardanoWallet.source.wallet.extendedAccountPublicKey
+        : state?.cardanoWallet.source.account.extendedAccountPublicKey
   }));
 
 export const QRPublicKeyDrawer = ({

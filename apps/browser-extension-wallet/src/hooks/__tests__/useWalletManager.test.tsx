@@ -280,10 +280,10 @@ describe('Testing useWalletManager hook', () => {
           walletId,
           type: WalletType.Ledger,
           metadata: { name },
-          extendedAccountPublicKey: 'pubkey' as any,
           accounts: [
             {
               accountIndex,
+              extendedAccountPublicKey: 'pubkey' as any,
               metadata: { name: 'Account #0' }
             }
           ]
@@ -482,7 +482,6 @@ describe('Testing useWalletManager hook', () => {
         connectedDevice
       });
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
-      expect(walletApiUi.walletRepository.addAccount).toBeCalledTimes(1);
     });
   });
 

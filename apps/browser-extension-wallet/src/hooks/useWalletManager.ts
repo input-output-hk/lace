@@ -90,6 +90,13 @@ const keyAgentDataToAddWalletProps = async (
   name: string,
   lockValue: Wallet.HexBlob | undefined
 ): Promise<AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>> => {
+  const accounts = [
+    {
+      accountIndex: data.accountIndex,
+      metadata: { name: defaultAccountName(data.accountIndex) },
+      extendedAccountPublicKey: data.extendedAccountPublicKey
+    }
+  ];
   switch (data.__typename) {
     case Wallet.KeyManagement.KeyAgentType.InMemory: {
       const { mnemonic } = await backgroundService.getBackgroundStorage();
@@ -97,24 +104,24 @@ const keyAgentDataToAddWalletProps = async (
       return {
         type: WalletType.InMemory,
         metadata: { name, lockValue },
-        extendedAccountPublicKey: data.extendedAccountPublicKey,
         encryptedSecrets: {
           rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
           keyMaterial: HexBlob.fromBytes(Buffer.from(JSON.parse(mnemonic).data))
-        }
+        },
+        accounts
       };
     }
     case Wallet.KeyManagement.KeyAgentType.Ledger:
       return {
         type: WalletType.Ledger,
         metadata: { name },
-        extendedAccountPublicKey: data.extendedAccountPublicKey
+        accounts
       };
     case Wallet.KeyManagement.KeyAgentType.Trezor:
       return {
         type: WalletType.Trezor,
         metadata: { name },
-        extendedAccountPublicKey: data.extendedAccountPublicKey
+        accounts
       };
     default:
       throw new Error('Unknown key agent type');
@@ -160,17 +167,17 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
         )
       )
     },
-    extendedAccountPublicKey: keyAgent.extendedAccountPublicKey,
+    accounts: [
+      {
+        accountIndex,
+        metadata: { name: defaultAccountName(accountIndex) },
+        extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+      }
+    ],
     type: WalletType.InMemory
   };
 
   const walletId = await walletRepository.addWallet(addWalletProps);
-  const addAccountProps = {
-    accountIndex,
-    metadata: { name: defaultAccountName(accountIndex) },
-    walletId
-  };
-  await walletRepository.addAccount(addAccountProps);
 
   // Needed for reset password flow
   saveValueInLocalStorage({ key: 'wallet', value: { name } });
@@ -187,10 +194,9 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
     source: {
       wallet: {
         ...addWalletProps,
-        accounts: [addAccountProps],
         walletId
       },
-      account: addAccountProps
+      account: addWalletProps.accounts[0]
     }
   };
 };
@@ -232,15 +238,15 @@ const createHardwareWallet = async ({
   const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
     metadata: { name },
     type: WalletType.Ledger,
-    extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+    accounts: [
+      {
+        extendedAccountPublicKey: keyAgent.extendedAccountPublicKey,
+        accountIndex,
+        metadata: { name: defaultAccountName(accountIndex) }
+      }
+    ]
   };
   const walletId = await walletRepository.addWallet(addWalletProps);
-  const addAccountProps = {
-    walletId,
-    accountIndex,
-    metadata: { name: defaultAccountName(accountIndex) }
-  };
-  await walletRepository.addAccount(addAccountProps);
 
   return {
     name,
@@ -249,10 +255,9 @@ const createHardwareWallet = async ({
     source: {
       wallet: {
         ...addWalletProps,
-        accounts: [addAccountProps],
         walletId
       },
-      account: addAccountProps
+      account: addWalletProps.accounts[0]
     }
   };
 };
@@ -335,11 +340,6 @@ export const useWalletManager = (): UseWalletManager => {
       await keyAgentDataToAddWalletProps(keyAgentData, backgroundService, walletName, lockValue)
     );
 
-    await walletRepository.addAccount({
-      accountIndex: keyAgentData.accountIndex,
-      metadata: { name: defaultAccountName(keyAgentData.accountIndex) },
-      walletId
-    });
     await walletManager.activate({
       chainId: keyAgentData.chainId,
       walletId,

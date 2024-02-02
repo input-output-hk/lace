@@ -4,7 +4,13 @@ import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
 import { firstValueFrom } from 'rxjs';
-import { AnyWallet, WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
+import {
+  AnyWallet,
+  Bip32WalletAccount,
+  WalletManagerApi,
+  WalletRepositoryApi,
+  WalletType
+} from '@cardano-sdk/web-extension';
 import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
@@ -95,12 +101,25 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
 export const getActiveWallet = async ({
   walletManager,
   walletRepository
-}: WalletManagementServices): Promise<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined> => {
+}: WalletManagementServices): Promise<
+  | {
+      wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+      account?: Bip32WalletAccount<Wallet.AccountMetadata>;
+    }
+  | undefined
+> => {
   const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
   if (!activeWallet) return;
   const wallets = await firstValueFrom(walletRepository.wallets$);
   // eslint-disable-next-line consistent-return
-  return wallets.find(({ walletId }) => walletId === activeWallet.walletId);
+  const wallet = wallets.find(({ walletId }) => walletId === activeWallet.walletId);
+  if (!wallet) return;
+  const account =
+    wallet.type === WalletType.Script
+      ? undefined
+      : wallet.accounts.find((acc) => activeWallet.accountIndex === acc.accountIndex);
+  // eslint-disable-next-line consistent-return
+  return { wallet, account };
 };
 
 export const ensureUiIsOpenAndLoaded = async (
@@ -110,8 +129,8 @@ export const ensureUiIsOpenAndLoaded = async (
 ): Promise<Tabs.Tab> => {
   const isHardwareWallet = checkKeyAgent
     ? await (async () => {
-        const activeWallet = await getActiveWallet(services);
-        return activeWallet?.type === WalletType.Ledger || activeWallet?.type === WalletType.Trezor;
+        const active = await getActiveWallet(services);
+        return active?.wallet.type === WalletType.Ledger || active?.wallet.type === WalletType.Trezor;
       })()
     : undefined;
 

@@ -73,7 +73,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     const bip32Account = new Wallet.KeyManagement.Bip32Account({
       accountIndex,
       chainId,
-      extendedAccountPublicKey: wallet.extendedAccountPublicKey
+      extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
     return new PersonalWallet(

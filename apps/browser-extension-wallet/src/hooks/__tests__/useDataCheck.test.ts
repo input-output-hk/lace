@@ -97,11 +97,16 @@ describe('useDataCheck', () => {
       {
         type: WalletType.InMemory,
         walletId: wmActiveWalletId.walletId,
-        accounts: [{ accountIndex: wmActiveWalletId.accountIndex, metadata: { name: 'wally' } }],
-        encryptedSecrets: {},
-        extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex(
-          'fc5ab25e830b67c47d0a17411bf7fdabf711a597fb6cf04102734b0a2934ceaaa65ff5e7c52498d52c07b8ddfcd436fc2b4d2775e2984a49d0c79f65ceee4779'
-        )
+        accounts: [
+          {
+            accountIndex: wmActiveWalletId.accountIndex,
+            metadata: { name: 'wally acc' },
+            extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex(
+              'fc5ab25e830b67c47d0a17411bf7fdabf711a597fb6cf04102734b0a2934ceaaa65ff5e7c52498d52c07b8ddfcd436fc2b4d2775e2984a49d0c79f65ceee4779'
+            )
+          }
+        ],
+        encryptedSecrets: {}
       } as InMemoryWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
     ];
 

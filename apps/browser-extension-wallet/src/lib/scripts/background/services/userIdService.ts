@@ -50,12 +50,12 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   private async getWalletBasedUserId(): Promise<string | undefined> {
-    const activeWallet = await getActiveWallet({
+    const active = await getActiveWallet({
       walletManager: this.walletManager,
       walletRepository: this.walletRepository
     });
-    if (!activeWallet) return;
-    if (activeWallet.type === WalletType.Script) {
+    if (!active) return;
+    if (active.wallet.type === WalletType.Script || !active.account) {
       throw new Error('Script wallet support not implemented');
     }
     const { usePersistentUserId } = await this.storage.get();
@@ -65,7 +65,7 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     if (!this.walletBasedUserId) {
-      this.walletBasedUserId = this.generateWalletBasedUserId(activeWallet.extendedAccountPublicKey);
+      this.walletBasedUserId = this.generateWalletBasedUserId(active.account.extendedAccountPublicKey);
 
       if (this.userTrackingType$.value !== UserTrackingType.Enhanced) {
         this.userTrackingType$.next(UserTrackingType.Enhanced);
