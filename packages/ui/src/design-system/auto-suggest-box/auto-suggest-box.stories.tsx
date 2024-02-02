@@ -110,12 +110,10 @@ export const Overview = (): JSX.Element => {
       <Cell>
         <Section title="Copy for use">
           <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
-            <Box w="$312">
-              <AutoSuggestBox
-                suggestions={SUGGESTIONS}
-                label="Auto suggest box"
-              />
-            </Box>
+            <AutoSuggestBox
+              suggestions={SUGGESTIONS}
+              label="Auto suggest box"
+            />
           </Flex>
         </Section>
 

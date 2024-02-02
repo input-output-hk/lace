@@ -9,6 +9,7 @@ import { Flex } from '../flex';
 import { ScrollArea } from '../scroll-area';
 import * as Text from '../typography';
 
+import { Button } from './auto-suggest-box-button.component';
 import { Input } from './auto-suggest-box-input.component';
 import * as cx from './auto-suggest-box.css';
 import {
@@ -43,13 +44,21 @@ export const AutoSuggestBoxBase = ({
     <Popover.Root open={isSuggesting}>
       <Popover.Anchor>
         <Flex justifyContent="space-between" flexDirection="column">
-          <Input
-            id={id}
-            label={label}
-            required={required}
-            disabled={disabled}
-            name={name}
-          />
+          <Flex
+            className={cn(cx.container, {
+              [cx.isSuggesting]: isSuggesting,
+            })}
+          >
+            <Input
+              id={id}
+              label={label}
+              required={required}
+              disabled={disabled}
+              name={name}
+            />
+            <Button disabled={disabled} />
+          </Flex>
+
           {Boolean(errorMessage) && (
             <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
           )}

@@ -1,9 +1,30 @@
 import { vars, style, sx, globalStyle } from '../../design-tokens';
 
+import { input } from './auto-suggest-box-input.css';
+
 export const disabledContainer = style({
   ':hover': {
     outline: 'none',
   },
+});
+
+export const container = style({
+  boxSizing: 'border-box',
+  border: '2px solid transparent',
+  background: vars.colors.$input_container_bgColor,
+  height: vars.spacing.$64,
+  borderRadius: vars.radius.$medium,
+  fontWeight: vars.fontWeights.$semibold,
+  fontFamily: vars.fontFamily.$nova,
+  alignItems: 'center',
+  position: 'relative',
+});
+
+export const isSuggesting = style({
+  border: 'solid 2px transparent',
+  borderBottomRightRadius: vars.radius.$sharp,
+  borderBottomLeftRadius: vars.radius.$sharp,
+  borderBottomColor: vars.colors.$auto_suggest_border_color,
 });
 
 export const suggestion = style([
@@ -41,4 +62,16 @@ export const errorMessage = style({
 
 globalStyle(`${scrollArea}:has(${scrollBar})`, {
   paddingRight: vars.spacing.$16,
+});
+
+globalStyle(`${container}:has(${input}:disabled)`, {
+  opacity: vars.opacities.$0_5,
+});
+
+globalStyle(`${container}:has(${input}:hover:not(:disabled))`, {
+  border: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
+});
+
+globalStyle(`${container}:has(${input}:focus)`, {
+  border: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
 });

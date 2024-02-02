@@ -5,7 +5,6 @@ import cn from 'classnames';
 
 import { Flex } from '../flex';
 
-import { Button } from './auto-suggest-box-button.component';
 import * as cx from './auto-suggest-box-input.css';
 import { useAutoSuggestBoxContext } from './auto-suggest-box.provider';
 
@@ -15,7 +14,6 @@ export interface Props {
   id?: string;
   label: string;
   name?: string;
-  defaultValue?: string;
 }
 
 export const Input = ({
@@ -23,31 +21,22 @@ export const Input = ({
   disabled = false,
   label,
   name,
-  defaultValue,
   id,
 }: Readonly<Props>): JSX.Element => {
-  const { isSuggesting, setIsSuggesting, value, setValue } =
-    useAutoSuggestBoxContext();
+  const { setIsSuggesting, value, setValue } = useAutoSuggestBoxContext();
   return (
-    <Form.Root style={{ width: '100%' }}>
+    <Form.Root>
       <Flex justifyContent="space-between" alignItems="center">
-        <Form.Field
-          name="field"
-          className={cn(cx.container, {
-            [cx.isSuggesting]: isSuggesting,
-          })}
-        >
+        <Form.Field name="field">
           <Form.Control asChild>
             <input
               data-testid="auto-suggest-box-input"
               id={id}
               type="text"
               required={required}
-              placeholder=""
               className={cx.input}
               disabled={disabled}
               name={name}
-              defaultValue={defaultValue}
               value={value}
               onChange={(event): void => {
                 setValue(event.target.value);
@@ -56,7 +45,6 @@ export const Input = ({
             />
           </Form.Control>
           <Form.Label className={cn(cx.label)}>{label}</Form.Label>
-          <Button disabled={disabled} />
         </Form.Field>
       </Flex>
     </Form.Root>

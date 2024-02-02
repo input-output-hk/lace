@@ -27,7 +27,5 @@ export const icon = style([
     width: '$24',
     height: '$24',
   }),
-  {
-    pointerEvents: 'none',
-  },
+  {},
 ]);
