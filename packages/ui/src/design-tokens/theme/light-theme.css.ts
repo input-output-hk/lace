@@ -408,6 +408,7 @@ const colors: Colors = {
   $auto_suggest_container_background_color:
     lightColorScheme.$primary_light_grey,
   $auto_suggest_border_color: lightColorScheme.$primary_light_grey_plus,
+  $auto_suggest_loader_color: lightColorScheme.$primary_accent_purple,
 };
 
 export const elevation: Elevation = {

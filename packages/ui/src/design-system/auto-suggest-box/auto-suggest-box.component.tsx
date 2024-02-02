@@ -11,6 +11,7 @@ import * as Text from '../typography';
 
 import { Button } from './auto-suggest-box-button.component';
 import { Input } from './auto-suggest-box-input.component';
+import { Loader } from './auto-suggest-box-loader.component';
 import * as cx from './auto-suggest-box.css';
 import {
   AutoSuggestBoxProvider,
@@ -27,6 +28,7 @@ export interface AutoSuggestBoxProps {
   errorMessage?: string;
   onChange?: (value: string) => void;
   initialValue?: string;
+  isValidating?: boolean;
 }
 
 export const AutoSuggestBoxBase = ({
@@ -36,6 +38,7 @@ export const AutoSuggestBoxBase = ({
   label,
   name,
   errorMessage,
+  isValidating,
 }: Readonly<AutoSuggestBoxProps>): JSX.Element => {
   const { suggestions, setValue, isSuggesting, setIsSuggesting } =
     useAutoSuggestBoxContext();
@@ -56,6 +59,7 @@ export const AutoSuggestBoxBase = ({
               disabled={disabled}
               name={name}
             />
+            <Loader isValidating={isValidating} />
             <Button disabled={disabled} />
           </Flex>
 

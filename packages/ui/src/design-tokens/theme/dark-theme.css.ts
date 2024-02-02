@@ -382,6 +382,7 @@ const colors: Colors = {
 
   $auto_suggest_container_background_color: darkColorScheme.$primary_dark_grey,
   $auto_suggest_border_color: darkColorScheme.$primary_grey,
+  $auto_suggest_loader_color: darkColorScheme.$primary_accent_purple,
 };
 
 const elevation: Elevation = {
