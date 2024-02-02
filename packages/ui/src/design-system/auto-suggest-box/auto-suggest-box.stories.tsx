@@ -20,6 +20,8 @@ import {
 } from './auto-suggest-box.component';
 import { AutoSuggestBoxContext } from './auto-suggest-box.provider';
 
+import type { AutoSuggestBoxProps } from './auto-suggest-box.component';
+
 const subtitle = 'Input with auto suggestions';
 
 const SUGGESTIONS = [
@@ -147,6 +149,21 @@ Overview.parameters = {
   pseudo: {
     hover: '#hover',
     focus: '#focus',
+  },
+};
+
+export const Controls = (props: Readonly<AutoSuggestBoxProps>): JSX.Element => (
+  <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
+    <AutoSuggestBox {...props} />
+  </Flex>
+);
+
+Controls.argTypes = {
+  label: {
+    defaultValue: 'Auto suggest box',
+  },
+  suggestions: {
+    defaultValue: SUGGESTIONS,
   },
 };
 
