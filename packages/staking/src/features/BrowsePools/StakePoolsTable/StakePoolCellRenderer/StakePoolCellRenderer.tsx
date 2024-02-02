@@ -19,7 +19,7 @@ export const stakePoolCellRenderer: Partial<
       </div>
     );
   },
-  [Columns.margin]: ({ value }) => <span>{typeof value !== 'string' ? value : ''}%</span>,
+  [Columns.margin]: ({ value }) => <span>{typeof value === 'string' ? value : ''}%</span>,
   [Columns.liveStake]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
   [Columns.cost]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
   [Columns.pledge]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,

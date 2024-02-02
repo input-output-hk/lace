@@ -56,7 +56,7 @@ export const StakePoolTableItemBrowser = ({
       dataTestId="stake-pool"
       withSelection
       keyProp={id}
-      {...(!selectionsFull && { onSelect })}
+      {...((!selectionsFull || poolAlreadySelected) && { onSelect })}
     />
   );
 };

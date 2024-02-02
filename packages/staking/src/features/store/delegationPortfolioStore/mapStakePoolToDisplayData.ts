@@ -8,6 +8,9 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
 
   return {
+    activeStake: metrics?.stake.active
+      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.active.toString()))
+      : { number: '-', unit: '' },
     contact: {
       primary: metadata?.homepage,
       ...metadata?.ext?.pool.contact,
@@ -17,14 +20,11 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
     description: metadata?.description || '-',
     hexId,
     id: id.toString(),
-    logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
-    ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
-    activeStake: metrics?.stake.active
-      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.active.toString()))
-      : { number: '-', unit: '' },
     liveStake: metrics?.stake.live
       ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.live.toString()))
       : { number: '-', unit: '' },
+    logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
+    margin: `${formatPercentages(margin.numerator / margin.denominator)}`,
     name: metadata?.name || '-',
     owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
     pledge: pledge ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(pledge.toString())) : { number: '-', unit: '' },
