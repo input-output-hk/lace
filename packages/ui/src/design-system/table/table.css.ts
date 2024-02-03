@@ -4,9 +4,6 @@ export const row = style([
   {
     ':hover': {
       background: vars.colors.$stake_pool_item_bg_hover,
-      height: '50px',
-      margin: '-3px 0',
-      minHeight: '50px',
     },
     alignItems: 'center',
     borderRadius: vars.radius.$medium,
