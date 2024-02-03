@@ -35,7 +35,7 @@ export const Body = <E extends object | undefined>({
       const tableVisiblePartHeight =
         window.innerHeight - tableReference.current.getBoundingClientRect().top;
       const initialItemsLimit = Math.ceil(tableVisiblePartHeight / rowHeight);
-      loadMoreData({ endIndex: initialItemsLimit, startIndex: 0 });
+      loadMoreData({ endIndex: Math.max(initialItemsLimit, 1), startIndex: 0 });
     }
   }, [loadMoreData, rowHeight, scrollableTargetId]);
 

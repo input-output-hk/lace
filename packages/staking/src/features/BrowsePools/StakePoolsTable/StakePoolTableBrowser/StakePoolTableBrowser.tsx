@@ -45,11 +45,7 @@ export const StakePoolTableBrowser = ({
       loadMoreData={loadMoreData}
       items={pools}
       itemContent={(_index, data) =>
-        data ? (
-          <StakePoolTableItemBrowser {...data} hideSelected />
-        ) : (
-          <StakePoolPlaceholder columns={config.columns} withSelection />
-        )
+        data ? <StakePoolTableItemBrowser {...data} /> : <StakePoolPlaceholder columns={config.columns} withSelection />
       }
       increaseViewportBy={{ bottom: 100, top: 0 }}
     />

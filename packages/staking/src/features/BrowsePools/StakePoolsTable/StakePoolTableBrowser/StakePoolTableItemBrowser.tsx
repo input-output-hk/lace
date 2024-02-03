@@ -9,7 +9,6 @@ import { config } from '../utils';
 import { StakePoolTableItemBrowserProps } from './types';
 
 export const StakePoolTableItemBrowser = ({
-  hideSelected,
   stakePool,
   hexId,
   id,
@@ -39,13 +38,7 @@ export const StakePoolTableItemBrowser = ({
     }
   };
 
-  return hideSelected && poolAlreadySelected ? (
-    // We need to hide/remove selected rows from the table.
-    // Virtuoso lib would throw an error into the console in case we try to render 0 sized rows,
-    // but still would treat it as legit row and would calculate proper first and last visible rows,
-    // that would allow us to calculate proper skip, limit that we pass in as a payload into the fetch pools util.
-    <></>
-  ) : (
+  return (
     <Table.Row<Partial<typeof data>, Columns>
       columns={config.columns}
       cellRenderers={config.renderer}
