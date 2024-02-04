@@ -1,6 +1,5 @@
 import React from 'react';
 
-import * as Form from '@radix-ui/react-form';
 import cn from 'classnames';
 
 import { Flex } from '../flex';
@@ -25,28 +24,22 @@ export const Input = ({
 }: Readonly<Props>): JSX.Element => {
   const { setIsSuggesting, value, setValue } = useAutoSuggestBoxContext();
   return (
-    <Form.Root>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Form.Field name="field">
-          <Form.Control asChild>
-            <input
-              data-testid="auto-suggest-box-input"
-              id={id}
-              type="text"
-              required={required}
-              className={cx.input}
-              disabled={disabled}
-              name={name}
-              value={value}
-              onChange={(event): void => {
-                setValue(event.target.value);
-                setIsSuggesting(true);
-              }}
-            />
-          </Form.Control>
-          <Form.Label className={cn(cx.label)}>{label}</Form.Label>
-        </Form.Field>
-      </Flex>
-    </Form.Root>
+    <Flex justifyContent="space-between" alignItems="center">
+      <input
+        data-testid="auto-suggest-box-input"
+        id={id}
+        type="text"
+        required={required}
+        className={cx.input}
+        disabled={disabled}
+        name={name}
+        value={value}
+        onChange={(event): void => {
+          setValue(event.target.value);
+          setIsSuggesting(true);
+        }}
+      />
+      <span className={cn(cx.label)}>{label}</span>
+    </Flex>
   );
 };
