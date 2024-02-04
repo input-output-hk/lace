@@ -1,10 +1,9 @@
 /* eslint-disable arrow-body-style */
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Flex, Text, Button, AutoSuggestBox, ControlButton } from '@lace/ui';
-import * as cx from './AddCoSigners.css';
 import { ReactComponent as GridIcon } from '@lace/icons/dist/GridComponent';
 import { Cardano, HandleResolution } from '@cardano-sdk/core';
-
+import styles from './AddCoSigners.module.scss';
 interface Props {
   onNext: () => void;
   onBack: () => void;
@@ -20,34 +19,42 @@ interface Props {
 
 type CoSigner = string;
 
+const MAX_COSIGNERS = 20;
+
 export const AddCoSigners = ({ translations, onBack, onNext }: Props): JSX.Element => {
-  const coSigners: CoSigner[] = [''];
+  const [coSigners, setCoSigners] = useState<CoSigner[]>(['']);
 
   return (
     <Flex h="$fill" w="$fill" flexDirection="column">
       <Box mb="$24">
-        <Text.Heading className={cx.text}>{translations.title}</Text.Heading>
+        <Text.Heading>{translations.title}</Text.Heading>
       </Box>
       <Box mb="$64">
-        <Text.Body.Normal weight="$medium" className={cx.text}>
-          {translations.subtitle}
-        </Text.Body.Normal>
+        <Text.Body.Normal weight="$medium">{translations.subtitle}</Text.Body.Normal>
       </Box>
 
       <Box mb="$8" w="$fill">
         {coSigners.map((value) => (
-          <Box key={value} w="$fill">
+          <Box key={value} w="$fill" className={styles.coSigners}>
             <AutoSuggestBox label={translations.inputLabel} />
           </Box>
         ))}
       </Box>
       <Box mb="$8">
-        <Text.Body.Small weight="$bold" className={cx.text}>
-          {coSigners.length}/20
+        <Text.Body.Small weight="$bold">
+          {coSigners.length}/{MAX_COSIGNERS}
         </Text.Body.Small>
       </Box>
       <Box mb="$148" w="$fill">
-        <ControlButton.Outlined w="$fill" label={translations.addButton} icon={<GridIcon />} />
+        <ControlButton.Outlined
+          w="$fill"
+          disabled={coSigners.length === MAX_COSIGNERS}
+          label={translations.addButton}
+          icon={<GridIcon />}
+          onClick={() => {
+            setCoSigners([...coSigners, '']);
+          }}
+        />
       </Box>
 
       <Flex w="$fill" justifyContent="space-between" alignItems="center">

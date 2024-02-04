@@ -20,7 +20,7 @@ export const Overview = (): JSX.Element => (
       translations={{
         title: 'Add your Co-signers',
         subtitle: 'Add up to 20 wallet addresses to your shared wallet',
-        inputLabel: "Recipien's address or $handle",
+        inputLabel: "Recipient's address or $handle",
         addButton: 'Add Co-signer',
         backButton: 'Back',
         nextButton: 'Next'
