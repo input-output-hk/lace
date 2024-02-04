@@ -55,7 +55,7 @@ export const AutoSuggestBoxBase = ({
               [cx.isSuggesting]: isSuggesting,
             })}
           >
-            <Box>
+            <Box w="$fill">
               <Input
                 id={id}
                 label={label}
