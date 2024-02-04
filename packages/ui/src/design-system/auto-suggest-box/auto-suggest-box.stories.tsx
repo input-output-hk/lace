@@ -14,6 +14,7 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
+import { ValidationState } from './auto-suggest-box-types';
 import {
   AutoSuggestBox,
   AutoSuggestBoxBase,
@@ -166,6 +167,13 @@ Controls.argTypes = {
   },
   suggestions: {
     defaultValue: SUGGESTIONS,
+  },
+  validationState: {
+    defaultValue: ValidationState.Idle,
+    options: Object.keys(ValidationState),
+    control: {
+      type: 'select',
+    },
   },
 };
 

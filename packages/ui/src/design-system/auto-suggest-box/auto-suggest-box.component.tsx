@@ -10,13 +10,15 @@ import { ScrollArea } from '../scroll-area';
 import * as Text from '../typography';
 
 import { Button } from './auto-suggest-box-button.component';
+import { Icon } from './auto-suggest-box-icon.component';
 import { Input } from './auto-suggest-box-input.component';
-import { Loader } from './auto-suggest-box-loader.component';
 import * as cx from './auto-suggest-box.css';
 import {
   AutoSuggestBoxProvider,
   useAutoSuggestBoxContext,
 } from './auto-suggest-box.provider';
+
+import type { ValidationState } from './auto-suggest-box-types';
 
 export interface AutoSuggestBoxProps {
   required?: boolean;
@@ -28,7 +30,7 @@ export interface AutoSuggestBoxProps {
   errorMessage?: string;
   onChange?: (value: string) => void;
   initialValue?: string;
-  isValidating?: boolean;
+  validationState?: ValidationState;
 }
 
 export const AutoSuggestBoxBase = ({
@@ -38,7 +40,7 @@ export const AutoSuggestBoxBase = ({
   label,
   name,
   errorMessage,
-  isValidating,
+  validationState,
 }: Readonly<AutoSuggestBoxProps>): JSX.Element => {
   const { suggestions, setValue, isSuggesting, setIsSuggesting } =
     useAutoSuggestBoxContext();
@@ -63,7 +65,7 @@ export const AutoSuggestBoxBase = ({
               />
             </Box>
             <Flex alignItems="center">
-              <Loader isValidating={isValidating} />
+              <Icon state={validationState} />
               <Button disabled={disabled} />
             </Flex>
           </Flex>

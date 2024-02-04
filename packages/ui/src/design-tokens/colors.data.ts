@@ -284,6 +284,7 @@ export const colors = {
   $auto_suggest_container_background_color: '',
   $auto_suggest_border_color: '',
   $auto_suggest_loader_color: '',
+  $auto_suggest_check_color: '',
 };
 
 export type Colors = typeof colors;
