@@ -25,20 +25,14 @@ export const Suggestion3Item = ({
   description,
 }: Readonly<Suggestion3ItemType>): JSX.Element => {
   return (
-    <Flex justifyContent="space-between" alignItems="center">
-      <Flex alignItems="center">
-        <Box mr="$16">
-          <Flex
-            className={cx.initial}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text.Body.Large weight="$bold">{title[0]}</Text.Body.Large>
-          </Flex>
+    <Flex className={cx.suggestion3Item}>
+      <Flex className={cx.suggestion3ItemCol}>
+        <Box className={cx.initial}>
+          <Text.Body.Large weight="$bold">{title[0]}</Text.Body.Large>
         </Box>
         <Text.Body.Large weight="$semibold">{title}</Text.Body.Large>
       </Flex>
-      <Box mr="$48">
+      <Box className={cx.suggestion3ItemCol}>
         <Text.Address className={cx.address}>{description}</Text.Address>
       </Box>
     </Flex>
