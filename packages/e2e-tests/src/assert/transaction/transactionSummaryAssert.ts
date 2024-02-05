@@ -1,8 +1,8 @@
-import webTester from '../../actor/webTester';
-import { TransactionSummaryPage } from '../../elements/newTransaction/transactionSummaryPage';
+import TransactionSummaryPage from '../../elements/newTransaction/transactionSummaryPage';
 import { TestnetPatterns } from '../../support/patterns';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
+import { isPopupMode } from '../../utils/pageUtils';
 
 interface ExpectedTransactionSummaryData {
   recipientAddress: string;
@@ -15,13 +15,20 @@ interface valuesToBeSend {
 }
 
 class TransactionSummaryAssert {
-  async assertSeeSummaryPage(expectedTransactionSummaryData: ExpectedTransactionSummaryData[]) {
-    const transactionSummary = new TransactionSummaryPage();
+  async assertSeeSummaryPage(expectedTransactionSummaryData: ExpectedTransactionSummaryData[], metadata = '') {
+    const isPopup = await isPopupMode();
+    await TransactionSummaryPage.drawerNavigationTitle.waitForDisplayed({ reverse: isPopup });
+    if (!isPopup) {
+      expect(await TransactionSummaryPage.drawerNavigationTitle.getText()).to.equal(await t('browserView.assets.send'));
+    }
+    await TransactionSummaryPage.drawerHeaderBackButton.waitForDisplayed();
+    await TransactionSummaryPage.drawerHeaderCloseButton.waitForDisplayed();
 
-    expect(await transactionSummary.getMainTitle()).to.equal(
+    await TransactionSummaryPage.drawerHeaderTitle.waitForDisplayed();
+    expect(await TransactionSummaryPage.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.transaction.send.drawer.transactionSummary')
     );
-    expect(await transactionSummary.getSubTitle()).to.equal(
+    expect(await TransactionSummaryPage.drawerHeaderSubtitle.getText()).to.equal(
       await t('browserView.transaction.send.drawer.breakdownOfYourTransactionCost')
     );
 
@@ -30,16 +37,30 @@ class TransactionSummaryAssert {
       await this.verifyBundle(expectedTransactionSummaryDatum, i, shouldVerifyTitle);
     }
 
-    expect(await transactionSummary.getFeeTitle()).to.equal(await t('core.outputSummaryList.txFee'));
-    expect((await transactionSummary.getFeeValueAda()) as string).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
-    expect((await transactionSummary.getFeeValueFiat()) as string).to.match(TestnetPatterns.USD_VALUE_REGEX);
+    if (metadata) {
+      await TransactionSummaryPage.metadataTitle.waitForDisplayed();
+      expect(await TransactionSummaryPage.metadataTitle.getText()).to.equal(await t('core.outputSummaryList.metaData'));
+      await TransactionSummaryPage.metadataValue.waitForDisplayed();
+      expect(await TransactionSummaryPage.metadataValue.getText()).to.equal(metadata);
+    }
 
-    await transactionSummary.confirmButton.waitForDisplayed();
-    expect(await transactionSummary.confirmButton.getText()).to.equal(
+    await TransactionSummaryPage.transactionFeeLabel.waitForDisplayed();
+    expect(await TransactionSummaryPage.transactionFeeLabel.getText()).to.equal(
+      await t('core.outputSummaryList.txFee')
+    );
+    await TransactionSummaryPage.transactionFeeValueAda.waitForDisplayed();
+    expect(await TransactionSummaryPage.transactionFeeValueAda.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+    );
+    await TransactionSummaryPage.transactionFeeValueFiat.waitForDisplayed();
+    expect(await TransactionSummaryPage.transactionFeeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
+
+    await TransactionSummaryPage.confirmButton.waitForDisplayed();
+    expect(await TransactionSummaryPage.confirmButton.getText()).to.equal(
       await t('browserView.transaction.send.footer.confirm')
     );
-    await transactionSummary.cancelButton.waitForDisplayed();
-    expect(await transactionSummary.cancelButton.getText()).to.equal(
+    await TransactionSummaryPage.cancelButton.waitForDisplayed();
+    expect(await TransactionSummaryPage.cancelButton.getText()).to.equal(
       await t('browserView.transaction.send.footer.cancel')
     );
   }
@@ -51,24 +72,30 @@ class TransactionSummaryAssert {
     shouldVerifyFiat?: boolean
   ) {
     if (shouldVerifyBundleTitle) {
-      expect(
-        await webTester.getTextValueFromElement(new TransactionSummaryPage().bundleRowTitle(bundleIndex + 1))
-      ).to.equal(`${await t('core.outputSummaryList.output')} ${bundleIndex + 1}`);
+      await TransactionSummaryPage.bundleRowTitle(bundleIndex + 1).waitForDisplayed();
+      expect(await TransactionSummaryPage.bundleRowTitle(bundleIndex + 1).getText()).to.equal(
+        `${await t('core.outputSummaryList.output')} ${bundleIndex + 1}`
+      );
     }
-    expect(
-      await webTester.getTextValueFromElement(new TransactionSummaryPage().sendingTitle(bundleIndex + 1))
-    ).to.equal(await t('core.outputSummaryList.sending'));
-    expect(
-      await webTester.getTextValueFromElement(new TransactionSummaryPage().recipientTitle(bundleIndex + 1))
-    ).to.equal(await t('core.outputSummaryList.recipientAddress'));
+    await TransactionSummaryPage.sendingTitle(bundleIndex + 1).waitForDisplayed();
+    expect(await TransactionSummaryPage.sendingTitle(bundleIndex + 1).getText()).to.equal(
+      await t('core.outputSummaryList.sending')
+    );
+    await TransactionSummaryPage.recipientAddressLabel(bundleIndex + 1).waitForDisplayed();
+    expect(await TransactionSummaryPage.recipientAddressLabel(bundleIndex + 1).getText()).to.equal(
+      await t('core.outputSummaryList.recipientAddress')
+    );
+    await TransactionSummaryPage.recipientAddressValue(bundleIndex + 1).waitForDisplayed();
+    expect(await TransactionSummaryPage.recipientAddressValue(bundleIndex + 1).getText()).to.equal(
+      expectedTransactionSummaryData.recipientAddress
+    );
 
     for (let i = 0; i < expectedTransactionSummaryData.valueToBeSent.length; i++) {
       const expectedValue = expectedTransactionSummaryData.valueToBeSent[i].value;
       const expectedCurrency = expectedTransactionSummaryData.valueToBeSent[i].currency;
 
-      const fieldValue = (await webTester.getTextValueFromElement(
-        new TransactionSummaryPage().sendingValueAda(bundleIndex + 1, i + 1)
-      )) as string;
+      await TransactionSummaryPage.sendingValueAda(bundleIndex + 1, i + 1).waitForDisplayed();
+      const fieldValue = await TransactionSummaryPage.sendingValueAda(bundleIndex + 1, i + 1).getText();
       const currentValue = fieldValue.split(' ')[0];
       const currentCurrency = fieldValue.slice(Math.max(0, fieldValue.indexOf(' ') + 1));
 
@@ -76,13 +103,10 @@ class TransactionSummaryAssert {
       expect(currentCurrency).to.contain(expectedCurrency);
 
       if (shouldVerifyFiat) {
-        expect(
-          String(
-            await webTester.getTextValueFromElement(
-              new TransactionSummaryPage().sendingValueFiat(bundleIndex + 1, i + 1)
-            )
-          )
-        ).to.match(TestnetPatterns.USD_VALUE_REGEX);
+        await TransactionSummaryPage.sendingValueFiat(bundleIndex + 1, i + 1).waitForDisplayed();
+        expect(await TransactionSummaryPage.sendingValueFiat(bundleIndex + 1, i + 1).getText()).to.match(
+          TestnetPatterns.USD_VALUE_REGEX
+        );
       }
     }
   }

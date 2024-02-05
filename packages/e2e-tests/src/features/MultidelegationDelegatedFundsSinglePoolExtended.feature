@@ -8,7 +8,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
   Scenario Outline: Extended View - Staking - Close drawer
     When I navigate to Staking extended page
     And I open Browse pools tab
-    And I pick "1" pools for delegation from browse pools view: "ADA Ocean"
+    And I pick "1" pools for delegation from browse pools view: "OCEAN"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     And I'm on a delegation flow "<delegationStep>"
@@ -82,7 +82,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
     When I click "Add stake pool" button
-    And I pick "CanadaStakes" pool for delegation
+    And I pick "CAN1" pool for delegation
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I see Manage delegation drawer
@@ -97,15 +97,15 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
     When I click "Add stake pool" button
-    And I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
+    And I pick "<pools_after>" pools for delegation from browse pools view: "<pool_tickers>"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I see Manage delegation drawer
     And I see selected pools counter is showing "<pools_after>"
     And I see "Add stake pool" button is disabled
     Examples:
-      | pools_after | pools_names                                                                                   |
-      | 10          | 8BETA, ADA Capital, AdaNet.io, Boople Turtle Pool, ADV, BAZAR, ADASquirrel, Akasha, Alfa Pool |
+      | pools_after | pool_tickers                                        |
+      | 10          | 8BETA, ADACT, WOOF, TEKO, ADV, MOC, SQRL, SEA, ALFA |
 
   @LW-9493
   Scenario: Extended View - Staking - Manage staking remove button disabled when staking to 1 pool
@@ -147,15 +147,15 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
   Scenario Outline: Extended View - button <button> click on stake pool details drawer
     When I navigate to Staking extended page
     And I open Browse pools tab
-    And I input "<pool>" into stake pool search bar
-    And I click on the stake pool with name "<pool>"
+    And I input "<ticker>" into stake pool search bar
+    And I click on the stake pool with ticker "<ticker>"
     Then I see "2" stake pool details buttons for <delegation> pool
     When I click on "<button>" button on stake pool details drawer
     Then <expected>
     Examples:
-      | pool      | delegation    | button                        | expected                                    |
-      | ADA Ocean | delegated     | Manage delegation             | I see Manage delegation drawer              |
-      | ADA Ocean | delegated     | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
-      | 8BETA     | non-delegated | Stake all on this pool        | I see Changing Staking Preferences modal    |
-      | 8BETA     | non-delegated | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
+      | ticker | delegation    | button                        | expected                                    |
+      | OCEAN  | delegated     | Manage delegation             | I see Manage delegation drawer              |
+      | OCEAN  | delegated     | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
+      | 8BETA  | non-delegated | Stake all on this pool        | I see Changing Staking Preferences modal    |
+      | 8BETA  | non-delegated | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
 

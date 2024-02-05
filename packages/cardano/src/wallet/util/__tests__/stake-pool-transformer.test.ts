@@ -38,6 +38,9 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
         delegators: 20,
         livePledge: BigInt('2000000000'),
         saturation: Percent(0.0512),
+        apy: Percent(0.013),
+        ros: Percent(0.69),
+        lastRos: Percent(0.88),
         size: {
           active: Percent(0.0578),
           live: Percent(0.0211)
@@ -45,8 +48,7 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
         stake: {
           live: BigInt('201000000'),
           active: BigInt('101000000')
-        },
-        apy: Percent(0.013)
+        }
       },
       owners: [
         Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),

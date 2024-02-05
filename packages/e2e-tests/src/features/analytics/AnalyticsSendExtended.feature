@@ -57,6 +57,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I don't see DApp window
     And I switch to window with Lace
     When I navigate to Transactions extended page
+    And I wait 2000 milliseconds
     And I set up request interception for posthog analytics request(s)
     Then Local storage unconfirmedTransaction contains tx with type: "external"
     When the Sent transaction is displayed with value: "3.00 tADA" and tokens count 1
