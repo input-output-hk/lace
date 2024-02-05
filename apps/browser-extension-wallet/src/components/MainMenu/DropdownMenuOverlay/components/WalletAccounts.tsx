@@ -63,7 +63,7 @@ const exampleAccountData = [
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
   const editAccountDrawer = useAccountDataModal();
-  const deleteAccountConfirmation = useAccountDataModal();
+  const disableAccountConfirmation = useAccountDataModal();
   const [mockAccountData, setMockAccountData] = useState<AccountData[]>(exampleAccountData);
 
   return (
@@ -90,7 +90,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
               editAccountDrawer.open(mockAccountData.find((a) => a.accountNumber === accountNumber))
             }
             onAccountDeleteClick={(accountNumber) => {
-              deleteAccountConfirmation.open(mockAccountData.find((a) => a.accountNumber === accountNumber));
+              disableAccountConfirmation.open(mockAccountData.find((a) => a.accountNumber === accountNumber));
             }}
             accounts={mockAccountData}
           />
@@ -120,16 +120,16 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       />
       <DisableAccountConfirmation
         zIndex={10_000}
-        open={deleteAccountConfirmation.isOpen}
-        onCancel={deleteAccountConfirmation.hide}
+        open={disableAccountConfirmation.isOpen}
+        onCancel={disableAccountConfirmation.hide}
         onConfirm={() => {
           const newAccountData = [...mockAccountData];
           const modifiedAccount = newAccountData.find(
-            (a) => a.accountNumber === deleteAccountConfirmation.accountData?.accountNumber
+            (a) => a.accountNumber === disableAccountConfirmation.accountData?.accountNumber
           );
           modifiedAccount.isUnlocked = false;
           setMockAccountData(newAccountData);
-          deleteAccountConfirmation.hide();
+          disableAccountConfirmation.hide();
         }}
         translations={{
           title: t('account.disable.title'),
