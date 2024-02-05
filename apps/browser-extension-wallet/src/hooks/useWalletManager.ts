@@ -12,7 +12,8 @@ import {
   deleteFromLocalStorage,
   clearLocalStorage,
   getValueFromLocalStorage,
-  saveValueInLocalStorage
+  saveValueInLocalStorage,
+  bufferReviver
 } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
@@ -324,7 +325,7 @@ export const useWalletManager = (): UseWalletManager => {
   > => {
     const walletName = getWalletFromStorage()?.name;
     const keyAgentData = getValueFromLocalStorage('keyAgentData');
-    const lock = getValueFromLocalStorage('lock');
+    const lock = getValueFromLocalStorage('lock', undefined, bufferReviver);
 
     // Wallet is locked: we don't have access to decrypted keyAgentData until it's unlocked
     if (!keyAgentData) {
