@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileDropdown } from '@lace/ui';
 
-export const useEditAccountState = (): {
+export const useAccountDataModal = (): {
   accountData: ProfileDropdown.AccountData | undefined;
   isOpen: boolean;
   open: (data: ProfileDropdown.AccountData) => void;
