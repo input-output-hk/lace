@@ -33,6 +33,7 @@ export const RadioButtonGroup = ({
   ...props
 }: Props): JSX.Element => {
   const isAnyOptionHasIcon = options.some(opx => !!opx.icon);
+
   return (
     <Box className={cn(className, cx.root)}>
       <RadixRadioGroup.Root
@@ -40,14 +41,16 @@ export const RadioButtonGroup = ({
         value={selectedValue}
         disabled={disabled}
         onValueChange={onValueChange}
-        className={cn(cx.radioGroupRoot, cx.noGap && cx.withIcon)}
+        className={cn(
+          cx.radioGroupRoot,
+          isAnyOptionHasIcon ? cx.noGap : cx.gap,
+        )}
       >
         {options.map(({ value, label, icon, onIconClick }) => (
           <Flex
-            alignItems="center"
             h="$fill"
-            w="$fill"
-            m="$0"
+            m="$4"
+            alignItems={'center'}
             key={value}
             className={cn(isAnyOptionHasIcon && cx.withIcon)}
           >
@@ -72,11 +75,13 @@ export const RadioButtonGroup = ({
                 </Box>
               </label>
             )}
-            {icon !== undefined && value === selectedValue && (
+            {icon !== undefined && (
               <Flex justifyContent="flex-end" className={cx.iconWrapper}>
-                <div className={cx.icon} onClick={onIconClick}>
-                  {React.createElement(icon)}
-                </div>
+                {value === selectedValue && (
+                  <div className={cx.icon} onClick={onIconClick}>
+                    {React.createElement(icon)}
+                  </div>
+                )}
               </Flex>
             )}
           </Flex>

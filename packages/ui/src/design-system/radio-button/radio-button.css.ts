@@ -4,8 +4,6 @@ export const radioGroupRoot = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    width: '$fill',
-    gap: '$0',
     margin: '$0',
   }),
   {
@@ -19,6 +17,14 @@ export const noGap = style([
     gap: '$0',
   }),
 ]);
+
+export const gap = style([
+  sx({
+    gap: '$20',
+  }),
+]);
+
+export const withIcon = style([{ minHeight: 36 }]);
 
 export const radioGroupItem = style([
   sx({
@@ -70,10 +76,17 @@ export const radioGroupIndicator = style([
   },
 ]);
 
+export const iconWrapper = style([
+  sx({
+    ml: '$18',
+    w: '$32',
+    h: '$32',
+  }),
+]);
+
 export const icon = style([
   sx({
     borderRadius: '$small',
-    ml: '$24',
     color: '$radiobutton_icon_color',
   }),
   {
@@ -96,10 +109,6 @@ export const icon = style([
   },
 ]);
 
-export const iconWrapper = style({
-  flexGrow: 1,
-});
-
 export const unchecked = style({
   border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
 });
@@ -113,7 +122,6 @@ export const root = style([
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '$small',
-    w: '$fill',
   }),
   {
     display: 'inline-flex',
@@ -130,15 +138,6 @@ export const label = style({
   paddingLeft: '15px',
   display: 'flex',
 });
-
-export const withIcon = style([
-  {
-    minHeight: 36,
-  },
-  sx({
-    margin: '$0',
-  }),
-]);
 
 export const disabled = style([
   sx({
