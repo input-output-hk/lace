@@ -1,6 +1,7 @@
 import { WalletConfig } from '../support/walletConfiguration';
 import { setBackgroundStorage, setMigrationState } from '../utils/browserStorage';
 import { Logger } from '../support/logger';
+import { switchToWindowWithLace } from '../utils/window';
 
 export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<void> => {
   try {
@@ -28,6 +29,7 @@ export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<vo
 
 export const clearWalletRepository = async (): Promise<void> => {
   Logger.log('Removing wallets');
+  await switchToWindowWithLace(0);
   const removedWallets = await browser.execute(`
     return (async () => {
       await window.walletManager.deactivate();
