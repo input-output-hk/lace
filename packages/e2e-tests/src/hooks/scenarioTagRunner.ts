@@ -15,7 +15,6 @@ Before(async () => {
 });
 
 After(async () => {
-  await closeAllTabsExceptOriginalOne();
   await clearWalletRepository();
   await networkManager.closeOpenedCdpSessions();
   await consoleManager.closeOpenedCdpSessions();
@@ -23,6 +22,7 @@ After(async () => {
   testContext.clearContext();
   await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown
   await localStorageManager.cleanLocalStorage();
+  await closeAllTabsExceptOriginalOne();
 });
 
 AfterStep(async (scenario) => {
