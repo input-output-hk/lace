@@ -248,7 +248,7 @@ Then(/^there are (\d+) stake pools returned$/, async (resultsCount: number) => {
 });
 
 Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, async (expectedTicker: string) => {
-  if ((await MultidelegationPage.poolsItems.length) > 0) {
+  if ((await MultidelegationPage.displayedPools.length) > 0) {
     await MultidelegationPageAssert.assertSeeFirstSearchResultWithTicker(expectedTicker);
   }
 });

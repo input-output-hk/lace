@@ -94,7 +94,7 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.pledgeTitle.waitForDisplayed();
     expect(await StakePoolDetails.pledgeTitle.getText()).to.equal(await t('drawer.details.metrics.pledge', 'staking'));
     await StakePoolDetails.pledgeValue.waitForDisplayed();
-    expect(await StakePoolDetails.pledgeValue.getText()).to.match(TestnetPatterns.PLEDGE_REGEX);
+    expect((await StakePoolDetails.pledgeValue.getText()).replace('\n', '')).to.match(TestnetPatterns.PLEDGE_REGEX);
   }
 
   private async assertSeeCostPerEpoch() {
