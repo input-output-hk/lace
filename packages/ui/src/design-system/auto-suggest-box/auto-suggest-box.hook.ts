@@ -1,15 +1,15 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
-import type { SuggestionBase } from './auto-suggest-box-types';
+import type { SuggestionBaseType } from './auto-suggest-box-types';
 
-interface Props<SuggestionType extends SuggestionBase> {
+interface Props<SuggestionType extends SuggestionBaseType> {
   onChange?: (value: string) => void;
   initialValue?: string;
   suggestions?: SuggestionType[];
 }
 
-interface Context<SuggestionType extends SuggestionBase> {
+interface Context<SuggestionType extends SuggestionBaseType> {
   value: string;
   pickedSuggestion?: SuggestionType;
   isSuggesting: boolean;
@@ -20,7 +20,7 @@ interface Context<SuggestionType extends SuggestionBase> {
   onButtonClick: (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
 }
 
-export const useAutoSuggestBox = <SuggestionType extends SuggestionBase>({
+export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
   onChange,
   initialValue = '',
   suggestions = [],

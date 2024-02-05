@@ -20,8 +20,8 @@ import { ValidationState } from './auto-suggest-box-types';
 import { AutoSuggestBox } from './auto-suggest-box.component';
 
 import type {
-  SuggestionClassic as SuggestionClassicType,
-  Suggestion3Item as Suggestion3ItemType,
+  SuggestionClassicType,
+  Suggestion3ItemType,
 } from './auto-suggest-box-types';
 import type { Props } from './auto-suggest-box.component';
 

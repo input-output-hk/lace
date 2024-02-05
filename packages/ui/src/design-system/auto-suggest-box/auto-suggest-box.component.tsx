@@ -19,9 +19,14 @@ import {
 import * as cx from './auto-suggest-box.css';
 import { useAutoSuggestBox } from './auto-suggest-box.hook';
 
-import type { SuggestionBase, ValidationState } from './auto-suggest-box-types';
+import type {
+  SuggestionBaseType,
+  ValidationState,
+} from './auto-suggest-box-types';
 
-export interface Props<SuggestionType extends SuggestionBase = SuggestionBase> {
+export interface Props<
+  SuggestionType extends SuggestionBaseType = SuggestionBaseType,
+> {
   required?: boolean;
   disabled?: boolean;
   id?: string;
@@ -36,7 +41,7 @@ export interface Props<SuggestionType extends SuggestionBase = SuggestionBase> {
   pickedSuggestionComponent?: React.FC<SuggestionType>;
 }
 
-export const AutoSuggestBox = <SuggestionType extends SuggestionBase>({
+export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
   id,
   required = false,
   disabled = false,

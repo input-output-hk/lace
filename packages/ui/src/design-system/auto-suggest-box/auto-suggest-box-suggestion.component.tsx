@@ -8,8 +8,8 @@ import * as Text from '../typography';
 import * as cx from './auto-suggest-box-suggestion.css';
 
 import type {
-  SuggestionClassic as SuggestionClassicType,
-  Suggestion3Item as Suggestion3ItemType,
+  SuggestionClassicType,
+  Suggestion3ItemType,
 } from './auto-suggest-box-types';
 
 export const SuggestionClassic = ({

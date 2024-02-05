@@ -4,15 +4,15 @@ export enum ValidationState {
   Validated = 'Validated',
 }
 
-export interface SuggestionBase {
+export interface SuggestionBaseType {
   value: string;
 }
 
-export interface SuggestionClassic extends SuggestionBase {
+export interface SuggestionClassicType extends SuggestionBaseType {
   label?: string;
 }
 
-export interface Suggestion3Item extends SuggestionBase {
+export interface Suggestion3ItemType extends SuggestionBaseType {
   title: string;
   description: string;
 }
