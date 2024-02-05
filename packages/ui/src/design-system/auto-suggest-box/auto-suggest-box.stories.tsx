@@ -11,6 +11,7 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import * as Text from '../typography';
 
 import {
   PickedSuggestion3Item,
@@ -115,12 +116,8 @@ export const Overview = (): JSX.Element => {
         <Section title="Copy for use">
           <Grid columns="$2">
             <Cell>
-              <Flex
-                flexDirection="column"
-                alignItems="center"
-                w="$fill"
-                my="$32"
-              >
+              <Text.SubHeading>Classic item dropdown</Text.SubHeading>
+              <Flex flexDirection="column" w="$fill" my="$32">
                 <Box w="$420">
                   <AutoSuggestBox
                     suggestions={SUGGESTIONS}
@@ -130,12 +127,8 @@ export const Overview = (): JSX.Element => {
               </Flex>
             </Cell>
             <Cell>
-              <Flex
-                flexDirection="column"
-                alignItems="center"
-                w="$fill"
-                my="$32"
-              >
+              <Text.SubHeading>3 item dropdown</Text.SubHeading>
+              <Flex flexDirection="column" w="$fill" my="$32">
                 <Box w="$420">
                   <AutoSuggestBox
                     suggestions={ADDRESS_SUGGESTIONS}
