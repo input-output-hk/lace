@@ -1,15 +1,15 @@
 import { Card, Flex, Text } from '@lace/ui';
 import cn from 'classnames';
+import { MetricType } from '../StakePoolsTable';
 import { PoolMetric } from './PoolMetric';
 import { StakePoolCardProgressBar } from './SkatePoolCardProgressBar';
 import * as styles from './StakePoolCard.css';
-import { MetricType } from './types';
 
 export interface StakePoolCardProps {
   title?: string;
   metricType: MetricType;
-  metricValue?: number;
-  saturation: string;
+  metricValue?: string;
+  saturation?: string;
   selected?: boolean;
   onClick?: () => void;
 }
@@ -28,7 +28,7 @@ export const StakePoolCard = ({
         <Text.Body.Normal weight="$medium" className={styles.title}>
           {title}
         </Text.Body.Normal>
-        <PoolMetric metricType={metricType} metricValue={metricValue} />
+        {metricValue && <PoolMetric metricType={metricType} metricValue={metricValue} />}
       </Flex>
       <StakePoolCardProgressBar percentage={saturation} />
     </Flex>

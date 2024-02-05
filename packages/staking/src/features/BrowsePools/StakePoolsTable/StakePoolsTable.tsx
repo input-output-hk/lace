@@ -1,13 +1,17 @@
 import { PostHogAction, Search } from '@lace/common';
 import { Box } from '@lace/ui';
+import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../../store';
+import { BrowsePoolsHeader } from '../BrowsePoolsHeader';
+import { BrowsePoolsView } from '../types';
+import { StakePoolsGrid } from './StakePoolsGrid/StakePoolsGrid';
+import { StakePoolsList, StakePoolsListProps } from './StakePoolsList/StakePoolsList';
 import * as styles from './StakePoolsTable.css';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty/StakePoolsTableEmpty';
-import { StakePoolTableBrowser, StakePoolTableBrowserProps } from './StakePoolTableBrowser/StakePoolTableBrowser';
 import { SortDirection, SortField, StakePoolSortOptions } from './types';
 
 type StakePoolsTableProps = {
@@ -26,6 +30,9 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
+  const [poolsView, setPoolsView] = useState<BrowsePoolsView>(
+    USE_MULTI_DELEGATION_STAKING_GRID_VIEW ? BrowsePoolsView.grid : BrowsePoolsView.table
+  );
   const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
     store.selectedPortfolio.map(({ stakePool }) => stakePool)
   );
@@ -61,7 +68,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   }, [currentChain, searchValue, sort, debouncedSearch, resetStakePools]);
 
   const loadMoreData = useCallback(
-    ({ startIndex, endIndex }: Parameters<StakePoolTableBrowserProps['loadMoreData']>[0]) => {
+    ({ startIndex, endIndex }: Parameters<StakePoolsListProps['loadMoreData']>[0]) => {
       if (startIndex !== endIndex) {
         debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
       }
@@ -90,24 +97,37 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
 
   return (
     <Box ref={componentRef} className={styles.stakePoolsTable} data-testid="stake-pool-table">
+      <BrowsePoolsHeader poolsCount={totalResultCount} poolsView={poolsView} setPoolsView={setPoolsView} />
       <Search
+        className={styles.searchBar}
         withSearchIcon
         inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
         onChange={onSearch}
         data-testid="search-input"
         loading={fetchingPools}
       />
-      <Box mt="$10" mb="$112">
-        <StakePoolTableBrowser
-          emptyPlaceholder={!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
-          selectedPools={selectedList}
-          pools={list}
-          loadMoreData={loadMoreData}
-          scrollableTargetId={scrollableTargetId}
-          translations={tableHeaderTranslations}
-          activeSort={sort}
-          setActiveSort={setSort}
-        />
+      <Box mt="$16" mb="$112">
+        {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && poolsView === BrowsePoolsView.grid ? (
+          <StakePoolsGrid
+            emptyPlaceholder={!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
+            selectedPools={selectedList}
+            pools={list}
+            loadMoreData={loadMoreData}
+            scrollableTargetId={scrollableTargetId}
+            sortField={sort.field}
+          />
+        ) : (
+          <StakePoolsList
+            emptyPlaceholder={!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
+            selectedPools={selectedList}
+            pools={list}
+            loadMoreData={loadMoreData}
+            scrollableTargetId={scrollableTargetId}
+            translations={tableHeaderTranslations}
+            activeSort={sort}
+            setActiveSort={setSort}
+          />
+        )}
       </Box>
     </Box>
   );

@@ -7,3 +7,5 @@ export type { HeaderProps } from './table-header.component';
 export type { BodyProps } from './table-body.component';
 
 export const Table = { Row, Header, Body };
+
+export * from './hooks';

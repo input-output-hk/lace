@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import inRange from 'lodash/inRange';
 import { stakePoolCellRenderer } from './StakePoolCellRenderer/StakePoolCellRenderer';
-import { Columns, SaturationLevels } from './types';
+import { MetricType, SaturationLevels } from './types';
 
 const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
   [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
@@ -28,10 +28,10 @@ export const getSaturationLevel = (saturation: number): SaturationLevels => {
   return result;
 };
 
-export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && Columns.apy].filter((c) => !!c);
+export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && MetricType.apy].filter((c) => !!c);
 
 export const config = {
-  columns: (Object.keys(Columns).filter((v) => Number.isNaN(Number(v))) as Columns[]).filter(
+  columns: (Object.keys(MetricType).filter((v) => Number.isNaN(Number(v))) as MetricType[]).filter(
     (column) => !hiddenColumns.includes(column)
   ),
   renderer: stakePoolCellRenderer,

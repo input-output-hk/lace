@@ -1,23 +1,14 @@
 import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, Text, ThemeColorScheme, Variants } from '@lace/ui';
 
 import type { Meta } from '@storybook/react';
+import { MetricType } from '../StakePoolsTable';
 import { StakePoolCard, StakePoolCardProps } from './StakePoolCard';
-import { MetricType } from './types';
 
 export default {
   title: 'StakePoolsGrid/StakePoolCard',
 } as Meta;
 
-const metricTypeOptions: MetricType[] = [
-  'ticker',
-  'saturation',
-  'ros',
-  'cost',
-  'margin',
-  'blocks',
-  'pledge',
-  'live-stake',
-];
+const metricTypeOptions: MetricType[] = Object.keys(MetricType) as MetricType[];
 
 const CardsGroup = (props: StakePoolCardProps) => (
   <Flex
@@ -44,8 +35,8 @@ const CardsGroup = (props: StakePoolCardProps) => (
 );
 
 const overviewCardProps: StakePoolCardProps = {
-  metricType: 'blocks',
-  metricValue: 123_456,
+  metricType: MetricType.blocks,
+  metricValue: '123_456',
   saturation: '51.75',
   selected: false,
   title: 'TIKRNM',
@@ -114,28 +105,28 @@ export const Overview = () => (
       >
         <Variants.Row>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="ticker" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.ticker} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="saturation" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.saturation} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="ros" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.apy} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="cost" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.cost} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="margin" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.margin} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="blocks" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.blocks} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="pledge" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.pledge} />
           </Variants.Cell>
           <Variants.Cell style={{ padding: 10 }}>
-            <StakePoolCard {...overviewCardProps} metricType="live-stake" />
+            <StakePoolCard {...overviewCardProps} metricType={MetricType.liveStake} />
           </Variants.Cell>
         </Variants.Row>
       </Variants.Table>
@@ -204,7 +195,7 @@ export const Overview = () => (
               </Cell>
               <Cell>
                 <Box w="$214">
-                  <StakePoolCard title="MDS" metricType="cost" metricValue={30_000_000} saturation="51.75" />
+                  <StakePoolCard title="MDS" metricType={MetricType.cost} metricValue="30_000_000" saturation="51.75" />
                 </Box>
               </Cell>
               <Cell>
@@ -219,8 +210,8 @@ export const Overview = () => (
                 <Box w="$214">
                   <StakePoolCard
                     title="Medusa Development Support"
-                    metricType="cost"
-                    metricValue={30_000_000}
+                    metricType={MetricType.cost}
+                    metricValue="30_000_000"
                     saturation="51.75"
                   />
                 </Box>
@@ -233,7 +224,7 @@ export const Overview = () => (
               </Cell>
               <Cell>
                 <Box w="$214">
-                  <StakePoolCard metricType="cost" metricValue={30_000_000} saturation="51.75" />
+                  <StakePoolCard metricType={MetricType.cost} metricValue="30_000_000" saturation="51.75" />
                 </Box>
               </Cell>
               <Cell>
@@ -244,7 +235,7 @@ export const Overview = () => (
               </Cell>
               <Cell>
                 <Box w="$214">
-                  <StakePoolCard metricType="cost" saturation="51.75" />
+                  <StakePoolCard metricType={MetricType.cost} saturation="51.75" />
                 </Box>
               </Cell>
             </Grid>
@@ -264,7 +255,7 @@ export const Controls = {
   },
   args: {
     metricType: 'blocks',
-    metricValue: 123_456,
+    metricValue: '123_456',
     saturation: '51.75',
     selected: false,
     title: 'TIKRNM',

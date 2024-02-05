@@ -12,16 +12,20 @@ export const wrapper = style([
   },
 ]);
 
-export const stakepoolTable = style([
+export const stakePoolList = style([
   {
     width: '100%',
   },
 ]);
 
+export const selectedTitle = style({
+  color: theme.colors.$titleColor,
+});
+
 export const selectedPools = style([
   {
     selectors: {
-      [`${stakepoolTable} &`]: {
+      [`${stakePoolList} &`]: {
         borderBottom: `1px solid ${theme.colors.$selectedPoolsSectionBorderColor}`,
         display: 'flex',
         flexDirection: 'column',

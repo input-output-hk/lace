@@ -10,7 +10,11 @@ export const card = style([
     width: '$fill',
   }),
   {
+    ':hover': {
+      borderColor: theme.colors.$poolCardSelectedBorderColor,
+    },
     borderWidth: 1.5,
+    cursor: 'pointer',
     overflow: 'hidden',
   },
 ]);
@@ -39,8 +43,12 @@ const opacity = keyframes({
 
 export const skeleton = style([
   {
+    ':hover': {
+      border: 'none',
+    },
     animationDuration: '1s',
     animationIterationCount: 'infinite',
     animationName: opacity,
+    cursor: 'default',
   },
 ]);

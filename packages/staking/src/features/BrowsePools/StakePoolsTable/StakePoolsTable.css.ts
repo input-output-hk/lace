@@ -5,3 +5,7 @@ export const stakePoolsTable = sx({
   display: { minimumScreen: 'flex' },
   flexDirection: { minimumScreen: 'column' },
 });
+
+export const searchBar = sx({
+  mt: '$16',
+});

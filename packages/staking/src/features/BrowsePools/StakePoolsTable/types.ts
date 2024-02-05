@@ -1,6 +1,4 @@
-import { Wallet } from '@lace/cardano';
-
-export enum Columns {
+export enum MetricType {
   ticker = 'ticker',
   saturation = 'saturation',
   apy = 'apy',
@@ -18,7 +16,7 @@ export enum SortDirection {
 }
 
 export type StakePoolSortOptions = {
-  field: Wallet.SortField;
+  field: SortField;
   order: SortDirection;
 };
 

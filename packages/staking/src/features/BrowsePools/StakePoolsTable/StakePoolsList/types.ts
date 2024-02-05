@@ -1,6 +1,6 @@
 import { Wallet } from '@lace/cardano';
 
-export type StakePoolTableItemBrowserProps = {
+export type StakePoolsListRowProps = {
   id: string;
   hexId: Wallet.Cardano.PoolIdHex;
   ticker?: string;
@@ -12,5 +12,4 @@ export type StakePoolTableItemBrowserProps = {
   pledge: { number: string; unit?: string };
   liveStake: { number: string; unit?: string };
   stakePool: Wallet.Cardano.StakePool;
-  hideSelected?: boolean;
 };

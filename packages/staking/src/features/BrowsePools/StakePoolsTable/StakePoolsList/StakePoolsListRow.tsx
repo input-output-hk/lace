@@ -4,16 +4,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
-import { Columns } from '../types';
+import { MetricType } from '../types';
 import { config } from '../utils';
-import { StakePoolTableItemBrowserProps } from './types';
+import { StakePoolsListRowProps } from './types';
 
-export const StakePoolTableItemBrowser = ({
-  stakePool,
-  hexId,
-  id,
-  ...data
-}: StakePoolTableItemBrowserProps): React.ReactElement => {
+export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolsListRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
 
@@ -39,7 +34,7 @@ export const StakePoolTableItemBrowser = ({
   };
 
   return (
-    <Table.Row<Partial<typeof data>, Columns>
+    <Table.Row<Partial<typeof data>, MetricType>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}

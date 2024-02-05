@@ -3,13 +3,13 @@ import debounce from 'lodash/debounce';
 import { Box, Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
 import {
-  Columns,
+  MetricType,
   SortDirection,
   SortField,
   StakePoolSortOptions,
   TranslationsFor,
   stakePooltableConfig,
-  StakePoolTableItemBrowserProps,
+  StakePoolsListRowProps,
   StakePoolPlaceholder
 } from '@lace/staking';
 import { Typography } from 'antd';
@@ -61,7 +61,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     blockchainProvider
   } = useWalletStore();
 
-  const tableHeaderTranslations: TranslationsFor<Columns> = {
+  const tableHeaderTranslations: TranslationsFor<MetricType> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker'),
     apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.title'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost'),
@@ -71,7 +71,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.title'),
     liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake')
   };
-  const tableHeaderTooltipsTranslations: Partial<TranslationsFor<Columns>> = {
+  const tableHeaderTooltipsTranslations: Partial<TranslationsFor<MetricType>> = {
     apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.tooltip'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.tooltip'),
@@ -115,12 +115,14 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     setIsDrawerVisible(true);
   };
 
-  const onSortChange = (field: Columns) => {
+  const onSortChange = (field: MetricType) => {
     // TODO: remove once updated on sdk side (LW-9530)
     if (!Object.keys(SortField).includes(field)) return;
-    const order = field === sort?.field && sort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
+    const sortField = field as unknown as SortField;
+    const order =
+      sortField === sort?.field && sort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
 
-    setSort({ field: field as unknown as SortField, order });
+    setSort({ field: sortField, order });
   };
 
   const headers = stakePooltableConfig.columns.map((column) => {
@@ -163,7 +165,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           order={sort?.order}
         />
         {!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
-        <Table.Body<StakePoolTableItemBrowserProps>
+        <Table.Body<StakePoolsListRowProps>
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
           items={list}
@@ -174,7 +176,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { stakePool, hexId, id, ...data } = props;
             return (
-              <Table.Row<typeof data, Columns>
+              <Table.Row<typeof data, MetricType>
                 onClick={() => onPoolClick(stakePool)}
                 columns={stakePooltableConfig.columns}
                 cellRenderers={stakePooltableConfig.renderer}

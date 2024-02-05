@@ -1,15 +1,15 @@
 /* eslint-disable react/no-multi-comp */
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
-import { StakePoolTableItemBrowserProps } from '../StakePoolTableBrowser/types';
-import { Columns } from '../types';
+import { StakePoolsListRowProps } from '../StakePoolsList/types';
+import { MetricType } from '../types';
 import { getSaturationLevel } from '../utils';
 import * as styles from './StakePoolCellRenderer.css';
 
 export const stakePoolCellRenderer: Partial<
-  Record<Columns, React.FunctionComponent<{ value?: Partial<StakePoolTableItemBrowserProps>[Columns] }>>
+  Record<MetricType, React.FunctionComponent<{ value?: Partial<StakePoolsListRowProps>[MetricType] }>>
 > = {
-  [Columns.saturation]: ({ value }) => {
+  [MetricType.saturation]: ({ value }) => {
     if (typeof value !== 'string' || isNil(value)) return <>'-'</>;
     const saturationColor: styles.DotVariants['level'] = getSaturationLevel(Number.parseFloat(value.toString()));
     return (
@@ -19,8 +19,10 @@ export const stakePoolCellRenderer: Partial<
       </div>
     );
   },
-  [Columns.margin]: ({ value }) => <span>{typeof value === 'string' ? value : ''}%</span>,
-  [Columns.liveStake]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
-  [Columns.cost]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
-  [Columns.pledge]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
+  [MetricType.margin]: ({ value }) => <span>{typeof value === 'string' ? value : ''}%</span>,
+  [MetricType.liveStake]: ({ value }) => (
+    <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>
+  ),
+  [MetricType.cost]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
+  [MetricType.pledge]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
 };

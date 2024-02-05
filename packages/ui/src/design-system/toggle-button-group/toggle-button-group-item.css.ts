@@ -49,6 +49,6 @@ export const root = style([
 ]);
 
 export const icon = sx({
-  width: '$24',
-  height: '$24',
+  width: '$20',
+  height: '$20',
 });
