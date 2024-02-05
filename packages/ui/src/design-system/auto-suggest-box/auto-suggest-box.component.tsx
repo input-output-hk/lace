@@ -108,6 +108,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBase>({
         </Flex>
       </Popover.Anchor>
       <Popover.Content
+        className={cx.popover}
         avoidCollisions={false}
         onOpenAutoFocus={(event): void => {
           event.preventDefault();
