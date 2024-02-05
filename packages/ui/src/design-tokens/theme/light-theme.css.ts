@@ -410,6 +410,9 @@ const colors: Colors = {
   $auto_suggest_border_color: lightColorScheme.$primary_light_grey_plus,
   $auto_suggest_loader_color: lightColorScheme.$primary_accent_purple,
   $auto_suggest_check_color: lightColorScheme.$secondary_data_green,
+  $auto_suggest_address_color: lightColorScheme.$primary_dark_grey,
+  $auto_suggest_initial_bgColor: lightColorScheme.$primary_accent_purple_0_3,
+  $auto_suggest_initial_color: lightColorScheme.$primary_accent_purple,
 };
 
 export const elevation: Elevation = {

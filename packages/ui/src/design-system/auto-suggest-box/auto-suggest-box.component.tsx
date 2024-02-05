@@ -1,4 +1,4 @@
-/* eslint-disable react/no-multi-comp */
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import * as Popover from '@radix-ui/react-popover';
@@ -12,38 +12,52 @@ import * as Text from '../typography';
 import { Button } from './auto-suggest-box-button.component';
 import { Icon } from './auto-suggest-box-icon.component';
 import { Input } from './auto-suggest-box-input.component';
+import { SuggestionClassic } from './auto-suggest-box-suggestion.component';
 import * as cx from './auto-suggest-box.css';
-import {
-  AutoSuggestBoxProvider,
-  useAutoSuggestBoxContext,
-} from './auto-suggest-box.provider';
+import { useAutoSuggestBox } from './auto-suggest-box.hook';
 
-import type { ValidationState } from './auto-suggest-box-types';
+import type { SuggestionBase, ValidationState } from './auto-suggest-box-types';
 
-export interface AutoSuggestBoxProps {
+export interface Props<SuggestionType extends SuggestionBase = SuggestionBase> {
   required?: boolean;
   disabled?: boolean;
   id?: string;
   label: string;
   name?: string;
-  suggestions?: { value: string; label?: string }[];
+  suggestions?: SuggestionType[];
   errorMessage?: string;
   onChange?: (value: string) => void;
   initialValue?: string;
   validationState?: ValidationState;
+  suggestionComponent?: React.FC<SuggestionType>;
 }
 
-export const AutoSuggestBoxBase = ({
+export const AutoSuggestBox = <SuggestionType extends SuggestionBase>({
   id,
   required = false,
   disabled = false,
   label,
   name,
+  initialValue,
+  onChange,
+  suggestions = [],
   errorMessage,
   validationState,
-}: Readonly<AutoSuggestBoxProps>): JSX.Element => {
-  const { suggestions, setValue, isSuggesting, setIsSuggesting } =
-    useAutoSuggestBoxContext();
+  suggestionComponent: SuggestionComponent = SuggestionClassic,
+}: Readonly<PropsWithChildren<Props<SuggestionType>>>): JSX.Element => {
+  const {
+    value,
+    isCloseButton,
+    isSuggesting,
+    filteredSuggestions,
+    onButtonClick,
+    onInputChange,
+    onSuggestionClick,
+  } = useAutoSuggestBox({
+    initialValue,
+    onChange,
+    suggestions,
+  });
 
   return (
     <Popover.Root open={isSuggesting}>
@@ -58,15 +72,21 @@ export const AutoSuggestBoxBase = ({
             <Box w="$fill">
               <Input
                 id={id}
+                value={value}
                 label={label}
                 required={required}
                 disabled={disabled}
                 name={name}
+                onChange={onInputChange}
               />
             </Box>
             <Flex alignItems="center">
               <Icon state={validationState} />
-              <Button disabled={disabled} />
+              <Button
+                disabled={disabled}
+                isCloseButton={isCloseButton}
+                onButtonClick={onButtonClick}
+              />
             </Flex>
           </Flex>
 
@@ -89,19 +109,16 @@ export const AutoSuggestBoxBase = ({
           }}
         >
           <Box data-testid="auto-suggest-box-suggestions">
-            {suggestions.map(suggestion => (
+            {filteredSuggestions.map(props => (
               <div
-                data-testid={`auto-suggest-box-suggestion-${suggestion.value}`}
-                className={cn(cx.suggestion)}
-                key={suggestion.value}
+                key={props.value}
+                data-testid={`auto-suggest-box-suggestion-${props.value}`}
+                className={cx.suggestion}
                 onClick={(): void => {
-                  setIsSuggesting(false);
-                  setValue(suggestion.value);
+                  onSuggestionClick(props.value);
                 }}
               >
-                <Text.Body.Large weight="$semibold">
-                  {suggestion.label ?? suggestion.value}
-                </Text.Body.Large>
+                <SuggestionComponent {...props} />
               </div>
             ))}
           </Box>
@@ -110,16 +127,3 @@ export const AutoSuggestBoxBase = ({
     </Popover.Root>
   );
 };
-
-export const AutoSuggestBox = ({
-  suggestions = [],
-  ...props
-}: Readonly<AutoSuggestBoxProps>): JSX.Element => (
-  <AutoSuggestBoxProvider
-    onChange={props.onChange}
-    initialValue={props.initialValue}
-    suggestions={suggestions}
-  >
-    <AutoSuggestBoxBase {...props} />
-  </AutoSuggestBoxProvider>
-);

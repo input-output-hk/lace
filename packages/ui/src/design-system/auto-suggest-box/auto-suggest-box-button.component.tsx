@@ -4,16 +4,18 @@ import { ReactComponent as BookIcon } from '@lace/icons/dist/BookComponent';
 import { ReactComponent as CloseIcon } from '@lace/icons/dist/CloseComponent';
 
 import * as cx from './auto-suggest-box-button.css';
-import { useAutoSuggestBoxContext } from './auto-suggest-box.provider';
 
 interface Props {
   disabled: boolean;
+  isCloseButton: boolean;
+  onButtonClick: (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
 }
 
-export const Button = ({ disabled }: Readonly<Props>): JSX.Element => {
-  const { value, setValue, isSuggesting, setIsSuggesting } =
-    useAutoSuggestBoxContext();
-  const isCloseButton = isSuggesting || Boolean(value);
+export const Button = ({
+  disabled,
+  isCloseButton,
+  onButtonClick,
+}: Readonly<Props>): JSX.Element => {
   const Icon = isCloseButton ? CloseIcon : BookIcon;
   return (
     <button
@@ -21,13 +23,7 @@ export const Button = ({ disabled }: Readonly<Props>): JSX.Element => {
         isCloseButton ? 'close' : 'open'
       }`}
       className={cx.button}
-      onClick={(event): void => {
-        event.preventDefault();
-        if (isCloseButton) {
-          setValue('');
-        }
-        setIsSuggesting(!isCloseButton);
-      }}
+      onClick={onButtonClick}
       disabled={disabled}
     >
       <Icon className={cx.icon} />

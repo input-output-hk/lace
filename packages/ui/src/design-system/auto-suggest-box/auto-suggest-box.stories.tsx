@@ -14,23 +14,43 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
+import { Suggestion3Item } from './auto-suggest-box-suggestion.component';
 import { ValidationState } from './auto-suggest-box-types';
-import {
-  AutoSuggestBox,
-  AutoSuggestBoxBase,
-} from './auto-suggest-box.component';
-import { AutoSuggestBoxContext } from './auto-suggest-box.provider';
+import { AutoSuggestBox } from './auto-suggest-box.component';
 
-import type { AutoSuggestBoxProps } from './auto-suggest-box.component';
+import type {
+  SuggestionBase,
+  SuggestionClassic,
+  Suggestion3Item as Suggestion3ItemType,
+} from './auto-suggest-box-types';
+import type { Props } from './auto-suggest-box.component';
 
 const subtitle = 'Input with auto suggestions';
 
-const SUGGESTIONS = [
+const SUGGESTIONS: SuggestionBase[] = [
   { value: 'apple' },
   { value: 'orange' },
   { value: 'grape' },
   { value: 'banana' },
   { value: 'pear' },
+];
+
+const ADDRESS_SUGGESTIONS: Suggestion3ItemType[] = [
+  {
+    title: 'Alice',
+    description: 'addr1q12ab...0t7a1',
+    value: 'addr1q12ab0t7a1',
+  },
+  {
+    title: 'Bob',
+    description: 'addr1r23de...1u8b2',
+    value: 'addr1r23de1u8b2',
+  },
+  {
+    title: 'Charlie',
+    description: 'addr1s45fg...2v9c3',
+    value: 'addr1s45fg2v9c3',
+  },
 ];
 
 export default {
@@ -39,21 +59,6 @@ export default {
   decorators: [page({ title: 'Auto Suggest Box', subtitle })],
 } as Meta;
 
-const Provider = ({
-  children,
-}: Readonly<React.PropsWithChildren<void>>): JSX.Element => (
-  <AutoSuggestBoxContext.Provider
-    value={{
-      setValue: () => void 0,
-      setIsSuggesting: () => void 0,
-      suggestions: SUGGESTIONS.slice(0, 3),
-      value: '',
-      isSuggesting: true,
-    }}
-  >
-    {children}
-  </AutoSuggestBoxContext.Provider>
-);
 const MainComponents = (): JSX.Element => (
   <>
     <Variants.Row>
@@ -64,11 +69,7 @@ const MainComponents = (): JSX.Element => (
         <AutoSuggestBox label="label" id="hover" />
       </Variants.Cell>
       <Variants.Cell>
-        <Provider>
-          <Box h="$214">
-            <AutoSuggestBoxBase label="label" />
-          </Box>
-        </Provider>
+        <AutoSuggestBox label="label" />
       </Variants.Cell>
       <Variants.Cell>
         <AutoSuggestBox label="label" errorMessage="Error" />
@@ -109,42 +110,67 @@ const MainComponents = (): JSX.Element => (
 
 export const Overview = (): JSX.Element => {
   return (
-    <Grid>
-      <Cell>
+    <>
+      <Grid columns="$1">
         <Section title="Copy for use">
-          <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
-            <Box w="$420">
-              <AutoSuggestBox
-                suggestions={SUGGESTIONS}
-                label="Auto suggest box"
-              />
-            </Box>
-          </Flex>
+          <Grid columns="$2">
+            <Cell>
+              <Flex
+                flexDirection="column"
+                alignItems="center"
+                w="$fill"
+                my="$32"
+              >
+                <Box w="$420">
+                  <AutoSuggestBox
+                    suggestions={SUGGESTIONS}
+                    label="Auto suggest box"
+                  />
+                </Box>
+              </Flex>
+            </Cell>
+            <Cell>
+              <Flex
+                flexDirection="column"
+                alignItems="center"
+                w="$fill"
+                my="$32"
+              >
+                <Box w="$420">
+                  <AutoSuggestBox
+                    suggestions={ADDRESS_SUGGESTIONS}
+                    label="Auto suggest box"
+                    suggestionComponent={Suggestion3Item}
+                  />
+                </Box>
+              </Flex>
+            </Cell>
+          </Grid>
         </Section>
-
         <Divider my="$64" />
-
         <Section title="Main components">
-          <Variants.Table
-            headers={[
-              'Rest',
-              'Hover',
-              'Active/Pressed',
-              'Error',
-              'Disabled',
-              'Focused',
-            ]}
-          >
-            <MainComponents />
-          </Variants.Table>
-          <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-            <Variants.Table>
+          <Cell>
+            <Variants.Table
+              headers={[
+                'Rest',
+                'Hover',
+                'Active/Pressed',
+                'Error',
+                'Disabled',
+                'Focused',
+              ]}
+            >
               <MainComponents />
             </Variants.Table>
-          </LocalThemeProvider>
+            <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+              <Variants.Table>
+                <MainComponents />
+              </Variants.Table>
+            </LocalThemeProvider>
+          </Cell>
         </Section>
-      </Cell>
-    </Grid>
+      </Grid>
+    </>
   );
 };
 
@@ -155,7 +181,7 @@ Overview.parameters = {
   },
 };
 
-export const Controls = (props: Readonly<AutoSuggestBoxProps>): JSX.Element => (
+export const Controls = (props: Readonly<Props>): JSX.Element => (
   <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
     <AutoSuggestBox {...props} />
   </Flex>

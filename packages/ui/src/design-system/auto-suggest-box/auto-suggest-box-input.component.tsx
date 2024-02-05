@@ -5,7 +5,6 @@ import cn from 'classnames';
 import { Flex } from '../flex';
 
 import * as cx from './auto-suggest-box-input.css';
-import { useAutoSuggestBoxContext } from './auto-suggest-box.provider';
 
 export interface Props {
   required?: boolean;
@@ -13,6 +12,8 @@ export interface Props {
   id?: string;
   label: string;
   name?: string;
+  value: string;
+  onChange: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
 }
 
 export const Input = ({
@@ -21,8 +22,9 @@ export const Input = ({
   label,
   name,
   id,
+  value,
+  onChange,
 }: Readonly<Props>): JSX.Element => {
-  const { setIsSuggesting, value, setValue } = useAutoSuggestBoxContext();
   return (
     <Flex justifyContent="space-between" alignItems="center">
       <input
@@ -34,10 +36,7 @@ export const Input = ({
         disabled={disabled}
         name={name}
         value={value}
-        onChange={(event): void => {
-          setValue(event.target.value);
-          setIsSuggesting(true);
-        }}
+        onChange={onChange}
       />
       <span className={cn(cx.label)}>{label}</span>
     </Flex>
