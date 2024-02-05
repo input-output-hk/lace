@@ -167,7 +167,7 @@ export const Connect = (): React.ReactElement => {
       <Modal
         centered
         closable={false}
-        visible={isModalVisible}
+        open={isModalVisible}
         width={312}
         className={styles.dappConnection}
         zIndex={1001}
