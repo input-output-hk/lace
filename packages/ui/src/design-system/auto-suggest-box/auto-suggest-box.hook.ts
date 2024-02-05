@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-useless-undefined */
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -27,11 +28,11 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
 }: Readonly<Props<SuggestionType>>): Context<SuggestionType> => {
   const [value, setValue] = useState(initialValue);
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const [pickedSuggestion, setPickedSuggestion] = useState<
+    SuggestionType | undefined
+  >();
   const filteredSuggestions = suggestions.filter(item =>
     item.value.toLowerCase().includes(value.toLowerCase()),
-  );
-  const pickedSuggestion = suggestions.find(
-    suggestion => suggestion.value === value,
   );
 
   const isCloseButton = isSuggesting || Boolean(value);
@@ -50,6 +51,13 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
       onSuggestionClick: (value): void => {
         setIsSuggesting(false);
         setValue(value);
+        const pickedSuggestion = suggestions.find(
+          suggestion => suggestion.value === value,
+        );
+
+        if (pickedSuggestion) {
+          setPickedSuggestion(pickedSuggestion);
+        }
       },
       onInputChange: (event): void => {
         setValue(event.target.value);
@@ -59,6 +67,7 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
         event.preventDefault();
         if (isCloseButton) {
           setValue('');
+          setPickedSuggestion(undefined);
         }
         setIsSuggesting(!isCloseButton);
       },
