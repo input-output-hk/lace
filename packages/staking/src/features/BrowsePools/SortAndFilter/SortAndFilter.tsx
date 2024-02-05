@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
 import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
-import { Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
+import { Box, Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
 import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
@@ -49,7 +49,7 @@ export const SortAndFilter = ({
   const getFilters = (filter: FilterOption): React.ReactElement => {
     if (filter.type === 'input') {
       return (
-        <>
+        <Flex>
           {(filter.opts as string[]).map((opt, idx) => (
             <TextBox
               key={opt}
@@ -60,7 +60,7 @@ export const SortAndFilter = ({
               onChange={(e) => onLocalFilterChange(filter.key, idx, e.target.value)}
             />
           ))}
-        </>
+        </Flex>
       );
     }
 
@@ -73,7 +73,7 @@ export const SortAndFilter = ({
         showArrow
         withOutline
         className={styles.selectGroup}
-        placeholder=""
+        placeholder="Select"
         options={filter.opts as SelectOption[]}
         selectedValue={selectedValue}
       />
@@ -156,18 +156,9 @@ export const SortAndFilter = ({
         ) : (
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">
             {filterOptions.map((filter) => (
-              <Flex
-                flexDirection="column"
-                justifyContent="flex-start"
-                alignItems="flex-start"
-                h="$fill"
-                m="$4"
-                key={filter.title}
-              >
-                <Flex>
-                  <Text.Body.Small weight="$medium">{filter.title}</Text.Body.Small>
-                </Flex>
-                <Flex>{getFilters(filter)}</Flex>
+              <Flex flexDirection="column" m="$4" key={filter.title} alignItems="stretch">
+                <Text.Body.Small weight="$medium">{filter.title}</Text.Body.Small>
+                <Box>{getFilters(filter)}</Box>
               </Flex>
             ))}
           </Flex>

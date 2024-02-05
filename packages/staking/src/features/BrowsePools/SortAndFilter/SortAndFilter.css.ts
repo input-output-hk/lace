@@ -9,10 +9,8 @@ export const groupedInputContainer = style([
 ]);
 
 export const selectGroup = style([
-  sx({
-    w: '$fill',
-  }),
   {
-    backgroundColor: 'F9F9F9',
+    backgroundColor: '#F9F9F9',
+    width: '$fill',
   },
 ]);
