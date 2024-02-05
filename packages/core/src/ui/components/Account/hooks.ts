@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
+import { ProfileDropdown } from '@lace/ui';
 
 export const useEditAccountState = (): {
-  accountData: AccountData | undefined;
+  accountData: ProfileDropdown.AccountData | undefined;
   isOpen: boolean;
-  open: (data: AccountData) => void;
+  open: (data: ProfileDropdown.AccountData) => void;
   hide: () => void;
 } => {
-  const [dataToEdit, setDataToEdit] = useState<AccountData | undefined>();
+  const [dataToEdit, setDataToEdit] = useState<ProfileDropdown.AccountData | undefined>();
 
   return {
     accountData: dataToEdit,
     isOpen: dataToEdit !== undefined,
-    open: (data: AccountData) => {
+    open: (data: ProfileDropdown.AccountData) => {
       setDataToEdit(data);
     },
     hide: () => {
