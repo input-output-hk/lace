@@ -226,8 +226,6 @@ export const SuggestAndPick = createInteraction();
 SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
   const canvas = within(canvasElement);
 
-  await sleep();
-
   userEvent.click(canvas.getByTestId('auto-suggest-box-button-open'));
 
   expect(
@@ -246,13 +244,9 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
     await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
   ).toBeInTheDocument();
 
-  await sleep();
-
   await userEvent.type(canvas.getByTestId('auto-suggest-box-input'), 'ra', {
     delay: 100,
   });
-
-  await sleep();
 
   expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('ra');
 
@@ -271,8 +265,6 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
   expect(
     canvas.queryByTestId('auto-suggest-box-suggestion-pear'),
   ).not.toBeInTheDocument();
-
-  await sleep();
 
   userEvent.click(canvas.getByTestId('auto-suggest-box-button-close'));
 
@@ -282,8 +274,6 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
 SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
   const canvas = within(canvasElement);
 
-  await sleep();
-
   userEvent.click(canvas.getByTestId('auto-suggest-box-button-open'));
 
   expect(
@@ -302,13 +292,9 @@ SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
     await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
   ).toBeInTheDocument();
 
-  await sleep();
-
   await userEvent.type(canvas.getByTestId('auto-suggest-box-input'), 'ra', {
     delay: 100,
   });
-
-  await sleep();
 
   expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('ra');
 
@@ -327,8 +313,6 @@ SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
   expect(
     canvas.queryByTestId('auto-suggest-box-suggestion-pear'),
   ).not.toBeInTheDocument();
-
-  await sleep();
 
   userEvent.click(canvas.getByTestId('auto-suggest-box-suggestion-orange'));
 
