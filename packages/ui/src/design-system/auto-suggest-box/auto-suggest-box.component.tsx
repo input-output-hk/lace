@@ -12,7 +12,10 @@ import * as Text from '../typography';
 import { Button } from './auto-suggest-box-button.component';
 import { Icon } from './auto-suggest-box-icon.component';
 import { Input } from './auto-suggest-box-input.component';
-import { SuggestionClassic } from './auto-suggest-box-suggestion.component';
+import {
+  PickedSuggestionClassic,
+  SuggestionClassic,
+} from './auto-suggest-box-suggestion.component';
 import * as cx from './auto-suggest-box.css';
 import { useAutoSuggestBox } from './auto-suggest-box.hook';
 
@@ -30,6 +33,7 @@ export interface Props<SuggestionType extends SuggestionBase = SuggestionBase> {
   initialValue?: string;
   validationState?: ValidationState;
   suggestionComponent?: React.FC<SuggestionType>;
+  pickedSuggestionComponent?: React.FC<SuggestionType>;
 }
 
 export const AutoSuggestBox = <SuggestionType extends SuggestionBase>({
@@ -44,12 +48,15 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBase>({
   errorMessage,
   validationState,
   suggestionComponent: SuggestionComponent = SuggestionClassic,
+  pickedSuggestionComponent:
+    PickedSuggestionComponent = PickedSuggestionClassic,
 }: Readonly<PropsWithChildren<Props<SuggestionType>>>): JSX.Element => {
   const {
     value,
     isCloseButton,
     isSuggesting,
     filteredSuggestions,
+    pickedSuggestion,
     onButtonClick,
     onInputChange,
     onSuggestionClick,
@@ -73,6 +80,11 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBase>({
               <Input
                 id={id}
                 value={value}
+                pickedSuggestion={
+                  pickedSuggestion ? (
+                    <PickedSuggestionComponent {...pickedSuggestion} />
+                  ) : undefined
+                }
                 label={label}
                 required={required}
                 disabled={disabled}

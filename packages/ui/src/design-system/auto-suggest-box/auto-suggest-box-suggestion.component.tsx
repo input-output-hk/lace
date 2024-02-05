@@ -3,7 +3,6 @@ import React from 'react';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import { UserProfile } from '../profile-picture';
 import * as Text from '../typography';
 
 import * as cx from './auto-suggest-box-suggestion.css';
@@ -18,6 +17,13 @@ export const SuggestionClassic = ({
   value,
 }: Readonly<SuggestionClassicType>): JSX.Element => {
   return <Text.Body.Large weight="$semibold">{label ?? value}</Text.Body.Large>;
+};
+
+export const PickedSuggestionClassic = ({
+  label,
+  value,
+}: Readonly<SuggestionClassicType>): JSX.Element => {
+  return <Box className={cx.pickedSuggesion}>{label ?? value}</Box>;
 };
 
 export const Suggestion3Item = ({
@@ -35,6 +41,20 @@ export const Suggestion3Item = ({
       <Box className={cx.suggestion3ItemCol}>
         <Text.Address className={cx.address}>{description}</Text.Address>
       </Box>
+    </Flex>
+  );
+};
+
+export const PickedSuggestion3Item = ({
+  title,
+  description,
+}: Readonly<Suggestion3ItemType>): JSX.Element => {
+  return (
+    <Flex className={cx.pickedSuggesion} alignItems="center">
+      <Box mr="$8">
+        <Text.Body.Large weight="$semibold">{title}</Text.Body.Large>
+      </Box>
+      <Text.Address className={cx.address}>{description}</Text.Address>
     </Flex>
   );
 };

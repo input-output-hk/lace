@@ -1,5 +1,7 @@
 import { vars, style, globalStyle } from '../../design-tokens';
 
+import { pickedSuggesion } from './auto-suggest-box-suggestion.css';
+
 export const input = style({
   width: '100%',
   boxSizing: 'border-box',
@@ -28,7 +30,10 @@ export const label = style({
   fontSize: vars.fontSizes.$18,
 });
 
-globalStyle(`${input}:focus + ${label}, ${input}:not([value=""]) + ${label}`, {
-  top: '8px',
-  fontSize: vars.fontSizes.$12,
-});
+globalStyle(
+  `${input}:focus + ${label},${pickedSuggesion} + ${label}, ${input}:not([value=""]) + ${label}`,
+  {
+    top: '8px',
+    fontSize: vars.fontSizes.$12,
+  },
+);

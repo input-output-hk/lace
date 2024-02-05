@@ -11,6 +11,7 @@ interface Props<SuggestionType extends SuggestionBase> {
 
 interface Context<SuggestionType extends SuggestionBase> {
   value: string;
+  pickedSuggestion?: SuggestionType;
   isSuggesting: boolean;
   isCloseButton: boolean;
   filteredSuggestions: SuggestionType[];
@@ -29,6 +30,10 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBase>({
   const filteredSuggestions = suggestions.filter(item =>
     item.value.toLowerCase().includes(value.toLowerCase()),
   );
+  const pickedSuggestion = suggestions.find(
+    suggestion => suggestion.value === value,
+  );
+
   const isCloseButton = isSuggesting || Boolean(value);
 
   useEffect(() => {
@@ -41,6 +46,7 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBase>({
       isSuggesting: filteredSuggestions.length > 0 && isSuggesting,
       isCloseButton,
       filteredSuggestions,
+      pickedSuggestion,
       onSuggestionClick: (value): void => {
         setIsSuggesting(false);
         setValue(value);

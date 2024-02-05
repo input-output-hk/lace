@@ -13,6 +13,7 @@ export interface Props {
   label: string;
   name?: string;
   value: string;
+  pickedSuggestion?: React.ReactElement;
   onChange: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
 }
 
@@ -23,21 +24,24 @@ export const Input = ({
   name,
   id,
   value,
+  pickedSuggestion,
   onChange,
 }: Readonly<Props>): JSX.Element => {
   return (
     <Flex justifyContent="space-between" alignItems="center">
-      <input
-        data-testid="auto-suggest-box-input"
-        id={id}
-        type="text"
-        required={required}
-        className={cx.input}
-        disabled={disabled}
-        name={name}
-        value={value}
-        onChange={onChange}
-      />
+      {pickedSuggestion ?? (
+        <input
+          data-testid="auto-suggest-box-input"
+          id={id}
+          type="text"
+          required={required}
+          className={cx.input}
+          disabled={disabled}
+          name={name}
+          value={value}
+          onChange={onChange}
+        />
+      )}
       <span className={cn(cx.label)}>{label}</span>
     </Flex>
   );

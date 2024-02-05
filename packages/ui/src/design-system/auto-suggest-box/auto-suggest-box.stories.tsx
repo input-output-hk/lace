@@ -1,4 +1,3 @@
-/* eslint-disable functional/no-loop-statements */
 /* eslint-disable react/display-name */
 import React from 'react';
 
@@ -13,24 +12,27 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
-import { Suggestion3Item } from './auto-suggest-box-suggestion.component';
+import {
+  PickedSuggestion3Item,
+  Suggestion3Item,
+} from './auto-suggest-box-suggestion.component';
 import { ValidationState } from './auto-suggest-box-types';
 import { AutoSuggestBox } from './auto-suggest-box.component';
 
 import type {
-  SuggestionBase,
+  SuggestionClassic as SuggestionClassicType,
   Suggestion3Item as Suggestion3ItemType,
 } from './auto-suggest-box-types';
 import type { Props } from './auto-suggest-box.component';
 
 const subtitle = 'Input with auto suggestions';
 
-const SUGGESTIONS: SuggestionBase[] = [
-  { value: 'apple' },
-  { value: 'orange' },
-  { value: 'grape' },
-  { value: 'banana' },
-  { value: 'pear' },
+const SUGGESTIONS: SuggestionClassicType[] = [
+  { value: 'apple', label: 'Apple' },
+  { value: 'orange', label: 'Orange' },
+  { value: 'grape', label: 'Grape' },
+  { value: 'banana', label: 'Banana' },
+  { value: 'pear', label: 'Pear' },
 ];
 
 const ADDRESS_SUGGESTIONS: Suggestion3ItemType[] = [
@@ -139,6 +141,7 @@ export const Overview = (): JSX.Element => {
                     suggestions={ADDRESS_SUGGESTIONS}
                     label="Auto suggest box"
                     suggestionComponent={Suggestion3Item}
+                    pickedSuggestionComponent={PickedSuggestion3Item}
                   />
                 </Box>
               </Flex>

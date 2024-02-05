@@ -58,3 +58,9 @@ export const initial = style([
     position: 'relative',
   },
 ]);
+
+export const pickedSuggesion = style({
+  padding: `0 ${vars.spacing.$24}`,
+  top: vars.spacing.$8,
+  position: 'relative',
+});
