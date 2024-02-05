@@ -6970,9 +6970,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/web-extension@npm:0.24.1":
-  version: 0.24.1
-  resolution: "@cardano-sdk/web-extension@npm:0.24.1"
+"@cardano-sdk/web-extension@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@cardano-sdk/web-extension@npm:0.24.2"
   dependencies:
     "@cardano-sdk/core": ~0.27.0
     "@cardano-sdk/crypto": ~0.1.20
@@ -6991,7 +6991,7 @@ __metadata:
     ts-log: ^2.2.3
     uuid: ^8.3.2
     webextension-polyfill: ^0.8.0
-  checksum: b72917ff589c5cdf0883a2b02198aae2a7578ccb73a602c43c2f40fc135eba9075c14e9412876d3d35c575e342bc2d70e344e26c5c889df649ecc61cc56e9d6e
+  checksum: 5d674165472f9d9a1c5fdc53e215ac5d31563cb5de25747d8e492b4a165fd5355615c79aee1d7ccf34771f1b53df4dcea8e7cce470f6d5fa6d57abdca32129b9
   languageName: node
   linkType: hard
 
@@ -9802,7 +9802,7 @@ __metadata:
     "@cardano-sdk/tx-construction": 0.17.7
     "@cardano-sdk/util": 0.15.0
     "@cardano-sdk/wallet": 0.33.1
-    "@cardano-sdk/web-extension": 0.24.1
+    "@cardano-sdk/web-extension": 0.24.2
     "@dcspark/cardano-multiplatform-lib-asmjs": ^3.1.0
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
@@ -9876,7 +9876,7 @@ __metadata:
     "@cardano-sdk/util": 0.15.0
     "@cardano-sdk/util-dev": 0.19.10
     "@cardano-sdk/wallet": 0.33.1
-    "@cardano-sdk/web-extension": 0.24.1
+    "@cardano-sdk/web-extension": 0.24.2
     "@dcspark/cardano-multiplatform-lib-browser": ^3.1.1
     "@dcspark/cardano-multiplatform-lib-nodejs": ^3.1.1
     "@emurgo/cardano-message-signing-browser": 1.0.1
@@ -10100,7 +10100,7 @@ __metadata:
     "@cardano-sdk/tx-construction": 0.17.7
     "@cardano-sdk/util": 0.15.0
     "@cardano-sdk/wallet": 0.33.1
-    "@cardano-sdk/web-extension": 0.24.1
+    "@cardano-sdk/web-extension": 0.24.2
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0

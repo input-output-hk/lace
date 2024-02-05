@@ -403,15 +403,8 @@ export const useWalletManager = (): UseWalletManager => {
 
       // Synchronize active wallet UI state with service worker
       const activeWallet = wallets.find((w) => w.walletId === activeWalletProps.walletId);
-      // deleting a wallet calls deactivateWallet(),
-      // which currently does not delete it from wallet manager's stored last activate props
       if (!activeWallet) {
-        await walletManager.activate({
-          walletId: wallets[0].walletId,
-          accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0]?.accountIndex,
-          chainId: currentChain || DEFAULT_CHAIN_ID,
-          provider
-        });
+        // deleting a wallet calls deactivateWallet(): do nothing, wallet will also be deleted from repository
         return;
       }
       const activeAccount =

@@ -47,7 +47,7 @@
     "@cardano-sdk/tx-construction": "0.17.7",
     "@cardano-sdk/util": "0.15.0",
     "@cardano-sdk/wallet": "0.33.1",
-    "@cardano-sdk/web-extension": "0.24.1",
+    "@cardano-sdk/web-extension": "0.24.2",
     "@emurgo/cip14-js": "~3.0.1",
     "@koralabs/handles-public-api-interfaces": "^1.6.6",
     "@lace/cardano": "0.1.0",
