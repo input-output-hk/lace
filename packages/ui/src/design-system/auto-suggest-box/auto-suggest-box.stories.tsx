@@ -7,7 +7,6 @@ import type { ComponentStory, Meta } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
-import { sleep } from '../../test';
 import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
@@ -20,7 +19,6 @@ import { AutoSuggestBox } from './auto-suggest-box.component';
 
 import type {
   SuggestionBase,
-  SuggestionClassic,
   Suggestion3Item as Suggestion3ItemType,
 } from './auto-suggest-box-types';
 import type { Props } from './auto-suggest-box.component';
