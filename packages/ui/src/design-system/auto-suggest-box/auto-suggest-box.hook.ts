@@ -32,7 +32,9 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     SuggestionType | undefined
   >();
   const filteredSuggestions = suggestions.filter(item =>
-    item.value.toLowerCase().includes(value.toLowerCase()),
+    Object.values(item).some((itemValue: string) =>
+      itemValue.toLowerCase().includes(value.toLowerCase()),
+    ),
   );
 
   const isCloseButton = isSuggesting || Boolean(value);
