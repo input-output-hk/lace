@@ -1,28 +1,50 @@
 /* eslint-disable arrow-body-style */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Box, Flex, Text, Button, AutoSuggestBox, ControlButton } from '@lace/ui';
 import { ReactComponent as GridIcon } from '@lace/icons/dist/GridComponent';
-import { Cardano, HandleResolution } from '@cardano-sdk/core';
+import { Wallet } from '@lace/cardano';
 import styles from './AddCoSigners.module.scss';
+import { AddCoSignerInput } from './AddCoSignerInput';
+import { CoSigner, ValidateAddress } from './type';
+import { addEllipsis } from '@lace/common';
+
 interface Props {
-  onNext: () => void;
   onBack: () => void;
+  onNext: (coSigner: CoSigner[]) => void;
+  validateAddress: ValidateAddress;
+  addressBook: {
+    name: string;
+    address: string | Wallet.Cardano.PaymentAddress;
+    handleResolution?: Wallet.HandleResolution;
+  }[];
   translations: {
     title: string;
     subtitle: string;
     inputLabel: string;
+    inputError: string;
     addButton: string;
     backButton: string;
     nextButton: string;
   };
 }
 
-type CoSigner = string;
-
 const MAX_COSIGNERS = 20;
+const HEAD_LENGTH = 10;
+const TAIL_LENGTH = 5;
 
-export const AddCoSigners = ({ translations, onBack, onNext }: Props): JSX.Element => {
-  const [coSigners, setCoSigners] = useState<CoSigner[]>(['']);
+export const AddCoSigners = ({ addressBook, translations, validateAddress, onBack, onNext }: Props): JSX.Element => {
+  const [coSigners, setCoSigners] = useState<CoSigner[]>([{ address: '', isValid: false }]);
+  const suggestions: AutoSuggestBox.Suggestion3ItemType[] = useMemo(
+    () =>
+      addressBook.map((addressEntry) => ({
+        description: addEllipsis(addressEntry.address, HEAD_LENGTH, TAIL_LENGTH),
+        title: addressEntry.name,
+        value: addressEntry.handleResolution
+          ? addressEntry.handleResolution.cardanoAddress.toString()
+          : addressEntry.address
+      })),
+    [addressBook]
+  );
 
   return (
     <Flex h="$fill" w="$fill" flexDirection="column">
@@ -34,9 +56,20 @@ export const AddCoSigners = ({ translations, onBack, onNext }: Props): JSX.Eleme
       </Box>
 
       <Box mb="$8" w="$fill">
-        {coSigners.map((value) => (
-          <Box key={value} w="$fill" className={styles.coSigners}>
-            <AutoSuggestBox label={translations.inputLabel} />
+        {coSigners.map((_, index) => (
+          <Box key={index} className={styles.coSigners}>
+            <AddCoSignerInput
+              suggestions={suggestions}
+              validateAddress={validateAddress}
+              translations={{
+                label: translations.inputLabel,
+                error: translations.inputError
+              }}
+              onChange={(value) => {
+                coSigners[index] = value;
+                setCoSigners([...coSigners]);
+              }}
+            />
           </Box>
         ))}
       </Box>
@@ -52,14 +85,18 @@ export const AddCoSigners = ({ translations, onBack, onNext }: Props): JSX.Eleme
           label={translations.addButton}
           icon={<GridIcon />}
           onClick={() => {
-            setCoSigners([...coSigners, '']);
+            setCoSigners([...coSigners, { address: '', isValid: false }]);
           }}
         />
       </Box>
 
       <Flex w="$fill" justifyContent="space-between" alignItems="center">
         <Button.Secondary label={translations.backButton} onClick={onBack} />
-        <Button.CallToAction disabled label={translations.nextButton} onClick={onNext} />
+        <Button.CallToAction
+          disabled={coSigners.some(({ isValid }) => !isValid)}
+          label={translations.nextButton}
+          onClick={() => onNext(coSigners)}
+        />
       </Flex>
     </Flex>
   );

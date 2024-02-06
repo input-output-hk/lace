@@ -15,7 +15,8 @@ export {
   SupplySummary,
   StakeSummary,
   SortField,
-  EraSummary
+  EraSummary,
+  HandleResolution
 } from '@cardano-sdk/core';
 
 export { testnetEraSummaries } from '@cardano-sdk/util-dev';
