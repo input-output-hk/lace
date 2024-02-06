@@ -1,9 +1,9 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex } from '@lace/ui';
 import cn from 'classnames';
+import { MetricType } from 'features/BrowsePools/types';
 import isNil from 'lodash/isNil';
 import { StakePoolsListRowProps } from '../StakePoolsList/types';
-import { MetricType } from '../types';
 import { getSaturationLevel } from '../utils';
 import * as styles from './StakePoolCellRenderer.css';
 

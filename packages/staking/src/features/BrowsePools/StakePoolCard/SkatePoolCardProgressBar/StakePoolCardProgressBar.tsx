@@ -9,8 +9,7 @@ interface Props {
 
 export const StakePoolCardProgressBar = ({ percentage }: Props) => {
   const percentageNumber = Number(percentage);
-  const isPercentageDefined = !Number.isNaN(percentageNumber);
-  const progressWidth = Math.min(100, isPercentageDefined ? percentageNumber : 0);
+  const progressWidth = Math.min(100, percentageNumber || 0);
 
   return (
     <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>
@@ -28,7 +27,7 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
         />
       </div>
       <Text.Body.Small weight="$medium" className={styles.progressValue}>
-        {isPercentageDefined ? `${percentage}%` : 'N/A'}
+        {!Number.isNaN(percentageNumber) ? `${percentage}%` : 'N/A'}
       </Text.Body.Small>
     </Flex>
   );

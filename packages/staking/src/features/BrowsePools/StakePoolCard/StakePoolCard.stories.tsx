@@ -1,7 +1,7 @@
 import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, Text, ThemeColorScheme, Variants } from '@lace/ui';
 
+import { MetricType } from 'features/BrowsePools/types';
 import type { Meta } from '@storybook/react';
-import { MetricType } from '../StakePoolsTable';
 import { StakePoolCard, StakePoolCardProps } from './StakePoolCard';
 
 export default {

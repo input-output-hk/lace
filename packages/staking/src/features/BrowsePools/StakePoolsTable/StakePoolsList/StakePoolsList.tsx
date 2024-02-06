@@ -1,9 +1,9 @@
 import { Box, Flex, Table, Text } from '@lace/ui';
+import { MetricType, StakePoolSortOptions, TranslationsFor } from 'features/BrowsePools/types';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
 import { StakePoolPlaceholder } from '../StakePoolPlaceholder/StakePoolPlaceholder';
-import { MetricType, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from '../utils';
 import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';

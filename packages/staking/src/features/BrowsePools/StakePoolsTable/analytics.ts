@@ -1,5 +1,5 @@
 import { PostHogAction } from '@lace/common';
-import { MetricType } from './types';
+import { MetricType } from 'features/BrowsePools/types';
 
 export const analyticsActionsMap: Record<MetricType, PostHogAction> = {
   [MetricType.ticker]: PostHogAction.StakingBrowsePoolsTickerClick,

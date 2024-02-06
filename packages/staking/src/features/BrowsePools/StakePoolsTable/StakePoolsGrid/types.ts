@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { SortField } from '../types';
+import { SortField } from 'features/BrowsePools/types';
 
 export type StakePoolsGridItemProps = {
   id: string;

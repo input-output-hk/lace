@@ -1,12 +1,12 @@
 /* eslint-disable no-magic-numbers */
 import { Box, Text } from '@lace/ui';
+import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
 import { StakePoolCardSkeleton } from '../../StakePoolCard';
 import { StakePoolsListRowProps } from '../StakePoolsList/types';
-import { SortField } from '../types';
 import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
 import { StakePoolsGridItem } from './StakePoolsGridItem';

@@ -129,8 +129,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     const translationKey = `cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`;
     const tooltipText = t(translationKey);
     return {
-      label: tableHeaderTranslations[column],
-      ...(tableHeaderTooltipsTranslations[column] && { tooltipText }),
+      label: tableHeaderTranslations[column as MetricType],
+      ...(tableHeaderTooltipsTranslations[column as MetricType] && { tooltipText }),
       value: column
     };
   });

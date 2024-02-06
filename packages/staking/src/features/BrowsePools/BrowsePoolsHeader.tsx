@@ -15,7 +15,7 @@ type BrowsePoolsHeaderProps = {
 
 export const BrowsePoolsHeader = ({ poolsCount, poolsView, setPoolsView }: BrowsePoolsHeaderProps) => {
   const { t } = useTranslation();
-  const formattedPoolsCount = Number(poolsCount) === poolsCount ? formatLocaleNumber(poolsCount, 0) : 0;
+  const formattedPoolsCount = formatLocaleNumber(poolsCount, 0);
 
   return (
     <Flex justifyContent="space-between" alignItems="center">

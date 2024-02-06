@@ -1,6 +1,7 @@
 import { PostHogAction, Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
+import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +13,6 @@ import { StakePoolsGrid } from './StakePoolsGrid/StakePoolsGrid';
 import { StakePoolsList, StakePoolsListProps } from './StakePoolsList/StakePoolsList';
 import * as styles from './StakePoolsTable.css';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty/StakePoolsTableEmpty';
-import { SortDirection, SortField, StakePoolSortOptions } from './types';
 
 type StakePoolsTableProps = {
   scrollableTargetId: string;

@@ -8,22 +8,16 @@ export const useVisibleItemsCount = ({
   rowHeight: number;
   containerRef: RefObject<HTMLElement | null>;
 }>): number | undefined => {
-  const [initialItemsLimit, setInitialItemsLimit] = useState<
+  const [visibleItemsCount, setVisibleItemsCount] = useState<
     number | undefined
   >();
 
   useLayoutEffect(() => {
-    if (containerRef.current !== null) {
-      const tableVisiblePartHeight =
-        window.innerHeight - containerRef.current.getBoundingClientRect().top;
-      console.log(
-        rowHeight,
-        window.innerHeight,
-        containerRef.current.getBoundingClientRect().top,
-      );
-      setInitialItemsLimit(Math.ceil(tableVisiblePartHeight / rowHeight));
-    }
+    if (containerRef.current === null) return;
+    const tableVisiblePartHeight =
+      window.innerHeight - containerRef.current.getBoundingClientRect().top;
+    setVisibleItemsCount(Math.ceil(tableVisiblePartHeight / rowHeight));
   }, [rowHeight, containerRef]);
 
-  return initialItemsLimit;
+  return visibleItemsCount;
 };

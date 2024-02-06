@@ -1,10 +1,16 @@
 import { Table } from '@lace/ui';
+import {
+  MetricType,
+  SortDirection,
+  SortField,
+  StakePoolSortOptions,
+  TranslationsFor,
+} from 'features/BrowsePools/types';
 import { TranslationKey } from 'features/i18n';
 import { en } from 'features/i18n/translations';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
-import { MetricType, SortDirection, SortField, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from '../utils';
 
 const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);

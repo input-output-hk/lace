@@ -1,6 +1,6 @@
 import { Card, Flex, Text } from '@lace/ui';
 import cn from 'classnames';
-import { MetricType } from '../StakePoolsTable';
+import { MetricType } from 'features/BrowsePools/types';
 import { PoolMetric } from './PoolMetric';
 import { StakePoolCardProgressBar } from './SkatePoolCardProgressBar';
 import * as styles from './StakePoolCard.css';

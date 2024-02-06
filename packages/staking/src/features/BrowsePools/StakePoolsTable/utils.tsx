@@ -1,7 +1,8 @@
 /* eslint-disable no-magic-numbers */
+import { MetricType } from 'features/BrowsePools/types';
 import inRange from 'lodash/inRange';
 import { stakePoolCellRenderer } from './StakePoolCellRenderer/StakePoolCellRenderer';
-import { MetricType, SaturationLevels } from './types';
+import { SaturationLevels } from './types';
 
 const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
   [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
