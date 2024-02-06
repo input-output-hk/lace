@@ -62,7 +62,8 @@ export const scrollBar = style({});
 
 export const errorMessage = style({
   color: vars.colors.$input_error_message_color,
-  marginLeft: vars.spacing.$20,
+  marginLeft: vars.spacing.$24,
+  marginTop: vars.spacing.$4,
 });
 
 globalStyle(`${scrollArea}:has(${scrollBar})`, {

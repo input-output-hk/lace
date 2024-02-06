@@ -73,8 +73,8 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
 
   return (
     <Popover.Root open={isSuggesting}>
-      <Popover.Anchor>
-        <Flex flexDirection="column">
+      <Box>
+        <Popover.Anchor>
           <Flex
             justifyContent="space-between"
             className={cn(cx.container, {
@@ -106,12 +106,12 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
               />
             </Flex>
           </Flex>
+        </Popover.Anchor>
+        {Boolean(errorMessage) && (
+          <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
+        )}
+      </Box>
 
-          {Boolean(errorMessage) && (
-            <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
-          )}
-        </Flex>
-      </Popover.Anchor>
       <Popover.Content
         className={cx.popover}
         avoidCollisions={false}
