@@ -1,6 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
-import { StakePoolSortOptions, Wallet } from '@lace/cardano';
+import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
+import { StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
 import type { IAnalyticsTracker } from '@lace/common';
 
 type WalletBalance = {

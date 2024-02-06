@@ -45,7 +45,7 @@ export const WarningModal = ({
       onCancel={onCancel}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible}
+      open={visible}
       width={isPopupView ? '100%' : modalWidth}
       data-testid={dataTestId}
     >

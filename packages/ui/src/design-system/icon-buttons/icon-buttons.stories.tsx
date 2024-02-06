@@ -78,6 +78,23 @@ const Buttons = (): JSX.Element => (
         <Caret id="focused" />
       </Variants.Cell>
     </Variants.Row>
+    <Variants.Row>
+      <Variants.Cell>
+        <Caret direction="desc" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" id="hover" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" id="pressed" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" disabled />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Caret direction="desc" id="focused" />
+      </Variants.Cell>
+    </Variants.Row>
   </>
 );
 

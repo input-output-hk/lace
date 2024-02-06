@@ -1,8 +1,13 @@
 class ChangingStakingPreferencesModal {
+  private CONTAINER = '.ant-modal-body';
   private TITLE = '[data-testid="stake-modal-title"]';
   private DESCRIPTION = '[data-testid="stake-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="switch-pools-modal-cancel"]';
   private FINE_BY_ME_BUTTON = '[data-testid="switch-pools-modal-confirm"]';
+
+  get container() {
+    return $(this.CONTAINER);
+  }
 
   get title() {
     return $(this.TITLE);

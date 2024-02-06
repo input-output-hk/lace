@@ -1,5 +1,8 @@
 import { sx, style, vars } from '../../design-tokens';
 
+export const asc = style([]);
+export const desc = style([]);
+
 export const container = style([
   sx({
     height: '$18',
@@ -33,6 +36,9 @@ export const container = style([
         outlineColor: `${vars.colors.$icon_button_container_outlineColor}`,
         outlineWidth: vars.spacing.$4,
         outlineStyle: 'solid',
+      },
+      [`&${asc}`]: {
+        transform: 'rotate(180deg)',
       },
     },
   },
