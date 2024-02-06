@@ -22,7 +22,6 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
       console.log('Analytics', action, properties);
     },
   },
-  backgroundServiceAPIContextSetWalletPassword: undefined,
   delegationStoreSetDelegationTxBuilder: undefined,
   delegationStoreSetDelegationTxFee: undefined,
   fetchCoinPricePriceResult: undefined,

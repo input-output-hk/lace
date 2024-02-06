@@ -42,7 +42,6 @@ interface TokenAPIResponse {
 }
 
 const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefined);
-let walletPassword: Uint8Array;
 
 const handleOpenBrowser = async (data: OpenBrowserData) => {
   let path = '';
@@ -171,13 +170,6 @@ exposeApi<BackgroundService>(
       clearBackgroundStorage,
       getBackgroundStorage,
       setBackgroundStorage,
-      getWalletPassword: () => {
-        if (!walletPassword) throw new Error('Missing password');
-        return walletPassword;
-      },
-      setWalletPassword: (password?: Uint8Array) => {
-        walletPassword = password;
-      },
       resetStorage: async () => {
         await clearBackgroundStorage();
         await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });

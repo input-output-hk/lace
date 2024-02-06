@@ -5,7 +5,6 @@ import { Sections } from '../../types';
 import { useWalletStore } from '@stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
-import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -45,14 +44,12 @@ export const StakePoolDetailsDrawer = ({
   //   [simpleSendConfig.currentSection]
   // );
   const { setDelegationTxBuilder } = useDelegationStore();
-  const backgroundService = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
   const closeDrawer = useCallback(() => {
     if (showExitConfirmation?.(simpleSendConfig.currentSection)) {
       setExitStakingVisible(true);
     } else {
-      backgroundService.setWalletPassword();
       setDelegationTxBuilder();
       resetStates();
       removePassword();
@@ -73,7 +70,6 @@ export const StakePoolDetailsDrawer = ({
     showExitConfirmation,
     simpleSendConfig.currentSection,
     setExitStakingVisible,
-    backgroundService,
     setDelegationTxBuilder,
     resetStates,
     removePassword,
@@ -86,7 +82,6 @@ export const StakePoolDetailsDrawer = ({
 
   const onArrowIconClick = useCallback(() => {
     if (password) {
-      backgroundService.setWalletPassword();
       removePassword();
     }
     if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemoryWallet) {
@@ -104,8 +99,7 @@ export const StakePoolDetailsDrawer = ({
     setPrevSection,
     setSection,
     simpleSendConfig.currentSection,
-    simpleSendConfig?.prevSection,
-    backgroundService
+    simpleSendConfig?.prevSection
   ]);
 
   useKeyboardShortcut(['Escape'], () => {

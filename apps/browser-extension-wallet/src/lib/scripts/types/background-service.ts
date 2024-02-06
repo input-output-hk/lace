@@ -64,8 +64,6 @@ export type BackgroundService = {
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;
   clearBackgroundStorage: typeof clearBackgroundStorage;
-  getWalletPassword: () => Uint8Array;
-  setWalletPassword: (password?: Uint8Array) => void;
   resetStorage: () => Promise<void>;
   backendFailures$: BehaviorSubject<number>;
 };

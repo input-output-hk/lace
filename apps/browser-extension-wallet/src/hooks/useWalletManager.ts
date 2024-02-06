@@ -66,12 +66,10 @@ export interface UseWalletManager {
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
-  getPassword: () => Promise<Uint8Array>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
   saveHardwareWallet: (wallet: Wallet.CardanoWallet, chainName?: Wallet.ChainName) => Promise<void>;
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<void>;
-  clearPassword: () => void;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
 }
 
@@ -311,24 +309,6 @@ export const useWalletManager = (): UseWalletManager => {
   } = useDbState<NftFoldersSchema, NftFoldersSchema>([], nftFoldersSchema);
   const backgroundService = useBackgroundServiceAPIContext();
   const userIdService = getUserIdService();
-
-  /**
-   * Called by the wallet when needed to decrypt private key.
-   *
-   * Input password must be set before a function that needs it is executed (e.g. finalizeTx()),
-   * and should be cleared afterwards
-   */
-  const getPassword: () => Promise<Uint8Array> = useCallback(
-    async () => backgroundService.getWalletPassword(),
-    [backgroundService]
-  );
-
-  /**
-   * Clears the wallet password
-   */
-  const clearPassword = useCallback(() => {
-    backgroundService.setWalletPassword();
-  }, [backgroundService]);
 
   const tryMigrateToWalletRepository = useCallback(async (): Promise<
     AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] | undefined
@@ -576,12 +556,10 @@ export const useWalletManager = (): UseWalletManager => {
     unlockWallet,
     loadWallet,
     createWallet,
-    getPassword,
     createHardwareWallet,
     connectHardwareWallet,
     saveHardwareWallet,
     deleteWallet,
-    clearPassword,
     switchNetwork,
     walletManager,
     walletRepository

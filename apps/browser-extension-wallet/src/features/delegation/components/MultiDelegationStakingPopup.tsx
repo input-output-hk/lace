@@ -27,7 +27,7 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { setWalletPassword, handleOpenBrowser } = useBackgroundServiceAPIContext();
+  const { handleOpenBrowser } = useBackgroundServiceAPIContext();
   const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
@@ -103,7 +103,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
           setMultidelegationFirstVisit(false);
           setMultidelegationFirstVisitSincePortfolioPersistence(false);
         },
-        backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,

@@ -358,26 +358,6 @@ describe('Testing useWalletManager hook', () => {
     });
   });
 
-  describe('getPassword', () => {
-    test('should retrieve pasword from the background storage', async () => {
-      const password = 'password';
-      const getWalletPassword = jest.fn().mockReturnValue(password);
-      const {
-        result: {
-          current: { getPassword }
-        }
-      } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper({
-          backgroundService: {
-            getWalletPassword
-          } as unknown as BackgroundServiceAPIProviderProps['value']
-        })
-      });
-      expect(getPassword).toBeDefined();
-      expect(await getPassword()).toEqual(password);
-    });
-  });
-
   describe('createHardwareWallet', () => {
     test('should use cardano manager to create wallet', async () => {
       const walletId = 'walletId';

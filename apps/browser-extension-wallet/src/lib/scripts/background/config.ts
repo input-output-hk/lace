@@ -16,8 +16,6 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
-  getWalletPassword: RemoteApiPropertyType.MethodReturningPromise,
-  setWalletPassword: RemoteApiPropertyType.MethodReturningPromise,
   resetStorage: RemoteApiPropertyType.MethodReturningPromise,
   backendFailures$: RemoteApiPropertyType.HotObservable
 };

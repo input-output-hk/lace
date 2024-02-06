@@ -53,7 +53,6 @@ export interface IBlockchainProvider {
 export type OutsideHandlesContextValue = {
   analytics: IAnalyticsTracker;
   walletManagerExecuteWithPassword: <T>(action: () => Promise<T>, password?: string) => Promise<T>;
-  backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
   balancesBalance?: Balance;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
