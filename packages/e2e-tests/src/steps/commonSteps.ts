@@ -20,6 +20,7 @@ import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
 import {
   closeAllTabsExceptActiveOne,
+  closeAllTabsExceptOriginalOne,
   switchToLastWindow,
   switchToWindowWithLace,
   switchToWindowWithRetry
@@ -154,6 +155,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();
+  await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();

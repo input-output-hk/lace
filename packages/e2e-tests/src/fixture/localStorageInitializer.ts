@@ -5,6 +5,7 @@ import extensionUtils from '../utils/utils';
 import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
+import { closeAllTabsExceptOriginalOne } from '../utils/window';
 
 class LocalStorageInitializer {
   async initializeLastStaking(): Promise<void> {
@@ -64,6 +65,7 @@ class LocalStorageInitializer {
     await localStorageManager.cleanLocalStorage();
     await this.initializeWallet(walletName);
     await browser.refresh();
+    await closeAllTabsExceptOriginalOne();
   };
 
   disableShowingMultidelegationBetaBanner = async () => {
