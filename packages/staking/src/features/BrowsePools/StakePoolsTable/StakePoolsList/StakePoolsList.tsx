@@ -1,4 +1,4 @@
-import { Box, Table, Text } from '@lace/ui';
+import { Box, Flex, Table, Text } from '@lace/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
@@ -34,18 +34,18 @@ export const StakePoolsList = ({
   const { t } = useTranslation();
 
   return (
-    <div className={styles.stakePoolList} data-testid="stake-pools-list-container">
+    <Box w="$fill" data-testid="stake-pools-list-container">
       <StakePoolsListHeader {...{ activeSort, setActiveSort, translations }} />
       {selectedPools?.length > 0 && (
         <>
-          <Text.Body.Normal className={styles.selectedTitle} weight="$bold">
+          <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
             {t('browsePools.stakePoolGrid.selected')}
           </Text.Body.Normal>
-          <Box mt="$16" className={styles.selectedPools}>
+          <Flex flexDirection="column" mb="$24" pb="$16" className={styles.selectedPools}>
             {selectedPools.map((pool) => (
               <StakePoolsListRow key={pool.id} {...{ ...pool, selected: true }} />
             ))}
-          </Box>
+          </Flex>
         </>
       )}
       {!(selectedPools.length > 0 && selectedPools.length === pools.length) && emptyPlaceholder}
@@ -53,11 +53,15 @@ export const StakePoolsList = ({
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}
         items={pools}
-        itemContent={(_index, data) =>
-          data ? <StakePoolsListRow {...data} /> : <StakePoolPlaceholder columns={config.columns} withSelection />
+        itemContent={(index, data) =>
+          data ? (
+            <StakePoolsListRow {...data} />
+          ) : (
+            <StakePoolPlaceholder index={index} columns={config.columns} withSelection />
+          )
         }
         increaseViewportBy={{ bottom: 100, top: 0 }}
       />
-    </div>
+    </Box>
   );
 };

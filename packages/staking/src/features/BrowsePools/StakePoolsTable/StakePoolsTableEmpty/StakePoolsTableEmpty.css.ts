@@ -1,16 +1,4 @@
-import { style, vars } from '@lace/ui';
-
-export const container = style([
-  {
-    alignItems: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    justifyContent: 'center',
-    marginTop: vars.spacing.$40,
-    width: '100%',
-  },
-]);
+import { style, sx, vars } from '@lace/ui';
 
 export const icon = style([
   {
@@ -19,12 +7,12 @@ export const icon = style([
 ]);
 
 export const text = style([
+  sx({
+    color: '$text_secondary',
+    lineHeight: '$32',
+  }),
   {
-    color: vars.colors.$text_secondary,
-    fontSize: vars.fontSizes.$14,
-    fontWeight: vars.fontWeights.$medium,
-    lineHeight: vars.spacing.$32,
-    marginTop: '-6px',
+    marginTop: `-${vars.spacing.$6}`,
     textAlign: 'center',
   },
 ]);

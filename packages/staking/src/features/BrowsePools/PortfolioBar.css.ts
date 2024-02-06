@@ -24,12 +24,6 @@ export const barContainer = style([
   },
 ]);
 
-export const buttons = sx({
-  gap: '$16',
-});
-
 export const nextIcon = style({
   fontSize: 24,
 });
-
-export const selectedPoolsLabel = sx({ fontWeight: '$bold' });

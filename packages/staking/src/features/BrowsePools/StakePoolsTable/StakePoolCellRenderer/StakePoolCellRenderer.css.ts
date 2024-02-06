@@ -1,22 +1,13 @@
-import { style, sx } from '@lace/ui';
+import { sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
 import { theme } from 'features/theme';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-export const dotWrapper = style([
-  {
-    alignItems: 'center',
-    display: 'flex',
-  },
-]);
 
 export const dot = recipe({
   base: [
     {
       borderRadius: theme.radius.$circle,
-      display: 'flex',
       height: '7px',
-      marginRight: theme.spacing.$6,
       width: '7px',
     },
   ],

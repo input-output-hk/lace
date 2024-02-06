@@ -1,4 +1,5 @@
 /* eslint-disable react/no-multi-comp */
+import { Flex } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { StakePoolsListRowProps } from '../StakePoolsList/types';
@@ -13,10 +14,10 @@ export const stakePoolCellRenderer: Partial<
     if (typeof value !== 'string' || isNil(value)) return <>'-'</>;
     const saturationColor: styles.DotVariants['level'] = getSaturationLevel(Number.parseFloat(value.toString()));
     return (
-      <div className={styles.dotWrapper}>
-        <span className={cn(styles.dot({ level: saturationColor }))} />
+      <Flex alignItems="center">
+        <Flex mr="$6" className={cn(styles.dot({ level: saturationColor }))} />
         {value}%
-      </div>
+      </Flex>
     );
   },
   [MetricType.margin]: ({ value }) => <span>{typeof value === 'string' ? value : ''}%</span>,

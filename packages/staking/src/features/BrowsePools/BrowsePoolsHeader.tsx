@@ -19,7 +19,7 @@ export const BrowsePoolsHeader = ({ poolsCount, poolsView, setPoolsView }: Brows
 
   return (
     <Flex justifyContent="space-between" alignItems="center">
-      <Text.Body.Normal className={styles.title} weight="$bold">
+      <Text.Body.Normal className={styles.title} weight="$semibold">
         {t('browsePools.header.poolsCount', {
           poolsCount: !Number.isNaN(formattedPoolsCount) ? formattedPoolsCount : 0,
         })}

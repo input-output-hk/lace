@@ -7,7 +7,6 @@ export const grid = style([
     columnGap: '$16',
     display: 'grid',
     rowGap: '$12',
-    width: '$fill',
   }),
   {
     '@media': {
