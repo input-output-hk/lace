@@ -1,23 +1,24 @@
 import { expect } from 'chai';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
+import { getNumWalletsInRepository } from '../fixture/browserStorageInitializer';
 
 class LocalStorageAssert {
-  assertLocalStorageIsEmpty = async () => {
+  assertWalletIsDeleted = async () => {
     expect(JSON.parse(await localStorageManager.getItem('wallet'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('appSettings'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('analyticsAccepted'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).to.be.null;
-    expect(JSON.parse(await localStorageManager.getItem('lock'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('unconfirmedTransactions'))).to.be.null;
+    expect(await getNumWalletsInRepository()).to.be.eq(0);
   };
 
-  assertLocalStorageIsNotEmpty = async () => {
+  assertWalletIsNotDeleted = async () => {
     expect(JSON.parse(await localStorageManager.getItem('wallet'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('appSettings'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('analyticsAccepted'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).not.to.be.null;
-    expect(JSON.parse(await localStorageManager.getItem('lock'))).not.to.be.null;
+    expect(await getNumWalletsInRepository()).to.be.eq(1);
   };
 
   assertLocalStorageContainNetwork = async (expectedNetwork: string) => {

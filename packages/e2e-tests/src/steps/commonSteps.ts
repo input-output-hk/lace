@@ -79,10 +79,10 @@ Then(/^Drawer (is|is not) displayed$/, async (shouldSee: string) => {
   await drawerCommonExtendedAssert.assertSeeDrawer(shouldSee === 'is');
 });
 
-Then(/^I expect browser local storage to (not be|be) empty$/, async (isEmpty: string) => {
+Then(/^I expect wallet repository and local storage to (not be|be) empty$/, async (isEmpty: string) => {
   isEmpty === 'not be'
-    ? await LocalStorageAssert.assertLocalStorageIsNotEmpty()
-    : await LocalStorageAssert.assertLocalStorageIsEmpty();
+    ? await LocalStorageAssert.assertWalletIsNotDeleted()
+    : await LocalStorageAssert.assertWalletIsDeleted();
 });
 
 When(

@@ -27,6 +27,14 @@ export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<vo
   await setMigrationState();
 };
 
+export const getNumWalletsInRepository = async (): Promise<number> =>
+  await browser.execute(`
+    return (async () => {
+      const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
+      return wallets.length;
+    })()
+  `);
+
 export const clearWalletRepository = async (): Promise<void> => {
   Logger.log('Removing wallets');
   await switchToWindowWithLace(0);
