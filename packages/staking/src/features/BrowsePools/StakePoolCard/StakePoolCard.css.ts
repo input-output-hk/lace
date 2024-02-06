@@ -1,5 +1,6 @@
 import { style, sx } from '@lace/ui';
-import { keyframes } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
+import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { theme } from '../../theme';
 
 export const card = style([
@@ -35,20 +36,38 @@ export const cardSelected = style({
   borderColor: theme.colors.$poolCardSelectedBorderColor,
 });
 
-const opacity = keyframes({
-  '0%': { opacity: 0.5 },
-  '50%': { opacity: 1 },
-  '100%': { opacity: 0.5 },
+export const skeleton = recipe({
+  base: [
+    {
+      ':hover': {
+        border: 'none',
+      },
+      cursor: 'default',
+    },
+  ],
+  variants: {
+    fade3: {
+      0: style({ opacity: '0.75' }),
+      1: style({ opacity: '0.5' }),
+      2: style({ opacity: '0.25' }),
+      3: style({ opacity: '0.5' }),
+    },
+    fade4: {
+      0: style({ opacity: '1' }),
+      1: style({ opacity: '0.75' }),
+      2: style({ opacity: '0.5' }),
+      3: style({ opacity: '0.25' }),
+      4: style({ opacity: '0.5' }),
+    },
+    fade5: {
+      0: style({ opacity: '1' }),
+      1: style({ opacity: '0.75' }),
+      2: style({ opacity: '0.5' }),
+      3: style({ opacity: '0.25' }),
+      4: style({ opacity: '0.5' }),
+      5: style({ opacity: '0.75' }),
+    },
+  },
 });
 
-export const skeleton = style([
-  {
-    ':hover': {
-      border: 'none',
-    },
-    animationDuration: '1s',
-    animationIterationCount: 'infinite',
-    animationName: opacity,
-    cursor: 'default',
-  },
-]);
+export type fadeVariants = Required<NonNullable<RecipeVariants<typeof skeleton>>>;

@@ -1,4 +1,12 @@
+import { Box } from '@lace/ui';
 import * as styles from './StakePoolPlaceholderCellRenderer.css';
 
-// TODO: remove once replaced with new pool skeleton (LW-9659)
-export const stakePoolCellPlaceholderRenderer = () => <span className={styles.cellPlaceholder} />;
+const fadeScale = 10;
+
+export const stakePoolCellPlaceholderRenderer = (index: number) => (
+  <Box
+    h="$16"
+    w="$fill"
+    className={styles.cellPlaceholder({ fade: (index % fadeScale) as styles.fadeVariants['fade'] })}
+  />
+);

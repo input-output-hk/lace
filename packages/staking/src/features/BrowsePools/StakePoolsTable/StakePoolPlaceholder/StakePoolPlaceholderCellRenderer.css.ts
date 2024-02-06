@@ -1,14 +1,33 @@
-// TODO: remove once replaced with new pool skeleton (LW-9659)
 import { style, sx } from '@lace/ui';
+import { recipe } from '@vanilla-extract/recipes';
 import { theme } from 'features/theme';
+import type { RecipeVariants } from '@vanilla-extract/recipes';
 
-export const cellPlaceholder = style([
-  sx({
-    borderRadius: '$medium',
-    width: '$fill',
-  }),
-  {
-    background: theme.colors.$stakePoolCellPlaceholder,
-    height: '15px',
+export const cellPlaceholder = recipe({
+  base: [
+    style([
+      sx({
+        borderRadius: '$medium',
+      }),
+      {
+        background: theme.colors.$stakePoolCellPlaceholder,
+      },
+    ]),
+  ],
+  variants: {
+    fade: {
+      0: style({ opacity: '0.7' }),
+      1: style({ opacity: '0.6' }),
+      2: style({ opacity: '0.5' }),
+      3: style({ opacity: '0.4' }),
+      4: style({ opacity: '0.3' }),
+      5: style({ opacity: '0.2' }),
+      6: style({ opacity: '0.3' }),
+      7: style({ opacity: '0.4' }),
+      8: style({ opacity: '0.5' }),
+      9: style({ opacity: '0.6' }),
+    },
   },
-]);
+});
+
+export type fadeVariants = Required<NonNullable<RecipeVariants<typeof cellPlaceholder>>>;

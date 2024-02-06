@@ -1,12 +1,12 @@
-// TODO: remove once replaced with new pool skeleton (LW-9659)
-import { style, vars } from '@lace/ui';
+import { style, sx, vars } from '@lace/ui';
+import { theme } from 'features/theme';
 
 export const row = style([
   {
     alignItems: 'center',
     display: 'grid',
     flex: '1',
-    gap: '7px',
+    gap: vars.spacing.$10,
     gridTemplateColumns: 'repeat(auto-fit, minmax(0px, 1fr))',
     height: vars.spacing.$44,
     minHeight: vars.spacing.$44,
@@ -23,9 +23,23 @@ export const selectable = style([
   },
 ]);
 
-export const cell = style([
+export const checkbox = style([
+  sx({
+    borderRadius: '$tiny',
+  }),
   {
-    display: 'flex',
+    border: '2px solid',
+    borderColor: theme.colors.$stakePoolListPlaceholderCheckboxColor,
+    justifySelf: 'flex-end',
+    opacity: 0.24,
+  },
+]);
+
+export const cell = style([
+  sx({
+    pl: '$8',
+  }),
+  {
     selectors: {
       [`${selectable} &:first-child`]: {
         justifyContent: 'flex-end',

@@ -169,9 +169,9 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
           items={list}
-          itemContent={(_index, props) => {
+          itemContent={(index, props) => {
             if (!props) {
-              return <StakePoolPlaceholder columns={stakePooltableConfig.columns} />;
+              return <StakePoolPlaceholder index={index} columns={stakePooltableConfig.columns} />;
             }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { stakePool, hexId, id, ...data } = props;

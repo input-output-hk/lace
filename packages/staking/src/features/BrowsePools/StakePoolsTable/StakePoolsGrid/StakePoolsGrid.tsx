@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { Box, Text } from '@lace/ui';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -14,9 +15,11 @@ const DEFAULT_DEBOUNCE = 200;
 
 const gridCardHeight = 84;
 
-const defaultNumberOfItemsPerMediaQueryMap = 3;
-const numberOfItemsPerMediaQueryMap: Record<number, string> = {
-  4: 'screen and (min-width: 1024px)',
+type numOfItemsType = 3 | 4 | 5;
+
+const numberOfItemsPerMediaQueryMap: Partial<Record<numOfItemsType, string>> = {
+  3: 'screen and (max-width: 1023px)',
+  4: 'screen and (min-width: 1024px) and (max-width: 1659px)',
   5: 'screen and (min-width: 1660px)',
 };
 
@@ -39,16 +42,16 @@ export const StakePoolsGrid = ({
 }: StakePoolsGridProps) => {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
-  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<number | undefined>();
+  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType | undefined>();
 
   const getNumberOfItemsInRow = useCallback(() => {
     if (!ref?.current) return;
 
-    const result =
-      Object.entries(numberOfItemsPerMediaQueryMap).find(([, query]) => window.matchMedia(query))?.[0] ||
-      defaultNumberOfItemsPerMediaQueryMap;
+    const result = Number(
+      Object.entries(numberOfItemsPerMediaQueryMap).find(([, query]) => window.matchMedia(query).matches)?.[0]
+    ) as numOfItemsType;
 
-    setNumberOfItemsPerRow(Number(result));
+    setNumberOfItemsPerRow(result);
   }, []);
 
   const debouncedGetNumberOfItemsInRow = useMemo(
@@ -71,10 +74,10 @@ export const StakePoolsGrid = ({
     <div ref={ref} data-testid="stake-pools-grid-container">
       {selectedPoolsLength > 0 && (
         <>
-          <Text.Body.Normal className={styles.selectedTitle} weight="$bold">
+          <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
             {t('browsePools.stakePoolGrid.selected')}
           </Text.Body.Normal>
-          <Box mt="$16" className={styles.grid}>
+          <Box w="$fill" mt="$16" className={styles.grid}>
             {selectedPools.map((pool) => (
               <StakePoolsGridItem key={pool.id} sortField={sortField} {...pool} />
             ))}
@@ -90,7 +93,11 @@ export const StakePoolsGrid = ({
         loadMoreData={loadMoreData}
         items={pools}
         itemContent={(index, data) =>
-          data ? <StakePoolsGridItem sortField={sortField} {...data} /> : <StakePoolCardSkeleton index={index} />
+          data ? (
+            <StakePoolsGridItem sortField={sortField} {...data} />
+          ) : (
+            <StakePoolCardSkeleton fadeScale={numberOfItemsPerRow || 3} index={index} />
+          )
         }
       />
     </div>
