@@ -5,6 +5,7 @@ export {
   Suggestion3Item,
   SuggestionClassic,
 } from './auto-suggest-box-suggestion.component';
+export { ValidationState } from './auto-suggest-box-types';
 export type {
   SuggestionClassicType,
   Suggestion3ItemType,
