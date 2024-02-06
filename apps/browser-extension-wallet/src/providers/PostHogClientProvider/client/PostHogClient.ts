@@ -32,6 +32,7 @@ export class PostHogClient {
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
   private hasPostHogInitialized$: BehaviorSubject<boolean>;
+  private subscription: Subscription;
 
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -103,18 +104,17 @@ export class PostHogClient {
   }
 
   shutdown(): void {
-    this.userIdService.userTrackingType$.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   subscribeToDistinctIdUpdate(): void {
-    this.userIdService.userTrackingType$.subscribe(async (trackingType) => {
-      this.currentUserTrackingType = trackingType;
-      const id = await this.userIdService.getUserId(this.chain.networkId);
+    this.subscription = this.userIdService.userId$.subscribe(({ id, type }) => {
+      this.currentUserTrackingType = type;
       posthog.register({
         distinct_id: id
       });
 
-      if (trackingType === UserTrackingType.Enhanced && !this.hasPostHogInitialized$.value) {
+      if (type === UserTrackingType.Enhanced && !this.hasPostHogInitialized$.value) {
         this.loadExperiments();
       }
     });

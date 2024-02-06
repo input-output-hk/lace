@@ -47,8 +47,8 @@ export class AnalyticsTracker implements IAnalyticsTracker {
       this.postHogClient = postHogClient;
     }
 
-    this.userIdService.userTrackingType$.subscribe((trackingType) => {
-      this.userTrackingType = trackingType;
+    this.userIdService.userId$.subscribe(({ type }) => {
+      this.userTrackingType = type;
     });
   }
 

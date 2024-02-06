@@ -611,7 +611,7 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getRandomizedUserId: jest.fn(),
   getUserId: jest.fn(),
   getAliasProperties: jest.fn(),
-  userTrackingType$: new Subject() as any,
+  userId$: new Subject() as any,
   isNewSession: jest.fn(() => true),
   resetToDefaultValues: jest.fn()
 };

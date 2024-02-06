@@ -1,8 +1,8 @@
 import { WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, combineLatest, distinctUntilChanged } from 'rxjs';
 import { getActiveWallet, hashExtendedAccountPublicKey } from '@lib/scripts/background/util';
-import { UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
+import { UserId, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import isUndefined from 'lodash/isUndefined';
@@ -23,7 +23,8 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
-  public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
+  public userId$: ReplaySubject<UserId> = new ReplaySubject();
+  private userTrackingType$: BehaviorSubject<UserTrackingType> = new BehaviorSubject(UserTrackingType.Basic);
   private hasNewSessionStarted = false;
 
   constructor(
@@ -35,7 +36,20 @@ export class UserIdService implements UserIdServiceInterface {
       set: setBackgroundStorage
     },
     private sessionLength: number = SESSION_LENGTH
-  ) {}
+  ) {
+    combineLatest([
+      this.userTrackingType$.pipe(distinctUntilChanged()),
+      this.walletManager.activeWalletId$.pipe(
+        distinctUntilChanged((a, b) => a?.walletId === b?.walletId && a?.accountIndex === b?.accountIndex)
+      )
+    ]).subscribe(async ([type]) => {
+      const id = await this.getUserId();
+      this.userId$.next({
+        type,
+        id
+      });
+    });
+  }
 
   async init(): Promise<void> {
     if (!this.userIdRestored) {
@@ -112,10 +126,10 @@ export class UserIdService implements UserIdServiceInterface {
     console.debug('[ANALYTICS] clearId() called');
     this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
-    this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
     this.hasNewSessionStarted = false;
     await this.storage.clear({ keys: ['userId', 'usePersistentUserId'] });
+    this.userTrackingType$.next(UserTrackingType.Basic);
   }
 
   async makePersistent(): Promise<void> {

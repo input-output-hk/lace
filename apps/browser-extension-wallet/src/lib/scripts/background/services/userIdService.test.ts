@@ -65,6 +65,7 @@ describe('userIdService', () => {
   beforeEach(() => {
     walletRepository = {} as jest.Mocked<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>;
     walletManager = {} as jest.Mocked<WalletManagerApi>;
+    walletManager.activeWalletId$ = of(null);
     mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
     mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
   });
@@ -164,7 +165,7 @@ describe('userIdService', () => {
       const newUserId = await userIdService.getUserId();
       expect(storage.clear).toHaveBeenCalledWith({ keys: ['userId', 'usePersistentUserId'] });
       expect(previousUserId).not.toEqual(newUserId);
-      const subscription = userIdService.userTrackingType$.subscribe((trackingType) => {
+      const subscription = userIdService.userId$.subscribe(({ type: trackingType }) => {
         expect(trackingType).toEqual(UserTrackingType.Basic);
       });
       subscription.unsubscribe();
