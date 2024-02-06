@@ -316,7 +316,7 @@ describe('Testing useWalletManager hook', () => {
     test('should store wallet in repository', async () => {
       const walletId = 'walletId';
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
-      (walletApiUi.walletRepository as any).addAccount = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
       const name = 'name';
       const mnemonic = [
         'vacant violin soft weird deliver render brief always monitor general maid smart jelly core drastic erode echo there clump dizzy card filter option defense'
@@ -355,6 +355,8 @@ describe('Testing useWalletManager hook', () => {
       const nullifiedPassphrase = Buffer.from(new Uint8Array(password.length));
       expect(mockEmip3encrypt.mock.calls[0]).toEqual([LOCK_VALUE, nullifiedPassphrase]);
       expect(mockEmip3encrypt.mock.calls[1]).toEqual([Buffer.from(mnemonic.join(' ')), nullifiedPassphrase]);
+      expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
+      expect(walletApiUi.walletManager.activate).toBeCalledTimes(1);
     });
   });
 
@@ -366,6 +368,7 @@ describe('Testing useWalletManager hook', () => {
       });
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletRepository as any).addAccount = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
 
       const accountIndex = 1;
       const name = 'name';
@@ -391,6 +394,7 @@ describe('Testing useWalletManager hook', () => {
         connectedDevice
       });
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
+      expect(walletApiUi.walletManager.activate).toBeCalledTimes(1);
     });
   });
 
