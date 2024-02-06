@@ -1,4 +1,4 @@
-export enum ValidationState {
+export enum ValidationStatus {
   Idle = 'Idle',
   Validading = 'Validading',
   Validated = 'Validated',

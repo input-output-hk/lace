@@ -17,7 +17,7 @@ import {
   PickedSuggestion3Item,
   Suggestion3Item,
 } from './auto-suggest-box-suggestion.component';
-import { ValidationState } from './auto-suggest-box-types';
+import { ValidationStatus } from './auto-suggest-box-types';
 import { AutoSuggestBox } from './auto-suggest-box.component';
 
 import type {
@@ -188,9 +188,9 @@ Controls.argTypes = {
   suggestions: {
     defaultValue: SUGGESTIONS,
   },
-  validationState: {
-    defaultValue: ValidationState.Idle,
-    options: Object.keys(ValidationState),
+  ValidationStatus: {
+    defaultValue: ValidationStatus.Idle,
+    options: Object.keys(ValidationStatus),
     control: {
       type: 'select',
     },

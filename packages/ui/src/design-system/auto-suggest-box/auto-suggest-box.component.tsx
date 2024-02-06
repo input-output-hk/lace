@@ -21,7 +21,7 @@ import { useAutoSuggestBox } from './auto-suggest-box.hook';
 
 import type {
   SuggestionBaseType,
-  ValidationState,
+  ValidationStatus,
 } from './auto-suggest-box-types';
 
 export interface Props<
@@ -36,7 +36,7 @@ export interface Props<
   errorMessage?: string;
   onChange?: (value: string) => void;
   initialValue?: string;
-  validationState?: ValidationState;
+  validationStatus?: ValidationStatus;
   suggestionComponent?: React.FC<SuggestionType>;
   pickedSuggestionComponent?: React.FC<SuggestionType>;
 }
@@ -51,7 +51,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
   onChange,
   suggestions = [],
   errorMessage,
-  validationState,
+  validationStatus,
   suggestionComponent: SuggestionComponent = SuggestionClassic,
   pickedSuggestionComponent:
     PickedSuggestionComponent = PickedSuggestionClassic,
@@ -98,7 +98,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
               />
             </Box>
             <Flex alignItems="center">
-              <Icon state={validationState} />
+              <Icon status={validationStatus} />
               <Button
                 disabled={disabled}
                 isCloseButton={isCloseButton}
