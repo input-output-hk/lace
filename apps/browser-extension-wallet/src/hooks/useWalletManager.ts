@@ -1,7 +1,6 @@
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
 import { useCallback } from 'react';
-import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
@@ -67,7 +66,6 @@ export interface UseWalletManager {
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
-  activateWallet: (args: SetWallet) => Promise<void>;
   getPassword: () => Promise<Uint8Array>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
@@ -192,6 +190,12 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
   };
 
   const walletId = await walletRepository.addWallet(addWalletProps);
+  await walletManager.activate({
+    walletId,
+    chainId: DEFAULT_CHAIN_ID,
+    accountIndex,
+    provider
+  });
 
   // Needed for reset password flow
   saveValueInLocalStorage({ key: 'wallet', value: { name } });
@@ -261,6 +265,12 @@ const createHardwareWallet = async ({
     ]
   };
   const walletId = await walletRepository.addWallet(addWalletProps);
+  await walletManager.activate({
+    walletId,
+    chainId: DEFAULT_CHAIN_ID,
+    accountIndex,
+    provider
+  });
 
   return {
     name,
@@ -385,14 +395,7 @@ export const useWalletManager = (): UseWalletManager => {
 
       // If there is no active wallet, activate the 1st one
       if (!activeWalletProps) {
-        const firstWallet = wallets[0];
-        const accountIndex = firstWallet.type === WalletType.Script ? undefined : firstWallet.accounts[0]?.accountIndex;
-        await walletManager.activate({
-          chainId: currentChain || DEFAULT_CHAIN_ID,
-          walletId: firstWallet.walletId,
-          accountIndex,
-          provider
-        });
+        // deleting a wallet calls deactivateWallet(): do nothing, wallet will also be deleted from repository
         return;
       }
 
@@ -405,7 +408,7 @@ export const useWalletManager = (): UseWalletManager => {
       // Synchronize active wallet UI state with service worker
       const activeWallet = wallets.find((w) => w.walletId === activeWalletProps.walletId);
       if (!activeWallet) {
-        // deleting a wallet calls deactivateWallet(): do nothing, wallet will also be deleted from repository
+        console.error('Active wallet not found', activeWallet, wallets);
         return;
       }
       const activeAccount =
@@ -432,27 +435,6 @@ export const useWalletManager = (): UseWalletManager => {
       return newCardanoWallet;
     },
     [setCardanoWallet, setCurrentChain, tryMigrateToWalletRepository, cardanoWallet, currentChain, setCardanoCoin]
-  );
-
-  const activateWallet = useCallback(
-    async ({ walletInstance, mnemonicVerificationFrequency = '', chainName = CHAIN }: SetWallet): Promise<void> => {
-      await walletManager.activate({
-        chainId: chainIdFromName(chainName),
-        walletId: walletInstance.source.wallet.walletId,
-        accountIndex: walletInstance.source.account?.accountIndex,
-        provider
-      });
-      updateAppSettings({
-        chainName,
-        mnemonicVerificationFrequency,
-        lastMnemonicVerification: dayjs().valueOf().toString()
-      });
-
-      // Set wallet states
-      setCardanoWallet(walletInstance);
-      setCurrentChain(chainName);
-    },
-    [updateAppSettings, setCardanoWallet, setCurrentChain]
   );
 
   /**
@@ -594,7 +576,6 @@ export const useWalletManager = (): UseWalletManager => {
     unlockWallet,
     loadWallet,
     createWallet,
-    activateWallet,
     getPassword,
     createHardwareWallet,
     connectHardwareWallet,
