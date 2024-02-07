@@ -15,7 +15,6 @@ import {
 } from '@stores';
 import { AddressListType } from '@views/browser/features/activity';
 import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
-import { createInputResolver } from '@cardano-sdk/wallet';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { useFetchCoinPrice, useRedirection } from '@hooks';
@@ -38,7 +37,7 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-
+import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
 const DAPP_TOAST_DURATION = 50;
 
 const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
@@ -117,7 +116,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     TransactionSummaryInspection | undefined
   >();
 
-  const txInputResolver = useMemo(() => createInputResolver({ utxo: inMemoryWallet.utxo }), [inMemoryWallet.utxo]);
+  // const txInputResolver = useMemo(() => createInputResolver({ utxo: inMemoryWallet.utxo }), [inMemoryWallet.utxo]);
+  const txInputResolver = useMemo(
+    () =>
+      combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: inMemoryWallet.chainHistoryProvider }),
+    [inMemoryWallet]
+  );
   console.log('transactioninspecion details:', transactionInspectionDetails);
   useEffect(() => {
     fetchNetworkInfo();
@@ -345,7 +349,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
-  console.log('tx body:', transactionInspectionDetails);
+  console.log('utxo:', inMemoryWallet?.utxo?.available$);
+  console.log('chainHistoryProvider:', inMemoryWallet?.chainHistoryProvider);
 
   return (
     <div className={styles.transactionContainer}>
