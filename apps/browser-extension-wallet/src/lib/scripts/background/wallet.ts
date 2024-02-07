@@ -1,5 +1,5 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of } from 'rxjs';
+import { of, combineLatest, map, EMPTY } from 'rxjs';
 import { getProviders } from './config';
 import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery, PersonalWallet, storage } from '@cardano-sdk/wallet';
 import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
@@ -103,7 +103,58 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
 };
 
 const storesFactory: StoresFactory = {
-  create: ({ name }) => storage.createPouchDbWalletStores(name, { logger })
+  create: ({ name }) => {
+    const baseDbName = name.replace(/[^\da-z]/gi, '');
+    const docsDbName = `${baseDbName}Docs`;
+    return {
+      addresses: new storage.PouchDbAddressesStore(docsDbName, 'addresses', logger),
+      assets: new storage.PouchDbAssetsStore(docsDbName, 'assets', logger),
+      destroy() {
+        if (!this.destroyed) {
+          // since the database of document stores is shared, destroying any document store destroys all of them
+          this.destroyed = true;
+          logger.debug('Destroying PouchDb WalletStores...');
+          const destroyDocumentsDb = this.tip.destroy();
+          return combineLatest([
+            destroyDocumentsDb,
+            this.transactions.destroy(),
+            this.utxo.destroy(),
+            this.unspendableUtxo.destroy(),
+            this.rewardsHistory.destroy(),
+            this.stakePools.destroy(),
+            this.rewardsBalances.destroy()
+          ]).pipe(map(() => void 0));
+        }
+        return EMPTY;
+      },
+      destroyed: false,
+      eraSummaries: new storage.PouchDbEraSummariesStore(docsDbName, 'EraSummaries', logger),
+      genesisParameters: new storage.PouchDbGenesisParametersStore(docsDbName, 'genesisParameters', logger),
+      inFlightTransactions: new storage.PouchDbInFlightTransactionsStore(docsDbName, 'transactionsInFlight_v3', logger),
+      policyIds: new storage.PouchDbPolicyIdsStore(docsDbName, 'policyIds', logger),
+      protocolParameters: new storage.PouchDbProtocolParametersStore(docsDbName, 'protocolParameters', logger),
+      rewardsBalances: new storage.PouchDbRewardsBalancesStore(`${baseDbName}RewardsBalances`, logger),
+      rewardsHistory: new storage.PouchDbRewardsHistoryStore(`${baseDbName}RewardsHistory`, logger),
+      stakePools: new storage.PouchDbStakePoolsStore(`${baseDbName}StakePools`, logger),
+      tip: new storage.PouchDbTipStore(docsDbName, 'tip', logger),
+      transactions: new storage.PouchDbTransactionsStore(
+        {
+          computeDocId: ({ blockHeader: { blockNo }, index }) =>
+            /**
+             * Multiplied by 100k to distinguish between blockNo=1,index=0 and blockNo=0,index=1
+             * Assuming there can never be more >=100k transactions in a block
+             */
+            // eslint-disable-next-line no-magic-numbers
+            (blockNo * 100_000 + index).toString(),
+          dbName: `${baseDbName}Transactions_v3`
+        },
+        logger
+      ),
+      unspendableUtxo: new storage.PouchDbUtxoStore({ dbName: `${baseDbName}UnspendableUtxo` }, logger),
+      utxo: new storage.PouchDbUtxoStore({ dbName: `${baseDbName}Utxo_v2` }, logger),
+      volatileTransactions: new storage.PouchDbVolatileTransactionsStore(docsDbName, 'volatileTransactions_v4', logger)
+    };
+  }
 };
 
 const signingCoordinatorApi = consumeSigningCoordinatorApi({ logger, runtime });
