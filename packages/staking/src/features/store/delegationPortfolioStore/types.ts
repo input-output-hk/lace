@@ -38,8 +38,8 @@ export type StakePoolDetails = {
   ticker: string;
   apy?: string;
   status: Wallet.Cardano.StakePool['status'];
-  fee: string;
   contact: Wallet.Cardano.PoolContactData;
   blocks?: string;
-  pledge: string;
+  pledge: { number: string; unit?: string };
+  cost: { number: string; unit?: string };
 };

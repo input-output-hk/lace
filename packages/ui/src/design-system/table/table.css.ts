@@ -1,8 +1,10 @@
-import { style, vars } from '@lace/ui';
-import { theme } from 'features/theme';
+import { sx, vars, style } from '../../design-tokens';
 
 export const row = style([
   {
+    ':hover': {
+      background: vars.colors.$stake_pool_item_bg_hover,
+    },
     alignItems: 'center',
     borderRadius: vars.radius.$medium,
     cursor: 'pointer',
@@ -12,14 +14,6 @@ export const row = style([
     gridTemplateColumns: 'repeat(auto-fit, minmax(0px, 1fr))',
     height: vars.spacing.$44,
     minHeight: vars.spacing.$44,
-    selectors: {
-      '&:hover': {
-        background: theme.colors.$stakePoolItemBgHover,
-        height: '50px',
-        margin: '-3px 0',
-        minHeight: '50px',
-      },
-    },
   },
 ]);
 
@@ -34,13 +28,15 @@ export const selectable = style([
 ]);
 
 export const cell = style([
+  sx({
+    color: '$stake_pool_item_text_color',
+    fontSize: '$16',
+    fontWeight: '$medium',
+    lineHeight: '$24',
+    px: '$8',
+  }),
   {
-    color: theme.colors.$stakePoolItemTextColor,
     display: 'flex',
-    fontSize: vars.fontSizes.$16,
-    fontWeight: vars.fontWeights.$medium,
-    lineHeight: vars.spacing.$24,
-    padding: `0 ${vars.spacing.$8}`,
     selectors: {
       [`${selectable} &:first-child`]: {
         justifyContent: 'flex-end',
@@ -51,15 +47,21 @@ export const cell = style([
 ]);
 
 export const cellInner = style([
+  sx({
+    width: '$fill',
+    fontFamily: '$nova',
+  }),
   {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    width: '100%',
+    display: 'flex',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
   },
 ]);
 
-// header styles
+export const checkBoxWrapper = style({
+  display: 'flex',
+});
+
 export const header = style([
   {
     cursor: 'default',
@@ -76,8 +78,20 @@ export const header = style([
 
 export const headerItem = style([
   {
-    color: theme.colors.$stakePoolHeaderTextColor,
+    color: vars.colors.$stake_pool_header_text_color,
     padding: '0',
+    fontFamily: vars.fontFamily.$nova,
+  },
+]);
+
+export const headerItemInner = style([
+  sx({
+    width: '$fill',
+  }),
+  {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
 ]);
 
@@ -99,5 +113,15 @@ export const withAction = style([
         cursor: 'pointer',
       },
     },
+  },
+]);
+
+export const bodyWrapper = sx({
+  height: '$fill',
+});
+
+export const body = style([
+  {
+    flex: 1,
   },
 ]);

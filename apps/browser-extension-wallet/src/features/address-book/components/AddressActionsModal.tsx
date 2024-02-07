@@ -46,7 +46,7 @@ export const AddressActionsModal = ({
       // eslint-disable-next-line unicorn/no-null
       footer={null}
       closable={false}
-      visible={visible}
+      open={visible}
       width={isPopup ? 'calc(100% - 50px)' : modalWidth}
       zIndex={1000}
       data-testid="delete-address-modal-container"

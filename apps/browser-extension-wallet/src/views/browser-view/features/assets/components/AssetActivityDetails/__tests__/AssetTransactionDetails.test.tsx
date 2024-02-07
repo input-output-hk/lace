@@ -24,7 +24,7 @@ jest.mock('@stores', (): typeof Stores => ({
 }));
 
 describe('AssetActivityDetails', () => {
-  const afterVisibleChangeMock = jest.fn();
+  const afterOpenChangeMock = jest.fn();
   const onBackMock = jest.fn();
   const onCloseMock = jest.fn();
 
@@ -32,7 +32,7 @@ describe('AssetActivityDetails', () => {
     const { queryByTestId } = render(
       <AssetActivityDetails
         appMode={APP_MODE_BROWSER}
-        afterVisibleChange={afterVisibleChangeMock}
+        afterOpenChange={afterOpenChangeMock}
         onBack={onBackMock}
         onClose={onCloseMock}
         isVisible
@@ -48,7 +48,7 @@ describe('AssetActivityDetails', () => {
     const { queryByTestId } = render(
       <AssetActivityDetails
         appMode={APP_MODE_BROWSER}
-        afterVisibleChange={afterVisibleChangeMock}
+        afterOpenChange={afterOpenChangeMock}
         onBack={onBackMock}
         onClose={onCloseMock}
         isVisible
@@ -63,7 +63,7 @@ describe('AssetActivityDetails', () => {
     const { queryByTestId } = render(
       <AssetActivityDetails
         appMode={APP_MODE_BROWSER}
-        afterVisibleChange={afterVisibleChangeMock}
+        afterOpenChange={afterOpenChangeMock}
         onBack={onBackMock}
         onClose={onCloseMock}
         isVisible
@@ -76,7 +76,7 @@ describe('AssetActivityDetails', () => {
     const { queryByTestId } = render(
       <AssetActivityDetails
         appMode={APP_MODE_BROWSER}
-        afterVisibleChange={afterVisibleChangeMock}
+        afterOpenChange={afterOpenChangeMock}
         onBack={onBackMock}
         onClose={onCloseMock}
       />
