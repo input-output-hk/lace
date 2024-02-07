@@ -413,6 +413,10 @@ const colors: Colors = {
   $auto_suggest_address_color: lightColorScheme.$primary_dark_grey,
   $auto_suggest_initial_bgColor: lightColorScheme.$primary_accent_purple_0_3,
   $auto_suggest_initial_color: lightColorScheme.$primary_accent_purple,
+
+  $stake_pool_item_bg_hover: lightColorScheme.$primary_light_grey,
+  $stake_pool_header_text_color: lightColorScheme.$primary_dark_grey,
+  $stake_pool_item_text_color: lightColorScheme.$primary_black,
 };
 
 export const elevation: Elevation = {

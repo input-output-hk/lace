@@ -288,6 +288,10 @@ export const colors = {
   $auto_suggest_address_color: '',
   $auto_suggest_initial_bgColor: '',
   $auto_suggest_initial_color: '',
+
+  $stake_pool_header_text_color: '',
+  $stake_pool_item_bg_hover: '',
+  $stake_pool_item_text_color: '',
 };
 
 export type Colors = typeof colors;

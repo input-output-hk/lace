@@ -38,3 +38,4 @@ export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
 export * as AutoSuggestBox from './auto-suggest-box';
+export * from './table';
