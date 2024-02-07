@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { stakePoolSearchSlice } from '../stake-pool-search-slice';
@@ -24,7 +25,7 @@ describe('Testing stake pool search slice', () => {
     expect(result.current.fetchStakePools).toBeDefined();
     expect(result.current.stakePoolSearchResultsStatus).toBe(StateStatus.IDLE);
     expect(result.current.stakePoolSearchResults.pageResults).toEqual([]);
-    expect(result.current.stakePoolSearchResults.totalResultCount).toEqual(0);
+    expect(result.current.stakePoolSearchResults.totalResultCount).toEqual(null);
     expect(result.current.selectedStakePool).toBeUndefined();
     expect(result.current.setSelectedStakePool).toBeDefined();
   });

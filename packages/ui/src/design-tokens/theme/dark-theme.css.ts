@@ -175,8 +175,8 @@ const colors: Colors = {
     lightColorScheme.$secondary_data_pink,
 
   $dialog_container_bgColor: darkColorScheme.$primary_light_black,
-  $dialog_title_color: darkColorScheme.$primary_grey,
-  $dialog_description_color: darkColorScheme.$primary_grey,
+  $dialog_title_color: darkColorScheme.$primary_white,
+  $dialog_description_color: darkColorScheme.$primary_light_grey,
 
   $side_drawer_container_bgColor: darkColorScheme.$primary_light_black,
   $side_drawer_separator_bgColor: darkColorScheme.$primary_mid_grey,
@@ -379,6 +379,10 @@ const colors: Colors = {
   $action_card_container_borderColor: colorTransparent,
   $action_card_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
   $action_card_icon_container_borderColor: colorTransparent,
+
+  $stake_pool_item_bg_hover: darkColorScheme.$primary_dark_grey_plus,
+  $stake_pool_header_text_color: darkColorScheme.$primary_white,
+  $stake_pool_item_text_color: darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
