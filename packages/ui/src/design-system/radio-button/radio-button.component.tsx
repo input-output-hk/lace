@@ -16,8 +16,7 @@ export type Props = Readonly<{
   options: {
     value: string;
     label: string;
-    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-
+    icon?: React.ReactNode;
     onIconClick?: () => void;
   }[];
 
@@ -32,7 +31,7 @@ export const RadioButtonGroup = ({
   options,
   ...props
 }: Props): JSX.Element => {
-  const isAnyOptionHasIcon = options.some(opx => !!opx.icon);
+  const isAnyOptionHasIcon = options.some(opx => Boolean(opx.icon));
 
   return (
     <Box className={cn(className, cx.root)}>
@@ -41,15 +40,13 @@ export const RadioButtonGroup = ({
         value={selectedValue}
         disabled={disabled}
         onValueChange={onValueChange}
-        className={cn(
-          cx.radioGroupRoot,
-          isAnyOptionHasIcon ? cx.noGap : cx.gap,
-        )}
+        className={cn(cx.radioGroupRoot, {
+          [cx.gap]: !isAnyOptionHasIcon,
+        })}
       >
         {options.map(({ value, label, icon, onIconClick }) => (
           <Flex
             h="$fill"
-            m="$4"
             alignItems={'center'}
             key={value}
             className={cn(isAnyOptionHasIcon && cx.withIcon)}
@@ -79,7 +76,7 @@ export const RadioButtonGroup = ({
               <Flex justifyContent="flex-end" className={cx.iconWrapper}>
                 {value === selectedValue && (
                   <div className={cx.icon} onClick={onIconClick}>
-                    {React.createElement(icon)}
+                    {icon}
                   </div>
                 )}
               </Flex>

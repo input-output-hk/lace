@@ -5,6 +5,7 @@ import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDow
 import type { Meta } from '@storybook/react';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
@@ -30,7 +31,7 @@ const optionsWithIcon = [
   {
     value: 'option',
     label: 'Label',
-    icon: DocumentDownload,
+    icon: <DocumentDownload />,
     onIconClick: (): void => void 0,
   },
 ];
@@ -49,7 +50,6 @@ const MainComponents = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={emptyOption}
@@ -89,7 +89,6 @@ const MainComponents = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
@@ -136,7 +135,6 @@ const AdditionalVariants = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={options}
@@ -176,7 +174,6 @@ const AdditionalVariants = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={optionsWithIcon}
@@ -214,9 +211,14 @@ export const Overview = (): JSX.Element => {
   const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
   const option = [{ value: 'singleOption', label: 'Single label' }];
   const options = [
-    { value: 'label01', label: 'Label 1' },
-    { value: 'label02', label: 'Label 2' },
-    { value: 'label03', label: 'Label 3' },
+    { value: 'label01', label: 'Label A', icon: <DocumentDownload /> },
+    {
+      value: 'label02',
+      label:
+        'Label ABC asd asd qwe as asd wqers dsdfqwer sdfwedf sdfsdf sdf sdf sdf sd ',
+      icon: <DocumentDownload />,
+    },
+    { value: 'label03', label: 'Label ABCDE', icon: <DocumentDownload /> },
   ];
 
   const [radioValue, setRadioValue] = React.useState(options[0].value);
@@ -252,7 +254,7 @@ export const Overview = (): JSX.Element => {
             w="$fill"
             my="$32"
           >
-            <Flex mr="$8">
+            <Flex mr="$8" w="$380">
               <RadioButtonGroup
                 selectedValue={radioValue}
                 options={options}

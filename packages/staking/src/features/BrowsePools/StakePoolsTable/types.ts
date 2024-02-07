@@ -27,7 +27,13 @@ export enum SortField {
   name = 'name',
   apy = 'apy',
   saturation = 'saturation',
+  ticker = 'ticker',
   cost = 'cost',
+  margin = 'margin',
+  ros = 'ros',
+  livestake = 'livestake',
+  blocks = 'blocks',
+  pledge = 'pledge',
 }
 
 export enum SaturationLevels {

@@ -45,10 +45,10 @@ const CardsGroup = () => (
     gap="$20"
   >
     <Box w="$342">
-      <Wrapper visibleSection="sorting" />{' '}
+      <Wrapper visibleSection="sorting" />
     </Box>
     <Box w="$342">
-      <Wrapper visibleSection="filtering" />{' '}
+      <Wrapper visibleSection="filtering" />
     </Box>
   </Flex>
 );
@@ -57,10 +57,10 @@ export const Overview = (): JSX.Element => (
   <>
     <Grid columns="$2">
       <Cell w="$fill" style={{ display: 'inline-flex', justifyContent: 'center' }}>
-        {/* <SortAndFilter toggleSection="sorting" /> */}
+        <Wrapper visibleSection="sorting" />
       </Cell>
       <Cell style={{ display: 'inline-flex', justifyContent: 'center' }}>
-        {/* <SortAndFilter toggleSection="filtering" /> */}
+        <Wrapper visibleSection="filtering" />
       </Cell>
     </Grid>
 

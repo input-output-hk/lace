@@ -4,18 +4,14 @@ export const radioGroupRoot = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    margin: '$0',
+    alignItems: 'stretch',
+    margin: '$4',
+    w: '$fill',
   }),
   {
     fontFamily: vars.fontFamily.$nova,
     fontWeight: vars.fontWeights.$semibold,
   },
-]);
-
-export const noGap = style([
-  sx({
-    gap: '$0',
-  }),
 ]);
 
 export const gap = style([
@@ -34,6 +30,8 @@ export const radioGroupItem = style([
     borderRadius: '$circle',
   }),
   {
+    flexShrink: 0,
+    flexGrow: 0,
     background: vars.colors.$radiobutton_indicator_check_color,
 
     ':focus': {
@@ -82,6 +80,9 @@ export const iconWrapper = style([
     w: '$32',
     h: '$32',
   }),
+  {
+    flexGrow: 1,
+  },
 ]);
 
 export const icon = style([
@@ -120,7 +121,6 @@ export const checked = style({
 export const root = style([
   sx({
     alignItems: 'center',
-    justifyContent: 'center',
     borderRadius: '$small',
   }),
   {

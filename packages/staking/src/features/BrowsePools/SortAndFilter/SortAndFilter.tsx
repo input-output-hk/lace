@@ -2,12 +2,13 @@
 import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
 import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
 import { Box, Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
+import cn from 'classnames';
 import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as styles from './SortAndFilter.css';
 import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortOption, VisibleSection } from './types';
-import { groupedTextBoxStyle } from './utils';
 
 export interface SortAndFilterProps {
   visibleSection: VisibleSection;
@@ -30,6 +31,7 @@ export const SortAndFilter = ({
   onFiltersChange,
   onVisibleSectionChange,
 }: SortAndFilterProps) => {
+  const { t } = useTranslation();
   const [localFilters, setLocalFilters] = useState<FilterValues>(filters);
 
   const debouncedFilterChange = useMemo(() => debounce(onFiltersChange, 400), [onFiltersChange]);
@@ -53,8 +55,12 @@ export const SortAndFilter = ({
           {(filter.opts as string[]).map((opt, idx) => (
             <TextBox
               key={opt}
-              containerStyle={groupedTextBoxStyle(filter.opts.length, idx)}
-              containerClassName={styles.groupedInputContainer}
+              containerClassName={cn(
+                filter.opts.length > 1 && {
+                  [styles.textBoxLeft]: idx === 0,
+                  [styles.textBoxRight]: idx === filter.opts.length - 1,
+                }
+              )}
               label={opt}
               value={localFilters[filter.key][idx]}
               onChange={(e) => onLocalFilterChange(filter.key, idx, e.target.value)}
@@ -80,26 +86,54 @@ export const SortAndFilter = ({
     );
   };
 
-  const icon = direction === SortDirection.asc ? SortDirectionAscIcon : SortDirectionDescIcon;
-
-  const sortingOptions: SortOption[] = useMemo(
-    () => [
+  const sortingOptions: SortOption[] = useMemo(() => {
+    const icon = direction === SortDirection.asc ? <SortDirectionAscIcon /> : <SortDirectionDescIcon />;
+    return [
       {
         icon,
-        label: 'Ticker name',
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.ticker'),
         onIconClick,
-        value: 'ticker',
+        value: SortField.ticker,
       },
-      { icon, label: 'Saturation', onIconClick, value: 'saturation' },
-      { icon, label: 'ROS', onIconClick, value: 'ros' },
-      { icon, label: 'Cost', onIconClick, value: 'cost' },
-      { icon, label: 'Margin', onIconClick, value: 'margin' },
-      { icon, label: 'Blocks produced', onIconClick, value: 'blocks' },
-      { icon, label: 'Pledge', onIconClick, value: 'pledge' },
-      { icon, label: 'Live stake', onIconClick, value: 'livestake' },
-    ],
-    [icon, onIconClick]
-  );
+      {
+        icon,
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
+        onIconClick,
+        value: SortField.saturation,
+      },
+      { icon, label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros'), onIconClick, value: SortField.ros },
+      {
+        icon,
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.cost'),
+        onIconClick,
+        value: SortField.cost,
+      },
+      {
+        icon,
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.margin'),
+        onIconClick,
+        value: SortField.margin,
+      },
+      {
+        icon,
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.blocks'),
+        onIconClick,
+        value: SortField.blocks,
+      },
+      {
+        icon,
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.pledge'),
+        onIconClick,
+        value: SortField.pledge,
+      },
+      {
+        icon,
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.livestake'),
+        onIconClick,
+        value: SortField.livestake,
+      },
+    ];
+  }, [direction, onIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(
     () => [
@@ -135,7 +169,7 @@ export const SortAndFilter = ({
   );
 
   return (
-    <Card.Outlined style={{ width: 340 }}>
+    <Card.Outlined className={styles.card}>
       <Flex flexDirection="column" justifyContent="flex-start" alignItems="stretch" my="$32" mx="$32" gap="$20">
         <Text.SubHeading weight="$bold">More options</Text.SubHeading>
         <ToggleButtonGroup.Root
@@ -146,13 +180,12 @@ export const SortAndFilter = ({
           <ToggleButtonGroup.Item value="filtering">Filters</ToggleButtonGroup.Item>
         </ToggleButtonGroup.Root>
         {visibleSection === 'sorting' ? (
-          <Flex justifyContent="flex-start">
-            <RadioButtonGroup
-              options={sortingOptions}
-              selectedValue={sortedBy}
-              onValueChange={(value) => onSortChange(value as SortField)}
-            />
-          </Flex>
+          <RadioButtonGroup
+            className={styles.radioGroup}
+            options={sortingOptions}
+            selectedValue={sortedBy}
+            onValueChange={(value) => onSortChange(value as SortField)}
+          />
         ) : (
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">
             {filterOptions.map((filter) => (
