@@ -42,3 +42,4 @@ export type {
   ToggleButtonGroupRootProps,
   ToggleButtonGroupItemProps,
 } from './toggle-button-group';
+export * from './table';

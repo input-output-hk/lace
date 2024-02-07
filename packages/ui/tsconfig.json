@@ -20,5 +20,5 @@
     "strict": true,
     "target": "ES2018"
   },
-  "exclude": ["dist"]
+  "exclude": ["dist", "**/storybook-static/*"]
 }

@@ -5,10 +5,9 @@ import { lovelacesToAdaString } from './unit-converters';
 
 export interface StakePool {
   id: string;
-  hexId: string;
-  pledge: string;
+  hexId: Cardano.PoolIdHex;
+  pledge: { number: string; unit?: string };
   margin: string;
-  cost: string;
   owners: string[];
   name?: string;
   description?: string;
@@ -16,10 +15,11 @@ export interface StakePool {
   logo?: string;
   retired?: boolean;
   apy?: string;
-  liveStake?: { number: string; unit?: string };
+  liveStake: { number: string; unit?: string };
+  cost: { number: string; unit?: string };
   saturation?: string;
-  fee?: number | string;
   isStakingPool?: boolean;
+  stakePool: Cardano.StakePool;
 }
 
 type StakePoolTransformerProp = {
@@ -30,21 +30,18 @@ type StakePoolTransformerProp = {
 
 export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
-  const formattedPledge = getNumberWithUnit(lovelacesToAdaString(pledge.toString()));
-  const formattedCost = cost && getNumberWithUnit(lovelacesToAdaString(cost.toString()));
 
   return {
     id: id.toString(),
-    hexId: hexId.toString(),
+    hexId,
     name: metadata?.name,
     ticker: metadata?.ticker,
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
     owners: owners ? owners.map((owner: Cardano.RewardAccount) => owner.toString()) : [],
     retired: status === Cardano.StakePoolStatus.Retired,
-    fee: lovelacesToAdaString(cost.toString()),
     description: metadata?.description,
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
-    cost: `${formattedCost.number}${formattedCost.unit}`,
+    cost: cost ? getNumberWithUnit(lovelacesToAdaString(cost.toString())) : { number: '-', unit: '' },
     liveStake: metrics?.stake.live
       ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
       : { number: '-', unit: '' },
@@ -53,7 +50,8 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
       saturation: formatPercentages(metrics.saturation.valueOf()),
       blocks: metrics?.blocksCreated?.toString()
     }),
-    pledge: `${formattedPledge.number}${formattedPledge.unit}`,
-    ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() })
+    pledge: pledge ? getNumberWithUnit(lovelacesToAdaString(pledge.toString())) : { number: '-', unit: '' },
+    ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() }),
+    stakePool
   };
 };

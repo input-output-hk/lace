@@ -33,5 +33,6 @@ module.exports = createJestConfig({
     'ts-jest': {
       tsconfig: './src/tsconfig.json'
     }
-  }
+  },
+  workerThreads: true
 });

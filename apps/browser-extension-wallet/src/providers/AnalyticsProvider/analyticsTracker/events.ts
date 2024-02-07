@@ -157,7 +157,6 @@ const ViewTokens = {
 const Staking = {
   VIEW_STAKING_BROWSER: 'view-staking-browser',
   VIEW_STAKING_POPUP: 'view-staking-popup',
-  VIEW_STAKEPOOL_INFO_BROWSER: 'view-stakepool-info-browser',
   VIEW_STAKEPOOL_INFO_POPUP: 'view-stakepool-info-popup',
   STAKE_ON_THIS_POOL_BROWSER: 'stake-on-this-pool-browser',
   STAKE_ON_THIS_POOL_POPUP: 'stake-on-this-pool-popup',

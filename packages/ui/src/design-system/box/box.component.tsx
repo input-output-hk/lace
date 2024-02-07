@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import type { CSSProperties, PropsWithChildren } from 'react';
 
 import classNames from 'classnames';
@@ -29,34 +29,43 @@ export type BoxProps = Pick<
 
 export type Props = PropsWithChildren<BoxProps>;
 
-export const Box = ({
-  children,
-  className,
-  h,
-  m,
-  mb,
-  ml,
-  mr,
-  mt,
-  mx,
-  my,
-  p,
-  pb,
-  pl,
-  pr,
-  pt,
-  px,
-  py,
-  w,
-  ...props
-}: Readonly<Props>): JSX.Element => (
-  <div
-    {...props}
-    className={classNames(
-      sx({ h, m, mb, ml, mr, mt, mx, my, p, pb, pl, pr, pt, px, py, w }),
+export const Box = forwardRef<HTMLDivElement | null, Readonly<Props>>(
+  (
+    {
+      children,
       className,
-    )}
-  >
-    {children}
-  </div>
+      h,
+      m,
+      mb,
+      ml,
+      mr,
+      mt,
+      mx,
+      my,
+      p,
+      pb,
+      pl,
+      pr,
+      pt,
+      px,
+      py,
+      w,
+      ...props
+    },
+    ref,
+  ): JSX.Element => (
+    <div
+      {...props}
+      className={classNames(
+        sx({ h, m, mb, ml, mr, mt, mx, my, p, pb, pl, pr, pt, px, py, w }),
+        className,
+      )}
+      ref={ref}
+    >
+      {children}
+    </div>
+  ),
 );
+
+// eslint-disable-next-line functional/immutable-data
+Box.displayName = 'Box';
