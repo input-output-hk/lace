@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { SuggestionBaseType } from './auto-suggest-box-types';
 
@@ -44,47 +44,37 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     onChange?.(value);
   }, [value]);
 
-  return useMemo(
-    () => ({
-      value,
-      isSuggesting: filteredSuggestions.length > 0 && isSuggesting,
-      isCloseButton,
-      filteredSuggestions,
-      pickedSuggestion,
-      onSuggestionClick: (value): void => {
-        setIsSuggesting(false);
-        setValue(value);
-        const pickedSuggestion = suggestions.find(
-          suggestion => suggestion.value === value,
-        );
+  return {
+    value,
+    isSuggesting: filteredSuggestions.length > 0 && isSuggesting,
+    isCloseButton,
+    filteredSuggestions,
+    pickedSuggestion,
+    onSuggestionClick: (value): void => {
+      setIsSuggesting(false);
+      setValue(value);
+      const pickedSuggestion = suggestions.find(
+        suggestion => suggestion.value === value,
+      );
 
-        if (pickedSuggestion) {
-          setPickedSuggestion(pickedSuggestion);
-        }
-      },
-      onPickedSuggestionClick: (): void => {
+      if (pickedSuggestion) {
+        setPickedSuggestion(pickedSuggestion);
+      }
+    },
+    onPickedSuggestionClick: (): void => {
+      setPickedSuggestion(undefined);
+    },
+    onInputChange: (event): void => {
+      setValue(event.target.value);
+      setIsSuggesting(true);
+    },
+    onButtonClick: (event): void => {
+      event.preventDefault();
+      if (isCloseButton) {
+        setValue('');
         setPickedSuggestion(undefined);
-      },
-      onInputChange: (event): void => {
-        setValue(event.target.value);
-        setIsSuggesting(true);
-      },
-      onButtonClick: (event): void => {
-        event.preventDefault();
-        if (isCloseButton) {
-          setValue('');
-          setPickedSuggestion(undefined);
-        }
-        setIsSuggesting(!isCloseButton);
-      },
-    }),
-    [
-      value,
-      setValue,
-      isSuggesting,
-      setIsSuggesting,
-      pickedSuggestion,
-      setPickedSuggestion,
-    ],
-  );
+      }
+      setIsSuggesting(!isCloseButton);
+    },
+  };
 };
