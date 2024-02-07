@@ -33,6 +33,7 @@ export class PostHogClient {
   private currentUserTrackingType?: UserTrackingType;
   private hasPostHogInitialized$: BehaviorSubject<boolean>;
   private subscription: Subscription;
+  private initComplete: Promise<void>;
 
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -46,7 +47,7 @@ export class PostHogClient {
     if (!token) throw new Error('posthog token has not been provided');
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
 
-    this.userIdService
+    this.initComplete = this.userIdService
       .getUserId(chain.networkMagic)
       .then((id) => {
         posthog.init(token, {
@@ -108,8 +109,11 @@ export class PostHogClient {
   }
 
   subscribeToDistinctIdUpdate(): void {
-    this.subscription = this.userIdService.userId$.subscribe(({ id, type }) => {
+    this.subscription = this.userIdService.userId$.subscribe(async ({ id, type }) => {
       this.currentUserTrackingType = type;
+      // register must be called after posthog.init resolves
+      await this.initComplete;
+
       posthog.register({
         distinct_id: id
       });
