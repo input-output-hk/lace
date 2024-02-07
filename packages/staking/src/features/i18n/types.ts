@@ -35,6 +35,7 @@ type KeysStructure = {
     };
     stakePoolGrid: {
       selected: '';
+      notAvailable: '';
     };
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';

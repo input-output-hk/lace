@@ -10,6 +10,7 @@ export const en: Translations = {
   'activity.rewardsHistory.noStakingActivityYet': 'No staking activity yet.',
   'activity.rewardsHistory.title': 'History',
   'browsePools.header.poolsCount': 'Pools ({{poolsCount}})',
+  'browsePools.stakePoolGrid.notAvailable': 'N/A',
   'browsePools.stakePoolGrid.selected': 'Selected',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',

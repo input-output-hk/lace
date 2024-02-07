@@ -48,6 +48,7 @@ export const root = style([
   },
 ]);
 
+// TODO: allign all icons viewBox
 export const icon = sx({
   width: '$20',
   height: '$20',

@@ -4,6 +4,7 @@ import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
 import { StakePoolCardSkeleton } from '../../StakePoolCard';
 import { StakePoolsListRowProps } from '../StakePoolsList/types';
@@ -16,12 +17,6 @@ const DEFAULT_DEBOUNCE = 200;
 const gridCardHeight = 84;
 
 type numOfItemsType = 3 | 4 | 5;
-
-const numberOfItemsPerMediaQueryMap: Partial<Record<numOfItemsType, string>> = {
-  3: 'screen and (max-width: 1023px)',
-  4: 'screen and (min-width: 1024px) and (max-width: 1659px)',
-  5: 'screen and (min-width: 1660px)',
-};
 
 export type StakePoolsGridProps = {
   scrollableTargetId: string;
@@ -42,23 +37,37 @@ export const StakePoolsGrid = ({
 }: StakePoolsGridProps) => {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
-  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType | undefined>();
+  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType>();
+
+  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1023 });
+  const matchFourColumnsLayout = useMediaQuery({ maxWidth: 1659, minWidth: 1024 });
+  const matchFiveColumnsLayout = useMediaQuery({ minWidth: 1660 });
+
+  const numberOfItemsPerMediaQueryMap: Partial<Record<numOfItemsType, boolean>> = useMemo(
+    () => ({
+      3: matchThreeColumnsLayout,
+      4: matchFourColumnsLayout,
+      5: matchFiveColumnsLayout,
+    }),
+    [matchFiveColumnsLayout, matchFourColumnsLayout, matchThreeColumnsLayout]
+  );
 
   const getNumberOfItemsInRow = useCallback(() => {
     if (!ref?.current) return;
 
     const result = Number(
-      Object.entries(numberOfItemsPerMediaQueryMap).find(([, query]) => window.matchMedia(query).matches)?.[0]
+      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0]
     ) as numOfItemsType;
 
     setNumberOfItemsPerRow(result);
-  }, []);
+  }, [numberOfItemsPerMediaQueryMap]);
 
   const debouncedGetNumberOfItemsInRow = useMemo(
     () => debounce(getNumberOfItemsInRow, DEFAULT_DEBOUNCE),
     [getNumberOfItemsInRow]
   );
 
+  // TODO: consider using resize-observer instead
   useEffect(() => {
     window.addEventListener('resize', debouncedGetNumberOfItemsInRow);
     debouncedGetNumberOfItemsInRow();
