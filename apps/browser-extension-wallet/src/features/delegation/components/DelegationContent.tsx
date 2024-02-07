@@ -86,11 +86,13 @@ export const DelegationContent = (): React.ReactElement => {
 
   const parseStakePools = () =>
     stakePoolSearchResults?.pageResults.map((pool) =>
-      Wallet.util.stakePoolTransformer({
-        stakePool: pool,
-        delegatingPoolId: delegationDetails?.id?.toString(),
-        cardanoCoin
-      })
+      pool
+        ? Wallet.util.stakePoolTransformer({
+            stakePool: pool,
+            delegatingPoolId: delegationDetails?.id?.toString(),
+            cardanoCoin
+          })
+        : undefined
     );
 
   useEffect(() => {

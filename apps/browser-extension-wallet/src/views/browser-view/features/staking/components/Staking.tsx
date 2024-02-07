@@ -22,6 +22,7 @@ import { useStakePoolDetails } from '../store';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useObservable } from '@lace/common';
+import { fetchPoolsInfo } from '../utils';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -39,7 +40,7 @@ export const Staking = (): React.ReactElement => {
     inMemoryWallet,
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const { stakePoolSearchResults, isSearching, fetchStakePools } = useWalletStore(stakePoolResultsSelector);
+  const { fetchStakePools } = useWalletStore(stakePoolResultsSelector);
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
@@ -84,10 +85,11 @@ export const Staking = (): React.ReactElement => {
       const stakePoolId = localStorage.getItem('TEMP_POOLID');
       if (!stakePoolId) return;
       const searchString = String(stakePoolId);
-      await fetchStakePools({ searchString });
-      const foundStakePool = stakePoolSearchResults.pageResults.find(
-        (pool: Wallet.Cardano.StakePool) => pool?.id?.toString() === stakePoolId
-      );
+      const pageResults = await fetchPoolsInfo({
+        searchString,
+        stakePoolProvider: blockchainProvider.stakePoolProvider
+      });
+      const foundStakePool = pageResults.find((pool: Wallet.Cardano.StakePool) => pool?.id?.toString() === stakePoolId);
       if (!foundStakePool) return;
       setSelectedStakePool(foundStakePool);
       setIsDrawerVisible(true);
@@ -95,13 +97,12 @@ export const Staking = (): React.ReactElement => {
     };
     fetchSelectedStakePool();
   }, [
-    setIsDrawerVisible,
-    setSelectedStakePool,
-    stakePoolSearchResults,
-    networkInfo,
-    isSearching,
+    blockchainProvider.stakePoolProvider,
+    fetchStakePools,
     isInMemoryWallet,
-    fetchStakePools
+    networkInfo,
+    setIsDrawerVisible,
+    setSelectedStakePool
   ]);
 
   return (
@@ -136,7 +137,7 @@ export const Staking = (): React.ReactElement => {
           />
         </div>
       )}
-      <StakePoolsTable scrollableTargetId={LACE_APP_ID} onStake={onStake} />
+      <StakePoolsTable scrollableTargetId={LACE_APP_ID} />
       <StakePoolDetails
         showCloseIcon
         showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}

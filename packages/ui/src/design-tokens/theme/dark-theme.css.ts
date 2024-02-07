@@ -383,6 +383,10 @@ const colors: Colors = {
   $action_card_container_borderColor: colorTransparent,
   $action_card_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
   $action_card_icon_container_borderColor: colorTransparent,
+
+  $stake_pool_item_bg_hover: darkColorScheme.$primary_dark_grey_plus,
+  $stake_pool_header_text_color: darkColorScheme.$primary_white,
+  $stake_pool_item_text_color: darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {

@@ -283,6 +283,9 @@ export const colors = {
   $action_card_container_borderColor: '',
   $action_card_icon_container_bgColor: '',
   $action_card_icon_container_borderColor: '',
+  $stake_pool_header_text_color: '',
+  $stake_pool_item_bg_hover: '',
+  $stake_pool_item_text_color: '',
 };
 
 export type Colors = typeof colors;

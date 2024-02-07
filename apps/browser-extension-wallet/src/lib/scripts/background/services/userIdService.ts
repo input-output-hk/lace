@@ -138,6 +138,10 @@ export class UserIdService implements UserIdServiceInterface {
     this.setSessionTimeout();
     const userId = await this.getRandomizedUserId();
     await this.storage.set({ usePersistentUserId: true, userId });
+    this.userId$.next({
+      id: userId,
+      type: UserTrackingType.Enhanced
+    });
     this.userTrackingType$.next(UserTrackingType.Enhanced);
   }
 
