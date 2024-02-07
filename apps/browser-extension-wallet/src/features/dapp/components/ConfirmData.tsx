@@ -89,7 +89,8 @@ export const DappConfirmData = (): React.ReactElement => {
   }, [setSignDataRequest]);
 
   useEffect(() => {
-    const dataFromHex = fromHex(req.blob);
+    if (!req) return;
+    const dataFromHex = fromHex(req.signContext.payload || req.blob);
     const txDataAddress = req.signContext.address || `${req.derivationPath.role}/${req.derivationPath.index}`;
     const jsonStructureOrHexString = {
       address: txDataAddress,

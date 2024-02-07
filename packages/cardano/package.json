@@ -39,15 +39,15 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/cardano-services-client": "0.17.3",
-    "@cardano-sdk/core": "0.27.0",
+    "@cardano-sdk/cardano-services-client": "0.17.4",
+    "@cardano-sdk/core": "0.28.0",
     "@cardano-sdk/crypto": "0.1.20",
-    "@cardano-sdk/hardware-ledger": "0.8.10",
-    "@cardano-sdk/hardware-trezor": "0.4.10",
-    "@cardano-sdk/key-management": "0.19.4",
+    "@cardano-sdk/hardware-ledger": "0.8.11",
+    "@cardano-sdk/hardware-trezor": "0.4.11",
+    "@cardano-sdk/key-management": "0.19.5",
     "@cardano-sdk/util": "0.15.0",
-    "@cardano-sdk/wallet": "0.33.1",
-    "@cardano-sdk/web-extension": "0.24.2",
+    "@cardano-sdk/wallet": "0.34.0",
+    "@cardano-sdk/web-extension": "0.24.3",
     "@dcspark/cardano-multiplatform-lib-browser": "^3.1.1",
     "@lace/common": "0.1.0",
     "@stablelib/chacha20poly1305": "1.0.1",
@@ -68,7 +68,7 @@
     "webextension-polyfill": "0.8.0"
   },
   "devDependencies": {
-    "@cardano-sdk/util-dev": "0.19.10",
+    "@cardano-sdk/util-dev": "0.19.11",
     "@dcspark/cardano-multiplatform-lib-nodejs": "^3.1.1",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.8.0",
