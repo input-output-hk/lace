@@ -86,6 +86,7 @@ export type OutsideHandlesContextValue = {
     limit?: number;
     sort?: StakePoolSortOptions;
   }) => Promise<void>;
+  walletStoreResetStakePools?: () => void;
   walletStoreNetworkInfo?: {
     nextEpochIn: Date;
     currentEpochIn: Date;

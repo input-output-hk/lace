@@ -1,9 +1,9 @@
 import { PostHogAction } from '@lace/common';
+import { Table } from '@lace/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
-import { TableRow } from '../Table';
 import { Columns } from '../types';
 import { config } from '../utils';
 import { StakePoolTableItemBrowserProps } from './types';
@@ -11,6 +11,7 @@ import { StakePoolTableItemBrowserProps } from './types';
 export const StakePoolTableItemBrowser = ({
   stakePool,
   hexId,
+  id,
   ...data
 }: StakePoolTableItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -38,18 +39,17 @@ export const StakePoolTableItemBrowser = ({
   };
 
   return (
-    <TableRow<Columns>
+    <Table.Row<Partial<typeof data>, Columns>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}
       selected={poolAlreadySelected}
       onClick={onClick}
-      onSelect={onSelect}
-      selectable={!selectionsFull}
       selectionDisabledMessage={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
       dataTestId="stake-pool"
       withSelection
-      key={data?.id}
+      keyProp={id}
+      {...((!selectionsFull || poolAlreadySelected) && { onSelect })}
     />
   );
 };
