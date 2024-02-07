@@ -92,6 +92,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
                     <div
                       onClick={onPickedSuggestionClick}
                       className={cxSuggestion.pickedSuggesion}
+                      data-testid="auto-suggest-box-picked-suggestion"
                     >
                       <PickedSuggestionComponent {...pickedSuggestion} />
                     </div>

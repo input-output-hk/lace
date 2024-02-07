@@ -310,7 +310,7 @@ SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
 
   userEvent.click(canvas.getByTestId('auto-suggest-box-suggestion-orange'));
 
-  expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue(
-    'orange',
-  );
+  expect(
+    await canvas.findByTestId('auto-suggest-box-picked-suggestion'),
+  ).toHaveTextContent('Orange');
 };
