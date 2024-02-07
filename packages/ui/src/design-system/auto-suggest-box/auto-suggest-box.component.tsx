@@ -16,6 +16,7 @@ import {
   PickedSuggestionClassic,
   SuggestionClassic,
 } from './auto-suggest-box-suggestion.component';
+import * as cxSuggestion from './auto-suggest-box-suggestion.css';
 import * as cx from './auto-suggest-box.css';
 import { useAutoSuggestBox } from './auto-suggest-box.hook';
 
@@ -65,6 +66,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     onButtonClick,
     onInputChange,
     onSuggestionClick,
+    onPickedSuggestionClick,
   } = useAutoSuggestBox({
     initialValue,
     onChange,
@@ -87,7 +89,12 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
                 value={value}
                 pickedSuggestion={
                   pickedSuggestion ? (
-                    <PickedSuggestionComponent {...pickedSuggestion} />
+                    <div
+                      onClick={onPickedSuggestionClick}
+                      className={cxSuggestion.pickedSuggesion}
+                    >
+                      <PickedSuggestionComponent {...pickedSuggestion} />
+                    </div>
                   ) : undefined
                 }
                 label={label}

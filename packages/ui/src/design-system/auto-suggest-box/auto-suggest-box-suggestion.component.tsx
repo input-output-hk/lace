@@ -12,6 +12,10 @@ import type {
   Suggestion3ItemType,
 } from './auto-suggest-box-types';
 
+export interface BasePickedSuggestionProps {
+  onClick: () => void;
+}
+
 export const SuggestionClassic = ({
   label,
   value,
@@ -23,7 +27,7 @@ export const PickedSuggestionClassic = ({
   label,
   value,
 }: Readonly<SuggestionClassicType>): JSX.Element => {
-  return <Box className={cx.pickedSuggesion}>{label ?? value}</Box>;
+  return <Box>{label ?? value}</Box>;
 };
 
 export const Suggestion3Item = ({
@@ -50,7 +54,7 @@ export const PickedSuggestion3Item = ({
   description,
 }: Readonly<Suggestion3ItemType>): JSX.Element => {
   return (
-    <Flex className={cx.pickedSuggesion} alignItems="center">
+    <Flex alignItems="center">
       <Box mr="$8">
         <Text.Body.Large weight="$semibold">{title}</Text.Body.Large>
       </Box>
