@@ -188,12 +188,8 @@ Controls.argTypes = {
   suggestions: {
     defaultValue: SUGGESTIONS,
   },
-  ValidationStatus: {
+  validationStatus: {
     defaultValue: ValidationStatus.Idle,
-    options: Object.keys(ValidationStatus),
-    control: {
-      type: 'select',
-    },
   },
 };
 
