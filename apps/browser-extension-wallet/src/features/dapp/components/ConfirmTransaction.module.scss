@@ -13,14 +13,18 @@
   padding-top: size_unit(2);
 }
 
+.transactionContainer { 
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .actions {
   background-color: var(--bg-color-body);
   @extend %flex-column;
   justify-content: center;
-  gap: size_unit(1);
   padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
-  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  margin: 0 size_unit(-3) size_unit(-2) size_unit(-3);
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
   position: sticky;
   bottom: 0;
   .actionBtn {

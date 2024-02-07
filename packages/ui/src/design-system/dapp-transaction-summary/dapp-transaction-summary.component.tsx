@@ -17,8 +17,8 @@ import * as cx from './dapp-transaction-summary.css';
 import type { OmitClassName } from '../../types';
 
 type Props = OmitClassName<'div'> & {
-  transactionAmount: bigint;
-  // title: string;
+  transactionAmount: string;
+  title?: string;
   items?: {
     imageSrc?: string;
     balance?: string;
@@ -33,8 +33,8 @@ type Props = OmitClassName<'div'> & {
 
 export const TransactionSummary = ({
   transactionAmount,
-  // title,
   items,
+  title,
   cardanoSymbol,
   ...props
 }: Readonly<Props>): JSX.Element => {
@@ -45,14 +45,16 @@ export const TransactionSummary = ({
 
   const getImageSource = (value: string | undefined): string =>
     value === '' || value === undefined ? setThemeFallbackImagine : value;
-
+  console.log('ui package', transactionAmount);
   return (
     <>
-      {/* <Flex justifyContent="flex-start">
-        <Typography.Body.Large className={cx.boldLabel}>
-          {title}
-        </Typography.Body.Large>
-      </Flex> */}
+      {title !== undefined && (
+        <Flex justifyContent="flex-start">
+          <Typography.Body.Large className={cx.boldLabel}>
+            {title}
+          </Typography.Body.Large>
+        </Flex>
+      )}
       <Grid {...props} columns="$2">
         <Cell>
           <AdaComponent className={cx.adaIcon} />

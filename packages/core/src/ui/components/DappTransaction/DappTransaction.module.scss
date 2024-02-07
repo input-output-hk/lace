@@ -7,19 +7,12 @@
 
 .details {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  justify-content: space-between;
-  margin: size_unit(4) 0 size_unit(2) 0px;
-  padding: size_unit(3) 0;
-  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  gap: size_unit(3);
 }
 
 .error {
   margin: size_unit(2) 0px;
 }
-
 
 .warningAlert {
   flex-direction: row;

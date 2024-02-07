@@ -4,16 +4,15 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
-// import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 
-// import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
 import { AddressListType } from '@views/browser/features/activity';
 import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
+import { createInputResolver } from '@cardano-sdk/wallet';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { useFetchCoinPrice, useRedirection } from '@hooks';
@@ -24,9 +23,7 @@ import {
   AssetsMintedInspection,
   MintedAsset,
   TransactionSummaryInspection,
-  transactionSummaryInspector,
-  TokenTransferInspection,
-  tokenTransferInspector
+  transactionSummaryInspector
 } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
@@ -38,8 +35,6 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { createInputResolver } from '@cardano-sdk/wallet';
-import { transactionSummaryInspector as mock } from '../mock_data/transactionSummaryInspector';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -96,17 +91,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isHardwareWallet,
     blockchainProvider: { assetProvider },
     walletUI: { cardanoCoin },
-    fetchNetworkInfo,
-    networkInfo
-  } = useWalletStore((state) => ({
-    networkInfo: state.networkInfo,
-    fetchNetworkInfo: state.fetchNetworkInfo,
-    walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
-    blockchainProvider: state.blockchainProvider,
-    getKeyAgentType: state.getKeyAgentType,
-    inMemoryWallet: state.inMemoryWallet,
-    walletInfo: state.walletInfo
-  }));
+    fetchNetworkInfo
+  } = useWalletStore();
 
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
 
@@ -127,10 +113,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
     TransactionSummaryInspection | undefined
   >();
-  // const [toAddressDetails, setToAddressDetails] = useState();
-  // const [fromAddressDetails, setFromAddressDetails] = useState();
 
-  const txInputResolver = createInputResolver({ utxo: inMemoryWallet.utxo });
+  const txInputResolver = useMemo(() => createInputResolver({ utxo: inMemoryWallet.utxo }), [inMemoryWallet.utxo]);
   console.log('transactioninspecion details:', transactionInspectionDetails);
   useEffect(() => {
     fetchNetworkInfo();
@@ -264,14 +248,13 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [addressList]
   );
 
-  const userAddresses = walletInfo.addresses.map((v) => v.address);
-
+  const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
   const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rewardAccountsAddresses = userRewardAccounts && userRewardAccounts.map((key) => key.address);
-
+  const rewardAccountsAddresses = useMemo(
+    () => userRewardAccounts && userRewardAccounts.map((key) => key.address),
+    [userRewardAccounts]
+  );
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
-
-  console.log('userAddress and rewards', userAddresses, rewardAccountsAddresses);
 
   useEffect(() => {
     if (!req) {
@@ -287,7 +270,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           addresses: userAddresses,
           rewardAccounts: rewardAccountsAddresses,
           inputResolver: txInputResolver,
-          protocolParameters
+          protocolParameters,
+          assetProvider
         })
       });
 
@@ -339,7 +323,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     userAddresses,
     rewardAccountsAddresses,
     txInputResolver,
-    protocolParameters
+    protocolParameters,
+    assetProvider
   ]);
 
   const onConfirm = () => {
@@ -355,18 +340,16 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
-  const newTxData = mock();
 
   return (
-    <>
+    <div className={styles.transactionContainer}>
       {req && txSummary ? (
         <DappTransaction
           transaction={txSummary}
-          // dappInfo={dappInfo}
           fiatCurrencyCode={fiatCurrency?.code}
           fiatCurrencyPrice={priceResult?.cardano?.price}
           coinSymbol={cardanoCoin.symbol}
-          newTxSummary={newTxData}
+          newTxSummary={transactionInspectionDetails}
         />
       ) : (
         <Skeleton loading />
@@ -375,8 +358,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         <Button
           onClick={onConfirm}
           loading={isHardwareWallet && isConfirmingTx}
-          // loading={(isUsingHardwareWallet && isConfirmingTx) || isLoadingNetworkInfo}
-
+          // loading={(isHardwareWallet && isConfirmingTx) || isLoadingNetworkInfo}
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}
         >
@@ -393,6 +375,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>
-    </>
+    </div>
   );
 });
