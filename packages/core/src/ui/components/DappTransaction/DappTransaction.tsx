@@ -4,10 +4,10 @@ import React from 'react';
 import { ErrorPane } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 
-// import {
-//   // DappInfo,
-//   DappInfoProps
-// } from '../DappInfo';
+import {
+  // DappInfo,
+  DappInfoProps
+} from '../DappInfo';
 
 // import { DappTxHeader } from './DappTxHeader/DappTxHeader';
 import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
@@ -44,7 +44,7 @@ export interface DappTransactionProps {
   transaction: TransactionDetails;
   newTxSummary?: TransactionSummaryInspection;
   /** dApp information such as logo, name and url */
-  // dappInfo: Omit<DappInfoProps, 'className'>;
+  dappInfo: Omit<DappInfoProps, 'className'>;
   /** Optional error message */
   errorMessage?: string;
   fiatCurrencyCode?: string;
@@ -58,12 +58,15 @@ export const DappTransaction = ({
   errorMessage,
   fiatCurrencyCode,
   fiatCurrencyPrice,
-  coinSymbol
+  coinSymbol,
+  dappInfo
 }: DappTransactionProps): React.ReactElement => {
   // const { t } = useTranslate();
-  console.log('dapp transaction', assets, coins, sumFee, collateral, deposit, returnedDeposit, unresolved);
+  console.log('dapp transaction 1', assets, collateral, deposit, returnedDeposit, unresolved);
+
   const totalAmount = Wallet.util.lovelacesToAdaString(coins.toString());
-  console.log('total amount:', totalAmount);
+  const txFee = Wallet.util.lovelacesToAdaString(sumFee.toString());
+  console.log('dapp transaction', fee, txFee, TxType[type]);
 
   return (
     <div>
@@ -71,8 +74,12 @@ export const DappTransaction = ({
       <div data-testid="dapp-transaction-container" className={styles.details}>
         {type === TxType.Mint && mintedAssets?.length > 0 && (
           <>
+            {/* <DappTxHeader
+              title={t('package.core.dappTransaction.transaction')}
+              subtitle={t('package.core.dappTransaction.mint')}
+            /> */}
             <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
-            <TransactionOrigin label="Origin" origin="Wingriders" />
+            <TransactionOrigin label="Origin" origin={dappInfo.name} />
             {mintedAssets.map((asset) => (
               <DappTxAsset key={asset.name} {...asset} />
             ))}
@@ -80,8 +87,12 @@ export const DappTransaction = ({
         )}
         {type === TxType.Mint && burnedAssets?.length > 0 && (
           <>
+            {/* <DappTxHeader
+              title={mintedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
+              subtitle={t('package.core.dappTransaction.burn')}
+            /> */}
             <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
-            <TransactionOrigin label="Origin" origin="Wingriders" />
+            <TransactionOrigin label="Origin" origin={dappInfo.name} />
             {burnedAssets.map((asset) => (
               <DappTxAsset key={asset.name} {...asset} />
             ))}
@@ -90,7 +101,7 @@ export const DappTransaction = ({
         {type === TxType.Send && (
           <>
             <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
-            <TransactionOrigin label="Origin" origin="Wingriders" />
+            <TransactionOrigin label="Origin" origin={dappInfo.name} />
             <DappTransactionSummary
               title="Transaction Summary"
               cardanoSymbol={coinSymbol}
@@ -100,9 +111,9 @@ export const DappTransaction = ({
         )}
 
         {/* Add new fee */}
-        {fee && fee !== '-' && (
+        {txFee && txFee !== '-' && (
           <TransactionFee
-            fee={fee}
+            fee={txFee}
             amountTransformer={(ada: string) =>
               `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
             }
