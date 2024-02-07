@@ -1,6 +1,6 @@
 import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, ThemeColorScheme, Variants } from '@lace/ui';
 
-import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
+import { SortDirection, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
 import { useState } from 'react';
 import type { Meta } from '@storybook/react';
 
@@ -13,23 +13,23 @@ export default {
 
 const Wrapper = ({ visibleSection: inVisibleSection }: { visibleSection: VisibleSection }) => {
   const [visibleSection, setVisibleSection] = useState(inVisibleSection);
-  const [sortedBy, setSortedBy] = useState(SortField.saturation);
+  const [sortAndDirection, setSortAndDirection] = useState<StakePoolSortOptions>({
+    field: 'saturation',
+    order: SortDirection.asc,
+  });
   const [filters, setFilters] = useState<FilterValues>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
     [PoolsFilter.Performance]: ['', ''],
     [PoolsFilter.Ros]: [''],
   });
-  const [direction, setDirection] = useState(SortDirection.asc);
 
   return (
     <SortAndFilter
-      onSortChange={setSortedBy}
+      onSortAndDirectionChange={setSortAndDirection}
       onFiltersChange={setFilters}
-      onDirectionChange={setDirection}
       onVisibleSectionChange={setVisibleSection}
-      sortedBy={sortedBy}
-      direction={direction}
+      sortAndDirection={sortAndDirection}
       filters={filters}
       visibleSection={visibleSection}
     />

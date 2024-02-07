@@ -1,9 +1,10 @@
 /* eslint-disable no-magic-numbers */
+import { Wallet } from '@lace/cardano';
 import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
 import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
 import { Box, Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
 import cn from 'classnames';
-import { SortDirection, SortField } from 'features/BrowsePools/StakePoolsTable/types';
+import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,27 +13,24 @@ import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortOption, Visi
 
 export interface SortAndFilterProps {
   visibleSection: VisibleSection;
-  sortedBy: SortField;
-  direction: SortDirection;
+  sortAndDirection: StakePoolSortOptions;
   filters: FilterValues;
-  onSortChange: (sortBy: SortField) => void;
-  onDirectionChange: (direction: SortDirection) => void;
+  onSortAndDirectionChange: (value: StakePoolSortOptions) => void;
   onFiltersChange: (filters: FilterValues) => void;
   onVisibleSectionChange: (section: VisibleSection) => void;
 }
 
 export const SortAndFilter = ({
   visibleSection,
-  direction,
   filters,
-  sortedBy,
-  onDirectionChange,
-  onSortChange,
+  sortAndDirection,
   onFiltersChange,
   onVisibleSectionChange,
+  onSortAndDirectionChange,
 }: SortAndFilterProps) => {
   const { t } = useTranslation();
   const [localFilters, setLocalFilters] = useState<FilterValues>(filters);
+  const { field: sortBy, order: direction } = sortAndDirection;
 
   const debouncedFilterChange = useMemo(() => debounce(onFiltersChange, 400), [onFiltersChange]);
   const onLocalFilterChange = (key: PoolsFilter, optIndex: number, value: string) => {
@@ -45,8 +43,12 @@ export const SortAndFilter = ({
   };
 
   const onIconClick = useCallback(() => {
-    onDirectionChange(direction === SortDirection.desc ? SortDirection.asc : SortDirection.desc);
-  }, [direction, onDirectionChange]);
+    const newSort: StakePoolSortOptions = {
+      field: sortBy,
+      order: direction === SortDirection.desc ? SortDirection.asc : SortDirection.desc,
+    };
+    onSortAndDirectionChange(newSort);
+  }, [direction, onSortAndDirectionChange, sortBy]);
 
   const getFilters = (filter: FilterOption): React.ReactElement => {
     if (filter.type === 'input') {
@@ -183,8 +185,13 @@ export const SortAndFilter = ({
           <RadioButtonGroup
             className={styles.radioGroup}
             options={sortingOptions}
-            selectedValue={sortedBy}
-            onValueChange={(value) => onSortChange(value as SortField)}
+            selectedValue={sortBy}
+            onValueChange={(value) =>
+              onSortAndDirectionChange({
+                field: value as Wallet.SortField,
+                order: direction,
+              })
+            }
           />
         ) : (
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">
