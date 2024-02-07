@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof ParameterChangeAction> = {
-  title: 'ProposalProcedure/ParameterChangeAction',
+  title: 'Sanchonet/Proposal Procedures/ParameterChangeAction',
   component: ParameterChangeAction,
   parameters: {
     layout: 'centered',

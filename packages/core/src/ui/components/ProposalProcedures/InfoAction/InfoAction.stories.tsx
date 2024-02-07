@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof InfoAction> = {
-  title: 'ProposalProcedure/InfoAction',
+  title: 'Sanchonet/Proposal Procedures/InfoAction',
   component: InfoAction,
   parameters: {
     layout: 'centered',

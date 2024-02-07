@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof UpdateCommitteeAction> = {
-  title: 'ProposalProcedure/UpdateCommitteeAction',
+  title: 'Sanchonet/Proposal Procedures/UpdateCommitteeAction',
   component: UpdateCommitteeAction,
   parameters: {
     layout: 'centered',

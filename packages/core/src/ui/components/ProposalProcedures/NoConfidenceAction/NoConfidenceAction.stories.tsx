@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof NoConfidenceAction> = {
-  title: 'ProposalProcedure/NoConfidenceAction',
+  title: 'Sanchonet/Proposal Procedures/NoConfidenceAction',
   component: NoConfidenceAction,
   parameters: {
     layout: 'centered',

@@ -3,11 +3,25 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { VotingProcedures } from './VotingProcedures';
 import { ComponentProps } from 'react';
 
+const customViewports = {
+  popup: {
+    name: 'Popup',
+    styles: {
+      width: '360px',
+      height: '600'
+    }
+  }
+};
+
 const meta: Meta<typeof VotingProcedures> = {
-  title: 'VotingProcedures',
+  title: 'Sanchonet/Voting/Procedures',
   component: VotingProcedures,
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
+    viewport: {
+      viewports: customViewports,
+      defaultViewport: 'popup'
+    }
   }
 };
 
@@ -82,7 +96,7 @@ export const MultipleVotes: Story = {
       {
         voter: {
           type: 'DRep',
-          dRepId: 'drep1cs234l5mtapethapx8cq97nkpa27xf84phruh5f6jqxa78ymlp4'
+          dRepId: 'drep1cs234l5mtapethapx8cq97nkpa27xf84phruh5f6jqxa78ymlp5'
         },
         votes: [
           {

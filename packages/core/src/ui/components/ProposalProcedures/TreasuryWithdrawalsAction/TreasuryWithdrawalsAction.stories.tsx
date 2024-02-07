@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof TreasuryWithdrawalsAction> = {
-  title: 'ProposalProcedure/TreasuryWithdrawalsAction',
+  title: 'Sanchonet/Proposal Procedures/TreasuryWithdrawalsAction',
   component: TreasuryWithdrawalsAction,
   parameters: {
     layout: 'centered',

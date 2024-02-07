@@ -3,11 +3,25 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ConfirmVoteRegistrationDelegation } from './ConfirmVoteRegistrationDelegation';
 import { ComponentProps } from 'react';
 
+const customViewports = {
+  popup: {
+    name: 'Popup',
+    styles: {
+      width: '360px',
+      height: '600'
+    }
+  }
+};
+
 const meta: Meta<typeof ConfirmVoteRegistrationDelegation> = {
-  title: 'ConfirmVoteRegistrationDelegation',
+  title: 'Sanchonet/Certificates/ConfirmVoteRegistrationDelegation',
   component: ConfirmVoteRegistrationDelegation,
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
+    viewport: {
+      viewports: customViewports,
+      defaultViewport: 'popup'
+    }
   }
 };
 
