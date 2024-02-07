@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AutoSuggestBox } from '@lace/ui';
 import { CoSigner, ValidateAddress } from './type';
 import { useCoSignerInput } from './hooks';
