@@ -59,21 +59,12 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
 
   useEffect(() => {
-    // Fetch pools on mount, network switching, searchValue change and sort change
-    debouncedSearch({ searchString: searchValue, sort });
     setDelegationPreferencePersistence({
       ...delegationPreferencePersistence,
       searchQuery: searchValue,
       sortOptions: sort,
     });
-  }, [
-    currentChain,
-    searchValue,
-    sort,
-    debouncedSearch,
-    setDelegationPreferencePersistence,
-    delegationPreferencePersistence,
-  ]);
+  }, [delegationPreferencePersistence, searchValue, setDelegationPreferencePersistence, sort]);
 
   useEffect(() => {
     if (componentRef?.current) {
