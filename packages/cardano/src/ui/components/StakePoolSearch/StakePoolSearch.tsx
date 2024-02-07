@@ -104,9 +104,9 @@ const renderIcon = (
   saturation?: string | number,
   isStakingPool?: boolean
 ) => {
-  const notSaturated = saturation < 90;
-  const gettingSaturated = saturation >= 90 && saturation <= 100;
-  const saturated = saturation >= 100 && saturation <= 110;
+  const notSaturated = Number(saturation) < 90;
+  const gettingSaturated = Number(saturation) >= 90 && Number(saturation) <= 100;
+  const saturated = Number(saturation) >= 100 && Number(saturation) <= 110;
 
   const iconColor = gettingSaturated ? '#FDC300' : saturated ? '#FF8E3C' : '#FF5470';
   const saturationTooltip = gettingSaturated
@@ -197,7 +197,7 @@ export const StakePoolSearch = ({
         onBlur={() => setShowRemove(false)}
         // eslint-disable-next-line unicorn/no-null
         notFoundContent={null}
-        dropdownClassName={styles.dropdown}
+        popupClassName={styles.dropdown}
         dropdownAlign={{ offset: [SELECT_DROPDOWN_OFFSET_X, SELECT_DROPDOWN_OFFSET_Y] }}
         getPopupContainer={() => document.querySelector('#stakepool-search-bar')}
         placement="bottomLeft"

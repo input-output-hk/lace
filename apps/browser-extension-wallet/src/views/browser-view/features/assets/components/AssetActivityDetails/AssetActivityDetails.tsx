@@ -6,7 +6,7 @@ import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
 
 export interface AssetActivityDetailsProps {
-  afterVisibleChange: (visible: boolean) => void;
+  afterOpenChange: (visible: boolean) => void;
   appMode: AppMode;
   onBack: () => void;
   onClose: () => void;
@@ -14,7 +14,7 @@ export interface AssetActivityDetailsProps {
 }
 
 export const AssetActivityDetails = ({
-  afterVisibleChange,
+  afterOpenChange,
   appMode,
   onBack,
   onClose,
@@ -25,8 +25,8 @@ export const AssetActivityDetails = ({
 
   return (
     <Drawer
-      afterVisibleChange={afterVisibleChange}
-      visible={isVisible}
+      afterOpenChange={afterOpenChange}
+      open={isVisible}
       onClose={onClose}
       navigation={<DrawerNavigation onCloseIconClick={onClose} onArrowIconClick={onBack} />}
       popupView={appMode === APP_MODE_POPUP}

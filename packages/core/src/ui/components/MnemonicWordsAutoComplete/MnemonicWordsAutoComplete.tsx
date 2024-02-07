@@ -98,7 +98,7 @@ export const MnemonicWordsAutoComplete = ({
   return (
     <MnemonicWordContainer ref={containerRef} number={idx}>
       <AutoComplete
-        dropdownClassName={styles.dropdown}
+        popupClassName={styles.dropdown}
         className={styles.autoComplete}
         options={options}
         onSearch={handleSearch}

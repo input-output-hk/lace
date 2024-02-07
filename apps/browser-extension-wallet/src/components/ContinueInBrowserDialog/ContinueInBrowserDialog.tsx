@@ -30,7 +30,7 @@ export const ContinueInBrowserDialog = ({
     closable={false}
     // eslint-disable-next-line unicorn/no-null
     footer={null}
-    visible={visible}
+    open={visible}
     width={HW_POPUPS_WIDTH}
     className={styles.continueInBrowser}
   >

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
-import { Variants } from '../decorators';
+import * as Variants from '../decorators/variants-table';
 
 interface Props {
   children: React.ReactNode;

@@ -43,7 +43,7 @@ export const ErrorDialog = ({ visible, onRetry, errorCode = 'common' }: ErrorDia
       closable={false}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible}
+      open={visible}
       width={420}
       className={styles.errorDialog}
     >

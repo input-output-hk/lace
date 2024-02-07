@@ -3,7 +3,7 @@ import React from 'react';
 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
-import { Text } from '../';
+import * as Text from '../typography';
 
 import * as cx from './dialog-title.css';
 
