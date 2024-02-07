@@ -12,6 +12,7 @@ export const input = style({
   background: 'transparent',
   color: vars.colors.$input_value_color,
   position: 'relative',
+  pointerEvents: 'all',
   selectors: {
     '&:focus, &:not(:placeholder-shown)': {
       top: vars.spacing.$8,

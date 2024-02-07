@@ -16,10 +16,11 @@ interface Context<SuggestionType extends SuggestionBaseType> {
   isSuggesting: boolean;
   isCloseButton: boolean;
   filteredSuggestions: SuggestionType[];
+  closeSuggestions: () => void;
   onPickedSuggestionClick: () => void;
   onSuggestionClick: (value: string) => void;
   onInputChange: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
-  onButtonClick: (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
+  onButtonClick: () => void;
 }
 
 export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
@@ -68,13 +69,15 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
       setValue(event.target.value);
       setIsSuggesting(true);
     },
-    onButtonClick: (event): void => {
-      event.preventDefault();
+    onButtonClick: (): void => {
       if (isCloseButton) {
         setValue('');
         setPickedSuggestion(undefined);
       }
       setIsSuggesting(!isCloseButton);
+    },
+    closeSuggestions: (): void => {
+      setIsSuggesting(false);
     },
   };
 };

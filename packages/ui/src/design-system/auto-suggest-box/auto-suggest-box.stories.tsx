@@ -6,6 +6,7 @@ import type { ComponentStory, Meta } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { sleep } from '../../test';
 import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
@@ -218,6 +219,8 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
 
   userEvent.click(canvas.getByTestId('auto-suggest-box-button-open'));
 
+  await sleep();
+
   expect(
     await canvas.findByTestId('auto-suggest-box-suggestion-apple'),
   ).toBeInTheDocument();
@@ -238,6 +241,8 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
     delay: 100,
   });
 
+  await sleep();
+
   expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('ra');
 
   expect(
@@ -256,13 +261,19 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
     canvas.queryByTestId('auto-suggest-box-suggestion-pear'),
   ).not.toBeInTheDocument();
 
+  userEvent.click(canvas.getByTestId('auto-suggest-box-input'));
+
   userEvent.click(canvas.getByTestId('auto-suggest-box-button-close'));
+
+  await sleep();
 
   expect(await canvas.findByTestId('auto-suggest-box-input')).toHaveValue('');
 };
 
 SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
   const canvas = within(canvasElement);
+
+  await sleep();
 
   userEvent.click(canvas.getByTestId('auto-suggest-box-button-open'));
 
@@ -282,6 +293,8 @@ SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
     await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
   ).toBeInTheDocument();
 
+  await sleep();
+
   await userEvent.type(canvas.getByTestId('auto-suggest-box-input'), 'ra', {
     delay: 100,
   });
@@ -303,6 +316,8 @@ SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
   expect(
     canvas.queryByTestId('auto-suggest-box-suggestion-pear'),
   ).not.toBeInTheDocument();
+
+  await sleep();
 
   userEvent.click(canvas.getByTestId('auto-suggest-box-suggestion-orange'));
 

@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import * as Popover from '@radix-ui/react-popover';
+import * as Select from '@radix-ui/react-select';
 import cn from 'classnames';
 
 import { Box } from '../box';
@@ -63,6 +64,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     isSuggesting,
     filteredSuggestions,
     pickedSuggestion,
+    closeSuggestions,
     onButtonClick,
     onInputChange,
     onSuggestionClick,
@@ -75,81 +77,93 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
 
   return (
     <Popover.Root open={isSuggesting}>
-      <Box>
-        <Popover.Anchor>
-          <Flex
-            justifyContent="space-between"
-            className={cn(cx.container, {
-              [cx.isSuggesting]: isSuggesting,
-            })}
-          >
-            <Box w="$fill">
-              <Input
-                id={id}
-                value={value}
-                pickedSuggestion={
-                  pickedSuggestion ? (
-                    <div
-                      onClick={onPickedSuggestionClick}
-                      className={cxSuggestion.pickedSuggesion}
-                      data-testid="auto-suggest-box-picked-suggestion"
-                    >
-                      <PickedSuggestionComponent {...pickedSuggestion} />
-                    </div>
-                  ) : undefined
-                }
-                label={label}
-                required={required}
-                disabled={disabled}
-                name={name}
-                onChange={onInputChange}
-              />
-            </Box>
-            <Flex alignItems="center">
-              <Icon status={validationStatus} />
-              <Button
-                disabled={disabled}
-                isCloseButton={isCloseButton}
-                onButtonClick={onButtonClick}
-              />
-            </Flex>
-          </Flex>
-        </Popover.Anchor>
-        {Boolean(errorMessage) && (
-          <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
-        )}
-      </Box>
-
-      <Popover.Content
-        className={cx.popover}
-        avoidCollisions={false}
-        onOpenAutoFocus={(event): void => {
-          event.preventDefault();
-        }}
-      >
-        <ScrollArea
-          classNames={{
-            root: cx.scrollArea,
-            viewport: cx.scrollAreaViewport,
-            bar: cx.scrollBar,
-          }}
+      <Popover.Anchor>
+        <Flex
+          justifyContent="space-between"
+          className={cn(cx.container, {
+            [cx.isSuggesting]: isSuggesting,
+          })}
         >
-          <Box data-testid="auto-suggest-box-suggestions">
-            {filteredSuggestions.map(props => (
-              <div
-                key={props.value}
-                data-testid={`auto-suggest-box-suggestion-${props.value}`}
-                className={cx.suggestion}
-                onClick={(): void => {
-                  onSuggestionClick(props.value);
+          <Box w="$fill">
+            <Input
+              id={id}
+              value={value}
+              pickedSuggestion={
+                pickedSuggestion ? (
+                  <div
+                    onClick={onPickedSuggestionClick}
+                    className={cxSuggestion.pickedSuggesion}
+                    data-testid="auto-suggest-box-picked-suggestion"
+                  >
+                    <PickedSuggestionComponent {...pickedSuggestion} />
+                  </div>
+                ) : undefined
+              }
+              label={label}
+              required={required}
+              disabled={disabled}
+              name={name}
+              onChange={onInputChange}
+            />
+          </Box>
+          <Flex alignItems="center">
+            <Icon status={validationStatus} />
+            <Button
+              disabled={disabled}
+              isCloseButton={isCloseButton}
+              onButtonClick={onButtonClick}
+            />
+          </Flex>
+        </Flex>
+      </Popover.Anchor>
+      {Boolean(errorMessage) && (
+        <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
+      )}
+      <Select.Root open={isSuggesting}>
+        <Select.Content onPointerDownOutside={closeSuggestions}>
+          <Select.Viewport>
+            <Popover.Content
+              className={cx.popover}
+              avoidCollisions={false}
+              onOpenAutoFocus={(event): void => {
+                if (value) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <ScrollArea
+                classNames={{
+                  root: cx.scrollArea,
+                  viewport: cx.scrollAreaViewport,
+                  bar: cx.scrollBar,
                 }}
               >
-                <SuggestionComponent {...props} />
-              </div>
-            ))}
-          </Box>
-        </ScrollArea>
-      </Popover.Content>
+                <Box data-testid="auto-suggest-box-suggestions">
+                  {filteredSuggestions.map(props => (
+                    <Select.Item
+                      data-testid={`auto-suggest-box-suggestion-${props.value}`}
+                      tabIndex={0}
+                      key={props.value}
+                      value={props.value}
+                      className={cx.suggestion}
+                      onClick={(): void => {
+                        onSuggestionClick(props.value);
+                      }}
+                      onKeyDown={(event): void => {
+                        if (event.code === 'Enter') {
+                          onSuggestionClick(props.value);
+                        }
+                      }}
+                    >
+                      <SuggestionComponent {...props} />
+                    </Select.Item>
+                  ))}
+                </Box>
+              </ScrollArea>
+            </Popover.Content>
+          </Select.Viewport>
+        </Select.Content>
+      </Select.Root>
     </Popover.Root>
   );
 };

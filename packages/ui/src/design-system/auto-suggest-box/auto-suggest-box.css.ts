@@ -42,6 +42,11 @@ export const suggestion = style([
       backgroundColor: vars.colors.$auto_suggest_border_color,
       borderRadius: vars.radius.$medium,
     },
+    ':focus': {
+      backgroundColor: vars.colors.$auto_suggest_border_color,
+      borderRadius: vars.radius.$medium,
+      outline: 'none',
+    },
   },
 ]);
 
