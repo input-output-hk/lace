@@ -1,4 +1,4 @@
-import { globalStyle, style, vars } from '@lace/ui';
+import { style, vars } from '@lace/ui';
 import { theme } from 'features/theme';
 
 export const wrapper = style([
@@ -9,19 +9,6 @@ export const wrapper = style([
     marginTop: '-3px',
     paddingTop: '3px',
     width: '100%',
-  },
-]);
-
-globalStyle(`${wrapper} .ant-list-items`, {
-  paddingTop: '3px',
-});
-
-export const listItemWrapper = style([
-  {
-    alignItems: 'center',
-    borderBottom: 'none !important',
-    height: vars.spacing.$44,
-    padding: 0,
   },
 ]);
 
