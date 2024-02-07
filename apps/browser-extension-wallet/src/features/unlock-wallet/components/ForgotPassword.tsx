@@ -38,7 +38,7 @@ export const ForgotPassword = ({ onForgotPasswordClick }: UnlockWalletProps): Re
         closable={false}
         // eslint-disable-next-line unicorn/no-null
         footer={null}
-        visible={isModalVisible}
+        open={isModalVisible}
         width={HW_POPUPS_WIDTH}
         className={styles.modal}
       >

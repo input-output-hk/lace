@@ -91,11 +91,10 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   );
 
   useEffect(() => {
-    if (componentRef?.current) {
-      // Fetch pools on network switching, searchValue change and sort change
-      setIsDrawerVisible(false);
-      resetStakePools();
-    }
+    if (!componentRef?.current) return;
+    // Fetch pools on network switching, searchValue change and sort change
+    setIsDrawerVisible(false);
+    resetStakePools();
   }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible, resetStakePools]);
 
   const onSearch = (searchString: string) => {
