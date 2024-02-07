@@ -419,6 +419,10 @@ const colors: Colors = {
   $stake_pool_item_bg_hover: lightColorScheme.$primary_light_grey,
   $stake_pool_header_text_color: lightColorScheme.$primary_dark_grey,
   $stake_pool_item_text_color: lightColorScheme.$primary_black,
+
+  $info_bar_container_bgColor: lightColorScheme.$secondary_cream,
+  $info_bar_icon_color: lightColorScheme.$secondary_data_pink,
+  $info_bar_message_color: lightColorScheme.$primary_black,
 };
 
 export const elevation: Elevation = {
