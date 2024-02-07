@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
+import useResizeObserver from 'use-resize-observer';
 import { StakePoolCardSkeleton } from '../../StakePoolCard';
 import { StakePoolsListRowProps } from '../StakePoolsList/types';
 import { Grid } from './Grid';
@@ -37,6 +38,7 @@ export const StakePoolsGrid = ({
 }: StakePoolsGridProps) => {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
+  const { width: containerWidth } = useResizeObserver<HTMLDivElement>({ ref });
   const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType>();
 
   const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1023 });
@@ -67,14 +69,9 @@ export const StakePoolsGrid = ({
     [getNumberOfItemsInRow]
   );
 
-  // TODO: consider using resize-observer instead
   useEffect(() => {
-    window.addEventListener('resize', debouncedGetNumberOfItemsInRow);
     debouncedGetNumberOfItemsInRow();
-    return () => {
-      window.removeEventListener('resize', debouncedGetNumberOfItemsInRow);
-    };
-  }, [debouncedGetNumberOfItemsInRow]);
+  }, [containerWidth, debouncedGetNumberOfItemsInRow]);
 
   const poolsLength = pools.length;
   const selectedPoolsLength = selectedPools?.length;

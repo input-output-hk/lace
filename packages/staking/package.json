@@ -62,6 +62,7 @@
     "react-responsive": "^9.0.2",
     "react-virtuoso": "^4.6.3",
     "recharts": "^2.9.2",
+    "use-resize-observer": "^9.1.0",
     "zustand": "^4.4.1"
   },
   "devDependencies": {
