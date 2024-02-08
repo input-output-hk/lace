@@ -33,12 +33,12 @@ export const useWalletActivities = ({
     fetchWalletActivities();
   }, [
     fetchWalletActivities,
-    walletState.transactions.history,
-    walletState.transactions.outgoing.inFlight,
-    walletState.addresses,
-    walletState.assetInfo,
-    walletState.delegation.rewardsHistory,
-    walletState.eraSummaries
+    walletState?.transactions.history,
+    walletState?.transactions.outgoing.inFlight,
+    walletState?.addresses,
+    walletState?.assetInfo,
+    walletState?.delegation.rewardsHistory,
+    walletState?.eraSummaries
   ]);
 
   return {
