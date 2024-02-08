@@ -2,7 +2,6 @@ import webTester from '../actor/webTester';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
-import { AddressInput } from '../elements/addressInput';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 import nftsPageObject from './nftsPageObject';
@@ -13,25 +12,11 @@ import extensionUtils from '../utils/utils';
 import { byron, shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
-import AddressForm from '../elements/addressbook/AddressForm';
 import { generateRandomString } from '../utils/textUtils';
 import { AssetInput } from '../elements/newTransaction/assetInput';
+import { AddressInput } from '../elements/AddressInput';
 
 export default new (class NewTransactionExtendedPageObject {
-  fillAddress = async (address: string, index?: number) => {
-    // Workaround - native method setValue() is failing during filling multiple bundles
-    await browser.pause(500); // TODO: refactor AddressInput class and use waitForClickable() method
-    await $(new AddressInput(index).input().toJSLocator()).click();
-    await browser.execute(`document.execCommand('insertText', false, '${address}');`);
-    Logger.log(`Filled address: ${address}`);
-  };
-
-  fillAddressWithFirstChars = async (address: string, characters: number) => {
-    await browser.pause(500);
-    await webTester.fillComponent(TransactionNewPage.addressInput().input(), address.slice(0, characters));
-    await browser.pause(500);
-  };
-
   fillTokenValue = async (valueToEnter: number, assetName?: string, bundleIndex = 1) => {
     await browser.pause(400);
     await webTester.fillComponent(new CoinConfigure(bundleIndex, assetName).input(), String(valueToEnter));
@@ -67,10 +52,6 @@ export default new (class NewTransactionExtendedPageObject {
     const element = new CoinConfigure(bundleIndex, assetName).nameElement();
     await webTester.waitUntilSeeElement(element);
     await webTester.hoverOnWebElement(element);
-  };
-
-  addToAddress = async (value: string) => {
-    await $(new AddressInput().input().toJSLocator()).addValue(value);
   };
 
   clickCoinSelectorName = async (assetName: string, bundleIndex?: number) => {
@@ -127,11 +108,6 @@ export default new (class NewTransactionExtendedPageObject {
 
   clickCoinConfigureTokenSearchResult = async (tokenName: string) => {
     await webTester.clickElement(new TokenSearchResult(tokenName).container());
-  };
-
-  clickAddAddressButton = async (index?: number) => {
-    await AddressForm.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
-    await TransactionNewPage.addressInput(index).ctaButton.click();
   };
 
   clickRemoveBundleButton = async (outputIndex: number) => {
@@ -195,7 +171,7 @@ export default new (class NewTransactionExtendedPageObject {
   };
 
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
-    await this.fillAddress(byron.getAddress(), bundleIndex);
+    await new AddressInput(bundleIndex).fillAddress(byron.getAddress());
     await new AssetInput(bundleIndex).clickAddAssetButton();
     await this.clickCoinConfigureTokenSearchResult(
       extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name
@@ -211,7 +187,7 @@ export default new (class NewTransactionExtendedPageObject {
   async setTwoBundlesWithMultipleAssets() {
     await this.setTwoAssetsForBundle(1, 2, 1);
     await TransactionNewPage.addBundleButton.click();
-    await this.fillAddress(shelley.getAddress(), 2);
+    await new AddressInput(2).fillAddress(shelley.getAddress());
     await this.clickCoinSelectorName(Asset.CARDANO.ticker, 2);
     await this.clickNFTsButton();
     await nftsPageObject.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
@@ -229,7 +205,7 @@ export default new (class NewTransactionExtendedPageObject {
   }
 
   async setOneBundleWithMultipleAssets() {
-    await this.fillAddress(shelley.getAddress(), 1);
+    await new AddressInput(1).fillAddress(shelley.getAddress());
     await new AssetInput(1).clickAddAssetButton();
     await this.clickCoinConfigureTokenSearchResult(
       extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name

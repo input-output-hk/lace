@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { CoinConfigure } from './coinConfigure';
-import { AddressInput } from '../addressInput';
+import { AddressInput } from '../AddressInput';
 import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';

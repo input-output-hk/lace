@@ -7,6 +7,7 @@ import TransactionNewPage from '../../elements/newTransaction/transactionNewPage
 import { t } from '../../utils/translationService';
 import { CoinConfigure } from '../../elements/newTransaction/coinConfigure';
 import { AssetInput } from '../../elements/newTransaction/assetInput';
+import { AddressInput } from '../../elements/AddressInput';
 
 class TransactionBundleAssert {
   assertSeeBundles = async (expectedNumberOfBundles: number) => {
@@ -18,7 +19,7 @@ class TransactionBundleAssert {
         );
         await webTester.seeWebElement(bundle.bundleRemoveButton());
       }
-      await webTester.seeWebElement(bundle.bundleAddressInput().input());
+      await new AddressInput(i).input.waitForDisplayed();
       await coinConfigureAssert.assertSeeCoinConfigure();
       await assetInputAssert.assertSeeAssetInput(i);
     }
