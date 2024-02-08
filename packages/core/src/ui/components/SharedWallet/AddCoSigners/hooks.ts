@@ -17,7 +17,7 @@ export const useCoSignerInput = ({
   validationStatus: AutoSuggestBox.ValidationStatus;
   onInputChange: (address: string) => Promise<void>;
 } => {
-  const [validationStatus, setValidationState] = useState(AutoSuggestBox.ValidationStatus.Idle);
+  const [validationStatus, setValidationStatus] = useState(AutoSuggestBox.ValidationStatus.Idle);
   const [errorMessage, setErrorMessage] = useState('');
 
   return {
@@ -26,20 +26,20 @@ export const useCoSignerInput = ({
     onInputChange: async (value: string) => {
       if (!value) {
         onChange({ address: '', isValid: false });
-        setValidationState(AutoSuggestBox.ValidationStatus.Idle);
+        setValidationStatus(AutoSuggestBox.ValidationStatus.Idle);
         setErrorMessage('');
         return;
       }
-      setValidationState(AutoSuggestBox.ValidationStatus.Validading);
+      setValidationStatus(AutoSuggestBox.ValidationStatus.Validading);
       const result = await validateAddress(value);
 
       if (result.isValid) {
         onChange({ address: result.handleResolution || value, isValid: true });
-        setValidationState(AutoSuggestBox.ValidationStatus.Validated);
+        setValidationStatus(AutoSuggestBox.ValidationStatus.Validated);
         setErrorMessage('');
       } else {
         onChange({ address: value, isValid: false });
-        setValidationState(AutoSuggestBox.ValidationStatus.Idle);
+        setValidationStatus(AutoSuggestBox.ValidationStatus.Idle);
         setErrorMessage(errorString);
       }
     }

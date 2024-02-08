@@ -46,7 +46,7 @@ const validateAddress: ValidateAddress = async (address) => {
   if (!address) {
     return { isValid: false };
   }
-  if (address[0] === '$') {
+  if (address.startsWith('$')) {
     return new Promise((resolve) => {
       if (timeout) {
         clearTimeout(timeout);

@@ -112,60 +112,58 @@ const MainComponents = (): JSX.Element => (
 
 export const Overview = (): JSX.Element => {
   return (
-    <>
-      <Grid columns="$1">
-        <Section title="Copy for use">
-          <Grid columns="$2">
-            <Cell>
-              <Text.SubHeading>Classic item dropdown</Text.SubHeading>
-              <Flex flexDirection="column" w="$fill" my="$32">
-                <Box w="$420">
-                  <AutoSuggestBox
-                    suggestions={SUGGESTIONS}
-                    label="Auto suggest box"
-                  />
-                </Box>
-              </Flex>
-            </Cell>
-            <Cell>
-              <Text.SubHeading>3 item dropdown</Text.SubHeading>
-              <Flex flexDirection="column" w="$fill" my="$32">
-                <Box w="$420">
-                  <AutoSuggestBox
-                    suggestions={ADDRESS_SUGGESTIONS}
-                    label="Auto suggest box"
-                    suggestionComponent={Suggestion3Item}
-                    pickedSuggestionComponent={PickedSuggestion3Item}
-                  />
-                </Box>
-              </Flex>
-            </Cell>
-          </Grid>
-        </Section>
-        <Divider my="$64" />
-        <Section title="Main components">
+    <Grid columns="$1">
+      <Section title="Copy for use">
+        <Grid columns="$2">
           <Cell>
-            <Variants.Table
-              headers={[
-                'Rest',
-                'Hover',
-                'Active/Pressed',
-                'Error',
-                'Disabled',
-                'Focused',
-              ]}
-            >
+            <Text.SubHeading>Classic item dropdown</Text.SubHeading>
+            <Flex flexDirection="column" w="$fill" my="$32">
+              <Box w="$420">
+                <AutoSuggestBox
+                  suggestions={SUGGESTIONS}
+                  label="Auto suggest box"
+                />
+              </Box>
+            </Flex>
+          </Cell>
+          <Cell>
+            <Text.SubHeading>3 item dropdown</Text.SubHeading>
+            <Flex flexDirection="column" w="$fill" my="$32">
+              <Box w="$420">
+                <AutoSuggestBox
+                  suggestions={ADDRESS_SUGGESTIONS}
+                  label="Auto suggest box"
+                  suggestionComponent={Suggestion3Item}
+                  pickedSuggestionComponent={PickedSuggestion3Item}
+                />
+              </Box>
+            </Flex>
+          </Cell>
+        </Grid>
+      </Section>
+      <Divider my="$64" />
+      <Section title="Main components">
+        <Cell>
+          <Variants.Table
+            headers={[
+              'Rest',
+              'Hover',
+              'Active/Pressed',
+              'Error',
+              'Disabled',
+              'Focused',
+            ]}
+          >
+            <MainComponents />
+          </Variants.Table>
+          <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+            <Variants.Table>
               <MainComponents />
             </Variants.Table>
-            <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-              <Variants.Table>
-                <MainComponents />
-              </Variants.Table>
-            </LocalThemeProvider>
-          </Cell>
-        </Section>
-      </Grid>
-    </>
+          </LocalThemeProvider>
+        </Cell>
+      </Section>
+    </Grid>
   );
 };
 
