@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, PostHogAction } from '@lace/common';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -23,6 +24,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     walletStoreWalletType: walletType,
     submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
+    isMultidelegationSupportedByDevice,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
@@ -39,9 +41,16 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+
+    if (!isInMemory) {
+      const isSupported = await isMultidelegationSupportedByDevice(walletType);
+      if (!isSupported) {
+        throw new Error('MULTIDELEGATION_NOT_SUPPORTED');
+      }
+    }
     const signedTx = await delegationTxBuilder.build().sign();
     await inMemoryWallet.submitTx(signedTx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+  }, [delegationTxBuilder, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType]);
 
   const handleSubmission = useCallback(async () => {
     setOpenPoolsManagementConfirmationModal(null);
@@ -56,7 +65,10 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       await signAndSubmitTransaction();
       setIsRestaking(currentPortfolio.length > 0);
       portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
-    } catch {
+    } catch (error: any) {
+      if (error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
+        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+      }
       portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
     } finally {
       setIsConfirmingTx(false);

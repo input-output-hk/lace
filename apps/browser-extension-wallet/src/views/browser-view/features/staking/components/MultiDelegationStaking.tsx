@@ -15,6 +15,7 @@ import { ActivityDetail } from '../../activity';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { isMultidelegationSupportedByDevice } from '../helpers';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
@@ -125,7 +126,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
           setMultidelegationFirstVisitSincePortfolioPersistence(false);
         },
         walletAddress,
-        currentChain
+        currentChain,
+        isMultidelegationSupportedByDevice
       }}
     >
       <Staking currentChain={currentChain} theme={theme.name} />
