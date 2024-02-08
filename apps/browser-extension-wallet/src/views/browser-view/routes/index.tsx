@@ -89,10 +89,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const {
     walletInfo,
     isWalletLocked,
-    inMemoryWallet,
     setCardanoCoin,
     currentChain,
     setCurrentChain,
+    walletState,
     walletType,
     deletingWallet,
     stayOnAllDonePage,
@@ -168,7 +168,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
+  if (!isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted) {
     return (
       <>
         <Switch location={page || location}>

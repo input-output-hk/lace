@@ -1,6 +1,7 @@
 import { WalletType } from '@cardano-sdk/web-extension';
 import { BlockchainProviderSlice, SliceCreator, WalletInfoSlice } from '../types';
 import { Wallet } from '@lace/cardano';
+import { ObservableWalletState } from '@hooks/useWalletState';
 
 /**
  * has all wallet info related actions and states
@@ -14,6 +15,8 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   // Loaded wallet
   inMemoryWallet: undefined,
   cardanoWallet: undefined,
+  walletState: undefined,
+  setWalletState: (walletState?: ObservableWalletState) => set({ walletState }),
   walletManager: undefined,
   initialHdDiscoveryCompleted: false,
   isInMemoryWallet: undefined,

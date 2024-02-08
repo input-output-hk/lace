@@ -1,38 +1,31 @@
 /* eslint-disable unicorn/no-null */
+import { ObservableWalletState } from '@hooks/useWalletState';
 import { Wallet } from '@lace/cardano';
-import { Observable, combineLatest, firstValueFrom, map } from 'rxjs';
 
-interface Args {
-  transactionsHistory$: Observable<Wallet.Cardano.HydratedTx[]>;
-  addresses$: Observable<Wallet.WalletAddress[]>;
-}
+type Args = Pick<ObservableWalletState, 'addresses'> & {
+  transactions: Pick<ObservableWalletState['transactions'], 'history'>;
+};
 
 export const createHistoricalOwnInputResolver = ({
-  transactionsHistory$,
-  addresses$
+  transactions: { history: txs },
+  addresses
 }: Args): Wallet.Cardano.InputResolver => ({
-  resolveInput({ txId, index }: Wallet.Cardano.TxIn) {
-    return firstValueFrom(
-      combineLatest([transactionsHistory$, addresses$]).pipe(
-        map(([txs, addresses]) => {
-          for (const tx of txs) {
-            if (txId !== tx.id) {
-              continue;
-            }
-            const output = tx.body.outputs[index];
+  async resolveInput({ txId, index }: Wallet.Cardano.TxIn) {
+    for (const tx of txs) {
+      if (txId !== tx.id) {
+        continue;
+      }
+      const output = tx.body.outputs[index];
 
-            if (!output) {
-              console.error('Resolving utxo with invalid index', txId, index);
-              return null;
-            }
-            if (addresses.some(({ address }) => address === output.address)) {
-              return output;
-            }
-          }
+      if (!output) {
+        console.error('Resolving utxo with invalid index', txId, index);
+        return null;
+      }
+      if (addresses.some(({ address }) => address === output.address)) {
+        return output;
+      }
+    }
 
-          return null;
-        })
-      )
-    );
+    return null;
   }
 });
