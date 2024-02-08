@@ -21,7 +21,6 @@ import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
-  AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
   PostHogAction,
   postHogOnboardingActions,
@@ -36,7 +35,7 @@ import { passwordTranslationMap } from '../constants';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
@@ -76,8 +75,6 @@ const {
 } = Wallet;
 const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 
-const { WalletSetup: Events } = AnalyticsEventNames;
-
 export interface WalletSetupWizardProps {
   setupType: SetupType;
   onCancel: () => void;
@@ -113,7 +110,7 @@ export const WalletSetupWizard = ({
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
-  const { calculateTimeSpentOnPage, updateEnteredAtTime } = useTimeSpentOnPage();
+  const { updateEnteredAtTime } = useTimeSpentOnPage();
 
   const useDifferentMnemonicLengths = process.env.USE_DIFFERENT_MNEMONIC_LENGTHS === 'true';
 
@@ -260,13 +257,12 @@ export const WalletSetupWizard = ({
     const postHogAnalyticsAgreeAction = postHogOnboardingActions[setupType]?.ANALYTICS_AGREE_CLICK;
     const postHogAnalyticcSkipAction = postHogOnboardingActions[setupType]?.ANALYTICS_SKIP_CLICK;
 
-    const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
     const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticcSkipAction;
     const postHogProperties = {
       // eslint-disable-next-line camelcase
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
-    await sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
+    await sendAnalytics(postHogAction, postHogProperties);
     moveForward();
   };
 
@@ -345,18 +341,18 @@ export const WalletSetupWizard = ({
   const handleNamePasswordStepNextButtonClick = (result: { password: string; walletName: string }) => {
     setPassword(result.password);
     setWalletName(result.walletName);
-    sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK);
+    sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK);
     createFlowPasswordNextStep();
   };
 
   const handlePasswordStepNextButtonClick = (result: { password: string }) => {
-    sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType]?.WALLET_PASSWORD_NEXT_CLICK);
+    sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_PASSWORD_NEXT_CLICK);
     setPassword(result.password);
     createFlowPasswordNextStep();
   };
 
   const handleRegisterStepNextButtonClick = (result: { walletName: string }) => {
-    sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions[setupType]?.WALLET_NAME_NEXT_CLICK);
+    sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_NAME_NEXT_CLICK);
     setWalletName(result.walletName);
     moveForward();
   };
@@ -387,22 +383,13 @@ export const WalletSetupWizard = ({
             /* eslint-disable no-magic-numbers */
             switch (step) {
               case 0:
-                sendAnalytics(
-                  Events.MNEMONICS_INPUT_0_NEXT,
-                  postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK
-                );
+                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK);
                 break;
               case 1:
-                sendAnalytics(
-                  Events.MNEMONICS_INPUT_1_NEXT,
-                  postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK
-                );
+                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK);
                 break;
               case 2:
-                sendAnalytics(
-                  Events.MNEMONICS_INPUT_2_NEXT,
-                  postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK
-                );
+                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK);
             }
           }}
           isSubmitEnabled={isMnemonicSubmitEnabled}
@@ -425,36 +412,18 @@ export const WalletSetupWizard = ({
           switch (step) {
             case 0:
               stage === 'input'
-                ? sendAnalytics(
-                    Events.MNEMONICS_INPUT_0_NEXT,
-                    postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK
-                  )
-                : sendAnalytics(
-                    Events.MNEMONICS_WRITEDOWN_0_NEXT,
-                    postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_01_NEXT_CLICK
-                  );
+                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK)
+                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_01_NEXT_CLICK);
               break;
             case 1:
               stage === 'input'
-                ? sendAnalytics(
-                    Events.MNEMONICS_INPUT_1_NEXT,
-                    postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK
-                  )
-                : sendAnalytics(
-                    Events.MNEMONICS_WRITEDOWN_1_NEXT,
-                    postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_09_NEXT_CLICK
-                  );
+                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK)
+                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_09_NEXT_CLICK);
               break;
             case 2:
               stage === 'input'
-                ? sendAnalytics(
-                    Events.MNEMONICS_INPUT_2_NEXT,
-                    postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK
-                  )
-                : sendAnalytics(
-                    Events.MNEMONICS_WRITEDOWN_2_NEXT,
-                    postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_17_NEXT_CLICK
-                  );
+                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK)
+                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_17_NEXT_CLICK);
           }
           /* eslint-enable no-magic-numbers */
         }}
@@ -485,11 +454,7 @@ export const WalletSetupWizard = ({
         <WalletSetupLegalStep
           onBack={moveBack}
           onNext={() => {
-            sendAnalytics(
-              Events.LEGAL_STUFF_NEXT,
-              postHogOnboardingActions[setupType]?.LACE_TERMS_OF_USE_NEXT_CLICK,
-              calculateTimeSpentOnPage()
-            );
+            sendAnalytics(postHogOnboardingActions[setupType]?.LACE_TERMS_OF_USE_NEXT_CLICK);
             moveForward();
           }}
           translations={walletSetupLegalStepTranslations}
@@ -570,7 +535,7 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Finish && (
         <WalletSetupFinalStep
           onFinish={() => {
-            sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
+            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
             goToMyWallet();
           }}
           translations={walletSetupFinalStepTranslations}

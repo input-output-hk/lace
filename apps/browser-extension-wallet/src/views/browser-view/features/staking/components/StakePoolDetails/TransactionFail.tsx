@@ -11,12 +11,7 @@ import styles from './TransactionComplete.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { usePassword } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
 type TransactionFailProps = {
@@ -49,13 +44,6 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const analytics = useAnalyticsContext();
 
   const closeDrawer = () => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.Staking.STAKING_FAIL_POPUP
-        : AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER
-    });
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongCancelClick);
     setDelegationTxBuilder();
     setIsDrawerVisible(false);

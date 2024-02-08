@@ -22,12 +22,7 @@ import FolderIcon from '@assets/icons/new-folder-icon.component.svg';
 import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { getTokenList, NFT } from '@src/utils/get-token-list';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DetailsDrawer } from './DetailsDrawer';
 import { NFTFolderDrawer } from './CreateFolder/CreateFolderDrawer';
 import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext } from '@src/features/nfts/context';
@@ -93,11 +88,6 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const onSelectNft = useCallback(
     (nft) => {
       setSelectedNft(nft);
-      analytics.sendEventToMatomo({
-        category: MatomoEventCategories.VIEW_NFT,
-        action: MatomoEventActions.CLICK_EVENT,
-        name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_BROWSER
-      });
       analytics.sendEventToPostHog(PostHogAction.NFTsImageClick);
     },
     [analytics]
@@ -181,11 +171,6 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, [blockchainProvider]);
 
   const onSendAsset = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_NFT,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.ViewNFTs.SEND_NFT_BROWSER
-    });
     // eslint-disable-next-line camelcase
     analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     closeNftDetails();

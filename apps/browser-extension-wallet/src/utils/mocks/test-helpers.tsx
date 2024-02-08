@@ -14,7 +14,6 @@ import { EMPTY, Observable, of, Subject } from 'rxjs';
 import { PriceResult } from '@hooks';
 import { Percent } from '@cardano-sdk/util';
 import { UserIdService } from '@lib/scripts/types';
-import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
 import { PostHogClient } from '@providers/PostHogClientProvider/client';
 import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ObservableWalletState } from '@hooks/useWalletState';
@@ -636,13 +635,6 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   resetToDefaultValues: jest.fn()
 };
 
-export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
-  sendPageNavigationEvent: jest.fn(),
-  sendEvent: jest.fn(),
-  setChain: jest.fn(),
-  getMetadata: jest.fn()
-};
-
 export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
   sendEvent: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
@@ -657,7 +649,6 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {
-  sendEventToMatomo: jest.fn(),
   sendEventToPostHog: jest.fn(),
   setOptedInForEnhancedAnalytics: jest.fn(),
   sendPageNavigationEvent: jest.fn(),

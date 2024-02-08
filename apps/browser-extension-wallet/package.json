@@ -73,7 +73,6 @@
     "i18next": "20.4.0",
     "intersection-observer-polyfill": "0.1.0",
     "lodash": "4.17.21",
-    "matomo-tracker": "^2.2.4",
     "node-abort-controller": "^3.1.1",
     "p-debounce": "^4.0.0",
     "pluralize": "^8.0.0",

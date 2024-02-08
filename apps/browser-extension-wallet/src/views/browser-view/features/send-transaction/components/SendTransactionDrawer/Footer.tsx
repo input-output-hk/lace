@@ -25,15 +25,8 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useSendEvent } from '@hooks';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction,
-  TxCreationType,
-  TX_CREATION_TYPE_KEY
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { useHandleResolver, useNetwork } from '@hooks';
+import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
 import { clearTemporaryTxDataFromStorage, getTemporaryTxDataFromStorage } from '../../helpers';
@@ -45,8 +38,6 @@ import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
-
-const { SendTransaction: Events, AddressBook } = AnalyticsEventNames;
 
 export const nextStepBtnLabels: Partial<Record<Sections, string>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -77,7 +68,7 @@ export const Footer = withAddressBookContext(
     const triggerSubmit = () => confirmRef.current?.click();
     const { t } = useTranslation();
     const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
-    const { hasInvalidOutputs, outputMap } = useTransactionProps();
+    const { hasInvalidOutputs } = useTransactionProps();
     const { builtTxData } = useBuiltTxState();
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
@@ -92,19 +83,7 @@ export const Footer = withAddressBookContext(
     const { addressToEdit } = useAddressBookStore() as { addressToEdit: AddressBookSchema };
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
-    const sendEvent = useSendEvent(MatomoEventActions.CLICK_EVENT, MatomoEventCategories.SEND_TRANSACTION);
     const handleResolver = useHandleResolver();
-
-    const sendEventToMatomo = useCallback(
-      (name: string, value?: number) =>
-        analytics.sendEventToMatomo({
-          action: MatomoEventActions.CLICK_EVENT,
-          category: MatomoEventCategories.SEND_TRANSACTION,
-          name,
-          value
-        }),
-      [analytics]
-    );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -117,34 +96,29 @@ export const Footer = withAddressBookContext(
     const sendAnalytics = useCallback(() => {
       switch (currentSection.currentSection) {
         case Sections.FORM: {
-          sendEventToMatomo(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
           sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
           break;
         }
         case Sections.SUMMARY: {
-          sendEventToMatomo(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
           sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick);
           break;
         }
         case Sections.CONFIRMATION: {
-          sendEventToMatomo(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
           sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
           break;
         }
         case Sections.SUCCESS_TX: {
-          sendEventToMatomo(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
           sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
           break;
         }
         case Sections.UNAUTHORIZED_TX:
         case Sections.FAIL_TX: {
-          sendEventToMatomo(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
           sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
           break;
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentSection.currentSection, isPopupView, sendEventToMatomo]);
+    }, [currentSection.currentSection, isPopupView]);
 
     const handleReviewAddress = useCallback(
       (result: keyof typeof ACTIONS) => {
@@ -158,11 +132,6 @@ export const Footer = withAddressBookContext(
 
     const onHandleCancel = () => {
       // eslint-disable-next-line unicorn/no-null
-      if (action === ACTIONS.DELETE) {
-        sendEvent(isPopupView ? AddressBook.CANCEL_DELETE_ADDRESS_POPUP : AddressBook.CANCEL_DELETE_ADDRESS_BROWSER);
-      } else {
-        sendEvent(isPopupView ? AddressBook.CANCEL_UPDATE_ADDRESS_POPUP : AddressBook.CANCEL_UPDATE_ADDRESS_BROWSER);
-      }
       setSelectedId(null);
     };
 
@@ -171,17 +140,11 @@ export const Footer = withAddressBookContext(
       setSelectedId(null);
 
       if (action === 'DELETE') {
-        sendEvent(
-          isPopupView
-            ? AddressBook.CONFIRM_DELETE_UPDATE_ADDRESS_POPUP
-            : AddressBook.CONFIRM_DELETE_UPDATE_ADDRESS_BROWSER
-        );
         deleteAddress(selectedId, {
           text: t('browserView.addressBook.toast.deleteAddress'),
           icon: DeleteIcon
         });
       } else {
-        sendEvent(isPopupView ? AddressBook.CONFIRM_UPDATE_ADDRESS_POPUP : AddressBook.CONFIRM_UPDATE_ADDRESS_BROWSER);
         const addressToSave = await getAddressToSave({ address: addressToEdit, handleResolver });
         await updateAddress(selectedId, addressToSave, {
           text: t('browserView.addressBook.toast.editAddress'),
@@ -212,21 +175,17 @@ export const Footer = withAddressBookContext(
       try {
         await withSignTxConfirmation(signAndSubmitTransaction, password);
         // Send amount of bundles as value
-        sendEvent(isPopupView ? Events.TX_SUCCESS_POPUP : Events.TX_SUCCESS_BROWSER, outputMap.size);
         setSection({ currentSection: Sections.SUCCESS_TX });
         setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
       } catch (error) {
         if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
           if (isHwSummary) {
-            sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
             setSection({ currentSection: Sections.UNAUTHORIZED_TX });
             setSubmitingTxState({ isSubmitingTx: false });
           } else {
             setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
           }
         } else {
-          // TODO: identify the errors and give them a value to send it with the event and track it [LW-6497]
-          sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
           setSection({ currentSection: Sections.FAIL_TX });
           setSubmitingTxState({ isSubmitingTx: false });
         }
@@ -234,11 +193,8 @@ export const Footer = withAddressBookContext(
         removePassword();
       }
     }, [
-      isPopupView,
       isSubmitingTx,
-      outputMap,
       removePassword,
-      sendEvent,
       setSection,
       setSubmitingTxState,
       signAndSubmitTransaction,
@@ -249,7 +205,6 @@ export const Footer = withAddressBookContext(
     useEffect(() => {
       const onHardwareWalletDisconnect = (event: HIDConnectionEvent) => {
         if (event.device.opened) {
-          sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
           setSection({ currentSection: Sections.FAIL_TX });
           setSubmitingTxState({ isSubmitingTx: false });
         }
@@ -260,7 +215,7 @@ export const Footer = withAddressBookContext(
       return () => {
         navigator.hid.removeEventListener('disconnect', onHardwareWalletDisconnect);
       };
-    }, [sendEvent, setSection, setSubmitingTxState, isPopupView]);
+    }, [setSection, setSubmitingTxState, isPopupView]);
 
     const onConfirm = useCallback(() => {
       sendAnalytics();
