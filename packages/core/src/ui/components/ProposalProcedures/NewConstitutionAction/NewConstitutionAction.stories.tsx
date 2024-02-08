@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof NewConstitutionAction> = {
-  title: 'ProposalProcedure/NewConstitutionAction',
+  title: 'Sanchonet/Proposal Procedures/NewConstitutionAction',
   component: NewConstitutionAction,
   parameters: {
     layout: 'centered',

@@ -3,11 +3,25 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ConfirmDRepUpdate } from './ConfirmDRepUpdate';
 import { ComponentProps } from 'react';
 
+const customViewports = {
+  popup: {
+    name: 'Popup',
+    styles: {
+      width: '360px',
+      height: '600'
+    }
+  }
+};
+
 const meta: Meta<typeof ConfirmDRepUpdate> = {
-  title: 'ConfirmDRepUpdate',
+  title: 'Sanchonet/Certificates/ConfirmDRepUpdate',
   component: ConfirmDRepUpdate,
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
+    viewport: {
+      viewports: customViewports,
+      defaultViewport: 'popup'
+    }
   }
 };
 

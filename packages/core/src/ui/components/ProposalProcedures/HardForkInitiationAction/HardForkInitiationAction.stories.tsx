@@ -14,7 +14,7 @@ const customViewports = {
 };
 
 const meta: Meta<typeof HardForkInitiationAction> = {
-  title: 'ProposalProcedure/HardForkInitiationAction',
+  title: 'Sanchonet/Proposal Procedures/HardForkInitiationAction',
   component: HardForkInitiationAction,
   parameters: {
     layout: 'centered',
