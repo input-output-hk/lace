@@ -31,6 +31,13 @@ type KeysStructure = {
   };
   browsePools: {
     stakePoolTableBrowser: {
+      sortAndFilter: {
+        headers: {
+          sorting: '';
+          filters: '';
+          moreOptions: '';
+        };
+      };
       sortByTitle: {
         ticker: '';
         saturation: '';

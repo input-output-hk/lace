@@ -188,13 +188,19 @@ export const SortAndFilter = ({
   return (
     <Card.Outlined className={styles.card}>
       <Flex flexDirection="column" justifyContent="flex-start" alignItems="stretch" my="$32" mx="$32" gap="$20">
-        <Text.SubHeading weight="$bold">More options</Text.SubHeading>
+        <Text.SubHeading weight="$bold">
+          {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.moreOptions')}
+        </Text.SubHeading>
         <ToggleButtonGroup.Root
           value={visibleSection}
           onValueChange={(value) => onVisibleSectionChange(value as VisibleSection)}
         >
-          <ToggleButtonGroup.Item value="sorting">Sorting</ToggleButtonGroup.Item>
-          <ToggleButtonGroup.Item value="filtering">Filters</ToggleButtonGroup.Item>
+          <ToggleButtonGroup.Item value="sorting">
+            {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.sorting')}
+          </ToggleButtonGroup.Item>
+          <ToggleButtonGroup.Item value="filtering">
+            {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.filters')}
+          </ToggleButtonGroup.Item>
         </ToggleButtonGroup.Root>
         {visibleSection === 'sorting' ? (
           <RadioButtonGroup
