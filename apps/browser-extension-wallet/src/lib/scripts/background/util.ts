@@ -84,10 +84,18 @@ export const initMigrationState = async (): Promise<void> => {
   await webStorage.local.set(INITIAL_STORAGE);
 };
 
-export const getLastActiveTab: (url?: string) => Promise<Tabs.Tab> = async (url?: string) =>
-  await (
-    await tabs.query({ currentWindow: true, active: true, url })
-  )[0];
+export const getLastActiveTab: (url?: string) => Promise<Tabs.Tab> = async (url?: string) => {
+  try {
+    return await (
+      await tabs.query({ currentWindow: true, active: true, url })
+    )[0];
+  } catch {
+    // fallback if cannot match on URL
+    return await (
+      await tabs.query({ active: true, lastFocusedWindow: true })
+    )[0];
+  }
+};
 
 /**
  * getDappInfoFromLastActiveTab
