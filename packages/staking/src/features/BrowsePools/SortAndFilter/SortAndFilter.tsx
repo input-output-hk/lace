@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
 import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
-import { Box, Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
+import { Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
 import cn from 'classnames';
 import { Columns, SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
 import debounce from 'lodash/debounce';
@@ -214,7 +214,7 @@ export const SortAndFilter = ({
             {filterOptions.map((filter) => (
               <Flex flexDirection="column" m="$4" key={filter.title} alignItems="stretch">
                 <Text.Body.Small weight="$medium">{filter.title}</Text.Body.Small>
-                <Box>{getFilters(filter)}</Box>
+                {getFilters(filter)}
               </Flex>
             ))}
           </Flex>

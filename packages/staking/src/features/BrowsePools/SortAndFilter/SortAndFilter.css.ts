@@ -18,20 +18,14 @@ export const textBoxRight = style({
   borderTopRightRadius: 16,
 });
 
-export const radioGroup = style([
-  {
-    width: '$fill',
-  },
-]);
+export const radioGroup = sx({
+  width: '$fill',
+});
 
-export const selectGroup = style([
-  {
-    width: '$fill',
-  },
-]);
+export const selectGroup = sx({
+  width: '$fill',
+});
 
-export const card = style([
-  sx({
-    width: '$342',
-  }),
-]);
+export const card = sx({
+  width: '$342',
+});
