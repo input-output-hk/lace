@@ -71,12 +71,13 @@ const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEleme
 };
 
 export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactElement => {
-  const icon = type && activityTypeIcon[type];
+  const icon = (type && activityTypeIcon[type]) || RefreshOutlinedIcon;
   const iconStyle = { fontSize: txIconSize() };
 
   const isGovernanceTx =
     Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
-    type in ConwayEraGovernanceActions;
+    type in ConwayEraGovernanceActions ||
+    type in Cip1694GovernanceActivityType;
 
   return (
     <Flex

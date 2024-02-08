@@ -7,9 +7,10 @@ import {
   Cip1694GovernanceActivityType,
   ConwayEraCertificatesTypes
 } from '../ActivityDetail';
+import { ActivityStatus } from './AssetActivityItem';
 
 const meta: Meta<typeof AssetActivityList> = {
-  title: 'Activity/AssetActivityList',
+  title: 'Sanchonet/ActivityHistory/AssetActivityList',
   component: AssetActivityList,
   parameters: {
     layout: 'centered'
@@ -27,8 +28,8 @@ const activityTypes = [
   Cip1694GovernanceActivityType.ParameterChangeAction,
   Cip1694GovernanceActivityType.TreasuryWithdrawalsAction,
   Cip1694GovernanceActivityType.UpdateCommittee,
-  Cip1694GovernanceActivityType.InfoAction,
   ConwayEraCertificatesTypes.UpdateDelegateRepresentative,
+  Cip1694GovernanceActivityType.InfoAction,
   ConwayEraCertificatesTypes.StakeVoteDelegation,
   ConwayEraCertificatesTypes.StakeRegistrationDelegation,
   ConwayEraCertificatesTypes.VoteRegistrationDelegation,
@@ -45,6 +46,7 @@ const data: ComponentProps<typeof AssetActivityList> = {
     amount: '0.17 ADA',
     fiatAmount: '0.04 USD',
     type,
+    status: ActivityStatus.SUCCESS,
     formattedTimestamp: '00:00:00'
   }))
 };

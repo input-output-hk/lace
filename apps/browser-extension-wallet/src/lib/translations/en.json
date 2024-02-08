@@ -41,7 +41,10 @@
           "AuthorizeCommitteeHotCertificate": "Authorize Committee",
           "RegisterDelegateRepresentativeCertificate": "DRep Registration",
           "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
-          "VoteDelegationCertificate": "Vote Delegation"
+          "VoteDelegationCertificate": "Vote Delegation",
+          "StakeRegistrationDelegateCertificate": "Stake Registration Delegation Certificate",
+          "StakeVoteRegistrationDelegateCertificate": "Stake Vote Registration Delegation Certificate",
+          "VoteRegistrationDelegateCertificate": "Vote Registration Delegation Certificate"
         },
         "certificates": {
           "headings": {
