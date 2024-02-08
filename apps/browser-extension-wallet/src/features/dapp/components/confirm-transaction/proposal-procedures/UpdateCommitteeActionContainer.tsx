@@ -4,7 +4,7 @@ import { Wallet } from '@lace/cardano';
 import { UpdateCommitteeAction } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
-import { useCExpolorerBaseUrl } from '../hooks';
+import { useCexplorerBaseUrl } from '../hooks';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
@@ -28,7 +28,7 @@ export const UpdateCommitteeActionContainer = ({
     walletUI: { cardanoCoin }
   } = useWalletStore();
 
-  const explorerBaseUrl = useCExpolorerBaseUrl();
+  const explorerBaseUrl = useCexplorerBaseUrl();
 
   const translations = useMemo<Parameters<typeof UpdateCommitteeAction>[0]['translations']>(
     () => ({

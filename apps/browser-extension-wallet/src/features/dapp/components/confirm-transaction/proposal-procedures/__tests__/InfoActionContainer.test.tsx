@@ -5,7 +5,7 @@ const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockInfoAction = jest.fn(() => <span data-testid="InfoAction" />);
 const mockedCExpolorerBaseUrl = 'mockedCExpolorerBaseUrl';
-const mockUseCExpolorerBaseUrl = jest.fn(() => mockedCExpolorerBaseUrl);
+const mockuseCexplorerBaseUrl = jest.fn(() => mockedCExpolorerBaseUrl);
 import { Wallet } from '@lace/cardano';
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
@@ -37,7 +37,7 @@ jest.mock('../../hooks', () => {
   return {
     __esModule: true,
     ...original,
-    useCExpolorerBaseUrl: mockUseCExpolorerBaseUrl
+    useCexplorerBaseUrl: mockuseCexplorerBaseUrl
   };
 });
 

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { VotingProcedures } from '@lace/core';
 import { SignTxData } from './types';
 import { drepIDasBech32FromHash, votingProceduresInspector } from './utils';
-import { useCExpolorerBaseUrl } from './hooks';
+import { useCexplorerBaseUrl } from './hooks';
 import { VoterTypeEnum, getVote, getVoterType } from '@src/utils/tx-inspection';
 
 interface Props {
@@ -14,8 +14,7 @@ interface Props {
 export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const votingProcedures = votingProceduresInspector(signTxData.tx);
-
-  const explorerBaseUrl = useCExpolorerBaseUrl();
+  const explorerBaseUrl = useCexplorerBaseUrl();
 
   return (
     <VotingProcedures
