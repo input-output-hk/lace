@@ -323,9 +323,10 @@ class DrawerSendExtendedAssert {
   }
 
   assertSeeAddressWithNameInRecipientsAddressInput = async (address: string, name: string) => {
-    await webTester.waitUntilSeeElementContainingText(name);
     const text = await new AddressInput().container.getText();
-    expect(text).contains(address);
+    const splitText = text.split('\n');
+    expect(splitText[1]).equals(name);
+    expect(splitText[2]).endsWith(address);
   };
 
   assertSeeAddressNameInRecipientsAddressInput = async (expectedName: string) => {
