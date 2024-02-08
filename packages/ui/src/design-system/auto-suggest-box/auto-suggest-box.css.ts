@@ -28,8 +28,8 @@ export const isSuggesting = style({
   borderBottomColor: vars.colors.$auto_suggest_border_color,
 });
 
-export const popover = style({
-  zIndex: 10,
+export const selectContent = style({
+  zIndex: 1000,
 });
 
 export const suggestion = style([

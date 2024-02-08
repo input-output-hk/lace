@@ -77,7 +77,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
 
   return (
     <Popover.Root open={isSuggesting}>
-      <Popover.Anchor>
+      <Popover.Anchor asChild>
         <Flex
           justifyContent="space-between"
           className={cn(cx.container, {
@@ -120,10 +120,13 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
         <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
       )}
       <Select.Root open={isSuggesting}>
-        <Select.Content onPointerDownOutside={closeSuggestions}>
-          <Select.Viewport>
+        <Select.Content
+          asChild
+          className={cx.selectContent}
+          onPointerDownOutside={closeSuggestions}
+        >
+          <Select.Viewport asChild>
             <Popover.Content
-              className={cx.popover}
               avoidCollisions={false}
               onOpenAutoFocus={(event): void => {
                 if (value) {
