@@ -11,6 +11,7 @@ import { page, Variants, Section } from '../decorators';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 
+import { TransactionAssets } from './dapp-transaction-assets.component';
 import { TransactionOrigin } from './dapp-transaction-origin.component';
 import { TransactionSummary } from './dapp-transaction-summary.component';
 import { TransactionType } from './dapp-transaction-type.component';
@@ -34,35 +35,66 @@ const Layout = ({
 );
 
 const items = [
+  // {
+  //   key: '',
+  //   value: {
+  //     amount: BigInt(-2),
+  //     assetInfo: {
+  //       assetId:
+  //         '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a757696e67526964657273',
+  //       fingerprint: 'asset1sjk0uucljv4qxxnhq8gjy7r5mar64erhfuh4q8',
+  //       name: '57696e67526964657273',
+  //       nftMetadata: null,
+  //       policyId: '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a7',
+  //       quantity: BigInt(1),
+  //       supply: BigInt(1),
+  //       tokenMetadata: {
+  //         assetId:
+  //           '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a757696e67526964657273',
+  //         decimals: 6,
+  //         desc: 'WingRiders is a decentralized exchange protocol on Cardano. WRT provides access to dao voting and other DEX related functions.',
+  //         icon: '',
+  //         name: 'WingRiders Preprod Governance Token',
+  //         ticker: 'tWRT',
+  //         url: 'https://app.preprod.wingriders.com',
+  //       },
+  //     },
+  //   },
+  // },
   {
     imageSrc: token1,
     balance: '-200.00',
     tokenName: 'Maui',
     metadataHash: '#3442348',
+    recipient: '',
   },
   {
     imageSrc: '',
     balance: '-10.00',
     tokenName: 'HairMaui',
     metadataHash: '#3438888',
+    recipient: '',
   },
   {
     imageSrc: token2,
     balance: '-1000.00',
     tokenName: 'Lapisluzzz',
     metadataHash: '#3430008',
+    recipient: '',
   },
   {
     imageSrc: token3,
     balance: '-1078.00',
     tokenName: 'HawaiSand',
     metadataHash: '#3430008',
+    recipient: '',
   },
   {
     imageSrc: '',
     balance: '-20780.00',
     tokenName: 'HelloSand',
     metadataHash: '#3430008',
+    recipient: '',
   },
 ];
 
@@ -79,8 +111,16 @@ const Example = (): JSX.Element => (
       <TransactionSummary
         title="Transaction Summary"
         transactionAmount="-100.00"
-        items={items}
       />
+      {items.map(value => (
+        <TransactionAssets
+          key={value.metadataHash}
+          imageSrc={value.imageSrc}
+          balance={value.balance}
+          tokenName={value.tokenName}
+          metadataHash={value.metadataHash}
+        />
+      ))}
     </Flex>
   </Layout>
 );
@@ -95,8 +135,16 @@ const MainComponents = (): JSX.Element => (
           <TransactionSummary
             title="Transaction Summary"
             transactionAmount="-100.00"
-            items={items}
           />
+          {items.map(value => (
+            <TransactionAssets
+              key={value.metadataHash}
+              imageSrc={value.imageSrc}
+              balance={value.balance}
+              tokenName={value.tokenName}
+              metadataHash={value.metadataHash}
+            />
+          ))}
         </Layout>
       </Variants.Cell>
     </Variants.Row>

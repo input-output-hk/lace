@@ -25,8 +25,13 @@ import {
   AssetsMintedInspection,
   MintedAsset,
   TransactionSummaryInspection,
-  transactionSummaryInspector
+  transactionSummaryInspector,
+  tokenTransferInspector,
+  TokenTransferInspection,
+  Cardano,
+  TokenTransferValue
 } from '@cardano-sdk/core';
+import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
 import type { UserPromptService } from '@lib/scripts/background/services';
@@ -35,7 +40,7 @@ import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-informati
 import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
-import { signingCoordinator } from '@lib/wallet-api-ui';
+import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
 const DAPP_TOAST_DURATION = 50;
@@ -112,16 +117,20 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
 
+  const [fromAddressTokens, setFromAddressTokens] = useState<
+    Map<Cardano.PaymentAddress, TokenTransferValue> | undefined
+  >();
+  const [toAddressTokens, setToAddressTokens] = useState<Map<Cardano.PaymentAddress, TokenTransferValue> | undefined>();
   const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
     TransactionSummaryInspection | undefined
   >();
 
-  // const txInputResolver = useMemo(() => createInputResolver({ utxo: inMemoryWallet.utxo }), [inMemoryWallet.utxo]);
   const txInputResolver = useMemo(
     () =>
       combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: inMemoryWallet.chainHistoryProvider }),
     [inMemoryWallet]
   );
+
   console.log('transactioninspecion details:', transactionInspectionDetails);
   useEffect(() => {
     fetchNetworkInfo();
@@ -269,10 +278,27 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       setTransactionInspectionDetails(void 0);
       return;
     }
+
+    const tx = req.transaction.toCore();
+
     const getTxSummary = async () => {
       const inspector = createTxInspector({
         minted: assetsMintedInspector,
         burned: assetsBurnedInspector,
+        tokenTransfer: tokenTransferInspector({
+          inputResolver: txInputResolver,
+          fromAddressAssetProvider: createWalletAssetProvider({
+            assetProvider,
+            assetInfo$: inMemoryWallet.assetInfo$,
+            logger
+          }),
+          toAddressAssetProvider: createWalletAssetProvider({
+            assetProvider,
+            assetInfo$: inMemoryWallet.assetInfo$,
+            tx,
+            logger
+          })
+        }),
         summary: transactionSummaryInspector({
           addresses: userAddresses,
           rewardAccounts: rewardAccountsAddresses,
@@ -282,9 +308,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         })
       });
 
-      const tx = req.transaction.toCore();
-      const { minted, burned, summary } = await inspector(tx as Wallet.Cardano.HydratedTx);
+      const { minted, burned, summary, tokenTransfer } = await inspector(tx as Wallet.Cardano.HydratedTx);
 
+      const { toAddress, fromAddress } = tokenTransfer;
+      setToAddressTokens(toAddress);
+      setFromAddressTokens(fromAddress);
       const isMintTransaction = minted.length > 0 || burned.length > 0;
 
       const txType = isMintTransaction ? 'Mint' : 'Send';
@@ -332,7 +360,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     rewardAccountsAddresses,
     txInputResolver,
     protocolParameters,
-    assetProvider
+    assetProvider,
+    inMemoryWallet.assetInfo$
   ]);
 
   const onConfirm = () => {
@@ -349,9 +378,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
-  console.log('utxo:', inMemoryWallet?.utxo?.available$);
-  console.log('chainHistoryProvider:', inMemoryWallet?.chainHistoryProvider);
-
   return (
     <div className={styles.transactionContainer}>
       {req && txSummary && transactionInspectionDetails ? (
@@ -362,6 +388,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           coinSymbol={cardanoCoin.symbol}
           newTxSummary={transactionInspectionDetails}
           dappInfo={dappInfo}
+          fromAddress={fromAddressTokens}
+          toAddress={toAddressTokens}
         />
       ) : (
         <Skeleton loading />

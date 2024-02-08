@@ -4,8 +4,8 @@ import { Ellipsis } from '@lace/common';
 import { useTranslate } from '@src/ui/hooks';
 
 export interface DappTxAssetProps {
-  name: string;
   amount: string;
+  name: string;
   ticker?: string;
 }
 
