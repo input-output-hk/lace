@@ -16,6 +16,7 @@ import {
   useDelegationPortfolioStore,
 } from '../store';
 import { StakePoolConfirmationContent, StakePoolConfirmationFooter } from './confirmation';
+import { HwDeviceFail, HwDeviceFailFooter } from './HwDeviceFail';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
@@ -101,6 +102,7 @@ export const Drawer = ({
       [DrawerManagementStep.Sign]: <SignConfirmation />,
       [DrawerManagementStep.Success]: <TransactionSuccess />,
       [DrawerManagementStep.Failure]: <TransactionFail />,
+      [DrawerManagementStep.HwDeviceFailure]: <HwDeviceFail />,
     }),
     [popupView]
   );
@@ -142,6 +144,7 @@ export const Drawer = ({
       [DrawerManagementStep.Sign]: <SignConfirmationFooter />,
       [DrawerManagementStep.Success]: <TransactionSuccessFooter />,
       [DrawerManagementStep.Failure]: <TransactionFailFooter />,
+      [DrawerManagementStep.HwDeviceFailure]: <HwDeviceFailFooter />,
     }),
     [
       activeDelegationFlow,
