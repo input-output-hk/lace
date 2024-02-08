@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable no-console */
 /* eslint-disable sonarjs/no-duplicate-string */
 import React from 'react';
@@ -26,8 +27,8 @@ import {
   TransactionType,
   TransactionOrigin,
   DappTransactionSummary,
-  TransactionAssets
-  // SummaryExpander
+  TransactionAssets,
+  SummaryExpander
 } from '@lace/ui';
 
 export enum TxType {
@@ -160,23 +161,49 @@ export const DappTransaction = ({
                 metadataHash={assetWithAmmount.assetInfo.nftMetadata?.name}
               />
             ))}
-            {/* 
+
             <SummaryExpander title="To address">
-              {[...assets].map(([key, assetWithAmmount]: [string, AssetInfoWithAmount]) => (
+              {groupedToAddresses.tokens.map((token) => (
                 <TransactionAssets
-                  key={key}
-                  imageSrc={assetWithAmmount.assetInfo.tokenMetadata.icon}
-                  balance={Wallet.util.lovelacesToAdaString(assetWithAmmount.amount.toString())}
-                  tokenName={assetWithAmmount.assetInfo.name}
-                  metadataHash={assetWithAmmount.assetInfo.nftMetadata?.name}
+                  key={token.assetInfo.fingerprint}
+                  imageSrc={token.assetInfo.tokenMetadata.icon}
+                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                  tokenName={token.assetInfo.name}
                 />
               ))}
-            </SummaryExpander> */}
+              {groupedToAddresses.nfts.map((token) => (
+                <TransactionAssets
+                  key={token.assetInfo.fingerprint}
+                  imageSrc={token.assetInfo.tokenMetadata.icon}
+                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                  tokenName={token.assetInfo.name}
+                  metadataHash={token.assetInfo.nftMetadata?.name}
+                />
+              ))}
+            </SummaryExpander>
+
+            <SummaryExpander title="From address">
+              {groupedFromAddresses.tokens.map((token) => (
+                <TransactionAssets
+                  key={token.assetInfo.fingerprint}
+                  imageSrc={token.assetInfo.tokenMetadata.icon}
+                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                  tokenName={token.assetInfo.name}
+                  metadataHash={token.assetInfo.nftMetadata?.name}
+                />
+              ))}
+              {groupedFromAddresses.nfts.map((token) => (
+                <TransactionAssets
+                  key={token.assetInfo.fingerprint}
+                  imageSrc={token.assetInfo.tokenMetadata.icon}
+                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                  tokenName={token.assetInfo.name}
+                  metadataHash={token.assetInfo.nftMetadata?.name}
+                />
+              ))}
+            </SummaryExpander>
           </>
         )}
-
-        {groupedToAddresses.tokens.map(token) => (<>...</>)}
-        {groupedToAddresses.nfts.map(token) => (<>...</>)}
 
         {/* Display fee */}
         {txFee && txFee !== '-' && (
