@@ -102,17 +102,12 @@ When(
   }
 );
 
+// TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  switch (expectedResult) {
-    case 'An': {
-      await commonAssert.assertSeeElementWithText((await t(expectedText)) ?? expectedText);
-      break;
-    }
-    case 'No': {
-      await commonAssert.assertDontSeeElementWithText((await t(expectedText)) ?? expectedText);
-      break;
-    }
-  }
+  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
+    timeout: 5000,
+    reverse: expectedResult === 'No'
+  });
 });
 
 Then(
