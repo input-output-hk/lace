@@ -1,10 +1,9 @@
 /* eslint-disable no-magic-numbers */
-import { Wallet } from '@lace/cardano';
 import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
 import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
 import { Box, Card, Flex, RadioButtonGroup, SelectGroup, Text, TextBox, ToggleButtonGroup } from '@lace/ui';
 import cn from 'classnames';
-import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
+import { Columns, SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -49,6 +48,22 @@ export const SortAndFilter = ({
     };
     onSortAndDirectionChange(newSort);
   }, [direction, onSortAndDirectionChange, sortBy]);
+
+  const onSortChange = useCallback(
+    (field: Columns) => {
+      // TODO: remove once updated on sdk side (LW-9530)
+      if (!Object.keys(SortField).includes(field)) {
+        console.debug(`Sort not supported by ${field}`);
+        return;
+      }
+      const newSort: StakePoolSortOptions = {
+        field: field as unknown as SortField,
+        order: direction,
+      };
+      onSortAndDirectionChange(newSort);
+    },
+    [direction, onSortAndDirectionChange]
+  );
 
   const getFilters = (filter: FilterOption): React.ReactElement => {
     if (filter.type === 'input') {
@@ -95,44 +110,44 @@ export const SortAndFilter = ({
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ticker'),
         onIconClick,
-        value: SortField.ticker,
+        value: Columns.ticker,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
         onIconClick,
-        value: SortField.saturation,
+        value: Columns.saturation,
       },
-      { icon, label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros'), onIconClick, value: SortField.ros },
+      { icon, label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros'), onIconClick, value: Columns.apy },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.cost'),
         onIconClick,
-        value: SortField.cost,
+        value: Columns.cost,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.margin'),
         onIconClick,
-        value: SortField.margin,
+        value: Columns.margin,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.blocks'),
         onIconClick,
-        value: SortField.blocks,
+        value: Columns.blocks,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.pledge'),
         onIconClick,
-        value: SortField.pledge,
+        value: Columns.pledge,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.livestake'),
         onIconClick,
-        value: SortField.livestake,
+        value: Columns.liveStake,
       },
     ];
   }, [direction, onIconClick, t]);
@@ -186,12 +201,7 @@ export const SortAndFilter = ({
             className={styles.radioGroup}
             options={sortingOptions}
             selectedValue={sortBy}
-            onValueChange={(value) =>
-              onSortAndDirectionChange({
-                field: value as Wallet.SortField,
-                order: direction,
-              })
-            }
+            onValueChange={(value) => onSortChange(value as Columns)}
           />
         ) : (
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">

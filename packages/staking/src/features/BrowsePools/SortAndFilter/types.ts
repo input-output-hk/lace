@@ -1,4 +1,4 @@
-import { SortField } from '../StakePoolsTable/types';
+import { Columns } from '../StakePoolsTable/types';
 
 export enum PoolsFilter {
   Saturation = 'SATURATION',
@@ -9,7 +9,7 @@ export enum PoolsFilter {
 
 export type SortOption = {
   label: string;
-  value: SortField;
+  value: Columns;
   icon: React.ReactNode;
   onIconClick?: () => void;
 };

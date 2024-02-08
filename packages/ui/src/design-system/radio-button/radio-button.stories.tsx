@@ -5,7 +5,6 @@ import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDow
 import type { Meta } from '@storybook/react';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
-import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
