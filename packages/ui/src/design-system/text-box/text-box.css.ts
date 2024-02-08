@@ -57,8 +57,10 @@ globalStyle(`${container}:has(${input}:disabled)`, {
 
 globalStyle(`${container}:has(${input}:hover:not(:disabled))`, {
   outline: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
+  outlineOffset: -2,
 });
 
 globalStyle(`${container}:has(${input}:focus)`, {
   outline: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
+  outlineOffset: -3,
 });
