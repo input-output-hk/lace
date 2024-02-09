@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Box, Flex, Button, Text, TextBox } from '@lace/ui';
 import { Drawer, DrawerNavigation } from '@lace/common';
-import { ACCOUNT_NAME_MAX_LENGTH } from '../../config';
+import { ACCOUNT_NAME_MAX_LENGTH } from './config';
 
 export type Props = {
   isPopup?: boolean;
@@ -11,6 +10,12 @@ export type Props = {
   hide: () => void;
   name: string;
   index: number;
+  translations: {
+    title: string;
+    inputLabel: string;
+    save: string;
+    cancel: string;
+  };
 };
 
 export const EditAccountDrawer = ({
@@ -19,9 +24,9 @@ export const EditAccountDrawer = ({
   visible,
   onSave,
   hide,
-  isPopup = false
+  isPopup = false,
+  translations
 }: Props): React.ReactElement => {
-  const { t } = useTranslation();
   const [currentName, setCurrentName] = useState(name);
 
   return (
@@ -39,26 +44,26 @@ export const EditAccountDrawer = ({
               disabled={name === currentName || currentName === '' || currentName === undefined}
               onClick={() => onSave(currentName)}
               data-testid="edit-account-save-btn"
-              label={t('account.edit.footer.save')}
+              label={translations.save}
             />
           </Box>
           <Button.Secondary
             w="$fill"
             onClick={hide}
             data-testid="edit-account-cancel-btn"
-            label={t('account.edit.footer.cancel')}
+            label={translations.cancel}
           />
         </Flex>
       }
     >
       <div data-testid="edit-account">
         <Box mb="$16">
-          <Text.SubHeading weight="$bold">{t('account.edit.title')}</Text.SubHeading>
+          <Text.SubHeading weight="$bold">{translations.title}</Text.SubHeading>
         </Box>
         <TextBox
           data-testid="edit-account-name-input"
           containerStyle={{ width: '100%' }}
-          label={t('account.edit.input.label')}
+          label={translations.inputLabel}
           defaultValue={name}
           maxLength={ACCOUNT_NAME_MAX_LENGTH}
           onChange={(e) => setCurrentName(e.target.value.trim())}
