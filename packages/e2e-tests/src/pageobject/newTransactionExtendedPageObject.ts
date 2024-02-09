@@ -130,7 +130,7 @@ export default new (class NewTransactionExtendedPageObject {
   };
 
   clickAddAddressButton = async (index?: number) => {
-    await AddressForm.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await AddressForm.searchLoader.waitForClickable({ reverse: true, timeout: 5000 });
     await TransactionNewPage.addressInput(index).ctaButton.click();
   };
 
