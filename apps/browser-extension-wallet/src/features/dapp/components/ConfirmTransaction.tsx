@@ -9,10 +9,7 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
-import {
-  // networkInfoStatusSelector,
-  useWalletStore
-} from '@stores';
+import { useWalletStore } from '@stores';
 import { AddressListType } from '@views/browser/features/activity';
 import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '@src/utils/constants';
@@ -26,8 +23,7 @@ import {
   MintedAsset,
   TransactionSummaryInspection,
   transactionSummaryInspector,
-  tokenTransferInspector,
-  TokenTransferInspection,
+  // tokenTransferInspector,
   Cardano,
   TokenTransferValue
 } from '@cardano-sdk/core';
@@ -43,6 +39,7 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
+import { chainHistoryHttpProvider } from '@cardano-sdk/cardano-services-client';
 const DAPP_TOAST_DURATION = 50;
 
 const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
@@ -101,8 +98,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     fetchNetworkInfo
   } = useWalletStore();
 
-  // const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
-
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
   const { priceResult } = useFetchCoinPrice();
@@ -125,9 +120,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     TransactionSummaryInspection | undefined
   >();
 
+  const newHistoryProvider = new chainHistoryHttpProvider({ baseUrl, logger });
+
   const txInputResolver = useMemo(
     () =>
-      combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: inMemoryWallet.chainHistoryProvider }),
+      // pass the chainHistoryprovider here
+      combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newHistoryProvider }),
     [inMemoryWallet]
   );
 

@@ -5,23 +5,12 @@ import React from 'react';
 import { ErrorPane } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWithAmount } from '@cardano-sdk/core';
+import { Typography } from 'antd';
 
-import {
-  // DappInfo,
-  DappInfoProps
-} from '../DappInfo';
+import { DappInfoProps } from '../DappInfo';
 
-// import { DappTxHeader } from './DappTxHeader/DappTxHeader';
-import {
-  // DappTxAsset,
-  DappTxAssetProps
-} from './DappTxAsset/DappTxAsset';
-import {
-  // DappTxOutput,
-  DappTxOutputProps
-} from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
-// import { useTranslate } from '@src/ui/hooks';
+
 import { TransactionFee } from '@ui/components/ActivityDetail';
 import {
   TransactionType,
@@ -42,11 +31,7 @@ export enum TxType {
 }
 
 type TransactionDetails = {
-  fee: string;
-  outputs: DappTxOutputProps[];
   type: 'Mint' | 'Send';
-  mintedAssets?: DappTxAssetProps[];
-  burnedAssets?: DappTxAssetProps[];
 };
 
 export interface DappTransactionProps {
@@ -64,6 +49,8 @@ export interface DappTransactionProps {
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
 }
+
+const { Title } = Typography;
 
 const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValue>) => {
   const groupedAddresses: { nfts: Array<AssetInfoWithAmount>; tokens: Array<AssetInfoWithAmount> } = {
@@ -86,11 +73,13 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
   return groupedAddresses;
 };
 
+const tokenName = (assetWithAmount: AssetInfoWithAmount) =>
+  assetWithAmount.assetInfo.nftMetadata !== null
+    ? assetWithAmount.assetInfo.nftMetadata.name
+    : assetWithAmount.assetInfo.tokenMetadata.ticker;
+
 export const DappTransaction = ({
-  transaction: {
-    type
-    // mintedAssets, burnedAssets
-  },
+  transaction: { type },
   newTxSummary: { assets, coins, fee },
   toAddress,
   fromAddress,
@@ -100,7 +89,6 @@ export const DappTransaction = ({
   coinSymbol,
   dappInfo
 }: DappTransactionProps): React.ReactElement => {
-  // const { t } = useTranslate();
   console.log('dapp transaction 2', assets, toAddress, fromAddress);
 
   const totalAmount = Wallet.util.lovelacesToAdaString(coins.toString());
@@ -109,40 +97,11 @@ export const DappTransaction = ({
   const groupedToAddresses = groupAddresses(toAddress);
   const groupedFromAddresses = groupAddresses(fromAddress);
 
-  // So there shouldnt be a need here for mint/burn inspection, we can know what each addres is getting and losing by just checking at the inputs and outputs
-  // if a token is minted for example, it will be listed in the toAddress of one of the address as it is required to be placed somewhere
-  // if a token is burn, then we will see it in the fromAddress of some address (but no destination as there is none)
-
+  console.log('grouped addresses:', groupedToAddresses);
   return (
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
-        {/* {type === TxType.Mint && mintedAssets?.length > 0 && (
-          <> */}
-        {/* <DappTxHeader
-              title={t('package.core.dappTransaction.transaction')}
-              subtitle={t('package.core.dappTransaction.mint')}
-            /> */}
-        {/* <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
-            <TransactionOrigin label="Origin" origin={dappInfo.name} />
-            {mintedAssets.map((asset) => (
-              <DappTxAsset key={asset.name} {...asset} />
-            ))}
-          </>
-        )} */}
-        {/* {type === TxType.Mint && burnedAssets?.length > 0 && (
-          <> */}
-        {/* <DappTxHeader
-              title={mintedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
-              subtitle={t('package.core.dappTransaction.burn')}
-            /> */}
-        {/* <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
-            <TransactionOrigin label="Origin" origin={dappInfo.name} />
-            {burnedAssets.map((asset) => (
-              <DappTxAsset key={asset.name} {...asset} />
-            ))}
-          </>
-        )} */}
         {type === TxType.Send && (
           <>
             <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
@@ -152,68 +111,88 @@ export const DappTransaction = ({
               cardanoSymbol={coinSymbol}
               transactionAmount={totalAmount}
             />
-            {[...assets].map(([key, assetWithAmmount]: [string, AssetInfoWithAmount]) => (
+            {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => (
               <TransactionAssets
                 key={key}
-                imageSrc={assetWithAmmount.assetInfo.tokenMetadata.icon}
-                balance={Wallet.util.lovelacesToAdaString(assetWithAmmount.amount.toString())}
-                tokenName={assetWithAmmount.assetInfo.name}
-                metadataHash={assetWithAmmount.assetInfo.nftMetadata?.name}
+                imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
+                balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
+                tokenName={tokenName(assetWithAmount)}
+                metadataHash={assetWithAmount.assetInfo.nftMetadata?.name}
               />
             ))}
 
+            {/* Display fee */}
+            {txFee && txFee !== '-' && (
+              <TransactionFee
+                fee={txFee}
+                amountTransformer={(ada: string) =>
+                  `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+                }
+                coinSymbol={coinSymbol}
+              />
+            )}
+
             <SummaryExpander title="To address">
-              {groupedToAddresses.tokens.map((token) => (
-                <TransactionAssets
-                  key={token.assetInfo.fingerprint}
-                  imageSrc={token.assetInfo.tokenMetadata.icon}
-                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                  tokenName={token.assetInfo.name}
-                />
-              ))}
-              {groupedToAddresses.nfts.map((token) => (
-                <TransactionAssets
-                  key={token.assetInfo.fingerprint}
-                  imageSrc={token.assetInfo.tokenMetadata.icon}
-                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                  tokenName={token.assetInfo.name}
-                  metadataHash={token.assetInfo.nftMetadata?.name}
-                />
-              ))}
+              {groupedToAddresses.tokens.length > 0 && (
+                <>
+                  <Title level={5}>Tokens</Title>
+                  {groupedToAddresses.tokens.map((token) => (
+                    <TransactionAssets
+                      key={token.assetInfo.fingerprint}
+                      imageSrc={token.assetInfo.tokenMetadata.icon}
+                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                      tokenName={token.assetInfo.tokenMetadata.ticker}
+                    />
+                  ))}
+                </>
+              )}
+              {groupedToAddresses.nfts.length > 0 && (
+                <>
+                  <Title level={5}>NFTs</Title>
+                  {groupedToAddresses.nfts.map((token) => (
+                    <TransactionAssets
+                      key={token.assetInfo.fingerprint}
+                      imageSrc={token.assetInfo.tokenMetadata.icon}
+                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                      tokenName={token.assetInfo.name}
+                      metadataHash={token.assetInfo.nftMetadata?.name}
+                    />
+                  ))}
+                </>
+              )}
             </SummaryExpander>
 
             <SummaryExpander title="From address">
-              {groupedFromAddresses.tokens.map((token) => (
-                <TransactionAssets
-                  key={token.assetInfo.fingerprint}
-                  imageSrc={token.assetInfo.tokenMetadata.icon}
-                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                  tokenName={token.assetInfo.name}
-                  metadataHash={token.assetInfo.nftMetadata?.name}
-                />
-              ))}
-              {groupedFromAddresses.nfts.map((token) => (
-                <TransactionAssets
-                  key={token.assetInfo.fingerprint}
-                  imageSrc={token.assetInfo.tokenMetadata.icon}
-                  balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                  tokenName={token.assetInfo.name}
-                  metadataHash={token.assetInfo.nftMetadata?.name}
-                />
-              ))}
+              {groupedFromAddresses.tokens.length > 0 && (
+                <>
+                  <Title level={5}>Tokens</Title>
+                  {groupedFromAddresses.tokens.map((token) => (
+                    <TransactionAssets
+                      key={token.assetInfo.fingerprint}
+                      imageSrc={token.assetInfo.tokenMetadata.icon}
+                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                      tokenName={token.assetInfo.tokenMetadata.ticker}
+                      metadataHash={token.assetInfo.nftMetadata?.name}
+                    />
+                  ))}
+                </>
+              )}
+              {groupedFromAddresses.nfts.length > 0 && (
+                <>
+                  <Title level={5}>NFTs</Title>
+                  {groupedFromAddresses.nfts.map((token) => (
+                    <TransactionAssets
+                      key={token.assetInfo.fingerprint}
+                      imageSrc={token.assetInfo.tokenMetadata.icon}
+                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                      tokenName={token.assetInfo.name}
+                      metadataHash={token.assetInfo.nftMetadata?.name}
+                    />
+                  ))}
+                </>
+              )}
             </SummaryExpander>
           </>
-        )}
-
-        {/* Display fee */}
-        {txFee && txFee !== '-' && (
-          <TransactionFee
-            fee={txFee}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
-            coinSymbol={coinSymbol}
-          />
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@ import { Cardano } from '@cardano-sdk/core';
 
 interface CombinedInputResolverArgs {
   utxo: Wallet.ObservableWallet['utxo'];
-  chainHistoryProvider: Wallet.ObservableWallet['chainHistoryProvider'];
+  chainHistoryProvider?: any;
 }
 
 export const combinedInputResolver = ({

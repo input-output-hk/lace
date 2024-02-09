@@ -35,32 +35,6 @@ const Layout = ({
 );
 
 const items = [
-  // {
-  //   key: '',
-  //   value: {
-  //     amount: BigInt(-2),
-  //     assetInfo: {
-  //       assetId:
-  //         '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a757696e67526964657273',
-  //       fingerprint: 'asset1sjk0uucljv4qxxnhq8gjy7r5mar64erhfuh4q8',
-  //       name: '57696e67526964657273',
-  //       nftMetadata: null,
-  //       policyId: '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a7',
-  //       quantity: BigInt(1),
-  //       supply: BigInt(1),
-  //       tokenMetadata: {
-  //         assetId:
-  //           '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a757696e67526964657273',
-  //         decimals: 6,
-  //         desc: 'WingRiders is a decentralized exchange protocol on Cardano. WRT provides access to dao voting and other DEX related functions.',
-  //         icon: '',
-  //         name: 'WingRiders Preprod Governance Token',
-  //         ticker: 'tWRT',
-  //         url: 'https://app.preprod.wingriders.com',
-  //       },
-  //     },
-  //   },
-  // },
   {
     imageSrc: token1,
     balance: '-200.00',
