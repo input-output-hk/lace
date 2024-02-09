@@ -228,6 +228,13 @@ export const useWalletManager = (): UseWalletManager => {
   const backgroundService = useBackgroundServiceAPIContext();
   const userIdService = getUserIdService();
 
+  const getCurrentChainId = useCallback(() => {
+    if (currentChain) return currentChain;
+    // reading stored chain name to preserve network for forgot password flow, or when migrating a locked wallet
+    const storedChain = getValueFromLocalStorage('appSettings');
+    return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
+  }, [currentChain]);
+
   const tryMigrateToWalletRepository = useCallback(async (): Promise<
     AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] | undefined
   > => {
@@ -264,14 +271,15 @@ export const useWalletManager = (): UseWalletManager => {
     );
 
     await walletManager.activate({
-      chainId: keyAgentData.chainId,
+      // when wallet is locked before migration, keyAgentData.chainId is the default one instead of last active one
+      chainId: getCurrentChainId(),
       walletId,
       accountIndex: keyAgentData.accountIndex,
       provider
     });
 
     return firstValueFrom(walletRepository.wallets$);
-  }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock]);
+  }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock, getCurrentChainId]);
 
   /**
    * Loads wallet from storage.
@@ -395,11 +403,9 @@ export const useWalletManager = (): UseWalletManager => {
       };
 
       const walletId = await walletRepository.addWallet(addWalletProps);
-      // reading stored chain name to preserve network for forgot password flow
-      const storedChain = getValueFromLocalStorage('appSettings');
       await walletManager.activate({
         walletId,
-        chainId: currentChain || (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID,
+        chainId: getCurrentChainId(),
         accountIndex,
         provider
       });
@@ -425,7 +431,7 @@ export const useWalletManager = (): UseWalletManager => {
         }
       };
     },
-    [currentChain]
+    [getCurrentChainId]
   );
 
   /**
