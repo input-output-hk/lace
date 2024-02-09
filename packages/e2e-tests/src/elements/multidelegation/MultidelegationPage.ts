@@ -348,13 +348,13 @@ class MultidelegationPage {
         await this.columnHeaderCost.moveTo();
         break;
       case 'Margin':
-        await this.columnHeaderMargin.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderMargin.moveTo();
         break;
       case 'Blocks':
-        await this.columnHeaderBlocks.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderBlocks.moveTo();
         break;
       case 'Pledge':
-        await this.columnHeaderPledge.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderPledge.moveTo();
         break;
       case 'Live stake':
         await this.columnHeaderLiveStake.moveTo();
