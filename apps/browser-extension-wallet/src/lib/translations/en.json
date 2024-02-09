@@ -1382,6 +1382,12 @@
       "input.label": "Account name",
       "footer.save": "Save",
       "footer.cancel": "Cancel"
+    },
+    "disable": {
+      "title": "Hold up!",
+      "description": "Are you sure you want to disable this account? You can re-enable it later",
+      "cancel": "Cancel",
+      "confirm": "Disable"
     }
   },
   "multiWallet": {
