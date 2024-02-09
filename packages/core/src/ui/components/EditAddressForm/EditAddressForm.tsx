@@ -22,6 +22,8 @@ export type EditAddressFormProps = {
   footer?: React.ReactNode;
 };
 
+const isAdaHandleEnabled = process.env.USE_ADA_HANDLE === 'true';
+
 export const EditAddressForm = ({
   form,
   initialValues,
@@ -78,7 +80,7 @@ export const EditAddressForm = ({
                 <Form.Item
                   name="address"
                   className={styles.inputWrapper}
-                  rules={[{ validator: isAddressHandle ? handleValidator : addressValidator }]}
+                  rules={[{ validator: isAddressHandle && isAdaHandleEnabled ? handleValidator : addressValidator }]}
                 >
                   <Search
                     className={cn(styles.textArea)}
