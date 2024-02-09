@@ -7,7 +7,7 @@ Feature: ADA handle - popup view
     And I use a single wallet with "$handletosend" NFT in popup mode
 
   @LW-8808 @Pending
-  # BUG LW-8793
+  @issue=LW-8793
   Scenario: Popup view - Ada handle transfer e2e, review flow
     Given I validate that handle: "$handletosend" is listed on the Receive screen
     And I add address with name: "$handletosend" and address: "$handletosend" to address book in popup mode

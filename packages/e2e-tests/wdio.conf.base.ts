@@ -35,6 +35,7 @@ export const config: WebdriverIO.Config = {
         disableWebdriverStepsReporting: true,
         disableWebdriverScreenshotsReporting: false,
         issueLinkTemplate: 'https://input-output.atlassian.net/browse/{}',
+        tmsLinkTemplate: 'https://input-output.atlassian.net/browse/{}',
         useCucumberStepReporter: true,
         addConsoleLogs: true
       }
