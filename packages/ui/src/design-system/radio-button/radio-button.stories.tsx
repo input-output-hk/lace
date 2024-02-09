@@ -30,7 +30,7 @@ const optionsWithIcon = [
   {
     value: 'option',
     label: 'Label',
-    icon: DocumentDownload,
+    icon: <DocumentDownload />,
     onIconClick: (): void => void 0,
   },
 ];
@@ -218,6 +218,15 @@ export const Overview = (): JSX.Element => {
     { value: 'label02', label: 'Label 2' },
     { value: 'label03', label: 'Label 3' },
   ];
+  const optionsWithIcon = [
+    { value: 'More text', label: 'More text', icon: <DocumentDownload /> },
+    { value: 'Text', label: 'Text', icon: <DocumentDownload /> },
+    {
+      value: 'Some more text',
+      label: 'Some more text',
+      icon: <DocumentDownload />,
+    },
+  ];
 
   const [radioValue, setRadioValue] = React.useState(options[0].value);
 
@@ -256,6 +265,26 @@ export const Overview = (): JSX.Element => {
               <RadioButtonGroup
                 selectedValue={radioValue}
                 options={options}
+                onValueChange={(value: React.SetStateAction<string>): void => {
+                  setRadioValue(value);
+                }}
+              />
+            </Flex>
+          </Flex>
+
+          <Divider my="$64" />
+
+          <Flex
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="center"
+            w="$fill"
+            my="$32"
+          >
+            <Flex mr="$8">
+              <RadioButtonGroup
+                selectedValue={radioValue}
+                options={optionsWithIcon}
                 onValueChange={(value: React.SetStateAction<string>): void => {
                   setRadioValue(value);
                 }}
