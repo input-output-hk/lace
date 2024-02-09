@@ -30,6 +30,7 @@ import {
 } from '@cardano-sdk/web-extension';
 import { deepEquals, HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
+import { getChainName } from '@src/utils/get-chain-name';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -78,18 +79,6 @@ const chainIdFromName = (chainName: Wallet.ChainName) => {
   const chainId = Wallet.Cardano.ChainIds[chainName];
   if (!chainId || !AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
   return chainId;
-};
-const getChainName = (chainId: Wallet.Cardano.ChainId): Wallet.ChainName => {
-  switch (chainId.networkMagic) {
-    case Wallet.Cardano.ChainIds.Mainnet.networkMagic:
-      return 'Mainnet';
-    case Wallet.Cardano.ChainIds.Preprod.networkMagic:
-      return 'Preprod';
-    case Wallet.Cardano.ChainIds.Preview.networkMagic:
-      return 'Preview';
-  }
-
-  throw new Error('Chain name is not in known ChainIds');
 };
 
 const defaultAccountName = (accountIndex: number) => `Account #${accountIndex}`;
@@ -144,77 +133,6 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
     passphrase
   );
   return HexBlob.fromBytes(walletEncrypted);
-};
-
-/**
- * Creates or restores a new in-memory wallet with the cardano-js-sdk and saves it in wallet repository
- */
-const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet): Promise<Wallet.CardanoWallet> => {
-  const accountIndex = 0;
-  const passphrase = Buffer.from(password, 'utf8');
-  const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-    {
-      chainId,
-      getPassphrase: async () => passphrase,
-      mnemonicWords: mnemonic,
-      accountIndex
-    },
-    {
-      bip32Ed25519: Wallet.bip32Ed25519,
-      logger
-    }
-  );
-
-  const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
-  const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-    metadata: { name, lockValue },
-    encryptedSecrets: {
-      keyMaterial: await encryptMnemonic(mnemonic, passphrase),
-      rootPrivateKeyBytes: HexBlob.fromBytes(
-        Buffer.from(
-          (keyAgent.serializableData as Wallet.KeyManagement.SerializableInMemoryKeyAgentData)
-            .encryptedRootPrivateKeyBytes
-        )
-      )
-    },
-    accounts: [
-      {
-        accountIndex,
-        metadata: { name: defaultAccountName(accountIndex) },
-        extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
-      }
-    ],
-    type: WalletType.InMemory
-  };
-
-  const walletId = await walletRepository.addWallet(addWalletProps);
-  await walletManager.activate({
-    walletId,
-    chainId: DEFAULT_CHAIN_ID,
-    accountIndex,
-    provider
-  });
-
-  // Needed for reset password flow
-  saveValueInLocalStorage({ key: 'wallet', value: { name } });
-
-  // Clear passphrase
-  for (let i = 0; i < passphrase.length; i++) {
-    passphrase[i] = 0;
-  }
-
-  return {
-    name,
-    signingCoordinator,
-    wallet: observableWallet,
-    source: {
-      wallet: {
-        ...addWalletProps,
-        walletId
-      },
-      account: addWalletProps.accounts[0]
-    }
-  };
 };
 
 /**
@@ -435,6 +353,82 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   /**
+   * Creates or restores a new in-memory wallet with the cardano-js-sdk and saves it in wallet repository
+   */
+  const createWallet = useCallback(
+    async ({ mnemonic, name, password, chainId }: CreateWallet): Promise<Wallet.CardanoWallet> => {
+      const accountIndex = 0;
+      const passphrase = Buffer.from(password, 'utf8');
+      const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+        {
+          chainId,
+          getPassphrase: async () => passphrase,
+          mnemonicWords: mnemonic,
+          accountIndex
+        },
+        {
+          bip32Ed25519: Wallet.bip32Ed25519,
+          logger
+        }
+      );
+
+      const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
+      const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+        metadata: { name, lockValue },
+        encryptedSecrets: {
+          keyMaterial: await encryptMnemonic(mnemonic, passphrase),
+          rootPrivateKeyBytes: HexBlob.fromBytes(
+            Buffer.from(
+              (keyAgent.serializableData as Wallet.KeyManagement.SerializableInMemoryKeyAgentData)
+                .encryptedRootPrivateKeyBytes
+            )
+          )
+        },
+        accounts: [
+          {
+            accountIndex,
+            metadata: { name: defaultAccountName(accountIndex) },
+            extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+          }
+        ],
+        type: WalletType.InMemory
+      };
+
+      const walletId = await walletRepository.addWallet(addWalletProps);
+      // reading stored chain name to preserve network for forgot password flow
+      const storedChain = getValueFromLocalStorage('appSettings');
+      await walletManager.activate({
+        walletId,
+        chainId: currentChain || (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID,
+        accountIndex,
+        provider
+      });
+
+      // Needed for reset password flow
+      saveValueInLocalStorage({ key: 'wallet', value: { name } });
+
+      // Clear passphrase
+      for (let i = 0; i < passphrase.length; i++) {
+        passphrase[i] = 0;
+      }
+
+      return {
+        name,
+        signingCoordinator,
+        wallet: observableWallet,
+        source: {
+          wallet: {
+            ...addWalletProps,
+            walletId
+          },
+          account: addWalletProps.accounts[0]
+        }
+      };
+    },
+    [currentChain]
+  );
+
+  /**
    * Deletes Wallet from memory, all info from browser storage and destroys all stores
    */
   const deleteWallet = useCallback(
@@ -442,7 +436,9 @@ export const useWalletManager = (): UseWalletManager => {
       const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
       await walletManager.deactivate();
       await walletRepository.removeWallet(activeWallet.walletId);
-      deleteFromLocalStorage('appSettings');
+      if (!isForgotPasswordFlow) {
+        deleteFromLocalStorage('appSettings');
+      }
       deleteFromLocalStorage('showDappBetaModal');
       deleteFromLocalStorage('lastStaking');
       deleteFromLocalStorage('userInfo');
@@ -452,7 +448,6 @@ export const useWalletManager = (): UseWalletManager => {
       });
       resetWalletLock();
       setCardanoWallet();
-      setCurrentChain(CHAIN);
 
       const commonLocalStorageKeysToKeep: (keyof ILocalStorage)[] = [
         'currency',
@@ -465,7 +460,11 @@ export const useWalletManager = (): UseWalletManager => {
       ];
 
       if (isForgotPasswordFlow) {
-        const additionalKeysToKeep: (keyof ILocalStorage)[] = ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY];
+        const additionalKeysToKeep: (keyof ILocalStorage)[] = [
+          'wallet',
+          'appSettings',
+          ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY
+        ];
         clearLocalStorage({
           except: [...commonLocalStorageKeysToKeep, ...additionalKeysToKeep]
         });
@@ -481,15 +480,7 @@ export const useWalletManager = (): UseWalletManager => {
         await walletManager.destroyData(activeWallet.walletId, chainIdFromName(chainName));
       }
     },
-    [
-      resetWalletLock,
-      setCardanoWallet,
-      backgroundService,
-      setCurrentChain,
-      userIdService,
-      clearAddressBook,
-      clearNftsFolders
-    ]
+    [resetWalletLock, setCardanoWallet, backgroundService, userIdService, clearAddressBook, clearNftsFolders]
   );
 
   /**

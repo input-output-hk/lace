@@ -500,11 +500,9 @@ describe('Testing useWalletManager hook', () => {
 
       const resetWalletLock = jest.fn();
       const setCardanoWallet = jest.fn();
-      const setCurrentChain = jest.fn();
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         resetWalletLock,
-        setCardanoWallet,
-        setCurrentChain
+        setCardanoWallet
       }));
 
       const {
@@ -539,7 +537,6 @@ describe('Testing useWalletManager hook', () => {
       });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
-      expect(setCurrentChain).toBeCalledWith('Preprod');
     });
   });
 
