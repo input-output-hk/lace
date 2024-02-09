@@ -50,18 +50,11 @@ export const SortAndFilter = ({
   }, [direction, onSortAndDirectionChange, sortBy]);
 
   const onSortChange = useCallback(
-    (field: Columns) => {
-      // TODO: remove once updated on sdk side (LW-9530)
-      if (!Object.keys(SortField).includes(field)) {
-        console.debug(`Sort not supported by ${field}`);
-        return;
-      }
-      const newSort: StakePoolSortOptions = {
+    (field: Columns) =>
+      onSortAndDirectionChange({
         field: field as unknown as SortField,
         order: direction,
-      };
-      onSortAndDirectionChange(newSort);
-    },
+      }),
     [direction, onSortAndDirectionChange]
   );
 

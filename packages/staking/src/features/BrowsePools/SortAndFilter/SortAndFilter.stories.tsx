@@ -1,7 +1,7 @@
 import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, ThemeColorScheme, Variants } from '@lace/ui';
-
+import { action } from '@storybook/addon-actions';
 import { SortDirection, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Meta } from '@storybook/react';
 
 import { SortAndFilter } from './SortAndFilter';
@@ -24,9 +24,17 @@ const Wrapper = ({ visibleSection: inVisibleSection }: { visibleSection: Visible
     [PoolsFilter.Ros]: [''],
   });
 
+  const handleSortAndDirectionChange = useCallback(
+    (options: StakePoolSortOptions) => {
+      action('SortAndDirectionChange')(options);
+      setSortAndDirection(options);
+    },
+    [setSortAndDirection]
+  );
+
   return (
     <SortAndFilter
-      onSortAndDirectionChange={setSortAndDirection}
+      onSortAndDirectionChange={handleSortAndDirectionChange}
       onFiltersChange={setFilters}
       onVisibleSectionChange={setVisibleSection}
       sortAndDirection={sortAndDirection}
