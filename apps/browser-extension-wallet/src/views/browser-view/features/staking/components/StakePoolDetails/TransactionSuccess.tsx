@@ -8,12 +8,7 @@ import { useDelegationStore } from '@src/features/delegation/stores';
 import { useStakePoolDetails } from '../../store';
 import styles from './TransactionComplete.module.scss';
 import Success from '@src/assets/icons/success-staking.svg';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
 import { useWalletStore } from '@src/stores';
@@ -53,7 +48,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
   );
 };
 
-export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }): React.ReactElement => {
+export const TransactionSuccessFooter = (): React.ReactElement => {
   const { t } = useTranslation();
   const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
   const { setDelegationTxBuilder } = useDelegationStore();
@@ -61,13 +56,6 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
   const { isInMemoryWallet } = useWalletStore();
 
   const closeDrawer = () => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP
-        : AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER
-    });
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);
     setDelegationTxBuilder();
     setIsDrawerVisible(false);

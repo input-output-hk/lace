@@ -17,7 +17,7 @@ import {
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { ILocalStorage } from '@src/types';
 import { firstValueFrom } from 'rxjs';
 import {

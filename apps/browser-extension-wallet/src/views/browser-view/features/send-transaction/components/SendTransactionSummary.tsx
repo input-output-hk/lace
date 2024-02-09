@@ -12,12 +12,7 @@ import { Typography } from 'antd';
 import styles from './SendTransactionSummary.module.scss';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { AddressListType } from '@views/browser/features/activity';
-import { useAnalyticsContext, useCurrencyStore } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { useCurrencyStore } from '@providers';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
 import { useObservable, Banner } from '@lace/common';
 import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
@@ -115,7 +110,6 @@ export const SendTransactionSummary = withAddressBookContext(
     const isTrezor = walletType === WalletType.Trezor;
 
     const { list: addressList } = useAddressBookContext();
-    const analytics = useAnalyticsContext();
     const { fiatCurrency } = useCurrencyStore();
 
     const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
@@ -152,20 +146,6 @@ export const SendTransactionSummary = withAddressBookContext(
           }}
           metadata={metadata}
           translations={outputSummaryListTranslation}
-          onDepositTooltipHover={() =>
-            analytics.sendEventToMatomo({
-              action: MatomoEventActions.HOVER_EVENT,
-              category: MatomoEventCategories.SEND_TRANSACTION,
-              name: AnalyticsEventNames.SendTransaction.SEE_TX_DEPOSIT_INFO
-            })
-          }
-          onFeeTooltipHover={() =>
-            analytics.sendEventToMatomo({
-              action: MatomoEventActions.HOVER_EVENT,
-              category: MatomoEventCategories.SEND_TRANSACTION,
-              name: AnalyticsEventNames.SendTransaction.SEE_TX_FEE_INFO
-            })
-          }
         />
         {isHardwareWallet && !isPopupView && (
           <Text className={styles.connectLedgerText}>

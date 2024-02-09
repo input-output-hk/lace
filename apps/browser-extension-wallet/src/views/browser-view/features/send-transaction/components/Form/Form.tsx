@@ -4,18 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import { Tokens } from '@src/types';
 import { PriceResult } from '@hooks';
-import { useAnalyticsContext, useCurrencyStore } from '@providers';
+import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
 import { Button, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from '@hooks/useMaxAda';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames
-} from '@providers/AnalyticsProvider/analyticsTracker';
-
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
 import { getFee } from '../SendTransactionSummary';
 import { useBuiltTxState, useSpentBalances, useLastFocusedInput, useOutputs } from '../../store';
@@ -53,7 +47,6 @@ export const Form = ({
   const [isBundle, setIsBundle] = useState(false);
   const tokensUsed = useSpentBalances();
   const spendableCoin = useMaxAda();
-  const analytics = useAnalyticsContext();
   const [insufficientBalanceInputs, setInsufficientBalanceInputs] = useState<string[]>([]); // we save all the element input ids with insufficient balance error
   const { lastFocusedInput } = useLastFocusedInput();
   const { fiatCurrency } = useCurrencyStore();
@@ -159,13 +152,6 @@ export const Form = ({
           adaAmount={totalCost.ada}
           fiatAmount={totalCost.fiat}
           tooltipContent={t('send.theAmountYoullBeChargedToProcessYourTransaction')}
-          onTooltipHover={() =>
-            analytics.sendEventToMatomo({
-              action: MatomoEventActions.HOVER_EVENT,
-              category: MatomoEventCategories.SEND_TRANSACTION,
-              name: AnalyticsEventNames.SendTransaction.SEE_TX_FEE_INFO
-            })
-          }
         />
 
         {hasMissingCoins && (
@@ -179,13 +165,6 @@ export const Form = ({
               cardanoCoin,
               fiatCurrency
             })}
-            onTooltipHover={() =>
-              analytics.sendEventToMatomo({
-                action: MatomoEventActions.HOVER_EVENT,
-                category: MatomoEventCategories.SEND_TRANSACTION,
-                name: AnalyticsEventNames.SendTransaction.SEE_ADA_ALLOCATION_INFO
-              })
-            }
           />
         )}
       </div>

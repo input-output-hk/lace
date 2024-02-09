@@ -28,14 +28,7 @@ import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction,
-  TX_CREATION_TYPE_KEY,
-  TxCreationType
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
@@ -43,8 +36,6 @@ import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokens
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
-
-const { SendTransaction: Events } = AnalyticsEventNames;
 
 export const useHandleClose = (): {
   onClose: () => void;
@@ -140,16 +131,6 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
-  const sendAnalytics = useCallback(() => {
-    if (section.currentSection === Sections.SUMMARY) {
-      analytics.sendEventToMatomo({
-        action: MatomoEventActions.CLICK_EVENT,
-        category: MatomoEventCategories.SEND_TRANSACTION,
-        name: isPopupView ? Events.BACK_TX_DETAILS_POPUP : Events.BACK_TX_DETAILS_BROWSER
-      });
-    }
-  }, [section.currentSection, analytics, isPopupView]);
-
   const shouldRenderArrow = isPopupView
     ? [...sectionsWithArrowIcon, Sections.FORM].includes(section.currentSection)
     : sectionsWithArrowIcon.includes(section.currentSection);
@@ -160,7 +141,6 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const shouldRenderCross = !sectionsWithoutCrossIcon.has(section.currentSection);
 
   const onArrowIconClick = () => {
-    sendAnalytics();
     const shouldRedirect =
       isPopupView &&
       [Sections.SUCCESS_TX, Sections.FORM, Sections.FAIL_TX, Sections.UNAUTHORIZED_TX].includes(section.currentSection);

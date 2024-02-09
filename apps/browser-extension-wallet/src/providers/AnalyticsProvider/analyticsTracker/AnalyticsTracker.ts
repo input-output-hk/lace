@@ -4,11 +4,9 @@ import {
   UserTrackingType,
   PostHogAction,
   PostHogProperties,
-  MatomoSendEventProps,
   IAnalyticsTracker
 } from './types';
 import { Wallet } from '@lace/cardano';
-import { MatomoClient, MATOMO_OPTED_OUT_EVENTS_DISABLED } from '../matomo';
 import {
   POSTHOG_OPTED_OUT_EVENTS_DISABLED,
   PostHogClient,
@@ -18,7 +16,6 @@ import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService'
 import { UserIdService } from '@lib/scripts/types';
 
 interface AnalyticsTrackerArgs {
-  chain: Wallet.Cardano.ChainId;
   postHogClient?: PostHogClient;
   view?: ExtensionViews;
   analyticsDisabled?: boolean;
@@ -26,7 +23,6 @@ interface AnalyticsTrackerArgs {
   excludedEvents?: string;
 }
 export class AnalyticsTracker implements IAnalyticsTracker {
-  protected matomoClient?: MatomoClient;
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
@@ -34,13 +30,11 @@ export class AnalyticsTracker implements IAnalyticsTracker {
 
   constructor({
     postHogClient,
-    chain,
     analyticsDisabled = false,
     excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? ''
   }: AnalyticsTrackerArgs) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
-    this.matomoClient = new MatomoClient(chain, this.userIdService);
     this.excludedEvents = excludedEvents;
 
     if (postHogClient) {
@@ -87,13 +81,6 @@ export class AnalyticsTracker implements IAnalyticsTracker {
     await this.postHogClient?.sendAliasEvent();
   }
 
-  async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
-    const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
-    if (MATOMO_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser) return;
-    await this.userIdService?.extendLifespan();
-    await this.matomoClient?.sendEvent(props);
-  }
-
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const isEventExcluded = this.isEventExcluded(action);
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
@@ -104,7 +91,6 @@ export class AnalyticsTracker implements IAnalyticsTracker {
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
-    this.matomoClient?.setChain(chain);
     this.postHogClient?.setChain(chain);
   }
 

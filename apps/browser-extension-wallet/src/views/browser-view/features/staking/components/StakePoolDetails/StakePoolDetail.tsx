@@ -14,12 +14,7 @@ import styles from './StakePoolDetail.module.scss';
 import { useWalletStore } from '@src/stores';
 
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 // TODO: remove duplication once lw-9270 is merged (lw-9552)
 export enum SaturationLevels {
@@ -319,19 +314,12 @@ export const StakePoolDetailFooter = ({
 
   const onStakeClick = useCallback(() => {
     if (canDelegate) {
-      analytics.sendEventToMatomo({
-        category: MatomoEventCategories.STAKING,
-        action: MatomoEventActions.CLICK_EVENT,
-        name: popupView
-          ? AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_POPUP
-          : AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_BROWSER
-      });
       analytics.sendEventToPostHog(PostHogAction.StakingStakePoolDetailStakeOnThisPoolClick);
       onStake();
     } else {
       setNoFundsVisible(true);
     }
-  }, [analytics, canDelegate, onStake, popupView, setNoFundsVisible]);
+  }, [analytics, canDelegate, onStake, setNoFundsVisible]);
 
   const delegationDetails = useDelegationDetails();
   const currentDelegatedStakePool =

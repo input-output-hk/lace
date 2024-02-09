@@ -9,12 +9,7 @@ import styles from './SignConfirmation.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationDetails } from '@hooks';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletStore } from '@src/stores';
 
@@ -56,7 +51,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
   );
 };
 
-export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): ReactElement => {
+export const SignConfirmationFooter = (): ReactElement => {
   const { t } = useTranslation();
   const { password, removePassword } = usePassword();
   const { signAndSubmitTransaction } = useDelegationTransaction();
@@ -75,16 +70,8 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
   }, [removePassword]);
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_POPUP
-        : AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER
-    });
-
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
-  }, [analytics, popupView]);
+  }, [analytics]);
 
   const handleVerifyPass = useCallback(async () => {
     setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });

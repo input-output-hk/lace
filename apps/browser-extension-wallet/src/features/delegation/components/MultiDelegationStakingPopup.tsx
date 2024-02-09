@@ -23,6 +23,7 @@ import {
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -130,7 +131,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         walletAddress,
-        currentChain
+        currentChain,
+        isMultidelegationSupportedByDevice
       }}
     >
       <ContentLayout

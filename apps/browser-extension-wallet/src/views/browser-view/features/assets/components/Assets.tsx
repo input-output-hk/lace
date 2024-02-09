@@ -14,12 +14,7 @@ import { walletRoutePaths } from '@routes';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventCategories,
-  MatomoEventActions,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
 import {
   SendFlowAnalyticsProperties,
@@ -171,13 +166,6 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
 
   const onAssetRowClick = (id: string) => {
     analytics.sendEventToPostHog(PostHogAction.TokenTokensTokenRowClick);
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_TOKENS,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_POPUP
-        : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_BROWSER
-    });
     const selectedAsset = id === cardanoCoin.id ? getTransformedCardano(true) : getTransformedAsset(id, true);
     setAssetDetails(selectedAsset);
     setSelectedAssetId(id);
@@ -224,13 +212,6 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     const postHogProperties: SendFlowAnalyticsProperties = { trigger_point: SendFlowTriggerPoints.TOKENS };
     setPickedCoin(SEND_COIN_OUTPUT_ID, { prev: cardanoCoin.id, next: id });
     setTriggerPoint(SendFlowTriggerPoints.TOKENS);
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_TOKENS,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.ViewTokens.SEND_TOKEN_POPUP
-        : AnalyticsEventNames.ViewTokens.SEND_TOKEN_BROWSER
-    });
 
     analytics.sendEventToPostHog(PostHogAction.SendClick, postHogProperties);
     if (popupView) {

@@ -26,6 +26,7 @@ import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discovere
 import { Reward } from '@cardano-sdk/core';
 import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
 import { StakePoolSortOptions } from '@lace/staking';
+import { ObservableWalletState } from '@hooks/useWalletState';
 
 export enum StateStatus {
   IDLE = 'idle',
@@ -67,7 +68,7 @@ export interface WalletActivitiesSlice {
   firstDelegationTxId?: string;
   activitiesCount: number;
   walletActivitiesStatus: StateStatus;
-  getWalletActivitiesObservable: (payload: FetchWalletActivitiesProps) => FetchWalletActivitiesReturn;
+  getWalletActivities: (payload: FetchWalletActivitiesProps) => Promise<FetchWalletActivitiesReturn>;
 }
 
 export interface NetworkSlice {
@@ -103,6 +104,8 @@ export interface WalletInfoSlice {
   walletInfo?: WalletInfo | undefined;
   setWalletInfo: (info?: WalletInfo) => void;
   inMemoryWallet: Wallet.ObservableWallet | undefined;
+  walletState: ObservableWalletState | null;
+  setWalletState: (walletState: ObservableWalletState | null) => void;
   cardanoWallet: Wallet.CardanoWallet | undefined;
   walletManager: WalletManagerApi | undefined;
   initialHdDiscoveryCompleted: boolean;

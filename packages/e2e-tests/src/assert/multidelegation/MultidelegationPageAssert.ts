@@ -15,16 +15,9 @@ class MultidelegationPageAssert {
   };
 
   assertSeeSearchResultsCountExact = async (items: number) => {
-    await browser.waitUntil(async () => (await MultidelegationPage.poolsItems.length) === items, {
+    await browser.waitUntil(async () => (await MultidelegationPage.displayedPools.length) === items, {
       timeout: 20_000,
       timeoutMsg: `Search result does not match exact items count expected: ${items}`
-    });
-  };
-
-  assertSeeSearchResultsCountMinimum = async (items: number) => {
-    await browser.waitUntil(async () => (await MultidelegationPage.poolsItems.length) >= items, {
-      timeout: 20_000,
-      timeoutMsg: `Search result does not match minimum items count expected: ${items}`
     });
   };
 
@@ -159,7 +152,7 @@ class MultidelegationPageAssert {
   };
 
   assertSeeSearchResults = async (expectedResultsCount: number) => {
-    const rowsNumber = (await MultidelegationPage.poolsItems).length;
+    const rowsNumber = (await MultidelegationPage.displayedPools).length;
     expect(rowsNumber).to.equal(expectedResultsCount);
     await MultidelegationPage.emptySearchResultsImage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
     await MultidelegationPage.emptySearchResultsMessage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
@@ -224,7 +217,6 @@ class MultidelegationPageAssert {
 
   assertSeeStakePoolRow = async (index?: number) => {
     const stakePoolListItem = new StakePoolListItem(index);
-    await stakePoolListItem.container.scrollIntoView();
     await stakePoolListItem.checkbox.waitForDisplayed();
     await stakePoolListItem.ticker.waitForDisplayed();
     expect(await stakePoolListItem.ticker.getText()).to.not.be.empty;
@@ -248,7 +240,7 @@ class MultidelegationPageAssert {
   };
 
   assertSeeStakePoolRows = async () => {
-    const rowsNumber = (await MultidelegationPage.poolsItems).length;
+    const rowsNumber = (await MultidelegationPage.displayedPools).length; // TODO: update to use pools counter when LW-9726 is resolved
 
     for (let i = 0; i < rowsNumber; i++) {
       await this.assertSeeStakePoolRow(i);

@@ -53,6 +53,7 @@ export enum DrawerManagementStep {
   Sign = 'Sign',
   Success = 'Success',
   Failure = 'Failure',
+  HwDeviceFailure = 'HwDeviceFailure',
 }
 
 export type DrawerStep = DrawerDefaultStep | DrawerManagementStep;

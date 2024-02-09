@@ -9,7 +9,7 @@ import { useLocalStorage } from '@src/hooks';
 import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 
 const { Title } = Typography;
 interface SettingsSecurityProps {
