@@ -23,9 +23,9 @@ import {
   MintedAsset,
   TransactionSummaryInspection,
   transactionSummaryInspector,
-  // tokenTransferInspector,
   Cardano,
-  TokenTransferValue
+  TokenTransferValue,
+  tokenTransferInspector
 } from '@cardano-sdk/core';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
@@ -33,13 +33,14 @@ import { dAppRoutePaths } from '@routes';
 import type { UserPromptService } from '@lib/scripts/background/services';
 import { of, take } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
-import { useCurrencyStore, useAnalyticsContext } from '@providers';
+import { useCurrencyStore, useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
 import { chainHistoryHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { getBaseUrlForChain } from '@src/utils/chain';
 const DAPP_TOAST_DURATION = 50;
 
 const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
@@ -111,6 +112,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
   const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
+  const [{ chainName }] = useAppSettingsContext();
 
   const [fromAddressTokens, setFromAddressTokens] = useState<
     Map<Cardano.PaymentAddress, TokenTransferValue> | undefined
@@ -119,17 +121,18 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
     TransactionSummaryInspection | undefined
   >();
+  const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
 
-  const newHistoryProvider = new chainHistoryHttpProvider({ baseUrl, logger });
-
-  const txInputResolver = useMemo(
-    () =>
-      // pass the chainHistoryprovider here
-      combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newHistoryProvider }),
-    [inMemoryWallet]
+  const newChainHistoryProvider = useMemo(
+    () => chainHistoryHttpProvider({ baseUrl: baseCardanoServicesUrl, logger }),
+    [baseCardanoServicesUrl]
   );
 
-  console.log('transactioninspecion details:', transactionInspectionDetails);
+  const txInputResolver = useMemo(
+    () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newChainHistoryProvider }),
+    [inMemoryWallet, newChainHistoryProvider]
+  );
+
   useEffect(() => {
     fetchNetworkInfo();
   }, [fetchNetworkInfo]);

@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable no-console */
 /* eslint-disable sonarjs/no-duplicate-string */
@@ -52,16 +53,26 @@ export interface DappTransactionProps {
 
 const { Title } = Typography;
 
+// move the strings to translation files
+// move the from and to sections to its own file
+// do we have to delete the previous dapheader?
+
 const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValue>) => {
-  const groupedAddresses: { nfts: Array<AssetInfoWithAmount>; tokens: Array<AssetInfoWithAmount> } = {
+  const groupedAddresses: {
+    nfts: Array<AssetInfoWithAmount>;
+    tokens: Array<AssetInfoWithAmount>;
+    addresses: Array<Cardano.PaymentAddress>;
+  } = {
     nfts: [],
-    tokens: []
+    tokens: [],
+    addresses: []
   };
 
-  for (const [_, value] of addresses) {
+  for (const [address, value] of addresses) {
     const addressAssets = value.assets;
+    groupedAddresses.addresses.push(address);
 
-    for (const [__, asset] of addressAssets) {
+    for (const [_, asset] of addressAssets) {
       if (asset.assetInfo.nftMetadata !== null) {
         groupedAddresses.nfts.push(asset);
       } else {
@@ -89,15 +100,14 @@ export const DappTransaction = ({
   coinSymbol,
   dappInfo
 }: DappTransactionProps): React.ReactElement => {
-  console.log('dapp transaction 2', assets, toAddress, fromAddress);
-
   const totalAmount = Wallet.util.lovelacesToAdaString(coins.toString());
   const txFee = Wallet.util.lovelacesToAdaString(fee.toString());
 
   const groupedToAddresses = groupAddresses(toAddress);
   const groupedFromAddresses = groupAddresses(fromAddress);
 
-  console.log('grouped addresses:', groupedToAddresses);
+  const isFromAddressesEnabled = groupedFromAddresses.tokens.length > 0 || groupedFromAddresses.nfts.length > 0;
+  const isToAddressesEnabled = groupedToAddresses.tokens.length > 0 || groupedToAddresses.nfts.length > 0;
   return (
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
@@ -132,37 +142,10 @@ export const DappTransaction = ({
               />
             )}
 
-            <SummaryExpander title="To address">
-              {groupedToAddresses.tokens.length > 0 && (
-                <>
-                  <Title level={5}>Tokens</Title>
-                  {groupedToAddresses.tokens.map((token) => (
-                    <TransactionAssets
-                      key={token.assetInfo.fingerprint}
-                      imageSrc={token.assetInfo.tokenMetadata.icon}
-                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                      tokenName={token.assetInfo.tokenMetadata.ticker}
-                    />
-                  ))}
-                </>
-              )}
-              {groupedToAddresses.nfts.length > 0 && (
-                <>
-                  <Title level={5}>NFTs</Title>
-                  {groupedToAddresses.nfts.map((token) => (
-                    <TransactionAssets
-                      key={token.assetInfo.fingerprint}
-                      imageSrc={token.assetInfo.tokenMetadata.icon}
-                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                      tokenName={token.assetInfo.name}
-                      metadataHash={token.assetInfo.nftMetadata?.name}
-                    />
-                  ))}
-                </>
-              )}
-            </SummaryExpander>
-
-            <SummaryExpander title="From address">
+            <SummaryExpander title="From address" disabled={!isFromAddressesEnabled}>
+              {groupedFromAddresses.addresses.map((address) => (
+                <span key={address}>Address {address}</span>
+              ))}
               {groupedFromAddresses.tokens.length > 0 && (
                 <>
                   <Title level={5}>Tokens</Title>
@@ -181,6 +164,41 @@ export const DappTransaction = ({
                 <>
                   <Title level={5}>NFTs</Title>
                   {groupedFromAddresses.nfts.map((token) => (
+                    <TransactionAssets
+                      key={token.assetInfo.fingerprint}
+                      imageSrc={token.assetInfo.tokenMetadata.icon}
+                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                      tokenName={token.assetInfo.name}
+                      metadataHash={token.assetInfo.nftMetadata?.name}
+                    />
+                  ))}
+                </>
+              )}
+            </SummaryExpander>
+
+            <SummaryExpander title="To address" disabled={!isToAddressesEnabled}>
+              <div>
+                {groupedToAddresses.addresses.map((address) => (
+                  <span key={address}>Address {address}</span>
+                ))}
+              </div>
+              {groupedToAddresses.tokens.length > 0 && (
+                <>
+                  <Title level={5}>Tokens</Title>
+                  {groupedToAddresses.tokens.map((token) => (
+                    <TransactionAssets
+                      key={token.assetInfo.fingerprint}
+                      imageSrc={token.assetInfo.tokenMetadata.icon}
+                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+                      tokenName={token.assetInfo.tokenMetadata.ticker}
+                    />
+                  ))}
+                </>
+              )}
+              {groupedToAddresses.nfts.length > 0 && (
+                <>
+                  <Title level={5}>NFTs</Title>
+                  {groupedToAddresses.nfts.map((token) => (
                     <TransactionAssets
                       key={token.assetInfo.fingerprint}
                       imageSrc={token.assetInfo.tokenMetadata.icon}
