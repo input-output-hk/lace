@@ -140,7 +140,8 @@ class TransactionNewPage extends CommonDrawerElements {
   }
 
   async getAddressBookSearchResultsRows(): Promise<WebdriverIO.ElementArray> {
-    return $$(`${this.ADDR_SEARCH_RESULTS_ROW}`);
+    await $(this.ADDR_SEARCH_RESULTS_ROW).waitForClickable({ timeout: 5000 });
+    return $$(this.ADDR_SEARCH_RESULTS_ROW);
   }
 
   async getContactName(index: number): Promise<string> {
