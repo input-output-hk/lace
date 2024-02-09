@@ -210,14 +210,9 @@ export const Overview = (): JSX.Element => {
   const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
   const option = [{ value: 'singleOption', label: 'Single label' }];
   const options = [
-    { value: 'label01', label: 'Label A', icon: <DocumentDownload /> },
-    {
-      value: 'label02',
-      label:
-        'Label ABC asd asd qwe as asd wqers dsdfqwer sdfwedf sdfsdf sdf sdf sdf sd ',
-      icon: <DocumentDownload />,
-    },
-    { value: 'label03', label: 'Label ABCDE', icon: <DocumentDownload /> },
+    { value: 'label01', label: 'Label 1' },
+    { value: 'label02', label: 'Label 2' },
+    { value: 'label03', label: 'Label 3' },
   ];
 
   const [radioValue, setRadioValue] = React.useState(options[0].value);
@@ -253,7 +248,7 @@ export const Overview = (): JSX.Element => {
             w="$fill"
             my="$32"
           >
-            <Flex mr="$8" w="$380">
+            <Flex mr="$8">
               <RadioButtonGroup
                 selectedValue={radioValue}
                 options={options}
