@@ -8,5 +8,9 @@
 }
 
 .addressInfo {
-  color: $theme-light-grey !important;
+  color: var(--text-color-grey, #6b7280) !important;
+}
+
+.summaryContent {
+  padding-bottom: 20px;
 }

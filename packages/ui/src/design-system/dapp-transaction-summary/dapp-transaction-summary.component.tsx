@@ -23,7 +23,7 @@ export const TransactionSummary = ({
   cardanoSymbol,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <div className={cx.container}>
+  <div className={cx.transactionSummaryContainer}>
     {title !== undefined && (
       <Flex justifyContent="flex-start">
         <Typography.Body.Large className={cx.boldLabel}>
@@ -31,7 +31,7 @@ export const TransactionSummary = ({
         </Typography.Body.Large>
       </Flex>
     )}
-    <Grid {...props} columns="$2">
+    <Grid {...props} alignItems="$center" columns="$2">
       <Cell>
         <AdaComponent className={cx.adaIcon} />
       </Cell>

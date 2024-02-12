@@ -1,5 +1,6 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import React from 'react';
-import { addEllipsis } from '@lace/common';
+import { truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 import { Typography } from 'antd';
@@ -37,8 +38,8 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
       key={nft.assetInfo.fingerprint}
       imageSrc={nft.assetInfo.tokenMetadata.icon ?? undefined}
       balance={Wallet.util.lovelacesToAdaString(nft.amount.toString())}
-      tokenName={addEllipsis(nft.assetInfo.nftMetadata?.name, charBeforeEllName, charAfterEllName)}
-      metadataHash={addEllipsis(nft.assetInfo.nftMetadata?.name, charBeforeEllMetadata, charAfterEllMetadata)}
+      tokenName={truncate(nft.assetInfo.nftMetadata?.name, charBeforeEllName, charAfterEllName)}
+      metadataHash={truncate(nft.assetInfo.nftMetadata?.name, charBeforeEllMetadata, charAfterEllMetadata)}
     />
   ));
 
@@ -49,8 +50,8 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
       key={token.assetInfo.fingerprint}
       imageSrc={token.assetInfo.tokenMetadata.icon ?? undefined}
       balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-      tokenName={addEllipsis(token.assetInfo.tokenMetadata.name, charBeforeEllName, charAfterEllName)}
-      metadataHash={addEllipsis(token.assetInfo.assetId, charBeforeEllMetadata, charAfterEllMetadata)}
+      tokenName={truncate(token.assetInfo.tokenMetadata.name, charBeforeEllName, charAfterEllName)}
+      metadataHash={truncate(token.assetInfo.assetId, charBeforeEllMetadata, charAfterEllMetadata)}
     />
   ));
 
@@ -70,26 +71,28 @@ export const DappAddressSections = ({
   return (
     <>
       <SummaryExpander title={t('package.core.dappTransaction.fromAddress')} disabled={!isFromAddressesEnabled}>
-        {groupedFromAddresses.addresses.map((address) => (
-          <div key={address} className={styles.address}>
-            <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
-            <Text className={styles.addressInfo}>
-              {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
-            </Text>
-          </div>
-        ))}
-        {groupedFromAddresses.tokens.length > 0 && (
-          <>
-            <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
-            {displayGroupedTokens(groupedFromAddresses.tokens)}
-          </>
-        )}
-        {groupedFromAddresses.nfts.length > 0 && (
-          <>
-            <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
-            {displayGroupedNFTs(groupedFromAddresses.nfts)}
-          </>
-        )}
+        <div className={styles.summaryContent}>
+          {groupedFromAddresses.addresses.map((address) => (
+            <div key={address} className={styles.address}>
+              <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
+              <Text className={styles.addressInfo}>
+                {truncate(address, charBeforeEllipsisName, charAfterEllipsisName)}
+              </Text>
+            </div>
+          ))}
+          {groupedFromAddresses.tokens.length > 0 && (
+            <>
+              <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+              {displayGroupedTokens(groupedFromAddresses.tokens)}
+            </>
+          )}
+          {groupedFromAddresses.nfts.length > 0 && (
+            <>
+              <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+              {displayGroupedNFTs(groupedFromAddresses.nfts)}
+            </>
+          )}
+        </div>
       </SummaryExpander>
 
       <SummaryExpander title={t('package.core.dappTransaction.toAddress')} disabled={!isToAddressesEnabled}>
@@ -98,7 +101,7 @@ export const DappAddressSections = ({
             <div key={address} className={styles.address}>
               <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
               <Text className={styles.addressInfo}>
-                {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                {truncate(address, charBeforeEllipsisName, charAfterEllipsisName)}
               </Text>
             </div>
           ))}

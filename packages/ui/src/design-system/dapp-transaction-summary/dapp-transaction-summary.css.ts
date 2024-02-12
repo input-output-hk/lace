@@ -1,11 +1,11 @@
 import { sx, style } from '../../design-tokens';
 
-export const container = sx({
-  p: ['$0', '$20'],
+export const transactionSummaryContainer = style({
+  padding: '20px 10px 0 0',
 });
 
-export const assetContainer = style({
-  padding: '0 20px',
+export const transactionTypeContainer = style({
+  padding: '20px 0',
 });
 
 export const label = sx({
@@ -47,7 +47,6 @@ export const adaIcon = style([
   sx({
     display: 'flex',
     m: ['$10', '$0'],
-    p: ['$0', '$10'],
   }),
   {
     width: '25px',
@@ -75,6 +74,12 @@ export const avatarImage = style({
   borderRadius: 'inherit',
 });
 
-export const greyBackground = style({
+export const greyBackground = sx({
   backgroundColor: '$dapp_transaction_asset_grey_color',
+  borderRadius: '$small',
+});
+
+export const balanceDetailContainer = style({
+  height: '100%',
+  paddingRight: '10px',
 });

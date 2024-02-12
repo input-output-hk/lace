@@ -8,7 +8,7 @@ import * as cx from './dapp-transaction-summary.css';
 
 import type { OmitClassName } from '../../types';
 
-export const TransactionTypes = {
+const TransactionTypes = {
   Withdrawal: 'withdrawal' as const,
   Receive: 'receive' as const,
   Sent: 'outgoing' as const,
@@ -31,7 +31,7 @@ export const TransactionType = ({
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
-    <div className={cx.container}>
+    <div className={cx.transactionTypeContainer}>
       <Grid {...props} columns="$2">
         <Cell>
           <Typography.Body.Large className={cx.boldLabel}>

@@ -118,7 +118,9 @@
       "nfts": "NFTs",
       "address": "Address",
       "origin": "Origin",
-      "transactionSummary": "Transaction Summary"
+      "transactionSummary": "Transaction Summary",
+      "deposit": "Deposit",
+      "returnedDeposit": "Returned deposit"
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable max-statements */
 /* eslint-disable complexity */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -63,6 +64,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
@@ -82,8 +84,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newChainHistoryProvider }),
     [inMemoryWallet, newChainHistoryProvider]
   );
-  // eslint-disable-next-line no-console
-  console.log('DETAILS:', transactionInspectionDetails);
 
   useEffect(() => {
     fetchNetworkInfo();

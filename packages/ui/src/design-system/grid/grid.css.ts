@@ -83,6 +83,11 @@ export const grid = recipe({
       $20: sx({ gap: '$20' }),
       $32: sx({ gap: '$32' }),
     },
+    alignItems: {
+      $center: {
+        alignItems: 'center',
+      },
+    },
   },
 
   defaultVariants: {

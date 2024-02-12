@@ -58,11 +58,7 @@ export const TransactionAssets = ({
   };
 
   return (
-    <div
-      className={cn(cx.assetContainer, {
-        [cx.greyBackground]: index % 2 === 0,
-      })}
-    >
+    <div className={cn({ [cx.greyBackground]: index % 2 === 0 })}>
       <Grid {...props} columns="$2">
         <Cell>
           <RadixUIAvatar.Root className={cx.avatarRoot}>
@@ -74,7 +70,11 @@ export const TransactionAssets = ({
           </RadixUIAvatar.Root>
         </Cell>
         <Cell>
-          <Flex justifyContent="flex-end" alignItems="center">
+          <Flex
+            justifyContent="flex-end"
+            alignItems="center"
+            className={cx.balanceDetailContainer}
+          >
             <Typography.Body.Normal className={cx.label}>
               {balance} {tokenName} {metadataHash}
             </Typography.Body.Normal>

@@ -8,7 +8,7 @@ import { TransactionType, SummaryExpander, Card } from '@lace/ui';
 
 const { Text } = Typography;
 
-export const TransactionTypes = {
+const TransactionTypes = {
   Withdrawal: 'withdrawal' as const,
   Receive: 'receive' as const,
   Sent: 'outgoing' as const,
@@ -22,11 +22,11 @@ type TransactionType = keyof typeof TransactionTypes;
 
 export interface DappInfoProps {
   name: string;
-  // url: string;
-  // logo: string;
-  // fallbackLogo?: string;
+  url?: string;
+  logo?: string;
+  fallbackLogo?: string;
   className?: string;
-  transactionType: TransactionType;
+  transactionType?: TransactionType;
 }
 
 export const DappInfo = ({ transactionType, name }: DappInfoProps): React.ReactElement => {
