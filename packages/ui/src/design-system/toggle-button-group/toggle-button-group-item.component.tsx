@@ -22,7 +22,9 @@ export const Item = forwardRef<HTMLButtonElement, ToggleButtonGroupItemProps>(
   ): JSX.Element => (
     <ToggleGroup.Item className={cx.root} ref={forwardReference} {...props}>
       {IconComponent && <IconComponent className={cx.icon} />}
-      <Typography.Button weight="$semibold">{children}</Typography.Button>
+      {Boolean(children) && (
+        <Typography.Button weight="$semibold">{children}</Typography.Button>
+      )}
     </ToggleGroup.Item>
   ),
 );
