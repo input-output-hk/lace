@@ -8,20 +8,20 @@ import { Flex } from '../flex';
 
 import * as cx from './radio-button.css';
 
-export type Props = Readonly<{
+export interface RadioButtonGroupOption {
+  value: string;
+  label: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  onIconClick?: () => void;
+}
+
+export interface RadioButtonGroupProps {
   disabled?: boolean;
   className?: string;
   selectedValue: string;
-
-  options: {
-    value: string;
-    label: string;
-    icon?: React.ReactNode;
-    onIconClick?: () => void;
-  }[];
-
+  options: RadioButtonGroupOption[];
   onValueChange: (value: string) => void;
-}>;
+}
 
 export const RadioButtonGroup = ({
   disabled = false,
@@ -30,8 +30,8 @@ export const RadioButtonGroup = ({
   selectedValue,
   options,
   ...props
-}: Props): JSX.Element => {
-  const isAnyOptionHasIcon = options.some(opx => Boolean(opx.icon));
+}: Readonly<RadioButtonGroupProps>): JSX.Element => {
+  const hasIcon = options.some(({ icon }) => Boolean(icon));
 
   return (
     <Box className={cn(className, cx.root)}>
@@ -41,15 +41,15 @@ export const RadioButtonGroup = ({
         disabled={disabled}
         onValueChange={onValueChange}
         className={cn(cx.radioGroupRoot, {
-          [cx.gap]: !isAnyOptionHasIcon,
+          [cx.gap]: !hasIcon,
         })}
       >
-        {options.map(({ value, label, icon, onIconClick }) => (
+        {options.map(({ value, label, icon: Icon, onIconClick }) => (
           <Flex
             h="$fill"
             alignItems={'center'}
             key={value}
-            className={cn(isAnyOptionHasIcon && cx.withIcon)}
+            className={cn({ [cx.withIcon]: hasIcon })}
           >
             <RadixRadioGroup.Item
               id={label}
@@ -72,13 +72,11 @@ export const RadioButtonGroup = ({
                 </Box>
               </label>
             )}
-            {icon !== undefined && (
-              <Flex justifyContent="flex-end" className={cx.iconWrapper}>
-                {value === selectedValue && (
-                  <div className={cx.icon} onClick={onIconClick}>
-                    {icon}
-                  </div>
-                )}
+            {Icon !== undefined && value === selectedValue && (
+              <Flex justifyContent="flex-end">
+                <div className={cx.icon} onClick={onIconClick}>
+                  <Icon />
+                </div>
               </Flex>
             )}
           </Flex>

@@ -30,7 +30,7 @@ const optionsWithIcon = [
   {
     value: 'option',
     label: 'Label',
-    icon: <DocumentDownload />,
+    icon: DocumentDownload,
     onIconClick: (): void => void 0,
   },
 ];
