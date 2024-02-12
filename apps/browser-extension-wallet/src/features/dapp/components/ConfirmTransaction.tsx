@@ -1,4 +1,5 @@
 /* eslint-disable max-statements */
+/* eslint-disable complexity */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +16,6 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { useFetchCoinPrice, useRedirection, useChainHistoryProvider } from '@hooks';
 import {
-  assetsBurnedInspector,
-  assetsMintedInspector,
   createTxInspector,
   TransactionSummaryInspection,
   transactionSummaryInspector,
@@ -67,7 +66,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [_, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
-  const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
   const [{ chainName }] = useAppSettingsContext();
 
   const [fromAddressTokens, setFromAddressTokens] = useState<
@@ -84,12 +82,13 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newChainHistoryProvider }),
     [inMemoryWallet, newChainHistoryProvider]
   );
+  // eslint-disable-next-line no-console
+  console.log('DETAILS:', transactionInspectionDetails);
 
   useEffect(() => {
     fetchNetworkInfo();
   }, [fetchNetworkInfo]);
 
-  console.log('whats here:', transactionInspectionDetails);
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
     if (!req) return [];
@@ -188,7 +187,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   useEffect(() => {
     if (!req) {
-      setTxSummary(void 0);
       setTransactionInspectionDetails(void 0);
       return;
     }
@@ -197,8 +195,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
     const getTxSummary = async () => {
       const inspector = createTxInspector({
-        minted: assetsMintedInspector,
-        burned: assetsBurnedInspector,
         tokenTransfer: tokenTransferInspector({
           inputResolver: txInputResolver,
           fromAddressAssetProvider: createWalletAssetProvider({
@@ -222,40 +218,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         })
       });
 
-      const { minted, burned, summary, tokenTransfer } = await inspector(tx as Wallet.Cardano.HydratedTx);
+      const { summary, tokenTransfer } = await inspector(tx as Wallet.Cardano.HydratedTx);
 
       const { toAddress, fromAddress } = tokenTransfer;
       setToAddressTokens(toAddress);
       setFromAddressTokens(fromAddress);
-      const isMintTransaction = minted.length > 0 || burned.length > 0;
-
-      const txType = isMintTransaction ? 'Mint' : 'Send';
-      const externalOutputs = tx.body.outputs.filter((output) => {
-        if (txType === 'Send') {
-          return walletInfo.addresses.every((addr) => output.address !== addr.address);
-        }
-        return true;
-      });
-
-      const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
-        // Don't show withdrawl tx's etc
-        if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-
-        return [
-          ...acc,
-          {
-            coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
-            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString()
-          }
-        ];
-      }, []);
-
-      // eslint-disable-next-line consistent-return
-      setTxSummary({
-        fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-        outputs: txSummaryOutputs,
-        type: txType
-      });
 
       setTransactionInspectionDetails(summary);
     };
@@ -264,7 +231,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     req,
     walletInfo.addresses,
     addressToNameMap,
-    setTxSummary,
     userAddresses,
     rewardAccountsAddresses,
     txInputResolver,
@@ -289,9 +255,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   return (
     <div className={styles.transactionContainer}>
-      {req && txSummary && transactionInspectionDetails ? (
+      {req && transactionInspectionDetails ? (
         <DappTransaction
-          transaction={txSummary}
           fiatCurrencyCode={fiatCurrency?.code}
           fiatCurrencyPrice={priceResult?.cardano?.price}
           coinSymbol={cardanoCoin.symbol}

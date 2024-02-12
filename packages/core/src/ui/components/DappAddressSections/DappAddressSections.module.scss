@@ -1,12 +1,12 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/_typography.scss';
 
-.details {
+.address {
   display: flex;
-  flex-direction: column;
-  margin: 0 20px;
+  justify-content: space-between;
+  padding: size_unit(2.5) 0;
 }
 
-.error {
-  margin: size_unit(2) 0px;
+.addressInfo {
+  color: $theme-light-grey !important;
 }

@@ -4,6 +4,10 @@ export const container = sx({
   p: ['$0', '$20'],
 });
 
+export const assetContainer = style({
+  padding: '0 20px',
+});
+
 export const label = sx({
   color: '$dapp_transaction_summary_label',
   fontWeight: '$semibold',
@@ -69,4 +73,8 @@ export const avatarImage = style({
   height: '70%',
   objectFit: 'cover',
   borderRadius: 'inherit',
+});
+
+export const greyBackground = style({
+  backgroundColor: '$dapp_transaction_asset_grey_color',
 });

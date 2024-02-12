@@ -10,7 +10,7 @@ import type { OmitClassName } from '../../types';
 
 export const TransactionTypes = {
   Withdrawal: 'withdrawal' as const,
-  Received: 'incoming' as const,
+  Receive: 'receive' as const,
   Sent: 'outgoing' as const,
   Send: 'send' as const,
   Sending: 'sending' as const,

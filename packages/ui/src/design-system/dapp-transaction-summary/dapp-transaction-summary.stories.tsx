@@ -73,27 +73,21 @@ const items = [
 
 const Example = (): JSX.Element => (
   <Layout>
-    <Flex
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      w="$fill"
-    >
-      <TransactionType label="Transaction" transactionType={'Sent'} />
-      <TransactionSummary
-        title="Transaction Summary"
-        transactionAmount="-100.00"
+    <TransactionType label="Transaction" transactionType={'Sent'} />
+    <TransactionSummary
+      title="Transaction Summary"
+      transactionAmount="-100.00"
+    />
+    {items.map((value, index) => (
+      <TransactionAssets
+        index={index}
+        key={value.metadataHash}
+        imageSrc={value.imageSrc}
+        balance={value.balance}
+        tokenName={value.tokenName}
+        metadataHash={value.metadataHash}
       />
-      {items.map(value => (
-        <TransactionAssets
-          key={value.metadataHash}
-          imageSrc={value.imageSrc}
-          balance={value.balance}
-          tokenName={value.tokenName}
-          metadataHash={value.metadataHash}
-        />
-      ))}
-    </Flex>
+    ))}
   </Layout>
 );
 
@@ -107,8 +101,9 @@ const MainComponents = (): JSX.Element => (
             title="Transaction Summary"
             transactionAmount="-100.00"
           />
-          {items.map(value => (
+          {items.map((value, index) => (
             <TransactionAssets
+              index={index}
               key={value.metadataHash}
               imageSrc={value.imageSrc}
               balance={value.balance}
