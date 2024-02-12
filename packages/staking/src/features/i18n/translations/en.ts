@@ -77,8 +77,13 @@ export const en: Translations = {
   'drawer.details.status.saturated': 'This pool is too saturated. Stake on another pool to avoid losing rewards',
   'drawer.details.unselectPool': 'Unselect pool',
   'drawer.failure.button.back': 'Back',
+  'drawer.failure.button.cancel': 'Cancel',
   'drawer.failure.button.close': 'Close',
+  'drawer.failure.button.removePools': 'Remove pools',
   'drawer.failure.button.retry': 'Retry',
+  'drawer.failure.deviceUpdate.subTitle':
+    'Your device needs to be up to date in order to use Multi-delegation. You can still delegate to a single pool with your current version',
+  'drawer.failure.deviceUpdate.title': 'Device update required',
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',

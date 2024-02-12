@@ -81,4 +81,11 @@
   align-items: center;
   height: 80%;
   justify-content: center;
+  color: green;
+  &.staking {
+    h5 {
+      max-width: 481px;
+      padding: 10px 0;
+    }
+  }
 }

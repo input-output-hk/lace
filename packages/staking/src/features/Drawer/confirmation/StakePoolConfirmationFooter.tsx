@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Wallet } from '@lace/cardano';
 import { Button, PostHogAction } from '@lace/common';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -23,6 +24,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     walletStoreGetKeyAgentType: getKeyAgentType,
     submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
+    isMultidelegationSupportedByDevice,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
@@ -40,9 +42,20 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+
+    if (
+      keyAgentType === Wallet.KeyManagement.KeyAgentType.Ledger ||
+      keyAgentType === Wallet.KeyManagement.KeyAgentType.Trezor
+    ) {
+      const isSupported = await isMultidelegationSupportedByDevice(keyAgentType);
+      if (!isSupported) {
+        throw new Error('MULTIDELEGATION_NOT_SUPPORTED');
+      }
+    }
+
     const signedTx = await delegationTxBuilder.build().sign();
     await inMemoryWallet.submitTx(signedTx.tx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+  }, [delegationTxBuilder, inMemoryWallet, keyAgentType, isMultidelegationSupportedByDevice]);
 
   const handleSubmission = useCallback(async () => {
     setOpenPoolsManagementConfirmationModal(null);
@@ -57,7 +70,10 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       await signAndSubmitTransaction();
       setIsRestaking(currentPortfolio.length > 0);
       portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
-    } catch {
+    } catch (error: any) {
+      if (error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
+        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+      }
       portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
     } finally {
       setIsConfirmingTx(false);
@@ -80,7 +96,6 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     }
 
     if (isPoolsReduced) return setOpenPoolsManagementConfirmationModal(PoolsManagementModalType.REDUCTION);
-
     return handleSubmission();
   }, [analytics, currentPortfolio, draftPortfolio, handleSubmission]);
 

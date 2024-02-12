@@ -29,3 +29,4 @@ export * from '@ui/components/Send/SendTransactionCost';
 export * from '@ui/components/MnemonicWordsAutoComplete';
 export * from '@ui/components/AddressCard';
 export * from '@ui/components/SharedWallet';
+export * from '@ui/components/Account';

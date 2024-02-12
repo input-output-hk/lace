@@ -101,6 +101,12 @@ type KeysStructure = {
         close: '';
         back: '';
         retry: '';
+        cancel: '';
+        removePools: '';
+      };
+      deviceUpdate: {
+        title: '';
+        subTitle: '';
       };
     };
     details: {
