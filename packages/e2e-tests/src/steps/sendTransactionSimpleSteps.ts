@@ -56,7 +56,7 @@ Given(/all fields are empty/, async () => {
 });
 
 When(
-  /I enter a valid "([^"]*)" address in the bundle (\d) recipient's address/,
+  /I enter a valid "([^"]*)" address in the bundle (\d+) recipient's address/,
   async (address: string, inputIndex: number) => {
     let addr;
     switch (address) {
@@ -91,12 +91,12 @@ When(
         addr = address;
         break;
     }
-    await new AddressInput(String(inputIndex).length === 0 ? 1 : inputIndex).fillAddress(addr);
+    await new AddressInput(inputIndex).fillAddress(addr);
   }
 );
 
-When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
-  await new AddressInput(String(inputIndex).length === 0 ? 1 : inputIndex).fillAddress(value);
+When(/I enter "([^"]*)" in the bundle (\d+) recipient's address/, async (value: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).fillAddress(value);
 });
 
 When(/I enter the first characters of the contacts/, async () => {
@@ -155,9 +155,9 @@ Then(
 );
 
 Then(
-  /I enter an address (\d*) that matches the amount of characters but does not match with the checksum/,
-  async (inputIndex?: number) => {
-    await new AddressInput(String(inputIndex).length === 0 ? 1 : inputIndex).fillAddress(shelleyInvalid.getAddress());
+  /I enter an address that matches the amount of characters but does not match with the checksum into address input (\d+)/,
+  async (inputIndex: number) => {
+    await new AddressInput(inputIndex).fillAddress(shelleyInvalid.getAddress());
   }
 );
 
@@ -202,11 +202,14 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
   await coinConfigureAssert.assertSeeNonEmptyBalanceInCoinConfigure();
 });
 
-Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
-  const addressInput = new AddressInput(String(inputIndex).length === 0 ? 1 : inputIndex);
-  await addressInput.searchLoader.waitForDisplayed({ reverse: true });
-  await addressInput.clickAddAddressButton();
-});
+Then(
+  /^click "(Add|Remove) address" button inside address input (\d+)$/,
+  async (_ignored: string, inputIndex: number) => {
+    const addressInput = new AddressInput(inputIndex);
+    await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    await addressInput.clickAddAddressButton();
+  }
+);
 
 When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
@@ -626,8 +629,8 @@ Then(/^recipients address input contains address entry with name "([^"]*)"$/, as
   await drawerSendExtendedAssert.assertSeeAddressNameInRecipientsAddressInput(addressName);
 });
 
-Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
-  await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(String(inputIndex).length === 0 ? 1 : inputIndex);
+Then(/^recipients address input (\d+) is empty$/, async (inputIndex: number) => {
+  await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });
 
 Then(/^I see (ADA|tADA) in transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
