@@ -8411,27 +8411,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dcspark/cardano-multiplatform-lib-asmjs@npm:^3.1.0":
-  version: 3.1.2
-  resolution: "@dcspark/cardano-multiplatform-lib-asmjs@npm:3.1.2"
-  checksum: 355032e18ba25349d89688f1732a6f4983d863dd8e5c98b6bbb49995925ba93f28dff86eb561ca3ca5f7107d6636861156ad0315ea2ceafd99ef5aab11f117e0
-  languageName: node
-  linkType: hard
-
-"@dcspark/cardano-multiplatform-lib-browser@npm:^3.1.1":
-  version: 3.1.2
-  resolution: "@dcspark/cardano-multiplatform-lib-browser@npm:3.1.2"
-  checksum: 60124ad62a87a6530af020a1eae09ce84ee87a0ce7c3401dc39987969e145c9bb41f036af2809d8bcd7515f0452aa8cb6bd7beb519804221cf583d16f45bf954
-  languageName: node
-  linkType: hard
-
-"@dcspark/cardano-multiplatform-lib-nodejs@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "@dcspark/cardano-multiplatform-lib-nodejs@npm:3.1.1"
-  checksum: e408d338fe199a29f0901364b77d284cc9455c0adc9041aadd8932b068a929040fda823a07eb80e5ca0df1396f148295cea3ea089de75339649141b23bdc00e3
-  languageName: node
-  linkType: hard
-
 "@design-systems/utils@npm:2.12.0":
   version: 2.12.0
   resolution: "@design-systems/utils@npm:2.12.0"
@@ -10641,7 +10620,6 @@ __metadata:
     "@cardano-sdk/util": 0.15.0
     "@cardano-sdk/wallet": 0.34.1
     "@cardano-sdk/web-extension": 0.24.4
-    "@dcspark/cardano-multiplatform-lib-asmjs": ^3.1.0
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
     "@koralabs/handles-public-api-interfaces": ^1.6.6
@@ -10714,8 +10692,6 @@ __metadata:
     "@cardano-sdk/util-dev": 0.19.12
     "@cardano-sdk/wallet": 0.34.1
     "@cardano-sdk/web-extension": 0.24.4
-    "@dcspark/cardano-multiplatform-lib-browser": ^3.1.1
-    "@dcspark/cardano-multiplatform-lib-nodejs": ^3.1.1
     "@emurgo/cardano-message-signing-browser": 1.0.1
     "@lace/common": 0.1.0
     "@stablelib/chacha20poly1305": 1.0.1

@@ -90,7 +90,6 @@
     "zustand": "3.5.14"
   },
   "devDependencies": {
-    "@dcspark/cardano-multiplatform-lib-asmjs": "^3.1.0",
     "@emurgo/cardano-message-signing-asmjs": "1.0.1",
     "@types/dotenv-webpack": "7.0.3",
     "@types/pluralize": "^0.0.29",
