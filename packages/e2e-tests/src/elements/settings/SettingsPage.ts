@@ -1,6 +1,5 @@
 import AboutLaceWidget from './extendedView/AboutLaceWidget';
 import { SettingsLink } from './SettingsLink';
-import { ChainablePromiseArray, ElementArray } from 'webdriverio';
 
 class SettingsPage {
   private readonly WALLET_HEADER = '[data-testid="wallet-settings-heading"]';
@@ -126,7 +125,7 @@ class SettingsPage {
     return $(this.THEME_SWITCH_TEST_ID);
   }
 
-  securitySettingsElements(): ChainablePromiseArray<ElementArray> {
+  get securitySettingsElements() {
     return $$(this.SECURITY_SETTINGS_ELEMENTS);
   }
 }

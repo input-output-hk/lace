@@ -12,7 +12,7 @@ jest.mock('@cardano-sdk/web-extension', () => ({
   WalletManagerUi: jest.fn().mockImplementation(() => ({ wallet: mockObservableWallet, activate: jest.fn() }))
 }));
 
-describe('Testing cardano-wallet', () => {
+describe('Testing cardano-wallet2234', () => {
   let keyAgent: KeyManagement.InMemoryKeyAgent;
   const mnemonicWords = [
     'board',

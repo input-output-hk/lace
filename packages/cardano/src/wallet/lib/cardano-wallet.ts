@@ -16,12 +16,10 @@ import * as KeyManagement from '@cardano-sdk/key-management';
 import { AnyWallet, Bip32WalletAccount, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
-// Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
-import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 import { Wallet } from '@src/index';
 import { HexBlob } from '@cardano-sdk/util';
 
-export const bip32Ed25519 = new Crypto.CmlBip32Ed25519(CML);
+export const bip32Ed25519 = new Crypto.SodiumBip32Ed25519();
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
