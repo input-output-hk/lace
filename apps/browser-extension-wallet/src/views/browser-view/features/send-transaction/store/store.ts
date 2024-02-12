@@ -446,7 +446,7 @@ export const useTransactionProps = (): {
         let handle: string;
         try {
           address = info.address ? Wallet.Cardano.PaymentAddress(info.address) : undefined;
-          handle = info.handle;
+          handle = info.handle?.toLowerCase();
         } catch {
           address = undefined;
           handle = undefined;
