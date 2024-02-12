@@ -8,14 +8,14 @@ import { t } from '../utils/translationService';
 export type ExpectedActivityDetails = {
   transactionDescription: string;
   hash?: string;
-  transactionData?: transactionData[];
+  transactionData?: TransactionData[];
   status: string;
   poolName?: string;
   poolTicker?: string;
   poolID?: string;
 };
 
-type transactionData = {
+export type TransactionData = {
   address: string;
   ada: string;
   assets?: string[];

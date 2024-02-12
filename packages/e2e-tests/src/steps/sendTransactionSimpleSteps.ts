@@ -23,7 +23,7 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails, TransactionData } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
 import { Asset } from '../data/Asset';
@@ -411,14 +411,19 @@ Then(
   /^The Tx details are displayed as "([^"]*)" for (\d) tokens with following details:$/,
   async (type: string, numberOfTokens: number, options: DataTable) => {
     const txData = options.hashes();
+    const parsedTxData: TransactionData[] = [];
     for (const entry of txData) {
-      entry.address = getTestWallet(entry.address).address;
-      entry.assets = entry.assets.split(',');
+      const parsedEntry = {
+        ada: entry.ada,
+        address: String(getTestWallet(entry.address).address),
+        assets: entry.assets.split(',')
+      };
+      parsedTxData.push(parsedEntry);
     }
     const expectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(${numberOfTokens})`,
       hash: String(testContext.load('txHashValue')),
-      transactionData: txData,
+      transactionData: parsedTxData,
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);

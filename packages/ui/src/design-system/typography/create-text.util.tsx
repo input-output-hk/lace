@@ -1,5 +1,5 @@
-import type { HTMLAttributes, PropsWithChildren } from 'react';
-import React from 'react';
+import type { ForwardRefExoticComponent, PropsWithChildren } from 'react';
+import React, { forwardRef } from 'react';
 
 import classNames from 'classnames';
 
@@ -24,40 +24,34 @@ export type TextNodes =
   | 'p'
   | 'span';
 
-type Props<T extends FontWeights = FontWeights> =
-  HTMLAttributes<HTMLSpanElement> &
-    PropsWithChildren<{
-      weight?: T;
-      as?: TextNodes;
-    }>;
-
-interface CreateTextArguments {
+interface CreateTextArguments<T extends TextNodes, W extends FontWeights> {
   type: TextTypes;
-  as: TextNodes;
-  weight: FontWeights;
+  as: T;
+  weight: W;
 }
 
-// this type annotation is required for
-// https://github.com/styleguidist/react-docgen-typescript
-export type Text<T extends FontWeights> = (
-  props: Readonly<PropsWithChildren<{ weight?: T; className?: string }>>,
-) => JSX.Element;
+type TextProps<W extends FontWeights> = PropsWithChildren<{
+  weight?: W;
+  className?: string;
+}>;
 
-export const createText = <T extends FontWeights>({
+export const createText = <
+  W extends FontWeights,
+  T extends TextNodes = TextNodes,
+>({
   type,
-  as: defaultTag,
+  as: Tag,
   weight: defaultWeight,
-}: Readonly<CreateTextArguments>): Text<T> => {
-  const Text = ({
-    as = defaultTag,
-    weight = defaultWeight as T,
-    className,
-    ...props
-  }: Readonly<Props<T>>): JSX.Element => {
-    const Tag = as;
-    return (
+}: Readonly<CreateTextArguments<T, W>>): ForwardRefExoticComponent<
+  TextProps<W>
+> =>
+  // eslint-disable-next-line react/display-name
+  forwardRef<typeof Tag, TextProps<W>>(
+    ({ weight = defaultWeight, className, ...props }, ref) => (
+      // @ts-expect-error TODO research the topic https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33116
       <Tag
         {...props}
+        ref={ref}
         className={classNames(typography({ type }), className, {
           [regular]: weight === '$regular',
           [medium]: weight === '$medium',
@@ -65,8 +59,5 @@ export const createText = <T extends FontWeights>({
           [bold]: weight === '$bold',
         })}
       />
-    );
-  };
-
-  return Text;
-};
+    ),
+  );
