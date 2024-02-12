@@ -1,49 +1,37 @@
 import React from 'react';
-import { Typography } from 'antd';
-
+import cn from 'classnames';
+import { Image } from 'antd';
 import styles from './DappInfo.module.scss';
-import { useTranslate } from '@src/ui/hooks';
-
-import { TransactionType, SummaryExpander, Card } from '@lace/ui';
-
-const { Text } = Typography;
-
-const TransactionTypes = {
-  Withdrawal: 'withdrawal' as const,
-  Receive: 'receive' as const,
-  Sent: 'outgoing' as const,
-  Send: 'send' as const,
-  Sending: 'sending' as const,
-  Mint: 'mint' as const,
-  'Self Transaction': 'self' as const
-};
-
-type TransactionType = keyof typeof TransactionTypes;
 
 export interface DappInfoProps {
   name: string;
-  url?: string;
-  logo?: string;
+  url: string;
+  logo: string;
   fallbackLogo?: string;
   className?: string;
-  transactionType?: TransactionType;
 }
 
-export const DappInfo = ({ transactionType, name }: DappInfoProps): React.ReactElement => {
-  const { t } = useTranslate();
+const imageSize = 40;
 
-  return (
-    <>
-      <TransactionType
-        label={t('package.core.dappTransaction.transaction')}
-        transactionType={transactionType}
-        data-testid="transaction-type-container"
-      />
-      <SummaryExpander title={t('package.core.dappTransaction.origin')}>
-        <Card.Outlined className={styles.dappInfoContainer}>
-          <Text className={styles.dappInfo}>{name}</Text>
-        </Card.Outlined>
-      </SummaryExpander>
-    </>
-  );
-};
+export const DappInfo = ({ name, url, logo, fallbackLogo, className }: DappInfoProps): React.ReactElement => (
+  <div className={cn(styles.pane, className)}>
+    <Image
+      className={styles.logo}
+      alt="dapp-logo"
+      width={imageSize}
+      height={imageSize}
+      src={logo}
+      fallback={fallbackLogo}
+      preview={false}
+      data-testid="dapp-info-logo"
+    />
+    <div className={styles.info}>
+      <div className={styles.name} data-testid="dapp-info-name">
+        {name}
+      </div>
+      <div className={styles.url} data-testid="dapp-info-url">
+        {url}
+      </div>
+    </div>
+  </div>
+);

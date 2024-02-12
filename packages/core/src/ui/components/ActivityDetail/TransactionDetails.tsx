@@ -9,7 +9,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import type { ActivityStatus } from '../Activity';
 import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
-import { TransactionFee } from './TransactionFee';
+import { TransactionFooterDetails } from './TransactionFooterDetails';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -266,7 +266,7 @@ export const TransactionDetails = ({
           </div>
           {fee && fee !== '-' && (
             <Box mb="$32">
-              <TransactionFee fee={fee} amountTransformer={amountTransformer} coinSymbol={coinSymbol} />
+              <TransactionFooterDetails fee={fee} amountTransformer={amountTransformer} coinSymbol={coinSymbol} />
             </Box>
           )}
           {deposit && renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}

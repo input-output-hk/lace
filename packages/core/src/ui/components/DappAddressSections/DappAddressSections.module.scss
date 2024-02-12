@@ -8,9 +8,18 @@
 }
 
 .addressInfo {
-  color: var(--text-color-grey, #6b7280) !important;
+  color: var(--text-color-primary, #ffffff) !important;
+  font-size: medium;
+  font-weight: 500;
 }
+
 
 .summaryContent {
   padding-bottom: 20px;
+}
+
+.tokenCount {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
 }

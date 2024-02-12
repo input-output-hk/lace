@@ -3,26 +3,28 @@ import React from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import cn from 'classnames';
-import styles from './TransactionFee.module.scss';
+import styles from './TransactionFooterDetails.module.scss';
 import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import { useTranslate } from '@src/ui/hooks';
 
-export interface TransactionFeeProps {
+export interface TransactionFooterDetailsProps {
   fee: string;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
   title?: string;
   className?: string;
   displayTooltip?: boolean;
+  displayFiat?: boolean;
 }
-export const TransactionFee = ({
+export const TransactionFooterDetails = ({
   fee,
   amountTransformer,
   coinSymbol,
   title,
   className,
-  displayTooltip = true
-}: TransactionFeeProps): React.ReactElement => {
+  displayTooltip = true,
+  displayFiat = true
+}: TransactionFooterDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
 
   return (
@@ -48,9 +50,11 @@ export const TransactionFee = ({
       <div data-testid="tx-fee" className={styles.detail}>
         <div className={styles.amount}>
           <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
-          <span data-testid="tx-fee-fiat" className={styles.fiat}>
-            {amountTransformer(fee)}
-          </span>
+          {displayFiat && (
+            <span data-testid="tx-fee-fiat" className={styles.fiat}>
+              {amountTransformer(fee)}
+            </span>
+          )}
         </div>
       </div>
     </div>

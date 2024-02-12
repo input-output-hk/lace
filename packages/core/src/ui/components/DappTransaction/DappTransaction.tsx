@@ -3,12 +3,12 @@ import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWithAmount } from '@cardano-sdk/core';
 
-import { DappInfo, DappInfoProps } from '../DappInfo';
+import { DappTransactionHeader, DappTransactionHeaderProps } from '../DappTransactionHeader';
 
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
-import { TransactionFee } from '@ui/components/ActivityDetail';
+import { TransactionFooterDetails } from '../ActivityDetail/TransactionFooterDetails';
 import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
 
@@ -26,7 +26,7 @@ export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
   txInspectionDetails: TransactionSummaryInspection;
   /** dApp information such as logo, name and url */
-  dappInfo: Omit<DappInfoProps, 'className'>;
+  dappInfo: Omit<DappTransactionHeaderProps, 'className'>;
   /** Optional error message */
   errorMessage?: string;
   fiatCurrencyCode?: string;
@@ -112,63 +112,64 @@ export const DappTransaction = ({
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
-        <>
-          <DappInfo transactionType={getTxType(coins)} name={dappInfo.name} />
-          <DappTransactionSummary
-            title={t('package.core.dappTransaction.transactionSummary')}
-            cardanoSymbol={coinSymbol}
-            transactionAmount={getStringFromLovelace(coins)}
-          />
-          <div className={styles.transactionAssetsContainer}>
-            {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount], index: number) => (
-              <TransactionAssets
-                index={index}
-                key={key}
-                imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
-                balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
-                tokenName={truncate(tokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
-                metadataHash={truncate(hash(assetWithAmount), charBeforeEllMetadata, charAfterEllMetadata)}
-              />
-            ))}
-          </div>
+        <DappTransactionHeader transactionType={getTxType(coins)} name={dappInfo.name} />
+        <DappTransactionSummary
+          title={t('package.core.dappTransaction.transactionSummary')}
+          cardanoSymbol={coinSymbol}
+          transactionAmount={getStringFromLovelace(coins)}
+        />
+        <div className={styles.transactionAssetsContainer}>
+          {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount], index: number) => (
+            <TransactionAssets
+              index={index}
+              key={key}
+              imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
+              balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
+              tokenName={truncate(tokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
+              metadataHash={truncate(hash(assetWithAmount), charBeforeEllMetadata, charAfterEllMetadata)}
+            />
+          ))}
+        </div>
 
-          <TransactionFee
-            fee={getStringFromLovelace(returnedDeposit)}
-            title={t('package.core.dappTransaction.returnedDeposit')}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
-            coinSymbol={coinSymbol}
-            displayTooltip={false}
-          />
+        <TransactionFooterDetails
+          fee={getStringFromLovelace(returnedDeposit)}
+          title={t('package.core.dappTransaction.returnedDeposit')}
+          amountTransformer={(ada: string) =>
+            `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+          }
+          coinSymbol={coinSymbol}
+          displayTooltip={false}
+          displayFiat={false}
+        />
 
-          <TransactionFee
-            displayTooltip={false}
-            className={styles.depositContainer}
-            fee={getStringFromLovelace(deposit)}
-            title={t('package.core.dappTransaction.deposit')}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
-            coinSymbol={coinSymbol}
-          />
+        <TransactionFooterDetails
+          displayTooltip={false}
+          fee={getStringFromLovelace(deposit)}
+          title={t('package.core.dappTransaction.deposit')}
+          amountTransformer={(ada: string) =>
+            `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+          }
+          coinSymbol={coinSymbol}
+          displayFiat={false}
+        />
 
-          <TransactionFee
-            displayTooltip={false}
-            fee={getStringFromLovelace(fee)}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
-            coinSymbol={coinSymbol}
-          />
+        <TransactionFooterDetails
+          displayTooltip={false}
+          displayFiat={false}
+          fee={getStringFromLovelace(fee)}
+          amountTransformer={(ada: string) =>
+            `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+          }
+          coinSymbol={coinSymbol}
+          className={styles.depositContainer}
+        />
 
-          <DappAddressSections
-            isToAddressesEnabled={isToAddressesEnabled}
-            isFromAddressesEnabled={isFromAddressesEnabled}
-            groupedFromAddresses={groupedFromAddresses}
-            groupedToAddresses={groupedToAddresses}
-          />
-        </>
+        <DappAddressSections
+          isToAddressesEnabled={isToAddressesEnabled}
+          isFromAddressesEnabled={isFromAddressesEnabled}
+          groupedFromAddresses={groupedFromAddresses}
+          groupedToAddresses={groupedToAddresses}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import React from 'react';
-import { truncate } from '@lace/common';
+import { truncate, addEllipsis } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 import { Typography } from 'antd';
@@ -68,27 +68,40 @@ export const DappAddressSections = ({
 }: DappAddressSectionProps): React.ReactElement => {
   const { t } = useTranslate();
 
+  const itemsCountCopy = t('package.core.dappTransaction.items');
+
   return (
     <>
       <SummaryExpander title={t('package.core.dappTransaction.fromAddress')} disabled={!isFromAddressesEnabled}>
         <div className={styles.summaryContent}>
           {groupedFromAddresses.addresses.map((address) => (
             <div key={address} className={styles.address}>
-              <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
+              <Text className={styles.addressInfo}>{t('package.core.dappTransaction.address')}</Text>
               <Text className={styles.addressInfo}>
-                {truncate(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
               </Text>
             </div>
           ))}
           {groupedFromAddresses.tokens.length > 0 && (
             <>
-              <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+              <div className={styles.tokenCount}>
+                <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+                <Title level={5}>
+                  -{groupedFromAddresses.tokens.length}
+                  {itemsCountCopy}
+                </Title>
+              </div>
               {displayGroupedTokens(groupedFromAddresses.tokens)}
             </>
           )}
           {groupedFromAddresses.nfts.length > 0 && (
             <>
-              <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+              <div className={styles.tokenCount}>
+                <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+                <Title level={5}>
+                  -{groupedFromAddresses.nfts.length} {itemsCountCopy}
+                </Title>
+              </div>
               {displayGroupedNFTs(groupedFromAddresses.nfts)}
             </>
           )}
@@ -99,22 +112,32 @@ export const DappAddressSections = ({
         <div>
           {groupedToAddresses.addresses.map((address) => (
             <div key={address} className={styles.address}>
-              <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
+              <Text className={styles.addressInfo}>{t('package.core.dappTransaction.address')}</Text>
               <Text className={styles.addressInfo}>
-                {truncate(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
               </Text>
             </div>
           ))}
         </div>
         {groupedToAddresses.tokens.length > 0 && (
           <>
-            <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+            <div className={styles.tokenCount}>
+              <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+              <Title level={5}>
+                +{groupedToAddresses.tokens.length} {itemsCountCopy}
+              </Title>
+            </div>
             {displayGroupedTokens(groupedToAddresses.tokens)}
           </>
         )}
         {groupedToAddresses.nfts.length > 0 && (
           <>
-            <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+            <div className={styles.tokenCount}>
+              <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+              <Title level={5}>
+                +{groupedToAddresses.nfts.length} {itemsCountCopy}
+              </Title>
+            </div>
             {displayGroupedNFTs(groupedToAddresses.nfts)}
           </>
         )}

@@ -120,7 +120,8 @@
       "origin": "Origin",
       "transactionSummary": "Transaction Summary",
       "deposit": "Deposit",
-      "returnedDeposit": "Returned deposit"
+      "returnedDeposit": "Returned deposit",
+      "items": "item(s)"
     }
   }
 }

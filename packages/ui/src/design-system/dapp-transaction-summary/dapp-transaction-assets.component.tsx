@@ -16,7 +16,7 @@ import * as cx from './dapp-transaction-summary.css';
 import type { OmitClassName } from '../../types';
 
 type Props = OmitClassName<'div'> & {
-  imageSrc?: string | undefined;
+  imageSrc: string | undefined;
   balance?: string;
   tokenName?: string;
   metadataHash?: string;

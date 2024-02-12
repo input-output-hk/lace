@@ -93,31 +93,29 @@ const Example = (): JSX.Element => (
 );
 
 const MainComponents = (): JSX.Element => (
-  <>
-    <Variants.Row>
-      <Variants.Cell>
-        <Layout>
-          <TransactionType label="Transaction" transactionType={'Sent'} />
-          <TransactionSummary
-            title="Transaction Summary"
-            transactionAmount="-100.00"
-          />
-          <div className={styles.assetContainer}>
-            {items.map((value, index) => (
-              <TransactionAssets
-                index={index}
-                key={value.metadataHash}
-                imageSrc={value.imageSrc}
-                balance={value.balance}
-                tokenName={value.tokenName}
-                metadataHash={value.metadataHash}
-              />
-            ))}
-          </div>
-        </Layout>
-      </Variants.Cell>
-    </Variants.Row>
-  </>
+  <Variants.Row>
+    <Variants.Cell>
+      <Layout>
+        <TransactionType label="Transaction" transactionType={'Sent'} />
+        <TransactionSummary
+          title="Transaction Summary"
+          transactionAmount="-100.00"
+        />
+        <div className={styles.assetContainer}>
+          {items.map((value, index) => (
+            <TransactionAssets
+              index={index}
+              key={value.metadataHash}
+              imageSrc={value.imageSrc}
+              balance={value.balance}
+              tokenName={value.tokenName}
+              metadataHash={value.metadataHash}
+            />
+          ))}
+        </div>
+      </Layout>
+    </Variants.Cell>
+  </Variants.Row>
 );
 
 export const Overview = (): JSX.Element => (

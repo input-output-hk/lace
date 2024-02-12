@@ -54,18 +54,22 @@ export const adaIcon = style([
   },
 ]);
 
-export const avatarRoot = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  verticalAlign: 'middle',
-  overflow: 'hidden',
-  userSelect: 'none',
-  width: '45px',
-  height: '45px',
-  borderRadius: '5px',
-  backgroundColor: '$transaction_summary_secondary_label_color',
-});
+export const avatarRoot = style([
+  sx({
+    backgroundColor: '$transaction_summary_secondary_label_color',
+    borderRadius: '$small',
+  }),
+  {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    verticalAlign: 'middle',
+    overflow: 'hidden',
+    userSelect: 'none',
+    width: '45px',
+    height: '45px',
+  },
+]);
 
 export const avatarImage = style({
   width: '70%',

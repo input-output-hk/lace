@@ -29,7 +29,7 @@ import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';
 import type { UserPromptService } from '@lib/scripts/background/services';
 import { of, take } from 'rxjs';
-import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
+
 import { useCurrencyStore, useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
@@ -60,12 +60,9 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const { priceResult } = useFetchCoinPrice();
   const analytics = useAnalyticsContext();
 
-  const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
   const [{ chainName }] = useAppSettingsContext();
@@ -88,39 +85,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   useEffect(() => {
     fetchNetworkInfo();
   }, [fetchNetworkInfo]);
-
-  // All assets' ids in the transaction body. Used to fetch their info from cardano services
-  const assetIds = useMemo(() => {
-    if (!req) return [];
-    const tx = req.transaction.toCore();
-    const uniqueAssetIds = new Set<Wallet.Cardano.AssetId>();
-    // Merge all assets (TokenMaps) from the tx outputs and mint
-    const assetMaps = tx.body?.outputs?.map((output) => output.value.assets) ?? [];
-    if (tx.body?.mint?.size > 0) assetMaps.push(tx.body.mint);
-
-    // Extract all unique asset ids from the array of TokenMaps
-    for (const asset of assetMaps) {
-      if (asset) {
-        for (const id of asset.keys()) {
-          !uniqueAssetIds.has(id) && uniqueAssetIds.add(id);
-        }
-      }
-    }
-    return [...uniqueAssetIds.values()];
-  }, [req]);
-
-  useEffect(() => {
-    if (assetIds?.length > 0) {
-      getAssetsInformation(assetIds, assets, {
-        assetProvider,
-        extraData: { nftMetadata: true, tokenMetadata: true }
-      })
-        .then((result) => setAssetsInfo(result))
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-  }, [assetIds, assetProvider, assets]);
 
   const cancelTransaction = useCallback(
     async (close = false) => {
@@ -223,7 +187,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       const { toAddress, fromAddress } = tokenTransfer;
       setToAddressTokens(toAddress);
       setFromAddressTokens(fromAddress);
-
       setTransactionInspectionDetails(summary);
     };
     getTxSummary();
