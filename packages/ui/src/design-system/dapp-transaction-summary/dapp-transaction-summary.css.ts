@@ -1,5 +1,9 @@
 import { sx, style } from '../../design-tokens';
 
+export const container = sx({
+  p: ['$0', '$20'],
+});
+
 export const label = sx({
   color: '$dapp_transaction_summary_label',
   fontWeight: '$semibold',

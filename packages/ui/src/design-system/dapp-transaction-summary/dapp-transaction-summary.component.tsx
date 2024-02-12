@@ -23,7 +23,7 @@ export const TransactionSummary = ({
   cardanoSymbol,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <>
+  <div className={cx.container}>
     {title !== undefined && (
       <Flex justifyContent="flex-start">
         <Typography.Body.Large className={cx.boldLabel}>
@@ -43,5 +43,5 @@ export const TransactionSummary = ({
         </Flex>
       </Cell>
     </Grid>
-  </>
+  </div>
 );

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable max-statements */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
@@ -14,13 +13,11 @@ import { AddressListType } from '@views/browser/features/activity';
 import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useFetchCoinPrice, useRedirection } from '@hooks';
+import { useFetchCoinPrice, useRedirection, useChainHistoryProvider } from '@hooks';
 import {
   assetsBurnedInspector,
   assetsMintedInspector,
   createTxInspector,
-  AssetsMintedInspection,
-  MintedAsset,
   TransactionSummaryInspection,
   transactionSummaryInspector,
   Cardano,
@@ -39,50 +36,9 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
-import { chainHistoryHttpProvider } from '@cardano-sdk/cardano-services-client';
-import { getBaseUrlForChain } from '@src/utils/chain';
+
 const DAPP_TOAST_DURATION = 50;
 
-const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
-  const result: Record<string, unknown> = {};
-  for (const item of arr) {
-    if (typeof item === 'object' && !Array.isArray(item) && item !== null) {
-      Object.assign(result, item);
-    }
-  }
-  return result;
-};
-
-// eslint-disable-next-line complexity, sonarjs/cognitive-complexity
-const getAssetNameFromMintMetadata = (asset: MintedAsset, metadata: Wallet.Cardano.TxMetadata): string | undefined => {
-  if (!asset || !metadata) return;
-  const decodedAssetName = Buffer.from(asset.assetName, 'hex').toString();
-
-  // Tries to find the asset name in the tx metadata under label 721 or 20
-  for (const [key, value] of metadata.entries()) {
-    // eslint-disable-next-line no-magic-numbers
-    if (key !== BigInt(721) && key !== BigInt(20)) return;
-    const cip25Metadata = Wallet.cardanoMetadatumToObj(value);
-    if (!Array.isArray(cip25Metadata)) return;
-
-    // cip25Metadata should be an array containing all policies for the minted assets in the tx
-    const policyLevelMetadata = convertMetadataArrayToObj(cip25Metadata)[asset.policyId];
-    if (!Array.isArray(policyLevelMetadata)) return;
-
-    // policyLevelMetadata should be an array of objects with the minted assets names as key
-    // e.g. "policyId" = [{ "AssetName1": { ...metadataAsset1 } }, { "AssetName2": { ...metadataAsset2 } }];
-    const assetProperties = convertMetadataArrayToObj(policyLevelMetadata)?.[decodedAssetName];
-    if (!Array.isArray(assetProperties)) return;
-
-    // assetProperties[decodedAssetName] should be an array of objects with the properties as keys
-    // e.g. [{ "name": "Asset Name" }, { "description": "An asset" }, ...]
-    const assetMetadataName = convertMetadataArrayToObj(assetProperties)?.name;
-    // eslint-disable-next-line consistent-return
-    return typeof assetMetadataName === 'string' ? assetMetadataName : undefined;
-  }
-};
-
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export const ConfirmTransaction = withAddressBookContext((): React.ReactElement => {
   const {
     utils: { setNextView },
@@ -108,7 +64,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
-  const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
+  const [_, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
   const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
@@ -121,12 +77,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
     TransactionSummaryInspection | undefined
   >();
-  const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
 
-  const newChainHistoryProvider = useMemo(
-    () => chainHistoryHttpProvider({ baseUrl: baseCardanoServicesUrl, logger }),
-    [baseCardanoServicesUrl]
-  );
+  const newChainHistoryProvider = useChainHistoryProvider({ chainName });
 
   const txInputResolver = useMemo(
     () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newChainHistoryProvider }),
@@ -137,6 +89,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     fetchNetworkInfo();
   }, [fetchNetworkInfo]);
 
+  console.log('whats here:', transactionInspectionDetails);
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
     if (!req) return [];
@@ -220,46 +173,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     };
   }, [setSignTxRequest]);
 
-  const createMintedList = useCallback(
-    (mintedAssets: AssetsMintedInspection) => {
-      if (!assetsInfo) return [];
-      return mintedAssets.map((asset) => {
-        const assetId = Wallet.Cardano.AssetId.fromParts(asset.policyId, asset.assetName);
-        const assetInfo = assets.get(assetId) || assetsInfo?.get(assetId);
-        // If it's a new asset or the name is being updated we should be getting it from the tx metadata
-        const metadataName = getAssetNameFromMintMetadata(asset, req.transaction.toCore()?.auxiliaryData?.blob);
-        return {
-          name: assetInfo?.name.toString() || asset.fingerprint || assetId,
-          ticker:
-            metadataName ??
-            assetInfo?.nftMetadata?.name ??
-            assetInfo?.tokenMetadata?.ticker ??
-            assetInfo?.tokenMetadata?.name ??
-            asset.fingerprint.toString(),
-          amount: Wallet.util.calculateAssetBalance(asset.quantity, assetInfo)
-        };
-      });
-    },
-    [assets, assetsInfo, req]
-  );
-
-  const createAssetList = useCallback(
-    (txAssets: Wallet.Cardano.TokenMap) => {
-      if (!assetsInfo) return [];
-      const assetList: Wallet.Cip30SignTxAssetItem[] = [];
-      txAssets.forEach(async (value, key) => {
-        const walletAsset = assets.get(key) || assetsInfo?.get(key);
-        assetList.push({
-          name: walletAsset?.name.toString() || key.toString(),
-          ticker: walletAsset?.tokenMetadata?.ticker || walletAsset?.nftMetadata?.name,
-          amount: Wallet.util.calculateAssetBalance(value, walletAsset)
-        });
-      });
-      return assetList;
-    },
-    [assets, assetsInfo]
-  );
-
   const addressToNameMap = useMemo(
     () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
     [addressList]
@@ -332,8 +245,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           ...acc,
           {
             coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
-            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
-            ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString()
           }
         ];
       }, []);
@@ -342,9 +254,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       setTxSummary({
         fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
         outputs: txSummaryOutputs,
-        type: txType,
-        mintedAssets: createMintedList(minted),
-        burnedAssets: createMintedList(burned)
+        type: txType
       });
 
       setTransactionInspectionDetails(summary);
@@ -353,8 +263,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   }, [
     req,
     walletInfo.addresses,
-    createAssetList,
-    createMintedList,
     addressToNameMap,
     setTxSummary,
     userAddresses,
@@ -387,7 +295,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           fiatCurrencyCode={fiatCurrency?.code}
           fiatCurrencyPrice={priceResult?.cardano?.price}
           coinSymbol={cardanoCoin.symbol}
-          newTxSummary={transactionInspectionDetails}
+          txInspectionDetails={transactionInspectionDetails}
           dappInfo={dappInfo}
           fromAddress={fromAddressTokens}
           toAddress={toAddressTokens}

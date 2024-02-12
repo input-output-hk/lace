@@ -111,7 +111,14 @@
       "recipient": "Recipient",
       "send": "Send",
       "sending": "Sending",
-      "transaction": "Transaction"
+      "transaction": "Transaction",
+      "toAddress": "To address",
+      "fromAddress": "From address",
+      "tokens": "Tokens",
+      "nfts": "NFTs",
+      "address": "Address",
+      "origin": "Origin",
+      "transactionSummary": "Transaction Summary"
     }
   }
 }

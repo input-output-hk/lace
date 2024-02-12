@@ -1,9 +1,6 @@
 /* eslint-disable complexity */
-/* eslint-disable sonarjs/no-identical-functions */
-/* eslint-disable no-console */
-/* eslint-disable sonarjs/no-duplicate-string */
 import React from 'react';
-import { ErrorPane } from '@lace/common';
+import { ErrorPane, addEllipsis } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWithAmount } from '@cardano-sdk/core';
 import { Typography } from 'antd';
@@ -11,24 +8,15 @@ import { Typography } from 'antd';
 import { DappInfoProps } from '../DappInfo';
 
 import styles from './DappTransaction.module.scss';
+import { useTranslate } from '@src/ui/hooks';
 
 import { TransactionFee } from '@ui/components/ActivityDetail';
-import {
-  TransactionType,
-  TransactionOrigin,
-  DappTransactionSummary,
-  TransactionAssets,
-  SummaryExpander
-} from '@lace/ui';
+import { TransactionType, DappTransactionSummary, TransactionAssets, SummaryExpander, Card } from '@lace/ui';
 
 export enum TxType {
   Send = 'Send',
   Mint = 'Mint',
-  Burn = 'Burn',
-  DRepRegistration = 'DRepRegistration',
-  DRepRetirement = 'DRepRetirement',
-  VoteDelegation = 'VoteDelegation',
-  VotingProcedures = 'VotingProcedures'
+  Burn = 'Burn'
 }
 
 type TransactionDetails = {
@@ -38,7 +26,7 @@ type TransactionDetails = {
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
   transaction: TransactionDetails;
-  newTxSummary?: TransactionSummaryInspection;
+  txInspectionDetails: TransactionSummaryInspection;
   /** dApp information such as logo, name and url */
   dappInfo: Omit<DappInfoProps, 'className'>;
   /** Optional error message */
@@ -49,13 +37,11 @@ export interface DappTransactionProps {
   /** tokens send to being sent to or from the user */
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
+  deposit?: string;
+  returnedDeposit?: string;
 }
 
-const { Title } = Typography;
-
-// move the strings to translation files
-// move the from and to sections to its own file
-// do we have to delete the previous dapheader?
+const { Title, Text } = Typography;
 
 const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValue>) => {
   const groupedAddresses: {
@@ -84,22 +70,60 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
   return groupedAddresses;
 };
 
+const charBeforeEllName = 9;
+const charAfterEllName = 0;
+
+const charBeforeEllMetadata = 6;
+const charAfterEllMetadata = 0;
+
+const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
+  nfts.map((nft: AssetInfoWithAmount) => (
+    <TransactionAssets
+      key={nft.assetInfo.fingerprint}
+      imageSrc={nft.assetInfo.tokenMetadata.icon ?? undefined}
+      balance={Wallet.util.lovelacesToAdaString(nft.amount.toString())}
+      tokenName={addEllipsis(nft.assetInfo.nftMetadata?.name, charBeforeEllName, charAfterEllName)}
+      metadataHash={addEllipsis(nft.assetInfo.nftMetadata?.name, charBeforeEllMetadata, charAfterEllMetadata)}
+    />
+  ));
+
+const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
+  tokens.map((token: AssetInfoWithAmount) => (
+    <TransactionAssets
+      key={token.assetInfo.fingerprint}
+      imageSrc={token.assetInfo.tokenMetadata.icon ?? undefined}
+      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+      tokenName={addEllipsis(token.assetInfo.tokenMetadata.name, charBeforeEllName, charAfterEllName)}
+      metadataHash={addEllipsis(token.assetInfo.assetId, charBeforeEllMetadata, charAfterEllMetadata)}
+    />
+  ));
+
 const tokenName = (assetWithAmount: AssetInfoWithAmount) =>
   assetWithAmount.assetInfo.nftMetadata !== null
     ? assetWithAmount.assetInfo.nftMetadata.name
-    : assetWithAmount.assetInfo.tokenMetadata.ticker;
+    : assetWithAmount.assetInfo.tokenMetadata.name;
+
+const hash = (assetWithAmount: AssetInfoWithAmount) =>
+  assetWithAmount.assetInfo.nftMetadata !== null ? assetWithAmount.assetInfo.nftMetadata.name : assetWithAmount.assetId;
+
+const charBeforeEllipsisName = 8;
+const charAfterEllipsisName = 8;
 
 export const DappTransaction = ({
   transaction: { type },
-  newTxSummary: { assets, coins, fee },
+  txInspectionDetails: { assets, coins, fee },
   toAddress,
   fromAddress,
   errorMessage,
   fiatCurrencyCode,
   fiatCurrencyPrice,
   coinSymbol,
-  dappInfo
+  dappInfo,
+  deposit,
+  returnedDeposit
 }: DappTransactionProps): React.ReactElement => {
+  const { t } = useTranslate();
+
   const totalAmount = Wallet.util.lovelacesToAdaString(coins.toString());
   const txFee = Wallet.util.lovelacesToAdaString(fee.toString());
 
@@ -108,110 +132,115 @@ export const DappTransaction = ({
 
   const isFromAddressesEnabled = groupedFromAddresses.tokens.length > 0 || groupedFromAddresses.nfts.length > 0;
   const isToAddressesEnabled = groupedToAddresses.tokens.length > 0 || groupedToAddresses.nfts.length > 0;
+
   return (
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
-        {type === TxType.Send && (
-          <>
-            <TransactionType label="Transaction" transactionType={type} data-testid="transaction-type-container" />
-            <TransactionOrigin label="Origin" origin={dappInfo.name} />
-            <DappTransactionSummary
-              title="Transaction Summary"
-              cardanoSymbol={coinSymbol}
-              transactionAmount={totalAmount}
+        <>
+          <TransactionType
+            label={t('package.core.dappTransaction.transaction')}
+            transactionType={type}
+            data-testid="transaction-type-container"
+          />
+          <SummaryExpander title={t('package.core.dappTransaction.origin')}>
+            <Card.Outlined className={styles.dappInfoContainer}>
+              <Text className={styles.dappInfo}>{dappInfo.name}</Text>
+            </Card.Outlined>
+          </SummaryExpander>
+          <DappTransactionSummary
+            title={t('package.core.dappTransaction.transactionSummary')}
+            cardanoSymbol={coinSymbol}
+            transactionAmount={totalAmount}
+          />
+          {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => (
+            <TransactionAssets
+              key={key}
+              imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
+              balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
+              tokenName={tokenName(assetWithAmount)}
+              metadataHash={hash(assetWithAmount)}
             />
-            {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => (
-              <TransactionAssets
-                key={key}
-                imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
-                balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
-                tokenName={tokenName(assetWithAmount)}
-                metadataHash={assetWithAmount.assetInfo.nftMetadata?.name}
-              />
-            ))}
+          ))}
 
-            {/* Display fee */}
-            {txFee && txFee !== '-' && (
-              <TransactionFee
-                fee={txFee}
-                amountTransformer={(ada: string) =>
-                  `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-                }
-                coinSymbol={coinSymbol}
-              />
-            )}
+          {returnedDeposit && (
+            <TransactionFee
+              fee={returnedDeposit}
+              amountTransformer={(ada: string) =>
+                `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+              }
+              coinSymbol={coinSymbol}
+            />
+          )}
 
-            <SummaryExpander title="From address" disabled={!isFromAddressesEnabled}>
-              {groupedFromAddresses.addresses.map((address) => (
-                <span key={address}>Address {address}</span>
-              ))}
-              {groupedFromAddresses.tokens.length > 0 && (
-                <>
-                  <Title level={5}>Tokens</Title>
-                  {groupedFromAddresses.tokens.map((token) => (
-                    <TransactionAssets
-                      key={token.assetInfo.fingerprint}
-                      imageSrc={token.assetInfo.tokenMetadata.icon}
-                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                      tokenName={token.assetInfo.tokenMetadata.ticker}
-                      metadataHash={token.assetInfo.nftMetadata?.name}
-                    />
-                  ))}
-                </>
-              )}
-              {groupedFromAddresses.nfts.length > 0 && (
-                <>
-                  <Title level={5}>NFTs</Title>
-                  {groupedFromAddresses.nfts.map((token) => (
-                    <TransactionAssets
-                      key={token.assetInfo.fingerprint}
-                      imageSrc={token.assetInfo.tokenMetadata.icon}
-                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                      tokenName={token.assetInfo.name}
-                      metadataHash={token.assetInfo.nftMetadata?.name}
-                    />
-                  ))}
-                </>
-              )}
-            </SummaryExpander>
+          {deposit && (
+            <TransactionFee
+              fee={deposit}
+              amountTransformer={(ada: string) =>
+                `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+              }
+              coinSymbol={coinSymbol}
+            />
+          )}
 
-            <SummaryExpander title="To address" disabled={!isToAddressesEnabled}>
-              <div>
-                {groupedToAddresses.addresses.map((address) => (
-                  <span key={address}>Address {address}</span>
-                ))}
+          {txFee && txFee !== '-' && (
+            <TransactionFee
+              fee={txFee}
+              amountTransformer={(ada: string) =>
+                `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+              }
+              coinSymbol={coinSymbol}
+            />
+          )}
+
+          <SummaryExpander title={t('package.core.dappTransaction.fromAddress')} disabled={!isFromAddressesEnabled}>
+            {groupedFromAddresses.addresses.map((address) => (
+              <div key={address} className={styles.address}>
+                <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
+                <Text className={styles.addressInfo}>
+                  {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                </Text>
               </div>
-              {groupedToAddresses.tokens.length > 0 && (
-                <>
-                  <Title level={5}>Tokens</Title>
-                  {groupedToAddresses.tokens.map((token) => (
-                    <TransactionAssets
-                      key={token.assetInfo.fingerprint}
-                      imageSrc={token.assetInfo.tokenMetadata.icon}
-                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                      tokenName={token.assetInfo.tokenMetadata.ticker}
-                    />
-                  ))}
-                </>
-              )}
-              {groupedToAddresses.nfts.length > 0 && (
-                <>
-                  <Title level={5}>NFTs</Title>
-                  {groupedToAddresses.nfts.map((token) => (
-                    <TransactionAssets
-                      key={token.assetInfo.fingerprint}
-                      imageSrc={token.assetInfo.tokenMetadata.icon}
-                      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-                      tokenName={token.assetInfo.name}
-                      metadataHash={token.assetInfo.nftMetadata?.name}
-                    />
-                  ))}
-                </>
-              )}
-            </SummaryExpander>
-          </>
-        )}
+            ))}
+            {groupedFromAddresses.tokens.length > 0 && (
+              <>
+                <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+                {displayGroupedTokens(groupedFromAddresses.tokens)}
+              </>
+            )}
+            {groupedFromAddresses.nfts.length > 0 && (
+              <>
+                <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+                {displayGroupedNFTs(groupedFromAddresses.nfts)}
+              </>
+            )}
+          </SummaryExpander>
+
+          <SummaryExpander title={t('package.core.dappTransaction.toAddress')} disabled={!isToAddressesEnabled}>
+            <div>
+              {groupedToAddresses.addresses.map((address) => (
+                <div key={address} className={styles.address}>
+                  <Title level={5}>{t('package.core.dappTransaction.address')}</Title>
+                  <Text className={styles.addressInfo}>
+                    {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                  </Text>
+                </div>
+              ))}
+            </div>
+            {groupedToAddresses.tokens.length > 0 && (
+              <>
+                <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+                {displayGroupedTokens(groupedToAddresses.tokens)}
+              </>
+            )}
+            {groupedToAddresses.nfts.length > 0 && (
+              <>
+                <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+                {displayGroupedNFTs(groupedToAddresses.nfts)}
+              </>
+            )}
+          </SummaryExpander>
+        </>
       </div>
     </div>
   );

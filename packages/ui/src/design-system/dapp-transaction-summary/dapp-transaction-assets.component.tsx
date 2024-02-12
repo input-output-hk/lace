@@ -16,13 +16,22 @@ import * as cx from './dapp-transaction-summary.css';
 import type { OmitClassName } from '../../types';
 
 type Props = OmitClassName<'div'> & {
-  imageSrc?: string;
+  imageSrc?: string | undefined;
   balance?: string;
   tokenName?: string;
   metadataHash?: string;
   coins?: string;
 };
 
+const isImageBase64Encoded = (image: string): boolean => {
+  try {
+    atob(image);
+
+    return true;
+  } catch {
+    return false;
+  }
+};
 export const TransactionAssets = ({
   imageSrc,
   balance,
@@ -36,7 +45,7 @@ export const TransactionAssets = ({
     theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
 
   const getImageSource = (value: string | undefined): string =>
-    value === '' || value === undefined
+    value === '' || value === undefined || !isImageBase64Encoded(value)
       ? setThemeFallbackImagine
       : `data:image/png;base64,${value}`;
 

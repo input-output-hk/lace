@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import * as Typography from '../typography';
@@ -32,7 +31,7 @@ export const TransactionType = ({
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
-    <>
+    <div className={cx.container}>
       <Grid {...props} columns="$2">
         <Cell>
           <Typography.Body.Large className={cx.boldLabel}>
@@ -47,7 +46,6 @@ export const TransactionType = ({
           </Flex>
         </Cell>
       </Grid>
-      <Divider my="$20" />
-    </>
+    </div>
   );
 };

@@ -12,7 +12,6 @@ import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 
 import { TransactionAssets } from './dapp-transaction-assets.component';
-import { TransactionOrigin } from './dapp-transaction-origin.component';
 import { TransactionSummary } from './dapp-transaction-summary.component';
 import { TransactionType } from './dapp-transaction-type.component';
 
@@ -20,7 +19,7 @@ const subtitle = `Control that displays data items in rows.`;
 
 export default {
   title: 'List & tables/DApp transaction summary',
-  subcomponents: { TransactionOrigin, TransactionSummary, TransactionType },
+  subcomponents: { TransactionSummary, TransactionType },
   decorators: [page({ title: 'Dapp transaction summary', subtitle })],
 } as Meta;
 
@@ -81,7 +80,6 @@ const Example = (): JSX.Element => (
       w="$fill"
     >
       <TransactionType label="Transaction" transactionType={'Sent'} />
-      <TransactionOrigin label="Origin" origin="Wingriders" />
       <TransactionSummary
         title="Transaction Summary"
         transactionAmount="-100.00"
@@ -105,7 +103,6 @@ const MainComponents = (): JSX.Element => (
       <Variants.Cell>
         <Layout>
           <TransactionType label="Transaction" transactionType={'Sent'} />
-          <TransactionOrigin label="Origin" origin="Wingriders" />
           <TransactionSummary
             title="Transaction Summary"
             transactionAmount="-100.00"
