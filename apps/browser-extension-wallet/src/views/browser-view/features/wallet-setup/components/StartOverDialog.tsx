@@ -21,7 +21,7 @@ export const StartOverDialog = ({ visible, onStartOver, onClose }: StartOverDial
       closable={false}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible}
+      open={visible}
       width={480}
       className={styles.startOverDialog}
     >
