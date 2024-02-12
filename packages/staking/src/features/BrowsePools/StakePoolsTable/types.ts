@@ -1,5 +1,6 @@
 import { Wallet } from '@lace/cardano';
 
+// TODO use unified MetricType
 export enum Columns {
   ticker = 'ticker',
   saturation = 'saturation',

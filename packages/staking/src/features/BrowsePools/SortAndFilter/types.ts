@@ -1,5 +1,3 @@
-import { Columns } from '../StakePoolsTable/types';
-
 export enum PoolsFilter {
   Saturation = 'SATURATION',
   ProfitMargin = 'PROFIT_MARGIN',
@@ -7,12 +5,6 @@ export enum PoolsFilter {
   Ros = 'ROS',
 }
 
-export type SortOption = {
-  label: string;
-  value: Columns;
-  icon: React.ReactNode;
-  onIconClick?: () => void;
-};
 export type SelectOption = { label: string; value: string; selected: boolean };
 
 export type FilterOption = {
@@ -29,4 +21,7 @@ export interface FilterValues {
   [PoolsFilter.Ros]: string[];
 }
 
-export type VisibleSection = 'sorting' | 'filtering';
+export enum SortAndFilterTab {
+  sort = 'sort',
+  filter = 'filter',
+}

@@ -73,7 +73,7 @@ export const RadioButtonGroup = ({
               </label>
             )}
             {Icon !== undefined && value === selectedValue && (
-              <Flex justifyContent="flex-end">
+              <Flex justifyContent="flex-end" className={cx.iconWrapper}>
                 <div className={cx.icon} onClick={onIconClick}>
                   <Icon />
                 </div>

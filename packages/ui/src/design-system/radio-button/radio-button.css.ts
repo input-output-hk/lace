@@ -76,9 +76,9 @@ export const radioGroupIndicator = style([
 
 export const iconWrapper = style([
   sx({
-    ml: '$18',
-    w: '$32',
-    h: '$32',
+    marginLeft: '$18',
+    width: '$32',
+    height: '$32',
   }),
   {
     flexGrow: 1,

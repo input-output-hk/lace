@@ -5,41 +5,49 @@ import { useCallback, useState } from 'react';
 import type { Meta } from '@storybook/react';
 
 import { SortAndFilter } from './SortAndFilter';
-import { FilterValues, PoolsFilter, VisibleSection } from './types';
+import { FilterValues, PoolsFilter, SortAndFilterTab } from './types';
 
 export default {
   title: 'Cards/Stake Pool Sorting & Filter',
 } as Meta;
 
-const Wrapper = ({ visibleSection: inVisibleSection }: { visibleSection: VisibleSection }) => {
-  const [visibleSection, setVisibleSection] = useState(inVisibleSection);
-  const [sortAndDirection, setSortAndDirection] = useState<StakePoolSortOptions>({
+const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [sort, setSort] = useState<StakePoolSortOptions>({
     field: 'saturation',
     order: SortDirection.asc,
   });
-  const [filters, setFilters] = useState<FilterValues>({
+  const [filter, setFilter] = useState<FilterValues>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
     [PoolsFilter.Performance]: ['', ''],
     [PoolsFilter.Ros]: [''],
   });
 
-  const handleSortAndDirectionChange = useCallback(
+  const handleSortChange = useCallback(
     (options: StakePoolSortOptions) => {
-      action('SortAndDirectionChange')(options);
-      setSortAndDirection(options);
+      action('SortChange')(options);
+      setSort(options);
     },
-    [setSortAndDirection]
+    [setSort]
+  );
+
+  const handleFilterChange = useCallback(
+    (options: FilterValues) => {
+      action('FilterChange')(options);
+      setFilter(options);
+    },
+    [setFilter]
   );
 
   return (
     <SortAndFilter
-      onSortAndDirectionChange={handleSortAndDirectionChange}
-      onFiltersChange={setFilters}
-      onVisibleSectionChange={setVisibleSection}
-      sortAndDirection={sortAndDirection}
-      filters={filters}
-      visibleSection={visibleSection}
+      activeTab={activeTab}
+      sort={sort}
+      filter={filter}
+      onTabChange={setActiveTab}
+      onSortChange={handleSortChange}
+      onFilterChange={handleFilterChange}
     />
   );
 };
@@ -53,10 +61,10 @@ const CardsGroup = () => (
     gap="$20"
   >
     <Box w="$342">
-      <Wrapper visibleSection="sorting" />
+      <Wrapper defaultTab={SortAndFilterTab.sort} />
     </Box>
     <Box w="$342">
-      <Wrapper visibleSection="filtering" />
+      <Wrapper defaultTab={SortAndFilterTab.filter} />
     </Box>
   </Flex>
 );
@@ -65,10 +73,10 @@ export const Overview = (): JSX.Element => (
   <>
     <Grid columns="$2">
       <Cell w="$fill" style={{ display: 'inline-flex', justifyContent: 'center' }}>
-        <Wrapper visibleSection="sorting" />
+        <Wrapper defaultTab={SortAndFilterTab.sort} />
       </Cell>
       <Cell style={{ display: 'inline-flex', justifyContent: 'center' }}>
-        <Wrapper visibleSection="filtering" />
+        <Wrapper defaultTab={SortAndFilterTab.filter} />
       </Cell>
     </Grid>
 
