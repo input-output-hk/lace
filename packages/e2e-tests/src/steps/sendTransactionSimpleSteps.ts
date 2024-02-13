@@ -215,13 +215,16 @@ When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
     const addressInput = new AddressInput(bundleIndex);
-    await addressInput.input.waitForClickable();
     await addressInput.fillAddress(
       receivingAddress === 'CopiedAddress'
         ? String(await clipboard.read())
         : String(getTestWallet(receivingAddress).address)
     );
     await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    // Close address dropdown menu if exists
+    if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
+      await TransactionNewPage.clickDrawerBackground();
+    }
     for (const entry of options.hashes()) {
       switch (entry.type) {
         case 'ADA':
