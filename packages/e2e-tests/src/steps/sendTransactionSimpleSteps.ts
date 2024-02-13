@@ -206,7 +206,7 @@ Then(
   /^click "(Add|Remove) address" button inside address input (\d+)$/,
   async (_ignored: string, inputIndex: number) => {
     const addressInput = new AddressInput(inputIndex);
-    await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    await addressInput.searchLoader.waitForClickable({ reverse: true });
     await addressInput.clickAddAddressButton();
   }
 );

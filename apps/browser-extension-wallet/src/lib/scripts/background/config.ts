@@ -16,8 +16,6 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
-  getWalletPassword: RemoteApiPropertyType.MethodReturningPromise,
-  setWalletPassword: RemoteApiPropertyType.MethodReturningPromise,
   resetStorage: RemoteApiPropertyType.MethodReturningPromise,
   backendFailures$: RemoteApiPropertyType.HotObservable
 };
@@ -47,7 +45,7 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   getAliasProperties: RemoteApiPropertyType.MethodReturningPromise,
   getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
   getUserId: RemoteApiPropertyType.MethodReturningPromise,
-  userTrackingType$: RemoteApiPropertyType.HotObservable,
+  userId$: RemoteApiPropertyType.HotObservable,
   isNewSession: RemoteApiPropertyType.MethodReturningPromise,
   resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise
 };

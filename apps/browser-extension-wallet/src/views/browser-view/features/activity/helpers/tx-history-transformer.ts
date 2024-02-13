@@ -7,7 +7,7 @@ interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
   tx: Wallet.Cardano.HydratedTx;
 }
 
-export const txHistoryTransformer = ({
+export const txHistoryTransformer = async ({
   tx,
   walletAddresses,
   fiatCurrency,
@@ -17,7 +17,7 @@ export const txHistoryTransformer = ({
   cardanoCoin,
   resolveInput
 }: TxHistoryTransformerInput): Promise<TransformedTransactionActivity[]> => {
-  const type = inspectTxType({ walletAddresses, tx });
+  const type = await inspectTxType({ walletAddresses, tx, inputResolver: { resolveInput } });
   const direction = getTxDirection({ type });
 
   return txTransformer({

@@ -8,13 +8,8 @@ import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
-import { useDelegationDetails, useWalletManager } from '@hooks';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { useDelegationDetails } from '@hooks';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletStore } from '@src/stores';
 
@@ -56,13 +51,12 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
   );
 };
 
-export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): ReactElement => {
+export const SignConfirmationFooter = (): ReactElement => {
   const { t } = useTranslation();
   const { password, removePassword } = usePassword();
   const { signAndSubmitTransaction } = useDelegationTransaction();
   const { setSubmitingTxState, isSubmitingTx, setIsRestaking } = useSubmitingState();
   const { setSection } = useStakePoolDetails();
-  const { executeWithPassword } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
@@ -76,16 +70,8 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
   }, [removePassword]);
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_POPUP
-        : AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER
-    });
-
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
-  }, [analytics, popupView]);
+  }, [analytics]);
 
   const handleVerifyPass = useCallback(async () => {
     setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
@@ -119,7 +105,7 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
-        onClick={() => executeWithPassword(password, handleVerifyPass)}
+        onClick={handleVerifyPass}
         disabled={isSubmitDisabled}
         loading={isSubmitingTx}
         className={styles.confirmBtn}

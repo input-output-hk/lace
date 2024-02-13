@@ -61,7 +61,8 @@ export class AddressInput {
   };
 
   clickAddAddressButton = async (): Promise<void> => {
-    await this.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await browser.pause(500);
+    await this.searchLoader.waitForClickable({ reverse: true, timeout: 5000 });
     await this.ctaButton.click();
   };
 }

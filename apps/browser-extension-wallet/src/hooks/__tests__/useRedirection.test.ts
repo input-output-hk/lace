@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-useless-undefined */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook } from '@testing-library/react-hooks';
-import { useRedirection } from '../useRedirection';
+import { RedirectionHandler, useRedirection } from '../useRedirection';
 
 const mockUseLocationValue = {
   push: jest.fn()
@@ -19,7 +19,7 @@ describe('Testing useRedirection hook', () => {
   test('should call history push with proper url', () => {
     const path = 'path';
     const hook = renderHook(() => useRedirection<any>(path));
-    const handleRedirection = hook.result.current;
+    const handleRedirection = hook.result.current as RedirectionHandler<never>;
     handleRedirection();
 
     expect(mockUseLocationValue.push).toBeCalledWith('path');
