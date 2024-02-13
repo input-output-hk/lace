@@ -22,6 +22,9 @@ export interface WalletSetupOptionsStepProps {
   };
 }
 
+const PRIVACY_POLICY_URL = process.env.PRIVACY_POLICY_URL;
+const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
+
 export const WalletSetupOptionsStep = ({
   onNewWalletRequest,
   onHardwareWalletRequest,
@@ -61,6 +64,16 @@ export const WalletSetupOptionsStep = ({
           testId="restore-wallet"
         />
       </div>
+    </div>
+    <div className={styles.legal}>
+      By proceeding you agree to Lace’s{' '}
+      <a href={TERMS_OF_USE_URL} target="_blank" className={styles.link}>
+        Terms of Service
+      </a>{' '}
+      and{' '}
+      <a href={PRIVACY_POLICY_URL} target="_blank" className={styles.link}>
+        Privacy Policy
+      </a>
     </div>
   </div>
 );

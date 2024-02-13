@@ -1,9 +1,21 @@
 /* eslint-disable no-console */
-import { WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
+import {
+  WalletSetupSteps,
+  WalletSetupFlowProvider,
+  WalletSetupFlow,
+  WalletAnalyticsInfo
+} from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
+import {
+  PostHogAction,
+  postHogOnboardingActions,
+  PostHogProperties,
+  EnhancedAnalyticsOptInStatus,
+  UserTrackingType
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';
-import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
+import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
 import React, { useCallback, useEffect } from 'react';
 import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { HardwareWalletFlow } from './HardwareWalletFlow';
@@ -26,7 +38,17 @@ export interface WalletSetupProps {
 export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletSetupProps): React.ReactElement => {
   const history = useHistory();
   const { path } = useRouteMatch();
+  const [isConfirmRestoreOpen, setIsConfirmRestoreOpen] = useState(false);
+  const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+  const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
+  const { t: translate, Trans } = useTranslate();
   const analytics = useAnalyticsContext();
+  const isAnalyticsPromptResponded = getValueFromLocalStorage<ILocalStorage, 'isAnalyticsPromptResponded'>(
+    'isAnalyticsPromptResponded',
+    false
+  );
+
   const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
   const [enhancedAnalyticsStatus] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
@@ -78,6 +100,38 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
 
   const cancelWalletFlow = () => history.push(walletRoutePaths.setup.home);
 
+  const handleStartHardwareOnboarding = () => {
+    setIsDappConnectorWarningOpen(true);
+    analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
+  };
+
+  const sendAnalytics = async (args: { postHogAction: PostHogAction; postHogProperties?: PostHogProperties }) => {
+    await analytics.sendEventToPostHog(args.postHogAction, args?.postHogProperties);
+  };
+
+  const handleAnalyticsChoice = async (isAccepted: boolean) => {
+    saveValueInLocalStorage<ILocalStorage, 'isAnalyticsPromptResponded'>({
+      key: 'isAnalyticsPromptResponded',
+      value: true
+    });
+    await analytics.setOptedInForEnhancedAnalytics(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
+
+    const postHogAnalyticsAgreeAction = postHogOnboardingActions.landing.ANALYTICS_AGREE_CLICK;
+    const postHogAnalyticsRejectAction = postHogOnboardingActions.landing.ANALYTICS_REJECT_CLICK;
+
+    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticsRejectAction;
+    const postHogProperties = {
+      // eslint-disable-next-line camelcase
+      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
+    };
+    await sendAnalytics({
+      postHogAction,
+      postHogProperties
+    });
+  };
+
   const sendAnalyticsHandler: SendOnboardingAnalyticsEvent = async (postHogAction, postHogProperties) =>
     await analytics.sendEventToPostHog(postHogAction, postHogProperties);
 
@@ -88,9 +142,26 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
           <Route exact path={`${path}/`}>
             <WalletSetupMainPage />
             <ConfirmationBanner
-              message="Help us improve the quality and performance of Lace by sharing analytics data from your browser. Learn more"
-              onConfirm={() => console.log('confirming...')}
-              onReject={() => console.log('rejecting...')}
+              message={
+                <div>
+                  <span>
+                    Help us improve the quality and performance of Lace by sharing analytics data from your browser.
+                  </span>
+                  <span className={styles.learnMore} onClick={() => setIsAnalyticsModalOpen(true)}>
+                    Learn more
+                  </span>
+                </div>
+              }
+              onConfirm={() => handleAnalyticsChoice(true)}
+              onReject={() => handleAnalyticsChoice(false)}
+              showBanner={!isAnalyticsPromptResponded}
+            />
+            <WarningModal
+              header={<div className={styles.analyticsModalTitle}>Help us improve your experience</div>}
+              content={<WalletAnalyticsInfo />}
+              visible={isAnalyticsModalOpen}
+              confirmLabel="Got it"
+              onConfirm={() => setIsAnalyticsModalOpen(false)}
             />
           </Route>
           {enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet ? (

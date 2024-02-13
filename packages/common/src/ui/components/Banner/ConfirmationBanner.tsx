@@ -7,14 +7,16 @@ type ConfirmationBannerProps = {
   message: string | React.ReactElement;
   onConfirm: () => void;
   onReject: () => void;
+  showBanner?: boolean;
 };
 
 export const ConfirmationBanner = ({
   message,
   onConfirm,
-  onReject
+  onReject,
+  showBanner = true
 }: ConfirmationBannerProps): ReactPortal | undefined => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(showBanner);
 
   const handleConfirm = () => {
     setIsVisible(false);

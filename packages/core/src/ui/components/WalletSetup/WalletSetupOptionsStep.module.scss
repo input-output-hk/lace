@@ -45,3 +45,13 @@
     background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
   }
 }
+
+.link {
+  color: var(--data-blue);
+  cursor: pointer;
+}
+
+.legal {
+  margin-top: size_unit(2);
+  text-align: center;
+}
