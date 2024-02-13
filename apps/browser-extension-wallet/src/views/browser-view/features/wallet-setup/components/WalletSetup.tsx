@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -14,6 +15,7 @@ import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsPro
 import { WalletSetupMainPage } from './WalletSetupMainPage';
 import { useLocalStorage } from '@hooks';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ConfirmationBanner } from '@lace/common';
 const userIdService = getUserIdService();
 
 // This initial step is needed for configure the step that we want to snapshot
@@ -85,6 +87,11 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
         <Switch>
           <Route exact path={`${path}/`}>
             <WalletSetupMainPage />
+            <ConfirmationBanner
+              message="Help us improve the quality and performance of Lace by sharing analytics data from your browser. Learn more"
+              onConfirm={() => console.log('confirming...')}
+              onReject={() => console.log('rejecting...')}
+            />
           </Route>
           {enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet ? (
             <Redirect to="/" />
