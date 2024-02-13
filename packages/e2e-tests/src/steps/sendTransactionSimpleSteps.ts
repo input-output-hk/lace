@@ -37,7 +37,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
-import { AddressInput } from '../elements/addressInput';
+import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
@@ -56,7 +56,7 @@ Given(/all fields are empty/, async () => {
 });
 
 When(
-  /I enter a valid "([^"]*)" address in the bundle (\d) recipient's address/,
+  /I enter a valid "([^"]*)" address in the bundle (\d+) recipient's address/,
   async (address: string, inputIndex: number) => {
     let addr;
     switch (address) {
@@ -91,16 +91,16 @@ When(
         addr = address;
         break;
     }
-    await transactionExtendedPageObject.fillAddress(addr, inputIndex);
+    await new AddressInput(inputIndex).fillAddress(addr);
   }
 );
 
-When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
-  await transactionExtendedPageObject.fillAddress(value, inputIndex);
+When(/I enter "([^"]*)" in the bundle (\d+) recipient's address/, async (value: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).fillAddress(value);
 });
 
 When(/I enter the first characters of the contacts/, async () => {
-  await transactionExtendedPageObject.fillAddressWithFirstChars(validAddress2.getName(), 3);
+  await new AddressInput().fillAddressWithFirstChars(validAddress2.getName(), 3);
 });
 
 When(/click on one of the contacts on the dropdown/, async () => {
@@ -155,15 +155,16 @@ Then(
 );
 
 Then(
-  /I enter an address (\d*) that matches the amount of characters but does not match with the checksum/,
-  async (inputIndex?: number) => {
-    await transactionExtendedPageObject.fillAddress(shelleyInvalid.getAddress(), inputIndex);
+  /I enter an address that matches the amount of characters but does not match with the checksum into address input (\d+)/,
+  async (inputIndex: number) => {
+    await new AddressInput(inputIndex).fillAddress(shelleyInvalid.getAddress());
   }
 );
 
 Then(/I enter more or less characters than the required for an address in the bundle recipient's address/, async () => {
-  await transactionExtendedPageObject.fillAddress(shelley.getAddress());
-  await transactionExtendedPageObject.addToAddress('a');
+  const addressInput = new AddressInput();
+  await addressInput.fillAddress(shelley.getAddress());
+  await addressInput.addToAddress('a');
 });
 
 Then(/click on the coin selector for "([^"]*)" asset in bundle (\d)/, async (assetName: string, index: number) => {
@@ -201,23 +202,30 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
   await coinConfigureAssert.assertSeeNonEmptyBalanceInCoinConfigure();
 });
 
-Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
-  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
-  await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
-});
+Then(
+  /^click "(Add|Remove) address" button inside address input (\d+)$/,
+  async (_ignored: string, inputIndex: number) => {
+    const addressInput = new AddressInput(inputIndex);
+    await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    await addressInput.clickAddAddressButton();
+  }
+);
 
 When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
-    await browser.pause(500);
-    await transactionExtendedPageObject.fillAddress(
+    const addressInput = new AddressInput(bundleIndex);
+    await addressInput.fillAddress(
       receivingAddress === 'CopiedAddress'
         ? String(await clipboard.read())
-        : String(getTestWallet(receivingAddress).address),
-      bundleIndex
+        : String(getTestWallet(receivingAddress).address)
     );
+    await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    // Close address dropdown menu if exists
+    if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
+      await TransactionNewPage.clickDrawerBackground();
+    }
     for (const entry of options.hashes()) {
-      await browser.pause(500);
       switch (entry.type) {
         case 'ADA':
           break;
@@ -299,22 +307,21 @@ Then(
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () => {
-  await transactionExtendedPageObject.fillAddress(shelley.getAddress());
+  await new AddressInput().fillAddress(shelley.getAddress());
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
 Then(
   /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
   async (network: 'Preprod' | 'Mainnet') => {
-    await (network === 'Mainnet'
-      ? transactionExtendedPageObject.fillAddress(shelley.getMainnetAddress())
-      : transactionExtendedPageObject.fillAddress(shelley.getTestnetAddress()));
+    const address = network === 'Mainnet' ? shelley.getMainnetAddress() : shelley.getTestnetAddress();
+    await new AddressInput().fillAddress(address);
     await transactionExtendedPageObject.fillTokenValue(1);
   }
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
-  await transactionExtendedPageObject.fillAddress(byron.getAddress());
+  await new AddressInput().fillAddress(byron.getAddress());
   await transactionExtendedPageObject.fillTokenValue(0.5);
 });
 
@@ -631,7 +638,7 @@ Then(/^recipients address input contains address entry with name "([^"]*)"$/, as
   await drawerSendExtendedAssert.assertSeeAddressNameInRecipientsAddressInput(addressName);
 });
 
-Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
+Then(/^recipients address input (\d+) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });
 
