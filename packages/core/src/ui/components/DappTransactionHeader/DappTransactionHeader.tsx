@@ -22,7 +22,6 @@ type TransactionType = keyof typeof TransactionTypes;
 
 export interface DappTransactionHeaderProps {
   name: string;
-  className?: string;
   transactionType?: TransactionType;
 }
 

@@ -31,19 +31,19 @@ export const TransactionSummary = ({
         </Typography.Body.Large>
       </Flex>
     )}
-    <Grid {...props} alignItems="$center" columns="$2">
-      <Cell>
-        <AdaComponent className={cx.adaIcon} />
-      </Cell>
-      <Cell>
-        <Flex justifyContent="flex-end">
-          <div className={cx.greyBackground}>
+    <div className={cx.greyBackground}>
+      <Grid {...props} alignItems="$center" columns="$2">
+        <Cell>
+          <AdaComponent className={cx.adaIcon} />
+        </Cell>
+        <Cell>
+          <Flex justifyContent="flex-end">
             <Typography.Body.Normal className={cx.label}>
               {transactionAmount} {cardanoSymbol}
             </Typography.Body.Normal>
-          </div>
-        </Flex>
-      </Cell>
-    </Grid>
+          </Flex>
+        </Cell>
+      </Grid>
+    </div>
   </div>
 );
