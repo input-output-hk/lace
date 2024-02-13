@@ -39,10 +39,7 @@ export const StakePoolDetailsDrawer = ({
   const { setIsRestaking } = useSubmitingState();
   const { isInMemoryWallet } = useWalletStore();
   const { password, removePassword } = usePassword();
-  // const isSuccessSection = useMemo(
-  //   () => simpleSendConfig.currentSection === Sections.SUCCESS_TX,
-  //   [simpleSendConfig.currentSection]
-  // );
+
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
 
@@ -53,8 +50,6 @@ export const StakePoolDetailsDrawer = ({
       setDelegationTxBuilder();
       resetStates();
       removePassword();
-      // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
-      // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
     }
     setIsRestaking(false);
@@ -73,8 +68,6 @@ export const StakePoolDetailsDrawer = ({
     setDelegationTxBuilder,
     resetStates,
     removePassword,
-    // isInMemory,
-    // isSuccessSection,
     setIsDrawerVisible,
     setIsRestaking,
     analytics
