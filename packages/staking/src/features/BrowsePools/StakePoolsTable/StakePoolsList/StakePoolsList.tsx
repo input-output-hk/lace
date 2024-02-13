@@ -41,7 +41,7 @@ export const StakePoolsList = ({
           <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
             {t('browsePools.stakePoolGrid.selected')}
           </Text.Body.Normal>
-          <Flex flexDirection="column" mb="$24" pb="$16" className={styles.selectedPools}>
+          <Flex flexDirection="column" alignItems="stretch" mb="$24" pb="$16" className={styles.selectedPools}>
             {selectedPools.map((pool) => (
               <StakePoolsListRow key={pool.id} {...{ ...pool, selected: true }} />
             ))}
