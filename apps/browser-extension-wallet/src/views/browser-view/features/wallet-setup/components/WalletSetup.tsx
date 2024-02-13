@@ -41,7 +41,7 @@ export interface WalletSetupProps {
   initialStep?: WalletSetupSteps;
 }
 
-export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetupProps): React.ReactElement => {
+export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletSetupProps): React.ReactElement => {
   const history = useHistory();
   const { path } = useRouteMatch();
   const [isConfirmRestoreOpen, setIsConfirmRestoreOpen] = useState(false);
