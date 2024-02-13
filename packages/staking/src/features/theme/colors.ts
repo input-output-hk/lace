@@ -1,9 +1,12 @@
-import { darkColorScheme, laceGradient, lightColorScheme } from '@lace/ui';
+import { darkColorScheme, laceGradient, lightColorScheme, vars } from '@lace/ui';
 
 export const colorsContract = {
   $activityNoActivityTextColor: '',
   $bannerBellIconColor: '',
   $bannerInfoIconColor: '',
+  $dataGreenGradient: '',
+  $dataOrangeGradient: '',
+  $dataPinkGradient: '',
   $delegationCardInfoLabelColor: '',
   $delegationCardInfoValueColor: '',
   $delegationCardWarningValueColor: '',
@@ -42,6 +45,9 @@ export const lightThemeColors: typeof colorsContract = {
   $activityNoActivityTextColor: lightColorScheme.$primary_dark_grey,
   $bannerBellIconColor: lightColorScheme.$primary_accent_purple,
   $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
+  $dataGreenGradient: `linear-gradient(to right, ${vars.colors.$data_green}, ${vars.colors.$data_green})`,
+  $dataOrangeGradient: `linear-gradient(to right, ${vars.colors.$data_orange}, ${vars.colors.$data_orange})`,
+  $dataPinkGradient: `linear-gradient(to right, ${vars.colors.$data_pink}, ${vars.colors.$data_pink})`,
   $delegationCardInfoLabelColor: lightColorScheme.$primary_dark_grey,
   $delegationCardInfoValueColor: lightColorScheme.$primary_black,
   $delegationCardWarningValueColor: lightColorScheme.$secondary_data_pink,
@@ -80,6 +86,9 @@ export const darkThemeColors: typeof colorsContract = {
   $activityNoActivityTextColor: darkColorScheme.$primary_light_grey,
   $bannerBellIconColor: darkColorScheme.$primary_accent_purple,
   $bannerInfoIconColor: darkColorScheme.$primary_accent_purple,
+  $dataGreenGradient: `linear-gradient(to right, ${vars.colors.$data_green}, ${vars.colors.$data_green})`,
+  $dataOrangeGradient: `linear-gradient(to right, ${vars.colors.$data_orange}, ${vars.colors.$data_orange})`,
+  $dataPinkGradient: `linear-gradient(to right, ${vars.colors.$data_pink}, ${vars.colors.$data_pink})`,
   $delegationCardInfoLabelColor: darkColorScheme.$primary_light_grey,
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
   $delegationCardWarningValueColor: darkColorScheme.$secondary_data_pink,

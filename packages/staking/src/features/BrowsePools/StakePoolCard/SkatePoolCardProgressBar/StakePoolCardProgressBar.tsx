@@ -25,7 +25,7 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
               [styles.progressVeryHigh]: percentageNumber > 95,
             },
           ])}
-          style={{ width: `${progressWidth}%` }}
+          style={{ backgroundSize: `${progressWidth}%` }}
         />
       </div>
       <Text.Body.Small weight="$medium" className={styles.progressValue}>
