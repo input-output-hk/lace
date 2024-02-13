@@ -11,9 +11,13 @@
   margin: size_unit(2) 0px;
 }
 
-.depositContainer {
+.feeContainer {
   opacity: 50%;
   padding-bottom: 20px;
+}
+
+.depositContainer {
+  padding-bottom: 15px;
 }
 
 .transactionAssetsContainer {

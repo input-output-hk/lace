@@ -58,7 +58,7 @@ export const TransactionAssets = ({
   };
 
   return (
-    <div className={cn({ [cx.greyBackground]: index % 2 === 0 })}>
+    <div className={cn({ [cx.greyBackground]: index % 2 === 1 })}>
       <Grid {...props} columns="$2">
         <Cell>
           <RadixUIAvatar.Root className={cx.avatarRoot}>

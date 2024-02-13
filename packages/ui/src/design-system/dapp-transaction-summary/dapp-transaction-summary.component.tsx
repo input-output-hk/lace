@@ -37,9 +37,11 @@ export const TransactionSummary = ({
       </Cell>
       <Cell>
         <Flex justifyContent="flex-end">
-          <Typography.Body.Normal className={cx.label}>
-            {transactionAmount} {cardanoSymbol}
-          </Typography.Body.Normal>
+          <div className={cx.greyBackground}>
+            <Typography.Body.Normal className={cx.label}>
+              {transactionAmount} {cardanoSymbol}
+            </Typography.Body.Normal>
+          </div>
         </Flex>
       </Cell>
     </Grid>

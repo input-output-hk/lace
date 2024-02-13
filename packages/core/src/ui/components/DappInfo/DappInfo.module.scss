@@ -8,11 +8,10 @@
   min-height: size_unit(8);
   width: 100%;
 
-  >* {
+  > * {
     display: flex;
     flex: 0 0 auto;
     margin-right: size_unit(1);
-
     &:last-child {
       margin-right: 0;
     }
@@ -43,7 +42,6 @@
       font-style: normal;
       word-break: break-all;
     }
-
     .url {
       @include text-bodySmall-medium;
       color: var(--text-color-secondary);

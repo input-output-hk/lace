@@ -1,6 +1,3 @@
-/* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable max-statements */
-/* eslint-disable complexity */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -217,7 +214,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   };
 
   return (
-    <div className={styles.transactionContainer}>
+    <div data-testid="layout-title" className={styles.transactionContainer}>
       {req && transactionInspectionDetails ? (
         <DappTransaction
           fiatCurrencyCode={fiatCurrency?.code}

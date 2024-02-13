@@ -140,6 +140,7 @@ export const DappTransaction = ({
           coinSymbol={coinSymbol}
           displayTooltip={false}
           displayFiat={false}
+          className={styles.despositContainer}
         />
 
         <TransactionFooterDetails
@@ -151,6 +152,7 @@ export const DappTransaction = ({
           }
           coinSymbol={coinSymbol}
           displayFiat={false}
+          className={styles.despositContainer}
         />
 
         <TransactionFooterDetails
@@ -161,7 +163,7 @@ export const DappTransaction = ({
             `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
           }
           coinSymbol={coinSymbol}
-          className={styles.depositContainer}
+          className={styles.feeContainer}
         />
 
         <DappAddressSections
