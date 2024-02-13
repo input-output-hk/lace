@@ -160,13 +160,4 @@ export default new (class WebTester {
       timeoutMsg: `failed while waiting for: ${element.toJSLocator()}`
     });
   }
-
-  async waitUntilSeeElementContainingText(text: string, timeoutMs = 3000) {
-    const selectorToWait = `//*[contains(text(), "${text}")]`;
-    Logger.log(`waiting for: ${selectorToWait}`);
-    await browser.waitUntil(async () => await $(selectorToWait).isExisting(), {
-      timeout: timeoutMs,
-      timeoutMsg: `failed while waiting for element containing text: ${text}`
-    });
-  }
 })();

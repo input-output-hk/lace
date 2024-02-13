@@ -1,9 +1,7 @@
 /* eslint-disable no-undef */
-import { LocatorStrategy } from '../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from './webElement';
 import { ChainablePromiseElement } from 'webdriverio';
 
-export class AddressInput extends WebElement {
+export class AddressInput {
   protected CONTAINER = '//div[@data-testid="address-input"]';
   private SEARCH_INPUT = '//input[@data-testid="search-input"]';
   private SEARCH_LABEL = '//div[@data-testid="input-label"]';
@@ -13,29 +11,27 @@ export class AddressInput extends WebElement {
   private ADA_HANDLE_ICON_INVALID = '[data-icon="exclamation-circle"]';
   private ADA_HANDLE_INPUT_ERROR = '[data-testid="handle-input-error"]';
 
-  constructor(index?: number) {
-    super();
-    this.CONTAINER =
-      typeof index === 'undefined' || index.toString() === '' ? this.CONTAINER : `(${this.CONTAINER})[${index}]`;
+  constructor(index = 1) {
+    this.CONTAINER = `(${this.CONTAINER})[${index}]`;
   }
 
-  container(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}`, 'xpath');
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER);
   }
 
-  input(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SEARCH_INPUT}`, 'xpath');
+  get input(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.SEARCH_INPUT}`);
   }
 
-  label(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SEARCH_LABEL}`, 'xpath');
+  get label(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.SEARCH_LABEL}`);
   }
 
   get ctaButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(this.CTA_BUTTON);
   }
 
-  name(): ChainablePromiseElement<WebdriverIO.Element> {
+  get name(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(this.ADDRESS_INPUT_NAME);
   }
 
@@ -51,11 +47,21 @@ export class AddressInput extends WebElement {
     return $(this.ADA_HANDLE_INPUT_ERROR);
   }
 
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
+  fillAddress = async (address: string): Promise<void> => {
+    await this.input.waitForClickable();
+    await this.input.setValue(address);
+  };
 
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
-  }
+  fillAddressWithFirstChars = async (address: string, characters: number): Promise<void> => {
+    await this.fillAddress(address.slice(0, characters));
+  };
+
+  addToAddress = async (value: string): Promise<void> => {
+    await this.input.addValue(value);
+  };
+
+  clickAddAddressButton = async (): Promise<void> => {
+    await this.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await this.ctaButton.click();
+  };
 }
