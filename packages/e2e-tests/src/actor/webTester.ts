@@ -148,11 +148,6 @@ export default new (class WebTester {
     return await this.getAttributeValue(element.toJSLocator(), attribute);
   }
 
-  async getElementCount(selector: string, by: LocatorStrategy): Promise<number> {
-    Logger.log(`Get element count for selector ${selector}`);
-    return (await browser.findElements(by, selector)).length;
-  }
-
   async waitUntilSeeElement(element: WebElement, timeoutMs = 3000) {
     Logger.log(`waiting for: ${element.toJSLocator()}`);
     await browser.waitUntil(async () => await $(element.toJSLocator()).isDisplayed(), {

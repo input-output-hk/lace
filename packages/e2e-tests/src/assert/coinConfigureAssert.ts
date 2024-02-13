@@ -1,8 +1,6 @@
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { Logger } from '../support/logger';
 import webTester from '../actor/webTester';
-import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
-import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
 
@@ -16,19 +14,6 @@ class CoinConfigureAssert {
     } else {
       Logger.log('Fiat balance = "-", skipping validation');
     }
-  }
-
-  async assertSeeTokenSelectionPageButtons() {
-    const tokenSelectionPage = new TokenSelectionPage();
-    await tokenSelectionPage.tokensButton.waitForDisplayed();
-    await tokenSelectionPage.nftsButton.waitForDisplayed();
-    await tokenSelectionPage.selectMultipleButton.waitForDisplayed();
-
-    expect(await tokenSelectionPage.tokensButton.getText()).to.equal(await t('browserView.sideMenu.links.tokens'));
-    expect(await tokenSelectionPage.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
-    expect(await tokenSelectionPage.selectMultipleButton.getText()).to.equal(
-      await t('multipleSelection.selectMultiple')
-    );
   }
 
   async assertTokenDisplayed(tokenName: string, shouldBeDisplayed: boolean) {
