@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { CoinConfigure } from './coinConfigure';
-import { AddressInput } from '../addressInput';
+import { AddressInput } from '../AddressInput';
 import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';
@@ -147,7 +147,8 @@ class TransactionNewPage extends CommonDrawerElements {
   }
 
   async getAddressBookSearchResultsRows(): Promise<WebdriverIO.ElementArray> {
-    return $$(`${this.ADDR_SEARCH_RESULTS_ROW}`);
+    await $(this.ADDR_SEARCH_RESULTS_ROW).waitForClickable({ timeout: 5000 });
+    return $$(this.ADDR_SEARCH_RESULTS_ROW);
   }
 
   async getContactName(index: number): Promise<string> {
