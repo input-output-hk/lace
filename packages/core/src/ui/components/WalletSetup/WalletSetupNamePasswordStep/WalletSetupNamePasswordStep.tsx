@@ -23,10 +23,12 @@ export interface WalletSetupNamePasswordStepProps {
   onChange?: (state: { name: string; password: string }) => void;
 }
 
+const INITIAL_WALLET_NAME = 'Wallet 1';
+
 export const WalletSetupNamePasswordStep = ({
   onBack,
   onNext,
-  initialWalletName = '',
+  initialWalletName = INITIAL_WALLET_NAME,
   onChange
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
   const { t } = useTranslate();
