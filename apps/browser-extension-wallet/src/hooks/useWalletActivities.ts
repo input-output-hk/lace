@@ -1,43 +1,45 @@
 import { useCurrencyStore } from '@providers';
-import { FetchWalletActivitiesReturn } from '@src/stores/slices';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useFetchCoinPrice } from './useFetchCoinPrice';
 import { WalletActivitiesSlice, useWalletStore } from '@src/stores';
+import noop from 'lodash/noop';
 
 type UseWalletActivitiesProps = {
   sendAnalytics: () => void;
 };
-type WalletActivities = Omit<WalletActivitiesSlice, 'getWalletActivitiesObservable'>;
+const noAnalyticsProps = { sendAnalytics: noop };
+type WalletActivities = Omit<WalletActivitiesSlice, 'getWalletActivities'>;
 
-export const useWalletActivities = ({ sendAnalytics }: UseWalletActivitiesProps): WalletActivities => {
-  const [walletActivitiesObservable, setWalletActivitiesObservable] = useState<FetchWalletActivitiesReturn>();
+export const useWalletActivities = ({
+  sendAnalytics
+}: UseWalletActivitiesProps = noAnalyticsProps): WalletActivities => {
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
-  const { getWalletActivitiesObservable, walletActivitiesStatus, walletActivities, activitiesCount } = useWalletStore();
+  const { getWalletActivities, walletActivitiesStatus, walletActivities, activitiesCount, walletState } =
+    useWalletStore();
 
   const cardanoFiatPrice = priceResult?.cardano?.price;
 
   const fetchWalletActivities = useCallback(async () => {
-    const result =
-      fiatCurrency &&
-      (await getWalletActivitiesObservable({
+    fiatCurrency &&
+      getWalletActivities({
         fiatCurrency,
         cardanoFiatPrice,
         sendAnalytics
-      }));
-    setWalletActivitiesObservable(result);
-  }, [fiatCurrency, cardanoFiatPrice, getWalletActivitiesObservable, sendAnalytics]);
+      });
+  }, [fiatCurrency, cardanoFiatPrice, getWalletActivities, sendAnalytics]);
 
   useEffect(() => {
     fetchWalletActivities();
-  }, [fetchWalletActivities]);
-
-  useEffect(() => {
-    const subscription = walletActivitiesObservable?.subscribe();
-    return () => {
-      if (subscription) subscription.unsubscribe();
-    };
-  }, [walletActivitiesObservable]);
+  }, [
+    fetchWalletActivities,
+    walletState?.transactions.history,
+    walletState?.transactions.outgoing.inFlight,
+    walletState?.addresses,
+    walletState?.assetInfo,
+    walletState?.delegation.rewardsHistory,
+    walletState?.eraSummaries
+  ]);
 
   return {
     walletActivitiesStatus,

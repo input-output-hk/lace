@@ -25,7 +25,6 @@ import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
 import transactionDetailsAssert, { ExpectedActivityDetails, TransactionData } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import { Asset } from '../data/Asset';
 import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
@@ -39,6 +38,7 @@ import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageOb
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
 import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
+import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -136,15 +136,15 @@ When(/^I click MAX button in bundle (\d) for "([^"]*)" asset$/, async (bundleInd
 });
 
 When(/^I select amount: (\d*) of asset type: (Tokens|NFTs)$/, async (amount: number, assetType: 'Tokens' | 'NFTs') => {
-  await transactionExtendedPageObject.addAmountOfAssets(amount, assetType);
+  await TokenSelectionPage.addAmountOfAssets(amount, assetType);
 });
 
 When(/^I deselect (Tokens|NFTs) (\d*)$/, async (assetType: 'Tokens' | 'NFTs', index: number) => {
-  await transactionExtendedPageObject.deselectToken(assetType, index);
+  await TokenSelectionPage.deselectToken(assetType, index);
 });
 
 When(/^I save selected (Tokens|NFTs) in bundle (\d*)$/, async (assetType: 'Tokens' | 'NFTs', bundle: number) => {
-  await transactionExtendedPageObject.saveSelectedTokens(assetType, bundle);
+  await TokenSelectionPage.saveSelectedTokens(assetType, bundle);
 });
 
 Then(
@@ -173,13 +173,11 @@ Then(/click on the coin selector for "([^"]*)" asset in bundle (\d)/, async (ass
 });
 
 Then(/^coin selector contains two tabs: tokens & nfts$/, async () => {
-  await coinConfigureAssert.assertSeeTokenSelectionPageButtons();
+  await TransactionAssetSelectionAssert.assertSeeTokenSelectionPageButtons();
 });
 
 Then(/^click on the (Tokens|NFTs) button in the coin selector dropdown$/, async (button: string) => {
-  button === 'Tokens'
-    ? await transactionExtendedPageObject.clickTokensButton()
-    : await transactionExtendedPageObject.clickNFTsButton();
+  button === 'Tokens' ? await TokenSelectionPage.clickTokensButton() : await TokenSelectionPage.clickNFTsButton();
 });
 
 Then(/click on an token with name: "([^"]*)"/, async (tokenName: string) => {
@@ -206,7 +204,7 @@ Then(
   /^click "(Add|Remove) address" button inside address input (\d+)$/,
   async (_ignored: string, inputIndex: number) => {
     const addressInput = new AddressInput(inputIndex);
-    await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    await addressInput.searchLoader.waitForClickable({ reverse: true });
     await addressInput.clickAddAddressButton();
   }
 );
@@ -231,8 +229,8 @@ When(
           break;
         case 'NFT':
           await new AssetInput(bundleIndex).clickAddAssetButton();
-          await transactionExtendedPageObject.clickNFTsButton();
-          await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
+          await TokenSelectionPage.clickNFTsButton();
+          await TokenSelectionPage.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
           await new AssetInput(bundleIndex).clickAddAssetButton();
@@ -251,7 +249,7 @@ When(
 When(
   /^I save ticker for the (Token|NFT) with name: ([^"]*)$/,
   async (assetType: 'Token' | 'NFT', assetName: string) => {
-    await transactionExtendedPageObject.saveTicker(assetType, assetName);
+    await TokenSelectionPage.saveTicker(assetType, assetName);
   }
 );
 

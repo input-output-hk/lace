@@ -1,20 +1,14 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { ResultMessage } from '@components/ResultMessage';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useStakePoolDetails } from '../../store';
 import styles from './TransactionComplete.module.scss';
 import Success from '@src/assets/icons/success-staking.svg';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
 import { useWalletStore } from '@src/stores';
@@ -54,28 +48,20 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
   );
 };
 
-export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }): React.ReactElement => {
+export const TransactionSuccessFooter = (): React.ReactElement => {
   const { t } = useTranslation();
   const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
-  const { getKeyAgentType } = useWalletStore();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const { isInMemoryWallet } = useWalletStore();
 
   const closeDrawer = () => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP
-        : AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER
-    });
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);
     setDelegationTxBuilder();
     setIsDrawerVisible(false);
     resetStates();
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
-    if (!isInMemory) window.location.reload();
+    if (!isInMemoryWallet) window.location.reload();
   };
 
   return (

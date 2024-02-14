@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
@@ -34,7 +34,7 @@ export const Staking = (): React.ReactElement => {
   const { networkInfo, fetchNetworkInfo } = useWalletStore(stakingInfoSelector);
   const { setSelectedStakePool } = useDelegationStore();
   const {
-    getKeyAgentType,
+    isInMemoryWallet,
     blockchainProvider,
     walletInfo,
     inMemoryWallet,
@@ -48,7 +48,6 @@ export const Staking = (): React.ReactElement => {
   const delegationDetails = useDelegationDetails();
   const { totalRewards, lastReward } = useStakingRewards();
 
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
 
   useEffect(() => {
@@ -82,7 +81,7 @@ export const Staking = (): React.ReactElement => {
 
   useEffect(() => {
     const fetchSelectedStakePool = async () => {
-      if (isInMemory || !networkInfo) return;
+      if (isInMemoryWallet || !networkInfo) return;
       const stakePoolId = localStorage.getItem('TEMP_POOLID');
       if (!stakePoolId) return;
       const searchString = String(stakePoolId);
@@ -100,7 +99,7 @@ export const Staking = (): React.ReactElement => {
   }, [
     blockchainProvider.stakePoolProvider,
     fetchStakePools,
-    isInMemory,
+    isInMemoryWallet,
     networkInfo,
     setIsDrawerVisible,
     setSelectedStakePool

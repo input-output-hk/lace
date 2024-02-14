@@ -9,12 +9,7 @@ import { ActivityDetail } from '@src/views/browser-view/features/activity';
 import styles from './Activity.module.scss';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
@@ -27,11 +22,6 @@ export const Activity = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_TRANSACTIONS,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_POPUP
-    });
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
   const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });

@@ -1,7 +1,7 @@
 import { Runtime, runtime, storage } from 'webextension-polyfill';
-import { initMigrationState } from './util';
 import { checkMigrations } from '../migrations';
 import { ABOUT_EXTENSION_KEY, ExtensionUpdateData, MigrationState } from '../types';
+import { initMigrationState } from './storage';
 
 type UpdateType = 'downgrade' | 'update';
 

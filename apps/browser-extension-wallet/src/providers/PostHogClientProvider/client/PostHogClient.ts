@@ -32,6 +32,8 @@ export class PostHogClient {
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
   private hasPostHogInitialized$: BehaviorSubject<boolean>;
+  private subscription: Subscription;
+  private initSuccess: Promise<boolean>;
 
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -45,7 +47,7 @@ export class PostHogClient {
     if (!token) throw new Error('posthog token has not been provided');
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
 
-    this.userIdService
+    this.initSuccess = this.userIdService
       .getUserId(chain.networkMagic)
       .then((id) => {
         posthog.init(token, {
@@ -73,8 +75,10 @@ export class PostHogClient {
           ]
         });
       })
+      .then(() => true)
       .catch(() => {
-        // TODO: do something with the error if we couldn't get the ID
+        console.warn('Analytics failed');
+        return false;
       });
 
     this.subscribeToDistinctIdUpdate();
@@ -103,19 +107,21 @@ export class PostHogClient {
   }
 
   shutdown(): void {
-    this.userIdService.userTrackingType$.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   subscribeToDistinctIdUpdate(): void {
-    this.userIdService.userTrackingType$.subscribe(async (trackingType) => {
-      this.currentUserTrackingType = trackingType;
-      const id = await this.userIdService.getUserId(this.chain.networkId);
-      posthog.register({
-        distinct_id: id
-      });
+    this.subscription = this.userIdService.userId$.subscribe(async ({ id, type }) => {
+      this.currentUserTrackingType = type;
+      // register must be called after posthog.init resolves
+      if (await this.initSuccess) {
+        posthog.register({
+          distinct_id: id
+        });
 
-      if (trackingType === UserTrackingType.Enhanced && !this.hasPostHogInitialized$.value) {
-        this.loadExperiments();
+        if (type === UserTrackingType.Enhanced && !this.hasPostHogInitialized$.value) {
+          this.loadExperiments();
+        }
       }
     });
   }
@@ -185,7 +191,7 @@ export class PostHogClient {
     // if the variant does not exist, we need to check for out cache
     if (!variant) {
       const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-      return (backgroundStorage?.experimentsConfiguration[key] as string) || experiments[key].defaultVariant;
+      return (backgroundStorage?.experimentsConfiguration?.[key] as string) || experiments[key].defaultVariant;
     }
 
     return variant;

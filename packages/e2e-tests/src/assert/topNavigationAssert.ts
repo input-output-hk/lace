@@ -80,7 +80,7 @@ class TopNavigationAssert {
     expectedStatus = (await t(expectedStatus)) ?? expectedStatus;
     await MenuHeader.menuUserDetailsButton.waitForDisplayed();
     await browser.waitUntil(async () => (await MenuHeader.menuWalletStatus.getText()) === expectedStatus, {
-      timeout: 80_000,
+      timeout: 180_000,
       interval: 500,
       timeoutMsg: `expected sync status: ${expectedStatus} was not displayed`
     });

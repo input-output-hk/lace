@@ -14,12 +14,7 @@ import LightBulb from '@assets/icons/light.svg';
 import Video from '@assets/icons/video.svg';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const ActivityLayout = (): ReactElement => {
@@ -28,11 +23,6 @@ export const ActivityLayout = (): ReactElement => {
   const { inMemoryWallet, walletInfo, activityDetail, resetActivityState, blockchainProvider } = useWalletStore();
   const analytics = useAnalyticsContext();
   const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_TRANSACTIONS,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_BROWSER
-    });
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
   const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });

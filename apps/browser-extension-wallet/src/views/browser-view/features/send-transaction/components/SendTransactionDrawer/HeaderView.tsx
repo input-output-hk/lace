@@ -4,11 +4,10 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-nested-ternary */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styles from './Header.module.scss';
 import { BrowserViewSections } from '@src/lib/scripts/types';
 import { NavigationButton, Button, DrawerNavigation, DrawerHeader } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { Sections } from '../../types';
 import {
   useSections,
@@ -29,14 +28,7 @@ import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction,
-  TX_CREATION_TYPE_KEY,
-  TxCreationType
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
@@ -45,15 +37,13 @@ import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
 
-const { SendTransaction: Events } = AnalyticsEventNames;
-
 export const useHandleClose = (): {
   onClose: () => void;
   onCloseSubmitedTransaction: () => void;
 } => {
   const {
     walletUI: { appMode },
-    getKeyAgentType
+    isInMemoryWallet
   } = useWalletStore();
   const isPopup = appMode === APP_MODE_POPUP;
   const [, setWarnigModalVisibility] = useWarningModal();
@@ -64,7 +54,6 @@ export const useHandleClose = (): {
   const { currentSection: section, resetSection } = useSections();
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const resetStates = useCallback(() => {
     reset();
@@ -91,8 +80,8 @@ export const useHandleClose = (): {
       redirectToTransactions();
     }
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to sign tx multiple times without reloading).
-    if (!isInMemory) window.location.reload();
-  }, [closeDrawer, isInMemory, isPopup, redirectToTransactions, resetStates]);
+    if (!isInMemoryWallet) window.location.reload();
+  }, [closeDrawer, isInMemoryWallet, isPopup, redirectToTransactions, resetStates]);
 
   const onCloseWhileCreating = useCallback(() => {
     if (hasOutput) {
@@ -105,11 +94,11 @@ export const useHandleClose = (): {
   const onClose = useCallback(() => {
     if (section.currentSection === Sections.SUCCESS_TX) {
       isPopup ? redirect() : closeDrawer();
-      if (!isInMemory) window.location.reload();
+      if (!isInMemoryWallet) window.location.reload();
     } else {
       onCloseWhileCreating();
     }
-  }, [section.currentSection, isPopup, redirect, closeDrawer, isInMemory, onCloseWhileCreating]);
+  }, [section.currentSection, isPopup, redirect, closeDrawer, isInMemoryWallet, onCloseWhileCreating]);
 
   return { onClose, onCloseSubmitedTransaction };
 };
@@ -142,16 +131,6 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
-  const sendAnalytics = useCallback(() => {
-    if (section.currentSection === Sections.SUMMARY) {
-      analytics.sendEventToMatomo({
-        action: MatomoEventActions.CLICK_EVENT,
-        category: MatomoEventCategories.SEND_TRANSACTION,
-        name: isPopupView ? Events.BACK_TX_DETAILS_POPUP : Events.BACK_TX_DETAILS_BROWSER
-      });
-    }
-  }, [section.currentSection, analytics, isPopupView]);
-
   const shouldRenderArrow = isPopupView
     ? [...sectionsWithArrowIcon, Sections.FORM].includes(section.currentSection)
     : sectionsWithArrowIcon.includes(section.currentSection);
@@ -162,7 +141,6 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const shouldRenderCross = !sectionsWithoutCrossIcon.has(section.currentSection);
 
   const onArrowIconClick = () => {
-    sendAnalytics();
     const shouldRedirect =
       isPopupView &&
       [Sections.SUCCESS_TX, Sections.FORM, Sections.FAIL_TX, Sections.UNAUTHORIZED_TX].includes(section.currentSection);
