@@ -1,8 +1,10 @@
 /* eslint-disable no-magic-numbers */
+import { MetricType } from 'features/BrowsePools/types';
 import inRange from 'lodash/inRange';
-import { stakePoolCellRenderer } from './StakePoolCellRenderer/StakePoolCellRenderer';
-import { Columns, SaturationLevels } from './types';
+import { SaturationLevels } from '../types';
+import { stakePoolCellRendererByMetricType } from './stakePoolCellRendererByMetricType';
 
+// TODO move saturation-related logic to higher level e.g. features/staking, as it's not coupled with BrowsePools
 const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
   [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
   [SaturationLevels.Veryhigh]: [90, 100],
@@ -28,11 +30,11 @@ export const getSaturationLevel = (saturation: number): SaturationLevels => {
   return result;
 };
 
-export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && Columns.apy].filter((c) => !!c);
+export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && MetricType.apy].filter((c) => !!c);
 
 export const config = {
-  columns: (Object.keys(Columns).filter((v) => Number.isNaN(Number(v))) as Columns[]).filter(
+  columns: (Object.keys(MetricType).filter((v) => Number.isNaN(Number(v))) as MetricType[]).filter(
     (column) => !hiddenColumns.includes(column)
   ),
-  renderer: stakePoolCellRenderer,
+  renderer: stakePoolCellRendererByMetricType,
 };

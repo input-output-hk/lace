@@ -1,12 +1,11 @@
-// TODO: remove once replaced with new pool skeleton (LW-9659)
-import { style, vars } from '@lace/ui';
+import { style, sx, vars } from '@lace/ui';
 
 export const row = style([
   {
     alignItems: 'center',
     display: 'grid',
     flex: '1',
-    gap: '7px',
+    gap: vars.spacing.$10,
     gridTemplateColumns: 'repeat(auto-fit, minmax(0px, 1fr))',
     height: vars.spacing.$44,
     minHeight: vars.spacing.$44,
@@ -24,8 +23,10 @@ export const selectable = style([
 ]);
 
 export const cell = style([
+  sx({
+    pl: '$8',
+  }),
   {
-    display: 'flex',
     selectors: {
       [`${selectable} &:first-child`]: {
         justifyContent: 'flex-end',
