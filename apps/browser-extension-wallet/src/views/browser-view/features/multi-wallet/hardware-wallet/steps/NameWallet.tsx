@@ -1,5 +1,5 @@
 import { WalletSetupWalletNameStep } from '@lace/core';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 import { StartOverDialog } from '../../../wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ interface State {
 export const NameWallet = (): JSX.Element => {
   const history = useHistory();
   const { t } = useTranslation();
-  const { createWallet, setName, resetConnection } = useHardwareWallet();
+  const { createWallet, setName, data, resetConnection } = useHardwareWallet();
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
   const [state, setState] = useState<State>({});
 
@@ -26,8 +26,9 @@ export const NameWallet = (): JSX.Element => {
     chooseName: t('core.walletSetupWalletNameStep.chooseName')
   };
 
-  const handleOnNext = async (name: string) => {
-    setName(name);
+  // if createWallet is called in handleOnNext, then it will get name as ''
+  useEffect(() => {
+    if (!data?.name) return;
     createWallet()
       .then(() => {
         setState({ error: undefined });
@@ -38,11 +39,19 @@ export const NameWallet = (): JSX.Element => {
           error: 'common'
         });
       });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.name]);
 
-  const onRetry = () => {
+  const handleOnNext = useCallback(
+    async (name: string) => {
+      setName(name);
+    },
+    [setName]
+  );
+
+  const onRetry = useCallback(() => {
     setState({ error: undefined });
-  };
+  }, [setState]);
 
   return (
     <>

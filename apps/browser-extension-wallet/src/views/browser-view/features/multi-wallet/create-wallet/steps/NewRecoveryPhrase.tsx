@@ -1,11 +1,12 @@
 import { MnemonicStage, WalletSetupMnemonicStep } from '@lace/core';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useCreateWallet } from '../context';
 import { walletRoutePaths } from '@routes';
+import { useWalletManager } from '@hooks/useWalletManager';
 
 const noop = (): void => void 0;
 
@@ -20,6 +21,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
   const history = useHistory();
   const { t } = useTranslation();
   const { generatedMnemonic, data } = useCreateWallet();
+  const { createWallet } = useWalletManager();
   const [state, setState] = useState<State>(() => ({
     isResetMnemonicModalOpen: false,
     resetMnemonicStage: 'writedown'
@@ -36,6 +38,19 @@ export const NewRecoveryPhrase = (): JSX.Element => {
     passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
   };
 
+  const clearSecrets = useCallback(() => {
+    for (let i = 0; i < data.mnemonic.length; i++) {
+      data.mnemonic[i] = '';
+    }
+    data.password = '';
+  }, [data]);
+
+  const saveWallet = useCallback(async () => {
+    await createWallet(data);
+    clearSecrets();
+    history.push(walletRoutePaths.assets);
+  }, [data, createWallet, history, clearSecrets]);
+
   return (
     <>
       <WalletSetupMnemonicStep
@@ -43,7 +58,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         onReset={(resetStage) =>
           setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }))
         }
-        onNext={() => history.push(walletRoutePaths.assets)}
+        onNext={saveWallet}
         onStepNext={noop}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
