@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   WalletSetupSteps,
   WalletSetupFlowProvider,
@@ -157,10 +156,10 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
               showBanner={!isAnalyticsPromptResponded}
             />
             <WarningModal
-              header={<div className={styles.analyticsModalTitle}>Help us improve your experience</div>}
+              header={<div className={styles.analyticsModalTitle}>{translate('core.walletAnalyticsInfo.title')}</div>}
               content={<WalletAnalyticsInfo />}
               visible={isAnalyticsModalOpen}
-              confirmLabel="Got it"
+              confirmLabel={translate('core.walletAnalyticsInfo.gotIt')}
               onConfirm={() => setIsAnalyticsModalOpen(false)}
             />
           </Route>

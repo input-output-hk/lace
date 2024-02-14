@@ -190,6 +190,16 @@ export const HardwareWalletFlow = ({
         onSubmit={(account: number, name: string) => {
           sendAnalytics(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
           setAccountIndex(account);
+          navigateTo('connect');
+        }}
+        wallet={connectedDevice}
+      />
+    ),
+    register: () => (
+      <WalletSetupWalletNameStep
+        onBack={showStartOverDialog}
+        onNext={(name: string) => {
+          sendAnalytics(postHogOnboardingActions.hw.WALLET_NAME_NEXT_CLICK);
           handleCreateWallet(name);
           navigateTo('create');
         }}

@@ -39,12 +39,11 @@
       "next": "Next",
       "back": "Back",
       "skip": "Skip",
-      "legalAndAnalytics": "Legal & analytics",
       "walletSetup": "Wallet setup",
       "recoveryPhrase": "Recovery phrase",
       "connectWallet": "Connect wallet",
       "nameWallet": "Name wallet",
-      "allDone": "All done",
+      "enterWallet": "Enter wallet",
       "enterWallet": "Enter wallet"
     },
     "assetSelectorOverlay": {

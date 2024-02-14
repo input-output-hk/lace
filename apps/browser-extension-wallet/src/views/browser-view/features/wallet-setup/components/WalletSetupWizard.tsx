@@ -6,6 +6,8 @@ import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   WalletSetupCreationStep,
+  WalletSetupFinalStep,
+  WalletSetupMnemonicIntroStep,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
