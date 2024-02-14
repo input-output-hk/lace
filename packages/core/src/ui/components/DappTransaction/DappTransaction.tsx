@@ -140,7 +140,7 @@ export const DappTransaction = ({
           coinSymbol={coinSymbol}
           displayTooltip={false}
           displayFiat={false}
-          className={styles.despositContainer}
+          className={styles.depositContainer}
         />
 
         <TransactionFooterDetails

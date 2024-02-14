@@ -31,7 +31,7 @@ export const TransactionSummary = ({
         </Typography.Body.Large>
       </Flex>
     )}
-    <div className={cx.greyBackground}>
+    <div className={cx.txAmountContainer}>
       <Grid {...props} alignItems="$center" columns="$2">
         <Cell>
           <AdaComponent className={cx.adaIcon} />

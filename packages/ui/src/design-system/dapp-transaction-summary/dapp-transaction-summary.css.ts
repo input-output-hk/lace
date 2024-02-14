@@ -82,6 +82,12 @@ export const avatarImage = style({
   borderRadius: 'inherit',
 });
 
+export const txAmountContainer = sx({
+  backgroundColor: '$dapp_transaction_asset_grey_color',
+  borderRadius: '$small',
+  paddingRight: '$10',
+});
+
 export const greyBackground = sx({
   backgroundColor: '$dapp_transaction_asset_grey_color',
   borderRadius: '$small',
