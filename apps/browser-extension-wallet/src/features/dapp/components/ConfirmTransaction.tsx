@@ -68,11 +68,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     TransactionSummaryInspection | undefined
   >();
 
-  const newChainHistoryProvider = useChainHistoryProvider({ chainName });
+  const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
   const txInputResolver = useMemo(
-    () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider: newChainHistoryProvider }),
-    [inMemoryWallet, newChainHistoryProvider]
+    () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
+    [inMemoryWallet, chainHistoryProvider]
   );
 
   useEffect(() => {

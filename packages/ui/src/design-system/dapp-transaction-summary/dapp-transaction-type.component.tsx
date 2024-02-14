@@ -23,11 +23,13 @@ type TransactionType = keyof typeof TransactionTypes;
 type Props = OmitClassName<'div'> & {
   label: string;
   transactionType: TransactionType;
+  testId?: string;
 };
 
 export const TransactionType = ({
   label,
   transactionType,
+  testId,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
@@ -40,7 +42,10 @@ export const TransactionType = ({
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Large className={cx.coloredText}>
+            <Typography.Body.Large
+              className={cx.coloredText}
+              data-testid={testId}
+            >
               {transactionType}
             </Typography.Body.Large>
           </Flex>

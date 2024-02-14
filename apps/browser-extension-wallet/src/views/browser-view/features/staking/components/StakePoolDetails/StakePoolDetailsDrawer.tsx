@@ -39,6 +39,7 @@ export const StakePoolDetailsDrawer = ({
   const { setIsRestaking } = useSubmitingState();
   const { isInMemoryWallet } = useWalletStore();
   const { password, removePassword } = usePassword();
+
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
 

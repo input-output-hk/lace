@@ -29,17 +29,19 @@ export const DappTransactionHeader = ({ transactionType, name }: DappTransaction
   const { t } = useTranslate();
 
   return (
-    <>
+    <div data-testid="transaction-type-container">
       <TransactionType
         label={t('package.core.dappTransaction.transaction')}
         transactionType={transactionType}
-        data-testid="transaction-type-container"
+        data-testid="dapp-transaction-title"
       />
       <SummaryExpander title={t('package.core.dappTransaction.origin')}>
         <Card.Outlined className={styles.dappInfoContainer}>
-          <Text className={styles.dappInfo}>{name}</Text>
+          <Text className={styles.dappInfo} data-testid="dapp-transaction-type">
+            {name}
+          </Text>
         </Card.Outlined>
       </SummaryExpander>
-    </>
+    </div>
   );
 };

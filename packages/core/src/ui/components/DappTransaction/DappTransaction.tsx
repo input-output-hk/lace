@@ -52,8 +52,7 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
     const addressAssets = value.assets;
     groupedAddresses.addresses.push(address);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [_, asset] of addressAssets) {
+    for (const [, asset] of addressAssets) {
       if (asset.assetInfo.nftMetadata !== null) {
         groupedAddresses.nfts.push(asset);
       } else {
@@ -119,9 +118,9 @@ export const DappTransaction = ({
           transactionAmount={getStringFromLovelace(coins)}
         />
         <div className={styles.transactionAssetsContainer}>
-          {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount], index: number) => (
+          {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => (
             <TransactionAssets
-              index={index}
+              testId="dapp-transaction-amount-value"
               key={key}
               imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
               balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
@@ -133,6 +132,7 @@ export const DappTransaction = ({
 
         <TransactionFooterDetails
           fee={getStringFromLovelace(returnedDeposit)}
+          testId="dapp-transaction-returned-deposit-title"
           title={t('package.core.dappTransaction.returnedDeposit')}
           amountTransformer={(ada: string) =>
             `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
@@ -145,6 +145,7 @@ export const DappTransaction = ({
 
         <TransactionFooterDetails
           displayTooltip={false}
+          testId="dapp-transaction-deposit-title"
           fee={getStringFromLovelace(deposit)}
           title={t('package.core.dappTransaction.deposit')}
           amountTransformer={(ada: string) =>
@@ -157,6 +158,7 @@ export const DappTransaction = ({
 
         <TransactionFooterDetails
           displayTooltip={false}
+          testId="dapp-transaction-fee"
           displayFiat={false}
           fee={getStringFromLovelace(fee)}
           amountTransformer={(ada: string) =>

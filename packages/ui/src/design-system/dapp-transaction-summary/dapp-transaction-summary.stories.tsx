@@ -79,9 +79,8 @@ const Example = (): JSX.Element => (
       title="Transaction Summary"
       transactionAmount="-100.00"
     />
-    {items.map((value, index) => (
+    {items.map(value => (
       <TransactionAssets
-        index={index}
         key={value.metadataHash}
         imageSrc={value.imageSrc}
         balance={value.balance}
@@ -102,9 +101,8 @@ const MainComponents = (): JSX.Element => (
           transactionAmount="-100.00"
         />
         <div className={styles.assetContainer}>
-          {items.map((value, index) => (
+          {items.map(value => (
             <TransactionAssets
-              index={index}
               key={value.metadataHash}
               imageSrc={value.imageSrc}
               balance={value.balance}

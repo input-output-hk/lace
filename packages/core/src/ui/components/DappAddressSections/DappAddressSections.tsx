@@ -32,9 +32,9 @@ const charBeforeEllMetadata = 6;
 const charAfterEllMetadata = 0;
 
 const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
-  nfts.map((nft: AssetInfoWithAmount, index: number) => (
+  nfts.map((nft: AssetInfoWithAmount) => (
     <TransactionAssets
-      index={index}
+      testId="dapp-transaction-nfts-container"
       key={nft.assetInfo.fingerprint}
       imageSrc={nft.assetInfo.tokenMetadata.icon ?? undefined}
       balance={Wallet.util.lovelacesToAdaString(nft.amount.toString())}
@@ -44,9 +44,9 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
   ));
 
 const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
-  tokens.map((token: AssetInfoWithAmount, index: number) => (
+  tokens.map((token: AssetInfoWithAmount) => (
     <TransactionAssets
-      index={index}
+      testId="dapp-transaction-token-container"
       key={token.assetInfo.fingerprint}
       imageSrc={token.assetInfo.tokenMetadata.icon ?? undefined}
       balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
@@ -76,8 +76,10 @@ export const DappAddressSections = ({
         <div className={styles.summaryContent}>
           {groupedFromAddresses.addresses.map((address) => (
             <div key={address} className={styles.address}>
-              <Text className={styles.addressInfo}>{t('package.core.dappTransaction.address')}</Text>
-              <Text className={styles.addressInfo}>
+              <Text className={styles.addressInfo} data-testId="dapp-transaction-from-address-title">
+                {t('package.core.dappTransaction.address')}
+              </Text>
+              <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-address">
                 {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
               </Text>
             </div>
@@ -85,7 +87,9 @@ export const DappAddressSections = ({
           {groupedFromAddresses.tokens.length > 0 && (
             <>
               <div className={styles.tokenCount}>
-                <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+                <Title level={5} data-testid="dapp-transaction-tokens-title">
+                  {t('package.core.dappTransaction.tokens')}
+                </Title>
                 <Title level={5}>
                   -{groupedFromAddresses.tokens.length}
                   {itemsCountCopy}
@@ -97,7 +101,9 @@ export const DappAddressSections = ({
           {groupedFromAddresses.nfts.length > 0 && (
             <>
               <div className={styles.tokenCount}>
-                <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+                <Title level={5} data-testid="dapp-transaction-nfts-title">
+                  {t('package.core.dappTransaction.nfts')}
+                </Title>
                 <Title level={5}>
                   -{groupedFromAddresses.nfts.length} {itemsCountCopy}
                 </Title>
@@ -112,8 +118,10 @@ export const DappAddressSections = ({
         <div>
           {groupedToAddresses.addresses.map((address) => (
             <div key={address} className={styles.address}>
-              <Text className={styles.addressInfo}>{t('package.core.dappTransaction.address')}</Text>
-              <Text className={styles.addressInfo}>
+              <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address-title">
+                {t('package.core.dappTransaction.address')}
+              </Text>
+              <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address">
                 {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
               </Text>
             </div>
@@ -122,7 +130,9 @@ export const DappAddressSections = ({
         {groupedToAddresses.tokens.length > 0 && (
           <>
             <div className={styles.tokenCount}>
-              <Title level={5}>{t('package.core.dappTransaction.tokens')}</Title>
+              <Title level={5} data-testid="dapp-transaction-tokens-title">
+                {t('package.core.dappTransaction.tokens')}
+              </Title>
               <Title level={5}>
                 +{groupedToAddresses.tokens.length} {itemsCountCopy}
               </Title>
@@ -133,7 +143,9 @@ export const DappAddressSections = ({
         {groupedToAddresses.nfts.length > 0 && (
           <>
             <div className={styles.tokenCount}>
-              <Title level={5}>{t('package.core.dappTransaction.nfts')}</Title>
+              <Title level={5} data-testid="dapp-transaction-nfts-title">
+                {t('package.core.dappTransaction.nfts')}
+              </Title>
               <Title level={5}>
                 +{groupedToAddresses.nfts.length} {itemsCountCopy}
               </Title>

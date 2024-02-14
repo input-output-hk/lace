@@ -1,7 +1,6 @@
 import React from 'react';
 
 import * as RadixUIAvatar from '@radix-ui/react-avatar';
-import cn from 'classnames';
 
 import DarkFallBack from '../../assets/images/dark-mode-fallback.png';
 import LightFallBack from '../../assets/images/light-mode-fallback.png';
@@ -21,7 +20,7 @@ type Props = OmitClassName<'div'> & {
   tokenName?: string;
   metadataHash?: string;
   coins?: string;
-  index: number;
+  testId?: string;
 };
 
 const isImageBase64Encoded = (image: string): boolean => {
@@ -39,7 +38,7 @@ export const TransactionAssets = ({
   balance,
   tokenName,
   metadataHash,
-  index,
+  testId,
   ...props
 }: Readonly<Props>): JSX.Element => {
   const { theme } = useThemeVariant();
@@ -58,7 +57,7 @@ export const TransactionAssets = ({
   };
 
   return (
-    <div className={cn({ [cx.greyBackground]: index % 2 === 1 })}>
+    <div data-testid={testId} className={cx.assetsContainer}>
       <Grid {...props} columns="$fitContent">
         <Cell>
           <RadixUIAvatar.Root className={cx.avatarRoot}>

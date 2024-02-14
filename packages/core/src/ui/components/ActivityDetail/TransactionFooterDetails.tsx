@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 import React from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
@@ -15,6 +14,7 @@ export interface TransactionFooterDetailsProps {
   className?: string;
   displayTooltip?: boolean;
   displayFiat?: boolean;
+  testId?: string;
 }
 export const TransactionFooterDetails = ({
   fee,
@@ -23,14 +23,16 @@ export const TransactionFooterDetails = ({
   title,
   className,
   displayTooltip = true,
-  displayFiat = true
+  displayFiat = true,
+  testId
 }: TransactionFooterDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
 
+  const titleTestId = testId ?? 'tx-fee-title';
   return (
     <div className={cn(styles.details, className)}>
       <div className={styles.txFeeContainer}>
-        <div className={styles.txfee} data-testid="tx-fee-title">
+        <div className={styles.txfee} data-testid={titleTestId}>
           {title ?? t('package.core.activityDetails.transactionFee')}
         </div>
         {displayTooltip && (
