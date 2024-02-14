@@ -14,7 +14,7 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';
-import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
+import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import React, { useCallback, useEffect } from 'react';
 import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { HardwareWalletFlow } from './HardwareWalletFlow';
@@ -27,6 +27,8 @@ import { WalletSetupMainPage } from './WalletSetupMainPage';
 import { useLocalStorage } from '@hooks';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ConfirmationBanner } from '@lace/common';
+import { useLocalStorage } from '@hooks';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 const userIdService = getUserIdService();
 
 // This initial step is needed for configure the step that we want to snapshot
@@ -43,9 +45,9 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
   const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
   const { t: translate, Trans } = useTranslate();
   const analytics = useAnalyticsContext();
-  const isAnalyticsPromptResponded = getValueFromLocalStorage<ILocalStorage, 'isAnalyticsPromptResponded'>(
-    'isAnalyticsPromptResponded',
-    false
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.NotSet
   );
 
   const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
@@ -109,13 +111,9 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
   };
 
   const handleAnalyticsChoice = async (isAccepted: boolean) => {
-    saveValueInLocalStorage<ILocalStorage, 'isAnalyticsPromptResponded'>({
-      key: 'isAnalyticsPromptResponded',
-      value: true
-    });
-    await analytics.setOptedInForEnhancedAnalytics(
-      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-    );
+    const analyticsStatus = isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
+    setDoesUserAllowAnalytics(analyticsStatus);
+    await analytics.setOptedInForEnhancedAnalytics(analyticsStatus);
 
     const postHogAnalyticsAgreeAction = postHogOnboardingActions.landing.ANALYTICS_AGREE_CLICK;
     const postHogAnalyticsRejectAction = postHogOnboardingActions.landing.ANALYTICS_REJECT_CLICK;
@@ -153,7 +151,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
               }
               onConfirm={() => handleAnalyticsChoice(true)}
               onReject={() => handleAnalyticsChoice(false)}
-              showBanner={!isAnalyticsPromptResponded}
+              showBanner={enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet}
             />
             <WarningModal
               header={<div className={styles.analyticsModalTitle}>{translate('core.walletAnalyticsInfo.title')}</div>}
