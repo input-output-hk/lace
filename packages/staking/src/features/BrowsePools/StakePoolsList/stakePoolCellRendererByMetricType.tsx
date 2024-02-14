@@ -1,13 +1,13 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex } from '@lace/ui';
 import cn from 'classnames';
-import { MetricType } from 'features/BrowsePools/types';
 import isNil from 'lodash/isNil';
-import { StakePoolsListRowProps } from '../StakePoolsList/types';
-import { getSaturationLevel } from '../utils';
+import { MetricType } from '../types';
+import { getSaturationLevel } from './config';
 import * as styles from './StakePoolCellRenderer.css';
+import { StakePoolsListRowProps } from './types';
 
-export const stakePoolCellRenderer: Partial<
+export const stakePoolCellRendererByMetricType: Partial<
   Record<MetricType, React.FunctionComponent<{ value?: Partial<StakePoolsListRowProps>[MetricType] }>>
 > = {
   [MetricType.saturation]: ({ value }) => {

@@ -1,5 +1,4 @@
 import { style, sx, vars } from '@lace/ui';
-import { theme } from 'features/theme';
 
 export const row = style([
   {
@@ -20,18 +19,6 @@ export const selectable = style([
         gridTemplateColumns: '28px repeat(auto-fit, minmax(0px, 1fr))',
       },
     },
-  },
-]);
-
-export const checkbox = style([
-  sx({
-    borderRadius: '$tiny',
-  }),
-  {
-    border: '2px solid',
-    borderColor: theme.colors.$stakePoolListPlaceholderCheckboxColor,
-    justifySelf: 'flex-end',
-    opacity: 0.24,
   },
 ]);
 

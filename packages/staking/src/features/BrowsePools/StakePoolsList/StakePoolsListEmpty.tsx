@@ -1,14 +1,14 @@
 import { Flex, Text } from '@lace/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Empty from '../../../../assets/images/empty.svg';
-import * as styles from './StakePoolsTableEmpty.css';
+import Empty from '../../../assets/images/empty.svg';
+import * as styles from './StakePoolsListEmpty.css';
 
-export type StakePoolsTableEmptyProps = {
+export type StakePoolsListEmptyProps = {
   title?: string | React.ReactElement;
 };
 
-export const StakePoolsTableEmpty = ({ title }: StakePoolsTableEmptyProps): React.ReactElement => {
+export const StakePoolsListEmpty = ({ title }: StakePoolsListEmptyProps): React.ReactElement => {
   const { t } = useTranslation();
 
   return (

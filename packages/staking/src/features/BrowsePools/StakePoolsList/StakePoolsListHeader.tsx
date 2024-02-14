@@ -9,9 +9,9 @@ import {
 import { TranslationKey } from 'features/i18n';
 import { en } from 'features/i18n/translations';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../../../outside-handles-provider';
+import { useOutsideHandles } from '../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
-import { config } from '../utils';
+import { config } from './config';
 
 const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
 

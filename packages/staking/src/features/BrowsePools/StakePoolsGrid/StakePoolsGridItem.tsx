@@ -3,8 +3,8 @@ import { StakePoolCard } from 'features/BrowsePools/StakePoolCard';
 import { MetricType, SortField } from 'features/BrowsePools/types';
 import get from 'lodash/get';
 import React from 'react';
-import { useOutsideHandles } from '../../../outside-handles-provider';
-import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
 import { StakePoolsGridItemProps } from './types';
 
 export const StakePoolsGridItem = ({

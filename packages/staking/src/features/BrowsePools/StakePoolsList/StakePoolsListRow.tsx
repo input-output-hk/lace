@@ -3,9 +3,9 @@ import { Table } from '@lace/ui';
 import { MetricType } from 'features/BrowsePools/types';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../../../outside-handles-provider';
-import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
-import { config } from '../utils';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
+import { config } from './config';
 import { StakePoolsListRowProps } from './types';
 
 export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolsListRowProps): React.ReactElement => {

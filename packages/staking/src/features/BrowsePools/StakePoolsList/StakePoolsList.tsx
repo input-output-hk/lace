@@ -1,13 +1,13 @@
 import { Box, Flex, Table, Text } from '@lace/ui';
-import { MetricType, StakePoolSortOptions, TranslationsFor } from 'features/BrowsePools/types';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
-import { StakePoolPlaceholder } from '../StakePoolPlaceholder/StakePoolPlaceholder';
-import { config } from '../utils';
+import { MetricType, StakePoolSortOptions, TranslationsFor } from '../types';
+import { config } from './config';
 import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';
 import { StakePoolsListRow } from './StakePoolsListRow';
+import { StakePoolsListRowSkeleton } from './StakePoolsListRowSkeleton';
 import { StakePoolsListRowProps } from './types';
 
 export type StakePoolsListProps = {
@@ -57,7 +57,7 @@ export const StakePoolsList = ({
           data ? (
             <StakePoolsListRow {...data} />
           ) : (
-            <StakePoolPlaceholder index={index} columns={config.columns} withSelection />
+            <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection />
           )
         }
         increaseViewportBy={{ bottom: 100, top: 0 }}

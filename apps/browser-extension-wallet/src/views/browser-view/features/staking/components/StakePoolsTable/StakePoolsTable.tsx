@@ -8,9 +8,9 @@ import {
   SortField,
   StakePoolSortOptions,
   TranslationsFor,
-  stakePooltableConfig,
+  stakePoolTableConfig,
   StakePoolsListRowProps,
-  StakePoolPlaceholder
+  StakePoolsListRowSkeleton
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search } from '@lace/common';
@@ -124,7 +124,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     setSort({ field: sortField, order });
   };
 
-  const headers = stakePooltableConfig.columns.map((column) => {
+  const headers = stakePoolTableConfig.columns.map((column) => {
     const translationKey = `cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`;
     const tooltipText = t(translationKey);
     return {
@@ -170,15 +170,15 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           items={list}
           itemContent={(index, props) => {
             if (!props) {
-              return <StakePoolPlaceholder index={index} columns={stakePooltableConfig.columns} />;
+              return <StakePoolsListRowSkeleton index={index} columns={stakePoolTableConfig.columns} />;
             }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { stakePool, hexId, id, ...data } = props;
             return (
               <Table.Row<typeof data, MetricType>
                 onClick={() => onPoolClick(stakePool)}
-                columns={stakePooltableConfig.columns}
-                cellRenderers={stakePooltableConfig.renderer}
+                columns={stakePoolTableConfig.columns}
+                cellRenderers={stakePoolTableConfig.renderer}
                 dataTestId="stake-pool"
                 data={data}
               />

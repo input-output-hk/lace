@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
 import useResizeObserver from 'use-resize-observer';
-import { STAKE_POOL_CARD_HEIGHT, StakePoolCardSkeleton } from '../../StakePoolCard';
+import { STAKE_POOL_CARD_HEIGHT, StakePoolCardSkeleton } from '../StakePoolCard';
 import { StakePoolsListRowProps } from '../StakePoolsList/types';
 import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
