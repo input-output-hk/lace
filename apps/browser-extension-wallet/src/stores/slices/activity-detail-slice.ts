@@ -24,6 +24,8 @@ import {
   governanceProposalsTransformer,
   votingProceduresTransformer
 } from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
+import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
+import { getCollateral } from '@cardano-sdk/core';
 
 /**
  * validates if the transaction is confirmed
@@ -87,6 +89,21 @@ const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider:
   const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
 
   return pools;
+};
+
+const computeCollateral = async (wallet: Wallet.ObservableWallet, tx?: Wallet.Cardano.Tx): Promise<bigint> => {
+  const addresses = await firstValueFrom(wallet.addresses$);
+
+  const inputResolver = createHistoricalOwnInputResolver({
+    addresses$: wallet.addresses$,
+    transactionsHistory$: wallet.transactions.history$
+  });
+
+  return await getCollateral(
+    tx,
+    inputResolver,
+    addresses.map((addr) => addr.address)
+  );
 };
 
 /**
@@ -204,6 +221,8 @@ const buildGetActivityDetail =
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
+    const collateral = await computeCollateral(wallet, tx);
+    const collateralInAda = Wallet.util.lovelacesToAdaString(collateral.toString());
 
     // Delegation tx additional data (LW-3324)
 
@@ -230,7 +249,8 @@ const buildGetActivityDetail =
         fiatCurrency,
         proposalProcedures: tx.body.proposalProcedures
       }),
-      certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates)
+      certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates),
+      collateral: collateral > 0 ? collateralInAda : undefined
     };
 
     if (type === DelegationActivityType.delegation && delegationInfo) {
