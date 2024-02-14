@@ -1,6 +1,6 @@
 /* eslint-disable arrow-body-style */
 import React, { useMemo, useState } from 'react';
-import { Box, Flex, Text, Button, AutoSuggestBox, ControlButton } from '@lace/ui';
+import { Box, Flex, Text, Button, ControlButton, SuggestionThreeItemType } from '@lace/ui';
 import { ReactComponent as GridIcon } from '@lace/icons/dist/GridComponent';
 import { Wallet } from '@lace/cardano';
 import styles from './AddCoSigners.module.scss';
@@ -34,7 +34,7 @@ const TAIL_LENGTH = 5;
 
 export const AddCoSigners = ({ addressBook, translations, validateAddress, onBack, onNext }: Props): JSX.Element => {
   const [coSigners, setCoSigners] = useState<CoSigner[]>([{ address: '', isValid: false }]);
-  const suggestions: AutoSuggestBox.Suggestion3ItemType[] = useMemo(
+  const suggestions: SuggestionThreeItemType[] = useMemo(
     () =>
       addressBook.map((addressEntry) => ({
         description: addEllipsis(addressEntry.address, HEAD_LENGTH, TAIL_LENGTH),

@@ -1,23 +1,18 @@
 import { vars, style, globalStyle } from '../../design-tokens';
 
-import { pickedSuggesion } from './auto-suggest-box-suggestion.css';
+import { pickedSuggesion } from './auto-suggest-box-picked-suggestion.css';
 
 export const input = style({
   width: '100%',
   boxSizing: 'border-box',
   fontSize: vars.fontSizes.$18,
-  padding: `0 ${vars.spacing.$24}`,
   border: 'none',
   outline: 'none',
   background: 'transparent',
   color: vars.colors.$input_value_color,
   position: 'relative',
   pointerEvents: 'all',
-  selectors: {
-    '&:focus, &:not(:placeholder-shown)': {
-      top: vars.spacing.$8,
-    },
-  },
+  padding: '0',
 });
 
 export const label = style({

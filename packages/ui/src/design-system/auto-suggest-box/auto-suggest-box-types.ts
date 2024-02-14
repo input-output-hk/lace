@@ -12,7 +12,9 @@ export interface SuggestionClassicType extends SuggestionBaseType {
   label?: string;
 }
 
-export interface Suggestion3ItemType extends SuggestionBaseType {
+export interface SuggestionThreeItemType extends SuggestionBaseType {
   title: string;
   description: string;
 }
+
+export type SuggestionType = SuggestionClassicType | SuggestionThreeItemType;

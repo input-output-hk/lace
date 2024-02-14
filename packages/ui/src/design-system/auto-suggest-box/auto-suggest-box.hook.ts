@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { SuggestionBaseType } from './auto-suggest-box-types';
 
@@ -16,6 +16,7 @@ interface Context<SuggestionType extends SuggestionBaseType> {
   isSuggesting: boolean;
   isCloseButton: boolean;
   filteredSuggestions: SuggestionType[];
+  firstSuggestionRef: React.MutableRefObject<HTMLDivElement | null>;
   closeSuggestions: () => void;
   onPickedSuggestionClick: () => void;
   onSuggestionClick: (value: string) => void;
@@ -28,6 +29,7 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
   initialValue = '',
   suggestions = [],
 }: Readonly<Props<SuggestionType>>): Context<SuggestionType> => {
+  const firstSuggestionReference = useRef<HTMLDivElement | null>(null);
   const [value, setValue] = useState(initialValue);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [pickedSuggestion, setPickedSuggestion] = useState<
@@ -51,6 +53,7 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     isCloseButton,
     filteredSuggestions,
     pickedSuggestion,
+    firstSuggestionRef: firstSuggestionReference,
     onSuggestionClick: (value): void => {
       setIsSuggesting(false);
       setValue(value);
@@ -67,7 +70,9 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     },
     onInputChange: (event): void => {
       setValue(event.target.value);
-      setIsSuggesting(true);
+      if (event.target.value) {
+        setIsSuggesting(true);
+      }
     },
     onButtonClick: (): void => {
       if (isCloseButton) {

@@ -1,3 +1,4 @@
+/* eslint-disable prefer-arrow-functions/prefer-arrow-functions */
 import React from 'react';
 
 import cn from 'classnames';
@@ -15,6 +16,7 @@ export interface Props {
   value: string;
   pickedSuggestion?: React.ReactElement;
   onChange: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
+  onKeyDown?: (event: Readonly<React.KeyboardEvent<HTMLInputElement>>) => void;
 }
 
 export const Input = ({
@@ -26,6 +28,7 @@ export const Input = ({
   value,
   pickedSuggestion,
   onChange,
+  onKeyDown = (): void => void 0,
 }: Readonly<Props>): JSX.Element => {
   return (
     <Flex justifyContent="space-between" alignItems="center">
@@ -40,6 +43,7 @@ export const Input = ({
           name={name}
           value={value}
           onChange={onChange}
+          onKeyDown={onKeyDown}
         />
       )}
       <span className={cn(cx.label)}>{label}</span>

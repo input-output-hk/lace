@@ -5,7 +5,7 @@ export const button = style([
     width: '$52',
     height: '$52',
     borderRadius: '$extraSmall',
-    m: '$6',
+    mx: '$6',
     background: '$input_button_bgColor',
     display: 'flex',
     alignItems: 'center',
@@ -30,5 +30,4 @@ export const icon = style([
     width: '$24',
     height: '$24',
   }),
-  {},
 ]);

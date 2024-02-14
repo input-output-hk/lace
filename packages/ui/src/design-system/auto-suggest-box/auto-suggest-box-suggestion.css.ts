@@ -1,43 +1,27 @@
 import { vars, style, sx } from '../../design-tokens';
 
-export const suggestion = style([
-  sx({
-    p: '$16',
-  }),
-  {
-    cursor: 'pointer',
-    ':hover': {
-      backgroundColor: vars.colors.$auto_suggest_border_color,
-      borderRadius: vars.radius.$medium,
-    },
+export const suggestion = style({
+  cursor: 'pointer',
+  padding: vars.spacing.$16,
+  ':hover': {
+    backgroundColor: vars.colors.$auto_suggest_border_color,
+    borderRadius: vars.radius.$medium,
   },
-]);
-
-export const suggestion3Item = style([
-  sx({
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  }),
-  {
-    cursor: 'pointer',
-    ':hover': {
-      backgroundColor: vars.colors.$auto_suggest_border_color,
-      borderRadius: vars.radius.$medium,
-    },
+  ':focus': {
+    backgroundColor: vars.colors.$auto_suggest_border_color,
+    borderRadius: vars.radius.$medium,
+    outline: 'none',
   },
-]);
+});
 
-export const suggestion3ItemCol = style([
-  sx({
-    alignItems: 'center',
-  }),
-  {
-    flex: '1',
-  },
-]);
+export const title = style({
+  flex: '1',
+  alignItems: 'center',
+});
 
-export const address = sx({
-  color: '$auto_suggest_address_color',
+export const address = style({
+  color: vars.colors.$auto_suggest_address_color,
+  flex: '1',
 });
 
 export const initial = style([
@@ -58,9 +42,3 @@ export const initial = style([
     position: 'relative',
   },
 ]);
-
-export const pickedSuggesion = style({
-  padding: `0 ${vars.spacing.$24}`,
-  top: vars.spacing.$8,
-  position: 'relative',
-});

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { SuggestionThreeItemType } from '@lace/ui';
 import { AutoSuggestBox } from '@lace/ui';
 import { CoSigner, ValidateAddress } from './type';
 import { useCoSignerInput } from './hooks';
@@ -10,7 +11,7 @@ interface Props {
     label: string;
     error: string;
   };
-  suggestions: AutoSuggestBox.Suggestion3ItemType[];
+  suggestions: SuggestionThreeItemType[];
 }
 
 export const AddCoSignerInput = ({ translations, suggestions, validateAddress, onChange }: Props): JSX.Element => {
@@ -21,12 +22,10 @@ export const AddCoSignerInput = ({ translations, suggestions, validateAddress, o
   });
 
   return (
-    <AutoSuggestBox.Root
+    <AutoSuggestBox
       label={translations.label}
       errorMessage={errorMessage}
       suggestions={suggestions}
-      suggestionComponent={AutoSuggestBox.Suggestion3Item}
-      pickedSuggestionComponent={AutoSuggestBox.PickedSuggestion3Item}
       validationStatus={validationStatus}
       onChange={onInputChange}
     />

@@ -1,4 +1,3 @@
-import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import * as Popover from '@radix-ui/react-popover';
@@ -13,11 +12,8 @@ import * as Text from '../typography';
 import { Button } from './auto-suggest-box-button.component';
 import { Icon } from './auto-suggest-box-icon.component';
 import { Input } from './auto-suggest-box-input.component';
-import {
-  PickedSuggestionClassic,
-  SuggestionClassic,
-} from './auto-suggest-box-suggestion.component';
-import * as cxSuggestion from './auto-suggest-box-suggestion.css';
+import { PickedSuggestion } from './auto-suggest-box-picked-suggestion.component';
+import { Suggestion } from './auto-suggest-box-suggestion.component';
 import * as cx from './auto-suggest-box.css';
 import { useAutoSuggestBox } from './auto-suggest-box.hook';
 
@@ -39,8 +35,6 @@ export interface Props<
   onChange?: (value: string) => void;
   initialValue?: string;
   validationStatus?: ValidationStatus;
-  suggestionComponent?: React.FC<SuggestionType>;
-  pickedSuggestionComponent?: React.FC<SuggestionType>;
 }
 
 export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
@@ -54,16 +48,14 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
   suggestions = [],
   errorMessage,
   validationStatus,
-  suggestionComponent: SuggestionComponent = SuggestionClassic,
-  pickedSuggestionComponent:
-    PickedSuggestionComponent = PickedSuggestionClassic,
-}: Readonly<PropsWithChildren<Props<SuggestionType>>>): JSX.Element => {
+}: Readonly<Props<SuggestionType>>): JSX.Element => {
   const {
     value,
     isCloseButton,
     isSuggesting,
     filteredSuggestions,
     pickedSuggestion,
+    firstSuggestionRef,
     closeSuggestions,
     onButtonClick,
     onInputChange,
@@ -76,97 +68,88 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
   });
 
   return (
-    <Popover.Root open={isSuggesting}>
-      <Popover.Anchor asChild>
-        <Flex
-          justifyContent="space-between"
-          className={cn(cx.container, {
-            [cx.isSuggesting]: isSuggesting,
-          })}
-        >
-          <Box w="$fill">
-            <Input
-              id={id}
-              value={value}
-              pickedSuggestion={
-                pickedSuggestion ? (
-                  <div
-                    onClick={onPickedSuggestionClick}
-                    onKeyDown={onPickedSuggestionClick}
-                    className={cxSuggestion.pickedSuggesion}
-                    data-testid="auto-suggest-box-picked-suggestion"
-                  >
-                    <PickedSuggestionComponent {...pickedSuggestion} />
-                  </div>
-                ) : undefined
-              }
-              label={label}
-              required={required}
-              disabled={disabled}
-              name={name}
-              onChange={onInputChange}
-            />
-          </Box>
-          <Flex alignItems="center">
-            <Icon status={validationStatus} />
-            <Button
-              disabled={disabled}
-              isCloseButton={isCloseButton}
-              onButtonClick={onButtonClick}
-            />
-          </Flex>
-        </Flex>
-      </Popover.Anchor>
-      {Boolean(errorMessage) && (
-        <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
-      )}
+    <Popover.Root open={isSuggesting} modal={false}>
       <Select.Root open={isSuggesting}>
-        <Select.Content
-          asChild
-          className={cx.selectContent}
-          onPointerDownOutside={closeSuggestions}
-        >
-          <Select.Viewport asChild>
-            <Popover.Content
-              avoidCollisions={false}
-              onOpenAutoFocus={(event): void => {
-                if (value) {
-                  event.preventDefault();
-                }
-              }}
+        <Box className={cx.container}>
+          <Popover.Anchor asChild>
+            <Box
+              className={cn(
+                cx.inputContainer,
+                isSuggesting ? cx.isSuggesting : cx.idle,
+              )}
             >
-              <ScrollArea
-                classNames={{
-                  root: cx.scrollArea,
-                  viewport: cx.scrollAreaViewport,
-                  bar: cx.scrollBar,
-                }}
-              >
-                <Box data-testid="auto-suggest-box-suggestions">
-                  {filteredSuggestions.map(props => (
-                    <Select.Item
-                      data-testid={`auto-suggest-box-suggestion-${props.value}`}
-                      tabIndex={0}
-                      key={props.value}
-                      value={props.value}
-                      className={cx.suggestion}
-                      onClick={(): void => {
-                        onSuggestionClick(props.value);
-                      }}
-                      onKeyDown={(event): void => {
-                        if (event.code === 'Enter') {
-                          onSuggestionClick(props.value);
-                        }
-                      }}
-                    >
-                      <SuggestionComponent {...props} />
-                    </Select.Item>
-                  ))}
-                </Box>
-              </ScrollArea>
-            </Popover.Content>
-          </Select.Viewport>
-        </Select.Content>
+              <Box w="$fill" pt="$24">
+                <Input
+                  id={id}
+                  value={value}
+                  label={label}
+                  required={required}
+                  disabled={disabled}
+                  name={name}
+                  onChange={onInputChange}
+                  onKeyDown={(event): void => {
+                    if (event.code === 'ArrowDown') {
+                      firstSuggestionRef.current?.focus();
+                    }
+                  }}
+                  pickedSuggestion={
+                    pickedSuggestion && (
+                      <PickedSuggestion
+                        onClick={onPickedSuggestionClick}
+                        {...pickedSuggestion}
+                      />
+                    )
+                  }
+                />
+              </Box>
+              <Flex alignItems="center">
+                <Icon status={validationStatus} />
+                <Button
+                  disabled={disabled}
+                  isCloseButton={isCloseButton}
+                  onButtonClick={onButtonClick}
+                />
+              </Flex>
+            </Box>
+          </Popover.Anchor>
+          <Popover.Content
+            align="start"
+            className={cx.popoverContent}
+            onOpenAutoFocus={(event): void => {
+              event.preventDefault();
+            }}
+          >
+            <Select.Content
+              asChild
+              className={cx.selectContent}
+              onPointerDownOutside={closeSuggestions}
+            >
+              <Select.Viewport>
+                <ScrollArea
+                  classNames={{
+                    root: cx.scrollArea,
+                    viewport: cx.scrollAreaViewport,
+                    bar: cx.scrollBar,
+                  }}
+                >
+                  <Box data-testid="auto-suggest-box-suggestions">
+                    {filteredSuggestions.map((suggestion, index) => (
+                      <Suggestion
+                        {...(index === 0 ? { ref: firstSuggestionRef } : {})}
+                        key={suggestion.value}
+                        onClick={onSuggestionClick}
+                        suggestion={suggestion}
+                      />
+                    ))}
+                  </Box>
+                </ScrollArea>
+              </Select.Viewport>
+            </Select.Content>
+          </Popover.Content>
+          {Boolean(errorMessage) && (
+            <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
+          )}
+        </Box>
       </Select.Root>
     </Popover.Root>
   );

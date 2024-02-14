@@ -14,16 +14,12 @@ import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 import * as Text from '../typography';
 
-import {
-  PickedSuggestion3Item,
-  Suggestion3Item,
-} from './auto-suggest-box-suggestion.component';
 import { ValidationStatus } from './auto-suggest-box-types';
 import { AutoSuggestBox } from './auto-suggest-box.component';
 
 import type {
   SuggestionClassicType,
-  Suggestion3ItemType,
+  SuggestionThreeItemType,
 } from './auto-suggest-box-types';
 import type { Props } from './auto-suggest-box.component';
 
@@ -37,7 +33,7 @@ const SUGGESTIONS: SuggestionClassicType[] = [
   { value: 'pear', label: 'Pear' },
 ];
 
-const ADDRESS_SUGGESTIONS: Suggestion3ItemType[] = [
+const ADDRESS_SUGGESTIONS: SuggestionThreeItemType[] = [
   {
     title: 'Alice',
     description: 'addr1q12ab...0t7a1',
@@ -133,8 +129,6 @@ export const Overview = (): JSX.Element => {
                 <AutoSuggestBox
                   suggestions={ADDRESS_SUGGESTIONS}
                   label="Auto suggest box"
-                  suggestionComponent={Suggestion3Item}
-                  pickedSuggestionComponent={PickedSuggestion3Item}
                 />
               </Box>
             </Flex>
@@ -176,7 +170,9 @@ Overview.parameters = {
 
 export const Controls = (props: Readonly<Props>): JSX.Element => (
   <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
-    <AutoSuggestBox {...props} />
+    <Box w="$420">
+      <AutoSuggestBox {...props} />
+    </Box>
   </Flex>
 );
 
@@ -235,6 +231,10 @@ SuggestAndErase.play = async ({ canvasElement }): Promise<void> => {
     await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
   ).toBeInTheDocument();
 
+  userEvent.click(canvas.getByTestId('auto-suggest-box-input'));
+
+  await sleep();
+
   await userEvent.type(canvas.getByTestId('auto-suggest-box-input'), 'ra', {
     delay: 100,
   });
@@ -290,6 +290,10 @@ SuggestAndPick.play = async ({ canvasElement }): Promise<void> => {
   expect(
     await canvas.findByTestId('auto-suggest-box-suggestion-pear'),
   ).toBeInTheDocument();
+
+  await sleep();
+
+  userEvent.click(canvas.getByTestId('auto-suggest-box-input'));
 
   await sleep();
 
