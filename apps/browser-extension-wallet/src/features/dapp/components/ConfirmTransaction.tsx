@@ -6,9 +6,8 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
-import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
+import { withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
-import { AddressListType } from '@views/browser/features/activity';
 import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
@@ -53,15 +52,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   } = useWalletStore();
 
   const { fiatCurrency } = useCurrencyStore();
-  const { list: addressList } = useAddressBookContext();
   const { priceResult } = useFetchCoinPrice();
   const analytics = useAnalyticsContext();
-
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
-
   const [{ chainName }] = useAppSettingsContext();
 
   const [fromAddressTokens, setFromAddressTokens] = useState<
@@ -133,11 +129,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     };
   }, [setSignTxRequest]);
 
-  const addressToNameMap = useMemo(
-    () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
-    [addressList]
-  );
-
   const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
   const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const rewardAccountsAddresses = useMemo(
@@ -190,7 +181,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   }, [
     req,
     walletInfo.addresses,
-    addressToNameMap,
     userAddresses,
     rewardAccountsAddresses,
     txInputResolver,

@@ -19,12 +19,9 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
   const { setDeletingWallet, resetWalletLock, setAddressesDiscoveryCompleted, currentChain } = useWalletStore();
   const backgroundService = useBackgroundServiceAPIContext();
-
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [isValidPassword, setIsValidPassword] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setUnlocked] = useState<boolean>();
 
   const handlePasswordChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +45,6 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       setIsValidPassword(decrypted);
       analytics.sendEventToPostHog(PostHogAction.UnlockWalletWelcomeBackUnlockClick);
       if (decrypted) {
-        setUnlocked(true);
         setAddressesDiscoveryCompleted(true);
         resetWalletLock();
       }

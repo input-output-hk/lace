@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
-import newTransactionExtendedPageObject from './newTransactionExtendedPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
@@ -10,6 +9,7 @@ import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
 import NftsPage from '../elements/NFTs/nftsPage';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
+import { AddressInput } from '../elements/AddressInput';
 
 class NftsPageObject {
   async clickNftItemOnNftsPage(nftName: string, clickType: 'left' | 'right' = 'left') {
@@ -33,7 +33,7 @@ class NftsPageObject {
     const receiverAddress = extensionUtils.isMainnet()
       ? String(receiverWallet.mainnetAddress)
       : String(receiverWallet.address);
-    await newTransactionExtendedPageObject.fillAddress(receiverAddress);
+    await new AddressInput().fillAddress(receiverAddress);
     await simpleTxSideDrawerPageObject.fillTokenValue('1');
     await TransactionNewPage.reviewTransactionButton.waitForClickable({ timeout: 15_000 });
     await TransactionNewPage.reviewTransactionButton.click();
