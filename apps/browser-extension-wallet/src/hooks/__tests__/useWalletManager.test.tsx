@@ -21,7 +21,7 @@ const mockLedgerCreateWithDevice = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { LOCK_VALUE, useWalletManager } from '../useWalletManager';
+import { LOCK_VALUE, UseWalletManager, useWalletManager } from '../useWalletManager';
 import {
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
@@ -376,19 +376,19 @@ describe('Testing useWalletManager hook', () => {
   describe('createHardwareWallet', () => {
     test('should use cardano manager to create wallet', async () => {
       const walletId = 'walletId';
-      mockLedgerCreateWithDevice.mockResolvedValue({
-        extendedAccountPublicKey: 'pubkey'
-      });
+      mockLedgerGetXpub.mockResolvedValue('pubkey');
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletRepository as any).addAccount = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
 
       const accountIndex = 1;
       const name = 'name';
-      const chainId = {
-        networkId: 0,
-        networkMagic: 0
-      };
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        currentChain: {
+          networkId: 0,
+          networkMagic: 0
+        }
+      }));
       const connectedDevice = 'Ledger' as any;
       const deviceConnection = 'deviceConnection' as any;
 
@@ -403,7 +403,6 @@ describe('Testing useWalletManager hook', () => {
         deviceConnection,
         accountIndex,
         name,
-        chainId,
         connectedDevice
       });
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
@@ -491,13 +490,17 @@ describe('Testing useWalletManager hook', () => {
 
   describe('deleteWallet', () => {
     const walletId = 'walletId';
+    let clearBackgroundStorage: jest.Mock;
+    let clearLocalStorage: jest.Mock;
+    let resetWalletLock: jest.Mock;
+    let setCardanoWallet: jest.Mock;
+    let deleteWallet: UseWalletManager['deleteWallet'];
 
     beforeEach(() => {
       (walletApiUi.walletManager as any).activeWalletId$ = of({ walletId });
       (walletApiUi.walletManager as any).deactivate = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletRepository as any).removeWallet = jest.fn().mockResolvedValue(undefined);
-      (walletApiUi.walletRepository as any).wallets$ = of([]);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
         settings: {},
@@ -505,21 +508,17 @@ describe('Testing useWalletManager hook', () => {
         setCardanoCoin: jest.fn(),
         setAddressesDiscoveryCompleted: () => {}
       }));
-    });
-
-    test('should shutdown wallet, delete data from the LS, indexed DB and background storage, reset lock and current chain ', async () => {
-      const clearBackgroundStorage = jest.fn();
-      const clearLocalStorage = jest.fn();
+      clearBackgroundStorage = jest.fn();
+      clearLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'clearLocalStorage').mockImplementation(clearLocalStorage);
 
-      const resetWalletLock = jest.fn();
-      const setCardanoWallet = jest.fn();
+      resetWalletLock = jest.fn();
+      setCardanoWallet = jest.fn();
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         resetWalletLock,
         setCardanoWallet
       }));
-
-      const {
+      ({
         result: {
           current: { deleteWallet }
         }
@@ -529,8 +528,12 @@ describe('Testing useWalletManager hook', () => {
             clearBackgroundStorage
           } as unknown as BackgroundServiceAPIProviderProps['value']
         })
-      });
-      expect(deleteWallet).toBeDefined();
+      }));
+    });
+
+    test('should shutdown wallet, delete data from the LS, indexed DB and background storage, reset lock and current chain ', async () => {
+      (walletApiUi.walletRepository as any).wallets$ = of([]);
+
       await deleteWallet();
       expect(walletApiUi.walletManager.deactivate).toBeCalledTimes(1);
       expect(walletApiUi.walletManager.destroyData).toBeCalled();
@@ -551,6 +554,24 @@ describe('Testing useWalletManager hook', () => {
       });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
+    });
+
+    test('should activate another wallet if exists after deletion', async () => {
+      const remainingWallet = {
+        type: WalletType.InMemory,
+        walletId: 'remaining-wallet-id',
+        accounts: [{ accountIndex: 1 }]
+      };
+      (walletApiUi.walletRepository as any).wallets$ = of([remainingWallet]);
+
+      await deleteWallet();
+
+      expect(walletApiUi.walletManager.activate).toBeCalledWith(
+        expect.objectContaining({
+          walletId: remainingWallet.walletId,
+          accountIndex: remainingWallet.accounts[0].accountIndex
+        })
+      );
     });
   });
 

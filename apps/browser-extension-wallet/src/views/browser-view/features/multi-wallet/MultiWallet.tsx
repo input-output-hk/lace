@@ -23,6 +23,7 @@ import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
+import { Providers } from './hardware-wallet/types';
 
 const { newWallet } = walletRoutePaths;
 
@@ -33,8 +34,25 @@ interface ConfirmationDialog {
 }
 
 export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
-  const { connectHardwareWallet } = useWalletManager();
+  const { connectHardwareWallet, createHardwareWallet } = useWalletManager();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
+
+  const hardwareWalletProviders = useMemo(
+    (): Providers => ({
+      connectHardwareWallet,
+      disconnectHardwareWallet$,
+      shouldShowDialog$,
+      createWallet: async ({ account, connection, model, name }) => {
+        await createHardwareWallet({
+          connectedDevice: model,
+          deviceConnection: connection,
+          name,
+          accountIndex: account
+        });
+      }
+    }),
+    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$]
+  );
 
   useEffect(() => {
     const onHardwareWalletDisconnect = (event: HIDConnectionEvent) => {
@@ -49,16 +67,7 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
     };
   }, [disconnectHardwareWallet$]);
 
-  return (
-    <HardwareWallet
-      providers={{
-        connectHardwareWallet,
-        createWallet,
-        disconnectHardwareWallet$,
-        shouldShowDialog$
-      }}
-    />
-  );
+  return <HardwareWallet providers={hardwareWalletProviders} />;
 };
 
 export const SetupCreateWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
