@@ -4,6 +4,7 @@ import React from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { TooltipContent } from './tooltip-content.component';
+import * as cx from './tooltip-root.css';
 
 export type Props = PropsWithChildren<
   Pick<Tooltip.PopperContentProps, 'side'> &
@@ -21,7 +22,7 @@ export const Root = ({
     <Tooltip.Root>
       {children}
       <Tooltip.Portal>
-        <Tooltip.Content side={side}>
+        <Tooltip.Content side={side} className={cx.root}>
           <TooltipContent label={label} />
         </Tooltip.Content>
       </Tooltip.Portal>
