@@ -26,6 +26,7 @@ import {
 } from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
 import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import { getCollateral } from '@cardano-sdk/core';
+import { ObservableWalletState } from '@hooks/useWalletState';
 
 /**
  * validates if the transaction is confirmed
@@ -91,18 +92,16 @@ const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider:
   return pools;
 };
 
-const computeCollateral = async (wallet: Wallet.ObservableWallet, tx?: Wallet.Cardano.Tx): Promise<bigint> => {
-  const addresses = await firstValueFrom(wallet.addresses$);
-
+const computeCollateral = async (wallet: ObservableWalletState, tx?: Wallet.Cardano.Tx): Promise<bigint> => {
   const inputResolver = createHistoricalOwnInputResolver({
-    addresses$: wallet.addresses$,
-    transactionsHistory$: wallet.transactions.history$
+    addresses: wallet.addresses,
+    transactions: wallet.transactions
   });
 
   return await getCollateral(
     tx,
     inputResolver,
-    addresses.map((addr) => addr.address)
+    wallet.addresses.map((addr) => addr.address)
   );
 };
 
@@ -123,7 +122,8 @@ const buildGetActivityDetail =
       inMemoryWallet: wallet,
       walletUI: { cardanoCoin },
       activityDetail,
-      walletInfo
+      walletInfo,
+      walletState
     } = get();
 
     set({ fetchingActivityInfo: true });
@@ -221,7 +221,7 @@ const buildGetActivityDetail =
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
-    const collateral = await computeCollateral(wallet, tx);
+    const collateral = await computeCollateral(walletState, tx);
     const collateralInAda = Wallet.util.lovelacesToAdaString(collateral.toString());
 
     // Delegation tx additional data (LW-3324)
