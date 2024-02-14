@@ -8,19 +8,12 @@ import NftDetails from '../elements/NFTs/nftDetails';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
 import NftsPage from '../elements/NFTs/nftsPage';
-import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 import { AddressInput } from '../elements/AddressInput';
 
 class NftsPageObject {
   async clickNftItemOnNftsPage(nftName: string, clickType: 'left' | 'right' = 'left') {
     const nftNameElement = await NftsPage.getNftName(nftName);
     await nftNameElement.click({ button: clickType });
-  }
-
-  async clickNftItemInAssetSelector(nftName: string) {
-    const tokenSelectionPage = new TokenSelectionPage();
-    const nftNameElement = await tokenSelectionPage.getNftName(nftName);
-    await nftNameElement.click();
   }
 
   async progressWithSendUntilPasswordPage(nftName: string, hdWallet = false): Promise<any> {
