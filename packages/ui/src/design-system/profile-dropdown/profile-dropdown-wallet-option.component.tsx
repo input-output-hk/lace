@@ -73,7 +73,10 @@ export const WalletOption = ({
               justifyContent="center"
             >
               <IconButton
-                onClick={onOpenAccountsMenu}
+                onClick={(event): void => {
+                  onOpenAccountsMenu?.();
+                  event.stopPropagation();
+                }}
                 icon={<ChevronRight />}
                 size="extraSmall"
                 as="div"
