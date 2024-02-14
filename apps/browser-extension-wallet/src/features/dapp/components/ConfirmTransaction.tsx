@@ -87,7 +87,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     walletType,
     isHardwareWallet,
     blockchainProvider: { assetProvider },
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    walletState
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
@@ -101,7 +102,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
-  const txCollateral = useComputeTxCollateral(inMemoryWallet, tx);
+  const txCollateral = useComputeTxCollateral(walletState, tx);
 
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
