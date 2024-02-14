@@ -24,7 +24,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   @LW-2356 @LW-5036 @Testnet @Mainnet
   Scenario: Extended-view - Enter Incorrect address - Wrong checksum - Error displayed & Review button is disabled
     When I click "Send" button on page header
-    And I enter an address  that matches the amount of characters but does not match with the checksum
+    And I enter an address that matches the amount of characters but does not match with the checksum into address input 1
     Then "Incorrect address" error is displayed under address input field
     And "Review transaction" button is disabled on "Send" page
     And "Add address" button is disabled in the bundle 1 recipient's address input
@@ -59,7 +59,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   Scenario: Extended-view - Address can be saved from Send screen
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
-    And click "Add address" button  in address bar
+    And click "Add address" button inside address input 1
     And I see "Add address" drawer in send flow in extended mode
     Then address form is filled with "shelley" address
     When I fill address form with "WalletName" name
@@ -75,7 +75,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
-    And click "Add address" button  in address bar
+    And click "Add address" button inside address input 1
     When I click address on the list with name "Shelley"
     Then recipients address input contains address "fwr6ja" and name "Shelley"
     When I enter a value of: 1 to the "tADA" asset in bundle 1
@@ -86,7 +86,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
-    And click "Add address" button  in address bar
+    And click "Add address" button inside address input 1
     When I click address on the list with name "Shelley"
     Then recipients address input contains address "2c767z" and name "Shelley"
     When I enter a value of: 1 to the "ADA" asset in bundle 1
@@ -114,11 +114,11 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
-    And click "Add address" button  in address bar
+    And click "Add address" button inside address input 1
     When I click address on the list with name "Byron"
     Then recipients address input contains address "Nj7Dzp" and name "Byron"
-    And click "Remove address" button  in address bar
-    Then recipients address input  is empty
+    And click "Remove address" button inside address input 1
+    Then recipients address input 1 is empty
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
@@ -127,11 +127,11 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
-    And click "Add address" button  in address bar
+    And click "Add address" button inside address input 1
     And I click address on the list with name "Byron"
     Then recipients address input contains address "FiPvM4" and name "Byron"
-    And click "Remove address" button  in address bar
-    And recipients address input  is empty
+    And click "Remove address" button inside address input 1
+    And recipients address input 1 is empty
     And I enter a value of: 1 to the "ADA" asset in bundle 1
     And "Review transaction" button is disabled on "Send" page
 

@@ -30,6 +30,13 @@ type KeysStructure = {
     };
   };
   browsePools: {
+    header: {
+      poolsCount: '';
+    };
+    stakePoolGrid: {
+      selected: '';
+      notAvailable: '';
+    };
     stakePoolTableBrowser: {
       sortAndFilter: {
         headers: {
@@ -111,6 +118,12 @@ type KeysStructure = {
         close: '';
         back: '';
         retry: '';
+        cancel: '';
+        removePools: '';
+      };
+      deviceUpdate: {
+        title: '';
+        subTitle: '';
       };
     };
     details: {

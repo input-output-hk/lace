@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const mockUseMaxAda = jest.fn();
-const mockGetKeyAgentType = jest.fn();
 const mockUseBuitTxState = jest.fn();
 const mockToastNotify = jest.fn();
 const mockUseSyncingTheFirstTime = jest.fn();
@@ -24,6 +23,7 @@ import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 import { SignedTx, TxInspection } from '@cardano-sdk/tx-construction';
 import { Cardano, HandleResolution, TxCBOR } from '@cardano-sdk/core';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const txHash = 'e6eb1c8c806ae7f4d9fe148e9c23853607ffba692ef0a464688911ad3374a932';
 const address =
@@ -89,7 +89,7 @@ const getWrapper =
 
 describe('Testing useCollateral hook', () => {
   beforeEach(() => {
-    mockUseWalletStore.mockReturnValue({ inMemoryWallet, getKeyAgentType: mockGetKeyAgentType });
+    mockUseWalletStore.mockReturnValue({ inMemoryWallet });
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -176,8 +176,7 @@ describe('Testing useCollateral hook', () => {
             setUnspendable: mockSetUnspendable,
             available$
           }
-        },
-        getKeyAgentType: mockGetKeyAgentType
+        }
       });
     });
 
@@ -285,7 +284,6 @@ describe('Testing useCollateral hook', () => {
       });
 
       test('should submit the tx and set the colateral for inMemory wallet', async () => {
-        mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
         mockSubmitTx.mockReset();
         mockUseWalletStore.mockReturnValue({
           inMemoryWallet: {
@@ -297,7 +295,8 @@ describe('Testing useCollateral hook', () => {
               available$
             }
           },
-          getKeyAgentType: mockGetKeyAgentType
+          walletType: WalletType.InMemory,
+          isInMemoryWallet: true
         });
 
         mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));
@@ -310,7 +309,7 @@ describe('Testing useCollateral hook', () => {
         });
 
         await waitFor(() => {
-          expect(mockSubmitTx).toBeCalledWith(signedTx.tx);
+          expect(mockSubmitTx).toBeCalledWith(signedTx);
           expect(mockToastNotify).toBeCalledWith({ text: 'Collateral added' });
           expect(mockSetUnspendable).toBeCalledWith([utxo]);
           expect(mockSetBuiltTxData).not.toBeCalled();
@@ -332,7 +331,7 @@ describe('Testing useCollateral hook', () => {
         });
 
         await waitFor(() => {
-          expect(mockSubmitTx).toBeCalledWith(signedTx.tx);
+          expect(mockSubmitTx).toBeCalledWith(signedTx);
           expect(mockToastNotify).toBeCalledWith({ text: 'Collateral added' });
           expect(mockSetUnspendable).toBeCalledWith([utxo]);
           expect(mockSetBuiltTxData).toBeCalledWith({

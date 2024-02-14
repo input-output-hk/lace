@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { userIdServiceMock, matomoClientMocks, postHogClientMocks } from '@src/utils/mocks/test-helpers';
+import { userIdServiceMock, postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import '@testing-library/jest-dom';
 import React from 'react';
 import i18n from '@lib/i18n';
@@ -16,11 +16,6 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 jest.mock('@stores', () => ({
   ...jest.requireActual<any>('@stores'),
   useWalletStore: jest.fn().mockReturnValue({})
-}));
-
-jest.mock('@providers/AnalyticsProvider/matomo/MatomoClient', () => ({
-  ...jest.requireActual<any>('@providers/AnalyticsProvider/matomo/MatomoClient'),
-  MatomoClient: jest.fn().mockReturnValue(matomoClientMocks)
 }));
 
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
@@ -72,15 +67,14 @@ describe('Testing Analytics Agreement step', () => {
     jest.clearAllMocks();
   });
 
-  test('should call send event for matamo and posthog', async () => {
+  test('should call send event for posthog', async () => {
     const { findByTestId } = render(<SetupContainerTest />);
     const nextAnalyticsAccept = await findByTestId('wallet-setup-step-btn-next');
     fireEvent.click(nextAnalyticsAccept);
 
-    await waitFor(() => expect(matomoClientMocks.sendEvent).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(postHogClientMocks.sendEvent).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(postHogClientMocks.sendPageNavigationEvent).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(2));
   });
 
   test('should call makePersistent when clicking agree', async () => {

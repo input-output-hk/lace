@@ -27,7 +27,7 @@ export const RewardsChartTooltip = ({
                 <Flex gap="$8" key={i} alignItems="center">
                   <PoolIndicator color={poolColorMapper(poolId)} />
                   <Flex flexDirection="column">
-                    <Text.Body.Small>{p.payload?.rewards?.[i]?.metadata.name}</Text.Body.Small>
+                    <Text.Body.Small>{p.payload?.rewards?.[i]?.metadata?.name || '-'}</Text.Body.Small>
                     <Text.Body.Small>
                       {t('activity.rewardsChart.rewards')}: {payload[i]?.value} ADA
                     </Text.Body.Small>

@@ -1,3 +1,5 @@
+import { Cardano } from '@cardano-sdk/core';
+
 export {
   Asset,
   AssetProvider,
@@ -15,12 +17,13 @@ export {
   SupplySummary,
   StakeSummary,
   SortField,
-  EraSummary
+  EraSummary,
+  TxSubmissionError
 } from '@cardano-sdk/core';
 
 export { testnetEraSummaries } from '@cardano-sdk/util-dev';
 
-export { ProtocolParameters } from '../../../../node_modules/@cardano-sdk/core/dist/cjs/Cardano';
+export type ProtocolParameters = Cardano.ProtocolParameters;
 
 export {
   BalanceTracker as Balance,
@@ -32,8 +35,9 @@ export {
   PollingConfig,
   createWalletUtil,
   Assets,
-  TxInFlight
-} from '../../../../node_modules/@cardano-sdk/wallet/dist/cjs';
+  TxInFlight,
+  WalletAddress
+} from '@cardano-sdk/wallet';
 
 export {
   InitializeTxProps,
@@ -43,26 +47,25 @@ export {
   UnsignedTx
 } from '@cardano-sdk/tx-construction';
 
-export * as KeyManagement from '../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
+export * as KeyManagement from '@cardano-sdk/key-management';
+export * as Ledger from '@cardano-sdk/hardware-ledger';
+export * as Trezor from '@cardano-sdk/hardware-trezor';
 
 export { HexBlob, Percent, BigIntMath } from '@cardano-sdk/util';
 export * as Crypto from '@cardano-sdk/crypto';
+export { InputSelectionError } from '@cardano-sdk/input-selection';
 
 export {
   CardanoWallet,
-  CardanoWalletByChain,
   CreateStores,
-  KeyAgentsByChain,
   WalletProvidersDependencies,
-  createCardanoWallet,
-  shutdownWallet,
-  restoreWalletFromKeyAgent,
   validateWalletMnemonic,
   validateWalletPassword,
-  switchKeyAgents,
-  createCardanoWalletsByChain,
   restoreWallet,
-  createKeyAgent
+  createKeyAgent,
+  bip32Ed25519,
+  WalletMetadata,
+  AccountMetadata
 } from '@wallet/lib/cardano-wallet';
 
 export * from '@wallet/lib/hardware-wallet';

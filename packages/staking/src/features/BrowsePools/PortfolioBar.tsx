@@ -24,16 +24,14 @@ export const PortfolioBar = () => {
 
   return (
     <Card.Elevated className={styles.barContainer} data-testid="portfoliobar-container">
-      <Text.Body.Normal>
-        <span className={styles.selectedPoolsLabel} data-testid="portfoliobar-selected-pools">
-          {t('portfolioBar.selectedPools', { selectedPoolsCount })}
-        </span>
+      <Text.Body.Normal weight="$bold" data-testid="portfoliobar-selected-pools">
+        {t('portfolioBar.selectedPools', { selectedPoolsCount })}
         &nbsp;
         <span data-testid="portfoliobar-max-pools">
           {t('portfolioBar.maxPools', { maxPoolsCount: MAX_POOLS_COUNT })}
         </span>
       </Text.Body.Normal>
-      <Flex className={styles.buttons}>
+      <Flex gap="$16">
         <Button.Secondary
           label={t('portfolioBar.clear')}
           onClick={() => {

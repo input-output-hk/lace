@@ -1,10 +1,11 @@
 import { getTestWallet, WalletConfig } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import { initializeBrowserStorage } from './browserStorageInitializer';
+import { clearWalletRepository, initializeBrowserStorage } from './browserStorageInitializer';
 import extensionUtils from '../utils/utils';
 import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
+import { closeAllTabsExceptOriginalOne } from '../utils/window';
 
 class LocalStorageInitializer {
   async initializeLastStaking(): Promise<void> {
@@ -59,10 +60,12 @@ class LocalStorageInitializer {
   }
 
   reInitializeWallet = async (walletName: string) => {
+    await clearWalletRepository();
     await cleanBrowserStorage();
     await localStorageManager.cleanLocalStorage();
     await this.initializeWallet(walletName);
     await browser.refresh();
+    await closeAllTabsExceptOriginalOne();
   };
 
   disableShowingMultidelegationBetaBanner = async () => {

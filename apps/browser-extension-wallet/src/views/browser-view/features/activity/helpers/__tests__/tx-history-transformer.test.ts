@@ -182,6 +182,7 @@ describe('Testing txHistoryTransformer function', () => {
     const result: any = await txHistoryTransformers.txHistoryTransformer(props);
 
     expect(inspectTxTypeSpy).toBeCalledWith({
+      inputResolver: { resolveInput: props.resolveInput },
       walletAddresses: props.walletAddresses,
       tx: props.tx
     });

@@ -23,9 +23,8 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails, TransactionData } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import { Asset } from '../data/Asset';
 import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
@@ -37,8 +36,9 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
-import { AddressInput } from '../elements/addressInput';
+import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
+import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -56,7 +56,7 @@ Given(/all fields are empty/, async () => {
 });
 
 When(
-  /I enter a valid "([^"]*)" address in the bundle (\d) recipient's address/,
+  /I enter a valid "([^"]*)" address in the bundle (\d+) recipient's address/,
   async (address: string, inputIndex: number) => {
     let addr;
     switch (address) {
@@ -91,16 +91,16 @@ When(
         addr = address;
         break;
     }
-    await transactionExtendedPageObject.fillAddress(addr, inputIndex);
+    await new AddressInput(inputIndex).fillAddress(addr);
   }
 );
 
-When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
-  await transactionExtendedPageObject.fillAddress(value, inputIndex);
+When(/I enter "([^"]*)" in the bundle (\d+) recipient's address/, async (value: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).fillAddress(value);
 });
 
 When(/I enter the first characters of the contacts/, async () => {
-  await transactionExtendedPageObject.fillAddressWithFirstChars(validAddress2.getName(), 3);
+  await new AddressInput().fillAddressWithFirstChars(validAddress2.getName(), 3);
 });
 
 When(/click on one of the contacts on the dropdown/, async () => {
@@ -136,15 +136,15 @@ When(/^I click MAX button in bundle (\d) for "([^"]*)" asset$/, async (bundleInd
 });
 
 When(/^I select amount: (\d*) of asset type: (Tokens|NFTs)$/, async (amount: number, assetType: 'Tokens' | 'NFTs') => {
-  await transactionExtendedPageObject.addAmountOfAssets(amount, assetType);
+  await TokenSelectionPage.addAmountOfAssets(amount, assetType);
 });
 
 When(/^I deselect (Tokens|NFTs) (\d*)$/, async (assetType: 'Tokens' | 'NFTs', index: number) => {
-  await transactionExtendedPageObject.deselectToken(assetType, index);
+  await TokenSelectionPage.deselectToken(assetType, index);
 });
 
 When(/^I save selected (Tokens|NFTs) in bundle (\d*)$/, async (assetType: 'Tokens' | 'NFTs', bundle: number) => {
-  await transactionExtendedPageObject.saveSelectedTokens(assetType, bundle);
+  await TokenSelectionPage.saveSelectedTokens(assetType, bundle);
 });
 
 Then(
@@ -155,15 +155,16 @@ Then(
 );
 
 Then(
-  /I enter an address (\d*) that matches the amount of characters but does not match with the checksum/,
-  async (inputIndex?: number) => {
-    await transactionExtendedPageObject.fillAddress(shelleyInvalid.getAddress(), inputIndex);
+  /I enter an address that matches the amount of characters but does not match with the checksum into address input (\d+)/,
+  async (inputIndex: number) => {
+    await new AddressInput(inputIndex).fillAddress(shelleyInvalid.getAddress());
   }
 );
 
 Then(/I enter more or less characters than the required for an address in the bundle recipient's address/, async () => {
-  await transactionExtendedPageObject.fillAddress(shelley.getAddress());
-  await transactionExtendedPageObject.addToAddress('a');
+  const addressInput = new AddressInput();
+  await addressInput.fillAddress(shelley.getAddress());
+  await addressInput.addToAddress('a');
 });
 
 Then(/click on the coin selector for "([^"]*)" asset in bundle (\d)/, async (assetName: string, index: number) => {
@@ -172,13 +173,11 @@ Then(/click on the coin selector for "([^"]*)" asset in bundle (\d)/, async (ass
 });
 
 Then(/^coin selector contains two tabs: tokens & nfts$/, async () => {
-  await coinConfigureAssert.assertSeeTokenSelectionPageButtons();
+  await TransactionAssetSelectionAssert.assertSeeTokenSelectionPageButtons();
 });
 
 Then(/^click on the (Tokens|NFTs) button in the coin selector dropdown$/, async (button: string) => {
-  button === 'Tokens'
-    ? await transactionExtendedPageObject.clickTokensButton()
-    : await transactionExtendedPageObject.clickNFTsButton();
+  button === 'Tokens' ? await TokenSelectionPage.clickTokensButton() : await TokenSelectionPage.clickNFTsButton();
 });
 
 Then(/click on an token with name: "([^"]*)"/, async (tokenName: string) => {
@@ -201,30 +200,37 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
   await coinConfigureAssert.assertSeeNonEmptyBalanceInCoinConfigure();
 });
 
-Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
-  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
-  await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
-});
+Then(
+  /^click "(Add|Remove) address" button inside address input (\d+)$/,
+  async (_ignored: string, inputIndex: number) => {
+    const addressInput = new AddressInput(inputIndex);
+    await addressInput.searchLoader.waitForClickable({ reverse: true });
+    await addressInput.clickAddAddressButton();
+  }
+);
 
 When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
-    await browser.pause(500);
-    await transactionExtendedPageObject.fillAddress(
+    const addressInput = new AddressInput(bundleIndex);
+    await addressInput.fillAddress(
       receivingAddress === 'CopiedAddress'
         ? String(await clipboard.read())
-        : String(getTestWallet(receivingAddress).address),
-      bundleIndex
+        : String(getTestWallet(receivingAddress).address)
     );
+    await addressInput.searchLoader.waitForDisplayed({ reverse: true });
+    // Close address dropdown menu if exists
+    if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
+      await TransactionNewPage.clickDrawerBackground();
+    }
     for (const entry of options.hashes()) {
-      await browser.pause(500);
       switch (entry.type) {
         case 'ADA':
           break;
         case 'NFT':
           await new AssetInput(bundleIndex).clickAddAssetButton();
-          await transactionExtendedPageObject.clickNFTsButton();
-          await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
+          await TokenSelectionPage.clickNFTsButton();
+          await TokenSelectionPage.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
           await new AssetInput(bundleIndex).clickAddAssetButton();
@@ -243,7 +249,7 @@ When(
 When(
   /^I save ticker for the (Token|NFT) with name: ([^"]*)$/,
   async (assetType: 'Token' | 'NFT', assetName: string) => {
-    await transactionExtendedPageObject.saveTicker(assetType, assetName);
+    await TokenSelectionPage.saveTicker(assetType, assetName);
   }
 );
 
@@ -299,22 +305,21 @@ Then(
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () => {
-  await transactionExtendedPageObject.fillAddress(shelley.getAddress());
+  await new AddressInput().fillAddress(shelley.getAddress());
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
 Then(
   /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
   async (network: 'Preprod' | 'Mainnet') => {
-    await (network === 'Mainnet'
-      ? transactionExtendedPageObject.fillAddress(shelley.getMainnetAddress())
-      : transactionExtendedPageObject.fillAddress(shelley.getTestnetAddress()));
+    const address = network === 'Mainnet' ? shelley.getMainnetAddress() : shelley.getTestnetAddress();
+    await new AddressInput().fillAddress(address);
     await transactionExtendedPageObject.fillTokenValue(1);
   }
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
-  await transactionExtendedPageObject.fillAddress(byron.getAddress());
+  await new AddressInput().fillAddress(byron.getAddress());
   await transactionExtendedPageObject.fillTokenValue(0.5);
 });
 
@@ -411,14 +416,19 @@ Then(
   /^The Tx details are displayed as "([^"]*)" for (\d) tokens with following details:$/,
   async (type: string, numberOfTokens: number, options: DataTable) => {
     const txData = options.hashes();
+    const parsedTxData: TransactionData[] = [];
     for (const entry of txData) {
-      entry.address = getTestWallet(entry.address).address;
-      entry.assets = entry.assets.split(',');
+      const parsedEntry = {
+        ada: entry.ada,
+        address: String(getTestWallet(entry.address).address),
+        assets: entry.assets.split(',')
+      };
+      parsedTxData.push(parsedEntry);
     }
     const expectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(${numberOfTokens})`,
       hash: String(testContext.load('txHashValue')),
-      transactionData: txData,
+      transactionData: parsedTxData,
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
@@ -626,7 +636,7 @@ Then(/^recipients address input contains address entry with name "([^"]*)"$/, as
   await drawerSendExtendedAssert.assertSeeAddressNameInRecipientsAddressInput(addressName);
 });
 
-Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
+Then(/^recipients address input (\d+) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });
 

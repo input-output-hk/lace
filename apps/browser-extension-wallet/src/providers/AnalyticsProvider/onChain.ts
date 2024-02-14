@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers, unicorn/no-array-reduce, @typescript-eslint/no-empty-function */
+/* eslint-disable no-magic-numbers, @typescript-eslint/no-empty-function */
 import { useEffect } from 'react';
 import { PostHogAction, PostHogProperties, TX_CREATION_TYPE_KEY } from './analyticsTracker';
 import { getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';

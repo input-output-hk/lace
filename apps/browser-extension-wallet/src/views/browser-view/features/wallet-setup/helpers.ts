@@ -3,10 +3,11 @@ import { Wallet } from '@lace/cardano';
 import * as HardwareLedger from '../../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import * as HardwareTrezor from '../../../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
 import { PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 export const isHardwareWalletAvailable = (wallet: Wallet.HardwareWallets): boolean =>
-  wallet !== Wallet.KeyManagement.KeyAgentType.Trezor || isTrezorHWSupported();
+  wallet !== WalletType.Trezor || isTrezorHWSupported();
 type HardwareWalletPersonProperties = {
   model: string;
   firmwareVersion?: string;
@@ -17,7 +18,7 @@ export const getTrezorSpecifications = async (): Promise<HardwareWalletPersonPro
   const { model, major_version, minor_version, patch_version } =
     await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
   return {
-    model: `${Wallet.KeyManagement.KeyAgentType.Trezor} model ${model}`,
+    model: `${WalletType.Trezor} model ${model}`,
     firmwareVersion: `${major_version}.${minor_version}.${patch_version}`
   };
 };
@@ -37,7 +38,7 @@ export const getHWPersonProperties = async (
   deviceConnection: Wallet.DeviceConnection
 ): Promise<PostHogProperties> => {
   const HWSpecifications =
-    connectedDevice === Wallet.KeyManagement.KeyAgentType.Trezor
+    connectedDevice === WalletType.Trezor
       ? await getTrezorSpecifications()
       : await getLedgerSpecifications(deviceConnection as HardwareLedger.LedgerKeyAgent['deviceConnection']);
   return {

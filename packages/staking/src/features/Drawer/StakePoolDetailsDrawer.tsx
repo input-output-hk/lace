@@ -35,7 +35,6 @@ export const StakePoolDetailsDrawer = ({
   const { t } = useTranslation();
 
   const {
-    backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
     password: { password, removePassword },
     submittingState: { setIsRestaking },
@@ -45,7 +44,6 @@ export const StakePoolDetailsDrawer = ({
     if (activeDrawerStep && showExitConfirmation?.(activeDrawerStep)) {
       setExitStakingVisible(true);
     } else {
-      backgroundServiceAPIContextSetWalletPassword();
       delegationStoreSetDelegationTxBuilder();
       removePassword();
       portfolioMutators.executeCommand({ type: 'CancelDrawer' });
@@ -56,7 +54,6 @@ export const StakePoolDetailsDrawer = ({
     showExitConfirmation,
     setIsRestaking,
     setExitStakingVisible,
-    backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
     removePassword,
     portfolioMutators,
@@ -64,13 +61,12 @@ export const StakePoolDetailsDrawer = ({
 
   const onGoBack = useCallback(() => {
     if (password) {
-      backgroundServiceAPIContextSetWalletPassword();
       removePassword();
     }
     portfolioMutators.executeCommand({
       type: 'DrawerBack',
     });
-  }, [password, portfolioMutators, backgroundServiceAPIContextSetWalletPassword, removePassword]);
+  }, [password, portfolioMutators, removePassword]);
 
   const shouldShowBackIcon =
     activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon;

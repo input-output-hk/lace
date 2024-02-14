@@ -1,9 +1,12 @@
-import { darkColorScheme, laceGradient, lightColorScheme } from '@lace/ui';
+import { darkColorScheme, laceGradient, lightColorScheme, vars } from '@lace/ui';
 
 export const colorsContract = {
   $activityNoActivityTextColor: '',
   $bannerBellIconColor: '',
   $bannerInfoIconColor: '',
+  $dataGreenGradient: '',
+  $dataOrangeGradient: '',
+  $dataPinkGradient: '',
   $browsePoolsFilterInputRightBorderColor: '',
   $delegationCardInfoLabelColor: '',
   $delegationCardInfoValueColor: '',
@@ -33,8 +36,9 @@ export const colorsContract = {
   $sliderFillSecondary: '',
   $sliderKnobFill: '',
   $sliderRailFill: '',
-  // TODO: remove once replaced with new pool skeleton (LW-9659)
   $stakePoolCellPlaceholder: '',
+  $stakePoolListPlaceholderCheckboxColor: '',
+  $titleColor: '',
   $tooltipBgColor: '',
 };
 
@@ -42,6 +46,9 @@ export const lightThemeColors: typeof colorsContract = {
   $activityNoActivityTextColor: lightColorScheme.$primary_dark_grey,
   $bannerBellIconColor: lightColorScheme.$primary_accent_purple,
   $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
+  $dataGreenGradient: `linear-gradient(to right, ${vars.colors.$data_green}, ${vars.colors.$data_green})`,
+  $dataOrangeGradient: `linear-gradient(to right, ${vars.colors.$data_orange}, ${vars.colors.$data_orange})`,
+  $dataPinkGradient: `linear-gradient(to right, ${vars.colors.$data_pink}, ${vars.colors.$data_pink})`,
   $browsePoolsFilterInputRightBorderColor: lightColorScheme.$primary_light_grey_plus,
   $delegationCardInfoLabelColor: lightColorScheme.$primary_dark_grey,
   $delegationCardInfoValueColor: lightColorScheme.$primary_black,
@@ -71,8 +78,9 @@ export const lightThemeColors: typeof colorsContract = {
   $sliderFillSecondary: lightColorScheme.$primary_dark_grey,
   $sliderKnobFill: lightColorScheme.$primary_white,
   $sliderRailFill: lightColorScheme.$primary_light_grey_plus,
-  // TODO: remove once replaced with new pool skeleton (LW-9659)
   $stakePoolCellPlaceholder: lightColorScheme.$primary_light_grey,
+  $stakePoolListPlaceholderCheckboxColor: lightColorScheme.$primary_grey,
+  $titleColor: lightColorScheme.$primary_dark_grey,
   $tooltipBgColor: lightColorScheme.$primary_white,
 };
 
@@ -80,6 +88,9 @@ export const darkThemeColors: typeof colorsContract = {
   $activityNoActivityTextColor: darkColorScheme.$primary_light_grey,
   $bannerBellIconColor: darkColorScheme.$primary_accent_purple,
   $bannerInfoIconColor: darkColorScheme.$primary_accent_purple,
+  $dataGreenGradient: `linear-gradient(to right, ${vars.colors.$data_green}, ${vars.colors.$data_green})`,
+  $dataOrangeGradient: `linear-gradient(to right, ${vars.colors.$data_orange}, ${vars.colors.$data_orange})`,
+  $dataPinkGradient: `linear-gradient(to right, ${vars.colors.$data_pink}, ${vars.colors.$data_pink})`,
   $browsePoolsFilterInputRightBorderColor: darkColorScheme.$primary_grey,
   $delegationCardInfoLabelColor: darkColorScheme.$primary_light_grey,
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
@@ -91,9 +102,9 @@ export const darkThemeColors: typeof colorsContract = {
   $getStartedStepNumberColor: laceGradient,
   $multidelegationBetaModalPillBackground: laceGradient,
   $multidelegationBetaModalPillText: darkColorScheme.$primary_white,
-  $poolCardMetricColor: darkColorScheme.$primary_grey,
+  $poolCardMetricColor: darkColorScheme.$primary_light_grey,
   $poolCardProgressBarBaseBackgroundColor: darkColorScheme.$primary_dark_grey_plus,
-  $poolCardProgressBarValue: darkColorScheme.$primary_mid_grey,
+  $poolCardProgressBarValue: darkColorScheme.$primary_light_grey,
   $poolCardSelectedBorderColor: darkColorScheme.$primary_accent_purple,
   $poolItemEvenBackground: darkColorScheme.$primary_light_black,
   $preferencesPoolCardBorderColor: darkColorScheme.$primary_mid_black,
@@ -113,7 +124,8 @@ export const darkThemeColors: typeof colorsContract = {
   $sliderFillSecondary: darkColorScheme.$primary_light_grey,
   $sliderKnobFill: lightColorScheme.$primary_black,
   $sliderRailFill: darkColorScheme.$primary_dark_grey_plus,
-  // TODO: remove once replaced with new pool skeleton (LW-9659)
   $stakePoolCellPlaceholder: darkColorScheme.$primary_mid_grey,
+  $stakePoolListPlaceholderCheckboxColor: darkColorScheme.$primary_light_grey,
+  $titleColor: darkColorScheme.$primary_light_grey,
   $tooltipBgColor: darkColorScheme.$primary_mid_grey,
 };

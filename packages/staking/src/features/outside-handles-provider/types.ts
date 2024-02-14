@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
-import { StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
+import { StakePoolSortOptions } from 'features/BrowsePools/types';
 import type { IAnalyticsTracker } from '@lace/common';
 
 type WalletBalance = {
@@ -52,7 +52,7 @@ export interface IBlockchainProvider {
 
 export type OutsideHandlesContextValue = {
   analytics: IAnalyticsTracker;
-  backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
+  walletManagerExecuteWithPassword: <T>(action: () => Promise<T>, password?: string) => Promise<T>;
   expandStakingView?: () => void;
   balancesBalance?: Balance;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
@@ -68,16 +68,11 @@ export type OutsideHandlesContextValue = {
   openExternalLink: (href: string) => void;
   password: PasswordHook;
   submittingState: SubmittingState;
-  walletStoreGetKeyAgentType: () => string;
+  walletStoreWalletType: string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletActivities: AssetActivityListProps[];
   walletStoreWalletActivitiesStatus: StateStatus;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
-  walletManagerExecuteWithPassword: <T>(
-    password: string,
-    promiseFn: () => Promise<T>,
-    cleanPassword?: boolean
-  ) => Promise<T>;
   walletStoreStakePoolSearchResults: Wallet.StakePoolSearchResults & {
     skip?: number;
     limit?: number;
@@ -110,4 +105,5 @@ export type OutsideHandlesContextValue = {
   triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
   currentChain: Wallet.Cardano.ChainId;
+  isMultidelegationSupportedByDevice: (walletType: string) => Promise<boolean>;
 };

@@ -11,7 +11,7 @@ import {
   ToggleButtonGroup,
 } from '@lace/ui';
 import cn from 'classnames';
-import { Columns, SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/StakePoolsTable/types';
+import { MetricType, SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -117,49 +117,49 @@ export const SortAndFilter = ({
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ticker'),
         onIconClick: handleIconClick,
-        value: Columns.ticker,
+        value: MetricType.ticker,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
         onIconClick: handleIconClick,
-        value: Columns.saturation,
+        value: MetricType.saturation,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros'),
         onIconClick: handleIconClick,
-        value: Columns.apy,
+        value: MetricType.apy,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.cost'),
         onIconClick: handleIconClick,
-        value: Columns.cost,
+        value: MetricType.cost,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.margin'),
         onIconClick: handleIconClick,
-        value: Columns.margin,
+        value: MetricType.margin,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.blocks'),
         onIconClick: handleIconClick,
-        value: Columns.blocks,
+        value: MetricType.blocks,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.pledge'),
         onIconClick: handleIconClick,
-        value: Columns.pledge,
+        value: MetricType.pledge,
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.livestake'),
         onIconClick: handleIconClick,
-        value: Columns.liveStake,
+        value: MetricType.liveStake,
       },
     ];
   }, [direction, handleIconClick, t]);
