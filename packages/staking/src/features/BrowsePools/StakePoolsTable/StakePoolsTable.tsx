@@ -23,7 +23,7 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
   order: SortDirection.desc,
 };
 
-const searchDebounce = 300;
+const SEARCH_DEBOUNCE = 300;
 
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
   const componentRef = useRef<HTMLDivElement | null>(null);
@@ -58,7 +58,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker'),
   };
 
-  const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
+  const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE), [fetchStakePools]);
 
   useEffect(() => {
     if (componentRef?.current) {

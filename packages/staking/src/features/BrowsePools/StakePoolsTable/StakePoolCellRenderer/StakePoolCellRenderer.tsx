@@ -20,7 +20,7 @@ export const stakePoolCellRenderer: Partial<
       </Flex>
     );
   },
-  [MetricType.margin]: ({ value }) => <span>{typeof value === 'string' ? value : ''}%</span>,
+  [MetricType.margin]: ({ value }) => <span>{typeof value === 'string' ? value : '-'}%</span>,
   [MetricType.liveStake]: ({ value }) => (
     <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>
   ),

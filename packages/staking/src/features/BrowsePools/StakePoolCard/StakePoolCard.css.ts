@@ -2,11 +2,12 @@ import { style, sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { theme } from '../../theme';
+import { STAKE_POOL_CARD_HEIGHT } from './constants';
 
 export const card = style([
   sx({
     boxSizing: 'border-box',
-    height: '$84',
+    height: `$${STAKE_POOL_CARD_HEIGHT}`,
     padding: '$20',
     width: '$fill',
   }),

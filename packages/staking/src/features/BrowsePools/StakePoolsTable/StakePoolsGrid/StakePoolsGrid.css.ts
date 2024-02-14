@@ -1,7 +1,7 @@
 import { style, sx } from '@lace/ui';
 import { theme } from 'features/theme';
 
-// this is temporary, until @lace/ui Grid component will accept responsive properties per breakpoint
+// TODO use new @lace/ui Grid when available: https://input-output.atlassian.net/browse/LW-9791
 export const grid = style([
   sx({
     columnGap: '$16',
