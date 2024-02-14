@@ -36,7 +36,7 @@
 
 .secondaryButton {
   background: var(--text-color-white, #ffffff) !important;
-  color: #6E7786 !important;
+  color:var(--primary-default, #7f5af0) !important;
   &:hover {
     color: #3D3B39 !important;
   }

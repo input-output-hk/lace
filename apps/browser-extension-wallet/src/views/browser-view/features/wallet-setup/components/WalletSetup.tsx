@@ -141,11 +141,9 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
             <ConfirmationBanner
               message={
                 <div>
-                  <span>
-                    Help us improve the quality and performance of Lace by sharing analytics data from your browser.
-                  </span>
+                  <span>{translate('analyticsConfirmationBanner.message')}</span>
                   <span className={styles.learnMore} onClick={() => setIsAnalyticsModalOpen(true)}>
-                    Learn more
+                    {translate('analyticsConfirmationBanner.learnMore')}
                   </span>
                 </div>
               }
