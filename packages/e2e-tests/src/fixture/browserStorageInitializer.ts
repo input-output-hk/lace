@@ -2,6 +2,7 @@ import { WalletConfig } from '../support/walletConfiguration';
 import { setBackgroundStorage, setMigrationState } from '../utils/browserStorage';
 import { Logger } from '../support/logger';
 import { switchToWindowWithLace } from '../utils/window';
+import { browser } from '@wdio/globals';
 
 export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<void> => {
   try {
@@ -36,9 +37,9 @@ export const getNumWalletsInRepository = async (): Promise<number> =>
   `);
 
 export const clearWalletRepository = async (): Promise<void> => {
-  Logger.log('Removing wallets');
-  await switchToWindowWithLace(0);
-  const removedWallets = await browser.execute(`
+  try {
+    await switchToWindowWithLace(0);
+    await browser.execute(`
     return (async () => {
       await window.walletManager.deactivate();
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
@@ -48,5 +49,7 @@ export const clearWalletRepository = async (): Promise<void> => {
       return JSON.stringify(wallets);
     })()
   `);
-  Logger.log(`Removed wallets: ${removedWallets}`);
+  } catch (error) {
+    Logger.log(`Failed to clear wallet repository: ${error}`);
+  }
 };
