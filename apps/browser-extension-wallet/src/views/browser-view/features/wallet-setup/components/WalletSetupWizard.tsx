@@ -76,7 +76,6 @@ export const WalletSetupWizard = ({
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<CreateWalletData | undefined>();
-  const [isAnalyticsAccepted] = useState(false);
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
@@ -173,11 +172,8 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     (wallet?: CreateWalletData) => {
       setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
-      if (isAnalyticsAccepted) {
-        analytics.sendAliasEvent();
-      }
     },
-    [analytics, isAnalyticsAccepted, setWallet, walletInstance]
+    [analytics, setWallet, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {
@@ -189,12 +185,6 @@ export const WalletSetupWizard = ({
         chainId: DEFAULT_CHAIN_ID
       });
       setWalletInstance(wallet);
-      setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
-      await analytics.setOptedInForEnhancedAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
 
       wallet.wallet.wallet.addresses$.subscribe((addresses) => {
         if (addresses.length === 0) return;
@@ -220,7 +210,6 @@ export const WalletSetupWizard = ({
     mnemonic,
     password,
     setDoesUserAllowAnalytics,
-    isAnalyticsAccepted,
     analytics,
     setupType,
     goToMyWallet,
