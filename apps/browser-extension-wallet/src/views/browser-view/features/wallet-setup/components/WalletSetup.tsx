@@ -2,7 +2,8 @@ import {
   WalletSetupSteps,
   WalletSetupFlowProvider,
   WalletSetupFlow,
-  WalletAnalyticsInfo
+  WalletAnalyticsInfo,
+  AnalyticsConfirmationBanner
 } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
@@ -138,7 +139,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
         <Switch>
           <Route exact path={`${path}/`}>
             <WalletSetupMainPage />
-            <ConfirmationBanner
+            <AnalyticsConfirmationBanner
               message={
                 <div>
                   <span>{translate('analyticsConfirmationBanner.message')}</span>
@@ -149,7 +150,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
               }
               onConfirm={() => handleAnalyticsChoice(true)}
               onReject={() => handleAnalyticsChoice(false)}
-              showBanner={enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet}
+              show={enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet}
             />
             <WarningModal
               header={<div className={styles.analyticsModalTitle}>{translate('core.walletAnalyticsInfo.title')}</div>}
