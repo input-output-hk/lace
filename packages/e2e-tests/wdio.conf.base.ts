@@ -14,7 +14,7 @@ export const config: WebdriverIO.Config = {
   logLevel: 'error',
   outputDir: 'logs',
   bail: 0,
-  execArgv: ['--max-old-space-size=8192'],
+  execArgv: ['--max-old-space-size=16384'],
   baseUrl: '',
   capabilities: [],
   injectGlobals: true,
