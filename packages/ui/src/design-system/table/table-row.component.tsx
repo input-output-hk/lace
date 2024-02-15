@@ -1,8 +1,10 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
 
-import { Checkbox, Tooltip } from '@lace/ui';
 import cn from 'classnames';
+
+import { Checkbox } from '../checkbox';
+import { Tooltip } from '../tooltip';
 
 import * as cx from './table.css';
 
