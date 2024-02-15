@@ -46,10 +46,9 @@ export const BrowsePools = () => {
       ? delegationPreferencePersistence?.poolsView || BrowsePoolsView.grid
       : BrowsePoolsView.table
   );
-  const { selectedPortfolioStakePools, viewedStakePool } = useDelegationPortfolioStore((store) => ({
+  const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
     selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
-    viewedStakePool: store.viewedStakePool,
   }));
 
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
@@ -74,7 +73,6 @@ export const BrowsePools = () => {
       searchQuery: searchValue,
       selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
       sortOptions: sort,
-      viewedStakePoolId: viewedStakePool?.id,
     });
   }, [
     delegationPreferencePersistence,
@@ -83,7 +81,6 @@ export const BrowsePools = () => {
     selectedPortfolioStakePools,
     setDelegationPreferencePersistence,
     sort,
-    viewedStakePool?.id,
   ]);
 
   useRestorePoolsSelection();
