@@ -5,3 +5,23 @@
     justify-content: center;
   }
 }
+
+.scrollArea {
+  overflow: visible;
+}
+
+.scrollAreaViewport {
+  max-height: 300px;
+  overflow: visible;
+}
+
+.scrollBar {
+  padding: 0;
+  right: -25px !important;
+}
+
+.remove {
+  color: var(--primary-default, #7f5af0);
+  margin-left: 24px;
+  cursor: pointer;
+}

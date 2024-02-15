@@ -10745,6 +10745,7 @@ __metadata:
     "@storybook/testing-library": ^0.0.13
     "@types/babel__preset-env": ^7
     "@types/debounce-promise": ^3.1.6
+    "@types/uuid": ^9
     antd: ^4.24.10
     axios: 0.21.4
     axios-cache-adapter: 2.7.3
@@ -10761,6 +10762,7 @@ __metadata:
     sass: ^1.68.0
     storybook: ^7.4.3
     typescript: ^4.3.5
+    uuid: ^9.0.1
     zxcvbn: ^4.4.2
   peerDependencies:
     react: 17.0.2
@@ -19981,6 +19983,13 @@ __metadata:
   version: 9.0.1
   resolution: "@types/uuid@npm:9.0.1"
   checksum: c472b8a77cbeded4bc529220b8611afa39bd64677f507838f8083d8aac8033b1f88cb9ddaa2f8589e0dcd2317291d0f6e1379f82d5ceebd6f74f3b4825288e00
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9":
+  version: 9.0.8
+  resolution: "@types/uuid@npm:9.0.8"
+  checksum: b8c60b7ba8250356b5088302583d1704a4e1a13558d143c549c408bf8920535602ffc12394ede77f8a8083511b023704bc66d1345792714002bfa261b17c5275
   languageName: node
   linkType: hard
 
@@ -51694,6 +51703,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: f5b7b5cc28accac68d5c083fd51cca64896639ebd4cca88c6cfb363801aaa83aa439c86dfc8446ea250a7a98d17afd2ad9e88d9d4958c79a412eccb93bae29de
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "uuid@npm:9.0.1"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 39931f6da74e307f51c0fb463dc2462807531dc80760a9bff1e35af4316131b4fc3203d16da60ae33f07fdca5b56f3f1dd662da0c99fea9aaeab2004780cc5f4
   languageName: node
   linkType: hard
 

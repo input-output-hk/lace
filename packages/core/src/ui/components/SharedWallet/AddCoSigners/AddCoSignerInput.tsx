@@ -1,11 +1,11 @@
 import React from 'react';
 import type { SuggestionThreeItemType } from '@lace/ui';
 import { AutoSuggestBox } from '@lace/ui';
-import { CoSigner, ValidateAddress } from './type';
+import { ValidateAddress } from './type';
 import { useCoSignerInput } from './hooks';
 
 interface Props {
-  onChange: (coSigner: CoSigner) => void;
+  onChange: (address: string, isValid: boolean) => void;
   validateAddress: ValidateAddress;
   translations: {
     label: string;

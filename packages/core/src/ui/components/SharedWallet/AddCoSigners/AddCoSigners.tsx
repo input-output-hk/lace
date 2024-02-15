@@ -1,12 +1,12 @@
-/* eslint-disable arrow-body-style */
-import React, { useMemo, useState } from 'react';
-import { Box, Flex, Text, Button, ControlButton, SuggestionThreeItemType } from '@lace/ui';
+import React, { useMemo } from 'react';
+import { Box, Flex, Text, Button, ControlButton, SuggestionThreeItemType, ScrollArea, sx } from '@lace/ui';
 import { ReactComponent as GridIcon } from '@lace/icons/dist/GridComponent';
 import { Wallet } from '@lace/cardano';
 import styles from './AddCoSigners.module.scss';
 import { AddCoSignerInput } from './AddCoSignerInput';
 import { CoSigner, ValidateAddress } from './type';
 import { addEllipsis } from '@lace/common';
+import { useCoSigners } from './hooks';
 
 interface Props {
   onBack: () => void;
@@ -25,6 +25,7 @@ interface Props {
     addButton: string;
     backButton: string;
     nextButton: string;
+    removeButton: string;
   };
 }
 
@@ -33,7 +34,8 @@ const HEAD_LENGTH = 10;
 const TAIL_LENGTH = 5;
 
 export const AddCoSigners = ({ addressBook, translations, validateAddress, onBack, onNext }: Props): JSX.Element => {
-  const [coSigners, setCoSigners] = useState<CoSigner[]>([{ address: '', isValid: false }]);
+  const { coSigners, updateCoSigner, removeCoSigner, addCoSigner } = useCoSigners();
+
   const suggestions: SuggestionThreeItemType[] = useMemo(
     () =>
       addressBook.map((addressEntry) => ({
@@ -55,9 +57,15 @@ export const AddCoSigners = ({ addressBook, translations, validateAddress, onBac
         <Text.Body.Normal weight="$medium">{translations.subtitle}</Text.Body.Normal>
       </Box>
 
-      <Box mb="$8" w="$fill">
-        {coSigners.map((_, index) => (
-          <Box key={index} className={styles.coSigners}>
+      <ScrollArea
+        classNames={{
+          root: styles.scrollArea,
+          viewport: styles.scrollAreaViewport,
+          bar: styles.scrollBar
+        }}
+      >
+        {coSigners.map(({ id }, index) => (
+          <Box key={id} className={styles.coSigners}>
             <AddCoSignerInput
               suggestions={suggestions}
               validateAddress={validateAddress}
@@ -65,28 +73,44 @@ export const AddCoSigners = ({ addressBook, translations, validateAddress, onBac
                 label: translations.inputLabel,
                 error: translations.inputError
               }}
-              onChange={(value) => {
-                coSigners[index] = value;
-                setCoSigners([...coSigners]);
+              onChange={(address, isValid) => {
+                updateCoSigner(index, { address, isValid, id });
               }}
             />
+            {index !== 0 && (
+              <div
+                onClick={() => {
+                  removeCoSigner(index);
+                }}
+              >
+                <Text.Body.Small weight="$semibold" className={styles.remove}>
+                  {translations.removeButton}
+                </Text.Body.Small>
+              </div>
+            )}
           </Box>
         ))}
-      </Box>
-      <Box mb="$8">
-        <Text.Body.Small weight="$bold">
-          {coSigners.length}/{MAX_COSIGNERS}
-        </Text.Body.Small>
-      </Box>
-      <Box mb="$148" w="$fill">
+      </ScrollArea>
+
+      {coSigners.length > 1 && (
+        <Flex w="$fill" mb="$8" justifyContent="flex-end">
+          <Text.Body.Small
+            weight="$bold"
+            className={sx({
+              color: '$text_secondary'
+            })}
+          >
+            {coSigners.length}/{MAX_COSIGNERS}
+          </Text.Body.Small>
+        </Flex>
+      )}
+      <Box w="$fill" mb="$40">
         <ControlButton.Outlined
           w="$fill"
           disabled={coSigners.length === MAX_COSIGNERS}
           label={translations.addButton}
           icon={<GridIcon />}
-          onClick={() => {
-            setCoSigners([...coSigners, { address: '', isValid: false }]);
-          }}
+          onClick={() => addCoSigner()}
         />
       </Box>
 

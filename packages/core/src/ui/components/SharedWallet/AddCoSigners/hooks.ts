@@ -1,10 +1,34 @@
 import { useState } from 'react';
 import { ValidationStatus } from '@lace/ui';
 import { CoSigner, ValidateAddress } from './type';
+import { v1 as uuid } from 'uuid';
+
+export const useCoSigners = (): {
+  coSigners: CoSigner[];
+  removeCoSigner: (index: number) => void;
+  updateCoSigner: (index: number, coSigner: CoSigner) => void;
+  addCoSigner: () => void;
+} => {
+  const [coSigners, setCoSigners] = useState<CoSigner[]>([{ address: '', isValid: true, id: uuid() }]);
+
+  return {
+    coSigners,
+    removeCoSigner: (index) => {
+      setCoSigners([...coSigners.filter((_, i) => i !== index)]);
+    },
+    updateCoSigner: (index: number, coSigner: CoSigner) => {
+      coSigners[index] = coSigner;
+      setCoSigners([...coSigners]);
+    },
+    addCoSigner: () => {
+      setCoSigners([...coSigners, { address: '', isValid: false, id: uuid() }]);
+    }
+  };
+};
 
 interface UseCoSignerInput {
   errorString: string;
-  onChange: (coSigner: CoSigner) => void;
+  onChange: (address: string, isValid: boolean) => void;
   validateAddress: ValidateAddress;
 }
 
@@ -25,7 +49,7 @@ export const useCoSignerInput = ({
     validationStatus,
     onInputChange: async (value: string) => {
       if (!value) {
-        onChange({ address: '', isValid: false });
+        onChange(value, false);
         setValidationStatus(ValidationStatus.Idle);
         setErrorMessage('');
         return;
@@ -34,11 +58,11 @@ export const useCoSignerInput = ({
       const result = await validateAddress(value);
 
       if (result.isValid) {
-        onChange({ address: result.handleResolution || value, isValid: true });
+        onChange(result.handleResolution || value, true);
         setValidationStatus(ValidationStatus.Validated);
         setErrorMessage('');
       } else {
-        onChange({ address: value, isValid: false });
+        onChange(value, false);
         setValidationStatus(ValidationStatus.Idle);
         setErrorMessage(errorString);
       }

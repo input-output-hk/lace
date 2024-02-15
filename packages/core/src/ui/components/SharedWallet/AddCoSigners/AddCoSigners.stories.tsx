@@ -63,7 +63,7 @@ const validateAddress: ValidateAddress = async (address) => {
 };
 
 export const Overview = (): JSX.Element => (
-  <Flex alignItems="center" justifyContent="center" w="$480" h="$420">
+  <Flex alignItems="center" justifyContent="center" w="$480" h="$480">
     <AddCoSigners
       validateAddress={validateAddress}
       translations={{
@@ -72,6 +72,7 @@ export const Overview = (): JSX.Element => (
         inputLabel: "Recipient's address or $handle",
         inputError: 'Invalid address',
         addButton: 'Add Co-signer',
+        removeButton: 'Remove',
         backButton: 'Back',
         nextButton: 'Next'
       }}
