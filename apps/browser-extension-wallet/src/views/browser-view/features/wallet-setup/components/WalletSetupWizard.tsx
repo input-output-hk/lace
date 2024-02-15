@@ -227,7 +227,15 @@ export const WalletSetupWizard = ({
       console.error('Error completing wallet creation', error);
       throw new Error(error);
     }
-  }, [createWallet, walletName, mnemonic, password, analytics, setupType, goToMyWallet, moveForward]);
+  }, [createWallet,
+    walletName,
+    mnemonic,
+    password,
+    analytics,
+    setupType,
+    goToMyWallet,
+    moveForward
+  ]);
 
   const handleNamePasswordStepNextButtonClick = (result: { password: string; walletName: string }) => {
     setWalletName(result.walletName);

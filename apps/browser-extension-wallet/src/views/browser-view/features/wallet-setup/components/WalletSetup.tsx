@@ -18,6 +18,8 @@ import { ConfirmationBanner } from '@lace/common';
 import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { WalletSetupMainPage } from './WalletSetupMainPage';
+import { useLocalStorage } from '@hooks';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 const userIdService = getUserIdService();
 
 // This initial step is needed for configure the step that we want to snapshot
