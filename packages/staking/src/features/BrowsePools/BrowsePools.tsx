@@ -9,6 +9,7 @@ import { StateStatus, useOutsideHandles } from '../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
+import { useRestorePoolsSelection } from './hooks';
 import { PortfolioBar } from './PortfolioBar';
 import { StakePoolsGrid } from './StakePoolsGrid/StakePoolsGrid';
 import { StakePoolsList, StakePoolsListEmpty, StakePoolsListProps } from './StakePoolsList';
@@ -45,9 +46,11 @@ export const BrowsePools = () => {
       ? delegationPreferencePersistence?.poolsView || BrowsePoolsView.grid
       : BrowsePoolsView.table
   );
-  const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
-    store.selectedPortfolio.map(({ stakePool }) => stakePool)
-  );
+  const { selectedPortfolioStakePools, viewedStakePool } = useDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+    selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
+    viewedStakePool: store.viewedStakePool,
+  }));
 
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
 
@@ -69,9 +72,21 @@ export const BrowsePools = () => {
       ...delegationPreferencePersistence,
       poolsView,
       searchQuery: searchValue,
+      selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
       sortOptions: sort,
+      viewedStakePoolId: viewedStakePool?.id,
     });
-  }, [delegationPreferencePersistence, searchValue, setDelegationPreferencePersistence, sort, poolsView]);
+  }, [
+    delegationPreferencePersistence,
+    poolsView,
+    searchValue,
+    selectedPortfolioStakePools,
+    setDelegationPreferencePersistence,
+    sort,
+    viewedStakePool?.id,
+  ]);
+
+  useRestorePoolsSelection();
 
   useEffect(() => {
     if (componentRef?.current) {

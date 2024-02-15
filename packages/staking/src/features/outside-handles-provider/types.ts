@@ -44,6 +44,8 @@ export interface DelegationPreferences {
   sortOptions: StakePoolSortOptions;
   searchQuery?: string;
   poolsView: BrowsePoolsView;
+  selectedPoolsIds: string[];
+  viewedStakePoolId?: string;
 }
 
 export interface IBlockchainProvider {

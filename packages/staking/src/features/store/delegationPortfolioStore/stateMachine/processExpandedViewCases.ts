@@ -163,8 +163,8 @@ export const processExpandedViewCases: Handler = (params) =>
           SelectPoolFromList: handler<SelectPoolFromList, StateBrowsePools, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,
-              ...atomicStateMutators.selectPool({
-                stakePool: data,
+              ...atomicStateMutators.selectPools({
+                stakePools: data,
                 state,
               }),
             })
@@ -243,7 +243,7 @@ export const processExpandedViewCases: Handler = (params) =>
           SelectPoolFromDetails: handler<SelectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,
-              ...atomicStateMutators.selectPool({ stakePool: data, state }),
+              ...atomicStateMutators.selectPools({ stakePools: [data], state }),
               ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
               viewedStakePool: undefined,
             })
