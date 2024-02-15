@@ -41,7 +41,9 @@ export const BrowsePools = () => {
     delegationPreferencePersistence?.sortOptions || DEFAULT_SORT_OPTIONS
   );
   const [poolsView, setPoolsView] = useState<BrowsePoolsView>(
-    USE_MULTI_DELEGATION_STAKING_GRID_VIEW ? BrowsePoolsView.grid : BrowsePoolsView.table
+    USE_MULTI_DELEGATION_STAKING_GRID_VIEW
+      ? delegationPreferencePersistence?.poolsView || BrowsePoolsView.grid
+      : BrowsePoolsView.table
   );
   const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
     store.selectedPortfolio.map(({ stakePool }) => stakePool)
@@ -65,10 +67,11 @@ export const BrowsePools = () => {
   useEffect(() => {
     setDelegationPreferencePersistence({
       ...delegationPreferencePersistence,
+      poolsView,
       searchQuery: searchValue,
       sortOptions: sort,
     });
-  }, [delegationPreferencePersistence, searchValue, setDelegationPreferencePersistence, sort]);
+  }, [delegationPreferencePersistence, searchValue, setDelegationPreferencePersistence, sort, poolsView]);
 
   useEffect(() => {
     if (componentRef?.current) {
