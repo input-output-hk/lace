@@ -31,6 +31,9 @@ import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
+import { isScriptAddress } from '@cardano-sdk/wallet';
+import { filter, firstValueFrom } from 'rxjs';
+import { useWalletStore } from '@src/stores';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -73,12 +76,15 @@ export const WalletSetupWizard = ({
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
-  const [isAnalyticsAccepted] = useState(false);
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
+  );
 
   const { createWallet } = useWalletManager();
   const { setStayOnAllDonePage } = useWalletStore();
@@ -163,15 +169,10 @@ export const WalletSetupWizard = ({
     setCurrentStep(walletStep);
   };
 
-  const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
-
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       setStayOnAllDonePage(false);
-      if (isAnalyticsAccepted) {
+      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
         analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
@@ -180,12 +181,13 @@ export const WalletSetupWizard = ({
         }
       }
     },
-    [analytics, isAnalyticsAccepted, setStayOnAllDonePage, walletInstance]
+    [analytics, enhancedAnalyticsStatus, setStayOnAllDonePage, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {
     try {
       setStayOnAllDonePage(true);
+
       const wallet = await createWallet({
         name: walletName,
         mnemonic,
@@ -193,12 +195,6 @@ export const WalletSetupWizard = ({
         chainId: DEFAULT_CHAIN_ID
       });
       setWalletInstance(wallet);
-      setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
-      await analytics.setOptedInForEnhancedAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
 
       wallet.wallet.addresses$.subscribe((addresses) => {
         if (addresses.length === 0) return;
@@ -225,7 +221,6 @@ export const WalletSetupWizard = ({
     mnemonic,
     password,
     setDoesUserAllowAnalytics,
-    isAnalyticsAccepted,
     analytics,
     setupType,
     goToMyWallet,
