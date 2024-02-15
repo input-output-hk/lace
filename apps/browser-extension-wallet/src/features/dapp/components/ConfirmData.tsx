@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -7,20 +7,20 @@ import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './ConfirmData.module.scss';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import { DappInfo } from '@lace/core';
-import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { exposeApi, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { runtime } from 'webextension-polyfill';
 import { DAPP_CHANNELS } from '@src/utils/constants';
-import { UserPromptService } from '@lib/scripts/background/services/dappService';
-import { of } from 'rxjs';
+import type { UserPromptService } from '@lib/scripts/background/services/dappService';
+import { of, take } from 'rxjs';
 import { HexBlob } from '@cardano-sdk/util';
-import { DappDataService } from '@lib/scripts/types';
 import { Skeleton } from 'antd';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
-import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { signingCoordinator } from '@lib/wallet-api-ui';
+import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 
 const INDENT_SPACING = 2;
 const DAPP_TOAST_DURATION = 50;
@@ -40,105 +40,90 @@ const hasJsonStructure = (str: string): boolean => {
 
 export const DappConfirmData = (): React.ReactElement => {
   const {
-    utils: { setNextView }
+    utils: { setNextView },
+    signDataRequest: { request: req, set: setSignDataRequest }
   } = useViewsFlowContext();
-  const { getKeyAgentType } = useWalletStore();
+  const { isHardwareWallet } = useWalletStore();
   const { t } = useTranslation();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const analytics = useAnalyticsContext();
-  const isUsingHardwareWallet = useMemo(
-    () => getKeyAgentType() !== Wallet.KeyManagement.KeyAgentType.InMemory,
-    [getKeyAgentType]
-  );
 
   const [formattedData, setFormattedData] = useState<{
     address: string;
     dataToSign: string;
   }>();
 
-  const cancelTransaction = useCallback(() => {
-    exposeApi<Pick<UserPromptService, 'allowSignData'>>(
-      {
-        api$: of({
-          async allowSignData(): Promise<boolean> {
-            return Promise.reject();
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { allowSignData: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
+  const cancelTransaction = useCallback(async () => {
+    await req.reject('User rejected to sign');
     setTimeout(() => window.close(), DAPP_TOAST_DURATION);
-  }, []);
+  }, [req]);
 
   window.addEventListener('beforeunload', cancelTransaction);
 
   useEffect(() => {
-    const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignDataData'>>(
+    const subscription = signingCoordinator.signDataRequest$.pipe(take(1)).subscribe(async (r) => {
+      setDappInfo(await senderToDappInfo(r.signContext.sender));
+      setSignDataRequest(r);
+    });
+
+    const api = exposeApi<Pick<UserPromptService, 'readyToSignData'>>(
       {
-        baseChannel: DAPP_CHANNELS.dappData,
-        properties: {
-          getSignDataData: RemoteApiPropertyType.MethodReturningPromise
-        }
+        api$: of({
+          async readyToSignData(): Promise<boolean> {
+            return Promise.resolve(true);
+          }
+        }),
+        baseChannel: DAPP_CHANNELS.userPrompt,
+        properties: { readyToSignData: RemoteApiPropertyType.MethodReturningPromise }
       },
       { logger: console, runtime }
     );
 
-    dappDataApi
-      .getSignDataData()
-      .then(({ sign: backgroundData, dappInfo: backgroundDappInfo }) => {
-        const dataFromHex = fromHex(backgroundData.payload);
-        const txDataAddress = backgroundData.addr.toString();
-        const jsonStructureOrHexString = {
-          address: txDataAddress,
-          dataToSign: hasJsonStructure(dataFromHex)
-            ? JSON.stringify(JSON.parse(dataFromHex), undefined, INDENT_SPACING)
-            : dataFromHex
-        };
-        setDappInfo(backgroundDappInfo);
-        setFormattedData(jsonStructureOrHexString);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+      api.shutdown();
+    };
+  }, [setSignDataRequest]);
+
+  useEffect(() => {
+    if (!req) return;
+    const dataFromHex = fromHex(req.signContext.payload || req.blob);
+    const txDataAddress = req.signContext.address || `${req.derivationPath.role}/${req.derivationPath.index}`;
+    const jsonStructureOrHexString = {
+      address: txDataAddress,
+      dataToSign: hasJsonStructure(dataFromHex)
+        ? JSON.stringify(JSON.parse(dataFromHex), undefined, INDENT_SPACING)
+        : dataFromHex
+    };
+    setFormattedData(jsonStructureOrHexString);
+  }, [req]);
 
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
-      HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
-        .then(() => {
-          exposeApi<Pick<UserPromptService, 'allowSignData'>>(
-            {
-              api$: of({
-                async allowSignData(): Promise<boolean> {
-                  return Promise.resolve(true);
-                }
-              }),
-              baseChannel: DAPP_CHANNELS.userPrompt,
-              properties: { allowSignData: RemoteApiPropertyType.MethodReturningPromise }
-            },
-            { logger: console, runtime }
-          );
-        })
-        .catch((error) => {
-          throw error;
-        });
-    } catch {
+      if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
+        throw new Error('Invalid state: expected hw wallet');
+      }
+      await req.sign();
+      redirectToSignSuccess();
+    } catch (error) {
+      console.error('error', error);
+      cancelTransaction();
       redirectToSignFailure();
     }
-  }, [setIsConfirmingTx, redirectToSignFailure, redirectToSignSuccess]);
+
+    setIsConfirmingTx(true);
+  }, [setIsConfirmingTx, redirectToSignFailure, redirectToSignSuccess, cancelTransaction, req]);
 
   const confirmationCallback = useCallback(() => {
     analytics?.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
-    isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
-  }, [isUsingHardwareWallet, signWithHardwareWallet, setNextView, analytics]);
+    isHardwareWallet ? signWithHardwareWallet() : setNextView();
+  }, [isHardwareWallet, signWithHardwareWallet, setNextView, analytics]);
 
   return (
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_DATA])}>

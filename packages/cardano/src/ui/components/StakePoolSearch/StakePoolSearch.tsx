@@ -202,7 +202,7 @@ export const StakePoolSearch = ({
         getPopupContainer={() => document.querySelector('#stakepool-search-bar')}
         placement="bottomLeft"
       >
-        {pools?.map(({ id, name, ticker, logo, saturation, isStakingPool }) => {
+        {pools?.filter(Boolean).map(({ id, name, ticker, logo, saturation, isStakingPool }) => {
           let title = name;
           let subTitle: string | React.ReactElement = ticker || '-';
           if (!name) {

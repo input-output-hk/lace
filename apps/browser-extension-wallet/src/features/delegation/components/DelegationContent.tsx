@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-nested-ternary */
 /* eslint-disable complexity */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import isNumber from 'lodash/isNumber';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
@@ -17,12 +17,7 @@ import { DelegationLayout } from './DelegationLayout';
 
 import { TransitionAcknowledgmentDialog } from '@components/TransitionAcknowledgmentDialog';
 import { useTranslation } from 'react-i18next';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useObservable } from '@lace/common';
 
@@ -41,15 +36,14 @@ const PoolDetailsStepsWithBackBtn = new Set([Sections.DETAIL, Sections.CONFIRMAT
 export const DelegationContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    getKeyAgentType,
+    isInMemoryWallet,
     walletUI: { cardanoCoin },
     blockchainProvider
   } = useWalletStore();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const [searchValue, setSearchValue] = useState<string | undefined>();
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const dialogHiddenByUser = localStorage.getItem(STORAGE_MEMO_ENTRY_NAME) === 'true';
-  const shouldShowAcknowledgmentDialog = !dialogHiddenByUser && !isInMemory;
+  const shouldShowAcknowledgmentDialog = !dialogHiddenByUser && !isInMemoryWallet;
   const [isTransitionAcknowledgmentDialogVisible, setIsTransitionAcknowledgmentDialogVisible] =
     useState(shouldShowAcknowledgmentDialog);
   const toggleisTransitionAcknowledgmentDialog = () =>
@@ -98,12 +92,12 @@ export const DelegationContent = (): React.ReactElement => {
 
   useEffect(() => {
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
-    const isHardwareWalletPopupTransition = !isInMemory && hasPersistedHwStakepool;
+    const isHardwareWalletPopupTransition = !isInMemoryWallet && hasPersistedHwStakepool;
     // `hasPersistedHwStakepool` will get immidiately unset once the HW transition is over.
     if (isHardwareWalletPopupTransition) return;
     if (searchValue?.length !== 0 && searchValue?.length < MIN_CHARS_TO_SEARCH) return;
     fetchStakePools({ searchString: searchValue || '', limit: MAX_ITEMS_TO_SHOW });
-  }, [searchValue, fetchStakePools, isInMemory, blockchainProvider]);
+  }, [searchValue, fetchStakePools, isInMemoryWallet, blockchainProvider]);
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();
@@ -120,11 +114,6 @@ export const DelegationContent = (): React.ReactElement => {
   }, [isDelegating, setStakeConfirmationVisible, openDelagationConfirmation, setIsDrawerVisible]);
 
   const sendAnalytics = () => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_POPUP
-    });
     analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
   };
 

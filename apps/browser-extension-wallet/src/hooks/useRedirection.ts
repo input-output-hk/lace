@@ -8,7 +8,7 @@ interface RouteConfig<P extends GenericParams = never, S extends GenericParams =
   search?: S;
 }
 
-export type RedirectionHandler<R> = (...args: R extends never ? [] : [R]) => void;
+export type RedirectionHandler<R> = (...args: [R] extends [never] ? [] : [R]) => void;
 
 export const useRedirection = <R extends RouteConfig<GenericParams, GenericParams> = never>(
   path: string
@@ -16,7 +16,8 @@ export const useRedirection = <R extends RouteConfig<GenericParams, GenericParam
   const history = useHistory();
 
   return useCallback(
-    (config = {}) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (config = {} as any) => {
       let url = path;
       if (config.params) {
         url = generatePath(url, config.params);

@@ -1,10 +1,17 @@
 /* eslint-disable no-magic-numbers */
 import { POPUP_WINDOW } from '@src/utils/constants';
-import { getRandomIcon } from '@lace/common';
-import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'webextension-polyfill';
+import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
-import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
-import uniqueId from 'lodash/uniqueId';
+import { BackgroundStorage } from '../types';
+import { firstValueFrom } from 'rxjs';
+import {
+  AnyWallet,
+  Bip32WalletAccount,
+  WalletManagerApi,
+  WalletRepositoryApi,
+  WalletType
+} from '@cardano-sdk/web-extension';
+import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
 
@@ -20,90 +27,14 @@ type WindowSize = {
 
 type WindowSizeAndPositionProps = WindowPosition & WindowSize;
 
-export const INITIAL_STORAGE = { MIGRATION_STATE: { state: 'not-loaded' } as MigrationState };
-
-/**
- * Gets the background storage content
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getBackgroundStorage = async (): Promise<BackgroundStorage> =>
-  (await webStorage.local.get('BACKGROUND_STORAGE'))?.BACKGROUND_STORAGE ?? {};
+type WalletManagementServices = {
+  walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  walletManager: WalletManagerApi;
+};
 
 export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStorage['fiatPrices']> => {
   const backgroundStorage = await getBackgroundStorage();
   return backgroundStorage?.fiatPrices;
-};
-
-/**
- * Deletes the specified `keys` from the background storage.
- *
- * If no `options` are passed then **ALL** of it is cleared.
- *
- * @param options Optional. List of keys to either delete or remove from storage
- */
-type ClearBackgroundStorageOptions =
-  | {
-      keys: BackgroundStorageKeys[];
-      except?: never;
-    }
-  | {
-      keys?: never;
-      except: BackgroundStorageKeys[];
-    };
-export const clearBackgroundStorage = async (options?: ClearBackgroundStorageOptions): Promise<void> => {
-  if (!options) {
-    await webStorage.local.remove('BACKGROUND_STORAGE');
-    return;
-  }
-  const backgroundStorage = await getBackgroundStorage();
-  for (const key in backgroundStorage) {
-    if (options.keys && options.keys.includes(key as BackgroundStorageKeys)) {
-      delete backgroundStorage[key as BackgroundStorageKeys];
-    }
-    if (options.except && !options.except.includes(key as BackgroundStorageKeys)) {
-      delete backgroundStorage[key as BackgroundStorageKeys];
-    }
-  }
-  // TODO make sure to remove other properties from webStorage (e.g. "lace-activate" seems to remain after clearing)
-  await webStorage.local.set({ BACKGROUND_STORAGE: backgroundStorage ?? {} });
-};
-
-/**
- * Adds content to the background storage. Does not replace it.
- */
-export const setBackgroundStorage = async (data: BackgroundStorage): Promise<void> => {
-  const backgroundStorage = await getBackgroundStorage();
-
-  await webStorage.local.set({ BACKGROUND_STORAGE: { ...backgroundStorage, ...data } });
-};
-
-/**
- * Initialize MIGRATION_STATE
- */
-export const initMigrationState = async (): Promise<void> => {
-  await webStorage.local.set(INITIAL_STORAGE);
-};
-
-export const getLastActiveTab: (url?: string) => Promise<Tabs.Tab> = async (url?: string) =>
-  await (
-    await tabs.query({ currentWindow: true, active: true, url })
-  )[0];
-
-/**
- * getDappInfoFromLastActiveTab
- * @returns {Promise<Wallet.DappInfo>}
- */
-export const getDappInfoFromLastActiveTab: (url?: string) => Promise<Wallet.DappInfo> = async (url?: string) => {
-  const lastActiveTab = await getLastActiveTab(url);
-  if (!lastActiveTab) throw new Error('could not find DApp');
-  if (url && url !== lastActiveTab.url) {
-    throw new Error('unable to match dApp URL');
-  }
-  return {
-    logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),
-    name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
-    url: url ? new URL(url).origin : lastActiveTab.url.replace(/\/$/, '')
-  };
 };
 
 const calculatePopupWindowPositionAndSize = (
@@ -167,22 +98,44 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
     tabs.onUpdated.addListener(listener);
   });
 
-const keyAgentIsHardwareWallet = (keyAgentsByChain?: Wallet.KeyAgentsByChain): boolean => {
-  if (!keyAgentsByChain) return false;
-  return Object.values(keyAgentsByChain).some(
-    ({ keyAgentData }) => keyAgentData.__typename !== Wallet.KeyManagement.KeyAgentType.InMemory
-  );
+export const getActiveWallet = async ({
+  walletManager,
+  walletRepository
+}: WalletManagementServices): Promise<
+  | {
+      wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+      account?: Bip32WalletAccount<Wallet.AccountMetadata>;
+    }
+  | undefined
+> => {
+  const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
+  if (!activeWallet) return;
+  const wallets = await firstValueFrom(walletRepository.wallets$);
+  // eslint-disable-next-line consistent-return
+  const wallet = wallets.find(({ walletId }) => walletId === activeWallet.walletId);
+  if (!wallet) return;
+  const account =
+    wallet.type === WalletType.Script
+      ? undefined
+      : wallet.accounts.find((acc) => activeWallet.accountIndex === acc.accountIndex);
+  // eslint-disable-next-line consistent-return
+  return { wallet, account };
 };
 
-export const ensureUiIsOpenAndLoaded = async (url?: string, checkKeyAgent = true): Promise<Tabs.Tab> => {
-  const bgStorage = await getBackgroundStorage();
-
-  const keyAgentTypeIsHardwareWallet = checkKeyAgent
-    ? keyAgentIsHardwareWallet(bgStorage?.keyAgentsByChain)
+export const ensureUiIsOpenAndLoaded = async (
+  services: WalletManagementServices,
+  url?: string,
+  checkKeyAgent = true
+): Promise<Tabs.Tab> => {
+  const isHardwareWallet = checkKeyAgent
+    ? await (async () => {
+        const active = await getActiveWallet(services);
+        return active?.wallet.type === WalletType.Ledger || active?.wallet.type === WalletType.Trezor;
+      })()
     : undefined;
 
-  const windowType: Windows.CreateType = keyAgentTypeIsHardwareWallet ? 'normal' : 'popup';
-  if (keyAgentTypeIsHardwareWallet) {
+  const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
+  if (isHardwareWallet) {
     const openTabs = await tabs.query({ title: 'Lace' });
     // Close all previously opened lace windows
     for (const tab of openTabs) {

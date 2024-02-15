@@ -1,14 +1,13 @@
 import { WalletLocked } from '@src/types';
 import {
-  saveValueInLocalStorage,
   deleteFromLocalStorage,
   getValueFromLocalStorage,
-  bufferReviver
+  bufferReviver,
+  saveValueInLocalStorage
 } from '@src/utils/local-storage';
 import { LockSlice, SliceCreator, WalletInfoSlice, ZustandHandlers } from '../types';
 
-const isWalletLocked = ({ get }: ZustandHandlers<LockSlice & WalletInfoSlice>): boolean =>
-  !get().keyAgentData && !!get().walletLock;
+const isWalletLocked = ({ get }: ZustandHandlers<LockSlice & WalletInfoSlice>): boolean => !!get().walletLock;
 
 /**
  * Saves wallet in browser storage and global store
@@ -30,8 +29,8 @@ export const lockSlice: SliceCreator<LockSlice & WalletInfoSlice, LockSlice, voi
   const walletLock = getValueFromLocalStorage('lock', undefined, bufferReviver);
   return {
     isWalletLocked: () => isWalletLocked({ get }),
-    walletLock,
     setWalletLock: (lock: WalletLocked) => setWalletLock(lock, { set }),
+    walletLock,
     resetWalletLock: () => resetWalletLock(undefined, { set })
   };
 };

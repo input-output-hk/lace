@@ -7,9 +7,6 @@ import {
 } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
   PostHogAction,
   postHogOnboardingActions,
   PostHogProperties
@@ -28,13 +25,6 @@ import styles from './WalletSetup.module.scss';
 import { WalletSetupWizard } from './WalletSetupWizard';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 const userIdService = getUserIdService();
-
-const { WalletSetup: Events } = AnalyticsEventNames;
-
-type SetupAnalyticsCategories =
-  | MatomoEventCategories.WALLET_CREATE
-  | MatomoEventCategories.WALLET_RESTORE
-  | MatomoEventCategories.HW_CONNECT;
 
 // This initial step is needed for configure the step that we want to snapshot
 export interface WalletSetupProps {
@@ -120,27 +110,12 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
     analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
   };
 
-  const sendAnalytics = async (args: {
-    category: SetupAnalyticsCategories;
-    eventName: string;
-    value?: number;
-    postHogAction?: PostHogAction;
-    postHogProperties?: PostHogProperties;
-  }) => {
-    await analytics.sendEventToMatomo({
-      action: MatomoEventActions.CLICK_EVENT,
-      category: args.category,
-      name: args.eventName,
-      value: args?.value || 1
-    });
-    if (args?.postHogAction) {
-      await analytics.sendEventToPostHog(args.postHogAction, args?.postHogProperties);
-    }
+  const sendAnalytics = async (args: { postHogAction: PostHogAction; postHogProperties?: PostHogProperties }) => {
+    await analytics.sendEventToPostHog(args.postHogAction, args?.postHogProperties);
   };
 
-  const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOnboardingAnalyticsEvent =
-    (eventCategory) => async (event, postHogAction, value, postHogProperties) =>
-      await sendAnalytics({ category: eventCategory, eventName: event, value, postHogAction, postHogProperties });
+  const sendAnalyticsHandler: SendOnboardingAnalyticsEvent = async (postHogAction, postHogProperties) =>
+    await sendAnalytics({ postHogAction, postHogProperties });
 
   const handleRestoreWallet = () => {
     setIsConfirmRestoreOpen(true);
@@ -149,8 +124,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
 
   const handleCreateNewWallet = () => {
     sendAnalytics({
-      category: MatomoEventCategories.WALLET_CREATE,
-      eventName: Events.CREATE_WALLET_START,
       postHogAction: postHogOnboardingActions.create.SETUP_OPTION_CLICK
     });
     history.push(walletRoutePaths.setup.create);
@@ -164,8 +137,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
   const handleConfirmRestoreWarning = () => {
     setIsConfirmRestoreOpen(false);
     sendAnalytics({
-      category: MatomoEventCategories.WALLET_RESTORE,
-      eventName: Events.RESTORE_WALLET_START,
       postHogAction: postHogOnboardingActions.create.RESTORE_MULTI_ADDR_OK_CLICK
     });
     history.push(walletRoutePaths.setup.restore);
@@ -216,10 +187,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
                 onCancel={() => setIsDappConnectorWarningOpen(false)}
                 onConfirm={() => {
                   setIsDappConnectorWarningOpen(false);
-                  sendAnalytics({
-                    category: MatomoEventCategories.HW_CONNECT,
-                    eventName: Events.CONNECT_HW_START
-                  });
                   history.push(walletRoutePaths.setup.hardware);
                 }}
               />
@@ -229,7 +196,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
             <WalletSetupWizard
               setupType={SetupType.CREATE}
               onCancel={cancelWalletFlow}
-              sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_CREATE)}
+              sendAnalytics={sendAnalyticsHandler}
               initialStep={initialStep}
             />
           </Route>
@@ -237,7 +204,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
             <WalletSetupWizard
               setupType={isForgotPasswordFlow ? SetupType.FORGOT_PASSWORD : SetupType.RESTORE}
               onCancel={cancelWalletFlow}
-              sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_RESTORE)}
+              sendAnalytics={sendAnalyticsHandler}
               initialStep={initialStep}
             />
           </Route>
@@ -245,7 +212,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
             <HardwareWalletFlow
               onCancel={cancelWalletFlow}
               onAppReload={() => location.reload()}
-              sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.HW_CONNECT)}
+              sendAnalytics={sendAnalyticsHandler}
             />
           </Route>
         </Switch>

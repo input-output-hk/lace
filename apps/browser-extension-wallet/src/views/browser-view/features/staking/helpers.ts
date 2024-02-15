@@ -2,6 +2,7 @@
 import { Wallet } from '@lace/cardano';
 import * as HardwareLedger from '../../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import * as HardwareTrezor from '../../../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export enum LedgerMultidelegationMinAppVersion {
   MAJOR = 6,
@@ -16,10 +17,10 @@ export enum TrezorMultidelegationFirmwareMinVersion {
 }
 
 export const isMultidelegationSupportedByDevice = async (
-  keyAgentType: Exclude<Wallet.KeyManagement.KeyAgentType, Wallet.KeyManagement.KeyAgentType.InMemory>
+  walletType: Exclude<WalletType, WalletType.InMemory | WalletType.Script>
 ): Promise<boolean> => {
-  switch (keyAgentType) {
-    case Wallet.KeyManagement.KeyAgentType.Ledger: {
+  switch (walletType) {
+    case WalletType.Ledger: {
       const ledgerInfo = await HardwareLedger.LedgerKeyAgent.getAppVersion(Wallet.KeyManagement.CommunicationType.Web);
       return (
         ledgerInfo.version.major >= LedgerMultidelegationMinAppVersion.MAJOR &&
@@ -27,7 +28,7 @@ export const isMultidelegationSupportedByDevice = async (
         ledgerInfo.version.patch >= LedgerMultidelegationMinAppVersion.PATCH
       );
     }
-    case Wallet.KeyManagement.KeyAgentType.Trezor: {
+    case WalletType.Trezor: {
       const trezorInfo = await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(
         Wallet.KeyManagement.CommunicationType.Web
       );
