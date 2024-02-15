@@ -1080,8 +1080,14 @@
     },
     "stakePoolTableBrowser": {
       "tableHeader": {
-        "ticker": "Ticker",
-        "cost": "Cost",
+        "ticker": {
+          "title": "Ticker",
+          "tooltip": "Refers to the unique identifier or name of a staking pool"
+        },
+        "cost": {
+          "title": "Cost",
+          "tooltip": "The cost is not directly paid by the delegator; they are deducted from a pool's rewards, consisting of a fixed cost and a variable cost, which fund the pool's operational costs"
+        },
         "ros": {
           "title": "ROS",
           "tooltip": "Estimated 'Return On Stake' based on previous pool performance"
@@ -1102,7 +1108,10 @@
           "title": "Pledge",
           "tooltip": "An amount of self‐bonded assets intended to remain staked to the pool for as long as it operates"
         },
-        "liveStake": "Live Stake"
+        "liveStake": {
+          "title": "Live Stake",
+          "tooltip": "Refers to the total amount of a cryptocurrency that is currently being staked in a particular staking pool"
+        }
       }
     },
     "stakingConfirmationInfo": {

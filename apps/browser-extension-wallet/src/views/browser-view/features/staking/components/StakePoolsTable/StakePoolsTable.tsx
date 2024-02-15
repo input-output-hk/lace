@@ -62,21 +62,24 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   } = useWalletStore();
 
   const tableHeaderTranslations: TranslationsFor<MetricType> = {
-    ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker'),
+    ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.title'),
     apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.title'),
-    cost: t('cardano.stakePoolTableBrowser.tableHeader.cost'),
+    cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.title'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.title'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.title'),
     blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks.title'),
     pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.title'),
-    liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake')
+    liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake.title')
   };
   const tableHeaderTooltipsTranslations: Partial<TranslationsFor<MetricType>> = {
+    ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.tooltip'),
     apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.tooltip'),
+    cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.tooltip'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.tooltip'),
     blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks.tooltip'),
-    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.tooltip')
+    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.tooltip'),
+    liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake.tooltip')
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
