@@ -81,7 +81,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const [enhancedAnalyticsStatus] = useLocalStorage(
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
@@ -169,36 +169,25 @@ export const WalletSetupWizard = ({
     setCurrentStep(walletStep);
   };
 
-  const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
-
-  const goToMyWallet = useCallback(
-    (wallet?: CreateWalletData) => {
-      setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
-    },
-    [analytics, setWallet, walletInstance]
-  );
-
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       setStayOnAllDonePage(false);
-      // if (isAnalyticsAccepted) {
-      analytics.sendAliasEvent();
-      const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
-      const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-      if (hdWalletDiscovered) {
-        analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
+        analytics.sendAliasEvent();
+        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
+        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+        if (hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        }
       }
-      // }
     },
-    [analytics, setStayOnAllDonePage, walletInstance]
+    [analytics, enhancedAnalyticsStatus, setStayOnAllDonePage, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {
     try {
       setStayOnAllDonePage(true);
+
       const wallet = await createWallet({
         name: walletName,
         mnemonic,
