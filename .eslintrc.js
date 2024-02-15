@@ -21,6 +21,7 @@ module.exports = {
     'unicorn/prefer-node-protocol': 'off',
     'unicorn/no-array-for-each': 'off',
     'unicorn/prefer-module': 'off',
+    'unicorn/no-array-reduce': 'off',
     'promise/always-return': 'off',
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': ['error'],

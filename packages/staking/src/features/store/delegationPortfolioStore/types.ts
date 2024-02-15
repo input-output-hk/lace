@@ -30,7 +30,7 @@ export type StakePoolDetails = {
   id: string;
   logo?: string;
   margin: number | string;
-  name: string;
+  name?: string;
   owners: string[];
   saturation?: string;
   liveStake: { number: string; unit?: string };

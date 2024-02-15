@@ -15,7 +15,6 @@ describe('Testing lockWalletSelector', () => {
     });
 
     expect(result.current).toHaveProperty('isWalletLocked');
-    expect(result.current).toHaveProperty('setWalletLock');
     expect(result.current).toHaveProperty('walletLock');
   });
 });

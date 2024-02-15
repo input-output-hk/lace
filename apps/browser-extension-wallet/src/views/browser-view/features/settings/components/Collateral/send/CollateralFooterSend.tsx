@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 import { Button } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import styles from '../Collateral.module.scss';
 import { useTranslation } from 'react-i18next';
-import { useWalletManager } from '@hooks';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { Sections } from '../types';
 import { SectionConfig } from '@src/views/browser-view/stores';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 interface CollateralFooterProps {
   onClose: () => void;
   onClaim: () => void;
-  keyAgentType: string;
+  walletType: string;
   setIsPasswordValid: (isPasswordValid: boolean) => void;
   popupView: boolean;
   password: string;
@@ -26,7 +26,7 @@ interface CollateralFooterProps {
 export const CollateralFooterSend = ({
   onClose,
   onClaim,
-  keyAgentType,
+  walletType,
   setIsPasswordValid,
   popupView,
   password,
@@ -37,13 +37,10 @@ export const CollateralFooterSend = ({
   setCurrentStep
 }: CollateralFooterProps): JSX.Element => {
   const { t } = useTranslation();
-  const { executeWithPassword } = useWalletManager();
   const backgroundServices = useBackgroundServiceAPIContext();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
+  const isInMemory = walletType === WalletType.InMemory;
 
-  const submitTx = async () => {
-    await (isInMemory ? executeWithPassword(password, submitCollateralTx) : submitCollateralTx());
-  };
+  const submitTx = async () => withSignTxConfirmation(submitCollateralTx, password);
 
   const handleClick = async () => {
     onClaim();
@@ -75,10 +72,10 @@ export const CollateralFooterSend = ({
       if (popupView) {
         return t('browserView.settings.wallet.collateral.continueInAdvancedView');
       }
-      return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: keyAgentType });
+      return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: walletType });
     }
     return t('browserView.settings.wallet.collateral.close');
-  }, [hasEnoughAda, isInMemory, keyAgentType, popupView, t]);
+  }, [hasEnoughAda, isInMemory, walletType, popupView, t]);
 
   // password is not required for hw flow
   const isPasswordMissing = isInMemory && !password;

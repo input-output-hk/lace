@@ -13,12 +13,7 @@ import styles from './AddressDetailDrawer.module.scss';
 import Copy from '@src/assets/icons/copy.component.svg';
 import Icon from '@ant-design/icons';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import { Form } from 'antd';
 
@@ -114,14 +109,6 @@ export const AddressDetailDrawer = ({
     onCancelClick();
   };
 
-  const sendAnalytics = (name: string) => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.ADDRESS_BOOK,
-      action: MatomoEventActions.CLICK_EVENT,
-      name
-    });
-  };
-
   const editAddressFormTranslations = {
     walletName: t('core.addressForm.name'),
     address: t('core.editAddressForm.address')
@@ -163,11 +150,6 @@ export const AddressDetailDrawer = ({
                 <Button
                   data-testid="address-form-details-btn-edit"
                   onClick={() => {
-                    sendAnalytics(
-                      popupView
-                        ? AnalyticsEventNames.AddressBook.EDIT_ADDRESS_POPUP
-                        : AnalyticsEventNames.AddressBook.EDIT_ADDRESS_BROWSER
-                    );
                     analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordEditClick);
                     setCurrentStepConfig(stepsConfiguration[currentStepConfig.nextSection]);
                   }}
@@ -179,11 +161,6 @@ export const AddressDetailDrawer = ({
                 <Button
                   data-testid="address-form-details-btn-delete"
                   onClick={() => {
-                    sendAnalytics(
-                      popupView
-                        ? AnalyticsEventNames.AddressBook.DELETE_ADDRESS_PROMPT_POPUP
-                        : AnalyticsEventNames.AddressBook.DELETE_ADDRESS_PROMPT_BROWSER
-                    );
                     analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordDeleteClick);
                     setSelectedId(initialValues.id);
                   }}
@@ -261,21 +238,11 @@ export const AddressDetailDrawer = ({
       <AddressActionsModal
         action={ACTIONS.DELETE}
         onCancel={() => {
-          sendAnalytics(
-            popupView
-              ? AnalyticsEventNames.AddressBook.CANCEL_DELETE_ADDRESS_POPUP
-              : AnalyticsEventNames.AddressBook.CANCEL_DELETE_ADDRESS_BROWSER
-          );
           analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordHoldUpCancelClick);
           // eslint-disable-next-line unicorn/no-null
           setSelectedId(null);
         }}
         onConfirm={() => {
-          sendAnalytics(
-            popupView
-              ? AnalyticsEventNames.AddressBook.CONFIRM_DELETE_ADDRESS_POPUP
-              : AnalyticsEventNames.AddressBook.CONFIRM_DELETE_ADDRESS_BROWSER
-          );
           analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordHoldUpDeleteAddressClick);
           onDelete(selectedId);
           // eslint-disable-next-line unicorn/no-null

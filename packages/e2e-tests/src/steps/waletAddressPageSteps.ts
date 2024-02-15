@@ -21,6 +21,7 @@ Then(
 );
 
 When(/^I click "Copy" button on "Receive" page for default wallet address$/, async () => {
+  await browser.pause(500);
   await walletAddressPage.addressCard.scrollIntoView();
   await walletAddressPage.addressCard.moveTo();
   await walletAddressPage.copyButton.click();

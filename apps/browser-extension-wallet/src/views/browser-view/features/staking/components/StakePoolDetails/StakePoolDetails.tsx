@@ -49,8 +49,8 @@ export const StakePoolDetails = ({
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetailFooter popupView={popupView} canDelegate={canDelegate} onStake={onStake} />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter popupView={popupView} />,
-      [Sections.SIGN]: <SignConfirmationFooter popupView={popupView} />,
-      [Sections.SUCCESS_TX]: <TransactionSuccessFooter popupView={popupView} />,
+      [Sections.SIGN]: <SignConfirmationFooter />,
+      [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,
       [Sections.FAIL_TX]: <TransactionFailFooter popupView={popupView} />
     }),
     [onStake, canDelegate, popupView]

@@ -5,25 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
-export const AddressBookLink = ({ isPopup }: { isPopup: boolean }): React.ReactElement => {
+export const AddressBookLink = (): React.ReactElement => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
 
   const handleOnClicked = () => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.ADDRESS_BOOK,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: isPopup
-        ? AnalyticsEventNames.AddressBook.VIEW_ADDRESSES_POPUP
-        : AnalyticsEventNames.AddressBook.VIEW_ADDRESSES_BROWSER
-    });
     analytics.sendEventToPostHog(PostHogAction.UserWalletProfileAddressBookClick);
   };
 

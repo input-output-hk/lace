@@ -1,6 +1,5 @@
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import webTester from '../actor/webTester';
 import { expect } from 'chai';
 import { getNumberOfOpenedTabs, switchToLastWindow, waitUntilExpectedNumberOfHandles } from '../utils/window';
 import testContext from '../utils/testContext';
@@ -13,14 +12,6 @@ class CommonAssert {
     Logger.log(`Checking clipboard to contain: ${text}`);
     const clipboardContent = await clipboard.read();
     expect(clipboardContent).to.contain(text);
-  }
-
-  async assertSeeElementWithText(expectedText: string) {
-    await webTester.waitUntilSeeElementContainingText(expectedText);
-  }
-
-  async assertDontSeeElementWithText(unexpectedText: string, timeout = 3000) {
-    await webTester.dontSeeElement(`//*[contains(text(), "${unexpectedText}")]`, timeout);
   }
 
   async assertSeeTabWithUrl(urlPart: string) {

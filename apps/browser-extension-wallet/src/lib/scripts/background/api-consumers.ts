@@ -9,7 +9,7 @@ import {
   WalletApi,
   WalletApiMethodNames
 } from '@cardano-sdk/dapp-connector';
-import { Shutdown, GetErrorPrototype } from '@cardano-sdk/util';
+import { Shutdown } from '@cardano-sdk/util';
 import {
   consumeRemoteApi,
   MessengerDependencies,
@@ -36,9 +36,6 @@ const authenticatorChannel = (walletName: string) => `authenticator-${walletName
 const walletApiChannel = (walletName: string) => `wallet-api-${walletName}`;
 
 const cip30errorTypes = [ApiError, DataSignError, PaginateError, TxSendError, TxSignError];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getErrorPrototype: GetErrorPrototype = (err: any) =>
-  cip30errorTypes.find((ErrorType) => ErrorType.prototype.name === err.name)?.prototype || Error.prototype;
 
 // copied from sdk
 export const consumeRemoteAuthenticatorApi = (
@@ -63,7 +60,7 @@ export const consumeRemoteWalletApi = (
   consumeRemoteApi(
     {
       baseChannel: walletApiChannel(walletName),
-      getErrorPrototype,
+      errorTypes: cip30errorTypes,
       properties: fromPairs(
         WalletApiMethodNames.map((prop) => [prop, RemoteApiPropertyType.MethodReturningPromise])
       ) as RemoteApiProperties<WalletApi>

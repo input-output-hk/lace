@@ -3,6 +3,7 @@ import { AppMode } from '@src/utils/constants';
 import { MainLoader } from '@components/MainLoader';
 import { CorruptedData } from './CorruptedData';
 import { DataCheckDispatcher, useDataCheck } from '@hooks/useDataCheck';
+import { walletRepository } from '@lib/wallet-api-ui';
 
 const isFeatureEnabled = process.env.USE_DATA_CHECK === 'true';
 
@@ -21,7 +22,7 @@ export const DataCheckContainer = ({
 
   useEffect(() => {
     // Run only on mount
-    if (isFeatureEnabled) performDataCheck();
+    if (isFeatureEnabled) performDataCheck(walletRepository);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

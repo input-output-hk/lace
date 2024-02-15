@@ -33,6 +33,9 @@ const convertAssetsToBigInt = (
   return assetMap;
 };
 
+/**
+ * @deprecated use TxBuilder methods instead
+ */
 export const buildTransactionProps = (props: {
   outputsMap: OutputsMap;
   metadata?: string;
@@ -40,7 +43,6 @@ export const buildTransactionProps = (props: {
 }): InitializeTxProps => {
   const txSet = new Set<Cardano.TxOut & { handleResolution?: HandleResolution }>();
   for (const output of props.outputsMap.values()) {
-    // filter outputs that are missing fields
     if (output?.address && output?.value?.coins) {
       txSet.add({
         address: output.address,
@@ -48,12 +50,14 @@ export const buildTransactionProps = (props: {
           coins: BigInt(output.value.coins),
           ...(output?.value?.assets && { assets: convertAssetsToBigInt(output.value.assets, props.assetsInfo) })
         },
-        handleResolution: {
-          handle: output.handle,
-          cardanoAddress: output.address,
-          hasDatum: !!output.datum,
-          policyId: ADA_HANDLE_POLICY_ID
-        }
+        handleResolution: output.handle
+          ? {
+              handle: output.handle,
+              cardanoAddress: output.address,
+              hasDatum: !!output.datum,
+              policyId: ADA_HANDLE_POLICY_ID
+            }
+          : undefined
       });
     }
   }

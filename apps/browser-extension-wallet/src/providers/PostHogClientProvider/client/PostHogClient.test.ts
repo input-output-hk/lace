@@ -1,17 +1,17 @@
 import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
-import { UserIdService } from '@lib/scripts/types';
+import { UserId } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientProvider/client/config';
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
-const mockUserTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
+const mockUserId$ = new ReplaySubject<UserId>();
 
 jest.mock('posthog-js');
 
@@ -19,9 +19,9 @@ describe('PostHogClient', () => {
   const publicPosthogHost = 'test';
   const chain = Wallet.Cardano.ChainIds.Preprod;
   const userId = 'userId';
-  const mockUserIdService: UserIdService = {
+  const mockUserIdService = {
     ...userIdServiceMock,
-    userTrackingType$: mockUserTrackingType$,
+    userId$: mockUserId$,
     getUserId: jest.fn().mockImplementation(() => Promise.resolve(userId))
   };
 
@@ -196,7 +196,10 @@ describe('PostHogClient', () => {
       ExtensionViews.Extended,
       publicPosthogHost
     );
-    mockUserIdService.userTrackingType$.next(UserTrackingType.Enhanced);
+    mockUserIdService.userId$.next({
+      type: UserTrackingType.Enhanced,
+      id: userId
+    });
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -212,10 +215,13 @@ describe('PostHogClient', () => {
 
   it('should return user_tracking_type basic after calling twice', async () => {
     const event = PostHogAction.OnboardingCreateClick;
-    const tracking = new BehaviorSubject(UserTrackingType.Enhanced);
+    const tracking = new BehaviorSubject<UserId>({
+      type: UserTrackingType.Enhanced,
+      id: userId
+    });
     const client = new PostHogClient(
       chain,
-      { ...mockUserIdService, userTrackingType$: tracking },
+      { ...mockUserIdService, userId$: tracking },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
@@ -231,7 +237,10 @@ describe('PostHogClient', () => {
         }
       })
     );
-    tracking.next(UserTrackingType.Basic);
+    tracking.next({
+      type: UserTrackingType.Basic,
+      id: userId
+    });
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,

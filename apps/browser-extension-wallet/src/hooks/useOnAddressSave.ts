@@ -1,11 +1,6 @@
 import { AddressBookSchema } from '@lib/storage';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import {
-  AnalyticsEventNames,
-  MatomoEventActions,
-  MatomoEventCategories,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getAddressToSave } from '@src/utils/validators';
 import AddIcon from '@assets/icons/add.component.svg';
 import EditIcon from '@assets/icons/edit.component.svg';
@@ -31,12 +26,6 @@ export const useOnAddressSave = (): useOnAddressSaveInterface => {
     address: AddressBookSchema | Omit<AddressBookSchema, 'id' | 'network'> | Omit<AddressBookSchema, 'id'>,
     addressToEdit: AddressBookSchema | Omit<AddressBookSchema, 'id' | 'network'>
   ) => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.ADDRESS_BOOK,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_BROWSER
-    });
-
     const addressToSave = await getAddressToSave({ address, handleResolver });
 
     if ('id' in addressToEdit) {

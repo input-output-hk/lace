@@ -1,4 +1,4 @@
-import { TokenSelectionPage } from '../../elements/newTransaction/tokenSelectionPage';
+import TokenSelectionPage from '../../elements/newTransaction/tokenSelectionPage';
 import webTester from '../../actor/webTester';
 import { TokenSearchResult } from '../../elements/newTransaction/tokenSearchResult';
 import { expect } from 'chai';
@@ -18,65 +18,54 @@ class TransactionAssetSelectionAssert {
   }
 
   async assertSpecificAssetSelected(shouldBeSelected: boolean, assetType: string, index: number) {
-    const tokenSelectionPage = new TokenSelectionPage();
     if (assetType === 'Tokens') {
-      await $(tokenSelectionPage.grayedOutTokenIcon(index).toJSLocator()).waitForDisplayed({
+      await TokenSelectionPage.grayedOutTokenIcon(index).waitForDisplayed({
         reverse: !shouldBeSelected
       });
-      await $(tokenSelectionPage.checkmarkInSelectedToken(index).toJSLocator()).waitForDisplayed({
+      await TokenSelectionPage.checkmarkInSelectedToken(index).waitForDisplayed({
         reverse: !shouldBeSelected
       });
     } else {
-      await (
-        await tokenSelectionPage.grayedOutNFT(index)
-      ).waitForDisplayed({
+      await TokenSelectionPage.grayedOutNFT(index).waitForDisplayed({
         reverse: !shouldBeSelected
       });
-      await (
-        await tokenSelectionPage.checkmarkInSelectedNFT(index)
-      ).waitForDisplayed({
+      await TokenSelectionPage.checkmarkInSelectedNFT(index).waitForDisplayed({
         reverse: !shouldBeSelected
       });
     }
   }
 
-  async assertSelectedAssetsCounter(isVisible: boolean, amount: number) {
-    const tokenSelectionPage = new TokenSelectionPage();
-    if (isVisible) {
-      await webTester.seeWebElement(tokenSelectionPage.assetsCounter());
-      const counterValue = Number(await webTester.getTextValueFromElement(tokenSelectionPage.assetsCounter()));
+  async assertSelectedAssetsCounter(shouldBeDisplayed: boolean, amount: number) {
+    await TokenSelectionPage.assetsCounter.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      const counterValue = Number(await TokenSelectionPage.assetsCounter.getText());
       expect(Number(amount)).to.equal(Number(counterValue));
-    } else {
-      await webTester.dontSeeWebElement(tokenSelectionPage.assetsCounter());
     }
   }
 
   async assertSeeAllAssetsUsedMessage(shouldSee: boolean) {
-    const tokenSelectionPage = new TokenSelectionPage();
-    await tokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
-    await tokenSelectionPage.neutralFaceIcon.waitForDisplayed({ reverse: !shouldSee });
+    await TokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
+    await TokenSelectionPage.neutralFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(
+      expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(
         await t('package.core.assetSelectorOverlay.usedAllAssets')
       );
     }
   }
 
   async assertSeeNoMatchingResultsMessage(shouldSee: boolean) {
-    const tokenSelectionPage = new TokenSelectionPage();
-    await tokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
-    await tokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
+    await TokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
+    await TokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(
+      expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(
         await t('package.core.assetSelectorOverlay.noMatchingResult')
       );
     }
   }
 
   async assertSeeNoAssetsAvailableMessage(assetType: 'tokens' | 'nfts', shouldSee: boolean) {
-    const tokenSelectionPage = new TokenSelectionPage();
-    await tokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
-    await tokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
+    await TokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
+    await TokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       const messageForTokens = `${await t('package.core.assetSelectorOverlay.youDonthaveAnyTokens')}\n${await t(
         'package.core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted'
@@ -85,8 +74,20 @@ class TransactionAssetSelectionAssert {
         'package.core.assetSelectorOverlay.addFundsToStartYourWeb3Journey.'
       )}`;
       const expectedMessage = assetType === 'tokens' ? messageForTokens : messageForNFTs;
-      expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(expectedMessage);
+      expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(expectedMessage);
     }
+  }
+
+  async assertSeeTokenSelectionPageButtons() {
+    await TokenSelectionPage.tokensButton.waitForDisplayed();
+    await TokenSelectionPage.nftsButton.waitForDisplayed();
+    await TokenSelectionPage.selectMultipleButton.waitForDisplayed();
+
+    expect(await TokenSelectionPage.tokensButton.getText()).to.equal(await t('browserView.sideMenu.links.tokens'));
+    expect(await TokenSelectionPage.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
+    expect(await TokenSelectionPage.selectMultipleButton.getText()).to.equal(
+      await t('multipleSelection.selectMultiple')
+    );
   }
 }
 

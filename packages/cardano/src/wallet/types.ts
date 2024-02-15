@@ -1,10 +1,10 @@
 import { Cardano, Paginated } from '@cardano-sdk/core';
 import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
-import * as KeyManagement from '../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export type DeviceConnection = LedgerKeyAgent['deviceConnection'] | boolean;
 
-export type HardwareWallets = Exclude<KeyManagement.KeyAgentType, KeyManagement.KeyAgentType.InMemory>;
+export type HardwareWallets = WalletType.Trezor | WalletType.Ledger;
 
 export type StakePoolSearchResults = Paginated<Cardano.StakePool>;
 

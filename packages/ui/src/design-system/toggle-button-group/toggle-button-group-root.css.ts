@@ -2,7 +2,6 @@ import { style, sx } from '../../design-tokens';
 
 export const root = style([
   sx({
-    height: '$40',
     backgroundColor: '$toggle_button_group_bgColor',
     borderRadius: '$medium',
     padding: '$8',

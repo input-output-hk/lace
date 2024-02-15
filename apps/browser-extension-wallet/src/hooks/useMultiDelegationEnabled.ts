@@ -1,19 +1,18 @@
-import { Wallet } from '@lace/cardano';
+import { WalletType } from '@cardano-sdk/web-extension';
 import { useWalletStore } from '@src/stores';
 import { useMemo } from 'react';
 
 export const useMultiDelegationEnabled = (): boolean => {
-  const { getKeyAgentType } = useWalletStore();
+  const { walletType } = useWalletStore();
 
   return useMemo(() => {
-    const keyAgentType = getKeyAgentType();
-    switch (keyAgentType) {
-      case Wallet.KeyManagement.KeyAgentType.Ledger:
+    switch (walletType) {
+      case WalletType.Ledger:
         return process.env.USE_MULTI_DELEGATION_STAKING_LEDGER === 'true';
-      case Wallet.KeyManagement.KeyAgentType.Trezor:
+      case WalletType.Trezor:
         return process.env.USE_MULTI_DELEGATION_STAKING_TREZOR === 'true';
       default:
         return true;
     }
-  }, [getKeyAgentType]);
+  }, [walletType]);
 };

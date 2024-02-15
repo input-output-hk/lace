@@ -38,9 +38,8 @@ describe('Testing MnemonicValidation component', () => {
     <AppSettingsProvider>
       <StoreProvider appMode={APP_MODE_BROWSER}>
         <MnemonicValidation
-          plainPassword="password"
           onValidationSuccess={onSuccessMock}
-          walletKeyAgent={mockKeyAgentDataTestnet}
+          publicKey={mockKeyAgentDataTestnet.extendedAccountPublicKey}
         />
       </StoreProvider>
     </AppSettingsProvider>

@@ -2,7 +2,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { createStubStakePoolProvider } from '@cardano-sdk/util-dev';
 import { ObservableWallet, PersonalWallet, storage } from '@cardano-sdk/wallet';
-import * as KeyManagement from '../../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
+import * as KeyManagement from '@cardano-sdk/key-management';
 import { assetsProviderStub } from './AssetsProviderStub';
 import { networkInfoProviderStub } from './NetworkInfoProviderStub';
 import { queryTransactionsResult, rewardAccount } from './ProviderStub';

@@ -446,7 +446,9 @@ export const useTransactionProps = (): {
         let handle: string;
         try {
           address = info.address ? Wallet.Cardano.PaymentAddress(info.address) : undefined;
-          handle = info.handle;
+          // handles are case-insensitive and minted as lowercase
+          // https://mint.handle.me/faq#faq_5
+          handle = info.handle?.toLowerCase();
         } catch {
           address = undefined;
           handle = undefined;

@@ -70,10 +70,6 @@ module.exports = () => {
       new NormalModuleReplacementPlugin(/blake2b$/, 'blake2b-no-wasm'),
       new NormalModuleReplacementPlugin(/@emurgo\/cip14-js/, path.join(__dirname, './src/utils/cip14.js')),
       new NormalModuleReplacementPlugin(
-        /@dcspark\/cardano-multiplatform-lib-nodejs/,
-        '@dcspark/cardano-multiplatform-lib-browser'
-      ),
-      new NormalModuleReplacementPlugin(
         /@emurgo\/cardano-message-signing-nodejs/,
         '@emurgo/cardano-message-signing-browser'
       ),

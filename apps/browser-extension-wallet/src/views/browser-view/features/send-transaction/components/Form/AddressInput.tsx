@@ -75,7 +75,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const isAddressInputInvalidHandle =
     isAdaHandleEnabled &&
     isHandle(addressInputValue.address.toString()) &&
-    !Asset.util.isValidHandle(addressInputValue.address.toString().slice(1));
+    !Asset.util.isValidHandle(addressInputValue.address.toString().slice(1).toLowerCase());
 
   const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 

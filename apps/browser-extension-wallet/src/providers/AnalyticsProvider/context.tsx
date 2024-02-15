@@ -56,7 +56,6 @@ export const AnalyticsProvider = ({
       tracker ||
       new AnalyticsTracker({
         postHogClient,
-        chain: currentChain,
         view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended,
         analyticsDisabled,
         excludedEvents: POSTHOG_EXCLUDED_EVENTS

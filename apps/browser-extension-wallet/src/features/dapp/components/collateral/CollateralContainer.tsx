@@ -10,7 +10,7 @@ import { MainLoader } from '@src/components/MainLoader';
 import { InsufficientFunds } from './InsufficientFunds';
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@utils/constants';
-import { UserPromptService } from '@lib/scripts/background/services';
+import type { UserPromptService } from '@lib/scripts/background/services';
 import { useWalletStore } from '@src/stores';
 import { DappSetCollateral } from './SetCollateral';
 import { CollateralAmount, CollateralAmountWithCollateralAmount } from './types';
@@ -98,7 +98,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
         redirectToCreateFailure();
       }
     },
-    [inMemoryWallet]
+    [inMemoryWallet, redirectToCreateFailure, redirectToCreateSuccess]
   );
 
   useEffect(() => {
@@ -146,7 +146,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
       console.error(error);
       redirectToCreateFailure();
     }
-  }, []);
+  }, [redirectToCreateFailure]);
 
   if (!isCalculatingCollateral) {
     if (insufficientBalance) {

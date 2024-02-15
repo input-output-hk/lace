@@ -18,6 +18,7 @@ export interface StakePool {
   liveStake: { number: string; unit?: string };
   cost: { number: string; unit?: string };
   saturation?: string;
+  blocks?: string;
   isStakingPool?: boolean;
   stakePool: Cardano.StakePool;
 }

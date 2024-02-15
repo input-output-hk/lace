@@ -116,10 +116,6 @@ export const withAction = style([
   },
 ]);
 
-export const bodyWrapper = sx({
-  height: '$fill',
-});
-
 export const body = style([
   {
     flex: 1,

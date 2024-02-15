@@ -14,12 +14,7 @@ import styles from './StakePoolDetail.module.scss';
 import { useWalletStore } from '@src/stores';
 
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 // TODO: remove duplication once lw-9270 is merged (lw-9552)
 export enum SaturationLevels {
@@ -312,28 +307,19 @@ export const StakePoolDetailFooter = ({
   const { setNoFundsVisible } = useStakePoolDetails();
   const { id } = useDelegationStore(stakePoolDetailsSelector) || {};
   const {
-    getKeyAgentType,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    isInMemoryWallet
   } = useWalletStore();
   const analytics = useAnalyticsContext();
 
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
-
   const onStakeClick = useCallback(() => {
     if (canDelegate) {
-      analytics.sendEventToMatomo({
-        category: MatomoEventCategories.STAKING,
-        action: MatomoEventActions.CLICK_EVENT,
-        name: popupView
-          ? AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_POPUP
-          : AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_BROWSER
-      });
       analytics.sendEventToPostHog(PostHogAction.StakingStakePoolDetailStakeOnThisPoolClick);
       onStake();
     } else {
       setNoFundsVisible(true);
     }
-  }, [analytics, canDelegate, onStake, popupView, setNoFundsVisible]);
+  }, [analytics, canDelegate, onStake, setNoFundsVisible]);
 
   const delegationDetails = useDelegationDetails();
   const currentDelegatedStakePool =
@@ -341,13 +327,13 @@ export const StakePoolDetailFooter = ({
   const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
 
   useEffect(() => {
-    if (isInMemory) return;
+    if (isInMemoryWallet) return;
     if (popupView) return;
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
     if (!hasPersistedHwStakepool) return;
     onStakeClick();
     localStorage.removeItem('TEMP_POOLID');
-  }, [isInMemory, onStakeClick, popupView]);
+  }, [isInMemoryWallet, onStakeClick, popupView]);
 
   return (
     <div className={cn(styles.footer, { [styles.popupView]: popupView })}>

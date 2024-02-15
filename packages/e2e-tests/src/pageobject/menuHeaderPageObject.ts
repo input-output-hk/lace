@@ -2,6 +2,7 @@ import MenuHeader from '../elements/menuHeader';
 
 class MenuHeaderPageObject {
   async clickMenuButton() {
+    await MenuHeader.menuButton.waitForClickable({ timeout: 16_000 });
     await MenuHeader.menuButton.click();
   }
 

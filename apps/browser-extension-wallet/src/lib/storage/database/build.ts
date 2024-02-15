@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-array-reduce */
 import { Wallet } from '@lace/cardano';
 import { startWithRegExp } from '@src/utils/regex';
 import Dexie, { PromiseExtended, Transaction, Version } from 'dexie';

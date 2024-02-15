@@ -75,7 +75,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
   Scenario: Extended-view - reuse new address in bundle outputs
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
-    And click "Add address" button 1 in address bar
+    And click "Add address" button inside address input 1
     Then I see "Add address" drawer in send flow in extended mode
     And address form is filled with "shelley" address
     When I fill address form with "WalletName" name
@@ -83,7 +83,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Then the "tADA" asset is displayed in bundle 1
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     And I click "Add bundle" button on "Send" page
-    And click "Add address" button 2 in address bar
+    And click "Add address" button inside address input 2
     And I click address on the list with name "WalletName"
     And I enter a value of: 2 to the "tADA" asset in bundle 2
     Then the "tADA" asset is displayed in bundle 2
@@ -94,22 +94,22 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Given I have 3 addresses in my address book in extended mode
     When I navigate to Tokens extended page
     And I click "Send" button on page header
-    And click "Add address" button 1 in address bar
+    And click "Add address" button inside address input 1
     And I click address on the list with name "Shelley"
     And I click "Add bundle" button on "Send" page
-    And click "Add address" button 2 in address bar
+    And click "Add address" button inside address input 2
     And I click address on the list with name "Shelley"
-    And click "Remove address" button 1 in address bar
+    And click "Remove address" button inside address input 1
     Then recipients address input 1 is empty
-    When click "Remove address" button 2 in address bar
+    When click "Remove address" button inside address input 2
     Then recipients address input 2 is empty
 
   @LW-3265
   Scenario: Extended-view - use new invalid address in bundle outputs
     Given I click "Send" button on page header
-    And I enter an address 1 that matches the amount of characters but does not match with the checksum
+    And I enter an address that matches the amount of characters but does not match with the checksum into address input 1
     When I click "Add bundle" button on "Send" page
-    And I enter an address 2 that matches the amount of characters but does not match with the checksum
+    And I enter an address that matches the amount of characters but does not match with the checksum into address input 2
     Then An Incorrect address 1 error is displayed
     And An Incorrect address 2 error is displayed
     And "Review transaction" button is disabled on "Send" page

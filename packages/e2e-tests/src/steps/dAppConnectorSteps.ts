@@ -87,10 +87,33 @@ Then(
   }
 );
 
-Then(/^I see DApp connector "Something went wrong" page on (\d) window handle$/, async (handleNumber: number) => {
-  await DAppConnectorPageObject.waitAndSwitchToHandle(4, handleNumber);
-  await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
-});
+Then(
+  /^I see DApp connector "(Confirm transaction|Something went wrong|All done)" page on (\d) window handle$/,
+  async (expectedPage: 'Confirm transaction' | 'Something went wrong' | 'All done', handleNumber: number) => {
+    await DAppConnectorPageObject.waitAndSwitchToHandle(4, handleNumber);
+
+    const defaultDAppTransactionData: ExpectedTransactionData = {
+      typeOfTransaction: 'Send',
+      amountADA: '3.00 ADA',
+      amountAsset: '0',
+      recipientAddress: String(getTestWallet('WalletReceiveSimpleTransactionE2E').address)
+    };
+
+    switch (expectedPage) {
+      case 'Confirm transaction':
+        await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, defaultDAppTransactionData);
+        break;
+      case 'Something went wrong':
+        await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
+        break;
+      case 'All done':
+        await DAppConnectorAssert.assertSeeAllDonePage();
+        break;
+      default:
+        throw new Error(`Unsupported page: ${expectedPage}`);
+    }
+  }
+);
 
 Then(/^I see DApp connector "Sign transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);

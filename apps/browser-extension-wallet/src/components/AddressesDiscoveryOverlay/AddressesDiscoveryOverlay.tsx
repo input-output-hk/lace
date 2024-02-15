@@ -2,7 +2,7 @@ import RefreshIcon from '@assets/icons/refresh.component.svg';
 import WarningIcon from '@assets/icons/warning.component.svg';
 import styles from '@components/MainLoader/MainLoader.module.scss';
 import { Loader, toast } from '@lace/common';
-import { AddressesDiscoveryStatus } from '@lib/communication';
+import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { useWalletStore } from '@stores';
 import { WarningModal } from '@views/browser/components';
 import React, { FC, useEffect, useState } from 'react';

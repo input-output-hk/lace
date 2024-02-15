@@ -16,7 +16,7 @@ import { Tooltip } from './StatsTooltip';
 
 const DEFAULT_DECIMALS = 2;
 
-export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAULT_DECIMALS): string =>
+export const formatLocaleNumber = (value: string | number, decimalPlaces: number = DEFAULT_DECIMALS): string =>
   new BigNumber(value).toFormat(decimalPlaces, {
     decimalSeparator: '.',
     groupSeparator: ',',
@@ -104,7 +104,7 @@ export const StakingInfoCard = ({
               id={id}
               onClick={onStakePoolSelect}
             />
-            {(status === 'retired' || status === 'saturated' || status === 'retiring') && (
+            {status && (
               <Tooltip content={t(labelTranslationKeysByPoolStatus[status])}>{iconsByPoolStatus[status]}</Tooltip>
             )}
           </Flex>

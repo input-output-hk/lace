@@ -47,8 +47,8 @@ exposeApi<AuthorizedDappService>(
 
 export interface UserPromptService {
   allowOrigin(origin: Origin): Promise<'allow' | 'just-once' | 'deny'>;
-  allowSignData(): Promise<boolean>;
-  allowSignTx(): Promise<boolean>;
+  readyToSignData(): Promise<boolean>;
+  readyToSignTx(): Promise<boolean>;
   getCollateralRequest(): Promise<Wallet.Cardano.Utxo[]>;
 }
 
@@ -57,8 +57,8 @@ export const userPromptService = consumeRemoteApi<UserPromptService>(
     baseChannel: DAPP_CHANNELS.userPrompt,
     properties: {
       allowOrigin: RemoteApiPropertyType.MethodReturningPromise,
-      allowSignData: RemoteApiPropertyType.MethodReturningPromise,
-      allowSignTx: RemoteApiPropertyType.MethodReturningPromise,
+      readyToSignData: RemoteApiPropertyType.MethodReturningPromise,
+      readyToSignTx: RemoteApiPropertyType.MethodReturningPromise,
       getCollateralRequest: RemoteApiPropertyType.MethodReturningPromise
     }
   },

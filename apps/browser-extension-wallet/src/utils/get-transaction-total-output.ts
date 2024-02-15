@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-array-reduce */
 import { CardanoTxOut } from '../types';
 import BigNumber from 'bignumber.js';
 

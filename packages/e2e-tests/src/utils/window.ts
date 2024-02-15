@@ -40,8 +40,8 @@ export const waitUntilExpectedNumberOfHandles = async (expectedNumberOfHandles: 
   });
 };
 
-export const switchToWindowWithLace = async (): Promise<void> => {
-  await browser.pause(1000);
+export const switchToWindowWithLace = async (delay = 1000): Promise<void> => {
+  await browser.pause(delay);
   await browser.switchWindow(/^Lace$/);
 };
 

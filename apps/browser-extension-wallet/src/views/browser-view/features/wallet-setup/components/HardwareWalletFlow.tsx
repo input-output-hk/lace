@@ -19,26 +19,20 @@ import { PinExtension } from './PinExtension';
 import { ErrorDialog, HWErrorCode } from './ErrorDialog';
 import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
-import {
-  AnalyticsEventNames,
-  EnhancedAnalyticsOptInStatus,
-  PostHogAction,
-  postHogOnboardingActions
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { getHWPersonProperties, isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { SendOnboardingAnalyticsEvent } from '../types';
-
-const { WalletSetup: Events } = AnalyticsEventNames;
+import { WalletType } from '@cardano-sdk/web-extension';
+import { useWalletStore } from '@src/stores';
 
 const { CHAIN } = config();
 const {
   Cardano: { ChainIds },
-  AVAILABLE_WALLETS,
-  KeyManagement
+  AVAILABLE_WALLETS
 } = Wallet;
 const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 
@@ -67,12 +61,13 @@ export const HardwareWalletFlow = ({
   const [hardwareWalletErrorCode, setHardwareWalletErrorCode] = useState<HWErrorCode>('common');
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
   const showStartOverDialog = () => setIsStartOverDialogVisible(true);
-  const [walletCreated, setWalletCreated] = useState<Wallet.CardanoWalletByChain>();
+  const [walletCreated, setWalletCreated] = useState<Wallet.CardanoWallet>();
   const [deviceConnection, setDeviceConnection] = useState<Wallet.DeviceConnection>();
   const [connectedDevice, setConnectedDevice] = useState<Wallet.HardwareWallets | undefined>();
   const [accountIndex, setAccountIndex] = useState<number>(0);
   const { createHardwareWallet, connectHardwareWallet, saveHardwareWallet } = useWalletManager();
-  const { calculateTimeSpentOnPage, updateEnteredAtTime } = useTimeSpentOnPage();
+  const { setStayOnAllDonePage } = useWalletStore();
+  const { updateEnteredAtTime } = useTimeSpentOnPage();
   const analytics = useAnalyticsContext();
 
   useEffect(() => {
@@ -153,39 +148,30 @@ export const HardwareWalletFlow = ({
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
 
-    const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
     const postHogAction = isAccepted
       ? postHogOnboardingActions.hw.ANALYTICS_AGREE_CLICK
       : postHogOnboardingActions.hw.ANALYTICS_SKIP_CLICK;
 
-    sendAnalytics(matomoEvent, postHogAction);
+    sendAnalytics(postHogAction);
     navigateTo('connect');
   };
 
   const handleCreateWallet = async (name: string) => {
     try {
-      const wallet = await createHardwareWallet({
+      setStayOnAllDonePage(true);
+      const cardanoWallet = await createHardwareWallet({
         accountIndex,
         deviceConnection,
         name,
         chainId: DEFAULT_CHAIN_ID,
         connectedDevice
       });
-      setWalletCreated(wallet);
-      setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
-      const addressDiscoverySubscriber = wallet.wallet.addresses$.subscribe((addresses) => {
-        if (addresses.length === 0) return;
-        const hdWalletDiscovered = addresses.some((addr) => addr.index > 0);
-        if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        }
-        addressDiscoverySubscriber.unsubscribe();
-      });
-      await analytics.setOptedInForEnhancedAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
+      setWalletCreated(cardanoWallet);
+      const analyticsOptInStatus = isAnalyticsAccepted
+        ? EnhancedAnalyticsOptInStatus.OptedIn
+        : EnhancedAnalyticsOptInStatus.OptedOut;
+      setDoesUserAllowAnalytics(analyticsOptInStatus);
+      await analytics.setOptedInForEnhancedAnalytics(analyticsOptInStatus);
       navigateTo('finish');
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });
@@ -203,9 +189,7 @@ export const HardwareWalletFlow = ({
       if (error.innerError?.innerError?.message === 'The device is already open.') {
         setDeviceConnection(deviceConnection);
       } else {
-        showHardwareWalletError(
-          model === KeyManagement.KeyAgentType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger'
-        );
+        showHardwareWalletError(model === WalletType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger');
       }
     }
   };
@@ -214,13 +198,9 @@ export const HardwareWalletFlow = ({
 
   const handleGoToMyWalletClick = async () => {
     try {
+      setStayOnAllDonePage(false);
       const posthogProperties = await getHWPersonProperties(connectedDevice, deviceConnection);
-      await sendAnalytics(
-        Events.SETUP_FINISHED_NEXT,
-        postHogOnboardingActions.hw.DONE_GO_TO_WALLET,
-        undefined,
-        posthogProperties
-      );
+      await sendAnalytics(postHogOnboardingActions.hw.DONE_GO_TO_WALLET, posthogProperties);
     } catch {
       console.error('We were not able to send the analytics event');
     } finally {
@@ -249,11 +229,7 @@ export const HardwareWalletFlow = ({
       <WalletSetupLegalStep
         onBack={() => onCancel()}
         onNext={() => {
-          sendAnalytics(
-            Events.LEGAL_STUFF_NEXT,
-            postHogOnboardingActions.hw.LACE_TERMS_OF_USE_NEXT_CLICK,
-            calculateTimeSpentOnPage()
-          );
+          sendAnalytics(postHogOnboardingActions.hw.LACE_TERMS_OF_USE_NEXT_CLICK);
           navigateTo('analytics');
         }}
         translations={walletSetupLegalStepTranslations}
@@ -275,7 +251,6 @@ export const HardwareWalletFlow = ({
         onBack={() => navigateTo('analytics')}
         onConnect={handleConnect}
         onNext={() => {
-          sendAnalytics(Events.SELECT_MODEL_NEXT);
           analytics.sendEventToPostHog(postHogOnboardingActions.hw.CONNECT_HW_NEXT_CLICK);
           navigateTo('accounts');
         }}
@@ -289,7 +264,7 @@ export const HardwareWalletFlow = ({
         accounts={TOTAL_ACCOUNTS}
         onBack={showStartOverDialog}
         onSubmit={(account: number) => {
-          sendAnalytics(Events.SELECT_ACCOUNT_NEXT, postHogOnboardingActions.hw.SELECT_HW_ACCOUNT_NEXT_CLICK);
+          sendAnalytics(postHogOnboardingActions.hw.SELECT_HW_ACCOUNT_NEXT_CLICK);
           setAccountIndex(account);
           navigateTo('register');
         }}
@@ -300,7 +275,7 @@ export const HardwareWalletFlow = ({
       <WalletSetupWalletNameStep
         onBack={showStartOverDialog}
         onNext={(name: string) => {
-          sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions.hw.WALLET_NAME_NEXT_CLICK);
+          sendAnalytics(postHogOnboardingActions.hw.WALLET_NAME_NEXT_CLICK);
           handleCreateWallet(name);
           navigateTo('create');
         }}

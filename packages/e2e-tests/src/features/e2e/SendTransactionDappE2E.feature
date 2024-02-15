@@ -74,5 +74,5 @@ Feature: Send Transactions from Dapp - E2E
     And I click "Confirm" button on "Sign transaction" page
     And I see DApp connector "All done" page
     Then I click "Send ADA" "Run" button in test DApp
-    Then I see DApp connector "Something went wrong" page on 3 window handle
-    And I see DApp connector "Something went wrong" page on 4 window handle
+    Then I see DApp connector "All done" page on 3 window handle
+    And I see DApp connector "Confirm transaction" page on 4 window handle

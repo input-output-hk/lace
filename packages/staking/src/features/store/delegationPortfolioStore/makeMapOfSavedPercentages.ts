@@ -17,7 +17,6 @@ export const makeMapOfSavedPercentages = (pools?: Wallet.Cardano.Cip17Pool[]) =>
     key: 'percentage',
   });
 
-  // eslint-disable-next-line unicorn/no-array-reduce
   return portfolioWithSavedPercentages.reduce<Record<Wallet.Cardano.PoolIdHex, number>>((acc, { percentage, id }) => {
     acc[id] = percentage;
     return acc;

@@ -67,7 +67,10 @@ module.exports = () => ({
             typeofs: false
           },
           mangle: {
-            keepFnNames: true
+            keepFnNames: true,
+            // Required for extension messaging, as it ends up using different mangled
+            // class name for the same class in service worker and UI scripts
+            keep_classnames: true
           }
         }
       })

@@ -1,12 +1,10 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
 import { Sections } from '../../types';
 import { useWalletStore } from '@stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
-import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -39,27 +37,19 @@ export const StakePoolDetailsDrawer = ({
   } = useStakePoolDetails();
   const { t } = useTranslation();
   const { setIsRestaking } = useSubmitingState();
-  const { getKeyAgentType } = useWalletStore();
+  const { isInMemoryWallet } = useWalletStore();
   const { password, removePassword } = usePassword();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
-  // const isSuccessSection = useMemo(
-  //   () => simpleSendConfig.currentSection === Sections.SUCCESS_TX,
-  //   [simpleSendConfig.currentSection]
-  // );
+
   const { setDelegationTxBuilder } = useDelegationStore();
-  const backgroundService = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
   const closeDrawer = useCallback(() => {
     if (showExitConfirmation?.(simpleSendConfig.currentSection)) {
       setExitStakingVisible(true);
     } else {
-      backgroundService.setWalletPassword();
       setDelegationTxBuilder();
       resetStates();
       removePassword();
-      // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
-      // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
     }
     setIsRestaking(false);
@@ -75,12 +65,9 @@ export const StakePoolDetailsDrawer = ({
     showExitConfirmation,
     simpleSendConfig.currentSection,
     setExitStakingVisible,
-    backgroundService,
     setDelegationTxBuilder,
     resetStates,
     removePassword,
-    // isInMemory,
-    // isSuccessSection,
     setIsDrawerVisible,
     setIsRestaking,
     analytics
@@ -88,10 +75,9 @@ export const StakePoolDetailsDrawer = ({
 
   const onArrowIconClick = useCallback(() => {
     if (password) {
-      backgroundService.setWalletPassword();
       removePassword();
     }
-    if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
+    if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemoryWallet) {
       return setSection(sectionsConfig[Sections.DETAIL]);
     }
     if (simpleSendConfig?.prevSection) {
@@ -100,14 +86,13 @@ export const StakePoolDetailsDrawer = ({
     return closeDrawer();
   }, [
     closeDrawer,
-    isInMemory,
+    isInMemoryWallet,
     password,
     removePassword,
     setPrevSection,
     setSection,
     simpleSendConfig.currentSection,
-    simpleSendConfig?.prevSection,
-    backgroundService
+    simpleSendConfig?.prevSection
   ]);
 
   useKeyboardShortcut(['Escape'], () => {

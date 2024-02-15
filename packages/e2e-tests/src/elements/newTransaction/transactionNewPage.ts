@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { CoinConfigure } from './coinConfigure';
-import { AddressInput } from '../addressInput';
+import { AddressInput } from '../AddressInput';
 import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';
@@ -8,6 +8,7 @@ import Banner from '../banner';
 import CommonDrawerElements from '../CommonDrawerElements';
 import testContext from '../../utils/testContext';
 import { generateRandomString } from '../../utils/textUtils';
+import { browser } from '@wdio/globals';
 
 class TransactionNewPage extends CommonDrawerElements {
   private CONTAINER = '//div[@class="ant-drawer-body"]';
@@ -128,6 +129,12 @@ class TransactionNewPage extends CommonDrawerElements {
   }
 
   async getTransactionFeeValueInAda(): Promise<number> {
+    await this.transactionFeeValueAda.waitForDisplayed();
+    await browser.waitUntil(async () => (await this.transactionFeeValueAda.getText()) !== '', {
+      timeout: 2000,
+      timeoutMsg: 'fee value should not be empty'
+    });
+
     const stringValue = await this.transactionFeeValueAda.getText();
     const stringValueTrimmed = stringValue.replace(` ${Asset.CARDANO.ticker}`, '');
     return Number(stringValueTrimmed);
@@ -140,7 +147,8 @@ class TransactionNewPage extends CommonDrawerElements {
   }
 
   async getAddressBookSearchResultsRows(): Promise<WebdriverIO.ElementArray> {
-    return $$(`${this.ADDR_SEARCH_RESULTS_ROW}`);
+    await $(this.ADDR_SEARCH_RESULTS_ROW).waitForClickable({ timeout: 5000 });
+    return $$(this.ADDR_SEARCH_RESULTS_ROW);
   }
 
   async getContactName(index: number): Promise<string> {

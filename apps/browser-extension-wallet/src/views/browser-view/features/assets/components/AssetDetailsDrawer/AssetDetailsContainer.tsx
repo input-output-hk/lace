@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import flatten from 'lodash/flatten';
 import { AssetDetails } from './AssetDetails';
 import { useRedirection } from '@hooks';
@@ -6,12 +6,7 @@ import { walletRoutePaths } from '@routes/wallet-paths';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletStore } from '@src/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
@@ -30,19 +25,8 @@ export const AssetDetailsContainer = ({
   const { assetDetails, setAssetDetails } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
-  const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_TOKENS,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_TX_DETAILS_POPUP
-        : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_TX_DETAILS_BROWSER
-    });
-  }, [analytics, popupView]);
 
-  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
-    sendAnalytics
-  });
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities();
 
   const setVisibility = () => setAssetDetails();
 

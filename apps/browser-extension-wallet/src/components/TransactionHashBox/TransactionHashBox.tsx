@@ -5,12 +5,6 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Copy from '../../assets/icons/copy.component.svg';
 import Check from '../../assets/icons/check-success.component.svg';
 import styles from './TransactionHashBox.module.scss';
-import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames
-} from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface TransactionHashBoxProps {
   hash: string;
@@ -20,7 +14,6 @@ const { Text, Paragraph } = Typography;
 
 export const TransactionHashBox = ({ hash }: TransactionHashBoxProps): React.ReactElement => {
   const { t } = useTranslation();
-  const analytics = useAnalyticsContext();
   const [hasMouseEnter, setHasMouseEnter] = useState(false);
   const [hasBeenCopied, setHasBeenCopied] = useState(false);
 
@@ -33,11 +26,6 @@ export const TransactionHashBox = ({ hash }: TransactionHashBoxProps): React.Rea
   };
 
   const handleCopy = (_text: string, result: boolean) => {
-    analytics.sendEventToMatomo({
-      action: MatomoEventActions.CLICK_EVENT,
-      category: MatomoEventCategories.SEND_TRANSACTION,
-      name: AnalyticsEventNames.SendTransaction.COPY_TX_HASH
-    });
     setHasBeenCopied(result);
   };
 

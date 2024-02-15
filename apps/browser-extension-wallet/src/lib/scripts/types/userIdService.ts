@@ -1,9 +1,12 @@
 import { Wallet } from '@lace/cardano';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 export const USER_ID_SERVICE_BASE_CHANNEL = 'user-id-actions';
 
+export type UserId = { type: UserTrackingType; id: string };
+
 export interface UserIdService {
+  userId$: Observable<UserId>;
   getUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string>;
   getRandomizedUserId(): Promise<string>;
   getAliasProperties(networkMagic: Wallet.Cardano.NetworkMagic): Promise<{ alias: string; id: string }>;
@@ -12,6 +15,5 @@ export interface UserIdService {
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
   resetToDefaultValues(): Promise<void>;
-  userTrackingType$: BehaviorSubject<UserTrackingType>;
   isNewSession(): Promise<boolean>;
 }

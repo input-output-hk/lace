@@ -40,11 +40,23 @@ export const StakingView = () => {
       </Box>
       <Navigation>
         {(activePage) => (
-          <Box mt="$40">
-            {activePage === Page.overview && <Overview />}
-            {activePage === Page.browsePools && <BrowsePools />}
-            {activePage === Page.activity && <Activity />}
-          </Box>
+          <>
+            {activePage === Page.overview && (
+              <Box mt="$40">
+                <Overview />
+              </Box>
+            )}
+            {activePage === Page.browsePools && (
+              <Box mt="$16">
+                <BrowsePools />
+              </Box>
+            )}
+            {activePage === Page.activity && (
+              <Box mt="$40">
+                <Activity />
+              </Box>
+            )}
+          </>
         )}
       </Navigation>
       <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />

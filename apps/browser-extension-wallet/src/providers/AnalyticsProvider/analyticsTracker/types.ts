@@ -4,30 +4,6 @@ import { PostHogAction } from '@lace/common';
 export { PostHogAction } from '@lace/common';
 export type { IAnalyticsTracker } from '@lace/common';
 
-export enum MatomoEventActions {
-  CLICK_EVENT = 'click-event',
-  HOVER_EVENT = 'hover-event'
-}
-
-export enum MatomoEventCategories {
-  SEND_TRANSACTION = 'send-transaction',
-  WALLET_CREATE = 'wallet-create',
-  WALLET_RESTORE = 'wallet-restore',
-  HW_CONNECT = 'hw-connect',
-  VIEW_TOKENS = 'view-tokens',
-  VIEW_NFT = 'view-nft',
-  ADDRESS_BOOK = 'address-book',
-  VIEW_TRANSACTIONS = 'view-transactions',
-  STAKING = 'staking'
-}
-
-export type MatomoSendEventProps = {
-  category: MatomoEventCategories;
-  action: MatomoEventActions;
-  name: string;
-  value?: number;
-};
-
 export type Metadata = {
   _id?: string;
   cookie?: number;

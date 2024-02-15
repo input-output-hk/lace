@@ -31,7 +31,6 @@ Feature: Forgot password
       | lock         |
       | keyAgentData |
       | lastStaking  |
-      | appSettings  |
 
   @LW-1592
   Scenario Outline: "Forgot password?" - password page - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>

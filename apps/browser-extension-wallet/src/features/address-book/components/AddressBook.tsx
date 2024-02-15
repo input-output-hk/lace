@@ -11,12 +11,7 @@ import { useAddressBookStore } from '../store';
 import styles from './AddressBook.modules.scss';
 import DeleteIcon from '../../../assets/icons/delete-icon.component.svg';
 import PlusIcon from '../../../assets/icons/plus-icon.svg';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
 import { useHandleResolver, useOnAddressSave, useUpdateAddressStatus } from '@hooks';
@@ -53,11 +48,6 @@ export const AddressBook = withAddressBookContext(() => {
         address: item.address,
         name: item.name,
         onClick: (address: AddressBookSchema) => {
-          analytics.sendEventToMatomo({
-            category: MatomoEventCategories.ADDRESS_BOOK,
-            action: MatomoEventActions.CLICK_EVENT,
-            name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
-          });
           analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordClick);
           setAddressToEdit(address);
           if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {

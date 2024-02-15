@@ -26,10 +26,7 @@ module.exports = () =>
             loader: 'webassembly-loader-sw',
             options: {
               export: 'instance',
-              importObjectProps:
-                // eslint-disable-next-line max-len
-                `'./cardano_multiplatform_lib_bg.js': __webpack_require__("../../node_modules/@dcspark/cardano-multiplatform-lib-browser/cardano_multiplatform_lib_bg.js"),
-               './cardano_message_signing_bg.js': __webpack_require__("../../node_modules/@emurgo/cardano-message-signing-browser/cardano_message_signing_bg.js")`
+              importObjectProps: `'./cardano_message_signing_bg.js': __webpack_require__("../../node_modules/@emurgo/cardano-message-signing-browser/cardano_message_signing_bg.js")`
             }
           }
         }

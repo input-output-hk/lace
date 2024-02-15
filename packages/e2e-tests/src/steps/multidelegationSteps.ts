@@ -469,6 +469,7 @@ Then(/^I see input ratio field showing (\d+)% for pool (\d+)$/, async (ratio: nu
 });
 
 When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
+  await browser.pause(1000);
   if (await SwitchingStakePoolModal.title.isDisplayed()) {
     await SwitchingStakePoolModal.fineByMeButton.click();
   }

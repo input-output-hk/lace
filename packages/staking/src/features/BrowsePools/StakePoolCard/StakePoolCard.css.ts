@@ -1,16 +1,22 @@
 import { style, sx } from '@lace/ui';
-import { keyframes } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
+import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { theme } from '../../theme';
+import { STAKE_POOL_CARD_HEIGHT } from './constants';
 
 export const card = style([
   sx({
     boxSizing: 'border-box',
-    height: '$84',
+    height: `$${STAKE_POOL_CARD_HEIGHT}`,
     padding: '$20',
     width: '$fill',
   }),
   {
+    ':hover': {
+      borderColor: theme.colors.$poolCardSelectedBorderColor,
+    },
     borderWidth: 1.5,
+    cursor: 'pointer',
     overflow: 'hidden',
   },
 ]);
@@ -31,16 +37,38 @@ export const cardSelected = style({
   borderColor: theme.colors.$poolCardSelectedBorderColor,
 });
 
-const opacity = keyframes({
-  '0%': { opacity: 0.5 },
-  '50%': { opacity: 1 },
-  '100%': { opacity: 0.5 },
+export const skeleton = recipe({
+  base: [
+    {
+      ':hover': {
+        border: 'none',
+      },
+      cursor: 'default',
+    },
+  ],
+  variants: {
+    fade3: {
+      0: style({ opacity: '0.75' }),
+      1: style({ opacity: '0.5' }),
+      2: style({ opacity: '0.25' }),
+      3: style({ opacity: '0.5' }),
+    },
+    fade4: {
+      0: style({ opacity: '1' }),
+      1: style({ opacity: '0.75' }),
+      2: style({ opacity: '0.5' }),
+      3: style({ opacity: '0.25' }),
+      4: style({ opacity: '0.5' }),
+    },
+    fade5: {
+      0: style({ opacity: '1' }),
+      1: style({ opacity: '0.75' }),
+      2: style({ opacity: '0.5' }),
+      3: style({ opacity: '0.25' }),
+      4: style({ opacity: '0.5' }),
+      5: style({ opacity: '0.75' }),
+    },
+  },
 });
 
-export const skeleton = style([
-  {
-    animationDuration: '1s',
-    animationIterationCount: 'infinite',
-    animationName: opacity,
-  },
-]);
+export type fadeVariants = Required<NonNullable<RecipeVariants<typeof skeleton>>>;

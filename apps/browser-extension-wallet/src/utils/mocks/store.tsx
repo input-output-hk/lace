@@ -1,14 +1,14 @@
 import React from 'react';
 import create, { GetState, SetState } from 'zustand';
 import { Wallet } from '@lace/cardano';
-import { mockKeyAgentDataTestnet, mockWalletInfoTestnet } from './test-helpers';
+import { mockWalletInfoTestnet } from './test-helpers';
 import { APP_MODE_BROWSER, cardanoCoin } from '@utils/constants';
 import { StateStatus, WalletStore } from '@stores/types';
 import { StoreProvider } from '@stores';
-import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import { NetworkConnectionStates } from '@src/types';
 import { mockBlockchainProviders } from './blockchain-providers';
-import { AddressesDiscoveryStatus } from '@lib/communication';
+import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
+import { WalletManager, WalletType } from '@cardano-sdk/web-extension';
 
 interface StoreProviderProps {
   children: React.ReactNode;
@@ -31,14 +31,18 @@ export const walletStoreMock = async (
 
   // TODO: If possible use real methods/states and mock only needed ones, like inMemoryWallet [LW-5454]
   return {
+    walletState: undefined,
+    setWalletState: jest.fn(),
     fetchNetworkInfo: jest.fn(),
     resetStakePools: jest.fn(),
     fetchStakePools: jest.fn(),
-    getWalletActivitiesObservable: jest.fn(),
+    getWalletActivities: jest.fn(),
     fetchingActivityInfo: false,
     getActivityDetail: jest.fn(),
     inMemoryWallet: wallet as Wallet.ObservableWallet,
-    getKeyAgentType: jest.fn(() => Wallet.KeyManagement.KeyAgentType.InMemory),
+    walletType: WalletType.InMemory,
+    isInMemoryWallet: true,
+    isHardwareWallet: false,
     // TODO: mock [LW-5454]
     cardanoWallet: undefined,
     isWalletLocked: jest.fn(() => false),
@@ -51,6 +55,8 @@ export const walletStoreMock = async (
     setRewardsActivityDetail: jest.fn(),
     setTransactionActivityDetail: jest.fn(),
     setWalletLock: jest.fn(),
+    setStayOnAllDonePage: jest.fn(),
+    stayOnAllDonePage: false,
     stakePoolSearchResults: { pageResults: [], totalResultCount: 0 },
     stakePoolSearchResultsStatus: StateStatus.LOADED,
     walletActivitiesStatus: StateStatus.LOADED,
@@ -63,8 +69,6 @@ export const walletStoreMock = async (
     getAssets: jest.fn(),
     setAssetDetails: jest.fn(),
     walletInfo: mockWalletInfoTestnet,
-    keyAgentData: mockKeyAgentDataTestnet,
-    setKeyAgentData: jest.fn(),
     setWalletInfo: jest.fn(),
     setCardanoCoin: jest.fn(),
     setNetworkConnection: jest.fn(),
@@ -77,8 +81,10 @@ export const walletStoreMock = async (
       getHiddenBalancePlaceholder: jest.fn()
     },
     setBalancesVisibility: jest.fn(),
-    setWalletManagerUi: jest.fn(),
-    walletManagerUi: { wallet, activate: jest.fn() } as unknown as WalletManagerUi,
+    walletManager: { wallet, activate: jest.fn() } as unknown as WalletManager<
+      Wallet.WalletMetadata,
+      Wallet.AccountMetadata
+    >,
     blockchainProvider: mockBlockchainProviders(),
     setBlockchainProvider: jest.fn(),
     initialHdDiscoveryCompleted: false,

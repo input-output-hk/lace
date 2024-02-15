@@ -1,11 +1,10 @@
 /* eslint-disable no-undef */
-import { WebElement, WebElementFactory as Factory } from '../webElement';
-import { ChainablePromiseElement } from 'webdriverio';
-import { ChainablePromiseArray } from 'webdriverio/build/types';
+import CommonDrawerElements from '../CommonDrawerElements';
+import testContext from '../../utils/testContext';
 
-export class TokenSelectionPage extends WebElement {
+class TokenSelectionPage extends CommonDrawerElements {
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
-  private TOKEN_ROW = '//div[@data-testid="coin-search-row-info"]';
+  private TOKEN_ROW = '//div[@data-testid="coin-search-row"]';
   private TOKEN_INFO = '//div[@data-testid="coin-search-row-info"]';
   private TOKEN_ICON = '//div[@data-testid="coin-search-row-icon"]';
   private NFTS_BUTTON = '//input[@data-testid="asset-selector-button-nfts"]';
@@ -24,114 +23,184 @@ export class TokenSelectionPage extends WebElement {
   private ADD_TO_TRANSACTION_BUTTON = '[data-testid="add-to-transaction-button"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
 
-  constructor() {
-    super();
-  }
-
-  get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get tokensButton() {
     return $(this.TOKENS_BUTTON).parentElement().parentElement();
   }
 
-  get nftImages(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+  get nftImages() {
     return this.assetSelectorContainer.$$(this.NFT_IMAGE);
   }
 
-  tokenItem(): WebElement {
-    return Factory.fromSelector(`${this.TOKEN_ROW}`, 'xpath');
+  get tokens() {
+    return $$(this.TOKEN_ROW);
   }
 
-  tokenName(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_ROW})[${index}]/h6`, 'xpath');
+  tokenItemInfo(index: number) {
+    return $(`(${this.TOKEN_INFO})[${index}]`);
   }
 
-  tokenTicker(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_ROW})[${index}]/p`, 'xpath');
+  tokenName(index: number) {
+    return $(String(`(${this.TOKEN_ROW})[${index}]//h6`));
   }
 
-  tokenTickerFromName(assetName: string): WebElement {
-    return Factory.fromSelector(`${this.TOKEN_ROW}//h6[text() = '${assetName}']/following-sibling::p`, 'xpath');
+  tokenTicker(index: number) {
+    return $(String(`(${this.TOKEN_ROW})[${index}]//p`));
   }
 
-  grayedOutTokenIcon(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_ICON})[${index}]/div[contains(@class, 'overlay')]`, 'xpath');
+  tokenTickerFromName(assetName: string) {
+    return $(String(`${this.TOKEN_ROW}//h6[text() = '${assetName}']/following-sibling::p`));
   }
 
-  checkmarkInSelectedToken(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_ICON})[${index}]/*[name()='svg']`, 'xpath');
+  grayedOutTokenIcon(index: number) {
+    return $(String(`(${this.TOKEN_ICON})[${index}]//div[contains(@class, 'overlay')]`));
   }
 
-  tokenItemInfo(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_INFO})[${index}]`, 'xpath');
+  checkmarkInSelectedToken(index: number) {
+    return $(String(`(${this.TOKEN_ICON})[${index}]//*[name()='svg']`));
   }
 
-  get nftsButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get nftsButton() {
     return $(this.NFTS_BUTTON).parentElement().parentElement();
   }
 
-  get assetSelectorContainer(): ChainablePromiseElement<WebdriverIO.Element> {
+  get assetSelectorContainer() {
     return $(this.ASSET_SELECTOR_CONTAINER);
   }
 
-  get nftItemSelectedCheckmark(): ChainablePromiseElement<WebdriverIO.Element> {
+  get nftItemSelectedCheckmark() {
     return $(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
-  get nftContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+  get nftContainers() {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
   }
 
-  get nftNames(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+  get nftNames() {
     return this.assetSelectorContainer.$$(this.NFT_ITEM_NAME);
   }
 
-  async getNftContainer(name: string): Promise<WebdriverIO.Element> {
-    return (await this.nftContainers.find(
+  getNftContainer = async (name: string) =>
+    (await this.nftContainers.find(
       async (item) => (await item.$(this.NFT_ITEM_NAME).getText()) === name
     )) as WebdriverIO.Element;
-  }
 
-  async getNftName(name: string): Promise<WebdriverIO.Element> {
+  getNftName = async (name: string) => {
     const nftContainer = await this.getNftContainer(name);
     return nftContainer.$(this.NFT_ITEM_NAME);
-  }
+  };
 
-  async grayedOutNFT(index: number): Promise<WebdriverIO.Element> {
+  grayedOutNFT(index: number) {
     return this.nftContainers[index].$(this.NFT_ITEM_OVERLAY);
   }
 
-  async checkmarkInSelectedNFT(index: number): Promise<WebdriverIO.Element> {
+  checkmarkInSelectedNFT(index: number) {
     return this.nftContainers[index].$(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
-  assetsCounter(): WebElement {
-    return Factory.fromSelector(`${this.ASSETS_SELECTION_COUNTER}`, 'xpath');
+  get assetsCounter() {
+    return $(this.ASSETS_SELECTION_COUNTER);
   }
 
-  get neutralFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+  get neutralFaceIcon() {
     return $(this.NEUTRAL_FACE_ICON);
   }
 
-  get sadFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+  get sadFaceIcon() {
     return $(this.SAD_FACE_ICON);
   }
 
-  get emptyStateMessage(): ChainablePromiseElement<WebdriverIO.Element> {
+  get emptyStateMessage() {
     return $(this.EMPTY_STATE_MESSAGE);
   }
 
-  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get cancelButton() {
     return $(this.CANCEL_BUTTON);
   }
 
-  get clearButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get clearButton() {
     return $(this.CLEAR_BUTTON);
   }
 
-  get selectMultipleButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get selectMultipleButton() {
     return $(this.SELECT_MULTIPLE_BUTTON);
   }
 
-  get addToTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get addToTransactionButton() {
     return $(this.ADD_TO_TRANSACTION_BUTTON);
   }
+
+  clickNftItemInAssetSelector = async (nftName: string) => {
+    const nftNameElement = await this.getNftName(nftName);
+    await nftNameElement.click();
+  };
+
+  clickTokensButton = async () => {
+    await this.tokensButton.click();
+  };
+
+  clickNFTsButton = async () => {
+    await this.nftsButton.click();
+  };
+
+  addAmountOfAssets = async (amount: number, assetType: string) => {
+    for (let i = 1; i <= amount; i++) {
+      assetType === 'Tokens' ? await this.tokenItemInfo(i).click() : await this.nftNames[i].click();
+    }
+  };
+
+  deselectToken = async (assetType: string, index: number) => {
+    assetType === 'Tokens' ? await this.tokenItemInfo(index).click() : await this.nftNames[index].click();
+  };
+
+  saveSelectedTokens = async (assetType: string, bundle: number) => {
+    const amountOfAssets = Number(await this.assetsCounter.getText());
+    testContext.save(`amountOfAssetsInBundle${String(bundle)}`, amountOfAssets);
+
+    for (let i = 1; i <= amountOfAssets; i++) {
+      if (assetType === 'Tokens') {
+        const tokenName = String(await this.tokenName(i).getText()).slice(0, 6);
+        const asset =
+          tokenName === 'asset1'
+            ? String(await this.tokenName(i).getText()).slice(0, 10)
+            : String(await this.tokenTicker(i).getText()).slice(0, 10);
+        testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
+      } else {
+        const asset = String(await this.nftNames[i].getText()).slice(0, 10);
+        testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
+      }
+    }
+  };
+
+  saveTicker = async (assetType: string, assetName: string) => {
+    if (assetType === 'Token') {
+      assetName =
+        assetName.slice(0, 6) === 'asset1'
+          ? assetName.slice(0, 10)
+          : String(await this.tokenTickerFromName(assetName).getText());
+    }
+    testContext.save('savedTicker', String(assetName));
+  };
+
+  getTokensInfo = async () => {
+    const tokenInfo = [];
+    const numberOfTokens = await this.tokens.length;
+    for (let tokenIndex = 1; tokenIndex <= numberOfTokens; tokenIndex++) {
+      const tokenDetailsText = await this.tokenItemInfo(tokenIndex).getText();
+      const tokenDetailsArray = tokenDetailsText.split('\n');
+      const tokenDetails = { name: tokenDetailsArray[0], ticker: tokenDetailsArray[1] };
+      tokenInfo.push(tokenDetails);
+    }
+    return tokenInfo;
+  };
+
+  getNftNames = async () => {
+    const nftInfo = [];
+    const numberOfNFTs = await this.nftNames.length;
+    for (let i = 0; i < numberOfNFTs; i++) {
+      nftInfo.push(await this.nftNames[i].getText());
+    }
+    return nftInfo;
+  };
 }
+
+export default new TokenSelectionPage();

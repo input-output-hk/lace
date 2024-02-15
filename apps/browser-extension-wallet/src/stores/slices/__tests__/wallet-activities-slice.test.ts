@@ -14,7 +14,7 @@ import { waitFor } from '@testing-library/react';
 import { mockBlockchainProviders } from '@src/utils/mocks/blockchain-providers';
 import create, { SetState, GetState } from 'zustand';
 import { cardanoCoin } from '@src/utils/constants';
-import { mockInMemoryWallet, mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
+import { mockInMemoryWallet, mockWalletInfoTestnet, mockWalletState } from '@src/utils/mocks/test-helpers';
 
 const mockActivitiesSlice = (
   set: SetState<WalletActivitiesSlice>,
@@ -32,6 +32,7 @@ const mockActivitiesSlice = (
       blockchainProvider: mockBlockchainProviders(),
       walletUI: { cardanoCoin },
       inMemoryWallet: mockInMemoryWallet,
+      walletState: mockWalletState,
       walletInfo: mockWalletInfoTestnet
     } as WalletInfoSlice &
       WalletActivitiesSlice &
@@ -47,7 +48,7 @@ describe('Testing wallet activities slice', () => {
     const useActivitiesHook = create(mockActivitiesSlice);
     const { result } = renderHook(() => useActivitiesHook());
 
-    expect(result.current.getWalletActivitiesObservable).toBeDefined();
+    expect(result.current.getWalletActivities).toBeDefined();
     expect(result.current.walletActivitiesStatus).toBe(StateStatus.IDLE);
   });
 
@@ -56,11 +57,10 @@ describe('Testing wallet activities slice', () => {
     const { result } = renderHook(() => useActivitiesHook());
 
     await act(async () => {
-      const subscription = await result.current.getWalletActivitiesObservable({
+      await result.current.getWalletActivities({
         fiatCurrency: { code: 'USD', symbol: '$' },
         cardanoFiatPrice: 1
       });
-      subscription.subscribe();
     });
 
     await waitFor(() => {

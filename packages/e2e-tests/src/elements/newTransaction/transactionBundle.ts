@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { LocatorStrategy } from '../../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from '../webElement';
-import { AddressInput } from '../addressInput';
+import { AddressInput } from '../AddressInput';
 import { AssetInput } from './assetInput';
 import { ChainablePromiseElement } from 'webdriverio';
 

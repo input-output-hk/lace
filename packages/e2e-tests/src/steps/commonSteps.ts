@@ -20,6 +20,7 @@ import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
 import {
   closeAllTabsExceptActiveOne,
+  closeAllTabsExceptOriginalOne,
   switchToLastWindow,
   switchToWindowWithLace,
   switchToWindowWithRetry
@@ -38,6 +39,7 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
+import { clearWalletRepository } from '../fixture/browserStorageInitializer';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -78,10 +80,10 @@ Then(/^Drawer (is|is not) displayed$/, async (shouldSee: string) => {
   await drawerCommonExtendedAssert.assertSeeDrawer(shouldSee === 'is');
 });
 
-Then(/^I expect browser local storage to (not be|be) empty$/, async (isEmpty: string) => {
+Then(/^I expect wallet repository and local storage to (not be|be) empty$/, async (isEmpty: string) => {
   isEmpty === 'not be'
-    ? await LocalStorageAssert.assertLocalStorageIsNotEmpty()
-    : await LocalStorageAssert.assertLocalStorageIsEmpty();
+    ? await LocalStorageAssert.assertWalletIsNotDeleted()
+    : await LocalStorageAssert.assertWalletIsDeleted();
 });
 
 When(
@@ -102,17 +104,12 @@ When(
   }
 );
 
+// TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  switch (expectedResult) {
-    case 'An': {
-      await commonAssert.assertSeeElementWithText((await t(expectedText)) ?? expectedText);
-      break;
-    }
-    case 'No': {
-      await commonAssert.assertDontSeeElementWithText((await t(expectedText)) ?? expectedText);
-      break;
-    }
-  }
+  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
+    timeout: 5000,
+    reverse: expectedResult === 'No'
+  });
 });
 
 Then(
@@ -149,9 +146,11 @@ Then(/^FAQ page is displayed$/, async () => {
 
 Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: string, mode: 'extended' | 'popup') => {
   await cleanBrowserStorage();
+  await clearWalletRepository();
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();
+  await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();

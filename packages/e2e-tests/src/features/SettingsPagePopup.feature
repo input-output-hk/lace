@@ -54,7 +54,7 @@ Feature: General Settings - Popup View
     And I click on Remove wallet button
     And I click "Back" button on "Remove wallet" modal
     Then I see settings page
-    And I expect browser local storage to not be empty
+    And I expect wallet repository and local storage to not be empty
 
   @LW-2670 @Mainnet @Testnet
   Scenario: Popup View - Show public key
@@ -324,5 +324,5 @@ Feature: General Settings - Popup View
     And I click "Remove wallet" button on "Remove wallet" modal
     And I switch to last window
     Then "Get started" page is displayed
-    And I expect browser local storage to be empty
+    And I expect wallet repository and local storage to be empty
     And Mnemonic is not stored in background storage

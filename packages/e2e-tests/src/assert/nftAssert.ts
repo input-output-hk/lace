@@ -5,7 +5,7 @@ import NftDetails from '../elements/NFTs/nftDetails';
 import { t } from '../utils/translationService';
 import { expect, use } from 'chai';
 import { browser } from '@wdio/globals';
-import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
+import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import chaiSorted from 'chai-sorted';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
@@ -122,8 +122,7 @@ class NftAssert {
   }
 
   async assertNftDisplayedInCoinSelector(nftName: string, shouldBeDisplayed: boolean) {
-    const tokenSelectionPage = new TokenSelectionPage();
-    const nftItem = await tokenSelectionPage.getNftContainer(nftName);
+    const nftItem = await TokenSelectionPage.getNftContainer(nftName);
     await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
   }
 
@@ -199,9 +198,8 @@ class NftAssert {
   }
 
   async assertSeeCustomAdaHandleInCoinSelector() {
-    const tokenSelectionPage = new TokenSelectionPage();
-    const nftItem = await tokenSelectionPage.getNftContainer(Asset.ADA_HANDLE_3.name);
-    await adaHandleAssert.assertSeeCustomImage(await nftItem.$(tokenSelectionPage.NFT_IMAGE));
+    const nftItem = await TokenSelectionPage.getNftContainer(Asset.ADA_HANDLE_3.name);
+    await adaHandleAssert.assertSeeCustomImage(await nftItem.$(TokenSelectionPage.NFT_IMAGE));
   }
 }
 

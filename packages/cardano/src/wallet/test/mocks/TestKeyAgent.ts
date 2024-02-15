@@ -1,8 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
-import * as KeyManagement from '../../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
+import * as KeyManagement from '@cardano-sdk/key-management';
 import * as Crypto from '@cardano-sdk/crypto';
-// Using nodejs to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
-import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 
 interface TestKeyAgentProps {
   password?: string;
@@ -23,6 +21,6 @@ export const testKeyAgent = ({
     },
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519()
     }
   );

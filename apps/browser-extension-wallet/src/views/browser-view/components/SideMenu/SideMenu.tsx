@@ -3,12 +3,7 @@ import { MenuProps } from 'antd';
 import { useHistory } from 'react-router-dom';
 import { MenuItemList } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { sideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
@@ -35,13 +30,7 @@ export const SideMenu = (): React.ReactElement => {
     return () => unregisterListener();
   }, [listen]);
 
-  const sendAnalytics = (category: MatomoEventCategories, name: string, postHogAction?: PostHogAction) => {
-    analytics.sendEventToMatomo({
-      category,
-      action: MatomoEventActions.CLICK_EVENT,
-      name
-    });
-
+  const sendAnalytics = (postHogAction?: PostHogAction) => {
     if (postHogAction) {
       analytics.sendEventToPostHog(postHogAction);
     }
@@ -50,32 +39,16 @@ export const SideMenu = (): React.ReactElement => {
   const handleRedirection: MenuProps['onClick'] = (field) => {
     switch (field.key) {
       case routes.assets:
-        sendAnalytics(
-          MatomoEventCategories.VIEW_TOKENS,
-          AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER,
-          PostHogAction.TokenTokensClick
-        );
+        sendAnalytics(PostHogAction.TokenTokensClick);
         break;
       case routes.staking:
-        sendAnalytics(
-          MatomoEventCategories.STAKING,
-          AnalyticsEventNames.Staking.VIEW_STAKING_BROWSER,
-          PostHogAction.StakingClick
-        );
+        sendAnalytics(PostHogAction.StakingClick);
         break;
       case routes.activity:
-        sendAnalytics(
-          MatomoEventCategories.VIEW_TRANSACTIONS,
-          AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_BROWSER,
-          PostHogAction.ActivityActivityClick
-        );
+        sendAnalytics(PostHogAction.ActivityActivityClick);
         break;
       case routes.nfts:
-        sendAnalytics(
-          MatomoEventCategories.VIEW_NFT,
-          AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_BROWSER,
-          PostHogAction.NFTsClick
-        );
+        sendAnalytics(PostHogAction.NFTsClick);
     }
     push(field.key);
   };

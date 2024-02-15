@@ -1,19 +1,18 @@
-import { exposeApi } from '@cardano-sdk/web-extension';
+import { WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { of, BehaviorSubject } from 'rxjs';
-import { runtime } from 'webextension-polyfill';
-import {
-  clearBackgroundStorage,
-  getBackgroundStorage,
-  hashExtendedAccountPublicKey,
-  setBackgroundStorage
-} from '@lib/scripts/background/util';
-import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
+import { BehaviorSubject, ReplaySubject, combineLatest, distinctUntilChanged } from 'rxjs';
+import { getActiveWallet, hashExtendedAccountPublicKey } from '@lib/scripts/background/util';
+import { UserId, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
-import { userIdServiceProperties } from '../config';
-import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import isUndefined from 'lodash/isUndefined';
+import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
+
+export type UserIdServiceStorage = {
+  get: typeof getBackgroundStorage;
+  set: typeof setBackgroundStorage;
+  clear: typeof clearBackgroundStorage;
+};
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -24,15 +23,33 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
-  public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
+  public userId$: ReplaySubject<UserId> = new ReplaySubject();
+  private userTrackingType$: BehaviorSubject<UserTrackingType> = new BehaviorSubject(UserTrackingType.Basic);
   private hasNewSessionStarted = false;
 
   constructor(
-    private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
-    private setStorage: typeof setBackgroundStorage = setBackgroundStorage,
-    private clearStorage: typeof clearBackgroundStorage = clearBackgroundStorage,
+    private walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+    private walletManager: WalletManagerApi,
+    private storage: UserIdServiceStorage = {
+      clear: clearBackgroundStorage,
+      get: getBackgroundStorage,
+      set: setBackgroundStorage
+    },
     private sessionLength: number = SESSION_LENGTH
-  ) {}
+  ) {
+    combineLatest([
+      this.userTrackingType$.pipe(distinctUntilChanged()),
+      this.walletManager.activeWalletId$.pipe(
+        distinctUntilChanged((a, b) => a?.walletId === b?.walletId && a?.accountIndex === b?.accountIndex)
+      )
+    ]).subscribe(async ([type]) => {
+      const id = await this.getUserId();
+      this.userId$.next({
+        type,
+        id
+      });
+    });
+  }
 
   async init(): Promise<void> {
     if (!this.userIdRestored) {
@@ -46,22 +63,23 @@ export class UserIdService implements UserIdServiceInterface {
     }
   }
 
-  private async getWalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
-    const { keyAgentsByChain, usePersistentUserId } = await this.getStorage();
-
-    if (!keyAgentsByChain) {
-      console.debug('[ANALYTICS] Key agents not found - Wallet not created yet');
-      return undefined;
+  private async getWalletBasedUserId(): Promise<string | undefined> {
+    const active = await getActiveWallet({
+      walletManager: this.walletManager,
+      walletRepository: this.walletRepository
+    });
+    if (!active) return;
+    if (active.wallet.type === WalletType.Script || !active.account) {
+      throw new Error('Script wallet support not implemented');
     }
+    const { usePersistentUserId } = await this.storage.get();
 
     if (!usePersistentUserId) {
       return undefined;
     }
 
     if (!this.walletBasedUserId) {
-      const chainName = getChainNameByNetworkMagic(networkMagic);
-      const extendedAccountPublicKey = keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey;
-      this.walletBasedUserId = this.generateWalletBasedUserId(extendedAccountPublicKey);
+      this.walletBasedUserId = this.generateWalletBasedUserId(active.account.extendedAccountPublicKey);
 
       if (this.userTrackingType$.value !== UserTrackingType.Enhanced) {
         this.userTrackingType$.next(UserTrackingType.Enhanced);
@@ -80,8 +98,8 @@ export class UserIdService implements UserIdServiceInterface {
     return this.randomizedUserId;
   }
 
-  async getUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string> {
-    const walletBasedId = await this.getWalletBasedUserId(networkMagic);
+  async getUserId(): Promise<string> {
+    const walletBasedId = await this.getWalletBasedUserId();
 
     if (!walletBasedId) {
       return await this.getRandomizedUserId();
@@ -90,14 +108,14 @@ export class UserIdService implements UserIdServiceInterface {
     return walletBasedId;
   }
 
-  async getAliasProperties(networkMagic: Wallet.Cardano.NetworkMagic): Promise<{ alias: string; id: string }> {
-    const id = await this.getWalletBasedUserId(networkMagic);
+  async getAliasProperties(): Promise<{ alias: string; id: string }> {
+    const id = await this.getWalletBasedUserId();
     const alias = await this.getRandomizedUserId();
     return { alias, id };
   }
 
   async resetToDefaultValues(): Promise<void> {
-    const { usePersistentUserId, userId } = await this.getStorage();
+    const { usePersistentUserId, userId } = await this.storage.get();
     if (isUndefined(usePersistentUserId) && isUndefined(userId)) {
       await this.clearId();
       this.userIdRestored = false;
@@ -108,10 +126,10 @@ export class UserIdService implements UserIdServiceInterface {
     console.debug('[ANALYTICS] clearId() called');
     this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
-    this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
     this.hasNewSessionStarted = false;
-    await this.clearStorage({ keys: ['userId', 'usePersistentUserId'] });
+    await this.storage.clear({ keys: ['userId', 'usePersistentUserId'] });
+    this.userTrackingType$.next(UserTrackingType.Basic);
   }
 
   async makePersistent(): Promise<void> {
@@ -119,13 +137,17 @@ export class UserIdService implements UserIdServiceInterface {
     this.clearSessionTimeout();
     this.setSessionTimeout();
     const userId = await this.getRandomizedUserId();
-    await this.setStorage({ usePersistentUserId: true, userId });
+    await this.storage.set({ usePersistentUserId: true, userId });
+    this.userId$.next({
+      id: userId,
+      type: UserTrackingType.Enhanced
+    });
     this.userTrackingType$.next(UserTrackingType.Enhanced);
   }
 
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
-    await this.setStorage({ usePersistentUserId: false, userId: undefined });
+    await this.storage.set({ usePersistentUserId: false, userId: undefined });
     this.setSessionTimeout();
     this.userTrackingType$.next(UserTrackingType.Basic);
   }
@@ -137,7 +159,7 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   private async restoreUserId(): Promise<void> {
-    const { userId, usePersistentUserId } = await this.getStorage();
+    const { userId, usePersistentUserId } = await this.storage.get();
 
     if (usePersistentUserId) {
       console.debug('[ANALYTICS] Restoring user ID from extension storage');
@@ -181,14 +203,3 @@ export class UserIdService implements UserIdServiceInterface {
     return isNewSession;
   }
 }
-
-const userIdService = new UserIdService();
-
-exposeApi<UserIdServiceInterface>(
-  {
-    api$: of(userIdService),
-    baseChannel: USER_ID_SERVICE_BASE_CHANNEL,
-    properties: userIdServiceProperties
-  },
-  { logger: console, runtime }
-);

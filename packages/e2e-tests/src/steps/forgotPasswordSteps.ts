@@ -79,7 +79,7 @@ Then(/^I am on (.*) page of restoration flow$/, async (expectedPage: string) => 
 });
 
 Then(/^all wallet related data is removed$/, async () => {
-  await LocalStorageAssert.assertLocalStorageIsEmpty();
+  await LocalStorageAssert.assertWalletIsDeleted();
   await BackgroundStorageAssert.assertKeyAgentsByChainNotInBackgroundStorage();
 });
 

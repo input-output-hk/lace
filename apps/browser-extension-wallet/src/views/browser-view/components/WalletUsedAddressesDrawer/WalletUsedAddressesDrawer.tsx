@@ -4,6 +4,7 @@ import { map } from 'rxjs';
 import { useWalletStore } from '../../../../stores';
 import { useDrawer } from '../../stores';
 import { UsedAddressesSchema, WalletUsedAddressesDrawer as Component } from './WalletUsedAddressesDrawer.component';
+import { isScriptAddress } from '@cardano-sdk/wallet';
 
 export const WalletUsedAddressesDrawer = (): React.ReactElement => {
   const { inMemoryWallet } = useWalletStore();
@@ -14,9 +15,10 @@ export const WalletUsedAddressesDrawer = (): React.ReactElement => {
           addresses
             // TODO: Filter used when multi address in supported
             // .filter((address) => address.isUsed)
-            .map((address) => ({
+            .map((address, addressNo) => ({
               address: address.address.toString(),
-              id: address.index
+              // TODO: might be better to id script addresses by address LW-9574
+              id: isScriptAddress(address) ? addressNo : address.index
             }))
         )
       ),

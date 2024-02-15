@@ -7,7 +7,7 @@ import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import { Asset } from '../data/Asset';
 import testContext from '../utils/testContext';
-import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
+import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import adaHandleAssert from './adaHandleAssert';
@@ -79,11 +79,10 @@ class NftCreateFolderAssert {
         await t('cardano.stakePoolSearch.searchPlaceholder')
       );
       await NftSelectNftsPage.assetSelectorContainer.waitForDisplayed();
-      const tokenSelectionPage = new TokenSelectionPage();
 
-      const ibileCoin = await tokenSelectionPage.getNftContainer(Asset.IBILECOIN.name);
+      const ibileCoin = await TokenSelectionPage.getNftContainer(Asset.IBILECOIN.name);
       await ibileCoin.waitForDisplayed();
-      const bisonCoin = await tokenSelectionPage.getNftContainer(Asset.BISON_COIN.name);
+      const bisonCoin = await TokenSelectionPage.getNftContainer(Asset.BISON_COIN.name);
       await bisonCoin.waitForDisplayed();
 
       await NftSelectNftsPage.nextButton.waitForDisplayed();
@@ -97,7 +96,7 @@ class NftCreateFolderAssert {
 
   async verifySeeAllOwnedNfts() {
     const ownedNftNames = testContext.load('ownedNfts');
-    const displayedNfts = await new TokenSelectionPage().nftContainers;
+    const displayedNfts = await TokenSelectionPage.nftContainers;
 
     const displayedNftNames: string[] = [];
     for (const nftContainer of displayedNfts) {
@@ -109,7 +108,7 @@ class NftCreateFolderAssert {
 
   async verifySeeAllAdaHandles() {
     const ownedAdaHandleNames: string[] = testContext.load('displayedAdaHandleNames');
-    const displayedNfts = await new TokenSelectionPage().nftContainers;
+    const displayedNfts = await TokenSelectionPage.nftContainers;
 
     const displayedAdaHandleNames: string[] = [];
     for (const nftContainer of displayedNfts) {
@@ -120,7 +119,7 @@ class NftCreateFolderAssert {
 
   async verifySeeAllAdaImages() {
     const adaHandleImages: string[] = testContext.load('displayedAdaHandleImages');
-    const displayedAdaHandleImages = await new TokenSelectionPage().nftImages;
+    const displayedAdaHandleImages = await TokenSelectionPage.nftImages;
     const displayedAdaHandleImagesSrc: string[] = [];
 
     for (const displayedAdaHandleImage of displayedAdaHandleImages) {
@@ -132,7 +131,7 @@ class NftCreateFolderAssert {
   }
 
   async verifyNoneNftIsSelected() {
-    await new TokenSelectionPage().nftItemSelectedCheckmark.waitForDisplayed({ reverse: true });
+    await TokenSelectionPage.nftItemSelectedCheckmark.waitForDisplayed({ reverse: true });
   }
 
   async assertSeeInputMaxLengthError(shouldBeDisplayed: boolean, maxLength: number) {

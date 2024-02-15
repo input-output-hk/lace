@@ -75,7 +75,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
     const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
+    await inMemoryWallet.submitTx(signedTx);
   }, [delegationTxBuilder, inMemoryWallet]);
 
   const handleVerifyPass = useCallback(async () => {
@@ -112,8 +112,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        onClick={() => executeWithPassword(password!, handleVerifyPass)}
+        onClick={() => executeWithPassword(handleVerifyPass, password)}
         disabled={isSubmitDisabled}
         loading={isSubmitingTx}
         className={styles.confirmBtn}
