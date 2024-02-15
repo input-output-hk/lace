@@ -1,5 +1,6 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 
+import wasm from 'vite-plugin-wasm';
 import { dirname, join } from 'path';
 import { mergeConfig, UserConfig } from 'vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
@@ -43,7 +44,16 @@ const config: StorybookConfig = {
           esbuildOptions: { loader: { '.css': 'empty' } },
         }),
         tsconfigPaths(),
+        wasm(),
       ],
+      resolve: {
+        alias: [
+          {
+            find: /@emurgo\/cardano-message-signing-nodejs/,
+            replacement: '@emurgo/cardano-message-signing-browser',
+          },
+        ],
+      },
     };
 
     return mergeConfig(baseConfig, userConfig);

@@ -10852,6 +10852,7 @@ __metadata:
     "@cardano-sdk/input-selection": 0.12.20
     "@cardano-sdk/tx-construction": 0.17.10
     "@cardano-sdk/util": 0.15.0
+    "@emurgo/cardano-message-signing-browser": 1.0.1
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
@@ -10907,6 +10908,7 @@ __metadata:
     vite-plugin-commonjs: ^0.10.1
     vite-plugin-node-polyfills: ^0.19.0
     vite-plugin-svgr: ^4.2.0
+    vite-plugin-wasm: ^3.3.0
     vite-tsconfig-paths: ^4.2.3
     vitest: ^0.31.0
     wait-on: ^7.0.1
@@ -52155,6 +52157,15 @@ __metadata:
   peerDependencies:
     vite: ^2.6.0 || 3 || 4 || 5
   checksum: 8202c0b25c7aa547825c2a73c7ea3702bd13dadb12634a8c2ea4e4c701164d8718632a391deff5fdc53877a09ec3668843b521a3e7ca8083e040e5e4f7e53ecb
+  languageName: node
+  linkType: hard
+
+"vite-plugin-wasm@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "vite-plugin-wasm@npm:3.3.0"
+  peerDependencies:
+    vite: ^2 || ^3 || ^4 || ^5
+  checksum: 844034955d6650f89988eebb543e4b3307a54d7b800365052f5b97683223d3b99640ecb22d1fd770e768239576629d975bdefc0c9545999564e206b331f0ac3b
   languageName: node
   linkType: hard
 
