@@ -17,13 +17,9 @@ import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import {
-  setBackgroundStorage,
-  clearBackgroundStorage,
-  getBackgroundStorage,
-  getADAPriceFromBackgroundStorage
-} from '../util';
+import { getADAPriceFromBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
+import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -46,7 +42,6 @@ interface TokenAPIResponse {
 }
 
 const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefined);
-let walletPassword: Uint8Array;
 
 const handleOpenBrowser = async (data: OpenBrowserData) => {
   let path = '';
@@ -175,13 +170,6 @@ exposeApi<BackgroundService>(
       clearBackgroundStorage,
       getBackgroundStorage,
       setBackgroundStorage,
-      getWalletPassword: () => {
-        if (!walletPassword) throw new Error('Missing password');
-        return walletPassword;
-      },
-      setWalletPassword: (password?: Uint8Array) => {
-        walletPassword = password;
-      },
       resetStorage: async () => {
         await clearBackgroundStorage();
         await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });

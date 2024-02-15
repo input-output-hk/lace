@@ -7,7 +7,7 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
+import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -23,11 +23,13 @@ import {
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   DELEGATION_PREFERENCES_LS_KEY
 } from '@utils/constants';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { setWalletPassword, handleOpenBrowser } = useBackgroundServiceAPIContext();
+  const { handleOpenBrowser } = useBackgroundServiceAPIContext();
   const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
@@ -36,7 +38,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
   const {
-    getKeyAgentType,
+    walletType,
     inMemoryWallet,
     walletUI: { cardanoCoin },
     stakePoolSearchResults,
@@ -48,7 +50,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     walletInfo,
     currentChain
   } = useWalletStore((state) => ({
-    getKeyAgentType: state.getKeyAgentType,
+    walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
     walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
     stakePoolSearchResults: state.stakePoolSearchResults,
@@ -76,7 +78,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   }, []);
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
-  const { executeWithPassword } = useWalletManager();
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -110,7 +111,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
           setMultidelegationFirstVisit(false);
           setMultidelegationFirstVisitSincePortfolioPersistence(false);
         },
-        backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
@@ -122,11 +122,11 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         password,
         stakingRewards,
         submittingState,
-        walletStoreGetKeyAgentType: getKeyAgentType,
+        walletManagerExecuteWithPassword: withSignTxConfirmation,
+        walletStoreWalletType: walletType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,
-        walletManagerExecuteWithPassword: executeWithPassword,
         walletStoreStakePoolSearchResults: stakePoolSearchResults,
         walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
         walletStoreFetchStakePools: fetchStakePools,
@@ -138,7 +138,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         walletAddress,
-        currentChain
+        currentChain,
+        isMultidelegationSupportedByDevice
       }}
     >
       <ContentLayout

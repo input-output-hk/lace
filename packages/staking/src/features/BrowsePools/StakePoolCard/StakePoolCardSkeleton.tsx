@@ -1,17 +1,15 @@
+/* eslint-disable no-magic-numbers */
 import { Card } from '@lace/ui';
 import cn from 'classnames';
 import * as styles from './StakePoolCard.css';
 
 interface Props {
   index?: number;
+  fadeScale?: 3 | 4 | 5;
 }
 
-export const StakePoolCardSkeleton = ({ index = 0 }: Props) => (
-  <Card.Greyed
-    className={cn(styles.card, styles.skeleton)}
-    style={{
-      // eslint-disable-next-line no-magic-numbers
-      animationDelay: `${index * 0.05}s`,
-    }}
-  />
+const defaultFadeScale = 5;
+
+export const StakePoolCardSkeleton = ({ index = 0, fadeScale = defaultFadeScale }: Props) => (
+  <Card.Greyed className={cn(styles.card, styles.skeleton({ [`fade${fadeScale}`]: index % (fadeScale + 1) }))} />
 );

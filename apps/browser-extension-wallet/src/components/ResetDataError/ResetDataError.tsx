@@ -22,14 +22,14 @@ export const ResetDataError = ({
   buttonLabel
 }: ResetDataErrorProps): React.ReactElement => {
   const { deleteWallet } = useWalletManager();
-  const { walletManagerUi, setDeletingWallet } = useWalletStore();
+  const { walletManager, setDeletingWallet } = useWalletStore();
   const { theme } = useTheme();
   const backgroundService = useBackgroundServiceAPIContext();
 
   const Layout = appMode === 'browser' ? WalletSetupLayout : React.Fragment;
 
   const resetData = async () => {
-    if (walletManagerUi) {
+    if (walletManager) {
       setDeletingWallet(true);
       await deleteWallet();
     }

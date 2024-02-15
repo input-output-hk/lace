@@ -1,13 +1,7 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
-import {
-  useAnalyticsContext,
-  useBackgroundServiceAPIContext,
-  useCurrencyStore,
-  useExternalLinkOpener,
-  useTheme
-} from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
+import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import { useBalances, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
@@ -21,10 +15,11 @@ import {
 import { ActivityDetail } from '../../activity';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { isMultidelegationSupportedByDevice } from '../helpers';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
-  const { setWalletPassword } = useBackgroundServiceAPIContext();
   const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
@@ -33,7 +28,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const { balance } = useBalances(priceResult?.cardano?.price);
   const {
     walletInfo,
-    getKeyAgentType,
+    walletType,
     inMemoryWallet,
     walletUI: { cardanoCoin },
     stakePoolSearchResults,
@@ -47,7 +42,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
     activityDetail,
     resetActivityState
   } = useWalletStore((state) => ({
-    getKeyAgentType: state.getKeyAgentType,
+    walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
     walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
     stakePoolSearchResults: state.stakePoolSearchResults,
@@ -79,7 +74,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
   }, []);
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
-  const { executeWithPassword } = useWalletManager();
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
@@ -106,7 +100,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
         analytics,
         delegationPreferencePersistence,
         setDelegationPreferencePersistence,
-        backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,
@@ -114,13 +107,13 @@ export const MultiDelegationStaking = (): JSX.Element => {
         delegationStoreDelegationTxFee: delegationTxFee,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
+        walletManagerExecuteWithPassword: withSignTxConfirmation,
         password,
         submittingState,
-        walletStoreGetKeyAgentType: getKeyAgentType,
+        walletStoreWalletType: walletType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,
-        walletManagerExecuteWithPassword: executeWithPassword,
         walletStoreStakePoolSearchResults: stakePoolSearchResults,
         walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
         walletStoreFetchStakePools: fetchStakePools,
@@ -140,7 +133,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
           setMultidelegationFirstVisitSincePortfolioPersistence(false);
         },
         walletAddress,
-        currentChain
+        currentChain,
+        isMultidelegationSupportedByDevice
       }}
     >
       <Staking currentChain={currentChain} theme={theme.name} />

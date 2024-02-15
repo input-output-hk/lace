@@ -13,6 +13,8 @@ import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
 import { browser } from '@wdio/globals';
+import { expect } from 'chai';
+import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
@@ -22,7 +24,7 @@ When(
 );
 
 When(/^I click on NFT with name: "([^"]*)" in asset selector$/, async (nftName: string) => {
-  await nftsPageObject.clickNftItemInAssetSelector(nftName);
+  await TokenSelectionPage.clickNftItemInAssetSelector(nftName);
 });
 
 Then(
@@ -90,7 +92,7 @@ Given(
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await mainMenuPageObject.navigateToSection('NFTs', mode);
-      expect(await nftsPageObject.isNftDisplayed(nftName));
+      expect(await nftsPageObject.isNftDisplayed(nftName)).to.be.true;
     }
   }
 );

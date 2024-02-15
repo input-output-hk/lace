@@ -2,7 +2,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { themes } from '@providers/ThemeProvider';
 import { BackgroundStorage, MigrationState } from './storage';
 import { CoinPrices } from './prices';
-import type { clearBackgroundStorage } from '../background/util';
+import type { clearBackgroundStorage } from '../background/storage';
 
 export enum BaseChannels {
   BACKGROUND_ACTIONS = 'background-actions'
@@ -64,8 +64,6 @@ export type BackgroundService = {
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;
   clearBackgroundStorage: typeof clearBackgroundStorage;
-  getWalletPassword: () => Uint8Array;
-  setWalletPassword: (password?: Uint8Array) => void;
   resetStorage: () => Promise<void>;
   backendFailures$: BehaviorSubject<number>;
 };

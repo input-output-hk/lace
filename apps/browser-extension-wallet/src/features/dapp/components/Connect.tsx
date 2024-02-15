@@ -12,7 +12,7 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { runtime } from 'webextension-polyfill';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import * as cip30 from '@cardano-sdk/dapp-connector';
-import { UserPromptService } from '@lib/scripts/background/services/dappService';
+import type { UserPromptService } from '@lib/scripts/background/services/dappService';
 import { of } from 'rxjs';
 import InfoIcon from '../../../assets/icons/info.component.svg';
 import ShieldExclamation from '../../../assets/icons/shield-exclamation.component.svg';

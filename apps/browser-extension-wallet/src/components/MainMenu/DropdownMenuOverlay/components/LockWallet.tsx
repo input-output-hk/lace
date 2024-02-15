@@ -10,7 +10,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 export const LockWallet = (): React.ReactElement => {
   const { t } = useTranslation();
   const { lockWallet } = useWalletManager();
-  const { walletLock } = useWalletStore();
+  const { isInMemoryWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
 
   const handleLockWallet = () => {
@@ -23,7 +23,7 @@ export const LockWallet = (): React.ReactElement => {
       data-testid="header-menu-lock"
       onClick={handleLockWallet}
       className={styles.menuItem}
-      disabled={!walletLock}
+      disabled={!isInMemoryWallet}
     >
       {t('browserView.topNavigationBar.links.lockWallet')}
     </Menu.Item>
