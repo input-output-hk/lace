@@ -46,6 +46,9 @@ class CollateralDrawerAssert {
 
   async assertSeeCollateralNotEnoughAdaDrawer() {
     await CollateralDrawer.collateralButton.waitForClickable();
+    await CollateralDrawer.passwordInputContainer.waitForClickable({
+      reverse: true
+    });
     expect(await CollateralDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.wallet.collateral.title')
     );
