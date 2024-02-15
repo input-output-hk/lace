@@ -16,6 +16,7 @@ export const TransactionFee = ({ fee, amountTransformer, coinSymbol }: Transacti
       fiatPrice={amountTransformer(fee)}
       label={t('package.core.activityDetails.transactionFee')}
       tooltip={t('package.core.activityDetails.transactionFeeInfo')}
+      data-testid="fee"
     />
   );
 };

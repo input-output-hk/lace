@@ -64,6 +64,7 @@ const Example = (): JSX.Element => (
                 tooltip="This is a sample tooltip text"
                 amount="102.00 ADA"
                 fiatPrice="84.45 USD"
+                data-testid="sample"
               />
             </Cell>
           </Grid>

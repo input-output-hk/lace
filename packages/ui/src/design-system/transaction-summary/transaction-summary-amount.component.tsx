@@ -17,6 +17,11 @@ type Props = OmitClassName<'div'> & {
   tooltip?: string;
   amount: string;
   fiatPrice: string;
+  'data-testid'?: string;
+};
+
+const makeTestId = (namespace = '', path = ''): string | undefined => {
+  return namespace === '' ? undefined : `tx-amount-${namespace}-${path}`;
 };
 
 export const Amount = ({
@@ -26,17 +31,25 @@ export const Amount = ({
   tooltip,
   ...props
 }: Readonly<Props>): JSX.Element => {
+  const testId = props['data-testid'];
+
   return (
-    <Grid {...props} columns="$2">
+    <Grid {...props} data-testid={makeTestId(testId, 'root')} columns="$2">
       <Cell>
         <Flex>
-          <Typography.Body.Normal className={cx.label}>
+          <Typography.Body.Normal
+            data-testid={makeTestId(testId, 'label')}
+            className={cx.label}
+          >
             {label}
           </Typography.Body.Normal>
           {tooltip !== undefined && (
             <Box ml="$8" className={cx.tooltip}>
               <Tooltip label={tooltip}>
-                <div className={cx.tooltipText}>
+                <div
+                  className={cx.tooltipText}
+                  data-testid={makeTestId(testId, 'tooltip-icon')}
+                >
                   <InfoIcon />
                 </div>
               </Tooltip>
@@ -46,10 +59,16 @@ export const Amount = ({
       </Cell>
       <Cell>
         <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-          <Typography.Body.Normal className={cx.text}>
+          <Typography.Body.Normal
+            className={cx.text}
+            data-testid={makeTestId(testId, 'amount')}
+          >
             {amount}
           </Typography.Body.Normal>
-          <Typography.Body.Normal className={cx.secondaryText}>
+          <Typography.Body.Normal
+            className={cx.secondaryText}
+            data-testid={makeTestId(testId, 'fiat')}
+          >
             {fiatPrice}
           </Typography.Body.Normal>
         </Flex>
