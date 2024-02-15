@@ -103,7 +103,7 @@ export const SortAndFilter = ({
         showArrow
         withOutline
         className={styles.selectGroup}
-        placeholder="Select"
+        placeholder={t('browsePools.stakePoolTableBrowser.sortAndFilter.input.select')}
         options={filterOption.opts as SelectOption[]}
         selectedValue={selectedValue}
       />
@@ -127,7 +127,7 @@ export const SortAndFilter = ({
       },
       {
         icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros'),
+        label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.title'),
         onIconClick: handleIconClick,
         value: MetricType.apy,
       },
@@ -164,38 +164,48 @@ export const SortAndFilter = ({
     ];
   }, [direction, handleIconClick, t]);
 
-  const filterOptions: FilterOption[] = useMemo(
-    () => [
+  const filterOptions: FilterOption[] = useMemo(() => {
+    const fromLabel = t('browsePools.stakePoolTableBrowser.sortAndFilter.input.from');
+    const toLabel = t('browsePools.stakePoolTableBrowser.sortAndFilter.input.to');
+
+    return [
       {
         key: PoolsFilter.Saturation,
-        opts: ['From', 'To'],
-        title: 'Saturation',
+        opts: [fromLabel, toLabel],
+        title: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
         type: 'input',
       },
       {
         key: PoolsFilter.ProfitMargin,
-        opts: ['From', 'To'],
-        title: 'Profit Margin',
+        opts: [fromLabel, toLabel],
+        title: t('browsePools.stakePoolTableBrowser.sortByTitle.profitMargin'),
         type: 'input',
       },
       {
         key: PoolsFilter.Performance,
-        opts: ['From', 'To'],
-        title: 'Performance',
+        opts: [fromLabel, toLabel],
+        title: t('browsePools.stakePoolTableBrowser.sortByTitle.performance'),
         type: 'input',
       },
       {
         key: PoolsFilter.Ros,
         opts: [
-          { label: 'Last epoch', selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch', value: 'lastepoch' },
-          { label: 'other', selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch', value: 'other' },
+          {
+            label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.lastEpoch'),
+            selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch',
+            value: 'lastepoch',
+          },
+          {
+            label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.other'),
+            selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch',
+            value: 'other',
+          },
         ],
-        title: 'ROS',
+        title: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.title'),
         type: 'select',
       },
-    ],
-    [localFilters]
-  );
+    ];
+  }, [localFilters, t]);
 
   return (
     <Card.Outlined className={styles.card}>
@@ -222,7 +232,7 @@ export const SortAndFilter = ({
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">
             {filterOptions.map((filterOption) => (
               <Flex flexDirection="column" m="$4" key={filterOption.title} alignItems="stretch">
-                <Text.Body.Small weight="$medium">{filterOption.title}</Text.Body.Small>
+                <Text.Body.Large weight="$medium">{filterOption.title}</Text.Body.Large>
                 {getFilters(filterOption)}
               </Flex>
             ))}

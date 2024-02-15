@@ -21,7 +21,7 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
     [PoolsFilter.Performance]: ['', ''],
-    [PoolsFilter.Ros]: [''],
+    [PoolsFilter.Ros]: ['lastepoch'],
   });
 
   const handleSortChange = useCallback(
