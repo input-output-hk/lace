@@ -13,6 +13,25 @@ export const radioGroupRoot = style([
   },
 ]);
 
+export const radioGroupItemWrapper = style([
+  {
+    position: 'relative',
+    selectors: {
+      '&:focus-within::after': {
+        content: '',
+        border: `3px solid ${vars.colors.$radiobutton_focus_color}`,
+        width: vars.spacing.$fill,
+        height: vars.spacing.$fill,
+        borderRadius: vars.radius.$tiny,
+        position: 'absolute',
+        padding: `${vars.spacing.$6} ${vars.spacing.$8}`,
+        left: '50%',
+        transform: 'translateX(-50%)',
+      },
+    },
+  },
+]);
+
 export const radioGroupItem = style([
   sx({
     width: '$16',

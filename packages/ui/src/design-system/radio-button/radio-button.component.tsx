@@ -41,7 +41,12 @@ export const RadioButtonGroup = ({
       className={cx.radioGroupRoot}
     >
       {options.map(({ value, label, icon, onIconClick }) => (
-        <Flex alignItems="center" h="$fill" m="$4" key={value}>
+        <Flex
+          alignItems="center"
+          m="$4"
+          key={value}
+          className={cn({ [cx.radioGroupItemWrapper]: !!label })}
+        >
           <RadixRadioGroup.Item
             id={label}
             value={value}
@@ -53,7 +58,7 @@ export const RadioButtonGroup = ({
             <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
           </RadixRadioGroup.Item>
           {label && (
-            <label id="Label" htmlFor={value}>
+            <label id="Label" htmlFor={label}>
               <Box
                 className={cn(cx.label, {
                   [cx.disabled]: disabled,
