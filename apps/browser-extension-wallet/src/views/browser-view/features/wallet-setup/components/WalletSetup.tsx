@@ -1,18 +1,5 @@
-import {
-  WalletSetupSteps,
-  WalletSetupFlowProvider,
-  WalletSetupFlow,
-  WalletAnalyticsInfo,
-  AnalyticsConfirmationBanner
-} from '@lace/core';
+import { WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import {
-  PostHogAction,
-  postHogOnboardingActions,
-  PostHogProperties,
-  EnhancedAnalyticsOptInStatus,
-  UserTrackingType
-} from '@providers/AnalyticsProvider/analyticsTracker';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
@@ -30,6 +17,7 @@ import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analy
 import { ConfirmationBanner } from '@lace/common';
 import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { WalletSetupMainPage } from './WalletSetupMainPage';
 const userIdService = getUserIdService();
 
 // This initial step is needed for configure the step that we want to snapshot
@@ -40,11 +28,6 @@ export interface WalletSetupProps {
 export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletSetupProps): React.ReactElement => {
   const history = useHistory();
   const { path } = useRouteMatch();
-  const [isConfirmRestoreOpen, setIsConfirmRestoreOpen] = useState(false);
-  const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
-  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
-  const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
-  const { t: translate, Trans } = useTranslate();
   const analytics = useAnalyticsContext();
   const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
@@ -101,34 +84,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
   }, [clearWallet, isForgotPasswordFlow]);
 
   const cancelWalletFlow = () => history.push(walletRoutePaths.setup.home);
-
-  const handleStartHardwareOnboarding = () => {
-    setIsDappConnectorWarningOpen(true);
-    analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
-  };
-
-  const sendAnalytics = async (args: { postHogAction: PostHogAction; postHogProperties?: PostHogProperties }) => {
-    await analytics.sendEventToPostHog(args.postHogAction, args?.postHogProperties);
-  };
-
-  const handleAnalyticsChoice = async (isAccepted: boolean) => {
-    const analyticsStatus = isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
-    setDoesUserAllowAnalytics(analyticsStatus);
-    await analytics.setOptedInForEnhancedAnalytics(analyticsStatus);
-
-    const postHogAnalyticsAgreeAction = postHogOnboardingActions.landing.ANALYTICS_AGREE_CLICK;
-    const postHogAnalyticsRejectAction = postHogOnboardingActions.landing.ANALYTICS_REJECT_CLICK;
-
-    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticsRejectAction;
-    const postHogProperties = {
-      // eslint-disable-next-line camelcase
-      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
-    };
-    await sendAnalytics({
-      postHogAction,
-      postHogProperties
-    });
-  };
 
   const sendAnalyticsHandler: SendOnboardingAnalyticsEvent = async (postHogAction, postHogProperties) =>
     await analytics.sendEventToPostHog(postHogAction, postHogProperties);
