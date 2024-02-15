@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 export const useRestorePoolsSelection = () => {
   const areSelectedPoolsRestored = useRef<{ restored: boolean }>({ restored: false });
-  const { delegationPreferencePersistence, walletStoreBlockchainProvider } = useOutsideHandles();
+  const { stakingBrowserPreferencesPersistence, walletStoreBlockchainProvider } = useOutsideHandles();
 
   const { portfolioMutators, selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
@@ -34,11 +34,15 @@ export const useRestorePoolsSelection = () => {
     if (areSelectedPoolsRestored.current.restored) return;
     const selectedPortfolioStakePoolsId = new Set(selectedPortfolioStakePools.map(({ id }) => id.toString()));
     const selectedPoolsIdsWithNoData =
-      delegationPreferencePersistence?.selectedPoolsIds
+      stakingBrowserPreferencesPersistence?.selectedPoolsIds
         ?.slice(0, MAX_POOLS_COUNT)
         .filter((poolId) => !selectedPortfolioStakePoolsId.has(poolId)) || [];
 
     if (selectedPoolsIdsWithNoData?.length === 0) return;
     setMissingSelectedPoolsData(selectedPoolsIdsWithNoData);
-  }, [delegationPreferencePersistence?.selectedPoolsIds, selectedPortfolioStakePools, setMissingSelectedPoolsData]);
+  }, [
+    stakingBrowserPreferencesPersistence?.selectedPoolsIds,
+    selectedPortfolioStakePools,
+    setMissingSelectedPoolsData,
+  ]);
 };

@@ -88,7 +88,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
-  const [delegationPreferencePersistence, { updateLocalStorage: setDelegationPreferencePersistence }] =
+  const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
     useLocalStorage(DELEGATION_PREFERENCES_LS_KEY);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
@@ -102,8 +102,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     <OutsideHandlesProvider
       {...{
         analytics,
-        delegationPreferencePersistence,
-        setDelegationPreferencePersistence,
+        stakingBrowserPreferencesPersistence,
+        setStakingBrowserPreferencesPersistence,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         multidelegationFirstVisitSincePortfolioPersistence,

@@ -31,19 +31,19 @@ export const BrowsePools = () => {
     walletStoreResetStakePools: resetStakePools,
     walletStoreFetchStakePools: fetchStakePools,
     analytics,
-    delegationPreferencePersistence,
-    setDelegationPreferencePersistence,
+    stakingBrowserPreferencesPersistence,
+    setStakingBrowserPreferencesPersistence,
   } = useOutsideHandles();
 
   const componentRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
-  const [searchValue, setSearchValue] = useState<string>(delegationPreferencePersistence?.searchQuery || '');
+  const [searchValue, setSearchValue] = useState<string>(stakingBrowserPreferencesPersistence?.searchQuery || '');
   const [sort, setSort] = useState<StakePoolSortOptions>(
-    delegationPreferencePersistence?.sortOptions || DEFAULT_SORT_OPTIONS
+    stakingBrowserPreferencesPersistence?.sortOptions || DEFAULT_SORT_OPTIONS
   );
   const [poolsView, setPoolsView] = useState<BrowsePoolsView>(
     USE_MULTI_DELEGATION_STAKING_GRID_VIEW
-      ? delegationPreferencePersistence?.poolsView || BrowsePoolsView.grid
+      ? stakingBrowserPreferencesPersistence?.poolsView || BrowsePoolsView.grid
       : BrowsePoolsView.table
   );
   const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
@@ -67,19 +67,19 @@ export const BrowsePools = () => {
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE), [fetchStakePools]);
 
   useEffect(() => {
-    setDelegationPreferencePersistence({
-      ...delegationPreferencePersistence,
+    setStakingBrowserPreferencesPersistence({
+      ...stakingBrowserPreferencesPersistence,
       poolsView,
       searchQuery: searchValue,
       selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
       sortOptions: sort,
     });
   }, [
-    delegationPreferencePersistence,
+    stakingBrowserPreferencesPersistence,
     poolsView,
     searchValue,
     selectedPortfolioStakePools,
-    setDelegationPreferencePersistence,
+    setStakingBrowserPreferencesPersistence,
     sort,
   ]);
 
