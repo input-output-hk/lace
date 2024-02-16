@@ -21,7 +21,7 @@ import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
-  DELEGATION_PREFERENCES_LS_KEY
+  STAKING_BROWSER_PREFERENCES_LS_KEY
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
@@ -89,7 +89,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(DELEGATION_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();

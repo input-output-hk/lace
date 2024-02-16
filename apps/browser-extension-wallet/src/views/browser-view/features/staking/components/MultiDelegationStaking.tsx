@@ -8,7 +8,7 @@ import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
-  DELEGATION_PREFERENCES_LS_KEY,
+  STAKING_BROWSER_PREFERENCES_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
 } from '@utils/constants';
@@ -84,7 +84,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(DELEGATION_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();
