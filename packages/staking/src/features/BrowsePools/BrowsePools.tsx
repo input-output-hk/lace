@@ -71,7 +71,7 @@ export const BrowsePools = () => {
       ...stakingBrowserPreferencesPersistence,
       poolsView,
       searchQuery: searchValue,
-      selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
+      selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id).reverse(),
       sortOptions: sort,
     });
   }, [
@@ -130,6 +130,7 @@ export const BrowsePools = () => {
           inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
           onChange={onSearch}
           value={searchValue}
+          defaultValue={searchValue}
           data-testid="search-input"
           loading={fetchingPools}
         />
