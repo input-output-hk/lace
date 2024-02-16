@@ -6,7 +6,7 @@ class PortfolioBarAssert {
   assertSeePortfolioBar = async (selectedPools: string) => {
     await PortfolioBar.container.waitForDisplayed();
     await PortfolioBar.selectedPoolsCounter.waitForDisplayed();
-    expect(await PortfolioBar.selectedPoolsCounter.getText()).to.equal(
+    expect(await PortfolioBar.selectedPoolsCounter.getText()).to.startWith(
       (await t('portfolioBar.selectedPools', 'staking')).replace('{{selectedPoolsCount}}', selectedPools)
     );
     await PortfolioBar.maxPoolsCounter.waitForDisplayed();

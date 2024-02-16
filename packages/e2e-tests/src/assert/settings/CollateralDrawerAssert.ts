@@ -45,6 +45,7 @@ class CollateralDrawerAssert {
   }
 
   async assertSeeCollateralNotEnoughAdaDrawer() {
+    await CollateralDrawer.collateralButton.waitForClickable();
     await CollateralDrawer.passwordInputContainer.waitForClickable({
       reverse: true
     });
