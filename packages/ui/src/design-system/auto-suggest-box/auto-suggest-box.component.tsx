@@ -90,6 +90,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
                   onKeyDown={(event): void => {
                     if (event.code === 'ArrowDown') {
                       firstSuggestionRef.current?.focus();
+                      event.preventDefault();
                     }
                   }}
                   pickedSuggestion={
