@@ -19,12 +19,14 @@ import {
   GoToActivity,
   GoToBrowsePools,
   GoToOverview,
+  HwSkipToDeviceFailure,
   HwSkipToFailure,
   HwSkipToSuccess,
   ManageDelegationFromDetails,
   ManagePortfolio,
   NewPortfolioConfirmationCommand,
   NewPortfolioFailureCommand,
+  NewPortfolioHwFailureCommand,
   NewPortfolioPreferencesCommand,
   NewPortfolioSignCommand,
   NewPortfolioSuccessCommand,
@@ -32,6 +34,7 @@ import {
   PoolDetailsCommand,
   PortfolioManagementConfirmationCommand,
   PortfolioManagementFailureCommand,
+  PortfolioManagementHwFailureCommand,
   PortfolioManagementPreferencesCommand,
   PortfolioManagementSignCommand,
   PortfolioManagementSuccessCommand,
@@ -314,6 +317,12 @@ export const processExpandedViewCases: Handler = (params) =>
                   activeDrawerStep: DrawerManagementStep.Sign,
                 })
               ),
+              HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                })
+              ),
               HwSkipToFailure: handler<HwSkipToFailure, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({
                   ...state,
@@ -384,6 +393,22 @@ export const processExpandedViewCases: Handler = (params) =>
             },
             params.command.type,
             DrawerManagementStep.Failure
+          ),
+          [DrawerManagementStep.HwDeviceFailure]: cases<PortfolioManagementHwFailureCommand['type']>(
+            {
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Confirmation,
+              })),
+            },
+            params.command.type,
+            DrawerManagementStep.HwDeviceFailure
           ),
         },
         params.state.activeDrawerStep as DrawerManagementStep,
@@ -469,6 +494,12 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Sign,
               })),
+              HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StateNewPortfolio, StateNewPortfolio>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                })
+              ),
               HwSkipToFailure: handler<HwSkipToFailure, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Failure,
@@ -530,6 +561,22 @@ export const processExpandedViewCases: Handler = (params) =>
             },
             params.command.type,
             DrawerManagementStep.Failure
+          ),
+          [DrawerManagementStep.HwDeviceFailure]: cases<NewPortfolioHwFailureCommand['type']>(
+            {
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Confirmation,
+              })),
+            },
+            params.command.type,
+            DrawerManagementStep.HwDeviceFailure
           ),
         },
         params.state.activeDrawerStep as DrawerManagementStep,

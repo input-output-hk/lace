@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const useLocationMock = jest.fn();
-const mockGetKeyAgentType = jest.fn();
 const mockUseWalletStore = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseCollateral = jest.fn();
@@ -15,17 +14,14 @@ import '@testing-library/jest-dom';
 import { I18nextProvider } from 'react-i18next';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
-import { Wallet } from '@lace/cardano';
 import i18n from '@lib/i18n';
 import {
   AnalyticsProvider,
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps,
-  CardanoWalletManagerProvider,
   CurrencyStoreProvider,
-  DatabaseProvider,
-  ICardanoWalletManager
+  DatabaseProvider
 } from '@providers';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
@@ -36,6 +32,7 @@ import * as common from '@lace/common';
 import { walletRoutePaths } from '@routes';
 import { SettingsDrawer } from '../SettingsWalletBase';
 import { mockAnalyticsTracker } from '@src/utils/mocks/test-helpers';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const OLD_ENV = process.env;
 
@@ -128,21 +125,19 @@ const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
   ({ children }: { children: React.ReactNode }) =>
     (
-      <CardanoWalletManagerProvider value={{} as unknown as ICardanoWalletManager}>
-        <AppSettingsProvider>
-          <DatabaseProvider>
-            <StoreProvider appMode={APP_MODE_BROWSER}>
-              <I18nextProvider i18n={i18n}>
-                <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                  <CurrencyStoreProvider>
-                    <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-                  </CurrencyStoreProvider>
-                </AnalyticsProvider>
-              </I18nextProvider>
-            </StoreProvider>
-          </DatabaseProvider>
-        </AppSettingsProvider>
-      </CardanoWalletManagerProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <I18nextProvider i18n={i18n}>
+              <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                <CurrencyStoreProvider>
+                  <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+                </CurrencyStoreProvider>
+              </AnalyticsProvider>
+            </I18nextProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
 describe('Testing SettingsWalletBase component', () => {
@@ -159,9 +154,10 @@ describe('Testing SettingsWalletBase component', () => {
         txFee: 0
       });
       useLocationMock.mockReturnValue({ search: '' });
-      mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
       mockUseWalletStore.mockImplementation(() => ({
-        getKeyAgentType: mockGetKeyAgentType,
+        walletType: WalletType.InMemory,
+        isInMemoryWallet: true,
+        isHardwareWallet: false,
         inMemoryWallet,
         walletUI: {},
         walletInfo: {}

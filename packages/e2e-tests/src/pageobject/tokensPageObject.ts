@@ -14,7 +14,7 @@ class TokensPageObject {
 
   async waitUntilCardanoTokenLoaded() {
     const selector = 'p=Cardano';
-    await $(selector).waitForClickable({ timeout: 30_000 });
+    await $(selector).waitForClickable({ timeout: 120_000 });
   }
 
   async saveTokenBalance(tokenName: string) {

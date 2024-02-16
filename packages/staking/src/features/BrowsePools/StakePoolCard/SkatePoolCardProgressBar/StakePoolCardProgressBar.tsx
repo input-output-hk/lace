@@ -1,15 +1,17 @@
 /* eslint-disable no-magic-numbers */
 import { Flex, Text } from '@lace/ui';
 import cn from 'classnames';
+import { useTranslation } from 'react-i18next';
 import * as styles from './StakePoolCardProgressBar.css';
 
 interface Props {
-  percentage: string;
+  percentage?: string;
 }
 
 export const StakePoolCardProgressBar = ({ percentage }: Props) => {
+  const { t } = useTranslation();
   const percentageNumber = Number(percentage);
-  const progressWidth = Math.min(100, percentageNumber);
+  const progressWidth = Math.min(100, percentageNumber || 0);
 
   return (
     <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>
@@ -23,11 +25,11 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
               [styles.progressVeryHigh]: percentageNumber > 95,
             },
           ])}
-          style={{ width: `${progressWidth}%` }}
+          style={{ backgroundSize: `${progressWidth}%` }}
         />
       </div>
       <Text.Body.Small weight="$medium" className={styles.progressValue}>
-        {percentage}%
+        {!Number.isNaN(percentageNumber) ? `${percentage}%` : t('browsePools.stakePoolGrid.notAvailable')}
       </Text.Body.Small>
     </Flex>
   );

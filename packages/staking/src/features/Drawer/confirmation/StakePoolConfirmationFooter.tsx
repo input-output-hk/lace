@@ -1,4 +1,5 @@
-import { Wallet } from '@lace/cardano';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, PostHogAction } from '@lace/common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,9 +21,10 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { analytics } = useOutsideHandles();
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
-    walletStoreGetKeyAgentType: getKeyAgentType,
+    walletStoreWalletType: walletType,
     submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
+    isMultidelegationSupportedByDevice,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
@@ -34,15 +36,21 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const [openPoolsManagementConfirmationModal, setOpenPoolsManagementConfirmationModal] =
     useState<PoolsManagementModalType | null>(null);
 
-  const keyAgentType = getKeyAgentType();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
+  const isInMemory = walletType === WalletType.InMemory;
 
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+
+    if (!isInMemory) {
+      const isSupported = await isMultidelegationSupportedByDevice(walletType);
+      if (!isSupported) {
+        throw new Error('MULTIDELEGATION_NOT_SUPPORTED');
+      }
+    }
     const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+    await inMemoryWallet.submitTx(signedTx);
+  }, [delegationTxBuilder, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType]);
 
   const handleSubmission = useCallback(async () => {
     setOpenPoolsManagementConfirmationModal(null);
@@ -57,7 +65,10 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       await signAndSubmitTransaction();
       setIsRestaking(currentPortfolio.length > 0);
       portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
-    } catch {
+    } catch (error: any) {
+      if (error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
+        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+      }
       portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
     } finally {
       setIsConfirmingTx(false);
@@ -88,11 +99,11 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     if (!isInMemory) {
       const staleLabels = popupView
         ? t('drawer.confirmation.button.continueInAdvancedView')
-        : t('drawer.confirmation.button.confirmWithDevice', { hardwareWallet: keyAgentType });
+        : t('drawer.confirmation.button.confirmWithDevice', { hardwareWallet: walletType });
       return isConfirmingTx ? t('drawer.confirmation.button.signing') : staleLabels;
     }
     return t('drawer.confirmation.button.confirm');
-  }, [isConfirmingTx, isInMemory, keyAgentType, popupView, t]);
+  }, [isConfirmingTx, isInMemory, walletType, popupView, t]);
 
   return (
     <>

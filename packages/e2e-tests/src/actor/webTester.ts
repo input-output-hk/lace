@@ -40,25 +40,22 @@ export default new (class WebTester {
   async fillField(selector: string, value: string) {
     try {
       await this.clearInputText(selector);
-      await value
-        .split('')
-        // eslint-disable-next-line unicorn/no-array-reduce
-        .reduce(async (prev: Promise<string>, current: string) => {
-          const nextString = `${await prev}${current}`;
-          await $(selector).addValue(current);
-          await $(selector).waitUntil(
-            async () => {
-              const text = (await $(selector).getValue()).replace(',', '');
-              return text === nextString;
-            },
-            {
-              timeout: 5000,
-              interval: 100
-            }
-          );
+      await value.split('').reduce(async (prev: Promise<string>, current: string) => {
+        const nextString = `${await prev}${current}`;
+        await $(selector).addValue(current);
+        await $(selector).waitUntil(
+          async () => {
+            const text = (await $(selector).getValue()).replace(',', '');
+            return text === nextString;
+          },
+          {
+            timeout: 5000,
+            interval: 100
+          }
+        );
 
-          return nextString;
-        }, Promise.resolve(''));
+        return nextString;
+      }, Promise.resolve(''));
     } catch (error) {
       Logger.log(`SetInputValue Error: ${error}`);
     }
@@ -148,25 +145,11 @@ export default new (class WebTester {
     return await this.getAttributeValue(element.toJSLocator(), attribute);
   }
 
-  async getElementCount(selector: string, by: LocatorStrategy): Promise<number> {
-    Logger.log(`Get element count for selector ${selector}`);
-    return (await browser.findElements(by, selector)).length;
-  }
-
   async waitUntilSeeElement(element: WebElement, timeoutMs = 3000) {
     Logger.log(`waiting for: ${element.toJSLocator()}`);
     await browser.waitUntil(async () => await $(element.toJSLocator()).isDisplayed(), {
       timeout: timeoutMs,
       timeoutMsg: `failed while waiting for: ${element.toJSLocator()}`
-    });
-  }
-
-  async waitUntilSeeElementContainingText(text: string, timeoutMs = 3000) {
-    const selectorToWait = `//*[contains(text(), "${text}")]`;
-    Logger.log(`waiting for: ${selectorToWait}`);
-    await browser.waitUntil(async () => await $(selectorToWait).isExisting(), {
-      timeout: timeoutMs,
-      timeoutMsg: `failed while waiting for element containing text: ${text}`
     });
   }
 })();

@@ -5,7 +5,7 @@ import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { TestnetPatterns } from '../support/patterns';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
-import { AddressInput } from '../elements/addressInput';
+import { AddressInput } from '../elements/AddressInput';
 import coinConfigureAssert from './coinConfigureAssert';
 import assetInputAssert from './assetInputAssert';
 import testContext from '../utils/testContext';
@@ -21,10 +21,9 @@ class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
     await this.assertSeeDrawerTitle(mode === 'extended');
     const addressInput = new AddressInput();
-    await webTester.seeWebElement(addressInput.input());
-    expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
-      await t('core.destinationAddressInput.recipientAddress')
-    );
+    await addressInput.input.waitForDisplayed();
+    await addressInput.label.waitForDisplayed();
+    expect(await addressInput.label.getText()).to.equal(await t('core.destinationAddressInput.recipientAddress'));
     await addressInput.ctaButton.waitForDisplayed();
     await coinConfigureAssert.assertSeeCoinConfigure();
     await assetInputAssert.assertSeeAssetInput();
@@ -73,7 +72,12 @@ class DrawerSendExtendedAssert {
   private async assertSeeDrawerTitle(shouldBeDisplayed: boolean) {
     await TransactionNewPage.title.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await TransactionNewPage.title.getText()).to.equal(await t('browserView.transaction.send.title'));
+      const expectedTitle = await t('browserView.transaction.send.title');
+      // It renders empty first: wait for it to be set to an actual title
+      await browser.waitUntil(async () => {
+        const title = await TransactionNewPage.title.getText();
+        return title === expectedTitle;
+      });
     }
   }
 
@@ -93,7 +97,7 @@ class DrawerSendExtendedAssert {
     if (mode === 'extended') {
       await TransactionNewPage.addBundleButton.waitForDisplayed();
     }
-    await webTester.seeWebElement(TransactionNewPage.addressInput().container());
+    await TransactionNewPage.addressInput().container.waitForDisplayed();
     await webTester.seeWebElement(TransactionNewPage.coinConfigure().container());
 
     await this.assertSeeTransactionCostsLabel();
@@ -204,7 +208,7 @@ class DrawerSendExtendedAssert {
   async assertDefaultInputsDoNotContainValues() {
     const coinConfigure = new CoinConfigure();
     const addressInput = new AddressInput();
-    expect(await webTester.getAttributeValue(addressInput.input().toJSLocator(), 'value')).to.be.empty;
+    expect(await addressInput.input.getValue()).to.be.empty;
     expect(await webTester.getAttributeValue(coinConfigure.input().toJSLocator(), 'value')).to.equal('0.00');
   }
 
@@ -324,17 +328,18 @@ class DrawerSendExtendedAssert {
   }
 
   assertSeeAddressWithNameInRecipientsAddressInput = async (address: string, name: string) => {
-    await webTester.waitUntilSeeElementContainingText(name);
-    const text = await webTester.getTextValueFromElement(new AddressInput().container());
-    expect(text).contains(address);
+    const text = await new AddressInput().container.getText();
+    const splitText = text.split('\n');
+    expect(splitText[1]).equals(name);
+    expect(splitText[2]).endsWith(address);
   };
 
   assertSeeAddressNameInRecipientsAddressInput = async (expectedName: string) => {
-    expect(await new AddressInput().name().getText()).to.equal(expectedName);
+    expect(await new AddressInput().name.getText()).to.equal(expectedName);
   };
 
   assertSeeEmptyRecipientsAddressInput = async (index?: number) => {
-    const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
+    const text = await new AddressInput(index).container.getText();
     expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
 

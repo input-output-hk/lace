@@ -248,7 +248,7 @@ Then(/^there are (\d+) stake pools returned$/, async (resultsCount: number) => {
 });
 
 Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, async (expectedTicker: string) => {
-  if ((await MultidelegationPage.poolsItems.length) > 0) {
+  if ((await MultidelegationPage.displayedPools.length) > 0) {
     await MultidelegationPageAssert.assertSeeFirstSearchResultWithTicker(expectedTicker);
   }
 });
@@ -469,6 +469,7 @@ Then(/^I see input ratio field showing (\d+)% for pool (\d+)$/, async (ratio: nu
 });
 
 When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
+  await browser.pause(1000);
   if (await SwitchingStakePoolModal.title.isDisplayed()) {
     await SwitchingStakePoolModal.fineByMeButton.click();
   }

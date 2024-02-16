@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { CollateralStepSend, CollateralStepReclaim, CollateralFooterReclaim } from './';
 import { useCollateral, useSyncingTheFirstTime } from '@hooks';
@@ -35,17 +34,11 @@ export const CollateralDrawer = ({
   const { t } = useTranslation();
   const { currentSection: section, setSection } = useSections();
   const {
-    getKeyAgentType,
+    isInMemoryWallet,
+    walletType,
     walletUI: { appMode }
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
-  const { keyAgentType, isInMemory } = useMemo(() => {
-    const agentType = getKeyAgentType();
-    return {
-      keyAgentType: agentType,
-      isInMemory: getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory
-    };
-  }, [getKeyAgentType]);
   const [password, setPassword] = useState<string>();
   const clearPassword = () => setPassword('');
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
@@ -58,10 +51,10 @@ export const CollateralDrawer = ({
   const handleClose = useCallback(async () => {
     sendAnalyticsEvent(PostHogAction.SettingsCollateralXClick);
     // TODO: Remove this workaround for Hardware Wallets alongside send flow and staking.
-    if ([Sections.FAIL_TX, Sections.SUCCESS_TX].includes(section.currentSection) && !isInMemory)
+    if ([Sections.FAIL_TX, Sections.SUCCESS_TX].includes(section.currentSection) && !isInMemoryWallet)
       window.location.reload();
     else onClose();
-  }, [isInMemory, onClose, section.currentSection, sendAnalyticsEvent]);
+  }, [isInMemoryWallet, onClose, section.currentSection, sendAnalyticsEvent]);
 
   useEffect(() => {
     if (!visible) return;
@@ -77,25 +70,25 @@ export const CollateralDrawer = ({
 
   // handle drawer states for inMemory(non-hardware) wallets
   useEffect(() => {
-    if (!isInMemory || !readyToOperate) return;
+    if (!isInMemoryWallet || !readyToOperate) return;
     setSection({ currentSection: hasCollateral ? Sections.RECLAIM : Sections.SEND });
-  }, [hasCollateral, isInMemory, setSection, readyToOperate]);
+  }, [hasCollateral, isInMemoryWallet, setSection, readyToOperate]);
 
   // handle drawer states for hw
   useEffect(() => {
-    if (isInMemory || !readyToOperate) return;
+    if (isInMemoryWallet || !readyToOperate) return;
     if (!hasCollateral && section.currentSection === Sections.RECLAIM) {
       setSection({
         currentSection: Sections.SEND
       });
     }
-  }, [hasCollateral, isInMemory, section.currentSection, setSection, readyToOperate]);
+  }, [hasCollateral, isInMemoryWallet, section.currentSection, setSection, readyToOperate]);
 
   // show tx success screen for hw flow
   useEffect(() => {
-    if (isInMemory || !builtTxData?.uiTx?.hash) return;
+    if (isInMemoryWallet || !builtTxData?.uiTx?.hash) return;
     setSection({ currentSection: Sections.SUCCESS_TX });
-  }, [builtTxData?.uiTx?.hash, isInMemory, setSection]);
+  }, [builtTxData?.uiTx?.hash, isInMemoryWallet, setSection]);
 
   const handleReclaimCollateral = () => {
     onClose();
@@ -114,7 +107,7 @@ export const CollateralDrawer = ({
         popupView={popupView}
         password={password}
         setPassword={setPassword}
-        isInMemory={isInMemory}
+        isInMemory={isInMemoryWallet}
         isPasswordValid={isPasswordValid}
         setIsPasswordValid={setIsPasswordValid}
         txFee={txFee}
@@ -140,7 +133,7 @@ export const CollateralDrawer = ({
         setCurrentStep={setSection}
         onClose={handleConfirmCollateral}
         onClaim={clearPassword}
-        keyAgentType={keyAgentType}
+        walletType={walletType}
         setIsPasswordValid={setIsPasswordValid}
         popupView={popupView}
         password={password}
