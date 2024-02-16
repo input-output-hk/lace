@@ -27,6 +27,7 @@ export const radioGroupItemWrapper = style([
         padding: `${vars.spacing.$6} ${vars.spacing.$8}`,
         left: '50%',
         transform: 'translateX(-50%)',
+        zIndex: '-1',
       },
     },
   },
@@ -41,6 +42,7 @@ export const radioGroupItem = style([
   }),
   {
     background: vars.colors.$radiobutton_indicator_check_color,
+    border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
 
     ':focus': {
       backgroundColor: vars.colors.$radiobutton_focus_color,
@@ -53,6 +55,10 @@ export const radioGroupItem = style([
     ':disabled': {
       cursor: 'not-allowed',
       opacity: '20%',
+    },
+
+    ':checked': {
+      border: 0,
     },
   },
 ]);
@@ -107,14 +113,6 @@ export const icon = style([
     },
   },
 ]);
-
-export const unchecked = style({
-  border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
-});
-
-export const checked = style({
-  border: 0,
-});
 
 export const root = style([
   sx({

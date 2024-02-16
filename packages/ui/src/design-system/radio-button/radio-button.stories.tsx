@@ -10,8 +10,6 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
-import * as cx from './radio-button.stories.css';
-
 import { RadioButtonGroup } from './';
 
 export default {
@@ -49,7 +47,6 @@ const MainComponents = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={emptyOption}
@@ -72,7 +69,7 @@ const MainComponents = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            className={cx.focus}
+            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={emptyOption}
@@ -89,7 +86,6 @@ const MainComponents = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
@@ -112,7 +108,7 @@ const MainComponents = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            className={cx.focus}
+            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
@@ -136,7 +132,6 @@ const AdditionalVariants = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={options}
@@ -159,7 +154,7 @@ const AdditionalVariants = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            className={cx.focus}
+            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={options}
@@ -176,7 +171,6 @@ const AdditionalVariants = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={optionsWithIcon}
@@ -199,7 +193,7 @@ const AdditionalVariants = (): JSX.Element => {
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            className={cx.focus}
+            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={optionsWithIcon}
