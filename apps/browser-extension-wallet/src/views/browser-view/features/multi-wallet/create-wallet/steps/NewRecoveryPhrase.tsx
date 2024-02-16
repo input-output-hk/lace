@@ -27,7 +27,6 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   const walletSetupMnemonicStepTranslations = {
     writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
-    body: t('core.walletSetupMnemonicStep.body'),
     enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
     enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
     passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),

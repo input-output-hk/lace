@@ -13,10 +13,6 @@ export const walletSetupWizard: WalletSetupWizard = {
     next: WalletSetupSteps.Create
   },
   [WalletSetupSteps.Create]: {
-    prev: WalletSetupSteps.Mnemonic,
-    next: WalletSetupSteps.Finish
-  },
-  [WalletSetupSteps.Finish]: {
-    prev: WalletSetupSteps.Create
+    prev: WalletSetupSteps.Mnemonic
   }
 };

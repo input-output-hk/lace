@@ -27,23 +27,20 @@ export const walletRoutePaths = {
       root: '/new-wallet/create',
       setup: '/new-wallet/create/setup',
       keepSecure: '/new-wallet/create/keep-secure',
-      recoveryPhrase: '/new-wallet/create/recovery-phrase',
-      allDone: '/new-wallet/create/all-done'
+      recoveryPhrase: '/new-wallet/create/recovery-phrase'
     },
     hardware: {
       root: '/new-wallet/hardware',
       connect: '/new-wallet/hardware/connect',
       select: '/new-wallet/hardware/select',
-      name: '/new-wallet/hardware/name',
-      allDone: '/new-wallet/hardware/all-done'
+      name: '/new-wallet/hardware/name'
     },
     restore: {
       root: '/new-wallet/restore',
       setup: '/new-wallet/restore/setup',
       keepSecure: '/new-wallet/restore/keep-secure',
       selectRecoveryPhraseLength: '/new-wallet/restore/select-recovery-phrase-length',
-      enterRecoveryPhrase: '/new-wallet/restore/enter-recovery-phrase',
-      allDone: '/new-wallet/restore/all-done'
+      enterRecoveryPhrase: '/new-wallet/restore/enter-recovery-phrase'
     }
   },
   sharedWallet: {

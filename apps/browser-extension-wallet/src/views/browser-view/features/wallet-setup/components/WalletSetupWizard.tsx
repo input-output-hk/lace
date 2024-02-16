@@ -6,7 +6,6 @@ import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   WalletSetupCreationStep,
-  WalletSetupFinalStep,
   WalletSetupNamePasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
   WalletSetupSteps,
@@ -133,25 +132,32 @@ export const WalletSetupWizard = ({
     description: t('core.walletSetupCreateStep.description')
   };
 
-  const walletSetupFinalStepTranslations = {
-    title: t('core.walletSetupFinalStep.title'),
-    description: t('core.walletSetupFinalStep.description'),
-    close: t('core.walletSetupFinalStep.close'),
-    followTwitter: t('core.walletSetupFinalStep.followTwitter'),
-    followYoutube: t('core.walletSetupFinalStep.followYoutube'),
-    followDiscord: t('core.walletSetupFinalStep.followDiscord')
-  };
-
   const walletSetupRecoveryPhraseLengthStepTranslations = {
     title: t('core.walletSetupRecoveryPhraseLengthStep.title'),
     description: t('core.walletSetupRecoveryPhraseLengthStep.description'),
     wordPassphrase: t('core.walletSetupRecoveryPhraseLengthStep.wordPassphrase')
   };
 
+  const goToMyWallet = useCallback(
+    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
+      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
+        analytics.sendAliasEvent();
+        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
+        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+        if (hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        }
+      }
+    },
+    [analytics, enhancedAnalyticsStatus, setStayOnAllDonePage, walletInstance]
+  );
+
   const moveForward = useCallback(() => {
     const nextStep = walletSetupWizard[currentStep].next;
     if (nextStep) {
       setCurrentStep(nextStep);
+    } else if (currentStep === WalletSetupSteps.Create) {
+      goToMyWallet();
     }
   }, [currentStep, setCurrentStep]);
 
@@ -169,25 +175,8 @@ export const WalletSetupWizard = ({
     setCurrentStep(walletStep);
   };
 
-  const goToMyWallet = useCallback(
-    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
-      setStayOnAllDonePage(false);
-      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        analytics.sendAliasEvent();
-        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
-        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-        if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        }
-      }
-    },
-    [analytics, enhancedAnalyticsStatus, setStayOnAllDonePage, walletInstance]
-  );
-
   const handleCompleteCreation = useCallback(async () => {
     try {
-      setStayOnAllDonePage(true);
-
       const wallet = await createWallet({
         name: walletName,
         mnemonic,
@@ -216,7 +205,6 @@ export const WalletSetupWizard = ({
     }
   }, [
     createWallet,
-    setStayOnAllDonePage,
     walletName,
     mnemonic,
     password,
@@ -345,15 +333,6 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Create && (
         <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />
-      )}
-      {currentStep === WalletSetupSteps.Finish && (
-        <WalletSetupFinalStep
-          onFinish={() => {
-            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
-            goToMyWallet();
-          }}
-          translations={walletSetupFinalStepTranslations}
-        />
       )}
       {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
         <WarningModal

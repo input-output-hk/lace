@@ -17,8 +17,8 @@ export interface WalletSetupMnemonicStepProps {
   mnemonicWordsInStep?: number;
   translations: TranslationsFor<
     | 'writePassphrase'
-    | 'body'
     | 'enterPassphrase'
+    | 'enterPassphraseDescription'
     | 'passphraseInfo1'
     | 'passphraseInfo2'
     | 'passphraseInfo3'
@@ -94,7 +94,7 @@ export const WalletSetupMnemonicStep = ({
         </a>
       </>
     ) : (
-      translations.body
+      translations.enterPassphraseDescription
     );
   const currentStepFirstWordIndex = mnemonicStep * mnemonicWordsInStep;
   const currentStepLastWordIndex = (mnemonicStep + 1) * mnemonicWordsInStep;
