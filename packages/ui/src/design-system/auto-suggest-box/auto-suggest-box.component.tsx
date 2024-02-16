@@ -9,9 +9,10 @@ import { Flex } from '../flex';
 import { ScrollArea } from '../scroll-area';
 import * as Text from '../typography';
 
-import { Button } from './auto-suggest-box-button.component';
+import { CloseButton } from './auto-suggest-box-close-button.component';
 import { Icon } from './auto-suggest-box-icon.component';
 import { Input } from './auto-suggest-box-input.component';
+import { OpenButton } from './auto-suggest-box-open-button.component';
 import { PickedSuggestion } from './auto-suggest-box-picked-suggestion.component';
 import { Suggestion } from './auto-suggest-box-suggestion.component';
 import * as cx from './auto-suggest-box.css';
@@ -57,7 +58,8 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     pickedSuggestion,
     firstSuggestionRef,
     closeSuggestions,
-    onButtonClick,
+    onOpenButtonClick,
+    onCloseButtonClick,
     onInputChange,
     onSuggestionClick,
     onPickedSuggestionClick,
@@ -105,11 +107,14 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
               </Box>
               <Flex alignItems="center">
                 <Icon status={validationStatus} />
-                <Button
-                  disabled={disabled}
-                  isCloseButton={isCloseButton}
-                  onButtonClick={onButtonClick}
-                />
+                {isCloseButton ? (
+                  <CloseButton
+                    disabled={disabled}
+                    onClick={onCloseButtonClick}
+                  />
+                ) : (
+                  <OpenButton disabled={disabled} onClick={onOpenButtonClick} />
+                )}
               </Flex>
             </Box>
           </Popover.Anchor>

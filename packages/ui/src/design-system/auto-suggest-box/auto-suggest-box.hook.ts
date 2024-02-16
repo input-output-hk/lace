@@ -21,7 +21,8 @@ interface Context<SuggestionType extends SuggestionBaseType> {
   onPickedSuggestionClick: () => void;
   onSuggestionClick: (value: string) => void;
   onInputChange: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
-  onButtonClick: () => void;
+  onOpenButtonClick: () => void;
+  onCloseButtonClick: () => void;
 }
 
 export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
@@ -74,12 +75,13 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
         setIsSuggesting(true);
       }
     },
-    onButtonClick: (): void => {
-      if (isCloseButton) {
-        setValue('');
-        setPickedSuggestion(undefined);
-      }
-      setIsSuggesting(!isCloseButton);
+    onOpenButtonClick: (): void => {
+      setIsSuggesting(true);
+    },
+    onCloseButtonClick: (): void => {
+      setValue('');
+      setPickedSuggestion(undefined);
+      setIsSuggesting(false);
     },
     closeSuggestions: (): void => {
       setIsSuggesting(false);
