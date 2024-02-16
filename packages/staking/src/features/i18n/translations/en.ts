@@ -38,8 +38,7 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip':
     'Once a pool reaches the point of saturation, it will offer diminishing rewards',
   'browsePools.stakePoolTableBrowser.tableHeader.ticker.title': 'Ticker',
-  'browsePools.stakePoolTableBrowser.tableHeader.ticker.tooltip':
-    'Refers to the unique identifier or name of a staking pool',
+  'browsePools.stakePoolTableBrowser.tableHeader.ticker.tooltip': 'Refers to the unique identifier of a staking pool',
   'browsePools.stakePoolTableBrowser.unselect': 'Unselect',
   'drawer.confirmation.button.confirm': 'Next',
   'drawer.confirmation.button.confirmWithDevice': 'Confirm with {{hardwareWallet}}',

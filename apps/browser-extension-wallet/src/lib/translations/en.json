@@ -1082,7 +1082,7 @@
       "tableHeader": {
         "ticker": {
           "title": "Ticker",
-          "tooltip": "Refers to the unique identifier or name of a staking pool"
+          "tooltip": "Refers to the unique identifier of a staking pool"
         },
         "cost": {
           "title": "Cost",
