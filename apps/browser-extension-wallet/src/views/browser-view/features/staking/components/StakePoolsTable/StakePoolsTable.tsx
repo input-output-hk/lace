@@ -71,7 +71,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.title'),
     liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake.title')
   };
-  const tableHeaderTooltipsTranslations: Partial<TranslationsFor<MetricType>> = {
+  const tableHeaderTooltipsTranslations: TranslationsFor<MetricType> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.tooltip'),
     apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.tooltip'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.tooltip'),
