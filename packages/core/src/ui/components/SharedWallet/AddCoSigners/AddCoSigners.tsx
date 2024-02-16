@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { Box, Flex, Text, Button, ControlButton, SuggestionThreeItemType, ScrollArea, sx } from '@lace/ui';
-import { ReactComponent as GridIcon } from '@lace/icons/dist/GridComponent';
 import { Wallet } from '@lace/cardano';
 import styles from './AddCoSigners.module.scss';
 import { AddCoSignerInput } from './AddCoSignerInput';
@@ -109,7 +108,6 @@ export const AddCoSigners = ({ addressBook, translations, validateAddress, onBac
           w="$fill"
           disabled={coSigners.length === MAX_COSIGNERS}
           label={translations.addButton}
-          icon={<GridIcon />}
           onClick={() => addCoSigner()}
         />
       </Box>
