@@ -58,7 +58,7 @@ export const RadioButtonGroup = ({
             <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
           </RadixRadioGroup.Item>
           {label && (
-            <label id="Label" htmlFor={`radio-btn-id-${label || value}`}>
+            <label id="Label" htmlFor={`radio-btn-id-${label}`}>
               <Box
                 className={cn(cx.label, {
                   [cx.disabled]: disabled,
