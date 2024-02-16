@@ -49,3 +49,13 @@ export const getHWPersonProperties = async (
     }
   };
 };
+
+export const copyRecoveryPhrase = async (mnemonic: string[], joiner = ' ') => {
+  const copiedPhrase = mnemonic.join(joiner);
+  await navigator.clipboard.writeText(copiedPhrase);
+};
+
+export const pasteRecoveryPhrase = async (splitter = ' ') => {
+  const text = await navigator.clipboard.readText();
+  return text.split(splitter);
+};
