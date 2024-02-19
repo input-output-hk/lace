@@ -24,7 +24,7 @@ export const Collateral = ({
 }: Props): React.ReactElement => {
   const { t } = useTranslate();
 
-  const tooltip = (): string => {
+  const getTooltipText = (): string => {
     switch (status) {
       case 'review':
       case 'error':
@@ -42,7 +42,7 @@ export const Collateral = ({
         amount={`${collateral} ${coinSymbol}`}
         fiatPrice={amountTransformer(collateral)}
         label={t('package.core.activityDetails.collateral.label')}
-        tooltip={tooltip()}
+        tooltip={getTooltipText()}
       />
       {status === CollateralStatus.ERROR && (
         <Box mt="$32">
