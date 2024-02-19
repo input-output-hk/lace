@@ -29,7 +29,7 @@ describe('Testing AssetActivityItem component', () => {
     const activityInfo = await findByTestId('asset-info');
 
     const activityAmount = await findByTestId(assetsAmountTestId);
-    const activityAmountText = await within(activityAmount).findByText(props.amount);
+    const activityAmountText = await within(activityAmount).findByText(`- ${props.amount}`);
     const activityFiatAmountText = await within(activityAmount).findByText(props.fiatAmount);
     const activityStatus = await findByTestId('activity-status');
 
@@ -53,7 +53,7 @@ describe('Testing AssetActivityItem component', () => {
     const { findByTestId } = render(<AssetActivityItem {...props} />);
 
     const activityAmount = await findByTestId(assetsAmountTestId);
-    const tickerText = `${props.amount}, ${props.assets[0].val} ${props.assets[0].info.ticker}`;
+    const tickerText = `- ${props.amount}, ${props.assets[0].val} ${props.assets[0].info.ticker}`;
     const activityAssetTickerText = await within(activityAmount).findByText(tickerText);
 
     expect(activityAssetTickerText).toBeVisible();
