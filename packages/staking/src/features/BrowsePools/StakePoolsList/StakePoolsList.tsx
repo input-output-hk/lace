@@ -36,9 +36,11 @@ export const StakePoolsList = ({
   return (
     <Box w="$fill" data-testid="stake-pools-list-container">
       {selectedPools?.length > 0 && (
-        <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
-          {t('browsePools.stakePoolGrid.selected')}
-        </Text.Body.Normal>
+        <Box w="$fill" pb="$6">
+          <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
+            {t('browsePools.stakePoolGrid.selected')}
+          </Text.Body.Normal>
+        </Box>
       )}
       <StakePoolsListHeader {...{ activeSort, setActiveSort, translations }} />
       {selectedPools?.length > 0 && (

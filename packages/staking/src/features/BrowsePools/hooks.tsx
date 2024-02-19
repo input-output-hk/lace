@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { getPoolInfos } from 'features/activity/PastEpochsRewards/hooks/useRewardsByEpoch';
 import { useOutsideHandles } from 'features/outside-handles-provider';
@@ -21,10 +22,9 @@ export const useRestorePoolsSelection = () => {
           ids.map((poolId) => Wallet.Cardano.PoolId(poolId)),
           walletStoreBlockchainProvider.stakePoolProvider
         );
-
         portfolioMutators.executeCommand({ data, type: 'SelectPoolFromList' });
-      } finally {
-        areSelectedPoolsRestored.current.restored = true;
+      } catch (error) {
+        console.error(error);
       }
     },
     [portfolioMutators, walletStoreBlockchainProvider.stakePoolProvider]
@@ -40,6 +40,7 @@ export const useRestorePoolsSelection = () => {
 
     if (selectedPoolsIdsWithNoData?.length === 0) return;
     setMissingSelectedPoolsData(selectedPoolsIdsWithNoData);
+    areSelectedPoolsRestored.current.restored = true;
   }, [
     stakingBrowserPreferencesPersistence?.selectedPoolsIds,
     selectedPortfolioStakePools,

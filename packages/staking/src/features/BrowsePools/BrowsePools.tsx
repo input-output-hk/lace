@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { PostHogAction, Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
@@ -47,7 +48,6 @@ export const BrowsePools = () => {
       : BrowsePoolsView.table
   );
   const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
-    portfolioMutators: store.mutators,
     selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
   }));
 
@@ -66,22 +66,24 @@ export const BrowsePools = () => {
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE), [fetchStakePools]);
 
-  useEffect(() => {
-    setStakingBrowserPreferencesPersistence({
-      ...stakingBrowserPreferencesPersistence,
+  useEffect(
+    () => () =>
+      setStakingBrowserPreferencesPersistence({
+        ...stakingBrowserPreferencesPersistence,
+        poolsView,
+        searchQuery: searchValue,
+        selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
+        sortOptions: sort,
+      }),
+    [
+      stakingBrowserPreferencesPersistence,
       poolsView,
-      searchQuery: searchValue,
-      selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id).reverse(),
-      sortOptions: sort,
-    });
-  }, [
-    stakingBrowserPreferencesPersistence,
-    poolsView,
-    searchValue,
-    selectedPortfolioStakePools,
-    setStakingBrowserPreferencesPersistence,
-    sort,
-  ]);
+      searchValue,
+      selectedPortfolioStakePools,
+      setStakingBrowserPreferencesPersistence,
+      sort,
+    ]
+  );
 
   useRestorePoolsSelection();
 
@@ -111,14 +113,32 @@ export const BrowsePools = () => {
 
   const list = useMemo(
     () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
-
     [pageResults]
   );
 
-  const selectedList = useMemo(
-    () => selectedPortfolioStakePools.map((pool) => mapStakePoolToDisplayData({ stakePool: pool })),
-    [selectedPortfolioStakePools]
+  const sortSelectedPools = useCallback(
+    (pool1: Wallet.util.StakePool, pool2: Wallet.util.StakePool) => {
+      switch (sort.field) {
+        case SortField.name:
+          return (pool1.name || '-')?.localeCompare(pool2.name || '-');
+        case SortField.saturation:
+        case SortField.apy:
+          return Number(pool1[sort.field]) - Number(pool2[sort.field]);
+        case SortField.cost:
+          return (pool1.cost.number || '-')?.localeCompare(pool2.cost.number || '-');
+        default:
+          return 0;
+      }
+    },
+    [sort.field]
   );
+
+  const selectedList = useMemo(() => {
+    const result = selectedPortfolioStakePools
+      .map((pool) => mapStakePoolToDisplayData({ stakePool: pool }))
+      .sort(sortSelectedPools);
+    return sort.order === SortDirection.desc ? result.reverse() : result;
+  }, [selectedPortfolioStakePools, sort.order, sortSelectedPools]);
 
   return (
     <>
