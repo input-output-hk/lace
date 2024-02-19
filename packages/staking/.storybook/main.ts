@@ -1,12 +1,12 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 
-import wasm from 'vite-plugin-wasm';
 import { dirname, join } from 'path';
 import { mergeConfig, UserConfig } from 'vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import svgrPlugin from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+// TODO to be removed when @lace/icons properly supports ESM
 import commonjs from 'vite-plugin-commonjs';
 
 /**
@@ -44,13 +44,12 @@ const config: StorybookConfig = {
           esbuildOptions: { loader: { '.css': 'empty' } },
         }),
         tsconfigPaths(),
-        wasm(),
       ],
       resolve: {
         alias: [
           {
-            find: /@emurgo\/cardano-message-signing-nodejs/,
-            replacement: '@emurgo/cardano-message-signing-browser',
+            find: '@lace/cardano',
+            replacement: require.resolve('./__mocks__/cardano.ts'),
           },
         ],
       },
