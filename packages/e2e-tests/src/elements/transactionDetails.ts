@@ -18,8 +18,8 @@ class ActivityDetailsPage extends CommonDrawerElements {
   private TRANSACTION_DETAILS_TO_ADDRESS = '[data-testid="tx-to-detail"]';
   private TRANSACTION_DETAILS_STATUS = '[data-testid="tx-status"]';
   private TRANSACTION_DETAILS_TIMESTAMP = '[data-testid="tx-timestamp"]';
-  private TRANSACTION_DETAILS_FEE_ADA = '[data-testid="tx-fee-ada"]';
-  private TRANSACTION_DETAILS_FEE_FIAT = '[data-testid="tx-fee-fiat"]';
+  private TRANSACTION_DETAILS_FEE_ADA = '[data-testid="tx-amount-fee-amount"]';
+  private TRANSACTION_DETAILS_FEE_FIAT = '[data-testid="tx-amount-fee-fiat"]';
   private TRANSACTION_DETAILS_INPUTS_SECTION = '[data-testid="tx-inputs"]';
   private TRANSACTION_DETAILS_OUTPUTS_SECTION = '[data-testid="tx-outputs"]';
   private TRANSACTION_DETAILS_DROPDOWN = '[data-testid="tx-addr-list_toggle"]';
