@@ -224,7 +224,7 @@ const buildGetActivityDetail =
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
     const collateral = await computeCollateral(walletState, tx);
-    const collateralInAda = Wallet.util.lovelacesToAdaString(collateral.toString());
+    const collateralInAda = collateral > 0 ? Wallet.util.lovelacesToAdaString(collateral.toString()) : undefined;
 
     // Delegation tx additional data (LW-3324)
 
@@ -252,7 +252,7 @@ const buildGetActivityDetail =
         proposalProcedures: tx.body.proposalProcedures
       }),
       certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates),
-      collateral: collateral > 0 ? collateralInAda : undefined
+      collateral: collateralInAda
     };
 
     if (type === DelegationActivityType.delegation && delegationInfo) {
