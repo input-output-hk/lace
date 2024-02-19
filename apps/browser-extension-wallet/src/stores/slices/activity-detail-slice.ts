@@ -24,9 +24,8 @@ import {
   governanceProposalsTransformer,
   votingProceduresTransformer
 } from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
-import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
+import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
 import { getCollateral } from '@cardano-sdk/core';
-import { ObservableWalletState } from '@hooks/useWalletState';
 
 /**
  * validates if the transaction is confirmed
@@ -92,16 +91,19 @@ const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider:
   return pools;
 };
 
-const computeCollateral = async (wallet: ObservableWalletState, tx?: Wallet.Cardano.Tx): Promise<bigint> => {
+const computeCollateral = async (
+  { addresses, transactions }: HistoricalOwnInputResolverArgs,
+  tx?: Wallet.Cardano.Tx
+): Promise<bigint> => {
   const inputResolver = createHistoricalOwnInputResolver({
-    addresses: wallet.addresses,
-    transactions: wallet.transactions
+    addresses,
+    transactions
   });
 
   return await getCollateral(
     tx,
     inputResolver,
-    wallet.addresses.map((addr) => addr.address)
+    addresses.map((addr) => addr.address)
   );
 };
 
