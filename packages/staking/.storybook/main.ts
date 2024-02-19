@@ -6,6 +6,7 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import svgrPlugin from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+// TODO to be removed when @lace/icons properly supports ESM
 import commonjs from 'vite-plugin-commonjs';
 
 /**
@@ -44,6 +45,14 @@ const config: StorybookConfig = {
         }),
         tsconfigPaths(),
       ],
+      resolve: {
+        alias: [
+          {
+            find: '@lace/cardano',
+            replacement: require.resolve('./__mocks__/cardano.ts'),
+          },
+        ],
+      },
     };
 
     return mergeConfig(baseConfig, userConfig);
