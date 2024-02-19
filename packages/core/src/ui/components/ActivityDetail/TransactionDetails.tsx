@@ -227,7 +227,8 @@ export const TransactionDetails = ({
 
   const getCollateralStatus = (): CollateralStatus => {
     switch (status) {
-      // TODO: HOW ABOUT ActivityStatus.SPENDABLE??
+      case ActivityStatus.SPENDABLE:
+        return CollateralStatus.NONE;
       case ActivityStatus.PENDING:
         return CollateralStatus.REVIEW;
       case ActivityStatus.SUCCESS:

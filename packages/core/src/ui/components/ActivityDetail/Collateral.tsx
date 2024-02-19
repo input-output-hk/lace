@@ -6,7 +6,8 @@ import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
 export enum CollateralStatus {
   REVIEW = 'review',
   SUCCESS = 'success',
-  ERROR = 'error'
+  ERROR = 'error',
+  NONE = 'none'
 }
 
 export interface Props {
