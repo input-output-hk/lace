@@ -75,7 +75,7 @@ export const errorMessage = style({
 globalStyle(
   `${input}:focus + ${label}, ${input}:not(:placeholder-shown) + ${label}`,
   {
-    top: '0px',
+    top: '10px',
     fontSize: vars.fontSizes.$12,
   },
 );
