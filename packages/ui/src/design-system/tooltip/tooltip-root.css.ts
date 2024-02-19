@@ -1,4 +1,4 @@
-import { style, sx } from '../../design-tokens';
+import { style } from '../../design-tokens';
 
 export const root = style([
   {
