@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 
-import * as dns from 'dns';
 import extensionUtils from './src/utils/utils';
 
 export const config: WebdriverIO.Config = {
@@ -59,8 +58,5 @@ export const config: WebdriverIO.Config = {
     tagsInTitle: true,
     timeout: 200_000,
     retry: 1
-  } as WebdriverIO.CucumberOpts,
-  async beforeSession() {
-    await dns.setDefaultResultOrder('ipv4first');
-  }
+  } as WebdriverIO.CucumberOpts
 };

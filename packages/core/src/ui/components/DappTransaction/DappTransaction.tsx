@@ -7,8 +7,9 @@ import { DappTransactionHeader, DappTransactionHeaderProps } from '../DappTransa
 
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
+import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
-import { TransactionFooterDetails } from '../ActivityDetail/TransactionFooterDetails';
+// import { TransactionFooterDetails } from '../ActivityDetail/TransactionFooterDetails';
 import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
 
@@ -21,6 +22,9 @@ const TransactionTypes = {
   Mint: 'mint' as const,
   'Self Transaction': 'self' as const
 };
+
+const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
+  `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
 
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
@@ -35,6 +39,7 @@ export interface DappTransactionProps {
   /** tokens send to being sent to or from the user */
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
+  collateral?: string;
 }
 
 const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValue>) => {
@@ -93,6 +98,7 @@ export const DappTransaction = ({
   txInspectionDetails: { assets, coins, fee, deposit, returnedDeposit },
   toAddress,
   fromAddress,
+  collateral,
   errorMessage,
   fiatCurrencyCode,
   fiatCurrencyPrice,
@@ -130,11 +136,22 @@ export const DappTransaction = ({
           ))}
         </div>
 
-        <TransactionFooterDetails
+        {collateral && (
+          <Collateral
+            collateral={collateral}
+            amountTransformer={amountTransformer({
+              price: fiatCurrencyPrice,
+              code: fiatCurrencyCode
+            })}
+            coinSymbol={coinSymbol}
+          />
+        )}
+
+        <TransactionFee
           fee={getStringFromLovelace(returnedDeposit)}
-          testId="dapp-transaction-returned-deposit"
-          title={t('package.core.dappTransaction.returnedDeposit')}
-          amountTransformer={(ada: string) =>
+          data-testid="dapp-transaction-returned-deposit"
+          label={t('package.core.dappTransaction.returnedDeposit')}
+          amount={(ada: string) =>
             `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
           }
           coinSymbol={coinSymbol}
@@ -143,12 +160,12 @@ export const DappTransaction = ({
           className={styles.depositContainer}
         />
 
-        <TransactionFooterDetails
+        <TransactionFee
           displayTooltip={false}
-          testId="dapp-transaction-deposit"
+          data-testid="dapp-transaction-deposit"
           fee={getStringFromLovelace(deposit)}
-          title={t('package.core.dappTransaction.deposit')}
-          amountTransformer={(ada: string) =>
+          label={t('package.core.dappTransaction.deposit')}
+          amount={(ada: string) =>
             `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
           }
           coinSymbol={coinSymbol}
@@ -156,12 +173,12 @@ export const DappTransaction = ({
           className={styles.depositContainer}
         />
 
-        <TransactionFooterDetails
+        <TransactionFee
           displayTooltip={false}
-          testId="dapp-transaction-fee"
+          data-testid="dapp-transaction-fee"
           displayFiat={false}
           fee={getStringFromLovelace(fee)}
-          amountTransformer={(ada: string) =>
+          amount={(ada: string) =>
             `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
           }
           coinSymbol={coinSymbol}

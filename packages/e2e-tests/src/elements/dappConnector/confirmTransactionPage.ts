@@ -30,6 +30,17 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_AMOUNT_TOKENS_TITLE = '[data-testid="dapp-transaction-tokens-title"]';
   private TRANSACTION_AMOUNT_TOKEN_CONTAINER = '[data-testid="dapp-transaction-token-container"]';
 
+  // private TRANSACTION_AMOUNT_FEE_TITLE = '[data-testid="tx-amount-fee-label"]';
+  // private TRANSACTION_AMOUNT_FEE_TITLE_TOOLTIP_ICON = '[data-testid="tx-amount-fee-tooltip-icon"]';
+  // private TRANSACTION_AMOUNT_FEE_VALUE_ADA = '[data-testid="tx-amount-fee-amount"]';
+  // private TRANSACTION_AMOUNT_FEE_VALUE_FIAT = '[data-testid="tx-amount-fee-fiat"]';
+  // private TRANSACTION_AMOUNT_ASSET = '[data-testid="dapp-transaction-asset"]';
+  // private TRANSACTION_RECIPIENT_TITLE = '[data-testid="dapp-transaction-recipient-title"]';
+  // private TRANSACTION_RECIPIENT_ADDRESS_TITLE = '[data-testid="dapp-transaction-recipient-address-title"]';
+  // private TRANSACTION_RECIPIENT_ADDRESS = '[data-testid="dapp-transaction-recipient-address"]';
+  // private TRANSACTION_DATA_TITLE = '[data-testid="dapp-transaction-data-title"]';
+  // private TRANSACTION_DATA = '[data-testid="dapp-transaction-data"]';
+
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
 

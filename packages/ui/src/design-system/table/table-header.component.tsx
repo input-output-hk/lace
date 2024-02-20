@@ -1,25 +1,26 @@
 import React from 'react';
 
-import { IconButton } from '@lace/ui';
 import { Tooltip } from 'antd';
 import cn from 'classnames';
 
+import * as IconButton from '../icon-buttons';
+
 import * as cx from './table.css';
 
-export interface Headers<Columns> {
+export interface Headers<T> {
   label: string;
-  value: Columns;
+  value: T;
   tooltipText?: string;
 }
 
-export interface HeaderProps<Columns> {
+export interface HeaderProps<T> {
   isActiveSortItem: (value: string) => boolean;
   isSortingAvailable: (value: string) => boolean;
-  onSortChange: (field: Columns) => void;
+  onSortChange: (field: T) => void;
   order: 'asc' | 'desc';
   withSelection?: boolean;
   dataTestId?: string;
-  headers: Headers<Columns>[];
+  headers: Headers<T>[];
 }
 
 export const Header = <T extends string>({

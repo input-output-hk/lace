@@ -10897,11 +10897,13 @@ __metadata:
     react-dom: 17.0.2
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
-    react-virtuoso: ^4.6.2
+    react-responsive: ^9.0.2
+    react-virtuoso: ^4.6.3
     recharts: ^2.9.2
     storybook: ^7.6.7
     tsup: ^6.7.0
     typescript: ^4.9.5
+    use-resize-observer: ^9.1.0
     vite-plugin-commonjs: ^0.10.1
     vite-plugin-node-polyfills: ^0.19.0
     vite-plugin-svgr: ^4.2.0
@@ -45569,7 +45571,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtuoso@npm:^4.6.2":
+"react-virtuoso@npm:^4.6.3":
   version: 4.6.3
   resolution: "react-virtuoso@npm:4.6.3"
   peerDependencies:

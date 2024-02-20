@@ -32,6 +32,7 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
+import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -48,7 +49,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isHardwareWallet,
     blockchainProvider: { assetProvider },
     walletUI: { cardanoCoin },
-    fetchNetworkInfo
+    fetchNetworkInfo,
+    walletState
   } = useWalletStore();
 
   const { fiatCurrency } = useCurrencyStore();
@@ -58,6 +60,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+
   const [{ chainName }] = useAppSettingsContext();
 
   const [fromAddressTokens, setFromAddressTokens] = useState<
@@ -74,6 +77,9 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
     [inMemoryWallet, chainHistoryProvider]
   );
+
+  const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
+  const txCollateral = useComputeTxCollateral(walletState, tx);
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -142,9 +148,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       setTransactionInspectionDetails(void 0);
       return;
     }
-
-    const tx = req.transaction.toCore();
-
     const getTxSummary = async () => {
       const inspector = createTxInspector({
         tokenTransfer: tokenTransferInspector({
@@ -186,7 +189,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     txInputResolver,
     protocolParameters,
     assetProvider,
-    inMemoryWallet.assetInfo$
+    inMemoryWallet.assetInfo$,
+    tx
   ]);
 
   const onConfirm = () => {
@@ -214,6 +218,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           dappInfo={dappInfo}
           fromAddress={fromAddressTokens}
           toAddress={toAddressTokens}
+          collateral={Wallet.util.lovelacesToAdaString(txCollateral.toString())}
         />
       ) : (
         <Skeleton loading />
