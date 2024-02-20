@@ -40,12 +40,18 @@ type KeysStructure = {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
       tableHeader: {
-        ticker: '';
+        ticker: {
+          title: '';
+          tooltip: '';
+        };
         ros: {
           title: '';
           tooltip: '';
         };
-        cost: '';
+        cost: {
+          title: '';
+          tooltip: '';
+        };
         saturation: {
           title: '';
           tooltip: '';
@@ -64,6 +70,7 @@ type KeysStructure = {
         };
         liveStake: {
           title: '';
+          tooltip: '';
         };
       };
       emptyMessage: '';

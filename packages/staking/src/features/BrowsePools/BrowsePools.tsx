@@ -47,12 +47,12 @@ export const BrowsePools = () => {
   const tableHeaderTranslations = {
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
     blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
-    cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
+    cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost.title'),
     liveStake: t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.title'),
     margin: t('browsePools.stakePoolTableBrowser.tableHeader.margin.title'),
     pledge: t('browsePools.stakePoolTableBrowser.tableHeader.pledge.title'),
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
-    ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker'),
+    ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker.title'),
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE), [fetchStakePools]);
