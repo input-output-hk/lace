@@ -2,6 +2,8 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+/* eslint-disable sonarjs/no-identical-functions */
+
 import { AssetsMintedInspection } from '@cardano-sdk/core';
 
 const mockPubDRepKeyToHash = jest.fn();
@@ -18,9 +20,8 @@ import {
   useCreateAssetList,
   useGetOwnPubDRepKeyHash,
   useOnBeforeUnload,
-  useSignTxData,
-  useSignWithHardwareWallet,
-  useTxSummary
+  useTxSummary,
+  useSignWithHardwareWallet
 } from '../hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { Wallet } from '@lace/cardano';
@@ -30,6 +31,7 @@ import { TokenInfo } from '@src/utils/get-assets-information';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { WalletInfo } from '@src/types';
 import * as Core from '@cardano-sdk/core';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 jest.mock('@stores', () => ({
   ...jest.requireActual<any>('@stores'),
@@ -238,35 +240,12 @@ describe('Testing hooks', () => {
     ]);
   });
 
-  test('useSignTxData', async () => {
-    const signTxData = { dappInfo: 'dappInfo', tx: 'tx' };
-    const getSignTxDataMock = jest.fn();
-    getSignTxDataMock.mockImplementation(async () => await signTxData);
-    const hook = renderHook(() => useSignTxData(getSignTxDataMock));
-
-    await hook.waitFor(() => {
-      expect(hook.result.current.signTxData).toEqual(signTxData);
-      expect(hook.result.current.errorMessage).toEqual(undefined);
-    });
-
-    const errorMessage = 'error';
-    getSignTxDataMock.mockImplementation(async () => {
-      throw new Error(errorMessage);
-    });
-    try {
-      await hook.rerender();
-    } catch {
-      expect(hook.result.current.signTxData).toEqual(undefined);
-      expect(hook.result.current.errorMessage).toEqual(errorMessage);
-    }
-  });
-
   test('useSignWithHardwareWallet', async () => {
     const redirectToSignFailure = jest.fn();
     const useRedirectionSpy = jest.spyOn(hooks, 'useRedirection').mockImplementation(() => redirectToSignFailure);
     mockEstablishDeviceConnection.mockReset();
     mockEstablishDeviceConnection.mockImplementation(async () => await true);
-    const hook = renderHook(() => useSignWithHardwareWallet());
+    const hook = renderHook(() => useSignWithHardwareWallet({} as any));
 
     await hook.waitFor(() => {
       expect(hook.result.current.isConfirmingTx).toBeFalsy;
@@ -311,7 +290,7 @@ describe('Testing hooks', () => {
 
     const createTxInspectorSpy = jest
       .spyOn(Core, 'createTxInspector')
-      .mockReturnValue(() => ({ minted: [], burned: [], votingProcedures: true }));
+      .mockReturnValue(() => ({ minted: [], burned: [], votingProcedures: true } as any));
 
     const tx = {
       body: {
@@ -340,10 +319,23 @@ describe('Testing hooks', () => {
     const createAssetList = (txAssets: Wallet.Cardano.TokenMap) => txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
     const createMintedAssetList = (txAssets: AssetsMintedInspection) =>
       txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
-
+    createAssetList({} as any);
+    createMintedAssetList({} as any);
     let hook: any;
     await act(async () => {
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetList }));
+      hook = renderHook(() =>
+        useTxSummary({
+          req: {
+            transaction: {
+              toCore: () => tx
+            }
+          } as unknown as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+          addressList,
+          walletInfo,
+          createAssetList,
+          createMintedAssetList
+        })
+      );
     });
 
     expect(hook.result.current).toEqual({
@@ -367,9 +359,21 @@ describe('Testing hooks', () => {
     hook.unmount();
 
     await act(async () => {
-      createTxInspectorSpy.mockReturnValue(() => ({ minted: [], burned: [] }));
+      createTxInspectorSpy.mockReturnValue(() => ({ minted: [], burned: [] } as any));
 
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetList }));
+      hook = renderHook(() =>
+        useTxSummary({
+          req: {
+            transaction: {
+              toCore: () => tx
+            }
+          } as unknown as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+          addressList,
+          walletInfo,
+          createAssetList,
+          createMintedAssetList
+        })
+      );
     });
 
     expect(hook.result.current).toEqual({

@@ -20,12 +20,7 @@ import TransactionsIconHover from '../../assets/icons/hover-transactions-icon.co
 import { MenuItemList } from '@src/utils/constants';
 import styles from './MainFooter.module.scss';
 import { useAnalyticsContext } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const includesCoin = /coin/i;
 
@@ -52,13 +47,7 @@ export const MainFooter = (): React.ReactElement => {
     currentHoveredItem === MenuItemList.TRANSACTIONS ? TransactionsIconHover : TransactionsIconDefault;
   const StakingIcon = currentHoveredItem === MenuItemList.STAKING ? StakingIconHover : StakingIconDefault;
 
-  const sendAnalytics = (category: MatomoEventCategories, name: string, postHogAction?: PostHogAction) => {
-    analytics.sendEventToMatomo({
-      category,
-      action: MatomoEventActions.CLICK_EVENT,
-      name
-    });
-
+  const sendAnalytics = (postHogAction?: PostHogAction) => {
     if (postHogAction) {
       analytics.sendEventToPostHog(postHogAction);
     }
@@ -67,32 +56,16 @@ export const MainFooter = (): React.ReactElement => {
   const handleNavigation = (path: string) => {
     switch (path) {
       case walletRoutePaths.assets:
-        sendAnalytics(
-          MatomoEventCategories.VIEW_TOKENS,
-          AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_POPUP,
-          PostHogAction.TokenTokensClick
-        );
+        sendAnalytics(PostHogAction.TokenTokensClick);
         break;
       case walletRoutePaths.earn:
-        sendAnalytics(
-          MatomoEventCategories.STAKING,
-          AnalyticsEventNames.Staking.VIEW_STAKING_POPUP,
-          PostHogAction.StakingClick
-        );
+        sendAnalytics(PostHogAction.StakingClick);
         break;
       case walletRoutePaths.activity:
-        sendAnalytics(
-          MatomoEventCategories.VIEW_TRANSACTIONS,
-          AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_POPUP,
-          PostHogAction.ActivityActivityClick
-        );
+        sendAnalytics(PostHogAction.ActivityActivityClick);
         break;
       case walletRoutePaths.nfts:
-        sendAnalytics(
-          MatomoEventCategories.VIEW_NFT,
-          AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_POPUP,
-          PostHogAction.NFTsClick
-        );
+        sendAnalytics(PostHogAction.NFTsClick);
     }
     history.push(path);
   };

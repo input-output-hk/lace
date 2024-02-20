@@ -1,29 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmStakeVoteDelegation } from '@lace/core';
-import { SignTxData } from './types';
 import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
+import { useViewsFlowContext } from '@providers';
+import { Skeleton } from 'antd';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
 }
 
-export const ConfirmStakeVoteDelegationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
+export const ConfirmStakeVoteDelegationContainer = ({ errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const { currentChain } = useWalletStore();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.StakeVoteDelegationCertificate>(
-    CertificateType.StakeVoteDelegation
-  )(signTxData.tx);
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+  const [certificate, setCertificate] = useState<Wallet.Cardano.StakeVoteDelegationCertificate>();
+
+  useEffect(() => {
+    const getCertificateData = async () => {
+      const txCertificate = await certificateInspectorFactory<Wallet.Cardano.StakeVoteDelegationCertificate>(
+        CertificateType.StakeVoteDelegation
+      )(request.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  if (!certificate) {
+    return <Skeleton loading />;
+  }
+
   const dRep = certificate.dRep;
 
   return (
     <ConfirmStakeVoteDelegation
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         poolId: certificate.poolId,
         stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)

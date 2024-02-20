@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-array-reduce */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { PIE_CHART_DEFAULT_COLOR_SET } from '@lace/ui';
 import { useDelegationPortfolioStore } from 'features/store';

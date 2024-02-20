@@ -1,26 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepUpdate } from '@lace/core';
-import { SignTxData } from './types';
 import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
+import { useViewsFlowContext } from '@providers';
+import { Skeleton } from 'antd';
 
 const { CertificateType } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
 }
 
-export const ConfirmDRepUpdateContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepUpdateContainer = ({ errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.UpdateDelegateRepresentativeCertificate>(
-    CertificateType.UpdateDelegateRepresentative
-  )(signTxData.tx);
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+  const [certificate, setCertificate] = useState<Wallet.Cardano.UpdateDelegateRepresentativeCertificate>();
+
+  useEffect(() => {
+    const getCertificateData = async () => {
+      const txCertificate = await certificateInspectorFactory<Wallet.Cardano.UpdateDelegateRepresentativeCertificate>(
+        CertificateType.UpdateDelegateRepresentative
+      )(request.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  if (!certificate) {
+    return <Skeleton loading />;
+  }
 
   return (
     <ConfirmDRepUpdate
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),
         hash: certificate.anchor?.dataHash,

@@ -1,5 +1,4 @@
-/* eslint-disable unicorn/consistent-destructuring */
-/* eslint-disable consistent-return, unicorn/no-array-reduce */
+/* eslint-disable consistent-return */
 import {
   createTxInspector,
   delegationInspector,
@@ -20,7 +19,7 @@ import {
 } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
-const { CertificateType } = Wallet.Cardano;
+const { CertificateType, GovernanceActionType, Vote, VoterType } = Wallet.Cardano;
 
 const hasWalletStakeAddress = (
   withdrawals: Wallet.Cardano.HydratedTx['body']['withdrawals'],
@@ -83,19 +82,19 @@ export const cip1694GovernanceActionsInspection = (
   procedure: Wallet.Cardano.ProposalProcedure
 ): Cip1694GovernanceActivityType => {
   switch (procedure.governanceAction.__typename) {
-    case Wallet.Cardano.GovernanceActionType.parameter_change_action:
+    case GovernanceActionType.parameter_change_action:
       return Cip1694GovernanceActivityType.ParameterChangeAction;
-    case Wallet.Cardano.GovernanceActionType.hard_fork_initiation_action:
+    case GovernanceActionType.hard_fork_initiation_action:
       return Cip1694GovernanceActivityType.HardForkInitiationAction;
-    case Wallet.Cardano.GovernanceActionType.treasury_withdrawals_action:
+    case GovernanceActionType.treasury_withdrawals_action:
       return Cip1694GovernanceActivityType.TreasuryWithdrawalsAction;
-    case Wallet.Cardano.GovernanceActionType.no_confidence:
+    case GovernanceActionType.no_confidence:
       return Cip1694GovernanceActivityType.NoConfidence;
-    case Wallet.Cardano.GovernanceActionType.update_committee:
+    case GovernanceActionType.update_committee:
       return Cip1694GovernanceActivityType.UpdateCommittee;
-    case Wallet.Cardano.GovernanceActionType.new_constitution:
+    case GovernanceActionType.new_constitution:
       return Cip1694GovernanceActivityType.NewConstitution;
-    case Wallet.Cardano.GovernanceActionType.info_action:
+    case GovernanceActionType.info_action:
       return Cip1694GovernanceActivityType.InfoAction;
   }
 };
@@ -127,26 +126,29 @@ const isTxWithRewardsWithdrawal = (
   txWithdrawals.length > 0 &&
   walletAddresses.some((addr) => hasWalletStakeAddress(txWithdrawals, addr.rewardAccount));
 
-const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => (tx: Wallet.Cardano.HydratedTx) => {
+const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => async (tx: Wallet.Cardano.HydratedTx) => {
   const notOwnInputs = tx.body.inputs.some((input) => !addresses.includes(input.address));
   if (notOwnInputs) return false;
   const notOwnOutputs = tx.body.outputs.some((output) => !addresses.includes(output.address));
   return !notOwnOutputs;
 };
 
-export const inspectTxType = ({
+export const inspectTxType = async ({
   walletAddresses,
-  tx
+  tx,
+  inputResolver
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
-}): Exclude<ActivityType, TransactionActivityType.rewards> => {
+  inputResolver: Wallet.Cardano.InputResolver;
+}): Promise<Exclude<ActivityType, TransactionActivityType.rewards>> => {
   const { paymentAddresses, rewardAccounts } = getWalletAccounts(walletAddresses);
 
-  const inspectionProperties = createTxInspector({
+  const inspectionProperties = await createTxInspector({
     sent: sentInspector({
       addresses: paymentAddresses,
-      rewardAccounts
+      rewardAccounts,
+      inputResolver
     }),
     totalWithdrawals: withdrawalInspector,
     delegation: delegationInspector,
@@ -189,7 +191,7 @@ export const inspectTxType = ({
   return TransactionActivityType.incoming;
 };
 
-export const inspectTxValues = ({
+export const inspectTxValues = async ({
   addresses,
   tx,
   direction
@@ -197,7 +199,7 @@ export const inspectTxValues = ({
   addresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
   direction: TxDirection;
-}): Wallet.Cardano.Value => {
+}): Promise<Wallet.Cardano.Value> => {
   const paymentAddresses = addresses.map((addr) => addr.address);
 
   const targetAddresses =
@@ -205,7 +207,7 @@ export const inspectTxValues = ({
       ? tx.body.outputs.filter((item) => !paymentAddresses.includes(item.address)).map((item) => item.address)
       : paymentAddresses;
 
-  const inspectionProperties = createTxInspector({
+  const inspectionProperties = await createTxInspector({
     totalOutputsValue: totalAddressOutputsValueInspector(targetAddresses)
   })(tx);
 
@@ -220,13 +222,13 @@ export enum VoterTypeEnum {
 
 export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterTypeEnum => {
   switch (voterType) {
-    case Wallet.Cardano.VoterType.ccHotKeyHash:
-    case Wallet.Cardano.VoterType.ccHotScriptHash:
+    case VoterType.ccHotKeyHash:
+    case VoterType.ccHotScriptHash:
       return VoterTypeEnum.CONSTITUTIONAL_COMMITTEE;
-    case Wallet.Cardano.VoterType.stakePoolKeyHash:
+    case VoterType.stakePoolKeyHash:
       return VoterTypeEnum.SPO;
-    case Wallet.Cardano.VoterType.dRepKeyHash:
-    case Wallet.Cardano.VoterType.dRepScriptHash:
+    case VoterType.dRepKeyHash:
+    case VoterType.dRepScriptHash:
       return VoterTypeEnum.DREP;
     default:
       return VoterTypeEnum.DREP;
@@ -241,11 +243,11 @@ export enum VotesEnum {
 
 export const getVote = (vote: Wallet.Cardano.Vote): VotesEnum => {
   switch (vote) {
-    case Wallet.Cardano.Vote.yes:
+    case Vote.yes:
       return VotesEnum.YES;
-    case Wallet.Cardano.Vote.no:
+    case Vote.no:
       return VotesEnum.NO;
-    case Wallet.Cardano.Vote.abstain:
+    case Vote.abstain:
     default:
       return VotesEnum.ABSTAIN;
   }

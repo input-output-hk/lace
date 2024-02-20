@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
 import '@testing-library/jest-dom';
 import { inspectTxType, getTxDirection } from '../tx-inspection';
@@ -29,6 +30,16 @@ const DEAFULT_TX_INPUT_INFO = {
 const POOL_ID = Wallet.Cardano.PoolId('pool185g59xpqzt7gf0ljr8v8f3akl95qnmardf2f8auwr3ffx7atjj5');
 
 const STAKE_KEY_HASH = Wallet.Cardano.RewardAccount.toHash(REWARD_ACCOUNT);
+
+const createStubInputResolver = (
+  walletAddresses: Wallet.KeyManagement.GroupedAddress[]
+): Wallet.Cardano.InputResolver => ({
+  resolveInput: jest.fn(async (input) => {
+    const address = (input as Wallet.Cardano.HydratedTxIn).address;
+    return walletAddresses.some((addr) => addr.address === address) ? ({ address } as Wallet.Cardano.TxOut) : null;
+  })
+});
+
 describe('testing tx-inspection utils', () => {
   describe('Testing getTxDirection function', () => {
     test('should return proper direction', () => {
@@ -39,7 +50,7 @@ describe('testing tx-inspection utils', () => {
     });
   });
   describe('Testing inspectTxType function', () => {
-    test('should return incoming', () => {
+    test('should return incoming', async () => {
       const incomingTX = buildMockTx({
         inputs: [
           {
@@ -59,8 +70,9 @@ describe('testing tx-inspection utils', () => {
         ]
       });
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: incomingTX,
+        inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) },
         walletAddresses: [
           { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
         ] as Wallet.KeyManagement.GroupedAddress[]
@@ -69,7 +81,7 @@ describe('testing tx-inspection utils', () => {
       expect(result).toBe('incoming');
     });
 
-    test('should return outgoing', () => {
+    test('should return outgoing', async () => {
       const outgoingX = buildMockTx({
         inputs: [
           {
@@ -88,18 +100,20 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: outgoingX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('outgoing');
     });
 
-    test('should return delegation', () => {
+    test('should return delegation', async () => {
       const delegationTX = buildMockTx({
         certificates: [
           {
@@ -112,48 +126,54 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: delegationTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('delegation');
     });
 
-    test('should not return delegation', () => {
+    test('should not return delegation', async () => {
       const delegationTX = buildMockTx({
         certificates: []
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: delegationTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).not.toBe('delegation');
     });
 
-    test('should not return delegation in case pool id is missing', () => {
+    test('should not return delegation in case pool id is missing', async () => {
       const delegationTX = buildMockTx({
         certificates: [{} as StakeDelegationCertificate]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: delegationTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).not.toBe('delegation');
     });
 
-    test('should return delegationRegistration', () => {
+    test('should return delegationRegistration', async () => {
       const stakeKeyRegistrationTX = buildMockTx({
         certificates: [
           {
@@ -165,18 +185,20 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: stakeKeyRegistrationTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('delegationRegistration');
     });
 
-    test('should return delegationDeregistration', () => {
+    test('should return delegationDeregistration', async () => {
       const stakeKeyDeregistrationTX = buildMockTx({
         certificates: [
           {
@@ -188,18 +210,20 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: stakeKeyDeregistrationTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('delegationDeregistration');
     });
 
-    test('is outgoing rewards', () => {
+    test('is outgoing rewards', async () => {
       const withdrawalTX = buildMockTx({
         withdrawals: [
           {
@@ -208,18 +232,20 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('outgoing');
     });
 
-    test('is self rewards', () => {
+    test('is self rewards', async () => {
       const withdrawalTX = buildMockTx({
         inputs: [
           {
@@ -240,18 +266,20 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('self');
     });
 
-    test('is self', () => {
+    test('is self', async () => {
       const withdrawalTX = buildMockTx({
         inputs: [
           {
@@ -266,18 +294,20 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [
-          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('self');
     });
 
-    test('is incoming tx with withdrawal and not the wallet stake address', () => {
+    test('is incoming tx with withdrawal and not the wallet stake address', async () => {
       const withdrawalTX = buildMockTx({
         withdrawals: [
           {
@@ -286,12 +316,14 @@ describe('testing tx-inspection utils', () => {
           }
         ]
       });
+      const walletAddresses = [
+        { address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }
+      ] as Wallet.KeyManagement.GroupedAddress[];
 
-      const result = inspectTxType({
+      const result = await inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [
-          { address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
+        inputResolver: createStubInputResolver(walletAddresses),
+        walletAddresses
       });
 
       expect(result).toBe('incoming');
@@ -331,7 +363,8 @@ describe('testing tx-inspection utils', () => {
               tx: mockTx,
               walletAddresses: [
                 { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-              ] as Wallet.KeyManagement.GroupedAddress[]
+              ] as Wallet.KeyManagement.GroupedAddress[],
+              inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) }
             });
             expect(result).toEqual(expectedReturn);
           }
@@ -393,7 +426,8 @@ describe('testing tx-inspection utils', () => {
             },
             walletAddresses: [
               { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-            ] as Wallet.KeyManagement.GroupedAddress[]
+            ] as Wallet.KeyManagement.GroupedAddress[],
+            inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) }
           });
 
           expect(result).toEqual('vote');
@@ -438,7 +472,8 @@ describe('testing tx-inspection utils', () => {
             },
             walletAddresses: [
               { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
-            ] as Wallet.KeyManagement.GroupedAddress[]
+            ] as Wallet.KeyManagement.GroupedAddress[],
+            inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) }
           });
           expect(result).toEqual('ParameterChangeAction');
         });

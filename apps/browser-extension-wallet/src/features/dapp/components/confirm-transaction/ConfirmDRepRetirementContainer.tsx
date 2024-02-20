@@ -1,58 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRetirement } from '@lace/core';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory, depositPaidWithSymbol, disallowSignTx, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
-import { SignTxData } from './types';
 import { useGetOwnPubDRepKeyHash } from './hooks';
 import { Skeleton } from 'antd';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { UserPromptService } from '@lib/scripts/background/services';
-import { of } from 'rxjs';
-import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
-import { DAPP_CHANNELS } from '@utils/constants';
-import { runtime } from 'webextension-polyfill';
 import { DappError } from '../DappError';
+import { useViewsFlowContext } from '@providers';
+
+const { CertificateType } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
   onError: () => void;
 }
 
-export const disallowSignTx = (): void => {
-  exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-    {
-      api$: of({
-        async allowSignTx(): Promise<boolean> {
-          return Promise.reject(new ApiError(APIErrorCode.InvalidRequest, 'DRep ID mismatch'));
-        }
-      }),
-      baseChannel: DAPP_CHANNELS.userPrompt,
-      properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-    },
-    { logger: console, runtime }
-  );
-};
-
-export const ConfirmDRepRetirementContainer = ({ signTxData, onError, errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
-    Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative
-  )(signTxData.tx);
-  const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
-    cardanoCoin.symbol
-  }`;
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+  const [certificate, setCertificate] = useState<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>();
   const { loading: loadingOwnPubDRepKeyHash, ownPubDRepKeyHash } = useGetOwnPubDRepKeyHash();
-  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
 
-  if (loadingOwnPubDRepKeyHash) {
-    return <Skeleton />;
+  useEffect(() => {
+    if (!request) return;
+    const getCertificateData = async () => {
+      const txCertificate =
+        await certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
+          CertificateType.UnregisterDelegateRepresentative
+        )(request.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  if (!certificate || loadingOwnPubDRepKeyHash) {
+    return <Skeleton loading />;
   }
+
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
+  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
 
   if (isNotOwnDRepKey) {
     return (
@@ -60,7 +54,7 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, onError, errorMessa
         title={t('core.DRepRetirement.drepIdMismatchScreen.title')}
         description={t('core.DRepRetirement.drepIdMismatchScreen.description')}
         onMount={() => {
-          disallowSignTx();
+          disallowSignTx(request, false);
           onError();
         }}
         containerTestId="drep-id-mismatch-container"
@@ -74,7 +68,7 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, onError, errorMessa
 
   return (
     <ConfirmDRepRetirement
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         depositReturned: depositPaidWithCardanoSymbol,
         drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)

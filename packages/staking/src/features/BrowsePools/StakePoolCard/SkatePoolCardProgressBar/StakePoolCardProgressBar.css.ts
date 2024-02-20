@@ -16,21 +16,26 @@ export const bar = style([
   },
 ]);
 
-export const progress = sx({
-  borderRadius: '$medium',
-  height: '$4',
-});
+export const progress = style([
+  sx({
+    borderRadius: '$medium',
+    height: '$4',
+  }),
+  {
+    backgroundRepeat: 'no-repeat',
+  },
+]);
 
 export const progressValue = style({
   color: theme.colors.$poolCardProgressBarValue,
 });
 
-export const progressMedium = sx({
-  backgroundColor: '$data_green',
+export const progressMedium = style({
+  backgroundImage: theme.colors.$dataGreenGradient,
 });
-export const progressHigh = sx({
-  backgroundColor: '$data_orange',
+export const progressHigh = style({
+  backgroundImage: theme.colors.$dataOrangeGradient,
 });
-export const progressVeryHigh = sx({
-  backgroundColor: '$data_pink',
+export const progressVeryHigh = style({
+  backgroundImage: theme.colors.$dataPinkGradient,
 });

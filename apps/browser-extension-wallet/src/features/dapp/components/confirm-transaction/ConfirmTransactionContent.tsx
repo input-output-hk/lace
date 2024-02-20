@@ -2,7 +2,7 @@
 import React from 'react';
 import { Skeleton } from 'antd';
 import { Wallet } from '@lace/cardano';
-import { SignTxData } from './types';
+// import { SignTxData } from './types';
 import { ConfirmDRepRegistrationContainer } from './ConfirmDRepRegistrationContainer';
 import { DappTransactionContainer } from './DappTransactionContainer';
 import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer';
@@ -17,45 +17,44 @@ import { ProposalProceduresContainer } from './ProposalProceduresContainer';
 
 interface Props {
   txType?: Wallet.Cip30TxType;
-  signTxData?: SignTxData;
   errorMessage?: string;
   onError?: () => void;
 }
 
-export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMessage }: Props): React.ReactElement => {
-  if (!signTxData) {
+export const ConfirmTransactionContent = ({ txType, onError, errorMessage }: Props): React.ReactElement => {
+  if (!txType) {
     return <Skeleton loading />;
   }
   if (txType === Wallet.Cip30TxType.DRepRegistration) {
-    return <ConfirmDRepRegistrationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmDRepRegistrationContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.DRepRetirement) {
-    return <ConfirmDRepRetirementContainer signTxData={signTxData} onError={onError} errorMessage={errorMessage} />;
+    return <ConfirmDRepRetirementContainer onError={onError} errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.DRepUpdate) {
-    return <ConfirmDRepUpdateContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmDRepUpdateContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.VoteDelegation) {
-    return <ConfirmVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmVoteDelegationContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.VotingProcedures) {
-    return <VotingProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <VotingProceduresContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.VoteRegistrationDelegation) {
-    return <ConfirmVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmVoteRegistrationDelegationContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.StakeRegistrationDelegation) {
-    return <ConfirmStakeRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmStakeRegistrationDelegationContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.StakeVoteDelegationRegistration) {
-    return <ConfirmStakeVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmStakeVoteRegistrationDelegationContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.StakeVoteDelegation) {
-    return <ConfirmStakeVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmStakeVoteDelegationContainer errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.ProposalProcedures) {
-    return <ProposalProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ProposalProceduresContainer errorMessage={errorMessage} />;
   }
 
-  return <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  return <DappTransactionContainer errorMessage={errorMessage} />;
 };

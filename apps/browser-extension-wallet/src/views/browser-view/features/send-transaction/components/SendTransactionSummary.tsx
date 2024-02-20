@@ -12,15 +12,11 @@ import { Typography } from 'antd';
 import styles from './SendTransactionSummary.module.scss';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { AddressListType } from '@views/browser/features/activity';
-import { useAnalyticsContext, useCurrencyStore } from '@providers';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { useCurrencyStore } from '@providers';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
 import { useObservable, Banner } from '@lace/common';
 import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Text } = Typography;
 
@@ -104,20 +100,16 @@ export const SendTransactionSummary = withAddressBookContext(
     const { t } = useTranslation();
     const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
-    const { inMemoryWallet } = useWalletStore();
-    const { priceResult } = useFetchCoinPrice();
     const {
-      getKeyAgentType,
+      inMemoryWallet,
+      isHardwareWallet,
+      walletType,
       walletUI: { cardanoCoin }
     } = useWalletStore();
-    const isInMemory = useMemo(
-      () => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
-      [getKeyAgentType]
-    );
-    const isTrezor = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.Trezor, [getKeyAgentType]);
+    const { priceResult } = useFetchCoinPrice();
+    const isTrezor = walletType === WalletType.Trezor;
 
     const { list: addressList } = useAddressBookContext();
-    const analytics = useAnalyticsContext();
     const { fiatCurrency } = useCurrencyStore();
 
     const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
@@ -154,22 +146,8 @@ export const SendTransactionSummary = withAddressBookContext(
           }}
           metadata={metadata}
           translations={outputSummaryListTranslation}
-          onDepositTooltipHover={() =>
-            analytics.sendEventToMatomo({
-              action: MatomoEventActions.HOVER_EVENT,
-              category: MatomoEventCategories.SEND_TRANSACTION,
-              name: AnalyticsEventNames.SendTransaction.SEE_TX_DEPOSIT_INFO
-            })
-          }
-          onFeeTooltipHover={() =>
-            analytics.sendEventToMatomo({
-              action: MatomoEventActions.HOVER_EVENT,
-              category: MatomoEventCategories.SEND_TRANSACTION,
-              name: AnalyticsEventNames.SendTransaction.SEE_TX_FEE_INFO
-            })
-          }
         />
-        {!isInMemory && !isPopupView && (
+        {isHardwareWallet && !isPopupView && (
           <Text className={styles.connectLedgerText}>
             {isTrezor ? t('send.connectYourTrezor') : t('send.connectYourLedger')}
           </Text>

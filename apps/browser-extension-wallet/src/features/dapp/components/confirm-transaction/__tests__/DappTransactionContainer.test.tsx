@@ -211,7 +211,7 @@ describe('Testing DappTransactionContainer component', () => {
     const signTxData = { tx: { body: {} } } as unknown as SignTxData;
 
     await act(async () => {
-      ({ queryByTestId } = render(<DappTransactionContainer {...{ signTxData }} />, {
+      ({ queryByTestId } = render(<DappTransactionContainer {...({ signTxData } as any)} />, {
         wrapper: getWrapper()
       }));
     });

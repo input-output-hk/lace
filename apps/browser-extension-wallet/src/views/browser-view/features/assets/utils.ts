@@ -42,8 +42,7 @@ export const getTotalWalletBalance = (
 ): string => {
   if (!tokenBalances) return coinBalanceInFiat;
   const totalTokenBalanceInFiat = tokenPrices
-    ? // eslint-disable-next-line unicorn/no-array-reduce
-      [...tokenPrices.entries()].reduce((total, [key, { priceInAda }]) => {
+    ? [...tokenPrices.entries()].reduce((total, [key, { priceInAda }]) => {
         const balance = tokenBalances?.get(key);
         const info = assetsInfo?.get(key);
         if (info?.tokenMetadata !== undefined && balance) {

@@ -3,20 +3,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 
-import { UserPromptService } from '@lib/scripts/background/services';
-import { ExposeApiProps } from '@cardano-sdk/web-extension';
-
 const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockConfirmDRepRetirement = jest.fn();
 const mockDappError = jest.fn();
 const mockUseGetOwnPubDRepKeyHash = jest.fn();
-const mockExposeApi = jest.fn((props: ExposeApiProps<Pick<UserPromptService, 'allowSignTx'>>) => {
-  let returnValue;
-  props.api$.forEach((v) => (returnValue = v.allowSignTx()));
-  return returnValue;
-});
+const flowContextMock = jest.fn();
+
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { ConfirmDRepRetirementContainer } from '../ConfirmDRepRetirementContainer';
@@ -28,6 +22,7 @@ import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
 import { getWrapper } from '../testing.utils';
 import { drepIDasBech32FromHash } from '../utils';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 const LOVELACE_VALUE = 1_000_000;
 const DEFAULT_DECIMALS = 2;
 
@@ -50,17 +45,37 @@ const inMemoryWallet = {
 };
 
 const cardanoCoinMock = {
+  name: 'Cardano',
   symbol: 'cardanoCoinMockSymbol'
 };
 
-jest.mock('@cardano-sdk/web-extension', () => {
-  const original = jest.requireActual('@cardano-sdk/web-extension');
-  return {
-    __esModule: true,
-    ...original,
-    exposeApi: mockExposeApi
-  };
+const dappInfo = {
+  name: 'dappName',
+  logo: 'dappLogo',
+  url: 'dappUrl'
+};
+const certificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.UnregisterDelegateRepresentative,
+  dRepCredential: {
+    type: Cardano.CredentialType.KeyHash,
+    hash
+  },
+  deposit: BigInt('1000')
+};
+const tx = buildMockTx({
+  certificates: [certificate]
 });
+
+const request = {
+  transaction: {
+    toCore: jest.fn().mockReturnValue(tx)
+  } as any
+} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: flowContextMock
+}));
 
 jest.mock('../hooks.ts', () => {
   const original = jest.requireActual('../hooks.ts');
@@ -106,7 +121,6 @@ jest.mock('react-i18next', () => {
 describe('Testing ConfirmDRepRetirementContainer component', () => {
   beforeEach(() => {
     mockUseWalletStore.mockReset();
-    mockExposeApi.mockRestore();
     mockUseGetOwnPubDRepKeyHash.mockImplementationOnce(() => ({
       loading: false,
       ownPubDRepKeyHash: hash
@@ -116,6 +130,12 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
       walletUI: { cardanoCoin: cardanoCoinMock },
       walletInfo: {}
     }));
+    flowContextMock.mockReset();
+    flowContextMock.mockImplementation(() => ({
+      signTxRequest: { request },
+      dappInfo
+    }));
+
     mockConfirmDRepRetirement.mockReset();
     mockConfirmDRepRetirement.mockReturnValue(<span data-testid="ConfirmDRepRetirementContainer" />);
     mockDappError.mockReset();
@@ -130,35 +150,17 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     cleanup();
   });
 
-  const dappInfo = {
-    name: 'dappName',
-    logo: 'dappLogo',
-    url: 'dappUrl'
-  };
-  const certificate: Wallet.Cardano.Certificate = {
-    __typename: Cardano.CertificateType.UnregisterDelegateRepresentative,
-    dRepCredential: {
-      type: Cardano.CredentialType.KeyHash,
-      hash
-    },
-    deposit: BigInt('1000')
-  };
-  const tx = buildMockTx({
-    certificates: [certificate]
-  });
   const errorMessage = 'errorMessage';
   // eslint-disable-next-line unicorn/consistent-function-scoping
   const onErrorMock = jest.fn();
+  const props = { errorMessage, onError: onErrorMock };
 
   test('should render ConfirmDRepRetirementContainer component with proper props', async () => {
     let queryByTestId: any;
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, errorMessage, onError: onErrorMock }} />,
-        {
-          wrapper: getWrapper()
-        }
-      ));
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...props} />, {
+        wrapper: getWrapper()
+      }));
     });
 
     expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
@@ -186,13 +188,12 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
 
   test('should render ConfirmDRepRetirementContainer component with proper error for own retirement', async () => {
     let queryByTestId: any;
+    const additionalProps = { errorMessage, onError: onErrorMock };
+
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, onError: onErrorMock }} />,
-        {
-          wrapper: getWrapper()
-        }
-      ));
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...additionalProps} />, {
+        wrapper: getWrapper()
+      }));
     });
 
     expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
@@ -208,13 +209,12 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
       ownPubDRepKeyHash: Crypto.Hash28ByteBase16(Buffer.from('WRONG_dRepCredentialHashdRep').toString('hex'))
     }));
     let queryByTestId: any;
+    const additionalProps = { errorMessage, onError: onErrorMock };
+
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, onError: onErrorMock }} />,
-        {
-          wrapper: getWrapper()
-        }
-      ));
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...additionalProps} />, {
+        wrapper: getWrapper()
+      }));
     });
 
     expect(queryByTestId('DappError')).toBeInTheDocument();

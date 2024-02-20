@@ -1,33 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRegistration } from '@lace/core';
-import { SignTxData } from './types';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory, depositPaidWithSymbol, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
+import { useViewsFlowContext } from '@providers';
+import { Skeleton } from 'antd';
 
 const { CertificateType } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
 }
 
-export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepRegistrationContainer = ({ errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>(
-    CertificateType.RegisterDelegateRepresentative
-  )(signTxData.tx);
-  const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
-    cardanoCoin.symbol
-  }`;
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+
+  const [certificate, setCertificate] = useState<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>();
+
+  useEffect(() => {
+    const getCertificateData = async () => {
+      const txCertificate = await certificateInspectorFactory<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>(
+        CertificateType.RegisterDelegateRepresentative
+      )(request?.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  if (!certificate) {
+    return <Skeleton loading />;
+  }
+
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
 
   return (
     <ConfirmDRepRegistration
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         depositPaid: depositPaidWithCardanoSymbol,
         drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),

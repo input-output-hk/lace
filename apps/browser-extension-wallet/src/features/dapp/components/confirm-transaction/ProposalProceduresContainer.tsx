@@ -1,8 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable complexity */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Wallet } from '@lace/cardano';
-import { SignTxData } from './types';
 import { proposalProceduresInspector } from './utils';
 import { HardForkInitiationActionContainer } from './proposal-procedures/HardForkInitiationActionContainer';
 import { InfoActionContainer } from './proposal-procedures/InfoActionContainer';
@@ -11,17 +10,27 @@ import { NoConfidenceActionContainer } from './proposal-procedures/NoConfidenceA
 import { ParameterChangeActionContainer } from './proposal-procedures/ParameterChangeActionContainer';
 import { TreasuryWithdrawalsActionContainer } from './proposal-procedures/TreasuryWithdrawalsActionContainer';
 import { UpdateCommitteeActionContainer } from './proposal-procedures/UpdateCommitteeActionContainer';
+import { useViewsFlowContext } from '@providers';
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
 }
 
-export const ProposalProceduresContainer = ({
-  signTxData: { dappInfo, tx },
-  errorMessage
-}: Props): React.ReactElement => {
-  const proposalProcedures = proposalProceduresInspector(tx);
+export const ProposalProceduresContainer = ({ errorMessage }: Props): React.ReactElement => {
+  const [proposalProcedures, setProposalProcedures] = useState<Wallet.Cardano.ProposalProcedure[]>([]);
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+
+  useEffect(() => {
+    const getCertificateData = async () => {
+      const procedures = await proposalProceduresInspector(request.transaction.toCore());
+      setProposalProcedures(procedures);
+    };
+
+    getCertificateData();
+  }, [request]);
 
   const props = useMemo(() => ({ dappInfo, errorMessage }), [dappInfo, errorMessage]);
 

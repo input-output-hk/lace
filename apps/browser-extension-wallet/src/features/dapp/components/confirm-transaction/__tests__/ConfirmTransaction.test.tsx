@@ -127,7 +127,16 @@ describe('Testing ConfirmTransaction component', () => {
     mockUseSignWithHardwareWallet.mockReset();
     mockUseSignWithHardwareWallet.mockReturnValue({});
     mockUseViewsFlowContext.mockReset();
-    mockUseViewsFlowContext.mockReturnValue({ utils: {} });
+    mockUseViewsFlowContext.mockReturnValue({
+      utils: {},
+      signTxRequest: {
+        request: {
+          transaction: {
+            toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' })
+          }
+        }
+      }
+    });
     mockConfirmTransactionContent.mockReset();
     mockConfirmTransactionContent.mockImplementation(() => <span data-testid="ConfirmTransactionContent" />);
   });
@@ -167,7 +176,16 @@ describe('Testing ConfirmTransaction component', () => {
     mockUseDisallowSignTx.mockReturnValue(disallowSignTx);
     const setNextViewMock = jest.fn();
     mockUseViewsFlowContext.mockReset();
-    mockUseViewsFlowContext.mockReturnValue({ utils: { setNextView: setNextViewMock } });
+    mockUseViewsFlowContext.mockReturnValue({
+      utils: { setNextView: setNextViewMock },
+      signTxRequest: {
+        request: {
+          transaction: {
+            toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' })
+          }
+        }
+      }
+    });
 
     await act(async () => {
       ({ queryByTestId } = render(<ConfirmTransaction />, {

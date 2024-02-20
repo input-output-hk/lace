@@ -29,8 +29,7 @@ export const useCollateral = (): UseCollateralReturn => {
   const { t } = useTranslation();
   const [txFee, setTxFee] = useState<Cardano.Lovelace>();
   const [txBuilder, setTxBuilder] = useState<TxBuilder | undefined>();
-  const { inMemoryWallet, getKeyAgentType } = useWalletStore();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const { inMemoryWallet, isInMemoryWallet } = useWalletStore();
   const { setBuiltTxData } = useBuiltTxState();
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -65,18 +64,20 @@ export const useCollateral = (): UseCollateralReturn => {
     setIsSubmitting(true);
     try {
       const txBuilt = txBuilder.build();
-      const { tx } = await txBuilt.sign();
-      await inMemoryWallet.submitTx(tx);
+      const signedTx = await txBuilt.sign();
+      await inMemoryWallet.submitTx(signedTx);
       const utxo = await firstValueFrom(
         inMemoryWallet.utxo.available$.pipe(
-          map((utxos) => utxos.find((o) => o[0].txId === tx.id && o[1].value.coins === COLLATERAL_AMOUNT_LOVELACES)),
+          map((utxos) =>
+            utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === COLLATERAL_AMOUNT_LOVELACES)
+          ),
           filter(isNotNil),
           take(1)
         )
       );
       await inMemoryWallet.utxo.setUnspendable([utxo]);
       // set tx data in case of hw for tx success/fail steps
-      if (!isInMemory) {
+      if (!isInMemoryWallet) {
         const txInspection = await txBuilt.inspect();
         setBuiltTxData({
           uiTx: {
@@ -89,7 +90,7 @@ export const useCollateral = (): UseCollateralReturn => {
       toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
     } catch (error) {
       // redirect to tx fail screen in case of hw
-      if (!isInMemory) {
+      if (!isInMemoryWallet) {
         console.error('submitCollateralTx fails with:', error?.message);
         setBuiltTxData({
           uiTx: undefined,
@@ -101,7 +102,7 @@ export const useCollateral = (): UseCollateralReturn => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [txBuilder, inMemoryWallet, isInMemory, t, setBuiltTxData]);
+  }, [txBuilder, inMemoryWallet, isInMemoryWallet, t, setBuiltTxData]);
   return {
     initializeCollateralTx,
     submitCollateralTx,
