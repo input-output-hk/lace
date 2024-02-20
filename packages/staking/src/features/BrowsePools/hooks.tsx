@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { getPoolInfos } from 'features/activity/PastEpochsRewards/hooks/useRewardsByEpoch';
 import { useOutsideHandles } from 'features/outside-handles-provider';
