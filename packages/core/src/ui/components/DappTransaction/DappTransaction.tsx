@@ -119,7 +119,7 @@ export const DappTransaction = ({
               key={key}
               imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
               balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
-              getAsset={truncate(getAssetTokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
+              tokenName={truncate(getAssetTokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
               metadataHash={truncate(getAssetHash(assetWithAmount), charBeforeEllMetadata, charAfterEllMetadata)}
             />
           ))}
