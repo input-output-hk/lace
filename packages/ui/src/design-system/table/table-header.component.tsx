@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { IconButton } from '@lace/ui';
 import { Tooltip } from 'antd';
 import cn from 'classnames';
+
+import * as IconButton from '../icon-buttons';
 
 import * as cx from './table.css';
 

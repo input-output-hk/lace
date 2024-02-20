@@ -31,6 +31,7 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -86,7 +87,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     walletType,
     isHardwareWallet,
     blockchainProvider: { assetProvider },
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    walletState
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
@@ -99,11 +101,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+  const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
+  const txCollateral = useComputeTxCollateral(walletState, tx);
 
   // All assets' ids in the transaction body. Used to fetch their info from cardano services
   const assetIds = useMemo(() => {
-    if (!req) return [];
-    const tx = req.transaction.toCore();
+    if (!tx) return [];
     const uniqueAssetIds = new Set<Wallet.Cardano.AssetId>();
     // Merge all assets (TokenMaps) from the tx outputs and mint
     const assetMaps = tx.body?.outputs?.map((output) => output.value.assets) ?? [];
@@ -118,7 +121,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       }
     }
     return [...uniqueAssetIds.values()];
-  }, [req]);
+  }, [tx]);
 
   useEffect(() => {
     if (assetIds?.length > 0) {
@@ -190,7 +193,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         const assetId = Wallet.Cardano.AssetId.fromParts(asset.policyId, asset.assetName);
         const assetInfo = assets.get(assetId) || assetsInfo?.get(assetId);
         // If it's a new asset or the name is being updated we should be getting it from the tx metadata
-        const metadataName = getAssetNameFromMintMetadata(asset, req.transaction.toCore()?.auxiliaryData?.blob);
+        const metadataName = getAssetNameFromMintMetadata(asset, tx?.auxiliaryData?.blob);
         return {
           name: assetInfo?.name.toString() || asset.fingerprint || assetId,
           ticker:
@@ -203,7 +206,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         };
       });
     },
-    [assets, assetsInfo, req]
+    [assets, assetsInfo, tx]
   );
 
   const createAssetList = useCallback(
@@ -231,7 +234,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
 
   useEffect(() => {
-    if (!req) {
+    if (!tx) {
       setTxSummary(void 0);
       return;
     }
@@ -241,7 +244,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         burned: assetsBurnedInspector
       });
 
-      const tx = req.transaction.toCore();
       const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
       const isMintTransaction = minted.length > 0 || burned.length > 0;
 
@@ -274,11 +276,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         outputs: txSummaryOutputs,
         type: txType,
         mintedAssets: createMintedList(minted),
-        burnedAssets: createMintedList(burned)
+        burnedAssets: createMintedList(burned),
+        collateral: txCollateral ? Wallet.util.lovelacesToAdaString(txCollateral.toString()) : undefined
       });
     };
     getTxSummary();
-  }, [req, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap, setTxSummary]);
+  }, [tx, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap, setTxSummary, txCollateral]);
 
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {

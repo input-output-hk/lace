@@ -265,7 +265,7 @@ export const TransactionDetails = ({
             </div>
           </div>
           {fee && fee !== '-' && (
-            <Box mb="$32">
+            <Box mb="$32" data-testid="tx-fee">
               <TransactionFee fee={fee} amountTransformer={amountTransformer} coinSymbol={coinSymbol} />
             </Box>
           )}

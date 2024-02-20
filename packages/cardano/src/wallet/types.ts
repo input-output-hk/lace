@@ -38,6 +38,7 @@ export type Cip30SignTxSummary = {
   type: 'Send' | 'Mint';
   mintedAssets?: Cip30SignTxAssetItem[];
   burnedAssets?: Cip30SignTxAssetItem[];
+  collateral?: string;
 };
 
 export type Cip30SignTxAssetItem = {
