@@ -31,6 +31,7 @@ export const useRestorePoolsSelection = () => {
   );
 
   useEffect(() => {
+    console.log(areSelectedPoolsRestored.current.restored);
     if (areSelectedPoolsRestored.current.restored) return;
     const selectedPortfolioStakePoolsId = new Set(selectedPortfolioStakePools.map(({ id }) => id.toString()));
     const selectedPoolsIdsWithNoData =
@@ -38,8 +39,9 @@ export const useRestorePoolsSelection = () => {
         ?.slice(0, MAX_POOLS_COUNT)
         .filter((poolId) => !selectedPortfolioStakePoolsId.has(poolId)) || [];
 
-    if (selectedPoolsIdsWithNoData?.length === 0) return;
-    setMissingSelectedPoolsData(selectedPoolsIdsWithNoData);
+    if (selectedPoolsIdsWithNoData?.length > 0) {
+      setMissingSelectedPoolsData(selectedPoolsIdsWithNoData);
+    }
     areSelectedPoolsRestored.current.restored = true;
   }, [
     stakingBrowserPreferencesPersistence?.selectedPoolsIds,
