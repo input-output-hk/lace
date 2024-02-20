@@ -21,15 +21,15 @@ describe('Testing AssetActivityItem component', () => {
 
   const assetActivityItemId = 'asset-activity-item';
 
-  test('should render an asset activity item', async () => {
-    const { findByTestId } = render(<AssetActivityItem {...props} />);
+  test('should render an asset activity item with type incoming', async () => {
+    const { findByTestId } = render(<AssetActivityItem {...props} type="incoming" />);
     const activityItem = await findByTestId(assetActivityItemId);
 
     const activityIcon = await findByTestId('asset-icon');
     const activityInfo = await findByTestId('asset-info');
 
     const activityAmount = await findByTestId(assetsAmountTestId);
-    const activityAmountText = await within(activityAmount).findByText(`- ${props.amount}`);
+    const activityAmountText = await within(activityAmount).findByText(props.amount);
     const activityFiatAmountText = await within(activityAmount).findByText(props.fiatAmount);
     const activityStatus = await findByTestId('activity-status');
 
