@@ -163,12 +163,12 @@ class ActivityDetailsPage extends CommonDrawerElements {
 
   async getTransactionSentTokensForBundle(index = 0): Promise<string[]> {
     const array = await this.transactionSentTokensForBundle(index);
-    return Promise.all(array.map(async (element) => await element.getText()));
+    return Promise.all(await array.map(async (element) => await element.getText()));
   }
 
   async getTransactionSentTokensWithoutDuplicates(): Promise<unknown[]> {
     const array = await this.transactionSentTokens();
-    const arr = Promise.all(array.map(async (element) => (await element.getText()).split(' ').pop()));
+    const arr = Promise.all(await array.map(async (element) => (await element.getText()).split(' ').pop()));
     return [...new Set(await arr)];
   }
 

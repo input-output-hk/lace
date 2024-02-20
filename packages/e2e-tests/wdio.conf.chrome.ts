@@ -3,7 +3,7 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const chromeConfig: WebdriverIO.Config = {
+const chromeConfig = {
   capabilities: [
     {
       maxInstances: 1,
