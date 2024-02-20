@@ -49,8 +49,8 @@ export const adaIcon = style([
     display: 'flex',
   }),
   {
-    width: '25px',
-    height: '25px',
+    width: '34px',
+    height: '26px',
   },
 ]);
 
