@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
+import { Flex } from '@lace/ui';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 
 import styles from './ConfirmTransaction.module.scss';
@@ -31,8 +32,8 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { combinedInputResolver } from '@src/utils/combined-input-resolvers';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
+import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -74,7 +75,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
   const txInputResolver = useMemo(
-    () => combinedInputResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
+    () => utxoAndBackendChainHistoryResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
     [inMemoryWallet, chainHistoryProvider]
   );
 
@@ -208,41 +209,43 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   };
 
   return (
-    <div data-testid="layout-title" className={styles.transactionContainer}>
-      {req && transactionInspectionDetails ? (
-        <DappTransaction
-          fiatCurrencyCode={fiatCurrency?.code}
-          fiatCurrencyPrice={priceResult?.cardano?.price}
-          coinSymbol={cardanoCoin.symbol}
-          txInspectionDetails={transactionInspectionDetails}
-          dappInfo={dappInfo}
-          fromAddress={fromAddressTokens}
-          toAddress={toAddressTokens}
-          collateral={Wallet.util.lovelacesToAdaString(txCollateral.toString())}
-        />
-      ) : (
-        <Skeleton loading />
-      )}
-      <div className={styles.actions}>
-        <Button
-          onClick={onConfirm}
-          loading={isHardwareWallet && isConfirmingTx}
-          data-testid="dapp-transaction-confirm"
-          className={styles.actionBtn}
-        >
-          {isHardwareWallet
-            ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
-            : t('dapp.confirm.btn.confirm')}
-        </Button>
-        <Button
-          color="secondary"
-          data-testid="dapp-transaction-cancel"
-          onClick={cancelTransaction}
-          className={styles.actionBtn}
-        >
-          {t('dapp.confirm.btn.cancel')}
-        </Button>
-      </div>
+    <div data-testid="layout-title">
+      <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch">
+        {req && transactionInspectionDetails ? (
+          <DappTransaction
+            fiatCurrencyCode={fiatCurrency?.code}
+            fiatCurrencyPrice={priceResult?.cardano?.price}
+            coinSymbol={cardanoCoin.symbol}
+            txInspectionDetails={transactionInspectionDetails}
+            dappInfo={dappInfo}
+            fromAddress={fromAddressTokens}
+            toAddress={toAddressTokens}
+            collateral={Wallet.util.lovelacesToAdaString(txCollateral.toString())}
+          />
+        ) : (
+          <Skeleton loading />
+        )}
+        <div className={styles.actions}>
+          <Button
+            onClick={onConfirm}
+            loading={isHardwareWallet && isConfirmingTx}
+            data-testid="dapp-transaction-confirm"
+            className={styles.actionBtn}
+          >
+            {isHardwareWallet
+              ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
+              : t('dapp.confirm.btn.confirm')}
+          </Button>
+          <Button
+            color="secondary"
+            data-testid="dapp-transaction-cancel"
+            onClick={cancelTransaction}
+            className={styles.actionBtn}
+          >
+            {t('dapp.confirm.btn.cancel')}
+          </Button>
+        </div>
+      </Flex>
     </div>
   );
 });

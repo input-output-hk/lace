@@ -8,15 +8,15 @@ import { TransactionType, SummaryExpander, Card } from '@lace/ui';
 
 const { Text } = Typography;
 
-const TransactionTypes = {
-  Withdrawal: 'withdrawal' as const,
-  Receive: 'receive' as const,
-  Sent: 'outgoing' as const,
-  Send: 'send' as const,
-  Sending: 'sending' as const,
-  Mint: 'mint' as const,
-  'Self Transaction': 'self' as const
-};
+export enum TransactionTypes {
+  Withdrawal = 'withdrawal',
+  Receive = 'receive',
+  Sent = 'sent',
+  Send = 'send',
+  Sending = 'sending',
+  Mint = 'mint',
+  'Self Transaction' = 'self'
+}
 
 type TransactionType = keyof typeof TransactionTypes;
 

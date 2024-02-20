@@ -165,7 +165,6 @@ export const colors = {
 
   $dapp_transaction_summary_type_label_color: '',
   $dapp_transaction_summary_label: '',
-  $dapp_transaction_asset_grey_color: '',
 
   $toast_bar_container_bgColor: '',
   $toast_bar_label_color: '',

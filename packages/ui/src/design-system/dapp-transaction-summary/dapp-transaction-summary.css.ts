@@ -1,9 +1,5 @@
 import { sx, style } from '../../design-tokens';
 
-export const transactionSummaryContainer = style({
-  padding: '20px 0 0 0',
-});
-
 export const transactionTypeContainer = style({
   padding: '20px 0',
 });
@@ -13,7 +9,7 @@ export const label = sx({
   fontWeight: '$semibold',
 });
 
-export const boldLabel = style([
+export const txSummaryTitle = style([
   sx({
     color: '$transaction_summary_label_color',
     fontWeight: '$bold',
@@ -51,7 +47,6 @@ export const secondaryText = style([
 export const adaIcon = style([
   sx({
     display: 'flex',
-    m: ['$10', '$0'],
   }),
   {
     width: '25px',
@@ -83,7 +78,7 @@ export const avatarImage = style({
 });
 
 export const txAmountContainer = style({
-  padding: '0 10px',
+  padding: '10px 0px',
 });
 
 export const balanceDetailContainer = style({
@@ -92,5 +87,9 @@ export const balanceDetailContainer = style({
 });
 
 export const assetsContainer = style({
-  padding: '5px 10px;',
+  padding: '10px 0px',
+});
+
+export const txSummaryContainer = style({
+  paddingTop: '20px',
 });

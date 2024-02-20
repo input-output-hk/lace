@@ -6,8 +6,16 @@ export interface Props {
   collateral: string;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
+  displayFiat?: boolean;
+  className?: string;
 }
-export const Collateral = ({ collateral, amountTransformer, coinSymbol }: Props): React.ReactElement => {
+export const Collateral = ({
+  collateral,
+  amountTransformer,
+  coinSymbol,
+  displayFiat,
+  className
+}: Props): React.ReactElement => {
   const { t } = useTranslate();
 
   return (
@@ -16,6 +24,8 @@ export const Collateral = ({ collateral, amountTransformer, coinSymbol }: Props)
       fiatPrice={amountTransformer(collateral)}
       label={t('package.core.activityDetails.collateral')}
       tooltip={t('package.core.activityDetails.collateralInfo')}
+      displayFiat={displayFiat}
+      className={className}
     />
   );
 };

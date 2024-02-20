@@ -19,6 +19,7 @@ type Props = OmitClassName<'div'> & {
   fiatPrice?: string;
   'data-testid'?: string;
   className?: string;
+  displayFiat?: boolean;
 };
 
 const makeTestId = (namespace = '', path = ''): string | undefined => {
@@ -31,6 +32,7 @@ export const Amount = ({
   fiatPrice,
   tooltip,
   className,
+  displayFiat = true,
   ...props
 }: Readonly<Props>): JSX.Element => {
   const testId = props['data-testid'];
@@ -68,7 +70,7 @@ export const Amount = ({
             >
               {amount}
             </Typography.Body.Normal>
-            {fiatPrice !== undefined && (
+            {displayFiat && (
               <Typography.Body.Normal
                 className={cx.secondaryText}
                 data-testid={makeTestId(testId, 'fiat')}

@@ -8,15 +8,15 @@ import * as cx from './dapp-transaction-summary.css';
 
 import type { OmitClassName } from '../../types';
 
-const TransactionTypes = {
-  Withdrawal: 'withdrawal' as const,
-  Receive: 'receive' as const,
-  Sent: 'outgoing' as const,
-  Send: 'send' as const,
-  Sending: 'sending' as const,
-  Mint: 'mint' as const,
-  'Self Transaction': 'self' as const,
-};
+export enum TransactionTypes {
+  Withdrawal = 'withdrawal',
+  Receive = 'receive',
+  Sent = 'sent',
+  Send = 'send',
+  Sending = 'sending',
+  Mint = 'mint',
+  'Self Transaction' = 'self',
+}
 
 type TransactionType = keyof typeof TransactionTypes;
 
@@ -36,7 +36,7 @@ export const TransactionType = ({
     <div className={cx.transactionTypeContainer}>
       <Grid {...props} columns="$2">
         <Cell>
-          <Typography.Body.Large className={cx.boldLabel}>
+          <Typography.Body.Large className={cx.txSummaryTitle}>
             {label}
           </Typography.Body.Large>
         </Cell>

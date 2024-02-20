@@ -3,7 +3,7 @@ import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWithAmount } from '@cardano-sdk/core';
 
-import { DappTransactionHeader, DappTransactionHeaderProps } from '../DappTransactionHeader';
+import { DappTransactionHeader, DappTransactionHeaderProps, TransactionTypes } from '../DappTransactionHeader';
 
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
@@ -11,16 +11,6 @@ import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
 import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
-
-const TransactionTypes = {
-  Withdrawal: 'withdrawal' as const,
-  Receive: 'receive' as const,
-  Sent: 'outgoing' as const,
-  Send: 'send' as const,
-  Sending: 'sending' as const,
-  Mint: 'mint' as const,
-  'Self Transaction': 'self' as const
-};
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
   `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
@@ -70,12 +60,12 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
 
 type TransactionType = keyof typeof TransactionTypes;
 
-const tokenName = (assetWithAmount: AssetInfoWithAmount) =>
+const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) =>
   assetWithAmount.assetInfo.nftMetadata !== null
     ? assetWithAmount.assetInfo.nftMetadata.name
     : assetWithAmount.assetInfo.tokenMetadata.name;
 
-const hash = (assetWithAmount: AssetInfoWithAmount) =>
+const getAssetHash = (assetWithAmount: AssetInfoWithAmount) =>
   assetWithAmount.assetInfo.nftMetadata !== null
     ? assetWithAmount.assetInfo.nftMetadata.name
     : assetWithAmount.assetInfo.assetId;
@@ -129,8 +119,8 @@ export const DappTransaction = ({
               key={key}
               imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
               balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
-              tokenName={truncate(tokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
-              metadataHash={truncate(hash(assetWithAmount), charBeforeEllMetadata, charAfterEllMetadata)}
+              getAsset={truncate(getAssetTokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
+              metadataHash={truncate(getAssetHash(assetWithAmount), charBeforeEllMetadata, charAfterEllMetadata)}
             />
           ))}
         </div>
@@ -143,6 +133,8 @@ export const DappTransaction = ({
               code: fiatCurrencyCode
             })}
             coinSymbol={coinSymbol}
+            className={styles.depositContainer}
+            displayFiat={false}
           />
         )}
 
@@ -155,6 +147,7 @@ export const DappTransaction = ({
           }
           coinSymbol={coinSymbol}
           className={styles.depositContainer}
+          displayFiat={false}
         />
 
         <TransactionFee
@@ -166,6 +159,7 @@ export const DappTransaction = ({
           }
           coinSymbol={coinSymbol}
           className={styles.depositContainer}
+          displayFiat={false}
         />
 
         <TransactionFee
@@ -176,6 +170,7 @@ export const DappTransaction = ({
           }
           coinSymbol={coinSymbol}
           className={styles.feeContainer}
+          displayFiat={false}
         />
 
         <DappAddressSections

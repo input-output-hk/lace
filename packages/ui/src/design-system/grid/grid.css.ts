@@ -87,6 +87,18 @@ export const grid = recipe({
       $center: {
         alignItems: 'center',
       },
+      $fleStart: {
+        alignItems: 'flex-start',
+      },
+      $flexEnd: {
+        alignItems: 'flex-end',
+      },
+      $baseline: {
+        alignItems: 'baseline',
+      },
+      $stretch: {
+        alignItems: 'stretch',
+      },
     },
   },
 

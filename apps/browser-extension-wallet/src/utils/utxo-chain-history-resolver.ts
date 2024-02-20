@@ -3,13 +3,13 @@ import { Wallet } from '@lace/cardano';
 import { combineInputResolvers, createBackendInputResolver, createInputResolver } from '@cardano-sdk/wallet';
 import { Cardano } from '@cardano-sdk/core';
 
-interface CombinedInputResolverArgs {
+interface UtxoAndBackendChainHistoryResolverArgs {
   utxo: Wallet.ObservableWallet['utxo'];
   chainHistoryProvider?: any;
 }
 
-export const combinedInputResolver = ({
+export const utxoAndBackendChainHistoryResolver = ({
   utxo,
   chainHistoryProvider
-}: CombinedInputResolverArgs): Cardano.InputResolver =>
+}: UtxoAndBackendChainHistoryResolverArgs): Cardano.InputResolver =>
   combineInputResolvers(createInputResolver({ utxo }), createBackendInputResolver(chainHistoryProvider));

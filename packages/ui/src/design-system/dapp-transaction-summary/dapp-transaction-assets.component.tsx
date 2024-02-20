@@ -1,13 +1,12 @@
 import React from 'react';
 
-import * as RadixUIAvatar from '@radix-ui/react-avatar';
-
 import DarkFallBack from '../../assets/images/dark-mode-fallback.png';
 import LightFallBack from '../../assets/images/light-mode-fallback.png';
 import { ThemeColorScheme } from '../../design-tokens';
 import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-variant';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
+import { UserProfile } from '../profile-picture';
 import * as Typography from '../typography';
 
 import * as cx from './dapp-transaction-summary.css';
@@ -60,13 +59,12 @@ export const TransactionAssets = ({
     <div data-testid={testId} className={cx.assetsContainer}>
       <Grid {...props} columns="$fitContent">
         <Cell>
-          <RadixUIAvatar.Root className={cx.avatarRoot}>
-            <RadixUIAvatar.Image
-              className={cx.avatarImage}
-              src={getImageSource(imageSrc)}
-              alt={tokenName}
-            />
-          </RadixUIAvatar.Root>
+          <UserProfile
+            fallback="L"
+            imageSrc={getImageSource(imageSrc)}
+            alt={tokenName}
+            radius="rounded"
+          />
         </Cell>
         <Cell>
           <Flex

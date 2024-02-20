@@ -23,10 +23,10 @@ export const TransactionSummary = ({
   cardanoSymbol,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <div className={cx.transactionSummaryContainer}>
+  <div className={cx.txSummaryContainer}>
     {title !== undefined && (
       <Flex justifyContent="flex-start">
-        <Typography.Body.Large className={cx.boldLabel}>
+        <Typography.Body.Large className={cx.txSummaryTitle}>
           {title}
         </Typography.Body.Large>
       </Flex>

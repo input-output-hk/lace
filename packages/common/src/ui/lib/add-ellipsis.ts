@@ -1,11 +1,11 @@
 /* eslint-disable no-magic-numbers */
 const addedLength = 4;
 
-export const truncate = (text: string, partOnelength: number, partTwoLength: number): string => {
-  const textMinLenght = partOnelength + partTwoLength + addedLength;
+export const truncate = (text: string, partOneLength: number, partTwoLength: number): string => {
+  const textMinLenght = partOneLength + partTwoLength + addedLength;
   if (text.length <= textMinLenght) return text;
 
-  return `${text.slice(0, partOnelength)}${text.slice(text.length - partTwoLength)}`;
+  return `${text.slice(0, partOneLength)}${text.slice(text.length - partTwoLength)}`;
 };
 
 export const addEllipsis = (text: string, partOnelength: number, partTwoLength: number): string => {
