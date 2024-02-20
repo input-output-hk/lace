@@ -31,7 +31,6 @@ export const useRestorePoolsSelection = () => {
   );
 
   useEffect(() => {
-    console.log(areSelectedPoolsRestored.current.restored);
     if (areSelectedPoolsRestored.current.restored) return;
     const selectedPortfolioStakePoolsId = new Set(selectedPortfolioStakePools.map(({ id }) => id.toString()));
     const selectedPoolsIdsWithNoData =
