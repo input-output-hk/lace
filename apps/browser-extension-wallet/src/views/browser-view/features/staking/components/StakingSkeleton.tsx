@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { PropsWithChildren, useEffect } from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
 import isNumber from 'lodash/isNumber';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,15 @@ import { EducationalList, SectionLayout } from '@src/views/browser-view/componen
 import { useWalletStore } from '@stores';
 import { useFetchCoinPrice, useBalances } from '@src/hooks';
 import LightBulb from '@src/assets/icons/light.svg';
+import {
+  SortAndFilter,
+  StakePoolSortOptions,
+  SortAndFilterTab,
+  SortField,
+  SortDirection,
+  FilterValues,
+  PoolsFilter
+} from '@lace/staking';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.ReactElement => {
@@ -19,6 +28,18 @@ export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.
   const { networkInfo, fetchNetworkInfo } = useWalletStore(stakingInfoSelector);
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
+
+  const [activeTab, setActiveTab] = useState<SortAndFilterTab>(SortAndFilterTab.sort);
+  const [sort, setSort] = useState<StakePoolSortOptions>({
+    field: SortField.saturation,
+    order: SortDirection.asc
+  });
+  const [filter, setFilter] = useState<FilterValues>({
+    [PoolsFilter.Saturation]: ['', ''],
+    [PoolsFilter.ProfitMargin]: ['', ''],
+    [PoolsFilter.Performance]: ['', ''],
+    [PoolsFilter.Ros]: ['lastepoch']
+  });
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -71,6 +92,14 @@ export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.
 
   const sidePanel = (
     <>
+      <SortAndFilter
+        activeTab={activeTab}
+        sort={sort}
+        filter={filter}
+        onTabChange={setActiveTab}
+        onSortChange={setSort}
+        onFilterChange={setFilter}
+      />
       <Skeleton loading={!networkInfo}>
         <NetworkInfo {...networkInfo} translations={translations} />
       </Skeleton>
