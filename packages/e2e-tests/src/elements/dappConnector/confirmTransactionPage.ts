@@ -8,14 +8,14 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_AMOUNT_TITLE = '[data-testid="dapp-transaction-amount-title"]';
   private TRANSACTION_AMOUNT_VALUE = '[data-testid="dapp-transaction-amount-value"]';
 
-  private TRANSACTION_RETURNED_DEPOSIT_TITLE = '[data-testid="dapp-transaction-returned-deposit-title"]';
-  private TRANSACTION_RETURNED_DEPOSIT_ADA = '[data-testid="dapp-transaction-returned-deposit-ada"]';
+  private TRANSACTION_RETURNED_DEPOSIT_TITLE = '[data-testid="tx-amount-returned-deposit-label"]';
+  private TRANSACTION_RETURNED_DEPOSIT_ADA = '[data-testid="tx-amount-returned-deposit-amount"]';
 
-  private TRANSACTION_DEPOSIT_TITLE = '[data-testid="dapp-transaction-deposit-title"]';
-  private TRANSACTION_DEPOSIT_ADA = '[data-testid="dapp-transaction-deposit-ada"]';
+  private TRANSACTION_DEPOSIT_TITLE = '[data-testid="tx-amount-deposit-label"]';
+  private TRANSACTION_DEPOSIT_ADA = '[data-testid="tx-amount-deposit-amount"]';
 
-  private TRANSACTION_FEE_TITLE = '[data-testid="dapp-fee-title"]';
-  private TRANSACTION_FEE_ADA = '[data-testid="dapp-transaction-fee-ada"]';
+  private TRANSACTION_FEE_TITLE = '[data-testid="tx-amount-fee-label"]';
+  private TRANSACTION_FEE_ADA = '[data-testid="tx-amount-fee-amount"]';
 
   private TRANSACTION_TO_ADDRESS_TITLE = '[data-testid="dapp-transaction-to-address-title"]';
   private TRANSACTION_TO_ADDRESS = '[data-testid="dapp-transaction-to-address-address"]';

@@ -2,7 +2,7 @@ import React from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import cn from 'classnames';
-import styles from './TransactionFooterDetails.module.scss';
+import styles from './TransactionFee.module.scss';
 import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import { useTranslate } from '@src/ui/hooks';
 

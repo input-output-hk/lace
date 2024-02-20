@@ -60,24 +60,24 @@ export const Amount = ({
             )}
           </Flex>
         </Cell>
-        {fiatPrice !== undefined && (
-          <Cell>
-            <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-              <Typography.Body.Normal
-                className={cx.text}
-                data-testid={makeTestId(testId, 'amount')}
-              >
-                {amount}
-              </Typography.Body.Normal>
+        <Cell>
+          <Flex flexDirection="column" alignItems="flex-end" h="$fill">
+            <Typography.Body.Normal
+              className={cx.text}
+              data-testid={makeTestId(testId, 'amount')}
+            >
+              {amount}
+            </Typography.Body.Normal>
+            {fiatPrice !== undefined && (
               <Typography.Body.Normal
                 className={cx.secondaryText}
                 data-testid={makeTestId(testId, 'fiat')}
               >
                 {fiatPrice}
               </Typography.Body.Normal>
-            </Flex>
-          </Cell>
-        )}
+            )}
+          </Flex>
+        </Cell>
       </Grid>
     </div>
   );
