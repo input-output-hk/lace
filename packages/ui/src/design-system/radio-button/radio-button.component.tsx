@@ -11,7 +11,7 @@ import * as cx from './radio-button.css';
 export type Props = Readonly<{
   disabled?: boolean;
   className?: string;
-  selectedValue: string;
+  selectedValue?: string;
 
   options: {
     value: string;
@@ -45,7 +45,10 @@ export const RadioButtonGroup = ({
           alignItems="center"
           m="$4"
           key={value}
-          className={cn({ [cx.radioGroupItemWrapper]: !!label })}
+          className={cn({
+            [`${cx.radioGroupItemWrapper} ${cx.radioGroupItemWrapperSelector}`]:
+              !!label,
+          })}
         >
           <RadixRadioGroup.Item
             id={`radio-btn-control-id-${value}`}
