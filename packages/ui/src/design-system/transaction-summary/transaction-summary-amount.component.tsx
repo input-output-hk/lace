@@ -16,8 +16,9 @@ type Props = OmitClassName<'div'> & {
   label?: string;
   tooltip?: string;
   amount: string;
-  fiatPrice: string;
+  fiatPrice?: string;
   'data-testid'?: string;
+  className?: string;
 };
 
 const makeTestId = (namespace = '', path = ''): string | undefined => {
@@ -29,50 +30,55 @@ export const Amount = ({
   amount,
   fiatPrice,
   tooltip,
+  className,
   ...props
 }: Readonly<Props>): JSX.Element => {
   const testId = props['data-testid'];
 
   return (
-    <Grid {...props} data-testid={makeTestId(testId, 'root')} columns="$2">
-      <Cell>
-        <Flex>
-          <Typography.Body.Normal
-            data-testid={makeTestId(testId, 'label')}
-            className={cx.label}
-          >
-            {label}
-          </Typography.Body.Normal>
-          {tooltip !== undefined && (
-            <Box ml="$8" className={cx.tooltip}>
-              <Tooltip label={tooltip}>
-                <div
-                  className={cx.tooltipText}
-                  data-testid={makeTestId(testId, 'tooltip-icon')}
-                >
-                  <InfoIcon />
-                </div>
-              </Tooltip>
-            </Box>
-          )}
-        </Flex>
-      </Cell>
-      <Cell>
-        <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-          <Typography.Body.Normal
-            className={cx.text}
-            data-testid={makeTestId(testId, 'amount')}
-          >
-            {amount}
-          </Typography.Body.Normal>
-          <Typography.Body.Normal
-            className={cx.secondaryText}
-            data-testid={makeTestId(testId, 'fiat')}
-          >
-            {fiatPrice}
-          </Typography.Body.Normal>
-        </Flex>
-      </Cell>
-    </Grid>
+    <div className={className}>
+      <Grid {...props} data-testid={makeTestId(testId, 'root')} columns="$2">
+        <Cell>
+          <Flex>
+            <Typography.Body.Normal
+              data-testid={makeTestId(testId, 'label')}
+              className={cx.label}
+            >
+              {label}
+            </Typography.Body.Normal>
+            {tooltip !== undefined && (
+              <Box ml="$8" className={cx.tooltip}>
+                <Tooltip label={tooltip}>
+                  <div
+                    className={cx.tooltipText}
+                    data-testid={makeTestId(testId, 'tooltip-icon')}
+                  >
+                    <InfoIcon />
+                  </div>
+                </Tooltip>
+              </Box>
+            )}
+          </Flex>
+        </Cell>
+        {fiatPrice !== undefined && (
+          <Cell>
+            <Flex flexDirection="column" alignItems="flex-end" h="$fill">
+              <Typography.Body.Normal
+                className={cx.text}
+                data-testid={makeTestId(testId, 'amount')}
+              >
+                {amount}
+              </Typography.Body.Normal>
+              <Typography.Body.Normal
+                className={cx.secondaryText}
+                data-testid={makeTestId(testId, 'fiat')}
+              >
+                {fiatPrice}
+              </Typography.Body.Normal>
+            </Flex>
+          </Cell>
+        )}
+      </Grid>
+    </div>
   );
 };
