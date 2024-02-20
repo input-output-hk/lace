@@ -61,6 +61,7 @@ type WalletManagerAddAccountProps = {
   wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
+  passphrase?: Uint8Array;
 };
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
@@ -120,13 +121,13 @@ const getHwExtendedAccountPublicKey = async (
 
 const getExtendedAccountPublicKey = async (
   wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
-  accountIndex: number
+  accountIndex: number,
+  passphrase?: Uint8Array
 ) => {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (wallet.type) {
     case WalletType.InMemory: {
       // eslint-disable-next-line no-alert
-      const passphrase = Buffer.from(prompt('Please enter your passphrase'));
       const rootPrivateKeyBytes = await Wallet.KeyManagement.emip3decrypt(
         Buffer.from(wallet.encryptedSecrets.rootPrivateKeyBytes, 'hex'),
         passphrase
@@ -705,8 +706,8 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const addAccount = useCallback(
-    async ({ wallet, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
-      const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
+    async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
+      const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey,

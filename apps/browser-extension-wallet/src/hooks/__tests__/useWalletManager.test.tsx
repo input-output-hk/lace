@@ -686,7 +686,6 @@ describe('Testing useWalletManager hook', () => {
             }
           },
           prepare: () => {
-            global.prompt = jest.fn(() => 'passphrase1');
             mockEmip3decrypt.mockImplementationOnce(
               jest.requireActual('@lace/cardano').Wallet.KeyManagement.emip3decrypt
             );
@@ -714,7 +713,8 @@ describe('Testing useWalletManager hook', () => {
           const addAccountProps = {
             wallet: { walletId, type, ...walletProps } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
             accountIndex: 0,
-            metadata: { name: 'new account' }
+            metadata: { name: 'new account' },
+            passphrase: Buffer.from('passphrase1')
           };
 
           const { addAccount } = render();

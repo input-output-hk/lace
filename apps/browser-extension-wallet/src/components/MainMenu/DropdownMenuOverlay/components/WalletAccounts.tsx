@@ -5,7 +5,14 @@ import { NavigationButton, toast } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
-import { DisableAccountConfirmation, EditAccountDrawer, useAccountDataModal } from '@lace/core';
+import {
+  DisableAccountConfirmation,
+  EditAccountDrawer,
+  EnableAccountConfirmWithHW,
+  EnableAccountConfirmWithHWState,
+  EnableAccountPasswordPrompt,
+  useDialogWithData
+} from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { useWalletManager } from '@hooks';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
@@ -17,6 +24,17 @@ import { BrowserViewSections } from '@lib/scripts/types';
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
 const NUMBER_OF_ACCOUNTS_PER_WALLET = 24;
+const HW_CONNECT_TIMEOUT_MS = 30_000;
+
+type EnableAccountPasswordDialogData = {
+  accountIndex: number;
+  wasPasswordIncorrect?: boolean;
+};
+
+type EnableAccountHWSigningDialogData = {
+  accountIndex: number;
+  state: EnableAccountConfirmWithHWState;
+};
 
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
@@ -27,17 +45,22 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     }),
     [t]
   );
-  const editAccountDrawer = useAccountDataModal();
   const backgroundServices = useBackgroundServiceAPIContext();
-  const disableAccountConfirmation = useAccountDataModal();
   const { manageAccountsWallet: wallet, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
+  const { walletRepository, addAccount, activateWallet } = useWalletManager();
   const {
     source: {
       wallet: { walletId: activeWalletId },
       account: activeAccount
     }
   } = cardanoWallet;
-  const { walletRepository, addAccount, activateWallet } = useWalletManager();
+
+  const editAccountDrawer = useDialogWithData<ProfileDropdown.AccountData | undefined>();
+  const disableAccountConfirmation = useDialogWithData<ProfileDropdown.AccountData | undefined>();
+  const enableAccountPasswordDialog = useDialogWithData<EnableAccountPasswordDialogData | undefined>();
+
+  const enableAccountHWSigningDialog = useDialogWithData<EnableAccountHWSigningDialogData | undefined>();
+
   const disableUnlock = useMemo(
     () =>
       isPopup &&
@@ -72,20 +95,27 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [wallet, activeAccount?.accountIndex, activeWalletId, disableUnlock]
   );
 
+  const closeDropdownAndShowAccountActivated = useCallback(
+    (accountName: string) => {
+      setIsDropdownMenuOpen(false);
+      toast.notify({
+        duration: TOAST_DEFAULT_DURATION,
+        text: t('multiWallet.activated.account', { accountName })
+      });
+    },
+    [setIsDropdownMenuOpen, t]
+  );
+
   const activateAccount = useCallback(
     async (accountIndex: number) => {
       await activateWallet({
         walletId: wallet.walletId,
         accountIndex
       });
-      setIsDropdownMenuOpen(false);
       const accountName = accountsData.find((acc) => acc.accountNumber === accountIndex)?.label;
-      toast.notify({
-        duration: TOAST_DEFAULT_DURATION,
-        text: t('multiWallet.activated.account', { accountName })
-      });
+      closeDropdownAndShowAccountActivated(accountName);
     },
-    [wallet.walletId, activateWallet, accountsData, setIsDropdownMenuOpen, t]
+    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated]
   );
 
   const editAccount = useCallback(
@@ -100,27 +130,77 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [disableAccountConfirmation, accountsData]
   );
 
-  const unlockAccount = useCallback(
+  const showHWErrorState = useCallback(() => {
+    enableAccountHWSigningDialog.setData({
+      ...enableAccountHWSigningDialog.data,
+      state: 'error'
+    });
+  }, [enableAccountHWSigningDialog]);
+
+  const unlockHWAccount = useCallback(
     async (accountIndex: number) => {
       const name = defaultAccountName(accountIndex);
-      await addAccount({
-        wallet,
-        accountIndex,
-        metadata: { name }
-      });
-      setIsDropdownMenuOpen(false);
-      toast.notify({
-        duration: TOAST_DEFAULT_DURATION,
-        text: t('multiWallet.activated.account', { accountName: name })
-      });
+      try {
+        const timeout = setTimeout(showHWErrorState, HW_CONNECT_TIMEOUT_MS);
+        await addAccount({
+          wallet,
+          accountIndex,
+          metadata: { name }
+        });
+        clearTimeout(timeout);
+        enableAccountHWSigningDialog.hide();
+        closeDropdownAndShowAccountActivated(name);
+      } catch {
+        showHWErrorState();
+      }
     },
-    [wallet, addAccount, t, setIsDropdownMenuOpen]
+    [addAccount, wallet, enableAccountHWSigningDialog, closeDropdownAndShowAccountActivated, showHWErrorState]
+  );
+
+  const unlockAccount = useCallback(
+    async (accountIndex: number) => {
+      switch (wallet.type) {
+        case WalletType.InMemory:
+          enableAccountPasswordDialog.setData({ accountIndex });
+          enableAccountPasswordDialog.open();
+          break;
+        case WalletType.Ledger:
+        case WalletType.Trezor:
+          enableAccountHWSigningDialog.setData({
+            accountIndex,
+            state: 'signing'
+          });
+          enableAccountHWSigningDialog.open();
+          await unlockHWAccount(accountIndex);
+      }
+    },
+    [wallet.type, enableAccountPasswordDialog, enableAccountHWSigningDialog, unlockHWAccount]
+  );
+
+  const unlockInMemoryWalletAccountWithPassword = useCallback(
+    async (passphrase: Uint8Array) => {
+      const { accountIndex } = enableAccountPasswordDialog.data;
+      const name = defaultAccountName(accountIndex);
+      try {
+        await addAccount({
+          wallet,
+          accountIndex,
+          passphrase,
+          metadata: { name: defaultAccountName(accountIndex) }
+        });
+        enableAccountPasswordDialog.hide();
+        closeDropdownAndShowAccountActivated(name);
+      } catch {
+        enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
+      }
+    },
+    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated]
   );
 
   const lockAccount = useCallback(async () => {
     await walletRepository.removeAccount({
       walletId: wallet.walletId,
-      accountIndex: disableAccountConfirmation.accountData.accountNumber
+      accountIndex: disableAccountConfirmation.data.accountNumber
     });
 
     disableAccountConfirmation.hide();
@@ -130,7 +210,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     async (newAccountName: string) => {
       await walletRepository.updateAccountMetadata({
         walletId: wallet.walletId,
-        accountIndex: editAccountDrawer.accountData.accountNumber,
+        accountIndex: editAccountDrawer.data.accountNumber,
         metadata: { name: newAccountName }
       });
       editAccountDrawer.hide();
@@ -166,12 +246,61 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           />
         </div>
       </div>
+      {/* Conditionally render the password prompt to make sure
+      the password is not stored in the component state */}
+      {enableAccountPasswordDialog.isOpen && (
+        <EnableAccountPasswordPrompt
+          open
+          isPopup={isPopup}
+          wasPasswordIncorrect={enableAccountPasswordDialog.data?.wasPasswordIncorrect}
+          onCancel={enableAccountPasswordDialog.hide}
+          onConfirm={unlockInMemoryWalletAccountWithPassword}
+          translations={{
+            title: t('account.enable.title'),
+            headline: t('account.enable.inMemory.headline'),
+            description: t('account.enable.inMemory.description'),
+            passwordPlaceholder: t('account.enable.inMemory.passwordPlaceholder'),
+            wrongPassword: t('account.enable.inMemory.wrongPassword'),
+            cancel: t('account.enable.inMemory.cancel'),
+            confirm: t('account.enable.inMemory.confirm')
+          }}
+        />
+      )}
+      {enableAccountHWSigningDialog.isOpen && (
+        <EnableAccountConfirmWithHW
+          open
+          isPopup={isPopup}
+          onCancel={enableAccountHWSigningDialog.hide}
+          onRetry={() => {
+            enableAccountHWSigningDialog.setData({
+              ...enableAccountHWSigningDialog.data,
+              state: 'signing'
+            });
+            unlockHWAccount(enableAccountHWSigningDialog.data?.accountIndex);
+          }}
+          state={enableAccountHWSigningDialog.data?.state}
+          translations={{
+            title: t('account.enable.title'),
+            headline: t('account.enable.hw.headline'),
+            errorHeadline: t('account.enable.hw.errorHeadline'),
+            description: t('account.enable.hw.description'),
+            errorDescription: t('account.enable.hw.errorDescription'),
+            errorHelpLink: t('account.enable.hw.errorHelpLink'),
+            buttons: {
+              cancel: t('account.enable.hw.buttons.cancel'),
+              waiting: t('account.enable.hw.buttons.waiting', { device: wallet.type }),
+              signing: t('account.enable.hw.buttons.signing'),
+              error: t('account.enable.hw.buttons.tryAgain')
+            }
+          }}
+        />
+      )}
       <EditAccountDrawer
         onSave={renameAccount}
         visible={editAccountDrawer.isOpen}
         hide={editAccountDrawer.hide}
-        name={editAccountDrawer.accountData?.label}
-        index={editAccountDrawer.accountData?.accountNumber}
+        name={editAccountDrawer.data?.label}
+        index={editAccountDrawer.data?.accountNumber}
         isPopup={isPopup}
         translations={{
           title: t('account.edit.title'),
