@@ -66,9 +66,11 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
 
 const transformedStakePool = {
   apy: '1.30',
-  cost: '6.04',
+  cost: {
+    number: '6.04',
+    unit: ''
+  },
   description: 'This is the STTST description',
-  fee: '6.04',
   hexId: 'a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab',
   id: 'pool1syqhydhdzcuqhwtt6q4m63f9g8e7262wzsvk7e0r0njsyjyd0yn',
   liveStake: {
@@ -82,11 +84,15 @@ const transformedStakePool = {
     'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
     'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
   ],
-  pledge: '2K',
+  pledge: {
+    number: '2',
+    unit: 'K'
+  },
   retired: false,
   saturation: '5.12',
   ticker: 'STTST',
-  blocks: '20'
+  blocks: '20',
+  stakePool: cardanoStakePoolMock.pageResults[0]
 };
 
 describe('Testing transformers', () => {

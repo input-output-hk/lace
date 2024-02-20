@@ -30,6 +30,11 @@ export const mockConwayCertificates: Partial<
     dRepCredential: CREDENTIAL,
     anchor: null
   },
+  [ConwayEraCertificatesTypes.VoteDelegation]: {
+    __typename: Wallet.Cardano.CertificateType.VoteDelegation,
+    dRep: CREDENTIAL,
+    stakeCredential: CREDENTIAL
+  },
   [ConwayEraCertificatesTypes.StakeVoteDelegation]: {
     __typename: Wallet.Cardano.CertificateType.StakeVoteDelegation,
     stakeCredential: CREDENTIAL,

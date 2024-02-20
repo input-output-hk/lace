@@ -67,6 +67,8 @@ const governanceCertificateInspection = (
       return ConwayEraCertificatesTypes.StakeRegistrationDelegation;
     case signedCertificateTypenames.includes(CertificateType.VoteRegistrationDelegation):
       return ConwayEraCertificatesTypes.VoteRegistrationDelegation;
+    case signedCertificateTypenames.includes(CertificateType.VoteDelegation):
+      return ConwayEraCertificatesTypes.VoteDelegation;
     case signedCertificateTypenames.includes(CertificateType.StakeVoteRegistrationDelegation):
       return ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation;
     case signedCertificateTypenames.includes(CertificateType.AuthorizeCommitteeHot):

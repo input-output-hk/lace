@@ -19,6 +19,7 @@ export const mapPortfolioToDisplayData = ({
     ...item.displayData,
     cardanoCoin,
     color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
+    fee: Wallet.util.lovelacesToAdaString(item.displayData.stakePool.cost.toString()),
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
     name: item.displayData.name || '-',

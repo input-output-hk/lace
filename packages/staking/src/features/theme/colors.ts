@@ -32,14 +32,8 @@ export const colorsContract = {
   $sliderFillSecondary: '',
   $sliderKnobFill: '',
   $sliderRailFill: '',
-  $stakePoolHeaderTextColor: '',
-  $stakePoolItemBgHover: '',
-  $stakePoolItemCheckboxBgColor: '',
-  $stakePoolItemCheckboxColor: '',
-  $stakePoolItemCheckboxHoverBgColor: '',
-  $stakePoolItemCheckboxHoverColor: '',
-  $stakePoolItemCheckboxSelectedColor: '',
-  $stakePoolItemTextColor: '',
+  // TODO: remove once replaced with new pool skeleton (LW-9659)
+  $stakePoolCellPlaceholder: '',
   $tooltipBgColor: '',
 };
 
@@ -75,14 +69,8 @@ export const lightThemeColors: typeof colorsContract = {
   $sliderFillSecondary: lightColorScheme.$primary_dark_grey,
   $sliderKnobFill: lightColorScheme.$primary_white,
   $sliderRailFill: lightColorScheme.$primary_light_grey_plus,
-  $stakePoolHeaderTextColor: lightColorScheme.$primary_dark_grey,
-  $stakePoolItemBgHover: lightColorScheme.$primary_light_grey,
-  $stakePoolItemCheckboxBgColor: 'transparent',
-  $stakePoolItemCheckboxColor: lightColorScheme.$primary_grey,
-  $stakePoolItemCheckboxHoverBgColor: 'transparent',
-  $stakePoolItemCheckboxHoverColor: darkColorScheme.$primary_dark_grey,
-  $stakePoolItemCheckboxSelectedColor: lightColorScheme.$primary_white,
-  $stakePoolItemTextColor: lightColorScheme.$primary_black,
+  // TODO: remove once replaced with new pool skeleton (LW-9659)
+  $stakePoolCellPlaceholder: lightColorScheme.$primary_light_grey,
   $tooltipBgColor: lightColorScheme.$primary_white,
 };
 
@@ -122,13 +110,7 @@ export const darkThemeColors: typeof colorsContract = {
   $sliderFillSecondary: darkColorScheme.$primary_light_grey,
   $sliderKnobFill: lightColorScheme.$primary_black,
   $sliderRailFill: darkColorScheme.$primary_dark_grey_plus,
-  $stakePoolHeaderTextColor: darkColorScheme.$primary_white,
-  $stakePoolItemBgHover: darkColorScheme.$primary_dark_grey_plus,
-  $stakePoolItemCheckboxBgColor: 'transparent',
-  $stakePoolItemCheckboxColor: darkColorScheme.$primary_light_grey,
-  $stakePoolItemCheckboxHoverBgColor: darkColorScheme.$primary_grey,
-  $stakePoolItemCheckboxHoverColor: darkColorScheme.$primary_light_grey,
-  $stakePoolItemCheckboxSelectedColor: darkColorScheme.$primary_bg_black,
-  $stakePoolItemTextColor: darkColorScheme.$primary_light_grey,
+  // TODO: remove once replaced with new pool skeleton (LW-9659)
+  $stakePoolCellPlaceholder: darkColorScheme.$primary_mid_grey,
   $tooltipBgColor: darkColorScheme.$primary_mid_grey,
 };

@@ -2,7 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 export class StakePoolListItem {
-  private LIST_ITEM = '[data-testid="stake-pool-item"]';
+  private LIST_ITEM = '[data-testid="stake-pool-list-scroll-wrapper"] [data-testid="stake-pool-item"]';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private TICKER = '[data-testid="stake-pool-list-ticker"]';
   private ROS = '[data-testid="stake-pool-list-apy"]';

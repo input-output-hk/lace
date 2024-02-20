@@ -112,6 +112,10 @@ export type HwSkipToFailure = {
   type: 'HwSkipToFailure';
 };
 
+export type HwSkipToDeviceFailure = {
+  type: 'HwSkipToDeviceFailure';
+};
+
 export type ActivityCommand = GoToOverview | GoToBrowsePools;
 
 export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools | GoToActivity;
@@ -146,11 +150,14 @@ export type PortfolioManagementConfirmationCommand =
   | DrawerContinue
   | DrawerBack
   | HwSkipToSuccess
-  | HwSkipToFailure;
+  | HwSkipToFailure
+  | HwSkipToDeviceFailure;
 
 export type PortfolioManagementSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
 export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue;
+
+export type PortfolioManagementHwFailureCommand = CancelDrawer | DrawerBack;
 
 export type PortfolioManagementSuccessCommand = CancelDrawer;
 
@@ -168,11 +175,14 @@ export type NewPortfolioConfirmationCommand =
   | DrawerContinue
   | DrawerBack
   | HwSkipToSuccess
-  | HwSkipToFailure;
+  | HwSkipToFailure
+  | HwSkipToDeviceFailure;
 
 export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
 export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue;
+
+export type NewPortfolioHwFailureCommand = CancelDrawer | DrawerBack;
 
 export type NewPortfolioSuccessCommand = CancelDrawer;
 
@@ -185,12 +195,14 @@ export type Command =
   | PortfolioManagementConfirmationCommand
   | PortfolioManagementSignCommand
   | PortfolioManagementFailureCommand
+  | PortfolioManagementHwFailureCommand
   | PortfolioManagementSuccessCommand
   | ChangingPreferencesCommand
   | NewPortfolioPreferencesCommand
   | NewPortfolioConfirmationCommand
   | NewPortfolioSignCommand
   | NewPortfolioFailureCommand
+  | NewPortfolioHwFailureCommand
   | NewPortfolioSuccessCommand;
 
 export type PopupOverviewCommand = ShowDelegatedPoolDetails;

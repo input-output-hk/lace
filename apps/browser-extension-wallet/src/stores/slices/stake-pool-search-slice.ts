@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/no-null */
+import isNumber from 'lodash/isNumber';
 import { Wallet } from '@lace/cardano';
 import { StateStatus, StakePoolSearchSlice, BlockchainProviderSlice, ZustandHandlers, SliceCreator } from '../types';
 
@@ -9,6 +11,7 @@ const fetchStakePools =
     get
   }: ZustandHandlers<StakePoolSearchSlice & BlockchainProviderSlice>): StakePoolSearchSlice['fetchStakePools'] =>
   async ({ searchString, skip = 0, limit = defaultFetchLimit, sort }) => {
+    const { totalResultCount: prevTotalCount, pageResults: prevPageResults } = get().stakePoolSearchResults || {};
     set({ stakePoolSearchResultsStatus: StateStatus.LOADING });
 
     let filtersValues = [];
@@ -35,13 +38,30 @@ const fetchStakePools =
       },
       pagination: {
         startAt: skip,
-        limit
+        limit: limit - skip + 1
       },
       sort
     };
-    const result = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
+    const { totalResultCount, pageResults } = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
+
+    const stakePools: (Wallet.Cardano.StakePool | undefined)[] =
+      isNumber(prevTotalCount) && totalResultCount === prevTotalCount
+        ? [...prevPageResults]
+        : Array.from({ length: totalResultCount });
+
+    if (pageResults.length > 0) {
+      stakePools.splice(skip, pageResults?.length, ...pageResults);
+    }
+
     set({
-      stakePoolSearchResults: { ...result, skip, limit, searchQuery: searchString, searchFilters: sort },
+      stakePoolSearchResults: {
+        totalResultCount,
+        pageResults: stakePools,
+        skip,
+        limit,
+        searchQuery: searchString,
+        searchFilters: sort
+      },
       stakePoolSearchResultsStatus: StateStatus.LOADED
     });
   };
@@ -51,13 +71,13 @@ const fetchStakePools =
  */
 export const stakePoolSearchSlice: SliceCreator<BlockchainProviderSlice & StakePoolSearchSlice, StakePoolSearchSlice> =
   ({ set, get }) => ({
-    stakePoolSearchResults: { pageResults: [], totalResultCount: 0 },
+    stakePoolSearchResults: { pageResults: [], totalResultCount: null },
     stakePoolSearchResultsStatus: StateStatus.IDLE,
     selectedStakePool: undefined,
     fetchStakePools: fetchStakePools({ set, get }),
     resetStakePools: () =>
       set(() => ({
-        stakePoolSearchResults: { pageResults: [], totalResultCount: 0 },
+        stakePoolSearchResults: { pageResults: [], totalResultCount: null },
         stakePoolSearchResultsStatus: StateStatus.IDLE
       })),
     setSelectedStakePool: (pool) => set(() => ({ selectedStakePool: pool }))

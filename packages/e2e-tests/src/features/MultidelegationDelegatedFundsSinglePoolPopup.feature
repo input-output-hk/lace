@@ -39,3 +39,11 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
       | close_button |
       | back         |
       | close        |
+
+  @LW-8934 @LW-8472
+  Scenario: Popup View - Start Staking - Delegated to single pool - "Expanded view" button click
+    Given I navigate to Staking popup page
+    And I see Expanded View banner
+    When I click "Expand view" on Start Staking page
+    And I switch to last window
+    Then I see Lace extension main page in extended mode

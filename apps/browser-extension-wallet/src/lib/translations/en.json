@@ -38,12 +38,13 @@
           "VoteRegistrationDelegationCertificate": "Vote Registration Delegation Certificate",
           "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation Certificate",
           "ResignCommitteeColdCertificate": "Resign Committee",
-          "AuthorizeCommitteeHotCertificate": "Authorise Committee",
+          "AuthorizeCommitteeHotCertificate": "Authorize Committee",
           "RegisterDelegateRepresentativeCertificate": "DRep Registration",
           "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
           "VoteDelegationCertificate": "Vote Delegation",
-
-          "submitProposal": "Confirm Vote"
+          "StakeRegistrationDelegateCertificate": "Stake Registration Delegation Certificate",
+          "StakeVoteRegistrationDelegateCertificate": "Stake Vote Registration Delegation Certificate",
+          "VoteRegistrationDelegateCertificate": "Vote Registration Delegation Certificate"
         },
         "certificates": {
           "headings": {
@@ -398,11 +399,11 @@
     "sign.data.success.description": "Data signed",
     "sign.data.failure.description": "Signing failed. Please try again",
     "list.title": "Authorized DApps",
-    "list.subTitle": "This is the list of the dApps you have authorized to interact with your wallet. You can remove them at anytime.",
-    "list.subTitleEmpty": "This is where you'll find any DApps you authorize to interact with your wallet.",
+    "list.subTitle": "You have authorized these DApps to interact with all your wallets & accounts. You can modify this at any time.",
+    "list.subTitleEmpty": "Any DApps that you have authorized to interact with all your wallets and accounts will appear here.",
     "list.removedSuccess": "DApp disconnected",
     "list.removedFailure": "DApp disconnection unsuccessful",
-    "list.empty.text": "You don't have any authorized DApps",
+    "list.empty.text": "You have not yet authorized any DApps.",
     "delete.title": "Hold up!",
     "delete.description": "Are you sure you want to disconnect this DApp? You'll have to authorize it again.",
     "delete.cancel": "Back",
@@ -832,7 +833,7 @@
         },
         "accounts": {
           "title": "Accounts",
-          "description": "Select your preferred account.",
+          "description": "Select account to activate.",
           "unlockLabel": "Enable"
         },
         "general": {
@@ -1702,10 +1703,15 @@
   "account": {
     "edit": {
       "title": "Edit account name",
-      "subtitle": "Choose a name to identify your account",
       "input.label": "Account name",
       "footer.save": "Save",
       "footer.cancel": "Cancel"
+    },
+    "disable": {
+      "title": "Hold up!",
+      "description": "Are you sure you want to disable this account? You can re-enable it later",
+      "cancel": "Cancel",
+      "confirm": "Disable"
     }
   },
   "multiWallet": {

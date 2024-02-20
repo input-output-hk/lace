@@ -291,7 +291,7 @@ export const useGetOwnPubDRepKeyHash = (): UseGetOwnPubDRepKeyHash => {
   return { loading: ownPubDRepKeyHash === undefined, ownPubDRepKeyHash };
 };
 
-export const useCExpolorerBaseUrl = (): string => {
+export const useCexplorerBaseUrl = (): string => {
   const [explorerBaseUrl, setExplorerBaseUrl] = useState('');
   const { environmentName } = useWalletStore();
 

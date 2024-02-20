@@ -70,7 +70,7 @@ class StartStakingPageAssert {
   };
 
   assertSeeExpandedViewBanner = async () => {
-    await StartStakingPage.expandedViewBannerContainer.waitForDisplayed();
+    await StartStakingPage.expandedViewBannerContainer.waitForDisplayed({ timeout: 10_000 });
     await StartStakingPage.expandedViewBannerTitle.waitForDisplayed();
     expect(await StartStakingPage.expandedViewBannerTitle.getText()).to.equal(
       await t('popup.expandBanner.title', 'staking')

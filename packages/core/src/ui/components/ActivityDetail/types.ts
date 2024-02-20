@@ -6,6 +6,7 @@ export enum ConwayEraCertificatesTypes {
   'RegisterDelegateRepresentative' = Wallet.Cardano.CertificateType.RegisterDelegateRepresentative,
   'ResignCommitteeCold' = Wallet.Cardano.CertificateType.ResignCommitteeCold,
   'VoteRegistrationDelegation' = Wallet.Cardano.CertificateType.VoteRegistrationDelegation,
+  'VoteDelegation' = Wallet.Cardano.CertificateType.VoteDelegation,
   'UpdateDelegateRepresentative' = Wallet.Cardano.CertificateType.UpdateDelegateRepresentative,
   'UnregisterDelegateRepresentative' = Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative,
   'StakeVoteRegistrationDelegation' = Wallet.Cardano.CertificateType.StakeVoteRegistrationDelegation,

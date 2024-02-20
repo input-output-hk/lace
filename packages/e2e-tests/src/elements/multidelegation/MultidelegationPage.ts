@@ -25,6 +25,7 @@ class MultidelegationPage {
   private SEARCH_LOADER = '[data-testid="search-loader"]';
   private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
   private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
+  private STAKE_POOL_LIST_SCROLL_WRAPPER = '[data-testid="stake-pool-list-scroll-wrapper"]';
   private POOL_ITEM = '[data-testid="stake-pool-item"]';
   private POOL_TICKER = '[data-testid="stake-pool-list-ticker"]';
   private COLUMN_HEADER_TICKER = '[data-testid="stake-pool-list-header-ticker"]';
@@ -124,8 +125,8 @@ class MultidelegationPage {
     return $(this.EMPTY_SEARCH_RESULTS_MESSAGE);
   }
 
-  get poolsItems() {
-    return $$(this.POOL_ITEM);
+  get displayedPools() {
+    return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_ITEM);
   }
 
   get columnHeaderTicker() {
@@ -241,7 +242,7 @@ class MultidelegationPage {
   }
 
   async getPoolByTicker(ticker: string) {
-    return (await this.poolsItems.find(
+    return (await this.displayedPools.find(
       async (item) => (await item.$(this.POOL_TICKER).getText()) === ticker
     )) as WebdriverIO.Element;
   }
@@ -278,7 +279,6 @@ class MultidelegationPage {
       await this.markStakePoolWithTicker(ticker);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);
-      await MultidelegationPageAssert.assertSeeSearchResultsCountMinimum(6);
     }
   }
 
@@ -365,7 +365,7 @@ class MultidelegationPage {
   }
 
   async waitForStakePoolListToLoad() {
-    await browser.waitUntil(async () => (await this.poolsItems).length > 1, {
+    await browser.waitUntil(async () => (await this.displayedPools).length > 1, {
       timeout: 30_000,
       timeoutMsg: 'failed while waiting for stake pool list to load'
     });

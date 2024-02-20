@@ -71,3 +71,11 @@ export const drepRetirementTx: Wallet.Cardano.HydratedTx = {
     certificates: [mockConwayCertificates[ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]]
   }
 };
+
+export const voteDelegationTx: Wallet.Cardano.HydratedTx = {
+  ...tx,
+  body: {
+    ...tx.body,
+    certificates: [mockConwayCertificates[ConwayEraCertificatesTypes.VoteDelegation]]
+  }
+};

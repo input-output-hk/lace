@@ -32,10 +32,13 @@
           "VoteRegistrationDelegationCertificate": "Vote Registration Delegation Certificate",
           "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation Certificate",
           "ResignCommitteeColdCertificate": "Resign Committee",
-          "AuthorizeCommitteeHotCertificate": "Authorise Committee",
+          "AuthorizeCommitteeHotCertificate": "Authorize Committee",
           "RegisterDelegateRepresentativeCertificate": "DRep Registration",
           "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
-          "VoteDelegationCertificate": "Vote Delegation"
+          "VoteDelegationCertificate": "Vote Delegation",
+          "StakeRegistrationDelegateCertificate": "Stake Registration Delegation Certificate",
+          "StakeVoteRegistrationDelegateCertificate": "Stake Vote Registration Delegation Certificate",
+          "VoteRegistrationDelegateCertificate": "Vote Registration Delegation Certificate"
         },
         "certificates": {
           "headings": {
@@ -134,7 +137,6 @@
       "AuthorizeCommitteeHotCertificate": "Authorize Committee",
       "VoteDelegationCertificate": "Vote Delegation",
       "vote": "Vote Signing",
-      "submitProposal": "Governance Proposal",
       "certificates": "Certificates",
       "certificate": "Certificate",
       "certificateTitles": {

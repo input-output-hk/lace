@@ -21,7 +21,7 @@ export const Card = ({ title, tooltip, data }: Props): JSX.Element => {
   });
 
   const renderRow = (props: Item) => (
-    <>
+    <React.Fragment key={props.label}>
       <Cell>
         <Flex>
           {props.tooltip ? (
@@ -50,7 +50,7 @@ export const Card = ({ title, tooltip, data }: Props): JSX.Element => {
           )}
         </Flex>
       </Cell>
-    </>
+    </React.Fragment>
   );
 
   const renderTitle = () => {

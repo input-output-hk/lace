@@ -4,8 +4,9 @@ import { ConfirmStakeVoteDelegation } from '@lace/core';
 import { SignTxData } from './types';
 import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
+import { useWalletStore } from '@src/stores';
 
-const { CertificateType } = Wallet.Cardano;
+const { CertificateType, RewardAddress } = Wallet.Cardano;
 
 interface Props {
   signTxData: SignTxData;
@@ -14,6 +15,7 @@ interface Props {
 
 export const ConfirmStakeVoteDelegationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
+  const { currentChain } = useWalletStore();
   const certificate = certificateInspectorFactory<Wallet.Cardano.StakeVoteDelegationCertificate>(
     CertificateType.StakeVoteDelegation
   )(signTxData.tx);
@@ -24,7 +26,9 @@ export const ConfirmStakeVoteDelegationContainer = ({ signTxData, errorMessage }
       dappInfo={signTxData.dappInfo}
       metadata={{
         poolId: certificate.poolId,
-        stakeKeyHash: drepIDasBech32FromHash(certificate.stakeCredential.hash),
+        stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)
+          .toAddress()
+          .toBech32(),
         alwaysAbstain: Wallet.Cardano.isDRepAlwaysAbstain(dRep),
         alwaysNoConfidence: Wallet.Cardano.isDRepAlwaysNoConfidence(dRep),
         ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: drepIDasBech32FromHash(dRep.hash) } : {})

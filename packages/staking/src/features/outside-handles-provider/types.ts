@@ -91,6 +91,7 @@ export type OutsideHandlesContextValue = {
     limit?: number;
     sort?: StakePoolSortOptions;
   }) => Promise<void>;
+  walletStoreResetStakePools?: () => void;
   walletStoreNetworkInfo?: {
     nextEpochIn: Date;
     currentEpochIn: Date;
@@ -109,4 +110,5 @@ export type OutsideHandlesContextValue = {
   triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
   currentChain: Wallet.Cardano.ChainId;
+  isMultidelegationSupportedByDevice: (keyAgentType: string) => Promise<boolean>;
 };

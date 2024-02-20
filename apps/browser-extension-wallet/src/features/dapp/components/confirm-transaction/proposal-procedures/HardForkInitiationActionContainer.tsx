@@ -4,7 +4,7 @@ import { Wallet } from '@lace/cardano';
 import { HardForkInitiationAction } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
-import { useCExpolorerBaseUrl } from '../hooks';
+import { useCexplorerBaseUrl } from '../hooks';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
@@ -28,7 +28,7 @@ export const HardForkInitiationActionContainer = ({
     walletUI: { cardanoCoin }
   } = useWalletStore();
 
-  const explorerBaseUrl = useCExpolorerBaseUrl();
+  const explorerBaseUrl = useCexplorerBaseUrl();
 
   const translations = useMemo<Parameters<typeof HardForkInitiationAction>[0]['translations']>(
     () => ({

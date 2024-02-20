@@ -2,11 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmStakeRegistrationDelegation } from '@lace/core';
 import { SignTxData } from './types';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 
-const { CertificateType } = Wallet.Cardano;
+const { CertificateType, RewardAddress } = Wallet.Cardano;
 
 interface Props {
   signTxData: SignTxData;
@@ -18,7 +18,8 @@ export const ConfirmStakeRegistrationDelegationContainer = ({
   errorMessage
 }: Props): React.ReactElement => {
   const {
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    currentChain
   } = useWalletStore();
   const { t } = useTranslation();
   const certificate = certificateInspectorFactory<Wallet.Cardano.StakeRegistrationDelegationCertificate>(
@@ -32,7 +33,9 @@ export const ConfirmStakeRegistrationDelegationContainer = ({
       dappInfo={signTxData.dappInfo}
       metadata={{
         poolId: certificate.poolId,
-        stakeKeyHash: drepIDasBech32FromHash(certificate.stakeCredential.hash),
+        stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)
+          .toAddress()
+          .toBech32(),
         depositPaid: depositPaidWithCardanoSymbol
       }}
       translations={{

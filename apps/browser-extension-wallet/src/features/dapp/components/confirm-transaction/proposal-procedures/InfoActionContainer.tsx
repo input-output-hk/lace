@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { InfoAction } from '@lace/core';
 import { SignTxData } from '../types';
-import { useCExpolorerBaseUrl } from '../hooks';
+import { useCexplorerBaseUrl } from '../hooks';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
@@ -14,7 +14,7 @@ interface Props {
 export const InfoActionContainer = ({ dappInfo, anchor, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
 
-  const explorerBaseUrl = useCExpolorerBaseUrl();
+  const explorerBaseUrl = useCexplorerBaseUrl();
 
   const translations = useMemo<Parameters<typeof InfoAction>[0]['translations']>(
     () => ({
