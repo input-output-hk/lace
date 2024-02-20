@@ -64,12 +64,12 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
   const unlockAccount = useCallback(
     async (accountIndex: number) => {
       await addAccount({
-        walletId: wallet.walletId,
+        wallet,
         accountIndex,
         metadata: { name: defaultAccountName(accountIndex) }
       });
     },
-    [wallet.walletId, addAccount]
+    [wallet, addAccount]
   );
 
   const lockAccount = useCallback(async () => {

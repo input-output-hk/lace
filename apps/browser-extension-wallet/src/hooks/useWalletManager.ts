@@ -21,7 +21,6 @@ import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsPro
 import { ILocalStorage } from '@src/types';
 import { firstValueFrom } from 'rxjs';
 import {
-  AddAccountProps,
   AddWalletProps,
   AnyBip32Wallet,
   AnyWallet,
@@ -58,7 +57,12 @@ export interface CreateHardwareWallet {
   connectedDevice: Wallet.HardwareWallets;
 }
 
-type WalletManagerAddAccountProps = Omit<AddAccountProps<Wallet.AccountMetadata>, 'extendedAccountPublicKey'>;
+type WalletManagerAddAccountProps = {
+  wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  metadata: Wallet.AccountMetadata;
+  accountIndex: number;
+};
+
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
 
 export interface UseWalletManager {
@@ -662,17 +666,13 @@ export const useWalletManager = (): UseWalletManager => {
     [walletLock, loadWallet]
   );
 
-  const addAccount = async ({ walletId, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
-    const wallets = await firstValueFrom(walletRepository.wallets$);
-    const wallet = wallets.find((w) => w.walletId === walletId);
-    if (!wallet) throw new Error(`Wallet not found: ${walletId}`);
-    if (wallet.type === WalletType.Script) throw new Error('Cannot add account to a script wallet');
+  const addAccount = async ({ wallet, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
     const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
     await walletRepository.addAccount({
       accountIndex,
       extendedAccountPublicKey,
       metadata,
-      walletId
+      walletId: wallet.walletId
     });
   };
 

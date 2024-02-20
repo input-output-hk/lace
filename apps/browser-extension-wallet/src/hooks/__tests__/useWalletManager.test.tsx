@@ -34,7 +34,7 @@ import * as localStorage from '@src/utils/local-storage';
 import * as AppSettings from '@providers/AppSettings';
 import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
-import { AnyBip32Wallet, AnyWallet, Bip32Wallet, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, AnyWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
 jest.mock('@providers/AppSettings', () => ({
@@ -669,28 +669,6 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('addAccount', () => {
-    it('throws an error when wallet with specified id does not exist', async () => {
-      (walletApiUi.walletRepository as any).wallets$ = of([]);
-      const { addAccount } = render();
-      await expect(
-        addAccount({ walletId: 'walletid', accountIndex: 1, metadata: { name: 'new account' } })
-      ).rejects.toThrowError('Wallet not found: walletid');
-    });
-
-    it('throws an error when wallet with specified id is not a bip32 wallet', async () => {
-      const walletId = 'script-wallet-id';
-      (walletApiUi.walletRepository as any).wallets$ = of([
-        {
-          walletId,
-          type: WalletType.Script
-        }
-      ]);
-      const { addAccount } = render();
-      await expect(addAccount({ walletId, accountIndex: 1, metadata: { name: 'new account' } })).rejects.toThrowError(
-        'Cannot add account to a script wallet'
-      );
-    });
-
     describe('for existing bip32 wallet', () => {
       const extendedAccountPublicKey =
         '12b608b67a743891656d6463f72aa6e5f0e62ba6dc47e32edfebafab1acf0fa9f3033c2daefa3cb2ac16916b08c7e7424d4e1aafae2206d23c4d002299c07128';
@@ -729,20 +707,18 @@ describe('Testing useWalletManager hook', () => {
         async ({ type, walletProps, prepare }) => {
           prepare();
           const walletId = 'bip32-wallet-id';
-          (walletApiUi.walletRepository as any).wallets$ = of([
-            {
-              walletId,
-              type,
-              accounts: [],
-              ...walletProps
-            } as unknown as Bip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
-          ]);
-          const addAccountProps = { walletId, accountIndex: 0, metadata: { name: 'new account' } };
+          const addAccountProps = {
+            wallet: { walletId, type, ...walletProps } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+            accountIndex: 0,
+            metadata: { name: 'new account' }
+          };
 
           const { addAccount } = render();
           await addAccount(addAccountProps);
           expect(walletApiUi.walletRepository.addAccount).toBeCalledWith({
-            ...addAccountProps,
+            walletId,
+            accountIndex: addAccountProps.accountIndex,
+            metadata: addAccountProps.metadata,
             extendedAccountPublicKey
           });
         }
