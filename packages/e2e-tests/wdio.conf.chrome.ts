@@ -8,6 +8,7 @@ const chromeConfig: WebdriverIO.Config = {
     {
       maxInstances: 1,
       browserName: 'chrome',
+      browserVersion: 'dev',
       ...(process.env.CI && { hostname: 'localhost' }),
       ...(process.env.CI && { port: 4444 }),
       'goog:chromeOptions': {

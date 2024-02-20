@@ -7,19 +7,14 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_TYPE = '[data-testid="dapp-transaction-type"]';
   private TRANSACTION_AMOUNT_TITLE = '[data-testid="dapp-transaction-amount-title"]';
   private TRANSACTION_AMOUNT_VALUE = '[data-testid="dapp-transaction-amount-value"]';
-  // private TRANSACTION_AMOUNT_FEE_TITLE = '[data-testid="tx-fee-title"]';
-  // private TRANSACTION_AMOUNT_FEE_VALUE_ADA = '[data-testid="tx-fee-ada"]';
 
   private TRANSACTION_RETURNED_DEPOSIT_TITLE = '[data-testid="dapp-transaction-returned-deposit-title"]';
-  private TRANSACTION_RETURNED_DEPOSIT_FEE = '[data-testid="dapp-transaction-returned-deposit-fee"]';
   private TRANSACTION_RETURNED_DEPOSIT_ADA = '[data-testid="dapp-transaction-returned-deposit-ada"]';
 
   private TRANSACTION_DEPOSIT_TITLE = '[data-testid="dapp-transaction-deposit-title"]';
-  private TRANSACTION_DEPOSIT_FEE = '[data-testid="dapp-transaction-deposit-fee"]';
   private TRANSACTION_DEPOSIT_ADA = '[data-testid="dapp-transaction-deposit-ada"]';
 
   private TRANSACTION_FEE_TITLE = '[data-testid="dapp-fee-title"]';
-  private TRANSACTION_FEE = '[data-testid="dapp-transaction-fee"]';
   private TRANSACTION_FEE_ADA = '[data-testid="dapp-transaction-fee-ada"]';
 
   private TRANSACTION_TO_ADDRESS_TITLE = '[data-testid="dapp-transaction-to-address-title"]';
@@ -38,10 +33,6 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
 
-  // get transactionFee(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_FEE);
-  // }
-
   get transactionFeeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_TITLE);
   }
@@ -54,10 +45,6 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     return $(this.TRANSACTION_DEPOSIT_TITLE);
   }
 
-  // get transactionDeposit(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_DEPOSIT_FEE);
-  // }
-
   get transactionDepositValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DEPOSIT_ADA);
   }
@@ -69,10 +56,6 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   get transactionReturnedDepositTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_RETURNED_DEPOSIT_TITLE);
   }
-
-  // get transactionReturnedDeposit(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_RETURNED_DEPOSIT_FEE);
-  // }
 
   get transactionAmountNftsTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_AMOUNT_NFTS_TITLE);
@@ -89,14 +72,6 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   get transactionAmountTokensContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_AMOUNT_TOKEN_CONTAINER);
   }
-
-  // get transactionReturnedDeposit(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_RETURNED_DEPOSIT);
-  // }
-
-  // get transactionDeposit(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_DEPOSIT);
-  // }
 
   get transactionToAddressTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_TO_ADDRESS_TITLE);
@@ -129,45 +104,6 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   get transactionAmountValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_AMOUNT_VALUE);
   }
-  // get transactionFeeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_AMOUNT_FEE_TITLE);
-  // }
-
-  // get transactionFeeTooltipIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_AMOUNT_FEE_TITLE_TOOLTIP_ICON);
-  // }
-
-  // get transactionFeeValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_AMOUNT_FEE_VALUE_ADA);
-  // }
-
-  // get transactionFeeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_AMOUNT_FEE_VALUE_FIAT);
-  // }
-
-  // get transactionAmountAsset(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_AMOUNT_ASSET);
-  // }
-
-  // get transactionRecipientTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_RECIPIENT_TITLE);
-  // }
-
-  // get transactionRecipientAddressTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_RECIPIENT_ADDRESS_TITLE);
-  // }
-
-  // get transactionRecipientAddress(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_RECIPIENT_ADDRESS);
-  // }
-
-  // get transactionDataTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_DATA_TITLE);
-  // }
-
-  // get transactionData(): ChainablePromiseElement<WebdriverIO.Element> {
-  //   return $(this.TRANSACTION_DATA);
-  // }
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRM_BUTTON);
