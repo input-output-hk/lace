@@ -31,7 +31,7 @@ export const TransactionFooterDetails = ({
   return (
     <div className={cn(styles.details, className)}>
       <div className={styles.txFeeContainer}>
-        <div className={styles.txfee} data-testid={`${testId}-title` ?? 'tx-fee-title'}>
+        <div className={styles.txfee} data-testid={testId ? `${testId}-title` : 'tx-fee-title'}>
           {title ?? t('package.core.activityDetails.transactionFee')}
         </div>
         {displayTooltip && (
@@ -48,9 +48,12 @@ export const TransactionFooterDetails = ({
         )}
       </div>
 
-      <div data-testid={`${testId}-fee` ?? 'tx-fee'} className={styles.detail}>
+      <div data-testid={testId ? `${testId}-fee` : 'tx-fee'} className={styles.detail}>
         <div className={styles.amount}>
-          <span data-testid={`${testId}-ada` ?? 'tx-fee-ada'} className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
+          <span
+            data-testid={testId ? `${testId}-ada` : 'tx-fee-ada'}
+            className={styles.ada}
+          >{`${fee} ${coinSymbol}`}</span>
           {displayFiat && (
             <span data-testid="tx-fee-fiat" className={styles.fiat}>
               {amountTransformer(fee)}
