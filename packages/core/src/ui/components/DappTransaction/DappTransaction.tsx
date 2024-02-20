@@ -132,7 +132,7 @@ export const DappTransaction = ({
 
         <TransactionFooterDetails
           fee={getStringFromLovelace(returnedDeposit)}
-          testId="dapp-transaction-returned-deposit-title"
+          testId="dapp-transaction-returned-deposit"
           title={t('package.core.dappTransaction.returnedDeposit')}
           amountTransformer={(ada: string) =>
             `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
@@ -145,7 +145,7 @@ export const DappTransaction = ({
 
         <TransactionFooterDetails
           displayTooltip={false}
-          testId="dapp-transaction-deposit-title"
+          testId="dapp-transaction-deposit"
           fee={getStringFromLovelace(deposit)}
           title={t('package.core.dappTransaction.deposit')}
           amountTransformer={(ada: string) =>

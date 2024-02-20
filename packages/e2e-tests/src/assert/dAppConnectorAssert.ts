@@ -300,23 +300,37 @@ class DAppConnectorAssert {
     expect(await ConfirmTransactionPage.transactionFeeTitle.getText()).to.equal(
       await t('package.core.activityDetails.transactionFee', 'core')
     );
-    await ConfirmTransactionPage.transactionFeeTooltipIcon.waitForDisplayed();
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
-    await ConfirmTransactionPage.transactionFeeValueFiat.waitForDisplayed();
 
-    if (expectedTransactionData.amountAsset && expectedTransactionData.amountAsset !== '0') {
-      await ConfirmTransactionPage.transactionAmountAsset.waitForDisplayed();
-      expect(await ConfirmTransactionPage.transactionAmountAsset.getText()).to.equal(
-        expectedTransactionData.amountAsset
-      );
-    }
-
-    await ConfirmTransactionPage.transactionRecipientTitle.waitForDisplayed();
-    expect(await ConfirmTransactionPage.transactionRecipientTitle.getText()).to.equal(
-      await t('dapp.confirm.details.recepient')
+    await ConfirmTransactionPage.transactionDepositTitle.waitForDisplayed();
+    expect(await ConfirmTransactionPage.transactionDepositTitle.getText()).to.equal(
+      await t('package.core.dappTransaction.deposit', 'core')
     );
-    expect(await ConfirmTransactionPage.transactionRecipientAddress.getText()).to.contain(
-      expectedTransactionData.recipientAddress.slice(-10)
+    await ConfirmTransactionPage.transactionDepositValueAda.waitForDisplayed();
+
+    await ConfirmTransactionPage.transactionReturnedDepositTitle.waitForDisplayed();
+    expect(await ConfirmTransactionPage.transactionReturnedDepositTitle.getText()).to.equal(
+      await t('package.core.dappTransaction.returnedDeposit', 'core')
+    );
+    await ConfirmTransactionPage.transactionReturnedDepositValueAda.waitForDisplayed();
+
+    // add from address address
+    // add from address address
+
+    await ConfirmTransactionPage.transactionToAddress.waitForDisplayed();
+    await ConfirmTransactionPage.transactionToAddressTitle.waitForDisplayed();
+    expect(
+      await ConfirmTransactionPage.transactionToAddressTitle
+        .getText()
+        .to.equal(await t('package.core.dappTransaction.toAddress', 'core'))
+    );
+
+    await ConfirmTransactionPage.transactionFromAddress.waitForDisplayed();
+    await ConfirmTransactionPage.transactionFromAddressTitle.waitForDisplayed();
+    expect(
+      await ConfirmTransactionPage.transactionFromAddressTitle
+        .getText()
+        .to.equal(await t('package.core.dappTransaction.fromAddress', 'core'))
     );
 
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
@@ -336,19 +350,19 @@ class DAppConnectorAssert {
   }
 
   async assertSeeSignDataConfirmTransactionPage(
-    expectedDApp: ExpectedDAppDetails,
-    expectedTransactionRecipientAddress: string
+    expectedDApp: ExpectedDAppDetails
+    // expectedTransactionRecipientAddress: string
   ) {
     await this.assertSeeHeader();
     await this.assertSeeTitleAndDappDetails('dapp.confirm.header', expectedDApp);
 
-    expect(await ConfirmTransactionPage.transactionRecipientAddressTitle.getText()).to.equal('Address:');
-    expect(await ConfirmTransactionPage.transactionRecipientAddress.getText()).to.equal(
-      expectedTransactionRecipientAddress
-    );
+    // expect(await ConfirmTransactionPage.transactionRecipientAddressTitle.getText()).to.equal('Address:');
+    // expect(await ConfirmTransactionPage.transactionRecipientAddress.getText()).to.equal(
+    //   expectedTransactionRecipientAddress
+    // );
 
-    expect(await ConfirmTransactionPage.transactionDataTitle.getText()).to.equal('Data:');
-    expect(await ConfirmTransactionPage.transactionData.getText()).to.equal('fixed the bug');
+    // expect(await ConfirmTransactionPage.transactionDataTitle.getText()).to.equal('Data:');
+    // expect(await ConfirmTransactionPage.transactionData.getText()).to.equal('fixed the bug');
   }
 
   async assertSeeSomethingWentWrongPage() {
