@@ -9,7 +9,7 @@ Feature: Send Transactions from Dapp - E2E
     And I save token: "Cardano" balance
     And I open and authorize test DApp with "Only once" setting
     When I click "Send ADA" "Run" button in test DApp
-    Then I see DApp connector "Confirm transaction" page with: "3.00 ADA" and: "0" assets
+    Then I see DApp connector "Confirm transaction" page with: "-3.17 tADA" and: "0" assets
     And I save fee value on DApp "Confirm transaction" page
     And I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page

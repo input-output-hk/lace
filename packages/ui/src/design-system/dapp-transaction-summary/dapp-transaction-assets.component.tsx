@@ -56,7 +56,7 @@ export const TransactionAssets = ({
   };
 
   return (
-    <div data-testid={testId} className={cx.assetsContainer}>
+    <div className={cx.assetsContainer}>
       <Grid {...props} columns="$fitContent">
         <Cell>
           <UserProfile
@@ -73,7 +73,10 @@ export const TransactionAssets = ({
             className={cx.balanceDetailContainer}
           >
             <Typography.Body.Normal className={cx.label}>
-              {balance} {tokenName} {metadataHash}
+              <span data-testid={testId}>
+                {balance} {tokenName}
+              </span>{' '}
+              {metadataHash}
             </Typography.Body.Normal>
           </Flex>
         </Cell>
