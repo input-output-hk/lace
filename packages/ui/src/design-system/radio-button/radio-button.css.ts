@@ -11,6 +11,7 @@ const radioGroupRootBase = style([
   {
     fontFamily: vars.fontFamily.$nova,
     fontWeight: vars.fontWeights.$semibold,
+    flexGrow: 1,
   },
 ]);
 
@@ -159,17 +160,13 @@ export const icon = style([
 export const root = style([
   sx({
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'stretch',
     borderRadius: '$small',
   }),
   {
     display: 'inline-flex',
   },
 ]);
-
-export const withLabel = style({
-  padding: `${vars.spacing.$2} ${vars.spacing.$8}`,
-});
 
 export const label = style({
   fontSize: '15px',
