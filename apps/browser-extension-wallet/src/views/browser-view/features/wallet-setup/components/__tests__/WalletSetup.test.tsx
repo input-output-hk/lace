@@ -10,7 +10,6 @@ import { ThemeProvider } from '@providers/ThemeProvider';
 import { MemoryRouter } from 'react-router-dom';
 import { WalletSetup } from '../WalletSetup';
 import { I18nextProvider } from 'react-i18next';
-import { WalletSetupSteps } from '@lace/core';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 
 jest.mock('@stores', () => ({
@@ -54,7 +53,7 @@ const SetupContainerTest = () => (
       <AnalyticsProvider>
         <ExternalLinkOpenerProvider>
           <ThemeProvider>
-            <WalletSetup initialStep={WalletSetupSteps.Analytics} />
+            <WalletSetup />
           </ThemeProvider>
         </ExternalLinkOpenerProvider>
       </AnalyticsProvider>

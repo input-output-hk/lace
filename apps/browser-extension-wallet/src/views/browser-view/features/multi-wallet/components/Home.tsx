@@ -3,7 +3,11 @@ import { walletRoutePaths } from '@routes';
 import React from 'react';
 import { useHistory } from 'react-router';
 
-export const Home = (): JSX.Element => {
+type HomeProps = {
+  paths: typeof walletRoutePaths.newWallet;
+};
+
+export const Home = ({ paths }: HomeProps): JSX.Element => {
   const { t: translate } = useTranslate();
   const history = useHistory();
 
@@ -29,9 +33,9 @@ export const Home = (): JSX.Element => {
 
   return (
     <WalletSetupOptionsStep
-      onNewWalletRequest={() => history.push(walletRoutePaths.newWallet.create.setup)}
-      onHardwareWalletRequest={() => history.push(walletRoutePaths.newWallet.hardware.connect)}
-      onRestoreWalletRequest={() => history.push(walletRoutePaths.newWallet.restore.setup)}
+      onNewWalletRequest={() => history.push(paths.create.setup)}
+      onHardwareWalletRequest={() => history.push(paths.hardware.connect)}
+      onRestoreWalletRequest={() => history.push(paths.restore.setup)}
       translations={walletSetupOptionsStepTranslations}
     />
   );

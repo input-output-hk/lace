@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Data, Providers } from './types';
+import { walletRoutePaths } from '@routes';
 
 interface Props {
   children: React.ReactNode;
@@ -8,6 +9,7 @@ interface Props {
 
 interface State {
   data: Data;
+  paths: typeof walletRoutePaths.newWallet;
   setMnemonic: (mnemonic: string[]) => void;
   setName: (name: string) => void;
   setPassword: (password: string) => void;
@@ -55,6 +57,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
     <CreateWalletContext.Provider
       value={{
         data: state,
+        paths: providers.paths,
         setMnemonic,
         setName,
         setPassword,

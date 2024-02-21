@@ -1,3 +1,4 @@
+import { walletRoutePaths } from '@routes';
 import { Subject } from 'rxjs';
 
 export interface Data {
@@ -12,4 +13,5 @@ export interface Providers {
   confirmationDialog: {
     shouldShowDialog$: Subject<boolean>;
   };
+  paths: typeof walletRoutePaths.newWallet;
 }

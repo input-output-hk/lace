@@ -31,6 +31,7 @@ const createWallet = (): Promise<void> => Promise.resolve(void 0);
 
 interface ConfirmationDialog {
   shouldShowDialog$: Subject<boolean>;
+  paths: typeof walletRoutePaths.newWallet;
 }
 
 export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
@@ -70,12 +71,13 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
   return <HardwareWallet providers={hardwareWalletProviders} />;
 };
 
-export const SetupCreateWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
+export const SetupCreateWallet = ({ paths, ...confirmationDialog }: ConfirmationDialog): JSX.Element => (
   <CreateWallet
     providers={{
       createWallet,
       generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords,
-      confirmationDialog
+      confirmationDialog,
+      paths
     }}
   />
 );
@@ -108,17 +110,17 @@ const Component = (): JSX.Element => {
         <Switch>
           <Route
             path={newWallet.create.root}
-            render={() => <SetupCreateWallet shouldShowDialog$={shouldShowDialog$} />}
+            render={() => <SetupCreateWallet shouldShowDialog$={shouldShowDialog$} paths={newWallet} />}
           />
           <Route
             path={newWallet.hardware.root}
-            render={() => <SetupHardwareWallet shouldShowDialog$={shouldShowDialog$} />}
+            render={() => <SetupHardwareWallet shouldShowDialog$={shouldShowDialog$} paths={newWallet} />}
           />
           <Route
             path={newWallet.restore.root}
-            render={() => <SetupRestoreWallet shouldShowDialog$={shouldShowDialog$} />}
+            render={() => <SetupRestoreWallet shouldShowDialog$={shouldShowDialog$} paths={newWallet} />}
           />
-          <Route exact path={`${path}/`} component={Home} />
+          <Route exact path={`${path}/`} render={() => <Home paths={newWallet} />} />
         </Switch>
       </Modal>
     </WalletSetupFlowProvider>

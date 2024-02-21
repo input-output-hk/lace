@@ -54,6 +54,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     confirmationDialog: {
       shouldShowDialog$: BehaviorSubject<boolean>;
     };
+    paths: typeof walletRoutePaths.newWallet;
   };
 
   beforeEach(() => {
@@ -62,7 +63,8 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       generateMnemonicWords: jest.fn(),
       confirmationDialog: {
         shouldShowDialog$: new BehaviorSubject(false)
-      }
+      },
+      paths: walletRoutePaths.newWallet
     };
   });
 
