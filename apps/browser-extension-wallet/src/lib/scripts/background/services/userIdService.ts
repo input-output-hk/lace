@@ -190,7 +190,7 @@ export class UserIdService implements UserIdServiceInterface {
     this.sessionTimeout = undefined;
   }
 
-  private generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex) {
+  generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): string {
     console.debug('[ANALYTICS] Wallet based ID not found - generating new one');
     // by requirement, we want to hash the extended account public key twice
     const hash = hashExtendedAccountPublicKey(extendedAccountPublicKey);
