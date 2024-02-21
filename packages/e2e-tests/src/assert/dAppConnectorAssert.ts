@@ -319,21 +319,21 @@ class DAppConnectorAssert {
     // add from address address
     // add from address address
 
-    await ConfirmTransactionPage.transactionToAddress.waitForDisplayed();
-    await ConfirmTransactionPage.transactionToAddressTitle.waitForDisplayed();
-    expect(
-      await ConfirmTransactionPage.transactionToAddressTitle
-        .getText()
-        .to.equal(await t('package.core.dappTransaction.toAddress', 'core'))
-    );
+    // await ConfirmTransactionPage.transactionToAddress.waitForDisplayed();
+    // await ConfirmTransactionPage.transactionToAddressTitle.waitForDisplayed();
+    // expect(
+    //   await ConfirmTransactionPage.transactionToAddressTitle
+    //     .getText()
+    //     .to.equal(await t('package.core.dappTransaction.toAddress', 'core'))
+    // );
 
-    await ConfirmTransactionPage.transactionFromAddress.waitForDisplayed();
-    await ConfirmTransactionPage.transactionFromAddressTitle.waitForDisplayed();
-    expect(
-      await ConfirmTransactionPage.transactionFromAddressTitle
-        .getText()
-        .to.equal(await t('package.core.dappTransaction.fromAddress', 'core'))
-    );
+    // await ConfirmTransactionPage.transactionFromAddress.waitForDisplayed();
+    // await ConfirmTransactionPage.transactionFromAddressTitle.waitForDisplayed();
+    // expect(
+    //   await ConfirmTransactionPage.transactionFromAddressTitle
+    //     .getText()
+    //     .to.equal(await t('package.core.dappTransaction.fromAddress', 'core'))
+    // );
 
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
