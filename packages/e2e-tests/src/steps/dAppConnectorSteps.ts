@@ -83,7 +83,7 @@ Then(
       amountAsset: assetValue,
       recipientAddress: String(getTestWallet('WalletReceiveSimpleTransactionE2E').address)
     };
-    await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, expectedTransactionData);
+    await DAppConnectorAssert.assertSeeConfirmTransactionPage(expectedTransactionData);
   }
 );
 
@@ -101,7 +101,7 @@ Then(
 
     switch (expectedPage) {
       case 'Confirm transaction':
-        await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, defaultDAppTransactionData);
+        await DAppConnectorAssert.assertSeeConfirmTransactionPage(defaultDAppTransactionData);
         break;
       case 'Something went wrong':
         await DAppConnectorAssert.assertSeeSomethingWentWrongPage();

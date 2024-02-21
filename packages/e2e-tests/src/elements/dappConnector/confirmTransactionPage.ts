@@ -8,6 +8,8 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_AMOUNT_TITLE = '[data-testid="dapp-transaction-amount-title"]';
   private TRANSACTION_AMOUNT_VALUE = '[data-testid="dapp-transaction-amount-value"]';
 
+  private TRANSACTION_ORIGIN = '[data-testid="dapp-transaction-origin"]';
+
   private TRANSACTION_RETURNED_DEPOSIT_TITLE = '[data-testid="tx-amount-returned-deposit-label"]';
   private TRANSACTION_RETURNED_DEPOSIT_ADA = '[data-testid="tx-amount-returned-deposit-amount"]';
 
@@ -31,6 +33,10 @@ class ConfirmTransactionPage extends CommonDappPageElements {
 
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
+
+  get transactionOrigin(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_ORIGIN);
+  }
 
   get transactionFeeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_TITLE);

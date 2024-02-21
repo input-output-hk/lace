@@ -28,9 +28,9 @@ export const TransactionFee = ({
     <TransactionSummary.Amount
       amount={`${fee} ${coinSymbol}`}
       fiatPrice={amountTransformer(fee)}
-      label={label ? label : t('package.core.activityDetails.transactionFee')}
+      label={label ?? t('package.core.activityDetails.transactionFee')}
       tooltip={tooltipInfo}
-      data-testid={testId ? testId : 'fee'}
+      data-testid={testId ?? 'fee'}
       className={className}
       displayFiat={displayFiat}
     />
