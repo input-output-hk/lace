@@ -232,7 +232,7 @@ export const SortAndFilter = ({
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">
             {filterOptions.map((filterOption) => (
               <Flex flexDirection="column" m="$4" key={filterOption.title} alignItems="stretch">
-                <Text.Body.Large weight="$medium">{filterOption.title}</Text.Body.Large>
+                <Text.Body.Small weight="$medium">{filterOption.title}</Text.Body.Small>
                 {getFilters(filterOption)}
               </Flex>
             ))}
