@@ -37,8 +37,12 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.stake': 'Stake',
   'browsePools.stakePoolTableBrowser.tableHeader.blocks.title': 'Blocks',
   'browsePools.stakePoolTableBrowser.tableHeader.blocks.tooltip': 'Total blocks created by the pool.',
-  'browsePools.stakePoolTableBrowser.tableHeader.cost': 'Cost',
+  'browsePools.stakePoolTableBrowser.tableHeader.cost.title': 'Cost',
+  'browsePools.stakePoolTableBrowser.tableHeader.cost.tooltip':
+    "The cost is not directly paid by the delegator; they are deducted from a pool's rewards, consisting of a fixed cost and a variable cost, which fund the pool's operational costs",
   'browsePools.stakePoolTableBrowser.tableHeader.liveStake.title': 'Live Stake',
+  'browsePools.stakePoolTableBrowser.tableHeader.liveStake.tooltip':
+    'Refers to the total amount of a cryptocurrency that is currently being staked in a particular staking pool',
   'browsePools.stakePoolTableBrowser.tableHeader.margin.title': 'Margin',
   'browsePools.stakePoolTableBrowser.tableHeader.margin.tooltip':
     'The percentage of rewards taken by the stake pool operator after the fixed cost but before rewards are distributed',
@@ -51,7 +55,8 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.title': 'Saturation',
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip':
     'Once a pool reaches the point of saturation, it will offer diminishing rewards',
-  'browsePools.stakePoolTableBrowser.tableHeader.ticker': 'Ticker',
+  'browsePools.stakePoolTableBrowser.tableHeader.ticker.title': 'Ticker',
+  'browsePools.stakePoolTableBrowser.tableHeader.ticker.tooltip': 'Refers to the unique identifier of a staking pool',
   'browsePools.stakePoolTableBrowser.unselect': 'Unselect',
   'drawer.confirmation.button.confirm': 'Next',
   'drawer.confirmation.button.confirmWithDevice': 'Confirm with {{hardwareWallet}}',
