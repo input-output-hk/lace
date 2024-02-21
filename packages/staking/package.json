@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "build": "tsc && tsup",
-    "build:storybook": "NODE_OPTIONS=--openssl-legacy-provider; storybook build",
+    "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; storybook build",
     "cleanup": "yarn exec rm -rf dist node_modules && yarn exec rm -rf ../../.cache/eslintcache",
     "dev": "NODE_OPTIONS=--openssl-legacy-provider; storybook dev -p 6006",
     "eslint:check": "yarn run -T eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '**/*.{cjs,mjs,js,ts,tsx}'",
