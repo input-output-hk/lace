@@ -11,7 +11,7 @@ import * as cx from './radio-button.css';
 export type Props = Readonly<{
   disabled?: boolean;
   className?: string;
-  selectedValue: string;
+  selectedValue?: string;
 
   options: {
     value: string;
@@ -41,19 +41,27 @@ export const RadioButtonGroup = ({
       className={cx.radioGroupRoot}
     >
       {options.map(({ value, label, icon, onIconClick }) => (
-        <Flex alignItems="center" h="$fill" m="$4" key={value}>
+        <Flex
+          alignItems="center"
+          m="$4"
+          key={value}
+          className={cn({
+            [`${cx.radioGroupItemWrapper} ${cx.radioGroupItemWrapperSelector}`]:
+              !!label,
+          })}
+        >
           <RadixRadioGroup.Item
-            id={label}
+            id={`radio-btn-control-id-${value}`}
             value={value}
-            className={cn(
-              cx.radioGroupItem,
-              value === selectedValue ? cx.checked : cx.unchecked,
-            )}
+            className={cx.radioGroupItem}
           >
             <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
           </RadixRadioGroup.Item>
           {label && (
-            <label id="Label" htmlFor={value}>
+            <label
+              id={`radio-btn-label-id-${value}`}
+              htmlFor={`radio-btn-control-id-${value}`}
+            >
               <Box
                 className={cn(cx.label, {
                   [cx.disabled]: disabled,

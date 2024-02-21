@@ -65,6 +65,7 @@ export const WalletSetupRegisterStep = ({
             label={translations.walletName}
             onChange={(e) => handleOnChange(e.target.value)}
             maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
+            autoFocus
           />
           {shouldShowErrorMessage && (
             <p
