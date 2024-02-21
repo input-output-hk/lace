@@ -15,6 +15,7 @@ import { ProfileDropdown } from '@lace/ui';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';
+import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -91,7 +92,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
               accountIndex: lastActiveAccount.accountIndex
             });
           }}
-          type="cold"
+          type={getUiWalletType(wallet.type)}
         />
       );
     },

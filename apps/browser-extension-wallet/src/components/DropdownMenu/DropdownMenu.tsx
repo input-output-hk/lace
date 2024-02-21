@@ -15,6 +15,7 @@ import { ProfileDropdown } from '@lace/ui';
 import { useGetHandles } from '@hooks';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import { getActiveWalletSubtitle } from '@src/utils/get-wallet-subtitle';
+import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -62,7 +63,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
                   }
                 : undefined
             }
-            type={process.env.USE_SHARED_WALLET === 'true' ? 'shared' : 'cold'}
+            type={getUiWalletType(cardanoWallet.source.wallet.type)}
             id="menu"
           />
         </div>
