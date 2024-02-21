@@ -18,7 +18,7 @@ export interface RadioButtonGroupOption {
 export interface RadioButtonGroupProps {
   disabled?: boolean;
   className?: string;
-  selectedValue: string;
+  selectedValue?: string;
   options: RadioButtonGroupOption[];
   onValueChange: (value: string) => void;
 }
@@ -40,29 +40,30 @@ export const RadioButtonGroup = ({
         value={selectedValue}
         disabled={disabled}
         onValueChange={onValueChange}
-        className={cn(cx.radioGroupRoot, {
-          [cx.gap]: !hasIcon,
-        })}
+        className={cx.radioGroupRootWithIcon[hasIcon ? 'withIcon' : 'default']}
       >
         {options.map(({ value, label, icon: Icon, onIconClick }) => (
           <Flex
-            h="$fill"
-            alignItems={'center'}
+            alignItems="center"
             key={value}
-            className={cn({ [cx.withIcon]: hasIcon })}
+            className={cn({
+              [`${cx.radioGroupItemWrapper} ${cx.radioGroupItemWrapperSelector}`]:
+                !!label,
+              [cx.withIcon]: hasIcon,
+            })}
           >
             <RadixRadioGroup.Item
-              id={label}
+              id={`radio-btn-control-id-${value}`}
               value={value}
-              className={cn(
-                cx.radioGroupItem,
-                value === selectedValue ? cx.checked : cx.unchecked,
-              )}
+              className={cx.radioGroupItem}
             >
               <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
             </RadixRadioGroup.Item>
             {label && (
-              <label id="Label" htmlFor={value}>
+              <label
+                id={`radio-btn-label-id-${value}`}
+                htmlFor={`radio-btn-control-id-${value}`}
+              >
                 <Box
                   className={cn(cx.label, {
                     [cx.disabled]: disabled,
