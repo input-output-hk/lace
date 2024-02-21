@@ -5,7 +5,6 @@ import * as toggleButtonGroupRootCn from './toggle-button-group-root.css';
 export const root = style([
   sx({
     padding: '$8',
-    fontSize: '$16',
     color: '$toggle_button_group_item_label_color',
     backgroundColor: '$toggle_button_group_item_bgColor',
     borderRadius: '$small',
