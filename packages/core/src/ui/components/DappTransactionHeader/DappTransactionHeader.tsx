@@ -30,11 +30,7 @@ export const DappTransactionHeader = ({ transactionType, name }: DappTransaction
 
   return (
     <div data-testid="transaction-type-container">
-      <TransactionType
-        label={t('package.core.dappTransaction.transaction')}
-        transactionType={transactionType}
-        data-testid="dapp-transaction-title"
-      />
+      <TransactionType label={t('package.core.dappTransaction.transaction')} transactionType={transactionType} />
       <SummaryExpander title={t('package.core.dappTransaction.origin')}>
         <Card.Outlined className={styles.dappInfoContainer}>
           <Text className={styles.dappInfo} data-testid="dapp-transaction-type">

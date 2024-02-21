@@ -36,7 +36,10 @@ export const TransactionType = ({
     <div className={cx.transactionTypeContainer}>
       <Grid {...props} columns="$2">
         <Cell>
-          <Typography.Body.Large className={cx.txSummaryTitle}>
+          <Typography.Body.Large
+            className={cx.txSummaryTitle}
+            data-testid="dapp-transaction-title"
+          >
             {label}
           </Typography.Body.Large>
         </Cell>

@@ -38,7 +38,10 @@ export const TransactionSummary = ({
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Normal className={cx.label}>
+            <Typography.Body.Normal
+              className={cx.label}
+              data-testId="dapp-transaction-amount-value"
+            >
               {transactionAmount} {cardanoSymbol}
             </Typography.Body.Normal>
           </Flex>
