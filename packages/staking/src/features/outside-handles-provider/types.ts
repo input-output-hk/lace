@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
-import { StakePoolSortOptions } from 'features/BrowsePools/types';
+import { BrowsePoolsView, StakePoolSortOptions } from 'features/BrowsePools/types';
 import type { IAnalyticsTracker } from '@lace/common';
 
 type WalletBalance = {
@@ -40,6 +40,13 @@ export enum StateStatus {
   ERROR = 'error',
 }
 
+export interface StakingBrowserPreferences {
+  sortOptions: StakePoolSortOptions;
+  searchQuery?: string;
+  poolsView: BrowsePoolsView;
+  selectedPoolsIds: string[];
+}
+
 export interface IBlockchainProvider {
   stakePoolProvider: Wallet.StakePoolProvider;
   assetProvider: Wallet.AssetProvider;
@@ -52,6 +59,8 @@ export interface IBlockchainProvider {
 
 export type OutsideHandlesContextValue = {
   analytics: IAnalyticsTracker;
+  stakingBrowserPreferencesPersistence: StakingBrowserPreferences;
+  setStakingBrowserPreferencesPersistence: (preferences: StakingBrowserPreferences) => void;
   walletManagerExecuteWithPassword: <T>(action: () => Promise<T>, password?: string) => Promise<T>;
   expandStakingView?: () => void;
   balancesBalance?: Balance;

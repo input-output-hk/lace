@@ -261,6 +261,8 @@ export const colors = {
   $radiobutton_indicator_backgroundColor: '',
   $radiobutton_indicator_check_color: '',
   $radiobutton_unchecked_borderColor: '',
+  $radiobutton_unchecked_bgColor: '',
+  $radiobutton_checked_bgColor: '',
   $radiobutton_icon_color: '',
   $radiobutton_icon_hover_color: '',
   $radiobutton_icon_hover_border_color: '',

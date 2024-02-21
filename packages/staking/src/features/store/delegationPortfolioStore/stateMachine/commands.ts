@@ -53,7 +53,7 @@ export type GoToOverview = {
 
 export type SelectPoolFromList = {
   type: 'SelectPoolFromList';
-  data: Wallet.Cardano.StakePool;
+  data: Wallet.Cardano.StakePool[];
 };
 
 export type UnselectPoolFromList = {
