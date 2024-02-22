@@ -44,7 +44,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const fullWalletName = cardanoWallet.source.wallet.metadata.name;
-  const walletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
+  const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const handleName = handle?.nftMetadata?.name;
 
@@ -84,7 +84,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           key={wallet.walletId}
           title={wallet.metadata.name}
           subtitle={lastActiveAccount.metadata.name}
-          id={walletName}
+          id={`wallet-option-${wallet.walletId}`}
           onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
           onClick={async () => {
             await activateWallet({
@@ -94,14 +94,14 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
             setIsDropdownMenuOpen(false);
             toast.notify({
               duration: TOAST_DEFAULT_DURATION,
-              text: t('multiWallet.activated.wallet', { walletName })
+              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
             });
           }}
           type={getUiWalletType(wallet.type)}
         />
       );
     },
-    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, walletName, setIsDropdownMenuOpen, t]
+    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, t]
   );
 
   const renderWallet = useCallback(
@@ -145,10 +145,10 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
               }
             >
               <div className={styles.userInfo} onClick={handleOnAddressCopy}>
-                {avatarVisible && <UserAvatar walletName={walletName} />}
+                {avatarVisible && <UserAvatar walletName={activeWalletName} />}
                 <div className={styles.userMeta} data-testid="header-menu-user-details">
                   <p className={styles.walletName} data-testid="header-menu-wallet-name">
-                    {walletName}
+                    {activeWalletName}
                   </p>
                   <p className={styles.walletAddress} data-testid="header-menu-wallet-address">
                     {handleName || shortenedWalletAddress}
