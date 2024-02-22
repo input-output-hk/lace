@@ -17,6 +17,13 @@ const NUMBER_OF_ACCOUNTS_PER_WALLET = 24;
 
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
+  const accountsListLabel = useMemo(
+    () => ({
+      unlock: t('browserView.settings.wallet.accounts.unlockLabel'),
+      lock: t('browserView.settings.wallet.accounts.lockLabel')
+    }),
+    [t]
+  );
   const editAccountDrawer = useAccountDataModal();
   const disableAccountConfirmation = useAccountDataModal();
   const { manageAccountsWallet: wallet, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
@@ -129,7 +136,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           data-testid="user-dropdown-wallet-account-list"
         >
           <ProfileDropdown.AccountsList
-            unlockLabel={t('browserView.settings.wallet.accounts.unlockLabel')}
+            label={accountsListLabel}
             onAccountActivateClick={activateAccount}
             onAccountEditClick={editAccount}
             onAccountDeleteClick={deleteAccount}

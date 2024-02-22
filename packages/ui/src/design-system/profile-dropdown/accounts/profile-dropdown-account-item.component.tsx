@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 
-import { ReactComponent as PencilIcon } from '@lace/icons/dist/PencilOutlineComponent';
-import { ReactComponent as TrashIcon } from '@lace/icons/dist/TrashOutlineComponent';
 import { Tooltip } from 'antd';
 
 import * as ControlButtons from '../../control-buttons';
@@ -14,8 +12,11 @@ import * as cx from './profile-dropdown-account-item.css';
 
 export interface Props {
   accountNumber: number;
-  label: string;
-  unlockLabel: string;
+  label: {
+    name: string;
+    unlock: string;
+    lock: string;
+  };
   disableUnlock?: { reason: string };
   isUnlocked: boolean;
   isDeletable: boolean;
@@ -48,11 +49,9 @@ export const AccountItem = ({
   accountNumber,
   disableUnlock,
   label,
-  unlockLabel,
   isUnlocked,
   isDeletable,
   onActivateClick,
-  onEditClick,
   onDeleteClick,
   onUnlockClick,
 }: Readonly<Props>): JSX.Element => (
@@ -83,7 +82,7 @@ export const AccountItem = ({
             className={cx.accountLabel}
             data-testid="wallet-account-item-label"
           >
-            {label}
+            {label.name}
           </Text.Label>
           <Text.Body.Small
             weight="$semibold"
@@ -96,29 +95,20 @@ export const AccountItem = ({
       </Flex>
     </div>
     {isUnlocked ? (
-      <Flex gap="$8">
-        <ControlButtons.Icon
-          icon={<PencilIcon className={cx.editIcon} />}
-          size="extraSmall"
-          onClick={(): void => {
-            onEditClick?.(accountNumber);
-          }}
-          data-testid="wallet-account-item-edit-btn"
-        />
-        <ControlButtons.Icon
-          icon={<TrashIcon className={cx.deleteIcon} />}
-          size="extraSmall"
-          data-testid="wallet-account-item-delete-btn"
-          disabled={!isDeletable}
+      isDeletable ? (
+        <ControlButtons.ExtraSmall
+          colorScheme={ControlButtons.Scheme.Outlined}
+          label={label.lock}
+          data-testid="wallet-account-item-lock-btn"
           onClick={(): void => {
             onDeleteClick?.(accountNumber);
           }}
         />
-      </Flex>
+      ) : undefined
     ) : (
       <MaybeWithDisableUnlockTooltip disableUnlock={disableUnlock}>
         <ControlButtons.ExtraSmall
-          label={unlockLabel}
+          label={label.unlock}
           data-testid="wallet-account-item-unlock-btn"
           disabled={!!disableUnlock}
           onClick={(): void => {
