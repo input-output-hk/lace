@@ -7,7 +7,7 @@
   gap: size_unit(1);
 
   .type {
-    @include text-heading;
+    @include text-subHeading-bold;
     color: var(--text-color-primary, #3d3b39);
   }
   .assets {

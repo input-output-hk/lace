@@ -222,7 +222,12 @@ const buildGetActivityDetail =
       includedUtcTime: blocks?.utcTime,
       // TODO: store the raw data here and transform it later so we always have the raw data when needed.(LW-9570)
       votingProcedures: votingProceduresTransformer(tx.body.votingProcedures),
-      proposalProcedures: governanceProposalsTransformer(cardanoCoin, tx.body.proposalProcedures),
+      proposalProcedures: governanceProposalsTransformer(
+        cardanoCoin,
+        coinPrices,
+        fiatCurrency,
+        tx.body.proposalProcedures
+      ),
       certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates)
     };
 

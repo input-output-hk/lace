@@ -19,7 +19,7 @@ export const DetailRow = ({ title, info, details, dataTestId }: DetailsRowProps)
     <div className={styles.detail}>
       {details.map((detail, idx) => (
         <span key={`${title}-details-${idx}`}>
-          {typeof detail === 'string' ? detail : <DetailRowSubitems item={detail[0]} subitem={detail[0]} />}
+          {typeof detail === 'string' ? detail : <DetailRowSubitems item={detail[0]} subitem={detail[1]} />}
         </span>
       ))}
     </div>

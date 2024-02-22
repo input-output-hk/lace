@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
 import BigNumber from 'bignumber.js';
@@ -23,7 +24,7 @@ import isEmpty from 'lodash/isEmpty';
 import { PriceResult } from '@hooks';
 import { formatPercentages } from '@lace/common';
 
-const { util, GovernanceActionType, PlutusLanguageVersion } = Wallet.Cardano;
+const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType } = Wallet.Cardano;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -260,12 +261,12 @@ export const certificateTransformer = (
       if ('anchor' in conwayEraCertificate && conwayEraCertificate.anchor) {
         transformedCertificate.push(
           {
-            title: 'anchorUrl',
-            details: [conwayEraCertificate.anchor.url]
-          },
-          {
             title: 'anchorHash',
             details: [conwayEraCertificate.anchor.dataHash.toString()]
+          },
+          {
+            title: 'anchorUrl',
+            details: [conwayEraCertificate.anchor.url]
           }
         );
       }
@@ -285,9 +286,13 @@ export const certificateTransformer = (
       }
 
       if ('deposit' in conwayEraCertificate) {
+        const depositTitle =
+          conwayEraCertificate.__typename === CertificateType.UnregisterDelegateRepresentative
+            ? 'depositReturned'
+            : 'depositPaid';
         transformedCertificate.push({
-          title: 'depositPaid',
-          info: 'depositPaidInfo',
+          title: depositTitle,
+          info: `${depositTitle}Info`,
           details: [
             [
               Wallet.util.getFormattedAmount({ amount: conwayEraCertificate.deposit.toString(), cardanoCoin }),
@@ -310,15 +315,7 @@ export const votingProceduresTransformer = (
 
   votingProcedures?.forEach((procedure) =>
     procedure.votes.forEach((vote) => {
-      const detail: TxDetails<TxDetailsVotingProceduresTitles> = [];
-      if (vote.votingProcedure.anchor) {
-        detail.push(
-          { title: 'anchorHash', details: [vote.votingProcedure.anchor.dataHash.toString()] },
-          { title: 'anchorURL', details: [vote.votingProcedure.anchor.url] }
-        );
-      }
-
-      detail.push(
+      const detail: TxDetails<TxDetailsVotingProceduresTitles> = [
         {
           title: 'voterType',
           details: [getVoterType(procedure.voter.__typename)]
@@ -327,8 +324,16 @@ export const votingProceduresTransformer = (
           title: 'credentialType',
           details: [getCredentialType(procedure.voter.credential.type)]
         },
-        { title: 'voteTypes', details: [getVote(vote.votingProcedure.vote)] }
-      );
+        { title: 'voteTypes', details: [getVote(vote.votingProcedure.vote)] },
+        { title: 'drepId', details: [getVote(vote.votingProcedure.vote)] }
+      ];
+
+      if (vote.votingProcedure.anchor) {
+        detail.push(
+          { title: 'anchorURL', details: [vote.votingProcedure.anchor.url] },
+          { title: 'anchorHash', details: [vote.votingProcedure.anchor.dataHash.toString()] }
+        );
+      }
 
       votingProcedureDetails.push(detail.filter((el: TxDetail<TxDetailsVotingProceduresTitles>) => !isEmpty(el)));
     })
@@ -339,6 +344,8 @@ export const votingProceduresTransformer = (
 
 export const governanceProposalsTransformer = (
   cardanoCoin: Wallet.CoinId,
+  coinPrices: PriceResult,
+  fiatCurrency: CurrencyInfo,
   proposalProcedures?: Wallet.Cardano.ProposalProcedure[]
 ): TxDetails<TxDetailsProposalProceduresTitles>[] =>
   proposalProcedures?.map((procedure) => {
@@ -347,18 +354,34 @@ export const governanceProposalsTransformer = (
       {
         ...(procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action && {
           title: 'deposit',
-          details: [`${Wallet.util.lovelacesToAdaString(procedure.deposit.toString())} ${cardanoCoin.symbol}`]
+          info: 'deposit',
+          details: [
+            [
+              Wallet.util.getFormattedAmount({ amount: procedure.deposit.toString(), cardanoCoin }),
+              `${Wallet.util.convertLovelaceToFiat({
+                lovelaces: procedure.deposit.toString(),
+                fiat: coinPrices?.cardano?.price
+              })} ${fiatCurrency?.code}`
+            ]
+          ]
         })
       },
-      { title: 'anchorHash', details: [procedure.anchor.dataHash.toString()] },
-      { title: 'anchorURL', details: [procedure.anchor.url] }
+      { title: 'rewardAccount', details: [procedure.anchor.dataHash.toString()] },
+      { title: 'anchorURL', details: [procedure.anchor.url] },
+      { title: 'anchorHash', details: [procedure.anchor.dataHash.toString()] }
     ];
 
-    if ('governanceActionId' in procedure.governanceAction) {
-      transformedProposal.push({
-        title: 'governanceActionIndex',
-        details: [procedure.governanceAction.governanceActionId.actionIndex.toString()]
-      });
+    if ('governanceActionId' in procedure.governanceAction && procedure.governanceAction.governanceActionId) {
+      transformedProposal.push(
+        {
+          title: 'governanceActionID',
+          details: [procedure.governanceAction.governanceActionId.id.toString()]
+        },
+        {
+          title: 'actionIndex',
+          details: [procedure.governanceAction.governanceActionId.actionIndex.toString()]
+        }
+      );
     }
 
     if ('withdrawals' in procedure.governanceAction) {
@@ -430,6 +453,18 @@ export const governanceProposalsTransformer = (
           details: membersToBeRemoved
         });
       }
+    }
+
+    if ('newQuorumThreshold' in procedure.governanceAction) {
+      transformedProposal.push({
+        title: 'newQuorumThreshold',
+        details: [
+          `${formatPercentages(
+            procedure.governanceAction.newQuorumThreshold.numerator /
+              procedure.governanceAction.newQuorumThreshold.denominator
+          )}%`
+        ]
+      });
     }
 
     if ('protocolVersion' in procedure.governanceAction) {
@@ -573,6 +608,19 @@ export const governanceProposalsTransformer = (
           ]
         },
         {
+          header: 'costModels',
+          details: [
+            {
+              title: 'PlutusV1',
+              details: costModels.get(PlutusLanguageVersion.V1).map((model) => model.toString())
+            },
+            {
+              title: 'PlutusV2',
+              details: costModels.get(PlutusLanguageVersion.V2).map((model) => model.toString())
+            }
+          ]
+        },
+        {
           header: 'technicalGroup',
           details: [
             {
@@ -594,19 +642,6 @@ export const governanceProposalsTransformer = (
           ]
         },
         {
-          header: 'costModels',
-          details: [
-            {
-              title: 'PlutusV1',
-              details: costModels.get(PlutusLanguageVersion.V1).map((model) => model.toString())
-            },
-            {
-              title: 'PlutusV2',
-              details: costModels.get(PlutusLanguageVersion.V2).map((model) => model.toString())
-            }
-          ]
-        },
-        {
           header: 'governanceGroup',
           details: [
             {
@@ -615,11 +650,13 @@ export const governanceProposalsTransformer = (
             },
             {
               title: 'govActionDeposit',
-              details: [governanceActionDeposit?.toString()]
+              // TODO: is it in Ada or lovelaces?
+              details: [`${governanceActionDeposit?.toString()} ${cardanoCoin.symbol}`]
             },
             {
               title: 'drepDeposit',
-              details: [dRepDeposit?.toString()]
+              // TODO: is it in Ada or lovelaces?
+              details: [`${dRepDeposit?.toString()}  ${cardanoCoin.symbol}`]
             },
             {
               title: 'drepActivity',
@@ -655,43 +692,43 @@ export const governanceProposalsTransformer = (
           details: [
             {
               title: 'motionNoConfidence',
-              details: [formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator)]
+              details: [`${formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator)}%`]
             },
             {
               title: 'committeeNormal',
-              details: [formatPercentages(committeeNormal.numerator / committeeNormal.denominator)]
+              details: [`${formatPercentages(committeeNormal.numerator / committeeNormal.denominator)}%`]
             },
             {
               title: 'committeeNoConfidence',
-              details: [formatPercentages(commiteeNoConfidence.numerator / commiteeNoConfidence.denominator)]
+              details: [`${formatPercentages(commiteeNoConfidence.numerator / commiteeNoConfidence.denominator)}%`]
             },
             {
               title: 'updateConstitution',
-              details: [formatPercentages(updateConstitution.numerator / updateConstitution.denominator)]
+              details: [`${formatPercentages(updateConstitution.numerator / updateConstitution.denominator)}%`]
             },
             {
               title: 'hardForkInitiation',
-              details: [formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator)]
+              details: [`${formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator)}%`]
             },
             {
               title: 'ppNetworkGroup',
-              details: [formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator)]
+              details: [`${formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator)}%`]
             },
             {
               title: 'ppEconomicGroup',
-              details: [formatPercentages(ppEconomicGroup.numerator / ppEconomicGroup.denominator)]
+              details: [`${formatPercentages(ppEconomicGroup.numerator / ppEconomicGroup.denominator)}%`]
             },
             {
               title: 'ppTechnicalGroup',
-              details: [formatPercentages(ppTechnicalGroup.numerator / ppTechnicalGroup.denominator)]
+              details: [`${formatPercentages(ppTechnicalGroup.numerator / ppTechnicalGroup.denominator)}%`]
             },
             {
               title: 'ppGovernanceGroup',
-              details: [formatPercentages(ppGovernanceGroup.numerator / ppGovernanceGroup.denominator)]
+              details: [`${formatPercentages(ppGovernanceGroup.numerator / ppGovernanceGroup.denominator)}%`]
             },
             {
               title: 'treasuryWithdrawal',
-              details: [formatPercentages(treasuryWithdrawal.numerator / treasuryWithdrawal.denominator)]
+              details: [`${formatPercentages(treasuryWithdrawal.numerator / treasuryWithdrawal.denominator)}%`]
             }
           ]
         });

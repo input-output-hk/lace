@@ -54,18 +54,6 @@
             "deposit": "Deposit paid",
             "coldCredential": "Cold credential",
             "hotCredential": "Hot credential"
-          },
-          "typenames": {
-            "VoteDelegationCertificate": "Vote Delegation",
-            "StakeVoteDelegationCertificate": "Stake Vote Delegation",
-            "StakeRegistrationDelegationCertificate": "Stake Registration Delegate",
-            "VoteRegistrationDelegationCertificate": "Vote Registration Delegate",
-            "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation",
-            "AuthorizeCommitteeHotCertificate": "Authorize Committee",
-            "ResignCommitteeColdCertificate": "Resign Committee",
-            "RegisterDelegateRepresentativeCertificate": "Register Delegate Representative",
-            "UnregisterDelegateRepresentativeCertificate": "Unregister Delegate Representative",
-            "UpdateDelegateRepresentativeCertificate": "Update Delegate Representative"
           }
         }
       }
@@ -1340,7 +1328,7 @@
             "ccMinSize": "CC Min Size",
             "ccMaxTermLength": "CC Max Term Length",
             "dRepVotingThresholds": {
-              "title": "Governance voting thresholds",
+              "title": "Governance Voting Thresholds",
               "motionNoConfidence": "Motion No Conf",
               "committeeNormal": "Comm Normal",
               "committeeNoConfidence": "Comm No Conf",

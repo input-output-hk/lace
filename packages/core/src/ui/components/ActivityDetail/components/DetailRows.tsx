@@ -33,7 +33,7 @@ export const DetailRows = function DetailRows<T extends string>({
               key={`${testId}-list-header`}
               className={cn(styles.listHeader, { [styles.topBorderContent]: index > 0 })}
             >
-              <div className={styles.listHeaderTitle}>{`${item.header} ${index + 1}`}</div>
+              <div className={styles.listHeaderTitle}>{translations[item.header]}</div>
             </div>
             <DetailRows testId={testId} list={item.details} translations={translations} />
           </>

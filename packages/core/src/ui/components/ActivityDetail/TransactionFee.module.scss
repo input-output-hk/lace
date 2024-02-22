@@ -10,9 +10,7 @@
 
 .txfee {
   color: var(--text-color-primary);
-  font-size: var(--body, 16px);
-  font-weight: 600;
-  line-height: size_unit(3);
+  @include text-body-semi-bold;
 }
 
 .details {

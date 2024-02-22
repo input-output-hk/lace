@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import cn from 'classnames';
@@ -136,13 +137,14 @@ export const TransactionDetails = ({
           ...detail,
           ...('title' in detail &&
             detail.title === 'certificateType' && {
-              details: [t(`package.core.assetActivityItem.entry.certificates.typenames.${detail.details[0]}`)]
+              details: [t(`package.core.assetActivityItem.entry.name.${detail.details[0]}`)]
             })
         } as TxDetail<TxDetailsCertificateTitles>)
     )
   );
 
   // Translate governance proposal typenames
+  // TODO: find a way to translate in the mappers
   const translatedProposalProcedures = proposalProcedures?.map((proposal) =>
     proposal?.map(
       (p) =>
@@ -151,8 +153,27 @@ export const TransactionDetails = ({
           ...('title' in p &&
             p.title === 'type' && {
               details: [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)]
-            })
-        } as TxDetail<TxDetailsProposalProceduresTitles>)
+            }),
+          ...('header' in p && {
+            details: p.details.map((detail) => ({
+              ...detail,
+              ...('title' in detail &&
+                ['govActionLifetime', 'drepActivity', 'ccMaxTermLength'].includes(detail.title) && {
+                  details: [
+                    `
+                    ${Number(detail.details[0])}
+                      ${t(
+                        // eslint-disable-next-line sonarjs/no-nested-template-literals
+                        `package.core.activityDetails.${
+                          Number(detail.details[0]) === 0 || Number(detail.details[0]) > 1 ? 'epochs' : 'epoch'
+                        }`
+                      )}
+                    `
+                  ]
+                })
+            }))
+          })
+        } as unknown as TxDetail<TxDetailsProposalProceduresTitles>)
     )
   );
 
@@ -342,10 +363,11 @@ export const TransactionDetails = ({
             lists={translatedVotingProcedures}
             translations={{
               voterType: t('package.core.activityDetails.votingProcedureTitles.voterType'),
+              drepId: t('package.core.activityDetails.votingProcedureTitles.drepId'),
               credentialType: t('package.core.activityDetails.votingProcedureTitles.credentialType'),
               voteTypes: t('package.core.activityDetails.votingProcedureTitles.voteTypes'),
               anchorHash: t('package.core.activityDetails.votingProcedureTitles.anchorHash'),
-              anchorURL: t('package.core.activityDetails.votingProcedureTitles.proposalTxHash')
+              anchorURL: t('package.core.activityDetails.votingProcedureTitles.anchorUrl')
             }}
             withSeparatorLine
           />
@@ -360,9 +382,12 @@ export const TransactionDetails = ({
             translations={{
               type: t('package.core.activityDetails.proposalProcedureTitles.type'),
               deposit: t('package.core.activityDetails.proposalProcedureTitles.deposit'),
+              rewardAccount: t('package.core.activityDetails.proposalProcedureTitles.rewardAccount'),
               anchorHash: t('package.core.activityDetails.proposalProcedureTitles.anchorHash'),
               anchorURL: t('package.core.activityDetails.proposalProcedureTitles.anchorURL'),
-              governanceActionIndex: t('package.core.activityDetails.proposalProcedureTitles.governanceActionIndex'),
+              governanceActionID: t('package.core.activityDetails.proposalProcedureTitles.governanceActionID'),
+              actionIndex: t('package.core.activityDetails.proposalProcedureTitles.actionIndex'),
+              newQuorumThreshold: t('package.core.activityDetails.proposalProcedureTitles.newQuorumThreshold'),
               withdrawal: t('package.core.activityDetails.proposalProcedureTitles.withdrawal'),
               withdrawalRewardAccount: t(
                 'package.core.activityDetails.proposalProcedureTitles.withdrawalRewardAccount'
@@ -378,78 +403,120 @@ export const TransactionDetails = ({
               protocolVersionMajor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMajor'),
               protocolVersionMinor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMinor'),
               protocolVersionPatch: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionPatch'),
-              maxTxExUnits: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'),
+              maxTxExUnits: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'
+              ),
               maxBlockExUnits: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
               ),
-              networkGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
-              economicGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'),
-              technicalGroup: t('core.ProposalProcedure.governanceAction.technicalGroup.title'),
-              costModels: t('core.ProposalProcedure.governanceAction.technicalGroup.costModels'),
-              PlutusV1: t('core.ProposalProcedure.governanceAction.technicalGroup.PlutusV1'),
-              PlutusV2: t('core.ProposalProcedure.governanceAction.technicalGroup.PlutusV2'),
-              governanceGroup: t('core.ProposalProcedure.governanceAction.governanceGroup.title'),
+              networkGroup: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
+              economicGroup: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'
+              ),
+              technicalGroup: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.title'
+              ),
+              costModels: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.costModels'
+              ),
+              PlutusV1: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV1'
+              ),
+              PlutusV2: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV2'
+              ),
+              governanceGroup: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.title'
+              ),
               dRepVotingThresholds: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.title'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.title'
               ),
-              memory: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
-              step: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
-              maxBBSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'),
-              maxTxSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'),
-              maxBHSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'),
-              maxValSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'),
+              memory: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
+              step: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
+              maxBBSize: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'
+              ),
+              maxTxSize: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'
+              ),
+              maxBHSize: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'
+              ),
+              maxValSize: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'
+              ),
               maxCollateralInputs: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
               ),
-              minFeeA: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
-              minFeeB: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
-              keyDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'),
-              poolDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'),
-              rho: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
-              tau: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
-              minPoolCost: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'),
+              minFeeA: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
+              minFeeB: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
+              keyDeposit: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'
+              ),
+              poolDeposit: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'
+              ),
+              rho: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
+              tau: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
+              minPoolCost: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'
+              ),
               coinsPerUTxOByte: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
               ),
-              a0: t('core.ProposalProcedure.governanceAction.technicalGroup.a0'),
-              eMax: t('core.ProposalProcedure.governanceAction.technicalGroup.eMax'),
-              nOpt: t('core.ProposalProcedure.governanceAction.technicalGroup.nOpt'),
-              collateralPercentage: t('core.ProposalProcedure.governanceAction.technicalGroup.collateralPercentage'),
-              govActionLifetime: t('core.ProposalProcedure.governanceAction.governanceGroup.govActionLifetime'),
-              govActionDeposit: t('core.ProposalProcedure.governanceAction.governanceGroup.govActionDeposit'),
-              drepDeposit: t('core.ProposalProcedure.governanceAction.governanceGroup.drepDeposit'),
-              drepActivity: t('core.ProposalProcedure.governanceAction.governanceGroup.drepActivity'),
-              ccMinSize: t('core.ProposalProcedure.governanceAction.governanceGroup.ccMinSize'),
-              ccMaxTermLength: t('core.ProposalProcedure.governanceAction.governanceGroup.ccMaxTermLength'),
+              a0: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.a0'),
+              eMax: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.eMax'),
+              nOpt: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.nOpt'),
+              collateralPercentage: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.collateralPercentage'
+              ),
+              govActionLifetime: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionLifetime'
+              ),
+              govActionDeposit: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionDeposit'
+              ),
+              drepDeposit: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepDeposit'
+              ),
+              drepActivity: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepActivity'
+              ),
+              ccMinSize: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMinSize'
+              ),
+              ccMaxTermLength: t(
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMaxTermLength'
+              ),
               motionNoConfidence: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.motionNoConfidence'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.motionNoConfidence'
               ),
               committeeNormal: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.committeeNormal'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNormal'
               ),
               committeeNoConfidence: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
               ),
               updateConstitution: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.updateConstitution'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.updateConstitution'
               ),
               hardForkInitiation: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.hardForkInitiation'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.hardForkInitiation'
               ),
               ppNetworkGroup: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
               ),
               ppEconomicGroup: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
               ),
               ppTechnicalGroup: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
               ),
               ppGovernanceGroup: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
               ),
               treasuryWithdrawal: t(
-                'core.ProposalProcedure.governanceAction.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
+                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
               )
             }}
           />
@@ -473,7 +540,9 @@ export const TransactionDetails = ({
               poolId: t('package.core.activityDetails.certificateTitles.poolId'),
               drep: t('package.core.activityDetails.certificateTitles.drep'),
               depositPaid: t('package.core.activityDetails.certificateTitles.depositPaid'),
-              depositPaidInfo: t('package.core.activityDetails.certificateTitles.depositPaidInfo')
+              depositPaidInfo: t('package.core.activityDetails.certificateTitles.depositPaidInfo'),
+              depositReturned: t('package.core.activityDetails.certificateTitles.depositReturned'),
+              depositReturnedInfo: t('package.core.activityDetails.certificateTitles.depositReturnedInfo')
             }}
           />
         )}

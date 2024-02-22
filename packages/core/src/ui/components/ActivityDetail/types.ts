@@ -54,14 +54,19 @@ export type TxDetailsCertificateTitles =
   | 'drep'
   | 'depositPaid'
   | 'depositPaidInfo'
+  | 'depositReturned'
+  | 'depositReturnedInfo'
   | 'certificate';
 
 export type TxDetailsProposalProceduresTitles =
   | 'type'
   | 'deposit'
+  | 'rewardAccount'
   | 'anchorHash'
   | 'anchorURL'
-  | 'governanceActionIndex'
+  | 'governanceActionID'
+  | 'actionIndex'
+  | 'newQuorumThreshold'
   | 'withdrawal'
   | 'withdrawalRewardAccount'
   | 'withdrawalAmount'
@@ -121,7 +126,13 @@ export type TxDetailsProposalProceduresTitles =
   | 'ppGovernanceGroup'
   | 'treasuryWithdrawal';
 
-export type TxDetailsVotingProceduresTitles = 'voterType' | 'credentialType' | 'voteTypes' | 'anchorHash' | 'anchorURL';
+export type TxDetailsVotingProceduresTitles =
+  | 'voterType'
+  | 'credentialType'
+  | 'voteTypes'
+  | 'drepId'
+  | 'anchorHash'
+  | 'anchorURL';
 
 export type TxDetail<T> = {
   title: T;

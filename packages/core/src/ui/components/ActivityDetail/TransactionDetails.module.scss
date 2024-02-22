@@ -15,7 +15,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 
   .header {
     color: var(--text-color-secondary, #878e9e);
-    @include text-bodyLarge-medium;
+    @include text-body-medium;
     margin-bottom: size_unit(9);
 
     @media (max-width: $breakpoint-popup) {
@@ -24,10 +24,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
       letter-spacing: -0.015em;
       margin-bottom: size_unit(4);
     }
-  }
-
-  * {
-    margin: 0;
   }
 
   .block {
@@ -185,7 +181,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 }
 
 .hashLabel {
-  max-width: auto;
+  max-width: initial;
   @media (max-width: $breakpoint-popup) {
     max-width: 85px;
     overflow-wrap: break-word;
