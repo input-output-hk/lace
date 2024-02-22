@@ -41,7 +41,7 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingHWNameNextClick,
     LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardinHWLaceTermsOfUseNextClick,
     CONNECT_HW_NEXT_CLICK: PostHogAction.OnboardingHWConnectNextClick,
-    SELECT_HW_ACCOUNT_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
+    SETUP_HW_WALLET_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
     DONE_GO_TO_WALLET: PostHogAction.OnboardingHWDoneGoToWallet
   },
