@@ -48,9 +48,7 @@ export const TextBox = ({
     <Flex justifyContent="space-between" alignItems="center">
       <Form.Field
         name="field"
-        className={cn(sx({ w }), cx.container, {
-          [containerClassName]: containerClassName,
-        })}
+        className={cn(sx({ w }), cx.container, containerClassName)}
         style={containerStyle}
       >
         <Form.Control asChild>

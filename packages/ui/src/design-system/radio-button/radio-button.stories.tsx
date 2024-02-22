@@ -38,7 +38,7 @@ const getOptionsWithIcon = (): {
   onIconClick: () => void;
 }[] => [
   {
-    value: `option-${uuid()}`,
+    value: 'option',
     label: 'Label',
     icon: DocumentDownload,
     onIconClick: (): void => void 0,

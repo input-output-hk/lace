@@ -1,19 +1,33 @@
+import { styleVariants } from '@vanilla-extract/css';
+
 import { style, sx, vars } from '../../design-tokens';
 
-export const radioGroupRoot = style([
+const radioGroupRootBase = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    gap: '$20',
-    margin: '$0',
+    gap: '$16',
   }),
   {
     fontFamily: vars.fontFamily.$nova,
     fontWeight: vars.fontWeights.$semibold,
+    flexGrow: 1,
   },
 ]);
 
+export const radioGroupRootWithIcon = styleVariants({
+  default: [radioGroupRootBase],
+  withIcon: [
+    radioGroupRootBase,
+    {
+      gap: 0,
+    },
+  ],
+});
+
 export const radioGroupItemWrapperSelector = style([]);
+
+export const withIcon = style([{ minHeight: 36 }]);
 
 export const radioGroupItem = style([
   {
@@ -106,6 +120,17 @@ export const radioGroupIndicator = style([
   },
 ]);
 
+export const iconWrapper = style([
+  sx({
+    marginLeft: '$18',
+    width: '$32',
+    height: '$32',
+  }),
+  {
+    flexGrow: 1,
+  },
+]);
+
 export const icon = style([
   sx({
     borderRadius: '$small',
@@ -135,17 +160,13 @@ export const icon = style([
 export const root = style([
   sx({
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'stretch',
     borderRadius: '$small',
   }),
   {
     display: 'inline-flex',
   },
 ]);
-
-export const withLabel = style({
-  padding: `${vars.spacing.$2} ${vars.spacing.$8}`,
-});
 
 export const label = style({
   fontSize: '15px',
