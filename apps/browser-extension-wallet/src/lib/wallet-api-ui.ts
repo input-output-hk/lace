@@ -1,5 +1,6 @@
 import {
   SigningCoordinator,
+  WalletConflictError,
   WalletRepositoryApi,
   WalletType,
   consumeRemoteApi,
@@ -44,7 +45,11 @@ export const observableWallet = consumeRemoteApi(
 );
 
 export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
-  { baseChannel: repositoryChannel(process.env.WALLET_NAME), properties: walletRepositoryProperties },
+  {
+    baseChannel: repositoryChannel(process.env.WALLET_NAME),
+    properties: walletRepositoryProperties,
+    errorTypes: [WalletConflictError]
+  },
   { logger, runtime }
 );
 

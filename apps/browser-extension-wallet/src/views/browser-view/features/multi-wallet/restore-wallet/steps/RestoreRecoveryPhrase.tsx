@@ -8,6 +8,9 @@ import { useRestoreWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 import noop from 'lodash/noop';
 import { useWalletManager } from '@hooks';
+import { WalletConflictError } from '@cardano-sdk/web-extension';
+import { toast } from '@lace/common';
+import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 
 const wordList = wordlists.english;
 
@@ -49,10 +52,18 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
           history.goBack();
         }}
         onSubmit={useCallback(async () => {
-          await createWallet(data);
+          try {
+            await createWallet(data);
+          } catch (error) {
+            if (error instanceof WalletConflictError) {
+              toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+            } else {
+              throw error;
+            }
+          }
           clearSecrets();
           history.push(walletRoutePaths.assets);
-        }, [data, clearSecrets, createWallet, history])}
+        }, [data, clearSecrets, createWallet, history, t])}
         onStepNext={noop}
         isSubmitEnabled={isValidMnemonic}
         translations={walletSetupMnemonicStepTranslations}

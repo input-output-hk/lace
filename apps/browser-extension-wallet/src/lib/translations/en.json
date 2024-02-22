@@ -1413,6 +1413,7 @@
       "wallet": "Wallet \"{{walletName}}\" activated",
       "account": "Account \"{{accountName}}\" activated"
     },
-    "popupHwAccountEnable": "Hardware wallets require the expanded view to enable accounts"
+    "popupHwAccountEnable": "Hardware wallets require the expanded view to enable accounts",
+    "walletAlreadyExists": "Wallet wasn't created because it already exists"
   }
 }

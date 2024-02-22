@@ -21,9 +21,12 @@ import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
-import { NavigationButton } from '@lace/common';
+import { NavigationButton, toast } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { Providers } from './hardware-wallet/types';
+import { WalletConflictError } from '@cardano-sdk/web-extension';
+import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import { useTranslation } from 'react-i18next';
 
 const { newWallet } = walletRoutePaths;
 
@@ -34,6 +37,7 @@ interface ConfirmationDialog {
 }
 
 export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
+  const { t } = useTranslation();
   const { connectHardwareWallet, createHardwareWallet } = useWalletManager();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
@@ -43,15 +47,23 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
       disconnectHardwareWallet$,
       shouldShowDialog$,
       createWallet: async ({ account, connection, model, name }) => {
-        await createHardwareWallet({
-          connectedDevice: model,
-          deviceConnection: connection,
-          name,
-          accountIndex: account
-        });
+        try {
+          await createHardwareWallet({
+            connectedDevice: model,
+            deviceConnection: connection,
+            name,
+            accountIndex: account
+          });
+        } catch (error) {
+          if (error instanceof WalletConflictError) {
+            toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+          } else {
+            throw error;
+          }
+        }
       }
     }),
-    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$]
+    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$, t]
   );
 
   useEffect(() => {
