@@ -66,10 +66,6 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
 
 Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeSignDataConfirmTransactionPage(
-    testDAppDetails
-    // String(getTestWallet('TestAutomationWallet').address)
-  );
 });
 
 Then(

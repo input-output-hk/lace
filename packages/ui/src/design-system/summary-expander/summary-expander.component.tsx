@@ -47,7 +47,12 @@ export const SummaryExpander = ({
         </Typography.Body.Large>
 
         <Collapsible.Trigger asChild>
-          <Trigger open={open} disabled={disabled} {...props} />
+          <Trigger
+            open={open}
+            disabled={disabled}
+            {...props}
+            data-testid="summary-expander-trigger"
+          />
         </Collapsible.Trigger>
       </Flex>
 

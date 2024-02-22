@@ -259,10 +259,7 @@ class DAppConnectorAssert {
     }
   }
 
-  async assertSeeConfirmTransactionPage(
-    // expectedDApp: ExpectedDAppDetails,
-    expectedTransactionData: ExpectedTransactionData
-  ) {
+  async assertSeeConfirmTransactionPage(expectedTransactionData: ExpectedTransactionData) {
     await this.assertSeeHeader();
     await ConfirmTransactionPage.transactionTypeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionTypeTitle.getText()).to.equal(

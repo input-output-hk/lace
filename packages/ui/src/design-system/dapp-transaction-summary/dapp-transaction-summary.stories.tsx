@@ -13,7 +13,6 @@ import { Grid, Cell } from '../grid';
 
 import { TransactionAssets } from './dapp-transaction-assets.component';
 import { TransactionSummary } from './dapp-transaction-summary.component';
-// import * as styles from './dapp-transaction-summary.stories.css';
 import { TransactionType } from './dapp-transaction-type.component';
 
 const subtitle = `Control that displays data items in rows.`;
