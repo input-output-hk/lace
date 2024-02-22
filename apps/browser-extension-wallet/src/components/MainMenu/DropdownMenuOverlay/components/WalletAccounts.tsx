@@ -87,13 +87,19 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
 
   const unlockAccount = useCallback(
     async (accountIndex: number) => {
+      const name = defaultAccountName(accountIndex);
       await addAccount({
         wallet,
         accountIndex,
-        metadata: { name: defaultAccountName(accountIndex) }
+        metadata: { name }
+      });
+      setIsDropdownMenuOpen(false);
+      toast.notify({
+        duration: TOAST_DEFAULT_DURATION,
+        text: t('multiWallet.activated.account', { accountName: name })
       });
     },
-    [wallet, addAccount]
+    [wallet, addAccount, t, setIsDropdownMenuOpen]
   );
 
   const lockAccount = useCallback(async () => {

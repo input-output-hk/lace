@@ -666,15 +666,19 @@ export const useWalletManager = (): UseWalletManager => {
     [walletLock, loadWallet]
   );
 
-  const addAccount = async ({ wallet, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
-    const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
-    await walletRepository.addAccount({
-      accountIndex,
-      extendedAccountPublicKey,
-      metadata,
-      walletId: wallet.walletId
-    });
-  };
+  const addAccount = useCallback(
+    async ({ wallet, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
+      const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
+      await walletRepository.addAccount({
+        accountIndex,
+        extendedAccountPublicKey,
+        metadata,
+        walletId: wallet.walletId
+      });
+      await walletManager.activate({ chainId: getCurrentChainId(), walletId: wallet.walletId, accountIndex });
+    },
+    [getCurrentChainId]
+  );
 
   return {
     activateWallet,
