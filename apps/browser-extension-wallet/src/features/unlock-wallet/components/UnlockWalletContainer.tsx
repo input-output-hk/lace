@@ -19,6 +19,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
   const { setDeletingWallet, resetWalletLock, setAddressesDiscoveryCompleted, currentChain } = useWalletStore();
   const backgroundService = useBackgroundServiceAPIContext();
+
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [isValidPassword, setIsValidPassword] = useState(true);

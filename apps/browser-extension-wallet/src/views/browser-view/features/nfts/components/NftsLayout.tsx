@@ -186,6 +186,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, []);
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
+
   return (
     <>
       <Layout>
