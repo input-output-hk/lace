@@ -19,7 +19,7 @@ import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { ILocalStorage } from '@src/types';
-import { firstValueFrom } from 'rxjs';
+import { combineLatest, firstValueFrom } from 'rxjs';
 import {
   AddWalletProps,
   AnyBip32Wallet,
@@ -513,7 +513,14 @@ export const useWalletManager = (): UseWalletManager => {
 
   const activateWallet = useCallback(
     async (props: ActivateWalletProps): Promise<void> => {
-      const wallets = await firstValueFrom(walletRepository.wallets$);
+      const [wallets, activeWallet] = await firstValueFrom(
+        combineLatest([walletRepository.wallets$, walletManager.activeWalletId$])
+      );
+      if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
+        logger.debug('Wallet is already active');
+        return;
+      }
+      await walletManager.deactivate();
       await walletRepository.updateWalletMetadata({
         walletId: props.walletId,
         metadata: {

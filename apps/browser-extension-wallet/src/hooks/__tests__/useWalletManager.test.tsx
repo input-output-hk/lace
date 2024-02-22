@@ -34,8 +34,10 @@ import * as localStorage from '@src/utils/local-storage';
 import * as AppSettings from '@providers/AppSettings';
 import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
-import { AnyBip32Wallet, AnyWallet, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
+
+(walletApiUi as any).logger = console;
 
 jest.mock('@providers/AppSettings', () => ({
   ...jest.requireActual<any>('@providers/AppSettings'),
@@ -727,18 +729,39 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('activateWallet', () => {
-    it('stores lastActiveAccountIndex in wallet metadata and activates wallet via WalletManager', async () => {
-      const walletId = 'walletId';
-      const accountIndex = 1;
-      const originalMetadata = { name: 'wallet' };
+    const walletId = 'walletId';
+    const accountIndex = 1;
+    const originalMetadata = { name: 'wallet' };
+
+    beforeEach(() => {
       walletApiUi.walletRepository.wallets$ = of([
         {
           walletId,
           metadata: originalMetadata
         } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
       ]);
+      walletApiUi.walletManager.deactivate = jest.fn().mockResolvedValueOnce(void 0);
       walletApiUi.walletRepository.updateWalletMetadata = jest.fn().mockResolvedValueOnce(void 0);
       walletApiUi.walletManager.activate = jest.fn().mockResolvedValueOnce(void 0);
+      walletApiUi.walletManager.deactivate = jest.fn().mockResolvedValueOnce(void 0);
+    });
+
+    it('does not re-activate an already active wallet', async () => {
+      walletApiUi.walletManager.activeWalletId$ = of({ walletId, accountIndex } as WalletManagerActivateProps<
+        any,
+        any
+      >);
+
+      const { activateWallet } = render();
+      await activateWallet({ walletId, accountIndex });
+
+      expect(walletApiUi.walletRepository.updateWalletMetadata).not.toBeCalled();
+      expect(walletApiUi.walletManager.activate).not.toBeCalled();
+      expect(walletApiUi.walletManager.deactivate).not.toBeCalled();
+    });
+
+    it('stores lastActiveAccountIndex in wallet metadata and activates wallet via WalletManager', async () => {
+      walletApiUi.walletManager.activeWalletId$ = of({ walletId: 'otherId' } as WalletManagerActivateProps<any, any>);
 
       const { activateWallet } = render();
       await activateWallet({ walletId, accountIndex });
