@@ -21,8 +21,11 @@
 }
 
 .remove {
-  color: var(--primary-default, #7f5af0);
   margin-left: 24px;
   cursor: pointer;
+}
+
+.removeLabel {
+  color: var(--primary-default, #7f5af0);
   font-size: 12px;
 }

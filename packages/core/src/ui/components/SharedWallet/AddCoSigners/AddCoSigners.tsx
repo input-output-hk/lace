@@ -78,11 +78,19 @@ export const AddCoSigners = ({ addressBook, translations, validateAddress, onBac
             />
             {index !== 0 && (
               <span
+                role="button"
+                tabIndex={0}
+                className={styles.remove}
+                onKeyDown={(event) => {
+                  if (event.code === 'Enter') {
+                    removeCoSigner(index);
+                  }
+                }}
                 onClick={() => {
                   removeCoSigner(index);
                 }}
               >
-                <Text.Body.Small weight="$semibold" className={styles.remove}>
+                <Text.Body.Small weight="$semibold" className={styles.removeLabel}>
                   {translations.removeButton}
                 </Text.Body.Small>
               </span>
