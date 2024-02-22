@@ -54,7 +54,7 @@ export const config: WebdriverIO.Config = {
     order: 'defined',
     snippetSyntax: undefined,
     strict: true,
-    tags: extensionUtils.isMainnet() ? '@Mainnet and not @Pending' : '@Testnet and not @Pending',
+    tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
     timeout: 200_000,
     retry: 1
