@@ -18,7 +18,6 @@ interface Context<SuggestionType extends SuggestionBaseType> {
   filteredSuggestions: SuggestionType[];
   firstSuggestionRef: React.MutableRefObject<HTMLDivElement | null>;
   closeSuggestions: () => void;
-  onPickedSuggestionClick: () => void;
   onSuggestionClick: (value: string) => void;
   onInputChange: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
   onOpenButtonClick: () => void;
@@ -65,9 +64,6 @@ export const useAutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
       if (pickedSuggestion) {
         setPickedSuggestion(pickedSuggestion);
       }
-    },
-    onPickedSuggestionClick: (): void => {
-      setPickedSuggestion(undefined);
     },
     onInputChange: (event): void => {
       setValue(event.target.value);

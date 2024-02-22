@@ -62,7 +62,6 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
     onCloseButtonClick,
     onInputChange,
     onSuggestionClick,
-    onPickedSuggestionClick,
   } = useAutoSuggestBox({
     initialValue,
     onChange,
@@ -97,10 +96,7 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
                   }}
                   pickedSuggestion={
                     pickedSuggestion && (
-                      <PickedSuggestion
-                        onClick={onPickedSuggestionClick}
-                        {...pickedSuggestion}
-                      />
+                      <PickedSuggestion {...pickedSuggestion} />
                     )
                   }
                 />
