@@ -2,7 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 import { Logger } from '../support/logger';
 import allure from '@wdio/allure-reporter';
-import { CDPSession } from 'puppeteer-core/lib/esm/puppeteer/common/Connection';
+import { CDPSession } from '../../../../node_modules/webdriverio/node_modules/puppeteer-core/src/common/Connection'; // FIXME: fix this temporary ugly import statement
 import { browser } from '@wdio/globals';
 
 export class NetworkManager {

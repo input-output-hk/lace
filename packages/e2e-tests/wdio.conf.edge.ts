@@ -2,7 +2,7 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const edgeConfig: WebdriverIO.Config = {
+const edgeConfig = {
   capabilities: [
     {
       maxInstances: 1,
