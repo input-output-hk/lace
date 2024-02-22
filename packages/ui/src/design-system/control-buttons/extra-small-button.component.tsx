@@ -7,10 +7,10 @@ import { SkeletonButton } from '../buttons';
 import * as cx from './control-button.css';
 import { Scheme } from './control-button.data';
 
-import type { ControlButtonWithLabelProps } from './control-button.data';
+import type { ControlButtonWithLabelAndColorSchemeProps } from './control-button.data';
 
 export const ExtraSmall = (
-  props: Readonly<ControlButtonWithLabelProps>,
+  props: Readonly<ControlButtonWithLabelAndColorSchemeProps>,
 ): JSX.Element => {
   return (
     <SkeletonButton
@@ -19,13 +19,14 @@ export const ExtraSmall = (
         container: cn(
           cx.container({
             paddingScheme: Scheme.ExtraSmall,
-            colorScheme: Scheme.ExtraSmall,
-            borderScheme: Scheme.ExtraSmall,
+            colorScheme: props.colorScheme ?? Scheme.ExtraSmall,
+            borderScheme: props.colorScheme ?? Scheme.ExtraSmall,
             widthSchema: Scheme.ExtraSmall,
           }),
         ),
         label: cx.label({
-          colorScheme: Scheme.ExtraSmall,
+          colorScheme: props.colorScheme ?? Scheme.ExtraSmall,
+          sizeScheme: Scheme.ExtraSmall,
         }),
         icon: cx.icon(),
       }}
