@@ -77,7 +77,7 @@ export const AddCoSigners = ({ addressBook, translations, validateAddress, onBac
               }}
             />
             {index !== 0 && (
-              <div
+              <span
                 onClick={() => {
                   removeCoSigner(index);
                 }}
@@ -85,7 +85,7 @@ export const AddCoSigners = ({ addressBook, translations, validateAddress, onBac
                 <Text.Body.Small weight="$semibold" className={styles.remove}>
                   {translations.removeButton}
                 </Text.Body.Small>
-              </div>
+              </span>
             )}
           </Box>
         ))}

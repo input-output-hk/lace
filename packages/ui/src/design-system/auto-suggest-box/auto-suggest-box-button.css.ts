@@ -7,6 +7,7 @@ export const button = style([
     borderRadius: '$extraSmall',
     mx: '$6',
     background: '$input_button_bgColor',
+    color: '$auto_suggest_address_color',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
