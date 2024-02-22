@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
 import React from 'react';
 
 import { ReactComponent as PencilIcon } from '@lace/icons/dist/PencilOutlineComponent';
 import { ReactComponent as TrashIcon } from '@lace/icons/dist/TrashOutlineComponent';
+import { Tooltip } from 'antd';
 
 import * as ControlButtons from '../../control-buttons';
 import { Flex } from '../../flex';
@@ -14,6 +16,7 @@ export interface Props {
   accountNumber: number;
   label: string;
   unlockLabel: string;
+  disableUnlock?: { reason: string };
   isUnlocked: boolean;
   isDeletable: boolean;
   onActivateClick?: (accountNumber: number) => void;
@@ -22,8 +25,28 @@ export interface Props {
   onUnlockClick?: (accountNumber: number) => void;
 }
 
+const MaybeWithDisableUnlockTooltip = ({
+  disableUnlock,
+  children,
+}: Readonly<{
+  disableUnlock: Readonly<Props['disableUnlock']>;
+  children: ReactNode;
+}>): JSX.Element => {
+  if (disableUnlock) {
+    return (
+      <Tooltip title={disableUnlock.reason}>
+        <span>{children}</span>
+      </Tooltip>
+    );
+  }
+
+  return <>{children}</>;
+};
+
+// eslint-disable-next-line react/no-multi-comp
 export const AccountItem = ({
   accountNumber,
+  disableUnlock,
   label,
   unlockLabel,
   isUnlocked,
@@ -93,13 +116,16 @@ export const AccountItem = ({
         />
       </Flex>
     ) : (
-      <ControlButtons.ExtraSmall
-        label={unlockLabel}
-        data-testid="wallet-account-item-unlock-btn"
-        onClick={(): void => {
-          onUnlockClick?.(accountNumber);
-        }}
-      />
+      <MaybeWithDisableUnlockTooltip disableUnlock={disableUnlock}>
+        <ControlButtons.ExtraSmall
+          label={unlockLabel}
+          data-testid="wallet-account-item-unlock-btn"
+          disabled={!!disableUnlock}
+          onClick={(): void => {
+            onUnlockClick?.(accountNumber);
+          }}
+        />
+      </MaybeWithDisableUnlockTooltip>
     )}
   </Flex>
 );

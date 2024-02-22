@@ -792,7 +792,8 @@
         "accounts": {
           "title": "Accounts",
           "description": "Select account to activate.",
-          "unlockLabel": "Enable"
+          "unlockLabel": "Enable",
+          "lockLabel": "Disable"
         },
         "general": {
           "title": "Your keys",
@@ -1411,6 +1412,7 @@
     "activated": {
       "wallet": "Wallet \"{{walletName}}\" activated",
       "account": "Account \"{{accountName}}\" activated"
-    }
+    },
+    "popupHwAccountEnable": "Hardware wallets require the expanded view to enable accounts"
   }
 }

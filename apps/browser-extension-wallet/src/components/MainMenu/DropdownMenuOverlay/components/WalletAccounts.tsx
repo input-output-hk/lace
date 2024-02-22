@@ -9,6 +9,7 @@ import { DisableAccountConfirmation, EditAccountDrawer, useAccountDataModal } fr
 import { useWalletStore } from '@src/stores';
 import { useWalletManager } from '@hooks';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
@@ -26,6 +27,14 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     }
   } = cardanoWallet;
   const { walletRepository, addAccount, activateWallet } = useWalletManager();
+  const disableUnlock = useMemo(
+    () =>
+      isPopup &&
+      (wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor) && {
+        reason: t('multiWallet.popupHwAccountEnable')
+      },
+    [isPopup, t, wallet.type]
+  );
   const accountsData = useMemo(
     () =>
       Array.from({ length: NUMBER_OF_ACCOUNTS_PER_WALLET }).map((_, accountNumber): AccountData => {
@@ -34,10 +43,11 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           isUnlocked: !!account,
           label: account ? account.metadata.name : defaultAccountName(accountNumber),
           accountNumber,
-          isActive: activeWalletId === wallet.walletId && activeAccount?.accountIndex === accountNumber
+          isActive: activeWalletId === wallet.walletId && activeAccount?.accountIndex === accountNumber,
+          disableUnlock
         };
       }),
-    [wallet, activeAccount?.accountIndex, activeWalletId]
+    [wallet, activeAccount?.accountIndex, activeWalletId, disableUnlock]
   );
 
   const activateAccount = useCallback(

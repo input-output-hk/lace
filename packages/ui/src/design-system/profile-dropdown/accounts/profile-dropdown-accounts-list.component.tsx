@@ -9,6 +9,7 @@ export interface AccountData {
   accountNumber: number;
   isUnlocked: boolean;
   isActive: boolean;
+  disableUnlock?: { reason: string };
 }
 
 export interface Props {
@@ -38,6 +39,7 @@ export const AccountsList = ({
           accountNumber={a.accountNumber}
           isUnlocked={a.isUnlocked}
           label={a.label}
+          disableUnlock={a.disableUnlock}
           isDeletable={!a.isActive && hasMultipleUnlockedAccounts}
           unlockLabel={unlockLabel}
           onActivateClick={(accountNumber: number): void => {
