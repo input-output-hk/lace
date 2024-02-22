@@ -1407,6 +1407,10 @@
       "description": "You'll have to start over.",
       "cancel": "Go back",
       "confirm": "Proceed"
+    },
+    "activated": {
+      "wallet": "Wallet \"{{walletName}}\" activated",
+      "account": "Account \"{{accountName}}\" activated"
     }
   }
 }

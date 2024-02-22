@@ -37,7 +37,7 @@ const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { walletInfo, cardanoWallet } = useWalletStore();
+  const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
   const { activateWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
@@ -86,22 +86,27 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           subtitle={lastActiveAccount.metadata.name}
           id={walletName}
           onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
-          onClick={() => {
-            activateWallet({
+          onClick={async () => {
+            await activateWallet({
               walletId: wallet.walletId,
               accountIndex: lastActiveAccount.accountIndex
+            });
+            setIsDropdownMenuOpen(false);
+            toast.notify({
+              duration: TOAST_DEFAULT_DURATION,
+              text: t('multiWallet.activated.wallet', { walletName })
             });
           }}
           type={getUiWalletType(wallet.type)}
         />
       );
     },
-    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, walletName]
+    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, walletName, setIsDropdownMenuOpen, t]
   );
 
   const renderWallet = useCallback(
     (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>, isLast: boolean) => (
-      <div>
+      <div key={wallet.walletId}>
         {wallet.type !== WalletType.Script
           ? renderBip32Wallet(wallet)
           : (() => {

@@ -1,13 +1,14 @@
 /* eslint-disable react/jsx-handler-names */
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavigationButton } from '@lace/common';
+import { NavigationButton, toast } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
 import { DisableAccountConfirmation, EditAccountDrawer, useAccountDataModal } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { useWalletManager } from '@hooks';
+import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
@@ -17,7 +18,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
   const { t } = useTranslation();
   const editAccountDrawer = useAccountDataModal();
   const disableAccountConfirmation = useAccountDataModal();
-  const { manageAccountsWallet: wallet, cardanoWallet } = useWalletStore();
+  const { manageAccountsWallet: wallet, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
   const {
     source: {
       wallet: { walletId: activeWalletId },
@@ -45,8 +46,14 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         walletId: wallet.walletId,
         accountIndex
       });
+      setIsDropdownMenuOpen(false);
+      const accountName = accountsData.find((acc) => acc.accountNumber === accountIndex)?.label;
+      toast.notify({
+        duration: TOAST_DEFAULT_DURATION,
+        text: t('multiWallet.activated.account', { accountName })
+      });
     },
-    [wallet.walletId, activateWallet]
+    [wallet.walletId, activateWallet, accountsData, setIsDropdownMenuOpen, t]
   );
 
   const editAccount = useCallback(

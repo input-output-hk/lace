@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
 import { Button } from '@lace/common';
@@ -23,8 +23,11 @@ export interface DropdownMenuProps {
 
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
-  const { cardanoWallet } = useWalletStore();
-  const [open, setOpen] = useState(false);
+  const {
+    cardanoWallet,
+    walletUI: { isDropdownMenuOpen },
+    setIsDropdownMenuOpen
+  } = useWalletStore();
   const [handle] = useGetHandles();
   const handleImage = handle?.profilePic;
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
@@ -34,7 +37,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   };
 
   const handleDropdownState = (openDropdown: boolean) => {
-    setOpen(openDropdown);
+    setIsDropdownMenuOpen(openDropdown);
     if (openDropdown) {
       sendAnalyticsEvent(PostHogAction.UserWalletProfileIconClick);
     }
@@ -48,6 +51,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       onOpenChange={handleDropdownState}
       overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
       placement="bottomRight"
+      open={isDropdownMenuOpen}
       trigger={['click']}
     >
       {process.env.USE_MULTI_WALLET === 'true' ? (

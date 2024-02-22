@@ -136,6 +136,7 @@ export interface LockSlice {
 
 export interface UISlice {
   walletUI: WalletUI | undefined;
+  setIsDropdownMenuOpen: (isOpen: boolean) => void;
   setCardanoCoin: (chainId: Wallet.Cardano.ChainId) => void;
   setNetworkConnection: (networkConnection: NetworkConnectionStates) => void;
   setBalancesVisibility: (visible: boolean) => void;
