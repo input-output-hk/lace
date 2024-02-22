@@ -50,6 +50,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
 
   return (
     <Dropdown
+      overlayClassName={styles.overlay}
       destroyPopupOnHide
       onOpenChange={handleDropdownState}
       overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
