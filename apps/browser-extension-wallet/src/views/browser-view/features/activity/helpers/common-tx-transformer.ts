@@ -342,12 +342,17 @@ export const votingProceduresTransformer = (
   return votingProcedureDetails;
 };
 
-export const governanceProposalsTransformer = (
-  cardanoCoin: Wallet.CoinId,
-  coinPrices: PriceResult,
-  fiatCurrency: CurrencyInfo,
-  proposalProcedures?: Wallet.Cardano.ProposalProcedure[]
-): TxDetails<TxDetailsProposalProceduresTitles>[] =>
+export const governanceProposalsTransformer = ({
+  cardanoCoin,
+  coinPrices,
+  fiatCurrency,
+  proposalProcedures
+}: {
+  cardanoCoin: Wallet.CoinId;
+  coinPrices: PriceResult;
+  fiatCurrency: CurrencyInfo;
+  proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
+}): TxDetails<TxDetailsProposalProceduresTitles>[] =>
   proposalProcedures?.map((procedure) => {
     const transformedProposal: TxDetails<TxDetailsProposalProceduresTitles> = [
       { title: 'type', details: [procedure.governanceAction.__typename] },
