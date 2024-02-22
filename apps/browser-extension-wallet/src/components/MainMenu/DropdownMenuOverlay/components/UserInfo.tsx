@@ -126,10 +126,10 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           [styles.multiWalletWrapper]: process.env.USE_MULTI_WALLET === 'true'
         })}
       >
-        <CopyToClipboard text={handleName || walletAddress}>
-          {process.env.USE_MULTI_WALLET === 'true' ? (
-            <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
-          ) : (
+        {process.env.USE_MULTI_WALLET === 'true' ? (
+          <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
+        ) : (
+          <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip
               overlayInnerStyle={overlayInnerStyle}
               placement="top"
@@ -151,8 +151,8 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 </div>
               </div>
             </AntdTooltip>
-          )}
-        </CopyToClipboard>
+          </CopyToClipboard>
+        )}
         {process.env.USE_MULTI_WALLET === 'true' ? undefined : (
           <div className={styles.walletStatusInfo}>
             <WalletStatusContainer />
