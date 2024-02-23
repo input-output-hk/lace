@@ -53,20 +53,6 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
-      - name: Start Chrome driver
-        run: |
-          if [ ${BROWSER} == "chrome" ]; then
-            ${CHROMEWEBDRIVER}/chromedriver -port=4444 &
-          else
-            echo "Skipping start of ChromeDriver"
-          fi
-      - name: Start Edge driver
-        run: |
-          if [ ${BROWSER} == "edge" ]; then
-            ${EDGEWEBDRIVER}/msedgedriver -port=4444 &
-          else
-            echo "Skipping start of EdgeDriver"
-          fi
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests
