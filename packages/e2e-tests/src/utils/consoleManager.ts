@@ -1,4 +1,4 @@
-import { CDPSession } from '../../../../node_modules/webdriverio/node_modules/puppeteer-core/src/common/Connection'; // FIXME: fix this temporary ugly import statement
+import { CDPSession } from 'puppeteer';
 import { browser } from '@wdio/globals';
 
 export interface ConsoleLogEntry {
