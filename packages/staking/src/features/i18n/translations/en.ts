@@ -51,7 +51,7 @@ export const en: Translations = {
     'An amount of self‐bonded assets intended to remain staked to the pool for as long as it operates',
   'browsePools.stakePoolTableBrowser.tableHeader.ros.title': 'ROS',
   'browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip':
-    "Estimated 'Return On Stake' based on previous pool performance",
+    "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation.",
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.title': 'Saturation',
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip':
     'Once a pool reaches the point of saturation, it will offer diminishing rewards',
