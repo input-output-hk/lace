@@ -79,7 +79,12 @@ const typefaces = [
   [Display, 'Display', fill({ $bold: true })],
 ] as const;
 
-const colors: TypographyVariants['color'][] = ['primary', 'secondary', 'link'];
+const colors: TypographyVariants['color'][] = [
+  'primary',
+  'secondary',
+  'highlight',
+  'error',
+];
 
 export const Overview = (): JSX.Element => (
   <Grid columns="$1">

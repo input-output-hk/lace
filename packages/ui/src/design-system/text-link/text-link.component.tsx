@@ -29,7 +29,7 @@ export const TextLink = ({
     >
       <Flex alignItems="center" justifyContent="center">
         <Text.Button
-          color="link"
+          color="highlight"
           className={classNames(cx.label)}
           weight="$semibold"
         >

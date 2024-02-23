@@ -47,7 +47,7 @@ export const FileUpload = ({
           {labelText.map(({ text, highlight }) => (
             <Text.Body.Normal
               weight="$medium"
-              color={highlight ? 'link' : 'primary'}
+              color={highlight ? 'highlight' : 'primary'}
               key={text}
             >
               {text}{' '}

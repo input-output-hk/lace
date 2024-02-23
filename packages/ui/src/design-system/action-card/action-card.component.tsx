@@ -38,7 +38,7 @@ export const ActionCard = ({
           {title.map(({ text, highlight }) => (
             <Text.Body.Normal
               weight="$medium"
-              color={highlight ? 'link' : 'primary'}
+              color={highlight ? 'highlight' : 'primary'}
               key={text}
             >
               {text}{' '}
