@@ -9,7 +9,7 @@ export interface AccountData {
   accountNumber: number;
   isUnlocked: boolean;
   isActive: boolean;
-  disableUnlock?: { reason: string };
+  disableUnlock?: { reason: React.ReactNode | string };
 }
 
 export interface Props {

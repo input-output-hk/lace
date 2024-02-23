@@ -17,7 +17,7 @@ export interface Props {
     unlock: string;
     lock: string;
   };
-  disableUnlock?: { reason: string };
+  disableUnlock?: { reason: ReactNode | string };
   isUnlocked: boolean;
   isDeletable: boolean;
   onActivateClick?: (accountNumber: number) => void;
