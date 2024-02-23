@@ -55,10 +55,10 @@ jobs:
           Xvfb :99 &
       - name: Start Chrome driver
         run: |
-            ${CHROMEWEBDRIVER}/chromedriver -port=4444 &
-            chromedriver -port=4444 &
+          ${CHROMEWEBDRIVER}/chromedriver -port=4444 &
+          chromedriver -port=4444 &
           else
-            echo "Skipping start of ChromeDriver"
+          echo "Skipping start of ChromeDriver"
           fi
       - name: Start Edge driver
         run: |
