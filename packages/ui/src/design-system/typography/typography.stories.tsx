@@ -90,7 +90,9 @@ export const Overview = (): JSX.Element => (
   <Grid columns="$1">
     <Cell>
       <Section title="Colors">
-        <ColorSchemaTable headers={['Primary', 'Secondary', 'TextLink']}>
+        <ColorSchemaTable
+          headers={['Primary', 'Secondary', 'Highlight', 'Error']}
+        >
           <Variants.Row>
             {colors.map(color => (
               <Variants.Cell key={color}>
