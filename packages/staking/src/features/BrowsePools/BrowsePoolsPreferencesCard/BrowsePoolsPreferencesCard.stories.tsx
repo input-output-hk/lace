@@ -4,7 +4,7 @@ import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowseP
 import { useCallback, useState } from 'react';
 import type { Meta } from '@storybook/react';
 
-import { SortAndFilter } from './SortAndFilter';
+import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 import { FilterValues, PoolsFilter, SortAndFilterTab } from './types';
 
 export default {
@@ -41,14 +41,16 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   );
 
   return (
-    <SortAndFilter
-      activeTab={activeTab}
-      sort={sort}
-      filter={filter}
-      onTabChange={setActiveTab}
-      onSortChange={handleSortChange}
-      onFilterChange={handleFilterChange}
-    />
+    <Box w="$342">
+      <BrowsePoolsPreferencesCard
+        activeTab={activeTab}
+        sort={sort}
+        filter={filter}
+        onTabChange={setActiveTab}
+        onSortChange={handleSortChange}
+        onFilterChange={handleFilterChange}
+      />
+    </Box>
   );
 };
 

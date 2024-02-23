@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
+import { CARDANO_COIN_SYMBOL_BY_NETWORK, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
 import { makeMapOfSavedPercentages } from './makeMapOfSavedPercentages';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
 import {
@@ -86,7 +86,7 @@ export const useDelegationPortfolioStore = create(
         }),
       setCardanoCoinSymbol: (currentChain) =>
         set((state) => {
-          state.cardanoCoinSymbol = CARDANO_COIN_SYMBOL[currentChain.networkId];
+          state.cardanoCoinSymbol = CARDANO_COIN_SYMBOL_BY_NETWORK[currentChain.networkId];
         }),
       setCurrentPortfolio: async ({
         currentEpoch,

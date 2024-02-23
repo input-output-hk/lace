@@ -15,7 +15,8 @@ import { MetricType, SortDirection, SortField, StakePoolSortOptions } from 'feat
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as styles from './SortAndFilter.css';
+import { USE_MULTI_DELEGATION_STAKING_FILTERS } from '../../../featureFlags';
+import * as styles from './BrowsePoolsPreferencesCard.css';
 import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortAndFilterTab } from './types';
 
 export interface SortAndFilterProps {
@@ -30,7 +31,7 @@ export interface SortAndFilterProps {
 // TODO consider moving this kind of responsibility to the parent component
 const ON_CHANGE_DEBOUNCE = 400;
 
-export const SortAndFilter = ({
+export const BrowsePoolsPreferencesCard = ({
   activeTab,
   filter,
   sort,
@@ -208,19 +209,21 @@ export const SortAndFilter = ({
   }, [localFilters, t]);
 
   return (
-    <Card.Outlined className={styles.card}>
+    <Card.Outlined>
       <Flex flexDirection="column" justifyContent="flex-start" alignItems="stretch" my="$32" mx="$32" gap="$20">
         <Text.SubHeading weight="$bold">
           {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.moreOptions')}
         </Text.SubHeading>
-        <ToggleButtonGroup.Root value={activeTab} onValueChange={(value) => onTabChange(value as SortAndFilterTab)}>
-          <ToggleButtonGroup.Item value={SortAndFilterTab.sort}>
-            {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.sorting')}
-          </ToggleButtonGroup.Item>
-          <ToggleButtonGroup.Item value={SortAndFilterTab.filter}>
-            {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.filters')}
-          </ToggleButtonGroup.Item>
-        </ToggleButtonGroup.Root>
+        {USE_MULTI_DELEGATION_STAKING_FILTERS && (
+          <ToggleButtonGroup.Root value={activeTab} onValueChange={(value) => onTabChange(value as SortAndFilterTab)}>
+            <ToggleButtonGroup.Item value={SortAndFilterTab.sort}>
+              {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.sorting')}
+            </ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item value={SortAndFilterTab.filter}>
+              {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.filters')}
+            </ToggleButtonGroup.Item>
+          </ToggleButtonGroup.Root>
+        )}
         {activeTab === SortAndFilterTab.sort ? (
           <RadioButtonGroup
             className={styles.radioGroup}

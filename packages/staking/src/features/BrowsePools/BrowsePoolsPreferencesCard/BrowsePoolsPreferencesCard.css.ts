@@ -21,7 +21,3 @@ export const radioGroup = sx({
 export const selectGroup = sx({
   width: '$fill',
 });
-
-export const card = sx({
-  width: '$342',
-});

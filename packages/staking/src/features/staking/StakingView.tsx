@@ -8,8 +8,9 @@ import { ChangingPreferencesModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
 import { DrawerManagementStep, DrawerStep, useDelegationPortfolioStore } from '../store';
-import { Navigation, Page } from './Navigation';
+import { Navigation } from './Navigation';
 import { OneTimeModals } from './OneTimeModals';
+import { StakingPage } from './types';
 
 const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation, DrawerManagementStep.Sign]);
 
@@ -41,17 +42,17 @@ export const StakingView = () => {
       <Navigation>
         {(activePage) => (
           <>
-            {activePage === Page.overview && (
+            {activePage === StakingPage.overview && (
               <Box mt="$40">
                 <Overview />
               </Box>
             )}
-            {activePage === Page.browsePools && (
+            {activePage === StakingPage.browsePools && (
               <Box mt="$16">
                 <BrowsePools />
               </Box>
             )}
-            {activePage === Page.activity && (
+            {activePage === StakingPage.activity && (
               <Box mt="$40">
                 <Activity />
               </Box>
