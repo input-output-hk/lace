@@ -92,14 +92,14 @@ Feature: Staking Page - Extended View
     Then tooltip for "<column_name>" column is displayed
     Examples:
       | column_name |
+      | Ticker      |
       | Saturation  |
-#     TODO: Update when LW-9634 is completed
-#      | ROS         |
-#      | Cost        |
+#      | ROS         | #TODO: Uncomment when LW-9827 is resolved
+      | Cost        |
       | Margin      |
       | Blocks      |
       | Pledge      |
-#      | Live stake  |
+      | Live stake  |
 
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details
