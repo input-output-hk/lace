@@ -30,6 +30,7 @@ export const PopupView = (): React.ReactElement => {
     walletInfo,
     isWalletLocked,
     walletLock,
+    walletState,
     initialHdDiscoveryCompleted
   } = useWalletStore();
 
@@ -66,7 +67,7 @@ export const PopupView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (!!cardanoWallet && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
+  if (!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted) {
     return <ExtensionRoutes />;
   }
 
