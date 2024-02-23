@@ -11,6 +11,7 @@ import type { Theme } from '../../design-tokens';
 type FontWeights = keyof Theme['fontWeights'];
 
 type TextTypes = TypographyVariants['type'];
+type TextColor = TypographyVariants['color'];
 
 export type TextNodes =
   | 'address'
@@ -32,6 +33,7 @@ interface CreateTextArguments<T extends TextNodes, W extends FontWeights> {
 
 type TextProps<W extends FontWeights> = PropsWithChildren<{
   weight?: W;
+  color?: TextColor;
   className?: string;
 }>;
 
@@ -47,12 +49,15 @@ export const createText = <
 > =>
   // eslint-disable-next-line react/display-name
   forwardRef<typeof Tag, TextProps<W>>(
-    ({ weight = defaultWeight, className, ...props }, ref) => (
+    (
+      { weight = defaultWeight, color = 'primary', className, ...props },
+      ref,
+    ) => (
       // @ts-expect-error TODO research the topic https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33116
       <Tag
         {...props}
         ref={ref}
-        className={classNames(typography({ type }), className, {
+        className={classNames(typography({ type, color }), className, {
           [regular]: weight === '$regular',
           [medium]: weight === '$medium',
           [semibold]: weight === '$semibold',

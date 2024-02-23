@@ -37,6 +37,12 @@ export const typography = recipe({
       pageHeading: sx({ fontSize: '$45', lineHeight: '$56' }),
       display: sx({ fontSize: '$58', lineHeight: '$64' }),
     },
+    color: {
+      primary: sx({ color: '$text_primary' }),
+      secondary: sx({ color: '$text_secondary' }),
+      link: sx({ color: '$data_blue' }),
+      error: sx({ color: '$data_pink' }),
+    },
   },
 });
 
