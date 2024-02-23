@@ -46,7 +46,7 @@ UI-mapped gherkin tests for the Lace browser extension
 
 ## Supported params
 
-- `CI=true|false` default = false (optional)
+- `STANDALONE_DRIVER=true|false` default = false (optional)
   - true = use already running chromedriver on port 4444
   - false = use webdriver manager
 - `ENV=(mainnet|preprod|preview)`default = preprod (optional)
@@ -59,7 +59,7 @@ UI-mapped gherkin tests for the Lace browser extension
 
 ## Run single feature file with params
 
-- `CI=true ENV=preprod WALLET_1_PASSWORD='<password>' yarn wdio run wdio.conf.<browser>.ts --spec SendTransactionSimpleExtended.feature`
+- `ENV=preprod WALLET_1_PASSWORD='<password>' yarn wdio run wdio.conf.<browser>.ts --spec SendTransactionSimpleExtended.feature`
 
 ## Updating walletConfiguration.ts (for development)
 
