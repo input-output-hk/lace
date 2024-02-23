@@ -23,8 +23,7 @@ import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { AnyBip32Wallet, WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
-import { Reward } from '@cardano-sdk/core';
-import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
+import { Cardano, Reward } from '@cardano-sdk/core';
 import { StakePoolSortOptions } from '@lace/staking';
 import { ObservableWalletState } from '@hooks/useWalletState';
 
@@ -152,7 +151,7 @@ export interface ActivityDetailSlice {
         type: RewardsActivityType;
         status: ActivityStatus.SPENDABLE;
         direction?: never;
-        activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+        activity: { spendableEpoch: Cardano.EpochNo; spendableDate: Date; rewards: Reward[] };
       }
     | {
         type: TransactionActivityType;
@@ -168,7 +167,7 @@ export interface ActivityDetailSlice {
     type: TransactionActivityType;
   }) => void;
   setRewardsActivityDetail: (params: {
-    activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+    activity: { spendableEpoch: Cardano.EpochNo; spendableDate: Date; rewards: Reward[] };
   }) => void;
   getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
   resetActivityState: () => void;
