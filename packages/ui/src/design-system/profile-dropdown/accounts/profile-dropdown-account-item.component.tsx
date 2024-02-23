@@ -45,6 +45,7 @@ export const AccountItem = ({
       />
       <Flex flexDirection="column">
         <Text.Label
+          color="secondary"
           weight="$medium"
           className={cx.accountLabel}
           data-testid="wallet-account-item-label"
@@ -52,6 +53,7 @@ export const AccountItem = ({
           {label}
         </Text.Label>
         <Text.Body.Small
+          color="primary"
           weight="$semibold"
           className={cx.derivationPath}
           data-testid="wallet-account-item-path"

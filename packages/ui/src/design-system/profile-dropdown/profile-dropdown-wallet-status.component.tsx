@@ -32,7 +32,7 @@ export const WalletStatus = ({
         justifyContent="center"
         mr="$8"
       />
-      <Text.Label weight="$medium" className={cx.label}>
+      <Text.Label color="secondary" weight="$medium">
         {label}
       </Text.Label>
     </Flex>

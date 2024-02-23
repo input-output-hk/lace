@@ -47,17 +47,14 @@ export const FileUpload = ({
           {labelText.map(({ text, highlight }) => (
             <Text.Body.Normal
               weight="$medium"
-              className={cn({
-                [cx.highlightLabel]: highlight,
-                [cx.label]: !highlight,
-              })}
+              color={highlight ? 'link' : 'primary'}
               key={text}
             >
               {text}{' '}
             </Text.Body.Normal>
           ))}
         </Box>
-        <Text.Body.Small weight="$medium" className={cx.supportedFormatText}>
+        <Text.Body.Small color="secondary" weight="$medium">
           {supportedFormats}
         </Text.Body.Small>
       </Box>
@@ -67,7 +64,7 @@ export const FileUpload = ({
           {files.map((file, index) => (
             <Box key={file}>
               <Flex mb="$8">
-                <Text.Body.Small weight="$medium" className={cx.fileName}>
+                <Text.Body.Small color="primary" weight="$medium">
                   {file}
                 </Text.Body.Small>
                 <Box className={cx.checkIconBox} ml="$8">
@@ -82,9 +79,7 @@ export const FileUpload = ({
                   }
                 }}
               >
-                <Text.Label className={cx.removeButtonLabel}>
-                  {removeButtonLabel}
-                </Text.Label>
+                <Text.Label color="error">{removeButtonLabel}</Text.Label>
               </button>
             </Box>
           ))}

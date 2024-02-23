@@ -29,7 +29,8 @@ export const TextLink = ({
     >
       <Flex alignItems="center" justifyContent="center">
         <Text.Button
-          className={classNames(cx.labelSelector, cx.label)}
+          color="link"
+          className={classNames(cx.label)}
           weight="$semibold"
         >
           {label}

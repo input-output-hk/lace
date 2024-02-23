@@ -10,7 +10,3 @@ export const root = style([
     border: `${vars.spacing.$2} solid ${vars.colors.$educational_card_root_container_borderColor}`,
   },
 ]);
-
-export const title = sx({
-  color: '$text_primary',
-});

@@ -17,6 +17,8 @@ export const MaxButton = ({
   ...props
 }: Readonly<Props>): JSX.Element => (
   <button {...props} className={classNames(cx.container, cx.button)}>
-    <Text.Label className={cx.label}>{label}</Text.Label>
+    <Text.Label color="secondary" className={cx.label}>
+      {label}
+    </Text.Label>
   </button>
 );

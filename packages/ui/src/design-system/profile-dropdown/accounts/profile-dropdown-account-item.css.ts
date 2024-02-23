@@ -31,9 +31,6 @@ export const root = style([
 ]);
 
 export const accountLabel = style([
-  sx({
-    color: '$text_secondary',
-  }),
   {
     width: '118px',
     overflow: 'hidden',
@@ -46,9 +43,6 @@ export const derivationPath = style([
   {
     lineHeight: '1.3',
   },
-  sx({
-    color: '$text_primary',
-  }),
 ]);
 
 export const editIcon = sx({

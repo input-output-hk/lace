@@ -64,11 +64,8 @@ export const colors = {
   $divider_bgColor: '',
 
   $bundle_input_container_bgColor: '',
-  $bundle_input_primary_label_color: '',
   $bundle_input_secondary_label_color: '',
-  $bundle_input_error_label_color: '',
   $bundle_input_max_button_container_bgColor: '',
-  $bundle_input_max_button_label_color: '',
   $bundle_input_max_button_label_color_hover: '',
 
   $bundle_input_remove_button_container_bgColor: '',
@@ -115,7 +112,6 @@ export const colors = {
   $assets_table_market_price_trend_down_label_color: '',
 
   $dialog_container_bgColor: '',
-  $dialog_title_color: '',
   $dialog_description_color: '',
 
   $side_drawer_container_bgColor: '',
@@ -192,7 +188,6 @@ export const colors = {
   $metadata_label_color: '',
   $metadata_secondary_label_color: '',
 
-  $text_link_label_color: '',
   $text_link_label_color_visited: '',
   $text_link_label_color_disabled: '',
 
@@ -230,8 +225,6 @@ export const colors = {
   $educational_card_item_container_bgColor_hover: '',
   $educational_card_item_container_bgColor_pressed: '',
   $educational_card_item_container_outlineColor: '',
-  $educational_card_item_label_color: '',
-  $educational_card_item_title_color: '',
   $educational_card_item_icon_container_bgColor: '',
   $educational_card_item_icon_container_borderColor: '',
 

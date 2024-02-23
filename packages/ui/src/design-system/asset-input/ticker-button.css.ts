@@ -8,10 +8,6 @@ export const button = style({
   padding: 0,
 });
 
-export const ticker = sx({
-  color: '$bundle_input_primary_label_color',
-});
-
 export const chevronIcon = sx({
   w: '$16',
   h: '$16',

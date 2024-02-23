@@ -117,13 +117,10 @@ const colors: Colors = {
   $divider_bgColor: lightColorScheme.$primary_light_grey_plus,
 
   $bundle_input_container_bgColor: lightColorScheme.$primary_light_grey,
-  $bundle_input_primary_label_color: lightColorScheme.$primary_black,
   $bundle_input_secondary_label_color: lightColorScheme.$primary_dark_grey,
-  $bundle_input_error_label_color: lightColorScheme.$secondary_data_pink,
 
   $bundle_input_max_button_container_bgColor:
     lightColorScheme.$primary_light_grey_plus,
-  $bundle_input_max_button_label_color: lightColorScheme.$primary_dark_grey,
   $bundle_input_max_button_label_color_hover: lightColorScheme.$primary_black,
 
   $bundle_input_remove_button_container_bgColor:
@@ -188,7 +185,6 @@ const colors: Colors = {
     lightColorScheme.$secondary_data_pink,
 
   $dialog_container_bgColor: lightColorScheme.$primary_white,
-  $dialog_title_color: lightColorScheme.$primary_black,
   $dialog_description_color: lightColorScheme.$primary_black,
 
   $side_drawer_container_bgColor: lightColorScheme.$primary_white,
@@ -286,7 +282,6 @@ const colors: Colors = {
   $metadata_label_color: lightColorScheme.$primary_black,
   $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
 
-  $text_link_label_color: lightColorScheme.$secondary_data_blue,
   $text_link_label_color_visited: lightColorScheme.$primary_hover_purple,
   $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 
@@ -342,8 +337,6 @@ const colors: Colors = {
     lightColorScheme.$primary_light_grey_plus_0_56,
   $educational_card_item_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
-  $educational_card_item_label_color: lightColorScheme.$primary_dark_grey,
-  $educational_card_item_title_color: lightColorScheme.$primary_black,
   $educational_card_item_icon_container_bgColor:
     lightColorScheme.$primary_white,
   $educational_card_item_icon_container_borderColor:

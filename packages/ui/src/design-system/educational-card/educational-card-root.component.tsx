@@ -20,7 +20,7 @@ export const Root = ({
 }: Readonly<Props>): JSX.Element => (
   <Flex {...props} className={cx.root} px="$16" py="$24" flexDirection="column">
     <Box px="$16" pb="$16">
-      <Text.SubHeading weight="$bold" className={cx.title}>
+      <Text.SubHeading color="primary" weight="$bold">
         {title}
       </Text.SubHeading>
     </Box>

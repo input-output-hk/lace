@@ -49,7 +49,7 @@ export const WalletCard = ({
         <UserProfile {...profile} radius="rounded" />
       )}
       <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
-        <Title className={cx.title} data-testid={makeTestId(testId, '-title')}>
+        <Title color="secondary" data-testid={makeTestId(testId, '-title')}>
           {title.text}
         </Title>
         <Box
@@ -59,8 +59,8 @@ export const WalletCard = ({
           })}
         >
           <Text.Body.Small
+            color="primary"
             weight="$semibold"
-            className={cx.subtitle}
             data-testid={makeTestId(testId, '-subtitle')}
           >
             {subtitle}

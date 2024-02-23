@@ -110,11 +110,9 @@ const colors: Colors = {
   $divider_bgColor: darkColorScheme.$primary_mid_grey,
 
   $bundle_input_container_bgColor: darkColorScheme.$primary_dark_grey,
-  $bundle_input_primary_label_color: darkColorScheme.$primary_white,
   $bundle_input_secondary_label_color: darkColorScheme.$primary_light_grey,
 
   $bundle_input_max_button_container_bgColor: darkColorScheme.$primary_grey,
-  $bundle_input_max_button_label_color: darkColorScheme.$primary_light_grey,
   $bundle_input_max_button_label_color_hover: darkColorScheme.$primary_white,
 
   $bundle_input_remove_button_container_bgColor:
@@ -127,7 +125,6 @@ const colors: Colors = {
   $bundle_input_remove_button_label_color_hover: darkColorScheme.$primary_white,
   $bundle_input_remove_button_label_color_focused:
     darkColorScheme.$primary_light_grey,
-  $bundle_input_error_label_color: darkColorScheme.$secondary_data_pink,
 
   $sub_navigation_container_borderColor: darkColorScheme.$primary_mid_grey,
 
@@ -175,7 +172,6 @@ const colors: Colors = {
     lightColorScheme.$secondary_data_pink,
 
   $dialog_container_bgColor: darkColorScheme.$primary_light_black,
-  $dialog_title_color: darkColorScheme.$primary_white,
   $dialog_description_color: darkColorScheme.$primary_light_grey,
 
   $side_drawer_container_bgColor: darkColorScheme.$primary_light_black,
@@ -265,7 +261,6 @@ const colors: Colors = {
   $metadata_label_color: darkColorScheme.$primary_white,
   $metadata_secondary_label_color: darkColorScheme.$primary_light_grey,
 
-  $text_link_label_color: darkColorScheme.$secondary_data_blue,
   $text_link_label_color_visited: darkColorScheme.$primary_accent_purple,
   $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 
@@ -321,8 +316,6 @@ const colors: Colors = {
     darkColorScheme.$primary_dark_grey,
   $educational_card_item_container_outlineColor:
     darkColorScheme.$primary_accent_purple_0_3,
-  $educational_card_item_label_color: darkColorScheme.$primary_light_grey,
-  $educational_card_item_title_color: darkColorScheme.$primary_white,
   $educational_card_item_icon_container_bgColor:
     darkColorScheme.$primary_dark_grey_plus,
   $educational_card_item_icon_container_borderColor: colorTransparent,

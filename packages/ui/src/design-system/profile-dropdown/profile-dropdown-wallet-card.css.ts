@@ -11,11 +11,3 @@ export const subtitleContentOffset = style({
 export const subtitleButtonOffset = style({
   top: '-2px',
 });
-
-export const title = sx({
-  color: '$text_secondary',
-});
-
-export const subtitle = sx({
-  color: '$text_primary',
-});

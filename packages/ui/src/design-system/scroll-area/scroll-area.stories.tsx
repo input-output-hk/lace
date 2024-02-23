@@ -28,11 +28,9 @@ const Demo = (): JSX.Element => {
           <Cell>
             {Array.from({ length: 50 }).map((_, index) => (
               <Box my="$4" key={`tag:${index}`}>
-                <Text.Body.Normal
-                  className={sx({
-                    color: '$buttons_primary_label_color',
-                  })}
-                >{`v1.2.0-beta.${index + 1}`}</Text.Body.Normal>
+                <Text.Body.Normal color="primary">
+                  {`v1.2.0-beta.${index + 1}`}
+                </Text.Body.Normal>
               </Box>
             ))}
           </Cell>

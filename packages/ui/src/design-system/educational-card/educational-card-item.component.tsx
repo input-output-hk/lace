@@ -32,11 +32,11 @@ export const Item = ({
     </Flex>
     <Box>
       <Box mb="$8">
-        <Text.Body.Normal weight="$medium" className={cx.label}>
+        <Text.Body.Normal weight="$medium" color="secondary">
           {label}
         </Text.Body.Normal>
       </Box>
-      <Text.Body.Large weight="$semibold" className={cx.title}>
+      <Text.Body.Large color="primary" weight="$semibold" className={cx.title}>
         {title}
       </Text.Body.Large>
     </Box>

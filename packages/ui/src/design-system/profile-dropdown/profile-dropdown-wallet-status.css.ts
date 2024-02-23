@@ -34,7 +34,3 @@ export const icon = recipe({
     bg: 'syncing',
   },
 });
-
-export const label = sx({
-  color: '$text_secondary',
-});

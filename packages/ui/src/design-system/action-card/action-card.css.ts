@@ -41,15 +41,3 @@ export const iconBox = style([
     flexShrink: 0,
   },
 ]);
-
-export const title = sx({
-  color: '$text_primary',
-});
-
-export const highlightTitle = sx({
-  color: '$data_blue',
-});
-
-export const description = sx({
-  color: '$text_secondary',
-});

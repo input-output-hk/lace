@@ -38,10 +38,7 @@ export const ActionCard = ({
           {title.map(({ text, highlight }) => (
             <Text.Body.Normal
               weight="$medium"
-              className={cn({
-                [cx.highlightTitle]: highlight,
-                [cx.title]: !highlight,
-              })}
+              color={highlight ? 'link' : 'primary'}
               key={text}
             >
               {text}{' '}
@@ -50,7 +47,7 @@ export const ActionCard = ({
         </Box>
         {description.length > 0 && (
           <Box mt="$8">
-            <Text.Body.Small weight="$medium" className={cx.description}>
+            <Text.Body.Small weight="$medium" color="secondary">
               {description}
             </Text.Body.Small>
           </Box>
