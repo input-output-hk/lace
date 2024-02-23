@@ -38,14 +38,48 @@ type KeysStructure = {
       notAvailable: '';
     };
     stakePoolTableBrowser: {
+      sortAndFilter: {
+        input: {
+          from: '';
+          to: '';
+          select: '';
+        };
+        headers: {
+          sorting: '';
+          filters: '';
+          moreOptions: '';
+        };
+      };
+      sortByTitle: {
+        ticker: '';
+        saturation: '';
+        ros: {
+          title: '';
+          lastEpoch: '';
+          other: '';
+        };
+        cost: '';
+        margin: '';
+        blocks: '';
+        pledge: '';
+        livestake: '';
+        profitMargin: '';
+        performance: '';
+      };
       searchInputPlaceholder: '';
       tableHeader: {
-        ticker: '';
+        ticker: {
+          title: '';
+          tooltip: '';
+        };
         ros: {
           title: '';
           tooltip: '';
         };
-        cost: '';
+        cost: {
+          title: '';
+          tooltip: '';
+        };
         saturation: {
           title: '';
           tooltip: '';
@@ -64,6 +98,7 @@ type KeysStructure = {
         };
         liveStake: {
           title: '';
+          tooltip: '';
         };
       };
       emptyMessage: '';

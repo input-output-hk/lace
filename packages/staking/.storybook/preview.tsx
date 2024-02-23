@@ -14,6 +14,7 @@ const wrapWith =
 
 const preview: Preview = {
   parameters: {
+    chromatic: { pauseAnimationAtEnd: true },
     actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {

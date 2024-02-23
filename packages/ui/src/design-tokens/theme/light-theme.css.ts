@@ -377,6 +377,8 @@ const colors: Colors = {
     lightColorScheme.$primary_accent_purple,
   $radiobutton_indicator_check_color: lightColorScheme.$primary_white,
   $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $radiobutton_unchecked_bgColor: 'transparent',
+  $radiobutton_checked_bgColor: 'transparent',
   $radiobutton_icon_color: lightColorScheme.$primary_grey,
   $radiobutton_icon_hover_color: lightColorScheme.$primary_light_grey,
   $radiobutton_icon_hover_border_color:

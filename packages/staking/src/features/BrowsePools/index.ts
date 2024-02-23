@@ -1,4 +1,5 @@
 export { BrowsePools } from './BrowsePools';
+export { SortAndFilter } from './SortAndFilter';
 // TODO: remove once multi delegaion feature is GA'd
 export type { StakePoolSortOptions, TranslationsFor } from './types';
 export { MetricType, SortField, SortDirection } from './types';

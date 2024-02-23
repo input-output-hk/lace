@@ -99,20 +99,6 @@ jobs:
       - name: Install dependencies
         working-directory: ./packages/e2e-tests
         run: yarn config set httpTimeout 300000 && yarn install --check-cache --immutable
-      - name: Start Chrome driver
-        run: |
-          if [ ${BROWSER} == "chrome" ]; then
-            ${CHROMEWEBDRIVER}\chromedriver.exe -port=4444 &
-          else
-            echo "Skipping start of ChromeDriver"
-          fi
-      - name: Start Edge driver
-        run: |
-          if [ ${BROWSER} == "edge" ]; then
-            ${EDGEWEBDRIVER}\msedgedriver.exe -port=4444 &
-          else
-            echo "Skipping start of EdgeDriver"
-          fi
       - name: Execute E2E tests
         working-directory: ./packages/e2e-tests
         id: e2e-tests
