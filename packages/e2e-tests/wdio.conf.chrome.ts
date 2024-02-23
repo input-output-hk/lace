@@ -9,8 +9,8 @@ const chromeConfig = {
       maxInstances: 1,
       browserName: 'chrome',
       browserVersion: 'stable',
-      ...(process.env.CI && { hostname: 'localhost' }),
-      ...(process.env.CI && { port: 4444 }),
+      ...(process.env.CI === 'true' && { hostname: 'localhost' }),
+      ...(process.env.CI === 'true' && { port: 4444 }),
       'goog:chromeOptions': {
         args: [
           '--no-sandbox',
@@ -36,7 +36,7 @@ const chromeConfig = {
   services: ['devtools', 'intercept']
 };
 
-if (process.env.CI) {
+if (process.env.CI === 'true') {
   fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
     throw new Error("chromedriver doesn't seem to be running, please start it first");
   });
