@@ -60,6 +60,7 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          CI: false
         run: |
           if [ "$TAGS" == "empty" ]; then
             TAGS_TO_RUN="";
