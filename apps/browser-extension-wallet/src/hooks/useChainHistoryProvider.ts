@@ -3,8 +3,10 @@ import { useMemo } from 'react';
 import { chainHistoryHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { logger } from '@lib/wallet-api-ui';
 
+export type NetworkType = 'Mainnet' | 'Preprod' | 'Preview';
+
 type UseChainHistoryProviderArgs = {
-  chainName: 'Mainnet' | 'Preprod' | 'Preview';
+  chainName: NetworkType;
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
