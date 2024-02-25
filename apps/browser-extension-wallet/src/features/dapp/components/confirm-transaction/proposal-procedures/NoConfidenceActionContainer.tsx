@@ -59,7 +59,10 @@ export const NoConfidenceActionContainer = ({
   const data: Parameters<typeof NoConfidenceAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.noConfidenceAction.title'),
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+      deposit: Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin
+      }),
       rewardAccount
     },
     procedure: {

@@ -75,7 +75,14 @@ export const ParameterChangeAction = ({
         <Cell>
           <Divider my={'$16'} />
         </Cell>
-        <EconomicGroup economicGroup={economicGroup} translations={translations.economicGroup} />
+        <EconomicGroup
+          economicGroup={economicGroup}
+          translations={{
+            ...translations.economicGroup,
+            memory: translations.memory,
+            step: translations.step
+          }}
+        />
         <TechnicalGroup technicalGroup={technicalGroup} translations={translations.technicalGroup} />
         <GovernanceGroup governanceGroup={governanceGroup} translations={translations.governanceGroup} />
       </Grid>

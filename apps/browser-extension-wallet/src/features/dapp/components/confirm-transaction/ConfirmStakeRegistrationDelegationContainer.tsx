@@ -25,9 +25,10 @@ export const ConfirmStakeRegistrationDelegationContainer = ({
   const certificate = certificateInspectorFactory<Wallet.Cardano.StakeRegistrationDelegationCertificate>(
     CertificateType.StakeRegistrationDelegation
   )(signTxData.tx);
-  const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
-    cardanoCoin.symbol
-  }`;
+  const depositPaidWithCardanoSymbol = Wallet.util.getFormattedAmount({
+    amount: certificate.deposit.toString(),
+    cardanoCoin
+  });
   return (
     <ConfirmStakeRegistrationDelegation
       dappInfo={signTxData.dappInfo}

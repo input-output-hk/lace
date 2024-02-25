@@ -400,7 +400,12 @@ export const governanceProposalsTransformer = ({
             },
             {
               title: 'withdrawalAmount',
-              details: [`${Wallet.util.lovelacesToAdaString(coin.toString())} ${cardanoCoin.symbol}`]
+              details: [
+                Wallet.util.getFormattedAmount({
+                  amount: coin.toString(),
+                  cardanoCoin
+                })
+              ]
             }
           ]
         });

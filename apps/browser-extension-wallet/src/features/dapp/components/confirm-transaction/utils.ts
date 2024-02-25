@@ -2,37 +2,22 @@
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { RemoteApiPropertyType, exposeApi } from '@cardano-sdk/web-extension';
+import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
-import { sectionTitle, DAPP_VIEWS } from '../../config';
 
 const { CertificateType } = Wallet.Cardano;
 
 const DAPP_TOAST_DURATION = 50;
 
-export const getTitleKey = (txType: Wallet.Cip30TxType): string =>
-  [
-    Wallet.Cip30TxType.DRepRegistration,
-    Wallet.Cip30TxType.DRepRetirement,
-    Wallet.Cip30TxType.DRepUpdate,
-    Wallet.Cip30TxType.VoteDelegation,
-    Wallet.Cip30TxType.VotingProcedures,
-    Wallet.Cip30TxType.StakeVoteDelegation,
-    Wallet.Cip30TxType.VoteRegistrationDelegation,
-    Wallet.Cip30TxType.StakeRegistrationDelegation,
-    Wallet.Cip30TxType.StakeVoteDelegationRegistration
-  ].includes(txType)
-    ? `core.${txType}.title`
-    : sectionTitle[DAPP_VIEWS.CONFIRM_TX];
-
-export const disallowSignTx = (close = false): void => {
+export const disallowSignTx = ({ error = '', close = false }: { error?: string; close?: boolean } = {}): void => {
   exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
     {
       api$: of({
         async allowSignTx(): Promise<boolean> {
-          return Promise.reject();
+          return Promise.reject(new ApiError(APIErrorCode.InvalidRequest, error));
         }
       }),
       baseChannel: DAPP_CHANNELS.userPrompt,

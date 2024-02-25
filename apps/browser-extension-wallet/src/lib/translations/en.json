@@ -1489,6 +1489,15 @@
       "stakeKeyHash": "Stake Key Hash",
       "depositPaid": "Deposit paid"
     },
+    "Mint": {
+      "title": "Confirm transaction"
+    },
+    "Burn": {
+      "title": "Confirm transaction"
+    },
+    "Send": {
+      "title": "Confirm transaction"
+    },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
     },

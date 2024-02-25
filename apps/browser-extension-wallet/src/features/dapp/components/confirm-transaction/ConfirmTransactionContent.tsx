@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Skeleton } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { SignTxData } from './types';
@@ -23,39 +23,33 @@ interface Props {
 }
 
 export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMessage }: Props): React.ReactElement => {
-  if (!signTxData) {
+  const containerPerTypeMap: Record<
+    Wallet.Cip30TxType,
+    (props: { signTxData: SignTxData; errorMessage?: string; onError?: () => void }) => React.ReactElement
+  > = useMemo(
+    () => ({
+      [Wallet.Cip30TxType.DRepRegistration]: ConfirmDRepRegistrationContainer,
+      [Wallet.Cip30TxType.DRepRetirement]: ConfirmDRepRetirementContainer,
+      [Wallet.Cip30TxType.DRepUpdate]: ConfirmDRepUpdateContainer,
+      [Wallet.Cip30TxType.VoteDelegation]: ConfirmVoteDelegationContainer,
+      [Wallet.Cip30TxType.VotingProcedures]: VotingProceduresContainer,
+      [Wallet.Cip30TxType.VoteRegistrationDelegation]: ConfirmVoteRegistrationDelegationContainer,
+      [Wallet.Cip30TxType.StakeRegistrationDelegation]: ConfirmStakeRegistrationDelegationContainer,
+      [Wallet.Cip30TxType.StakeVoteDelegationRegistration]: ConfirmStakeVoteRegistrationDelegationContainer,
+      [Wallet.Cip30TxType.StakeVoteDelegation]: ConfirmStakeVoteDelegationContainer,
+      [Wallet.Cip30TxType.ProposalProcedures]: ProposalProceduresContainer,
+      Send: undefined,
+      Mint: undefined,
+      Burn: undefined
+    }),
+    []
+  );
+
+  if (!signTxData || !txType) {
     return <Skeleton loading />;
   }
-  if (txType === Wallet.Cip30TxType.DRepRegistration) {
-    return <ConfirmDRepRegistrationContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.DRepRetirement) {
-    return <ConfirmDRepRetirementContainer signTxData={signTxData} onError={onError} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.DRepUpdate) {
-    return <ConfirmDRepUpdateContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.VoteDelegation) {
-    return <ConfirmVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.VotingProcedures) {
-    return <VotingProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.VoteRegistrationDelegation) {
-    return <ConfirmVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.StakeRegistrationDelegation) {
-    return <ConfirmStakeRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.StakeVoteDelegationRegistration) {
-    return <ConfirmStakeVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.StakeVoteDelegation) {
-    return <ConfirmStakeVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
-  if (txType === Wallet.Cip30TxType.ProposalProcedures) {
-    return <ProposalProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
-  }
 
-  return <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  const Container = containerPerTypeMap[txType] || DappTransactionContainer;
+
+  return <Container onError={onError} signTxData={signTxData} errorMessage={errorMessage} />;
 };

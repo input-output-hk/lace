@@ -64,7 +64,10 @@ export const HardForkInitiationActionContainer = ({
   const data: Parameters<typeof HardForkInitiationAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.hardForkInitiation.title'),
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+      deposit: Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin
+      }),
       rewardAccount
     },
     procedure: {

@@ -10,16 +10,6 @@ import { DetailRows } from './components';
 import styles from './TransactionInputOutput.module.scss';
 import { TxDetails } from './types';
 
-const rotateOpen: React.CSSProperties = {
-  transform: 'rotate(180deg)',
-  transition: 'transform .2s linear'
-};
-
-const rotateClose: React.CSSProperties = {
-  transform: 'rotate(0deg)',
-  transition: 'transform .2s linear'
-};
-
 interface TxDetailListProps<T extends string> {
   testId: string;
   title: string;
@@ -41,8 +31,16 @@ export const TxDetailList = <T extends string>({
 }: TxDetailListProps<T>): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
-  const animation = isVisible ? rotateOpen : rotateClose;
-  const Icon = BracketDown ? <BracketDown className={styles.bracket} style={{ ...animation }} /> : <DownOutlined />;
+  const Icon = BracketDown ? (
+    <BracketDown
+      className={cn(styles.bracket, {
+        [styles.rotateOpen]: isVisible,
+        [styles.rotateClose]: !isVisible
+      })}
+    />
+  ) : (
+    <DownOutlined />
+  );
 
   return (
     <div data-testid={testId} className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine })}>

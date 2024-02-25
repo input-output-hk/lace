@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,7 @@ import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extens
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { getTitleKey, getTxType } from './utils';
+import { getTxType } from './utils';
 import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
@@ -45,7 +45,6 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const disallowSignTx = useDisallowSignTx();
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
   const txType = signTxData ? getTxType(signTxData.tx) : undefined;
-  const title = txType ? t(getTitleKey(txType)) : '';
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
@@ -62,16 +61,20 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   useOnBeforeUnload(disallowSignTx);
 
+  const onError = useCallback(() => {
+    setConfirmTransactionError(true);
+  }, []);
+
   return (
     <Layout
       layoutClassname={cn(confirmTransactionError && styles.layoutError)}
       pageClassname={styles.spaceBetween}
-      title={!confirmTransactionError && title}
+      title={!confirmTransactionError && txType && t(`core.${txType}.title`)}
     >
       <ConfirmTransactionContent
         txType={txType}
         signTxData={signTxData}
-        onError={() => setConfirmTransactionError(true)}
+        onError={onError}
         errorMessage={getSignTxDataError}
       />
       {!confirmTransactionError && (
@@ -90,7 +93,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
           <Button
             color="secondary"
             data-testid="dapp-transaction-cancel"
-            onClick={() => disallowSignTx(true)}
+            onClick={() => disallowSignTx({ close: true })}
             className={styles.actionBtn}
           >
             {t('dapp.confirm.btn.cancel')}

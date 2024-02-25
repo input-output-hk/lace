@@ -64,7 +64,10 @@ export const TreasuryWithdrawalsActionContainer = ({
   const data: Parameters<typeof TreasuryWithdrawalsAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+      deposit: Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin
+      }),
       rewardAccount
     },
     procedure: {
@@ -76,7 +79,10 @@ export const TreasuryWithdrawalsActionContainer = ({
     },
     withdrawals: [...withdrawals].map((withdrawal) => ({
       rewardAccount: withdrawal.rewardAccount.toString(),
-      lovelace: `${Wallet.util.lovelacesToAdaString(withdrawal.coin.toString())} ${cardanoCoin.symbol}`
+      lovelace: Wallet.util.getFormattedAmount({
+        amount: withdrawal.coin.toString(),
+        cardanoCoin
+      })
     }))
   };
 

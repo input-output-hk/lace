@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
 import { useRedirection, useWalletManager, useAppInit } from '@src/hooks';
-import { dAppRoutePaths } from '@routes';
+import { dAppRoutePaths, walletRoutePaths } from '@routes';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import { Route, Switch } from 'react-router-dom';
@@ -77,7 +77,8 @@ export const DappConnectorView = (): React.ReactElement => {
   }, [walletInfo, inMemoryWallet, isLoadingWallet, loadWallet, redirectToSignFailure, redirectToSignSuccess]);
 
   const onCloseClick = useCallback(() => {
-    tabs.create({ url: 'app.html#/setup' });
+    tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
+    window.close();
   }, []);
 
   if (hasNoAvailableWallet) {

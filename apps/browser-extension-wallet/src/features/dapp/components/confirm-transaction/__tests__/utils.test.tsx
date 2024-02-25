@@ -12,14 +12,12 @@ import '@testing-library/jest-dom';
 import { Wallet } from '@lace/cardano';
 import * as Core from '@cardano-sdk/core';
 import {
-  getTitleKey,
   certificateInspectorFactory,
   votingProceduresInspector,
   getTxType,
   drepIDasBech32FromHash,
   pubDRepKeyToHash
 } from '../utils';
-import { DAPP_VIEWS, sectionTitle } from '@src/features/dapp/config';
 
 jest.mock('@cardano-sdk/core', () => ({
   ...jest.requireActual<any>('@cardano-sdk/core'),
@@ -58,21 +56,6 @@ describe('Testing utils', () => {
     jest.resetModules();
     jest.resetAllMocks();
     cleanup();
-  });
-
-  test('testing getVoterType', () => {
-    let txType = Wallet.Cip30TxType.DRepRegistration;
-    expect(getTitleKey(txType)).toEqual(`core.${txType}.title`);
-    txType = Wallet.Cip30TxType.DRepRetirement;
-    expect(getTitleKey(txType)).toEqual(`core.${txType}.title`);
-    txType = Wallet.Cip30TxType.DRepUpdate;
-    expect(getTitleKey(txType)).toEqual(`core.${txType}.title`);
-    txType = Wallet.Cip30TxType.VoteDelegation;
-    expect(getTitleKey(txType)).toEqual(`core.${txType}.title`);
-    txType = Wallet.Cip30TxType.VotingProcedures;
-    expect(getTitleKey(txType)).toEqual(`core.${txType}.title`);
-    txType = 'other' as Wallet.Cip30TxType;
-    expect(getTitleKey(txType)).toEqual(sectionTitle[DAPP_VIEWS.CONFIRM_TX]);
   });
 
   test('testing certificateInspectorFactory', () => {

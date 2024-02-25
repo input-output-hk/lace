@@ -128,3 +128,13 @@
     @include text-body-bold;
   }
 }
+
+.rotateOpen  {
+  transform: rotate(180deg);
+  transition: transform .2s linear;
+}
+
+.rotateClose  {
+  transform: rotate(0deg);
+  transition: transform .2s linear;
+}

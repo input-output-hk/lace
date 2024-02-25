@@ -21,10 +21,13 @@ export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: P
   const certificate = certificateInspectorFactory<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>(
     CertificateType.RegisterDelegateRepresentative
   )(signTxData.tx);
-  const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
-    cardanoCoin.symbol
-  }`;
 
+  const depositPaidWithCardanoSymbol = Wallet.util.getFormattedAmount({
+    amount: certificate.deposit.toString(),
+    cardanoCoin
+  });
+
+  // TODO: might be changed in scope of https://input-output.atlassian.net/browse/LW-9034
   return (
     <ConfirmDRepRegistration
       dappInfo={signTxData.dappInfo}

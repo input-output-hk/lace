@@ -174,7 +174,7 @@ export const useSignTxData = (getSignTxData: GetSignTxData): { signTxData?: Sign
   return { signTxData, errorMessage };
 };
 
-export const useDisallowSignTx = (): ((close?: boolean) => void) => useCallback(disallowSignTx, []);
+export const useDisallowSignTx = (): typeof disallowSignTx => useCallback(disallowSignTx, []);
 
 export const useAllowSignTx = (): (() => void) => useCallback(allowSignTx, []);
 
@@ -193,7 +193,7 @@ export const useSignWithHardwareWallet = (): {
       allow();
     } catch (error) {
       console.error('error', error);
-      disallow(false);
+      disallow();
       redirectToSignFailure({});
     }
   }, [allow, disallow, redirectToSignFailure]);
