@@ -46,6 +46,24 @@ class NftsPageObject {
       : TestWalletName.WalletReceiveNftE2E;
   }
 
+  async getNonActiveNft2WalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveNft2E2E
+      ? TestWalletName.WalletSendNft2E2E
+      : TestWalletName.WalletReceiveNft2E2E;
+  }
+
+  async getNonActiveAdaHandleWalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveAdaHandleE2E
+      ? TestWalletName.WalletSendAdaHandleE2E
+      : TestWalletName.WalletReceiveAdaHandleE2E;
+  }
+
+  async getNonActiveAdaHandle2WalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveAdaHandle2E2E
+      ? TestWalletName.WalletSendAdaHandle2E2E
+      : TestWalletName.WalletReceiveAdaHandle2E2E;
+  }
+
   async getNonActiveNftHdWalletName(): Promise<string> {
     return testContext.load('activeWallet') === TestWalletName.WalletReceiveNftHdWalletE2E
       ? TestWalletName.WalletSendNftHdWalletE2E

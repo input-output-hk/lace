@@ -1,11 +1,11 @@
-@AdaHandleSend @Testnet
+@AdaHandleSend-extended @Testnet
 Feature: ADA handle - extended view
 
   Background:
     Given Wallet is synced
     And I am on NFTs extended page
     And Address book is empty
-    And I use a single wallet with "$handletosend" NFT in extended mode
+    And I use a wallet with ADA handle "$handletosend" NFT in extended mode
 
   @LW-7073
   Scenario: Extended view - Ada handle transfer e2e, review flow

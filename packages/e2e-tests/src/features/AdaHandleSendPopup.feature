@@ -1,10 +1,10 @@
-@AdaHandleSend @Testnet
+@AdaHandleSend-popup @Testnet
 Feature: ADA handle - popup view
 
   Background:
     Given Wallet is synced
     And I am on NFTs popup page
-    And I use a single wallet with "$handletosend" NFT in popup mode
+    And I use a wallet with ADA handle "$handletosend" NFT in popup mode
 
   @LW-8808 @Pending
   # BUG LW-8793
