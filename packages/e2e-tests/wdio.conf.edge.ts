@@ -2,13 +2,14 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const edgeConfig: WebdriverIO.Config = {
+const edgeConfig = {
   capabilities: [
     {
       maxInstances: 1,
       browserName: 'MicrosoftEdge',
-      ...(process.env.CI && { hostname: 'localhost' }),
-      ...(process.env.CI && { port: 4444 }),
+      browserVersion: 'stable',
+      ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
+      ...(String(process.env.STANDALONE_DRIVER) === 'true' && { port: 4444 }),
       'ms:edgeOptions': {
         args: [
           '--disable-gpu',
@@ -33,7 +34,7 @@ const edgeConfig: WebdriverIO.Config = {
   services: ['devtools', 'intercept']
 };
 
-if (process.env.CI) {
+if (String(process.env.STANDALONE_DRIVER) === 'true') {
   fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
     throw new Error("chromedriver doesn't seem to be running, please start it first or use CI=false");
   });

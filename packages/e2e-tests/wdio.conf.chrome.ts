@@ -3,14 +3,14 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const chromeConfig: WebdriverIO.Config = {
+const chromeConfig = {
   capabilities: [
     {
       maxInstances: 1,
       browserName: 'chrome',
-      browserVersion: 'dev',
-      ...(process.env.CI && { hostname: 'localhost' }),
-      ...(process.env.CI && { port: 4444 }),
+      browserVersion: 'stable',
+      ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
+      ...(String(process.env.STANDALONE_DRIVER) === 'true' && { port: 4444 }),
       'goog:chromeOptions': {
         args: [
           '--no-sandbox',
@@ -36,7 +36,7 @@ const chromeConfig: WebdriverIO.Config = {
   services: ['devtools', 'intercept']
 };
 
-if (process.env.CI) {
+if (String(process.env.STANDALONE_DRIVER) === 'true') {
   fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
     throw new Error("chromedriver doesn't seem to be running, please start it first");
   });
