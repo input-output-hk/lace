@@ -32,6 +32,7 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   const backgroundServices = useBackgroundServiceAPIContext();
 
   const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
+  const [showDappBetaModal] = useLocalStorage('showDappBetaModal', true);
 
   useEffect(() => {
     const openDrawer = async () => {
@@ -56,11 +57,19 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   }, [backgroundServices, setTheme]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowPinExtension(false);
-    }, PIN_EXTENSION_TIMEOUT);
-    return () => clearTimeout(timer);
-  }, [setShowPinExtension]);
+    let timer: NodeJS.Timeout;
+    if (!showDappBetaModal) {
+      timer = setTimeout(() => {
+        setShowPinExtension(false);
+      }, PIN_EXTENSION_TIMEOUT);
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [setShowPinExtension, showDappBetaModal]);
 
   const debouncedToast = useMemo(() => debounce(toast.notify, toastThrottle), []);
   const showNetworkError = useCallback(
