@@ -300,8 +300,7 @@ export const useCexplorerBaseUrl = (): string => {
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
   useEffect(() => {
-    const newUrl =
-      environmentName === 'Sanchonet' ? '' : `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
+    const newUrl = `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
     if (newUrl !== explorerBaseUrl) {
       setExplorerBaseUrl(newUrl);
     }

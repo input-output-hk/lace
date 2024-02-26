@@ -69,7 +69,7 @@ export const NoConfidenceActionContainer = ({
       anchor: {
         url: anchor.url,
         hash: anchor.dataHash,
-        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+        txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}`
       }
     },
     ...(governanceActionId && {

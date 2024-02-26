@@ -55,6 +55,7 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
     walletInfo
   });
 
+  // TODO: merge with the upper skeleton check
   if (!txSummary) {
     return <Skeleton />;
   }

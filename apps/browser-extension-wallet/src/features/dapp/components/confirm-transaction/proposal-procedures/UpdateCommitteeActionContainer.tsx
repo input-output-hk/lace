@@ -83,7 +83,7 @@ export const UpdateCommitteeActionContainer = ({
       anchor: {
         url: anchor.url,
         hash: anchor.dataHash,
-        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+        txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}`
       }
     },
     ...(governanceActionId && {
@@ -94,12 +94,12 @@ export const UpdateCommitteeActionContainer = ({
     }),
     membersToBeAdded: [...membersToBeAdded].map(({ coldCredential: { hash }, epoch }) => ({
       coldCredential: {
-        hash: drepIDasBech32FromHash(hash)
+        hash: hash.toString()
       },
       epoch: epoch.toString()
     })),
     membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({
-      hash: drepIDasBech32FromHash(hash)
+      hash: hash.toString()
     }))
   };
 

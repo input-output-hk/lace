@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import { PriceResult } from '@hooks';
 import { formatPercentages } from '@lace/common';
+import { depositPaidWithSymbol } from '@src/features/dapp/components/confirm-transaction/utils';
 
 const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType } = Wallet.Cardano;
 
@@ -664,11 +665,11 @@ export const governanceProposalsTransformer = ({
             },
             {
               title: 'govActionDeposit',
-              details: [`${governanceActionDeposit?.toString()} ${cardanoCoin.symbol}`]
+              details: [depositPaidWithSymbol(BigInt(governanceActionDeposit), cardanoCoin)]
             },
             {
               title: 'drepDeposit',
-              details: [`${dRepDeposit?.toString()}  ${cardanoCoin.symbol}`]
+              details: [depositPaidWithSymbol(BigInt(dRepDeposit), cardanoCoin)]
             },
             {
               title: 'drepActivity',

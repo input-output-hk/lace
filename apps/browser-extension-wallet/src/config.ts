@@ -22,7 +22,7 @@ export type Config = {
   ADA_PRICE_CHECK_INTERVAL: number;
   TOKEN_PRICE_CHECK_INTERVAL: number;
   AVAILABLE_CHAINS: Wallet.ChainName[];
-  CEXPLORER_BASE_URL: Record<Exclude<EnvironmentTypes, 'Sanchonet'>, string>;
+  CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   CEXPLORER_URL_PATHS: CExplorerUrlPaths;
   SAVED_PRICE_DURATION: number;
 };
@@ -84,7 +84,8 @@ export const config = (): Config => {
     CEXPLORER_BASE_URL: {
       Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`,
+      Sanchonet: `${process.env.CEXPLORER_URL_SANCHONET}`
     },
     CEXPLORER_URL_PATHS: {
       Tx: 'tx',

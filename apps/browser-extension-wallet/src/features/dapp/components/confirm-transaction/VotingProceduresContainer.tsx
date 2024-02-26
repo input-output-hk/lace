@@ -45,7 +45,7 @@ export const VotingProceduresContainer = (): React.ReactElement => {
             actionId: {
               index: vote.actionId.actionIndex,
               txHash: vote.actionId.id.toString(),
-              ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}` })
+              txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}`
             },
             votingProcedure: {
               vote: t(`core.VotingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),

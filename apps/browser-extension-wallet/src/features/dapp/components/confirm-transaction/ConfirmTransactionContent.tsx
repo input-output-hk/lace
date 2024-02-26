@@ -17,8 +17,6 @@ interface Props {
   onError?: () => void;
 }
 
-ConfirmDRepRetirementContainer;
-
 export const ConfirmTransactionContent = ({ txType, onError }: Props): React.ReactElement => {
   const containerPerTypeMap: Record<
     Wallet.Cip30TxType,
