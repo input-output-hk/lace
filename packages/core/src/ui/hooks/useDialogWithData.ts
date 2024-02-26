@@ -9,18 +9,19 @@ export const useDialogWithData = <Data>(
   open: (data?: Data) => void;
   hide: () => void;
 } => {
-  const [dialogData, setDialogData] = useState<Data>(initialData);
+  const [isOpen, setIsOpen] = useState(false);
+  const [data, setData] = useState<Data>(initialData);
 
   return {
-    data: dialogData,
-    isOpen: dialogData !== undefined,
-    setData: setDialogData,
-    open: (data?: Data) => {
-      setDialogData(data);
+    data,
+    isOpen,
+    setData,
+    open: (d?: Data) => {
+      setIsOpen(true);
+      if (d !== undefined) setData(d);
     },
     hide: () => {
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      setDialogData(undefined);
+      setIsOpen(false);
     }
   };
 };

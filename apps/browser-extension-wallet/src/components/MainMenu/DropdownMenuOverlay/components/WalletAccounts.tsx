@@ -58,7 +58,6 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
   const editAccountDrawer = useDialogWithData<ProfileDropdown.AccountData | undefined>();
   const disableAccountConfirmation = useDialogWithData<ProfileDropdown.AccountData | undefined>();
   const enableAccountPasswordDialog = useDialogWithData<EnableAccountPasswordDialogData | undefined>();
-
   const enableAccountHWSigningDialog = useDialogWithData<EnableAccountHWSigningDialogData | undefined>();
 
   const disableUnlock = useMemo(
