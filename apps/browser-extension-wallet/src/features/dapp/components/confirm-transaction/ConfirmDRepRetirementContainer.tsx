@@ -12,11 +12,10 @@ import { useViewsFlowContext } from '@providers';
 const { CertificateType } = Wallet.Cardano;
 
 interface Props {
-  errorMessage?: string;
   onError: () => void;
 }
 
-export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
@@ -88,7 +87,6 @@ export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props)
           drepId: t('core.DRepRetirement.drepId')
         }
       }}
-      errorMessage={errorMessage}
     />
   );
 };

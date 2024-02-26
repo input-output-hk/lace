@@ -151,28 +151,6 @@ describe('Testing ConfirmTransactionContent component', () => {
     cleanup();
   });
 
-  test('should render loader placeholder if there is no signTxData', async () => {
-    let queryByTestId: any;
-
-    await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent />));
-    });
-
-    expect(queryByTestId('skeleton')).toBeInTheDocument();
-    expect(queryByTestId('ConfirmDRepRegistrationContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmDRepRetirementContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmStakeRegistrationDelegationContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
-    expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockSkeleton).toHaveBeenLastCalledWith({ loading: true }, {});
-  });
-
   test('should render ConfirmDRepRegistrationContainer with proper props', async () => {
     let queryByTestId: any;
 

@@ -11,11 +11,7 @@ import { UpdateCommitteeActionContainer } from './proposal-procedures/UpdateComm
 import { useViewsFlowContext } from '@providers';
 import { SignTxData } from './types';
 
-interface Props {
-  errorMessage?: string;
-}
-
-export const ProposalProceduresContainer = ({ errorMessage }: Props): React.ReactElement => {
+export const ProposalProceduresContainer = (): React.ReactElement => {
   const [proposalProcedures, setProposalProcedures] = useState<Wallet.Cardano.ProposalProcedure[]>([]);
   const {
     signTxRequest: { request },
@@ -30,8 +26,6 @@ export const ProposalProceduresContainer = ({ errorMessage }: Props): React.Reac
 
     getCertificateData();
   }, [request]);
-
-  const props = useMemo(() => ({ dappInfo, errorMessage }), [dappInfo, errorMessage]);
 
   const containerPerTypeMap: Record<
     Wallet.Cardano.GovernanceActionType,
@@ -63,7 +57,7 @@ export const ProposalProceduresContainer = ({ errorMessage }: Props): React.Reac
         return (
           <Container
             key={`${governanceAction.__typename}_${anchor.dataHash}`}
-            {...{ ...props, deposit, rewardAccount, anchor, governanceAction }}
+            {...{ dappInfo, deposit, rewardAccount, anchor, governanceAction }}
           />
         );
       })}

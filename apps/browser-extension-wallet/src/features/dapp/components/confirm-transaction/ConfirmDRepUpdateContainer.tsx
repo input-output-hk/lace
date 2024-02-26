@@ -8,11 +8,7 @@ import { Skeleton } from 'antd';
 
 const { CertificateType } = Wallet.Cardano;
 
-interface Props {
-  errorMessage?: string;
-}
-
-export const ConfirmDRepUpdateContainer = ({ errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepUpdateContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     signTxRequest: { request },
@@ -51,7 +47,6 @@ export const ConfirmDRepUpdateContainer = ({ errorMessage }: Props): React.React
           url: t('core.DRepUpdate.url')
         }
       }}
-      errorMessage={errorMessage}
     />
   );
 };

@@ -4,7 +4,7 @@ import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
 import type { UserPromptService } from '@lib/scripts/background/services';
-import { DAPP_CHANNELS } from '@src/utils/constants';
+import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
 
@@ -157,8 +157,11 @@ export const pubDRepKeyToHash = async (
 
 export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): string => {
   switch (coinId.name) {
-    case 'Cardano':
-      return `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${coinId.symbol}`;
+    case cardanoCoin.name:
+      return Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin: coinId
+      });
     default:
       throw new Error(`coinId ${coinId.name} not supported`);
   }

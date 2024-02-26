@@ -7,11 +7,7 @@ import { VoterTypeEnum, getVote, getVoterType } from '@src/utils/tx-inspection';
 import { Wallet } from '@lace/cardano';
 import { useViewsFlowContext } from '@providers';
 
-interface Props {
-  errorMessage?: string;
-}
-
-export const VotingProceduresContainer = ({ errorMessage }: Props): React.ReactElement => {
+export const VotingProceduresContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     signTxRequest: { request },
@@ -76,7 +72,6 @@ export const VotingProceduresContainer = ({ errorMessage }: Props): React.ReactE
         },
         dRepId: t('core.VotingProcedures.dRepId')
       }}
-      errorMessage={errorMessage}
     />
   );
 };

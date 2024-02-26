@@ -9,11 +9,7 @@ import { Skeleton } from 'antd';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
-interface Props {
-  errorMessage?: string;
-}
-
-export const ConfirmStakeVoteDelegationContainer = ({ errorMessage }: Props): React.ReactElement => {
+export const ConfirmStakeVoteDelegationContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const { currentChain } = useWalletStore();
   const {
@@ -62,7 +58,6 @@ export const ConfirmStakeVoteDelegationContainer = ({ errorMessage }: Props): Re
           alwaysNoConfidence: t('core.StakeVoteDelegation.alwaysNoConfidence')
         }
       }}
-      errorMessage={errorMessage}
     />
   );
 };
