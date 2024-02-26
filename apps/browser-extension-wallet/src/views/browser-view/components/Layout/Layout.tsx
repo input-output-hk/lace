@@ -57,18 +57,13 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   }, [backgroundServices, setTheme]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (!showDappBetaModal) {
-      timer = setTimeout(() => {
-        setShowPinExtension(false);
-      }, PIN_EXTENSION_TIMEOUT);
-    }
+    if (showDappBetaModal) return;
+    const timer = window.setTimeout(() => {
+      setShowPinExtension(false);
+    }, PIN_EXTENSION_TIMEOUT);
 
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
+    // eslint-disable-next-line consistent-return
+    return () => window.clearTimeout(timer);
   }, [setShowPinExtension, showDappBetaModal]);
 
   const debouncedToast = useMemo(() => debounce(toast.notify, toastThrottle), []);
