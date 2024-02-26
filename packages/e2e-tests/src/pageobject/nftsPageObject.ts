@@ -16,13 +16,19 @@ class NftsPageObject {
     await nftNameElement.click({ button: clickType });
   }
 
-  async progressWithSendUntilPasswordPage(nftName: string, hdWallet = false): Promise<any> {
+  async progressWithSendUntilPasswordPage(nftName: string, mode: string, hdWallet = false): Promise<any> {
     await this.clickNftItemOnNftsPage(nftName);
     await NftDetails.sendNFTButton.waitForClickable();
     await NftDetails.sendNFTButton.click();
-    const receiverWallet = hdWallet
-      ? getTestWallet(await this.getNonActiveNftHdWalletName())
-      : getTestWallet(await this.getNonActiveNftWalletName());
+    let receiverWallet;
+    if (hdWallet) {
+      receiverWallet = getTestWallet(await this.getNonActiveNftHdWalletName());
+    } else {
+      receiverWallet =
+        mode === 'extended'
+          ? getTestWallet(await this.getNonActiveNftWalletName())
+          : getTestWallet(await this.getNonActiveNft2WalletName());
+    }
     const receiverAddress = extensionUtils.isMainnet()
       ? String(receiverWallet.mainnetAddress)
       : String(receiverWallet.address);

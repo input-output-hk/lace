@@ -134,8 +134,11 @@ Then(/^each NFT has name and image displayed$/, async () => {
   await nftAssert.assertSeeEachNftItemOnNftsPage();
 });
 
-When(/^I open NFT receiving wallet$/, async () => {
-  const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
+When(/^I open NFT receiving wallet in (popup|extended) mode$/, async (mode: 'extended' | 'popup') => {
+  const walletToLoad =
+    mode === 'extended'
+      ? await nftsPageObject.getNonActiveNftWalletName()
+      : await nftsPageObject.getNonActiveNft2WalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 
