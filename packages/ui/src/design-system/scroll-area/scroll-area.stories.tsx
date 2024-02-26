@@ -27,7 +27,7 @@ const Demo = (): JSX.Element => {
           <Cell>
             {Array.from({ length: 50 }).map((_, index) => (
               <Box my="$4" key={`tag:${index}`}>
-                <Text.Body.Normal color="primary">
+                <Text.Body.Normal>
                   {`v1.2.0-beta.${index + 1}`}
                 </Text.Body.Normal>
               </Box>

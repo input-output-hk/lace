@@ -59,7 +59,6 @@ export const WalletCard = ({
           })}
         >
           <Text.Body.Small
-            color="primary"
             weight="$semibold"
             data-testid={makeTestId(testId, '-subtitle')}
           >

@@ -36,7 +36,7 @@ export const Item = ({
           {label}
         </Text.Body.Normal>
       </Box>
-      <Text.Body.Large color="primary" weight="$semibold" className={cx.title}>
+      <Text.Body.Large weight="$semibold" className={cx.title}>
         {title}
       </Text.Body.Large>
     </Box>

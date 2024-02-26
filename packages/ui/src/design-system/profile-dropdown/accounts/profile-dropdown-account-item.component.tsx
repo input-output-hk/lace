@@ -53,7 +53,6 @@ export const AccountItem = ({
           {label}
         </Text.Label>
         <Text.Body.Small
-          color="primary"
           weight="$semibold"
           className={cx.derivationPath}
           data-testid="wallet-account-item-path"

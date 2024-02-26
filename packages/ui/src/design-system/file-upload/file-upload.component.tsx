@@ -63,9 +63,7 @@ export const FileUpload = ({
           {files.map((file, index) => (
             <Box key={file}>
               <Flex mb="$8">
-                <Text.Body.Small color="primary" weight="$medium">
-                  {file}
-                </Text.Body.Small>
+                <Text.Body.Small weight="$medium">{file}</Text.Body.Small>
                 <Box className={cx.checkIconBox} ml="$8">
                   <CheckFileUploadIcon />
                 </Box>

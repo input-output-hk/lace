@@ -22,7 +22,7 @@ export const TickerButton = ({
     onClick={onClick}
     data-testid={`asset-input-ticker-button-${id}`}
   >
-    <Text.SubHeading weight="$bold" color="primary">
+    <Text.SubHeading weight="$bold">
       {name}
       <ChevronRight className={cx.chevronIcon} />
     </Text.SubHeading>
