@@ -45,7 +45,7 @@ export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactE
 
   useEffect(() => {
     if (ownPubDRepKeyHash && isNotOwnDRepKey) {
-      disallowSignTx(request, false);
+      disallowSignTx(request, true);
       onError();
     }
   }, [ownPubDRepKeyHash, isNotOwnDRepKey, onError, request]);

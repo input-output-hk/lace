@@ -55,6 +55,10 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
     walletInfo
   });
 
+  if (!txSummary) {
+    return <Skeleton />;
+  }
+
   return (
     <DappTransaction
       transaction={txSummary}

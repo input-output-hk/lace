@@ -117,11 +117,8 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
   test('should render ConfirmDRepUpdate component with proper props', async () => {
     let queryByTestId: any;
 
-    const errorMessage = 'errorMessage';
-    const props = { errorMessage };
-
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepUpdateContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmDRepUpdateContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -142,8 +139,7 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
             hash: t('core.DRepUpdate.hash'),
             url: t('core.DRepUpdate.url')
           }
-        },
-        errorMessage
+        }
       },
       {}
     );

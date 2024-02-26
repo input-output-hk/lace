@@ -5,6 +5,7 @@ import { UpdateCommitteeAction } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
 import { useCexplorerBaseUrl } from '../hooks';
+import { drepIDasBech32FromHash } from '../utils';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
@@ -93,14 +94,12 @@ export const UpdateCommitteeActionContainer = ({
     }),
     membersToBeAdded: [...membersToBeAdded].map(({ coldCredential: { hash }, epoch }) => ({
       coldCredential: {
-        // TODO: use bech32 in future revision
-        hash: hash.toString()
+        hash: drepIDasBech32FromHash(hash)
       },
       epoch: epoch.toString()
     })),
     membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({
-      // TODO: use bech32 in future revision
-      hash: hash.toString()
+      hash: drepIDasBech32FromHash(hash)
     }))
   };
 

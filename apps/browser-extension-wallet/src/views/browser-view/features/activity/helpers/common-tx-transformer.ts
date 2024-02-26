@@ -664,12 +664,10 @@ export const governanceProposalsTransformer = ({
             },
             {
               title: 'govActionDeposit',
-              // TODO: is it in Ada or lovelaces?
               details: [`${governanceActionDeposit?.toString()} ${cardanoCoin.symbol}`]
             },
             {
               title: 'drepDeposit',
-              // TODO: is it in Ada or lovelaces?
               details: [`${dRepDeposit?.toString()}  ${cardanoCoin.symbol}`]
             },
             {

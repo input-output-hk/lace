@@ -150,10 +150,9 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     cleanup();
   });
 
-  const errorMessage = 'errorMessage';
   // eslint-disable-next-line unicorn/consistent-function-scoping
   const onErrorMock = jest.fn();
-  const props = { errorMessage, onError: onErrorMock };
+  const props = { onError: onErrorMock };
 
   test('should render ConfirmDRepRetirementContainer component with proper props', async () => {
     let queryByTestId: any;
@@ -179,8 +178,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
             depositReturned: t('core.DRepRetirement.depositReturned'),
             drepId: t('core.DRepRetirement.drepId')
           }
-        },
-        errorMessage
+        }
       },
       {}
     );
@@ -188,7 +186,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
 
   test('should render ConfirmDRepRetirementContainer component with proper error for own retirement', async () => {
     let queryByTestId: any;
-    const additionalProps = { errorMessage, onError: onErrorMock };
+    const additionalProps = { onError: onErrorMock };
 
     await act(async () => {
       ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...additionalProps} />, {
@@ -197,9 +195,6 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     });
 
     expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
-    expect(
-      mockConfirmDRepRetirement.mock.calls[mockConfirmDRepRetirement.mock.calls.length - 1][0].errorMessage
-    ).toEqual(t('core.DRepRetirement.isOwnRetirement'));
   });
 
   test('should render ConfirmDRepRetirementContainer component with proper error for not own retirement', async () => {
@@ -209,7 +204,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
       ownPubDRepKeyHash: Crypto.Hash28ByteBase16(Buffer.from('WRONG_dRepCredentialHashdRep').toString('hex'))
     }));
     let queryByTestId: any;
-    const additionalProps = { errorMessage, onError: onErrorMock };
+    const additionalProps = { onError: onErrorMock };
 
     await act(async () => {
       ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...additionalProps} />, {

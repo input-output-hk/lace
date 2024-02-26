@@ -151,11 +151,8 @@ describe('Testing ConfirmStakeVoteDelegationContainer component', () => {
   test('should render ConfirmStakeVoteDelegation component with proper props', async () => {
     let queryByTestId: any;
 
-    const errorMessage = 'errorMessage';
-    const props = { errorMessage };
-
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmStakeVoteDelegationContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmStakeVoteDelegationContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -181,8 +178,7 @@ describe('Testing ConfirmStakeVoteDelegationContainer component', () => {
             alwaysAbstain: t('core.StakeVoteDelegation.alwaysAbstain'),
             alwaysNoConfidence: t('core.StakeVoteDelegation.alwaysNoConfidence')
           }
-        },
-        errorMessage
+        }
       },
       {}
     );

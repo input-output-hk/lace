@@ -121,13 +121,10 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
       },
       dappInfo
     }));
-
-    const errorMessage = 'errorMessage';
-    const props = { errorMessage };
     const dRep = certificate.dRep;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -149,8 +146,7 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
             alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
             alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
           }
-        },
-        errorMessage
+        }
       },
       {}
     );
@@ -182,11 +178,8 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
       dappInfo
     }));
 
-    const errorMessage = 'errorMessage';
-    const props = { errorMessage };
-
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -207,8 +200,7 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
             alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
             alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
           }
-        },
-        errorMessage
+        }
       },
       {}
     );
@@ -240,11 +232,8 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
       dappInfo
     }));
 
-    const errorMessage = 'errorMessage';
-    const props = { errorMessage };
-
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -265,8 +254,7 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
             alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
             alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
           }
-        },
-        errorMessage
+        }
       },
       {}
     );

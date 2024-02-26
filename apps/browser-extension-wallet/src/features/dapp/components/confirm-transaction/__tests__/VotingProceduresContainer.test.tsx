@@ -62,7 +62,6 @@ const dappInfo = {
   url: 'dappUrl'
 };
 const tx = buildMockTx();
-const errorMessage = 'errorMessage';
 const constitutionalCommitteeKeyHashVoter: Wallet.Cardano.ConstitutionalCommitteeKeyHashVoter = {
   __typename: Wallet.Cardano.VoterType.ccHotKeyHash,
   credential: {
@@ -138,8 +137,6 @@ const votingProcedures = voters.map((voter, index) => ({
   ]
 }));
 
-const props = { errorMessage };
-
 const request = {
   transaction: {
     toCore: jest.fn().mockReturnValue({ ...tx, body: { ...tx.body, votingProcedures } })
@@ -176,7 +173,7 @@ describe('Testing VotingProceduresContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<VotingProceduresContainer {...props} />, {
+      ({ queryByTestId } = render(<VotingProceduresContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -222,8 +219,7 @@ describe('Testing VotingProceduresContainer component', () => {
             url: t('core.VotingProcedures.anchor.url')
           },
           dRepId: t('core.VotingProcedures.dRepId')
-        },
-        errorMessage
+        }
       },
       {}
     );
