@@ -18,6 +18,7 @@ export {
   StakeSummary,
   SortField,
   EraSummary,
+  HandleResolution,
   TxSubmissionError
 } from '@cardano-sdk/core';
 
