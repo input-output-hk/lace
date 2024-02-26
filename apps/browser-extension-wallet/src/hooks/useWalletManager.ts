@@ -171,7 +171,7 @@ const createHardwareWallet = async ({
 
   const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
     metadata: { name },
-    type: WalletType.Ledger,
+    type: connectedDevice,
     accounts: [
       {
         extendedAccountPublicKey: keyAgent.extendedAccountPublicKey,
