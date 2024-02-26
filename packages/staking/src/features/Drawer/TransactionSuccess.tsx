@@ -2,7 +2,7 @@
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, PostHogAction } from '@lace/common';
 import cn from 'classnames';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -19,9 +19,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
     submittingState: { isRestaking },
     analytics,
   } = useOutsideHandles();
-  const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
-    draftPortfolio: store.draftPortfolio,
-  }));
+  const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
 
   const { title, description } = useMemo(() => {
     // un-delegation case

@@ -104,6 +104,11 @@ export const darkThemeColors: typeof colorsContract = {
   $getStartedStepNumberColor: laceGradient,
   $multidelegationBetaModalPillBackground: laceGradient,
   $multidelegationBetaModalPillText: darkColorScheme.$primary_white,
+  $poolCardMetricColor: darkColorScheme.$primary_light_grey,
+  $poolCardProgressBarBaseBackgroundColor: darkColorScheme.$primary_dark_grey_plus,
+  $poolCardProgressBarValue: darkColorScheme.$primary_light_grey,
+  $poolCardSelectedBorderColor: darkColorScheme.$primary_accent_purple,
+  $poolItemEvenBackground: darkColorScheme.$primary_light_black,
   $preferencesDrawerNoPoolsTextColor: darkColorScheme.$primary_light_grey,
   $preferencesPoolCardBorderColor: darkColorScheme.$primary_mid_black,
   // TODO: use darkColorScheme instead
