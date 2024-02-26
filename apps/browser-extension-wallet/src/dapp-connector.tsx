@@ -5,13 +5,7 @@ import { StoreProvider } from '@stores';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import { CurrencyStoreProvider } from '@providers/currency';
-import {
-  DatabaseProvider,
-  AxiosClientProvider,
-  AppSettingsProvider,
-  CardanoWalletManagerProvider,
-  AnalyticsProvider
-} from '@providers';
+import { DatabaseProvider, AxiosClientProvider, AppSettingsProvider, AnalyticsProvider } from '@providers';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '@providers/ThemeProvider';
 import { UIThemeProvider } from '@providers/UIThemeProvider';
@@ -24,31 +18,29 @@ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay'
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
     <AppSettingsProvider>
-      <CardanoWalletManagerProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_POPUP}>
-            <AxiosClientProvider>
-              <CurrencyStoreProvider>
-                <HashRouter>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <AddressesDiscoveryOverlay>
-                            <UIThemeProvider>
-                              <DappConnectorView />
-                            </UIThemeProvider>
-                          </AddressesDiscoveryOverlay>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </HashRouter>
-              </CurrencyStoreProvider>
-            </AxiosClientProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </CardanoWalletManagerProvider>
+      <DatabaseProvider>
+        <StoreProvider appMode={APP_MODE_POPUP}>
+          <AxiosClientProvider>
+            <CurrencyStoreProvider>
+              <HashRouter>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <AddressesDiscoveryOverlay>
+                          <UIThemeProvider>
+                            <DappConnectorView />
+                          </UIThemeProvider>
+                        </AddressesDiscoveryOverlay>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </HashRouter>
+            </CurrencyStoreProvider>
+          </AxiosClientProvider>
+        </StoreProvider>
+      </DatabaseProvider>
     </AppSettingsProvider>
   </BackgroundServiceAPIProvider>
 );

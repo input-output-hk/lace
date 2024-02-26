@@ -6,8 +6,8 @@ import { useObservable } from '@lace/common';
 
 const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 
-export const useMaxAda = (): BigInt => {
-  const [maxADA, setMaxADA] = useState<BigInt>();
+export const useMaxAda = (): bigint => {
+  const [maxADA, setMaxADA] = useState<bigint>();
   const { walletInfo, inMemoryWallet } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.available$);
   const availableRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);

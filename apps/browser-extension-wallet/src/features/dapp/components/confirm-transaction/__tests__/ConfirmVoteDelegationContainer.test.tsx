@@ -1,10 +1,12 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+/* eslint-disable sonarjs/no-identical-functions */
 const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockConfirmVoteDelegation = jest.fn();
+const mockUseViewsFlowContext = jest.fn();
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { ConfirmVoteDelegationContainer } from '../ConfirmVoteDelegationContainer';
@@ -32,8 +34,20 @@ const inMemoryWallet = {
 };
 
 const cardanoCoinMock = {
+  name: 'Cardano',
   symbol: 'cardanoCoinMockSymbol'
 };
+
+const dappInfo = {
+  name: 'dappName',
+  logo: 'dappLogo',
+  url: 'dappUrl'
+};
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: mockUseViewsFlowContext
+}));
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -66,6 +80,7 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
       walletUI: { cardanoCoin: cardanoCoinMock },
       walletInfo: {}
     }));
+    mockUseViewsFlowContext.mockReset();
     mockConfirmVoteDelegation.mockReset();
     mockConfirmVoteDelegation.mockReturnValue(<span data-testid="ConfirmVoteDelegation" />);
     mockUseTranslation.mockReset();
@@ -78,15 +93,8 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
     cleanup();
   });
 
-  test('should render ConfirmVoteDelegation component with proper props', async () => {
+  test('should render ConfirmVoteDelegation component with DRep ID', async () => {
     let queryByTestId: any;
-    let rerender: any;
-
-    const dappInfo = {
-      name: 'dappName',
-      logo: 'dappLogo',
-      url: 'dappUrl'
-    };
     const certificate: Wallet.Cardano.Certificate = {
       __typename: Wallet.Cardano.CertificateType.VoteDelegation,
       dRep: {
@@ -98,15 +106,28 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
         hash: Wallet.Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
       }
     };
-    const tx = buildMockTx({
-      certificates: [certificate]
-    });
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: {
+        request: {
+          transaction: {
+            toCore: jest.fn().mockReturnValue(
+              buildMockTx({
+                certificates: [certificate]
+              })
+            )
+          }
+        }
+      },
+      dappInfo
+    }));
+
     const errorMessage = 'errorMessage';
-    const props = { signTxData: { dappInfo, tx }, errorMessage };
+    const props = { errorMessage };
     const dRep = certificate.dRep;
 
     await act(async () => {
-      ({ rerender, queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
         wrapper: getWrapper()
       }));
     });
@@ -133,50 +154,121 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
       },
       {}
     );
+  });
+
+  test('should render ConfirmVoteDelegation component with AlwaysAbstain', async () => {
+    let queryByTestId: any;
+    const certificate: Wallet.Cardano.Certificate = {
+      __typename: Wallet.Cardano.CertificateType.VoteDelegation,
+      dRep: { __typename: 'AlwaysAbstain' },
+      stakeCredential: {
+        type: Wallet.Cardano.CredentialType.KeyHash,
+        hash: Wallet.Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
+      }
+    };
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: {
+        request: {
+          transaction: {
+            toCore: jest.fn().mockReturnValue(
+              buildMockTx({
+                certificates: [certificate]
+              })
+            )
+          }
+        }
+      },
+      dappInfo
+    }));
+
+    const errorMessage = 'errorMessage';
+    const props = { errorMessage };
 
     await act(async () => {
-      rerender(
-        <ConfirmVoteDelegationContainer
-          {...{
-            signTxData: {
-              dappInfo,
-              tx: buildMockTx({
-                certificates: [{ ...certificate, dRep: { __typename: 'AlwaysAbstain' } }]
+      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('ConfirmVoteDelegation')).toBeInTheDocument();
+    expect(mockConfirmVoteDelegation).toHaveBeenLastCalledWith(
+      {
+        dappInfo,
+        metadata: {
+          alwaysAbstain: true,
+          alwaysNoConfidence: false
+        },
+        translations: {
+          metadata: t('core.VoteDelegation.metadata'),
+          option: t('core.VoteDelegation.option'),
+          labels: {
+            drepId: t('core.VoteDelegation.drepId'),
+            alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
+            alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
+          }
+        },
+        errorMessage
+      },
+      {}
+    );
+  });
+
+  test('should render ConfirmVoteDelegation component with AlwaysAbstain', async () => {
+    let queryByTestId: any;
+    const certificate: Wallet.Cardano.Certificate = {
+      __typename: Wallet.Cardano.CertificateType.VoteDelegation,
+      dRep: { __typename: 'AlwaysNoConfidence' },
+      stakeCredential: {
+        type: Wallet.Cardano.CredentialType.KeyHash,
+        hash: Wallet.Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
+      }
+    };
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: {
+        request: {
+          transaction: {
+            toCore: jest.fn().mockReturnValue(
+              buildMockTx({
+                certificates: [certificate]
               })
-            },
-            errorMessage
-          }}
-        />,
-        {
-          wrapper: getWrapper()
+            )
+          }
         }
-      );
-    });
-    expect(mockConfirmVoteDelegation.mock.calls[mockConfirmVoteDelegation.mock.calls.length - 1][0].metadata).toEqual({
-      alwaysAbstain: true,
-      alwaysNoConfidence: false
-    });
+      },
+      dappInfo
+    }));
+
+    const errorMessage = 'errorMessage';
+    const props = { errorMessage };
+
     await act(async () => {
-      rerender(
-        <ConfirmVoteDelegationContainer
-          {...{
-            signTxData: {
-              dappInfo,
-              tx: buildMockTx({
-                certificates: [{ ...certificate, dRep: { __typename: 'AlwaysNoConfidence' } }]
-              })
-            },
-            errorMessage
-          }}
-        />,
-        {
-          wrapper: getWrapper()
-        }
-      );
+      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer {...props} />, {
+        wrapper: getWrapper()
+      }));
     });
-    expect(mockConfirmVoteDelegation.mock.calls[mockConfirmVoteDelegation.mock.calls.length - 1][0].metadata).toEqual({
-      alwaysAbstain: false,
-      alwaysNoConfidence: true
-    });
+
+    expect(queryByTestId('ConfirmVoteDelegation')).toBeInTheDocument();
+    expect(mockConfirmVoteDelegation).toHaveBeenLastCalledWith(
+      {
+        dappInfo,
+        metadata: {
+          alwaysAbstain: false,
+          alwaysNoConfidence: true
+        },
+        translations: {
+          metadata: t('core.VoteDelegation.metadata'),
+          option: t('core.VoteDelegation.option'),
+          labels: {
+            drepId: t('core.VoteDelegation.drepId'),
+            alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
+            alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
+          }
+        },
+        errorMessage
+      },
+      {}
+    );
   });
 });

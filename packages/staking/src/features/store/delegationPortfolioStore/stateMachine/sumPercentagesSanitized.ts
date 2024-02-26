@@ -13,7 +13,6 @@ export const sumPercentagesSanitized = <K extends string, T extends { [key in K]
   decimals?: number;
 }) => {
   // BigNumbers are used to avoid vanilla-JS precision issues, see unit test
-  // eslint-disable-next-line unicorn/no-array-reduce
   const sum = items.reduce((acc, item) => acc.plus(new BigNumber(item[key])), new BigNumber(0));
   // cut-off at N or 10 decimal places
   return Number(sum.toFixed(decimals));

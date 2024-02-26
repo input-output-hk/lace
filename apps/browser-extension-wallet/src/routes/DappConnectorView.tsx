@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useRedirection, useWalletManager, useAppInit } from '@src/hooks';
+import { useAppInit } from '@src/hooks';
 import { dAppRoutePaths, walletRoutePaths } from '@routes';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
@@ -17,7 +17,6 @@ import {
 } from '../features/dapp';
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
-import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
 import { useAppSettingsContext } from '@providers';
 import dayjs from 'dayjs';
@@ -38,43 +37,21 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 export const DappConnectorView = (): React.ReactElement => {
   const { t } = useTranslation();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, initialHdDiscoveryCompleted } =
-    useWalletStore();
+  const { inMemoryWallet, cardanoWallet, walletInfo, initialHdDiscoveryCompleted } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
-  const { loadWallet } = useWalletManager();
-  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
-  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
-  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
-
   useAppInit();
 
   useEffect(() => {
     const load = async () => {
       // try to get key agent data from local storage if exist and initialize state
       // If no key agent and the wallet is not locked, display a message
-      const keyAgentFromStorage = getValueFromLocalStorage('keyAgentData');
-      if (!keyAgentFromStorage && !isWalletLocked()) {
+      if (cardanoWallet === null && !isWalletLocked()) {
         setHasNoAvailableWallet(true);
-      } else {
-        setKeyAgentData(keyAgentFromStorage);
       }
     };
     load();
-  }, [setKeyAgentData, isWalletLocked, currentChain]);
-
-  useEffect(() => {
-    // TODO: LW-7807 revise the sdk cip30 implementation
-    const callback = (result: boolean) => {
-      if (result) {
-        redirectToSignSuccess();
-      } else {
-        redirectToSignFailure();
-      }
-    };
-    loadWallet(callback);
-    setIsLoadingWallet(true);
-  }, [walletInfo, inMemoryWallet, isLoadingWallet, loadWallet, redirectToSignFailure, redirectToSignSuccess]);
+  }, [isWalletLocked, cardanoWallet]);
 
   const onCloseClick = useCallback(() => {
     tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
@@ -111,7 +88,7 @@ export const DappConnectorView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
+  if (!!cardanoWallet && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
         <Switch>

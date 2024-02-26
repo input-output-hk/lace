@@ -1,50 +1,62 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRetirement } from '@lace/core';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory, depositPaidWithSymbol, disallowSignTx, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
-import { SignTxData } from './types';
-import { useDisallowSignTx, useGetOwnPubDRepKeyHash } from './hooks';
+import { useGetOwnPubDRepKeyHash } from './hooks';
 import { Skeleton } from 'antd';
 import { DappError } from '../DappError';
+import { useViewsFlowContext } from '@providers';
+
+const { CertificateType } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
   onError: () => void;
 }
 
-export const ConfirmDRepRetirementContainer = ({ signTxData, onError, errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
-    Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative
-  )(signTxData.tx);
-  const depositPaidWithCardanoSymbol = Wallet.util.getFormattedAmount({
-    amount: certificate.deposit.toString(),
-    cardanoCoin
-  });
-
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+  const [certificate, setCertificate] = useState<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>();
   const { loading: loadingOwnPubDRepKeyHash, ownPubDRepKeyHash } = useGetOwnPubDRepKeyHash();
-  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
-  const disallow = useDisallowSignTx();
 
   useEffect(() => {
-    if (isNotOwnDRepKey) {
-      disallow({ error: 'DRep ID mismatch' });
+    if (!request) return;
+    const getCertificateData = async () => {
+      const txCertificate =
+        await certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
+          CertificateType.UnregisterDelegateRepresentative
+        )(request.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
+  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
+
+  useEffect(() => {
+    if (ownPubDRepKeyHash && isNotOwnDRepKey) {
+      disallowSignTx(request, false);
       onError();
     }
-  }, [disallow, isNotOwnDRepKey, onError]);
+  }, [ownPubDRepKeyHash, isNotOwnDRepKey, onError, request]);
 
   const onCloseClick = useCallback(() => {
     window.close();
   }, []);
 
-  if (loadingOwnPubDRepKeyHash) {
-    return <Skeleton />;
+  if (!certificate || loadingOwnPubDRepKeyHash) {
+    return <Skeleton loading />;
   }
 
   if (isNotOwnDRepKey) {
@@ -64,7 +76,7 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, onError, errorMessa
 
   return (
     <ConfirmDRepRetirement
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         depositReturned: depositPaidWithCardanoSymbol,
         drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)

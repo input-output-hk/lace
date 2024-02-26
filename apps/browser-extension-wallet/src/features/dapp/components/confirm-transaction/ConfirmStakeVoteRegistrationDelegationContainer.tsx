@@ -1,39 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmStakeVoteRegistrationDelegation } from '@lace/core';
-import { SignTxData } from './types';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory, depositPaidWithSymbol, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
+import { useViewsFlowContext } from '@providers';
+import { Skeleton } from 'antd';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
 }
 
-export const ConfirmStakeVoteRegistrationDelegationContainer = ({
-  signTxData,
-  errorMessage
-}: Props): React.ReactElement => {
+export const ConfirmStakeVoteRegistrationDelegationContainer = ({ errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin },
     currentChain
   } = useWalletStore();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.StakeVoteRegistrationDelegationCertificate>(
-    CertificateType.StakeVoteRegistrationDelegation
-  )(signTxData.tx);
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+  const [certificate, setCertificate] = useState<Wallet.Cardano.StakeVoteRegistrationDelegationCertificate>();
+
+  useEffect(() => {
+    const getCertificateData = async () => {
+      const txCertificate =
+        await certificateInspectorFactory<Wallet.Cardano.StakeVoteRegistrationDelegationCertificate>(
+          CertificateType.StakeVoteRegistrationDelegation
+        )(request.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  if (!certificate) {
+    return <Skeleton loading />;
+  }
+
   const dRep = certificate.dRep;
-  const depositPaidWithCardanoSymbol = Wallet.util.getFormattedAmount({
-    amount: certificate.deposit.toString(),
-    cardanoCoin
-  });
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
 
   return (
     <ConfirmStakeVoteRegistrationDelegation
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         poolId: certificate.poolId,
         stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)

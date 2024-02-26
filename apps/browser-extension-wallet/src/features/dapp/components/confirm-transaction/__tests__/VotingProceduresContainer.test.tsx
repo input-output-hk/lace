@@ -19,6 +19,7 @@ import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
 import { getVoterType, getVote, VoterTypeEnum, VotesEnum } from '@src/utils/tx-inspection';
 import { drepIDasBech32FromHash } from '../utils';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -55,6 +56,104 @@ jest.mock('react-i18next', () => {
   };
 });
 
+const dappInfo = {
+  name: 'dappName',
+  logo: 'dappLogo',
+  url: 'dappUrl'
+};
+const tx = buildMockTx();
+const errorMessage = 'errorMessage';
+const constitutionalCommitteeKeyHashVoter: Wallet.Cardano.ConstitutionalCommitteeKeyHashVoter = {
+  __typename: Wallet.Cardano.VoterType.ccHotKeyHash,
+  credential: {
+    type: Wallet.Cardano.CredentialType.KeyHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  }
+};
+const constitutionalCommitteeScriptHashVoter: Wallet.Cardano.ConstitutionalCommitteeScriptHashVoter = {
+  __typename: Wallet.Cardano.VoterType.ccHotScriptHash,
+  credential: {
+    type: Wallet.Cardano.CredentialType.ScriptHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  }
+};
+const drepKeyHashVoter: Wallet.Cardano.DrepKeyHashVoter = {
+  __typename: Wallet.Cardano.VoterType.dRepKeyHash,
+  credential: {
+    type: Wallet.Cardano.CredentialType.KeyHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  }
+};
+const drepScriptHashVoter: Wallet.Cardano.DrepScriptHashVoter = {
+  __typename: Wallet.Cardano.VoterType.dRepScriptHash,
+  credential: {
+    type: Wallet.Cardano.CredentialType.ScriptHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  }
+};
+const stakePoolKeyHashVoter: Wallet.Cardano.StakePoolKeyHashVoter = {
+  __typename: Wallet.Cardano.VoterType.stakePoolKeyHash,
+  credential: {
+    type: Wallet.Cardano.CredentialType.KeyHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  }
+};
+
+const voters = [
+  constitutionalCommitteeKeyHashVoter,
+  constitutionalCommitteeScriptHashVoter,
+  drepKeyHashVoter,
+  drepScriptHashVoter,
+  stakePoolKeyHashVoter
+];
+
+const votes = [
+  Wallet.Cardano.Vote.yes,
+  Wallet.Cardano.Vote.no,
+  Wallet.Cardano.Vote.abstain,
+  Wallet.Cardano.Vote.yes,
+  Wallet.Cardano.Vote.no
+];
+
+const votingProcedures = voters.map((voter, index) => ({
+  voter,
+  votes: [
+    {
+      actionId: {
+        id: Wallet.Cardano.TransactionId(`724a0a88b9470a714fc5bf84daf5851fa259a9b89e1a5453f6f5cd6595ad982${index}`),
+        actionIndex: 0
+      },
+      votingProcedure: {
+        vote: votes[index],
+        ...(index && {
+          anchor: {
+            url: `anchorUrl${index}`,
+            dataHash: Wallet.Crypto.Hash32ByteBase16(
+              Buffer.from(`anchorDataHashanchorDataHashanc${index}`).toString('hex')
+            )
+          }
+        })
+      }
+    }
+  ]
+}));
+
+const props = { errorMessage };
+
+const request = {
+  transaction: {
+    toCore: jest.fn().mockReturnValue({ ...tx, body: { ...tx.body, votingProcedures } })
+  } as any
+} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: () => ({
+    signTxRequest: { request },
+    dappInfo
+  })
+}));
+
 describe('Testing VotingProceduresContainer component', () => {
   beforeEach(() => {
     mockUseWalletStore.mockReset();
@@ -72,90 +171,6 @@ describe('Testing VotingProceduresContainer component', () => {
     jest.resetAllMocks();
     cleanup();
   });
-
-  const dappInfo = {
-    name: 'dappName',
-    logo: 'dappLogo',
-    url: 'dappUrl'
-  };
-  const tx = buildMockTx();
-  const errorMessage = 'errorMessage';
-  const constitutionalCommitteeKeyHashVoter: Wallet.Cardano.ConstitutionalCommitteeKeyHashVoter = {
-    __typename: Wallet.Cardano.VoterType.ccHotKeyHash,
-    credential: {
-      type: Wallet.Cardano.CredentialType.KeyHash,
-      hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-    }
-  };
-  const constitutionalCommitteeScriptHashVoter: Wallet.Cardano.ConstitutionalCommitteeScriptHashVoter = {
-    __typename: Wallet.Cardano.VoterType.ccHotScriptHash,
-    credential: {
-      type: Wallet.Cardano.CredentialType.ScriptHash,
-      hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-    }
-  };
-  const drepKeyHashVoter: Wallet.Cardano.DrepKeyHashVoter = {
-    __typename: Wallet.Cardano.VoterType.dRepKeyHash,
-    credential: {
-      type: Wallet.Cardano.CredentialType.KeyHash,
-      hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-    }
-  };
-  const drepScriptHashVoter: Wallet.Cardano.DrepScriptHashVoter = {
-    __typename: Wallet.Cardano.VoterType.dRepScriptHash,
-    credential: {
-      type: Wallet.Cardano.CredentialType.ScriptHash,
-      hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-    }
-  };
-  const stakePoolKeyHashVoter: Wallet.Cardano.StakePoolKeyHashVoter = {
-    __typename: Wallet.Cardano.VoterType.stakePoolKeyHash,
-    credential: {
-      type: Wallet.Cardano.CredentialType.KeyHash,
-      hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-    }
-  };
-
-  const voters = [
-    constitutionalCommitteeKeyHashVoter,
-    constitutionalCommitteeScriptHashVoter,
-    drepKeyHashVoter,
-    drepScriptHashVoter,
-    stakePoolKeyHashVoter
-  ];
-
-  const votes = [
-    Wallet.Cardano.Vote.yes,
-    Wallet.Cardano.Vote.no,
-    Wallet.Cardano.Vote.abstain,
-    Wallet.Cardano.Vote.yes,
-    Wallet.Cardano.Vote.no
-  ];
-
-  const votingProcedures = voters.map((voter, index) => ({
-    voter,
-    votes: [
-      {
-        actionId: {
-          id: Wallet.Cardano.TransactionId(`724a0a88b9470a714fc5bf84daf5851fa259a9b89e1a5453f6f5cd6595ad982${index}`),
-          actionIndex: 0
-        },
-        votingProcedure: {
-          vote: votes[index],
-          ...(index && {
-            anchor: {
-              url: `anchorUrl${index}`,
-              dataHash: Wallet.Crypto.Hash32ByteBase16(
-                Buffer.from(`anchorDataHashanchorDataHashanc${index}`).toString('hex')
-              )
-            }
-          })
-        }
-      }
-    ]
-  }));
-
-  const props = { signTxData: { dappInfo, tx: { ...tx, body: { ...tx.body, votingProcedures } } }, errorMessage };
 
   test('should render VotingProcedures component with proper props', async () => {
     let queryByTestId: any;
@@ -212,34 +227,6 @@ describe('Testing VotingProceduresContainer component', () => {
       },
       {}
     );
-  });
-
-  test('should render VotingProcedures with no txHashUrl for Sanchonet network', async () => {
-    let queryByTestId: any;
-    mockUseWalletStore.mockReset();
-    mockUseWalletStore.mockImplementation(() => ({
-      environmentName: 'Sanchonet'
-    }));
-    await act(async () => {
-      ({ queryByTestId } = render(<VotingProceduresContainer {...props} />, {
-        wrapper: getWrapper()
-      }));
-    });
-
-    expect(queryByTestId('VotingProcedures')).toBeInTheDocument();
-    const lastCockVotingProceduresCallParams =
-      mockVotingProcedures.mock.calls[mockVotingProcedures.mock.calls.length - 1][0];
-
-    let txHashUrls: Array<string> = [];
-
-    for (const data of lastCockVotingProceduresCallParams.data) {
-      txHashUrls = [
-        ...txHashUrls,
-        ...data.votes.map(({ actionId: { txHashUrl } }: { actionId: { txHashUrl?: string } }) => txHashUrl)
-      ];
-    }
-
-    expect(txHashUrls.filter((e) => !!e).length).toEqual(0);
   });
 
   test('testing getVoterType', () => {

@@ -162,7 +162,7 @@ Feature: ADA handle - popup view
   Scenario: Popup View - Send flow - Add address - Valid ADA handle
     When I click "Send" button on Tokens page in popup mode
     And I enter "$test_handle_3" in the bundle 1 recipient's address
-    And click "Add address" button 1 in address bar
+    And click "Add address" button inside address input 1
     And I fill address form with "test handle" name
     Then Green tick icon is displayed next to ADA handle
     And "Save address" button is enabled on "Add new address" drawer
@@ -171,7 +171,7 @@ Feature: ADA handle - popup view
   Scenario: Popup View - Send flow - Add address - Invalid ADA handle
     When I click "Send" button on Tokens page in popup mode
     And I enter "$test_handle_3" in the bundle 1 recipient's address
-    And click "Add address" button 1 in address bar
+    And click "Add address" button inside address input 1
     And I fill address form with "test handle" name
     And I fill address form with "$fake_handle" ADA handle
     Then Red "X" icon is displayed next to ADA handle

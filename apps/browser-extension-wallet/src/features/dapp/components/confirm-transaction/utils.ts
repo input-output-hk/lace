@@ -1,9 +1,9 @@
-/* eslint-disable no-console, complexity */
+/* eslint-disable sonarjs/no-small-switch */
+/* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
-import { RemoteApiPropertyType, exposeApi } from '@cardano-sdk/web-extension';
-import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
-import { UserPromptService } from '@lib/scripts/background/services';
+import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
+import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
@@ -12,50 +12,55 @@ const { CertificateType } = Wallet.Cardano;
 
 const DAPP_TOAST_DURATION = 50;
 
-export const disallowSignTx = ({ error = '', close = false }: { error?: string; close?: boolean } = {}): void => {
-  exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+export const readyToSign = (): void => {
+  exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
     {
       api$: of({
-        async allowSignTx(): Promise<boolean> {
-          return Promise.reject(new ApiError(APIErrorCode.InvalidRequest, error));
-        }
-      }),
-      baseChannel: DAPP_CHANNELS.userPrompt,
-      properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-    },
-    { logger: console, runtime }
-  );
-  close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
-};
-
-export const allowSignTx = (): void => {
-  exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-    {
-      api$: of({
-        async allowSignTx(): Promise<boolean> {
+        async readyToSignTx(): Promise<boolean> {
           return Promise.resolve(true);
         }
       }),
       baseChannel: DAPP_CHANNELS.userPrompt,
-      properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+      properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
     },
     { logger: console, runtime }
   );
 };
 
+export const disallowSignTx = async (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+  close = false
+): Promise<void> => {
+  await req.reject('User declined to sign');
+  close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+};
+
+export const allowSignTx = async (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+  callback?: () => void
+): Promise<void> => {
+  if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
+    throw new Error('Invalid state: expected hw wallet');
+  }
+  await req.sign();
+  callback && callback();
+};
+
 export const certificateInspectorFactory =
   <T extends Wallet.Cardano.Certificate>(type: Wallet.Cardano.CertificateType) =>
-  (tx: Wallet.Cardano.Tx): T | undefined =>
+  async (tx: Wallet.Cardano.Tx): Promise<T | undefined> =>
     tx?.body?.certificates?.find((certificate) => certificate.__typename === type) as T | undefined;
 
-export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.VotingProcedures | undefined =>
-  tx?.body?.votingProcedures;
+export const votingProceduresInspector = async (
+  tx: Wallet.Cardano.Tx
+): Promise<Wallet.Cardano.VotingProcedures | undefined> => tx?.body?.votingProcedures;
 
 // eslint-disable-next-line complexity
-export const proposalProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.ProposalProcedure[] | undefined =>
-  tx?.body?.proposalProcedures;
+export const proposalProceduresInspector = async (
+  tx: Wallet.Cardano.Tx
+): Promise<Wallet.Cardano.ProposalProcedure[] | undefined> => tx?.body?.proposalProcedures;
 
-export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
+export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxType> => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
@@ -84,7 +89,7 @@ export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
     stakeRegistrationDelegation,
     stakeVoteDelegationRegistration,
     proposalProcedures
-  } = inspector(tx as Wallet.Cardano.HydratedTx);
+  } = await inspector(tx as Wallet.Cardano.HydratedTx);
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
@@ -148,4 +153,13 @@ export const pubDRepKeyToHash = async (
   const pubDRepKey = await Wallet.Crypto.Ed25519PublicKey.fromHex(pubDRepKeyHex);
   const drepKeyHex = (await pubDRepKey.hash()).hex();
   return Wallet.Crypto.Hash28ByteBase16.fromEd25519KeyHashHex(drepKeyHex);
+};
+
+export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): string => {
+  switch (coinId.name) {
+    case 'Cardano':
+      return `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${coinId.symbol}`;
+    default:
+      throw new Error(`coinId ${coinId.name} not supported`);
+  }
 };

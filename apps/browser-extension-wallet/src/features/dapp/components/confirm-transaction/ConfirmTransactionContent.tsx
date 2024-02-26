@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { Skeleton } from 'antd';
 import { Wallet } from '@lace/cardano';
-import { SignTxData } from './types';
+// import { SignTxData } from './types';
 import { ConfirmDRepRegistrationContainer } from './ConfirmDRepRegistrationContainer';
 import { DappTransactionContainer } from './DappTransactionContainer';
 import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer';
@@ -16,16 +16,14 @@ import { ConfirmStakeVoteDelegationContainer } from './ConfirmStakeVoteDelegatio
 import { ProposalProceduresContainer } from './ProposalProceduresContainer';
 
 interface Props {
-  txType?: Wallet.Cip30TxType;
-  signTxData?: SignTxData;
-  errorMessage?: string;
+  txType: Wallet.Cip30TxType;
   onError?: () => void;
 }
 
-export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMessage }: Props): React.ReactElement => {
+export const ConfirmTransactionContent = ({ txType, onError }: Props): React.ReactElement => {
   const containerPerTypeMap: Record<
     Wallet.Cip30TxType,
-    (props: { signTxData: SignTxData; errorMessage?: string; onError?: () => void }) => React.ReactElement
+    (props: { errorMessage?: string; onError?: () => void }) => React.ReactElement
   > = useMemo(
     () => ({
       [Wallet.Cip30TxType.DRepRegistration]: ConfirmDRepRegistrationContainer,
@@ -45,11 +43,11 @@ export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMe
     []
   );
 
-  if (!signTxData || !txType) {
+  if (!txType) {
     return <Skeleton loading />;
   }
 
   const Container = containerPerTypeMap[txType] || DappTransactionContainer;
 
-  return <Container onError={onError} signTxData={signTxData} errorMessage={errorMessage} />;
+  return <Container onError={onError} />;
 };

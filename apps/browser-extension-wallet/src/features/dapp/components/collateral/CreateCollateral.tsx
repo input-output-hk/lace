@@ -6,7 +6,7 @@ import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
-import { useFetchCoinPrice, useWalletManager } from '@hooks';
+import { useFetchCoinPrice } from '@hooks';
 import { Layout } from '../Layout';
 import { Banner, Button, Password, inputProps, useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
@@ -16,6 +16,7 @@ import { useCurrencyStore } from '@providers';
 import { cardanoCoin } from '@src/utils/constants';
 import { Spin, Typography } from 'antd';
 import styles from './styles.module.scss';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 const { Text } = Typography;
 
@@ -27,13 +28,11 @@ export const CreateCollateral = ({
 }: DappCreateCollateralProps): React.ReactElement => {
   const { t } = useTranslation();
 
-  const { executeWithPassword } = useWalletManager();
-  const { inMemoryWallet, getKeyAgentType } = useWalletStore();
+  const { inMemoryWallet, walletType, isInMemoryWallet } = useWalletStore();
   const addresses = useObservable(inMemoryWallet.addresses$);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(true);
-  const { unlockWallet: validatePassword } = useWalletManager();
 
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
     setIsPasswordValid(true);
@@ -41,8 +40,6 @@ export const CreateCollateral = ({
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
-  const keyAgentType = getKeyAgentType();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
   const [collateralTx, setCollateralTx] = useState<{ fee: bigint; tx: Wallet.UnsignedTx }>();
 
   useEffect(() => {
@@ -65,11 +62,11 @@ export const CreateCollateral = ({
   const createCollateralTx = useCallback(async () => {
     setIsSubmitting(true);
     const submitTx = async () => {
-      const { tx } = await collateralTx.tx.sign();
-      await inMemoryWallet.submitTx(tx);
+      const signedTx = await collateralTx.tx.sign();
+      await inMemoryWallet.submitTx(signedTx);
       const utxo = await firstValueFrom(
         inMemoryWallet.utxo.available$.pipe(
-          map((utxos) => utxos.find((o) => o[0].txId === tx.id && o[1].value.coins === collateralInfo.amount)),
+          map((utxos) => utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === collateralInfo.amount)),
           filter(isNotNil),
           take(1)
         )
@@ -77,27 +74,24 @@ export const CreateCollateral = ({
       await inMemoryWallet.utxo.setUnspendable([utxo]);
       confirm([utxo]);
     };
-    if (isInMemory) {
-      try {
-        await validatePassword(password);
-        await executeWithPassword(password, submitTx, true);
-      } catch {
+
+    try {
+      await withSignTxConfirmation(submitTx, password);
+    } catch (error) {
+      if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
         setPassword('');
         setIsPasswordValid(false);
-        setIsSubmitting(false);
       }
-    } else {
-      // submit HW transaction
-      await submitTx();
     }
-  }, [collateralTx, collateralInfo.amount, isInMemory, inMemoryWallet, password, executeWithPassword, confirm]);
+    setIsSubmitting(false);
+  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm]);
 
   const confirmButtonLabel = useMemo(() => {
-    if (isInMemory) {
+    if (isInMemoryWallet) {
       return t('browserView.settings.wallet.collateral.confirm');
     }
-    return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: keyAgentType });
-  }, [isInMemory, keyAgentType, t]);
+    return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: walletType });
+  }, [isInMemoryWallet, walletType, t]);
 
   return (
     <Layout
@@ -111,7 +105,7 @@ export const CreateCollateral = ({
           <Text className={styles.collateralDescription} data-testid="collateral-description">
             {t('browserView.settings.wallet.collateral.amountDescription')}
           </Text>
-          {isInMemory && (
+          {isInMemoryWallet && (
             <div data-testid="collateral-password">
               <Spin spinning={false}>
                 <Password

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { userIdServiceMock, matomoClientMocks, postHogClientMocks } from '@src/utils/mocks/test-helpers';
+import { userIdServiceMock, postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
@@ -20,11 +20,6 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   getUserIdService: jest.fn().mockReturnValue(userIdServiceMock)
 }));
 
-jest.mock('@providers/AnalyticsProvider/matomo/MatomoClient', () => ({
-  ...jest.requireActual<any>('@providers/AnalyticsProvider/matomo/MatomoClient'),
-  MatomoClient: jest.fn().mockReturnValue(matomoClientMocks)
-}));
-
 jest.mock('@providers/PostHogClientProvider/client', () => ({
   ...jest.requireActual<any>('@providers/PostHogClientProvider/client'),
   PostHogClient: jest.fn().mockReturnValue(postHogClientMocks)
@@ -32,7 +27,9 @@ jest.mock('@providers/PostHogClientProvider/client', () => ({
 
 jest.mock('@stores', () => ({
   ...jest.requireActual<any>('@stores'),
-  useWalletStore: jest.fn().mockReturnValue({})
+  useWalletStore: jest.fn().mockReturnValue({
+    isWalletLocked: jest.fn()
+  })
 }));
 
 jest.mock('@hooks/useWalletManager', () => ({

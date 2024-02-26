@@ -1,41 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmVoteRegistrationDelegation } from '@lace/core';
-import { SignTxData } from './types';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory, depositPaidWithSymbol, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
+import { useViewsFlowContext } from '@providers';
+import { Skeleton } from 'antd';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
 interface Props {
-  signTxData: SignTxData;
   errorMessage?: string;
 }
 
-export const ConfirmVoteRegistrationDelegationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
+export const ConfirmVoteRegistrationDelegationContainer = ({ errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin },
-    currentChain
+    currentChain: { networkId }
   } = useWalletStore();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.VoteRegistrationDelegationCertificate>(
-    CertificateType.VoteRegistrationDelegation
-  )(signTxData.tx);
-  const dRep = certificate.dRep;
-  const depositPaidWithCardanoSymbol = Wallet.util.getFormattedAmount({
-    amount: certificate.deposit.toString(),
-    cardanoCoin
-  });
+  const {
+    signTxRequest: { request },
+    dappInfo
+  } = useViewsFlowContext();
+  const [certificate, setCertificate] = useState<Wallet.Cardano.VoteRegistrationDelegationCertificate>();
+
+  useEffect(() => {
+    if (!request) return;
+    const getCertificateData = async () => {
+      const txCertificate = await certificateInspectorFactory<Wallet.Cardano.VoteRegistrationDelegationCertificate>(
+        CertificateType.VoteRegistrationDelegation
+      )(request.transaction.toCore());
+      setCertificate(txCertificate);
+    };
+
+    getCertificateData();
+  }, [request]);
+
+  if (!certificate) {
+    return <Skeleton loading />;
+  }
+
+  const { dRep, deposit, stakeCredential } = certificate;
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(deposit, cardanoCoin);
 
   return (
     <ConfirmVoteRegistrationDelegation
-      dappInfo={signTxData.dappInfo}
+      dappInfo={dappInfo}
       metadata={{
         depositPaid: depositPaidWithCardanoSymbol,
-        stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)
-          .toAddress()
-          .toBech32(),
+        stakeKeyHash: RewardAddress.fromCredentials(networkId, stakeCredential).toAddress().toBech32(),
         alwaysAbstain: Wallet.Cardano.isDRepAlwaysAbstain(dRep),
         alwaysNoConfidence: Wallet.Cardano.isDRepAlwaysNoConfidence(dRep),
         ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: drepIDasBech32FromHash(dRep.hash) } : {})

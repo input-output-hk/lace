@@ -19,6 +19,7 @@ import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
 import { drepIDasBech32FromHash } from '../utils';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 const REWARD_ACCOUNT = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
 const STAKE_KEY_HASH = Wallet.Cardano.RewardAccount.toHash(REWARD_ACCOUNT);
@@ -36,8 +37,45 @@ const inMemoryWallet = {
 };
 
 const cardanoCoinMock = {
+  name: 'Cardano',
   symbol: 'cardanoCoinMockSymbol'
 };
+
+const dappInfo = {
+  name: 'dappName',
+  logo: 'dappLogo',
+  url: 'dappUrl'
+};
+const certificate: Wallet.Cardano.Certificate = {
+  __typename: Wallet.Cardano.CertificateType.StakeVoteRegistrationDelegation,
+  poolId: Wallet.Cardano.PoolId('pool126zlx7728y7xs08s8epg9qp393kyafy9rzr89g4qkvv4cv93zem'),
+  stakeCredential: {
+    type: Wallet.Cardano.CredentialType.KeyHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
+  },
+  dRep: {
+    type: Wallet.Cardano.CredentialType.KeyHash,
+    hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  },
+  deposit: BigInt('100000')
+};
+const tx = buildMockTx({
+  certificates: [certificate]
+});
+
+const request = {
+  transaction: {
+    toCore: jest.fn().mockReturnValue(tx)
+  } as any
+} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: () => ({
+    signTxRequest: { request },
+    dappInfo
+  })
+}));
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -92,7 +130,10 @@ describe('Testing ConfirmStakeVoteRegistrationDelegationContainer component', ()
     mockUseWalletStore.mockImplementation(() => ({
       inMemoryWallet,
       walletUI: { cardanoCoin: cardanoCoinMock },
-      walletInfo: {}
+      walletInfo: {},
+      currentChain: {
+        networkId: 0
+      }
     }));
     mockConfirmStakeVoteRegistrationDelegation.mockReset();
     mockConfirmStakeVoteRegistrationDelegation.mockReturnValue(
@@ -119,29 +160,8 @@ describe('Testing ConfirmStakeVoteRegistrationDelegationContainer component', ()
   test('should render ConfirmStakeVoteRegistrationDelegation component with proper props', async () => {
     let queryByTestId: any;
 
-    const dappInfo = {
-      name: 'dappName',
-      logo: 'dappLogo',
-      url: 'dappUrl'
-    };
-    const certificate: Wallet.Cardano.Certificate = {
-      __typename: Wallet.Cardano.CertificateType.StakeVoteRegistrationDelegation,
-      poolId: Wallet.Cardano.PoolId('pool126zlx7728y7xs08s8epg9qp393kyafy9rzr89g4qkvv4cv93zem'),
-      stakeCredential: {
-        type: Wallet.Cardano.CredentialType.KeyHash,
-        hash: Wallet.Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
-      },
-      dRep: {
-        type: Wallet.Cardano.CredentialType.KeyHash,
-        hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-      },
-      deposit: BigInt('100000')
-    };
-    const tx = buildMockTx({
-      certificates: [certificate]
-    });
     const errorMessage = 'errorMessage';
-    const props = { signTxData: { dappInfo, tx }, errorMessage };
+    const props = { errorMessage };
 
     await act(async () => {
       ({ queryByTestId } = render(<ConfirmStakeVoteRegistrationDelegationContainer {...props} />, {
@@ -155,7 +175,7 @@ describe('Testing ConfirmStakeVoteRegistrationDelegationContainer component', ()
         dappInfo,
         metadata: {
           poolId: certificate.poolId,
-          stakeKeyHash: drepIDasBech32FromHash(certificate.stakeCredential.hash),
+          stakeKeyHash: 'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
           depositPaid: `${certificate.deposit.toString()} ${cardanoCoinMock.symbol}`,
           alwaysAbstain: isDRepAlwaysAbstainMocked,
           alwaysNoConfidence: isDRepAlwaysNoConfidenceMocked,

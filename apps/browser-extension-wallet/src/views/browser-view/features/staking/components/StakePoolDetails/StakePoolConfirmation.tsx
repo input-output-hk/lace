@@ -23,12 +23,7 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { ContinueInBrowserDialog } from '@components/ContinueInBrowserDialog';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import ExclamationMarkIcon from '@src/assets/icons/exclamation-circle-small.svg';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
 
@@ -205,7 +200,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { t } = useTranslation();
   const { isBuildingTx, stakingError } = useStakePoolDetails();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const { getKeyAgentType, inMemoryWallet } = useWalletStore();
+  const { isInMemoryWallet, inMemoryWallet, walletType } = useWalletStore();
   const analytics = useAnalyticsContext();
 
   const { setIsRestaking } = useSubmitingState();
@@ -227,8 +222,6 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     },
     [backgroundServices]
   );
-  const keyAgentType = getKeyAgentType();
-  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
 
   const { setSection } = useStakePoolDetails();
   const { id: poolId } = useDelegationStore(stakePoolDetailsSelector);
@@ -236,20 +229,13 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { signAndSubmitTransaction } = useDelegationTransaction();
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.STAKING,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: popupView
-        ? AnalyticsEventNames.Staking.STAKING_CONFIRMATION_POPUP
-        : AnalyticsEventNames.Staking.STAKING_CONFIRMATION_BROWSER
-    });
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
-  }, [analytics, popupView]);
+  }, [analytics]);
 
   const handleConfirmation = useCallback(async () => {
     sendAnalytics();
     setIsConfirmingTx(false);
-    if (!isInMemory) {
+    if (!isInMemoryWallet) {
       setIsConfirmingTx(true);
       try {
         if (popupView) return toggleContinueDialog();
@@ -266,7 +252,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     return setSection(sectionsConfig[Sections.SIGN]);
   }, [
     sendAnalytics,
-    isInMemory,
+    isInMemoryWallet,
     setSection,
     popupView,
     toggleContinueDialog,
@@ -277,16 +263,16 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   ]);
 
   const confirmLabel = useMemo(() => {
-    if (!isInMemory) {
+    if (!isInMemoryWallet) {
       const staleLabels = popupView
         ? t('browserView.staking.details.confirmation.button.continueInAdvancedView')
-        : t('browserView.staking.details.confirmation.button.confirmWithDevice', { hardwareWallet: keyAgentType });
+        : t('browserView.staking.details.confirmation.button.confirmWithDevice', { hardwareWallet: walletType });
       return isConfirmingTx ? t('browserView.staking.details.confirmation.button.signing') : staleLabels;
     }
     return popupView
       ? t('staking.details.confirmation.button.confirm')
       : t('browserView.staking.details.confirmation.button.confirm');
-  }, [isConfirmingTx, isInMemory, t, popupView, keyAgentType]);
+  }, [isConfirmingTx, isInMemoryWallet, t, popupView, walletType]);
 
   return (
     <>

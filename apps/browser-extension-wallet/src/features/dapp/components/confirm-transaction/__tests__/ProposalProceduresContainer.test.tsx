@@ -15,6 +15,7 @@ import { ProposalProceduresContainer } from '../ProposalProceduresContainer';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 jest.mock('../proposal-procedures/HardForkInitiationActionContainer', () => {
   const original = jest.requireActual('../proposal-procedures/HardForkInitiationActionContainer');
@@ -124,8 +125,21 @@ const proposalProcedures = [
   { deposit, rewardAccount, anchor, governanceAction: treasuryWithdrawalsAction },
   { deposit, rewardAccount, anchor, governanceAction: updateCommittee }
 ];
-const signTxData = { dappInfo, tx: { ...tx, body: { ...tx.body, proposalProcedures } } };
-const props = { signTxData, errorMessage };
+const props = { errorMessage };
+
+const request = {
+  transaction: {
+    toCore: jest.fn().mockReturnValue({ ...tx, body: { ...tx.body, proposalProcedures } })
+  } as any
+} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: () => ({
+    signTxRequest: { request },
+    dappInfo
+  })
+}));
 
 describe('Testing ProposalProceduresContainer component', () => {
   afterEach(() => {
@@ -148,7 +162,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('TreasuryWithdrawalsActionContainer')).toBeInTheDocument();
     expect(queryByTestId('UpdateCommitteeActionContainer')).toBeInTheDocument();
 
-    const expectedProps = { dappInfo: signTxData.dappInfo, errorMessage, deposit, rewardAccount, anchor };
+    const expectedProps = { dappInfo, errorMessage, deposit, rewardAccount, anchor };
 
     expect(mockHardForkInitiationActionContainer).toHaveBeenLastCalledWith(
       { ...expectedProps, governanceAction: hardForkInitiationAction },

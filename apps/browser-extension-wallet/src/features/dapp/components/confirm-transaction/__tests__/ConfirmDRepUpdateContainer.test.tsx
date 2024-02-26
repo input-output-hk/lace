@@ -15,6 +15,7 @@ import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
 import { drepIDasBech32FromHash } from '../utils';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 const { Cardano, Crypto } = Wallet;
 
@@ -31,8 +32,44 @@ const inMemoryWallet = {
 };
 
 const cardanoCoinMock = {
+  name: 'Cardano',
   symbol: 'cardanoCoinMockSymbol'
 };
+
+const dappInfo: Wallet.DappInfo = {
+  name: 'dappName',
+  logo: 'dappLogo',
+  url: 'dappUrl'
+};
+
+const certificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.UpdateDelegateRepresentative,
+  dRepCredential: {
+    type: Cardano.CredentialType.KeyHash,
+    hash: Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  },
+  anchor: {
+    url: 'anchorUrl',
+    dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
+  }
+};
+const tx = buildMockTx({
+  certificates: [certificate]
+});
+
+const request = {
+  transaction: {
+    toCore: jest.fn().mockReturnValue(tx)
+  } as any
+} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: () => ({
+    signTxRequest: { request },
+    dappInfo
+  })
+}));
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -80,27 +117,8 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
   test('should render ConfirmDRepUpdate component with proper props', async () => {
     let queryByTestId: any;
 
-    const dappInfo = {
-      name: 'dappName',
-      logo: 'dappLogo',
-      url: 'dappUrl'
-    };
-    const certificate: Wallet.Cardano.Certificate = {
-      __typename: Cardano.CertificateType.UpdateDelegateRepresentative,
-      dRepCredential: {
-        type: Cardano.CredentialType.KeyHash,
-        hash: Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-      },
-      anchor: {
-        url: 'anchorUrl',
-        dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
-      }
-    };
-    const tx = buildMockTx({
-      certificates: [certificate]
-    });
     const errorMessage = 'errorMessage';
-    const props = { signTxData: { dappInfo, tx }, errorMessage };
+    const props = { errorMessage };
 
     await act(async () => {
       ({ queryByTestId } = render(<ConfirmDRepUpdateContainer {...props} />, {

@@ -17,9 +17,9 @@ import { config } from '@src/config';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { getTransactionAssetsId } from '@src/stores/slices';
 import { AddressListType } from '@src/views/browser-view/features/activity';
-import { allowSignTx, pubDRepKeyToHash, disallowSignTx, getTxType } from './utils';
-import { GetSignTxData, SignTxData } from './types';
+import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
 import { useWalletStore } from '@stores';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 export const useCreateAssetList = ({
   assets,
@@ -155,35 +155,23 @@ export const useCreateMintedAssetList = ({
     [assets, assetsInfo, metadata]
   );
 };
-export const useSignTxData = (getSignTxData: GetSignTxData): { signTxData?: SignTxData; errorMessage?: string } => {
-  const [signTxData, setSignTxData] = useState<{ dappInfo: Wallet.DappInfo; tx: Wallet.Cardano.Tx }>();
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  useEffect(() => {
-    getSignTxData()
-      .then((result) => {
-        setSignTxData(result);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-        // TODO: consider mocking or removing this log
-        console.error(error);
-      });
-  }, [getSignTxData, setSignTxData, setErrorMessage]);
+export const useDisallowSignTx = (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
+): ((close?: boolean) => void) => useCallback(() => disallowSignTx(req), [req]);
 
-  return { signTxData, errorMessage };
-};
+export const useAllowSignTx = (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
+): (() => void) => useCallback(() => allowSignTx(req), [req]);
 
-export const useDisallowSignTx = (): typeof disallowSignTx => useCallback(disallowSignTx, []);
-
-export const useAllowSignTx = (): (() => void) => useCallback(allowSignTx, []);
-
-export const useSignWithHardwareWallet = (): {
+export const useSignWithHardwareWallet = (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
+): {
   signWithHardwareWallet: () => Promise<void>;
   isConfirmingTx: boolean;
 } => {
-  const allow = useAllowSignTx();
-  const disallow = useDisallowSignTx();
+  const allow = useAllowSignTx(req);
+  const disallow = useDisallowSignTx(req);
   const redirectToSignFailure = useRedirection<Record<string, never>>(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const signWithHardwareWallet = useCallback(async () => {
@@ -191,8 +179,7 @@ export const useSignWithHardwareWallet = (): {
     try {
       await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
       allow();
-    } catch (error) {
-      console.error('error', error);
+    } catch {
       disallow();
       redirectToSignFailure({});
     }
@@ -202,7 +189,7 @@ export const useSignWithHardwareWallet = (): {
 };
 
 export const useTxSummary = ({
-  tx,
+  req,
   addressList,
   walletInfo,
   createAssetList,
@@ -210,52 +197,67 @@ export const useTxSummary = ({
 }: {
   addressList: AddressListType[];
   walletInfo: WalletInfo;
-  tx: Wallet.Cardano.Tx;
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   createAssetList: (txAssets: Wallet.Cardano.TokenMap) => Wallet.Cip30SignTxAssetItem[];
   createMintedAssetList: (txAssets: AssetsMintedInspection) => Wallet.Cip30SignTxAssetItem[];
-}): Wallet.Cip30SignTxSummary | undefined =>
-  useMemo((): Wallet.Cip30SignTxSummary | undefined => {
-    const txType = getTxType(tx);
-    const inspector = createTxInspector({
-      minted: assetsMintedInspector,
-      burned: assetsBurnedInspector
-    });
+}): Wallet.Cip30SignTxSummary | undefined => {
+  const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
 
-    const { minted, burned } = inspector(tx as Wallet.Cardano.HydratedTx);
+  useEffect(() => {
+    if (!req) {
+      setTxSummary(void 0);
+      return;
+    }
+    const getTxSummary = async () => {
+      const inspector = createTxInspector({
+        minted: assetsMintedInspector,
+        burned: assetsBurnedInspector
+      });
 
-    const addressToNameMap = new Map<string, string>(
-      addressList?.map((item: AddressListType) => [item.address, item.name])
-    );
+      const tx = req.transaction.toCore();
+      const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
+      const isMintTransaction = minted.length > 0 || burned.length > 0;
 
-    const externalOutputs = tx.body.outputs.filter((output) => {
-      if (txType === Wallet.Cip30TxType.Send) {
-        return walletInfo.addresses.every((addr) => output.address !== addr.address);
-      }
-      // Don't show withdrawal tx's etc
-      return output.address.toString() !== walletInfo.addresses[0].address.toString();
-    });
+      const txType = isMintTransaction ? Wallet.Cip30TxType.Mint : Wallet.Cip30TxType.Send;
+      const addressToNameMap = new Map<string, string>(
+        addressList?.map((item: AddressListType) => [item.address, item.name])
+      );
 
-    // eslint-disable-next-line unicorn/no-array-reduce
-    const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce(
-      (acc, txOut) => [
-        ...acc,
-        {
-          coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
-          recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
-          ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+      const externalOutputs = tx.body.outputs.filter((output) => {
+        if (txType === 'Send') {
+          return walletInfo.addresses.every((addr) => output.address !== addr.address);
         }
-      ],
-      []
-    );
+        return true;
+      });
 
-    return {
-      fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-      outputs: txSummaryOutputs,
-      type: txType,
-      mintedAssets: createMintedAssetList(minted),
-      burnedAssets: createMintedAssetList(burned)
+      const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
+        // Don't show withdrawl tx's etc
+        if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
+
+        return [
+          ...acc,
+          {
+            coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
+            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
+            ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+          }
+        ];
+      }, []);
+
+      // eslint-disable-next-line consistent-return
+      setTxSummary({
+        fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
+        outputs: txSummaryOutputs,
+        type: txType,
+        mintedAssets: createMintedAssetList(minted),
+        burnedAssets: createMintedAssetList(burned)
+      });
     };
-  }, [tx, addressList, createMintedAssetList, walletInfo.addresses, createAssetList]);
+    getTxSummary();
+  }, [req, walletInfo.addresses, createAssetList, createMintedAssetList, setTxSummary, addressList]);
+
+  return txSummary;
+};
 
 export const useOnBeforeUnload = (callBack: () => void): void => {
   useEffect(() => {

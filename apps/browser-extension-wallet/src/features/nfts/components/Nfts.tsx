@@ -13,12 +13,7 @@ import { ContentLayout } from '@src/components/Layout';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { getTokenList } from '@src/utils/get-token-list';
-import {
-  MatomoEventActions,
-  MatomoEventCategories,
-  AnalyticsEventNames,
-  PostHogAction
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import FolderIcon from '@assets/icons/new-folder-icon.component.svg';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { NFTFolderDrawer } from '@src/views/browser-view/features/nfts/components/CreateFolder/CreateFolderDrawer';
@@ -51,11 +46,6 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
 
   const onSelectNft = useCallback(
     (nft) => {
-      analytics.sendEventToMatomo({
-        category: MatomoEventCategories.VIEW_NFT,
-        action: MatomoEventActions.CLICK_EVENT,
-        name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_POPUP
-      });
       analytics.sendEventToPostHog(PostHogAction.NFTsImageClick);
       redirectToNftDetail({ params: { id: nft.assetId.toString() } });
     },

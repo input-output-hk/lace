@@ -139,7 +139,7 @@ export const txTransformer = async ({
   const depositReclaim = depositReclaimValue
     ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
     : undefined;
-  const { assets } = inspectTxValues({
+  const { assets } = await inspectTxValues({
     addresses: walletAddresses,
     tx: tx as unknown as Wallet.Cardano.HydratedTx,
     direction
@@ -187,7 +187,11 @@ export const txTransformer = async ({
   // which would prevent `inspectTxType` from determining whether tx is incoming or outgoing.
   // However at runtime, the "address" property is present (ATM) and the call below works.
   // SDK Ticket LW-8767 should fix the type of Input in TxInFlight to contain the address
-  const type = inspectTxType({ walletAddresses, tx: tx as unknown as Wallet.Cardano.HydratedTx });
+  const type = await inspectTxType({
+    walletAddresses,
+    tx: tx as unknown as Wallet.Cardano.HydratedTx,
+    inputResolver: { resolveInput }
+  });
 
   if (type === DelegationActivityType.delegation) {
     return splitDelegationTx(baseTransformedActivity);

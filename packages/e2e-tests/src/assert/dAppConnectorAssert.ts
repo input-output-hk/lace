@@ -379,7 +379,7 @@ class DAppConnectorAssert {
     expect(await DAppTransactionAllDonePage.closeButton.getText()).to.equal(await t('general.button.close'));
 
     Logger.log('saving tx hash: null'); // TODO save proper hash once it's added to the all done page
-    testContext.save('txHashValue', false);
+    testContext.saveWithOverride('txHashValue', false);
   }
 
   async assertSeeWindowCardanoLaceProperties() {

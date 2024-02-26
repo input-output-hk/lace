@@ -1,6 +1,7 @@
 import { DAPP_VIEWS } from '@src/features/dapp/config';
 import React, { useState, createContext, useContext } from 'react';
-import { useSearchParams } from '@lace/common';
+import { SignDataRequest, TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
 
 export type IViewAction<TArg> = (arg: TArg) => () => React.ReactElement;
 
@@ -20,6 +21,13 @@ export interface IViewState<T extends string> {
 
 const useViewsFlowState = (view: IViewState<DAPP_VIEWS>) => {
   const [currentView, setCurrentView] = useState(view.initial);
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+  const [signTxRequest, setSignTxRequest] = useState<
+    TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined
+  >();
+  const [signDataRequest, setSignDataRequest] = useState<
+    SignDataRequest<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined
+  >();
 
   const renderCurrentView = (): (() => React.ReactElement) => view.states[currentView].action(currentView);
 
@@ -32,16 +40,18 @@ const useViewsFlowState = (view: IViewState<DAPP_VIEWS>) => {
     const nextView = view.states[currentView].next;
     setCurrentView(nextView);
   };
-
-  const { logo, url, name } = useSearchParams(['logo', 'url', 'name']);
-
   return {
     currentView,
     utils: { renderCurrentView, setPreviousView, setNextView },
-    dappInfo: {
-      logo,
-      url,
-      name
+    dappInfo,
+    setDappInfo,
+    signTxRequest: {
+      set: setSignTxRequest,
+      request: signTxRequest
+    },
+    signDataRequest: {
+      set: setSignDataRequest,
+      request: signDataRequest
     }
   };
 };
