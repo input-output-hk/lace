@@ -1283,10 +1283,20 @@
       "passphraseInfo3": "Find out more.",
       "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
     },
-    "walletSetupMnemonicIntroStep": {
+    "walletSetupMnemonicStepRevamp": {
+      "writePassphraseTitle": "Save your recovery phrase",
+      "enterPassphrase": "Enter your secret passphrase",
+      "enterPassphraseDescription": "Please enter each word of your recovery phrase in the right order to verify it and recover your wallet.",
+      "body": "Now let's check you've got the correct secret passphrase. Enter each word of your passphrase in the right order to verify it.",
+      "writePassphraseSubtitle1": "Consider your recovery phrase as the master key to your wallet.",
+      "writePassphraseSubtitle2": "Watch video.",
+      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
+    },
+    "mnemonicVideoPopupContent": {
       "title": "Keeping your wallet secure",
-      "description": "Consider your recovery phrase as the master key to your wallet, and the only way to access your funds.",
-      "link": "Read More."
+      "description": "Learn about what is a recovery phrase, and how to keep it safe from the video below.",
+      "link": "Read More.",
+      "closeButton": "Got it"
     },
     "walletSetupMnemonicVerificationStep": {
       "enterPassphrase": "Enter your secret passphrase"

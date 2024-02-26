@@ -9,7 +9,7 @@ import {
   WalletSetupCreationStep,
   WalletSetupFinalStep,
   WalletSetupLegalStep,
-  WalletSetupMnemonicIntroStep,
+  MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
   WalletSetupPasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
@@ -44,23 +44,12 @@ import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
 import { useWalletStore } from '@src/stores';
 
-const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
-const walletSetupWizardForABTest = {
-  ...walletSetupWizard,
-  [WalletSetupSteps.PreMnemonic]: { ...walletSetupWizard['pre-mnemonic'], prev: WalletSetupSteps.Register },
-  [WalletSetupSteps.RecoveryPhraseLength]: {
-    ...walletSetupWizard['recovery-phrase-length'],
-    prev: WalletSetupSteps.Register
-  },
-  [WalletSetupSteps.Mnemonic]: { ...walletSetupWizard.mnemonic, prev: WalletSetupSteps.Register }
-};
-
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
 );
 
-const WalletSetupMnemonicStep = React.lazy(() =>
-  import('@lace/core').then((module) => ({ default: module.WalletSetupMnemonicStep }))
+const WalletSetupMnemonicStepRevamp = React.lazy(() =>
+  import('@lace/core').then((module) => ({ default: module.WalletSetupMnemonicStepRevamp }))
 );
 
 const WalletSetupMnemonicVerificationStep = React.lazy(() =>
@@ -145,14 +134,13 @@ export const WalletSetupWizard = ({
   };
 
   const walletSetupMnemonicStepTranslations = {
-    writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
-    body: t('core.walletSetupMnemonicStep.body'),
-    enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
-    enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
-    passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
-    passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
-    passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
-    passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
+    writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
+    body: t('core.walletSetupMnemonicStepRevamp.body'),
+    enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
+    enterPassphraseDescription: t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription'),
+    writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
+    writePassphraseSubtitle2: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'),
+    passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError')
   };
 
   const walletSetupModeStepTranslations = {
@@ -179,10 +167,11 @@ export const WalletSetupWizard = ({
     followDiscord: t('core.walletSetupFinalStep.followDiscord')
   };
 
-  const walletSetupMnemonicIntroStepTranslations = {
-    title: t('core.walletSetupMnemonicIntroStep.title'),
-    description: t('core.walletSetupMnemonicIntroStep.description'),
-    linkText: t('core.walletSetupMnemonicIntroStep.link')
+  const mnemonicVideoPopupContentTranslations = {
+    title: t('core.mnemonicVideoPopupContent.title'),
+    description: t('core.mnemonicVideoPopupContent.description'),
+    linkText: t('core.mnemonicVideoPopupContent.link'),
+    closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
   const walletSetupRegisterStepTranslations = {
@@ -228,9 +217,7 @@ export const WalletSetupWizard = ({
   }, [currentStep, setCurrentStep]);
 
   const moveBack = () => {
-    const prevStep = isCombinedPasswordNameStepEnabled
-      ? walletSetupWizardForABTest[currentStep].prev
-      : walletSetupWizard[currentStep].prev;
+    const prevStep = walletSetupWizard[currentStep].prev;
 
     if (prevStep) {
       setCurrentStep(prevStep);
@@ -332,7 +319,7 @@ export const WalletSetupWizard = ({
 
   const createFlowPasswordNextStep = () => {
     setupType === SetupType.CREATE
-      ? skipTo(WalletSetupSteps.PreMnemonic)
+      ? skipTo(WalletSetupSteps.Mnemonic)
       : useDifferentMnemonicLengths
       ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
       : skipTo(WalletSetupSteps.Mnemonic);
@@ -400,32 +387,25 @@ export const WalletSetupWizard = ({
     }
 
     return (
-      <WalletSetupMnemonicStep
+      <WalletSetupMnemonicStepRevamp
         mnemonic={mnemonic}
         onReset={(resetStage) => {
           setResetMnemonicStage(resetStage);
           setIsResetMnemonicModalOpen(true);
         }}
+        renderVideoPopupContent={({ onClose }) => (
+          <MnemonicVideoPopupContent
+            translations={mnemonicVideoPopupContentTranslations}
+            onClickVideo={() => {
+              // TODO: https://input-output.atlassian.net/browse/LW-9761 handle analytics here based on the stage argument
+            }}
+            videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
+            onClose={onClose}
+          />
+        )}
         onNext={moveForward}
-        onStepNext={(stage: MnemonicStage, step: number) => {
-          /* eslint-disable no-magic-numbers */
-          switch (step) {
-            case 0:
-              stage === 'input'
-                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK)
-                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_01_NEXT_CLICK);
-              break;
-            case 1:
-              stage === 'input'
-                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK)
-                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_09_NEXT_CLICK);
-              break;
-            case 2:
-              stage === 'input'
-                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK)
-                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_17_NEXT_CLICK);
-          }
-          /* eslint-enable no-magic-numbers */
+        onStepNext={() => {
+          // TODO: https://input-output.atlassian.net/browse/LW-9761 handle analytics here based on the stage argument
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
@@ -466,20 +446,6 @@ export const WalletSetupWizard = ({
           onAccept={() => handleAnalyticsChoice(true)}
           onBack={moveBack}
           translations={walletSetupAnalyticsStepTranslations}
-        />
-      )}
-      {currentStep === WalletSetupSteps.PreMnemonic && (
-        <WalletSetupMnemonicIntroStep
-          onBack={moveBack}
-          onNext={() => {
-            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.PASSPHRASE_INTRO_NEXT_CLICK);
-            moveForward();
-          }}
-          translations={walletSetupMnemonicIntroStepTranslations}
-          onClickVideo={() =>
-            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.PASSPHRASE_INTRO_PLAY_VIDEO_CLICK)
-          }
-          videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
         />
       )}
       {currentStep === WalletSetupSteps.Mnemonic && (

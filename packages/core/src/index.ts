@@ -19,6 +19,7 @@ export * from '@ui/components/InfoWallet';
 export * from '@ui/components/OutputSummary';
 export * from '@ui/components/OutputSummaryList';
 export * from '@ui/components/WalletSetup';
+export * from 'ui/components/WalletSetupRevamp';
 export * from '@ui/components/ConnectedDapp';
 export * from '@ui/components/SendReceive';
 export * from '@ui/components/DappInfo';

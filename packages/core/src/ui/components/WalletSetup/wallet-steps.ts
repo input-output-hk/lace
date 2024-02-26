@@ -20,12 +20,8 @@ export const walletSetupWizard: WalletSetupWizard = {
     prev: WalletSetupSteps.Password,
     next: WalletSetupSteps.Mnemonic
   },
-  [WalletSetupSteps.PreMnemonic]: {
-    prev: WalletSetupSteps.Password,
-    next: WalletSetupSteps.Mnemonic
-  },
   [WalletSetupSteps.Mnemonic]: {
-    prev: WalletSetupSteps.PreMnemonic,
+    prev: WalletSetupSteps.Password,
     next: WalletSetupSteps.Create
   },
   [WalletSetupSteps.Create]: {
