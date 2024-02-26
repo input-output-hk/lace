@@ -34,7 +34,8 @@ const { Text } = Typography;
 
 interface AddressInputProps {
   row: string;
-  currentNetwork: Wallet.Cardano.NetworkId;
+  currentNetworkId: Wallet.Cardano.NetworkId;
+  adaHandleSupported: boolean;
   isPopupView: boolean;
 }
 
@@ -50,7 +51,12 @@ export enum HandleVerificationState {
   CHANGED_OWNERSHIP = 'changedOwnership'
 }
 
-export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
+export const AddressInput = ({
+  adaHandleSupported,
+  row,
+  currentNetworkId,
+  isPopupView
+}: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
   const [addressInputValue, setAddressInputValue] = useState<inputValue>({ address: '' });
@@ -68,8 +74,16 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     [filteredAddresses]
   );
 
+  const recipientAddressTranslationKey = useMemo(
+    () =>
+      adaHandleSupported
+        ? 'core.destinationAddressInput.recipientAddress'
+        : 'core.destinationAddressInput.recipientAddressNoHandle',
+    [adaHandleSupported]
+  );
+
   const destinationAddressInputTranslations = {
-    recipientAddress: t('core.destinationAddressInput.recipientAddress')
+    recipientAddress: t(recipientAddressTranslationKey)
   };
 
   const isAddressInputInvalidHandle =
@@ -202,10 +216,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         !isAddressValid ||
         isValidAddressPerNetwork({
           address,
-          network: currentNetwork
+          network: currentNetworkId
         })
     };
-  }, [address, currentNetwork, handleVerificationState]);
+  }, [address, currentNetworkId, handleVerificationState]);
 
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 

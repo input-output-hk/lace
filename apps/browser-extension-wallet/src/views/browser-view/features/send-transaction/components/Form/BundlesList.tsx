@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AssetInfo, Sections } from '../../types';
 import { AddressInput } from './AddressInput';
 import { CoinInput } from './CoinInput';
@@ -63,6 +63,11 @@ export const BundlesList = ({
 
   const handleRemoveRow = (id: string) => removeExistingOutput(id);
 
+  const networkSupportsHandles = useMemo(
+    () => currentChain.networkMagic !== Wallet.Cardano.NetworkMagics.Sanchonet,
+    [currentChain.networkMagic]
+  );
+
   return (
     <>
       {ids.map((bundleId, idx) => (
@@ -79,7 +84,12 @@ export const BundlesList = ({
               onDeleteRow={() => handleRemoveRow(bundleId)}
             />
           )}
-          <AddressInput row={bundleId} currentNetwork={currentChain.networkId} isPopupView={isPopupView} />
+          <AddressInput
+            row={bundleId}
+            currentNetworkId={currentChain.networkId}
+            adaHandleSupported={networkSupportsHandles}
+            isPopupView={isPopupView}
+          />
           <CoinInput
             bundleId={bundleId}
             assets={assets}

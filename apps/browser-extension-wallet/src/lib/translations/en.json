@@ -1189,7 +1189,8 @@
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
     "destinationAddressInput": {
-      "recipientAddress": "Recipient's address or $handle"
+      "recipientAddress": "Recipient's address or $handle",
+      "recipientAddressNoHandle": "Recipient's address"
     },
     "editAddressForm": {
       "walletName": "Wallet name",
