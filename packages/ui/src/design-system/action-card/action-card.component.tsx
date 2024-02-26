@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 
-import cn from 'classnames';
-
 import { Box } from '../box';
 import { Flex } from '../flex';
 import * as Text from '../typography';

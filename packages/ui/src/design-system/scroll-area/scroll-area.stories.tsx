@@ -2,11 +2,10 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { ThemeColorScheme, LocalThemeProvider, sx } from '../../design-tokens';
+import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
 import { Box } from '../box';
-import { page, Variants, Section } from '../decorators';
-import { Grid } from '../grid';
-import { Cell } from '../grid/cell.component';
+import { page, Section, Variants } from '../decorators';
+import { Cell, Grid } from '../grid';
 import * as Text from '../typography';
 
 import { ScrollArea } from './scroll-area.component';

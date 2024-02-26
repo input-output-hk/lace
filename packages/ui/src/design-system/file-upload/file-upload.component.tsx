@@ -2,7 +2,6 @@ import React from 'react';
 
 import { ReactComponent as CheckFileUploadIcon } from '@lace/icons/dist/CheckFileUploadComponent';
 import { ReactComponent as UploadIcon } from '@lace/icons/dist/UploadGradientComponent';
-import cn from 'classnames';
 
 import { Box } from '../box';
 import { Divider } from '../divider';

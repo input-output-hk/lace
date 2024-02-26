@@ -1,4 +1,4 @@
-import { sx, style } from '../../design-tokens';
+import { style } from '../../design-tokens';
 
 export const subtitleBox = style({
   position: 'relative',
