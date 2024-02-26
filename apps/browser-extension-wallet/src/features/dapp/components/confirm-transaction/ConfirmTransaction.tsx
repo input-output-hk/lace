@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { useDisallowSignTx, useSignWithHardwareWallet, useOnBeforeUnload } from './hooks';
-import { getTitleKey, getTxType } from './utils';
+import { getTxType } from './utils';
 import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
@@ -20,6 +20,7 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { of, take } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
+import { Skeleton } from 'antd';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -45,7 +46,6 @@ export const ConfirmTransaction = (): React.ReactElement => {
     fetchTxType();
   }, [req]);
 
-  const title = txType ? t(getTitleKey(txType)) : '';
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
@@ -87,13 +87,17 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   useOnBeforeUnload(disallowSignTx);
 
+  const onError = useCallback(() => {
+    setConfirmTransactionError(true);
+  }, []);
+
   return (
     <Layout
       layoutClassname={cn(confirmTransactionError && styles.layoutError)}
       pageClassname={styles.spaceBetween}
-      title={!confirmTransactionError && title}
+      title={!confirmTransactionError && txType && t(`core.${txType}.title`)}
     >
-      {req && txType && <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />}
+      {req && txType ? <ConfirmTransactionContent txType={txType} onError={onError} /> : <Skeleton loading />}
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button

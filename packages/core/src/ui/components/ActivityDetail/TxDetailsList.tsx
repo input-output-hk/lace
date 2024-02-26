@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import { Tooltip } from 'antd';
 import cn from 'classnames';
 import React, { useState } from 'react';
@@ -9,37 +10,37 @@ import { DetailRows } from './components';
 import styles from './TransactionInputOutput.module.scss';
 import { TxDetails } from './types';
 
-const rotateOpen: React.CSSProperties = {
-  transform: 'rotate(180deg)',
-  transition: 'transform .2s linear'
-};
-
-const rotateClose: React.CSSProperties = {
-  transform: 'rotate(0deg)',
-  transition: 'transform .2s linear'
-};
-
 interface TxDetailListProps<T extends string> {
   testId: string;
   title: string;
+  subTitle: string;
   lists: TxDetails<T>[];
   translations: TranslationsFor<T>;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
 
-export const TxDetailList = function TxDetailList<T extends string>({
+export const TxDetailList = <T extends string>({
   testId,
   title,
+  subTitle,
   lists,
   tooltipContent,
   withSeparatorLine,
   translations
-}: TxDetailListProps<T>): React.ReactElement {
+}: TxDetailListProps<T>): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
-  const animation = isVisible ? rotateOpen : rotateClose;
-  const Icon = BracketDown ? <BracketDown className={styles.bracket} style={{ ...animation }} /> : <DownOutlined />;
+  const Icon = BracketDown ? (
+    <BracketDown
+      className={cn(styles.bracket, {
+        [styles.rotateOpen]: isVisible,
+        [styles.rotateClose]: !isVisible
+      })}
+    />
+  ) : (
+    <DownOutlined />
+  );
 
   return (
     <div data-testid={testId} className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine })}>
@@ -65,9 +66,15 @@ export const TxDetailList = function TxDetailList<T extends string>({
       {isVisible && (
         <div className={styles.txInOutContent} data-testid={`${testId}-lists`}>
           {lists.map((list, idx) => (
-            <div key={`${testId}-list-${idx}`} className={cn({ [styles.topBorderContent]: idx > 0 })}>
+            <React.Fragment key={`${testId}-list-${idx}`}>
+              <div className={cn({ [styles.topBorderContent]: idx > 0 })} />
+              {lists.length > 1 && (
+                <div key={`${testId}-list-header`} className={styles.listHeader}>
+                  <div className={styles.listHeaderTitle}>{`${subTitle} ${idx + 1}`}</div>
+                </div>
+              )}
               <DetailRows<T> translations={translations} testId={testId} list={list} />
-            </div>
+            </React.Fragment>
           ))}
         </div>
       )}

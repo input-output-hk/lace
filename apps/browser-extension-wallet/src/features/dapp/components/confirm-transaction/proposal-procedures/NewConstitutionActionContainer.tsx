@@ -67,14 +67,17 @@ export const NewConstitutionActionContainer = ({
   const data: Parameters<typeof NewConstitutionAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.newConstitutionAction.title'),
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+      deposit: Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin
+      }),
       rewardAccount
     },
     procedure: {
       anchor: {
         url: anchor.url,
         hash: anchor.dataHash,
-        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+        txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}`
       }
     },
     ...(governanceActionId && {

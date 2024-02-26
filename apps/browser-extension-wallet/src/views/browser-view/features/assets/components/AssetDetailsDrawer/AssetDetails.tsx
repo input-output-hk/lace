@@ -48,12 +48,7 @@ export const AssetDetails = ({
   const { environmentName } = useWalletStore();
   const openExternalLink = useExternalLinkOpener();
 
-  // TODO remove if sanchonet gets an explorer
-  const explorerBaseUrl = useMemo(() => {
-    if (environmentName === 'Sanchonet') return;
-    // eslint-disable-next-line consistent-return
-    return CEXPLORER_BASE_URL[environmentName];
-  }, [environmentName]);
+  const explorerBaseUrl = useMemo(() => CEXPLORER_BASE_URL[environmentName], [environmentName]);
   const isTxListLoading = activityListStatus === StateStatus.IDLE || activityListStatus === StateStatus.LOADING;
 
   return (
@@ -116,19 +111,13 @@ export const AssetDetails = ({
                     name: t('browserView.assetDetails.fingerprint'),
                     value: fingerprint,
                     showCopyIcon: true,
-                    // TODO remove if sanchonet gets an explorer
-                    ...(explorerBaseUrl && {
-                      onClick: () => openExternalLink(`${explorerBaseUrl}/${CEXPLORER_URL_PATHS.Asset}/${fingerprint}`)
-                    })
+                    onClick: () => openExternalLink(`${explorerBaseUrl}/${CEXPLORER_URL_PATHS.Asset}/${fingerprint}`)
                   },
                   {
                     name: t('browserView.assetDetails.policyId'),
                     value: policyId,
                     showCopyIcon: true,
-                    // TODO remove if sanchonet gets an explorer
-                    ...(explorerBaseUrl && {
-                      onClick: () => openExternalLink(`${explorerBaseUrl}/${CEXPLORER_URL_PATHS.Policy}/${policyId}`)
-                    })
+                    onClick: () => openExternalLink(`${explorerBaseUrl}/${CEXPLORER_URL_PATHS.Policy}/${policyId}`)
                   }
                 ]}
               />

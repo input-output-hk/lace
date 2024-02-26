@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRetirement } from '@lace/core';
 import { certificateInspectorFactory, depositPaidWithSymbol, disallowSignTx, drepIDasBech32FromHash } from './utils';
@@ -12,11 +12,10 @@ import { useViewsFlowContext } from '@providers';
 const { CertificateType } = Wallet.Cardano;
 
 interface Props {
-  errorMessage?: string;
   onError: () => void;
 }
 
-export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
@@ -41,23 +40,31 @@ export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props)
     getCertificateData();
   }, [request]);
 
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
+  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
+
+  useEffect(() => {
+    if (ownPubDRepKeyHash && isNotOwnDRepKey) {
+      disallowSignTx(request, true);
+      onError();
+    }
+  }, [ownPubDRepKeyHash, isNotOwnDRepKey, onError, request]);
+
+  const onCloseClick = useCallback(() => {
+    window.close();
+  }, []);
+
   if (!certificate || loadingOwnPubDRepKeyHash) {
     return <Skeleton loading />;
   }
-
-  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
-  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
 
   if (isNotOwnDRepKey) {
     return (
       <DappError
         title={t('core.DRepRetirement.drepIdMismatchScreen.title')}
         description={t('core.DRepRetirement.drepIdMismatchScreen.description')}
-        onMount={() => {
-          disallowSignTx(request, false);
-          onError();
-        }}
         containerTestId="drep-id-mismatch-container"
+        onCloseClick={onCloseClick}
         imageTestId="drep-id-mismatch-image"
         titleTestId="drep-id-mismatch-heading"
         descriptionTestId="drep-id-mismatch-description"
@@ -80,7 +87,6 @@ export const ConfirmDRepRetirementContainer = ({ onError, errorMessage }: Props)
           drepId: t('core.DRepRetirement.drepId')
         }
       }}
-      errorMessage={errorMessage}
     />
   );
 };

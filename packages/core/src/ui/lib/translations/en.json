@@ -50,18 +50,6 @@
             "coldCredential": "Cold credential",
             "hotCredential": "Hot credential",
             "drepCredential": "DRep credential"
-          },
-          "typenames": {
-            "VoteDelegationCertificate": "Vote Delegation",
-            "StakeVoteDelegationCertificate": "Stake Vote Delegation",
-            "StakeRegistrationDelegationCertificate": "Stake Registration Delegate",
-            "VoteRegistrationDelegationCertificate": "Vote Registration Delegate",
-            "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation",
-            "AuthorizeCommitteeHotCertificate": "Authorize Committee",
-            "ResignCommitteeColdCertificate": "Resign Committee",
-            "RegisterDelegateRepresentativeCertificate": "Register Delegate Representative",
-            "UnregisterDelegateRepresentativeCertificate": "Unregister Delegate Representative",
-            "UpdateDelegateRepresentativeCertificate": "Update Delegate Representative"
           }
         }
       }
@@ -104,7 +92,7 @@
       "sent": "Sent",
       "sending": "Sending",
       "header": "Summary of your activity",
-      "transactionHash": "Transaction Hash",
+      "transactionID": "Transaction ID",
       "status": "Status",
       "timestamp": "Timestamp",
       "inputs": "Inputs",
@@ -123,6 +111,7 @@
       "poolId": "Pool ID",
       "rewards": "Rewards",
       "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
+      "summary": "Summary",
       "copiedToClipboard": "Copied to clipboard",
       "pools": "Pool(s)",
       "self": "Self Transaction",
@@ -138,46 +127,263 @@
       "VoteDelegationCertificate": "Vote Delegation",
       "vote": "Vote Signing",
       "certificates": "Certificates",
+      "certificate": "Certificate",
       "certificateTitles": {
-        "certificateType": "Certificate type",
+        "certificateType": "Type",
+        "stakeKey": "Stake Key",
+        "poolId": "Pool ID",
         "drep": "DRep",
-        "anchor": "Anchor",
+        "drepId": "Drep ID",
+        "depositPaid": "Deposit paid",
+        "depositPaidInfo": "Deposit paid",
+        "depositReturned": "Deposit returned",
+        "depositReturnedInfo": "Deposit returned",
+        "anchorUrl": "Anchor URL",
+        "anchorHash": "Anchor Hash",
         "coldCredential": "Cold credential",
-        "hotCredential": "Hot credential",
-        "drepCredential": "DRep credential",
-        "depositPaid": "Deposit paid"
+        "hotCredential": "Hot credential"
       },
-      "votingProcedures": "Voting Procedures",
+      "votingProcedures": "Vote",
+      "votingProcedure": "Vote",
       "votingProcedureTitles": {
-        "voterType": "Voter type",
-        "voterCredential": "Voter Credential",
         "vote": "Vote",
-        "anchor": "Anchor",
-        "proposalTxHash": "Proposal Tx hash",
-        "actionIndex": "Governance action index"
+        "voterType": "Voter type",
+        "credentialType": "Voter Credential",
+        "drepId": "DRep ID",
+        "anchorUrl": "Anchor URL",
+        "anchorHash": "Anchor Hash",
+        "voteTypes": "Vote"
       },
-      "proposalProcedures": "Proposal Procedures",
+      "proposalProcedures": "Action",
+      "proposalProcedure": "Action",
       "proposalProcedureTitles": {
-        "type": "Procedure type",
-        "governanceActionId": "Governance action ID",
-        "rewardAccount": "Reward account",
-        "anchor": "Anchor",
-        "protocolParamUpdate": "Protocol parameter update(s)",
-        "protocolVersion": "Protocol version",
-        "withdrawals": "Withdrawals",
-        "membersToBeRemoved": "Members to remove",
-        "membersToBeAdded": "Members to add",
-        "newQuorumThreshold": "New quorum threshold",
-        "constitutionAnchor": "Constitution anchor"
+        "type": "Type",
+        "deposit": "Deposit",
+        "rewardAccount": "Reward Account",
+        "anchorHash": "Anchor Hash",
+        "anchorURL": "Anchor URL",
+        "actionIndex": "Action Index",
+        "governanceActionID": "Governance Action ID",
+        "withdrawal": "Withdrawal",
+        "withdrawalRewardAccount": "Withdrawal Reward Account",
+        "withdrawalAmount": "Withdrawal Amount",
+        "constitutionAnchorURL": "Constitution Anchor URL",
+        "constitutionScriptHash": "Constitution Script Hash",
+        "coldCredentialHash": "Cold Credential Hash",
+        "epoch": "Epoch",
+        "membersToBeAdded": "Members To Be Added",
+        "hash": "Hash",
+        "membersToBeRemoved": "Members To Be Removed",
+        "protocolVersionMajor": "Protocol Version Major",
+        "protocolVersionMinor": "Protocol Version Minor",
+        "protocolVersionPatch": "Protocol Version Patch"
       },
       "governanceActions": {
         "info_action": "Info Action",
         "hard_fork_initiation_action": "Hard Fork Initiation",
-        "parameter_change_action": "Parameter Change",
+        "parameter_change_action": "Protocol Parameter Update",
         "treasury_withdrawals_action": "Treasury Withdrawals",
         "no_confidence": "No Confidence",
         "update_committee": "Update Committee",
         "new_constitution": "New Constitution"
+      },
+      "epoch": "epoch",
+      "epochs": "epochs",
+      "voterType": {
+        "constitutionalCommittee": "Constitutional Committee",
+        "spo": "SPO",
+        "drep": "DRep"
+      },
+      "voteTypes": {
+        "yes": "Yes",
+        "no": "No",
+        "abstain": "Abstain"
+      },
+      "credentialType": {
+        "KeyHash": "Keyhash",
+        "ScriptHash": "Scripthash"
+      }
+    },
+    "ProposalProcedure": {
+      "dRepId": "DRep ID",
+      "txDetails": {
+        "deposit": "Deposit",
+        "rewardAccount": "Reward account",
+        "title": "Transaction Details",
+        "txType": "Transaction Type"
+      },
+      "procedure": {
+        "anchor": {
+          "hash": "Anchor Hash",
+          "url": "Anchor URL"
+        },
+        "title": "Procedure",
+        "dRepId": "DRep ID"
+      },
+      "governanceAction": {
+        "actionId": {
+          "title": "Action ID",
+          "index": "Index",
+          "txId": "TX ID"
+        },
+        "hardForkInitiation": {
+          "title": "Hard Fork Initiation",
+          "protocolVersion": {
+            "major": "Protocol Version Major",
+            "minor": "Protocol Version Minor",
+            "patch": "Protocol Version Patch"
+          }
+        },
+        "newConstitutionAction": {
+          "title": "New Constitution Action",
+          "constitution": {
+            "title": "Constitution Details",
+            "anchor": {
+              "dataHash": "Anchor Data Hash",
+              "url": "Constitution Anchor URL"
+            },
+            "scriptHash": "Constitution Script Hash"
+          }
+        },
+        "infoAction": {
+          "title": "Info Action"
+        },
+        "noConfidenceAction": {
+          "title": "No Confidence"
+        },
+        "protocolParamUpdate": {
+          "title": "Protocol Parameter Update",
+          "memory": "Memory",
+          "step": "Step",
+          "networkGroup": {
+            "title": "Network group",
+            "maxBBSize": "Max BB Size",
+            "maxTxSize": "Max Tx Size",
+            "maxBHSize": "Max BH Size",
+            "maxValSize": "Max Val Size",
+            "maxTxExUnits": "Max TX Ex Units",
+            "maxBlockExUnits": "Max Blk Ex Units",
+            "maxCollateralInputs": "Max Coll Inputs",
+            "tooltip": {
+              "maxBBSize": "Max block body size",
+              "maxTxSize": "Max transaction size",
+              "maxBHSize": "Max block header size",
+              "maxValSize": "Max size of a serialized asset value",
+              "maxTxExUnits": "Max script execution units in a single transaction",
+              "maxBlockExUnits": "Max script execution units in a single block",
+              "maxCollateralInputs": "Max number of collateral inputs"
+            }
+          },
+          "economicGroup": {
+            "title": "Economic group",
+            "minFeeA": "Min Fee A",
+            "minFeeB": "Min Fee B",
+            "keyDeposit": "Key Deposit",
+            "poolDeposit": "Pool Deposit",
+            "rho": "Rho",
+            "tau": "Tau",
+            "minPoolCost": "Min Pool Cost",
+            "coinsPerUTxOByte": "Coins/UTxO Byte",
+            "prices": "Price",
+            "tooltip": {
+              "minFeeA": "Min fee coefficient",
+              "minFeeB": "Min fee constant",
+              "keyDeposit": "Delegation key Lovelace deposit",
+              "poolDeposit": "Pool registration Lovelace deposit",
+              "rho": "Monetary expansion",
+              "tau": "Treasury expansion",
+              "minPoolCost": "Min fixed rewards cut for pools",
+              "coinsPerUTxOByte": "Min Lovelace deposit per byte of serialized UTxO",
+              "prices": "Prices of Plutus execution units"
+            }
+          },
+          "technicalGroup": {
+            "title": "Technical group",
+            "a0": "A0",
+            "eMax": "EMax",
+            "nOpt": "NOpt",
+            "costModels": "Cost Models",
+            "PlutusV1": "PlutusV1",
+            "PlutusV2": "PlutusV2",
+            "collateralPercentage": "Coll Percentage",
+            "tooltip": {
+              "a0": "Pool pledge influence",
+              "eMax": "Pool retirement maximum epoch",
+              "nOpt": "Desired number of pools",
+              "costModels": "Plutus execution cost models",
+              "collateralPercentage": "Proportion of collateral needed for scripts"
+            }
+          },
+          "governanceGroup": {
+            "title": "Governance group",
+            "govActionLifetime": "Gov Act Lifetime",
+            "govActionDeposit": "Gov Act Deposit",
+            "drepDeposit": "DRep Deposit",
+            "drepActivity": "DRep Activity",
+            "ccMinSize": "CC Min Size",
+            "ccMaxTermLength": "CC Max Term Length",
+            "dRepVotingThresholds": {
+              "title": "Governance Voting Thresholds",
+              "motionNoConfidence": "Motion No Conf",
+              "committeeNormal": "Comm Normal",
+              "committeeNoConfidence": "Comm No Conf",
+              "updateConstitution": "Update Const",
+              "hardForkInitiation": "Hard Fork Init",
+              "ppNetworkGroup": "PP Network Grp",
+              "ppEconomicGroup": "PP Economic Grp",
+              "ppTechnicalGroup": "PP Technical Grp",
+              "ppGovernanceGroup": "PP Governance Grp",
+              "treasuryWithdrawal": "Treasury Withdraw"
+            },
+            "tooltip": {
+              "govActionLifetime": "governance action maximum lifetime in epochs",
+              "govActionDeposit": "governance action deposit",
+              "drepDeposit": "DRep deposit amount",
+              "drepActivity": "DRep activity period in epochs",
+              "ccMinSize": "Min constitutional committee size",
+              "ccMaxTermLength": "Max term length (in epochs) for the constitutional committee members",
+              "dRepVotingThresholds": {
+                "title": "Governance voting thresholds",
+                "motionNoConfidence": "1. Motion of no-confidence",
+                "committeeNormal": "2a. New committee/threshold (normal state)",
+                "committeeNoConfidence": "2b. New committee/threshold (state of no-confidence)",
+                "updateConstitution": "3. Update to the Constitution or proposal policy",
+                "hardForkInitiation": "4. Hard-fork initiation",
+                "ppNetworkGroup": "5a. Protocol parameter changes, network group",
+                "ppEconomicGroup": "5b. Protocol parameter changes, economic group",
+                "ppTechnicalGroup": "5c. Protocol parameter changes, technical group",
+                "ppGovernanceGroup": "5d. Protocol parameter changes, governance group",
+                "treasuryWithdrawal": "6. Treasury withdrawal"
+              }
+            }
+          }
+        },
+        "treasuryWithdrawals": {
+          "title": "Treasury Withdrawals",
+          "withdrawals": {
+            "lovelace": "Withdrawal Amount",
+            "rewardAccount": "Withdrawal Reward Account"
+          }
+        },
+        "updateCommitteeAction": {
+          "title": "Update Committee Action",
+          "membersToBeAdded": {
+            "title": "Members To Be Added",
+            "coldCredential": {
+              "hash": "Cold Credential Hash",
+              "epoch": "Epoch"
+            }
+          },
+          "membersToBeRemoved": {
+            "title": "Members To Be Removed",
+            "hash": "Hash"
+          },
+          "newQuorumThreshold": {
+            "title": "New Quorum Threshold",
+            "denominator": "Denominator",
+            "numerator": "Numerator"
+          }
+        }
       }
     },
     "authorizeDapp": {

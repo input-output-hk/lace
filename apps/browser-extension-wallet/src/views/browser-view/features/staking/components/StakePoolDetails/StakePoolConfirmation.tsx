@@ -157,7 +157,10 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
                 })}
                 <div>
                   {renderAmountInfo(
-                    `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+                    Wallet.util.getFormattedAmount({
+                      amount: deposit.toString(),
+                      cardanoCoin
+                    }),
                     `${Wallet.util.convertAdaToFiat({
                       ada: Wallet.util.lovelacesToAdaString(deposit.toString()),
                       fiat: priceResult?.cardano?.price || 0
@@ -175,7 +178,10 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
               })}
               <div>
                 {renderAmountInfo(
-                  `${Wallet.util.lovelacesToAdaString(delegationTxFee)} ${cardanoCoin.symbol}`,
+                  Wallet.util.getFormattedAmount({
+                    amount: delegationTxFee,
+                    cardanoCoin
+                  }),
                   `${Wallet.util.convertAdaToFiat({
                     ada: Wallet.util.lovelacesToAdaString(delegationTxFee),
                     fiat: priceResult?.cardano?.price || 0

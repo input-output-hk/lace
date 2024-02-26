@@ -257,13 +257,16 @@ export const ParameterChangeActionContainer = ({
   const data: Parameters<typeof ParameterChangeAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.title'),
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+      deposit: Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin
+      }),
       rewardAccount
     },
     anchor: {
       url: anchor.url,
       hash: anchor.dataHash,
-      ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}`
     },
     protocolParamUpdate: {
       maxTxExUnits: {
@@ -299,7 +302,6 @@ export const ParameterChangeActionContainer = ({
         a0: poolInfluence,
         eMax: poolRetirementEpochBound.toString(),
         nOpt: desiredNumberOfPools.toString(),
-        // TODO: review cost model syntax/display
         costModels: {
           PlutusV1: Object.entries(costModels.get(Wallet.Cardano.PlutusLanguageVersion.V1)).reduce(
             (acc, cur) => ({ ...acc, [cur[0]]: cur[1] }),

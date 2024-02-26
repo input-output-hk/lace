@@ -85,7 +85,6 @@ const dappInfo = {
   logo: 'dappLogo',
   url: 'dappUrl'
 };
-const errorMessage = 'errorMessage';
 const tx = buildMockTx();
 const deposit = BigInt('10000');
 const rewardAccount = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
@@ -125,7 +124,6 @@ const proposalProcedures = [
   { deposit, rewardAccount, anchor, governanceAction: treasuryWithdrawalsAction },
   { deposit, rewardAccount, anchor, governanceAction: updateCommittee }
 ];
-const props = { errorMessage };
 
 const request = {
   transaction: {
@@ -151,7 +149,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ProposalProceduresContainer {...props} />));
+      ({ queryByTestId } = render(<ProposalProceduresContainer />));
     });
 
     expect(queryByTestId('HardForkInitiationActionContainer')).toBeInTheDocument();
@@ -162,7 +160,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('TreasuryWithdrawalsActionContainer')).toBeInTheDocument();
     expect(queryByTestId('UpdateCommitteeActionContainer')).toBeInTheDocument();
 
-    const expectedProps = { dappInfo, errorMessage, deposit, rewardAccount, anchor };
+    const expectedProps = { dappInfo, deposit, rewardAccount, anchor };
 
     expect(mockHardForkInitiationActionContainer).toHaveBeenLastCalledWith(
       { ...expectedProps, governanceAction: hardForkInitiationAction },

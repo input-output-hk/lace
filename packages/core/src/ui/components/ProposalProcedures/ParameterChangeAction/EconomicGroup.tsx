@@ -5,7 +5,10 @@ import * as Types from './ParameterChangeActionTypes';
 
 interface Props {
   economicGroup: Types.EconomicGroup;
-  translations: Types.Translations['economicGroup'];
+  translations: Types.Translations['economicGroup'] & {
+    memory: Types.Translations['memory'];
+    step: Types.Translations['step'];
+  };
 }
 
 export const EconomicGroup = ({ economicGroup, translations }: Props): JSX.Element => {
@@ -66,11 +69,11 @@ export const EconomicGroup = ({ economicGroup, translations }: Props): JSX.Eleme
           tooltip={translations.tooltip.prices}
           data={[
             {
-              label: 'Memory',
+              label: translations.memory,
               value: economicGroup.price.memory
             },
             {
-              label: 'Step',
+              label: translations.step,
               value: economicGroup.price.step
             }
           ]}

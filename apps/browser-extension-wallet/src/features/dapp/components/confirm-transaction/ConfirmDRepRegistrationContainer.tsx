@@ -9,11 +9,7 @@ import { Skeleton } from 'antd';
 
 const { CertificateType } = Wallet.Cardano;
 
-interface Props {
-  errorMessage?: string;
-}
-
-export const ConfirmDRepRegistrationContainer = ({ errorMessage }: Props): React.ReactElement => {
+export const ConfirmDRepRegistrationContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
@@ -42,6 +38,7 @@ export const ConfirmDRepRegistrationContainer = ({ errorMessage }: Props): React
 
   const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
 
+  // TODO: might be changed in scope of https://input-output.atlassian.net/browse/LW-9034
   return (
     <ConfirmDRepRegistration
       dappInfo={dappInfo}
@@ -60,7 +57,6 @@ export const ConfirmDRepRegistrationContainer = ({ errorMessage }: Props): React
           url: t('core.DRepRegistration.url')
         }
       }}
-      errorMessage={errorMessage}
     />
   );
 };

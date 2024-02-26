@@ -44,40 +44,108 @@ export enum TransactionActivityType {
 
 export type TxDetailsCertificateTitles =
   | 'certificateType'
-  | 'drep'
-  | 'anchor'
   | 'coldCredential'
   | 'hotCredential'
-  | 'drepCredential'
-  | 'depositPaid';
+  | 'stakeKey'
+  | 'drepId'
+  | 'anchorUrl'
+  | 'anchorHash'
+  | 'poolId'
+  | 'drep'
+  | 'depositPaid'
+  | 'depositPaidInfo'
+  | 'depositReturned'
+  | 'depositReturnedInfo'
+  | 'certificate';
 
 export type TxDetailsProposalProceduresTitles =
   | 'type'
-  | 'governanceActionId'
+  | 'deposit'
   | 'rewardAccount'
-  | 'anchor'
-  | 'protocolParamUpdate'
-  | 'protocolVersion'
-  | 'withdrawals'
-  | 'membersToBeRemoved'
-  | 'membersToBeAdded'
+  | 'anchorHash'
+  | 'anchorURL'
+  | 'governanceActionID'
+  | 'actionIndex'
   | 'newQuorumThreshold'
-  | 'constitutionAnchor';
+  | 'withdrawal'
+  | 'withdrawalRewardAccount'
+  | 'withdrawalAmount'
+  | 'constitutionAnchorURL'
+  | 'constitutionScriptHash'
+  | 'coldCredentialHash'
+  | 'epoch'
+  | 'membersToBeAdded'
+  | 'hash'
+  | 'membersToBeRemoved'
+  | 'protocolVersionMajor'
+  | 'protocolVersionMinor'
+  | 'protocolVersionPatch'
+  | 'maxTxExUnits'
+  | 'maxBlockExUnits'
+  | 'networkGroup'
+  | 'economicGroup'
+  | 'technicalGroup'
+  | 'costModels'
+  | 'governanceGroup'
+  | 'dRepVotingThresholds'
+  | 'memory'
+  | 'step'
+  | 'maxBBSize'
+  | 'maxTxSize'
+  | 'maxBHSize'
+  | 'maxValSize'
+  | 'maxCollateralInputs'
+  | 'minFeeA'
+  | 'minFeeB'
+  | 'keyDeposit'
+  | 'poolDeposit'
+  | 'rho'
+  | 'tau'
+  | 'minPoolCost'
+  | 'coinsPerUTxOByte'
+  | 'a0'
+  | 'eMax'
+  | 'nOpt'
+  | 'collateralPercentage'
+  | 'PlutusV1'
+  | 'PlutusV2'
+  | 'govActionLifetime'
+  | 'govActionDeposit'
+  | 'drepDeposit'
+  | 'drepActivity'
+  | 'ccMinSize'
+  | 'ccMaxTermLength'
+  | 'motionNoConfidence'
+  | 'committeeNormal'
+  | 'committeeNoConfidence'
+  | 'updateConstitution'
+  | 'hardForkInitiation'
+  | 'ppNetworkGroup'
+  | 'ppEconomicGroup'
+  | 'ppTechnicalGroup'
+  | 'ppGovernanceGroup'
+  | 'treasuryWithdrawal';
 
 export type TxDetailsVotingProceduresTitles =
   | 'voterType'
-  | 'voterCredential'
-  | 'vote'
-  | 'anchor'
-  | 'proposalTxHash'
-  | 'actionIndex';
+  | 'credentialType'
+  | 'voteTypes'
+  | 'drepId'
+  | 'anchorHash'
+  | 'anchorURL';
 
 export type TxDetail<T> = {
   title: T;
-  details: string[];
+  info?: T;
+  details: (string | [string, string])[];
 };
 
-export type TxDetails<T> = TxDetail<T>[];
+export type TxDetaisList<T> = {
+  header: T;
+  details: TxDetail<T>[];
+};
+
+export type TxDetails<T> = (TxDetail<T> | TxDetaisList<T>)[];
 
 export type GovernanceTransactionTypes =
   | ConwayEraCertificatesTypes

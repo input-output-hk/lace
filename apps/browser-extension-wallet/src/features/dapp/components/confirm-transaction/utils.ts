@@ -1,31 +1,16 @@
-/* eslint-disable no-console, complexity, sonarjs/no-small-switch */
+/* eslint-disable sonarjs/no-small-switch */
+/* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
 import type { UserPromptService } from '@lib/scripts/background/services';
-import { DAPP_CHANNELS } from '@src/utils/constants';
+import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
-import { sectionTitle, DAPP_VIEWS } from '../../config';
 
 const { CertificateType } = Wallet.Cardano;
 
 const DAPP_TOAST_DURATION = 50;
-
-export const getTitleKey = (txType: Wallet.Cip30TxType): string =>
-  [
-    Wallet.Cip30TxType.DRepRegistration,
-    Wallet.Cip30TxType.DRepRetirement,
-    Wallet.Cip30TxType.DRepUpdate,
-    Wallet.Cip30TxType.VoteDelegation,
-    Wallet.Cip30TxType.VotingProcedures,
-    Wallet.Cip30TxType.StakeVoteDelegation,
-    Wallet.Cip30TxType.VoteRegistrationDelegation,
-    Wallet.Cip30TxType.StakeRegistrationDelegation,
-    Wallet.Cip30TxType.StakeVoteDelegationRegistration
-  ].includes(txType)
-    ? `core.${txType}.title`
-    : sectionTitle[DAPP_VIEWS.CONFIRM_TX];
 
 export const readyToSign = (): void => {
   exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
@@ -172,8 +157,11 @@ export const pubDRepKeyToHash = async (
 
 export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): string => {
   switch (coinId.name) {
-    case 'Cardano':
-      return `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${coinId.symbol}`;
+    case cardanoCoin.name:
+      return Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin: coinId
+      });
     default:
       throw new Error(`coinId ${coinId.name} not supported`);
   }

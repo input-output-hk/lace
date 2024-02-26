@@ -54,18 +54,6 @@
             "deposit": "Deposit paid",
             "coldCredential": "Cold credential",
             "hotCredential": "Hot credential"
-          },
-          "typenames": {
-            "VoteDelegationCertificate": "Vote Delegation",
-            "StakeVoteDelegationCertificate": "Stake Vote Delegation",
-            "StakeRegistrationDelegationCertificate": "Stake Registration Delegate",
-            "VoteRegistrationDelegationCertificate": "Vote Registration Delegate",
-            "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation",
-            "AuthorizeCommitteeHotCertificate": "Authorize Committee",
-            "ResignCommitteeColdCertificate": "Resign Committee",
-            "RegisterDelegateRepresentativeCertificate": "Register Delegate Representative",
-            "UnregisterDelegateRepresentativeCertificate": "Unregister Delegate Representative",
-            "UpdateDelegateRepresentativeCertificate": "Update Delegate Representative"
           }
         }
       }
@@ -75,7 +63,7 @@
       "sent": "Sent",
       "sending": "Sending",
       "header": "Summary of your activity",
-      "transactionHash": "Transaction Hash",
+      "transactionID": "Transaction ID",
       "status": "Status",
       "timestamp": "Timestamp",
       "inputs": "Inputs",
@@ -1320,6 +1308,8 @@
             "eMax": "EMax",
             "nOpt": "NOpt",
             "costModels": "Cost Models",
+            "PlutusV1": "PlutusV1",
+            "PlutusV2": "PlutusV2",
             "collateralPercentage": "Coll Percentage",
             "tooltip": {
               "a0": "Pool pledge influence",
@@ -1338,7 +1328,7 @@
             "ccMinSize": "CC Min Size",
             "ccMaxTermLength": "CC Max Term Length",
             "dRepVotingThresholds": {
-              "title": "Governance voting thresholds",
+              "title": "Governance Voting Thresholds",
               "motionNoConfidence": "Motion No Conf",
               "committeeNormal": "Comm Normal",
               "committeeNoConfidence": "Comm No Conf",
@@ -1498,6 +1488,15 @@
       "option": "Yes",
       "stakeKeyHash": "Stake Key Hash",
       "depositPaid": "Deposit paid"
+    },
+    "Mint": {
+      "title": "Confirm transaction"
+    },
+    "Burn": {
+      "title": "Confirm transaction"
+    },
+    "Send": {
+      "title": "Confirm transaction"
     },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"

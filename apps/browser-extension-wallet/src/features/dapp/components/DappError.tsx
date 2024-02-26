@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { Image } from 'antd';
 import { useTranslation } from 'react-i18next';
 import Empty from '../../../assets/icons/empty.svg';
@@ -10,7 +10,6 @@ type DappErrorProps = {
   description: ReactNode;
   closeButtonLabel?: string;
   onCloseClick?: () => void;
-  onMount?: () => void;
   containerTestId: string;
   imageTestId: string;
   titleTestId: string;
@@ -22,7 +21,6 @@ export const DappError = ({
   description,
   closeButtonLabel,
   onCloseClick,
-  onMount,
   containerTestId,
   imageTestId,
   titleTestId,
@@ -32,13 +30,7 @@ export const DappError = ({
   const { t } = useTranslation();
   const handleClose = useCallback(() => {
     onCloseClick?.();
-    window.close();
   }, [onCloseClick]);
-
-  useEffect(() => {
-    onMount?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div data-testid={containerTestId} className={styles.dappErrorContainer}>

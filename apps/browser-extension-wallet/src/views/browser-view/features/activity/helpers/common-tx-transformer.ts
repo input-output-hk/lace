@@ -1,7 +1,10 @@
+/* eslint-disable max-statements */
+/* eslint-disable sonarjs/cognitive-complexity */
+/* eslint-disable complexity */
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
-import { inspectTxValues, inspectTxType, getVoterType, VoterTypeEnum, getVote } from '@src/utils/tx-inspection';
+import { inspectTxValues, inspectTxType, getVoterType, getCredentialType, getVote } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
@@ -18,9 +21,11 @@ import {
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
-import { drepIDasBech32FromHash } from '@src/features/dapp/components/confirm-transaction/utils';
+import { PriceResult } from '@hooks';
+import { formatPercentages } from '@lace/common';
+import { depositPaidWithSymbol } from '@src/features/dapp/components/confirm-transaction/utils';
 
-const { util, GovernanceActionType } = Wallet.Cardano;
+const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType } = Wallet.Cardano;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -202,36 +207,6 @@ export const txTransformer = async ({
   ];
 };
 
-type TransactionCertificate = {
-  __typename: Wallet.Cardano.CertificateType;
-  deposit?: BigInt;
-  dRep?: Wallet.Cardano.DelegateRepresentative;
-  coldCredential?: Wallet.Cardano.Credential;
-  hotCredential?: Wallet.Cardano.Credential;
-  dRepCredential?: Wallet.Cardano.Credential;
-  anchor?: Wallet.Cardano.Anchor;
-};
-
-type TransactionGovernanceProposal = {
-  deposit: BigInt;
-  rewardAccount: Wallet.Cardano.RewardAccount;
-  anchor: Wallet.Cardano.Anchor;
-  governanceAction: {
-    __typename: Wallet.Cardano.GovernanceActionType;
-    governanceActionId?: Wallet.Cardano.GovernanceActionId;
-    protocolParamUpdate?: Wallet.Cardano.ProtocolParametersUpdate;
-    protocolVersion?: Wallet.Cardano.ProtocolVersion;
-    withdrawals?: Set<{
-      rewardAccount: Wallet.Cardano.RewardAccount;
-      coin: BigInt;
-    }>;
-    membersToBeRemoved?: Set<Wallet.Cardano.Credential>;
-    membersToBeAdded?: Set<Wallet.Cardano.CommitteeMember>;
-    newQuorumThreshold?: Wallet.Cardano.Fraction;
-    constitution?: Wallet.Cardano.Constitution;
-  };
-};
-
 const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
   if (Wallet.Cardano.isDRepAlwaysAbstain(drep)) {
     return 'alwaysAbstain';
@@ -245,9 +220,10 @@ const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
 
 export const certificateTransformer = (
   cardanoCoin: Wallet.CoinId,
-  certificates?: TransactionCertificate[]
+  coinPrices: PriceResult,
+  fiatCurrency: CurrencyInfo,
+  certificates?: Wallet.Cardano.Certificate[]
 ): TxDetails<TxDetailsCertificateTitles>[] =>
-  // Currently only show enhanced certificate info for conway era certificates pending further discussion
   certificates
     ?.filter((certificate) =>
       Object.values(ConwayEraCertificatesTypes).includes(
@@ -259,46 +235,77 @@ export const certificateTransformer = (
         { title: 'certificateType', details: [conwayEraCertificate.__typename] }
       ];
 
-      if (conwayEraCertificate.anchor) {
+      if ('coldCredential' in conwayEraCertificate) {
         transformedCertificate.push({
-          title: 'anchor',
-          details: [conwayEraCertificate.anchor.url, conwayEraCertificate.anchor.dataHash]
+          title: 'coldCredential',
+          details: [conwayEraCertificate.coldCredential.hash.toString()]
         });
       }
 
-      if (conwayEraCertificate.dRep) {
+      if ('hotCredential' in conwayEraCertificate) {
+        transformedCertificate.push({
+          title: 'hotCredential',
+          details: [conwayEraCertificate.hotCredential.hash.toString()]
+        });
+      }
+
+      if ('stakeCredential' in conwayEraCertificate) {
+        transformedCertificate.push({
+          title: 'stakeKey',
+          details: [conwayEraCertificate.stakeCredential.hash.toString()]
+        });
+      }
+
+      if ('dRepCredential' in conwayEraCertificate) {
+        transformedCertificate.push({
+          title: 'drepId',
+          details: [conwayEraCertificate.dRepCredential.hash.toString()]
+        });
+      }
+
+      if ('anchor' in conwayEraCertificate && conwayEraCertificate.anchor) {
+        transformedCertificate.push(
+          {
+            title: 'anchorHash',
+            details: [conwayEraCertificate.anchor.dataHash.toString()]
+          },
+          {
+            title: 'anchorUrl',
+            details: [conwayEraCertificate.anchor.url]
+          }
+        );
+      }
+
+      if ('poolId' in conwayEraCertificate) {
+        transformedCertificate.push({
+          title: 'poolId',
+          details: [conwayEraCertificate.poolId.toString()]
+        });
+      }
+
+      if ('dRep' in conwayEraCertificate) {
         transformedCertificate.push({
           title: 'drep',
           details: [drepMapper(conwayEraCertificate.dRep)]
         });
       }
 
-      if (conwayEraCertificate.coldCredential) {
+      if ('deposit' in conwayEraCertificate) {
+        const depositTitle =
+          conwayEraCertificate.__typename === CertificateType.UnregisterDelegateRepresentative
+            ? 'depositReturned'
+            : 'depositPaid';
         transformedCertificate.push({
-          title: 'coldCredential',
-          details: [conwayEraCertificate.coldCredential.hash]
-        });
-      }
-
-      if (conwayEraCertificate.hotCredential) {
-        transformedCertificate.push({
-          title: 'hotCredential',
-          details: [conwayEraCertificate.hotCredential.hash]
-        });
-      }
-
-      if (conwayEraCertificate.dRepCredential) {
-        transformedCertificate.push({
-          title: 'drepCredential',
-          details: [conwayEraCertificate.dRepCredential.hash]
-        });
-      }
-
-      if (conwayEraCertificate.deposit) {
-        transformedCertificate.push({
-          title: 'depositPaid',
+          title: depositTitle,
+          info: `${depositTitle}Info`,
           details: [
-            `${Wallet.util.lovelacesToAdaString(conwayEraCertificate.deposit.toString())} ${cardanoCoin.symbol}`
+            [
+              Wallet.util.getFormattedAmount({ amount: conwayEraCertificate.deposit.toString(), cardanoCoin }),
+              `${Wallet.util.convertLovelaceToFiat({
+                lovelaces: conwayEraCertificate.deposit.toString(),
+                fiat: coinPrices?.cardano?.price
+              })} ${fiatCurrency?.code}`
+            ]
           ]
         });
       }
@@ -313,25 +320,25 @@ export const votingProceduresTransformer = (
 
   votingProcedures?.forEach((procedure) =>
     procedure.votes.forEach((vote) => {
-      const voterType = getVoterType(procedure.voter.__typename);
-      const voterCredential =
-        voterType === VoterTypeEnum.DREP
-          ? drepIDasBech32FromHash(procedure.voter.credential.hash)
-          : procedure.voter.credential.hash;
       const detail: TxDetails<TxDetailsVotingProceduresTitles> = [
         {
           title: 'voterType',
-          details: [voterType]
+          details: [getVoterType(procedure.voter.__typename)]
         },
         {
-          title: 'voterCredential',
-          details: [voterCredential]
+          title: 'credentialType',
+          details: [getCredentialType(procedure.voter.credential.type)]
         },
-        { title: 'vote', details: [getVote(vote.votingProcedure.vote)] },
-        { ...(!!vote.votingProcedure.anchor && { title: 'anchor', details: [vote.votingProcedure.anchor.url] }) },
-        { title: 'proposalTxHash', details: [vote.actionId.id] },
-        { title: 'actionIndex', details: [vote.actionId.actionIndex.toString()] }
+        { title: 'voteTypes', details: [getVote(vote.votingProcedure.vote)] },
+        { title: 'drepId', details: [getVote(vote.votingProcedure.vote)] }
       ];
+
+      if (vote.votingProcedure.anchor) {
+        detail.push(
+          { title: 'anchorURL', details: [vote.votingProcedure.anchor.url] },
+          { title: 'anchorHash', details: [vote.votingProcedure.anchor.dataHash.toString()] }
+        );
+      }
 
       votingProcedureDetails.push(detail.filter((el: TxDetail<TxDetailsVotingProceduresTitles>) => !isEmpty(el)));
     })
@@ -340,137 +347,406 @@ export const votingProceduresTransformer = (
   return votingProcedureDetails;
 };
 
-export const governanceProposalsTransformer = (
-  cardanoCoin: Wallet.CoinId,
-  proposalProcedures?: TransactionGovernanceProposal[]
-): TxDetails<TxDetailsProposalProceduresTitles>[] =>
-  proposalProcedures?.map(
-    ({
-      governanceAction: {
-        __typename,
-        governanceActionId: { id: actionId, actionIndex },
-        protocolParamUpdate,
-        protocolVersion: { major, minor, patch },
-        withdrawals,
-        membersToBeRemoved,
-        membersToBeAdded,
-        newQuorumThreshold,
-        constitution
+export const governanceProposalsTransformer = ({
+  cardanoCoin,
+  coinPrices,
+  fiatCurrency,
+  proposalProcedures
+}: {
+  cardanoCoin: Wallet.CoinId;
+  coinPrices: PriceResult;
+  fiatCurrency: CurrencyInfo;
+  proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
+}): TxDetails<TxDetailsProposalProceduresTitles>[] =>
+  proposalProcedures?.map((procedure) => {
+    const transformedProposal: TxDetails<TxDetailsProposalProceduresTitles> = [
+      { title: 'type', details: [procedure.governanceAction.__typename] },
+      {
+        ...(procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action && {
+          title: 'deposit',
+          info: 'deposit',
+          details: [
+            [
+              Wallet.util.getFormattedAmount({ amount: procedure.deposit.toString(), cardanoCoin }),
+              `${Wallet.util.convertLovelaceToFiat({
+                lovelaces: procedure.deposit.toString(),
+                fiat: coinPrices?.cardano?.price
+              })} ${fiatCurrency?.code}`
+            ]
+          ]
+        })
       },
-      deposit,
-      anchor,
-      rewardAccount
-    }) => {
-      // Default details across all proposals
-      const transformedProposal: TxDetails<TxDetailsProposalProceduresTitles> = [
-        { title: 'type', details: [__typename] },
+      { title: 'rewardAccount', details: [procedure.anchor.dataHash.toString()] },
+      { title: 'anchorURL', details: [procedure.anchor.url] },
+      { title: 'anchorHash', details: [procedure.anchor.dataHash.toString()] }
+    ];
+
+    if ('governanceActionId' in procedure.governanceAction && procedure.governanceAction.governanceActionId) {
+      transformedProposal.push(
         {
-          title: 'governanceActionId',
-          details: [Wallet.util.lovelacesToAdaString(deposit.toString()) + cardanoCoin.symbol]
+          title: 'governanceActionID',
+          details: [procedure.governanceAction.governanceActionId.id.toString()]
         },
         {
-          title: 'rewardAccount',
-          details: [rewardAccount]
-        },
-        {
-          title: 'anchor',
-          details: [anchor.url, anchor.dataHash]
+          title: 'actionIndex',
+          details: [procedure.governanceAction.governanceActionId.actionIndex.toString()]
         }
-      ];
-
-      // Proposal-specific properties
-      switch (__typename) {
-        case GovernanceActionType.parameter_change_action: {
-          transformedProposal.push({
-            title: 'protocolParamUpdate',
-            details: Object.entries(protocolParamUpdate).map(
-              ([parameter, proposedValue]) => `${parameter}: ${proposedValue.toString()}`
-            )
-          });
-          break;
-        }
-        case GovernanceActionType.hard_fork_initiation_action: {
-          const compiledProtovolVersion = [major, minor, patch].filter((x) => !!x).join('.');
-          if (actionId) {
-            transformedProposal.push({
-              title: 'governanceActionId',
-              details: [actionId, actionIndex.toString()]
-            });
-          }
-
-          transformedProposal.push({
-            title: 'protocolVersion',
-            details: [compiledProtovolVersion]
-          });
-          break;
-        }
-        case GovernanceActionType.treasury_withdrawals_action: {
-          const treasuryWithdrawals: string[] = [];
-
-          withdrawals.forEach(({ rewardAccount: withdrawalRewardAccount, coin }) => {
-            treasuryWithdrawals.push(
-              `${withdrawalRewardAccount}: ${Wallet.util.lovelacesToAdaString(coin.toString()) + cardanoCoin.symbol}`
-            );
-          });
-
-          transformedProposal.push({
-            title: 'withdrawals',
-            details: treasuryWithdrawals
-          });
-          break;
-        }
-        case GovernanceActionType.no_confidence: {
-          if (actionId) {
-            transformedProposal.push({
-              title: 'governanceActionId',
-              details: [actionId, actionIndex.toString()]
-            });
-          }
-          break;
-        }
-        case GovernanceActionType.update_committee: {
-          const membersToBeRemovedDetails: string[] = [];
-          const membersToBeAddedDetails: string[] = [];
-
-          membersToBeRemoved.forEach(({ hash }) => {
-            membersToBeRemovedDetails.push(hash);
-          });
-
-          membersToBeAdded.forEach(({ coldCredential }) => {
-            membersToBeAddedDetails.push(coldCredential.hash);
-          });
-
-          if (actionId) {
-            transformedProposal.push({
-              title: 'governanceActionId',
-              details: [actionId, actionIndex.toString()]
-            });
-          }
-
-          transformedProposal.push(
-            {
-              title: 'membersToBeAdded',
-              details: membersToBeAddedDetails
-            },
-            {
-              title: 'membersToBeRemoved',
-              details: membersToBeRemovedDetails
-            },
-            {
-              title: 'newQuorumThreshold',
-              details: [`${newQuorumThreshold.numerator}\\${newQuorumThreshold.denominator}`]
-            }
-          );
-          break;
-        }
-        case GovernanceActionType.new_constitution: {
-          transformedProposal.push({
-            title: 'constitutionAnchor',
-            details: [constitution.anchor.url, constitution.anchor.dataHash]
-          });
-        }
-      }
-
-      return transformedProposal;
+      );
     }
-  );
+
+    if ('withdrawals' in procedure.governanceAction) {
+      procedure.governanceAction.withdrawals.forEach(({ rewardAccount, coin }) => {
+        transformedProposal.push({
+          header: 'withdrawal',
+          details: [
+            {
+              title: 'withdrawalRewardAccount',
+              details: [rewardAccount]
+            },
+            {
+              title: 'withdrawalAmount',
+              details: [
+                Wallet.util.getFormattedAmount({
+                  amount: coin.toString(),
+                  cardanoCoin
+                })
+              ]
+            }
+          ]
+        });
+      });
+    }
+
+    if ('constitution' in procedure.governanceAction) {
+      transformedProposal.push(
+        {
+          title: 'constitutionAnchorURL',
+          details: [procedure.governanceAction.constitution.anchor.url]
+        },
+        {
+          title: 'constitutionScriptHash',
+          details: [procedure.governanceAction.constitution.scriptHash.toString()]
+        }
+      );
+    }
+
+    if ('membersToBeAdded' in procedure.governanceAction) {
+      const membersToBeAdded: TxDetail<TxDetailsProposalProceduresTitles>[] = [];
+      procedure.governanceAction.membersToBeAdded.forEach(({ coldCredential, epoch }) => {
+        membersToBeAdded.push(
+          {
+            title: 'coldCredentialHash',
+            details: [coldCredential.hash]
+          },
+          {
+            title: 'epoch',
+            details: [epoch.toString()]
+          }
+        );
+      });
+
+      if (membersToBeAdded.length > 0) {
+        transformedProposal.push({
+          header: 'membersToBeAdded',
+          details: membersToBeAdded
+        });
+      }
+    }
+
+    if ('membersToBeRemoved' in procedure.governanceAction) {
+      const membersToBeRemoved: TxDetail<TxDetailsProposalProceduresTitles>[] = [];
+      procedure.governanceAction.membersToBeRemoved.forEach(({ hash }) => {
+        membersToBeRemoved.push({
+          title: 'hash',
+          details: [hash.toString()]
+        });
+      });
+
+      if (membersToBeRemoved.length > 0) {
+        transformedProposal.push({
+          header: 'membersToBeRemoved',
+          details: membersToBeRemoved
+        });
+      }
+    }
+
+    if ('newQuorumThreshold' in procedure.governanceAction) {
+      transformedProposal.push({
+        title: 'newQuorumThreshold',
+        details: [
+          `${formatPercentages(
+            procedure.governanceAction.newQuorumThreshold.numerator /
+              procedure.governanceAction.newQuorumThreshold.denominator
+          )}%`
+        ]
+      });
+    }
+
+    if ('protocolVersion' in procedure.governanceAction) {
+      transformedProposal.push(
+        {
+          title: 'protocolVersionMajor',
+          details: [procedure.governanceAction.protocolVersion.major.toString()]
+        },
+        {
+          title: 'protocolVersionMinor',
+          details: [procedure.governanceAction.protocolVersion.minor.toString()]
+        }
+      );
+      if (procedure.governanceAction.protocolVersion.patch) {
+        transformedProposal.push({
+          title: 'protocolVersionPatch',
+          details: [procedure.governanceAction.protocolVersion.patch.toString()]
+        });
+      }
+    }
+
+    if (procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action) {
+      const {
+        protocolParamUpdate: {
+          maxExecutionUnitsPerTransaction,
+          maxExecutionUnitsPerBlock,
+          maxBlockBodySize,
+          maxTxSize,
+          maxBlockHeaderSize,
+          maxValueSize,
+          maxCollateralInputs,
+          minFeeCoefficient,
+          minFeeConstant,
+          stakeKeyDeposit,
+          poolDeposit,
+          monetaryExpansion,
+          treasuryExpansion,
+          minPoolCost,
+          coinsPerUtxoByte,
+          poolInfluence,
+          poolRetirementEpochBound,
+          desiredNumberOfPools,
+          collateralPercentage,
+          costModels,
+          governanceActionValidityPeriod,
+          governanceActionDeposit,
+          dRepDeposit,
+          dRepInactivityPeriod,
+          minCommitteeSize,
+          committeeTermLimit,
+          dRepVotingThresholds
+        }
+      } = procedure.governanceAction;
+      transformedProposal.push(
+        {
+          header: 'maxTxExUnits',
+          details: [
+            {
+              title: 'memory',
+              details: [maxExecutionUnitsPerTransaction.memory.toString()]
+            },
+            {
+              title: 'step',
+              details: [maxExecutionUnitsPerTransaction.steps.toString()]
+            }
+          ]
+        },
+        {
+          header: 'maxBlockExUnits',
+          details: [
+            {
+              title: 'memory',
+              details: [maxExecutionUnitsPerBlock.memory.toString()]
+            },
+            {
+              title: 'step',
+              details: [maxExecutionUnitsPerBlock.steps.toString()]
+            }
+          ]
+        },
+        {
+          header: 'networkGroup',
+          details: [
+            {
+              title: 'maxBBSize',
+              details: [maxBlockBodySize?.toString()]
+            },
+            {
+              title: 'maxTxSize',
+              details: [maxTxSize?.toString()]
+            },
+            {
+              title: 'maxBHSize',
+              details: [maxBlockHeaderSize?.toString()]
+            },
+            {
+              title: 'maxValSize',
+              details: [maxValueSize?.toString()]
+            },
+            {
+              title: 'maxCollateralInputs',
+              details: [maxCollateralInputs?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'economicGroup',
+          details: [
+            {
+              title: 'minFeeA',
+              details: [minFeeCoefficient?.toString()]
+            },
+            {
+              title: 'minFeeB',
+              details: [minFeeConstant?.toString()]
+            },
+            {
+              title: 'keyDeposit',
+              details: [stakeKeyDeposit?.toString()]
+            },
+            {
+              title: 'poolDeposit',
+              details: [poolDeposit?.toString()]
+            },
+            {
+              title: 'rho',
+              details: [monetaryExpansion?.toString()]
+            },
+            {
+              title: 'tau',
+              details: [treasuryExpansion?.toString()]
+            },
+            {
+              title: 'minPoolCost',
+              details: [minPoolCost?.toString()]
+            },
+            {
+              title: 'coinsPerUTxOByte',
+              details: [coinsPerUtxoByte?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'costModels',
+          details: [
+            {
+              title: 'PlutusV1',
+              details: costModels.get(PlutusLanguageVersion.V1).map((model) => model.toString())
+            },
+            {
+              title: 'PlutusV2',
+              details: costModels.get(PlutusLanguageVersion.V2).map((model) => model.toString())
+            }
+          ]
+        },
+        {
+          header: 'technicalGroup',
+          details: [
+            {
+              title: 'a0',
+              details: [poolInfluence?.toString()]
+            },
+            {
+              title: 'eMax',
+              details: [poolRetirementEpochBound?.toString()]
+            },
+            {
+              title: 'nOpt',
+              details: [desiredNumberOfPools?.toString()]
+            },
+            {
+              title: 'collateralPercentage',
+              details: [collateralPercentage?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'governanceGroup',
+          details: [
+            {
+              title: 'govActionLifetime',
+              details: [governanceActionValidityPeriod?.toString()]
+            },
+            {
+              title: 'govActionDeposit',
+              details: [depositPaidWithSymbol(BigInt(governanceActionDeposit), cardanoCoin)]
+            },
+            {
+              title: 'drepDeposit',
+              details: [depositPaidWithSymbol(BigInt(dRepDeposit), cardanoCoin)]
+            },
+            {
+              title: 'drepActivity',
+              details: [dRepInactivityPeriod?.toString()]
+            },
+            {
+              title: 'ccMinSize',
+              details: [minCommitteeSize?.toString()]
+            },
+            {
+              title: 'ccMaxTermLength',
+              details: [committeeTermLimit?.toString()]
+            }
+          ]
+        }
+      );
+
+      if (dRepVotingThresholds) {
+        const {
+          motionNoConfidence,
+          committeeNormal,
+          commiteeNoConfidence,
+          hardForkInitiation,
+          ppNetworkGroup,
+          ppEconomicGroup,
+          ppTechnicalGroup,
+          ppGovernanceGroup,
+          treasuryWithdrawal,
+          updateConstitution
+        } = dRepVotingThresholds;
+        transformedProposal.push({
+          header: 'dRepVotingThresholds',
+          details: [
+            {
+              title: 'motionNoConfidence',
+              details: [`${formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator)}%`]
+            },
+            {
+              title: 'committeeNormal',
+              details: [`${formatPercentages(committeeNormal.numerator / committeeNormal.denominator)}%`]
+            },
+            {
+              title: 'committeeNoConfidence',
+              details: [`${formatPercentages(commiteeNoConfidence.numerator / commiteeNoConfidence.denominator)}%`]
+            },
+            {
+              title: 'updateConstitution',
+              details: [`${formatPercentages(updateConstitution.numerator / updateConstitution.denominator)}%`]
+            },
+            {
+              title: 'hardForkInitiation',
+              details: [`${formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator)}%`]
+            },
+            {
+              title: 'ppNetworkGroup',
+              details: [`${formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator)}%`]
+            },
+            {
+              title: 'ppEconomicGroup',
+              details: [`${formatPercentages(ppEconomicGroup.numerator / ppEconomicGroup.denominator)}%`]
+            },
+            {
+              title: 'ppTechnicalGroup',
+              details: [`${formatPercentages(ppTechnicalGroup.numerator / ppTechnicalGroup.denominator)}%`]
+            },
+            {
+              title: 'ppGovernanceGroup',
+              details: [`${formatPercentages(ppGovernanceGroup.numerator / ppGovernanceGroup.denominator)}%`]
+            },
+            {
+              title: 'treasuryWithdrawal',
+              details: [`${formatPercentages(treasuryWithdrawal.numerator / treasuryWithdrawal.denominator)}%`]
+            }
+          ]
+        });
+      }
+    }
+
+    return transformedProposal;
+  });

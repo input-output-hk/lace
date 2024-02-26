@@ -158,7 +158,7 @@ export const useCreateMintedAssetList = ({
 
 export const useDisallowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): ((close?: boolean) => void) => useCallback(() => disallowSignTx(req), [req]);
+): ((close?: boolean) => void) => useCallback((close?: boolean) => disallowSignTx(req, close), [req]);
 
 export const useAllowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
@@ -180,7 +180,7 @@ export const useSignWithHardwareWallet = (
       await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
       allow();
     } catch {
-      disallow(false);
+      disallow();
       redirectToSignFailure({});
     }
   }, [allow, disallow, redirectToSignFailure]);
@@ -300,8 +300,7 @@ export const useCexplorerBaseUrl = (): string => {
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
   useEffect(() => {
-    const newUrl =
-      environmentName === 'Sanchonet' ? '' : `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
+    const newUrl = `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
     if (newUrl !== explorerBaseUrl) {
       setExplorerBaseUrl(newUrl);
     }

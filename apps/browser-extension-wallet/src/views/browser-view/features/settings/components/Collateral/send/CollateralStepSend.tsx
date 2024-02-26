@@ -91,7 +91,10 @@ export const CollateralStepSend = ({
             })}
             <div>
               {renderAmountInfo(
-                `${Wallet.util.lovelacesToAdaString(txFee.toString())} ${cardanoCoin.symbol}`,
+                Wallet.util.getFormattedAmount({
+                  amount: txFee.toString(),
+                  cardanoCoin
+                }),
                 `${Wallet.util.convertAdaToFiat({
                   ada: Wallet.util.lovelacesToAdaString(txFee.toString()),
                   fiat: priceResult?.cardano?.price || 0

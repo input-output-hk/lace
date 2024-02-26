@@ -30,12 +30,10 @@ export const TransactionDetailsProxy = withAddressBookContext(
     const { list: addressList } = useAddressBookContext();
 
     const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
-    // TODO, remove if sanchonet gets an explorer
-    const explorerBaseUrl = useMemo(() => {
-      if (environmentName === 'Sanchonet') return;
-      // eslint-disable-next-line consistent-return
-      return `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
-    }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]);
+    const explorerBaseUrl = useMemo(
+      () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
+      [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
+    );
     const getHeaderDescription = () => {
       if (activityInfo.type === DelegationActivityType.delegation) return '1 token';
       return ` (${activityInfo?.assetAmount})`;
@@ -78,10 +76,6 @@ export const TransactionDetailsProxy = withAddressBookContext(
       [addressList]
     );
 
-    const environmentSpecificProps = {
-      ...(explorerBaseUrl && { openExternalLink: handleOpenExternalLink })
-    };
-
     return (
       // eslint-disable-next-line react/jsx-pascal-case
       <TransactionDetails
@@ -108,7 +102,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
         proposalProcedures={proposalProcedures}
         votingProcedures={votingProcedures}
         certificates={certificates}
-        {...environmentSpecificProps}
+        openExternalLink={handleOpenExternalLink}
       />
     );
   }

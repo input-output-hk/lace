@@ -5,6 +5,7 @@ import { UpdateCommitteeAction } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
 import { useCexplorerBaseUrl } from '../hooks';
+import { drepIDasBech32FromHash } from '../utils';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
@@ -72,14 +73,17 @@ export const UpdateCommitteeActionContainer = ({
   const data: Parameters<typeof UpdateCommitteeAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.title'),
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+      deposit: Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin
+      }),
       rewardAccount
     },
     procedure: {
       anchor: {
         url: anchor.url,
         hash: anchor.dataHash,
-        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+        txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}`
       }
     },
     ...(governanceActionId && {
@@ -90,13 +94,11 @@ export const UpdateCommitteeActionContainer = ({
     }),
     membersToBeAdded: [...membersToBeAdded].map(({ coldCredential: { hash }, epoch }) => ({
       coldCredential: {
-        // TODO: use bech32 in future revision
         hash: hash.toString()
       },
       epoch: epoch.toString()
     })),
     membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({
-      // TODO: use bech32 in future revision
       hash: hash.toString()
     }))
   };
