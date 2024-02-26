@@ -50,4 +50,5 @@ export { TransactionType } from './dapp-transaction-summary';
 export { TransactionSummary as DappTransactionSummary } from './dapp-transaction-summary';
 export { TransactionAssets } from './dapp-transaction-summary';
 export { SummaryExpander } from './summary-expander';
+export * from './auto-suggest-box';
 export * from './table';
