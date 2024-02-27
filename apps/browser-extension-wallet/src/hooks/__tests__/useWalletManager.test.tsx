@@ -17,6 +17,7 @@ const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
 const mockLedgerGetXpub = jest.fn();
 const mockTrezorGetXpub = jest.fn();
+const mockInitializeTrezorTransport = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 import React from 'react';
@@ -70,7 +71,8 @@ jest.mock('@lace/cardano', () => {
       },
       Trezor: {
         TrezorKeyAgent: {
-          getXpub: mockTrezorGetXpub
+          getXpub: mockTrezorGetXpub,
+          initializeTrezorTransport: mockInitializeTrezorTransport
         }
       },
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
