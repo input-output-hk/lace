@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
 import '@testing-library/jest-dom';
@@ -9,6 +10,7 @@ import { TxDirections } from '@src/types';
 import { StakeDelegationCertificate } from '@cardano-sdk/core/dist/cjs/Cardano';
 import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { TransactionActivityType, ActivityType } from '@lace/core';
+import * as Core from '@cardano-sdk/core';
 const ADDRESS_1 = Wallet.Cardano.PaymentAddress(
   'addr_test1qq585l3hyxgj3nas2v3xymd23vvartfhceme6gv98aaeg9muzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q2g7k3g'
 );
@@ -39,6 +41,11 @@ const createStubInputResolver = (
     return walletAddresses.some((addr) => addr.address === address) ? ({ address } as Wallet.Cardano.TxOut) : null;
   })
 });
+
+jest.mock('@cardano-sdk/core', () => ({
+  ...jest.requireActual<any>('@cardano-sdk/core'),
+  createTxInspector: jest.fn(jest.requireActual<any>('@cardano-sdk/core').createTxInspector)
+}));
 
 describe('testing tx-inspection utils', () => {
   describe('Testing getTxDirection function', () => {
@@ -339,7 +346,7 @@ describe('testing tx-inspection utils', () => {
 
         it.each(conwayCertificates)(
           "should return '$expectedReturn' if a certificate of type $cert.__typename exists in the transaction body",
-          ({ cert, expectedReturn }) => {
+          async ({ cert, expectedReturn }) => {
             const mockTx = buildMockTx({
               certificates: [cert],
               inputs: [
@@ -359,7 +366,7 @@ describe('testing tx-inspection utils', () => {
                 }
               ]
             });
-            const result = inspectTxType({
+            const result = await inspectTxType({
               tx: mockTx,
               walletAddresses: [
                 { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
@@ -372,7 +379,17 @@ describe('testing tx-inspection utils', () => {
       });
 
       describe('governance actions', () => {
-        it('should return "vote" if votingProcedures are present', () => {
+        it('should return "vote" if votingProcedures are present', async () => {
+          const createTxInspectorSpy = jest.spyOn(Core, 'createTxInspector').mockReturnValue(
+            async () =>
+              await ({
+                sent: { inputs: [1] },
+                delegation: [],
+                stakeKeyRegistration: [],
+                stakeKeyDeregistration: []
+              } as never)
+          );
+
           const mockTx = buildMockTx({
             inputs: [
               {
@@ -391,7 +408,7 @@ describe('testing tx-inspection utils', () => {
               }
             ]
           });
-          const result = inspectTxType({
+          const result = await inspectTxType({
             tx: {
               ...mockTx,
               body: {
@@ -431,9 +448,19 @@ describe('testing tx-inspection utils', () => {
           });
 
           expect(result).toEqual('vote');
+          createTxInspectorSpy.mockRestore();
         });
 
-        it('should return "submitProposal" if proposalProcedures are present', () => {
+        it('should return "submitProposal" if proposalProcedures are present', async () => {
+          const createTxInspectorSpy = jest.spyOn(Core, 'createTxInspector').mockReturnValue(
+            async () =>
+              await ({
+                sent: { inputs: [1] },
+                delegation: [],
+                stakeKeyRegistration: [],
+                stakeKeyDeregistration: []
+              } as never)
+          );
           const mockTx = buildMockTx({
             inputs: [
               {
@@ -452,7 +479,7 @@ describe('testing tx-inspection utils', () => {
               }
             ]
           });
-          const result = inspectTxType({
+          const result = await inspectTxType({
             tx: {
               ...mockTx,
               body: {
@@ -476,6 +503,7 @@ describe('testing tx-inspection utils', () => {
             inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) }
           });
           expect(result).toEqual('ParameterChangeAction');
+          createTxInspectorSpy.mockRestore();
         });
       });
     });

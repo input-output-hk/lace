@@ -34,7 +34,7 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
 
   const tx = request?.transaction.toCore();
   if (!tx) {
-    return <Skeleton />;
+    return <Skeleton loading />;
   }
   const createAssetList = useCreateAssetList({
     outputs: tx.body.outputs,
@@ -59,7 +59,7 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
 
   // TODO: merge with the upper skeleton check
   if (!txSummary) {
-    return <Skeleton />;
+    return <Skeleton loading />;
   }
 
   return (

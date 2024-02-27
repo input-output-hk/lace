@@ -15,7 +15,7 @@ const mockGetAssetsInformation = jest.fn();
 const mockCalculateAssetBalance = jest.fn();
 const mockLovelacesToAdaString = jest.fn();
 const mockUseWalletStore = jest.fn();
-import { act, cleanup } from '@testing-library/react';
+import { act, cleanup, waitFor } from '@testing-library/react';
 import {
   useCreateAssetList,
   useGetOwnPubDRepKeyHash,
@@ -291,7 +291,7 @@ describe('Testing hooks', () => {
 
     const createTxInspectorSpy = jest
       .spyOn(Core, 'createTxInspector')
-      .mockReturnValue(() => ({ minted: [], burned: [], votingProcedures: true } as any));
+      .mockReturnValue(async () => await ({ minted: [], burned: [], votingProcedures: true } as any));
 
     const tx = {
       body: {
@@ -323,14 +323,17 @@ describe('Testing hooks', () => {
     createAssetList({} as any);
     createMintedAssetList({} as any);
     let hook: any;
+
+    const req = {
+      transaction: {
+        toCore: () => tx
+      }
+    } as unknown as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
     await act(async () => {
       hook = renderHook(() =>
         useTxSummary({
-          req: {
-            transaction: {
-              toCore: () => tx
-            }
-          } as unknown as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+          req,
           addressList,
           walletInfo,
           createAssetList,
@@ -340,22 +343,24 @@ describe('Testing hooks', () => {
       );
     });
 
-    expect(hook.result.current).toEqual({
-      fee: tx.body.fee.toString(),
-      burnedAssets: [],
-      mintedAssets: [],
-      outputs: [
-        {
-          coins: tx.body.outputs[0].value.coins,
-          recipient: addressList[0].name,
-          assets: tx.body.outputs[0].value.assets
-        },
-        {
-          coins: tx.body.outputs[2].value.coins,
-          recipient: tx.body.outputs[2].address
-        }
-      ],
-      type: Wallet.Cip30TxType.VotingProcedures
+    await waitFor(async () => {
+      expect(hook.result.current).toEqual({
+        fee: tx.body.fee.toString(),
+        burnedAssets: [],
+        mintedAssets: [],
+        outputs: [
+          {
+            coins: tx.body.outputs[0].value.coins,
+            recipient: addressList[0].name,
+            assets: tx.body.outputs[0].value.assets
+          },
+          {
+            coins: tx.body.outputs[2].value.coins,
+            recipient: tx.body.outputs[2].address
+          }
+        ],
+        type: Wallet.Cip30TxType.VotingProcedures
+      });
     });
 
     hook.unmount();
@@ -365,11 +370,7 @@ describe('Testing hooks', () => {
 
       hook = renderHook(() =>
         useTxSummary({
-          req: {
-            transaction: {
-              toCore: () => tx
-            }
-          } as unknown as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+          req,
           addressList,
           walletInfo,
           createAssetList,
@@ -379,17 +380,19 @@ describe('Testing hooks', () => {
       );
     });
 
-    expect(hook.result.current).toEqual({
-      fee: tx.body.fee.toString(),
-      burnedAssets: [],
-      mintedAssets: [],
-      outputs: [
-        {
-          coins: tx.body.outputs[2].value.coins,
-          recipient: tx.body.outputs[2].address
-        }
-      ],
-      type: Wallet.Cip30TxType.Send
+    await act(async () => {
+      expect(hook.result.current).toEqual({
+        fee: tx.body.fee.toString(),
+        burnedAssets: [],
+        mintedAssets: [],
+        outputs: [
+          {
+            coins: tx.body.outputs[2].value.coins,
+            recipient: tx.body.outputs[2].address
+          }
+        ],
+        type: Wallet.Cip30TxType.Send
+      });
     });
   });
 

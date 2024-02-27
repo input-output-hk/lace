@@ -40,15 +40,14 @@ export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactE
     getCertificateData();
   }, [request]);
 
-  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
-  const isNotOwnDRepKey = certificate.dRepCredential.hash !== ownPubDRepKeyHash;
+  const isNotOwnDRepKey = certificate?.dRepCredential.hash !== ownPubDRepKeyHash;
 
   useEffect(() => {
-    if (ownPubDRepKeyHash && isNotOwnDRepKey) {
+    if (ownPubDRepKeyHash && certificate && isNotOwnDRepKey) {
       disallowSignTx(request, true);
       onError();
     }
-  }, [ownPubDRepKeyHash, isNotOwnDRepKey, onError, request]);
+  }, [ownPubDRepKeyHash, isNotOwnDRepKey, onError, request, certificate]);
 
   const onCloseClick = useCallback(() => {
     window.close();
@@ -57,6 +56,8 @@ export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactE
   if (!certificate || loadingOwnPubDRepKeyHash) {
     return <Skeleton loading />;
   }
+
+  const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
 
   if (isNotOwnDRepKey) {
     return (

@@ -8,6 +8,7 @@ const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockConfirmDRepRetirement = jest.fn();
 const mockDappError = jest.fn();
+const mockDisallowSignTx = jest.fn();
 const mockUseGetOwnPubDRepKeyHash = jest.fn();
 const flowContextMock = jest.fn();
 
@@ -19,12 +20,9 @@ import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
-import BigNumber from 'bignumber.js';
 import { getWrapper } from '../testing.utils';
-import { drepIDasBech32FromHash } from '../utils';
+import { depositPaidWithSymbol, drepIDasBech32FromHash } from '../utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
-const LOVELACE_VALUE = 1_000_000;
-const DEFAULT_DECIMALS = 2;
 
 const { Cardano, Crypto } = Wallet;
 
@@ -86,6 +84,15 @@ jest.mock('../hooks.ts', () => {
   };
 });
 
+jest.mock('../utils.ts', () => {
+  const original = jest.requireActual('../utils.ts');
+  return {
+    __esModule: true,
+    ...original,
+    disallowSignTx: mockDisallowSignTx
+  };
+});
+
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore
@@ -121,7 +128,8 @@ jest.mock('react-i18next', () => {
 describe('Testing ConfirmDRepRetirementContainer component', () => {
   beforeEach(() => {
     mockUseWalletStore.mockReset();
-    mockUseGetOwnPubDRepKeyHash.mockImplementationOnce(() => ({
+    mockUseGetOwnPubDRepKeyHash.mockReset();
+    mockUseGetOwnPubDRepKeyHash.mockImplementation(() => ({
       loading: false,
       ownPubDRepKeyHash: hash
     }));
@@ -145,8 +153,6 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
   });
 
   afterEach(() => {
-    jest.resetModules();
-    jest.resetAllMocks();
     cleanup();
   });
 
@@ -167,9 +173,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
       {
         dappInfo,
         metadata: {
-          depositReturned: `${new BigNumber(certificate.deposit.toString())
-            .dividedBy(LOVELACE_VALUE)
-            .toFixed(DEFAULT_DECIMALS)} ${cardanoCoinMock.symbol}`,
+          depositReturned: depositPaidWithSymbol(certificate.deposit, cardanoCoinMock as Wallet.CoinId),
           drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)
         },
         translations: {
@@ -186,10 +190,9 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
 
   test('should render ConfirmDRepRetirementContainer component with proper error for own retirement', async () => {
     let queryByTestId: any;
-    const additionalProps = { onError: onErrorMock };
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...additionalProps} />, {
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...props} />, {
         wrapper: getWrapper()
       }));
     });
@@ -204,14 +207,16 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
       ownPubDRepKeyHash: Crypto.Hash28ByteBase16(Buffer.from('WRONG_dRepCredentialHashdRep').toString('hex'))
     }));
     let queryByTestId: any;
-    const additionalProps = { onError: onErrorMock };
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...additionalProps} />, {
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...props} />, {
         wrapper: getWrapper()
       }));
     });
 
     expect(queryByTestId('DappError')).toBeInTheDocument();
+    expect(onErrorMock).toBeCalledTimes(1);
+    expect(mockDisallowSignTx).toBeCalledTimes(1);
+    expect(mockDisallowSignTx).toBeCalledWith(request, true);
   });
 });

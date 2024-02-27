@@ -3,7 +3,8 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable import/imports-first */
 const cardanoCoinMock = {
-  symbol: 'cardanoCoinMockSymbol'
+  symbol: 'cardanoCoinMockSymbol',
+  name: 'Cardano'
 };
 const mockUseWalletStore = jest.fn(() => ({
   walletUI: { cardanoCoin: cardanoCoinMock },
@@ -23,6 +24,7 @@ import { act } from 'react-dom/test-utils';
 import { ParameterChangeActionContainer } from '../ParameterChangeActionContainer';
 import { formatPercentages } from '@lace/common';
 import { getWrapper } from '../../testing.utils';
+import { depositPaidWithSymbol } from '../../utils';
 
 jest.mock('react-i18next', () => {
   const original = jest.requireActual('react-i18next');
@@ -202,7 +204,7 @@ describe('Testing ProposalProceduresContainer component', () => {
         data: {
           txDetails: {
             txType: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.title'),
-            deposit: `${deposit.toString()} ${cardanoCoinMock.symbol}`,
+            deposit: depositPaidWithSymbol(deposit, cardanoCoinMock as Wallet.CoinId),
             rewardAccount
           },
           anchor: {

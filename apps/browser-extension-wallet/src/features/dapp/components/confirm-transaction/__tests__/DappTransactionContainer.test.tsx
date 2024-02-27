@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
@@ -12,6 +13,7 @@ const mockDappTransaction = jest.fn();
 const mockUseTxSummary = jest.fn();
 const mockUseCreateAssetList = jest.fn();
 const mockUseCreateMintedAssetList = jest.fn();
+const mockUseViewsFlowContext = jest.fn();
 const mockWithAddressBookContext = jest.fn((children) => children);
 const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
 const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
@@ -25,6 +27,7 @@ import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { SignTxData } from '../types';
 import { getWrapper } from '../testing.utils';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 const { Cardano, Crypto } = Wallet;
 
@@ -102,6 +105,39 @@ jest.mock('antd', () => {
   };
 });
 
+const dappInfo = {
+  name: 'dappName',
+  logo: 'dappLogo',
+  url: 'dappUrl'
+};
+
+const certificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.RegisterDelegateRepresentative,
+  dRepCredential: {
+    type: Cardano.CredentialType.KeyHash,
+    hash: Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+  },
+  deposit: BigInt('1000'),
+  anchor: {
+    url: 'anchorUrl',
+    dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
+  }
+};
+const tx = buildMockTx({
+  certificates: [certificate]
+});
+
+const request = {
+  transaction: {
+    toCore: jest.fn().mockReturnValue(tx)
+  } as any
+} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: mockUseViewsFlowContext
+}));
+
 describe('Testing DappTransactionContainer component', () => {
   beforeEach(() => {
     mockUseWalletStore.mockReset();
@@ -119,6 +155,11 @@ describe('Testing DappTransactionContainer component', () => {
     mockWithAddressBookContext.mockImplementation((children) => children);
     mockSkeleton.mockReset();
     mockSkeleton.mockImplementation(() => <span data-testid="skeleton" />);
+    mockUseViewsFlowContext.mockReset();
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request },
+      dappInfo
+    }));
   });
 
   afterEach(() => {
@@ -130,28 +171,8 @@ describe('Testing DappTransactionContainer component', () => {
   test('should render DappTransaction component with proper props', async () => {
     let queryByTestId: any;
 
-    const dappInfo = {
-      name: 'dappName',
-      logo: 'dappLogo',
-      url: 'dappUrl'
-    };
-    const certificate: Wallet.Cardano.Certificate = {
-      __typename: Cardano.CertificateType.RegisterDelegateRepresentative,
-      dRepCredential: {
-        type: Cardano.CredentialType.KeyHash,
-        hash: Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-      },
-      deposit: BigInt('1000'),
-      anchor: {
-        url: 'anchorUrl',
-        dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
-      }
-    };
-    const tx = buildMockTx({
-      certificates: [certificate]
-    });
     const errorMessage = 'errorMessage';
-    const props = { signTxData: { dappInfo, tx }, errorMessage };
+    const props = { errorMessage };
 
     const txSummary = 'txSummary';
     mockUseTxSummary.mockReset();
@@ -171,22 +192,22 @@ describe('Testing DappTransactionContainer component', () => {
 
     expect(queryByTestId('DappTransaction')).toBeInTheDocument();
     expect(mockUseCreateAssetList).toHaveBeenLastCalledWith({
-      outputs: props.signTxData.tx.body.outputs,
+      outputs: tx.body.outputs,
       assets: mockedAssetsInfo,
       assetProvider
     });
     expect(mockUseCreateMintedAssetList).toHaveBeenLastCalledWith({
-      outputs: props.signTxData.tx.body.outputs,
+      outputs: tx.body.outputs,
       assets: mockedAssetsInfo,
       assetProvider,
-      metadata: props.signTxData.tx.auxiliaryData.blob,
-      mint: props.signTxData.tx.body.mint
+      metadata: tx.auxiliaryData.blob,
+      mint: tx.body.mint
     });
     expect(mockUseTxSummary).toHaveBeenLastCalledWith({
       addressList,
       createAssetList,
       createMintedAssetList,
-      tx: props.signTxData.tx,
+      req: request,
       walletInfo
     });
     expect(mockDappTransaction).toHaveBeenLastCalledWith(
@@ -199,6 +220,27 @@ describe('Testing DappTransactionContainer component', () => {
       },
       {}
     );
+  });
+
+  test('should render loader in case there is no tx data', async () => {
+    let queryByTestId: any;
+
+    mockUseViewsFlowContext.mockReset();
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: {},
+      dappInfo
+    }));
+
+    const signTxData = { tx: { body: {} } } as unknown as SignTxData;
+
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer {...({ signTxData } as any)} />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).not.toBeInTheDocument();
+    expect(queryByTestId('skeleton')).toBeInTheDocument();
   });
 
   test('should render loader in case there is no txSummary', async () => {

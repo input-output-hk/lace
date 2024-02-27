@@ -28,7 +28,6 @@ import { cleanup, render } from '@testing-library/react';
 import { ConfirmTransactionContent } from '../ConfirmTransactionContent';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
-import { buildMockTx } from '@src/utils/mocks/tx';
 
 jest.mock('antd', () => {
   const original = jest.requireActual('antd');
@@ -138,14 +137,6 @@ jest.mock('../DappTransactionContainer', () => {
   };
 });
 
-const dappInfo = {
-  name: 'dappName',
-  logo: 'dappLogo',
-  url: 'dappUrl'
-};
-const errorMessage = 'errorMessage';
-const props = { signTxData: { dappInfo, tx: buildMockTx() }, errorMessage };
-
 describe('Testing ConfirmTransactionContent component', () => {
   afterEach(() => {
     cleanup();
@@ -155,9 +146,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ ...props, txType: Wallet.Cip30TxType.DRepRegistration }} />
-      ));
+      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepRegistration }} />));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -172,11 +161,12 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmDRepRegistrationContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmDRepRegistrationContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ConfirmDRepRetirementContainer with proper props', async () => {
     let queryByTestId: any;
+    const props = { onError: jest.fn() };
 
     await act(async () => {
       ({ queryByTestId } = render(
@@ -203,9 +193,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepUpdate, ...props }} />
-      ));
+      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepUpdate }} />));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -220,16 +208,14 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmDRepUpdateContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmDRepUpdateContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ConfirmVoteDelegationContainer with proper props', async () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteDelegation, ...props }} />
-      ));
+      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteDelegation }} />));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -244,16 +230,14 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmVoteDelegationContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmVoteDelegationContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render VotingProceduresContainer with proper props', async () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VotingProcedures, ...props }} />
-      ));
+      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VotingProcedures }} />));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -268,7 +252,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockVotingProceduresContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockVotingProceduresContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ProposalProceduresContainer with proper props', async () => {
@@ -276,7 +260,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.ProposalProcedures, ...props }} />
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.ProposalProcedures }} />
       ));
     });
 
@@ -292,7 +276,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockProposalProceduresContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockProposalProceduresContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ConfirmVoteRegistrationDelegationContainer with proper props', async () => {
@@ -300,7 +284,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteRegistrationDelegation, ...props }} />
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteRegistrationDelegation }} />
       ));
     });
 
@@ -316,7 +300,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmVoteRegistrationDelegationContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmVoteRegistrationDelegationContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ConfirmStakeRegistrationDelegationContainer with proper props', async () => {
@@ -324,7 +308,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeRegistrationDelegation, ...props }} />
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeRegistrationDelegation }} />
       ));
     });
 
@@ -340,7 +324,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmStakeRegistrationDelegationContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmStakeRegistrationDelegationContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ConfirmStakeVoteRegistrationDelegationContainer with proper props', async () => {
@@ -348,7 +332,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeVoteDelegationRegistration, ...props }} />
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeVoteDelegationRegistration }} />
       ));
     });
 
@@ -364,7 +348,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmStakeVoteRegistrationDelegationContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmStakeVoteRegistrationDelegationContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render ConfirmStakeVoteDelegationContainer with proper props', async () => {
@@ -372,7 +356,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeVoteDelegation, ...props }} />
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeVoteDelegation }} />
       ));
     });
 
@@ -388,16 +372,14 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
-    expect(mockConfirmStakeVoteDelegationContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockConfirmStakeVoteDelegationContainer).toHaveBeenLastCalledWith({}, {});
   });
 
   test('should render DappTransactionContainer with proper props', async () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: 'other' as Wallet.Cip30TxType, ...props }} />
-      ));
+      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: 'other' as Wallet.Cip30TxType }} />));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -412,6 +394,6 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmStakeVoteRegistrationDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmStakeVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).toBeInTheDocument();
-    expect(mockDappTransactionContainer).toHaveBeenLastCalledWith(props, {});
+    expect(mockDappTransactionContainer).toHaveBeenLastCalledWith({}, {});
   });
 });

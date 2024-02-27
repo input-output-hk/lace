@@ -5,6 +5,7 @@ import { TreasuryWithdrawalsAction } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
 import { useCexplorerBaseUrl } from '../hooks';
+import { depositPaidWithSymbol } from '../utils';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
@@ -64,10 +65,7 @@ export const TreasuryWithdrawalsActionContainer = ({
   const data: Parameters<typeof TreasuryWithdrawalsAction>[0]['data'] = {
     txDetails: {
       txType: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
-      deposit: Wallet.util.getFormattedAmount({
-        amount: deposit.toString(),
-        cardanoCoin
-      }),
+      deposit: depositPaidWithSymbol(deposit, cardanoCoin),
       rewardAccount
     },
     procedure: {

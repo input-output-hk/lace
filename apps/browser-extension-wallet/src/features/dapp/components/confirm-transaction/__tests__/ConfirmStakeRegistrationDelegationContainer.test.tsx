@@ -16,6 +16,7 @@ import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { depositPaidWithSymbol } from '../utils';
 
 const REWARD_ACCOUNT = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
 const STAKE_KEY_HASH = Wallet.Cardano.RewardAccount.toHash(REWARD_ACCOUNT);
@@ -148,7 +149,7 @@ describe('Testing ConfirmStakeRegistrationDelegationContainer component', () => 
         metadata: {
           poolId: certificate.poolId,
           stakeKeyHash: 'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
-          depositPaid: `${certificate.deposit.toString()} ${cardanoCoinMock.symbol}`
+          depositPaid: depositPaidWithSymbol(certificate.deposit, cardanoCoinMock as Wallet.CoinId)
         },
         translations: {
           metadata: t('core.StakeRegistrationDelegation.metadata'),

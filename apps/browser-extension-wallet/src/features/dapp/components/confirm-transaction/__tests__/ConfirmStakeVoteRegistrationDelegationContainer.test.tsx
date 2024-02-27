@@ -18,7 +18,7 @@ import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
-import { drepIDasBech32FromHash } from '../utils';
+import { depositPaidWithSymbol, drepIDasBech32FromHash } from '../utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 const REWARD_ACCOUNT = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
@@ -173,7 +173,7 @@ describe('Testing ConfirmStakeVoteRegistrationDelegationContainer component', ()
         metadata: {
           poolId: certificate.poolId,
           stakeKeyHash: 'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
-          depositPaid: `${certificate.deposit.toString()} ${cardanoCoinMock.symbol}`,
+          depositPaid: depositPaidWithSymbol(certificate.deposit, cardanoCoinMock as Wallet.CoinId),
           alwaysAbstain: isDRepAlwaysAbstainMocked,
           alwaysNoConfidence: isDRepAlwaysNoConfidenceMocked,
           drepId: drepIDasBech32FromHash((certificate.dRep as Wallet.Cardano.Credential).hash)

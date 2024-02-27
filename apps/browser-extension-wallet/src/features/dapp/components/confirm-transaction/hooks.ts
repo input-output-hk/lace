@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import isPlainObject from 'lodash/isPlainObject';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -17,7 +18,7 @@ import { config } from '@src/config';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { getTransactionAssetsId } from '@src/stores/slices';
 import { AddressListType } from '@src/views/browser-view/features/activity';
-import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
+import { allowSignTx, pubDRepKeyToHash, disallowSignTx, getTxType } from './utils';
 import { useWalletStore } from '@stores';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
@@ -222,9 +223,8 @@ export const useTxSummary = ({
       });
 
       const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
-      const isMintTransaction = minted.length > 0 || burned.length > 0;
 
-      const txType = isMintTransaction ? Wallet.Cip30TxType.Mint : Wallet.Cip30TxType.Send;
+      const txType = await getTxType(tx);
       const addressToNameMap = new Map<string, string>(
         addressList?.map((item: AddressListType) => [item.address, item.name])
       );

@@ -4,8 +4,7 @@
 /* eslint-disable import/imports-first */
 const mockGetKeyAgentType = jest.fn();
 const mockUseWalletStore = jest.fn();
-const error = 'error in getSignTxData';
-const mockConsumeRemoteApi = jest.fn();
+const mockExposeApi = jest.fn(() => ({ shutdown: jest.fn() }));
 const mockConfirmTransactionContent = jest.fn(() => <span data-testid="ConfirmTransactionContent" />);
 const mockGetTxType = jest.fn();
 const mockUseDisallowSignTx = jest.fn();
@@ -52,7 +51,7 @@ jest.mock('@cardano-sdk/web-extension', () => {
   return {
     __esModule: true,
     ...original,
-    consumeRemoteApi: mockConsumeRemoteApi
+    exposeApi: mockExposeApi
   };
 });
 
@@ -130,7 +129,8 @@ describe('Testing ConfirmTransaction component', () => {
       signTxRequest: {
         request: {
           transaction: {
-            toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' })
+            toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+            getId: jest.fn().mockReturnValue({ id: 'test-tx-id' })
           }
         }
       }
@@ -140,8 +140,6 @@ describe('Testing ConfirmTransaction component', () => {
   });
 
   afterEach(() => {
-    jest.resetModules();
-    jest.resetAllMocks();
     cleanup();
   });
 
@@ -163,10 +161,6 @@ describe('Testing ConfirmTransaction component', () => {
     mockGetTxType.mockReturnValue(txType);
 
     const signTxData = { tx: { id: 'test-tx-id' } };
-    mockConsumeRemoteApi.mockReset();
-    mockConsumeRemoteApi.mockReturnValue({
-      getSignTxData: async () => await Promise.resolve(signTxData)
-    });
     const disallowSignTx = jest.fn();
     mockUseDisallowSignTx.mockReset();
     mockUseDisallowSignTx.mockReturnValue(disallowSignTx);
@@ -177,7 +171,8 @@ describe('Testing ConfirmTransaction component', () => {
       signTxRequest: {
         request: {
           transaction: {
-            toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' })
+            getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+            toCore: jest.fn().mockReturnValue(signTxData.tx)
           }
         }
       }
@@ -194,8 +189,6 @@ describe('Testing ConfirmTransaction component', () => {
     expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith(
       {
         txType,
-        signTxData,
-        errorMessage: undefined,
         onError: expect.any(Function)
       },
       {}
@@ -227,16 +220,13 @@ describe('Testing ConfirmTransaction component', () => {
     mockUseWalletStore.mockImplementation(() => ({
       getKeyAgentType: mockGetKeyAgentType,
       inMemoryWallet,
+      isHardwareWallet: true,
+      walletType: 'Ledger',
       walletUI: {},
       walletInfo: {},
       blockchainProvider: { assetProvider }
     }));
 
-    const signTxData = { tx: { id: 'test-tx-id' } };
-    mockConsumeRemoteApi.mockReset();
-    mockConsumeRemoteApi.mockReturnValue({
-      getSignTxData: async () => await Promise.resolve(signTxData)
-    });
     const signWithHardwareWalletMock = jest.fn();
     mockUseSignWithHardwareWallet.mockReset();
     mockUseSignWithHardwareWallet.mockReturnValue({ signWithHardwareWallet: signWithHardwareWalletMock });
@@ -254,35 +244,5 @@ describe('Testing ConfirmTransaction component', () => {
     });
 
     expect(signWithHardwareWalletMock).toHaveBeenCalled();
-  });
-
-  test('should disable confirm button and show proper error if getSignTxData throws', async () => {
-    let queryByTestId: any;
-    const txType = 'txType';
-    mockUseWalletStore.mockImplementation(() => ({
-      getKeyAgentType: mockGetKeyAgentType,
-      inMemoryWallet,
-      walletUI: {},
-      walletInfo: {},
-      blockchainProvider: { assetProvider }
-    }));
-    mockConsumeRemoteApi.mockReset();
-    mockConsumeRemoteApi.mockReturnValue({
-      getSignTxData: async () => await Promise.reject(error)
-    });
-    mockGetTxType.mockReset();
-    mockGetTxType.mockReturnValue(txType);
-    await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransaction />, {
-        wrapper: getWrapper()
-      }));
-    });
-
-    expect(queryByTestId('ConfirmTransactionContent')).toBeInTheDocument();
-    expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith(
-      { errorMessage: error, onError: expect.any(Function), signTxData: undefined, txType: undefined },
-      {}
-    );
-    expect(queryByTestId(testIds.dappTransactionConfirm).closest('button')).toHaveAttribute('disabled');
   });
 });
