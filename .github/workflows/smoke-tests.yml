@@ -22,11 +22,6 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Downgrade chrome
-        run: |
-          wget -q -O /tmp/chrome.deb http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_120.0.6099.216-1_amd64.deb \
-            && sudo apt install -y --allow-downgrades /tmp/chrome.deb \
-            && rm /tmp/chrome.deb
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
@@ -34,17 +29,6 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
-      - name: setup chromedriver
-        uses: nanasess/setup-chromedriver@v2
-        with:
-          chromedriver-version: '120.0.6099.216'
-      - name: Start Chrome driver
-        run: |
-          if [ ${BROWSER} == "chrome" ]; then
-            chromedriver -port=4444 &
-          else
-            echo "Skipping start of ChromeDriver"
-          fi
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests

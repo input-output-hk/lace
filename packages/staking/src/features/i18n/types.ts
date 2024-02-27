@@ -72,7 +72,7 @@ type KeysStructure = {
           title: '';
           tooltip: '';
         };
-        ros: {
+        apy: {
           title: '';
           tooltip: '';
         };

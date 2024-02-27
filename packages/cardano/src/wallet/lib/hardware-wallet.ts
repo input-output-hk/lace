@@ -2,7 +2,7 @@
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { DeviceConnection, HardwareWallets } from '../types';
 import * as HardwareLedger from '../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
-import * as HardwareTrezor from '../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
+import { TrezorKeyAgent } from '../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
 import { WalletType } from '@cardano-sdk/web-extension';
 // Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
 
@@ -25,13 +25,13 @@ const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> =
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
   ...(AVAILABLE_WALLETS.includes(WalletType.Trezor) && {
     [WalletType.Trezor]: async () => {
-      const isTrezorInitialized = await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
+      const isTrezorInitialized = await TrezorKeyAgent.initializeTrezorTransport({
         manifest,
         communicationType: DEFAULT_COMMUNICATION_TYPE
       });
 
       // initializeTrezorTransport would still succeed even when device is not connected
-      await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(KeyManagement.CommunicationType.Web);
+      await TrezorKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE);
 
       return isTrezorInitialized;
     }
