@@ -41,7 +41,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then I see a tooltip showing full name: "<nft>" for NFTs
     Examples:
       | nft                |
-      | Bear020            |
+      | LaceNFT            |
       | Pixel NFT          |
       | Bored Ape          |
       | Single NFT Preprod |
