@@ -7,7 +7,6 @@ const mockUseWalletStore = jest.fn();
 const error = 'error in getSignTxData';
 const mockConsumeRemoteApi = jest.fn();
 const mockConfirmTransactionContent = jest.fn(() => <span data-testid="ConfirmTransactionContent" />);
-const mockGetTitleKey = jest.fn();
 const mockGetTxType = jest.fn();
 const mockUseDisallowSignTx = jest.fn();
 const mockUseViewsFlowContext = jest.fn();
@@ -89,7 +88,6 @@ jest.mock('../utils.ts', () => {
   return {
     __esModule: true,
     ...original,
-    getTitleKey: mockGetTitleKey,
     getTxType: mockGetTxType
   };
 });
@@ -163,8 +161,6 @@ describe('Testing ConfirmTransaction component', () => {
     }));
     mockGetTxType.mockReset();
     mockGetTxType.mockReturnValue(txType);
-    mockGetTitleKey.mockReset();
-    mockGetTitleKey.mockImplementation((val) => val);
 
     const signTxData = { tx: { id: 'test-tx-id' } };
     mockConsumeRemoteApi.mockReset();

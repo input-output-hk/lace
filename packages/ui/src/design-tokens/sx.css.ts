@@ -111,6 +111,10 @@ const colorProperties = defineProperties({
 const radiusProperties = defineProperties({
   properties: {
     borderRadius: vars.radius,
+    borderTopLeftRadius: vars.radius,
+    borderTopRightRadius: vars.radius,
+    borderBottomRightRadius: vars.radius,
+    borderBottomLeftRadius: vars.radius,
   },
 });
 

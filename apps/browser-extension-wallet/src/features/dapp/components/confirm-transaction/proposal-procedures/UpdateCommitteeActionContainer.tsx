@@ -5,7 +5,6 @@ import { UpdateCommitteeAction } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
 import { useCexplorerBaseUrl } from '../hooks';
-import { drepIDasBech32FromHash } from '../utils';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];

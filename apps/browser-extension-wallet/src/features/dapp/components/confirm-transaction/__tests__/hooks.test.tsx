@@ -32,6 +32,7 @@ import { AddressListType } from '@src/views/browser-view/features/activity';
 import { WalletInfo } from '@src/types';
 import * as Core from '@cardano-sdk/core';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { mockWalletState } from '@src/utils/mocks/test-helpers';
 
 jest.mock('@stores', () => ({
   ...jest.requireActual<any>('@stores'),
@@ -333,7 +334,8 @@ describe('Testing hooks', () => {
           addressList,
           walletInfo,
           createAssetList,
-          createMintedAssetList
+          createMintedAssetList,
+          walletState: mockWalletState
         })
       );
     });
@@ -371,7 +373,8 @@ describe('Testing hooks', () => {
           addressList,
           walletInfo,
           createAssetList,
-          createMintedAssetList
+          createMintedAssetList,
+          walletState: mockWalletState
         })
       );
     });

@@ -1,10 +1,6 @@
-/* eslint-disable no-magic-numbers */
 import React from 'react';
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import styles from './TransactionFee.module.scss';
-import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import { useTranslate } from '@src/ui/hooks';
+import { TransactionSummary } from '@lace/ui';
 
 export interface TransactionFeeProps {
   fee: string;
@@ -15,28 +11,12 @@ export const TransactionFee = ({ fee, amountTransformer, coinSymbol }: Transacti
   const { t } = useTranslate();
 
   return (
-    <div className={styles.details}>
-      <div className={styles.txFeeContainer}>
-        <div className={styles.txfee} data-testid="tx-fee-title">
-          {t('package.core.activityDetails.transactionFee')}
-        </div>
-        <Tooltip title={t('package.core.activityDetails.transactionFeeInfo')}>
-          {Info ? (
-            <Info data-testid="tx-fee-tooltip-icon" style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
-          ) : (
-            <InfoCircleOutlined />
-          )}
-        </Tooltip>
-      </div>
-
-      <div data-testid="tx-fee" className={styles.detail}>
-        <div className={styles.amount}>
-          <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
-          <span data-testid="tx-fee-fiat" className={styles.fiat}>
-            {amountTransformer(fee)}
-          </span>
-        </div>
-      </div>
-    </div>
+    <TransactionSummary.Amount
+      amount={`${fee} ${coinSymbol}`}
+      fiatPrice={amountTransformer(fee)}
+      label={t('package.core.activityDetails.transactionFee')}
+      tooltip={t('package.core.activityDetails.transactionFeeInfo')}
+      data-testid="fee"
+    />
   );
 };

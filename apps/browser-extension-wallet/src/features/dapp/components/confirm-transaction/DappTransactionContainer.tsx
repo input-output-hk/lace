@@ -20,7 +20,8 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
     walletInfo,
     inMemoryWallet,
     blockchainProvider: { assetProvider },
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    walletState
   } = useWalletStore();
   const {
     signTxRequest: { request },
@@ -52,7 +53,8 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
     createAssetList,
     createMintedAssetList,
     req: request,
-    walletInfo
+    walletInfo,
+    walletState
   });
 
   // TODO: merge with the upper skeleton check

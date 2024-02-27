@@ -188,6 +188,9 @@ class MultidelegationPageAssert {
     await MultidelegationPage.tooltip.waitForDisplayed();
     let expectedTooltipText;
     switch (columnName) {
+      case 'Ticker':
+        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.ticker.tooltip', 'staking');
+        break;
       case 'Saturation':
         expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip', 'staking');
         break;

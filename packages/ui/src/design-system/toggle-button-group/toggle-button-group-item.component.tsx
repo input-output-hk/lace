@@ -2,6 +2,8 @@ import React, { forwardRef } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
+import * as Typography from '../typography';
+
 import * as cx from './toggle-button-group-item.css';
 
 import type { ToggleGroupItemProps } from '@radix-ui/react-toggle-group';
@@ -20,7 +22,9 @@ export const Item = forwardRef<HTMLButtonElement, ToggleButtonGroupItemProps>(
   ): JSX.Element => (
     <ToggleGroup.Item className={cx.root} ref={forwardReference} {...props}>
       {IconComponent && <IconComponent className={cx.icon} />}
-      {children}
+      {Boolean(children) && (
+        <Typography.Button weight="$semibold">{children}</Typography.Button>
+      )}
     </ToggleGroup.Item>
   ),
 );

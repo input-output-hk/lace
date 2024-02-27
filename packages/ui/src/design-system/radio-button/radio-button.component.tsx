@@ -8,21 +8,20 @@ import { Flex } from '../flex';
 
 import * as cx from './radio-button.css';
 
-export type Props = Readonly<{
+export interface RadioButtonGroupOption {
+  value: string;
+  label: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  onIconClick?: () => void;
+}
+
+export interface RadioButtonGroupProps {
   disabled?: boolean;
   className?: string;
-  selectedValue: string;
-
-  options: {
-    value: string;
-    label: string;
-    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-
-    onIconClick?: () => void;
-  }[];
-
+  selectedValue?: string;
+  options: RadioButtonGroupOption[];
   onValueChange: (value: string) => void;
-}>;
+}
 
 export const RadioButtonGroup = ({
   disabled = false,
@@ -31,47 +30,59 @@ export const RadioButtonGroup = ({
   selectedValue,
   options,
   ...props
-}: Props): JSX.Element => (
-  <Box className={cn(className, cx.root)}>
-    <RadixRadioGroup.Root
-      {...props}
-      value={selectedValue}
-      disabled={disabled}
-      onValueChange={onValueChange}
-      className={cx.radioGroupRoot}
-    >
-      {options.map(({ value, label, icon, onIconClick }) => (
-        <Flex alignItems="center" h="$fill" m="$4" key={value}>
-          <RadixRadioGroup.Item
-            id={label}
-            value={value}
-            className={cn(
-              cx.radioGroupItem,
-              value === selectedValue ? cx.checked : cx.unchecked,
-            )}
+}: Readonly<RadioButtonGroupProps>): JSX.Element => {
+  const hasIcon = options.some(({ icon }) => Boolean(icon));
+
+  return (
+    <Box className={cn(className, cx.root)}>
+      <RadixRadioGroup.Root
+        {...props}
+        value={selectedValue}
+        disabled={disabled}
+        onValueChange={onValueChange}
+        className={cx.radioGroupRootWithIcon[hasIcon ? 'withIcon' : 'default']}
+      >
+        {options.map(({ value, label, icon: Icon, onIconClick }) => (
+          <Flex
+            alignItems="center"
+            key={value}
+            className={cn({
+              [`${cx.radioGroupItemWrapper} ${cx.radioGroupItemWrapperSelector}`]:
+                !!label,
+              [cx.withIcon]: hasIcon,
+            })}
           >
-            <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
-          </RadixRadioGroup.Item>
-          {label && (
-            <label id="Label" htmlFor={value}>
-              <Box
-                className={cn(cx.label, {
-                  [cx.disabled]: disabled,
-                })}
+            <RadixRadioGroup.Item
+              id={`radio-btn-control-id-${value}`}
+              value={value}
+              className={cx.radioGroupItem}
+            >
+              <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
+            </RadixRadioGroup.Item>
+            {label && (
+              <label
+                id={`radio-btn-label-id-${value}`}
+                htmlFor={`radio-btn-control-id-${value}`}
               >
-                {label}
-              </Box>
-            </label>
-          )}
-          {icon !== undefined && value === selectedValue && (
-            <Flex justifyContent="flex-end">
-              <div className={cx.icon} onClick={onIconClick}>
-                {React.createElement(icon)}
-              </div>
-            </Flex>
-          )}
-        </Flex>
-      ))}
-    </RadixRadioGroup.Root>
-  </Box>
-);
+                <Box
+                  className={cn(cx.label, {
+                    [cx.disabled]: disabled,
+                  })}
+                >
+                  {label}
+                </Box>
+              </label>
+            )}
+            {Icon !== undefined && value === selectedValue && (
+              <Flex justifyContent="flex-end" className={cx.iconWrapper}>
+                <div className={cx.icon} onClick={onIconClick}>
+                  <Icon />
+                </div>
+              </Flex>
+            )}
+          </Flex>
+        ))}
+      </RadixRadioGroup.Root>
+    </Box>
+  );
+};

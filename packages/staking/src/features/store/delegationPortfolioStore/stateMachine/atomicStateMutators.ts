@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX } from '../constants';
+import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { initializeDraftPortfolioPool } from './initializeDraftPortfolioPool';
 import { normalizePercentages } from './normalizePercentages';
 import {
@@ -63,15 +63,14 @@ export const atomicStateMutators = {
       draftPortfolio: state.draftPortfolio.filter((pool) => pool.id !== id),
     } as const;
   },
-  selectPool: ({ stakePool, state }: { stakePool: Wallet.Cardano.StakePool; state: State }) => {
-    const selectionsFull = state.selectedPortfolio.length === MAX_POOLS_COUNT;
-    const alreadySelected = state.selectedPortfolio.some(({ id }) => stakePool.hexId === id);
-    if (selectionsFull || alreadySelected) return {};
-    const newPool = initializeDraftPortfolioPool({ initialPercentage: 0, stakePool, state });
+  selectPools: ({ stakePools, state }: { stakePools: Wallet.Cardano.StakePool[]; state: State }) => {
+    const newPools = stakePools.map((pool: Wallet.Cardano.StakePool) =>
+      initializeDraftPortfolioPool({ initialPercentage: 0, stakePool: pool, state })
+    );
 
     return {
-      // placing new pool at the top of the list for better UX
-      selectedPortfolio: [newPool, ...state.selectedPortfolio],
+      // placing new pools at the top of the list for better UX
+      selectedPortfolio: [...newPools, ...state.selectedPortfolio],
     };
   },
   showChangingPreferencesConfirmation: ({

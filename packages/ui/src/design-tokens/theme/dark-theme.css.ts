@@ -348,12 +348,14 @@ const colors: Colors = {
   $checkbox_hover_checked_backgroundColor:
     darkColorScheme.$primary_hover_purple,
 
-  $radiobutton_focus_color: darkColorScheme.$primary_accent_purple_0_3,
-  $radiobutton_hover_color: darkColorScheme.$primary_light_grey_plus,
+  $radiobutton_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $radiobutton_hover_color: darkColorScheme.$primary_light_grey,
   $radiobutton_indicator_backgroundColor:
     darkColorScheme.$primary_accent_purple,
   $radiobutton_indicator_check_color: darkColorScheme.$primary_black,
-  $radiobutton_unchecked_borderColor: darkColorScheme.$primary_grey,
+  $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $radiobutton_unchecked_bgColor: 'transparent',
+  $radiobutton_checked_bgColor: darkColorScheme.$primary_grey,
   $radiobutton_icon_color: darkColorScheme.$primary_white,
   $radiobutton_icon_hover_color: darkColorScheme.$primary_grey,
   $radiobutton_icon_hover_border_color:
@@ -379,6 +381,14 @@ const colors: Colors = {
   $action_card_container_borderColor: colorTransparent,
   $action_card_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
   $action_card_icon_container_borderColor: colorTransparent,
+
+  $auto_suggest_container_background_color: darkColorScheme.$primary_dark_grey,
+  $auto_suggest_border_color: darkColorScheme.$primary_grey,
+  $auto_suggest_loader_color: darkColorScheme.$primary_accent_purple,
+  $auto_suggest_check_color: darkColorScheme.$secondary_data_green,
+  $auto_suggest_address_color: darkColorScheme.$primary_light_grey,
+  $auto_suggest_initial_bgColor: darkColorScheme.$primary_accent_purple_0_3,
+  $auto_suggest_initial_color: darkColorScheme.$primary_accent_purple,
 
   $stake_pool_item_bg_hover: darkColorScheme.$primary_dark_grey_plus,
   $stake_pool_header_text_color: darkColorScheme.$primary_white,

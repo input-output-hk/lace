@@ -28,7 +28,7 @@ export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolsL
       portfolioMutators.executeCommand({ data: hexId, type: 'UnselectPoolFromList' });
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
     } else {
-      portfolioMutators.executeCommand({ data: stakePool, type: 'SelectPoolFromList' });
+      portfolioMutators.executeCommand({ data: [stakePool], type: 'SelectPoolFromList' });
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakeClick);
     }
   };

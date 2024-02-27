@@ -20,6 +20,8 @@ import { AddressListType } from '@src/views/browser-view/features/activity';
 import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
 import { useWalletStore } from '@stores';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
+import { ObservableWalletState } from '@hooks/useWalletState';
 
 export const useCreateAssetList = ({
   assets,
@@ -102,6 +104,7 @@ const getAssetNameFromMintMetadata = (asset: MintedAsset, metadata: Wallet.Carda
     return typeof assetMetadataName === 'string' ? assetMetadataName : undefined;
   }
 };
+
 export const useCreateMintedAssetList = ({
   assets,
   outputs,
@@ -158,7 +161,7 @@ export const useCreateMintedAssetList = ({
 
 export const useDisallowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): ((close?: boolean) => void) => useCallback((close?: boolean) => disallowSignTx(req, close), [req]);
+): ((close?: boolean) => void) => useCallback(() => disallowSignTx(req), [req]);
 
 export const useAllowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
@@ -180,7 +183,7 @@ export const useSignWithHardwareWallet = (
       await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
       allow();
     } catch {
-      disallow();
+      disallow(false);
       redirectToSignFailure({});
     }
   }, [allow, disallow, redirectToSignFailure]);
@@ -193,18 +196,22 @@ export const useTxSummary = ({
   addressList,
   walletInfo,
   createAssetList,
-  createMintedAssetList
+  createMintedAssetList,
+  walletState
 }: {
   addressList: AddressListType[];
   walletInfo: WalletInfo;
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   createAssetList: (txAssets: Wallet.Cardano.TokenMap) => Wallet.Cip30SignTxAssetItem[];
   createMintedAssetList: (txAssets: AssetsMintedInspection) => Wallet.Cip30SignTxAssetItem[];
+  walletState: ObservableWalletState | null;
 }): Wallet.Cip30SignTxSummary | undefined => {
   const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
+  const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
+  const txCollateral = useComputeTxCollateral(walletState, tx);
 
   useEffect(() => {
-    if (!req) {
+    if (!tx) {
       setTxSummary(void 0);
       return;
     }
@@ -214,7 +221,6 @@ export const useTxSummary = ({
         burned: assetsBurnedInspector
       });
 
-      const tx = req.transaction.toCore();
       const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
       const isMintTransaction = minted.length > 0 || burned.length > 0;
 
@@ -250,11 +256,12 @@ export const useTxSummary = ({
         outputs: txSummaryOutputs,
         type: txType,
         mintedAssets: createMintedAssetList(minted),
-        burnedAssets: createMintedAssetList(burned)
+        burnedAssets: createMintedAssetList(burned),
+        collateral: txCollateral ? Wallet.util.lovelacesToAdaString(txCollateral.toString()) : undefined
       });
     };
     getTxSummary();
-  }, [req, walletInfo.addresses, createAssetList, createMintedAssetList, setTxSummary, addressList]);
+  }, [tx, walletInfo.addresses, createAssetList, createMintedAssetList, setTxSummary, addressList, txCollateral]);
 
   return txSummary;
 };
@@ -300,9 +307,9 @@ export const useCexplorerBaseUrl = (): string => {
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
   useEffect(() => {
-    const newUrl = `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
-    if (newUrl !== explorerBaseUrl) {
-      setExplorerBaseUrl(newUrl);
+    const explorerUrl = `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
+    if (explorerUrl !== explorerBaseUrl) {
+      setExplorerBaseUrl(explorerUrl);
     }
   }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName, explorerBaseUrl]);
 

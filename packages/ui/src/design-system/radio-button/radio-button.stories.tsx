@@ -1,16 +1,19 @@
+/* eslint-disable unicorn/consistent-function-scoping */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import type { SVGProps } from 'react';
 import React from 'react';
 
 import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDownload';
 import type { Meta } from '@storybook/react';
+import { v4 as uuid } from 'uuid';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
-
-import * as cx from './radio-button.stories.css';
 
 import { RadioButtonGroup } from './';
 
@@ -25,8 +28,15 @@ export default {
   ],
 } as Meta;
 
-const options = [{ value: 'option', label: 'Label' }];
-const optionsWithIcon = [
+const getOptions = (label = ''): { value: string; label: string }[] => [
+  { value: `option-${uuid()}`, label },
+];
+const getOptionsWithIcon = (): {
+  value: string;
+  label: string;
+  icon: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
+  onIconClick: () => void;
+}[] => [
   {
     value: 'option',
     label: 'Label',
@@ -34,90 +44,61 @@ const optionsWithIcon = [
     onIconClick: (): void => void 0,
   },
 ];
-const emptyOption = [{ value: 'option', label: '' }];
 
 const MainComponents = (): JSX.Element => {
+  const getRow = (label?: string) => [
+    { options: getOptions(label), onValueChange: (): undefined => undefined },
+    {
+      options: getOptions(label),
+      id: 'hover',
+      onValueChange: (): undefined => undefined,
+    },
+    {
+      options: getOptions(label),
+      id: 'active',
+      onValueChange: (): undefined => undefined,
+    },
+    {
+      options: getOptions(label),
+      disabled: true,
+      onValueChange: (): undefined => undefined,
+    },
+    {
+      options: getOptions(label),
+      id: 'focus',
+      onValueChange: (): undefined => undefined,
+    },
+  ];
+
   return (
     <>
       <Variants.Row>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={emptyOption}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            id="hover"
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={emptyOption}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={emptyOption}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            disabled
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={emptyOption}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            className={cx.focus}
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={emptyOption}
-          />
-        </Variants.Cell>
+        {getRow().map(item => (
+          <Variants.Cell key={item.options[0].value}>
+            <RadioButtonGroup {...item} />
+          </Variants.Cell>
+        ))}
       </Variants.Row>
       <Variants.Row>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            id="hover"
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            disabled
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            className={cx.focus}
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
+        {getRow().map(item => (
+          <Variants.Cell key={item.options[0].value}>
+            <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
+          </Variants.Cell>
+        ))}
+      </Variants.Row>
+      <Variants.Row>
+        {getRow('Label').map(item => (
+          <Variants.Cell key={item.options[0].value}>
+            <RadioButtonGroup {...item} />
+          </Variants.Cell>
+        ))}
+      </Variants.Row>
+      <Variants.Row>
+        {getRow('Label').map(item => (
+          <Variants.Cell key={item.options[0].value}>
+            <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
+          </Variants.Cell>
+        ))}
       </Variants.Row>
     </>
   );
@@ -131,22 +112,21 @@ const AdditionalVariants = (): JSX.Element => {
           <RadioButtonGroup
             selectedValue={''}
             onValueChange={(): undefined => undefined}
-            options={options}
+            options={getOptions()}
           />
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
-            options={options}
+            options={getOptions()}
           />
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
-            options={options}
+            options={getOptions()}
           />
         </Variants.Cell>
         <Variants.Cell>
@@ -154,15 +134,15 @@ const AdditionalVariants = (): JSX.Element => {
             disabled
             selectedValue={''}
             onValueChange={(): undefined => undefined}
-            options={options}
+            options={getOptions()}
           />
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            className={cx.focus}
+            id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
-            options={options}
+            options={getOptions()}
           />
         </Variants.Cell>
       </Variants.Row>
@@ -171,22 +151,21 @@ const AdditionalVariants = (): JSX.Element => {
           <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            id="hover"
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
+            options={getOptionsWithIcon()}
           />
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
+            options={getOptionsWithIcon()}
+          />
+        </Variants.Cell>
+        <Variants.Cell>
+          <RadioButtonGroup
+            selectedValue={'option'}
+            onValueChange={(): undefined => undefined}
+            options={getOptionsWithIcon()}
           />
         </Variants.Cell>
         <Variants.Cell>
@@ -194,15 +173,15 @@ const AdditionalVariants = (): JSX.Element => {
             disabled
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
+            options={getOptionsWithIcon()}
           />
         </Variants.Cell>
         <Variants.Cell>
           <RadioButtonGroup
-            className={cx.focus}
+            id="hover"
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
+            options={getOptionsWithIcon()}
           />
         </Variants.Cell>
       </Variants.Row>
@@ -212,14 +191,15 @@ const AdditionalVariants = (): JSX.Element => {
 
 export const Overview = (): JSX.Element => {
   const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
-  const option = [{ value: 'singleOption', label: 'Single label' }];
+  const option = [{ value: 'singleOption', label: 'Label' }];
   const options = [
-    { value: 'label01', label: 'Label 1' },
-    { value: 'label02', label: 'Label 2' },
-    { value: 'label03', label: 'Label 3' },
+    { value: 'label01', label: 'Label' },
+    { value: 'label02', label: 'Label' },
+    { value: 'label03', label: 'Label' },
+    { value: 'label04', label: 'Label' },
   ];
 
-  const [radioValue, setRadioValue] = React.useState(options[0].value);
+  const [radioValue, setRadioValue] = React.useState(options[1].value);
 
   return (
     <Grid>
@@ -297,5 +277,7 @@ export const Overview = (): JSX.Element => {
 Overview.parameters = {
   pseudo: {
     hover: '#hover',
+    active: '#active',
+    focus: '#focus',
   },
 };

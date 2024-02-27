@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,6 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { of, take } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
-import { Skeleton } from 'antd';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -87,17 +86,13 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   useOnBeforeUnload(disallowSignTx);
 
-  const onError = useCallback(() => {
-    setConfirmTransactionError(true);
-  }, []);
-
   return (
     <Layout
       layoutClassname={cn(confirmTransactionError && styles.layoutError)}
       pageClassname={styles.spaceBetween}
       title={!confirmTransactionError && txType && t(`core.${txType}.title`)}
     >
-      {req && txType ? <ConfirmTransactionContent txType={txType} onError={onError} /> : <Skeleton loading />}
+      {req && txType && <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />}
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button

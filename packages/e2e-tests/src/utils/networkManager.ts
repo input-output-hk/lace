@@ -2,8 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 import { Logger } from '../support/logger';
 import allure from '@wdio/allure-reporter';
-// eslint-disable-next-line import/no-unresolved
-import { CDPSession } from 'puppeteer-core/lib/esm/puppeteer/common/Connection';
+import { CDPSession } from 'puppeteer';
 import { browser } from '@wdio/globals';
 
 export class NetworkManager {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+import type { SVGProps } from 'react';
 import React from 'react';
 
 import { ReactComponent as LoaderDarkIcon } from '@lace/icons/dist/LoaderDarkGradientComponent';
@@ -11,16 +13,23 @@ import * as cx from './loader.css';
 
 import type { BoxProps } from '../box';
 
+type Props = Readonly<
+  BoxProps & {
+    icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
+  }
+>;
+
 export const Loader = ({
   w = '$148',
   h = '$148',
+  icon,
   ...props
-}: Readonly<BoxProps>): JSX.Element => {
+}: Props): JSX.Element => {
   const { colorScheme } = useTheme();
-
-  const LoaderIcon =
+  const defaultIcon =
     colorScheme === ThemeColorScheme.Dark ? LoaderDarkIcon : LoaderLightIcon;
 
+  const LoaderIcon = icon ?? defaultIcon;
   return (
     <Flex {...props} h={h} w={w}>
       <LoaderIcon

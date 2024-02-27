@@ -4,6 +4,12 @@ import { Ellipsis } from '@lace/common';
 import { useTranslate } from '@src/ui/hooks';
 import { Wallet } from '@lace/cardano';
 
+export interface DappTxAssetProps {
+  name: string;
+  amount: string;
+  ticker?: string;
+}
+
 export const DappTxAsset = ({ amount, name, ticker }: Wallet.Cip30SignTxAssetItem): React.ReactElement => {
   const { t } = useTranslate();
   return (
