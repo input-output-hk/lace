@@ -1,7 +1,7 @@
 import { Button } from '@lace/ui';
 import { TranslationsFor } from '@ui/utils/types';
 import { urls } from '@ui/utils/constants';
-import React, { ReactNode, useRef, useState } from 'react';
+import React, { ReactElement, useRef, useState } from 'react';
 import styles from './MnemonicVideoPopupContent.module.scss';
 
 type MnemonicVideoPopupContentProps = {
@@ -16,7 +16,7 @@ export const MnemonicVideoPopupContent = ({
   onClose,
   translations,
   videoSrc
-}: MnemonicVideoPopupContentProps): ReactNode => {
+}: MnemonicVideoPopupContentProps): ReactElement => {
   const [overlayVisible, setOverlayVisible] = useState(true);
   const videoRef = useRef<HTMLIFrameElement>();
 
