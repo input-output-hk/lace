@@ -1,5 +1,6 @@
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const { NormalModuleReplacementPlugin, ProvidePlugin } = require('webpack');
+const { NormalModuleReplacementPlugin } = require('webpack');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
   stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
@@ -45,48 +46,6 @@ module.exports = {
       }
     };
 
-    // Please refer to the apps/browser-extension-wallet/webpack.common.js
-    config.resolve = {
-      ...config.resolve,
-      fallback: {
-        ...config.resolve.fallback,
-        https: require.resolve('https-browserify'),
-        http: require.resolve('stream-http'),
-        'get-port-please': false,
-        net: false,
-        fs: false,
-        os: false,
-        path: false,
-        events: require.resolve('events/'),
-        buffer: require.resolve('buffer/'),
-        stream: require.resolve('readable-stream'),
-        crypto: require.resolve('crypto-browserify'),
-        constants: require.resolve('constants-browserify'),
-        zlib: require.resolve('browserify-zlib'),
-        dns: false,
-        tls: false,
-        child_process: false
-      },
-      plugins: [new TsconfigPathsPlugin({ configFile: 'src/tsconfig.json' })]
-    };
-
-    // Need to add similar plugins to apps/browser-extension-wallet webpack to avoid issues with stories not loading
-    config.plugins = [
-      ...config.plugins,
-      new ProvidePlugin({
-        Buffer: ['buffer', 'Buffer'],
-        process: 'process/browser'
-      }),
-      new NormalModuleReplacementPlugin(
-        /@dcspark\/cardano-multiplatform-lib-nodejs/,
-        '@dcspark/cardano-multiplatform-lib-browser'
-      ),
-      new NormalModuleReplacementPlugin(
-        /@emurgo\/cardano-message-signing-nodejs/,
-        '@emurgo/cardano-message-signing-browser'
-      )
-    ];
-
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
@@ -100,28 +59,15 @@ module.exports = {
       ]
     });
 
-    // Required to avoid issues with components that use SDK features that might touch signing lib, review removal once we no longer require these libs
-    config.module.rules.push({
-      test: /\.wasm$/,
-      type: 'javascript/auto',
-      use: {
-        loader: 'webassembly-loader-sw',
-        options: {
-          export: 'instance',
-          importObjectProps:
-            // eslint-disable-next-line max-len
-            `'./cardano_multiplatform_lib_bg.js': __webpack_require__("../../node_modules/@dcspark/cardano-multiplatform-lib-browser/cardano_multiplatform_lib_bg.js"),
-             './cardano_message_signing_bg.js': __webpack_require__("../../node_modules/@emurgo/cardano-message-signing-browser/cardano_message_signing_bg.js")`
-        }
-      }
-    });
-
-    config.experiments = {
-      ...config.experiments,
-      syncWebAssembly: true
-    };
-
     config.resolve.extensions.push('.svg');
+    (config.resolve.plugins = config.resolve.plugins || []).push(
+      new TsconfigPathsPlugin({ configFile: 'src/tsconfig.json' })
+    );
+
+    config.plugins.push(
+      new NormalModuleReplacementPlugin(/@lace\/cardano/, require.resolve('./__mocks__/cardano.ts')),
+      new NodePolyfillPlugin()
+    );
 
     return config;
   },
