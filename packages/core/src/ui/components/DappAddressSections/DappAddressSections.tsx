@@ -36,10 +36,10 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
     <TransactionAssets
       testId="dapp-transaction-nfts-container"
       key={nft.assetInfo.fingerprint}
-      imageSrc={nft.assetInfo.tokenMetadata.icon ?? undefined}
+      imageSrc={nft.assetInfo.tokenMetadata?.icon ?? undefined}
       balance={Wallet.util.lovelacesToAdaString(nft.amount.toString())}
-      tokenName={truncate(nft.assetInfo.nftMetadata?.name, charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(nft.assetInfo.nftMetadata?.name, charBeforeEllMetadata, charAfterEllMetadata)}
+      tokenName={truncate(nft.assetInfo.nftMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
+      metadataHash={truncate(nft.assetInfo.nftMetadata?.name ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
     />
   ));
 
@@ -48,10 +48,10 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
     <TransactionAssets
       testId="dapp-transaction-token-container"
       key={token.assetInfo.fingerprint}
-      imageSrc={token.assetInfo.tokenMetadata.icon ?? undefined}
+      imageSrc={token.assetInfo.tokenMetadata?.icon ?? undefined}
       balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
-      tokenName={truncate(token.assetInfo.tokenMetadata.name, charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(token.assetInfo.assetId, charBeforeEllMetadata, charAfterEllMetadata)}
+      tokenName={truncate(token.assetInfo.tokenMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
+      metadataHash={truncate(token.assetInfo.assetId ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
     />
   ));
 

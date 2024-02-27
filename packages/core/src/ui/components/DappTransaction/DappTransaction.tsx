@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from 'react';
 import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
@@ -62,13 +63,13 @@ type TransactionType = keyof typeof TransactionTypes;
 
 const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) =>
   assetWithAmount.assetInfo.nftMetadata !== null
-    ? assetWithAmount.assetInfo.nftMetadata.name
-    : assetWithAmount.assetInfo.tokenMetadata.name;
+    ? assetWithAmount.assetInfo.nftMetadata?.name
+    : assetWithAmount.assetInfo.tokenMetadata?.name;
 
 const getAssetHash = (assetWithAmount: AssetInfoWithAmount) =>
   assetWithAmount.assetInfo.nftMetadata !== null
-    ? assetWithAmount.assetInfo.nftMetadata.name
-    : assetWithAmount.assetInfo.assetId;
+    ? assetWithAmount.assetInfo.nftMetadata?.name
+    : assetWithAmount.assetInfo?.assetId;
 
 const getStringFromLovelace = (value: bigint): string => Wallet.util.lovelacesToAdaString(value.toString());
 
@@ -117,10 +118,10 @@ export const DappTransaction = ({
             <TransactionAssets
               testId="dapp-transaction-amount-value"
               key={key}
-              imageSrc={assetWithAmount.assetInfo.tokenMetadata.icon}
+              imageSrc={assetWithAmount.assetInfo.tokenMetadata?.icon ?? undefined}
               balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
-              tokenName={truncate(getAssetTokenName(assetWithAmount), charBeforeEllName, charAfterEllName)}
-              metadataHash={truncate(getAssetHash(assetWithAmount), charBeforeEllMetadata, charAfterEllMetadata)}
+              tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
+              metadataHash={truncate(getAssetHash(assetWithAmount) ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
             />
           ))}
         </div>
