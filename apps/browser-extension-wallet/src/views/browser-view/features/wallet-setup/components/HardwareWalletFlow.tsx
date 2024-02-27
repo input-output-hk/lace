@@ -307,6 +307,8 @@ export const HardwareWalletFlow = ({
   const onRetry = () => {
     setIsErrorDialogVisible(false);
     goBackToConnect();
+    // TODO: Remove this workaround with full app reload when SDK allows to connect Hardware Wallet for the 2nd time.
+    onAppReload();
   };
 
   const handleStartOver = () => {
