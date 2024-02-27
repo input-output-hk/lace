@@ -1,10 +1,4 @@
-import {
-  useTranslate,
-  WalletSetupOptionsStep,
-  WalletSetupSteps,
-  WalletSetupFlowProvider,
-  WalletSetupFlow
-} from '@lace/core';
+import { WalletSetupStepsRevamp as WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   PostHogAction,

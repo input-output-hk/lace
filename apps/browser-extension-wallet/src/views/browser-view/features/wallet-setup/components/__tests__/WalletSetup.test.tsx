@@ -10,7 +10,7 @@ import { ThemeProvider } from '@providers/ThemeProvider';
 import { MemoryRouter } from 'react-router-dom';
 import { WalletSetup } from '../WalletSetup';
 import { I18nextProvider } from 'react-i18next';
-import { WalletSetupSteps } from '@lace/core';
+import { WalletSetupStepsRevamp as WalletSetupSteps } from '@lace/core';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 
 jest.mock('@stores', () => ({
