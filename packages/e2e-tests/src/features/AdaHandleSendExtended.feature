@@ -1,4 +1,5 @@
-@AdaHandleSend-extended @Testnet
+@AdaHandleSend-extended @Testnet @Pending
+# BUG LW-9885
 Feature: ADA handle - extended view
 
   Background:
@@ -7,8 +8,7 @@ Feature: ADA handle - extended view
     And Address book is empty
     And I use a wallet with ADA handle "$handletosend3" NFT in extended mode
 
-  @LW-7073 @Pending
-    # BUG LW-9885
+  @LW-7073
   Scenario: Extended view - Ada handle transfer e2e, review flow
     Given I validate that handle: "$handletosend3" is listed on the Receive screen
     And I add address with name: "$handletosend3" and address: "$handletosend3" to address book in extended mode
