@@ -112,7 +112,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then The Transaction error screen is displayed in popup mode
 
   @LW-7826 @Testnet @Pending
-  # Bug: LW-8579
+  @issue=LW-8579
   Scenario: Popup view - Validate if contact name that has up to 12 characters is not truncated
     Given address book contains address with name that has 12 characters
     When I navigate to Tokens popup page
@@ -123,7 +123,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then recipients address input contains address entry with name "abcdefghijkl"
 
   @LW-7827 @Testnet @Pending
-  # Bug: LW-8579
+  @issue=LW-8579
   Scenario: Popup view - Validate if contact name that has >12 characters is truncated
     Given address book contains address with name that has more than 12 characters
     When I navigate to Tokens popup page

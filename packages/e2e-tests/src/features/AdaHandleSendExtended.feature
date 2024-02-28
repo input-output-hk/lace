@@ -1,5 +1,5 @@
 @AdaHandleSend-extended @Testnet @Pending
-# BUG LW-9885
+@issue=LW-9885
 Feature: ADA handle - extended view
 
   Background:

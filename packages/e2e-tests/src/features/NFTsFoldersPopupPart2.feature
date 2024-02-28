@@ -107,7 +107,7 @@ Feature: NFT - Folders - Popup view
     Then I see folders on the NFTs page in the alphabetical order
 
   @LW-7229 @Pending
-  #Bug: LW-7632
+  @issue=LW-7632
   Scenario: Popup-view - NFT Folders - Trying to rename folder using name that already exists
     Given I navigate to NFTs popup page
     When I create folder with name: "Sample NFT folder1" and first available NFT
