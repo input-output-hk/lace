@@ -1,47 +1,28 @@
 import { Wallet } from '@lace/cardano';
-import { PostHogAction, Search } from '@lace/common';
+import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
-import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
-import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SortDirection, SortField } from 'features/BrowsePools/types';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StateStatus, useOutsideHandles } from '../outside-handles-provider';
+import { useOutsideHandles } from '../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
-import { useRestorePoolsSelection } from './hooks';
+import { useBrowsePools, useRestorePoolsSelection } from './hooks';
 import { PortfolioBar } from './PortfolioBar';
 import { StakePoolsGrid } from './StakePoolsGrid/StakePoolsGrid';
-import { StakePoolsList, StakePoolsListEmpty, StakePoolsListProps } from './StakePoolsList';
+import { StakePoolsList, StakePoolsListEmpty } from './StakePoolsList';
 import { BrowsePoolsView } from './types';
 
-const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: SortField.name,
-  order: SortDirection.desc,
-};
-
 const LACE_APP_ID = 'lace-app';
-const SEARCH_DEBOUNCE = 300;
 
 export const BrowsePools = () => {
-  const {
-    currentChain,
-    walletStoreStakePoolSearchResults: { pageResults, totalResultCount },
-    walletStoreStakePoolSearchResultsStatus,
-    walletStoreResetStakePools: resetStakePools,
-    walletStoreFetchStakePools: fetchStakePools,
-    analytics,
-    stakingBrowserPreferencesPersistence,
-    setStakingBrowserPreferencesPersistence,
-  } = useOutsideHandles();
+  const { stakingBrowserPreferencesPersistence, setStakingBrowserPreferencesPersistence } = useOutsideHandles();
+  const { totalResultCount, fetchingPools, searchValue, onSearch, setSort, sort, list, loadMoreData } =
+    useBrowsePools();
 
-  const componentRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
-  const [searchValue, setSearchValue] = useState<string>(stakingBrowserPreferencesPersistence?.searchQuery || '');
-  const [sort, setSort] = useState<StakePoolSortOptions>(
-    stakingBrowserPreferencesPersistence?.sortOptions || DEFAULT_SORT_OPTIONS
-  );
   const [poolsView, setPoolsView] = useState<BrowsePoolsView>(
     USE_MULTI_DELEGATION_STAKING_GRID_VIEW
       ? stakingBrowserPreferencesPersistence?.poolsView || BrowsePoolsView.grid
@@ -50,8 +31,6 @@ export const BrowsePools = () => {
   const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
     selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
   }));
-
-  const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
 
   const tableHeaderTranslations = {
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.apy.title'),
@@ -63,8 +42,6 @@ export const BrowsePools = () => {
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
     ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker.title'),
   };
-
-  const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE), [fetchStakePools]);
 
   useEffect(
     () => () =>
@@ -86,35 +63,6 @@ export const BrowsePools = () => {
   );
 
   useRestorePoolsSelection();
-
-  useEffect(() => {
-    if (componentRef?.current) {
-      // reset pools on network switching, searchValue change and sort change
-      resetStakePools?.();
-    }
-  }, [currentChain, searchValue, sort, resetStakePools]);
-
-  const loadMoreData = useCallback(
-    ({ startIndex, endIndex }: Parameters<StakePoolsListProps['loadMoreData']>[0]) => {
-      if (startIndex !== endIndex) {
-        debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
-      }
-    },
-    [debouncedSearch, searchValue, sort]
-  );
-
-  const onSearch = (searchString: string) => {
-    const startedTyping = searchValue === '' && searchString !== '';
-    if (startedTyping) {
-      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
-    }
-    setSearchValue(searchString);
-  };
-
-  const list = useMemo(
-    () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
-    [pageResults]
-  );
 
   const sortSelectedPools = useCallback(
     (pool1: Wallet.util.StakePool, pool2: Wallet.util.StakePool) => {
@@ -142,7 +90,7 @@ export const BrowsePools = () => {
 
   return (
     <>
-      <Box ref={componentRef} className={styles.stakePoolsTable} data-testid="stake-pool-table">
+      <Box className={styles.stakePoolsTable} data-testid="stake-pool-table">
         <BrowsePoolsHeader poolsCount={totalResultCount} poolsView={poolsView} setPoolsView={setPoolsView} />
         <Search
           className={styles.searchBar}

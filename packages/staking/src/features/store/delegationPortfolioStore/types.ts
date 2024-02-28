@@ -1,3 +1,4 @@
+import { StakePoolSortOptions } from '@cardano-sdk/core';
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
 import { ExecuteCommand, State } from './stateMachine';
@@ -42,4 +43,24 @@ export type StakePoolDetails = {
   blocks?: string;
   pledge: { number: string; unit?: string };
   cost: { number: string; unit?: string };
+};
+
+// TODO consider using SDK type
+export enum PoolsFilter {
+  Saturation = 'Saturation',
+  ProfitMargin = 'ProfitMargin',
+  Performance = 'Performance',
+  Ros = 'Ros',
+}
+
+export interface QueryStakePoolsFilters {
+  [PoolsFilter.Saturation]: [string, string];
+  [PoolsFilter.ProfitMargin]: [string, string];
+  [PoolsFilter.Performance]: [string, string];
+  [PoolsFilter.Ros]: [string];
+}
+
+export type QueryStakePoolsArgs = {
+  sort: StakePoolSortOptions;
+  filters?: QueryStakePoolsFilters;
 };

@@ -1,8 +1,9 @@
 import { Wallet } from '@lace/cardano';
-import { getPoolInfos } from 'features/activity/PastEpochsRewards/hooks/useRewardsByEpoch';
-import { useOutsideHandles } from 'features/outside-handles-provider';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from 'features/store';
 import { useCallback, useEffect, useRef } from 'react';
+import { getPoolInfos } from '../../activity/PastEpochsRewards/hooks/useRewardsByEpoch';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../../store';
+// TODO move getPoolInfos to where it belongs (BrowsePools)
 
 export const useRestorePoolsSelection = () => {
   const areSelectedPoolsRestored = useRef<{ restored: boolean }>({ restored: false });

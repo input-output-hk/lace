@@ -11,6 +11,7 @@ export enum SaturationLevels {
   Oversaturated = 'oversaturated',
 }
 
+// TODO replace by SortField from SDK + discuss if we present ROS or APY in the UI
 export enum MetricType {
   ticker = 'ticker',
   saturation = 'saturation',

@@ -1,24 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StakingPage } from '../../staking/types';
-import { activePageSelector, useDelegationPortfolioStore } from '../../store';
-import { SortDirection, SortField, StakePoolSortOptions } from '../types';
+import { PoolsFilter, QueryStakePoolsFilters, activePageSelector, useDelegationPortfolioStore } from '../../store';
+import { useBrowsePools } from '../hooks';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
-import { FilterValues, PoolsFilter, SortAndFilterTab } from './types';
+import { SortAndFilterTab } from './types';
 
 export const BrowsePoolsPreferencesCardContainer = () => {
   const activePage = useDelegationPortfolioStore(activePageSelector);
 
+  const { sort, setSort, loadMoreData, fetchingPools } = useBrowsePools();
   const [activeTab, setActiveTab] = useState<SortAndFilterTab>(SortAndFilterTab.sort);
-  const [sort, setSort] = useState<StakePoolSortOptions>({
-    field: SortField.saturation,
-    order: SortDirection.asc,
-  });
-  const [filter, setFilter] = useState<FilterValues>({
+  const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
     [PoolsFilter.Performance]: ['', ''],
     [PoolsFilter.Ros]: ['lastepoch'],
   });
+
+  // TODO to be removed after we have sorting and filtering in useDelegationPortfolioStore
+  useEffect(() => {
+    if (fetchingPools) return;
+    loadMoreData({ endIndex: 50, startIndex: 0 });
+  }, [sort, loadMoreData, fetchingPools]);
+
   if (activePage !== StakingPage.browsePools) return null;
 
   return (

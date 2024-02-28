@@ -4,8 +4,9 @@ import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowseP
 import { useCallback, useState } from 'react';
 import type { Meta } from '@storybook/react';
 
+import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
-import { FilterValues, PoolsFilter, SortAndFilterTab } from './types';
+import { SortAndFilterTab } from './types';
 
 export default {
   title: 'Cards/Stake Pool Sorting & Filter',
@@ -17,7 +18,7 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
     field: SortField.saturation,
     order: SortDirection.asc,
   });
-  const [filter, setFilter] = useState<FilterValues>({
+  const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
     [PoolsFilter.Performance]: ['', ''],
@@ -33,7 +34,7 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   );
 
   const handleFilterChange = useCallback(
-    (options: FilterValues) => {
+    (options) => {
       action('FilterChange')(options);
       setFilter(options);
     },

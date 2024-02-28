@@ -16,15 +16,16 @@ import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { USE_MULTI_DELEGATION_STAKING_FILTERS } from '../../../featureFlags';
+import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
 import * as styles from './BrowsePoolsPreferencesCard.css';
-import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortAndFilterTab } from './types';
+import { FilterOption, SelectOption, SortAndFilterTab } from './types';
 
 export interface SortAndFilterProps {
   activeTab: SortAndFilterTab;
   sort: StakePoolSortOptions;
-  filter: FilterValues;
+  filter: QueryStakePoolsFilters;
   onSortChange: (value: StakePoolSortOptions) => void;
-  onFilterChange: (filters: FilterValues) => void;
+  onFilterChange: (filters: QueryStakePoolsFilters) => void;
   onTabChange: (section: SortAndFilterTab) => void;
 }
 
@@ -40,7 +41,7 @@ export const BrowsePoolsPreferencesCard = ({
   onSortChange,
 }: SortAndFilterProps) => {
   const { t } = useTranslation();
-  const [localFilters, setLocalFilters] = useState<FilterValues>(filter);
+  const [localFilters, setLocalFilters] = useState<QueryStakePoolsFilters>(filter);
   const { field: sortBy, order: direction } = sort;
 
   const debouncedFilterChange = useMemo(() => debounce(onFilterChange, ON_CHANGE_DEBOUNCE), [onFilterChange]);

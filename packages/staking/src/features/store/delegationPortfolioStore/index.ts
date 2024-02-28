@@ -6,3 +6,5 @@ export type { CurrentPortfolioStakePool, DraftPortfolioStakePool, DrawerStep } f
 export { useDelegationPortfolioStore } from './useDelegationPortfolioStore';
 export type { DelegationPortfolioStore, StakePoolDetails } from './types';
 export { isPortfolioDrifted } from './isPortfolioDrifted';
+export { PoolsFilter } from './types';
+export type { QueryStakePoolsFilters } from './types';
