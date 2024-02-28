@@ -33,7 +33,7 @@ Feature: LW-423: NFTs - Extended view
   @LW-2500 @Mainnet
   Scenario: Extended-view - Send NFT - Password screen
     Given I am on NFTs extended page
-    When I'm sending the NFT with name: "Ibilecoin"
+    When I'm sending the NFT with name: "Ibilecoin" in extended mode
     Then The password screen is displayed:
       | Title: "Enter wallet" |
       | Input: Password       |
@@ -43,7 +43,7 @@ Feature: LW-423: NFTs - Extended view
   @LW-2501 @Mainnet
   Scenario: Extended-view  - Send NFT - User enters invalid password
     Given I am on NFTs extended page
-    And I'm sending the NFT with name: "Ibilecoin"
+    And I'm sending the NFT with name: "Ibilecoin" in extended mode
     When I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
