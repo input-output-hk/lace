@@ -1,5 +1,5 @@
 import { Cardano, Paginated } from '@cardano-sdk/core';
-import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
+import type { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
 import { WalletType } from '@cardano-sdk/web-extension';
 
 export type DeviceConnection = LedgerKeyAgent['deviceConnection'] | boolean;

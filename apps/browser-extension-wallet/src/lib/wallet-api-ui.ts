@@ -1,5 +1,6 @@
 import {
   SigningCoordinator,
+  WalletConflictError,
   WalletRepositoryApi,
   WalletType,
   consumeRemoteApi,
@@ -44,13 +45,19 @@ export const observableWallet = consumeRemoteApi(
 );
 
 export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
-  { baseChannel: repositoryChannel(process.env.WALLET_NAME), properties: walletRepositoryProperties },
+  {
+    baseChannel: repositoryChannel(process.env.WALLET_NAME),
+    properties: walletRepositoryProperties,
+    errorTypes: [WalletConflictError]
+  },
   { logger, runtime }
 );
 
+export const keyAgentFactory = createKeyAgentFactory({ bip32Ed25519: Wallet.bip32Ed25519, logger });
+
 export const signingCoordinator = new SigningCoordinator<Wallet.WalletMetadata, Wallet.AccountMetadata>(
   { hwOptions: { manifest: Wallet.manifest, communicationType: Wallet.KeyManagement.CommunicationType.Web } },
-  { keyAgentFactory: createKeyAgentFactory({ bip32Ed25519: Wallet.bip32Ed25519, logger }) }
+  { keyAgentFactory }
 );
 exposeSigningCoordinatorApi({ signingCoordinator }, { logger, runtime });
 

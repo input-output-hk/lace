@@ -7,7 +7,7 @@ import { buildMockTx } from '../mocks/tx';
 import { mockConwayCertificates } from '../mocks/certificates';
 import { Wallet } from '@lace/cardano';
 import { TxDirections } from '@src/types';
-import { StakeDelegationCertificate } from '@cardano-sdk/core/dist/cjs/Cardano';
+import { Cardano } from '@cardano-sdk/core';
 import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { TransactionActivityType, ActivityType } from '@lace/core';
 import * as Core from '@cardano-sdk/core';
@@ -165,7 +165,7 @@ describe('testing tx-inspection utils', () => {
 
     test('should not return delegation in case pool id is missing', async () => {
       const delegationTX = buildMockTx({
-        certificates: [{} as StakeDelegationCertificate]
+        certificates: [{} as Cardano.StakeDelegationCertificate]
       });
       const walletAddresses = [
         { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }

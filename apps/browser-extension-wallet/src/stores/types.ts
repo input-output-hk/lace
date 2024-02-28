@@ -16,10 +16,9 @@ import {
 import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainProvider } from './slices';
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
-import { WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
-import { Reward } from '@cardano-sdk/core';
-import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
+import { Cardano, Reward } from '@cardano-sdk/core';
 import { StakePoolSortOptions } from '@lace/staking';
 import { ObservableWalletState } from '@hooks/useWalletState';
 
@@ -96,6 +95,8 @@ export interface StakePoolSearchSlice {
 export type EnvironmentTypes = Wallet.ChainName;
 
 export interface WalletInfoSlice {
+  manageAccountsWallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined;
+  setManageAccountsWallet: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
   walletInfo?: WalletInfo | undefined;
   setWalletInfo: (info?: WalletInfo) => void;
   inMemoryWallet: Wallet.ObservableWallet | undefined;
@@ -129,6 +130,7 @@ export interface LockSlice {
 
 export interface UISlice {
   walletUI: WalletUI | undefined;
+  setIsDropdownMenuOpen: (isOpen: boolean) => void;
   setCardanoCoin: (chainId: Wallet.Cardano.ChainId) => void;
   setNetworkConnection: (networkConnection: NetworkConnectionStates) => void;
   setBalancesVisibility: (visible: boolean) => void;
@@ -144,7 +146,7 @@ export interface ActivityDetailSlice {
         type: TransactionActivityType.rewards;
         status: ActivityStatus.SPENDABLE;
         direction?: never;
-        activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+        activity: { spendableEpoch: Cardano.EpochNo; spendableDate: Date; rewards: Reward[] };
       }
     | {
         type: Exclude<ActivityType, TransactionActivityType.rewards>;
@@ -160,7 +162,7 @@ export interface ActivityDetailSlice {
     type: Exclude<ActivityType, TransactionActivityType.rewards>;
   }) => void;
   setRewardsActivityDetail: (params: {
-    activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+    activity: { spendableEpoch: Cardano.EpochNo; spendableDate: Date; rewards: Reward[] };
   }) => void;
   getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
   resetActivityState: () => void;
