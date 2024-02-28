@@ -9,7 +9,8 @@ import {
   WalletSetupFinalStep,
   WalletSetupNamePasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
-  WalletSetupStepsRevamp as WalletSetupSteps,
+  WalletSetupSteps,
+  walletSetupWizard
 } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
