@@ -1,7 +1,7 @@
 import React from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
-import { Button } from '@lace/common';
+import { Button, addEllipsis } from '@lace/common';
 import { DropdownMenuOverlay } from '../MainMenu';
 
 import ChevronNormal from '../../assets/icons/chevron-down.component.svg';
@@ -45,8 +45,12 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
 
   const walletName = cardanoWallet.source.wallet.metadata.name;
 
+  const titleCharBeforeEll = 10;
+  const titleCharAfterEll = 0;
+
   return (
     <Dropdown
+      overlayClassName={styles.overlay}
       destroyPopupOnHide
       onOpenChange={handleDropdownState}
       overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
@@ -57,7 +61,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       {process.env.USE_MULTI_WALLET === 'true' ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
-            title={walletName}
+            title={addEllipsis(walletName, titleCharBeforeEll, titleCharAfterEll)}
             subtitle={getActiveWalletSubtitle(cardanoWallet.source.account)}
             profile={
               handleImage

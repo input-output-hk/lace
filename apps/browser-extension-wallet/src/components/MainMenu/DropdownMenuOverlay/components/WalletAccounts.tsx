@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-handler-names */
 import React, { useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { NavigationButton, toast } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
@@ -10,6 +10,9 @@ import { useWalletStore } from '@src/stores';
 import { useWalletManager } from '@hooks';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { Link } from 'react-router-dom';
+import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
+import { BrowserViewSections } from '@lib/scripts/types';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
@@ -25,6 +28,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [t]
   );
   const editAccountDrawer = useAccountDataModal();
+  const backgroundServices = useBackgroundServiceAPIContext();
   const disableAccountConfirmation = useAccountDataModal();
   const { manageAccountsWallet: wallet, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
   const {
@@ -38,9 +42,20 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     () =>
       isPopup &&
       (wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor) && {
-        reason: t('multiWallet.popupHwAccountEnable')
+        reason: (
+          <Trans
+            i18nKey="multiWallet.popupHwAccountEnable"
+            components={[
+              <Link
+                key="expandLink"
+                to={BrowserViewSections.HOME}
+                onClick={() => backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME })}
+              />
+            ]}
+          />
+        )
       },
-    [isPopup, t, wallet.type]
+    [backgroundServices, isPopup, wallet.type]
   );
   const accountsData = useMemo(
     () =>
