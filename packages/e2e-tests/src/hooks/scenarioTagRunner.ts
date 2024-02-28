@@ -14,7 +14,7 @@ Before(async () => {
   // use Before hooks in feature steps file, see AddressBook.ts as an example
 });
 
-After(async () => {
+After({ tags: 'not @Pending and not @pending' }, async () => {
   await clearWalletRepository();
   await networkManager.closeOpenedCdpSessions();
   await consoleManager.closeOpenedCdpSessions();

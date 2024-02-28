@@ -511,7 +511,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then "No results matching your search" message is displayed inside asset selector
 
   @LW-1604 @Testnet @Pending
-  # Bug LW-9104
+  @issue=LW-9104
   Scenario: "Insufficient funds" error for extended view & advanced tx type for multiple assets
     And I save token: "Cardano" balance
     And I save token: "LaceCoin" balance
@@ -623,7 +623,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then The Transaction error screen is displayed in extended mode
 
   @LW-7824 @Testnet @Pending
-  # Bug: LW-8579
+  @issue=LW-8579
   Scenario: Extended view - Validate if contact name that has up to 12 characters is not truncated
     Given address book contains address with name that has 12 characters
     When I click "Send" button on page header
@@ -633,7 +633,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then recipients address input contains address entry with name "abcdefghijkl"
 
   @LW-7825 @Testnet @Pending
-  # Bug: LW-8579
+  @issue=LW-8579
   Scenario: Extended view - Validate if contact name that has >12 characters is truncated
     Given address book contains address with name that has more than 12 characters
     When I click "Send" button on page header

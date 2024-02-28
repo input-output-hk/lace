@@ -72,16 +72,11 @@ jobs:
         if: always()
         working-directory: ./packages/e2e-tests/reports/allure/results
         run: |
-          pendingCount=`grep -r "@Pending" ../../../src/features | wc -l | xargs`
-          pending=`grep -r -h "@Pending" ../../../src/features -A 2 | grep -v -- "^--$" | sed "s/@Pending//g" | awk '{$1=$1};1' | sed "/^@/s/ /./g;/^#/s/ /./g" | xargs | sed "s/@[^ ]*/\n&/g" | sed "s/ /./"`
           echo "
           env=${NETWORK}
           browser=${BROWSER}
           tags=${TAGS}
           platform=Linux
-          Pending.Count=${pendingCount}
-          @Pending.Scenarios=
-          ${pending}
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v1.0.1
