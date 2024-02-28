@@ -18,7 +18,7 @@ export interface WalletSetupMnemonicStepProps {
   mnemonicWordsInStep?: number;
   translations: TranslationsFor<
     | 'writePassphraseTitle'
-    | 'body'
+    | 'enterPassphraseDescription'
     | 'enterPassphrase'
     | 'writePassphraseSubtitle1'
     | 'writePassphraseSubtitle2'
@@ -76,7 +76,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         </Dialog.Root>
       </>
     ) : (
-      translations.body
+      translations.enterPassphraseDescription
     );
 
   const isNextEnabled = useMemo(() => {

@@ -7,7 +7,6 @@ import {
   MnemonicStage,
   WalletSetupAnalyticsStep,
   WalletSetupCreationStep,
-  WalletSetupFinalStep,
   WalletSetupLegalStep,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
@@ -42,7 +41,6 @@ import { useExperimentsContext } from '@providers/ExperimentsProvider';
 import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/ExperimentsProvider/types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
-import { useWalletStore } from '@src/stores';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -95,7 +93,6 @@ export const WalletSetupWizard = ({
   const [shouldDisplayTestVariantForExperiment, setShouldDisplayTestVariantForExperiment] = useState<boolean>();
 
   const { createWallet } = useWalletManager();
-  const { setStayOnAllDonePage } = useWalletStore();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -158,15 +155,6 @@ export const WalletSetupWizard = ({
     description: t('core.walletSetupCreateStep.description')
   };
 
-  const walletSetupFinalStepTranslations = {
-    title: t('core.walletSetupFinalStep.title'),
-    description: t('core.walletSetupFinalStep.description'),
-    close: t('core.walletSetupFinalStep.close'),
-    followTwitter: t('core.walletSetupFinalStep.followTwitter'),
-    followYoutube: t('core.walletSetupFinalStep.followYoutube'),
-    followDiscord: t('core.walletSetupFinalStep.followDiscord')
-  };
-
   const mnemonicVideoPopupContentTranslations = {
     title: t('core.mnemonicVideoPopupContent.title'),
     description: t('core.mnemonicVideoPopupContent.description'),
@@ -209,10 +197,26 @@ export const WalletSetupWizard = ({
     return translations;
   };
 
+  const goToMyWallet = useCallback(
+    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
+      if (isAnalyticsAccepted) {
+        analytics.sendAliasEvent();
+        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
+        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+        if (hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        }
+      }
+    },
+    [analytics, isAnalyticsAccepted, walletInstance]
+  );
+
   const moveForward = useCallback(() => {
     const nextStep = walletSetupWizard[currentStep].next;
     if (nextStep) {
       setCurrentStep(nextStep);
+    } else if (currentStep === WalletSetupSteps.Create) {
+      goToMyWallet();
     }
   }, [currentStep, setCurrentStep]);
 
@@ -253,24 +257,8 @@ export const WalletSetupWizard = ({
     moveForward();
   };
 
-  const goToMyWallet = useCallback(
-    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
-      setStayOnAllDonePage(false);
-      if (isAnalyticsAccepted) {
-        analytics.sendAliasEvent();
-        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
-        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-        if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        }
-      }
-    },
-    [analytics, isAnalyticsAccepted, setStayOnAllDonePage, walletInstance]
-  );
-
   const handleCompleteCreation = useCallback(async () => {
     try {
-      setStayOnAllDonePage(true);
       const wallet = await createWallet({
         name: walletName,
         mnemonic,
@@ -305,7 +293,6 @@ export const WalletSetupWizard = ({
     }
   }, [
     createWallet,
-    setStayOnAllDonePage,
     walletName,
     mnemonic,
     password,
@@ -497,15 +484,6 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Create && (
         <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />
-      )}
-      {currentStep === WalletSetupSteps.Finish && (
-        <WalletSetupFinalStep
-          onFinish={() => {
-            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
-            goToMyWallet();
-          }}
-          translations={walletSetupFinalStepTranslations}
-        />
       )}
       {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
         <WarningModal
