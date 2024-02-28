@@ -97,6 +97,8 @@ const translationTypes = {
   self: 'package.core.assetActivityItem.entry.name.self'
 };
 
+const negativeBalanceStyling: Set<ActivityType> = new Set(['outgoing', 'delegationRegistration', 'self', 'delegation']);
+
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
 export const AssetActivityItem = ({
   amount,
@@ -177,6 +179,8 @@ export const AssetActivityItem = ({
     assetAmountContent
   );
 
+  const isNegativeBalance = negativeBalanceStyling.has(type);
+
   return (
     <div data-testid="asset-activity-item" onClick={onClick} className={styles.assetActivityItem}>
       <div className={styles.leftSide}>
@@ -200,13 +204,15 @@ export const AssetActivityItem = ({
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.outgoingTx]: type === 'outgoing'
+            [styles.negativeBalance]: isNegativeBalance
           })}
           ref={ref}
         >
           <span>
-            {type === 'outgoing' ? '- ' : ''}
-            {assetsText.text}
+            <span data-testid="balance">
+              {isNegativeBalance ? '-' : ''}
+              {assetsText.text}
+            </span>
             {assetsText.suffix && (
               <Tooltip
                 overlayClassName={styles.tooltip}
