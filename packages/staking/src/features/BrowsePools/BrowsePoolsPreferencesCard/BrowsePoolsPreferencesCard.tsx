@@ -163,7 +163,7 @@ export const BrowsePoolsPreferencesCard = ({
         onIconClick: handleIconClick,
         value: MetricType.liveStake,
       },
-    ];
+    ].filter(({ value: metric }) => metric !== MetricType.apy || process.env.USE_ROS_STAKING_COLUMN);
   }, [direction, handleIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(() => {

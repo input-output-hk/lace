@@ -1,4 +1,6 @@
 import { Wallet } from '@lace/cardano';
+import { BrowsePoolsView, SortField } from 'features/BrowsePools/types';
+import { StakingBrowserPreferences } from 'features/outside-handles-provider';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { CARDANO_COIN_SYMBOL_BY_NETWORK, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
@@ -23,7 +25,11 @@ const defaultState: DelegationPortfolioState = {
   currentPortfolio: [],
   draftPortfolio: undefined,
   pendingSelectedPortfolio: undefined,
+  poolsView: BrowsePoolsView.table,
+  searchQuery: '',
   selectedPortfolio: [],
+  sortField: SortField.name,
+  sortOrder: 'desc',
   view: undefined,
   viewedStakePool: undefined,
 };
@@ -84,6 +90,18 @@ export const useDelegationPortfolioStore = create(
           state.pendingSelectedPortfolio = undefined;
           state.viewedStakePool = undefined;
         }),
+      setBrowserPreferences: ({
+        sortOptions,
+        poolsView,
+        searchQuery,
+      }: Omit<StakingBrowserPreferences, 'selectedPoolsIds'>) => {
+        set((state) => {
+          state.sortField = sortOptions.field;
+          state.sortOrder = sortOptions.order;
+          state.poolsView = poolsView;
+          state.searchQuery = searchQuery;
+        });
+      },
       setCardanoCoinSymbol: (currentChain) =>
         set((state) => {
           state.cardanoCoinSymbol = CARDANO_COIN_SYMBOL_BY_NETWORK[currentChain.networkId];

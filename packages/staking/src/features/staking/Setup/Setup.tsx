@@ -15,7 +15,7 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> &
   };
 
 export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => {
-  const { balancesBalance, walletStoreInMemoryWallet } = useOutsideHandles();
+  const { balancesBalance, walletStoreInMemoryWallet, stakingBrowserPreferencesPersistence } = useOutsideHandles();
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
   const currentEpoch = useObservable(walletStoreInMemoryWallet.currentEpoch$);
@@ -32,6 +32,15 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
       delegationRewardsHistory,
     });
     portfolioMutators.setView(view);
+
+    if (stakingBrowserPreferencesPersistence) {
+      const { poolsView, searchQuery, sortOptions } = stakingBrowserPreferencesPersistence;
+      portfolioMutators.setBrowserPreferences({
+        poolsView,
+        searchQuery,
+        sortOptions,
+      });
+    }
   }, [
     currentChain,
     currentEpoch,
@@ -39,6 +48,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     delegationPortfolio,
     delegationRewardsHistory,
     portfolioMutators,
+    stakingBrowserPreferencesPersistence,
     view,
   ]);
 
