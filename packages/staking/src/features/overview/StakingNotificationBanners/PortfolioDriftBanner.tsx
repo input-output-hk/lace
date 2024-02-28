@@ -17,7 +17,7 @@ export const PortfolioDriftBanner: VFC<PortfolioDriftBannerProps> = ({ popupView
 
   const onBannerClick = () => {
     if (popupView) {
-      expandStakingView();
+      expandStakingView('onLoadAction=ManagePortfolio');
       return;
     }
 

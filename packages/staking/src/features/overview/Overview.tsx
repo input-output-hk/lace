@@ -1,6 +1,7 @@
 import { useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -8,6 +9,7 @@ import { useDelegationPortfolioStore } from '../store';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
+import { useStakingSectionLoadActions } from './hooks';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
@@ -29,9 +31,27 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
+  const { onLoad } = useStakingSectionLoadActions();
   const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
+
+  useEffect(() => {
+    if (
+      totalCoinBalance &&
+      protocolParameters?.stakeKeyDeposit &&
+      balancesBalance?.available?.coinBalance &&
+      rewardAccounts
+    ) {
+      onLoad();
+    }
+  }, [
+    balancesBalance?.available?.coinBalance,
+    onLoad,
+    protocolParameters?.stakeKeyDeposit,
+    rewardAccounts,
+    totalCoinBalance,
+  ]);
 
   if (
     !totalCoinBalance ||
