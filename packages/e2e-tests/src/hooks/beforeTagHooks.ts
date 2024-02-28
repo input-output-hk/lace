@@ -19,6 +19,8 @@ const popupViewWalletInitialization = async (walletName = TestWalletName.TestAut
   await networkManager.logFailedRequests();
 };
 
+Before({ tags: '@pending or @Pending' }, async () => 'skipped');
+
 Before(
   {
     tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding'

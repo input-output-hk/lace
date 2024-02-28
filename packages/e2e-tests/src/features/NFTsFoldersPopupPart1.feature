@@ -46,7 +46,7 @@ Feature: NFT - Folders - Popup view
     And A gallery view showing my NFTs is displayed
 
   @LW-7215 @Pending
-  #Bug: LW-7632
+  @issue=LW-7632
   Scenario: Popup-view - NFT Folders - Trying to rename folder using too long name
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs popup page

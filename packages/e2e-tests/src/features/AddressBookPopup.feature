@@ -162,7 +162,7 @@ Feature: Address book - popup view
       | SomeWallet  | Byron          | addressBook.errors.givenAddressAlreadyExist |
 
   @LW-4784 @Pending
-  # Bug LW-7419
+  @issue=LW-7419
   Scenario: Popup-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
@@ -173,7 +173,7 @@ Feature: Address book - popup view
     Then Contact "Name field is required" name error and "empty" address error are displayed
 
   @LW-4783 @Pending
-  # Bug LW-7419
+  @issue=LW-7419
   Scenario: Popup-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
@@ -186,7 +186,7 @@ Feature: Address book - popup view
     And "Save address" button is disabled on "Add new address" drawer
 
   @LW-4785 @Pending
-  # Bug LW-7419
+  @issue=LW-7419
   Scenario: Popup-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
