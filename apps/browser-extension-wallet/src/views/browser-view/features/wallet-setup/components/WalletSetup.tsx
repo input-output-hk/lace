@@ -1,4 +1,4 @@
-import { WalletSetupStepsRevamp as WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
+import { WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';

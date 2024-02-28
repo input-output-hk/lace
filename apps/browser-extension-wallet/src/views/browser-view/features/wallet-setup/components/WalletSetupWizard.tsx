@@ -152,6 +152,9 @@ export const WalletSetupWizard = ({
   }, [currentStep, setCurrentStep]);
 
   const moveBack = () => {
+    const prevStep = isCombinedPasswordNameStepEnabled
+      ? walletSetupWizardForABTest[currentStep].prev
+      : walletSetupWizard[currentStep].prev;
     const prevStep = walletSetupWizard[currentStep].prev;
 
     if (prevStep) {

@@ -12,8 +12,7 @@ import {
   EnhancedAnalyticsOptInStatus,
   PostHogAction,
   postHogOnboardingActions,
-  PostHogProperties,
-  UserTrackingType
+  PostHogProperties
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useLocalStorage } from '@hooks';
