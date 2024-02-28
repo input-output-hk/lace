@@ -7,13 +7,13 @@
 
   background: var(--light-mode-light-grey, var(--dark-mode-dark-grey));
   border-radius: 100px;
-  padding: 0 size_unit(1.5);
+  padding: size_unit(1);
   display: flex;
   gap: size_unit(1);
   align-items: center;
   justify-content: space-between;
   color: var(--text-color-primary) !important;
-  height: size_unit(4.25);
+  height: size_unit(4.5);
   border: 1px solid transparent;
   width: size_unit(13);
   .number {

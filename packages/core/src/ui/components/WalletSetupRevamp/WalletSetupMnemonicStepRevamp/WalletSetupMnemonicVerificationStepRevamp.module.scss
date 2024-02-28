@@ -1,0 +1,52 @@
+@import '../../../styles/theme.scss';
+@import '../../../../../../common/src/ui/styles/abstracts/typography';
+
+.mnemonicContainer {
+  margin-top: size_unit(2) !important;
+}
+
+:global {
+  .ant-segmented {
+    display: inline-flex !important;
+    width: fit-content;
+    padding: size_unit(1) !important;
+    margin-left: size_unit(3) !important;
+    flex-shrink: 0;
+    border-radius: 100px !important;
+    border: 0px solid var(--light-mode-light-grey, #f9f9f9);
+    background-color: var(--color-white, #ffffff) !important;
+    box-shadow: 0px 4px 10px 0px rgba(167, 143, 160, 0.2);
+  }
+
+  .ant-segmented-item {
+    width: auto;
+    height: auto;
+    margin: 0px size_unit(0.25);
+
+    &.ant-segmented-item-selected {
+      border-radius: 100px;
+      color: var(--color-white, #ffffff) !important;
+      background-color: var(--primary-default, #7f5af0);
+    }
+
+    .ant-segmented-item-label {
+      width: size_unit(3.5);
+      height: size_unit(3.5);
+      padding: 0;
+    }
+  }
+
+  .ant-segmented-thumb {
+    border-radius: 100px !important;
+  }
+
+  .ant-segmented-thumb-motion-appear-active {
+    transition-duration: 0.1s;
+  }
+}
+
+.errorMessage {
+  @include text-bodyXs-semi-bold;
+  margin-top: size_unit(2) !important;
+  color: var(--color-pink, #ff5470);
+}

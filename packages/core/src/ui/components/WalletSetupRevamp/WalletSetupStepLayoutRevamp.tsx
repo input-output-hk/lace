@@ -25,7 +25,7 @@ export interface WalletSetupStepLayoutProps {
   stepInfoText?: string;
   onNext?: () => void;
   onBack?: () => void;
-  onSkip?: () => void;
+  customAction?: React.ReactNode;
   nextLabel?: string;
   backLabel?: string;
   skipLabel?: string;
@@ -84,10 +84,9 @@ export const WalletSetupStepLayoutRevamp = ({
   belowContentText,
   onNext,
   onBack,
-  onSkip,
+  customAction,
   nextLabel,
   backLabel,
-  skipLabel,
   isNextEnabled = true,
   isNextLoading = false,
   toolTipText,
@@ -144,11 +143,7 @@ export const WalletSetupStepLayoutRevamp = ({
             <div />
           )}
           {stepInfoText && <p data-testid="step-info-text">{stepInfoText}</p>}
-          {onSkip && (
-            <Button variant="text" onClick={onSkip} data-testid="wallet-setup-step-btn-skip">
-              {skipLabel || defaultLabel.skip}
-            </Button>
-          )}
+          {customAction}
           {onNext && (
             <span ref={nextButtonContainerRef}>
               <Tooltip

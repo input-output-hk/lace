@@ -1279,10 +1279,12 @@
     "walletSetupMnemonicStepRevamp": {
       "writePassphraseTitle": "Save your recovery phrase",
       "enterPassphrase": "Enter your recovery passphrase",
+      "enterPassphraseLength": "Choose recovery phrase length",
       "enterPassphraseDescription": "Let's check you've got the correct recovery phrase. Type each word in the right order or paste from clipboard to verify it.",
       "writePassphraseSubtitle1": "Consider your recovery phrase as the master key to your wallet.",
       "writePassphraseSubtitle2": "Watch video.",
-      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
+      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly.",
+      "enterWallet": "Enter wallet"
     },
     "mnemonicVideoPopupContent": {
       "title": "Keeping your wallet secure",
