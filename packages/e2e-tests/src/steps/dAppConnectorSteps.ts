@@ -73,15 +73,15 @@ Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => 
 });
 
 Then(
-  /^I see DApp connector "Confirm transaction" page with: "([^"]*)" and: "([^"]*)" assets$/,
-  async (adaValue: string, assetValue: string) => {
+  /^I see DApp connector "Confirm transaction" page with: "([^"]*)", "([^"]*)" assets and receiving wallet "([^"]*)"$/,
+  async (adaValue: string, assetValue: string, walletName: string) => {
     await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
 
     const expectedTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
       amountADA: adaValue,
       amountAsset: assetValue,
-      recipientAddress: String(getTestWallet('WalletReceiveSimpleTransactionE2E').address)
+      recipientAddress: String(getTestWallet(walletName).address)
     };
     await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, expectedTransactionData);
   }
@@ -96,7 +96,7 @@ Then(
       typeOfTransaction: 'Send',
       amountADA: '3.00 ADA',
       amountAsset: '0',
-      recipientAddress: String(getTestWallet('WalletReceiveSimpleTransactionE2E').address)
+      recipientAddress: String(getTestWallet('WalletReceiveDappTransactionE2E').address)
     };
 
     switch (expectedPage) {
@@ -304,4 +304,8 @@ Then(/^I click "Close" button on DApp "All done" page$/, async () => {
 
 Then(/^I save fee value on DApp "Confirm transaction" page$/, async () => {
   await DAppConnectorPageObject.saveDappTransactionFeeValue();
+});
+
+Then(/^I set send to wallet address to: "([^"]*)" in test DApp$/, async (walletName: string) => {
+  await TestDAppPage.sendAdaAddressInput.setValue(String(getTestWallet(walletName).address));
 });
