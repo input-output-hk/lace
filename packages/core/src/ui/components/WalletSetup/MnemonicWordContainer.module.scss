@@ -4,7 +4,7 @@
 .active {
   background: var(--light-mode-light-grey, var(--dark-mode-dark-grey));
   border-radius: 100px;
-  padding: size_unit(1) size_unit(2);
+  padding: size_unit(1);
   display: flex;
   gap: size_unit(1);
   align-items: center;
@@ -13,7 +13,7 @@
   font-size: var(--body);
   line-height: size_unit(3);
   color: var(--text-color-primary) !important;
-  height: size_unit(6);
+  height: size_unit(4.5);
   border: 1px solid transparent;
   width: 176px;
   .number {

@@ -21,10 +21,12 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     body: t('core.walletSetupMnemonicStep.body'),
     enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
     enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
+    enterPassphraseLength: t('core.walletSetupMnemonicStep.enterPassphraseLength'),
     passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
     passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
     passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
-    passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
+    passphraseError: t('core.walletSetupMnemonicStep.passphraseError'),
+    enterWallet: t('core.walletSetupMnemonicStep.enterWallet')
   };
 
   return (

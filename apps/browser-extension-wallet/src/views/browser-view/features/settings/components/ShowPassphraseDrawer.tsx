@@ -197,7 +197,7 @@ export const ShowPassphraseDrawer = ({
         )}
         {isPassphraseVisible && (
           <div className={styles.passphraseContainer}>
-            <MnemonicWordsWritedown firstWordNumber={1} words={passphrase} fourColumnView blurWords={blurWords} />
+            <MnemonicWordsWritedown words={passphrase} fourColumnView blurWords={blurWords} />
           </div>
         )}
       </div>

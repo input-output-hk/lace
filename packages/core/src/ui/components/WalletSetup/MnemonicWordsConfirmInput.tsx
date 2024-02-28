@@ -3,7 +3,6 @@ import styles from './MnemonicWordsConfirmInput.module.scss';
 import { MnemonicWordsAutoComplete } from '../MnemonicWordsAutoComplete';
 
 export interface MnemonicWordsConfirmInputProps {
-  firstWordNumber: number;
   words: string[];
   onChange: (words: string[]) => void;
   onDropdownVisibleChange?: (open: boolean) => void;
@@ -11,14 +10,15 @@ export interface MnemonicWordsConfirmInputProps {
   focus?: boolean;
 }
 
+const TWENTY_FOUR_WORD_LENGTH = 24;
+
 export const MnemonicWordsConfirmInput = ({
-  firstWordNumber,
   words,
   onChange,
   onDropdownVisibleChange,
   suggestionList
 }: MnemonicWordsConfirmInputProps): React.ReactElement => (
-  <div className={styles.mnemonicWordsConfirm}>
+  <div className={styles.container}>
     {words.map((word, index) => (
       <MnemonicWordsAutoComplete
         value={word}
@@ -28,10 +28,12 @@ export const MnemonicWordsConfirmInput = ({
           onChange(newWords);
         }}
         onDropdownVisibleChange={onDropdownVisibleChange}
-        idx={index + firstWordNumber}
+        idx={index + 1}
         key={index}
         wordList={suggestionList}
-        focus={index + firstWordNumber === firstWordNumber}
+        className={
+          words.length === TWENTY_FOUR_WORD_LENGTH ? styles.fourColumnWordContainer : styles.threeColumnWordContainer
+        }
       />
     ))}
   </div>

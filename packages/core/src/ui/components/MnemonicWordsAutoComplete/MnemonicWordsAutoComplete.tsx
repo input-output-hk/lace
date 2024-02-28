@@ -18,6 +18,7 @@ export interface MnemonicWordsAutoCompleteProps {
   wordList?: Array<string>;
   max?: number;
   focus?: boolean;
+  className?: string;
 }
 
 export const MnemonicWordsAutoComplete = ({
@@ -27,7 +28,8 @@ export const MnemonicWordsAutoComplete = ({
   onChange,
   onDropdownVisibleChange,
   max = DEFAULT_INPUT_MAX_LENGTH,
-  focus = false
+  focus = false,
+  className
 }: MnemonicWordsAutoCompleteProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputRef>(null);
@@ -96,7 +98,7 @@ export const MnemonicWordsAutoComplete = ({
   }, [options, value, max]);
 
   return (
-    <MnemonicWordContainer ref={containerRef} number={idx}>
+    <MnemonicWordContainer ref={containerRef} number={idx} className={className}>
       <AutoComplete
         popupClassName={styles.dropdown}
         className={styles.autoComplete}

@@ -7,7 +7,6 @@ import {
   MnemonicStage,
   WalletSetupCreationStep,
   WalletSetupNamePasswordStep,
-  WalletSetupRecoveryPhraseLengthStep,
   WalletSetupSteps,
   walletSetupWizard
 } from '@lace/core';
@@ -92,7 +91,7 @@ export const WalletSetupWizard = ({
 
   const { updateEnteredAtTime } = useTimeSpentOnPage();
 
-  const useDifferentMnemonicLengths = process.env.USE_DIFFERENT_MNEMONIC_LENGTHS === 'true';
+  // const useDifferentMnemonicLengths = process.env.USE_DIFFERENT_MNEMONIC_LENGTHS === 'true';
 
   useEffect(() => {
     updateEnteredAtTime();
@@ -111,10 +110,12 @@ export const WalletSetupWizard = ({
     body: t('core.walletSetupMnemonicStep.body'),
     enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
     enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
+    enterPassphraseLength: t('core.walletSetupMnemonicStep.enterPassphraseLength'),
     passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
     passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
     passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
-    passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
+    passphraseError: t('core.walletSetupMnemonicStep.passphraseError'),
+    enterWallet: t('core.walletSetupMnemonicStep.enterWallet')
   };
 
   const walletSetupModeStepTranslations = {
@@ -130,12 +131,6 @@ export const WalletSetupWizard = ({
   const walletSetupCreateStepTranslations = {
     title: t('core.walletSetupCreateStep.title'),
     description: t('core.walletSetupCreateStep.description')
-  };
-
-  const walletSetupRecoveryPhraseLengthStepTranslations = {
-    title: t('core.walletSetupRecoveryPhraseLengthStep.title'),
-    description: t('core.walletSetupRecoveryPhraseLengthStep.description'),
-    wordPassphrase: t('core.walletSetupRecoveryPhraseLengthStep.wordPassphrase')
   };
 
   const goToMyWallet = useCallback(
@@ -215,19 +210,11 @@ export const WalletSetupWizard = ({
     moveForward
   ]);
 
-  const createFlowPasswordNextStep = () => {
-    setupType === SetupType.CREATE
-      ? skipTo(WalletSetupSteps.Mnemonic)
-      : useDifferentMnemonicLengths
-      ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
-      : skipTo(WalletSetupSteps.Mnemonic);
-  };
-
   const handleNamePasswordStepNextButtonClick = (result: { password: string; walletName: string }) => {
-    setPassword(result.password);
     setWalletName(result.walletName);
+    setPassword(result.password);
     sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK);
-    createFlowPasswordNextStep();
+    skipTo(WalletSetupSteps.Mnemonic);
   };
 
   useEffect(() => {
@@ -241,16 +228,11 @@ export const WalletSetupWizard = ({
   const renderedMnemonicStep = () => {
     if ([SetupType.RESTORE, SetupType.FORGOT_PASSWORD].includes(setupType)) {
       const isMnemonicSubmitEnabled = util.validateMnemonic(util.joinMnemonicWords(mnemonic));
-
       return (
         <WalletSetupMnemonicVerificationStep
           mnemonic={mnemonic}
           onChange={setMnemonic}
-          onCancel={() =>
-            useDifferentMnemonicLengths
-              ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
-              : skipTo(WalletSetupSteps.Password)
-          }
+          onCancel={moveBack}
           onSubmit={moveForward}
           onStepNext={(step: number) => {
             /* eslint-disable no-magic-numbers */
@@ -268,6 +250,8 @@ export const WalletSetupWizard = ({
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
           suggestionList={wordList}
+          defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
+          onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
         />
       );
     }
@@ -280,26 +264,6 @@ export const WalletSetupWizard = ({
           resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : skipTo(WalletSetupSteps.Register);
         }}
         onNext={moveForward}
-        onStepNext={(stage: MnemonicStage, step: number) => {
-          /* eslint-disable no-magic-numbers */
-          switch (step) {
-            case 0:
-              stage === 'input'
-                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK)
-                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_01_NEXT_CLICK);
-              break;
-            case 1:
-              stage === 'input'
-                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK)
-                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_09_NEXT_CLICK);
-              break;
-            case 2:
-              stage === 'input'
-                ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK)
-                : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_17_NEXT_CLICK);
-          }
-          /* eslint-enable no-magic-numbers */
-        }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
@@ -319,17 +283,6 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
-      )}
-      {currentStep === WalletSetupSteps.RecoveryPhraseLength && (
-        <WalletSetupRecoveryPhraseLengthStep
-          onBack={moveBack}
-          onNext={(result) => {
-            setMnemonicLength(result.recoveryPhraseLength);
-            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK);
-            moveForward();
-          }}
-          translations={walletSetupRecoveryPhraseLengthStepTranslations}
-        />
       )}
       {currentStep === WalletSetupSteps.Create && (
         <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />

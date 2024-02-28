@@ -1258,10 +1258,12 @@
       "writePassphrase": "Write down your secret passphrase",
       "enterPassphrase": "Enter your recovery passphrase",
       "enterPassphraseDescription": "Let's check you've got the correct recovery phrase. Type each word in the right order or paste from clipboard to verify it.",
+      "enterPassphraseLength": "Choose recovery phrase length",
       "passphraseInfo1": "Make sure you create an offline backup of your secret passphrase.",
       "passphraseInfo2": "Do not store your backup digitally.",
       "passphraseInfo3": "Find out more.",
-      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
+      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly.",
+      "enterWallet": "Enter wallet"
     },
     "walletSetupMnemonicIntroStep": {
       "title": "Keeping your wallet secure",

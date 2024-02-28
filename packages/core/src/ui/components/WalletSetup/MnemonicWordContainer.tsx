@@ -29,7 +29,7 @@ export const MnemonicWordContainer = forwardRef<HTMLDivElement, MnemonicWordCont
       onContextMenu={onContextMenu}
     >
       <p onContextMenu={onContextMenu} className={styles.number}>
-        {number < 10 ? `0${number}` : number}.
+        {number}.
       </p>
       {children}
     </div>

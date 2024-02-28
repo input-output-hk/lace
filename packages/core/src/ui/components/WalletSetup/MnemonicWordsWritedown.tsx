@@ -5,7 +5,6 @@ import classnames from 'classnames';
 import { simpleCipher } from '@src/ui/utils/simple-cipher';
 
 export interface MnemonicWordsWritedownProps {
-  firstWordNumber: number;
   words: string[];
   fourColumnView?: boolean;
   blurWords?: boolean;
@@ -16,7 +15,6 @@ export const stopContextMenuDisplays = (e: React.MouseEvent<HTMLDivElement, Mous
 };
 
 export const MnemonicWordsWritedown = ({
-  firstWordNumber,
   words,
   fourColumnView = false,
   blurWords = false
@@ -26,7 +24,7 @@ export const MnemonicWordsWritedown = ({
       <MnemonicWordContainer
         disabled
         onContextMenu={stopContextMenuDisplays}
-        number={index + firstWordNumber}
+        number={index + 1}
         key={index}
         className={classnames({ [styles.blur]: blurWords, [styles.fourColumnWordContainer]: fourColumnView })}
       >
