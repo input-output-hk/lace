@@ -30,12 +30,7 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { useWalletStore } from '@src/stores';
 
 const { CHAIN } = config();
-const {
-  Cardano: { ChainIds },
-  AVAILABLE_WALLETS
-} = Wallet;
-const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
-
+const { AVAILABLE_WALLETS } = Wallet;
 export interface HardwareWalletFlowProps {
   onCancel: () => void;
   onAppReload: () => void;
@@ -163,7 +158,6 @@ export const HardwareWalletFlow = ({
         accountIndex,
         deviceConnection,
         name,
-        chainId: DEFAULT_CHAIN_ID,
         connectedDevice
       });
       setWalletCreated(cardanoWallet);
@@ -307,6 +301,8 @@ export const HardwareWalletFlow = ({
   const onRetry = () => {
     setIsErrorDialogVisible(false);
     goBackToConnect();
+    // TODO: Remove this workaround with full app reload when SDK allows to connect Hardware Wallet for the 2nd time.
+    onAppReload();
   };
 
   const handleStartOver = () => {

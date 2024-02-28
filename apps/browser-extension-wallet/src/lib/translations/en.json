@@ -792,7 +792,8 @@
         "accounts": {
           "title": "Accounts",
           "description": "Select account to activate.",
-          "unlockLabel": "Enable"
+          "unlockLabel": "Enable",
+          "lockLabel": "Disable"
         },
         "general": {
           "title": "Your keys",
@@ -1090,9 +1091,9 @@
           "title": "Cost",
           "tooltip": "The cost is not directly paid by the delegator; they are deducted from a pool's rewards, consisting of a fixed cost and a variable cost, which fund the pool's operational costs"
         },
-        "ros": {
+        "apy": {
           "title": "ROS",
-          "tooltip": "Estimated 'Return On Stake' based on previous pool performance"
+          "tooltip": "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation."
         },
         "saturation": {
           "title": "Saturation",
@@ -1407,6 +1408,12 @@
       "description": "You'll have to start over.",
       "cancel": "Go back",
       "confirm": "Proceed"
-    }
+    },
+    "activated": {
+      "wallet": "Wallet \"{{walletName}}\" activated",
+      "account": "Account \"{{accountName}}\" activated"
+    },
+    "popupHwAccountEnable": "Hardware wallets require the expanded view to enable accounts",
+    "walletAlreadyExists": "Wallet wasn't created because it already exists"
   }
 }

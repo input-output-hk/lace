@@ -202,7 +202,7 @@ Feature: Address book - extended view
       | Glossary | What is a saved address?       |
 
   @LW-4744 @Pending
-    # Bug LW-7697
+  @issue=LW-7697
   Scenario: Extended-view - Address Book - Enter and Escape buttons support when editing address
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
@@ -225,7 +225,7 @@ Feature: Address book - extended view
     Then I do not see address detail page in extended mode with details of "Byron" address
 
   @LW-4779 @Pending
-  # Bug LW-7419
+  @issue=LW-7419
   Scenario: Extended-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -236,7 +236,7 @@ Feature: Address book - extended view
     Then Contact "empty" name error and "Address field is required" address error are displayed
 
   @LW-4780 @Pending
-  # Bug LW-7419
+  @issue=LW-7419
   Scenario: Extended-view - Address Book - Display error message when adding valid address and clicking outside with empty name field
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -247,7 +247,7 @@ Feature: Address book - extended view
     Then Contact "Name field is required" name error and "empty" address error are displayed
 
   @LW-4781  @Pending
-  #Bug LW-7419
+  @issue=LW-7419
   Scenario: Extended-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page

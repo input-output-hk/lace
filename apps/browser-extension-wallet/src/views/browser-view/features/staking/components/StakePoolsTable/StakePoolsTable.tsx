@@ -63,7 +63,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
 
   const tableHeaderTranslations: TranslationsFor<MetricType> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.title'),
-    apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.title'),
+    apy: t('cardano.stakePoolTableBrowser.tableHeader.apy.title'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.title'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.title'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.title'),
@@ -73,7 +73,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   };
   const tableHeaderTooltipsTranslations: TranslationsFor<MetricType> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.tooltip'),
-    apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.tooltip'),
+    apy: t('cardano.stakePoolTableBrowser.tableHeader.apy.tooltip'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.tooltip'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.tooltip'),

@@ -28,7 +28,7 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
       | last reward  |
 
   @Pending @LW-9446 @Testnet
-    # BUG LW-9152
+  @issue=LW-9152
   Scenario Outline: Popup View - Staking - Stakepool details drawer - Close drawer by clicking <close_button> button
     Given I navigate to Staking popup page
     And I click on the stake pool title: "ADA Ocean" in currently staking component

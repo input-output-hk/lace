@@ -58,6 +58,7 @@
   }
 
   .walletStatusInfo {
+    margin-left: 8px;
     cursor: default;
     display: flex;
   }
@@ -73,13 +74,16 @@
       border-radius: 12px !important;
       background-color: var(--bg-color-container, #ffffff) !important;
       color: var(--text-color-primary);
+
       &:hover {
         background: var(--light-mode-light-grey, var(--dark-mode-mid-grey, #efefef)) !important;
       }
+
       &.cta {
         cursor: pointer;
       }
     }
+
     .menuItemTheme {
       :global {
         button.ant-switch {
@@ -87,32 +91,34 @@
           width: size_unit(5.5);
         }
 
-        .ant-switch > div.ant-switch-handle {
+        .ant-switch>div.ant-switch-handle {
           height: size_unit(2.5);
           width: size_unit(2.5);
         }
 
-        .ant-switch > span.ant-switch-inner svg {
+        .ant-switch>span.ant-switch-inner svg {
           margin-top: 1px;
         }
 
-        .ant-switch.ant-switch-checked > span.ant-switch-inner {
+        .ant-switch.ant-switch-checked>span.ant-switch-inner {
           margin: 0 size_unit(35) 0 size_unit(0.5);
         }
 
-        .ant-switch.ant-switch-checked > div.ant-switch-handle {
+        .ant-switch.ant-switch-checked>div.ant-switch-handle {
           left: calc(100% - 20px - 2px);
         }
       }
 
       display: flex;
       justify-content: space-between !important;
+
       &:hover {
         background: transparent !important;
       }
     }
   }
 }
+
 .separator {
   display: flex;
   height: 1.5px;
@@ -141,12 +147,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
   span {
     color: var(--dark-mode-mid-black, var(--text-color-white, #ffffff));
     font-size: var(--body);
     text-transform: uppercase;
     font-weight: 700;
   }
+
   .avatar {
     font-size: size_unit(4);
     cursor: pointer;
@@ -156,6 +164,7 @@
     height: 26px;
     width: 26px;
   }
+
   .userAvatarImage {
     border-radius: 30px;
   }
@@ -178,7 +187,8 @@
   font-size: 16px;
 }
 
-.popUpContainer, .extendedContainer {
+.popUpContainer,
+.extendedContainer {
   @include scroll-bar-style;
   overflow-y: scroll;
   margin: size_unit(1) size_unit(1) size_unit(1) 0;
