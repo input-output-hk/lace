@@ -437,6 +437,11 @@
         }
       }
     },
+    "multiAddressWallet.modal": {
+      "title": "Multi-address wallet balance is now visible!",
+      "content": "Lace supports multi-address wallets created by other applications, so now, you can see and spend tokens that are not owned by the displayed address. We just discovered and restored all your addresses. Moving forward, you may sync new addresses of your HD wallet from Settings",
+      "confirm": "Got it"
+    },
     "welcome": "Welcome!",
     "addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
     "sidePanel.aboutYourWallet": "About your wallet",
@@ -484,9 +489,6 @@
     "walletSetup.mnemonicResetModal.content": "In order to keep you safe, we'll show you a new set of 24 words.",
     "walletSetup.mnemonicResetModal.cancel": "Cancel",
     "walletSetup.mnemonicResetModal.confirm": "OK",
-    "walletSetup.confirmRestoreModal.header": "Multi-address wallet balance is now visible!",
-    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of addresses when you restore your wallet.",
-    "walletSetup.confirmRestoreModal.confirm": "OK",
     "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
     "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
     "walletSetup.confirmExperimentalHwDapp.confirm": "OK",
