@@ -5,7 +5,9 @@ import { MnemonicWordsConfirmInput } from './MnemonicWordsConfirmInput';
 import styles from './WalletSetupOption.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { hasEmptyString } from '@ui/components/WalletSetup/WalletSetupMnemonicVerificationStep';
-import { defaultMnemonicWordsInStep } from '@src/ui/utils/constants';
+import { Wallet } from '@lace/cardano';
+import { Button } from '@lace/common';
+import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 
 export type MnemonicStage = 'writedown' | 'input';
 
@@ -23,6 +25,7 @@ export interface WalletSetupMnemonicStepProps {
     | 'passphraseInfo2'
     | 'passphraseInfo3'
     | 'passphraseError'
+    | 'enterWallet'
   >;
   suggestionList?: Array<string>;
   passphraseInfoLink?: string;
@@ -32,56 +35,54 @@ export const WalletSetupMnemonicStep = ({
   mnemonic,
   onReset,
   onNext,
-  onStepNext,
-  mnemonicWordsInStep = defaultMnemonicWordsInStep,
   translations,
   suggestionList,
   passphraseInfoLink
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
-  const mnemonicLength = mnemonic.length;
-
   const initialMnemonicWordsConfirm = useMemo(() => mnemonic.map(() => ''), [mnemonic]);
-  const mnemonicSteps = Math.round(mnemonicLength / mnemonicWordsInStep);
 
-  const [mnemonicStep, setMnemonicStep] = useState(0);
   const [mnemonicStage, setMnemonicStage] = useState<MnemonicStage>('writedown');
   const [mnemonicConfirm, setMnemonicWordsConfirm] = useState(initialMnemonicWordsConfirm);
 
-  const [isWriting, setIsWriting] = useState(false);
+  // const [isWriting, setIsWriting] = useState(false);
 
   // reset the state on mnemonic change
   useEffect(() => {
-    setMnemonicStep(0);
     setMnemonicStage('writedown');
     setMnemonicWordsConfirm(initialMnemonicWordsConfirm);
   }, [initialMnemonicWordsConfirm, mnemonic]);
 
   const handleBack = () => {
-    if (mnemonicStep === 0) {
-      onReset(mnemonicStage);
-      return;
-    }
-    setMnemonicStep(mnemonicStep - 1);
+    onReset(mnemonicStage);
+  };
+
+  const pasteRecoveryPhrase = async () => {
+    const stepWords = await readMnemonicFromClipboard(mnemonic.length);
+
+    if (stepWords.length === -1) return;
+    // eslint-disable-next-line unicorn/no-new-array
+    const newMnemonic: string[] = new Array(mnemonic.length).fill('');
+    // eslint-disable-next-line unicorn/no-array-for-each
+    stepWords.forEach((word, index) => {
+      newMnemonic[index] = word;
+    });
+
+    setMnemonicWordsConfirm(newMnemonic);
   };
 
   const handleNext = () => {
-    if (onStepNext) onStepNext(mnemonicStage, mnemonicStep);
-    if (mnemonicStep < mnemonicSteps - 1) {
-      setMnemonicStep(mnemonicStep + 1);
-      return;
-    }
-
     if (mnemonicStage === 'writedown') {
       setMnemonicStage('input');
-      setMnemonicStep(0);
       return;
     }
 
     onNext();
   };
 
-  const currentMnemonicWordsProgress = (mnemonicStep + 1) * mnemonicWordsInStep;
-  const stepInfoText = `${currentMnemonicWordsProgress} / ${mnemonicLength}`;
+  const isSubmitEnabled =
+    mnemonicStage === 'writedown' ||
+    Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(mnemonicConfirm));
+
   const title = mnemonicStage === 'writedown' ? translations.writePassphrase : translations.enterPassphrase;
   const subtitle =
     mnemonicStage === 'writedown' ? (
@@ -96,58 +97,55 @@ export const WalletSetupMnemonicStep = ({
     ) : (
       translations.enterPassphraseDescription
     );
-  const currentStepFirstWordIndex = mnemonicStep * mnemonicWordsInStep;
-  const currentStepLastWordIndex = (mnemonicStep + 1) * mnemonicWordsInStep;
-  const firstWordNumber = currentStepFirstWordIndex + 1;
 
-  const currentStageWords = mnemonicStage === 'writedown' ? mnemonic : mnemonicConfirm;
-  const currentStepWords = useMemo(
-    () => currentStageWords.slice(currentStepFirstWordIndex, currentStepLastWordIndex),
-    [currentStageWords, currentStepFirstWordIndex, currentStepLastWordIndex]
-  );
-
-  const isNextEnabled = useMemo(() => {
-    if (mnemonicStage === 'writedown') return true;
-
-    return mnemonic
-      .slice(currentStepFirstWordIndex, currentStepLastWordIndex)
-      .every(
-        (word, index) => mnemonicConfirm.slice(currentStepFirstWordIndex, currentStepLastWordIndex)[index] === word
-      );
-  }, [mnemonic, mnemonicStage, mnemonicConfirm, currentStepFirstWordIndex, currentStepLastWordIndex]);
+  // const currentStageWords = mnemonicStage === 'writedown' ? mnemonic : mnemonicConfirm;
+  // const currentStepWords = useMemo(
+  //   () => currentStageWords.slice(currentStepFirstWordIndex, currentStepLastWordIndex),
+  //   [currentStageWords, currentStepFirstWordIndex, currentStepLastWordIndex]
+  // );
 
   return (
     <>
       <WalletSetupStepLayout
         title={title}
         description={subtitle}
-        stepInfoText={stepInfoText}
         onBack={handleBack}
         onNext={handleNext}
-        isNextEnabled={isNextEnabled}
+        customAction={
+          mnemonicStage === 'writedown' ? (
+            <Button color="gradient-secondary" onClick={async () => await writeMnemonicToClipboard(mnemonic)}>
+              Copy to clipboard
+            </Button>
+          ) : (
+            <Button color="gradient-secondary" onClick={pasteRecoveryPhrase}>
+              Paste from clipboard
+            </Button>
+          )
+        }
         currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+        nextLabel={translations.enterWallet}
+        isNextEnabled={isSubmitEnabled}
       >
         {mnemonicStage === 'writedown' ? (
-          <MnemonicWordsWritedown words={currentStepWords} firstWordNumber={firstWordNumber} />
+          <MnemonicWordsWritedown words={mnemonic} />
         ) : (
           <div className={styles.ContainerWordsConfirm}>
             <MnemonicWordsConfirmInput
-              words={currentStepWords}
+              words={mnemonicConfirm}
               onChange={(stepWords) => {
                 const newMnemonicWordsConfirm = [...mnemonicConfirm];
 
                 // eslint-disable-next-line unicorn/no-array-for-each
                 stepWords.forEach((word, index) => {
-                  newMnemonicWordsConfirm[index + currentStepFirstWordIndex] = word;
+                  newMnemonicWordsConfirm[index] = word;
                 });
 
                 setMnemonicWordsConfirm(newMnemonicWordsConfirm);
               }}
-              onDropdownVisibleChange={(open) => setIsWriting(open)}
-              firstWordNumber={firstWordNumber}
+              // onDropdownVisibleChange={(open) => setIsWriting(open)}
               suggestionList={suggestionList}
             />
-            {!isNextEnabled && !hasEmptyString(currentStepWords) && !isWriting && (
+            {!isSubmitEnabled && !hasEmptyString(mnemonicConfirm) && (
               <div className={styles.errorMessage}>
                 <span data-testid="passphrase-error">{translations.passphraseError}</span>
               </div>

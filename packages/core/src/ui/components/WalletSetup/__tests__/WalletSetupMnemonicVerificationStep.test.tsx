@@ -38,7 +38,8 @@ const Test = () => {
       translations={{
         enterPassphrase: 'Enter passphrase',
         passphraseError: 'Passphrase error',
-        enterPassphraseDescription: 'Enter passphrase description'
+        enterPassphraseLength: 'Choose passphrase length',
+        enterWallet: 'Enter wallet'
       }}
       isSubmitEnabled
     />
