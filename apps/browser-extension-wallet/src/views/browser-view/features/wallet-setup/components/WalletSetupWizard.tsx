@@ -70,9 +70,7 @@ export const WalletSetupWizard = ({
   sendAnalytics,
   initialStep = WalletSetupSteps.Register
 }: WalletSetupWizardProps): React.ReactElement => {
-  const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(
-    setupType === SetupType.FORGOT_PASSWORD ? WalletSetupSteps.Password : initialStep
-  );
+  const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(initialStep);
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
