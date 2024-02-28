@@ -8,7 +8,6 @@ import { t } from '../../utils/translationService';
 import { CoinConfigure } from '../../elements/newTransaction/coinConfigure';
 import { AssetInput } from '../../elements/newTransaction/assetInput';
 import { AddressInput } from '../../elements/AddressInput';
-import { browser } from '@wdio/globals';
 
 class TransactionBundleAssert {
   assertSeeBundles = async (expectedNumberOfBundles: number) => {
@@ -27,7 +26,6 @@ class TransactionBundleAssert {
   };
 
   async assertSeeTokenNameInBundleAndCoinConfigure(expectedName: string, bundleIndex: number) {
-    await browser.pause(50);
     const tokenName = await new TransactionBundle(bundleIndex)
       .bundleAssetInput()
       .coinConfigure(bundleIndex, expectedName.replace('...', ''))

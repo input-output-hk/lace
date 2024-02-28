@@ -98,7 +98,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
       | testnetByron   |
       | testnetIcarus  |
 
-  @LW-4595a @Mainnet
+  @LW-4595 @Mainnet
   Scenario Outline: Extended view - Send - Different network address, <network> from mainnet
     And I switch network to: "Preprod" in extended mode
     And I navigate to Tokens extended page
