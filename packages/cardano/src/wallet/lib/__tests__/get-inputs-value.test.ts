@@ -10,10 +10,9 @@ import { act } from 'react-dom/test-utils';
 import { Cardano, ChainHistoryProvider } from '@cardano-sdk/core';
 import { of } from 'rxjs';
 import { ObservableWallet } from '@cardano-sdk/wallet';
-import { HydratedTx } from '@cardano-sdk/core/dist/cjs/Cardano';
 
-const getMockWalletProvider = (mock: HydratedTx) => ({
-  transactionsByHashes: (_hashes: string[]) => new Promise<HydratedTx[]>((resolve) => resolve([mock]))
+const getMockWalletProvider = (mock: Cardano.HydratedTx) => ({
+  transactionsByHashes: (_hashes: string[]) => new Promise<Cardano.HydratedTx[]>((resolve) => resolve([mock]))
 });
 
 describe('Testing getTxInputsValueAndAddress function', () => {

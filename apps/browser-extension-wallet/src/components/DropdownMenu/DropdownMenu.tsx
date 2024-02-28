@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
 import { Button } from '@lace/common';
@@ -14,6 +14,8 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@lace/ui';
 import { useGetHandles } from '@hooks';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
+import { getActiveWalletSubtitle } from '@src/utils/get-wallet-subtitle';
+import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -21,8 +23,11 @@ export interface DropdownMenuProps {
 
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
-  const { walletInfo } = useWalletStore();
-  const [open, setOpen] = useState(false);
+  const {
+    cardanoWallet,
+    walletUI: { isDropdownMenuOpen },
+    setIsDropdownMenuOpen
+  } = useWalletStore();
   const [handle] = useGetHandles();
   const handleImage = handle?.profilePic;
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
@@ -32,11 +37,13 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   };
 
   const handleDropdownState = (openDropdown: boolean) => {
-    setOpen(openDropdown);
+    setIsDropdownMenuOpen(openDropdown);
     if (openDropdown) {
       sendAnalyticsEvent(PostHogAction.UserWalletProfileIconClick);
     }
   };
+
+  const walletName = cardanoWallet.source.wallet.metadata.name;
 
   return (
     <Dropdown
@@ -44,22 +51,23 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       onOpenChange={handleDropdownState}
       overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
       placement="bottomRight"
+      open={isDropdownMenuOpen}
       trigger={['click']}
     >
       {process.env.USE_MULTI_WALLET === 'true' ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
-            title={walletInfo.name}
-            subtitle="Account #0"
+            title={walletName}
+            subtitle={getActiveWalletSubtitle(cardanoWallet.source.account)}
             profile={
               handleImage
                 ? {
-                    fallback: walletInfo.name,
+                    fallback: walletName,
                     imageSrc: getAssetImageUrl(handleImage)
                   }
                 : undefined
             }
-            type={process.env.USE_SHARED_WALLET === 'true' ? 'shared' : 'cold'}
+            type={getUiWalletType(cardanoWallet.source.wallet.type)}
             id="menu"
           />
         </div>
@@ -71,7 +79,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
           data-testid="header-menu-button"
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
-            <UserAvatar walletName={walletInfo.name} isPopup={isPopup} />
+            <UserAvatar walletName={walletName} isPopup={isPopup} />
             <Chevron
               className={cn(styles.chevron, { [styles.open]: open })}
               data-testid={`chevron-${open ? 'up' : 'down'}`}

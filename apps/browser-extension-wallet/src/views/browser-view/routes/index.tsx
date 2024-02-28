@@ -106,11 +106,15 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const location = useLocation<{ background?: Location<unknown> }>();
 
   useEffect(() => {
-    if (
-      page === undefined &&
-      (location.pathname === routes.newWallet.root || location.pathname === routes.sharedWallet.root)
-    ) {
-      setBackgroundPage({ pathname: '/assets', search: '', hash: '', state: undefined });
+    const isCreatingWallet = [routes.newWallet.root, routes.sharedWallet.root].some((path) =>
+      location.pathname.startsWith(path)
+    );
+    if (page === undefined) {
+      if (isCreatingWallet) {
+        setBackgroundPage({ pathname: '/assets', search: '', hash: '', state: undefined });
+      }
+    } else if (!isCreatingWallet) {
+      setBackgroundPage();
     }
   }, [location, page, setBackgroundPage]);
 

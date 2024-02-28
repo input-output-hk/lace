@@ -18,3 +18,13 @@ export type ControlButtonProps = Omit<ButtonProps, 'className'> & {
 export type ControlButtonWithLabelProps = ControlButtonProps & {
   label?: string;
 };
+
+export type ColorScheme =
+  | Scheme.Danger
+  | Scheme.ExtraSmall
+  | Scheme.Filled
+  | Scheme.Outlined;
+export type ControlButtonWithLabelAndColorSchemeProps =
+  ControlButtonWithLabelProps & {
+    colorScheme?: ColorScheme;
+  };
