@@ -261,7 +261,7 @@ export const WalletSetupWizard = ({
           onCancel={() =>
             useDifferentMnemonicLengths
               ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
-              : skipTo(WalletSetupSteps.Password)
+              : skipTo(WalletSetupSteps.Register)
           }
           onSubmit={moveForward}
           onStepNext={(step: number) => {
