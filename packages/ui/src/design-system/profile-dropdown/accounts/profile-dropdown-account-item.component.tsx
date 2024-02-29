@@ -35,7 +35,11 @@ const MaybeWithDisableUnlockTooltip = ({
 }>): JSX.Element => {
   if (disableUnlock) {
     return (
-      <Tooltip title={disableUnlock.reason}>
+      <Tooltip
+        title={disableUnlock.reason}
+        overlayClassName={cx.tooltipStyle}
+        placement="topRight"
+      >
         <span>{children}</span>
       </Tooltip>
     );
