@@ -105,7 +105,9 @@ Then(/^An Incorrect address (\d*) error is displayed$/, async (inputIndex: numbe
 });
 
 Then(/^I click "Add token or NFT" button for bundle (\d*)$/, async (inputIndex: number) => {
-  await new AssetInput(inputIndex).clickAddAssetButton();
+  const assetInput = new AssetInput(inputIndex);
+  await assetInput.assetAddButton.waitForStable();
+  await assetInput.clickAddAssetButton();
 });
 
 Then(

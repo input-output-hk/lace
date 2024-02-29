@@ -1,5 +1,4 @@
-@Settings-Popup @Analytics @Mainnet @Testnet @Pending
-@issue=LW-9902
+@Settings-Popup @Analytics @Mainnet @Testnet
 Feature: Analytics - Settings - Popup View
 
   Background:

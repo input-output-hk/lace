@@ -57,8 +57,7 @@ Feature: Top Navigation - Extended view
       | light |
       | dark  |
 
-  @LW-4807 @Mainnet @Testnet @Pending
-  @issue=LW-9902
+  @LW-4807 @Mainnet @Testnet
   Scenario: Extended View - User menu button is displayed
     Then Menu button is displayed
     And chevron icon is changed to down
@@ -101,8 +100,7 @@ Feature: Top Navigation - Extended view
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     Then Lace is loaded properly
 
-  @LW-6074 @Testnet @Mainnet @Pending
-  @issue=LW-9902
+  @LW-6074 @Testnet @Mainnet
   Scenario: Extended View - Network switched after choosing Preview network
     Given I click the menu button
     And I see current network in user menu

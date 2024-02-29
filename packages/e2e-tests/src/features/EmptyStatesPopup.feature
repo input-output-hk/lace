@@ -33,8 +33,7 @@ Feature: Empty states
     When I click "Copy" button on empty state banner
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
 
-  @LW-5522 @Pending
-  @issue=LW-9902
+  @LW-5522
   Scenario: Popup View - Settings - Not enough Ada for Collateral
     When I open settings from header menu
     And I click on "Collateral" setting

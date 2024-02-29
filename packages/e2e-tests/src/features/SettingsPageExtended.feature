@@ -18,8 +18,7 @@ Feature: General Settings - Extended Browser View
     And I click on "Your keys" setting
     Then I see Show public key button
 
-  @LW-2387 @Mainnet @Testnet @Pending
-  @issue=LW-9902
+  @LW-2387 @Mainnet @Testnet
   Scenario: Extended View - Visibility of About component on settings page
     When I open settings from header menu
     Then I see "About Lace" component
@@ -110,8 +109,7 @@ Feature: General Settings - Extended Browser View
     And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
-  @LW-5258 @Mainnet @Pending
-  @issue=LW-9902
+  @LW-5258 @Mainnet
   Scenario: Extended View - Settings - Network name updated in settings, widget, logo, localStorage after network switching
     Given I am on Settings extended page
     And I see current network: "Mainnet" name in network setting
@@ -124,8 +122,7 @@ Feature: General Settings - Extended Browser View
     And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
-  @LW-5259 @Mainnet @Testnet @Pending
-  @issue=LW-9902
+  @LW-5259 @Mainnet @Testnet
   Scenario: Extended View - Settings - Toast displayed after switching network
     Given I am on Settings extended page
     When I switch network to: "Preview" without closing drawer

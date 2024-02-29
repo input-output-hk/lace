@@ -93,7 +93,10 @@ Before(
   async () => await extendedViewWalletInitialization(TestWalletName.WalletCollateral)
 );
 
-Before({ tags: '@Collateral-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral));
+Before(
+  { tags: '@Collateral-popup' },
+  async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral2)
+);
 
 Before(
   { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },

@@ -4,8 +4,7 @@ Feature: Analytics - Top Navigation - Popup view
   Background:
     Given Wallet is synced
 
-  @LW-8754 @Pending
-  @issue=LW-9902
+  @LW-8754
   Scenario: Analytics - Popup view - Lace menu - User/wallet profile events
     Given I am on Tokens popup page
     And I set up request interception for posthog analytics request(s)

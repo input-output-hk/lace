@@ -32,8 +32,7 @@ Feature: Top Navigation - Popup view
   Scenario: Popup View - network id is not visible for Mainnet
     Then I do not see network id: "Mainnet"
 
-  @LW-4809 @Mainnet @Testnet @Pending
-  @issue=LW-9902
+  @LW-4809 @Mainnet @Testnet
   Scenario: Popup View - User menu button is displayed
     Then Menu button is displayed
     And chevron icon is changed to down
@@ -68,8 +67,7 @@ Feature: Top Navigation - Popup view
     When I click on then network sub-menu back button
     Then the dropdown menu is visible
 
-  @LW-6078 @Testnet @Mainnet @Pending
-  @issue=LW-9902
+  @LW-6078 @Testnet @Mainnet
   Scenario: Popup View - Toast displayed after switching network to Preview
     When I click the menu button
     And I click on the network option
@@ -77,8 +75,7 @@ Feature: Top Navigation - Popup view
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     And Lace is loaded properly
 
-  @LW-6079 @Testnet @Mainnet @Pending
-  @issue=LW-9902
+  @LW-6079 @Testnet @Mainnet
   Scenario: Popup View - Network switched after choosing Preview network
     Given I click the menu button
     And I see current network in user menu

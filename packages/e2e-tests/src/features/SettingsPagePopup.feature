@@ -1,5 +1,4 @@
-@Settings-Popup @Pending
-@issue=LW-9902
+@Settings-Popup
 Feature: General Settings - Popup View
 
   Background:
