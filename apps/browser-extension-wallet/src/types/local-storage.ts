@@ -47,7 +47,6 @@ export interface ILocalStorage {
   lastStaking?: LastStakingInfo;
   mode?: 'light' | 'dark';
   hideBalance?: boolean;
-  showDappBetaModal?: boolean;
   analyticsAccepted?: EnhancedAnalyticsOptInStatus;
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;

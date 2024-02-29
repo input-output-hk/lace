@@ -131,7 +131,6 @@ Feature: Forgot password
     And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
     And I click "Next" button during wallet setup
     Then I see LW homepage
-    When I click "Got it" button on "DApp connector is now in Beta" modal
     And I click the menu button
     Then header menu displays "TestAutomationWallet" as a wallet name
     When I close header menu

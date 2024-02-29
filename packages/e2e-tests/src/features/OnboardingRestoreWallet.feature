@@ -183,7 +183,6 @@ Feature: Onboarding - Restore wallet
     # And "Creating wallet" page is displayed
     Then "All done" page is displayed
     When I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
 
   @LW-3063
@@ -192,7 +191,6 @@ Feature: Onboarding - Restore wallet
     When I click "OK" button on "Restoring a multi-address wallet?" modal
     Given I am on "All done" page with analytics tracking <button> from Restore wallet
     And I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     And I see LW homepage
     And I open settings from header menu
     Then Analytics toggle is enabled: <is_enabled>
@@ -338,7 +336,6 @@ Feature: Onboarding - Restore wallet
     When I press keyboard Enter button
     Then "All done" page is displayed
     When I press keyboard Enter button
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
 
   @LW-5835
@@ -392,7 +389,6 @@ Feature: Onboarding - Restore wallet
     # And "Creating wallet" page is displayed
     Then "All done" page is displayed
     When I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
 
   @LW-6080 @LW-5839
@@ -418,7 +414,6 @@ Feature: Onboarding - Restore wallet
     # And "Creating wallet" page is displayed
     Then "All done" page is displayed
     When I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
 
   @LW-6081

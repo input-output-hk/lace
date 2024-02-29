@@ -370,13 +370,6 @@
     "noWallet.heading": "You don't have a wallet right now",
     "noWallet.description": "You'll need to create or restore a wallet to connect to a dApp or make a transaction.",
     "educationBanner.title": "DApp Guide",
-    "betaModal": {
-      "header": "DApp connector is now in Beta",
-      "content.1": "This feature is now available in Lace but we're still ironing out the kinks, so you may have issues connecting to a DApp or signing transactions.",
-      "content.2": "Please bear with us while we work on improving your experience.",
-      "btn.close": "Got it",
-      "btn.learnMore": "Learn more"
-    },
     "transactions.confirm.title": "Confirm transaction",
     "collateral.set.header": "Set Collateral",
     "collateral.create.header": "Create Collateral",
