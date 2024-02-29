@@ -1,8 +1,7 @@
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { ReactComponent as LacePortal } from '../../../assets/images/lace-portal-01.svg';
-import { EnableAccountConfirmWithHW, EnableAccountConfirmWithHWState } from './EnableAccountConfirmWithHW';
+import { EnableAccountConfirmWithHW } from './EnableAccountConfirmWithHW';
 
 const meta: Meta<typeof EnableAccountConfirmWithHW> = {
   title: 'Accounts/EnableAccountConfirmWithHW',
@@ -17,31 +16,40 @@ type Story = StoryObj<typeof EnableAccountConfirmWithHW>;
 
 const data: ComponentProps<typeof EnableAccountConfirmWithHW> = {
   open: true,
-  state: EnableAccountConfirmWithHWState.ReadyToConfirm,
-  onConfirm: () => void 0,
+  state: 'waiting',
+  onRetry: () => void 0,
   onCancel: () => void 0,
   isPopup: false,
-  backgroundImage: <LacePortal />,
   translations: {
-    title: 'Confirm transaction with Ledger',
-    description:
-      'Connect your Ledger device directly to your computer. Unlock the device and open the Cardano app. Then click confirm.',
-    cancel: 'Cancel',
-    confirm: 'Confirm',
-    signing: 'Signing in progress'
+    title: 'Enable account',
+    headline: 'Confirm with Your Hardware Wallet',
+    description: 'Connect and unlock your device. Then, follow instructions to confirm your action.',
+    errorHeadline: 'Sorry! Something went wrong',
+    errorDescription: 'Please ensure your device is properly connected and unlocked.',
+    errorHelpLink: 'Having trouble?',
+    buttons: {
+      cancel: 'Cancel',
+      waiting: 'Waiting for device',
+      signing: 'Signing in progress',
+      error: 'Try again'
+    }
   }
 };
 
-export const ReadyToConfirm: Story = {
-  args: {
-    ...data,
-    state: EnableAccountConfirmWithHWState.ReadyToConfirm
-  }
+export const Waiting: Story = {
+  args: data
 };
 
 export const Signing: Story = {
   args: {
     ...data,
-    state: EnableAccountConfirmWithHWState.Signing
+    state: 'signing'
+  }
+};
+
+export const ErrorCase: Story = {
+  args: {
+    ...data,
+    state: 'error'
   }
 };

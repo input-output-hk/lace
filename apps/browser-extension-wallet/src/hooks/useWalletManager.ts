@@ -102,6 +102,7 @@ const getHwExtendedAccountPublicKey = async (
 ) => {
   switch (walletType) {
     case WalletType.Ledger:
+      await Wallet.Ledger.LedgerKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
       return Wallet.Ledger.LedgerKeyAgent.getXpub({
         communicationType: Wallet.KeyManagement.CommunicationType.Web,
         deviceConnection: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined,

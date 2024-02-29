@@ -15,6 +15,7 @@ const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
+const mockLedgerCheckDeviceConnection = jest.fn();
 const mockLedgerGetXpub = jest.fn();
 const mockTrezorGetXpub = jest.fn();
 const mockInitializeTrezorTransport = jest.fn();
@@ -66,6 +67,7 @@ jest.mock('@lace/cardano', () => {
       Ledger: {
         LedgerKeyAgent: {
           createWithDevice: mockLedgerCreateWithDevice,
+          checkDeviceConnection: mockLedgerCheckDeviceConnection,
           getXpub: mockLedgerGetXpub
         }
       },

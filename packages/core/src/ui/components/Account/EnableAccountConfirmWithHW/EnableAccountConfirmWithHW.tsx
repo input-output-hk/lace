@@ -1,25 +1,31 @@
 import React from 'react';
-import { Box, Button, Flex, Text } from '@lace/ui';
+import { Box, Button, Flex, Loader, Text } from '@lace/ui';
 import { Drawer, DrawerNavigation } from '@lace/common';
-import { ReactComponent as LacePortal } from '../../../assets/images/lace-portal-01.svg';
+import { ReactComponent as HardwareWalletIcon } from '../../../assets/images/hardware-wallet.svg';
+import { ReactComponent as ExclamationCircle } from '../../../assets/icons/exclamation-circle.svg';
+import styles from './EnableAccountConfirmWithHW.module.scss';
 
-export enum EnableAccountConfirmWithHWState {
-  ReadyToConfirm = 'ReadyToConfirm',
-  Signing = 'Signing'
-}
+export type EnableAccountConfirmWithHWState = 'waiting' | 'signing' | 'error';
 
 interface Props {
   open: boolean;
   state: EnableAccountConfirmWithHWState;
   onCancel: () => void;
-  onConfirm: () => void;
+  onRetry: () => void;
   isPopup: boolean;
   translations: {
     title: string;
+    headline: string;
     description: string;
-    cancel: string;
-    confirm: string;
-    signing: string;
+    errorHeadline: string;
+    errorDescription: string;
+    errorHelpLink: string;
+    buttons: {
+      cancel: string;
+      waiting: string;
+      signing: string;
+      error: string;
+    };
   };
 }
 
@@ -27,14 +33,14 @@ export const EnableAccountConfirmWithHW = ({
   open,
   state,
   isPopup,
-  onConfirm,
+  onRetry,
   onCancel,
   translations
 }: Props): JSX.Element => (
   <Drawer
     zIndex={1100}
     open={open}
-    navigation={<DrawerNavigation onArrowIconClick={onCancel} />}
+    navigation={<DrawerNavigation title={translations.title} onCloseIconClick={onCancel} />}
     onClose={onCancel}
     popupView={isPopup}
     footer={
@@ -42,28 +48,51 @@ export const EnableAccountConfirmWithHW = ({
         <Box mb="$16" w="$fill">
           <Button.CallToAction
             w="$fill"
-            disabled={state !== EnableAccountConfirmWithHWState.ReadyToConfirm}
-            onClick={onConfirm}
+            disabled={state !== 'error'}
+            onClick={onRetry}
             data-testid="enable-account-hw-signing-confirm-btn"
-            label={
-              state === EnableAccountConfirmWithHWState.ReadyToConfirm ? translations.confirm : translations.signing
-            }
+            label={translations.buttons[state]}
+            icon={state !== 'error' && <Loader w="$24" h="$24" />}
           />
         </Box>
         <Button.Secondary
           w="$fill"
           onClick={onCancel}
           data-testid="enable-account-hw-signing-cancel-btn"
-          label={translations.cancel}
+          label={translations.buttons.cancel}
         />
       </Flex>
     }
   >
-    <Flex h="$fill" data-testid="enable-account-hw-signing" flexDirection="column" justifyContent="center">
-      <Text.SubHeading weight="$bold">{translations.title}</Text.SubHeading>
-      <Text.Body.Normal>{translations.description}</Text.Body.Normal>
-      <Flex w="$fill" h="$fill" justifyContent="center" alignItems="center">
-        <LacePortal style={{ width: 452, height: 254 }} />
+    <Flex
+      className={styles.text}
+      h="$fill"
+      data-testid="enable-account-hw-signing"
+      flexDirection="column"
+      justifyContent="center"
+      gap="$12"
+    >
+      <Flex w="$fill" justifyContent="center" alignItems="center" flexDirection="column" gap="$12">
+        {state !== 'error' ? (
+          <HardwareWalletIcon style={{ width: 112, height: 112 }} />
+        ) : (
+          <ExclamationCircle style={{ width: 112, height: 112 }} />
+        )}
+        <Text.SubHeading weight="$bold">
+          {state !== 'error' ? translations.headline : translations.errorHeadline}
+        </Text.SubHeading>
+        <Text.Body.Normal>
+          {state !== 'error' ? (
+            translations.description
+          ) : (
+            <>
+              {translations.errorDescription}&nbsp;
+              <a href="https://iohk.zendesk.com/hc/en-us" target="_blank">
+                {translations.errorHelpLink}
+              </a>
+            </>
+          )}
+        </Text.Body.Normal>
       </Flex>
     </Flex>
   </Drawer>
