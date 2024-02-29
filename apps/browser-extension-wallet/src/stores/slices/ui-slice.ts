@@ -1,6 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import isNil from 'lodash/isNil';
-import { ILocalStorage, NetworkConnectionStates, WalletUIProps } from '@src/types';
+import { ILocalStorage, NetworkConnectionStates, WalletUI, WalletUIProps } from '@src/types';
 import { AppMode, cardanoCoin, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 import { GetState, SetState } from 'zustand';
 import { SliceCreator, UISlice } from '../types';
@@ -13,8 +13,14 @@ const setWalletUI = (
   {
     network,
     networkConnection,
-    areBalancesVisible
-  }: { network?: Wallet.Cardano.NetworkId; networkConnection?: NetworkConnectionStates; areBalancesVisible?: boolean },
+    areBalancesVisible,
+    isDropdownMenuOpen
+  }: {
+    network?: Wallet.Cardano.NetworkId;
+    networkConnection?: NetworkConnectionStates;
+    areBalancesVisible?: boolean;
+    isDropdownMenuOpen?: boolean;
+  },
   { get, set }: { get: GetState<UISlice>; set: SetState<UISlice> }
 ): void => {
   const { walletUI } = get();
@@ -28,13 +34,20 @@ const setWalletUI = (
           symbol: CARDANO_COIN_SYMBOL[network]
         }
       }),
+      ...(typeof isDropdownMenuOpen !== 'undefined' && { isDropdownMenuOpen }),
       ...(networkConnection && { networkConnection }),
       ...(!isNil(areBalancesVisible) && { areBalancesVisible })
     }
   });
 };
 
-const getWalletUI = ({ currentNetwork, appMode }: { currentNetwork: Wallet.Cardano.NetworkId; appMode: AppMode }) => {
+const getWalletUI = ({
+  currentNetwork,
+  appMode
+}: {
+  currentNetwork: Wallet.Cardano.NetworkId;
+  appMode: AppMode;
+}): WalletUI => {
   const shouldHideBalance = HIDE_BALANCE_FEATURE_ENABLED
     ? getValueFromLocalStorage<ILocalStorage, 'hideBalance'>('hideBalance')
     : false;
@@ -49,7 +62,8 @@ const getWalletUI = ({ currentNetwork, appMode }: { currentNetwork: Wallet.Carda
     areBalancesVisible: !shouldHideBalance,
     getHiddenBalancePlaceholder: (placeholderLength = HIDE_BALANCE_PLACEHOLDER_LENGTH, placeholderChar = '*') =>
       placeholderChar.repeat(placeholderLength),
-    canManageBalancesVisibility: HIDE_BALANCE_FEATURE_ENABLED
+    canManageBalancesVisibility: HIDE_BALANCE_FEATURE_ENABLED,
+    isDropdownMenuOpen: false
   };
 };
 
@@ -60,6 +74,7 @@ export const uiSlice: SliceCreator<UISlice, UISlice, WalletUIProps> = ({ get, se
   });
 
   return {
+    setIsDropdownMenuOpen: (isDropdownMenuOpen) => setWalletUI({ isDropdownMenuOpen }, { get, set }),
     walletUI: getWalletUI({ currentNetwork: currentChain.networkId, appMode }),
     setCardanoCoin: (chain: Wallet.Cardano.ChainId) => setWalletUI({ network: chain.networkId }, { get, set }),
     setNetworkConnection: (networkConnection: NetworkConnectionStates) =>

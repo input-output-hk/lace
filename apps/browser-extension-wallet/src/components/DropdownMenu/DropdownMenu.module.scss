@@ -1,5 +1,9 @@
 @import '../../../../../packages/common/src/ui/styles/theme.scss';
 
+.overlay {
+  z-index: 10 !important;
+}
+
 .avatarBtn {
   min-height: size_unit(6) !important;
   min-width: 0 !important;

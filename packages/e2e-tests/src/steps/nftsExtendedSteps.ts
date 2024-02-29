@@ -36,6 +36,13 @@ Given(
 );
 
 Given(
+  /^I'm sending the ADA handle with name: "([^"]*)" in (popup|extended) mode$/,
+  async (nftName: string, mode: 'extended' | 'popup') => {
+    await nftsPageObject.progressWithSendUntilPasswordPage(nftName, mode, false, true);
+  }
+);
+
+Given(
   /^I'm sending the NFT with name: "([^"]*)" with HD wallet in (popup|extended) mode$/,
   async (nftName: string, mode: 'extended' | 'popup') => {
     await nftsPageObject.progressWithSendUntilPasswordPage(nftName, mode, true);
