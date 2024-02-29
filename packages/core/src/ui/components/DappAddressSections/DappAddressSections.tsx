@@ -37,9 +37,13 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
       testId="dapp-transaction-nfts-container"
       key={nft.assetInfo.fingerprint}
       imageSrc={nft.assetInfo.tokenMetadata?.icon ?? undefined}
-      balance={Wallet.util.lovelacesToAdaString(nft.amount.toString())}
+      balance={Wallet.util.calculateAssetBalance(nft.amount, nft.assetInfo)}
       tokenName={truncate(nft.assetInfo.nftMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(nft.assetInfo.nftMetadata?.name ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
+      metadataHash={truncate(
+        Wallet.Cardano.AssetFingerprint(nft.assetInfo.fingerprint) ?? '',
+        charBeforeEllMetadata,
+        charAfterEllMetadata
+      )}
     />
   ));
 
@@ -49,9 +53,13 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
       testId="dapp-transaction-token-container"
       key={token.assetInfo.fingerprint}
       imageSrc={token.assetInfo.tokenMetadata?.icon ?? undefined}
-      balance={Wallet.util.lovelacesToAdaString(token.amount.toString())}
+      balance={Wallet.util.calculateAssetBalance(token.amount, token.assetInfo)}
       tokenName={truncate(token.assetInfo.tokenMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(token.assetInfo.assetId ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
+      metadataHash={truncate(
+        Wallet.Cardano.AssetFingerprint(token.assetInfo.fingerprint) ?? '',
+        charBeforeEllMetadata,
+        charAfterEllMetadata
+      )}
     />
   ));
 

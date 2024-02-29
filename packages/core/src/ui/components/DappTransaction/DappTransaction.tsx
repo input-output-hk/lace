@@ -66,11 +66,6 @@ const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) =>
     ? assetWithAmount.assetInfo.nftMetadata?.name
     : assetWithAmount.assetInfo.tokenMetadata?.name;
 
-const getAssetHash = (assetWithAmount: AssetInfoWithAmount) =>
-  assetWithAmount.assetInfo.nftMetadata !== null
-    ? assetWithAmount.assetInfo.nftMetadata?.name
-    : assetWithAmount.assetInfo?.assetId;
-
 const getStringFromLovelace = (value: bigint): string => Wallet.util.lovelacesToAdaString(value.toString());
 
 const getTxType = (coins: bigint): TransactionType => {
@@ -119,9 +114,13 @@ export const DappTransaction = ({
               testId="dapp-transaction-amount-value"
               key={key}
               imageSrc={assetWithAmount.assetInfo.tokenMetadata?.icon ?? undefined}
-              balance={Wallet.util.lovelacesToAdaString(assetWithAmount.amount.toString())}
+              balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
               tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
-              metadataHash={truncate(getAssetHash(assetWithAmount) ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
+              metadataHash={truncate(
+                Wallet.Cardano.AssetFingerprint(assetWithAmount.assetInfo.fingerprint) ?? '',
+                charBeforeEllMetadata,
+                charAfterEllMetadata
+              )}
             />
           ))}
         </div>
