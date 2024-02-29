@@ -1,13 +1,13 @@
 import { Card, Flex, Text } from '@lace/ui';
 import cn from 'classnames';
-import { MetricType } from 'features/BrowsePools/types';
+import { SortField } from 'features/BrowsePools/types';
 import { PoolMetric } from './PoolMetric';
 import { StakePoolCardProgressBar } from './SkatePoolCardProgressBar';
 import * as styles from './StakePoolCard.css';
 
 export interface StakePoolCardProps {
   title?: string;
-  metricType: MetricType;
+  metricType: SortField;
   metricValue?: string;
   saturation?: string;
   selected?: boolean;

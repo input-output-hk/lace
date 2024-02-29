@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
-import { SortDirection, SortField } from 'features/BrowsePools/types';
+import { SortDirection, SortField } from 'features/BrowsePools';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -32,13 +32,13 @@ export const BrowsePools = () => {
     selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
   }));
 
-  const tableHeaderTranslations = {
-    apy: t('browsePools.stakePoolTableBrowser.tableHeader.apy.title'),
+  const tableHeaderTranslations: Record<SortField, string> = {
     blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost.title'),
     liveStake: t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.title'),
     margin: t('browsePools.stakePoolTableBrowser.tableHeader.margin.title'),
     pledge: t('browsePools.stakePoolTableBrowser.tableHeader.pledge.title'),
+    ros: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
     ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker.title'),
   };
@@ -67,12 +67,12 @@ export const BrowsePools = () => {
   const sortSelectedPools = useCallback(
     (pool1: Wallet.util.StakePool, pool2: Wallet.util.StakePool) => {
       switch (sort.field) {
-        case SortField.name:
-          return (pool1.name || '-')?.localeCompare(pool2.name || '-');
-        case SortField.saturation:
-        case SortField.apy:
+        case 'ticker':
+          return (pool1.ticker || '-')?.localeCompare(pool2.ticker || '-');
+        case 'saturation':
+        case 'ros':
           return Number(pool1[sort.field]) - Number(pool2[sort.field]);
-        case SortField.cost:
+        case 'cost':
           return (pool1.cost.number || '-')?.localeCompare(pool2.cost.number || '-');
         default:
           return 0;

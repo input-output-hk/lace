@@ -68,9 +68,9 @@ class StakePoolDetailsAssert {
     expect(await StakePoolDetails.activeStakeTitle.getText()).to.equal(
       await t('cardano.stakePoolMetricsBrowser.activeStake')
     );
-    expect(await StakePoolDetails.apyTitle.getText()).to.equal('ROS');
+    expect(await StakePoolDetails.rosTitle.getText()).to.equal('ROS');
     // TODO BUG LW-5635
-    // expect((await StakePoolDetails.apyValue.getText()) as string).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    // expect((await StakePoolDetails.rosValue.getText()) as string).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     expect((await StakePoolDetails.activeStakeValue.getText()).slice(0, -1)).to.match(
       TestnetPatterns.NUMBER_DOUBLE_REGEX

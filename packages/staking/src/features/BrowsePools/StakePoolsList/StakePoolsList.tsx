@@ -2,7 +2,7 @@ import { Box, Flex, Table, Text } from '@lace/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
-import { MetricType, StakePoolSortOptions, TranslationsFor } from '../types';
+import { SortField, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from './config';
 import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';
@@ -15,7 +15,7 @@ export type StakePoolsListProps = {
   pools: (StakePoolsListRowProps | undefined)[];
   selectedPools: StakePoolsListRowProps[];
   loadMoreData: (range: ListRange) => void;
-  translations: TranslationsFor<MetricType>;
+  translations: TranslationsFor<SortField>;
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
   emptyPlaceholder?: React.ReactNode;

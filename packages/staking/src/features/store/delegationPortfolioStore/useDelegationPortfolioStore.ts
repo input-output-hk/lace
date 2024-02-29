@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { BrowsePoolsView, SortField } from 'features/BrowsePools/types';
+import { BrowsePoolsView } from 'features/BrowsePools';
 import { StakingBrowserPreferences } from 'features/outside-handles-provider';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -28,7 +28,7 @@ const defaultState: DelegationPortfolioState = {
   poolsView: BrowsePoolsView.table,
   searchQuery: '',
   selectedPortfolio: [],
-  sortField: SortField.name,
+  sortField: 'ticker',
   sortOrder: 'desc',
   view: undefined,
   viewedStakePool: undefined,

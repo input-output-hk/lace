@@ -1,11 +1,11 @@
 import { Wallet } from '@lace/cardano';
-import { SortField } from 'features/BrowsePools/types';
+import { SortField } from 'features/BrowsePools';
 
 export type StakePoolsGridItemProps = {
   id: string;
   hexId: Wallet.Cardano.PoolIdHex;
   ticker?: string;
-  apy?: string;
+  ros?: string;
   saturation?: string;
   cost: { number: string; unit?: string };
   margin?: string;

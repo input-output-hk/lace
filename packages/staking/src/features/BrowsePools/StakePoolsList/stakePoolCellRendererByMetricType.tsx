@@ -2,15 +2,27 @@
 import { Flex } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
-import { MetricType } from '../types';
+import { SortField } from '../types';
 import { getSaturationLevel } from './config';
 import * as styles from './StakePoolCellRenderer.css';
 import { StakePoolsListRowProps } from './types';
 
+const numberWithUnitRenderer = ({ value }: { value?: Partial<StakePoolsListRowProps>[SortField] }) => (
+  <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>
+);
+const percentageRenderer = ({ value }: { value?: Partial<StakePoolsListRowProps>[SortField] }) => (
+  <span>{typeof value === 'string' ? value : '-'}%</span>
+);
+
 export const stakePoolCellRendererByMetricType: Partial<
-  Record<MetricType, React.FunctionComponent<{ value?: Partial<StakePoolsListRowProps>[MetricType] }>>
+  Record<SortField, React.FunctionComponent<{ value?: Partial<StakePoolsListRowProps>[SortField] }>>
 > = {
-  [MetricType.saturation]: ({ value }) => {
+  cost: numberWithUnitRenderer,
+  liveStake: numberWithUnitRenderer,
+  margin: percentageRenderer,
+  pledge: numberWithUnitRenderer,
+  ros: percentageRenderer,
+  saturation: ({ value }) => {
     if (typeof value !== 'string' || isNil(value)) return <>'-'</>;
     const saturationColor: styles.DotVariants['level'] = getSaturationLevel(Number.parseFloat(value.toString()));
     return (
@@ -20,10 +32,4 @@ export const stakePoolCellRendererByMetricType: Partial<
       </Flex>
     );
   },
-  [MetricType.margin]: ({ value }) => <span>{typeof value === 'string' ? value : '-'}%</span>,
-  [MetricType.liveStake]: ({ value }) => (
-    <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>
-  ),
-  [MetricType.cost]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
-  [MetricType.pledge]: ({ value }) => <span>{typeof value === 'object' ? `${value.number}${value.unit}` : '-'}</span>,
 };

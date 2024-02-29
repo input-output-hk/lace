@@ -45,7 +45,7 @@ export type StakePoolDetails = {
   liveStake: { number: string; unit?: string };
   activeStake: { number: string; unit?: string };
   ticker: string;
-  apy?: string;
+  ros?: string;
   status: Wallet.Cardano.StakePool['status'];
   contact: Wallet.Cardano.PoolContactData;
   blocks?: string;

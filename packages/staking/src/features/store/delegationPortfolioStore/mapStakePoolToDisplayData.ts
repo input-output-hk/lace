@@ -32,7 +32,7 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
     status,
     ticker: metadata?.ticker || '-',
     ...(metrics && {
-      ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
+      ...(metrics.ros && { ros: formatPercentages(metrics.ros.valueOf()) }),
       blocks: new BigNumber(metrics.blocksCreated).toFormat(),
       delegators: new BigNumber(metrics.delegators).toFormat(),
       saturation: formatPercentages(metrics.saturation),

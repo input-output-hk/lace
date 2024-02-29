@@ -2,6 +2,7 @@ import { Cardano, Reward } from '@cardano-sdk/core';
 import { RewardsHistory } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
+import { getPoolInfos } from 'features/BrowsePools';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { groupBy, sortBy, takeLast, uniqBy } from 'rambda';
 import { useEffect, useState } from 'react';
@@ -16,24 +17,6 @@ export type RewardsByEpoch = { spendableEpoch: Cardano.EpochNo; rewards: RewardW
 
 export type UseRewardsByEpochProps = {
   epochsCount: number;
-};
-
-export const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
-  const filters: Wallet.QueryStakePoolsArgs = {
-    filters: {
-      identifier: {
-        _condition: 'or',
-        values: poolIds.map((poolId) => ({ id: poolId })),
-      },
-    },
-    pagination: {
-      limit: 100,
-      startAt: 0,
-    },
-  };
-  const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
-
-  return pools;
 };
 
 type GetRewardsByEpochProps = {

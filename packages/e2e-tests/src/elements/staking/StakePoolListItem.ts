@@ -7,7 +7,7 @@ export class StakePoolListItem extends WebElement {
   private LOGO = '//img[@data-testid="stake-pool-list-logo"]';
   private NAME = '//h6[@data-testid="stake-pool-list-name"]';
   private TICKER = '//p[@data-testid="stake-pool-list-ticker"]';
-  private ROS = '//p[@data-testid="stake-pool-list-apy"]';
+  private ROS = '//p[@data-testid="stake-pool-list-ros"]';
   private COST = '//p[@data-testid="stake-pool-list-cost"]';
   private SATURATION = '//p[@data-testid="stake-pool-list-saturation"]';
 

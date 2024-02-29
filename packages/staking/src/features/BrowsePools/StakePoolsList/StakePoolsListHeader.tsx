@@ -1,11 +1,5 @@
 import { Table } from '@lace/ui';
-import {
-  MetricType,
-  SortDirection,
-  SortField,
-  StakePoolSortOptions,
-  TranslationsFor,
-} from 'features/BrowsePools/types';
+import { SortDirection, SortField, StakePoolSortOptions, TranslationsFor } from 'features/BrowsePools/types';
 import { TranslationKey } from 'features/i18n';
 import { en } from 'features/i18n/translations';
 import { useTranslation } from 'react-i18next';
@@ -13,18 +7,16 @@ import { useOutsideHandles } from '../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
 import { config } from './config';
 
-const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
-
 export interface TableHeaders {
   label: string;
-  value: MetricType;
+  value: SortField;
   tooltipText?: string;
 }
 
 export type StakePoolsListHeaderProps = {
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
-  translations: TranslationsFor<MetricType>;
+  translations: TranslationsFor<SortField>;
 };
 
 export const StakePoolsListHeader = ({ translations, setActiveSort, activeSort }: StakePoolsListHeaderProps) => {
@@ -40,28 +32,24 @@ export const StakePoolsListHeader = ({ translations, setActiveSort, activeSort }
     };
   });
 
-  const onSortChange = (field: MetricType) => {
-    // TODO: remove once updated on sdk side (LW-9530)
-    if (Object.keys(SortField).includes(field)) {
-      const sortField = field as unknown as SortField;
-      const order =
-        sortField === activeSort?.field && activeSort?.order === SortDirection.asc
-          ? SortDirection.desc
-          : SortDirection.asc;
+  const onSortChange = (field: SortField) => {
+    const sortField = field as unknown as SortField;
+    const order =
+      sortField === activeSort?.field && activeSort?.order === SortDirection.asc
+        ? SortDirection.desc
+        : SortDirection.asc;
 
-      analytics.sendEventToPostHog(analyticsActionsMap[field]);
-      setActiveSort({ field: sortField, order });
-    }
+    analytics.sendEventToPostHog(analyticsActionsMap[field]);
+    setActiveSort({ field: sortField, order });
   };
 
   const isActiveSortItem = (value: string) => value === activeSort?.field;
 
   return (
-    <Table.Header<MetricType>
+    <Table.Header<SortField>
       dataTestId="stake-pool"
       headers={headers}
       isActiveSortItem={isActiveSortItem}
-      isSortingAvailable={isSortingAvailable}
       onSortChange={onSortChange}
       order={activeSort?.order}
       withSelection

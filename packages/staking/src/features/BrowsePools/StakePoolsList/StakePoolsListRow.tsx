@@ -1,6 +1,6 @@
 import { PostHogAction } from '@lace/common';
 import { Table } from '@lace/ui';
-import { MetricType } from 'features/BrowsePools/types';
+import { SortField } from 'features/BrowsePools';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
@@ -34,7 +34,7 @@ export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolsL
   };
 
   return (
-    <Table.Row<Partial<typeof data>, MetricType>
+    <Table.Row<Partial<typeof data>, SortField>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}

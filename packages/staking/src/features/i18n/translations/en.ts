@@ -35,9 +35,6 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.sortByTitle.saturation': 'Saturation',
   'browsePools.stakePoolTableBrowser.sortByTitle.ticker': 'Ticker name',
   'browsePools.stakePoolTableBrowser.stake': 'Stake',
-  'browsePools.stakePoolTableBrowser.tableHeader.apy.title': 'ROS',
-  'browsePools.stakePoolTableBrowser.tableHeader.apy.tooltip':
-    "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation.",
   'browsePools.stakePoolTableBrowser.tableHeader.blocks.title': 'Blocks',
   'browsePools.stakePoolTableBrowser.tableHeader.blocks.tooltip': 'Total blocks created by the pool.',
   'browsePools.stakePoolTableBrowser.tableHeader.cost.title': 'Cost',
@@ -52,6 +49,9 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.tableHeader.pledge.title': 'Pledge',
   'browsePools.stakePoolTableBrowser.tableHeader.pledge.tooltip':
     'An amount of self‐bonded assets intended to remain staked to the pool for as long as it operates',
+  'browsePools.stakePoolTableBrowser.tableHeader.ros.title': 'ROS',
+  'browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip':
+    "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation.",
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.title': 'Saturation',
   'browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip':
     'Once a pool reaches the point of saturation, it will offer diminishing rewards',
@@ -80,13 +80,13 @@ export const en: Translations = {
   'drawer.details.information': 'Information',
   'drawer.details.manageDelegation': 'Manage delegation',
   'drawer.details.metrics.activeStake': 'Active stake',
-  'drawer.details.metrics.apy': 'ROS',
   'drawer.details.metrics.blocks': 'Blocks',
   'drawer.details.metrics.cost': 'Cost p/ epoch',
   'drawer.details.metrics.delegators': 'Delegators',
   'drawer.details.metrics.liveStake': 'Live stake',
   'drawer.details.metrics.margin': 'Pool margin',
   'drawer.details.metrics.pledge': 'Pledge',
+  'drawer.details.metrics.ros': 'ROS',
   'drawer.details.metrics.saturation': 'Saturation',
   'drawer.details.owners': 'Owners',
   'drawer.details.poolIds': 'Pool IDs',

@@ -11,11 +11,11 @@ import {
   ToggleButtonGroup,
 } from '@lace/ui';
 import cn from 'classnames';
-import { MetricType, SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools';
+import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { USE_MULTI_DELEGATION_STAKING_FILTERS } from '../../../featureFlags';
+import { USE_MULTI_DELEGATION_STAKING_FILTERS, USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
 import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
 import * as styles from './BrowsePoolsPreferencesCard.css';
 import { FilterOption, SelectOption, SortAndFilterTab } from './types';
@@ -119,51 +119,51 @@ export const BrowsePoolsPreferencesCard = ({
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ticker'),
         onIconClick: handleIconClick,
-        value: MetricType.ticker,
+        value: 'ticker',
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
         onIconClick: handleIconClick,
-        value: MetricType.saturation,
+        value: 'saturation',
       },
-      {
+      USE_ROS_STAKING_COLUMN && {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.title'),
         onIconClick: handleIconClick,
-        value: MetricType.apy,
+        value: 'ros',
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.cost'),
         onIconClick: handleIconClick,
-        value: MetricType.cost,
+        value: 'cost',
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.margin'),
         onIconClick: handleIconClick,
-        value: MetricType.margin,
+        value: 'margin',
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.blocks'),
         onIconClick: handleIconClick,
-        value: MetricType.blocks,
+        value: 'blocks',
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.pledge'),
         onIconClick: handleIconClick,
-        value: MetricType.pledge,
+        value: 'pledge',
       },
       {
         icon,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.livestake'),
         onIconClick: handleIconClick,
-        value: MetricType.liveStake,
+        value: 'liveStake',
       },
-    ].filter(({ value: metric }) => metric !== MetricType.apy || process.env.USE_ROS_STAKING_COLUMN);
+    ].filter(Boolean) as RadioButtonGroupOption[];
   }, [direction, handleIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(() => {

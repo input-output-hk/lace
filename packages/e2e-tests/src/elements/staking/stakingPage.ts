@@ -79,10 +79,7 @@ class StakingPage {
   }
 
   stakingPoolListColumnHeader(listHeader: string) {
-    const headerColumnSelector = this.STAKE_POOL_LIST_HEADER_TEMPLATE.replace(
-      '###COLUMN_NAME###',
-      listHeader === 'ros' ? 'apy' : listHeader
-    );
+    const headerColumnSelector = this.STAKE_POOL_LIST_HEADER_TEMPLATE.replace('###COLUMN_NAME###', listHeader);
     return $(headerColumnSelector);
   }
 

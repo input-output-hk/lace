@@ -4,7 +4,7 @@ export type StakePoolsListRowProps = {
   id: string;
   hexId: Wallet.Cardano.PoolIdHex;
   ticker?: string;
-  apy?: string;
+  ros?: string;
   saturation?: string;
   cost: { number: string; unit?: string };
   margin?: string;

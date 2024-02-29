@@ -1,3 +1,4 @@
+import { SortField as SortFieldSDK } from '@cardano-sdk/core';
 export enum BrowsePoolsView {
   grid = 'grid',
   table = 'table',
@@ -11,25 +12,9 @@ export enum SaturationLevels {
   Oversaturated = 'oversaturated',
 }
 
-// TODO replace by SortField from SDK + discuss if we present ROS or APY in the UI
-export enum MetricType {
-  ticker = 'ticker',
-  saturation = 'saturation',
-  apy = 'apy',
-  cost = 'cost',
-  margin = 'margin',
-  blocks = 'blocks',
-  pledge = 'pledge',
-  liveStake = 'liveStake',
-}
-
-// TODO: update once updated on sdk side
-export enum SortField {
-  name = 'name',
-  apy = 'apy',
-  saturation = 'saturation',
-  cost = 'cost',
-}
+// TODO remove 'ticker', when it's included in SortFieldSDK
+// APY is deprecated and replaced by ROS
+export type SortField = 'ticker' | Exclude<SortFieldSDK, 'apy' | 'lastRos' | 'name'>;
 
 export type StakePoolSortOptions = {
   field: SortField;

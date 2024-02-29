@@ -7,7 +7,7 @@ class StakingInfoComponent {
   private POOL_LOGO = '[data-testid="stake-pool-logo"]';
   private POOL_NAME = '[data-testid="stake-pool-name"]';
   private POOL_TICKER = '[data-testid="stake-pool-ticker"]';
-  private STATS_APY_CONTAINER = '[data-testid="stats-apy-container"]';
+  private STATS_APY_CONTAINER = '[data-testid="stats-ros-container"]';
   private STATS_FEE_CONTAINER = '[data-testid="stats-fee-container"]';
   private STATS_MARGIN_CONTAINER = '[data-testid="stats-margin-container"]';
   private STATS_LAST_REWARD_CONTAINER = '[data-testid="stats-last-reward-container"]';

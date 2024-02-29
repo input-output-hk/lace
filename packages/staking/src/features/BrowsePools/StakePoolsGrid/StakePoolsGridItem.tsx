@@ -1,6 +1,5 @@
 import { PostHogAction } from '@lace/common';
 import { StakePoolCard } from 'features/BrowsePools/StakePoolCard';
-import { MetricType, SortField } from 'features/BrowsePools/types';
 import get from 'lodash/get';
 import React from 'react';
 import { useOutsideHandles } from '../../outside-handles-provider';
@@ -29,13 +28,11 @@ export const StakePoolsGridItem = ({
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailClick);
   };
 
-  const metricType = sortField === SortField.name ? MetricType.ticker : MetricType[sortField];
-
   return (
     <StakePoolCard
       key={id}
-      metricType={metricType}
-      metricValue={get(data, metricType)}
+      metricType={sortField}
+      metricValue={get(data, sortField)}
       saturation={saturation}
       title={ticker}
       onClick={onClick}

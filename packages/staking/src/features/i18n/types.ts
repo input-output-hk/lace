@@ -72,7 +72,7 @@ type KeysStructure = {
           title: '';
           tooltip: '';
         };
-        apy: {
+        ros: {
           title: '';
           tooltip: '';
         };
@@ -148,7 +148,7 @@ type KeysStructure = {
       metrics: {
         activeStake: '';
         liveStake: '';
-        apy: '';
+        ros: '';
         delegators: '';
         saturation: '';
         blocks: '';

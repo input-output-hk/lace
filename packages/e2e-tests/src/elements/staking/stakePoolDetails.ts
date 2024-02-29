@@ -15,8 +15,9 @@ class StakePoolDetails extends CommonDrawerElements {
   private SATURATION_VALUE = '//div[@data-testid="saturation-value"]';
   private DELEGATORS_TITLE = '//div[@data-testid="delegators-title"]';
   private DELEGATORS_VALUE = '//div[@data-testid="delegators-value"]';
-  private APY_TITLE = '//div[@data-testid="apy-title"]';
-  private APY_VALUE = '//div[@data-testid="apy-value"]';
+  // TODO APY is deprecated and replaced by ROS
+  private APY_TITLE = '//div[@data-testid="ros-title"]';
+  private APY_VALUE = '//div[@data-testid="ros-value"]';
   private INFORMATION_TITLE = '//div[@data-testid="stake-pool-details-information-title"]';
   private INFORMATION_DESCRIPTION = '//div[@data-testid="stake-pool-details-information-description"]';
   private SOCIAL_LINKS_TITLE = '//div[@data-testid="stake-pool-details-social-title"]';
@@ -71,11 +72,11 @@ class StakePoolDetails extends CommonDrawerElements {
     return $(this.DELEGATORS_VALUE);
   }
 
-  get apyTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+  get rosTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.APY_TITLE);
   }
 
-  get apyValue(): ChainablePromiseElement<WebdriverIO.Element> {
+  get rosValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.APY_VALUE);
   }
 

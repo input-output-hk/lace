@@ -40,7 +40,11 @@ const fetchStakePools =
         startAt: skip,
         limit: limit - skip + 1
       },
-      sort
+      // @ts-expect-error TODO remove when ticker sort is available
+      sort: {
+        ...sort,
+        ...(sort.field === 'ticker' ? { field: 'name' } : {})
+      }
     };
     const { totalResultCount, pageResults } = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
 

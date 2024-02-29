@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
-import { MetricType } from 'features/BrowsePools/types';
 import inRange from 'lodash/inRange';
-import { SaturationLevels } from '../types';
+import { USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
+import { SaturationLevels, SortField } from '../types';
 import { stakePoolCellRendererByMetricType } from './stakePoolCellRendererByMetricType';
 
 // TODO move saturation-related logic to higher level e.g. features/staking, as it's not coupled with BrowsePools
@@ -30,11 +30,18 @@ export const getSaturationLevel = (saturation: number): SaturationLevels => {
   return result;
 };
 
-export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && MetricType.apy].filter((c) => !!c);
+const columns = [
+  'ticker',
+  'saturation',
+  USE_ROS_STAKING_COLUMN && 'ros',
+  'cost',
+  'margin',
+  'blocks',
+  'pledge',
+  'liveStake',
+].filter(Boolean) as SortField[];
 
 export const config = {
-  columns: (Object.keys(MetricType).filter((v) => Number.isNaN(Number(v))) as MetricType[]).filter(
-    (column) => !hiddenColumns.includes(column)
-  ),
+  columns,
   renderer: stakePoolCellRendererByMetricType,
 };
