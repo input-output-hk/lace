@@ -170,7 +170,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           rewardAccounts: rewardAccountsAddresses,
           inputResolver: txInputResolver,
           protocolParameters,
-          assetProvider
+          assetProvider: createWalletAssetProvider({
+            assetProvider,
+            assetInfo$: inMemoryWallet.assetInfo$,
+            tx,
+            logger
+          })
         })
       });
 
