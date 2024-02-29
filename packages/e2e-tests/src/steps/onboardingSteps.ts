@@ -32,7 +32,6 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
-import MainLoader from '../elements/MainLoader';
 import CommonAssert from '../assert/commonAssert';
 import { shuffle } from '../utils/arrayUtils';
 import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
@@ -587,21 +586,6 @@ Then(
 Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (state: 'enabled' | 'disabled') => {
   await OnboardingLegalPageAssert.assertNextButtonEnabled(state === 'enabled');
 });
-
-When(
-  /^I click "(Got it|Learn more)" button on "DApp connector is now in Beta" modal$/,
-  async (button: 'Got it' | 'Learn more') => {
-    // Wait for main page to finish loading
-    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 60_000 });
-    if (button === 'Got it') {
-      await Modal.cancelButton.waitForClickable();
-      await Modal.cancelButton.click();
-    } else {
-      await Modal.confirmButton.waitForClickable();
-      await Modal.confirmButton.click();
-    }
-  }
-);
 
 Then(/^wallet name error "([^"]*)" (is|is not) displayed$/, async (errorText: string, isDisplayed: 'is' | 'is not') => {
   const expectedMessage = await t(errorText);
