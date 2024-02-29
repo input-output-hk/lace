@@ -4,7 +4,7 @@ import { AutoComplete, Input, InputRef } from 'antd';
 import classnames from 'classnames';
 import { wordListSearch } from '../../utils/word-list-search';
 import styles from './MnemonicWordsAutoComplete.module.scss';
-import { MnemonicWordContainerRevamp } from '../WalletSetupRevamp/WalletSetupMnemonicStepRevamp/MnemonicWordContainerRevamp';
+import { MnemonicWordContainerRevamp } from '../WalletSetupRevamp/WalletSetupMnemonicStepRevamp';
 
 const AUTO_COMPLETE_DROPDOWN_OFFSET_X = -43;
 const AUTO_COMPLETE_DROPDOWN_OFFSET_Y = 16;

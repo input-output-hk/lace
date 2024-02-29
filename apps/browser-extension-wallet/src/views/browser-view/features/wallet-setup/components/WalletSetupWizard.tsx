@@ -13,7 +13,7 @@ import {
   WalletSetupPasswordStep,
   WalletSetupRegisterStep,
   WalletSetupSteps,
-  walletSetupWizardRevamp
+  walletSetupWizard
 } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
@@ -207,16 +207,16 @@ export const WalletSetupWizard = ({
   );
 
   const moveForward = useCallback(() => {
-    const nextStep = walletSetupWizardRevamp[currentStep].next;
+    const nextStep = walletSetupWizard[currentStep].next;
     if (nextStep) {
       setCurrentStep(nextStep);
     } else if (currentStep === WalletSetupSteps.Create) {
       goToMyWallet();
     }
-  }, [currentStep, setCurrentStep]);
+  }, [currentStep, setCurrentStep, goToMyWallet]);
 
   const moveBack = () => {
-    const prevStep = walletSetupWizardRevamp[currentStep].prev;
+    const prevStep = walletSetupWizard[currentStep].prev;
 
     if (prevStep) {
       setCurrentStep(prevStep);

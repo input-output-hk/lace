@@ -10,6 +10,7 @@ import { Segmented, Button } from 'antd';
 import { readMnemonicFromClipboard } from './wallet-utils';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
+const MNEMONIC_LENGTHS = [12, 15, 24];
 
 export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
@@ -38,20 +39,10 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   translations,
   suggestionList
 }: WalletSetupMnemonicVerificationStepProps): React.ReactElement => {
-  const handleBack = () => {
-    onCancel();
-  };
-
-  const handleNext = () => {
-    onSubmit();
-  };
-
-  const title = translations.enterPassphrase;
-
   const description = (
     <>
       {translations.enterPassphraseLength}
-      <Segmented options={[12, 15, 24]} defaultValue={defaultMnemonicLength} onChange={onSetMnemonicLength} />
+      <Segmented options={MNEMONIC_LENGTHS} defaultValue={defaultMnemonicLength} onChange={onSetMnemonicLength} />
     </>
   );
 
@@ -70,10 +61,10 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
 
   return (
     <WalletSetupStepLayoutRevamp
-      title={title}
+      title={translations.enterPassphrase}
       description={description}
-      onBack={handleBack}
-      onNext={handleNext}
+      onBack={onCancel}
+      onNext={onSubmit}
       customAction={
         <Button type="link" onClick={pasteRecoveryPhrase}>
           {translations.pasteFromClipboard}

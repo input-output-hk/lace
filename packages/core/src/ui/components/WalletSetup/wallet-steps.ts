@@ -14,10 +14,6 @@ export const walletSetupWizard: WalletSetupWizard = {
   },
   [WalletSetupSteps.Password]: {
     prev: WalletSetupSteps.Register,
-    next: WalletSetupSteps.RecoveryPhraseLength
-  },
-  [WalletSetupSteps.RecoveryPhraseLength]: {
-    prev: WalletSetupSteps.Password,
     next: WalletSetupSteps.Mnemonic
   },
   [WalletSetupSteps.Mnemonic]: {
