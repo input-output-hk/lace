@@ -79,7 +79,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+  const [enhancedAnalyticsStatus] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
@@ -218,7 +218,6 @@ export const WalletSetupWizard = ({
     walletName,
     mnemonic,
     password,
-    setDoesUserAllowAnalytics,
     analytics,
     setupType,
     goToMyWallet,
