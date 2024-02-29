@@ -59,7 +59,7 @@ export const ConfirmVoteDelegation = ({ dappInfo, errorMessage, translations, me
           <TransactionSummary.Address
             label={translations.labels.alwaysNoConfidence}
             address={translations.option}
-            testID="metadata-alwaysNoCOnfidence"
+            testID="metadata-alwaysNoConfidence"
           />
         </Cell>
       )}
