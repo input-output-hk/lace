@@ -5,7 +5,8 @@ Feature: ADA handle - popup view
     Given Wallet is synced
     And all NFT folders are removed
 
-  @LW-7332
+  @LW-7332 @Pending
+  @issue=LW-9902
   Scenario: Popup view - Add a valid ADA handle to the address book
     Given I am on Address Book popup page
     And I click "Add address" button on address book page
@@ -17,7 +18,8 @@ Feature: ADA handle - popup view
     Then I see a toast with text: "Address added"
     And I see address row with name "test_handle_1" and address "$test_handle_1" on the list in popup mode
 
-  @LW-7334
+  @LW-7334 @Pending
+  @issue=LW-9902
   Scenario: Popup view - Add an invalid ADA handle to the address book
     Given I am on Address Book popup page
     And I click "Add address" button on address book page

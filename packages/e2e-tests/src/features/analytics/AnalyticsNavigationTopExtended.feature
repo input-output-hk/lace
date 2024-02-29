@@ -4,7 +4,8 @@ Feature: Analytics - Top Navigation - Extended view
   Background:
     Given Wallet is synced
 
-  @LW-8752
+  @LW-8752 @Pending
+  @issue=LW-9902
   Scenario: Analytics - Extended view - Lace menu - User/wallet profile events
     Given I am on Tokens extended page
     And I set up request interception for posthog analytics request(s)

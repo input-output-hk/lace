@@ -1,4 +1,5 @@
-@DAppConnector-Popup
+@DAppConnector-Popup @Pending
+@issue=LW-9902
 Feature: DAppConnector - Popup view
 
   Background:

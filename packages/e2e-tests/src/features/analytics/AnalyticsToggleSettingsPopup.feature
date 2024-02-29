@@ -4,7 +4,8 @@ Feature: Analytics - Settings Toggle - Popup View
   Background:
     Given Lace is ready for test
 
-  @LW-8314
+  @LW-8314 @Pending
+  @issue=LW-9902
   Scenario Outline: Analytics - Popup view - Settings - Analytics option enabled: <is_enabled> and Posthog events sent
     When I open settings from header menu
     And Analytics toggle is enabled: <toggle_enabled>

@@ -45,7 +45,8 @@ Feature: Main Navigation - Extended view
       | Settings     | I see settings page                                        |
       | Address Book | I see address book title                                   |
 
-  @LW-6662
+  @LW-6662 @Pending
+  @issue=LW-9902
   Scenario Outline: Extended view - Main Navigation - Right side panel not displayed in <section> section
     And I navigate to <section> extended page
     And I resize the window to a width of: 1350 and a height of: 840

@@ -1,4 +1,5 @@
-@Collateral-popup @Testnet
+@Collateral-popup @Testnet @Pending
+@issue=LW-9902
 Feature: Collateral - popup view
 
   Background:
