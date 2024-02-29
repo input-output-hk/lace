@@ -8,20 +8,18 @@ class PopupView implements Page {
   popupHeight = 600;
 
   async setPopupWindowSize() {
-    if ((await extensionUtils.getBrowser()) === 'chrome') {
-      const ua = await extensionUtils.getUserAgent();
-      await browser.emulateDevice({
-        viewport: {
-          width: this.popupWidth,
-          height: this.popupHeight,
-          deviceScaleFactor: 1,
-          isMobile: false,
-          hasTouch: false,
-          isLandscape: false
-        },
-        userAgent: `${ua}`
-      });
-    }
+    const ua = await extensionUtils.getUserAgent();
+    await browser.emulateDevice({
+      viewport: {
+        width: this.popupWidth,
+        height: this.popupHeight,
+        deviceScaleFactor: 1,
+        isMobile: false,
+        hasTouch: false,
+        isLandscape: false
+      },
+      userAgent: `${ua}`
+    });
   }
 
   async visit(resize = true) {
