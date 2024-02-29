@@ -2,7 +2,7 @@
 Feature: Send Transaction bundles - E2E
 
   @LW-4121 @LW-4122 @LW-3556 @Smoke @Pending
-#  Bug LW-8958
+  @issue=LW-8958
   Scenario: Extended view - Sending multiple assets and bundles E2E
     Given Wallet is synced
     And I save token: "Cardano" balance
