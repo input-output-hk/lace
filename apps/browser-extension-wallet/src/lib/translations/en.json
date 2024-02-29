@@ -1329,6 +1329,10 @@
       "validationMessage": "8+ characters with at least 1 uppercase letter, 1 lowercase letter, 1 number"
     },
     "walletSetupSelectAccountsStep": {
+      "setupLaceWallet": "Let's set up your Lace wallet",
+      "maxCharacters": "Max. 20 characters",
+      "chooseWalletName": "Choose a name to help identify your wallet and which account you would like to export. You can change this later!",
+      "enterWallet": "Enter wallet",
       "selectAccount": "Select Account",
       "exportKeys": "Next",
       "chooseAccountToExport": "Choose which account you would like to export.",

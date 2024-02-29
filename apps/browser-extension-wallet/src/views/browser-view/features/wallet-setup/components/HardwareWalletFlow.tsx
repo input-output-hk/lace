@@ -8,8 +8,7 @@ import {
   WalletSetupLegalStep,
   WalletSetupFinalStep,
   WalletSetupConnectHardwareWalletStep,
-  WalletSetupSelectAccountsStep,
-  WalletSetupWalletNameStep
+  WalletSetupSelectAccountsStepRevamp
 } from '@lace/core';
 import React, { useState, useCallback, useEffect } from 'react';
 import { Switch, Route, useHistory, useLocation } from 'react-router-dom';
@@ -36,7 +35,7 @@ export interface HardwareWalletFlowProps {
   sendAnalytics: SendOnboardingAnalyticsEvent;
 }
 
-type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'accounts' | 'register' | 'create' | 'finish';
+type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'setup' | 'create' | 'finish';
 
 const TOTAL_ACCOUNTS = 50;
 
@@ -114,14 +113,6 @@ export const HardwareWalletFlow = ({
   const walletSetupCreateStepTranslations = {
     title: t('core.walletSetupCreateStep.title'),
     description: t('core.walletSetupCreateStep.description')
-  };
-
-  const walletSetupWalletNameStepTranslations = {
-    maxCharacters: t('core.walletSetupWalletNameStep.maxCharacters'),
-    walletName: t('core.walletSetupWalletNameStep.walletName'),
-    nameYourWallet: t('core.walletSetupWalletNameStep.nameYourWallet'),
-    create: t('core.walletSetupWalletNameStep.create'),
-    chooseName: t('core.walletSetupWalletNameStep.chooseName')
   };
 
   const navigateTo = useCallback(
@@ -245,35 +236,24 @@ export const HardwareWalletFlow = ({
         onConnect={handleConnect}
         onNext={() => {
           analytics.sendEventToPostHog(postHogOnboardingActions.hw.CONNECT_HW_NEXT_CLICK);
-          navigateTo('accounts');
+          navigateTo('setup');
         }}
         isNextEnable={!!deviceConnection}
         translations={walletSetupConnectHardwareWalletStepTranslations}
         isHardwareWallet
       />
     ),
-    accounts: () => (
-      <WalletSetupSelectAccountsStep
+    setup: () => (
+      <WalletSetupSelectAccountsStepRevamp
         accounts={TOTAL_ACCOUNTS}
         onBack={showStartOverDialog}
-        onSubmit={(account: number) => {
-          sendAnalytics(postHogOnboardingActions.hw.SELECT_HW_ACCOUNT_NEXT_CLICK);
+        onSubmit={(account: number, name: string) => {
+          sendAnalytics(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
           setAccountIndex(account);
-          navigateTo('register');
-        }}
-        wallet={connectedDevice}
-      />
-    ),
-    register: () => (
-      <WalletSetupWalletNameStep
-        onBack={showStartOverDialog}
-        onNext={(name: string) => {
-          sendAnalytics(postHogOnboardingActions.hw.WALLET_NAME_NEXT_CLICK);
           handleCreateWallet(name);
           navigateTo('create');
         }}
-        translations={walletSetupWalletNameStepTranslations}
-        isHardwareWallet
+        wallet={connectedDevice}
       />
     ),
     create: () => <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} isHardwareWallet />,
@@ -323,8 +303,7 @@ export const HardwareWalletFlow = ({
         <Switch>
           <Route path={route('analytics')}>{hardwareWalletStepRenderFunctions.analytics()}</Route>
           <Route path={route('connect')}>{hardwareWalletStepRenderFunctions.connect()}</Route>
-          <Route path={route('accounts')}>{hardwareWalletStepRenderFunctions.accounts()}</Route>
-          <Route path={route('register')}>{hardwareWalletStepRenderFunctions.register()}</Route>
+          <Route path={route('setup')}>{hardwareWalletStepRenderFunctions.setup()}</Route>
           <Route path={route('create')}>{hardwareWalletStepRenderFunctions.create()}</Route>
           <Route path={route('finish')}>{hardwareWalletStepRenderFunctions.finish()}</Route>
           <Route>{hardwareWalletStepRenderFunctions.legal()}</Route>
