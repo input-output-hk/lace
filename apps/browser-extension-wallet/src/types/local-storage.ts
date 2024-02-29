@@ -54,4 +54,5 @@ export interface ILocalStorage {
   multidelegationFirstVisitSincePortfolioPersistence?: boolean;
   unconfirmedTransactions: UnconfirmedTransaction[];
   stakingBrowserPreferences: StakingBrowserPreferences;
+  showPinExtension?: boolean;
 }

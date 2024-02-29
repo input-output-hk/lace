@@ -28,7 +28,6 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
-import { PinExtension } from './PinExtension';
 import { Fallback } from './Fallback';
 
 import { passwordTranslationMap } from '../constants';
@@ -449,7 +448,7 @@ export const WalletSetupWizard = ({
   }, [shouldDisplayExperiment]);
 
   return (
-    <WalletSetupLayout prompt={currentStep === WalletSetupSteps.Finish ? <PinExtension /> : undefined}>
+    <WalletSetupLayout>
       {currentStep === WalletSetupSteps.Legal && (
         <WalletSetupLegalStep
           onBack={moveBack}
