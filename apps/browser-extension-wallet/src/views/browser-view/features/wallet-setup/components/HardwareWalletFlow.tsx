@@ -15,7 +15,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
-import { PinExtension } from './PinExtension';
 import { ErrorDialog, HWErrorCode } from './ErrorDialog';
 import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
@@ -320,7 +319,7 @@ export const HardwareWalletFlow = ({
         onStartOver={handleStartOver}
         onClose={() => setIsStartOverDialogVisible(false)}
       />
-      <WalletSetupLayout prompt={location.pathname.endsWith('finish') ? <PinExtension /> : undefined}>
+      <WalletSetupLayout>
         <Switch>
           <Route path={route('analytics')}>{hardwareWalletStepRenderFunctions.analytics()}</Route>
           <Route path={route('connect')}>{hardwareWalletStepRenderFunctions.connect()}</Route>
