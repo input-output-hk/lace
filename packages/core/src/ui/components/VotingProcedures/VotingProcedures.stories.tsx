@@ -60,7 +60,7 @@ const data: ComponentProps<typeof VotingProcedures> = {
     }
   ],
   translations: {
-    voterType: 'Voter type',
+    voterType: 'Voter Type',
     procedureTitle: 'Procedure',
     actionIdTitle: 'Action ID',
     vote: 'Vote',

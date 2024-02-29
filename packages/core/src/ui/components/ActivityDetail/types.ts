@@ -107,6 +107,7 @@ export type TxDetailsProposalProceduresTitles =
   | 'eMax'
   | 'nOpt'
   | 'collateralPercentage'
+  | 'prices'
   | 'PlutusV1'
   | 'PlutusV2'
   | 'govActionLifetime'
@@ -128,7 +129,7 @@ export type TxDetailsProposalProceduresTitles =
 
 export type TxDetailsVotingProceduresTitles =
   | 'voterType'
-  | 'credentialType'
+  | 'voterCredential'
   | 'voteTypes'
   | 'drepId'
   | 'anchorHash'

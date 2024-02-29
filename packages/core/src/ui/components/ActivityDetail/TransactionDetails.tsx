@@ -184,7 +184,7 @@ export const TransactionDetails = ({
         ({
           ...p,
           ...('title' in p &&
-            ['voterType', 'credentialType', 'voteTypes'].includes(p.title) && {
+            ['voterType', 'voteTypes'].includes(p.title) && {
               details: [t(`package.core.activityDetails.${p.title}.${p.details[0]}`)]
             })
         } as TxDetail<TxDetailsVotingProceduresTitles>)
@@ -364,7 +364,7 @@ export const TransactionDetails = ({
             translations={{
               voterType: t('package.core.activityDetails.votingProcedureTitles.voterType'),
               drepId: t('package.core.activityDetails.votingProcedureTitles.drepId'),
-              credentialType: t('package.core.activityDetails.votingProcedureTitles.credentialType'),
+              voterCredential: t('package.core.activityDetails.votingProcedureTitles.voterCredential'),
               voteTypes: t('package.core.activityDetails.votingProcedureTitles.voteTypes'),
               anchorHash: t('package.core.activityDetails.votingProcedureTitles.anchorHash'),
               anchorURL: t('package.core.activityDetails.votingProcedureTitles.anchorUrl')
@@ -470,6 +470,7 @@ export const TransactionDetails = ({
               collateralPercentage: t(
                 'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.collateralPercentage'
               ),
+              prices: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.prices'),
               govActionLifetime: t(
                 'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionLifetime'
               ),

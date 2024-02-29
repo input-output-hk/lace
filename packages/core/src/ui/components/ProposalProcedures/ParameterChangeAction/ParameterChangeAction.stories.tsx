@@ -127,13 +127,13 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
       url: 'Anchor URL'
     },
     networkGroup: {
-      title: 'Network group',
+      title: 'Network Group',
       maxBBSize: 'Max BB Size',
       maxTxSize: 'Max Tx Size',
       maxBHSize: 'Max BH Size',
       maxValSize: 'Max Val Size',
       maxTxExUnits: 'Max TX Ex Units',
-      maxBlockExUnits: 'Max Blk Ex Units',
+      maxBlockExUnits: 'Max BLK Ex Units',
       maxCollateralInputs: 'Max Coll Inputs',
       tooltip: {
         maxBBSize: 'Max block body size',
@@ -146,7 +146,7 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
       }
     },
     economicGroup: {
-      title: 'Economic group',
+      title: 'Economic Group',
       minFeeA: 'Min Fee A',
       minFeeB: 'Min Fee B',
       keyDeposit: 'Key Deposit',
@@ -169,7 +169,7 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
       }
     },
     technicalGroup: {
-      title: 'Technical group',
+      title: 'Technical Group',
       a0: 'A0',
       eMax: 'EMax',
       nOpt: 'NOpt',
@@ -184,7 +184,7 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
       }
     },
     governanceGroup: {
-      title: 'Governance group',
+      title: 'Governance Group',
       govActionLifetime: 'Gov Act Lifetime',
       govActionDeposit: 'Gov Act Deposit',
       drepDeposit: 'DRep Deposit',

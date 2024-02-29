@@ -346,16 +346,12 @@ const confirmVote = [
     details: ['drep']
   },
   {
-    title: 'credentialType',
+    title: 'voterCredential',
     details: ['drep1cs234l5mtapethapx8cq97nkpa27xf84phruh5f6jqxa78ymlp4']
   },
   {
     title: 'voteTypes',
     details: ['yes']
-  },
-  {
-    title: 'drepId',
-    details: ['drep1cs234l5mtapethapx8cq97nkpa27xf84phruh5f6jqxa78ymlp4']
   },
   {
     title: 'anchorURL',
@@ -515,6 +511,19 @@ const parameterChangeAction = [
       {
         title: 'collateralPercentage',
         details: ['150']
+      }
+    ]
+  },
+  {
+    header: 'prices',
+    details: [
+      {
+        title: 'memory',
+        details: ['0.0577']
+      },
+      {
+        title: 'step',
+        details: ['0.0000721']
       }
     ]
   },
@@ -727,7 +736,7 @@ const newConstitutionAction = [
 export const NewConstitutionAction: Story = {
   args: {
     ...data,
-    name: 'Info Action',
+    name: 'New Constitution Action',
     proposalProcedures: [newConstitutionAction]
   }
 };
@@ -736,6 +745,11 @@ const noConfidenceAction = [
   {
     title: 'type',
     details: [Wallet.Cardano.GovernanceActionType.no_confidence]
+  },
+  {
+    title: 'deposit',
+    info: 'deposit',
+    details: [['2.00 ADA', '0.18 USD']]
   },
   { title: 'rewardAccount', details: ['23bcf2892e8182a68e3aac6f9f42ed3317d115ebad12a17232681175'] },
   {
@@ -871,6 +885,14 @@ const treasuryWithdrawalsAction = [
   {
     header: 'withdrawal',
     details: [
+      {
+        title: 'withdrawalRewardAccount',
+        details: ['23bcf2892e8182a68e3aac6f9f42ed3317d115ebad12a17232681175']
+      },
+      {
+        title: 'withdrawalAmount',
+        details: ['1030939916423 ADA']
+      },
       {
         title: 'withdrawalRewardAccount',
         details: ['23bcf2892e8182a68e3aac6f9f42ed3317d115ebad12a17232681175']

@@ -4,7 +4,7 @@
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
-import { inspectTxValues, inspectTxType, getVoterType, getCredentialType, getVote } from '@src/utils/tx-inspection';
+import { inspectTxValues, inspectTxType, getVoterType, getVote } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
@@ -326,11 +326,10 @@ export const votingProceduresTransformer = (
           details: [getVoterType(procedure.voter.__typename)]
         },
         {
-          title: 'credentialType',
-          details: [getCredentialType(procedure.voter.credential.type)]
+          title: 'voterCredential',
+          details: [procedure.voter.credential.hash.toString()]
         },
-        { title: 'voteTypes', details: [getVote(vote.votingProcedure.vote)] },
-        { title: 'drepId', details: [getVote(vote.votingProcedure.vote)] }
+        { title: 'voteTypes', details: [getVote(vote.votingProcedure.vote)] }
       ];
 
       if (vote.votingProcedure.anchor) {
@@ -530,7 +529,8 @@ export const governanceProposalsTransformer = ({
           dRepInactivityPeriod,
           minCommitteeSize,
           committeeTermLimit,
-          dRepVotingThresholds
+          dRepVotingThresholds,
+          prices
         }
       } = procedure.governanceAction;
       transformedProposal.push(
@@ -653,6 +653,19 @@ export const governanceProposalsTransformer = ({
             {
               title: 'collateralPercentage',
               details: [collateralPercentage?.toString()]
+            }
+          ]
+        },
+        {
+          header: 'prices',
+          details: [
+            {
+              title: 'memory',
+              details: [prices.memory.toString()]
+            },
+            {
+              title: 'step',
+              details: [prices.steps.toString()]
             }
           ]
         },

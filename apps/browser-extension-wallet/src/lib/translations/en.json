@@ -1279,7 +1279,7 @@
             "maxBHSize": "Max BH Size",
             "maxValSize": "Max Val Size",
             "maxTxExUnits": "Max TX Ex Units",
-            "maxBlockExUnits": "Max Blk Ex Units",
+            "maxBlockExUnits": "Max BLK Ex Units",
             "maxCollateralInputs": "Max Coll Inputs",
             "tooltip": {
               "maxBBSize": "Max block body size",
@@ -1405,7 +1405,7 @@
     },
     "VotingProcedures": {
       "title": "Confirm Vote",
-      "voterType": "Voter type",
+      "voterType": "Voter Type",
       "procedureTitle": "Procedure",
       "actionIdTitle": "Action ID",
       "vote": "Vote",
