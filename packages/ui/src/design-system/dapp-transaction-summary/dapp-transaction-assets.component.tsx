@@ -76,7 +76,7 @@ export const TransactionAssets = ({
               <span data-testid={testId}>
                 {balance} {tokenName}
               </span>{' '}
-              {metadataHash}
+              `#{metadataHash}`
             </Typography.Body.Normal>
           </Flex>
         </Cell>

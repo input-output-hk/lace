@@ -91,8 +91,7 @@ export const DappAddressSections = ({
                   {t('package.core.dappTransaction.tokens')}
                 </Title>
                 <Title level={5}>
-                  -{groupedFromAddresses.tokens.length}
-                  {itemsCountCopy}
+                  -{groupedFromAddresses.tokens.length} {itemsCountCopy}
                 </Title>
               </div>
               {displayGroupedTokens(groupedFromAddresses.tokens)}
