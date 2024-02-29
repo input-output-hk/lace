@@ -79,14 +79,14 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
         <Button
           variant="outlined"
           color="secondary"
-          className={cn(styles.avatarBtn, { [styles.open]: open })}
+          className={cn(styles.avatarBtn, { [styles.open]: isDropdownMenuOpen })}
           data-testid="header-menu-button"
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
             <UserAvatar walletName={walletName} isPopup={isPopup} />
             <Chevron
-              className={cn(styles.chevron, { [styles.open]: open })}
-              data-testid={`chevron-${open ? 'up' : 'down'}`}
+              className={cn(styles.chevron, { [styles.open]: isDropdownMenuOpen })}
+              data-testid={`chevron-${isDropdownMenuOpen ? 'up' : 'down'}`}
             />
           </span>
         </Button>
