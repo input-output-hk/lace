@@ -15,7 +15,7 @@ export interface Headers<T> {
 
 export interface HeaderProps<T> {
   isActiveSortItem: (value: string) => boolean;
-  isSortingAvailable: (value: string) => boolean;
+  isSortingAvailable?: (value: string) => boolean;
   onSortChange: (field: T) => void;
   order: 'asc' | 'desc';
   withSelection?: boolean;
@@ -26,7 +26,7 @@ export interface HeaderProps<T> {
 export const Header = <T extends string>({
   headers,
   isActiveSortItem,
-  isSortingAvailable,
+  isSortingAvailable = (): boolean => true,
   onSortChange,
   order,
   withSelection = false,
