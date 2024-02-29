@@ -16,13 +16,23 @@ class NftsPageObject {
     await nftNameElement.click({ button: clickType });
   }
 
-  async progressWithSendUntilPasswordPage(nftName: string, mode: string, hdWallet = false): Promise<any> {
+  async progressWithSendUntilPasswordPage(
+    nftName: string,
+    mode: string,
+    hdWallet = false,
+    adaHandle = false
+  ): Promise<any> {
     await this.clickNftItemOnNftsPage(nftName);
     await NftDetails.sendNFTButton.waitForClickable();
     await NftDetails.sendNFTButton.click();
     let receiverWallet;
     if (hdWallet) {
       receiverWallet = getTestWallet(await this.getNonActiveNftHdWalletName());
+    } else if (adaHandle) {
+      receiverWallet =
+        mode === 'extended'
+          ? getTestWallet(await this.getNonActiveAdaHandleWalletName())
+          : getTestWallet(await this.getNonActiveAdaHandle2WalletName());
     } else {
       receiverWallet =
         mode === 'extended'
