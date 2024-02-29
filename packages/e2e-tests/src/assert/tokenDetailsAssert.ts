@@ -7,6 +7,7 @@ class TokenDetailsAssert {
   async assertSeeTokenDrawerNavigation(mode: 'extended' | 'popup') {
     await TokenDetailsPage.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
+      await TokenDetailsPage.drawerNavigationTitle.waitForStable();
       expect(await TokenDetailsPage.drawerNavigationTitle.getText()).to.equal(
         await t('browserView.assetDetails.title')
       );

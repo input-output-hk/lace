@@ -21,6 +21,7 @@ Given(
 );
 
 When(/^I click "Send NFT" button on NFT details drawer$/, async () => {
+  await NftDetails.sendNFTButton.waitForStable();
   await NftDetails.sendNFTButton.click();
 });
 
