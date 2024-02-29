@@ -136,7 +136,9 @@ export const WalletSetupWizard = ({
     writePassphraseSubtitle2: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'),
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterWallet: t('core.walletSetupMnemonicStepRevamp.enterWallet'),
-    enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength')
+    enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
+    copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
   };
 
   const walletSetupModeStepTranslations = {

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Button } from 'antd';
 import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
@@ -8,7 +9,6 @@ import { hasEmptyString } from '@ui/components/WalletSetup/WalletSetupMnemonicVe
 import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
-import { Button } from '@lace/common';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 
 export type MnemonicStage = 'writedown' | 'input';
@@ -27,6 +27,8 @@ export interface WalletSetupMnemonicStepProps {
     | 'writePassphraseSubtitle2'
     | 'passphraseError'
     | 'enterWallet'
+    | 'copyToClipboard'
+    | 'pasteFromClipboard'
   >;
   suggestionList?: Array<string>;
   passphraseInfoLink?: string;
@@ -108,12 +110,12 @@ export const WalletSetupMnemonicStepRevamp = ({
         currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
         customAction={
           mnemonicStage === 'writedown' ? (
-            <Button color="gradient-secondary" onClick={async () => await writeMnemonicToClipboard(mnemonic)}>
-              Copy to clipboard
+            <Button type="link" onClick={async () => await writeMnemonicToClipboard(mnemonic)}>
+              {translations.copyToClipboard}
             </Button>
           ) : (
-            <Button color="gradient-secondary" onClick={pasteRecoveryPhrase}>
-              Paste from clipboard
+            <Button type="link" onClick={pasteRecoveryPhrase}>
+              {translations.pasteFromClipboard}
             </Button>
           )
         }

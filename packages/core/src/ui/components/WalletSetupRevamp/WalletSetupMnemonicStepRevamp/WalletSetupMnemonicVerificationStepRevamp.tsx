@@ -6,9 +6,8 @@ import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '../WalletSetup
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import styles from './WalletSetupMnemonicVerificationStepRevamp.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { Segmented } from 'antd';
+import { Segmented, Button } from 'antd';
 import { readMnemonicFromClipboard } from './wallet-utils';
-import { Button } from '@lace/common';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
 
@@ -20,7 +19,9 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onStepNext?: (currentStep: number) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
-  translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'enterWallet'>;
+  translations: TranslationsFor<
+    'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'enterWallet' | 'pasteFromClipboard'
+  >;
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
   onSetMnemonicLength?: (length: number) => void;
@@ -74,8 +75,8 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       onBack={handleBack}
       onNext={handleNext}
       customAction={
-        <Button color="gradient-secondary" onClick={pasteRecoveryPhrase}>
-          Paste from clipboard
+        <Button type="link" onClick={pasteRecoveryPhrase}>
+          {translations.pasteFromClipboard}
         </Button>
       }
       currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
