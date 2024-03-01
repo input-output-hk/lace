@@ -106,7 +106,7 @@ When(
 
 // TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
+  await $(`/ /*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
     timeout: 5000,
     reverse: expectedResult === 'No'
   });
@@ -309,4 +309,8 @@ Then(/^I verify there are no errors in console logs$/, async () => {
 
 Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
   await browser.pause(delay);
+});
+
+Given(/^I'm on popup view$/, async () => {
+  await popupView.visit();
 });

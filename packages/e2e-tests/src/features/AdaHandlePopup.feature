@@ -3,6 +3,7 @@ Feature: ADA handle - popup view
 
   Background:
     Given Wallet is synced
+    And I'm on popup view
     And all NFT folders are removed
 
   @LW-7332
