@@ -62,6 +62,7 @@ export const BrowsePools = () => {
     ]
   );
 
+  // TODO consider moving to a single hydration/Setup step
   useRestorePoolsSelection();
 
   const sortSelectedPools = useCallback(

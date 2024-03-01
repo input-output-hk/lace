@@ -34,35 +34,46 @@ export const useBrowsePools = () => {
     [debouncedSearch, searchValue, sort]
   );
 
-  const onSearch = (searchString: string) => {
-    const startedTyping = searchValue === '' && searchString !== '';
-    if (startedTyping) {
-      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
-    }
-    setSearchValue(searchString);
-  };
+  const onSearch = useCallback(
+    (searchString: string) => {
+      const startedTyping = searchValue === '' && searchString !== '';
+      if (startedTyping) {
+        analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
+      }
+      setSearchValue(searchString);
+    },
+    [analytics, searchValue]
+  );
 
   const list = useMemo(
     () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
     [pageResults]
   );
 
-  // TODO consider refactor
   useEffect(() => {
-    // if (componentRef?.current) {
-    // reset pools on network switching, searchValue change and sort change
     resetStakePools?.();
-    // }
   }, [currentChain, searchValue, sort, resetStakePools]);
 
-  return {
-    fetchingPools: walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING,
-    list,
-    loadMoreData,
-    onSearch,
-    searchValue,
-    setSort,
-    sort,
-    totalResultCount,
-  };
+  return useMemo(
+    () => ({
+      fetchingPools: walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING,
+      list,
+      loadMoreData,
+      onSearch,
+      searchValue,
+      setSort,
+      sort,
+      totalResultCount,
+    }),
+    [
+      walletStoreStakePoolSearchResultsStatus,
+      list,
+      loadMoreData,
+      onSearch,
+      searchValue,
+      setSort,
+      sort,
+      totalResultCount,
+    ]
+  );
 };

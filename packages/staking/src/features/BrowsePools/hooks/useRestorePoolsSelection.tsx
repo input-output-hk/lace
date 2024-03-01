@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { getPoolInfos } from '../queries';
 
-// TODO use
 export const useRestorePoolsSelection = () => {
   const areSelectedPoolsRestored = useRef<{ restored: boolean }>({ restored: false });
   const { stakingBrowserPreferencesPersistence, walletStoreBlockchainProvider } = useOutsideHandles();

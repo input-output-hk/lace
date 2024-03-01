@@ -9,7 +9,7 @@ export const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolPr
       },
     },
     pagination: {
-      limit: poolIds.length - 1, // TODO test
+      limit: poolIds.length,
       startAt: 0,
     },
   };

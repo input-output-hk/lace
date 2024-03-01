@@ -8,7 +8,7 @@ import { SortAndFilterTab } from './types';
 export const BrowsePoolsPreferencesCardContainer = () => {
   const activePage = useDelegationPortfolioStore(activePageSelector);
 
-  const { sort, setSort, loadMoreData, fetchingPools } = useBrowsePools();
+  const { sort, setSort, loadMoreData } = useBrowsePools();
   const [activeTab, setActiveTab] = useState<SortAndFilterTab>(SortAndFilterTab.sort);
   const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
@@ -19,9 +19,8 @@ export const BrowsePoolsPreferencesCardContainer = () => {
 
   // TODO to be removed after we have sorting and filtering in useDelegationPortfolioStore
   useEffect(() => {
-    if (fetchingPools) return;
     loadMoreData({ endIndex: 50, startIndex: 0 });
-  }, [sort, loadMoreData, fetchingPools]);
+  }, [sort, loadMoreData]);
 
   if (activePage !== StakingPage.browsePools) return null;
 
