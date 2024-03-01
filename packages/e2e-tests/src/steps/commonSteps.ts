@@ -1,5 +1,4 @@
 import { Then, When } from '@cucumber/cucumber';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import extendedView from '../page/extendedView';
@@ -39,7 +38,18 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import { clearWalletRepository } from '../fixture/browserStorageInitializer';
+import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
+import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
+import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import transactionSubmittedAssert from '../assert/transaction/transactionSubmittedAssert';
+import { AddressInput } from '../elements/AddressInput';
+import {
+  addAndActivateWalletInRepository,
+  clearWalletRepository,
+  initialiseBasicLocalStorageData
+} from '../fixture/walletRepositoryBuilder';
+import OnboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -61,11 +71,11 @@ Then(/I navigate to home page on (popup|extended) view/, async (viewType: string
 });
 
 Then(/^I close the drawer by clicking close button$/, async () => {
-  await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
+  await SimpleTxSideDrawerPageObject.clickCloseDrawerButton();
 });
 
 Then(/^I close the drawer by clicking back button$/, async () => {
-  await simpleTxSideDrawerPageObject.clickBackDrawerButton();
+  await SimpleTxSideDrawerPageObject.clickBackDrawerButton();
 });
 
 Then(/^I close wallet synced toast/, async () => {
@@ -148,13 +158,33 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await cleanBrowserStorage();
   await clearWalletRepository();
   await localStorageManager.cleanLocalStorage();
-  await localStorageInitializer.initializeWallet(walletName);
+  if (walletName === 'newCreatedWallet') {
+    const wallets = String(testContext.load('newCreatedWallet'));
+    await addAndActivateWalletInRepository(wallets);
+    await initialiseBasicLocalStorageData(walletName, 'Preprod');
+  } else {
+    await localStorageInitializer.initializeWallet(walletName);
+  }
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
+});
+
+Then(/^I send back all tADA to the "([^"]*)" wallet$/, async (targetWalletName: string) => {
+  await MenuHeader.sendButton.waitForDisplayed();
+  await MenuHeader.sendButton.click();
+  const address = String(getTestWallet(targetWalletName).address);
+  await new AddressInput(1).fillAddress(address);
+  await transactionExtendedPageObject.clickMaxButton(1, 'tADA');
+  await TransactionNewPage.reviewTransactionButton.waitForEnabled({ timeout: 15_000 });
+  await TransactionNewPage.reviewTransactionButton.click();
+  await TransactionSummaryPage.confirmButton.waitForEnabled();
+  await TransactionSummaryPage.confirmButton.click();
+  await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(OnboardingPageObject.validPassword);
+  await transactionSubmittedAssert.assertSeeTransactionSubmittedPage('extended');
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {

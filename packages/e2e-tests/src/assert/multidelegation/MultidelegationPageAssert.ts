@@ -9,7 +9,7 @@ import Tooltip from '../../elements/Tooltip';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
-    await MultidelegationPage.delegationCardPoolsValue.waitForClickable();
+    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 60_000 });
     const poolsCounter = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     expect(poolsCounter).to.equal(poolsCount);
   };

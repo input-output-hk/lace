@@ -17,9 +17,8 @@ import testContext from '../utils/testContext';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
 
-const validPassword = 'N_8J@bne87A';
-
 class OnboardingPageObject {
+  public validPassword = 'N_8J@bne87A';
   async openLegalPage() {
     await this.acceptTCCheckbox();
   }
@@ -42,8 +41,8 @@ class OnboardingPageObject {
     await this.openNameYourWalletPage();
     await this.fillWalletNameInput('ValidWalletName');
     await OnboardingWalletNamePage.nextButton.click();
-    await this.fillPasswordInput(validPassword);
-    await this.fillPasswordConfirmationInput(validPassword);
+    await this.fillPasswordInput(this.validPassword);
+    await this.fillPasswordConfirmationInput(this.validPassword);
     await OnboardingWalletPasswordPage.nextButton.click();
     if (length) {
       await this.selectRecoveryPassphraseLength(length);
@@ -271,7 +270,7 @@ class OnboardingPageObject {
     await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
     await this.fillWalletNameInput('ValidName');
     await commonOnboardingElements.nextButton.click();
-    await this.fillPasswordPage(validPassword, validPassword);
+    await this.fillPasswordPage(this.validPassword, this.validPassword);
     await commonOnboardingElements.nextButton.click();
     await commonOnboardingElements.nextButton.click();
     await this.openMnemonicVerificationLastPage(getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []);

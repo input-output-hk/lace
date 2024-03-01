@@ -1,11 +1,12 @@
 import { getTestWallet, WalletConfig } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import { clearWalletRepository, initializeBrowserStorage } from './browserStorageInitializer';
+import { initializeBrowserStorage } from './browserStorageInitializer';
 import extensionUtils from '../utils/utils';
 import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
 import { closeAllTabsExceptOriginalOne } from '../utils/window';
+import { clearWalletRepository } from './walletRepositoryBuilder';
 
 class LocalStorageInitializer {
   async initializeLastStaking(): Promise<void> {
@@ -28,8 +29,7 @@ class LocalStorageInitializer {
 
   async initializeKeyAgentData(walletName = 'TestAutomationWallet'): Promise<void> {
     const network = extensionUtils.getNetwork().name;
-    const wallet: WalletConfig =
-      walletName === 'newCreatedWallet' ? testContext.load('newCreatedWallet') : getTestWallet(walletName);
+    const wallet: WalletConfig = getTestWallet(walletName);
     const keyAgentData = JSON.parse(String(wallet?.backgroundStorage?.keyAgentsByChain));
 
     await localStorageManager.setItem('keyAgentData', JSON.stringify(keyAgentData[network].keyAgentData));
@@ -39,11 +39,18 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('unconfirmedTransactions', `[${value}]`);
   }
 
+  async initializeAnalyticsAccepted(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
+    await localStorageManager.setItem('analyticsAccepted', value);
+  }
+
+  async initializeShowDappBetaModal(value: 'true' | 'false'): Promise<void> {
+    await localStorageManager.setItem('showDappBetaModal', value);
+  }
+
   async initializeWallet(walletName = 'TestAutomationWallet') {
     // Pause fix for flaky tests where local storage keys are disappearing when executed right after opening the extension
     await browser.pause(500);
-    const wallet: WalletConfig =
-      walletName === 'newCreatedWallet' ? testContext.load('newCreatedWallet') : getTestWallet(walletName);
+    const wallet: WalletConfig = getTestWallet(walletName);
     // Initialize 'Lock' only for TestAutomationWallet where we are triggering passphrase tests
     if (walletName === 'TestAutomationWallet')
       await localStorageManager.setItem('lock', String(wallet?.walletLocalStorageData?.lock));
@@ -53,7 +60,7 @@ class LocalStorageInitializer {
       'analyticsAccepted',
       wallet?.walletLocalStorageData?.analyticsAccepted ?? 'ACCEPTED'
     );
-    await localStorageManager.setItem('showDappBetaModal', 'false');
+    await this.initializeShowDappBetaModal('false');
     await initializeBrowserStorage(wallet);
     await this.initializeAppSettings();
     await this.initializeKeyAgentData(walletName);
