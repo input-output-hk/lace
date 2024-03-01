@@ -9,9 +9,7 @@ import {
   WalletSetupFinalStep,
   WalletSetupMnemonicIntroStep,
   WalletSetupNamePasswordStep,
-  WalletSetupPasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
-  WalletSetupRegisterStep,
   WalletSetupSteps,
   walletSetupWizard
 } from '@lace/core';
@@ -27,30 +25,16 @@ import { config } from '@src/config';
 
 import { Fallback } from './Fallback';
 
-import { passwordTranslationMap } from '../constants';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
-import { useExperimentsContext } from '@providers/ExperimentsProvider';
-import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/ExperimentsProvider/types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
 import { useWalletStore } from '@src/stores';
 // import { walletSetupWizardRevamp } from '@lace/core/dist/ui/components/WalletSetupRevamp/wallet-steps-revamp';
-
-const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
-const walletSetupWizardForABTest = {
-  ...walletSetupWizard,
-  [WalletSetupSteps.PreMnemonic]: { ...walletSetupWizard['pre-mnemonic'], prev: WalletSetupSteps.Register },
-  [WalletSetupSteps.RecoveryPhraseLength]: {
-    ...walletSetupWizard['recovery-phrase-length'],
-    prev: WalletSetupSteps.Register
-  },
-  [WalletSetupSteps.Mnemonic]: { ...walletSetupWizard.mnemonic, prev: WalletSetupSteps.Register }
-};
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -87,20 +71,19 @@ export const WalletSetupWizard = ({
   sendAnalytics,
   initialStep = WalletSetupSteps.Register
 }: WalletSetupWizardProps): React.ReactElement => {
-  const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(
-    setupType === SetupType.FORGOT_PASSWORD ? WalletSetupSteps.Password : initialStep
-  );
+  const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(initialStep);
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
-
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const { getExperimentVariant } = useExperimentsContext();
-  const [shouldDisplayTestVariantForExperiment, setShouldDisplayTestVariantForExperiment] = useState<boolean>();
+  const [enhancedAnalyticsStatus] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
+  );
 
   const { createWallet } = useWalletManager();
   const { setStayOnAllDonePage } = useWalletStore();
@@ -163,45 +146,10 @@ export const WalletSetupWizard = ({
     followDiscord: t('core.walletSetupFinalStep.followDiscord')
   };
 
-  const walletSetupMnemonicIntroStepTranslations = {
-    title: t('core.walletSetupMnemonicIntroStep.title'),
-    description: t('core.walletSetupMnemonicIntroStep.description'),
-    linkText: t('core.walletSetupMnemonicIntroStep.link')
-  };
-
-  const walletSetupRegisterStepTranslations = {
-    title: t('core.walletSetupRegisterStep.title'),
-    description: t('core.walletSetupRegisterStep.description'),
-    walletName: t('core.walletSetupRegisterStep.walletName'),
-    nameRequired: t('core.walletSetupRegisterStep.nameRequired'),
-    nameMaxLength: t('core.walletSetupRegisterStep.nameMaxLength')
-  };
-
-  const walletSetupPasswordStepTranslations = {
-    title: t('core.walletSetupRegisterStep.titlePassword'),
-    description: t('core.walletSetupRegisterStep.passwordDescription'),
-    password: t('core.walletSetupRegisterStep.password'),
-    confirmPassword: t('core.walletSetupRegisterStep.confirmPassword'),
-    noMatchPassword: t('core.walletSetupRegisterStep.noMatchPassword'),
-    validationMessage: t('core.walletSetupRegisterStep.validationMessage')
-  };
-
   const walletSetupRecoveryPhraseLengthStepTranslations = {
     title: t('core.walletSetupRecoveryPhraseLengthStep.title'),
     description: t('core.walletSetupRecoveryPhraseLengthStep.description'),
     wordPassphrase: t('core.walletSetupRecoveryPhraseLengthStep.wordPassphrase')
-  };
-
-  const passwordFeedbackTranslation = (translationKeys: string[]) => {
-    const translations = [];
-
-    for (const key of translationKeys) {
-      if (passwordTranslationMap[key]) {
-        translations.push(t(passwordTranslationMap[key]));
-      }
-    }
-
-    return translations;
   };
 
   const moveForward = useCallback(() => {
@@ -212,9 +160,7 @@ export const WalletSetupWizard = ({
   }, [currentStep, setCurrentStep]);
 
   const moveBack = () => {
-    const prevStep = isCombinedPasswordNameStepEnabled
-      ? walletSetupWizardForABTest[currentStep].prev
-      : walletSetupWizard[currentStep].prev;
+    const prevStep = walletSetupWizard[currentStep].prev;
 
     if (prevStep) {
       setCurrentStep(prevStep);
@@ -230,7 +176,7 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       setStayOnAllDonePage(false);
-      if (isAnalyticsAccepted) {
+      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
         analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
@@ -239,12 +185,13 @@ export const WalletSetupWizard = ({
         }
       }
     },
-    [analytics, isAnalyticsAccepted, setStayOnAllDonePage, walletInstance]
+    [analytics, enhancedAnalyticsStatus, setStayOnAllDonePage, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {
     try {
       setStayOnAllDonePage(true);
+
       const wallet = await createWallet({
         name: walletName,
         mnemonic,
@@ -285,7 +232,7 @@ export const WalletSetupWizard = ({
 
   const createFlowPasswordNextStep = () => {
     setupType === SetupType.CREATE
-      ? skipTo(WalletSetupSteps.PreMnemonic)
+      ? skipTo(WalletSetupSteps.Mnemonic)
       : useDifferentMnemonicLengths
       ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
       : skipTo(WalletSetupSteps.Mnemonic);
@@ -296,18 +243,6 @@ export const WalletSetupWizard = ({
     setWalletName(result.walletName);
     sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK);
     createFlowPasswordNextStep();
-  };
-
-  const handlePasswordStepNextButtonClick = (result: { password: string }) => {
-    sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_PASSWORD_NEXT_CLICK);
-    setPassword(result.password);
-    createFlowPasswordNextStep();
-  };
-
-  const handleRegisterStepNextButtonClick = (result: { walletName: string }) => {
-    sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_NAME_NEXT_CLICK);
-    setWalletName(result.walletName);
-    moveForward();
   };
 
   useEffect(() => {
@@ -329,7 +264,7 @@ export const WalletSetupWizard = ({
           onCancel={() =>
             useDifferentMnemonicLengths
               ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
-              : skipTo(WalletSetupSteps.Password)
+              : skipTo(WalletSetupSteps.Register)
           }
           onSubmit={moveForward}
           onStepNext={(step: number) => {
@@ -357,7 +292,7 @@ export const WalletSetupWizard = ({
         mnemonic={mnemonic}
         onReset={(resetStage) => {
           setResetMnemonicStage(resetStage);
-          setIsResetMnemonicModalOpen(true);
+          resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : skipTo(WalletSetupSteps.Register);
         }}
         onNext={moveForward}
         onStepNext={(stage: MnemonicStage, step: number) => {
@@ -386,20 +321,6 @@ export const WalletSetupWizard = ({
     );
   };
 
-  const shouldDisplayExperiment = useCallback(async () => {
-    const experimentValue = isAnalyticsAccepted
-      ? (await getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
-          ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN
-        )) === 'test'
-      : false;
-
-    setShouldDisplayTestVariantForExperiment(experimentValue);
-  }, [getExperimentVariant, isAnalyticsAccepted]);
-
-  useEffect(() => {
-    shouldDisplayExperiment();
-  }, [shouldDisplayExperiment]);
-
   return (
     <WalletSetupLayout>
       {currentStep === WalletSetupSteps.PreMnemonic && (
@@ -424,34 +345,9 @@ export const WalletSetupWizard = ({
           <WalletSetupModeStep onBack={moveBack} onNext={moveForward} translations={walletSetupModeStepTranslations} />
         </Suspense>
       )}
-
-      {shouldDisplayTestVariantForExperiment ? (
-        <>
-          {currentStep === WalletSetupSteps.Register && (
-            <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
-          )}
-        </>
-      ) : (
-        <>
-          {currentStep === WalletSetupSteps.Register && (
-            <WalletSetupRegisterStep
-              onBack={moveBack}
-              onNext={handleRegisterStepNextButtonClick}
-              initialWalletName={walletName}
-              translations={walletSetupRegisterStepTranslations}
-            />
-          )}
-          {currentStep === WalletSetupSteps.Password && (
-            <WalletSetupPasswordStep
-              onBack={setupType !== SetupType.FORGOT_PASSWORD ? moveBack : undefined}
-              onNext={handlePasswordStepNextButtonClick}
-              translations={walletSetupPasswordStepTranslations}
-              getFeedbackTranslations={passwordFeedbackTranslation}
-            />
-          )}
-        </>
+      {currentStep === WalletSetupSteps.Register && (
+        <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
       )}
-
       {currentStep === WalletSetupSteps.RecoveryPhraseLength && (
         <WalletSetupRecoveryPhraseLengthStep
           onBack={moveBack}

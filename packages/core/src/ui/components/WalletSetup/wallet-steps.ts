@@ -2,18 +2,14 @@ import { WalletSetupSteps, WalletSetupWizard } from './wallet-steps.common';
 
 export const walletSetupWizard: WalletSetupWizard = {
   [WalletSetupSteps.Register]: {
-    next: WalletSetupSteps.Password
-  },
-  [WalletSetupSteps.Password]: {
-    prev: WalletSetupSteps.Register,
     next: WalletSetupSteps.RecoveryPhraseLength
   },
   [WalletSetupSteps.RecoveryPhraseLength]: {
-    prev: WalletSetupSteps.Password,
+    prev: WalletSetupSteps.Register,
     next: WalletSetupSteps.Mnemonic
   },
   [WalletSetupSteps.PreMnemonic]: {
-    prev: WalletSetupSteps.Password,
+    prev: WalletSetupSteps.Register,
     next: WalletSetupSteps.Mnemonic
   },
   [WalletSetupSteps.Mnemonic]: {

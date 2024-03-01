@@ -47,16 +47,15 @@ const removeLegalAndAnalyticsStep = (
 
 const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, flow: WalletSetupFlow) => {
   const inMemoryWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
     { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
     { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('package.core.walletSetupStep.recoveryPhrase') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.enterWallet') }
   ];
 
   const hardwareWalletSteps = [
     { key: WalletTimelineSteps.CONNECT_WALLET, name: i18n.t('package.core.walletSetupStep.connectWallet') },
     { key: WalletTimelineSteps.NAME_WALLET, name: i18n.t('package.core.walletSetupStep.nameWallet') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.enterWallet') }
   ];
 
   const walletSteps = isHardwareWallet ? hardwareWalletSteps : inMemoryWalletSteps;
