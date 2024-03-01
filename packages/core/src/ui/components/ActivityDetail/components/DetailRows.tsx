@@ -18,7 +18,7 @@ export const DetailRows = function DetailRows<T extends string>({
 }: DetailRowsProps<T>): React.ReactElement {
   return (
     <>
-      {list.map((item, index) =>
+      {list?.map((item, index) =>
         'title' in item ? (
           <DetailRow
             key={`${testId}-${item.title}`}

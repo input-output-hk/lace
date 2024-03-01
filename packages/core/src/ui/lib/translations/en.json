@@ -125,6 +125,8 @@
       "VoteRegistrationDelegateCertificate": "Stake Key Registration & DRep Delegation",
       "AuthorizeCommitteeHotCertificate": "Authorize Committee",
       "VoteDelegationCertificate": "Vote Delegation",
+      "UpdateCommittee": "Update Committee Action",
+      "NoConfidence": "No Confidence Action",
       "vote": "Vote Signing",
       "certificates": "Certificates",
       "certificate": "Certificate",
@@ -186,7 +188,7 @@
         "treasury_withdrawals_action": "Treasury Withdrawals Action",
         "no_confidence": "No Confidence Action",
         "update_committee": "Update Committee Action",
-        "new_constitution": "New Constitution Action"
+        "new_constitution": "Update Constitution Action"
       },
       "epoch": "epoch",
       "epochs": "epochs",
