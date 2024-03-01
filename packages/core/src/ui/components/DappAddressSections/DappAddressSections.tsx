@@ -39,11 +39,7 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
       imageSrc={nft.assetInfo.tokenMetadata?.icon ?? undefined}
       balance={Wallet.util.calculateAssetBalance(nft.amount, nft.assetInfo)}
       tokenName={truncate(nft.assetInfo.nftMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(
-        Wallet.Cardano.AssetFingerprint(nft.assetInfo.fingerprint) ?? '',
-        charBeforeEllMetadata,
-        charAfterEllMetadata
-      )}
+      metadataHash={truncate(nft.assetInfo.assetId ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
     />
   ));
 
@@ -55,11 +51,7 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
       imageSrc={token.assetInfo.tokenMetadata?.icon ?? undefined}
       balance={Wallet.util.calculateAssetBalance(token.amount, token.assetInfo)}
       tokenName={truncate(token.assetInfo.tokenMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(
-        Wallet.Cardano.AssetFingerprint(token.assetInfo.fingerprint) ?? '',
-        charBeforeEllMetadata,
-        charAfterEllMetadata
-      )}
+      metadataHash={truncate(token.assetInfo.assetId ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
     />
   ));
 

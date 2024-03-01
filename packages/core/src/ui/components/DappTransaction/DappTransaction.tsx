@@ -48,7 +48,7 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
     groupedAddresses.addresses.push(address);
 
     for (const [, asset] of addressAssets) {
-      if (asset.assetInfo.nftMetadata !== null) {
+      if (asset.assetInfo.supply === BigInt(1)) {
         groupedAddresses.nfts.push(asset);
       } else {
         groupedAddresses.tokens.push(asset);
@@ -117,7 +117,7 @@ export const DappTransaction = ({
               balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
               tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
               metadataHash={truncate(
-                Wallet.Cardano.AssetFingerprint(assetWithAmount.assetInfo.fingerprint) ?? '',
+                assetWithAmount.assetInfo.assetId ?? '',
                 charBeforeEllMetadata,
                 charAfterEllMetadata
               )}
