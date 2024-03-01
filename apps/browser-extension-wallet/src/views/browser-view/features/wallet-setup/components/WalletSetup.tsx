@@ -14,12 +14,6 @@ import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsPro
 import { WalletSetupMainPage } from './WalletSetupMainPage';
 import { useLocalStorage } from '@hooks';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ConfirmationBanner } from '@lace/common';
-import { useLocalStorage } from '@hooks';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
-import { WalletSetupMainPage } from './WalletSetupMainPage';
-import { useLocalStorage } from '@hooks';
-import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 const userIdService = getUserIdService();
 
 // This initial step is needed for configure the step that we want to snapshot
@@ -31,11 +25,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
   const history = useHistory();
   const { path } = useRouteMatch();
   const analytics = useAnalyticsContext();
-  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.NotSet
-  );
-
   const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
   const [enhancedAnalyticsStatus] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
@@ -96,26 +85,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletS
         <Switch>
           <Route exact path={`${path}/`}>
             <WalletSetupMainPage />
-            <AnalyticsConfirmationBanner
-              message={
-                <div>
-                  <span>{translate('analyticsConfirmationBanner.message')}</span>
-                  <span className={styles.learnMore} onClick={() => setIsAnalyticsModalOpen(true)}>
-                    {translate('analyticsConfirmationBanner.learnMore')}
-                  </span>
-                </div>
-              }
-              onConfirm={() => handleAnalyticsChoice(true)}
-              onReject={() => handleAnalyticsChoice(false)}
-              show={enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet}
-            />
-            <WarningModal
-              header={<div className={styles.analyticsModalTitle}>{translate('core.walletAnalyticsInfo.title')}</div>}
-              content={<WalletAnalyticsInfo />}
-              visible={isAnalyticsModalOpen}
-              confirmLabel={translate('core.walletAnalyticsInfo.gotIt')}
-              onConfirm={() => setIsAnalyticsModalOpen(false)}
-            />
           </Route>
           {enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet ? (
             <Redirect to="/" />
