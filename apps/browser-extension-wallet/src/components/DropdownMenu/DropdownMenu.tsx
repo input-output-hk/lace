@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
-import { Button } from '@lace/common';
+import { Button, addEllipsis } from '@lace/common';
 import { DropdownMenuOverlay } from '../MainMenu';
 
 import ChevronNormal from '../../assets/icons/chevron-down.component.svg';
@@ -25,7 +25,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   const analytics = useAnalyticsContext();
   const {
     cardanoWallet,
-    walletUI: { isDropdownMenuOpen },
+    walletUI: { isDropdownMenuOpen = false },
     setIsDropdownMenuOpen
   } = useWalletStore();
   const [handle] = useGetHandles();
@@ -43,21 +43,26 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
     }
   };
 
+  useEffect(() => () => setIsDropdownMenuOpen(false), [setIsDropdownMenuOpen]);
+
   const walletName = cardanoWallet.source.wallet.metadata.name;
+
+  const titleCharBeforeEll = 10;
+  const titleCharAfterEll = 0;
 
   return (
     <Dropdown
+      overlayClassName={styles.overlay}
       destroyPopupOnHide
       onOpenChange={handleDropdownState}
       overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
       placement="bottomRight"
-      open={isDropdownMenuOpen}
       trigger={['click']}
     >
       {process.env.USE_MULTI_WALLET === 'true' ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
-            title={walletName}
+            title={addEllipsis(walletName, titleCharBeforeEll, titleCharAfterEll)}
             subtitle={getActiveWalletSubtitle(cardanoWallet.source.account)}
             profile={
               handleImage
@@ -75,14 +80,14 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
         <Button
           variant="outlined"
           color="secondary"
-          className={cn(styles.avatarBtn, { [styles.open]: open })}
+          className={cn(styles.avatarBtn, { [styles.open]: isDropdownMenuOpen })}
           data-testid="header-menu-button"
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
             <UserAvatar walletName={walletName} isPopup={isPopup} />
             <Chevron
-              className={cn(styles.chevron, { [styles.open]: open })}
-              data-testid={`chevron-${open ? 'up' : 'down'}`}
+              className={cn(styles.chevron, { [styles.open]: isDropdownMenuOpen })}
+              data-testid={`chevron-${isDropdownMenuOpen ? 'up' : 'down'}`}
             />
           </span>
         </Button>
