@@ -3,7 +3,6 @@ import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLa
 import { PasswordVerification } from '@lace/common';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
 import { useTranslate } from '@src/ui/hooks';
-
 import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
 import styles from './styles.module.scss';
 import {
