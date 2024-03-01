@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import React from 'react';
 import styles from './DetailRow.module.scss';
 import { DetailRowSubitems } from './DetailRowSubitems';
@@ -10,6 +11,7 @@ type DetailsRowProps = {
   details: (string | [string, string])[];
 };
 
+// TODO: add proper data mappers, eg: strings, urls, elements, arrays etc
 export const DetailRow = ({ title, info, details, dataTestId }: DetailsRowProps): React.ReactElement => (
   <div data-testid={dataTestId} className={styles.details}>
     <div className={styles.title}>
@@ -19,7 +21,9 @@ export const DetailRow = ({ title, info, details, dataTestId }: DetailsRowProps)
     <div className={styles.detail}>
       {details.map((detail, idx) => (
         <span key={`${title}-details-${idx}`}>
-          {typeof detail === 'string' ? detail : <DetailRowSubitems item={detail[0]} subitem={detail[1]} />}
+          {typeof detail === 'string' && detail}
+          {typeof detail === 'object' &&
+            (detail.length === 2 ? <DetailRowSubitems item={detail[0]} subitem={detail[1]} /> : detail)}
         </span>
       ))}
     </div>

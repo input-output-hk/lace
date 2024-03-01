@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable sonarjs/no-duplicate-string */
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -52,7 +53,10 @@ const data: ComponentProps<typeof TransactionDetails> = {
   isPopupView: false,
   votingProcedures: [],
   amountTransformer: (amount) => `${Number(amount) * adaPrice} USD`,
-  openExternalLink: () => void 0
+  openExternalLink: (url) => window.open(url, '_blank', 'noopener,noreferrer'),
+  handleOpenExternalHashLink: () => {
+    console.log('handle on hash click', '639a43144dc2c0ead16f2fb753360f4b4f536502dbdb8aa5e424b00abb7534ff');
+  }
 };
 
 const stakeVoteDelegationCertificate = [
@@ -189,7 +193,7 @@ const updateDRep = [
     details: ['3d2a9d15382c14f5ca260a2f5bfb645fe148bfe10c1d0e1d305b7b1393e2bd97']
   },
   {
-    title: 'anchorUrl',
+    title: 'anchorURL',
     details: [
       'https://raw.githubusercontent.com/Ryun1/gov-metadata/main/governace-action/metadata.jsonldr1q99...uqvzlalu'
     ]
@@ -219,7 +223,7 @@ const resignCommittee = [
     details: ['3d2a9d15382c14f5ca260a2f5bfb645fe148bfe10c1d0e1d305b7b1393e2bd97']
   },
   {
-    title: 'anchorUrl',
+    title: 'anchorURL',
     details: [
       'https://raw.githubusercontent.com/Ryun1/gov-metadata/main/governace-action/metadata.jsonldr1q99...uqvzlalu'
     ]
@@ -271,7 +275,7 @@ const dRepRegistration = [
     details: ['3d2a9d15382c14f5ca260a2f5bfb645fe148bfe10c1d0e1d305b7b1393e2bd97']
   },
   {
-    title: 'anchorUrl',
+    title: 'anchorURL',
     details: [
       'https://raw.githubusercontent.com/Ryun1/gov-metadata/main/governace-action/metadata.jsonldr1q99...uqvzlalu'
     ]

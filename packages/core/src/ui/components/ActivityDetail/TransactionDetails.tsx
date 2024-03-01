@@ -73,7 +73,8 @@ export interface TransactionDetailsProps {
   tooltipContent?: string;
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
-  openExternalLink?: () => void;
+  openExternalLink?: (url: string) => void;
+  handleOpenExternalHashLink?: () => void;
   sendAnalyticsInputs?: () => void;
   sendAnalyticsOutputs?: () => void;
   votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
@@ -119,6 +120,7 @@ export const TransactionDetails = ({
   addressToNameMap,
   isPopupView,
   openExternalLink,
+  handleOpenExternalHashLink,
   sendAnalyticsInputs,
   sendAnalyticsOutputs,
   proposalProcedures,
@@ -126,10 +128,18 @@ export const TransactionDetails = ({
   certificates
 }: TransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
+
   const isSending = status === ActivityStatus.PENDING;
   const isSuccess = status === ActivityStatus.SUCCESS;
 
+  const renderAnchorHashDetails = (url: string) => (
+    <div className={styles.txLink} onClick={() => openExternalLink(url)}>
+      {url}
+    </div>
+  );
+
   // Translate certificate typenames
+  // TODO: refactor this one
   const translatedCertificates = certificates?.map((certificate) =>
     certificate?.map(
       (detail) =>
@@ -138,13 +148,18 @@ export const TransactionDetails = ({
           ...('title' in detail &&
             detail.title === 'certificateType' && {
               details: [t(`package.core.assetActivityItem.entry.name.${detail.details[0]}`)]
+            }),
+          ...('title' in detail &&
+            detail.title === 'anchorURL' && {
+              details: [renderAnchorHashDetails(detail.details[0] as string)]
             })
-        } as TxDetail<TxDetailsCertificateTitles>)
+        } as unknown as TxDetail<TxDetailsCertificateTitles>)
     )
   );
 
   // Translate governance proposal typenames
   // TODO: find a way to translate in the mappers
+  // TODO: refactor this one
   const translatedProposalProcedures = proposalProcedures?.map((proposal) =>
     proposal?.map(
       (p) =>
@@ -153,6 +168,10 @@ export const TransactionDetails = ({
           ...('title' in p &&
             p.title === 'type' && {
               details: [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)]
+            }),
+          ...('title' in p &&
+            p.title === 'anchorURL' && {
+              details: [renderAnchorHashDetails(p.details[0] as string)]
             }),
           ...('header' in p && {
             details: p.details.map((detail) => ({
@@ -170,6 +189,10 @@ export const TransactionDetails = ({
                       )}
                     `
                   ]
+                }),
+              ...('title' in detail &&
+                detail.title === 'anchorURL' && {
+                  details: [renderAnchorHashDetails(detail.details[0] as string)]
                 })
             }))
           })
@@ -178,6 +201,7 @@ export const TransactionDetails = ({
   );
 
   // Translate voting procedure typenames
+  // TODO: refactor this one
   const translatedVotingProcedures = votingProcedures?.map((proposal) =>
     proposal?.map(
       (p) =>
@@ -186,8 +210,12 @@ export const TransactionDetails = ({
           ...('title' in p &&
             ['voterType', 'voteTypes'].includes(p.title) && {
               details: [t(`package.core.activityDetails.${p.title}.${p.details[0]}`)]
+            }),
+          ...('title' in p &&
+            p.title === 'anchorURL' && {
+              details: [renderAnchorHashDetails(p.details[0] as string)]
             })
-        } as TxDetail<TxDetailsVotingProceduresTitles>)
+        } as unknown as TxDetail<TxDetailsVotingProceduresTitles>)
     )
   );
 
@@ -218,10 +246,10 @@ export const TransactionDetails = ({
             <div
               data-testid="tx-hash-detail"
               className={cn(styles.detail, {
-                [styles.hash]: openExternalLink,
-                [styles.txLink]: isSuccess && !!openExternalLink
+                [styles.hash]: handleOpenExternalHashLink,
+                [styles.txLink]: isSuccess && !!handleOpenExternalHashLink
               })}
-              onClick={openExternalLink}
+              onClick={handleOpenExternalHashLink}
             >
               <div>
                 {isSending ? (
@@ -367,7 +395,7 @@ export const TransactionDetails = ({
               voterCredential: t('package.core.activityDetails.votingProcedureTitles.voterCredential'),
               voteTypes: t('package.core.activityDetails.votingProcedureTitles.voteTypes'),
               anchorHash: t('package.core.activityDetails.votingProcedureTitles.anchorHash'),
-              anchorURL: t('package.core.activityDetails.votingProcedureTitles.anchorUrl')
+              anchorURL: t('package.core.activityDetails.votingProcedureTitles.anchorURL')
             }}
             withSeparatorLine
           />
@@ -536,7 +564,7 @@ export const TransactionDetails = ({
               hotCredential: t('package.core.activityDetails.certificateTitles.hotCredential'),
               stakeKey: t('package.core.activityDetails.certificateTitles.stakeKey'),
               drepId: t('package.core.activityDetails.certificateTitles.drepId'),
-              anchorUrl: t('package.core.activityDetails.certificateTitles.anchorUrl'),
+              anchorURL: t('package.core.activityDetails.certificateTitles.anchorURL'),
               anchorHash: t('package.core.activityDetails.certificateTitles.anchorHash'),
               poolId: t('package.core.activityDetails.certificateTitles.poolId'),
               drep: t('package.core.activityDetails.certificateTitles.drep'),

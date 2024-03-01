@@ -140,7 +140,7 @@
         "depositPaidInfo": "Deposit paid",
         "depositReturned": "Deposit returned",
         "depositReturnedInfo": "Deposit returned",
-        "anchorUrl": "Anchor URL",
+        "anchorURL": "Anchor URL",
         "anchorHash": "Anchor Hash",
         "coldCredential": "Cold credential",
         "hotCredential": "Hot credential"
@@ -152,7 +152,7 @@
         "voterType": "Voter Type",
         "voterCredential": "Voter Credential",
         "drepId": "DRep ID",
-        "anchorUrl": "Anchor URL",
+        "anchorURL": "Anchor URL",
         "anchorHash": "Anchor Hash",
         "voteTypes": "Vote"
       },

@@ -96,13 +96,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
         text-align: right;
         cursor: pointer;
       }
-      &.txLink {
-        color: var(--text-color-blue, #3489f7);
-        line-height: 17px;
-        @media (max-width: $breakpoint-popup) {
-          flex: 60%;
-        }
-      }
       &.poolId {
         color: var(--text-color-secondary);
         font-size: var(--bodySmall);
@@ -273,5 +266,14 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 
   .lightLabel {
     color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  }
+}
+
+.txLink {
+  cursor: pointer !important;
+  color: var(--text-color-blue, #3489f7) !important;
+  line-height: 17px !important;
+  @media (max-width: $breakpoint-popup) {
+    flex: 60% !important;
   }
 }
