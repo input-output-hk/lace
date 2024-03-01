@@ -23,29 +23,9 @@
     gap: 10px;
   }
 
+
   .saturationProgress {
     width: 136px;
-  }
-
-  .saturation {
-    @include text-bodySmall-medium;
-    color: var(--light-mode-mid-grey, var(--dark-mode-light-grey));
-  }
-
-  .high {
-    background: var(--lace-yellow) !important;
-  }
-  .low {
-    background: var(--data-blue) !important;
-  }
-  .medium {
-    background: var(--data-green) !important;
-  }
-  .oversaturated {
-    background: var(--data-pink) !important;
-  }
-  .veryHigh {
-    background: var(--data-orange) !important;
   }
 }
 

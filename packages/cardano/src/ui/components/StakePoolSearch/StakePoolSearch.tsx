@@ -12,6 +12,7 @@ import { ReactComponent as Warning } from '../../assets/icons/warning.component.
 import { ReactComponent as BadgeCheckIcon } from '../../assets/icons/badge-check.component.svg';
 import { ReactComponent as Loader } from '../../assets/icons/loader.component.svg';
 import { TranslationsFor } from '@wallet/util/types';
+import { poolMetricsUtils } from '@src/index';
 
 const SELECT_DROPDOWN_OFFSET_X = 0;
 const SELECT_DROPDOWN_OFFSET_Y = 1;
@@ -93,29 +94,28 @@ export interface StakePoolSearchProps {
   withSuggestions?: boolean;
 }
 
-// const tooltipContent = {
-//   gettingSaturated: 'This pool starts to be saturated',
-//   saturated: 'This pool is saturated',
-//   overSaturation: 'This pool is over-saturated'
-// };
-
 const renderIcon = (
   tooltipContent: Record<RenderIconTip, string>,
   saturation?: string | number,
   isStakingPool?: boolean
 ) => {
-  const notSaturated = Number(saturation) < 90;
-  const gettingSaturated = Number(saturation) >= 90 && Number(saturation) <= 100;
-  const saturated = Number(saturation) >= 100 && Number(saturation) <= 110;
+  const { getSaturationLevel, SaturationLevels, isOversaturated } = poolMetricsUtils;
+  const saturationColoursMap = {
+    [SaturationLevels.Medium]: '#2CB67D',
+    [SaturationLevels.High]: '#FDC300',
+    [SaturationLevels.Veryhigh]: '#FF8E3C'
+  };
+  const formattedSaturation = Number(saturation);
+  const saturationLevel = getSaturationLevel(formattedSaturation);
 
-  const iconColor = gettingSaturated ? '#FDC300' : saturated ? '#FF8E3C' : '#FF5470';
-  const saturationTooltip = gettingSaturated
-    ? tooltipContent.gettingSaturated
-    : saturated
-    ? tooltipContent.saturated
-    : tooltipContent.overSaturation;
-  // eslint-disable-next-line unicorn/no-null
-  const saturationIcon = notSaturated ? null : (
+  const iconColor = isOversaturated(formattedSaturation) ? '#FF5470' : saturationColoursMap[saturationLevel];
+  const saturationTooltip =
+    saturationLevel === SaturationLevels.High
+      ? tooltipContent.gettingSaturated
+      : saturationLevel === SaturationLevels.Veryhigh
+      ? tooltipContent.saturated
+      : tooltipContent.overSaturation;
+  const saturationIcon = saturationLevel !== SaturationLevels.Medium && (
     <Tooltip title={saturationTooltip}>
       <Warning style={{ color: iconColor, fontSize: '16px' }} />
     </Tooltip>
