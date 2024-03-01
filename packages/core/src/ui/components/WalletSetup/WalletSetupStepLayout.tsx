@@ -54,7 +54,6 @@ const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: bo
   ];
 
   const hardwareWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
     { key: WalletTimelineSteps.CONNECT_WALLET, name: i18n.t('package.core.walletSetupStep.connectWallet') },
     { key: WalletTimelineSteps.NAME_WALLET, name: i18n.t('package.core.walletSetupStep.nameWallet') },
     { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }

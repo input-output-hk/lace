@@ -1,15 +1,7 @@
 import { WalletSetupSteps, WalletSetupWizard } from './wallet-steps.common';
 
 export const walletSetupWizard: WalletSetupWizard = {
-  [WalletSetupSteps.Legal]: {
-    next: WalletSetupSteps.Analytics
-  },
-  [WalletSetupSteps.Analytics]: {
-    prev: WalletSetupSteps.Legal,
-    next: WalletSetupSteps.Register
-  },
   [WalletSetupSteps.Register]: {
-    prev: WalletSetupSteps.Analytics,
     next: WalletSetupSteps.Password
   },
   [WalletSetupSteps.Password]: {

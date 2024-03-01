@@ -44,7 +44,8 @@
       "recoveryPhrase": "Recovery phrase",
       "connectWallet": "Connect wallet",
       "nameWallet": "Name wallet",
-      "allDone": "All done"
+      "allDone": "All done",
+      "enterWallet": "Enter wallet"
     },
     "assetSelectorOverlay": {
       "youDonthaveAnyTokens": "You don't have any tokens.",
@@ -112,6 +113,10 @@
       "send": "Send",
       "sending": "Sending",
       "transaction": "Transaction"
+    },
+    "confirmationBanner": {
+      "agree": "Agree",
+      "reject": "Reject"
     }
   }
 }

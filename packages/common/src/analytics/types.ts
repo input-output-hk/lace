@@ -1,4 +1,8 @@
 export enum PostHogAction {
+  // Landing page
+  // todo: These landing analytics events have not been implemented, the would be implemented on LW-9761
+  LandingAnalyticsAgreeClick = 'landing | agree | click',
+  LandingAnalyticsRejectClick = 'landing | reject | click',
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
   OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',

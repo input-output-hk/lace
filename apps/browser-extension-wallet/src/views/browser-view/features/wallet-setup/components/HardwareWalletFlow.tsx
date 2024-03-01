@@ -3,15 +3,13 @@
 /* eslint-disable react/no-multi-comp */
 import { useWalletManager, useTimeSpentOnPage, useLocalStorage } from '@hooks';
 import {
-  WalletSetupAnalyticsStep,
   WalletSetupCreationStep,
-  WalletSetupLegalStep,
   WalletSetupFinalStep,
   WalletSetupConnectHardwareWalletStep,
   WalletSetupSelectAccountsStepRevamp
 } from '@lace/core';
 import React, { useState, useCallback, useEffect } from 'react';
-import { Switch, Route, useHistory, useLocation } from 'react-router-dom';
+import { Switch, Route, useHistory, useLocation, Redirect } from 'react-router-dom';
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { ErrorDialog, HWErrorCode } from './ErrorDialog';
@@ -35,7 +33,7 @@ export interface HardwareWalletFlowProps {
   sendAnalytics: SendOnboardingAnalyticsEvent;
 }
 
-type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'setup' | 'create' | 'finish';
+type HardwareWalletStep = 'connect' | 'setup' | 'create' | 'finish';
 
 const TOTAL_ACCOUNTS = 50;
 
@@ -49,7 +47,6 @@ export const HardwareWalletFlow = ({
   const history = useHistory();
   const location = useLocation();
   const { t } = useTranslation();
-  const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [hardwareWalletErrorCode, setHardwareWalletErrorCode] = useState<HWErrorCode>('common');
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
@@ -70,24 +67,6 @@ export const HardwareWalletFlow = ({
   const showHardwareWalletError = (errorCode: HWErrorCode) => {
     setHardwareWalletErrorCode(errorCode);
     setIsErrorDialogVisible(true);
-  };
-
-  const walletSetupLegalStepTranslations = {
-    title: t('core.walletSetupLegalStep.title'),
-    toolTipText: t('core.walletSetupLegalStep.toolTipText')
-  };
-
-  const walletSetupAnalyticsStepTranslations = {
-    back: t('core.walletSetupAnalyticsStep.back'),
-    agree: t('core.walletSetupAnalyticsStep.agree'),
-    title: t('core.walletSetupAnalyticsStep.title'),
-    description: t('core.walletSetupAnalyticsStep.description'),
-    optionsTitle: t('core.walletSetupAnalyticsStep.optionsTitle'),
-    allowOptout: t('core.walletSetupAnalyticsStep.allowOptout'),
-    privacyPolicy: t('core.walletSetupAnalyticsStep.privacyPolicy'),
-    collectPrivateKeys: t('core.walletSetupAnalyticsStep.collectPrivateKeys'),
-    collectIp: t('core.walletSetupAnalyticsStep.collectIp'),
-    personalData: t('core.walletSetupAnalyticsStep.personalData')
   };
 
   const walletSetupConnectHardwareWalletStepTranslations = {
@@ -122,24 +101,10 @@ export const HardwareWalletFlow = ({
     [history]
   );
 
-  const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+  const [enhancedAnalyticsStatus] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
-
-  const handleAnalyticsChoice = (isAccepted: boolean) => {
-    setIsAnalyticsAccepted(isAccepted);
-    analytics.setOptedInForEnhancedAnalytics(
-      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-    );
-
-    const postHogAction = isAccepted
-      ? postHogOnboardingActions.hw.ANALYTICS_AGREE_CLICK
-      : postHogOnboardingActions.hw.ANALYTICS_SKIP_CLICK;
-
-    sendAnalytics(postHogAction);
-    navigateTo('connect');
-  };
 
   const handleCreateWallet = async (name: string) => {
     try {
@@ -151,11 +116,6 @@ export const HardwareWalletFlow = ({
         connectedDevice
       });
       setWalletCreated(cardanoWallet);
-      const analyticsOptInStatus = isAnalyticsAccepted
-        ? EnhancedAnalyticsOptInStatus.OptedIn
-        : EnhancedAnalyticsOptInStatus.OptedOut;
-      setDoesUserAllowAnalytics(analyticsOptInStatus);
-      await analytics.setOptedInForEnhancedAnalytics(analyticsOptInStatus);
       navigateTo('finish');
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });
@@ -189,7 +149,7 @@ export const HardwareWalletFlow = ({
       console.error('We were not able to send the analytics event');
     } finally {
       await handleFinishCreation();
-      if (isAnalyticsAccepted) {
+      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
         await analytics.sendAliasEvent();
       }
       // Workaround to enable staking with Ledger right after the onboarding LW-5564
@@ -209,30 +169,10 @@ export const HardwareWalletFlow = ({
   }, [onHardwareWalletDisconnect]);
 
   const hardwareWalletStepRenderFunctions: Record<HardwareWalletStep, () => JSX.Element> = {
-    legal: () => (
-      <WalletSetupLegalStep
-        onBack={() => onCancel()}
-        onNext={() => {
-          sendAnalytics(postHogOnboardingActions.hw.LACE_TERMS_OF_USE_NEXT_CLICK);
-          navigateTo('analytics');
-        }}
-        translations={walletSetupLegalStepTranslations}
-        isHardwareWallet
-      />
-    ),
-    analytics: () => (
-      <WalletSetupAnalyticsStep
-        onDeny={() => handleAnalyticsChoice(false)}
-        onAccept={() => handleAnalyticsChoice(true)}
-        onBack={() => navigateTo('legal')}
-        translations={walletSetupAnalyticsStepTranslations}
-        isHardwareWallet
-      />
-    ),
     connect: () => (
       <WalletSetupConnectHardwareWalletStep
         wallets={AVAILABLE_WALLETS}
-        onBack={() => navigateTo('analytics')}
+        onBack={onCancel}
         onConnect={handleConnect}
         onNext={() => {
           analytics.sendEventToPostHog(postHogOnboardingActions.hw.CONNECT_HW_NEXT_CLICK);
@@ -273,7 +213,6 @@ export const HardwareWalletFlow = ({
     setConnectedDevice(undefined);
     setAccountIndex(0);
     setWalletCreated(undefined);
-    /* eslint-enable unicorn/no-useless-undefined */
     history.replace(route('connect'));
   };
 
@@ -301,12 +240,11 @@ export const HardwareWalletFlow = ({
       />
       <WalletSetupLayout>
         <Switch>
-          <Route path={route('analytics')}>{hardwareWalletStepRenderFunctions.analytics()}</Route>
           <Route path={route('connect')}>{hardwareWalletStepRenderFunctions.connect()}</Route>
           <Route path={route('setup')}>{hardwareWalletStepRenderFunctions.setup()}</Route>
           <Route path={route('create')}>{hardwareWalletStepRenderFunctions.create()}</Route>
           <Route path={route('finish')}>{hardwareWalletStepRenderFunctions.finish()}</Route>
-          <Route>{hardwareWalletStepRenderFunctions.legal()}</Route>
+          <Redirect from="/" to={route('connect')} />
         </Switch>
       </WalletSetupLayout>
     </>

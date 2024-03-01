@@ -5,10 +5,8 @@ import { wordlists } from 'bip39';
 import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
-  WalletSetupAnalyticsStep,
   WalletSetupCreationStep,
   WalletSetupFinalStep,
-  WalletSetupLegalStep,
   WalletSetupMnemonicIntroStep,
   WalletSetupNamePasswordStep,
   WalletSetupPasswordStep,
@@ -23,8 +21,7 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   EnhancedAnalyticsOptInStatus,
   PostHogAction,
-  postHogOnboardingActions,
-  UserTrackingType
+  postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
@@ -42,6 +39,7 @@ import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/Ex
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
 import { useWalletStore } from '@src/stores';
+// import { walletSetupWizardRevamp } from '@lace/core/dist/ui/components/WalletSetupRevamp/wallet-steps-revamp';
 
 const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
 const walletSetupWizardForABTest = {
@@ -87,7 +85,7 @@ export const WalletSetupWizard = ({
   onCancel,
   setupType,
   sendAnalytics,
-  initialStep = WalletSetupSteps.Legal
+  initialStep = WalletSetupSteps.Register
 }: WalletSetupWizardProps): React.ReactElement => {
   const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(
     setupType === SetupType.FORGOT_PASSWORD ? WalletSetupSteps.Password : initialStep
@@ -95,7 +93,7 @@ export const WalletSetupWizard = ({
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
-  const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
+
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
@@ -108,10 +106,15 @@ export const WalletSetupWizard = ({
   const { setStayOnAllDonePage } = useWalletStore();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
+  const [enhancedAnalyticsStatus] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
+  );
 
   const { updateEnteredAtTime } = useTimeSpentOnPage();
 
   const useDifferentMnemonicLengths = process.env.USE_DIFFERENT_MNEMONIC_LENGTHS === 'true';
+  const isAnalyticsAccepted = enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn;
 
   useEffect(() => {
     updateEnteredAtTime();
@@ -124,24 +127,6 @@ export const WalletSetupWizard = ({
         : util.generateMnemonicWords()
     );
   }, [mnemonicLength, setupType]);
-
-  const walletSetupLegalStepTranslations = {
-    title: t('core.walletSetupLegalStep.title'),
-    toolTipText: t('core.walletSetupLegalStep.toolTipText')
-  };
-
-  const walletSetupAnalyticsStepTranslations = {
-    back: t('core.walletSetupAnalyticsStep.back'),
-    agree: t('core.walletSetupAnalyticsStep.agree'),
-    title: t('core.walletSetupAnalyticsStep.title'),
-    description: t('core.walletSetupAnalyticsStep.description'),
-    optionsTitle: t('core.walletSetupAnalyticsStep.optionsTitle'),
-    privacyPolicy: t('core.walletSetupAnalyticsStep.privacyPolicy'),
-    allowOptout: t('core.walletSetupAnalyticsStep.allowOptout'),
-    collectPrivateKeys: t('core.walletSetupAnalyticsStep.collectPrivateKeys'),
-    collectIp: t('core.walletSetupAnalyticsStep.collectIp'),
-    personalData: t('core.walletSetupAnalyticsStep.personalData')
-  };
 
   const walletSetupMnemonicStepTranslations = {
     writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
@@ -242,29 +227,6 @@ export const WalletSetupWizard = ({
     setCurrentStep(walletStep);
   };
 
-  const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
-
-  const handleAnalyticsChoice = async (isAccepted: boolean) => {
-    setIsAnalyticsAccepted(isAccepted);
-    await analytics.setOptedInForEnhancedAnalytics(
-      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-    );
-
-    const postHogAnalyticsAgreeAction = postHogOnboardingActions[setupType]?.ANALYTICS_AGREE_CLICK;
-    const postHogAnalyticcSkipAction = postHogOnboardingActions[setupType]?.ANALYTICS_SKIP_CLICK;
-
-    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticcSkipAction;
-    const postHogProperties = {
-      // eslint-disable-next-line camelcase
-      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
-    };
-    await sendAnalytics(postHogAction, postHogProperties);
-    moveForward();
-  };
-
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       setStayOnAllDonePage(false);
@@ -290,12 +252,6 @@ export const WalletSetupWizard = ({
         chainId: DEFAULT_CHAIN_ID
       });
       setWalletInstance(wallet);
-      setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
-      await analytics.setOptedInForEnhancedAnalytics(
-        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-      );
 
       wallet.wallet.addresses$.subscribe((addresses) => {
         if (addresses.length === 0) return;
@@ -321,8 +277,6 @@ export const WalletSetupWizard = ({
     walletName,
     mnemonic,
     password,
-    setDoesUserAllowAnalytics,
-    isAnalyticsAccepted,
     analytics,
     setupType,
     goToMyWallet,
@@ -424,7 +378,6 @@ export const WalletSetupWizard = ({
                 ? sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK)
                 : sendAnalytics(postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_17_NEXT_CLICK);
           }
-          /* eslint-enable no-magic-numbers */
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
@@ -449,24 +402,6 @@ export const WalletSetupWizard = ({
 
   return (
     <WalletSetupLayout>
-      {currentStep === WalletSetupSteps.Legal && (
-        <WalletSetupLegalStep
-          onBack={moveBack}
-          onNext={() => {
-            sendAnalytics(postHogOnboardingActions[setupType]?.LACE_TERMS_OF_USE_NEXT_CLICK);
-            moveForward();
-          }}
-          translations={walletSetupLegalStepTranslations}
-        />
-      )}
-      {currentStep === WalletSetupSteps.Analytics && (
-        <WalletSetupAnalyticsStep
-          onDeny={() => handleAnalyticsChoice(false)}
-          onAccept={() => handleAnalyticsChoice(true)}
-          onBack={moveBack}
-          translations={walletSetupAnalyticsStepTranslations}
-        />
-      )}
       {currentStep === WalletSetupSteps.PreMnemonic && (
         <WalletSetupMnemonicIntroStep
           onBack={moveBack}

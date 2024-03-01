@@ -36,3 +36,13 @@
     color: var(--text-color-primary, #3d3b39) !important;
   }
 }
+
+.learnMore {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: size_unit(0.5);
+}
+
+.analyticsModalTitle {
+  text-align: start;
+}

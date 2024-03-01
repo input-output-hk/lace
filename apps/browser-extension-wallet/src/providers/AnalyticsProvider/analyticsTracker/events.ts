@@ -1,11 +1,12 @@
 import { PostHogAction, PostHogOnboardingActionsType } from './types';
 
 export const postHogOnboardingActions: PostHogOnboardingActionsType = {
+  landing: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.LandingAnalyticsAgreeClick,
+    ANALYTICS_REJECT_CLICK: PostHogAction.LandingAnalyticsRejectClick
+  },
   create: {
-    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingCreateAnalyticsAgreeClick,
-    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingCreateAnalyticsSkipClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingCreateClick,
-    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardingCreateLaceTermsOfUseNextClick,
     WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingCreateWalletNameNextClick,
     WALLET_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingCreateWalletPasswordNextClick,
     PASSPHRASE_INTRO_NEXT_CLICK: PostHogAction.OnboardingCreatePassphraseIntroNextClick,
@@ -20,10 +21,7 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     PASSPHRASE_INTRO_PLAY_VIDEO_CLICK: PostHogAction.OnboardingCreatePassphraseIntroPlayVideoClick
   },
   restore: {
-    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingRestoreAnalyticsAgreeClick,
-    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingRestoreAnalyticsSkipClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingRestoreClick,
-    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardingRestoreLaceTermsOfUseNextClick,
     WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNameNextClick,
     WALLET_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletPasswordNextClick,
     RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.OnboardingRestoreRecoveryPhraseLengthNextClick,
@@ -36,10 +34,7 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNamePasswordNextClick
   },
   hw: {
-    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingHWAnalyticsAgreeClick,
-    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingHWAnalyticsSkipClick,
     WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingHWNameNextClick,
-    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardinHWLaceTermsOfUseNextClick,
     CONNECT_HW_NEXT_CLICK: PostHogAction.OnboardingHWConnectNextClick,
     SETUP_HW_WALLET_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
