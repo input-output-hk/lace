@@ -57,6 +57,7 @@ class LocalStorageInitializer {
     await initializeBrowserStorage(wallet);
     await this.initializeAppSettings();
     await this.initializeKeyAgentData(walletName);
+    await browser.pause(2500);
   }
 
   reInitializeWallet = async (walletName: string) => {
