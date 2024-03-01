@@ -79,6 +79,16 @@ Before(
 );
 
 Before(
+  { tags: '@Analytics-SendSimpleTransaction-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletAnalyticsSendSimpleTransactionE2E)
+);
+
+Before(
+  { tags: '@Analytics-SendSimpleTransaction-Popup-E2E' },
+  async () => await popupViewWalletInitialization(TestWalletName.WalletAnalyticsSendSimpleTransaction2E2E)
+);
+
+Before(
   { tags: '@SendTransactionDapp-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendDappTransactionE2E)
 );

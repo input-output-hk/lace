@@ -30,7 +30,6 @@ import SettingsPage from '../elements/settings/SettingsPage';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import type { NetworkType } from '../types/network';
-import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -99,7 +98,6 @@ Then(/I click on Remove wallet button/, async () => {
 });
 
 Then(/^I click on Show public key button$/, async () => {
-  await YourKeysDrawer.showPublicKeyButton.waitForStable();
   await settingsExtendedPageObject.clickOnShowPublicKey();
 });
 

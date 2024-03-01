@@ -93,8 +93,10 @@ class TransactionsPage {
   }
 
   async scrollToTheRow(index: number) {
-    await this.rows[index - 1].scrollIntoView();
-    await transactionsPageAssert.assertSeeSkeleton(true);
+    const rowsCount = await this.rows;
+    rowsCount[index - 1].scrollIntoView();
+    const tokensCounterValue = Number((await this.counter.getText()).slice(1, -1));
+    if (tokensCounterValue > rowsCount.length) await transactionsPageAssert.assertSeeSkeleton(true);
   }
 
   async scrollToTheLastRow() {
