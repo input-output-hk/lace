@@ -87,6 +87,7 @@ class TopNavigationAssert {
   }
 
   async assertWalletIsInSyncedStatus() {
+    await browser.refresh();
     await settingsExtendedPageObject.waitUntilHdWalletSynced();
     await this.assertLogoPresent();
     await MenuHeader.menuButton.waitForDisplayed();
