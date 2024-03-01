@@ -1,6 +1,4 @@
 /* eslint-disable sonarjs/no-identical-functions */
-import { BrowsePoolsView } from 'features/BrowsePools';
-import { DEFAULT_SORT_OPTIONS } from 'features/BrowsePools/constants';
 import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
@@ -94,10 +92,6 @@ export const processExpandedViewCases: Handler = (params) =>
           GoToBrowsePools: handler<GoToBrowsePools, StateOverview, StateBrowsePools>(({ state }) => ({
             ...state,
             activeDelegationFlow: DelegationFlow.BrowsePools,
-            searchQuery: '',
-            sortField: DEFAULT_SORT_OPTIONS.field,
-            sortOrder: DEFAULT_SORT_OPTIONS.order,
-            viewType: BrowsePoolsView.table,
           })),
           ManagePortfolio: handler<ManagePortfolio, StateOverview, StatePortfolioManagement>(({ state }) => ({
             ...state,
@@ -128,10 +122,6 @@ export const processExpandedViewCases: Handler = (params) =>
             activeDelegationFlow: DelegationFlow.BrowsePools,
             draftPortfolio: undefined,
             pendingSelectedPortfolio: undefined,
-            searchQuery: '',
-            sortField: DEFAULT_SORT_OPTIONS.field,
-            sortOrder: DEFAULT_SORT_OPTIONS.order,
-            viewType: BrowsePoolsView.table,
             viewedStakePool: undefined,
           })),
           GoToOverview: handler<GoToOverview, StateActivity, StateOverview>(({ state }) => ({
@@ -265,10 +255,6 @@ export const processExpandedViewCases: Handler = (params) =>
           CancelDrawer: handler<CancelDrawer, StatePoolDetails, StateBrowsePools>(({ state }) => ({
             ...state,
             ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
-            searchQuery: '',
-            sortField: DEFAULT_SORT_OPTIONS.field,
-            sortOrder: DEFAULT_SORT_OPTIONS.order,
-            viewType: BrowsePoolsView.table,
             viewedStakePool: undefined,
           })),
           ManageDelegationFromDetails: handler<ManageDelegationFromDetails, StatePoolDetails, StatePortfolioManagement>(
@@ -285,10 +271,6 @@ export const processExpandedViewCases: Handler = (params) =>
               ...state,
               ...atomicStateMutators.selectPools({ stakePools: [data], state }),
               ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
-              searchQuery: '',
-              sortField: DEFAULT_SORT_OPTIONS.field,
-              sortOrder: DEFAULT_SORT_OPTIONS.order,
-              viewType: BrowsePoolsView.table,
               viewedStakePool: undefined,
             })
           ),
@@ -297,10 +279,6 @@ export const processExpandedViewCases: Handler = (params) =>
               ...state,
               ...atomicStateMutators.unselectPool({ id: data, state }),
               ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
-              searchQuery: '',
-              sortField: DEFAULT_SORT_OPTIONS.field,
-              sortOrder: DEFAULT_SORT_OPTIONS.order,
-              viewType: BrowsePoolsView.table,
               viewedStakePool: undefined,
             })
           ),
@@ -315,10 +293,6 @@ export const processExpandedViewCases: Handler = (params) =>
               AddStakePools: handler<AddStakePools, StatePortfolioManagement, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.addPoolsFromPreferences({ state }),
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
@@ -488,10 +462,6 @@ export const processExpandedViewCases: Handler = (params) =>
               ...state,
               activeDelegationFlow: DelegationFlow.BrowsePools,
               pendingSelectedPortfolio: undefined,
-              searchQuery: '',
-              sortField: DEFAULT_SORT_OPTIONS.field,
-              sortOrder: DEFAULT_SORT_OPTIONS.order,
-              viewType: BrowsePoolsView.table,
             })
           ),
         },
@@ -505,19 +475,11 @@ export const processExpandedViewCases: Handler = (params) =>
               AddStakePools: handler<AddStakePools, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.addPoolsFromPreferences({ state }),
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -549,10 +511,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -586,10 +544,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -613,11 +567,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-                searchQuery: '',
                 selectedPortfolio: [],
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
             },
             params.command.type,
@@ -629,10 +579,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -649,10 +595,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-                searchQuery: '',
-                sortField: DEFAULT_SORT_OPTIONS.field,
-                sortOrder: DEFAULT_SORT_OPTIONS.order,
-                viewType: BrowsePoolsView.table,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,

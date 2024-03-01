@@ -3,7 +3,7 @@ import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
 import { SortDirection, SortField } from 'features/BrowsePools';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
@@ -19,15 +19,20 @@ const LACE_APP_ID = 'lace-app';
 
 export const BrowsePools = () => {
   const { setStakingBrowserPreferencesPersistence, stakingBrowserPreferencesPersistence } = useOutsideHandles();
-  const { totalResultCount, fetchingPools, searchValue, onSearch, setSort, sort, list, loadMoreData } =
-    useBrowsePools();
+  const {
+    totalResultCount,
+    fetchingPools,
+    searchValue,
+    onSearch,
+    setSort,
+    sort,
+    list,
+    loadMoreData,
+    switchPoolsView,
+    poolsView,
+  } = useBrowsePools();
 
   const { t } = useTranslation();
-  const [poolsView, setPoolsView] = useState<BrowsePoolsView>(
-    USE_MULTI_DELEGATION_STAKING_GRID_VIEW
-      ? stakingBrowserPreferencesPersistence?.poolsView || BrowsePoolsView.grid
-      : BrowsePoolsView.table
-  );
   const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
     selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
   }));
@@ -89,7 +94,7 @@ export const BrowsePools = () => {
   return (
     <>
       <Box className={styles.stakePoolsTable} data-testid="stake-pool-table">
-        <BrowsePoolsHeader poolsCount={totalResultCount} poolsView={poolsView} setPoolsView={setPoolsView} />
+        <BrowsePoolsHeader poolsCount={totalResultCount} poolsView={poolsView} setPoolsView={switchPoolsView} />
         <Search
           className={styles.searchBar}
           withSearchIcon

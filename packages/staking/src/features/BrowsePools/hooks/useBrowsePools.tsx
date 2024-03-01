@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo } from 'react';
 import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
 import { StakePoolsListProps } from '../StakePoolsList';
-import { BrowsePoolsView } from '../types';
+import { BrowsePoolsView, StakePoolSortOptions } from '../types';
 
 export const useBrowsePools = () => {
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
@@ -20,7 +20,7 @@ export const useBrowsePools = () => {
   } = useOutsideHandles();
 
   const { poolsView, searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
-    poolsView: store.browsePoolsView,
+    poolsView: store.browsePoolsView || BrowsePoolsView.table,
     searchQuery: store.searchQuery,
     sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
     sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
@@ -66,11 +66,15 @@ export const useBrowsePools = () => {
   }, [currentChain, searchQuery, sortField, sortOrder, resetStakePools]);
 
   const setSort = useCallback(
-    () => portfolioMutators.executeCommand({ type: 'CreateNewPortfolio' }),
+    (data: StakePoolSortOptions) =>
+      portfolioMutators.executeCommand({
+        data,
+        type: 'SetSort',
+      }),
     [portfolioMutators]
   );
 
-  const switchView = useCallback(() => {
+  const switchPoolsView = useCallback(() => {
     const newView = poolsView === BrowsePoolsView.table ? BrowsePoolsView.grid : BrowsePoolsView.table;
     setStakingBrowserPreferencesPersistence({
       poolsView: newView,
@@ -87,13 +91,14 @@ export const useBrowsePools = () => {
       list,
       loadMoreData,
       onSearch,
+      poolsView,
       searchValue: searchQuery,
       setSort,
       sort: {
         field: sortField,
         order: sortOrder,
       },
-      switchView,
+      switchPoolsView,
       totalResultCount,
     }),
     [
@@ -105,8 +110,9 @@ export const useBrowsePools = () => {
       setSort,
       sortField,
       sortOrder,
-      switchView,
+      switchPoolsView,
       totalResultCount,
+      poolsView,
     ]
   );
 };
