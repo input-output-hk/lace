@@ -352,7 +352,6 @@ Feature: General Settings - Extended Browser View
     When I click "Create" button on wallet setup page
     And I am on "All done" page
     When I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 
@@ -365,7 +364,6 @@ Feature: General Settings - Extended Browser View
     When I click "Restore" button and confirm
     And I am on "All done!" page from "Restore wallet" using "TAWalletNoFunds" wallet
     And I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 

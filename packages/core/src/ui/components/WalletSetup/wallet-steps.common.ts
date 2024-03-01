@@ -1,8 +1,5 @@
 export enum WalletSetupSteps {
-  Legal = 'legal',
-  Analytics = 'analytics',
   Mode = 'mode',
-  PreMnemonic = 'pre-mnemonic',
   Mnemonic = 'mnemonic',
   Register = 'register',
   RecoveryPhraseLength = 'recovery-phrase-length',

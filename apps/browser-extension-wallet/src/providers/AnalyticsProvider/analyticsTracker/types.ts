@@ -12,7 +12,8 @@ export type Metadata = {
 
 export enum EnhancedAnalyticsOptInStatus {
   OptedIn = 'ACCEPTED',
-  OptedOut = 'REJECTED'
+  OptedOut = 'REJECTED',
+  NotSet = 'NOT_SET'
 }
 
 export enum UserTrackingType {
@@ -37,11 +38,11 @@ export enum TxCreationType {
   External = 'external'
 }
 
-export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
+export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password' | 'landing';
 export type PostHogActionsKeys =
   | 'SETUP_OPTION_CLICK'
   | 'ANALYTICS_AGREE_CLICK'
-  | 'ANALYTICS_SKIP_CLICK'
+  | 'ANALYTICS_REJECT_CLICK'
   | 'LACE_TERMS_OF_USE_NEXT_CLICK'
   | 'WALLET_NAME_NEXT_CLICK'
   | 'WALLET_PASSWORD_NEXT_CLICK'
@@ -56,7 +57,7 @@ export type PostHogActionsKeys =
   | 'RESTORE_MULTI_ADDR_CANCEL_CLICK'
   | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
   | 'CONNECT_HW_NEXT_CLICK'
-  | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
+  | 'SETUP_HW_WALLET_NEXT_CLICK'
   | 'DONE_GO_TO_WALLET'
   | 'WALLET_NAME_PASSWORD_NEXT_CLICK'
   | 'PASSPHRASE_INTRO_PLAY_VIDEO_CLICK';

@@ -26,7 +26,6 @@ import { Portal } from '../features/wallet-setup/components/Portal';
 import { MultiWallet } from '../features/multi-wallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
-import { DappBetaModal } from '../features/dapp';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 
 export const defaultRoutes: RouteMap = [
@@ -106,11 +105,15 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const location = useLocation<{ background?: Location<unknown> }>();
 
   useEffect(() => {
-    if (
-      page === undefined &&
-      (location.pathname === routes.newWallet.root || location.pathname === routes.sharedWallet.root)
-    ) {
-      setBackgroundPage({ pathname: '/assets', search: '', hash: '', state: undefined });
+    const isCreatingWallet = [routes.newWallet.root, routes.sharedWallet.root].some((path) =>
+      location.pathname.startsWith(path)
+    );
+    if (page === undefined) {
+      if (isCreatingWallet) {
+        setBackgroundPage({ pathname: '/assets', search: '', hash: '', state: undefined });
+      }
+    } else if (!isCreatingWallet) {
+      setBackgroundPage();
     }
   }, [location, page, setBackgroundPage]);
 
@@ -184,7 +187,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
           </Switch>
         )}
         <StakingWarningModals />
-        <DappBetaModal />
       </>
     );
   }
