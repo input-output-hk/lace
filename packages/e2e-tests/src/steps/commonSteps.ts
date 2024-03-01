@@ -310,7 +310,3 @@ Then(/^I verify there are no errors in console logs$/, async () => {
 Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
   await browser.pause(delay);
 });
-
-Given(/^I'm on popup view$/, async () => {
-  await popupView.visit();
-});

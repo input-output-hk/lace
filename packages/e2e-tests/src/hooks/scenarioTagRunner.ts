@@ -8,6 +8,8 @@ import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
 import { clearWalletRepository } from '../fixture/browserStorageInitializer';
+import { isPopupMode } from '../utils/pageUtils';
+import popupView from '../page/popupView';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
@@ -23,6 +25,7 @@ After({ tags: 'not @Pending and not @pending' }, async () => {
   await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown
   await localStorageManager.cleanLocalStorage();
   await closeAllTabsExceptOriginalOne();
+  if (await isPopupMode()) await popupView.visit();
 });
 
 AfterStep(async (scenario) => {
