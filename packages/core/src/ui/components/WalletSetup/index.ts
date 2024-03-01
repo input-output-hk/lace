@@ -1,8 +1,6 @@
 export * from './WalletSetupOptionsStep';
 export * from './WalletSetupStepLayout';
-export * from './WalletSetupLegalStep';
 export * from './WalletSetupRegisterStep';
-export * from './WalletSetupAnalyticsStep';
 export * from './WalletSetupMnemonicIntroStep';
 export * from './WalletSetupMnemonicStep';
 export * from './WalletSetupCreationStep';
@@ -20,3 +18,6 @@ export * from './MnemonicWordsWritedown';
 export * from './WalletSetupNamePasswordStep';
 export * from './WalletSetupFlowProvider';
 export * from './WalletSetupConfirmationDialogProvider';
+export * from './WalletAnalyticsInfo';
+export * from './LegalTranslations';
+export * from './AnalyticsConfirmationBanner';

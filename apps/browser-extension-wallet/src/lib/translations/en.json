@@ -1152,6 +1152,10 @@
       "registered": "Registered"
     }
   },
+  "analyticsConfirmationBanner": {
+    "message": "Help us improve the quality and performance of Lace by sharing analytics data from your browser.",
+    "learnMore": "Learn more"
+  },
   "core": {
     "general": {
       "saveButton": "Save",
@@ -1226,22 +1230,14 @@
     "walletBasicInfo": {
       "balance": "Balance"
     },
-    "walletSetupLegalStep": {
-      "title": "Lace Terms of Use",
-      "toolTipText": "Please read and accept the terms"
-    },
-    "walletSetupAnalyticsStep": {
-      "title": "Give us a hand to improve your experience",
-      "description": "By sharing analytics data from your browser, you can help us improve the quality and performance of Lace. For more information on our privacy practices, please see our",
-      "back": "Back",
-      "agree": "Agree",
-      "optionsTitle": "Lace will:",
-      "optionsFooter1": "For more information on our privacy practices, please see our",
-      "privacyPolicy": "Privacy Policy.",
-      "allowOptout": "Only collect pseudonymous analytics info",
-      "collectPrivateKeys": "Not access your private keys",
-      "collectIp": "Not record your IP address",
-      "personalData": "Not sell your personal data"
+    "walletAnalyticsInfo": {
+      "title": "Help us improve your experience",
+      "description": "Please opt in to share your data with us. We'll collect anonymous analytics info from your browser extension to\n        help us improve the quality and performance of Lace.",
+      "gotIt": "Got it",
+      "allowOptout": "Always allow you to opt-out via Settings",
+      "collectPrivateKeys": "Never collect private keys",
+      "collectIp": "Never collect your IP address",
+      "personalData": "Never sell your personal data"
     },
     "walletSetupConnectHardwareWalletStep": {
       "title": "Connect hardware wallet",
@@ -1286,7 +1282,7 @@
       "enterPassphrase": "Enter your secret passphrase"
     },
     "walletSetupOptionsStep": {
-      "title": "Hello Web3",
+      "title": "Let's explore Web3 together",
       "subTitle": "Choose an option to get started",
       "newWallet": {
         "title": "New wallet",
