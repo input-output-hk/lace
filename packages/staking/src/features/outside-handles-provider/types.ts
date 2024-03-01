@@ -41,10 +41,10 @@ export enum StateStatus {
 }
 
 export interface StakingBrowserPreferences {
-  sortOptions: StakePoolSortOptions;
+  sortOptions?: StakePoolSortOptions;
   searchQuery?: string;
-  poolsView: BrowsePoolsView;
-  selectedPoolsIds: string[];
+  poolsView?: BrowsePoolsView;
+  selectedPoolsIds?: string[];
 }
 
 export interface IBlockchainProvider {

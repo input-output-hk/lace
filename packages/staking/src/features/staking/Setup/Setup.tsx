@@ -35,12 +35,10 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     portfolioMutators.setView(view);
 
     if (stakingBrowserPreferencesPersistence) {
-      const { poolsView, searchQuery, sortOptions } = stakingBrowserPreferencesPersistence;
+      const { poolsView } = stakingBrowserPreferencesPersistence;
       // TODO store poolsView only
       portfolioMutators.setBrowserPreferences({
         poolsView,
-        searchQuery,
-        sortOptions,
       });
     }
   }, [

@@ -1,6 +1,6 @@
 import { PostHogAction } from '@lace/common';
 import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
-import { mapStakePoolToDisplayData } from 'features/store';
+import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
@@ -8,6 +8,7 @@ import { StakePoolsListProps } from '../StakePoolsList';
 import { StakePoolSortOptions } from '../types';
 
 export const useBrowsePools = () => {
+  const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const {
     currentChain,
     walletStoreStakePoolSearchResults: { pageResults, totalResultCount },
@@ -17,18 +18,24 @@ export const useBrowsePools = () => {
     analytics,
     stakingBrowserPreferencesPersistence,
   } = useOutsideHandles();
-  // TODO idea:
-  // const { sort, setSort, searchValue, setSearchValue } = useDelegationPortfolioStore(state => state.mutators);
+
+  const { sortField, sortOrder, searchValue } = useDelegationPortfolioStore((state) => state.mutators);
+
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE_IN_MS), [fetchStakePools]);
-  const [searchValue, setSearchValue] = useState<string>(stakingBrowserPreferencesPersistence?.searchQuery || '');
-  const [sort, setSort] = useState<StakePoolSortOptions>(
-    stakingBrowserPreferencesPersistence?.sortOptions || DEFAULT_SORT_OPTIONS
-  );
+  // const [searchValue, setSearchValue] = useState<string>(stakingBrowserPreferencesPersistence?.searchQuery || '');
+  // const [sort, setSort] = useState<StakePoolSortOptions>(
+  //   stakingBrowserPreferencesPersistence?.sortOptions || DEFAULT_SORT_OPTIONS
+  // );
 
   const loadMoreData = useCallback(
     ({ startIndex, endIndex }: Parameters<StakePoolsListProps['loadMoreData']>[0]) => {
       if (startIndex !== endIndex) {
-        debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
+        debouncedSearch({
+          limit: endIndex,
+          searchString: searchValue,
+          skip: startIndex,
+          sort: { field: sortField, order: sortOrder },
+        });
       }
     },
     [debouncedSearch, searchValue, sort]
@@ -49,6 +56,17 @@ export const useBrowsePools = () => {
     () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
     [pageResults]
   );
+
+  useEffect(() => {
+    portfolioMutators.setBrowserPreferences({
+      searchQuery: stakingBrowserPreferencesPersistence?.searchQuery || '',
+      sortOptions: stakingBrowserPreferencesPersistence?.sortOptions ?? DEFAULT_SORT_OPTIONS,
+    });
+  }, [
+    portfolioMutators,
+    stakingBrowserPreferencesPersistence?.searchQuery,
+    stakingBrowserPreferencesPersistence?.sortOptions,
+  ]);
 
   useEffect(() => {
     resetStakePools?.();

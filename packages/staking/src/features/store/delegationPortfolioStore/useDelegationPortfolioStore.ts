@@ -96,10 +96,13 @@ export const useDelegationPortfolioStore = create(
         searchQuery,
       }: Omit<StakingBrowserPreferences, 'selectedPoolsIds'>) => {
         set((state) => {
-          state.sortField = sortOptions.field;
-          state.sortOrder = sortOptions.order;
-          state.poolsView = poolsView;
-          state.searchQuery = searchQuery;
+          if (sortOptions) {
+            state.sortField = sortOptions.field;
+            state.sortOrder = sortOptions?.order;
+          }
+
+          state.poolsView = poolsView ?? state.poolsView;
+          state.searchQuery = searchQuery ?? state.searchQuery;
         });
       },
       setCardanoCoinSymbol: (currentChain) =>
