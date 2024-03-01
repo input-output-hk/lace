@@ -152,7 +152,7 @@ export const DappTransaction = ({
             testId="returned-deposit"
             label={t('package.core.dappTransaction.returnedDeposit')}
             amountTransformer={(ada: string) =>
-              `+ ${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+              `+${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
             }
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
@@ -166,7 +166,7 @@ export const DappTransaction = ({
             fee={getStringFromLovelace(deposit)}
             label={t('package.core.dappTransaction.deposit')}
             amountTransformer={(ada: string) =>
-              `- ${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+              `-${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
             }
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
@@ -178,7 +178,7 @@ export const DappTransaction = ({
           testId="fee"
           fee={getStringFromLovelace(fee)}
           amountTransformer={(ada: string) =>
-            `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+            `-${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
           }
           coinSymbol={coinSymbol}
           className={styles.feeContainer}
