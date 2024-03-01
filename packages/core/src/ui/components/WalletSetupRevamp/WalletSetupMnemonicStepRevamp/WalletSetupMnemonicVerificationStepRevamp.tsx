@@ -85,7 +85,6 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
           onChange={(stepWords) => {
             const newMnemonic = [...mnemonic];
 
-            // eslint-disable-next-line unicorn/no-array-for-each
             stepWords.forEach((word, index) => {
               newMnemonic[index] = word;
             });
