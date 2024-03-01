@@ -18,7 +18,7 @@ import { BrowsePoolsView } from './types';
 const LACE_APP_ID = 'lace-app';
 
 export const BrowsePools = () => {
-  const { stakingBrowserPreferencesPersistence, setStakingBrowserPreferencesPersistence } = useOutsideHandles();
+  const { setStakingBrowserPreferencesPersistence, stakingBrowserPreferencesPersistence } = useOutsideHandles();
   const { totalResultCount, fetchingPools, searchValue, onSearch, setSort, sort, list, loadMoreData } =
     useBrowsePools();
 
@@ -44,21 +44,18 @@ export const BrowsePools = () => {
   };
 
   useEffect(
-    () => () =>
+    () =>
       setStakingBrowserPreferencesPersistence({
         ...stakingBrowserPreferencesPersistence,
-        poolsView,
-        searchQuery: searchValue,
         selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
-        sortOptions: sort,
       }),
     [
       stakingBrowserPreferencesPersistence,
       poolsView,
       searchValue,
       selectedPortfolioStakePools,
-      setStakingBrowserPreferencesPersistence,
       sort,
+      setStakingBrowserPreferencesPersistence,
     ]
   );
 

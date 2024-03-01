@@ -1,19 +1,12 @@
 import { StakePoolSortOptions } from '@cardano-sdk/core';
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
-import { SortField } from 'features/BrowsePools';
-import { BrowsePoolsView } from 'features/BrowsePools/types';
-import { StakingBrowserPreferences } from 'features/outside-handles-provider';
 import { ExecuteCommand, State } from './stateMachine';
 
 export type AdaSymbol = 'ADA' | 'tADA';
 
 export type DelegationPortfolioState = State & {
   view?: 'popup' | 'expanded';
-  sortField: SortField;
-  sortOrder: 'desc' | 'asc';
-  searchQuery?: string;
-  poolsView: BrowsePoolsView;
 };
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
@@ -28,7 +21,6 @@ export type DelegationPortfolioStore = DelegationPortfolioState & {
       delegationPortfolio: Wallet.Cardano.Cip17DelegationPortfolio | null;
     }) => Promise<void>;
     setView: (view: 'popup' | 'expanded') => void;
-    setBrowserPreferences: (params: Omit<StakingBrowserPreferences, 'selectedPoolsIds'>) => void;
   };
 };
 

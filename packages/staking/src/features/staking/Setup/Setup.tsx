@@ -22,7 +22,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
   const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);
   const delegationPortfolio = useObservable(walletStoreInMemoryWallet.delegation.portfolio$);
 
-  // TODO consider moving into a single hook that will hydrate the store
+  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view)
   useEffect(() => {
     if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
     portfolioMutators.setCardanoCoinSymbol(currentChain);
@@ -34,11 +34,10 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     });
     portfolioMutators.setView(view);
 
-    if (stakingBrowserPreferencesPersistence) {
-      const { poolsView } = stakingBrowserPreferencesPersistence;
-      // TODO store poolsView only
-      portfolioMutators.setBrowserPreferences({
-        poolsView,
+    if (stakingBrowserPreferencesPersistence?.poolsView) {
+      portfolioMutators.executeCommand({
+        data: stakingBrowserPreferencesPersistence.poolsView,
+        type: 'SetBrowsePoolsView',
       });
     }
   }, [

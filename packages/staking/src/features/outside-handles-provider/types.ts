@@ -41,9 +41,7 @@ export enum StateStatus {
 }
 
 export interface StakingBrowserPreferences {
-  sortOptions?: StakePoolSortOptions;
-  searchQuery?: string;
-  poolsView?: BrowsePoolsView;
+  poolsView: BrowsePoolsView;
   selectedPoolsIds?: string[];
 }
 

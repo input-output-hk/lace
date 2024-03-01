@@ -2,10 +2,10 @@ import { PostHogAction } from '@lace/common';
 import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
 import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
 import { StakePoolsListProps } from '../StakePoolsList';
-import { StakePoolSortOptions } from '../types';
+import { BrowsePoolsView } from '../types';
 
 export const useBrowsePools = () => {
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
@@ -16,40 +16,44 @@ export const useBrowsePools = () => {
     walletStoreResetStakePools: resetStakePools,
     walletStoreFetchStakePools: fetchStakePools,
     analytics,
-    stakingBrowserPreferencesPersistence,
+    setStakingBrowserPreferencesPersistence,
   } = useOutsideHandles();
 
-  const { sortField, sortOrder, searchValue } = useDelegationPortfolioStore((state) => state.mutators);
+  const { poolsView, searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
+    poolsView: store.browsePoolsView,
+    searchQuery: store.searchQuery,
+    sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
+    sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
+  }));
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE_IN_MS), [fetchStakePools]);
-  // const [searchValue, setSearchValue] = useState<string>(stakingBrowserPreferencesPersistence?.searchQuery || '');
-  // const [sort, setSort] = useState<StakePoolSortOptions>(
-  //   stakingBrowserPreferencesPersistence?.sortOptions || DEFAULT_SORT_OPTIONS
-  // );
 
   const loadMoreData = useCallback(
     ({ startIndex, endIndex }: Parameters<StakePoolsListProps['loadMoreData']>[0]) => {
       if (startIndex !== endIndex) {
         debouncedSearch({
           limit: endIndex,
-          searchString: searchValue,
+          searchString: searchQuery ?? '',
           skip: startIndex,
           sort: { field: sortField, order: sortOrder },
         });
       }
     },
-    [debouncedSearch, searchValue, sort]
+    [debouncedSearch, searchQuery, sortField, sortOrder]
   );
 
   const onSearch = useCallback(
     (searchString: string) => {
-      const startedTyping = searchValue === '' && searchString !== '';
+      const startedTyping = searchQuery === '' && searchString !== '';
       if (startedTyping) {
         analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
       }
-      setSearchValue(searchString);
+      portfolioMutators.executeCommand({
+        data: searchString,
+        type: 'SetSearchQuery',
+      });
     },
-    [analytics, searchValue]
+    [analytics, portfolioMutators, searchQuery]
   );
 
   const list = useMemo(
@@ -58,19 +62,24 @@ export const useBrowsePools = () => {
   );
 
   useEffect(() => {
-    portfolioMutators.setBrowserPreferences({
-      searchQuery: stakingBrowserPreferencesPersistence?.searchQuery || '',
-      sortOptions: stakingBrowserPreferencesPersistence?.sortOptions ?? DEFAULT_SORT_OPTIONS,
-    });
-  }, [
-    portfolioMutators,
-    stakingBrowserPreferencesPersistence?.searchQuery,
-    stakingBrowserPreferencesPersistence?.sortOptions,
-  ]);
-
-  useEffect(() => {
     resetStakePools?.();
-  }, [currentChain, searchValue, sort, resetStakePools]);
+  }, [currentChain, searchQuery, sortField, sortOrder, resetStakePools]);
+
+  const setSort = useCallback(
+    () => portfolioMutators.executeCommand({ type: 'CreateNewPortfolio' }),
+    [portfolioMutators]
+  );
+
+  const switchView = useCallback(() => {
+    const newView = poolsView === BrowsePoolsView.table ? BrowsePoolsView.grid : BrowsePoolsView.table;
+    setStakingBrowserPreferencesPersistence({
+      poolsView: newView,
+    });
+    portfolioMutators.executeCommand({
+      data: newView,
+      type: 'SetBrowsePoolsView',
+    });
+  }, [poolsView, portfolioMutators, setStakingBrowserPreferencesPersistence]);
 
   return useMemo(
     () => ({
@@ -78,9 +87,13 @@ export const useBrowsePools = () => {
       list,
       loadMoreData,
       onSearch,
-      searchValue,
+      searchValue: searchQuery,
       setSort,
-      sort,
+      sort: {
+        field: sortField,
+        order: sortOrder,
+      },
+      switchView,
       totalResultCount,
     }),
     [
@@ -88,9 +101,11 @@ export const useBrowsePools = () => {
       list,
       loadMoreData,
       onSearch,
-      searchValue,
+      searchQuery,
       setSort,
-      sort,
+      sortField,
+      sortOrder,
+      switchView,
       totalResultCount,
     ]
   );

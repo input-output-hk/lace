@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { BrowsePoolsView, SortDirection, SortField } from 'features/BrowsePools';
 import { AdaSymbol } from '../types';
 import { Command } from './commands';
 
@@ -67,6 +68,10 @@ export type SupportingData = {
   pendingSelectedPortfolio?: DraftPortfolioStakePool[];
   draftPortfolio?: DraftPortfolioStakePool[];
   viewedStakePool?: StakePoolWithLogo;
+  browsePoolsView?: BrowsePoolsView;
+  sortField?: SortField;
+  sortOrder?: SortDirection;
+  searchQuery?: string;
 };
 
 export type CrossStateData = {
