@@ -41,7 +41,7 @@ class LocalStorageInitializer {
 
   async initializeWallet(walletName = 'TestAutomationWallet') {
     // Pause fix for flaky tests where local storage keys are disappearing when executed right after opening the extension
-    await browser.pause(2500);
+    await browser.pause(4500);
     const wallet: WalletConfig =
       walletName === 'newCreatedWallet' ? testContext.load('newCreatedWallet') : getTestWallet(walletName);
     // Initialize 'Lock' only for TestAutomationWallet where we are triggering passphrase tests
