@@ -17,7 +17,6 @@ type Props = OmitClassName<'div'> & {
   imageSrc: string | undefined;
   balance?: string;
   tokenName?: string;
-  metadataHash?: string;
   coins?: string;
   testId?: string;
 };
@@ -36,7 +35,6 @@ export const TransactionAssets = ({
   imageSrc,
   balance,
   tokenName,
-  metadataHash,
   testId,
   ...props
 }: Readonly<Props>): JSX.Element => {
@@ -75,8 +73,7 @@ export const TransactionAssets = ({
             <Typography.Body.Normal className={cx.label}>
               <span data-testid={testId}>
                 {balance} {tokenName}
-              </span>{' '}
-              #{metadataHash}
+              </span>
             </Typography.Body.Normal>
           </Flex>
         </Cell>

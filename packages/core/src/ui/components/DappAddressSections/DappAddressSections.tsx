@@ -25,11 +25,29 @@ export interface DappAddressSectionProps {
   isFromAddressesEnabled: boolean;
 }
 
+const tryDecodeAsUtf8 = (
+  value: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: 'string'): string }
+): string => {
+  const bytes = Uint8Array.from(Buffer.from(value, 'hex'));
+  const decoder = new TextDecoder('utf-8');
+  // Decode the Uint8Array to a UTF-8 string
+  return decoder.decode(bytes);
+};
+
+const getFallbackName = (asset: AssetInfoWithAmount) =>
+  tryDecodeAsUtf8(asset.assetInfo.name) ? tryDecodeAsUtf8(asset.assetInfo.name) : asset.assetInfo.assetId;
+
+const isNFT = (asset: AssetInfoWithAmount) => asset.assetInfo.supply === BigInt(1);
+
+const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
+  if (isNFT(assetWithAmount)) {
+    return assetWithAmount.assetInfo.nftMetadata?.name ?? getFallbackName(assetWithAmount);
+  }
+  return assetWithAmount.assetInfo.tokenMetadata?.ticker ?? getFallbackName(assetWithAmount);
+};
+
 const charBeforeEllName = 9;
 const charAfterEllName = 0;
-
-const charBeforeEllMetadata = 6;
-const charAfterEllMetadata = 0;
 
 const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
   nfts.map((nft: AssetInfoWithAmount) => (
@@ -38,8 +56,7 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
       key={nft.assetInfo.fingerprint}
       imageSrc={nft.assetInfo.tokenMetadata?.icon ?? undefined}
       balance={Wallet.util.calculateAssetBalance(nft.amount, nft.assetInfo)}
-      tokenName={truncate(nft.assetInfo.nftMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(nft.assetInfo.assetId ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
+      tokenName={truncate(getAssetTokenName(nft), charBeforeEllName, charAfterEllName)}
     />
   ));
 
@@ -50,8 +67,7 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
       key={token.assetInfo.fingerprint}
       imageSrc={token.assetInfo.tokenMetadata?.icon ?? undefined}
       balance={Wallet.util.calculateAssetBalance(token.amount, token.assetInfo)}
-      tokenName={truncate(token.assetInfo.tokenMetadata?.name ?? '', charBeforeEllName, charAfterEllName)}
-      metadataHash={truncate(token.assetInfo.assetId ?? '', charBeforeEllMetadata, charAfterEllMetadata)}
+      tokenName={truncate(getAssetTokenName(token), charBeforeEllName, charAfterEllName)}
     />
   ));
 
