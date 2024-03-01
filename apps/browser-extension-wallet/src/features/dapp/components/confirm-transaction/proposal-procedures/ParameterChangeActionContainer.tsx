@@ -32,6 +32,7 @@ export const ParameterChangeActionContainer = ({
 
   const explorerBaseUrl = useCexplorerBaseUrl();
 
+  // TODO: consider encapsulating it inside the component itself, check if all the translations have the fallback to the parent int provider (LW-9920)
   const translations = useMemo<Parameters<typeof ParameterChangeAction>[0]['translations']>(
     () => ({
       txDetails: {
