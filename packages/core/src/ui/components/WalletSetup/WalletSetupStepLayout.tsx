@@ -16,6 +16,7 @@ export enum WalletTimelineSteps {
   CONNECT_WALLET,
   NAME_WALLET
 }
+
 export interface WalletSetupStepLayoutProps {
   title: React.ReactNode;
   children?: React.ReactNode;

@@ -3,8 +3,8 @@ import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { AutoComplete, Input, InputRef } from 'antd';
 import classnames from 'classnames';
 import { wordListSearch } from '../../utils/word-list-search';
-import { MnemonicWordContainer } from '../WalletSetup/MnemonicWordContainer';
 import styles from './MnemonicWordsAutoComplete.module.scss';
+import { MnemonicWordContainerRevamp } from '../WalletSetupRevamp/WalletSetupMnemonicStepRevamp';
 
 const AUTO_COMPLETE_DROPDOWN_OFFSET_X = -43;
 const AUTO_COMPLETE_DROPDOWN_OFFSET_Y = 16;
@@ -18,6 +18,7 @@ export interface MnemonicWordsAutoCompleteProps {
   wordList?: Array<string>;
   max?: number;
   focus?: boolean;
+  className?: string;
 }
 
 export const MnemonicWordsAutoComplete = ({
@@ -27,7 +28,8 @@ export const MnemonicWordsAutoComplete = ({
   onChange,
   onDropdownVisibleChange,
   max = DEFAULT_INPUT_MAX_LENGTH,
-  focus = false
+  focus = false,
+  className
 }: MnemonicWordsAutoCompleteProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputRef>(null);
@@ -96,7 +98,7 @@ export const MnemonicWordsAutoComplete = ({
   }, [options, value, max]);
 
   return (
-    <MnemonicWordContainer ref={containerRef} number={idx}>
+    <MnemonicWordContainerRevamp ref={containerRef} number={idx} className={className}>
       <AutoComplete
         popupClassName={styles.dropdown}
         className={styles.autoComplete}
@@ -136,6 +138,6 @@ export const MnemonicWordsAutoComplete = ({
           )}
         </div>
       </AutoComplete>
-    </MnemonicWordContainer>
+    </MnemonicWordContainerRevamp>
   );
 };

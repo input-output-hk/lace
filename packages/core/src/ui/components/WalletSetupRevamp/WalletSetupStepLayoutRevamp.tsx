@@ -17,7 +17,7 @@ export interface WalletSetupStepLayoutRevampProps {
   stepInfoText?: string;
   onNext?: () => void;
   onBack?: () => void;
-  onSkip?: () => void;
+  customAction?: React.ReactNode;
   nextLabel?: string;
   backLabel?: string;
   skipLabel?: string;
@@ -39,17 +39,15 @@ const removeLegalAndAnalyticsStep = (
 
 const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, flow: WalletSetupFlow) => {
   const inMemoryWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
     { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
     { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('package.core.walletSetupStep.recoveryPhrase') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.enterWallet') }
   ];
 
   const hardwareWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
     { key: WalletTimelineSteps.CONNECT_WALLET, name: i18n.t('package.core.walletSetupStep.connectWallet') },
     { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.enterWallet') }
   ];
 
   const walletSteps = isHardwareWallet ? hardwareWalletSteps : inMemoryWalletSteps;
@@ -76,10 +74,9 @@ export const WalletSetupStepLayoutRevamp = ({
   belowContentText,
   onNext,
   onBack,
-  onSkip,
+  customAction,
   nextLabel,
   backLabel,
-  skipLabel,
   isNextEnabled = true,
   isNextLoading = false,
   toolTipText,
@@ -111,9 +108,11 @@ export const WalletSetupStepLayoutRevamp = ({
       </div>
       <div className={styles.container}>
         <div className={styles.header} data-testid="wallet-setup-step-header">
-          <h1 data-testid="wallet-setup-step-title">{title}</h1>
+          <h1 data-testid="wallet-setup-step-title" className={styles.title}>
+            {title}
+          </h1>
           {description && (
-            <p data-testid="wallet-setup-step-subtitle">
+            <p data-testid="wallet-setup-step-subtitle" className={styles.subtitle}>
               {description}{' '}
               <a href={urls.faq.secretPassphrase} target="_blank" data-testid="faq-secret-passphrase-url">
                 {linkText}
@@ -134,11 +133,7 @@ export const WalletSetupStepLayoutRevamp = ({
             <div />
           )}
           {stepInfoText && <p data-testid="step-info-text">{stepInfoText}</p>}
-          {onSkip && (
-            <Button variant="text" onClick={onSkip} data-testid="wallet-setup-step-btn-skip">
-              {skipLabel || defaultLabel.skip}
-            </Button>
-          )}
+          {customAction}
           {onNext && (
             <span ref={nextButtonContainerRef}>
               <Tooltip

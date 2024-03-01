@@ -8,19 +8,11 @@ export const walletSetupWizard: WalletSetupWizard = {
     prev: WalletSetupSteps.Register,
     next: WalletSetupSteps.Mnemonic
   },
-  [WalletSetupSteps.PreMnemonic]: {
-    prev: WalletSetupSteps.Register,
-    next: WalletSetupSteps.Mnemonic
-  },
   [WalletSetupSteps.Mnemonic]: {
-    prev: WalletSetupSteps.PreMnemonic,
+    prev: WalletSetupSteps.RecoveryPhraseLength,
     next: WalletSetupSteps.Create
   },
   [WalletSetupSteps.Create]: {
-    prev: WalletSetupSteps.Mnemonic,
-    next: WalletSetupSteps.Finish
-  },
-  [WalletSetupSteps.Finish]: {
-    prev: WalletSetupSteps.Create
+    prev: WalletSetupSteps.Mnemonic
   }
 };
