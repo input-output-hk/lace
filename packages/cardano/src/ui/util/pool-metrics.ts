@@ -24,14 +24,12 @@ type Entries<T> = {
 }[keyof T][];
 
 export const getSaturationLevel = (saturation: number): SaturationLevels => {
-  let result = SaturationLevels.Medium;
   for (const [level, [min, max]] of Object.entries(saturationLevelsRangeMap) as Entries<
     typeof saturationLevelsRangeMap
   >) {
     if (inRange(saturation, min, max)) {
-      result = level;
-      return result;
+      return level;
     }
   }
-  return result;
+  return SaturationLevels.Medium;
 };
