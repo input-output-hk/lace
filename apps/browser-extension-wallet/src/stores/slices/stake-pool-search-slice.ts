@@ -41,7 +41,7 @@ const fetchStakePools =
         limit: limit - skip + 1
       },
       // @ts-expect-error TODO remove when ticker sort is available
-      sort: {
+      sort: sort && {
         ...sort,
         ...(sort.field === 'ticker' ? { field: 'name' } : {})
       }

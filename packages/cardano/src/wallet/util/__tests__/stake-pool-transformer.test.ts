@@ -64,7 +64,7 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
 };
 
 const transformedStakePool = {
-  ros: '1.30',
+  ros: '69.00',
   cost: {
     number: '6.04',
     unit: ''

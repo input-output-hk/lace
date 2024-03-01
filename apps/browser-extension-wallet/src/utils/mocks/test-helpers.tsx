@@ -569,6 +569,7 @@ export const cardanoStakePoolSelectedDetails = {
   liveStake: {
     number: '-'
   },
+  ros: '69.00',
   status: 'active',
   ticker: 'STTST',
   blocks: '20',
