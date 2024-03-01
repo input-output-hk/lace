@@ -3,7 +3,6 @@ export enum WalletSetupSteps {
   PreMnemonic = 'pre-mnemonic',
   Mnemonic = 'mnemonic',
   Register = 'register',
-  Password = 'password',
   RecoveryPhraseLength = 'recovery-phrase-length',
   Create = 'create',
   Finish = 'finish'
