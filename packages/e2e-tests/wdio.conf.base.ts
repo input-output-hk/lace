@@ -1,9 +1,17 @@
 /* eslint-disable no-undef */
 
 import extensionUtils from './src/utils/utils';
+import { Options } from '@wdio/types';
 
-export const config: WebdriverIO.Config = {
+export const config: Options.Testrunner = {
   runner: 'local',
+  autoCompileOpts: {
+    autoCompile: true,
+    tsNodeOpts: {
+      project: './tsconfig.json',
+      transpileOnly: true
+    }
+  },
   specs: ['./src/features/**/*.feature'],
   automationProtocol: 'webdriver',
   exclude: [],

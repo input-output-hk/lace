@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
-
 import { config as baseConfig } from './wdio.conf.base';
+import { getDirname } from './src/utils/esmUtils';
+
+const __dirname = getDirname(import.meta.url); // TODO: replace with import.meta.dirname (NodeJS v20)
 
 const edgeConfig = {
   capabilities: [

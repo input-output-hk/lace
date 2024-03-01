@@ -1,6 +1,9 @@
 import { flatten } from 'flat';
 import { readFromFile } from './fileUtils';
-import { en } from '../../../staking/src/features/i18n/translations/en';
+import { getDirname } from './esmUtils';
+import { en as stakingEN } from '../translations/staking/en';
+
+const __dirname = getDirname(import.meta.url); // TODO: replace with import.meta.dirname (NodeJS v20)
 
 const loadTranslations = async function (translationType = 'base') {
   const language = process.env.LACE_LOCALE ?? 'en';
@@ -17,7 +20,7 @@ const loadTranslations = async function (translationType = 'base') {
       stringStream = await flatten(JSON.parse(readFromFile(__dirname, coreTranslationPath).toString()));
       break;
     case 'staking':
-      stringStream = en;
+      stringStream = stakingEN;
       break;
   }
 

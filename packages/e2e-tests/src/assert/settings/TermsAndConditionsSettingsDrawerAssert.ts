@@ -2,7 +2,10 @@ import TermsAndConditionsDrawer from '../../elements/settings/TermsAndConditions
 import { removeWhitespacesFromText } from '../../utils/textUtils';
 import { readFromFile } from '../../utils/fileUtils';
 import { isPopupMode } from '../../utils/pageUtils';
+import { getDirname } from '../../utils/esmUtils';
 import { browser } from '@wdio/globals';
+
+const __dirname = getDirname(import.meta.url); // TODO: replace with import.meta.dirname (NodeJS v20)
 
 class TermsAndConditionsSettingsDrawerAssert {
   assertTermsAndConditionsContent = async () => {

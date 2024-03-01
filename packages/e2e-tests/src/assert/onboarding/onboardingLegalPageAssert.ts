@@ -4,6 +4,9 @@ import { expect } from 'chai';
 import OnboardingCommonAssert from './onboardingCommonAssert';
 import { removeWhitespacesFromText } from '../../utils/textUtils';
 import { readFromFile } from '../../utils/fileUtils';
+import { getDirname } from '../../utils/esmUtils';
+
+const __dirname = getDirname(import.meta.url); // TODO: replace with import.meta.dirname (NodeJS v20)
 
 class OnboardingLegalPageAssert extends OnboardingCommonAssert {
   async assertSeeLegalPageText() {

@@ -1,7 +1,9 @@
 /* eslint-disable no-undef */
 /* eslint-disable unicorn/prefer-module */
-
+import { getDirname } from './src/utils/esmUtils';
 import { config as baseConfig } from './wdio.conf.base';
+
+const __dirname = getDirname(import.meta.url); // TODO: replace with import.meta.dirname (NodeJS v20)
 
 const chromeConfig = {
   capabilities: [

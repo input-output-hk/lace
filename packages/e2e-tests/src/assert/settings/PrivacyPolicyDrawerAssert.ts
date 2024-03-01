@@ -3,7 +3,10 @@ import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';
 import { removeWhitespacesFromText } from '../../utils/textUtils';
+import { getDirname } from '../../utils/esmUtils';
 import { browser } from '@wdio/globals';
+
+const __dirname = getDirname(import.meta.url); // TODO: replace with import.meta.dirname (NodeJS v20)
 
 class PrivacyPolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
