@@ -48,7 +48,7 @@ export type TxDetailsCertificateTitles =
   | 'hotCredential'
   | 'stakeKey'
   | 'drepId'
-  | 'anchorUrl'
+  | 'anchorURL'
   | 'anchorHash'
   | 'poolId'
   | 'drep'

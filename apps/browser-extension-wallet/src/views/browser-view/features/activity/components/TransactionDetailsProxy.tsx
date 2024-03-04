@@ -65,7 +65,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
       [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
     );
 
-    const handleOpenExternalLink = () => {
+    const handleOpenExternalHashLink = () => {
       analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
       const externalLink = `${explorerBaseUrl}/${hash}`;
       externalLink && status === ActivityStatus.SUCCESS && openExternalLink(externalLink);
@@ -102,7 +102,8 @@ export const TransactionDetailsProxy = withAddressBookContext(
         proposalProcedures={proposalProcedures}
         votingProcedures={votingProcedures}
         certificates={certificates}
-        openExternalLink={handleOpenExternalLink}
+        handleOpenExternalHashLink={handleOpenExternalHashLink}
+        openExternalLink={openExternalLink}
       />
     );
   }

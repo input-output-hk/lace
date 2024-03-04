@@ -296,7 +296,6 @@ export const useGetOwnPubDRepKeyHash = (): UseGetOwnPubDRepKeyHash => {
     get();
   }, [inMemoryWallet]);
 
-  // TODO consider using Zustand or at least some common abstraction e.g. https://github.com/streamich/react-use/blob/master/src/useAsync.ts
   return { loading: ownPubDRepKeyHash === undefined, ownPubDRepKeyHash };
 };
 

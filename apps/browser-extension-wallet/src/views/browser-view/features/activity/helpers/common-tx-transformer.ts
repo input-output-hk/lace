@@ -270,7 +270,7 @@ export const certificateTransformer = (
             details: [conwayEraCertificate.anchor.dataHash.toString()]
           },
           {
-            title: 'anchorUrl',
+            title: 'anchorURL',
             details: [conwayEraCertificate.anchor.url]
           }
         );
