@@ -1430,6 +1430,14 @@
         "yes": "Yes",
         "no": "No",
         "abstain": "Abstain"
+      },
+      "NonRegisteredUserModal": {
+        "title": "You're not a registered DRep",
+        "description": "Proceeding with this vote won't have any impact. Do you still want to proceed?",
+        "cta": {
+          "ok": "Proceed anyway",
+          "cancel": "Cancel"
+        }
       }
     },
     "DRepRegistration": {

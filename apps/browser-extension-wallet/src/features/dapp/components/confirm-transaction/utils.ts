@@ -166,3 +166,18 @@ export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): s
       throw new Error(`coinId ${coinId.name} not supported`);
   }
 };
+
+export const hasValidDrepRegistration = (history: Wallet.Cardano.HydratedTx[]): boolean => {
+  for (const transaction of history) {
+    const drepRegistrationOrRetirementCerticicate = transaction.body.certificates?.find((cert) =>
+      [CertificateType.UnregisterDelegateRepresentative, CertificateType.RegisterDelegateRepresentative].includes(
+        cert.__typename
+      )
+    );
+
+    if (drepRegistrationOrRetirementCerticicate) {
+      return drepRegistrationOrRetirementCerticicate.__typename === CertificateType.RegisterDelegateRepresentative;
+    }
+  }
+  return false;
+};

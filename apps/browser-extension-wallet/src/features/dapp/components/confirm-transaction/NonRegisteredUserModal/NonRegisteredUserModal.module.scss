@@ -1,0 +1,52 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/_typography';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
+@import '../../../../../styles/rules/modal.scss';
+
+.continueInBrowser {
+  @extend %modal-globals;
+}
+
+.modal {
+  &:global(.ant-modal) {
+    max-width: calc(100vw - #{size_unit(6)}) !important;
+    max-height: calc(100vh - 80px) !important;
+  }
+  :global(.ant-modal-content) {
+    background: var(--color-white, var(--dark-mode-light-black)) !important;
+    border-radius: size_unit(2) !important;
+    box-shadow: var(--shadows-card-pop-up) !important;
+    max-height: calc(100vh - 80px) !important;
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    padding: size_unit(5) !important;
+    max-height: calc(100vh - 80px) !important;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(3);
+  text-align: center
+}
+
+.title {
+  @include text-subHeading-bold;
+  color: var(--text-color-primary) !important;
+  margin-bottom: 0 !important;
+}
+
+.description {
+  @include text-body-medium;
+  color: var(--text-color-secondary) !important;
+}
+
+.buttons {
+  display: flex;
+  gap: size_unit(2);
+  flex-direction: column;
+  width: 100%;
+}
