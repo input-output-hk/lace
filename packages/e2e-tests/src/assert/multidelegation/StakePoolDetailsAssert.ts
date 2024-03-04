@@ -54,6 +54,7 @@ class StakePoolDetailsAssert {
   }
 
   async assertSeeStakePoolDetailsCommonElements() {
+    await StakePoolDetails.poolName.waitForStable();
     await StakePoolDetails.poolName.waitForClickable();
     await StakePoolDetails.poolLogo.waitForDisplayed();
 
