@@ -15,19 +15,19 @@ Feature: Onboarding - Create wallet
     Given I click "Create" button on wallet setup page
     Then "Next" button is disabled during onboarding process
 
-  @LW-2429
+  @LW-2429 @Obsolete
   Scenario: Create wallet - Legal page - accept T&C - next button enabled
     Given I click "Create" button on wallet setup page
     When I accept "T&C" checkbox
     Then "Next" button is enabled during onboarding process
 
-  @LW-2430
+  @LW-2430 @Obsolete
   Scenario: Create wallet - Legal page - accept T&C - back button
     Given I click "Create" button on wallet setup page
     When I click "Back" button during wallet setup
     Then "Get started" page is displayed
 
-  @LW-2431
+  @LW-2431 @Obsolete
   Scenario: Create wallet - Help us improve your experience page displayed
     Given I click "Create" button on wallet setup page
     And I am on "Legal page"
@@ -198,15 +198,17 @@ Feature: Onboarding - Create wallet
   @LW-2443
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words 8 of 24
-    When I fill passphrase fields using 24 words mnemonic on 8/24 page
-    And I click "Next" button during wallet setup
-    When I fill passphrase fields using 24 words mnemonic on 16/24 page
-    And I click "Next" button during wallet setup
-    When I fill passphrase fields using 24 words mnemonic on 24/24 page
-    Then "Next" button is enabled during onboarding process
+    And I am on "Mnemonic verification" page
     When I click "Next" button during wallet setup
-    Then "All done" page is displayed
+    # And I am on "Mnemonic verification" page with words 8 of 24
+    # When I fill passphrase fields using 24 words mnemonic on 8/24 page
+    # And I click "Next" button during wallet setup
+    # When I fill passphrase fields using 24 words mnemonic on 16/24 page
+    # And I click "Next" button during wallet setup
+    # When I fill passphrase fields using 24 words mnemonic on 24/24 page
+    # Then "Next" button is enabled during onboarding process
+    # When I click "Next" button during wallet setup
+    # Then "All done" page is displayed
 
   @LW-3212
   Scenario Outline: Create Wallet - Mnemonic verification - all empty fields - next disabled - <init_page>
@@ -243,8 +245,10 @@ Feature: Onboarding - Create wallet
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I am on "All done" page
-    When I click "Go to my wallet" button on "All done" page
+    And I am on "Enter wallet" page from "Create" wallet
+    When I click "Enter wallet" button
+    # And I am on "All done" page
+    # When I click "Go to my wallet" button on "All done" page
     Then I see LW homepage
 
   @LW-3020

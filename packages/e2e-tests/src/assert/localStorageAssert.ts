@@ -6,7 +6,7 @@ import { getNumWalletsInRepository } from '../fixture/browserStorageInitializer'
 class LocalStorageAssert {
   assertWalletIsDeleted = async () => {
     expect(JSON.parse(await localStorageManager.getItem('wallet'))).to.be.null;
-    expect(JSON.parse(await localStorageManager.getItem('analyticsAccepted'))).to.be.null;
+    expect(JSON.parse(await localStorageManager.getItem('analyticsStatus'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('unconfirmedTransactions'))).to.be.null;
     expect(await getNumWalletsInRepository()).to.be.eq(0);
@@ -15,7 +15,7 @@ class LocalStorageAssert {
   assertWalletIsNotDeleted = async () => {
     expect(JSON.parse(await localStorageManager.getItem('wallet'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('appSettings'))).not.to.be.null;
-    expect(JSON.parse(await localStorageManager.getItem('analyticsAccepted'))).not.to.be.null;
+    expect(JSON.parse(await localStorageManager.getItem('analyticsStatus'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).not.to.be.null;
     expect(await getNumWalletsInRepository()).to.be.eq(1);
   };

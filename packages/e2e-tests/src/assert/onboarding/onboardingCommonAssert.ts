@@ -10,7 +10,8 @@ class OnboardingCommonAssert {
   }
   async assertSeeStepTitle(expectedTitle: string): Promise<void> {
     await this.commonOnboardingElements.stepTitle.waitForDisplayed();
-    expect(await this.commonOnboardingElements.stepTitle.getText()).to.equal(expectedTitle);
+    const stepTitle = await this.commonOnboardingElements.stepTitle.getText();
+    expect(stepTitle).to.equal(expectedTitle);
   }
 
   async assertSeeStepSubtitle(expectedSubtitle: string): Promise<void> {
@@ -32,6 +33,11 @@ class OnboardingCommonAssert {
 
   async assertNextButtonEnabled(shouldBeEnabled: boolean): Promise<void> {
     await this.commonOnboardingElements.nextButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
+
+  async assertNextButtonTextEquals(expectedText: string): Promise<void> {
+    await this.commonOnboardingElements.nextButton.waitForDisplayed();
+    expect(await this.commonOnboardingElements.nextButton.getText()).to.equal(expectedText);
   }
 
   async assertLegalContentIsDisplayed(linkName: string): Promise<void> {

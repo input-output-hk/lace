@@ -124,12 +124,15 @@ Feature: Forgot password
     And I click on "Proceed" button on "Forgot password?" modal
     And I switch to tab with restore wallet process
     And I close all remaining tabs except current one
-    Then "Wallet password" page is displayed in forgot password flow
-    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
-    And I click "Next" button during wallet setup
+    Then "Wallet setup" page is displayed
+    # Then "Wallet password" page is displayed in forgot password flow
+    When I am on "Enter wallet" page from "Restore" wallet
+    And I click "Enter wallet" button
+    # When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    # And I click "Next" button during wallet setup
+    # And I click "Next" button during wallet setup
+    # And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
+    # And I click "Next" button during wallet setup
     Then I see LW homepage
     And I click the menu button
     Then header menu displays "TestAutomationWallet" as a wallet name
