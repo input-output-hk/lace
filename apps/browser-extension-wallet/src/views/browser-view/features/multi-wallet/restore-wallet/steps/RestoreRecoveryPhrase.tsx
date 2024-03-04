@@ -60,12 +60,12 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   return (
     <WalletSetupMnemonicVerificationStep
       mnemonic={data.mnemonic}
-      onChange={(mnemonic: string[]) => setMnemonic(mnemonic)}
+      onChange={setMnemonic}
       onCancel={() => {
         clearSecrets();
         history.goBack();
       }}
-      onSubmit={() => onSubmitForm()}
+      onSubmit={onSubmitForm}
       onStepNext={noop}
       isSubmitEnabled={isValidMnemonic}
       translations={walletSetupMnemonicStepTranslations}
