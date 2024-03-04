@@ -292,7 +292,7 @@ describe('Testing VotingProceduresContainer component', () => {
     mockUseDisallowSignTx.mockReset();
     mockUseDisallowSignTx.mockReturnValue(disallowSignTxMock);
     mockHasValidDrepRegistration.mockReset();
-    mockHasValidDrepRegistration.mockReturnValue(true);
+    mockHasValidDrepRegistration.mockReturnValue(false);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
       environmentName: 'Preprod',
