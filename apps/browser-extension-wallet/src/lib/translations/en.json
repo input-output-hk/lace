@@ -1467,7 +1467,7 @@
       "option": "Yes"
     },
     "StakeVoteDelegation": {
-      "title": "Confirm Vote Delegation & Staking",
+      "title": "Confirm Staking & Vote Delegation",
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
