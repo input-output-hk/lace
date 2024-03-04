@@ -57,7 +57,7 @@ const data: ComponentProps<typeof NoConfidenceAction> = {
       title: 'Transaction Details',
       txType: 'Transaction Type',
       deposit: 'Deposit',
-      rewardAccount: 'Reward account'
+      rewardAccount: 'Reward Account'
     },
     procedure: {
       anchor: {

@@ -62,7 +62,7 @@ const data: ComponentProps<typeof HardForkInitiationAction> = {
       title: 'Transaction Details',
       txType: 'Transaction Type',
       deposit: 'Deposit',
-      rewardAccount: 'Reward account'
+      rewardAccount: 'Reward Account'
     },
     procedure: {
       anchor: {
