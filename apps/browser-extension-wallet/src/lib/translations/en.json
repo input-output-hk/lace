@@ -1276,7 +1276,7 @@
           "memory": "Memory",
           "step": "Step",
           "networkGroup": {
-            "title": "Network group",
+            "title": "Network Group",
             "maxBBSize": "Max BB Size",
             "maxTxSize": "Max Tx Size",
             "maxBHSize": "Max BH Size",
@@ -1295,7 +1295,7 @@
             }
           },
           "economicGroup": {
-            "title": "Economic group",
+            "title": "Economic Group",
             "minFeeA": "Min Fee A",
             "minFeeB": "Min Fee B",
             "keyDeposit": "Key Deposit",
@@ -1318,7 +1318,7 @@
             }
           },
           "technicalGroup": {
-            "title": "Technical group",
+            "title": "Technical Group",
             "a0": "A0",
             "eMax": "EMax",
             "nOpt": "NOpt",
@@ -1335,7 +1335,7 @@
             }
           },
           "governanceGroup": {
-            "title": "Governance group",
+            "title": "Governance Group",
             "govActionLifetime": "Gov Act Lifetime",
             "govActionDeposit": "Gov Act Deposit",
             "drepDeposit": "DRep Deposit",
