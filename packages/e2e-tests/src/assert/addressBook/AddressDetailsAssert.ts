@@ -6,7 +6,7 @@ import { Address } from '../../data/Address';
 class AddressDetailsAssert {
   assertSeeAddressDetailsPage = async (shouldSee: boolean, mode: 'extended' | 'popup', expectedAddress: Address) => {
     if (shouldSee) {
-      await AddressDetails.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
+      await AddressDetails.drawerNavigationTitle.waitForStable();
       await AddressDetails.drawerHeaderCloseButton.waitForDisplayed({ reverse: mode === 'popup' });
       await AddressDetails.drawerHeaderBackButton.waitForDisplayed({ reverse: mode === 'extended' });
       if (mode === 'extended') {

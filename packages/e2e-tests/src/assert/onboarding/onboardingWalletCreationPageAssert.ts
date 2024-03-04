@@ -10,7 +10,6 @@ class OnboardingWalletCreationPageAssert extends OnboardingCommonAssert {
   }
 
   async assertCreatingWalletDuration(duration: number) {
-    await WalletCreationPage.walletLoader.waitForDisplayed();
     await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 1000 * duration, reverse: true });
   }
 }
