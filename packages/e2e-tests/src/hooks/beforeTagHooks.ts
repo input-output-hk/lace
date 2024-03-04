@@ -79,6 +79,16 @@ Before(
 );
 
 Before(
+  { tags: '@Analytics-SendSimpleTransaction-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletAnalyticsSendSimpleTransactionE2E)
+);
+
+Before(
+  { tags: '@Analytics-SendSimpleTransaction-Popup-E2E' },
+  async () => await popupViewWalletInitialization(TestWalletName.WalletAnalyticsSendSimpleTransaction2E2E)
+);
+
+Before(
   { tags: '@SendTransactionDapp-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendDappTransactionE2E)
 );
@@ -93,7 +103,10 @@ Before(
   async () => await extendedViewWalletInitialization(TestWalletName.WalletCollateral)
 );
 
-Before({ tags: '@Collateral-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral));
+Before(
+  { tags: '@Collateral-popup' },
+  async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral2)
+);
 
 Before(
   { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
