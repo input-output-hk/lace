@@ -43,6 +43,7 @@ interface TokenAPIResponse {
 
 const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefined);
 
+// eslint-disable-next-line complexity
 const handleOpenBrowser = async (data: OpenBrowserData) => {
   let path = '';
   switch (data.section) {
@@ -79,7 +80,8 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
       path = walletRoutePaths.sharedWallet.root;
       break;
   }
-  await tabs.create({ url: `app.html#${path}` }).catch((error) => console.error(error));
+  const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
+  await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));
 };
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });

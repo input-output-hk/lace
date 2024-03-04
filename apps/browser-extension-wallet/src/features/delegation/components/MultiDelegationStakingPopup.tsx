@@ -111,7 +111,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
           setMultidelegationFirstVisit(false);
           setMultidelegationFirstVisitSincePortfolioPersistence(false);
         },
-        expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
+        expandStakingView: (urlSearchParams?: string) =>
+          handleOpenBrowser({ section: BrowserViewSections.STAKING, urlSearchParams }),
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,

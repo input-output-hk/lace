@@ -39,6 +39,7 @@ export enum BrowserViewSections {
 
 export interface OpenBrowserData {
   section: BrowserViewSections;
+  urlSearchParams?: string;
 }
 
 interface ChangeThemeMessage {
@@ -56,7 +57,7 @@ interface OpenBrowserMessage {
 export type Message = ChangeThemeMessage | HTTPConnectionMessage | OpenBrowserMessage;
 
 export type BackgroundService = {
-  handleOpenBrowser: (data: OpenBrowserData) => Promise<void>;
+  handleOpenBrowser: (data: OpenBrowserData, urlSearchParams?: string) => Promise<void>;
   requestMessage$: Subject<Message>;
   migrationState$: BehaviorSubject<MigrationState | undefined>;
   coinPrices: CoinPrices;

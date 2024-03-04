@@ -21,7 +21,7 @@ export const StakingNotificationBanners = ({ popupView, notifications }: Staking
 
   const onPoolRetiredOrSaturatedBannerClick = () => {
     if (popupView) {
-      expandStakingView();
+      expandStakingView('onLoadAction=ManagePortfolio');
       return;
     }
 
