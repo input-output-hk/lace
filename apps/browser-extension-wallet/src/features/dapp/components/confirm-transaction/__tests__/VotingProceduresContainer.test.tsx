@@ -179,6 +179,8 @@ jest.mock('@providers', () => ({
 
 describe('Testing VotingProceduresContainer component', () => {
   beforeEach(() => {
+    mockHasValidDrepRegistration.mockReset();
+    mockHasValidDrepRegistration.mockReturnValue(true);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
       environmentName: 'Preprod'
@@ -253,7 +255,7 @@ describe('Testing VotingProceduresContainer component', () => {
 
   test('should handle NonRegisteredUserModal onConfirm', async () => {
     mockHasValidDrepRegistration.mockReset();
-    mockHasValidDrepRegistration.mockReturnValue(true);
+    mockHasValidDrepRegistration.mockReturnValue(false);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
       environmentName: 'Preprod',

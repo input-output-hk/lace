@@ -32,7 +32,7 @@ export const VotingProceduresContainer = (): React.ReactElement => {
 
   useEffect(() => {
     if (!walletState?.transactions.history || userAckNonRegisteredState) return;
-    setIsNonRegisteredUserModalVisible(hasValidDrepRegistration(walletState.transactions.history));
+    setIsNonRegisteredUserModalVisible(!hasValidDrepRegistration(walletState.transactions.history));
   }, [walletState?.transactions.history, userAckNonRegisteredState]);
 
   const explorerBaseUrl = useCexplorerBaseUrl();
