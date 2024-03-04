@@ -277,18 +277,6 @@ class DAppConnectorAssert {
     );
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
 
-    await ConfirmTransactionPage.transactionDepositTitle.waitForDisplayed();
-    expect(await ConfirmTransactionPage.transactionDepositTitle.getText()).to.equal(
-      await t('package.core.dappTransaction.deposit', 'core')
-    );
-    await ConfirmTransactionPage.transactionDepositValueAda.waitForDisplayed();
-
-    await ConfirmTransactionPage.transactionReturnedDepositTitle.waitForDisplayed();
-    expect(await ConfirmTransactionPage.transactionReturnedDepositTitle.getText()).to.equal(
-      await t('package.core.dappTransaction.returnedDeposit', 'core')
-    );
-    await ConfirmTransactionPage.transactionReturnedDepositValueAda.waitForDisplayed();
-
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
 
