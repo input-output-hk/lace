@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VotingProcedures } from '@lace/core';
-import { drepIDasBech32FromHash, hasValidDrepRegistration, votingProceduresInspector } from './utils';
+import { getDRepId, hasValidDrepRegistration, votingProceduresInspector } from './utils';
 import { useCexplorerBaseUrl, useDisallowSignTx } from './hooks';
-import { VoterTypeEnum, getVote, getVoterType } from '@src/utils/tx-inspection';
+import { getVote, getVoterType } from '@src/utils/tx-inspection';
 import { Wallet } from '@lace/cardano';
 import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
 import { useViewsFlowContext } from '@providers';
@@ -52,14 +52,10 @@ export const VotingProceduresContainer = (): React.ReactElement => {
         data={votingProcedures.map((votingProcedure) => {
           const voterType = getVoterType(votingProcedure.voter.__typename);
 
-          const drepId =
-            voterType === VoterTypeEnum.DREP
-              ? drepIDasBech32FromHash(votingProcedure.voter.credential.hash)
-              : votingProcedure.voter.credential.hash.toString();
           return {
             voter: {
               type: t(`core.VotingProcedures.voterTypes.${voterType}`),
-              dRepId: drepId
+              dRepId: getDRepId(votingProcedure.voter)
             },
             votes: votingProcedure.votes.map((vote) => ({
               actionId: {
@@ -69,9 +65,9 @@ export const VotingProceduresContainer = (): React.ReactElement => {
               },
               votingProcedure: {
                 vote: t(`core.VotingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
-                anchor: !!vote.votingProcedure.anchor?.url && {
-                  url: vote.votingProcedure.anchor?.url,
-                  hash: vote.votingProcedure.anchor?.dataHash.toString()
+                anchor: !!vote.votingProcedure.anchor && {
+                  url: vote.votingProcedure.anchor.url,
+                  hash: vote.votingProcedure.anchor.dataHash.toString()
                 }
               }
             }))

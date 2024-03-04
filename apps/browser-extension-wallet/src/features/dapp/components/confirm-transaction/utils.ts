@@ -7,6 +7,7 @@ import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
+import { VoterTypeEnum, getVoterType } from '@src/utils/tx-inspection';
 
 const { CertificateType } = Wallet.Cardano;
 
@@ -181,3 +182,8 @@ export const hasValidDrepRegistration = (history: Wallet.Cardano.HydratedTx[]): 
   }
   return false;
 };
+
+export const getDRepId = (voter: Wallet.Cardano.Voter): Wallet.Cardano.DRepID | string =>
+  getVoterType(voter.__typename) === VoterTypeEnum.DREP
+    ? drepIDasBech32FromHash(voter.credential.hash)
+    : voter.credential.hash.toString();
