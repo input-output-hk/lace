@@ -34,33 +34,38 @@ export interface DappTransactionProps {
 
 const isNFT = (asset: AssetInfoWithAmount) => asset.assetInfo.supply === BigInt(1);
 
+interface GroupedAddressAssets {
+  nfts: Array<AssetInfoWithAmount>;
+  tokens: Array<AssetInfoWithAmount>;
+  coins: Array<bigint>;
+}
+
 const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValue>) => {
-  const groupedAddresses: {
-    nfts: Array<AssetInfoWithAmount>;
-    tokens: Array<AssetInfoWithAmount>;
-    addresses: Array<Cardano.PaymentAddress>;
-    coins: Array<bigint>;
-  } = {
-    nfts: [],
-    tokens: [],
-    addresses: [],
-    coins: []
-  };
+  const groupedAddresses: Map<Cardano.PaymentAddress, GroupedAddressAssets> = new Map();
 
   for (const [address, value] of addresses) {
+    const group: GroupedAddressAssets = {
+      coins: [],
+      nfts: [],
+      tokens: []
+    };
+
     const addressAssets = value.assets;
-    groupedAddresses.addresses.push(address);
 
     if (addressAssets.size === 0) {
-      groupedAddresses.coins.push(value.coins);
+      group.coins.push(value.coins);
     } else {
       for (const [, asset] of addressAssets) {
         if (asset.assetInfo.supply === BigInt(1)) {
-          groupedAddresses.nfts.push(asset);
+          group.nfts.push(asset);
         } else {
-          groupedAddresses.tokens.push(asset);
+          group.tokens.push(asset);
         }
       }
+    }
+
+    if (group.coins.length > 0 || group.nfts.length > 0 || group.tokens.length > 0) {
+      groupedAddresses.set(address, group);
     }
   }
 
@@ -110,21 +115,13 @@ export const DappTransaction = ({
   dappInfo
 }: DappTransactionProps): React.ReactElement => {
   const { t } = useTranslate();
-  console.log('FROM ADDRESs', fromAddress, toAddress);
 
   const groupedToAddresses = groupAddresses(toAddress);
   const groupedFromAddresses = groupAddresses(fromAddress);
 
-  const isFromAddressesEnabled =
-    groupedFromAddresses.addresses.length > 0 ||
-    groupedFromAddresses.tokens.length > 0 ||
-    groupedFromAddresses.nfts.length > 0;
-  const isToAddressesEnabled =
-    groupedToAddresses.addresses.length > 0 ||
-    groupedToAddresses.tokens.length > 0 ||
-    groupedToAddresses.nfts.length > 0;
+  const isFromAddressesEnabled = groupedFromAddresses.size > 0;
+  const isToAddressesEnabled = groupedToAddresses.size > 0;
 
-  console.log('from address:', groupedFromAddresses);
   return (
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}

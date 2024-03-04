@@ -10,19 +10,15 @@ import { useTranslate } from '@src/ui/hooks';
 
 import { TransactionAssets, SummaryExpander, DappTransactionSummary } from '@lace/ui';
 
+interface GroupedAddressAssets {
+  nfts: Array<AssetInfoWithAmount>;
+  tokens: Array<AssetInfoWithAmount>;
+  coins: Array<bigint>;
+}
+
 export interface DappAddressSectionProps {
-  groupedFromAddresses: {
-    nfts: Array<AssetInfoWithAmount>;
-    tokens: Array<AssetInfoWithAmount>;
-    addresses: Array<Cardano.PaymentAddress>;
-    coins: Array<bigint>;
-  };
-  groupedToAddresses: {
-    nfts: Array<AssetInfoWithAmount>;
-    tokens: Array<AssetInfoWithAmount>;
-    addresses: Array<Cardano.PaymentAddress>;
-    coins: Array<bigint>;
-  };
+  groupedFromAddresses: Map<Cardano.PaymentAddress, GroupedAddressAssets>;
+  groupedToAddresses: Map<Cardano.PaymentAddress, GroupedAddressAssets>;
   isToAddressesEnabled: boolean;
   isFromAddressesEnabled: boolean;
   coinSymbol: string;
@@ -81,6 +77,15 @@ const charAfterEllipsisName = 8;
 
 const getStringFromLovelace = (value: bigint): string => Wallet.util.lovelacesToAdaString(value.toString());
 
+const getTokenQuantity = (tokens: Array<AssetInfoWithAmount>, coins: Array<bigint>) => {
+  let quantity = tokens.length;
+
+  if (coins.length > 0) {
+    quantity += 1;
+  }
+
+  return quantity;
+};
 export const DappAddressSections = ({
   groupedFromAddresses,
   groupedToAddresses,
@@ -96,101 +101,104 @@ export const DappAddressSections = ({
     <>
       <SummaryExpander title={t('package.core.dappTransaction.fromAddress')} disabled={!isFromAddressesEnabled}>
         <div className={styles.summaryContent}>
-          {groupedFromAddresses.addresses.map((address) => (
-            <div key={address} className={styles.address}>
-              <Text className={styles.addressInfo} data-testId="dapp-transaction-from-address-title">
-                {t('package.core.dappTransaction.address')}
-              </Text>
-              <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-address">
-                {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
-              </Text>
-            </div>
-          ))}
-
-          {groupedFromAddresses.tokens.length > 0 ||
-            (groupedFromAddresses.coins.length > 0 && (
-              <>
-                <div className={styles.tokenCount}>
-                  <Title level={5} data-testid="dapp-transaction-tokens-title">
-                    {t('package.core.dappTransaction.tokens')}
-                  </Title>
-                  <Title level={5}>
-                    -{groupedFromAddresses.tokens.length} {itemsCountCopy}
-                  </Title>
-                </div>
-                {groupedFromAddresses.coins.map((coin) => (
-                  <DappTransactionSummary
-                    key={groupedFromAddresses.addresses[0]}
-                    cardanoSymbol={coinSymbol}
-                    transactionAmount={getStringFromLovelace(coin)}
-                  />
-                ))}
-                {displayGroupedTokens(groupedFromAddresses.tokens)}
-              </>
-            ))}
-          {groupedFromAddresses.nfts.length > 0 && (
+          {[...groupedFromAddresses.entries()].map(([address, addressData]) => (
             <>
-              <div className={styles.tokenCount}>
-                <Title level={5} data-testid="dapp-transaction-nfts-title">
-                  {t('package.core.dappTransaction.nfts')}
-                </Title>
-                <Title level={5}>
-                  -{groupedFromAddresses.nfts.length} {itemsCountCopy}
-                </Title>
+              <div key={address} className={styles.address}>
+                <Text className={styles.addressInfo} data-testId="dapp-transaction-from-address-title">
+                  {t('package.core.dappTransaction.address')}
+                </Text>
+                <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-address">
+                  {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                </Text>
               </div>
-              {displayGroupedNFTs(groupedFromAddresses.nfts)}
+              {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
+                <>
+                  <div className={styles.tokenCount}>
+                    <Title level={5} data-testid="dapp-transaction-tokens-title">
+                      {t('package.core.dappTransaction.tokens')}
+                    </Title>
+                    <Title level={5}>
+                      -{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
+                    </Title>
+                  </div>
+                  {addressData.coins.map((coin) => (
+                    <DappTransactionSummary
+                      key={`${address}${coin}`}
+                      cardanoSymbol={coinSymbol}
+                      transactionAmount={getStringFromLovelace(coin)}
+                    />
+                  ))}
+                  {displayGroupedTokens(addressData.tokens)}
+                </>
+              )}
+
+              {addressData.nfts.length > 0 && (
+                <>
+                  <div className={styles.tokenCount}>
+                    <Title level={5} data-testid="dapp-transaction-nfts-title">
+                      {t('package.core.dappTransaction.nfts')}
+                    </Title>
+                    <Title level={5}>
+                      -{addressData.nfts.length} {itemsCountCopy}
+                    </Title>
+                  </div>
+                  {displayGroupedNFTs(addressData.nfts)}
+                </>
+              )}
             </>
-          )}
+          ))}
         </div>
       </SummaryExpander>
 
       <SummaryExpander title={t('package.core.dappTransaction.toAddress')} disabled={!isToAddressesEnabled}>
         <div>
-          {groupedToAddresses.addresses.map((address) => (
-            <div key={address} className={styles.address}>
-              <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address-title">
-                {t('package.core.dappTransaction.address')}
-              </Text>
-              <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address">
-                {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
-              </Text>
-            </div>
-          ))}
-        </div>
-        {groupedToAddresses.tokens.length > 0 ||
-          (groupedToAddresses.coins.length > 0 && (
+          {[...groupedToAddresses.entries()].map(([address, addressData]) => (
             <>
-              <div className={styles.tokenCount}>
-                <Title level={5} data-testid="dapp-transaction-tokens-title">
-                  {t('package.core.dappTransaction.tokens')}
-                </Title>
-                <Title level={5}>
-                  +{groupedToAddresses.tokens.length} {itemsCountCopy}
-                </Title>
+              <div key={address} className={styles.address}>
+                <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address-title">
+                  {t('package.core.dappTransaction.address')}
+                </Text>
+                <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address">
+                  {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                </Text>
               </div>
-              {groupedToAddresses.coins.map((coin) => (
-                <DappTransactionSummary
-                  key={groupedFromAddresses.addresses[0]}
-                  cardanoSymbol={coinSymbol}
-                  transactionAmount={`+${getStringFromLovelace(coin)}`}
-                />
-              ))}
-              {displayGroupedTokens(groupedToAddresses.tokens)}
+              {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
+                <>
+                  <div className={styles.tokenCount}>
+                    <Title level={5} data-testid="dapp-transaction-tokens-title">
+                      {t('package.core.dappTransaction.tokens')}
+                    </Title>
+                    <Title level={5}>
+                      +{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
+                    </Title>
+                  </div>
+                  {addressData.coins.map((coin) => (
+                    <DappTransactionSummary
+                      key={`${address}${coin}`}
+                      cardanoSymbol={coinSymbol}
+                      transactionAmount={`+${getStringFromLovelace(coin)}`}
+                    />
+                  ))}
+                  {displayGroupedTokens(addressData.tokens)}
+                </>
+              )}
+
+              {addressData.nfts.length > 0 && (
+                <>
+                  <div className={styles.tokenCount}>
+                    <Title level={5} data-testid="dapp-transaction-nfts-title">
+                      {t('package.core.dappTransaction.nfts')}
+                    </Title>
+                    <Title level={5}>
+                      +{addressData.nfts.length} {itemsCountCopy}
+                    </Title>
+                  </div>
+                  {displayGroupedNFTs(addressData.nfts)}
+                </>
+              )}
             </>
           ))}
-        {groupedToAddresses.nfts.length > 0 && (
-          <>
-            <div className={styles.tokenCount}>
-              <Title level={5} data-testid="dapp-transaction-nfts-title">
-                {t('package.core.dappTransaction.nfts')}
-              </Title>
-              <Title level={5}>
-                +{groupedToAddresses.nfts.length} {itemsCountCopy}
-              </Title>
-            </div>
-            {displayGroupedNFTs(groupedToAddresses.nfts)}
-          </>
-        )}
+        </div>
       </SummaryExpander>
     </>
   );
