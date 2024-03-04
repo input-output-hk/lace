@@ -1,9 +1,9 @@
 /* eslint-disable react/no-multi-comp */
-import { poolMetricsUtils } from '@lace/cardano';
 import { Flex } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { MetricType } from '../types';
+import { getSaturationLevel } from '../utils';
 import * as styles from './StakePoolCellRenderer.css';
 import { StakePoolsListRowProps } from './types';
 
@@ -12,9 +12,7 @@ export const stakePoolCellRendererByMetricType: Partial<
 > = {
   [MetricType.saturation]: ({ value }) => {
     if (typeof value !== 'string' || isNil(value)) return <>'-'</>;
-    const saturationColor: styles.DotVariants['level'] = poolMetricsUtils.getSaturationLevel(
-      Number.parseFloat(value.toString())
-    );
+    const saturationColor: styles.DotVariants['level'] = getSaturationLevel(Number.parseFloat(value.toString()));
     return (
       <Flex alignItems="center">
         <Flex mr="$6" className={cn(styles.dot({ level: saturationColor }))} />

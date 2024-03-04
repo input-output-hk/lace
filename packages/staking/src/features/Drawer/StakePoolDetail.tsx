@@ -1,10 +1,11 @@
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
-import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet, poolMetricsUtils } from '@lace/cardano';
+import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { Ellipsis, PostHogAction } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { StakePoolCardProgressBar } from 'features/BrowsePools';
+import { isOversaturated } from 'features/BrowsePools/utils';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -133,7 +134,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
           {...{
             id,
             isDelegated: delegatingToThisPool,
-            isOversaturated: saturation !== undefined && poolMetricsUtils.isOversaturated(Number(saturation)),
+            isOversaturated: saturation !== undefined && isOversaturated(Number(saturation)),
             logo,
             name,
             status,

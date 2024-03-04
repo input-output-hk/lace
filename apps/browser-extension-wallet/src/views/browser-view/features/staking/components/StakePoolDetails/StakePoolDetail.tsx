@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Banner, Button, Ellipsis, getNumberWithUnit } from '@lace/common';
-import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet, poolMetricsUtils } from '@lace/cardano';
+import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { useDelegationStore, stakePoolDetailsSelector } from '@src/features/delegation/stores';
 import { useDelegationDetails } from '@src/hooks';
 import { useStakePoolDetails } from '../../store';
@@ -13,7 +13,7 @@ import { useWalletStore } from '@src/stores';
 
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { StakePoolCardProgressBar } from '@lace/staking';
+import { StakePoolCardProgressBar, utils } from '@lace/staking';
 
 const listItem = [
   'browserView.staking.details.clickOnAPoolFromTheListInTheMainPage',
@@ -144,7 +144,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
             id,
             status,
             isDelegated: isDelegatingToThisPool,
-            isOversaturated: saturation !== undefined && poolMetricsUtils.isOversaturated(Number(saturation))
+            isOversaturated: saturation !== undefined && utils.isOversaturated(Number(saturation))
           }}
           translations={statusLogoTranslations}
         />

@@ -1,6 +1,6 @@
-import { poolMetricsUtils } from '@lace/cardano';
 import { Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
+import { getSaturationLevel } from '../../utils';
 import * as styles from './StakePoolCardProgressBar.css';
 
 interface Props {
@@ -14,7 +14,7 @@ export const StakePoolCardProgressBar = ({ percentage, dataTestId }: Props) => {
   const { t } = useTranslation();
   const percentageNumber = Number(percentage);
   const progressWidth = Math.min(maxPercentages, percentageNumber || 0);
-  const saturationLevel = poolMetricsUtils.getSaturationLevel(percentageNumber);
+  const saturationLevel = getSaturationLevel(percentageNumber);
 
   return (
     <Flex

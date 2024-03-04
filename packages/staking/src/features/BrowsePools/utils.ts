@@ -3,7 +3,7 @@ import inRange from 'lodash/inRange';
 export enum SaturationLevels {
   Medium = 'medium',
   High = 'high',
-  Veryhigh = 'veryHigh'
+  Veryhigh = 'veryHigh',
 }
 
 const mediumUpperBound = 90;
@@ -12,7 +12,7 @@ const highUpperBound = 95;
 const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
   [SaturationLevels.Veryhigh]: [highUpperBound, Number.MAX_SAFE_INTEGER],
   [SaturationLevels.High]: [mediumUpperBound, highUpperBound],
-  [SaturationLevels.Medium]: [0, mediumUpperBound]
+  [SaturationLevels.Medium]: [0, mediumUpperBound],
 };
 
 const oversaturatedLowerBound = 100;

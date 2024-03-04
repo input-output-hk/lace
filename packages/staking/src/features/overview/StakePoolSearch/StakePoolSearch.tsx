@@ -1,23 +1,21 @@
-/* eslint-disable unicorn/no-nested-ternary */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-magic-numbers */
-import React, { useRef, useState } from 'react';
-import cn from 'classnames';
-import { Select, Tooltip } from 'antd';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Icon from '@ant-design/icons';
 import { Ellipsis, TextBoxItem } from '@lace/common';
-import { ReactComponent as SearchIcon } from '../../assets/icons/search.component.svg';
+import { RefSelectProps, Select, Tooltip } from 'antd';
+import cn from 'classnames';
+import { TranslationsFor } from 'features/BrowsePools';
+import { SaturationLevels, getSaturationLevel, isOversaturated } from 'features/BrowsePools/utils';
+import React, { useRef, useState } from 'react';
+import BadgeCheckIcon from '../../../assets/icons/badge-check.component.svg';
+import Loader from '../../../assets/icons/loader.component.svg';
+import SearchIcon from '../../../assets/icons/search.component.svg';
+import Warning from '../../../assets/icons/warning.component.svg';
 import styles from './StakePoolSearch.module.scss';
-import { ReactComponent as Warning } from '../../assets/icons/warning.component.svg';
-import { ReactComponent as BadgeCheckIcon } from '../../assets/icons/badge-check.component.svg';
-import { ReactComponent as Loader } from '../../assets/icons/loader.component.svg';
-import { TranslationsFor } from '@wallet/util/types';
-import { poolMetricsUtils } from '@src/index';
 
 const SELECT_DROPDOWN_OFFSET_X = 0;
 const SELECT_DROPDOWN_OFFSET_Y = 1;
 
-export interface StakePoolItemProps {
+interface StakePoolItemProps {
   /**
    * Stake pool ID as a bech32 string
    */
@@ -58,7 +56,7 @@ export interface StakePoolItemProps {
   onClick?: () => unknown;
 }
 
-export interface StakePoolSearchListProps {
+interface StakePoolSearchListProps {
   /**
    * Array of stake pools to be listed
    */
@@ -99,11 +97,10 @@ const renderIcon = (
   saturation?: string | number,
   isStakingPool?: boolean
 ) => {
-  const { getSaturationLevel, SaturationLevels, isOversaturated } = poolMetricsUtils;
   const saturationColoursMap = {
     [SaturationLevels.Medium]: '#2CB67D',
     [SaturationLevels.High]: '#FDC300',
-    [SaturationLevels.Veryhigh]: '#FF8E3C'
+    [SaturationLevels.Veryhigh]: '#FF8E3C',
   };
   const formattedSaturation = Number(saturation);
   const saturationLevel = getSaturationLevel(formattedSaturation);
@@ -141,23 +138,23 @@ export const StakePoolSearch = ({
   isSearching,
   onStakePoolClick,
   translations,
-  withSuggestions
+  withSuggestions,
 }: StakePoolSearchProps): React.ReactElement => {
   const [showRemove, setShowRemove] = useState(false);
-  const ref = useRef();
+  const ref = useRef<RefSelectProps | null>(null);
 
   const renderIconTranslations = {
     gettingSaturated: translations.gettingSaturated,
-    saturated: translations.saturated,
     overSaturation: translations.overSaturation,
-    staking: translations.staking
+    saturated: translations.saturated,
+    staking: translations.staking,
   };
 
   const onOptionSelect = (val: string) => {
     if (ref && ref.current) {
       (ref.current as HTMLElement).blur();
     }
-    onStakePoolClick(val);
+    onStakePoolClick?.(val);
   };
 
   const hideRemove = () => {
@@ -169,8 +166,8 @@ export const StakePoolSearch = ({
     <div
       data-testid="stakepool-search-bar"
       className={cn(styles.search, {
-        [styles.withSearchResults]: pools.length > 0,
-        [styles.withDropdown]: withSuggestions
+        [styles.withSearchResults!]: pools.length > 0,
+        [styles.withDropdown!]: withSuggestions,
       })}
       id="stakepool-search-bar"
     >
@@ -184,8 +181,7 @@ export const StakePoolSearch = ({
       <Select
         ref={ref}
         showSearch
-        // eslint-disable-next-line unicorn/no-null
-        value={value}
+        value={value || ''}
         data-testid="search-input"
         placeholder={translations.searchPlaceholder}
         defaultActiveFirstOption={false}
@@ -199,7 +195,7 @@ export const StakePoolSearch = ({
         notFoundContent={null}
         popupClassName={styles.dropdown}
         dropdownAlign={{ offset: [SELECT_DROPDOWN_OFFSET_X, SELECT_DROPDOWN_OFFSET_Y] }}
-        getPopupContainer={() => document.querySelector('#stakepool-search-bar')}
+        getPopupContainer={() => document.querySelector('#stakepool-search-bar') as HTMLElement}
         placement="bottomLeft"
       >
         {pools?.filter(Boolean).map(({ id, name, ticker, logo, saturation, isStakingPool }) => {
