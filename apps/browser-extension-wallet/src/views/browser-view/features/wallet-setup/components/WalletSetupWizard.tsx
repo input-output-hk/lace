@@ -142,13 +142,6 @@ export const WalletSetupWizard = ({
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
-  /* const moveForward = useCallback(() => {
-    const nextStep = walletSetupWizard[currentStep].next;
-    if (nextStep) {
-      setCurrentStep(nextStep);
-    }
-  }, [currentStep, setCurrentStep]);*/
-
   const moveBack = () => {
     const prevStep = walletSetupWizard[currentStep].prev;
 
