@@ -119,20 +119,24 @@ Feature: Onboarding - Restore wallet
     And I am on "Help us improve your experience" page
 
   @LW-2462 @Smoke
-  Scenario: Restore Wallet - Name your wallet - happy path to "All done page"
+  Scenario: Restore Wallet - Name your wallet - happy path to "Enter wallet step"
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I am on "Mnemonic verification" last page from "Restore wallet" and filled all words
-    And I click "Next" button during wallet setup
-    Then "All done" page is displayed
+    And I enter mnemonic words on "Mnemonic verification" page
+    Then "Enter wallet" button is enabled
+    # And I am on "Lace terms of use" page and accept terms
+    # And I am on "Help us improve your experience" page
+    # When I click "Agree" button on Analytics page
+    # And "Name your wallet" page is displayed
+    # When I enter wallet name: "ValidName"
+    # And I click "Next" button during wallet setup
+    # And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    # And I click "Next" button during wallet setup
+    # And I click "Next" button during wallet setup
+    # And I am on "Mnemonic verification" last page from "Restore wallet" and filled all words
+    # And I click "Next" button during wallet setup
+    # Then "All done" page is displayed
 
   @LW-2463
   Scenario: Restore Wallet  - Name your wallet - next button disabled for empty wallet name

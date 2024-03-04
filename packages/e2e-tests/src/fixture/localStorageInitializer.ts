@@ -49,11 +49,9 @@ class LocalStorageInitializer {
       await localStorageManager.setItem('lock', String(wallet?.walletLocalStorageData?.lock));
     testContext.saveWithOverride('activeWallet', walletName);
     await localStorageManager.setItem('wallet', String(wallet?.walletLocalStorageData?.wallet));
-    await localStorageManager.setItem(
-      'analyticsAccepted',
-      wallet?.walletLocalStorageData?.analyticsAccepted ?? 'ACCEPTED'
-    );
+    await localStorageManager.setItem('analyticsStatus', wallet?.walletLocalStorageData?.analyticsStatus ?? 'ACCEPTED');
     await localStorageManager.setItem('showDappBetaModal', 'false');
+    await localStorageManager.setItem('showPinExtension', 'false');
     await initializeBrowserStorage(wallet);
     await this.initializeAppSettings();
     await this.initializeKeyAgentData(walletName);

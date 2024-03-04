@@ -4,6 +4,7 @@ import localStorageInitializer from '../fixture/localStorageInitializer';
 import popupView from '../page/popupView';
 import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
+import analyticsBanner from '../elements/analyticsBanner';
 
 const extendedViewWalletInitialization = async (walletName = TestWalletName.TestAutomationWallet): Promise<void> => {
   await extendedView.visit();
@@ -25,7 +26,10 @@ Before(
   {
     tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding'
   },
-  async () => await extendedView.visit()
+  async () => {
+    await extendedView.visit();
+    await analyticsBanner.agreeButton.click();
+  }
 );
 
 Before(
