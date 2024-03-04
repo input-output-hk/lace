@@ -6,8 +6,6 @@ import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   WalletSetupCreationStep,
-  WalletSetupFinalStep,
-  WalletSetupMnemonicIntroStep,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
@@ -144,17 +142,14 @@ export const WalletSetupWizard = ({
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
-  const moveForward = useCallback(() => {
+  /* const moveForward = useCallback(() => {
     const nextStep = walletSetupWizard[currentStep].next;
     if (nextStep) {
       setCurrentStep(nextStep);
     }
-  }, [currentStep, setCurrentStep]);
+  }, [currentStep, setCurrentStep]);*/
 
   const moveBack = () => {
-    const prevStep = isCombinedPasswordNameStepEnabled
-      ? walletSetupWizardForABTest[currentStep].prev
-      : walletSetupWizard[currentStep].prev;
     const prevStep = walletSetupWizard[currentStep].prev;
 
     if (prevStep) {
@@ -237,15 +232,7 @@ export const WalletSetupWizard = ({
       console.error('Error completing wallet creation', error);
       throw new Error(error);
     }
-  }, [createWallet,
-    walletName,
-    mnemonic,
-    password,
-    analytics,
-    setupType,
-    goToMyWallet,
-    moveForward
-  ]);
+  }, [createWallet, walletName, mnemonic, password, analytics, setupType, goToMyWallet, moveForward]);
 
   const handleNamePasswordStepNextButtonClick = (result: { password: string; walletName: string }) => {
     setWalletName(result.walletName);
