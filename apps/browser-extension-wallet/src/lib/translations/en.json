@@ -1228,7 +1228,7 @@
       "dRepId": "DRep ID",
       "txDetails": {
         "deposit": "Deposit",
-        "rewardAccount": "Reward account",
+        "rewardAccount": "Reward Account",
         "title": "Transaction Details",
         "txType": "Transaction Type"
       },

@@ -64,7 +64,7 @@ const data: ComponentProps<typeof NewConstitutionAction> = {
       title: 'Transaction Details',
       txType: 'Transaction Type',
       deposit: 'Deposit',
-      rewardAccount: 'Reward account'
+      rewardAccount: 'Reward Account'
     },
     procedure: {
       anchor: {

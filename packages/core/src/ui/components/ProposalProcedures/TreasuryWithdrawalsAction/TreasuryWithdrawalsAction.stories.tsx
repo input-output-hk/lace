@@ -63,7 +63,7 @@ const data: ComponentProps<typeof TreasuryWithdrawalsAction> = {
       title: 'Transaction Details',
       txType: 'Transaction Type',
       deposit: 'Deposit',
-      rewardAccount: 'Reward account'
+      rewardAccount: 'Reward Account'
     },
     procedure: {
       anchor: {
@@ -80,7 +80,7 @@ const data: ComponentProps<typeof TreasuryWithdrawalsAction> = {
     withdrawals: {
       title: 'Withdrawal Details',
       lovelace: 'Lovelace Withdrawn',
-      rewardAccount: 'Reward account'
+      rewardAccount: 'Reward Account'
     }
   }
 };
