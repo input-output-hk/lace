@@ -106,7 +106,7 @@ When(
 
 // TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  await $(`/ /*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
+  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
     timeout: 5000,
     reverse: expectedResult === 'No'
   });
