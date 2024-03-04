@@ -8,21 +8,24 @@ import { Typography } from 'antd';
 import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
-import { TransactionAssets, SummaryExpander } from '@lace/ui';
+import { TransactionAssets, SummaryExpander, DappTransactionSummary } from '@lace/ui';
 
 export interface DappAddressSectionProps {
   groupedFromAddresses: {
     nfts: Array<AssetInfoWithAmount>;
     tokens: Array<AssetInfoWithAmount>;
     addresses: Array<Cardano.PaymentAddress>;
+    coins: Array<bigint>;
   };
   groupedToAddresses: {
     nfts: Array<AssetInfoWithAmount>;
     tokens: Array<AssetInfoWithAmount>;
     addresses: Array<Cardano.PaymentAddress>;
+    coins: Array<bigint>;
   };
   isToAddressesEnabled: boolean;
   isFromAddressesEnabled: boolean;
+  coinSymbol: string;
 }
 
 const tryDecodeAsUtf8 = (
@@ -76,11 +79,14 @@ const { Title, Text } = Typography;
 const charBeforeEllipsisName = 8;
 const charAfterEllipsisName = 8;
 
+const getStringFromLovelace = (value: bigint): string => Wallet.util.lovelacesToAdaString(value.toString());
+
 export const DappAddressSections = ({
   groupedFromAddresses,
   groupedToAddresses,
   isToAddressesEnabled,
-  isFromAddressesEnabled
+  isFromAddressesEnabled,
+  coinSymbol
 }: DappAddressSectionProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -100,19 +106,28 @@ export const DappAddressSections = ({
               </Text>
             </div>
           ))}
-          {groupedFromAddresses.tokens.length > 0 && (
-            <>
-              <div className={styles.tokenCount}>
-                <Title level={5} data-testid="dapp-transaction-tokens-title">
-                  {t('package.core.dappTransaction.tokens')}
-                </Title>
-                <Title level={5}>
-                  -{groupedFromAddresses.tokens.length} {itemsCountCopy}
-                </Title>
-              </div>
-              {displayGroupedTokens(groupedFromAddresses.tokens)}
-            </>
-          )}
+
+          {groupedFromAddresses.tokens.length > 0 ||
+            (groupedFromAddresses.coins.length > 0 && (
+              <>
+                <div className={styles.tokenCount}>
+                  <Title level={5} data-testid="dapp-transaction-tokens-title">
+                    {t('package.core.dappTransaction.tokens')}
+                  </Title>
+                  <Title level={5}>
+                    -{groupedFromAddresses.tokens.length} {itemsCountCopy}
+                  </Title>
+                </div>
+                {groupedFromAddresses.coins.map((coin) => (
+                  <DappTransactionSummary
+                    key={groupedFromAddresses.addresses[0]}
+                    cardanoSymbol={coinSymbol}
+                    transactionAmount={getStringFromLovelace(coin)}
+                  />
+                ))}
+                {displayGroupedTokens(groupedFromAddresses.tokens)}
+              </>
+            ))}
           {groupedFromAddresses.nfts.length > 0 && (
             <>
               <div className={styles.tokenCount}>
@@ -142,19 +157,27 @@ export const DappAddressSections = ({
             </div>
           ))}
         </div>
-        {groupedToAddresses.tokens.length > 0 && (
-          <>
-            <div className={styles.tokenCount}>
-              <Title level={5} data-testid="dapp-transaction-tokens-title">
-                {t('package.core.dappTransaction.tokens')}
-              </Title>
-              <Title level={5}>
-                +{groupedToAddresses.tokens.length} {itemsCountCopy}
-              </Title>
-            </div>
-            {displayGroupedTokens(groupedToAddresses.tokens)}
-          </>
-        )}
+        {groupedToAddresses.tokens.length > 0 ||
+          (groupedToAddresses.coins.length > 0 && (
+            <>
+              <div className={styles.tokenCount}>
+                <Title level={5} data-testid="dapp-transaction-tokens-title">
+                  {t('package.core.dappTransaction.tokens')}
+                </Title>
+                <Title level={5}>
+                  +{groupedToAddresses.tokens.length} {itemsCountCopy}
+                </Title>
+              </div>
+              {groupedToAddresses.coins.map((coin) => (
+                <DappTransactionSummary
+                  key={groupedFromAddresses.addresses[0]}
+                  cardanoSymbol={coinSymbol}
+                  transactionAmount={`+${getStringFromLovelace(coin)}`}
+                />
+              ))}
+              {displayGroupedTokens(groupedToAddresses.tokens)}
+            </>
+          ))}
         {groupedToAddresses.nfts.length > 0 && (
           <>
             <div className={styles.tokenCount}>

@@ -39,21 +39,27 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
     nfts: Array<AssetInfoWithAmount>;
     tokens: Array<AssetInfoWithAmount>;
     addresses: Array<Cardano.PaymentAddress>;
+    coins: Array<bigint>;
   } = {
     nfts: [],
     tokens: [],
-    addresses: []
+    addresses: [],
+    coins: []
   };
 
   for (const [address, value] of addresses) {
     const addressAssets = value.assets;
     groupedAddresses.addresses.push(address);
 
-    for (const [, asset] of addressAssets) {
-      if (asset.assetInfo.supply === BigInt(1)) {
-        groupedAddresses.nfts.push(asset);
-      } else {
-        groupedAddresses.tokens.push(asset);
+    if (addressAssets.size === 0) {
+      groupedAddresses.coins.push(value.coins);
+    } else {
+      for (const [, asset] of addressAssets) {
+        if (asset.assetInfo.supply === BigInt(1)) {
+          groupedAddresses.nfts.push(asset);
+        } else {
+          groupedAddresses.tokens.push(asset);
+        }
       }
     }
   }
@@ -104,13 +110,21 @@ export const DappTransaction = ({
   dappInfo
 }: DappTransactionProps): React.ReactElement => {
   const { t } = useTranslate();
+  console.log('FROM ADDRESs', fromAddress, toAddress);
 
   const groupedToAddresses = groupAddresses(toAddress);
   const groupedFromAddresses = groupAddresses(fromAddress);
 
-  const isFromAddressesEnabled = groupedFromAddresses.tokens.length > 0 || groupedFromAddresses.nfts.length > 0;
-  const isToAddressesEnabled = groupedToAddresses.tokens.length > 0 || groupedToAddresses.nfts.length > 0;
+  const isFromAddressesEnabled =
+    groupedFromAddresses.addresses.length > 0 ||
+    groupedFromAddresses.tokens.length > 0 ||
+    groupedFromAddresses.nfts.length > 0;
+  const isToAddressesEnabled =
+    groupedToAddresses.addresses.length > 0 ||
+    groupedToAddresses.tokens.length > 0 ||
+    groupedToAddresses.nfts.length > 0;
 
+  console.log('from address:', groupedFromAddresses);
   return (
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
@@ -190,6 +204,7 @@ export const DappTransaction = ({
           isFromAddressesEnabled={isFromAddressesEnabled}
           groupedFromAddresses={groupedFromAddresses}
           groupedToAddresses={groupedToAddresses}
+          coinSymbol={coinSymbol}
         />
       </div>
     </div>
