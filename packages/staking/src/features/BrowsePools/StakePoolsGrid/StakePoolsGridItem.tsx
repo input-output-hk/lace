@@ -1,6 +1,5 @@
 import { PostHogAction } from '@lace/common';
 import { StakePoolCard } from 'features/BrowsePools/StakePoolCard';
-import get from 'lodash/get';
 import React from 'react';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
@@ -10,8 +9,6 @@ export const StakePoolsGridItem = ({
   stakePool,
   hexId,
   id,
-  saturation,
-  ticker,
   sortField,
   ...data
 }: StakePoolsGridItemProps): React.ReactElement => {
@@ -32,9 +29,9 @@ export const StakePoolsGridItem = ({
     <StakePoolCard
       key={id}
       metricType={sortField}
-      metricValue={get(data, sortField)}
-      saturation={saturation}
-      title={ticker}
+      metricValue={data[sortField]}
+      saturation={data.saturation}
+      title={data.ticker}
       onClick={onClick}
       selected={poolAlreadySelected}
     />

@@ -1,3 +1,4 @@
+import { UnitSymbol } from '@lace/common';
 import { Flex, Text } from '@lace/ui';
 import AdaIcon from 'assets/icons/ada.svg';
 import ChartPieIcon from 'assets/icons/chart-pie.svg';
@@ -6,10 +7,19 @@ import { ReactNode } from 'react';
 import { SortField } from '../../types';
 import * as styles from './PoolMetric.css';
 
-interface Props {
-  metricType: SortField;
+type StringMetrics = Exclude<SortField, 'cost' | 'pledge' | 'liveStake'>;
+
+type StringMetricProps = {
+  metricType: StringMetrics;
   metricValue: string;
-}
+};
+
+type NumberMetricProps = {
+  metricType: Exclude<SortField, StringMetrics>;
+  metricValue: { number: number; unit: UnitSymbol };
+};
+
+type PoolMetricProps = StringMetricProps | NumberMetricProps;
 
 const iconsByType: Record<SortField, ReactNode> = {
   blocks: <CubeIcon className={styles.icon} />,
@@ -22,9 +32,11 @@ const iconsByType: Record<SortField, ReactNode> = {
   ticker: null,
 };
 
-export const PoolMetric = ({ metricType, metricValue }: Props) => (
+export const PoolMetric = ({ metricType, metricValue }: PoolMetricProps) => (
   <Flex alignItems="center" gap="$4" className={styles.metric}>
     {iconsByType[metricType]}
-    <Text.Body.Small weight="$medium">{metricValue}</Text.Body.Small>
+    <Text.Body.Small weight="$medium">
+      {typeof metricValue === 'string' ? metricValue : `${metricValue.number}${metricValue.unit}`}
+    </Text.Body.Small>
   </Flex>
 );
