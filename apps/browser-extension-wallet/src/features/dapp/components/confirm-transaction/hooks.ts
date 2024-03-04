@@ -9,7 +9,6 @@ import {
   createTxInspector,
   MintedAsset
 } from '@cardano-sdk/core';
-import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
 import { dAppRoutePaths } from '@routes';
 import { Wallet } from '@lace/cardano';
 import { useRedirection } from '@hooks';
@@ -20,7 +19,7 @@ import { getTransactionAssetsId } from '@src/stores/slices';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { allowSignTx, pubDRepKeyToHash, disallowSignTx, getTxType } from './utils';
 import { useWalletStore } from '@stores';
-import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { ObservableWalletState } from '@hooks/useWalletState';
 
@@ -176,16 +175,21 @@ export const useSignWithHardwareWallet = (
 } => {
   const allow = useAllowSignTx(req);
   const disallow = useDisallowSignTx(req);
-  const redirectToSignFailure = useRedirection<Record<string, never>>(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
-      await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
-      allow();
-    } catch {
+      if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
+        throw new Error('Invalid state: expected hw wallet');
+      }
+      await req.sign();
+      redirectToSignSuccess();
+    } catch (error) {
+      console.error('signWithHardwareWallet error', error);
       disallow(false);
-      redirectToSignFailure({});
+      redirectToSignFailure();
     }
   }, [allow, disallow, redirectToSignFailure]);
 
