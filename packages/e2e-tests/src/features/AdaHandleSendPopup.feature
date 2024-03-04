@@ -13,7 +13,7 @@ Feature: ADA handle - popup view
     Given I validate that handle: "$handletosend2" is listed on the Receive screen
     And I add address with name: "$handletosend2" and address: "$handletosend2" to address book in popup mode
     And I navigate to NFTs popup page
-    And I'm sending the NFT with name: "$handletosend2" in popup mode
+    And I'm sending the ADA handle with name: "$handletosend2" in popup mode
     And I enter correct password and confirm the transaction
     And The Transaction submitted screen is displayed in popup mode
     And I close the drawer by clicking close button

@@ -321,7 +321,11 @@ Then(
   /^I see review handle drawer in (extended|popup) mode for handle: "([^"]*)"$/,
   async (mode: 'extended' | 'popup', handleName: string) => {
     const previousAddress = String(getTestWallet(testContext.load('activeWallet')).address);
-    const newAddress = String(getTestWallet(await nftsPageObject.getNonActiveNftWalletName()).address);
+    const receiverWallet =
+      mode === 'extended'
+        ? getTestWallet(await nftsPageObject.getNonActiveAdaHandleWalletName())
+        : getTestWallet(await nftsPageObject.getNonActiveAdaHandle2WalletName());
+    const newAddress = String(receiverWallet.address);
     await ReviewAddressDrawerAssert.assertSeeReviewAddressDrawer(mode, handleName, previousAddress, newAddress);
   }
 );

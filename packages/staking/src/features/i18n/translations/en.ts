@@ -66,6 +66,7 @@ export const en: Translations = {
   'drawer.confirmation.chargedDepositAmountInfo': "The amount you'll be charged for registering your stake key.",
   'drawer.confirmation.errors.utxoBalanceInsufficient': 'Balance Insufficient',
   'drawer.confirmation.errors.utxoFullyDepleted': 'UTxO Fully Depleted',
+  'drawer.confirmation.noPools': 'No pools',
   'drawer.confirmation.reclaimDepositAmountInfo': "The amount you'll be awarded for de-registering your stake key.",
   'drawer.confirmation.stakingDeposit': 'Staking deposit',
   'drawer.confirmation.subTitle': 'Confirm the amount and the stake pool',
@@ -110,10 +111,12 @@ export const en: Translations = {
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
+  'drawer.preferences.browsePools': 'Browse pools',
   'drawer.preferences.confirmButton': 'Confirm new portfolio',
   'drawer.preferences.ctaButtonTooltip.invalidAllocation': 'You need to have a 100% allocation in order to proceed',
   'drawer.preferences.ctaButtonTooltip.zeroPercentageSliderError':
     'Every portfolio pool requires more than 0% allocation',
+  'drawer.preferences.noSelectedPools': "You don't have any staking pool selected",
   'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
   'drawer.preferences.poolDetails.actualRatio': 'Actual ratio',
   'drawer.preferences.poolDetails.actualRatioTooltip':
@@ -131,6 +134,7 @@ export const en: Translations = {
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
   'drawer.sign.error.invalidPassword': 'Wrong password',
   'drawer.sign.passwordPlaceholder': 'Password',
+  'drawer.success.modification.title': 'Hurray! Your modification has been submitted',
   'drawer.success.subTitle': "You'll start receiving your staking rewards after two epochs.",
   'drawer.success.switchedPools.subTitle':
     "You'll start receiving your staking rewards from the new pool after two epochs. Until then you'll continue receiving rewards from the previous one.",

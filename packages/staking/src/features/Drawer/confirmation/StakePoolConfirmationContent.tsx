@@ -47,13 +47,17 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
 
   useEffect(() => {
     (async () => {
-      if (draftPortfolio.length === 0 || loading) return;
+      if (loading) return;
       // TODO: move below logic to zustand store
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
         const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.sliderIntegerPercentage }));
-        const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
+        const tx = await txBuilder
+          // passing null de-registers all stake keys
+          .delegatePortfolio(pools.length > 0 ? { pools } : null)
+          .build()
+          .inspect();
         const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
         const newDelegationTxDeposit = implicitCoin.deposit;
         const newDelegationTxReclaim = Wallet.util.calculateDepositReclaim(implicitCoin) || BigInt(0);
