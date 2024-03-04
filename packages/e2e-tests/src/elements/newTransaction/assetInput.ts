@@ -24,6 +24,7 @@ export class AssetInput {
   }
 
   async clickAddAssetButton(): Promise<void> {
+    await this.assetAddButton.waitForStable();
     await this.assetAddButton.click();
   }
 }

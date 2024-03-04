@@ -128,6 +128,7 @@ type KeysStructure = {
         title: '';
         subTitle: '';
       };
+      modification: { title: '' };
     };
     failure: {
       title: '';
@@ -177,6 +178,7 @@ type KeysStructure = {
       title: '';
       subTitle: '';
       cardanoName: '';
+      noPools: '';
       transactionCost: {
         title: '';
       };
@@ -203,7 +205,9 @@ type KeysStructure = {
       };
     };
     preferences: {
+      browsePools: '';
       selectedStakePools: '';
+      noSelectedPools: '';
       addPoolButton: '';
       pickMorePools: '';
       confirmButton: '';
