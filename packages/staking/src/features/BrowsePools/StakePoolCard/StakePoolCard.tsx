@@ -14,6 +14,9 @@ export interface StakePoolCardProps {
   onClick?: () => void;
 }
 
+const shouldRenderMetric = (sortField: SortField, metricValue?: string): metricValue is string =>
+  !!metricValue && !['ros', 'ticker', 'saturation'].includes(sortField);
+
 export const StakePoolCard = ({
   title = '-',
   metricType,
@@ -28,7 +31,9 @@ export const StakePoolCard = ({
         <Text.Body.Normal weight="$medium" className={styles.title}>
           {title}
         </Text.Body.Normal>
-        {metricValue && <PoolMetric metricType={metricType} metricValue={metricValue} />}
+        {shouldRenderMetric(metricType, metricValue) && (
+          <PoolMetric metricType={metricType} metricValue={metricValue} />
+        )}
       </Flex>
       <StakePoolCardProgressBar percentage={saturation} />
     </Flex>
