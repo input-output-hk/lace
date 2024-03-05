@@ -23,6 +23,8 @@ const data: ComponentProps<typeof DappTransaction> = {
   fiatCurrencyCode: 'usd',
   fromAddress: new Map(),
   toAddress: new Map(),
+  // eslint-disable-next-line no-magic-numbers
+  collateral: 150_000 as unknown as bigint,
   txInspectionDetails: {
     assets: new Map(),
     // eslint-disable-next-line no-magic-numbers

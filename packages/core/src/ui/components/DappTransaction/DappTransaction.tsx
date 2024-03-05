@@ -30,7 +30,7 @@ export interface DappTransactionProps {
   /** tokens send to being sent to or from the user */
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
-  collateral?: string;
+  collateral?: bigint;
 }
 
 const isNFT = (asset: AssetInfoWithAmount) => asset.assetInfo.supply === BigInt(1);
@@ -150,9 +150,9 @@ export const DappTransaction = ({
           })}
         </div>
 
-        {collateral && (
+        {collateral !== undefined && collateral !== BigInt(0) && (
           <Collateral
-            collateral={collateral}
+            collateral={Wallet.util.lovelacesToAdaString(collateral.toString())}
             amountTransformer={amountTransformer({
               price: fiatCurrencyPrice,
               code: fiatCurrencyCode
