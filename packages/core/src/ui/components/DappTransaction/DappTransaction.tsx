@@ -13,6 +13,7 @@ import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
 import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
+import cn from 'classnames';
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
   `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
@@ -164,15 +165,16 @@ export const DappTransaction = ({
 
         {returnedDeposit !== BigInt(0) && (
           <TransactionFee
-            fee={`+${Wallet.util.lovelacesToAdaString(returnedDeposit.toString())}`}
+            fee={Wallet.util.lovelacesToAdaString(returnedDeposit.toString())}
             testId="returned-deposit"
             label={t('package.core.dappTransaction.returnedDeposit')}
             coinSymbol={coinSymbol}
-            className={styles.depositContainer}
+            className={cn([styles.depositContainer, styles.positiveAmount])}
             displayFiat={false}
             amountTransformer={() =>
               `${Wallet.util.lovelacesToAdaString(returnedDeposit.toString())} ${fiatCurrencyCode}`
             }
+            highlightPositiveAmount
           />
         )}
 

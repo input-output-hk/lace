@@ -11,6 +11,7 @@ export interface TransactionFeeProps {
   testId?: string;
   tooltipInfo?: string;
   displayFiat?: boolean;
+  highlightPositiveAmount?: boolean;
 }
 export const TransactionFee = ({
   fee,
@@ -20,7 +21,8 @@ export const TransactionFee = ({
   className,
   testId,
   tooltipInfo,
-  displayFiat
+  displayFiat,
+  highlightPositiveAmount
 }: TransactionFeeProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -33,6 +35,7 @@ export const TransactionFee = ({
       data-testid={testId ?? 'fee'}
       className={className}
       displayFiat={displayFiat}
+      highlightPositiveAmount={highlightPositiveAmount}
     />
   );
 };

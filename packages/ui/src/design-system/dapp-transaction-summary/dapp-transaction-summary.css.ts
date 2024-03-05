@@ -5,8 +5,15 @@ export const transactionTypeContainer = style({
 });
 
 export const label = sx({
-  color: '$dapp_transaction_summary_label',
   fontWeight: '$semibold',
+});
+
+export const positiveBalance = sx({
+  color: '$dapp_transaction_summary_positive_balance_label_color',
+});
+
+export const negativeBalance = sx({
+  color: '$dapp_transaction_summary_label',
 });
 
 export const txSummaryTitle = style([
