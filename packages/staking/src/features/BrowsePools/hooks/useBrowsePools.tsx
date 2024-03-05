@@ -10,37 +10,39 @@ import { BrowsePoolsView, StakePoolSortOptions } from '../types';
 export const useBrowsePools = () => {
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const {
-    walletStoreStakePoolSearchResults: { pageResults, totalResultCount },
+    walletStoreStakePoolSearchResults: { pageResults, totalResultCount: totalPoolsCount },
     walletStoreStakePoolSearchResultsStatus,
     walletStoreFetchStakePools: fetchStakePools,
     analytics,
     setStakingBrowserPreferencesPersistence,
   } = useOutsideHandles();
 
-  const { poolsView, searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
+  const { poolsView, searchQuery, sort } = useDelegationPortfolioStore((store) => ({
     poolsView: store.browsePoolsView || BrowsePoolsView.table,
     searchQuery: store.searchQuery,
-    sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
-    sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
+    sort: {
+      field: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
+      order: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
+    },
   }));
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE_IN_MS), [fetchStakePools]);
 
-  const loadMoreData = useCallback(
+  const fetchPoolsByRange = useCallback(
     ({ startIndex, endIndex }: Parameters<StakePoolsListProps['loadMoreData']>[0]) => {
       if (startIndex !== endIndex) {
         debouncedSearch({
           limit: endIndex,
           searchString: searchQuery ?? '',
           skip: startIndex,
-          sort: { field: sortField, order: sortOrder },
+          sort,
         });
       }
     },
-    [debouncedSearch, searchQuery, sortField, sortOrder]
+    [debouncedSearch, searchQuery, sort]
   );
 
-  const onSearch = useCallback(
+  const setSearchQuery = useCallback(
     (searchString: string) => {
       const startedTyping = searchQuery === '' && searchString !== '';
       if (startedTyping) {
@@ -54,7 +56,7 @@ export const useBrowsePools = () => {
     [analytics, portfolioMutators, searchQuery]
   );
 
-  const list = useMemo(
+  const pools = useMemo(
     () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
     [pageResults]
   );
@@ -81,31 +83,27 @@ export const useBrowsePools = () => {
 
   return useMemo(
     () => ({
-      fetchingPools: walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING,
-      list,
-      loadMoreData,
-      onSearch,
+      fetchPoolsByRange,
+      loading: walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING,
+      pools,
       poolsView,
-      searchValue: searchQuery,
+      searchQuery,
+      setSearchQuery,
       setSort,
-      sort: {
-        field: sortField,
-        order: sortOrder,
-      },
+      sort,
       switchPoolsView,
-      totalResultCount,
+      totalPoolsCount,
     }),
     [
       walletStoreStakePoolSearchResultsStatus,
-      list,
-      loadMoreData,
-      onSearch,
+      pools,
+      fetchPoolsByRange,
+      setSearchQuery,
       searchQuery,
       setSort,
-      sortField,
-      sortOrder,
+      sort,
       switchPoolsView,
-      totalResultCount,
+      totalPoolsCount,
       poolsView,
     ]
   );

@@ -1,4 +1,3 @@
-import { StakePoolSortOptions } from '@cardano-sdk/core';
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
 import { ExecuteCommand, State } from './stateMachine';
@@ -61,8 +60,3 @@ export interface QueryStakePoolsFilters {
   [PoolsFilter.Performance]: [string, string];
   [PoolsFilter.Ros]: [string];
 }
-
-export type QueryStakePoolsArgs = {
-  sort: StakePoolSortOptions;
-  filters?: QueryStakePoolsFilters;
-};

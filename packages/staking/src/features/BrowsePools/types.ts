@@ -16,14 +16,14 @@ export enum SaturationLevels {
 // APY is deprecated and replaced by ROS
 export type SortField = 'ticker' | Exclude<SortFieldSDK, 'apy' | 'lastRos' | 'name'>;
 
-export type StakePoolSortOptions = {
-  field: SortField;
-  order: SortDirection;
-};
-
 export enum SortDirection {
   asc = 'asc',
   desc = 'desc',
 }
+
+export type StakePoolSortOptions = {
+  field: SortField;
+  order: SortDirection;
+};
 
 export type TranslationsFor<T extends string> = Record<T, string>;

@@ -6,20 +6,6 @@ import { ReactNode } from 'react';
 import { SortField } from '../../types';
 import * as styles from './PoolMetric.css';
 
-// type StringMetrics = Exclude<SortField, 'cost' | 'pledge' | 'liveStake'>;
-
-// type StringMetricProps = {
-//   metricType: StringMetrics;
-//   metricValue: string;
-// };
-
-// type NumberMetricProps = {
-//   metricType: Exclude<SortField, StringMetrics>;
-//   metricValue: { number: number; unit: UnitSymbol };
-// };
-
-// type PoolMetricProps = StringMetricProps | NumberMetricProps;
-
 type PoolMetricProps = {
   metricType: SortField;
   metricValue: string;

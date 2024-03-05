@@ -19,14 +19,14 @@ const LACE_APP_ID = 'lace-app';
 export const BrowsePools = () => {
   const { setStakingBrowserPreferencesPersistence, stakingBrowserPreferencesPersistence } = useOutsideHandles();
   const {
-    totalResultCount,
-    fetchingPools,
-    searchValue,
-    onSearch,
+    totalPoolsCount,
+    loading,
+    searchQuery,
+    setSearchQuery,
     setSort,
     sort,
-    list,
-    loadMoreData,
+    pools,
+    fetchPoolsByRange,
     switchPoolsView,
     poolsView,
   } = useBrowsePools();
@@ -56,7 +56,7 @@ export const BrowsePools = () => {
     [
       stakingBrowserPreferencesPersistence,
       poolsView,
-      searchValue,
+      searchQuery,
       selectedPortfolioStakePools,
       sort,
       setStakingBrowserPreferencesPersistence,
@@ -93,33 +93,33 @@ export const BrowsePools = () => {
   return (
     <>
       <Box className={styles.stakePoolsTable} data-testid="stake-pool-table">
-        <BrowsePoolsHeader poolsCount={totalResultCount} poolsView={poolsView} setPoolsView={switchPoolsView} />
+        <BrowsePoolsHeader poolsCount={totalPoolsCount} poolsView={poolsView} setPoolsView={switchPoolsView} />
         <Search
           className={styles.searchBar}
           withSearchIcon
           inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
-          onChange={onSearch}
-          value={searchValue}
-          defaultValue={searchValue}
+          onChange={setSearchQuery}
+          value={searchQuery}
+          defaultValue={searchQuery}
           data-testid="search-input"
-          loading={fetchingPools}
+          loading={loading}
         />
         <Box mt="$16" mb="$112">
           {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && poolsView === BrowsePoolsView.grid ? (
             <StakePoolsGrid
-              emptyPlaceholder={!fetchingPools && totalResultCount === 0 && <StakePoolsListEmpty />}
+              emptyPlaceholder={!loading && totalPoolsCount === 0 && <StakePoolsListEmpty />}
               selectedPools={selectedList}
-              pools={list}
-              loadMoreData={loadMoreData}
+              pools={pools}
+              loadMoreData={fetchPoolsByRange}
               scrollableTargetId={LACE_APP_ID}
               sortField={sort.field}
             />
           ) : (
             <StakePoolsList
-              emptyPlaceholder={!fetchingPools && totalResultCount === 0 && <StakePoolsListEmpty />}
+              emptyPlaceholder={!loading && totalPoolsCount === 0 && <StakePoolsListEmpty />}
               selectedPools={selectedList}
-              pools={list}
-              loadMoreData={loadMoreData}
+              pools={pools}
+              loadMoreData={fetchPoolsByRange}
               scrollableTargetId={LACE_APP_ID}
               translations={tableHeaderTranslations}
               activeSort={sort}
