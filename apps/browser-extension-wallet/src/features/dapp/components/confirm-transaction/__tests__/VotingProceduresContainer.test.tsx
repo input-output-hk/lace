@@ -7,10 +7,13 @@ const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockVotingProcedures = jest.fn();
+const mockNonRegisteredUserModal = jest.fn();
+const mockUseDisallowSignTx = jest.fn();
+const mockHasValidDrepRegistration = jest.fn();
 const mockPreprodCexplorerBaseUrl = 'PREPROD_CEXPLORER_BASE_URL';
 const mockCexplorerUrlPathsTx = 'CEXPLORER_URL_PATHS.TX';
 import * as React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import { VotingProceduresContainer } from '../VotingProceduresContainer';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
@@ -47,12 +50,35 @@ jest.mock('@lace/core', () => {
   };
 });
 
+jest.mock('../NonRegisteredUserModal/NonRegisteredUserModal', () => {
+  const original = jest.requireActual('../NonRegisteredUserModal/NonRegisteredUserModal');
+  return {
+    __esModule: true,
+    ...original,
+    NonRegisteredUserModal: mockNonRegisteredUserModal
+  };
+});
+
 jest.mock('react-i18next', () => {
   const original = jest.requireActual('react-i18next');
   return {
     __esModule: true,
     ...original,
     useTranslation: mockUseTranslation
+  };
+});
+
+jest.mock('../utils', () => ({
+  ...jest.requireActual<any>('../utils'),
+  hasValidDrepRegistration: mockHasValidDrepRegistration
+}));
+
+jest.mock('../hooks', () => {
+  const original = jest.requireActual('../hooks');
+  return {
+    __esModule: true,
+    ...original,
+    useDisallowSignTx: mockUseDisallowSignTx
   };
 });
 
@@ -153,19 +179,21 @@ jest.mock('@providers', () => ({
 
 describe('Testing VotingProceduresContainer component', () => {
   beforeEach(() => {
+    mockHasValidDrepRegistration.mockReset();
+    mockHasValidDrepRegistration.mockReturnValue(true);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
       environmentName: 'Preprod'
     }));
     mockVotingProcedures.mockReset();
     mockVotingProcedures.mockReturnValue(<span data-testid="VotingProcedures" />);
+    mockNonRegisteredUserModal.mockReset();
+    mockNonRegisteredUserModal.mockReturnValue(<span data-testid="NonRegisteredUserModal" />);
     mockUseTranslation.mockReset();
     mockUseTranslation.mockImplementation(() => ({ t }));
   });
 
   afterEach(() => {
-    jest.resetModules();
-    jest.resetAllMocks();
     cleanup();
   });
 
@@ -223,6 +251,71 @@ describe('Testing VotingProceduresContainer component', () => {
       },
       {}
     );
+  });
+
+  test('should handle NonRegisteredUserModal onConfirm', async () => {
+    mockHasValidDrepRegistration.mockReset();
+    mockHasValidDrepRegistration.mockReturnValue(false);
+    mockUseWalletStore.mockReset();
+    mockUseWalletStore.mockImplementation(() => ({
+      environmentName: 'Preprod',
+      walletState: {
+        transactions: {
+          history: []
+        }
+      }
+    }));
+
+    await act(async () => {
+      render(<VotingProceduresContainer />, {
+        wrapper: getWrapper()
+      });
+    });
+
+    expect(mockNonRegisteredUserModal.mock.calls[mockNonRegisteredUserModal.mock.calls.length - 1][0].visible).toEqual(
+      true
+    );
+
+    await act(async () => {
+      mockNonRegisteredUserModal.mock.calls[mockNonRegisteredUserModal.mock.calls.length - 1][0].onConfirm();
+    });
+
+    await waitFor(async () => {
+      expect(
+        mockNonRegisteredUserModal.mock.calls[mockNonRegisteredUserModal.mock.calls.length - 1][0].visible
+      ).toEqual(false);
+    });
+  });
+
+  test('should handle NonRegisteredUserModal onClose', async () => {
+    const disallowSignTxMock = jest.fn();
+    mockUseDisallowSignTx.mockReset();
+    mockUseDisallowSignTx.mockReturnValue(disallowSignTxMock);
+    mockHasValidDrepRegistration.mockReset();
+    mockHasValidDrepRegistration.mockReturnValue(false);
+    mockUseWalletStore.mockReset();
+    mockUseWalletStore.mockImplementation(() => ({
+      environmentName: 'Preprod',
+      walletState: {
+        transactions: {
+          history: []
+        }
+      }
+    }));
+
+    await act(async () => {
+      render(<VotingProceduresContainer />, {
+        wrapper: getWrapper()
+      });
+    });
+
+    expect(disallowSignTxMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      mockNonRegisteredUserModal.mock.calls[mockNonRegisteredUserModal.mock.calls.length - 1][0].onClose();
+    });
+
+    expect(disallowSignTxMock).toHaveBeenCalledWith(true);
   });
 
   test('testing getVoterType', () => {

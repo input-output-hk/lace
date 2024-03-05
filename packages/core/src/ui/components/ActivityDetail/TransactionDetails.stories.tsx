@@ -129,7 +129,7 @@ const voteRegistrationDelegationCertificate = [
     details: ['stake1u929x2y7nnfm797upl7v9rc39pqg87pk5cygvnn2edqmvuq6h48su']
   },
   {
-    title: 'drep',
+    title: 'drepId',
     details: ['drep1cs234l5mtapethapx8cq97nkpa27xf84phruh5f6jqxa78ymlp4']
   },
   {
@@ -161,7 +161,7 @@ const stakeVoteRegistrationDelegationCertificate = [
     details: ['pool1k0ucs0fau2vhr3p7qh7mnpfgrllwwda7petxjz2gzzaxkyp8f88']
   },
   {
-    title: 'drep',
+    title: 'drepId',
     details: ['drep1cs234l5mtapethapx8cq97nkpa27xf84phruh5f6jqxa78ymlp4']
   },
   {

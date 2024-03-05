@@ -7,6 +7,7 @@ import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
+import { VoterTypeEnum, getVoterType } from '@src/utils/tx-inspection';
 
 const { CertificateType } = Wallet.Cardano;
 
@@ -166,3 +167,23 @@ export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): s
       throw new Error(`coinId ${coinId.name} not supported`);
   }
 };
+
+export const hasValidDrepRegistration = (history: Wallet.Cardano.HydratedTx[]): boolean => {
+  for (const transaction of history) {
+    const drepRegistrationOrRetirementCerticicate = transaction.body.certificates?.find((cert) =>
+      [CertificateType.UnregisterDelegateRepresentative, CertificateType.RegisterDelegateRepresentative].includes(
+        cert.__typename
+      )
+    );
+
+    if (drepRegistrationOrRetirementCerticicate) {
+      return drepRegistrationOrRetirementCerticicate.__typename === CertificateType.RegisterDelegateRepresentative;
+    }
+  }
+  return false;
+};
+
+export const getDRepId = (voter: Wallet.Cardano.Voter): Wallet.Cardano.DRepID | string =>
+  getVoterType(voter.__typename) === VoterTypeEnum.DREP
+    ? drepIDasBech32FromHash(voter.credential.hash)
+    : voter.credential.hash.toString();

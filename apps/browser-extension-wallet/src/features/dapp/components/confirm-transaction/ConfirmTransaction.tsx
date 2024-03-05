@@ -20,6 +20,7 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { of, take } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
+import { Skeleton } from 'antd';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -92,7 +93,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
       pageClassname={styles.spaceBetween}
       title={!confirmTransactionError && txType && t(`core.${txType}.title`)}
     >
-      {req && txType && <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />}
+      {req && txType ? (
+        <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />
+      ) : (
+        <Skeleton loading />
+      )}
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button
