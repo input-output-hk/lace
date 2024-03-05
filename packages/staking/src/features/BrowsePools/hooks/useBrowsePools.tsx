@@ -2,7 +2,7 @@ import { PostHogAction } from '@lace/common';
 import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
 import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
 import { StakePoolsListProps } from '../StakePoolsList';
 import { BrowsePoolsView, StakePoolSortOptions } from '../types';
@@ -10,10 +10,8 @@ import { BrowsePoolsView, StakePoolSortOptions } from '../types';
 export const useBrowsePools = () => {
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const {
-    currentChain,
     walletStoreStakePoolSearchResults: { pageResults, totalResultCount },
     walletStoreStakePoolSearchResultsStatus,
-    walletStoreResetStakePools: resetStakePools,
     walletStoreFetchStakePools: fetchStakePools,
     analytics,
     setStakingBrowserPreferencesPersistence,
@@ -60,10 +58,6 @@ export const useBrowsePools = () => {
     () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
     [pageResults]
   );
-
-  useEffect(() => {
-    resetStakePools?.();
-  }, [currentChain, searchQuery, sortField, sortOrder, resetStakePools]);
 
   const setSort = useCallback(
     (data: StakePoolSortOptions) =>
