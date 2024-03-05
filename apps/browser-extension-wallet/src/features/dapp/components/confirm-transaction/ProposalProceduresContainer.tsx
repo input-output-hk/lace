@@ -19,12 +19,12 @@ export const ProposalProceduresContainer = (): React.ReactElement => {
   } = useViewsFlowContext();
 
   useEffect(() => {
-    const getCertificateData = async () => {
+    const proposalProcedureData = async () => {
       const procedures = await proposalProceduresInspector(request.transaction.toCore());
       setProposalProcedures(procedures);
     };
 
-    getCertificateData();
+    proposalProcedureData();
   }, [request]);
 
   const containerPerTypeMap: Record<
