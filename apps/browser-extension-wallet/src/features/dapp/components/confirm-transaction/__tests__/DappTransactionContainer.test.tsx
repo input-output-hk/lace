@@ -10,7 +10,6 @@ const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockDappTransaction = jest.fn();
-const mockUseTxSummary = jest.fn();
 const mockUseCreateAssetList = jest.fn();
 const mockUseCreateMintedAssetList = jest.fn();
 const mockUseViewsFlowContext = jest.fn();
@@ -82,7 +81,6 @@ jest.mock('../hooks.ts', () => {
   return {
     __esModule: true,
     ...original,
-    useTxSummary: mockUseTxSummary,
     useCreateAssetList: mockUseCreateAssetList,
     useCreateMintedAssetList: mockUseCreateMintedAssetList
   };
@@ -175,8 +173,6 @@ describe('Testing DappTransactionContainer component', () => {
     const props = { errorMessage };
 
     const txSummary = 'txSummary';
-    mockUseTxSummary.mockReset();
-    mockUseTxSummary.mockReturnValue(txSummary);
     const createAssetList = 'createAssetList';
     mockUseCreateAssetList.mockReset();
     mockUseCreateAssetList.mockReturnValue(createAssetList);
@@ -202,13 +198,6 @@ describe('Testing DappTransactionContainer component', () => {
       assetProvider,
       metadata: tx.auxiliaryData.blob,
       mint: tx.body.mint
-    });
-    expect(mockUseTxSummary).toHaveBeenLastCalledWith({
-      addressList,
-      createAssetList,
-      createMintedAssetList,
-      req: request,
-      walletInfo
     });
     expect(mockDappTransaction).toHaveBeenLastCalledWith(
       {
@@ -246,8 +235,6 @@ describe('Testing DappTransactionContainer component', () => {
   test('should render loader in case there is no txSummary', async () => {
     let queryByTestId: any;
 
-    mockUseTxSummary.mockReset();
-    mockUseTxSummary.mockReturnValue(null);
     mockUseCurrencyStore.mockRestore();
 
     const signTxData = { tx: { body: {} } } as unknown as SignTxData;

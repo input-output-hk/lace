@@ -1,27 +1,17 @@
 /* eslint-disable no-console */
 import isPlainObject from 'lodash/isPlainObject';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AssetProvider,
-  assetsBurnedInspector,
-  AssetsMintedInspection,
-  assetsMintedInspector,
-  createTxInspector,
-  MintedAsset
-} from '@cardano-sdk/core';
+import { AssetProvider, AssetsMintedInspection, MintedAsset } from '@cardano-sdk/core';
 import { dAppRoutePaths } from '@routes';
 import { Wallet } from '@lace/cardano';
 import { useRedirection } from '@hooks';
-import { CardanoTxOut, WalletInfo } from '@src/types';
+import { CardanoTxOut } from '@src/types';
 import { config } from '@src/config';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { getTransactionAssetsId } from '@src/stores/slices';
-import { AddressListType } from '@src/views/browser-view/features/activity';
-import { allowSignTx, pubDRepKeyToHash, disallowSignTx, getTxType } from './utils';
+import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
 import { useWalletStore } from '@stores';
 import { TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
-import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
-import { ObservableWalletState } from '@hooks/useWalletState';
 
 export const useCreateAssetList = ({
   assets,
@@ -190,82 +180,8 @@ export const useSignWithHardwareWallet = (
       disallow(false);
       redirectToSignFailure();
     }
-  }, [disallow, redirectToSignFailure]);
+  }, [disallow, redirectToSignFailure, redirectToSignSuccess, req]);
   return { isConfirmingTx, signWithHardwareWallet };
-};
-
-export const useTxSummary = ({
-  req,
-  addressList,
-  walletInfo,
-  createAssetList,
-  createMintedAssetList,
-  walletState
-}: {
-  addressList: AddressListType[];
-  walletInfo: WalletInfo;
-  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
-  createAssetList: (txAssets: Wallet.Cardano.TokenMap) => Wallet.Cip30SignTxAssetItem[];
-  createMintedAssetList: (txAssets: AssetsMintedInspection) => Wallet.Cip30SignTxAssetItem[];
-  walletState: ObservableWalletState | null;
-}): Wallet.Cip30SignTxSummary | undefined => {
-  const [txSummary, setTxSummary] = useState<Wallet.Cip30SignTxSummary | undefined>();
-  const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
-  const txCollateral = useComputeTxCollateral(walletState, tx);
-
-  useEffect(() => {
-    if (!tx) {
-      setTxSummary(void 0);
-      return;
-    }
-    const getTxSummary = async () => {
-      const inspector = createTxInspector({
-        minted: assetsMintedInspector,
-        burned: assetsBurnedInspector
-      });
-
-      const { minted, burned } = await inspector(tx as Wallet.Cardano.HydratedTx);
-
-      const txType = await getTxType(tx);
-      const addressToNameMap = new Map<string, string>(
-        addressList?.map((item: AddressListType) => [item.address, item.name])
-      );
-
-      const externalOutputs = tx.body.outputs.filter((output) => {
-        if (txType === 'Send') {
-          return walletInfo.addresses.every((addr) => output.address !== addr.address);
-        }
-        return true;
-      });
-
-      const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
-        // Don't show withdrawl tx's etc
-        if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-
-        return [
-          ...acc,
-          {
-            coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
-            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
-            ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
-          }
-        ];
-      }, []);
-
-      // eslint-disable-next-line consistent-return
-      setTxSummary({
-        fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-        outputs: txSummaryOutputs,
-        type: txType,
-        mintedAssets: createMintedAssetList(minted),
-        burnedAssets: createMintedAssetList(burned),
-        collateral: txCollateral ? Wallet.util.lovelacesToAdaString(txCollateral.toString()) : undefined
-      });
-    };
-    getTxSummary();
-  }, [tx, walletInfo.addresses, createAssetList, createMintedAssetList, setTxSummary, addressList, txCollateral]);
-
-  return txSummary;
 };
 
 export const useOnBeforeUnload = (callBack: () => void): void => {
