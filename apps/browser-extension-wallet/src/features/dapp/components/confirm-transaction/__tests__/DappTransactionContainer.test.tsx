@@ -331,7 +331,7 @@ describe('Testing DappTransactionContainer component', () => {
         fiatCurrencyPrice: 2,
         errorMessage,
         coinSymbol: 'ADA',
-        collateral: '1.00',
+        collateral: BigInt(1_000_000),
         txInspectionDetails
       },
       {}

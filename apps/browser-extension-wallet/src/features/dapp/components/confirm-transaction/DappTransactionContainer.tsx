@@ -177,7 +177,7 @@ export const DappTransactionContainer = withAddressBookContext(
             fromAddress={fromAddressTokens}
             errorMessage={errorMessage}
             toAddress={toAddressTokens}
-            collateral={Wallet.util.lovelacesToAdaString(txCollateral.toString())}
+            collateral={txCollateral}
           />
         ) : (
           <Skeleton loading />
