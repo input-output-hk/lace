@@ -48,7 +48,7 @@ const items = [
   },
   {
     imageSrc: token2,
-    balance: '-1000.00',
+    balance: '1000.00',
     tokenName: 'Lapisluzzz',
     recipient: '',
   },

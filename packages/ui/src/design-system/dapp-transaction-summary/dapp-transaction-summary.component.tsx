@@ -2,12 +2,13 @@
 import React from 'react';
 
 import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
+import classNames from 'classnames';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import * as Typography from '../typography';
 
-import * as cx from './dapp-transaction-summary.css';
+import * as styles from './dapp-transaction-summary.css';
 
 import type { OmitClassName } from '../../types';
 
@@ -23,24 +24,27 @@ export const TransactionSummary = ({
   cardanoSymbol,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <div className={cx.txSummaryContainer}>
+  <div className={styles.txSummaryContainer}>
     {title !== undefined && (
       <Flex justifyContent="flex-start">
-        <Typography.Body.Large className={cx.txSummaryTitle}>
+        <Typography.Body.Large className={styles.txSummaryTitle}>
           {title}
         </Typography.Body.Large>
       </Flex>
     )}
-    <div className={cx.txAmountContainer}>
+    <div className={styles.txAmountContainer}>
       <Grid {...props} alignItems="$center" columns="$2">
         <Cell>
-          <AdaComponent className={cx.adaIcon} />
+          <AdaComponent className={styles.adaIcon} />
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
             <Typography.Body.Normal
-              className={cx.label}
-              data-testid="dapp-transaction-amount-value"
+              className={classNames(styles.label, {
+                [styles.positiveBalance]: !transactionAmount.includes('-'),
+                [styles.negativeBalance]: transactionAmount.includes('-'),
+              })}
+              data-testId="dapp-transaction-amount-value"
             >
               {transactionAmount} {cardanoSymbol}
             </Typography.Body.Normal>

@@ -177,15 +177,15 @@ export const DappAddressSections = ({
                     <Title level={5} data-testid="dapp-transaction-tokens-title">
                       {t('package.core.dappTransaction.tokens')}
                     </Title>
-                    <Title level={5}>
-                      +{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
+                    <Title level={5} className={styles.positiveAmount}>
+                      {getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
                     </Title>
                   </div>
                   {addressData.coins.map((coin) => (
                     <DappTransactionSummary
                       key={`${address}${coin}`}
                       cardanoSymbol={coinSymbol}
-                      transactionAmount={`+${getStringFromLovelace(coin)}`}
+                      transactionAmount={getStringFromLovelace(coin)}
                     />
                   ))}
                   {displayGroupedTokens(addressData.tokens)}
@@ -198,8 +198,8 @@ export const DappAddressSections = ({
                     <Title level={5} data-testid="dapp-transaction-nfts-title">
                       {t('package.core.dappTransaction.nfts')}
                     </Title>
-                    <Title level={5}>
-                      +{addressData.nfts.length} {itemsCountCopy}
+                    <Title level={5} className={styles.positiveAmount}>
+                      {addressData.nfts.length} {itemsCountCopy}
                     </Title>
                   </div>
                   {displayGroupedNFTs(addressData.nfts)}

@@ -7,6 +7,7 @@ import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import { Tooltip } from '../tooltip';
 import * as Typography from '../typography';
+import classNames from 'classnames';
 
 import * as cx from './transaction-summary.css';
 
@@ -20,6 +21,7 @@ type Props = OmitClassName<'div'> & {
   'data-testid'?: string;
   className?: string;
   displayFiat?: boolean;
+  highlightPositiveAmount?: boolean;
 };
 
 const makeTestId = (namespace = '', path = ''): string | undefined => {
@@ -33,10 +35,12 @@ export const Amount = ({
   tooltip,
   className,
   displayFiat = true,
+  highlightPositiveAmount,
   ...props
 }: Readonly<Props>): JSX.Element => {
   const testId = props['data-testid'];
-
+  const shouldHighlightPositiveAmount =
+    highlightPositiveAmount === true && !amount.includes('-');
   return (
     <div className={className}>
       <Grid {...props} data-testid={makeTestId(testId, 'root')} columns="$2">
@@ -64,19 +68,22 @@ export const Amount = ({
         </Cell>
         <Cell>
           <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-            <Typography.Body.Normal
-              className={cx.text}
+            <Typography.Body.Small
+              className={classNames(cx.text, {
+                [cx.normalAmount]: !shouldHighlightPositiveAmount,
+                [cx.highlightedAmount]: shouldHighlightPositiveAmount,
+              })}
               data-testid={makeTestId(testId, 'amount')}
             >
               {amount}
-            </Typography.Body.Normal>
+            </Typography.Body.Small>
             {displayFiat && (
-              <Typography.Body.Normal
+              <Typography.Body.Small
                 className={cx.secondaryText}
                 data-testid={makeTestId(testId, 'fiat')}
               >
                 {fiatPrice}
-              </Typography.Body.Normal>
+              </Typography.Body.Small>
             )}
           </Flex>
         </Cell>
