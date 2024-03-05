@@ -143,12 +143,21 @@ class TokensPageAssert {
       Number.parseFloat(subtractedAmount) -
       Number.parseFloat(fee);
     const expectedValueRounded = Number.parseFloat(expectedValue.toFixed(2));
+    const tokenBalance = await testContext.load(`${Asset.getByName(tokenName)?.ticker}tokenBalance`);
+    Logger.log(
+      `calculating balance with amount ${subtractedAmount} and fee ${fee} and starting balance ${tokenBalance}`
+    );
     Logger.log(`waiting for token: ${tokenName} with value: ${expectedValueRounded}`);
     await browser.waitUntil(
-      async () =>
-        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded + 0.01 ||
-        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded - 0.01 ||
-        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded,
+      async () => {
+        const valueOnPage = await TokensPage.getTokenBalanceAsFloatByName(tokenName);
+        Logger.log(`currentValue on page: ${valueOnPage}`);
+        return (
+          (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded + 0.01 ||
+          (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded - 0.01 ||
+          (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded
+        );
+      },
       {
         timeout: 120_000,
         interval: 3000,
