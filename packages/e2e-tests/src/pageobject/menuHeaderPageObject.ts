@@ -4,6 +4,7 @@ class MenuHeaderPageObject {
   async clickMenuButton() {
     await MenuHeader.menuButton.waitForClickable({ timeout: 16_000 });
     await MenuHeader.menuButton.click();
+    await MenuHeader.menuWalletName.waitForStable();
   }
 
   async clickUserDetailsButton() {

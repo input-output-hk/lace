@@ -2,6 +2,7 @@
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
+import cn from 'classnames';
 import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
@@ -96,6 +97,8 @@ const translationTypes = {
   self: 'package.core.assetActivityItem.entry.name.self'
 };
 
+const negativeBalanceStyling: Set<ActivityType> = new Set(['outgoing', 'delegationRegistration', 'self', 'delegation']);
+
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
 export const AssetActivityItem = ({
   amount,
@@ -176,6 +179,8 @@ export const AssetActivityItem = ({
     assetAmountContent
   );
 
+  const isNegativeBalance = negativeBalanceStyling.has(type);
+
   return (
     <div data-testid="asset-activity-item" onClick={onClick} className={styles.assetActivityItem}>
       <div className={styles.leftSide}>
@@ -196,9 +201,19 @@ export const AssetActivityItem = ({
         </div>
       </div>
       <div data-testid="asset-amount" className={styles.rightSide}>
-        <h6 data-testid="total-amount" className={styles.title} ref={ref}>
+        <h6
+          data-testid="total-amount"
+          className={cn(styles.title, {
+            [styles.negativeBalance]: isNegativeBalance,
+            [styles.positiveBalance]: !isNegativeBalance
+          })}
+          ref={ref}
+        >
           <span>
-            {assetsText.text}
+            <span data-testid="balance">
+              {isNegativeBalance ? '-' : ''}
+              {assetsText.text}
+            </span>
             {assetsText.suffix && (
               <Tooltip
                 overlayClassName={styles.tooltip}
