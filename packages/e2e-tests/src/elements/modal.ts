@@ -38,6 +38,7 @@ class Modal {
   }
 
   async clickConfirmButton() {
+    await this.confirmButton.waitForStable();
     await this.confirmButton.waitForClickable();
     await this.confirmButton.click();
   }
