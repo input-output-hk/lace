@@ -147,17 +147,6 @@ class TokensPageAssert {
     await browser.waitUntil(
       async () => {
         const tokenValueAsFloat = await TokensPage.getTokenBalanceAsFloatByName(tokenName);
-        Logger.log(
-          `1. ${tokenValueAsFloat === expectedValueRounded + 0.01}, ${tokenValueAsFloat} - ${
-            expectedValueRounded + 0.01
-          }`
-        );
-        Logger.log(
-          `2. ${tokenValueAsFloat === expectedValueRounded - +0.01}, ${tokenValueAsFloat} - ${
-            expectedValueRounded - 0.01
-          }`
-        );
-        Logger.log(`3. ${tokenValueAsFloat === expectedValueRounded}, ${tokenValueAsFloat} - ${expectedValueRounded}`);
         return (
           tokenValueAsFloat === expectedValueRounded + 0.01 ||
           tokenValueAsFloat === expectedValueRounded - 0.01 ||
