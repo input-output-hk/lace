@@ -173,11 +173,10 @@ export const useSignWithHardwareWallet = (
   signWithHardwareWallet: () => Promise<void>;
   isConfirmingTx: boolean;
 } => {
-  const allow = useAllowSignTx(req);
   const disallow = useDisallowSignTx(req);
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
-  const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
+  const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>(false);
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
@@ -191,8 +190,7 @@ export const useSignWithHardwareWallet = (
       disallow(false);
       redirectToSignFailure();
     }
-  }, [allow, disallow, redirectToSignFailure]);
-
+  }, [disallow, redirectToSignFailure]);
   return { isConfirmingTx, signWithHardwareWallet };
 };
 

@@ -31,7 +31,7 @@ import { TokenInfo } from '@src/utils/get-assets-information';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { WalletInfo } from '@src/types';
 import * as Core from '@cardano-sdk/core';
-import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
 import { mockWalletState } from '@src/utils/mocks/test-helpers';
 
 jest.mock('@stores', () => ({
@@ -246,11 +246,20 @@ describe('Testing hooks', () => {
     const useRedirectionSpy = jest.spyOn(hooks, 'useRedirection').mockImplementation(() => redirectToSignFailure);
     mockEstablishDeviceConnection.mockReset();
     mockEstablishDeviceConnection.mockImplementation(async () => await true);
-    const hook = renderHook(() => useSignWithHardwareWallet({} as any));
-
+    const mockSign = jest.fn().mockImplementation(async () => mockEstablishDeviceConnection());
+    const hook = renderHook(() =>
+      useSignWithHardwareWallet({
+        sign: mockSign as any,
+        requestContext: {} as any,
+        reject: jest.fn(),
+        signContext: {} as any,
+        transaction: {} as any,
+        walletType: WalletType.Ledger
+      } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>)
+    );
     await hook.waitFor(() => {
       expect(hook.result.current.isConfirmingTx).toBeFalsy;
-      expect(useRedirectionSpy).toHaveBeenLastCalledWith(dAppRoutePaths.dappTxSignFailure);
+      expect(useRedirectionSpy).toHaveBeenLastCalledWith(dAppRoutePaths.dappTxSignSuccess);
     });
 
     await act(async () => {
@@ -259,9 +268,8 @@ describe('Testing hooks', () => {
 
     await hook.waitFor(() => {
       expect(hook.result.current.isConfirmingTx).toBe(true);
-      expect(mockAllowSignTx).toHaveBeenCalledTimes(1);
+      expect(mockSign).toHaveBeenCalledTimes(1);
       expect(mockEstablishDeviceConnection).toHaveBeenCalledTimes(1);
-      expect(mockEstablishDeviceConnection).toHaveBeenLastCalledWith(Wallet.KeyManagement.CommunicationType.Web);
       expect(mockDisallowSignTx).not.toHaveBeenCalled();
     });
 
@@ -277,7 +285,7 @@ describe('Testing hooks', () => {
         await hook.result.current.signWithHardwareWallet();
       } catch {
         expect(hook.result.current.isConfirmingTx).toBe(true);
-        expect(mockAllowSignTx).toHaveBeenCalledTimes(1);
+        expect(mockSign).toHaveBeenCalledTimes(1);
         expect(mockDisallowSignTx).toHaveBeenCalledTimes(1);
         expect(mockDisallowSignTx).toHaveBeenLastCalledWith(false);
         expect(redirectToSignFailure).toHaveBeenCalledTimes(1);
