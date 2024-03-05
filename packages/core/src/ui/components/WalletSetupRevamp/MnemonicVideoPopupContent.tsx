@@ -5,14 +5,12 @@ import React, { ReactElement, useRef, useState } from 'react';
 import styles from './MnemonicVideoPopupContent.module.scss';
 
 type MnemonicVideoPopupContentProps = {
-  onClickVideo: () => void;
   onClose: () => void;
   translations: TranslationsFor<'title' | 'description' | 'linkText' | 'closeButton'>;
   videoSrc: string;
 };
 
 export const MnemonicVideoPopupContent = ({
-  onClickVideo,
   onClose,
   translations,
   videoSrc
@@ -37,7 +35,6 @@ export const MnemonicVideoPopupContent = ({
           onClick={() => {
             setOverlayVisible(false);
             videoRef.current.src += '&autoplay=1';
-            onClickVideo();
           }}
         >
           {overlayVisible && <div className={styles.overlay} />}
