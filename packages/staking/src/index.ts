@@ -5,5 +5,7 @@ export type { StakingBrowserPreferences } from './features/outside-handles-provi
 export { MAX_POOLS_COUNT } from './features/store';
 // TODO: remove once multi delegaion feature is GA'd
 export { SortDirection } from './features/BrowsePools';
-export type { StakePoolSortOptions, SortField, TranslationsFor, StakePoolsListRowProps } from './features/BrowsePools';
+export type { StakePoolSortOptions, SortField, TranslationsFor } from './features/BrowsePools';
+export type { StakePoolDetails as StakePoolsListRowProps } from './features/store';
 export { stakePoolTableConfig, StakePoolsListRowSkeleton } from './features/BrowsePools';
+export { mapStakePoolToDisplayData } from './features/store';

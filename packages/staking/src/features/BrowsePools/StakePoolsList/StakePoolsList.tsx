@@ -2,18 +2,18 @@ import { Box, Flex, Table, Text } from '@lace/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
+import { StakePoolDetails } from '../../store';
 import { SortField, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from './config';
 import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';
 import { StakePoolsListRow } from './StakePoolsListRow';
 import { StakePoolsListRowSkeleton } from './StakePoolsListRowSkeleton';
-import { StakePoolsListRowProps } from './types';
 
 export type StakePoolsListProps = {
   scrollableTargetId: string;
-  pools: (StakePoolsListRowProps | undefined)[];
-  selectedPools: StakePoolsListRowProps[];
+  pools: (StakePoolDetails | undefined)[];
+  selectedPools: StakePoolDetails[];
   loadMoreData: (range: ListRange) => void;
   translations: TranslationsFor<SortField>;
   setActiveSort: (props: StakePoolSortOptions) => void;
@@ -51,7 +51,7 @@ export const StakePoolsList = ({
         </Flex>
       )}
       {!(selectedPools.length > 0 && selectedPools.length === pools.length) && emptyPlaceholder}
-      <Table.Body<StakePoolsListRowProps | undefined>
+      <Table.Body<StakePoolDetails | undefined>
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}
         items={pools}

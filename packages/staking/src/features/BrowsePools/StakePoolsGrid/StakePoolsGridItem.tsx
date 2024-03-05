@@ -2,8 +2,13 @@ import { PostHogAction } from '@lace/common';
 import { StakePoolCard } from 'features/BrowsePools/StakePoolCard';
 import React from 'react';
 import { useOutsideHandles } from '../../outside-handles-provider';
-import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
-import { StakePoolsGridItemProps } from './types';
+import { MAX_POOLS_COUNT, StakePoolDetails, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
+import { getFormattedStakePoolProp } from '../formatters';
+import { SortField } from '../types';
+
+type StakePoolsGridItemProps = StakePoolDetails & {
+  sortField: SortField;
+};
 
 export const StakePoolsGridItem = ({
   stakePool,
@@ -29,7 +34,7 @@ export const StakePoolsGridItem = ({
     <StakePoolCard
       key={id}
       metricType={sortField}
-      metricValue={data[sortField]}
+      metricValue={getFormattedStakePoolProp(data, sortField)}
       saturation={data.saturation}
       title={data.ticker}
       onClick={onClick}

@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
 import useResizeObserver from 'use-resize-observer';
+import { StakePoolDetails } from '../../store';
 import { STAKE_POOL_CARD_HEIGHT, StakePoolCardSkeleton } from '../StakePoolCard';
-import { StakePoolsListRowProps } from '../StakePoolsList/types';
 import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
 import { StakePoolsGridItem } from './StakePoolsGridItem';
@@ -19,8 +19,8 @@ type numOfItemsType = 3 | 4 | 5;
 
 export type StakePoolsGridProps = {
   scrollableTargetId: string;
-  pools: (StakePoolsListRowProps | undefined)[];
-  selectedPools: StakePoolsListRowProps[];
+  pools: (StakePoolDetails | undefined)[];
+  selectedPools: StakePoolDetails[];
   loadMoreData: (range: ListRange) => void;
   emptyPlaceholder?: React.ReactNode;
   sortField: SortField;
@@ -90,7 +90,7 @@ export const StakePoolsGrid = ({
         </>
       )}
       {!(selectedPoolsLength > 0 && selectedPoolsLength === poolsLength) && emptyPlaceholder}
-      <Grid<StakePoolsListRowProps | undefined>
+      <Grid<StakePoolDetails | undefined>
         rowHeight={STAKE_POOL_CARD_HEIGHT}
         numberOfItemsPerRow={numberOfItemsPerRow}
         scrollableTargetId={scrollableTargetId}

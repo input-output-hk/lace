@@ -1,14 +1,12 @@
 import { PostHogAction } from '@lace/common';
 import { Table } from '@lace/ui';
-import { SortField } from 'features/BrowsePools';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
-import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
+import { MAX_POOLS_COUNT, StakePoolDetails, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
 import { config } from './config';
-import { StakePoolsListRowProps } from './types';
 
-export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolsListRowProps): React.ReactElement => {
+export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolDetails): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
 
@@ -34,7 +32,7 @@ export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolsL
   };
 
   return (
-    <Table.Row<Partial<typeof data>, SortField>
+    <Table.Row<Omit<StakePoolDetails, 'stakePool' | 'hexId' | 'id'>>
       columns={config.columns}
       cellRenderers={config.renderer}
       data={data}

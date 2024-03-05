@@ -25,24 +25,26 @@ export type DelegationPortfolioStore = DelegationPortfolioState & {
 };
 
 export type StakePoolDetails = {
-  delegators?: number | string;
-  description: string;
-  hexId: string;
-  id: string;
-  logo?: string;
-  margin: number | string;
-  name?: string;
-  owners: string[];
-  saturation?: string;
-  liveStake: { number: string; unit?: string };
-  activeStake: { number: string; unit?: string };
-  ticker: string;
-  ros?: string;
-  status: Wallet.Cardano.StakePool['status'];
+  activeStake: { number: string; unit: string };
+  blocks: string;
   contact: Wallet.Cardano.PoolContactData;
-  blocks?: string;
-  pledge: { number: string; unit?: string };
-  cost: { number: string; unit?: string };
+  cost: { number: string; unit: string };
+  delegators: string;
+  description: string;
+  hexId: Wallet.Cardano.PoolIdHex;
+  id: string;
+  liveStake: { number: string; unit: string };
+  logo: string;
+  margin: string;
+  name: string;
+  owners: string[];
+  pledge: { number: string; unit: string };
+  retired: boolean;
+  ros: string;
+  saturation: string;
+  stakePool: Wallet.Cardano.StakePool;
+  status: Wallet.Cardano.StakePoolStatus;
+  ticker: string;
 };
 
 // TODO consider using SDK type

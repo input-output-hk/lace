@@ -1,8 +1,10 @@
 /* eslint-disable no-magic-numbers */
 import inRange from 'lodash/inRange';
+import { ReactNode } from 'react';
 import { USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
+import { StakePoolDetails } from '../../store';
 import { SaturationLevels, SortField } from '../types';
-import { stakePoolCellRendererByMetricType } from './stakePoolCellRendererByMetricType';
+import { StakePoolListCell } from './StakePoolListCell';
 
 // TODO move saturation-related logic to higher level e.g. features/staking, as it's not coupled with BrowsePools
 const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
@@ -30,6 +32,15 @@ export const getSaturationLevel = (saturation: number): SaturationLevels => {
   return result;
 };
 
+type StakePoolsListRenderer = {
+  [K in SortField]: ({ value }: { value: StakePoolDetails[K] }) => ReactNode;
+};
+
+type StakePoolsListConfig = {
+  columns: SortField[];
+  renderer: StakePoolsListRenderer;
+};
+
 const columns = [
   'ticker',
   'saturation',
@@ -41,7 +52,15 @@ const columns = [
   'liveStake',
 ].filter(Boolean) as SortField[];
 
-export const config = {
+const createCellRenderer =
+  <T extends SortField>(sortField: T) =>
+  ({ value }: { value: StakePoolDetails[T] }) =>
+    <StakePoolListCell sortField={sortField} {...{ [sortField]: value }} />;
+
+export const config: StakePoolsListConfig = {
   columns,
-  renderer: stakePoolCellRendererByMetricType,
+  renderer: columns.reduce<StakePoolsListRenderer>((renderer, column) => {
+    renderer[column] = createCellRenderer(column);
+    return renderer;
+  }, {} as StakePoolsListRenderer),
 };

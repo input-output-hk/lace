@@ -3,13 +3,14 @@ import debounce from 'lodash/debounce';
 import { Box, Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
 import {
+  mapStakePoolToDisplayData,
   SortDirection,
   SortField,
-  StakePoolSortOptions,
-  TranslationsFor,
-  stakePoolTableConfig,
   StakePoolsListRowProps,
-  StakePoolsListRowSkeleton
+  StakePoolsListRowSkeleton,
+  StakePoolSortOptions,
+  stakePoolTableConfig,
+  TranslationsFor
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search } from '@lace/common';
@@ -53,10 +54,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     resetStakePools,
     fetchStakePools
   } = useWalletStore(stakePoolResultsSelector);
-  const {
-    walletUI: { cardanoCoin },
-    blockchainProvider
-  } = useWalletStore();
+  const { blockchainProvider } = useWalletStore();
 
   const tableHeaderTranslations: TranslationsFor<SortField> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.title'),
@@ -101,11 +99,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     setSearchValue(searchString);
   };
   const list = useMemo(
-    () =>
-      pageResults?.map((pool) =>
-        pool ? Wallet.util.stakePoolTransformer({ stakePool: pool, cardanoCoin }) : undefined
-      ),
-    [cardanoCoin, pageResults]
+    () => pageResults?.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
+    [pageResults]
   );
 
   const onPoolClick = (pool: Wallet.Cardano.StakePool) => {
@@ -168,15 +163,14 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
             if (!props) {
               return <StakePoolsListRowSkeleton index={index} columns={stakePoolTableConfig.columns} />;
             }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { stakePool, hexId, id, ...data } = props;
+            const { stakePool } = props;
             return (
-              <Table.Row<typeof data, SortField>
+              <Table.Row<StakePoolsListRowProps>
                 onClick={() => onPoolClick(stakePool)}
                 columns={stakePoolTableConfig.columns}
                 cellRenderers={stakePoolTableConfig.renderer}
                 dataTestId="stake-pool"
-                data={data}
+                data={props}
               />
             );
           }}

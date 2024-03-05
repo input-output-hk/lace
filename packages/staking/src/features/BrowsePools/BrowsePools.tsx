@@ -1,4 +1,3 @@
-import { Wallet } from '@lace/cardano';
 import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
@@ -6,7 +5,7 @@ import { SortDirection, SortField } from 'features/BrowsePools';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
+import { StakePoolDetails, mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
 import { useBrowsePools, useRestorePoolsSelection } from './hooks';
@@ -68,7 +67,7 @@ export const BrowsePools = () => {
   useRestorePoolsSelection();
 
   const sortSelectedPools = useCallback(
-    (pool1: Wallet.util.StakePool, pool2: Wallet.util.StakePool) => {
+    (pool1: StakePoolDetails, pool2: StakePoolDetails) => {
       switch (sort.field) {
         case 'ticker':
           return (pool1.ticker || '-')?.localeCompare(pool2.ticker || '-');
