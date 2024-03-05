@@ -16,7 +16,7 @@ const SaturationCell = ({ children: formattedValue, saturation }: { children: Re
   return (
     <Flex alignItems="center">
       <Flex mr="$6" className={styles.dot({ level })} />
-      {formattedValue}%
+      {formattedValue}
     </Flex>
   );
 };
