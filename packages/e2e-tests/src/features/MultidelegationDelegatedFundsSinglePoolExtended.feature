@@ -104,18 +104,17 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see selected pools counter is showing "<pools_after>"
     And I see "Add stake pool" button is disabled
     Examples:
-      | pools_after | pool_tickers                                        |
-      | 10          | 8BETA, ADACT, WOOF, TEKO, ADV, MOC, SQRL, SEA, ALFA |
+      | pools_after | pool_tickers                                         |
+      | 10          | 8BETA, SMAUG, WOOF, TEKO, ADV, MOC2, SQRL, SEA, ALFA |
 
   @LW-9493
-  Scenario: Extended View - Staking - Manage staking remove button disabled when staking to 1 pool
+  Scenario: Extended View - Staking - Manage staking remove button enabled when staking to 1 pool
     When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
     Then I see Manage delegation drawer
     And I see selected pools counter is showing "1"
-    And I see "Remove pool from portfolio" button is disabled for pool "1"
-    And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
+    And I see "Remove pool from portfolio" button is enabled for pool "1"
 
   @LW-9509
   Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' button not visible

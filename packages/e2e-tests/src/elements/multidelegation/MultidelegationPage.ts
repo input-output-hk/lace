@@ -283,6 +283,7 @@ class MultidelegationPage {
   }
 
   async fillSearch(searchTerm: string) {
+    await this.stakingPageSearchInput.waitForStable();
     await this.stakingPageSearchInput.waitForClickable();
     await this.stakingPageSearchInput.scrollIntoView();
     await this.stakingPageSearchInput.click();
@@ -292,7 +293,7 @@ class MultidelegationPage {
 
   async markStakePoolWithTicker(ticker: string) {
     const poolItem = await this.getPoolByTicker(ticker);
-    await poolItem.moveTo();
+    await poolItem.scrollIntoView();
     await poolItem.$(this.CHECKBOX).click();
   }
 
