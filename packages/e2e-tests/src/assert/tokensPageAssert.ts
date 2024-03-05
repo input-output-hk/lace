@@ -140,7 +140,7 @@ class TokensPageAssert {
   async assertSeeValueSubtractedAda(tokenName: string, subtractedAmount: string, fee: string) {
     const expectedValue =
       Number.parseFloat(await testContext.load(`${Asset.getByName(tokenName)?.ticker}tokenBalance`)) -
-      Number.parseFloat(subtractedAmount) -
+      Number.parseFloat(subtractedAmount) +
       Number.parseFloat(fee);
     const expectedValueRounded = Number.parseFloat(expectedValue.toFixed(2));
     const tokenBalance = await testContext.load(`${Asset.getByName(tokenName)?.ticker}tokenBalance`);
