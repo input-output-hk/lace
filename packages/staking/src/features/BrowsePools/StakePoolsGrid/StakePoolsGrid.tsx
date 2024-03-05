@@ -39,7 +39,7 @@ export const StakePoolsGrid = ({
   const { width: containerWidth } = useResizeObserver<HTMLDivElement>({ ref });
   const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType>();
 
-  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1023 });
+  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 667 });
   const matchFourColumnsLayout = useMediaQuery({ maxWidth: 1659, minWidth: 1024 });
   const matchFiveColumnsLayout = useMediaQuery({ minWidth: 1660 });
 
