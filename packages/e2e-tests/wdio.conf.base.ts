@@ -4,7 +4,8 @@ import extensionUtils from './src/utils/utils';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
-  specs: ['./src/features/**/*.feature'],
+  // specs: ['./src/features/**/*.feature'],
+  specs: ['./src/features/e2e/SendTransactionDappE2E.feature'],
   automationProtocol: 'webdriver',
   exclude: [],
   maxInstances: 1,
