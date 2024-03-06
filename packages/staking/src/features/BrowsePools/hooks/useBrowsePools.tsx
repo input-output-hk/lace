@@ -17,13 +17,11 @@ export const useBrowsePools = () => {
     setStakingBrowserPreferencesPersistence,
   } = useOutsideHandles();
 
-  const { poolsView, searchQuery, sort } = useDelegationPortfolioStore((store) => ({
+  const { poolsView, searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
     poolsView: store.browsePoolsView || BrowsePoolsView.table,
     searchQuery: store.searchQuery,
-    sort: {
-      field: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
-      order: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
-    },
+    sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
+    sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
   }));
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE_IN_MS), [fetchStakePools]);
@@ -35,11 +33,11 @@ export const useBrowsePools = () => {
           limit: endIndex,
           searchString: searchQuery ?? '',
           skip: startIndex,
-          sort,
+          sort: { field: sortField, order: sortOrder },
         });
       }
     },
-    [debouncedSearch, searchQuery, sort]
+    [debouncedSearch, searchQuery, sortField, sortOrder]
   );
 
   const setSearchQuery = useCallback(
@@ -90,7 +88,10 @@ export const useBrowsePools = () => {
       searchQuery,
       setSearchQuery,
       setSort,
-      sort,
+      sort: {
+        field: sortField,
+        order: sortOrder,
+      },
       switchPoolsView,
       totalPoolsCount,
     }),
@@ -101,7 +102,8 @@ export const useBrowsePools = () => {
       setSearchQuery,
       searchQuery,
       setSort,
-      sort,
+      sortField,
+      sortOrder,
       switchPoolsView,
       totalPoolsCount,
       poolsView,
