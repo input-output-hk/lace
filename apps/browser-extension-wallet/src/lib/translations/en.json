@@ -82,7 +82,9 @@
       "recipient": "Recipient",
       "send": "Send",
       "sending": "Sending",
-      "transaction": "Transaction"
+      "transaction": "Transaction",
+      "transactionSummary": "Transaction Summary",
+      "origin": "Origin"
     }
   },
   "tab.main.title": "Tab extension",
