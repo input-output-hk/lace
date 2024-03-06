@@ -52,7 +52,7 @@ export const StakePoolsGrid = ({
     [matchFiveColumnsLayout, matchFourColumnsLayout, matchThreeColumnsLayout]
   );
 
-  const getNumberOfItemsInRow = useCallback(() => {
+  const updateNumberOfItemsInRow = useCallback(() => {
     if (!ref?.current) return;
 
     const result = Number(
@@ -65,11 +65,11 @@ export const StakePoolsGrid = ({
   const setContainerWidthCb = useCallback(
     (size: ObservedSize) => {
       if (size.width !== containerWidth) {
-        getNumberOfItemsInRow();
+        updateNumberOfItemsInRow();
         setContainerWidth(size.width);
       }
     },
-    [containerWidth, getNumberOfItemsInRow]
+    [containerWidth, updateNumberOfItemsInRow]
   );
 
   const onResize = useMemo(
