@@ -28,14 +28,32 @@ export enum TransactionStatus {
   SPENDABLE = 'spendable'
 }
 
+export enum Cip30TxType {
+  Send = 'Send',
+  Mint = 'Mint',
+  Burn = 'Burn',
+  DRepRegistration = 'DRepRegistration',
+  DRepRetirement = 'DRepRetirement',
+  DRepUpdate = 'DRepUpdate',
+  VoteDelegation = 'VoteDelegation',
+  VotingProcedures = 'VotingProcedures',
+  VoteRegistrationDelegation = 'VoteRegistrationDelegation',
+  StakeRegistrationDelegation = 'StakeRegistrationDelegation',
+  StakeVoteDelegationRegistration = 'StakeVoteDelegationRegistration',
+  StakeVoteDelegation = 'StakeVoteDelegation',
+  ProposalProcedures = 'ProposalProcedures'
+}
+
+export type Cip30SignTxOutput = {
+  coins: string;
+  recipient: string;
+  assets?: Cip30SignTxAssetItem[];
+};
+
 export type Cip30SignTxSummary = {
   fee: string;
-  outputs: {
-    coins: string;
-    recipient: string;
-    assets?: Cip30SignTxAssetItem[];
-  }[];
-  type: 'Send' | 'Mint';
+  outputs: Cip30SignTxOutput[];
+  type: Cip30TxType;
   mintedAssets?: Cip30SignTxAssetItem[];
   burnedAssets?: Cip30SignTxAssetItem[];
   collateral?: string;
@@ -49,8 +67,8 @@ export type Cip30SignTxAssetItem = {
 export enum WalletManagerProviderTypes {
   CARDANO_SERVICES_PROVIDER = 'cardano-services-provider'
 }
-// Exclude Sanchonet until in main branch
-export type ChainName = keyof Omit<typeof Cardano.ChainIds, 'Sanchonet'>;
+
+export type ChainName = keyof typeof Cardano.ChainIds;
 
 export interface CreateHardwareWalletArgs {
   deviceConnection: DeviceConnection;

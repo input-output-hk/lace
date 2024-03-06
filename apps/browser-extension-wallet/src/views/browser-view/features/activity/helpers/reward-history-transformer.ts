@@ -4,9 +4,9 @@ import type { TransformedRewardsActivity } from './types';
 import dayjs from 'dayjs';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
-import type { CurrencyInfo } from '@src/types';
+import { TxDirections, CurrencyInfo } from '@src/types';
 import type { Reward } from '@cardano-sdk/core';
-import { ActivityStatus } from '@lace/core';
+import { ActivityStatus, TransactionActivityType } from '@lace/core';
 
 interface RewardHistoryTransformerInput {
   rewards: Reward[]; // TODO this supposes rewards grouped by epoch which is a bit fragile
@@ -34,8 +34,8 @@ export const rewardHistoryTransformer = ({
   const totalRewardsAmount = Wallet.BigIntMath.sum(rewards.map(({ rewards: _rewards }) => _rewards));
 
   return {
-    type: 'rewards',
-    direction: 'Incoming',
+    type: TransactionActivityType.rewards,
+    direction: TxDirections.Incoming,
     amount: Wallet.util.getFormattedAmount({ amount: totalRewardsAmount.toString(), cardanoCoin }),
     fiatAmount: getFormattedFiatAmount({
       amount: new BigNumber(totalRewardsAmount.toString()),
