@@ -1,6 +1,7 @@
 export { BrowsePools } from './BrowsePools';
 export { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 export { getPoolInfos } from './queries';
+export { useBrowsePoolsPersistence } from './hooks';
 export { DEFAULT_SORT_OPTIONS } from './constants';
 
 // TODO: remove once multi delegation feature is GA'd

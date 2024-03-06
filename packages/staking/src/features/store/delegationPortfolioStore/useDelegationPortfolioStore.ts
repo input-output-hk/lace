@@ -1,5 +1,4 @@
 import { Wallet } from '@lace/cardano';
-import { BrowsePoolsView } from 'features/BrowsePools';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { CARDANO_COIN_SYMBOL_BY_NETWORK, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
@@ -20,7 +19,6 @@ import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 const defaultState: DelegationPortfolioState = {
   activeDelegationFlow: DelegationFlow.Overview,
   activeDrawerStep: undefined,
-  browsePoolsView: BrowsePoolsView.table,
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,

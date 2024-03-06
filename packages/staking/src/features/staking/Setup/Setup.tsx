@@ -1,11 +1,12 @@
 import { useObservable } from '@lace/common';
+import { useBrowsePoolsPersistence } from 'features/BrowsePools';
+import { initI18n } from 'features/i18n';
+import { useOutsideHandles } from 'features/outside-handles-provider';
+import { useDelegationPortfolioStore } from 'features/store';
 import { useEffect } from 'react';
-import { initI18n } from '../../i18n';
-import '../reset.css';
-import { useOutsideHandles } from '../../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../../store';
 import { StakingProps } from '../types';
 import { SetupBase, SetupBaseProps } from './SetupBase';
+import '../reset.css';
 
 initI18n();
 
@@ -15,7 +16,7 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> &
   };
 
 export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => {
-  const { balancesBalance, walletStoreInMemoryWallet, stakingBrowserPreferencesPersistence } = useOutsideHandles();
+  const { balancesBalance, walletStoreInMemoryWallet } = useOutsideHandles();
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
   const currentEpoch = useObservable(walletStoreInMemoryWallet.currentEpoch$);
@@ -33,13 +34,6 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
       delegationRewardsHistory,
     });
     portfolioMutators.setView(view);
-
-    if (stakingBrowserPreferencesPersistence?.poolsView) {
-      portfolioMutators.executeCommand({
-        data: stakingBrowserPreferencesPersistence.poolsView,
-        type: 'SetBrowsePoolsView',
-      });
-    }
   }, [
     currentChain,
     currentEpoch,
@@ -47,9 +41,10 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     delegationPortfolio,
     delegationRewardsHistory,
     portfolioMutators,
-    stakingBrowserPreferencesPersistence,
     view,
   ]);
+
+  useBrowsePoolsPersistence();
 
   return (
     <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>

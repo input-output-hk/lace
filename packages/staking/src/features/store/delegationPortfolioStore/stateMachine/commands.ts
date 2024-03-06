@@ -140,6 +140,7 @@ export type OverviewCommand =
   | GoToBrowsePools
   | GoToActivity
   // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view)
+  | SelectPoolFromList
   | SetBrowsePoolsView;
 
 export type BrowsePoolsCommand =

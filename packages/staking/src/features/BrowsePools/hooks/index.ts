@@ -1,2 +1,3 @@
-export { useRestorePoolsSelection } from './useRestorePoolsSelection';
-export { useBrowsePools } from './useBrowsePools';
+export { useQueryStakePools } from './useQueryStakePools';
+export { useBrowsePoolsPersistence } from './useBrowsePoolsPersistence';
+export { useBrowsePoolsView } from './useBrowsePoolsView';

@@ -1,16 +1,16 @@
 import { StakingPage } from 'features/staking';
 import { PoolsFilter, QueryStakePoolsFilters, activePageSelector, useDelegationPortfolioStore } from 'features/store';
 import { useState } from 'react';
-import { useBrowsePools } from '../hooks';
+import { useQueryStakePools } from '../hooks';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 import { SortAndFilterTab } from './types';
 
 export const BrowsePoolsPreferencesCardContainer = () => {
   const activePage = useDelegationPortfolioStore(activePageSelector);
 
-  const { sort, setSort } = useBrowsePools();
+  const { sort, setSort } = useQueryStakePools();
   const [activeTab, setActiveTab] = useState<SortAndFilterTab>(SortAndFilterTab.sort);
-  // TODO move filters to the store + useBrowsePools when SDK is ready
+  // TODO move filters to the store + useQueryStakePools when SDK is ready
   const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],

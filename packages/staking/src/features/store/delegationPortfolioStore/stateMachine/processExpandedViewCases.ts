@@ -99,6 +99,15 @@ export const processExpandedViewCases: Handler = (params) =>
             activeDrawerStep: DrawerManagementStep.Preferences,
             draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
           })),
+          SelectPoolFromList: handler<SelectPoolFromList, StateBrowsePools, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.selectPools({
+                stakePools: data,
+                state,
+              }),
+            })
+          ),
           SetBrowsePoolsView: handler<SetBrowsePoolsView, StateOverview, StateOverview>(
             ({ state, command: { data } }) => ({
               ...state,

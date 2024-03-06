@@ -2,13 +2,12 @@ import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
 import { SortDirection, SortField } from 'features/BrowsePools';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../outside-handles-provider';
 import { StakePoolDetails, mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
-import { useBrowsePools, useRestorePoolsSelection } from './hooks';
+import { useBrowsePoolsView, useQueryStakePools } from './hooks';
 import { PortfolioBar } from './PortfolioBar';
 import { StakePoolsGrid } from './StakePoolsGrid/StakePoolsGrid';
 import { StakePoolsList, StakePoolsListEmpty } from './StakePoolsList';
@@ -17,19 +16,9 @@ import { BrowsePoolsView } from './types';
 const LACE_APP_ID = 'lace-app';
 
 export const BrowsePools = () => {
-  const { setStakingBrowserPreferencesPersistence, stakingBrowserPreferencesPersistence } = useOutsideHandles();
-  const {
-    totalPoolsCount,
-    loading,
-    searchQuery,
-    setSearchQuery,
-    setSort,
-    sort,
-    pools,
-    fetchPoolsByRange,
-    switchPoolsView,
-    poolsView,
-  } = useBrowsePools();
+  const { totalPoolsCount, loading, searchQuery, setSearchQuery, setSort, sort, pools, fetchPoolsByRange } =
+    useQueryStakePools();
+  const { poolsView, switchPoolsView } = useBrowsePoolsView();
 
   const { t } = useTranslation();
   const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
@@ -46,25 +35,6 @@ export const BrowsePools = () => {
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
     ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker.title'),
   };
-
-  useEffect(
-    () =>
-      setStakingBrowserPreferencesPersistence({
-        ...stakingBrowserPreferencesPersistence,
-        selectedPoolsIds: selectedPortfolioStakePools.map(({ id }) => id),
-      }),
-    [
-      stakingBrowserPreferencesPersistence,
-      poolsView,
-      searchQuery,
-      selectedPortfolioStakePools,
-      sort,
-      setStakingBrowserPreferencesPersistence,
-    ]
-  );
-
-  // TODO consider moving to a single hydration/Setup step
-  useRestorePoolsSelection();
 
   const sortSelectedPools = useCallback(
     (pool1: StakePoolDetails, pool2: StakePoolDetails) => {
