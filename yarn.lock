@@ -10747,7 +10747,7 @@ __metadata:
     "@storybook/testing-library": ^0.0.13
     "@types/babel__preset-env": ^7
     "@types/debounce-promise": ^3.1.6
-    "@types/uuid": ^9
+    "@types/uuid": ^8
     antd: ^4.24.10
     axios: 0.21.4
     axios-cache-adapter: 2.7.3
@@ -10763,8 +10763,9 @@ __metadata:
     react-infinite-scroll-component: ^6.1.0
     sass: ^1.68.0
     storybook: ^7.4.3
+    tsconfig-paths-webpack-plugin: 3.5.2
     typescript: ^4.3.5
-    uuid: ^9.0.1
+    uuid: ^8.3.2
     zxcvbn: ^4.4.2
   peerDependencies:
     react: 17.0.2
@@ -20146,7 +20147,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:8.3.4, @types/uuid@npm:^8.3.4":
+"@types/uuid@npm:8.3.4, @types/uuid@npm:^8, @types/uuid@npm:^8.3.4":
   version: 8.3.4
   resolution: "@types/uuid@npm:8.3.4"
   checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
@@ -20164,13 +20165,6 @@ __metadata:
   version: 9.0.7
   resolution: "@types/uuid@npm:9.0.7"
   checksum: c7321194aeba9ea173efd1e721403bdf4e7ae6945f8f8cdbc87c791f4b505ccf3dbc4a8883d90b394ef13b7c2dc778045792b05dbb23b3c746f8ea347804d448
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:^9":
-  version: 9.0.8
-  resolution: "@types/uuid@npm:9.0.8"
-  checksum: b8c60b7ba8250356b5088302583d1704a4e1a13558d143c549c408bf8920535602ffc12394ede77f8a8083511b023704bc66d1345792714002bfa261b17c5275
   languageName: node
   linkType: hard
 
@@ -26312,7 +26306,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"console-browserify@npm:^1.1.0":
+"console-browserify@npm:^1.1.0, console-browserify@npm:^1.2.0":
   version: 1.2.0
   resolution: "console-browserify@npm:1.2.0"
   checksum: 226591eeff8ed68e451dffb924c1fb750c654d54b9059b3b261d360f369d1f8f70650adecf2c7136656236a4bfeb55c39281b5d8a55d792ebbb99efd3d848d52
@@ -37688,6 +37682,7 @@ __metadata:
     madr-tools: ^1.0.0
     markdownlint-cli: ^0.31.1
     node-gyp: ^9.4.0
+    node-polyfill-webpack-plugin: ^3.0.0
     node-sass: ^7.0.1
     normalize.css: ^8.0.1
     p-retry: 5.1.2
@@ -40480,6 +40475,40 @@ __metadata:
   version: 1.0.0
   resolution: "node-modules-regexp@npm:1.0.0"
   checksum: 99541903536c5ce552786f0fca7f06b88df595e62e423c21fa86a1674ee2363dad1f7482d1bec20b4bd9fa5f262f88e6e5cb788fc56411113f2fe2e97783a3a7
+  languageName: node
+  linkType: hard
+
+"node-polyfill-webpack-plugin@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "node-polyfill-webpack-plugin@npm:3.0.0"
+  dependencies:
+    assert: ^2.1.0
+    browserify-zlib: ^0.2.0
+    buffer: ^6.0.3
+    console-browserify: ^1.2.0
+    constants-browserify: ^1.0.0
+    crypto-browserify: ^3.12.0
+    domain-browser: ^4.22.0
+    events: ^3.3.0
+    https-browserify: ^1.0.0
+    os-browserify: ^0.3.0
+    path-browserify: ^1.0.1
+    process: ^0.11.10
+    punycode: ^2.3.0
+    querystring-es3: ^0.2.1
+    readable-stream: ^4.4.2
+    stream-browserify: ^3.0.0
+    stream-http: ^3.2.0
+    string_decoder: ^1.3.0
+    timers-browserify: ^2.0.12
+    tty-browserify: ^0.0.1
+    type-fest: ^4.4.0
+    url: ^0.11.3
+    util: ^0.12.5
+    vm-browserify: ^1.1.2
+  peerDependencies:
+    webpack: ">=5"
+  checksum: 44d5ae098587d58dd42f011b376b113ae49ea0dbcd92b6f7d2f16946e93ed09c09c0bb46bd4c2473f324bc5872516d33aacb5eafaed24d2657c48bb96265fd6c
   languageName: node
   linkType: hard
 
@@ -43727,6 +43756,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"punycode@npm:^2.3.0":
+  version: 2.3.1
+  resolution: "punycode@npm:2.3.1"
+  checksum: bb0a0ceedca4c3c57a9b981b90601579058903c62be23c5e8e843d2c2d4148a3ecf029d5133486fb0e1822b098ba8bba09e89d6b21742d02fa26bda6441a6fb2
+  languageName: node
+  linkType: hard
+
 "pupa@npm:^2.0.1":
   version: 2.1.1
   resolution: "pupa@npm:2.1.1"
@@ -43889,6 +43925,15 @@ __metadata:
   dependencies:
     side-channel: ^1.0.4
   checksum: 00e390dbf98eff4d8ff121b61ab2fe32106852290de99ecd0e40fc76651c4101f43fc6cc8313cb69423563876fc532951b11dda55d2917def05f292258263480
+  languageName: node
+  linkType: hard
+
+"qs@npm:^6.11.2":
+  version: 6.11.2
+  resolution: "qs@npm:6.11.2"
+  dependencies:
+    side-channel: ^1.0.4
+  checksum: e812f3c590b2262548647d62f1637b6989cc56656dc960b893fe2098d96e1bd633f36576f4cd7564dfbff9db42e17775884db96d846bebe4f37420d073ecdc0b
   languageName: node
   linkType: hard
 
@@ -45783,6 +45828,19 @@ __metadata:
     events: ^3.3.0
     process: ^0.11.10
   checksum: 5f8d5fc1eb0c6eb47771ad4537881126d6280666e1f10ba1e2262a670a0352c36f59e6a04d17c9a6f7c888218984836dc67f55e95a77de8bfdf06fb75f00f670
+  languageName: node
+  linkType: hard
+
+"readable-stream@npm:^4.4.2":
+  version: 4.5.2
+  resolution: "readable-stream@npm:4.5.2"
+  dependencies:
+    abort-controller: ^3.0.0
+    buffer: ^6.0.3
+    events: ^3.3.0
+    process: ^0.11.10
+    string_decoder: ^1.3.0
+  checksum: c4030ccff010b83e4f33289c535f7830190773e274b3fcb6e2541475070bdfd69c98001c3b0cb78763fc00c8b62f514d96c2b10a8bd35d5ce45203a25fa1d33a
   languageName: node
   linkType: hard
 
@@ -49088,7 +49146,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string_decoder@npm:^1.0.0, string_decoder@npm:^1.1.1":
+"string_decoder@npm:^1.0.0, string_decoder@npm:^1.1.1, string_decoder@npm:^1.3.0":
   version: 1.3.0
   resolution: "string_decoder@npm:1.3.0"
   dependencies:
@@ -50168,7 +50226,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"timers-browserify@npm:^2.0.4":
+"timers-browserify@npm:^2.0.12, timers-browserify@npm:^2.0.4":
   version: 2.0.12
   resolution: "timers-browserify@npm:2.0.12"
   dependencies:
@@ -50788,7 +50846,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tty-browserify@npm:0.0.1":
+"tty-browserify@npm:0.0.1, tty-browserify@npm:^0.0.1":
   version: 0.0.1
   resolution: "tty-browserify@npm:0.0.1"
   checksum: 93b745d43fa5a7d2b948fa23be8d313576d1d884b48acd957c07710bac1c0d8ac34c0556ad4c57c73d36e11741763ef66b3fb4fb97b06b7e4d525315a3cd45f5
@@ -50927,6 +50985,13 @@ __metadata:
   version: 4.3.1
   resolution: "type-fest@npm:4.3.1"
   checksum: 04e0f073dcc31c113c1b8856c089b388e7e9f4383a9ed72cc1466a89ec50d9d67678844eeec342b5a1ce71b21e817764d4f067aa148f6bcb5df9005ff3803382
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^4.4.0":
+  version: 4.10.3
+  resolution: "type-fest@npm:4.10.3"
+  checksum: 37d265d584a6587253fe4ab2ed25ef787bb0650fe1924319f68ac3197bfaf3142b304a72d6499d61b60c38c9aba7e1e8f5e940df0898c974a8e6c4a37339b64e
   languageName: node
   linkType: hard
 
@@ -51661,6 +51726,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"url@npm:^0.11.3":
+  version: 0.11.3
+  resolution: "url@npm:0.11.3"
+  dependencies:
+    punycode: ^1.4.1
+    qs: ^6.11.2
+  checksum: f9e7886f46a16f96d2e42fbcc5d682c231c55ef5442c1ff66150c0f6556f6e3a97d094a84f51be15ec2432711d212eb60426659ce418f5fcadeaa3f601532c4e
+  languageName: node
+  linkType: hard
+
 "urlpattern-polyfill@npm:10.0.0":
   version: 10.0.0
   resolution: "urlpattern-polyfill@npm:10.0.0"
@@ -51901,7 +51976,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:9.0.1, uuid@npm:^9.0.1":
+"uuid@npm:9.0.1":
   version: 9.0.1
   resolution: "uuid@npm:9.0.1"
   bin:
@@ -52339,7 +52414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vm-browserify@npm:^1.0.1":
+"vm-browserify@npm:^1.0.1, vm-browserify@npm:^1.1.2":
   version: 1.1.2
   resolution: "vm-browserify@npm:1.1.2"
   checksum: 10a1c50aab54ff8b4c9042c15fc64aefccce8d2fb90c0640403242db0ee7fb269f9b102bdb69cfb435d7ef3180d61fd4fb004a043a12709abaf9056cfd7e039d

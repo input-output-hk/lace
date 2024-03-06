@@ -1,0 +1,45 @@
+@import '../../../styles/theme.scss';
+@import '../../../../../../common/src/ui/styles/abstracts/typography';
+
+.details {
+  color: var(--text-color-primary, #ffffff);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: size_unit(4);
+  width: 100%;
+
+  .title {
+    align-items: center;
+    gap: 8px;
+    display: flex;
+    flex: 0 0 50%;
+    align-self: baseline;
+    color: var(--text-color-primary, #ffffff);
+    @include text-body-semi-bold;
+  }
+
+  .detail {
+    align-items: end;
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(2);
+    color: var(--text-color-primary, #ffffff);
+    text-align: right;
+    word-break: break-all;
+    @include text-body-medium;
+
+    @media (max-width: $breakpoint-popup) {
+      flex-direction: column;
+    }
+
+    .subitems {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      align-items: flex-end;
+      .subitem {
+        color: var(--text-color-secondary, #878e9e);
+      }
+    }
+  }
+}

@@ -29,7 +29,7 @@ jest.mock('../../stores', () => ({
 }));
 
 describe('Testing useBuildDelegation hook', () => {
-  process.env.AVAILABLE_CHAINS = process.env.AVAILABLE_CHAINS || 'Mainnet,Preprod,Preview';
+  process.env.AVAILABLE_CHAINS = process.env.AVAILABLE_CHAINS || 'Mainnet,Preprod,Preview,Sanchonet';
   process.env.DEFAULT_CHAIN = process.env.DEFAULT_CHAIN || 'Preprod';
 
   test('should return use delegation details function', () => {
