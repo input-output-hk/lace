@@ -8,10 +8,12 @@ import {
   ActivityStatus,
   TxOutputInput,
   TxSummary,
-  ActivityType,
   useTranslate,
-  RewardsDetails
+  RewardsDetails,
+  TransactionActivityType,
+  DelegationActivityType
 } from '@lace/core';
+import type { ActivityType } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
 import { ActivityDetail as ActivityDetailType } from '@src/types';
@@ -78,12 +80,11 @@ interface ActivityDetailProps {
 }
 
 const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
-  if (type === 'rewards') return t('package.core.activityDetails.rewards');
-  if (type === 'delegation') return t('package.core.activityDetails.delegation');
-  if (type === 'delegationRegistration') return t('package.core.activityDetails.registration');
-  if (type === 'delegationDeregistration') return t('package.core.activityDetails.deregistration');
-  if (type === 'incoming') return t('package.core.activityDetails.received');
-  return t('package.core.activityDetails.sent');
+  if (type === DelegationActivityType.delegationRegistration) return t('package.core.activityDetails.registration');
+  if (type === DelegationActivityType.delegationDeregistration) return t('package.core.activityDetails.deregistration');
+  if (type === TransactionActivityType.incoming) return t('package.core.activityDetails.received');
+  if (type === TransactionActivityType.outgoing) return t('package.core.activityDetails.sent');
+  return t(`package.core.activityDetails.${type}`);
 };
 
 export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => {
@@ -97,7 +98,7 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
 
   const currentTransactionStatus = useMemo(
     () =>
-      activityDetail.type !== 'rewards'
+      activityDetail.type !== TransactionActivityType.rewards
         ? getCurrentTransactionStatus(walletActivities, activityDetail.activity.id) ?? activityInfo?.status
         : activityInfo?.status,
     [activityDetail.activity, activityDetail.type, activityInfo?.status, walletActivities]

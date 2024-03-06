@@ -17,7 +17,13 @@ export const AmountInfo = ({
 }) => (
   <div>
     {renderAmountInfo(
-      [sign ? `${sign} ` : '', `${Wallet.util.lovelacesToAdaString(amount)} ${cardanoCoin.symbol}`].join(''),
+      [
+        sign || '',
+        Wallet.util.getFormattedAmount({
+          amount,
+          cardanoCoin,
+        }),
+      ].join(''),
       `${Wallet.util.convertAdaToFiat({
         ada: Wallet.util.lovelacesToAdaString(amount.toString()),
         fiat: cardanoFiatPrice,

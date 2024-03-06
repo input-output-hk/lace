@@ -129,7 +129,10 @@ export const CreateCollateral = ({
               })}
               <div>
                 {renderAmountInfo(
-                  `${Wallet.util.lovelacesToAdaString(collateralTx.fee.toString())} ${cardanoCoin.symbol}`,
+                  Wallet.util.getFormattedAmount({
+                    amount: collateralTx.fee.toString(),
+                    cardanoCoin
+                  }),
                   `${Wallet.util.convertAdaToFiat({
                     ada: Wallet.util.lovelacesToAdaString(collateralTx.fee.toString()),
                     fiat: priceResult?.cardano?.price || 0

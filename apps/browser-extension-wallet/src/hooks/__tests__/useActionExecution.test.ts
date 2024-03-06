@@ -9,7 +9,7 @@ import { ActionExecutionArgs, useActionExecution } from '@hooks/useActionExecuti
 import { ToastProps } from '@lace/common';
 
 jest.mock('react-i18next', () => {
-  const original = jest.requireActual('@lace/common');
+  const original = jest.requireActual('react-i18next');
   return {
     __esModule: true,
     ...original,

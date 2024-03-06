@@ -32,7 +32,12 @@ export const CatalystRegistrationFlow = ({
   onCurrentStepChange
 }: CatalystRegistrationFlowProps): React.ReactElement => {
   const [confirmationStage, setConfirmationStage] = useState<CatalystConfirmationStepProps['stage']>('unlock');
-  const { walletInfo, inMemoryWallet } = useWalletStore();
+  const {
+    walletInfo,
+    inMemoryWallet,
+    walletUI: { cardanoCoin }
+  } = useWalletStore();
+
   const { t } = useTranslation();
   const totalBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
 
@@ -110,7 +115,10 @@ export const CatalystRegistrationFlow = ({
               <WalletBasicInfo
                 walletAddress={walletInfo.addresses[0].address.toString()}
                 walletName={walletInfo.name}
-                balance={`${Wallet.util.lovelacesToAdaString(totalBalance.coins.toString())} ₳`}
+                balance={Wallet.util.getFormattedAmount({
+                  amount: totalBalance.coins.toString(),
+                  cardanoCoin
+                })}
                 translations={walletBasicInfoTranslations}
               />
             }
