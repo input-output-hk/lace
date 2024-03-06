@@ -21,7 +21,6 @@ import { useHistory } from 'react-router-dom';
 
 export const WalletSetupMainPage = (): ReactElement => {
   const history = useHistory();
-  const [isConfirmRestoreOpen, setIsConfirmRestoreOpen] = useState(false);
   const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const { t: translate, Trans } = useTranslate();
@@ -70,8 +69,8 @@ export const WalletSetupMainPage = (): ReactElement => {
   };
 
   const handleRestoreWallet = () => {
-    setIsConfirmRestoreOpen(true);
     analytics.sendEventToPostHog(postHogOnboardingActions.restore?.SETUP_OPTION_CLICK);
+    history.push(walletRoutePaths.setup.restore);
   };
 
   const handleCreateNewWallet = () => {
@@ -79,19 +78,6 @@ export const WalletSetupMainPage = (): ReactElement => {
       postHogAction: postHogOnboardingActions.create.SETUP_OPTION_CLICK
     });
     history.push(walletRoutePaths.setup.create);
-  };
-
-  const handleCancelRestoreWarning = () => {
-    setIsConfirmRestoreOpen(false);
-    analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RESTORE_MULTI_ADDR_CANCEL_CLICK);
-  };
-
-  const handleConfirmRestoreWarning = () => {
-    setIsConfirmRestoreOpen(false);
-    sendAnalytics({
-      postHogAction: postHogOnboardingActions.create.RESTORE_MULTI_ADDR_OK_CLICK
-    });
-    history.push(walletRoutePaths.setup.restore);
   };
 
   return (
@@ -102,25 +88,6 @@ export const WalletSetupMainPage = (): ReactElement => {
           onHardwareWalletRequest={handleStartHardwareOnboarding}
           onRestoreWalletRequest={handleRestoreWallet}
           translations={walletSetupOptionsStepTranslations}
-        />
-        <WarningModal
-          header={translate('browserView.walletSetup.confirmRestoreModal.header')}
-          content={
-            <div className={styles.confirmResetContent}>
-              <p>
-                <Trans
-                  components={{
-                    b: <b />
-                  }}
-                  i18nKey="browserView.walletSetup.confirmRestoreModal.content"
-                />
-              </p>
-            </div>
-          }
-          visible={isConfirmRestoreOpen}
-          confirmLabel={translate('browserView.walletSetup.confirmRestoreModal.confirm')}
-          onCancel={handleCancelRestoreWarning}
-          onConfirm={handleConfirmRestoreWarning}
         />
         <WarningModal
           header={translate('browserView.walletSetup.confirmExperimentalHwDapp.header')}

@@ -2,11 +2,13 @@ import React, { ReactElement } from 'react';
 import { WarningModal } from '@views/browser/components';
 import { useTranslate } from '@lace/core';
 import { useLocalStorage } from '@hooks';
+import { useWalletStore } from '@stores';
 
 export const MultiAddressBalanceVisibleModal = (): ReactElement => {
+  const { walletState } = useWalletStore();
   const [showMultiAddressModal, { updateLocalStorage: setShowMultiAddressModal }] = useLocalStorage(
     'showMultiAddressModal',
-    true
+    walletState.addresses.length > 1
   );
   const { t } = useTranslate();
 
