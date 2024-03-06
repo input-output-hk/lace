@@ -1,6 +1,8 @@
 import { Wallet } from '@lace/cardano';
 
 export const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
+  if (poolIds.length === 0) return [];
+
   const filters: Wallet.QueryStakePoolsArgs = {
     filters: {
       identifier: {
