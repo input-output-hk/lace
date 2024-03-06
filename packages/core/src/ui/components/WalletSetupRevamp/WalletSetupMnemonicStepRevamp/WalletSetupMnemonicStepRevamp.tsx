@@ -4,6 +4,7 @@ import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import styles from '../../WalletSetup/WalletSetupOption.module.scss';
+import './WalletSetupMnemonicRevampCommon.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { hasEmptyString } from '@ui/components/WalletSetup/WalletSetupMnemonicVerificationStep';
 import { Dialog } from '@lace/ui';
@@ -59,7 +60,7 @@ export const WalletSetupMnemonicStepRevamp = ({
 
     if (copiedWords.length === -1) return;
 
-    const newMnemonic = [...mnemonic];
+    const newMnemonic = [...mnemonicConfirm];
 
     copiedWords.forEach((word, index) => {
       const newIndex = offset + index;

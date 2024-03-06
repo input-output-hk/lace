@@ -5,6 +5,7 @@ import React from 'react';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import styles from './WalletSetupMnemonicVerificationStepRevamp.module.scss';
+import './WalletSetupMnemonicRevampCommon.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { Segmented, Button } from 'antd';
 import { readMnemonicFromClipboard } from './wallet-utils';

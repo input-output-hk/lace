@@ -9,11 +9,12 @@
   border-radius: 100px;
   padding: size_unit(1);
   display: flex;
-  gap: size_unit(1);
+  gap: size_unit(0.75) !important;
+  margin: size_unit(1) size_unit(1) 0 0;
   align-items: center;
   justify-content: space-between;
   color: var(--text-color-primary) !important;
-  height: size_unit(4.5);
+  height: size_unit(4);
   border: 1px solid transparent;
   width: size_unit(13);
   .number {
