@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { useCallback, useMemo } from 'react';
 import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
 import { StakePoolsListProps } from '../StakePoolsList';
-import { BrowsePoolsView, StakePoolSortOptions } from '../types';
+import { StakePoolSortOptions } from '../types';
 
 export const useQueryStakePools = () => {
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
@@ -16,8 +16,7 @@ export const useQueryStakePools = () => {
     analytics,
   } = useOutsideHandles();
 
-  const { poolsView, searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
-    poolsView: store.browsePoolsView || BrowsePoolsView.grid,
+  const { searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
     searchQuery: store.searchQuery,
     sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
     sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
@@ -67,20 +66,11 @@ export const useQueryStakePools = () => {
     [portfolioMutators]
   );
 
-  const switchPoolsView = useCallback(() => {
-    const newView = poolsView === BrowsePoolsView.table ? BrowsePoolsView.grid : BrowsePoolsView.table;
-    portfolioMutators.executeCommand({
-      data: newView,
-      type: 'SetBrowsePoolsView',
-    });
-  }, [poolsView, portfolioMutators]);
-
   return useMemo(
     () => ({
       fetchPoolsByRange,
       loading: walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING,
       pools,
-      poolsView,
       searchQuery,
       setSearchQuery,
       setSort,
@@ -88,7 +78,6 @@ export const useQueryStakePools = () => {
         field: sortField,
         order: sortOrder,
       },
-      switchPoolsView,
       totalPoolsCount,
     }),
     [
@@ -100,9 +89,7 @@ export const useQueryStakePools = () => {
       setSort,
       sortField,
       sortOrder,
-      switchPoolsView,
       totalPoolsCount,
-      poolsView,
     ]
   );
 };
