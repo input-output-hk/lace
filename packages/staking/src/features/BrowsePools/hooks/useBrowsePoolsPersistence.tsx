@@ -25,21 +25,23 @@ export const useBrowsePoolsPersistence = () => {
 
   // LocalStorage -> Store (hydration)
   useEffect(() => {
-    if (storeHydrated.current || !storeReady || !stakingBrowserPreferencesPersistence) return;
-
-    // eslint-disable-next-line promise/catch-or-return
-    getPoolInfos(
-      stakingBrowserPreferencesPersistence?.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)),
-      walletStoreBlockchainProvider.stakePoolProvider
-    ).then((selectedStakePools) => {
-      // TODO add a common store hydration command
-      portfolioMutators.executeCommand({ data: selectedStakePools, type: 'SelectPoolFromList' });
-      portfolioMutators.executeCommand({
-        data: stakingBrowserPreferencesPersistence.poolsView,
-        type: 'SetBrowsePoolsView',
-      });
+    if (!storeHydrated.current && storeReady) {
+      if (stakingBrowserPreferencesPersistence) {
+        // eslint-disable-next-line promise/catch-or-return
+        getPoolInfos(
+          stakingBrowserPreferencesPersistence.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)),
+          walletStoreBlockchainProvider.stakePoolProvider
+        ).then((selectedStakePools) => {
+          // TODO add a common store hydration command
+          portfolioMutators.executeCommand({ data: selectedStakePools, type: 'SelectPoolFromList' });
+          portfolioMutators.executeCommand({
+            data: stakingBrowserPreferencesPersistence.poolsView,
+            type: 'SetBrowsePoolsView',
+          });
+        });
+      }
       storeHydrated.current = true;
-    });
+    }
   }, [
     storeReady,
     portfolioMutators,
