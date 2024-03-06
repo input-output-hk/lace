@@ -152,6 +152,7 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
+        analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
@@ -170,7 +171,7 @@ export const WalletSetupWizard = ({
     } else if (currentStep === WalletSetupSteps.Create) {
       goToMyWallet();
     }
-  }, [currentStep, setCurrentStep, goToMyWallet]);
+  }, [currentStep, goToMyWallet]);
 
   const handleCompleteCreation = useCallback(async () => {
     try {
@@ -226,24 +227,14 @@ export const WalletSetupWizard = ({
           onChange={setMnemonic}
           onCancel={moveBack}
           onSubmit={moveForward}
-          onStepNext={(step: number) => {
-            /* eslint-disable no-magic-numbers */
-            switch (step) {
-              case 0:
-                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK);
-                break;
-              case 1:
-                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK);
-                break;
-              case 2:
-                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK);
-            }
-          }}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
           suggestionList={wordList}
           defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
           onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
+          onPasteFromClipboard={() =>
+            sendAnalytics(postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+          }
         />
       );
     }

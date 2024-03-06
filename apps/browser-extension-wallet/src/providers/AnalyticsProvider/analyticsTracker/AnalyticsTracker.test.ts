@@ -152,7 +152,7 @@ describe('AnalyticsTracker', () => {
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
       await tracker.sendEventToPostHog(PostHogAction.LandingAnalyticsAgreeClick);
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreDoneGoToWallet);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreEnterWalletClick);
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
     });
 

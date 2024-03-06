@@ -8,7 +8,7 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   create: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingCreateClick,
     SAVE_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseNextClick,
-    ENTER_WALLET: PostHogAction.OnboardingCreateEnterRecoveryPhraseEnterWalletClick,
+    ENTER_WALLET: PostHogAction.OnboardingCreateEnterWalletClick,
     WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingCreateWalletNamePasswordNextClick,
     RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseIntroPlayVideoClick,
     RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.OnboardingCreateKeepWalletSecureGotItClick,
@@ -17,16 +17,12 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   },
   restore: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingRestoreClick,
-    WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNameNextClick,
-    WALLET_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletPasswordNextClick,
-    RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.OnboardingRestoreRecoveryPhraseLengthNextClick,
     RESTORE_MULTI_ADDR_CANCEL_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletCancelClick,
     RESTORE_MULTI_ADDR_OK_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletOkClick,
-    ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase01NextClick,
-    ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase09NextClick,
-    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase17NextClick,
-    DONE_GO_TO_WALLET: PostHogAction.OnboardingRestoreDoneGoToWallet,
-    WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNamePasswordNextClick
+    ENTER_WALLET: PostHogAction.OnboardingRestoreEnterWalletClick,
+    WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNamePasswordNextClick,
+    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
+      PostHogAction.OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick
   },
   hw: {
     WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingHWNameNextClick,
