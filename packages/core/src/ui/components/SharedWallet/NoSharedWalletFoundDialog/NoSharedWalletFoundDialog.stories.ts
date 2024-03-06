@@ -23,7 +23,8 @@ export const Overview: Story = {
       confirm: 'Proceed'
     },
     events: {
-      handleOnConfirm: noop,
+      onCancel: noop,
+      onConfirm: noop,
       onOpenChanged: noop
     }
   }
