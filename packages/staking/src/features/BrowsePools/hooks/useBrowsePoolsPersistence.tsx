@@ -25,7 +25,7 @@ export const useBrowsePoolsPersistence = () => {
 
   // LocalStorage -> Store (hydration)
   useEffect(() => {
-    if (!storeReady) return;
+    if (!storeReady || storeHydrated.current) return;
 
     if (stakingBrowserPreferencesPersistence) {
       // eslint-disable-next-line promise/catch-or-return
