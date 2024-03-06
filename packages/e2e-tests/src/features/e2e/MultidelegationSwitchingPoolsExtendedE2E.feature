@@ -26,9 +26,9 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then I wait until delegation info card shows staking to "<pools_after>" pool(s)
     Examples:
       | pools_before | pools_after | pool_tickers                                                    | tx_type                   |
-      | 1            | 2           | OCEAN, 8BETA                                                    | Delegation                |
-      | 2            | 10          | OCEAN, 8BETA, WOOF, PIANO, SMAUG, ZZZZX, ZZZG3, YATP, XSP, CENT | Delegation                |
-      | 10           | 1           | OCEAN                                                           | Stake Key De-Registration |
+      | 1            | 2           | 8BETA, OCEAN                                                    | Delegation                |
+      | 2            | 10          | 8BETA, OCEAN, WOOF, PIANO, SMAUG, ZZZZX, ZZZG3, YATP, XSP, CENT | Delegation                |
+      | 10           | 1           | 8BETA                                                           | Stake Key De-Registration |
 
   @LW-8434 @Testnet
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata

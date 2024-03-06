@@ -1,0 +1,26 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../src/styles/rules/flex.scss';
+
+.spaceBetween {
+  justify-content: space-between;
+  padding-top: size_unit(2);
+}
+
+.layoutError {
+  padding: 0;
+}
+
+.actions {
+  @extend %flex-column;
+  background-color: var(--bg-color-body);
+  gap: size_unit(1);
+  padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
+  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  margin: size_unit(4) size_unit(-3) size_unit(-2) size_unit(-3);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  .actionBtn {
+    width: 100%;
+  }
+}

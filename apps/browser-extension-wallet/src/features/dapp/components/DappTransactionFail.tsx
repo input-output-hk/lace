@@ -24,8 +24,8 @@ export const DappTransactionFail = (): React.ReactElement => {
   }, [analytics]);
 
   return (
-    <div data-testid="dapp-sign-tx-fail" className={styles.noWalletContainer}>
-      <div className={styles.noWalletContent}>
+    <div data-testid="dapp-sign-tx-fail" className={styles.dappErrorContainer}>
+      <div className={styles.dappErrorContent}>
         <Image data-testid="dapp-sign-tx-fail-image" preview={false} width={112} src={Fail} />
         <div data-testid="dapp-sign-tx-fail-heading" className={styles.heading}>
           {t('dapp.sign.failure.title')}
