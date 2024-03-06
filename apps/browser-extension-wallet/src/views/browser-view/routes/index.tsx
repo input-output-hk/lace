@@ -27,7 +27,7 @@ import { MultiWallet } from '../features/multi-wallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
-import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-wallet/components';
+import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 
 export const defaultRoutes: RouteMap = [
   {
