@@ -46,7 +46,7 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
     case Wallet.Cardano.ChainIds.Preview.networkMagic:
       return 'Preview';
     case Wallet.Cardano.ChainIds.Sanchonet.networkMagic:
-      throw new Error('TODO: add sanchonet option');
+      return 'Sanchonet';
     default:
       throw new Error(`Unknown network magic: ${chainId.networkMagic}`);
   }

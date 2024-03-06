@@ -4,27 +4,18 @@ import { ErrorPane } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { DappInfo, DappInfoProps } from '../DappInfo';
 import { DappTxHeader } from './DappTxHeader/DappTxHeader';
-import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
-import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
+import { DappTxAsset } from './DappTxAsset/DappTxAsset';
+import { DappTxOutput } from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
-
-type TransactionDetails = {
-  fee: string;
-  outputs: DappTxOutputProps[];
-  type: 'Send' | 'Mint';
-  mintedAssets?: DappTxAssetProps[];
-  burnedAssets?: DappTxAssetProps[];
-  collateral?: string;
-};
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
   `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
 
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
-  transaction: TransactionDetails;
+  transaction: Wallet.Cip30SignTxSummary;
   /** dApp information such as logo, name and url */
   dappInfo: Omit<DappInfoProps, 'className'>;
   /** Optional error message */
@@ -48,7 +39,7 @@ export const DappTransaction = ({
       <DappInfo {...dappInfo} className={styles.dappInfo} />
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
-        {type === 'Mint' && mintedAssets?.length > 0 && (
+        {type === Wallet.Cip30TxType.Mint && mintedAssets?.length > 0 && (
           <>
             <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
@@ -59,10 +50,10 @@ export const DappTransaction = ({
             ))}
           </>
         )}
-        {type === 'Mint' && burnedAssets?.length > 0 && (
+        {type === Wallet.Cip30TxType.Mint && burnedAssets?.length > 0 && (
           <>
             <DappTxHeader
-              title={mintedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
+              title={burnedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
               subtitle={t('package.core.dappTransaction.burn')}
             />
             {burnedAssets.map((asset) => (
@@ -70,7 +61,7 @@ export const DappTransaction = ({
             ))}
           </>
         )}
-        {type === 'Send' && (
+        {type === Wallet.Cip30TxType.Send && (
           <>
             <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
