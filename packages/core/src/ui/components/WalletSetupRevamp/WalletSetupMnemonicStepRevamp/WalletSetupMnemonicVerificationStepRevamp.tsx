@@ -35,7 +35,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   onSubmit,
   onCancel,
   onSetMnemonicLength,
-  defaultMnemonicLength,
+  defaultMnemonicLength = 24,
   isSubmitEnabled,
   translations,
   suggestionList
@@ -47,14 +47,18 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
     </>
   );
 
-  const pasteRecoveryPhrase = async () => {
-    const stepWords = await readMnemonicFromClipboard(mnemonic.length);
+  const pasteRecoveryPhrase = async (offset = 0) => {
+    const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    if (stepWords.length === -1) return;
+    if (copiedWords.length === -1) return;
 
-    const newMnemonic: string[] = new Array(mnemonic.length).fill('');
-    stepWords.forEach((word, index) => {
-      newMnemonic[index] = word;
+    const newMnemonic = [...mnemonic];
+
+    copiedWords.forEach((word, index) => {
+      const newIndex = offset + index;
+      if (newIndex < newMnemonic.length) {
+        newMnemonic[newIndex] = word;
+      }
     });
 
     onChange(newMnemonic);
@@ -67,7 +71,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       onBack={onCancel}
       onNext={onSubmit}
       customAction={
-        <Button type="link" onClick={pasteRecoveryPhrase}>
+        <Button type="link" onClick={() => pasteRecoveryPhrase()}>
           {translations.pasteFromClipboard}
         </Button>
       }
@@ -77,6 +81,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
     >
       <div className={styles.mnemonicContainer}>
         <MnemonicWordsConfirmInputRevamp
+          handlePaste={pasteRecoveryPhrase}
           onChange={(stepWords) => {
             const newMnemonic = [...mnemonic];
 

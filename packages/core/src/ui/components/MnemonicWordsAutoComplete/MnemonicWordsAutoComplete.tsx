@@ -19,6 +19,7 @@ export interface MnemonicWordsAutoCompleteProps {
   max?: number;
   focus?: boolean;
   className?: string;
+  handlePaste?: () => void;
 }
 
 export const MnemonicWordsAutoComplete = ({
@@ -29,7 +30,8 @@ export const MnemonicWordsAutoComplete = ({
   onDropdownVisibleChange,
   max = DEFAULT_INPUT_MAX_LENGTH,
   focus = false,
-  className
+  className,
+  handlePaste
 }: MnemonicWordsAutoCompleteProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputRef>(null);
@@ -120,6 +122,7 @@ export const MnemonicWordsAutoComplete = ({
           <Input
             data-testid="mnemonic-word-input"
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             className={classnames(styles.input, { [styles.focus]: isMaskVisible })}
             value={value?.slice(0, max)}
             onChange={handleChange}

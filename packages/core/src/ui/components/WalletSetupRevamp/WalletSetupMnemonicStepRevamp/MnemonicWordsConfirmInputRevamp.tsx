@@ -8,6 +8,7 @@ export interface MnemonicWordsConfirmInputProps {
   onDropdownVisibleChange?: (open: boolean) => void;
   suggestionList?: Array<string>;
   focus?: boolean;
+  handlePaste?: (index: number) => void;
 }
 
 const TWENTY_FOUR_WORD_LENGTH = 24;
@@ -16,11 +17,13 @@ export const MnemonicWordsConfirmInputRevamp = ({
   words,
   onChange,
   onDropdownVisibleChange,
-  suggestionList
+  suggestionList,
+  handlePaste
 }: MnemonicWordsConfirmInputProps): React.ReactElement => (
   <div className={styles.container}>
     {words.map((word, index) => (
       <MnemonicWordsAutoComplete
+        handlePaste={() => handlePaste(index)}
         value={word}
         onChange={(value) => {
           const newWords = [...words];

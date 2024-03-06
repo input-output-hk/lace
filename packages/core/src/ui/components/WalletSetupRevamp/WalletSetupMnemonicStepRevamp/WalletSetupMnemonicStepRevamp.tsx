@@ -54,15 +54,18 @@ export const WalletSetupMnemonicStepRevamp = ({
     setMnemonicWordsConfirm(initialMnemonicWordsConfirm);
   }, [initialMnemonicWordsConfirm, mnemonic]);
 
-  const pasteRecoveryPhrase = async () => {
-    const stepWords = await readMnemonicFromClipboard(mnemonic.length);
+  const pasteRecoveryPhrase = async (offset = 0) => {
+    const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    if (stepWords.length === -1) return;
-    // eslint-disable-next-line unicorn/no-new-array
-    const newMnemonic: string[] = new Array(mnemonic.length).fill('');
-    // eslint-disable-next-line unicorn/no-array-for-each
-    stepWords.forEach((word, index) => {
-      newMnemonic[index] = word;
+    if (copiedWords.length === -1) return;
+
+    const newMnemonic = [...mnemonic];
+
+    copiedWords.forEach((word, index) => {
+      const newIndex = offset + index;
+      if (newIndex < newMnemonic.length) {
+        newMnemonic[newIndex] = word;
+      }
     });
 
     setMnemonicWordsConfirm(newMnemonic);
@@ -114,7 +117,7 @@ export const WalletSetupMnemonicStepRevamp = ({
               {translations.copyToClipboard}
             </Button>
           ) : (
-            <Button type="link" onClick={pasteRecoveryPhrase}>
+            <Button type="link" onClick={() => pasteRecoveryPhrase()}>
               {translations.pasteFromClipboard}
             </Button>
           )
@@ -127,6 +130,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         ) : (
           <div className={styles.ContainerWordsConfirm}>
             <MnemonicWordsConfirmInputRevamp
+              handlePaste={pasteRecoveryPhrase}
               words={mnemonicConfirm}
               onChange={(stepWords) => {
                 const newMnemonicWordsConfirm = [...mnemonicConfirm];
