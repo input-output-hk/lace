@@ -26,6 +26,7 @@ import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { Providers } from './hardware-wallet/types';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useTranslation } from 'react-i18next';
+import { WalletConflictError } from '@cardano-sdk/web-extension';
 
 const { newWallet } = walletRoutePaths;
 
@@ -54,7 +55,7 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
             accountIndex: account
           });
         } catch (error) {
-          if (error.constructor.name === 'WalletConflictError') {
+          if (error instanceof WalletConflictError) {
             toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
           } else {
             throw error;

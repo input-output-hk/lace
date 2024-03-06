@@ -10,6 +10,7 @@ import noop from 'lodash/noop';
 import { useWalletManager } from '@hooks';
 import { toast } from '@lace/common';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import { WalletConflictError } from '@cardano-sdk/web-extension';
 
 const wordList = wordlists.english;
 
@@ -47,7 +48,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     try {
       await createWallet(data);
     } catch (error) {
-      if (error.constructor.name === 'WalletConflictError') {
+      if (error instanceof WalletConflictError) {
         toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
       } else {
         throw error;
