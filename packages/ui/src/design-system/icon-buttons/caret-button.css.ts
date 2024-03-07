@@ -37,7 +37,7 @@ export const container = style([
         outlineWidth: vars.spacing.$4,
         outlineStyle: 'solid',
       },
-      [`&${asc}`]: {
+      [`&${desc}`]: {
         transform: 'rotate(180deg)',
       },
     },
