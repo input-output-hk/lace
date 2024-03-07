@@ -1,9 +1,12 @@
 import { PostHogAction, PostHogOnboardingActionsType } from './types';
 
 export const postHogOnboardingActions: PostHogOnboardingActionsType = {
-  landing: {
-    ANALYTICS_AGREE_CLICK: PostHogAction.LandingAnalyticsAgreeClick,
-    ANALYTICS_REJECT_CLICK: PostHogAction.LandingAnalyticsRejectClick
+  onboarding: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingAnalyticsAgreeClick,
+    ANALYTICS_REJECT_CLICK: PostHogAction.OnboardingAnalyticsRejectClick,
+    LEARN_MORE_CLICK: PostHogAction.OnboardingAnalyticsLearnMoreClick,
+    GOT_IT_CLICK: PostHogAction.OnboardingAnalyticsGotItClick,
+    PIN_EXTENSION_CLICK: PostHogAction.OnboardingMainViewPinExtensionClick
   },
   create: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingCreateClick,

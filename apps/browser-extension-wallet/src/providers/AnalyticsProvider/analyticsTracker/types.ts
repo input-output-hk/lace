@@ -38,15 +38,18 @@ export enum TxCreationType {
   External = 'external'
 }
 
-export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password' | 'landing';
+export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password' | 'onboarding';
 export type PostHogActionsKeys =
   | 'SETUP_OPTION_CLICK'
   | 'ANALYTICS_AGREE_CLICK'
+  | 'LEARN_MORE_CLICK'
   | 'ANALYTICS_REJECT_CLICK'
   | 'WALLET_NAME_NEXT_CLICK'
   | 'WALLET_PASSWORD_NEXT_CLICK'
   | 'SAVE_RECOVERY_PHRASE_NEXT_CLICK'
   | 'ENTER_WALLET'
+  | 'GOT_IT_CLICK'
+  | 'PIN_EXTENSION_CLICK'
   | 'ENTER_PASSPHRASE_01_NEXT_CLICK'
   | 'ENTER_PASSPHRASE_09_NEXT_CLICK'
   | 'ENTER_PASSPHRASE_17_NEXT_CLICK'
