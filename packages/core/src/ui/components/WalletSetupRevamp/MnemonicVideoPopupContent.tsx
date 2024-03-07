@@ -23,8 +23,10 @@ export const MnemonicVideoPopupContent = ({
   return (
     <div className={styles.container}>
       <div className={styles.content} data-testid="wallet-setup-step-header">
-        <h1 className={styles.title}>{translations.title}</h1>
-        <p className={styles.description}>
+        <h1 className={styles.title} data-testid="watch-video-title">
+          {translations.title}
+        </h1>
+        <p className={styles.description} data-testid="watch-video-description">
           {translations.description}{' '}
           <a href={urls.faq.secretPassphrase} target="_blank" data-testid="faq-secret-passphrase-url">
             {translations.linkText}
@@ -49,7 +51,7 @@ export const MnemonicVideoPopupContent = ({
           />
         </div>
       </div>
-      <Button.CallToAction label={translations.closeButton} onClick={onClose} />
+      <Button.CallToAction label={translations.closeButton} onClick={onClose} data-testid="watch-video-got-it-button" />
     </div>
   );
 };

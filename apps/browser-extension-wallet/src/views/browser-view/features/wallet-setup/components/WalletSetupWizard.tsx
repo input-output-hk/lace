@@ -8,7 +8,6 @@ import {
   WalletSetupCreationStep,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
-  WalletSetupRecoveryPhraseLengthStep,
   WalletSetupSteps,
   walletSetupWizard
 } from '@lace/core';
@@ -129,12 +128,6 @@ export const WalletSetupWizard = ({
     description: t('core.walletSetupCreateStep.description')
   };
 
-  const walletSetupRecoveryPhraseLengthStepTranslations = {
-    title: t('core.walletSetupRecoveryPhraseLengthStep.title'),
-    description: t('core.walletSetupRecoveryPhraseLengthStep.description'),
-    wordPassphrase: t('core.walletSetupRecoveryPhraseLengthStep.wordPassphrase')
-  };
-
   const mnemonicVideoPopupContentTranslations = {
     title: t('core.mnemonicVideoPopupContent.title'),
     description: t('core.mnemonicVideoPopupContent.description'),
@@ -249,11 +242,6 @@ export const WalletSetupWizard = ({
         <WalletSetupMnemonicVerificationStepRevamp
           mnemonic={mnemonic}
           onChange={setMnemonic}
-          /* onCancel={() =>
-            useDifferentMnemonicLengths
-              ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
-              : skipTo(WalletSetupSteps.Register)
-          }*/
           onCancel={moveBack}
           onSubmit={moveForward}
           onStepNext={(step: number) => {
@@ -318,17 +306,6 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
-      )}
-      {currentStep === WalletSetupSteps.RecoveryPhraseLength && (
-        <WalletSetupRecoveryPhraseLengthStep
-          onBack={moveBack}
-          onNext={(result) => {
-            setMnemonicLength(result.recoveryPhraseLength);
-            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK);
-            moveForward();
-          }}
-          translations={walletSetupRecoveryPhraseLengthStepTranslations}
-        />
       )}
       {currentStep === WalletSetupSteps.Create && (
         <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />

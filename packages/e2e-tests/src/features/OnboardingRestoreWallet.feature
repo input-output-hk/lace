@@ -123,7 +123,7 @@ Feature: Onboarding - Restore wallet
     Given I click "Restore" button and confirm
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter mnemonic words on "Mnemonic verification" page
+    And I enter mnemonic words on "Mnemonic writedown" page
     Then "Enter wallet" button is enabled
     # And I am on "Lace terms of use" page and accept terms
     # And I am on "Help us improve your experience" page

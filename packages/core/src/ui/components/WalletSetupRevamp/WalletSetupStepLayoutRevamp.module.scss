@@ -7,10 +7,12 @@
   height: 100%;
   display: flex;
   position: relative;
+
   .sideTimelineContainer {
     width: 204px;
     border-right: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
     margin: size_unit(5) 0;
+
     .activeText {
       @include text-bodySmall-semi-bold;
     }
@@ -50,25 +52,16 @@
       @include scroll-bar-style;
     }
 
-    :global(.ant-btn-link) {
-      color: var(--primary-default, #7f5af0) !important;
-      font-weight: 600 !important;
-    
-      &:hover,
-      &:active,
-      &:focus {
-        color: var(--primary-default, #7f5af0) !important;
-      }
-    }
-
     .footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-top: size_unit(2);
+
       button {
         min-width: 116px !important;
       }
+
       p {
         font-weight: 600;
         font-size: var(--bodySmall);

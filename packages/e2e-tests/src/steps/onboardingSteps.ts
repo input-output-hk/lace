@@ -42,6 +42,9 @@ import { generateRandomString } from '../utils/textUtils';
 import OnboardingRevampPageObject from '../pageobject/onboardingRevampPageObject';
 import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
 import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
+import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
+import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
+import watchVideoModal from '../elements/onboarding/watchVideoModal';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -220,10 +223,6 @@ Then(/^"All done" page is displayed$/, async () => {
   await OnboardingAllDonePageAssert.assertSeeAllDonePage();
 });
 
-Then(/^"Enter wallet" button is enabled$/, async () => {
-  await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
-});
-
 Then(/^"Creating wallet" page is displayed$/, async () => {
   await OnboardingWalletCreationPageAssert.assertSeeCreatingWalletPage();
 });
@@ -234,10 +233,6 @@ Then(/^Creating wallet page finishes in < (\d*)s$/, async (duration: number) => 
 
 Then(/^"Name your wallet" page is displayed$/, async () => {
   await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
-});
-
-Then(/^"Wallet setup" page is displayed$/, async () => {
-  await onboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
 });
 
 Then(/^"Wallet password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
@@ -300,10 +295,6 @@ Then(/^Words 1 - 8 (are|are not) the same$/, async (expectedMatch: string) => {
   );
 });
 
-Given(/^I am on "Mnemonic verification" page$/, async () => {
-  await OnboardingRevampPageObject.goToEnterWalletPage('Create');
-});
-
 Given(/^I am on "Mnemonic verification" page with words (8|16|24) of 24$/, async (expectedWords: number) => {
   mnemonicWords.length = 0;
   await OnboardingPageObject.goToMnemonicWriteDownPage();
@@ -322,19 +313,6 @@ Given(
     }
   }
 );
-
-Given(/^I enter mnemonic words on "Mnemonic verification" page$/, async () => {
-  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
-});
-
-Given(/^I am on "Enter wallet" page from "(Create|Restore)" wallet$/, async (flowType: 'Create' | 'Restore') => {
-  await OnboardingRevampPageObject.goToEnterWalletPage(flowType, mnemonicWords);
-  await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage(flowType);
-});
-
-Given(/^I click "Enter wallet" button$/, async () => {
-  await OnboardingRevampPageObject.clickEnterWalletButton();
-});
 
 Given(/^I am on "All done" page$/, async () => {
   await OnboardingPageObject.openAllDonePage();
@@ -647,4 +625,44 @@ Given(
 
 When(/^I restore previously changed mnemonic word$/, async () => {
   await OnboardingPageObject.restorePreviousMnemonicWord();
+});
+
+Given(
+  /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
+  async (flowType: 'Create' | 'Restore') => {
+    await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
+    await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage(flowType);
+  }
+);
+
+Given(/^I am on "Mnemonic writedown" page$/, async () => {
+  await OnboardingRevampPageObject.goToRecoveryPhrasePage();
+});
+
+Given(/^I click "Enter wallet" button$/, async () => {
+  await OnboardingRevampPageObject.clickEnterWalletButton();
+});
+
+Given(/^I enter mnemonic words on "Mnemonic writedown" page$/, async () => {
+  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
+});
+
+When(/^I click on "Watch video" link on "Mnemonic writedown" page$/, async () => {
+  await RecoveryPhrasePage.watchVideoLink.click();
+});
+
+When(/^I click "Read More" link in modal$/, async () => {
+  await watchVideoModal.readMoreLink.click();
+});
+
+Then(/^"Enter wallet" button is enabled$/, async () => {
+  await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
+});
+
+Then(/^"Wallet setup" page is displayed$/, async () => {
+  await onboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
+});
+
+Then(/^I see "Watch video" modal$/, async () => {
+  await onboardingWatchVideoModalAssert.assertSeeModal();
 });

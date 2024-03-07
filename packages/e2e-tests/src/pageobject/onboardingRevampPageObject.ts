@@ -9,7 +9,7 @@ class OnboardingRevampPageObject {
     return this.mnemonicWords;
   }
 
-  async goToEnterWalletPage(flowType: 'Create' | 'Restore', mnemonicWords: string[] = []): Promise<void> {
+  async goToMenmonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWords: string[] = []): Promise<void> {
     await this.goToRecoveryPhrasePage();
     if (flowType === 'Create') {
       await this.collectMnemonicWords();

@@ -65,13 +65,13 @@ export const WalletSetupOptionsStepRevamp = ({
         />
       </div>
     </div>
-    <div className={styles.legal}>
+    <div className={styles.legal} data-testid="agreement-text">
       By proceeding you agree to Lace’s{' '}
-      <a href={TERMS_OF_USE_URL} target="_blank" className={styles.link}>
+      <a href={TERMS_OF_USE_URL} target="_blank" className={styles.link} data-testid="terms-of-service-link">
         Terms of Service
       </a>{' '}
       and{' '}
-      <a href={PRIVACY_POLICY_URL} target="_blank" className={styles.link}>
+      <a href={PRIVACY_POLICY_URL} target="_blank" className={styles.link} data-testid="privacy-policy-link">
         Privacy Policy
       </a>
     </div>
