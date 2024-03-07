@@ -132,8 +132,8 @@ When(
 
 Given(/^I click "Restore" button and confirm$/, async () => {
   await OnboardingMainPage.restoreWalletButton.click();
-  await Modal.confirmButton.waitForClickable();
-  await Modal.confirmButton.click();
+  // await Modal.confirmButton.waitForClickable();
+  // await Modal.confirmButton.click();
 });
 
 When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {

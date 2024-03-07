@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import CommonOnboardingElements from './commonOnboardingElements';
 import { ChainablePromiseElement } from 'webdriverio';
+import { setInputFieldValue } from '../../utils/inputFieldUtils';
 
 class WalletSetupPage extends CommonOnboardingElements {
   private SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
@@ -22,9 +23,11 @@ class WalletSetupPage extends CommonOnboardingElements {
   get walletNameError(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_NAME_ERROR);
   }
+
   get walletPasswordInput() {
     return $(this.PASSWORD_INPUT);
   }
+
   get walletPasswordConfirmInput() {
     return $(this.PASSWORD_CONFIRM_INPUT);
   }
@@ -38,7 +41,7 @@ class WalletSetupPage extends CommonOnboardingElements {
   }
 
   async setWalletNameInput(value: string): Promise<void> {
-    await this.walletNameInput.setValue(value);
+    await setInputFieldValue(await this.walletNameInput, value);
   }
 
   async setWalletPasswordInput(value: string): Promise<void> {

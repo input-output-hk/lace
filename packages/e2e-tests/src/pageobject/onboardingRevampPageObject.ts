@@ -20,7 +20,7 @@ class OnboardingRevampPageObject {
   }
 
   async goToRecoveryPhrasePage(): Promise<void> {
-    await this.enterWalletName('TestWallet');
+    await this.enterWalletName('TestAutomationWallet');
     await this.enterWalletPassword('N_8J@bne87A');
     await this.enterWalletPasswordConfirm('N_8J@bne87A');
     await WalletSetupPage.nextButton.click();
@@ -58,4 +58,5 @@ class OnboardingRevampPageObject {
     await WalletSetupPage.walletPasswordConfirmInput.setValue(password);
   }
 }
+
 export default new OnboardingRevampPageObject();

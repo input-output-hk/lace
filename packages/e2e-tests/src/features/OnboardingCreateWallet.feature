@@ -250,7 +250,7 @@ Feature: Onboarding - Create wallet
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page "Create" wallet
+    And I am on "Mnemonic verification" page from "Create" wallet
     When I click "Enter wallet" button
     # And I am on "All done" page
     # When I click "Go to my wallet" button on "All done" page

@@ -126,7 +126,7 @@ Feature: Forgot password
     And I close all remaining tabs except current one
     Then "Wallet setup" page is displayed
     # Then "Wallet password" page is displayed in forgot password flow
-    When I am on "Mnemonic verification" page "Restore" wallet
+    When I am on "Mnemonic verification" page from "Restore" wallet
     And I click "Enter wallet" button
     # When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     # And I click "Next" button during wallet setup
