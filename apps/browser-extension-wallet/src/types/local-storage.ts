@@ -54,4 +54,5 @@ export interface ILocalStorage {
   unconfirmedTransactions: UnconfirmedTransaction[];
   stakingBrowserPreferences: StakingBrowserPreferences;
   showPinExtension?: boolean;
+  showMultiAddressModal?: boolean;
 }
