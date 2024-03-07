@@ -116,6 +116,7 @@ export const MnemonicWordsAutoComplete = ({
         dropdownMatchSelectWidth={containerRef?.current?.offsetWidth}
         onBlur={resetState}
         onFocus={getOptions}
+        autoFocus={idx === 1}
         onDropdownVisibleChange={onDropdownVisibleChange}
       >
         <div className={styles.autocompleteContent} data-testid={`mnemonic-word-input-${idx}`}>
