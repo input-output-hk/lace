@@ -23,7 +23,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
   const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);
   const delegationPortfolio = useObservable(walletStoreInMemoryWallet.delegation.portfolio$);
 
-  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view)
+  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view) https://input-output.atlassian.net/browse/LW-9979
   useEffect(() => {
     if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
     portfolioMutators.setCardanoCoinSymbol(currentChain);

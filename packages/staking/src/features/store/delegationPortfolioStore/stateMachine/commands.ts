@@ -139,7 +139,7 @@ export type OverviewCommand =
   | ManagePortfolio
   | GoToBrowsePools
   | GoToActivity
-  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view)
+  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view) - https://input-output.atlassian.net/browse/LW-9979
   | SelectPoolFromList
   | SetBrowsePoolsView;
 
