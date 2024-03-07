@@ -1,0 +1,14 @@
+@import '../../../styles/theme.scss';
+
+:global {
+  .ant-btn-link {
+    color: var(--primary-default, #7f5af0) !important;
+    font-weight: 600 !important;
+    
+    &:hover,
+    &:active,
+    &:focus {
+        color: var(--primary-default, #7f5af0) !important;
+    }
+  }
+}

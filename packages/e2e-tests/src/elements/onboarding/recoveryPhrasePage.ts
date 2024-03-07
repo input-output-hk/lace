@@ -9,6 +9,7 @@ export class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD_AUTOCOMPLETE_OPTIONS = '.ant-select-item-option-content';
   private MNEMONIC_AUTOCOMPLETE_DROPDOWN = '.ant-select-dropdown';
   private MNEMONIC_ERROR_MESSAGE = '[data-testid="passphrase-error"]';
+  private WATCH_VIDEO_LINK = '[data-testid="find-out-more-link"]';
 
   get mnemonicAutocompleteDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MNEMONIC_AUTOCOMPLETE_DROPDOWN);
@@ -28,6 +29,10 @@ export class RecoveryPhrasePage extends CommonOnboardingElements {
 
   get errorMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MNEMONIC_ERROR_MESSAGE);
+  }
+
+  get watchVideoLink(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.WATCH_VIDEO_LINK);
   }
 
   async getMnemonicAutocompleteOptionsValues(): Promise<string[]> {
