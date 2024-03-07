@@ -63,6 +63,8 @@ class MultidelegationPage {
   private MANAGE_BTN = '[data-testid="manage-btn"]';
   private GRID_VIEW_TOGGLE = '[data-testid="grid-view-toggle"]';
   private LIST_VIEW_TOGGLE = '[data-testid="list-view-toggle"]';
+  private STAKE_POOL_LIST_ROW_SKELETON = '[data-testid="stake-pool-list-row-skeleton"]';
+  private STAKE_POOL_CARD_SKELETON = '[data-testid="stake-pool-card-skeleton"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -254,6 +256,14 @@ class MultidelegationPage {
 
   delegatedPoolLastRewardsValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_VALUE);
+  }
+
+  get stakePoolListRowSkeleton() {
+    return $(this.STAKE_POOL_LIST_ROW_SKELETON);
+  }
+
+  get stakePoolCardSkeleton() {
+    return $(this.STAKE_POOL_CARD_SKELETON);
   }
 
   async getPoolByTicker(ticker: string) {

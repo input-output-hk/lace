@@ -145,3 +145,27 @@ Feature: Staking Page - Extended View
     And I switch to list view on "Browse pools" tab
     And I wait for stake pool list to be populated
     Then each stake pool list item contains: checkbox, ticker, saturation, ROS, cost, margin, blocks, pledge and live stake
+
+  @LW-9985 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario: Extended View - Stake pool list - display skeleton while loading list elements
+    And I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I wait for stake pool list to be populated
+    When I scroll down 500 pixels
+    Then stake pool list row skeleton is displayed
+    When I wait 500 milliseconds
+    Then stake pool list row skeleton is not displayed
+
+  @LW-9986 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario: Extended View - Stake pool grid - display skeleton while loading grid cards
+    And I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to grid view on "Browse pools" tab
+    When I scroll down 500 pixels
+    Then stake pool grid card skeleton is displayed
+    When I wait 500 milliseconds
+    Then stake pool grid card skeleton is not displayed
+

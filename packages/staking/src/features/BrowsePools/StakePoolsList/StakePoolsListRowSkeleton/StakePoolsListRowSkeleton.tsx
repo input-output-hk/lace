@@ -17,7 +17,7 @@ export const StakePoolsListRowSkeleton = <E extends string>({
   withSelection,
 }: StakePoolsListRowSkeletonProps<E>) => (
   <div
-    data-testid={`${dataTestId}-placeholder-item`}
+    data-testid="stake-pool-list-row-skeleton"
     className={cn(styles.row, {
       [styles.selectable]: withSelection,
     })}

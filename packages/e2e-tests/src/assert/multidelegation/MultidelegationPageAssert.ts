@@ -257,6 +257,14 @@ class MultidelegationPageAssert {
     expect(await Tooltip.label.getText()).contains(`${currencyCode} Value`);
     expect(await Tooltip.value.getText()).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX); // TODO: update when LW-8935 is resolved
   };
+
+  assertSeeStakePoolListRowSkeleton = async (shouldBeDisplayed: boolean) => {
+    await MultidelegationPage.stakePoolListRowSkeleton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  };
+
+  assertSeeStakePoolGridCardSkeleton = async (shouldBeDisplayed: boolean) => {
+    await MultidelegationPage.stakePoolCardSkeleton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  };
 }
 
 export default new MultidelegationPageAssert();

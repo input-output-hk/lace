@@ -485,3 +485,11 @@ When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'g
     await MultidelegationPage.switchPoolsView(viewType);
   }
 });
+
+Then(/^stake pool list row skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {
+  await MultidelegationPageAssert.assertSeeStakePoolListRowSkeleton(status === 'is');
+});
+
+Then(/^stake pool grid card skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {
+  await MultidelegationPageAssert.assertSeeStakePoolGridCardSkeleton(status === 'is');
+});
