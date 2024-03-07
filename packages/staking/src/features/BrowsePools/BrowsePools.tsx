@@ -62,7 +62,7 @@ export const BrowsePools = () => {
 
   return (
     <>
-      <Box className={styles.stakePoolsTable} data-testid="stake-pool-table">
+      <Box className={styles.browsePools} data-testid="stake-pool-table">
         <BrowsePoolsHeader poolsCount={totalPoolsCount} poolsView={poolsView} setPoolsView={switchPoolsView} />
         <Search
           className={styles.searchBar}
