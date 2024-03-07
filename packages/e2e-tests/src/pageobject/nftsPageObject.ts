@@ -13,6 +13,7 @@ import { AddressInput } from '../elements/AddressInput';
 class NftsPageObject {
   async clickNftItemOnNftsPage(nftName: string, clickType: 'left' | 'right' = 'left') {
     const nftNameElement = await NftsPage.getNftName(nftName);
+    await nftNameElement.waitForStable();
     await nftNameElement.click({ button: clickType });
   }
 

@@ -4,6 +4,7 @@ import { ChainablePromiseElement } from 'webdriverio';
 import testContext from '../utils/testContext';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { browser } from '@wdio/globals';
+import transactionsPageAssert from '../assert/transactionsPageAssert';
 
 class TransactionsPage {
   private TRANSACTIONS_DATE = '[data-testid="transaction-date"]';
@@ -92,16 +93,18 @@ class TransactionsPage {
   }
 
   async scrollToTheRow(index: number) {
-    const rows = await this.rows;
-    await rows[index].scrollIntoView();
+    const rowsCount = await this.rows;
+    rowsCount[index - 1].scrollIntoView();
+    const tokensCounterValue = Number((await this.counter.getText()).slice(1, -1));
+    if (tokensCounterValue > rowsCount.length) await transactionsPageAssert.assertSeeSkeleton(true);
   }
 
   async scrollToTheLastRow() {
     const tokensCounterValue = Number((await this.counter.getText()).slice(1, -1));
-    let rowIndex = 0;
-    while (rowIndex < tokensCounterValue && (await this.rows).length < tokensCounterValue) {
-      await this.scrollToTheRow(rowIndex);
-      rowIndex += 8;
+    let rowsVisible = 0;
+    while (rowsVisible < tokensCounterValue && (await this.rows).length < tokensCounterValue) {
+      rowsVisible = (await this.rows).length;
+      await this.scrollToTheRow(rowsVisible);
       await browser.pause(1000);
     }
   }

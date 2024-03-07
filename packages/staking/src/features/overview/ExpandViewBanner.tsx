@@ -8,7 +8,7 @@ import styles from './ExpandViewBanner.module.scss';
 
 export const ExpandViewBanner = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { expandStakingView } = useOutsideHandles();
+  const { expandStakingView = () => void 0 } = useOutsideHandles();
 
   return (
     <div className={styles.wrapper}>
@@ -20,7 +20,7 @@ export const ExpandViewBanner = (): React.ReactElement => {
           {t('popup.expandBanner.description')}
         </div>
         <Button
-          onClick={expandStakingView}
+          onClick={() => expandStakingView()}
           className={styles.button}
           size="large"
           color="gradient"

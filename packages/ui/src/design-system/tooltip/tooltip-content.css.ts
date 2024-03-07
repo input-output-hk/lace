@@ -15,5 +15,6 @@ export const tooltipContent = style([
   }),
   {
     position: 'relative',
+    wordBreak: 'break-word',
   },
 ]);

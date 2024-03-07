@@ -1,4 +1,4 @@
-@SendSimpleTransaction-Popup-E2E @Analytics @Testnet
+@Analytics-SendSimpleTransaction-Popup-E2E @Analytics @Testnet
 Feature: Analytics - Posthog - Sending - Popup View
 
   Background:
@@ -10,7 +10,7 @@ Feature: Analytics - Posthog - Sending - Popup View
     And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
     Then I validate latest analytics single event "send | send | click"
-    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
+    And I fill bundle 1 with "WalletAnalyticsReceiveSimpleTransaction2E2E" address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page

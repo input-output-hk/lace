@@ -62,7 +62,7 @@ export type OutsideHandlesContextValue = {
   stakingBrowserPreferencesPersistence: StakingBrowserPreferences;
   setStakingBrowserPreferencesPersistence: (preferences: StakingBrowserPreferences) => void;
   walletManagerExecuteWithPassword: <T>(action: () => Promise<T>, password?: string) => Promise<T>;
-  expandStakingView?: () => void;
+  expandStakingView?: (urlSearchParams?: string) => void;
   balancesBalance?: Balance;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetDelegationTxFee: (fee?: string) => void;

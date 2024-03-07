@@ -1,13 +1,13 @@
 import React from 'react';
 import { Ellipsis } from '@lace/common';
-import { DappTxAssetProps } from '../DappTxAsset/DappTxAsset';
 import styles from './DappTxOutput.module.scss';
 import { useTranslate } from '@src/ui/hooks';
+import { Wallet } from '@lace/cardano';
 
 export interface DappTxOutputProps {
   coins: string;
   recipient: string;
-  assets?: DappTxAssetProps[];
+  assets?: Wallet.Cip30SignTxAssetItem[];
 }
 
 export const DappTxOutput = ({ recipient, coins, assets }: DappTxOutputProps): React.ReactElement => {

@@ -44,7 +44,7 @@ export class PostHogClient {
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
     const token = this.getApiToken(this.chain);
-    if (!token) throw new Error('posthog token has not been provided');
+    if (!token) throw new Error(`posthog token has not been provided for chain: ${this.chain.networkId}`);
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
 
     this.initSuccess = this.userIdService

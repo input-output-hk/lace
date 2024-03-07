@@ -123,3 +123,11 @@
     line-height: size_unit(3);
   }
 }
+
+.negativeBalance {
+  color: var(--data-orange);
+}
+
+.positiveBalance {
+  color: var(--data-green);
+}

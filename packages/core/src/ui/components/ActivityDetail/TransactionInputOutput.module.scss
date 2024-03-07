@@ -8,13 +8,10 @@
 
   .expanderHeader {
     display: flex;
-    font-size: var(--bodyLarge);
-    font-weight: 700;
     justify-content: space-between;
-    line-height: 32px;
     padding: size_unit(3) 0px;
-
     color: var(--text-color-primary);
+    @include text-bodyLarge-bold;
 
     .label {
       @include text-bodyLarge-bold;
@@ -109,4 +106,35 @@
 
 .separatorLine {
   border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+}
+
+.topBorderContent {
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  padding-top: size_unit(3);
+}
+
+.listHeader {
+  color: var(--text-color-primary, #ffffff);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: size_unit(4);
+  width: 100%;
+
+  .listHeaderTitle {
+    display: flex;
+    flex: 0 0 50%;
+    align-self: baseline;
+    color: var(--text-color-primary, #ffffff);
+    @include text-body-bold;
+  }
+}
+
+.rotateOpen  {
+  transform: rotate(180deg);
+  transition: transform .2s linear;
+}
+
+.rotateClose  {
+  transform: rotate(0deg);
+  transition: transform .2s linear;
 }

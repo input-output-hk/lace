@@ -8,6 +8,8 @@ export const getChainName = (chainId: Wallet.Cardano.ChainId): Wallet.ChainName 
       return 'Preprod';
     case Wallet.Cardano.ChainIds.Preview.networkMagic:
       return 'Preview';
+    case Wallet.Cardano.ChainIds.Sanchonet.networkMagic:
+      return 'Sanchonet';
   }
 
   throw new Error('Chain name is not in known ChainIds');

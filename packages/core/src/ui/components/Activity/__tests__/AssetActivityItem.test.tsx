@@ -3,13 +3,15 @@ import * as React from 'react';
 import { render, within, fireEvent, queryByTestId } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssetActivityItem, AssetActivityItemProps, ActivityStatus } from '../AssetActivityItem';
+import { TransactionActivityType } from '../../ActivityDetail/types';
+import { ActivityType } from '../../ActivityDetail';
 
 const assetsAmountTestId = 'asset-amount';
 
 describe('Testing AssetActivityItem component', () => {
   const props: AssetActivityItemProps = {
     id: '1',
-    type: 'outgoing',
+    type: TransactionActivityType.outgoing,
     amount: '100',
     fiatAmount: '300 $',
     formattedTimestamp: 'Timestamp',
@@ -21,8 +23,8 @@ describe('Testing AssetActivityItem component', () => {
 
   const assetActivityItemId = 'asset-activity-item';
 
-  test('should render an asset activity item', async () => {
-    const { findByTestId } = render(<AssetActivityItem {...props} />);
+  test('should render an asset activity item with type incoming', async () => {
+    const { findByTestId } = render(<AssetActivityItem {...props} type={TransactionActivityType.incoming} />);
     const activityItem = await findByTestId(assetActivityItemId);
 
     const activityIcon = await findByTestId('asset-icon');
@@ -43,6 +45,16 @@ describe('Testing AssetActivityItem component', () => {
     expect(activityFiatAmountText).toBeVisible();
   });
 
+  ['outgoing', 'delegationRegistration', 'self', 'delegation'].forEach((type) => {
+    test(`should apply negative balance for: ${type} activity`, async () => {
+      const { findByTestId } = render(<AssetActivityItem {...props} type={type as ActivityType} />);
+
+      const totalAmount = await findByTestId('balance');
+
+      expect(totalAmount).toHaveTextContent(`-${props.amount}`);
+    });
+  });
+
   test('should render an asset activity item with proper assets text when there is enough space to show assets info', async () => {
     const elWidth = 100;
     Object.defineProperties(window.HTMLElement.prototype, {
@@ -53,7 +65,7 @@ describe('Testing AssetActivityItem component', () => {
     const { findByTestId } = render(<AssetActivityItem {...props} />);
 
     const activityAmount = await findByTestId(assetsAmountTestId);
-    const tickerText = `${props.amount}, ${props.assets[0].val} ${props.assets[0].info.ticker}`;
+    const tickerText = `-${props.amount}, ${props.assets[0].val} ${props.assets[0].info.ticker}`;
     const activityAssetTickerText = await within(activityAmount).findByText(tickerText);
 
     expect(activityAssetTickerText).toBeVisible();

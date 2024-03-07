@@ -42,6 +42,7 @@ const MainComponents = (): JSX.Element => (
             <Cell>
               <Metadata
                 label="Hash"
+                tooltip="9bba8233cdd086f0325daba465d568a88970d42536f9e71e92a80d5922ded885"
                 text="9bba8233cdd086f0325daba465d568a88970d42536f9e71e92a80d5922ded885"
               />
             </Cell>

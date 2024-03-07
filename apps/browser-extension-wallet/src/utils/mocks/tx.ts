@@ -18,6 +18,9 @@ export const buildMockTx = (
   } = {}
 ): Wallet.Cardano.HydratedTx =>
   ({
+    auxiliaryData: {
+      blob: new Map([[BigInt(1), 'metadataMock']])
+    },
     blockHeader: {
       blockNo: Wallet.Cardano.BlockNo(200),
       hash: Wallet.Cardano.BlockId('0dbe461fb5f981c0d01615332b8666340eb1a692b3034f46bcb5f5ea4172b2ed'),
@@ -26,6 +29,9 @@ export const buildMockTx = (
     body: {
       certificates: args.certificates,
       fee: BigInt(170_000),
+      mint: new Map([
+        [Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'), BigInt(3)]
+      ]),
       inputs: args.inputs ?? [
         {
           address: sendingAddress,

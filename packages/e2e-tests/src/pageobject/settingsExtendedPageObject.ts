@@ -40,7 +40,10 @@ class SettingsExtendedPageObject {
 
   clickOnRemoveWallet = async () => await SettingsPage.removeWalletButton.click();
 
-  clickOnShowPublicKey = async () => await YourKeysDrawer.showPublicKeyButton.click();
+  clickOnShowPublicKey = async () => {
+    await YourKeysDrawer.showPublicKeyButton.waitForStable();
+    await YourKeysDrawer.showPublicKeyButton.click();
+  };
 
   clickOnNetworkRadioButton = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     switch (network) {

@@ -15,7 +15,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 
   .header {
     color: var(--text-color-secondary, #878e9e);
-    @include text-bodyLarge-medium;
+    @include text-body-medium;
     margin-bottom: size_unit(9);
 
     @media (max-width: $breakpoint-popup) {
@@ -24,10 +24,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
       letter-spacing: -0.015em;
       margin-bottom: size_unit(4);
     }
-  }
-
-  * {
-    margin: 0;
   }
 
   .block {
@@ -99,13 +95,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
         font-weight: 500;
         text-align: right;
         cursor: pointer;
-      }
-      &.txLink {
-        color: var(--text-color-blue, #3489f7);
-        line-height: 17px;
-        @media (max-width: $breakpoint-popup) {
-          flex: 60%;
-        }
       }
       &.poolId {
         color: var(--text-color-secondary);
@@ -185,7 +174,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 }
 
 .hashLabel {
-  max-width: auto;
+  max-width: initial;
   @media (max-width: $breakpoint-popup) {
     max-width: 85px;
     overflow-wrap: break-word;
@@ -277,5 +266,14 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 
   .lightLabel {
     color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  }
+}
+
+.txLink {
+  cursor: pointer !important;
+  color: var(--text-color-blue, #3489f7) !important;
+  line-height: 17px !important;
+  @media (max-width: $breakpoint-popup) {
+    flex: 60% !important;
   }
 }

@@ -1,10 +1,5 @@
-import type {
-  ActivityAssetProp,
-  ActivityStatus,
-  ActivityType,
-  RewardsActivityType,
-  TransactionActivityType
-} from '@lace/core';
+import type { ActivityAssetProp, ActivityStatus, ActivityType, TransactionActivityType } from '@lace/core';
+import { TxDirection } from '@src/types';
 
 export type TransformedActivity = {
   id?: string;
@@ -24,7 +19,7 @@ export type TransformedActivity = {
    */
   fiatAmount: string;
   /**
-   * Activity status: `sending` | `success` | 'error
+   * Activity status: `sending` | `success` | 'error' | 'spendable'
    */
   status?: ActivityStatus;
   /**
@@ -45,13 +40,15 @@ export type TransformedActivity = {
    * Direction: 'Incoming' | 'Outgoing' | 'Self'
    * TODO: Create a separate package for common types across apps/packages
    */
-  direction?: 'Incoming' | 'Outgoing' | 'Self';
+  direction?: TxDirection;
   /**
    * assets details
    */
   assets?: ActivityAssetProp[];
 };
 
-export type TransformedTransactionActivity = TransformedActivity & { type: TransactionActivityType };
+export type TransformedTransactionActivity = TransformedActivity & {
+  type: Exclude<ActivityType, TransactionActivityType.rewards>;
+};
 
-export type TransformedRewardsActivity = TransformedActivity & { type: RewardsActivityType };
+export type TransformedRewardsActivity = TransformedActivity & { type: TransactionActivityType.rewards };

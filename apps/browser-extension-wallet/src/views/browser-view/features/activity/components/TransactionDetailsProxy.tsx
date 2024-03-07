@@ -1,10 +1,11 @@
 import React, { ReactElement, useMemo } from 'react';
-import { ActivityStatus, TransactionDetails } from '@lace/core';
+import { ActivityStatus, DelegationActivityType, TransactionDetails } from '@lace/core';
 import { AddressListType, getTransactionData } from './ActivityDetail';
 import { useWalletStore } from '@src/stores';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import type { TransactionActivityDetail, TxDirection } from '@src/types';
+import { TxDirections } from '@src/types';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { config } from '@src/config';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -34,10 +35,10 @@ export const TransactionDetailsProxy = withAddressBookContext(
       [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
     );
     const getHeaderDescription = () => {
-      if (activityInfo.type === 'delegation') return '1 token';
+      if (activityInfo.type === DelegationActivityType.delegation) return '1 token';
       return ` (${activityInfo?.assetAmount})`;
     };
-    const isIncomingTransaction = direction === 'Incoming';
+    const isIncomingTransaction = direction === TxDirections.Incoming;
     const {
       addrOutputs,
       addrInputs,
@@ -48,7 +49,10 @@ export const TransactionDetailsProxy = withAddressBookContext(
       pools,
       deposit,
       depositReclaim,
-      metadata
+      metadata,
+      proposalProcedures,
+      votingProcedures,
+      certificates
     } = activityInfo.activity;
     const txSummary = useMemo(
       () =>
@@ -61,10 +65,10 @@ export const TransactionDetailsProxy = withAddressBookContext(
       [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
     );
 
-    const handleOpenExternalLink = () => {
+    const handleOpenExternalHashLink = () => {
       analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
       const externalLink = `${explorerBaseUrl}/${hash}`;
-      externalLink && status === 'success' && openExternalLink(externalLink);
+      externalLink && status === ActivityStatus.SUCCESS && openExternalLink(externalLink);
     };
 
     const addressToNameMap = useMemo(
@@ -93,9 +97,13 @@ export const TransactionDetailsProxy = withAddressBookContext(
         addressToNameMap={addressToNameMap}
         coinSymbol={cardanoCoin.symbol}
         isPopupView={isPopupView}
-        openExternalLink={handleOpenExternalLink}
         sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}
         sendAnalyticsOutputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailOutputsClick)}
+        proposalProcedures={proposalProcedures}
+        votingProcedures={votingProcedures}
+        certificates={certificates}
+        handleOpenExternalHashLink={handleOpenExternalHashLink}
+        openExternalLink={openExternalLink}
       />
     );
   }

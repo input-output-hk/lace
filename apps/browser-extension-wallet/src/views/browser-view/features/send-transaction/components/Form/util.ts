@@ -19,7 +19,10 @@ export const formatAdaAllocation = ({
   cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
 }): ResultFormatAdaAllocation => ({
-  adaAmount: `${Wallet.util.lovelacesToAdaString(missingCoins)} ${cardanoCoin.symbol}`,
+  adaAmount: Wallet.util.getFormattedAmount({
+    amount: missingCoins,
+    cardanoCoin
+  }),
   fiatAmount: `$${Wallet.util.convertLovelaceToFiat({
     lovelaces: missingCoins ?? '0',
     fiat

@@ -9,23 +9,27 @@ export const POSTHOG_EXCLUDED_EVENTS = process.env.POSTHOG_EXCLUDED_EVENTS ?? ''
 export const DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP: Record<Wallet.Cardano.NetworkMagic, string> = {
   [Wallet.Cardano.NetworkMagics.Mainnet]: process.env.POSTHOG_DEV_TOKEN_MAINNET,
   [Wallet.Cardano.NetworkMagics.Preprod]: process.env.POSTHOG_DEV_TOKEN_PREPROD,
-  [Wallet.Cardano.NetworkMagics.Preview]: process.env.POSTHOG_DEV_TOKEN_PREVIEW
+  [Wallet.Cardano.NetworkMagics.Preview]: process.env.POSTHOG_DEV_TOKEN_PREVIEW,
+  [Wallet.Cardano.NetworkMagics.Sanchonet]: process.env.POSTHOG_DEV_TOKEN_SANCHONET
 };
 
 export const PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP: Record<Wallet.Cardano.NetworkMagic, string> = {
   [Wallet.Cardano.NetworkMagics.Mainnet]: process.env.POSTHOG_PRODUCTION_TOKEN_MAINNET,
   [Wallet.Cardano.NetworkMagics.Preprod]: process.env.POSTHOG_PRODUCTION_TOKEN_PREPROD,
-  [Wallet.Cardano.NetworkMagics.Preview]: process.env.POSTHOG_PRODUCTION_TOKEN_PREVIEW
+  [Wallet.Cardano.NetworkMagics.Preview]: process.env.POSTHOG_PRODUCTION_TOKEN_PREVIEW,
+  [Wallet.Cardano.NetworkMagics.Sanchonet]: process.env.POSTHOG_PRODUCTION_TOKEN_SANCHONET
 };
 
 export const DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP: Record<Wallet.Cardano.NetworkMagic, number> = {
   [Wallet.Cardano.NetworkMagics.Mainnet]: 6315,
   [Wallet.Cardano.NetworkMagics.Preprod]: 6316,
-  [Wallet.Cardano.NetworkMagics.Preview]: 4874
+  [Wallet.Cardano.NetworkMagics.Preview]: 4874,
+  [Wallet.Cardano.NetworkMagics.Sanchonet]: 11_178
 };
 
 export const PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP: Record<Wallet.Cardano.NetworkMagic, number> = {
   [Wallet.Cardano.NetworkMagics.Mainnet]: 6621,
   [Wallet.Cardano.NetworkMagics.Preprod]: 6620,
-  [Wallet.Cardano.NetworkMagics.Preview]: 6619
+  [Wallet.Cardano.NetworkMagics.Preview]: 6619,
+  [Wallet.Cardano.NetworkMagics.Sanchonet]: 11_179
 };

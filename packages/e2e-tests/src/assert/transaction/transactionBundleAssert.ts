@@ -26,6 +26,7 @@ class TransactionBundleAssert {
   };
 
   async assertSeeTokenNameInBundleAndCoinConfigure(expectedName: string, bundleIndex: number) {
+    await TransactionNewPage.cancelTransactionButton.waitForStable();
     const tokenName = await new TransactionBundle(bundleIndex)
       .bundleAssetInput()
       .coinConfigure(bundleIndex, expectedName.replace('...', ''))

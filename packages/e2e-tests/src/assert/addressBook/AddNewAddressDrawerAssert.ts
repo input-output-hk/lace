@@ -5,6 +5,7 @@ import { t } from '../../utils/translationService';
 
 class AddNewAddressDrawerAssert {
   async assertSeeAddNewAddressDrawer(mode: 'extended' | 'popup', isSendFlow = false) {
+    await AddNewAddressDrawer.drawerHeaderTitle.waitForStable();
     await AddNewAddressDrawer.drawerHeaderBackButton.waitForClickable({
       reverse: isSendFlow ? false : mode === 'extended'
     });
@@ -21,7 +22,6 @@ class AddNewAddressDrawerAssert {
       expect(await AddNewAddressDrawer.drawerNavigationTitle.getText()).to.equal(expectedTitle);
     }
 
-    await AddNewAddressDrawer.drawerHeaderTitle.waitForDisplayed();
     const expectedTitle = isSendFlow
       ? await t('browserView.transaction.send.drawer.addressForm')
       : await t('browserView.addressBook.form.addNewAddress');

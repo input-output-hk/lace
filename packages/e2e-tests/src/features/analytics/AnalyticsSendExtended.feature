@@ -1,4 +1,4 @@
-@SendSimpleTransaction-Extended-E2E @Analytics @Testnet
+@Analytics-SendSimpleTransaction-Extended-E2E @Analytics @Testnet
 Feature: Analytics - Posthog - Sending - Extended View
 
   Background:
@@ -10,7 +10,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I have 2 addresses with ADA handle in my address book in extended mode
     And I click "Send" button on page header
     Then I validate latest analytics single event "send | send | click"
-    When I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
+    When I fill bundle 1 with "WalletAnalyticsReceiveSimpleTransactionE2E" address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     When I click "Add bundle" button on "Send" page
@@ -40,8 +40,9 @@ Feature: Analytics - Posthog - Sending - Extended View
   Scenario: Analytics - Extended-view - Send - Dapp Success Screen - View transaction - Transaction confirmed
     Given I de-authorize all DApps in extended mode
     And I open and authorize test DApp with "Only once" setting
+    And I set send to wallet address to: "WalletAnalyticsReceiveSimpleTransactionE2E" in test DApp
     And I click "Send ADA" "Run" button in test DApp
-    And I see DApp connector "Confirm transaction" page with: "3.00 ADA", "0" assets and receiving wallet "WalletReceiveSimpleTransactionE2E"
+    And I see DApp connector "Confirm transaction" page with: "3.00 ADA", "0" assets and receiving wallet "WalletAnalyticsReceiveSimpleTransactionE2E"
     And I set up request interception for posthog analytics request(s)
     When I click "Confirm" button on "Confirm transaction" page
     Then I validate latest analytics single event "send | transaction summary | confirm | click"
@@ -50,7 +51,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     When I click "Confirm" button on "Sign transaction" page
     Then I validate latest analytics multiple events:
       | send \| transaction confirmation \| confirm \| click |
-      | send \| all done \| view                     |
+      | send \| all done \| view                             |
     And I validate that the "send | transaction confirmation | confirm | click" event includes property "tx_creation_type" with value "external" in posthog
     And I validate that the "send | all done | view" event includes property "tx_creation_type" with value "external" in posthog
     And I click "Close" button on DApp "All done" page

@@ -25,8 +25,8 @@ export const DappTransactionSuccess = (): React.ReactElement => {
   }, [analytics]);
 
   return (
-    <div data-testid="dapp-sign-tx-success" className={styles.noWalletContainer}>
-      <div className={styles.noWalletContent}>
+    <div data-testid="dapp-sign-tx-success" className={styles.dappErrorContainer}>
+      <div className={styles.dappErrorContent}>
         <Image data-testid="dapp-sign-tx-success-image" preview={false} width={112} src={Success} />
         <div data-testid="dapp-sign-tx-success-heading" className={styles.heading}>
           {t('browserView.transaction.success.youCanSafelyCloseThisPanel')}

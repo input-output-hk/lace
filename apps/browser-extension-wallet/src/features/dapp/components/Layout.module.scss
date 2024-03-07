@@ -26,7 +26,7 @@
   padding-top: size_unit(4);
 }
 
-.noWalletContainer {
+.dappErrorContainer {
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
   justify-content: space-between;
   width: 100%;
 
-  .noWalletContent {
+  .dappErrorContent {
     padding: 0 size_unit(3);
     display: flex;
     flex: 1;
@@ -45,7 +45,7 @@
     .heading {
       color: var(--text-color-secondary);
       font-size: var(--bodyLarge);
-      font-weight: 800;
+      font-weight: 600;
       letter-spacing: 0.02em;
       line-height: size_unit(3);
       margin-top: size_unit(2);
@@ -55,6 +55,7 @@
     .description {
       color: var(--text-color-secondary);
       font-size: var(--bodySmall);
+      font-weight: 500;
       letter-spacing: 0.02em;
       line-height: size_unit(3);
       margin-top: size_unit(2);

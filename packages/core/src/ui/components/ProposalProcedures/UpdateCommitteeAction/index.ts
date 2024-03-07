@@ -1,0 +1,1 @@
+export { UpdateCommitteeAction } from './UpdateCommitteeActionAction';

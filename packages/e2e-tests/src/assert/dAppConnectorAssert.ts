@@ -171,7 +171,7 @@ class DAppConnectorAssert {
     expect(await NoWalletModal.description.getText()).to.equal(await t('dapp.noWallet.description'));
 
     await NoWalletModal.createRestoreButton.waitForDisplayed();
-    expect(await NoWalletModal.createRestoreButton.getText()).to.equal(await t('dapp.nowallet.btn'));
+    expect(await NoWalletModal.createRestoreButton.getText()).to.equal(await t('dapp.noWallet.closeButton'));
   }
 
   async assertSeeDAppRemovalConfirmationModal() {

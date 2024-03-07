@@ -1,0 +1,34 @@
+@import '../../../../../common/src/ui/styles/abstracts/typography';
+@import '../../styles/theme.scss';
+
+.iconWrapper {
+  width: size_unit(6);
+  height: size_unit(6);
+  border-radius: 100%;
+  background: rgba(#2cb67d, 0.1);
+  &.governance {
+    background: rgba(#3489f7, 0.1);
+  }
+
+  @media (max-width: $breakpoint-popup) {
+    width: size_unit(5);
+    height: size_unit(5);
+  }
+}
+
+.icon {
+  color: var(--data-green, #2cb67d) !important;
+  font-size: 22px !important;
+
+  @media (max-width: $breakpoint-popup) {
+    font-size: 16px !important;
+  }
+
+  &.governance {
+    color: var(--text-color-blue, #3489f7) !important;
+  }
+
+  svg {
+    fill: none;
+  }
+}

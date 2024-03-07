@@ -172,14 +172,17 @@ When(/^I click "(Copy|Delete|Edit)" button on address details page$/, async (but
   switch (button) {
     case 'Copy':
       testContext.save('address', await AddressDetails.address.getText());
+      await AddressDetails.copyButton.waitForStable();
       await AddressDetails.copyButton.waitForClickable();
       await AddressDetails.copyButton.click();
       break;
     case 'Delete':
+      await AddressDetails.deleteButton.waitForStable();
       await AddressDetails.deleteButton.waitForClickable();
       await AddressDetails.deleteButton.click();
       break;
     case 'Edit':
+      await AddressDetails.editButton.waitForStable();
       await AddressDetails.editButton.waitForClickable();
       await AddressDetails.editButton.click();
       break;

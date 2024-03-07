@@ -36,7 +36,7 @@ export const OverviewPopup = () => {
 
   if (
     !totalCoinBalance ||
-    !protocolParameters?.stakeKeyDeposit ||
+    !protocolParameters?.hasOwnProperty('stakeKeyDeposit') ||
     !balancesBalance?.available?.coinBalance ||
     !rewardAccounts
   ) {
@@ -87,7 +87,7 @@ export const OverviewPopup = () => {
     <>
       {stakingNotifications.length > 0 && (
         <Flex mb="$32" flexDirection="column">
-          <StakingNotificationBanners notifications={stakingNotifications} />
+          <StakingNotificationBanners notifications={stakingNotifications} popupView />
         </Flex>
       )}
       <Box mb="$32">
