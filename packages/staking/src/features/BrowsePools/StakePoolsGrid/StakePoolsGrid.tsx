@@ -2,11 +2,11 @@
 import { Box, Text } from '@lace/ui';
 import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
-import useResizeObserver from 'use-resize-observer';
+import useResizeObserver, { ObservedSize } from 'use-resize-observer';
 import { StakePoolDetails } from '../../store';
 import { STAKE_POOL_CARD_HEIGHT, StakePoolCardSkeleton } from '../StakePoolCard';
 import { Grid } from './Grid';
@@ -36,7 +36,7 @@ export const StakePoolsGrid = ({
 }: StakePoolsGridProps) => {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
-  const { width: containerWidth } = useResizeObserver<HTMLDivElement>({ ref });
+  const [containerWidth, setContainerWidth] = useState<number>();
   const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType>();
 
   const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 667 });
@@ -52,7 +52,7 @@ export const StakePoolsGrid = ({
     [matchFiveColumnsLayout, matchFourColumnsLayout, matchThreeColumnsLayout]
   );
 
-  const getNumberOfItemsInRow = useCallback(() => {
+  const updateNumberOfItemsInRow = useCallback(() => {
     if (!ref?.current) return;
 
     const result = Number(
@@ -62,14 +62,22 @@ export const StakePoolsGrid = ({
     setNumberOfItemsPerRow(result);
   }, [numberOfItemsPerMediaQueryMap]);
 
-  const debouncedGetNumberOfItemsInRow = useMemo(
-    () => debounce(getNumberOfItemsInRow, DEFAULT_DEBOUNCE),
-    [getNumberOfItemsInRow]
+  const setContainerWidthCb = useCallback(
+    (size: ObservedSize) => {
+      if (size.width !== containerWidth) {
+        updateNumberOfItemsInRow();
+        setContainerWidth(size.width);
+      }
+    },
+    [containerWidth, updateNumberOfItemsInRow]
   );
 
-  useEffect(() => {
-    debouncedGetNumberOfItemsInRow();
-  }, [containerWidth, debouncedGetNumberOfItemsInRow]);
+  const onResize = useMemo(
+    () => debounce(setContainerWidthCb, DEFAULT_DEBOUNCE, { leading: true }),
+    [setContainerWidthCb]
+  );
+
+  useResizeObserver<HTMLDivElement>({ onResize, ref });
 
   const poolsLength = pools.length;
   const selectedPoolsLength = selectedPools?.length;

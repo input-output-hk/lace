@@ -45,7 +45,7 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
     throw new Error('no available chains to connect to');
   }
 
-  if (!process.env.AVAILABLE_CHAINS.includes('Mainnet')) {
+  if (!process.env.AVAILABLE_CHAINS.includes('Mainnet') && process.env.DEFAULT_CHAIN !== 'Sanchonet') {
     throw new Error('mainnet chain not available in env');
   }
 
@@ -78,12 +78,14 @@ export const config = (): Config => {
     CARDANO_SERVICES_URLS: {
       Mainnet: process.env.CARDANO_SERVICES_URL_MAINNET,
       Preprod: process.env.CARDANO_SERVICES_URL_PREPROD,
-      Preview: process.env.CARDANO_SERVICES_URL_PREVIEW
+      Preview: process.env.CARDANO_SERVICES_URL_PREVIEW,
+      Sanchonet: process.env.CARDANO_SERVICES_URL_SANCHONET
     },
     CEXPLORER_BASE_URL: {
       Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`,
+      Sanchonet: `${process.env.CEXPLORER_URL_SANCHONET}`
     },
     CEXPLORER_URL_PATHS: {
       Tx: 'tx',
