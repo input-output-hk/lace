@@ -38,18 +38,8 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
-import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
-import transactionSubmittedAssert from '../assert/transaction/transactionSubmittedAssert';
-import { AddressInput } from '../elements/AddressInput';
-import {
-  addAndActivateWalletInRepository,
-  clearWalletRepository,
-  initialiseBasicLocalStorageData
-} from '../fixture/walletRepositoryInitializer';
-import OnboardingPageObject from '../pageobject/onboardingPageObject';
+import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -161,7 +151,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   if (walletName === 'newCreatedWallet') {
     const wallets = String(testContext.load('newCreatedWallet'));
     await addAndActivateWalletInRepository(wallets);
-    await initialiseBasicLocalStorageData(walletName, 'Preprod');
+    await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
   } else {
     await localStorageInitializer.initializeWallet(walletName);
   }
@@ -171,20 +161,6 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
-});
-
-Then(/^I send back all tADA to the "([^"]*)" wallet$/, async (targetWalletName: string) => {
-  await MenuHeader.sendButton.waitForDisplayed();
-  await MenuHeader.sendButton.click();
-  const address = String(getTestWallet(targetWalletName).address);
-  await new AddressInput(1).fillAddress(address);
-  await transactionExtendedPageObject.clickMaxButton(1, 'tADA');
-  await TransactionNewPage.reviewTransactionButton.waitForEnabled({ timeout: 15_000 });
-  await TransactionNewPage.reviewTransactionButton.click();
-  await TransactionSummaryPage.confirmButton.waitForEnabled();
-  await TransactionSummaryPage.confirmButton.click();
-  await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(OnboardingPageObject.validPassword);
-  await transactionSubmittedAssert.assertSeeTransactionSubmittedPage('extended');
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {

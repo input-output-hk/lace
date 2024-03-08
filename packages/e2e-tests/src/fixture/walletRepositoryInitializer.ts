@@ -1,8 +1,6 @@
 import { browser } from '@wdio/globals';
 import { Logger } from '../support/logger';
 import { switchToWindowWithLace } from '../utils/window';
-import localStorageInitializer from './localStorageInitializer';
-import localStorageManager from '../utils/localStorageManager';
 
 export const getNumWalletsInRepository = async (): Promise<number> =>
   await browser.execute(`
@@ -47,13 +45,3 @@ export const addAndActivateWalletInRepository = async (wallets: string): Promise
       })
   `
   );
-
-export const initialiseBasicLocalStorageData = async (
-  walletName: string,
-  chainName: 'Preprod' | 'Preview' | 'Mainnet'
-): Promise<void> => {
-  await localStorageInitializer.initializeAnalyticsAccepted('ACCEPTED');
-  await localStorageInitializer.initializeShowDAppBetaModal(false);
-  await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
-  await localStorageManager.setItem('appSettings', `{"chainName":"${chainName}"}`);
-};

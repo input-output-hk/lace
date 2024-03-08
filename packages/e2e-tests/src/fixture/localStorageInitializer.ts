@@ -82,6 +82,16 @@ class LocalStorageInitializer {
   disableShowingMultidelegationPersistenceBanner = async () => {
     await localStorageManager.setItem('multidelegationFirstVisitSincePortfolioPersistence', 'false');
   };
+
+  initialiseBasicLocalStorageData = async (
+    walletName: string,
+    chainName: 'Preprod' | 'Preview' | 'Mainnet'
+  ): Promise<void> => {
+    await this.initializeAnalyticsAccepted('ACCEPTED');
+    await this.initializeShowDAppBetaModal(false);
+    await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
+    await localStorageManager.setItem('appSettings', `{"chainName":"${chainName}"}`);
+  };
 }
 
 export default new LocalStorageInitializer();

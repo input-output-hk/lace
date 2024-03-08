@@ -44,4 +44,3 @@ Feature: Delegating funds to new pool E2E
     And I click and open recent transactions details until find transaction with correct poolID
     Then The Tx details are displayed for Staking with metadata
     And I close the drawer by clicking close button
-    And I send back all tADA to the "WalletSendingAdaToStakingE2E" wallet
