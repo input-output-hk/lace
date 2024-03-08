@@ -45,22 +45,24 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
   };
 
-  const onSubmitForm = useCallback(async () => {
-    event.preventDefault();
-
-    try {
-      const { source } = await createWallet(data);
-      await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-    } catch (error) {
-      if (error instanceof WalletConflictError) {
-        toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
-      } else {
-        throw error;
+  const onSubmitForm = useCallback(
+    async (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
+      event.preventDefault();
+      try {
+        const { source } = await createWallet(data);
+        await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+      } catch (error) {
+        if (error instanceof WalletConflictError) {
+          toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+        } else {
+          throw error;
+        }
       }
-    }
-    clearSecrets();
-    history.push(walletRoutePaths.assets);
-  }, [data, clearSecrets, createWallet, history, t, analytics]);
+      clearSecrets();
+      history.push(walletRoutePaths.assets);
+    },
+    [data, clearSecrets, createWallet, history, t, analytics]
+  );
 
   return (
     <WalletSetupMnemonicVerificationStep
