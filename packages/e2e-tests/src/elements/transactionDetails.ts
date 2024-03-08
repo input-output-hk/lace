@@ -53,6 +53,7 @@ class ActivityDetailsPage extends CommonDrawerElements {
   get transactionDetailsStakePoolIds(): Promise<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_STAKE_POOL_ID);
   }
+
   get transactionDetailsHash(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_HASH);
   }

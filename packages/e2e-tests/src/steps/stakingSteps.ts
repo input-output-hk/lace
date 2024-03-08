@@ -5,7 +5,7 @@ import stakingExtendedPageObject from '../pageobject/stakingExtendedPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import { getStakePoolById, getStakePoolByName, StakePoolsData } from '../data/expectedStakePoolsData';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedActivityDetails, poolData } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails, PoolData } from '../assert/transactionDetailsAssert';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import webTester from '../actor/webTester';
 import StakingExitModalAssert from '../assert/stakingExitModalAssert';
@@ -136,7 +136,7 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
   const expectedActivityDetails: ExpectedActivityDetails = {
     transactionDescription: 'Delegation\n1 token',
     status: 'Success',
-    poolData: testContext.load('stakePoolsInUse') as poolData[]
+    poolData: testContext.load('stakePoolsInUse') as PoolData[]
   };
 
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);

@@ -10,10 +10,10 @@ export type ExpectedActivityDetails = {
   hash?: string;
   transactionData?: TransactionData[];
   status: string;
-  poolData?: poolData[];
+  poolData?: PoolData[];
 };
 
-export type poolData = {
+export type PoolData = {
   poolName: string;
   poolTicker: string;
   poolId: string;
@@ -81,7 +81,7 @@ class TransactionsDetailsAssert {
     }
   }
 
-  async verifyPoolsData(poolData: poolData[]) {
+  async verifyPoolsData(poolData: PoolData[]) {
     const expectedIds: string[] = [];
     const expectedNames: string[] = [];
     const expectedTickers: string[] = [];

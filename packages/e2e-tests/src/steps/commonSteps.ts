@@ -48,7 +48,7 @@ import {
   addAndActivateWalletInRepository,
   clearWalletRepository,
   initialiseBasicLocalStorageData
-} from '../fixture/walletRepositoryBuilder';
+} from '../fixture/walletRepositoryInitializer';
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^Lace is ready for test$/, async () => {

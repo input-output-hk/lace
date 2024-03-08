@@ -11,6 +11,7 @@ export const getNumWalletsInRepository = async (): Promise<number> =>
       return wallets.length;
     })()
   `);
+
 export const clearWalletRepository = async (): Promise<void> => {
   Logger.log('Removing wallets');
   await switchToWindowWithLace(0);
@@ -26,11 +27,13 @@ export const clearWalletRepository = async (): Promise<void> => {
   `);
   Logger.log(`Removed wallets: ${removedWallets}`);
 };
-export const getWalletsFromRepository = async (): Promise<number> =>
+
+export const getWalletsFromRepository = async (): Promise<string> =>
   await browser.execute(`
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
       return wallets;
   `);
+
 export const addAndActivateWalletInRepository = async (wallets: string): Promise<number> =>
   await browser.execute(
     `
@@ -50,7 +53,7 @@ export const initialiseBasicLocalStorageData = async (
   chainName: 'Preprod' | 'Preview' | 'Mainnet'
 ): Promise<void> => {
   await localStorageInitializer.initializeAnalyticsAccepted('ACCEPTED');
-  await localStorageInitializer.initializeShowDappBetaModal('false');
+  await localStorageInitializer.initializeShowDAppBetaModal(false);
   await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
   await localStorageManager.setItem('appSettings', `{"chainName":"${chainName}"}`);
 };

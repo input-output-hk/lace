@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
 
-import { getNumWalletsInRepository } from '../fixture/walletRepositoryBuilder';
+import { getNumWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 
 class LocalStorageAssert {
   assertWalletIsDeleted = async () => {

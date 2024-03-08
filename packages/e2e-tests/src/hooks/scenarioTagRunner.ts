@@ -8,7 +8,7 @@ import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
 
-import { clearWalletRepository } from '../fixture/walletRepositoryBuilder';
+import { clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {

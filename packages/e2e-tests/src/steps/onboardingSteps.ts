@@ -39,7 +39,7 @@ import { browser } from '@wdio/globals';
 import type { RecoveryPhrase } from '../types/onboarding';
 import { generateRandomString } from '../utils/textUtils';
 
-import { getWalletsFromRepository } from '../fixture/walletRepositoryBuilder';
+import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];

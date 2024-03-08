@@ -1,6 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import transactionsPageAssert, { ExpectedTransactionRowAssetDetails } from '../assert/transactionsPageAssert';
-import transactionDetailsAssert, { poolData } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { PoolData } from '../assert/transactionDetailsAssert';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
@@ -82,7 +82,7 @@ When(
         expectedValue = String(testContext.load('txHashValue'));
       } else {
         actualValue = await TransactionDetailsPage.transactionDetailsStakePoolId.getText();
-        const expectedPoolData: poolData[] = testContext.load('stakePoolsInUse');
+        const expectedPoolData: PoolData[] = testContext.load('stakePoolsInUse');
         expectedValue = expectedPoolData[0].poolId;
       }
       if (actualValue !== expectedValue) {

@@ -6,7 +6,7 @@ import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
 import { closeAllTabsExceptOriginalOne } from '../utils/window';
-import { clearWalletRepository } from './walletRepositoryBuilder';
+import { clearWalletRepository } from './walletRepositoryInitializer';
 
 class LocalStorageInitializer {
   async initializeLastStaking(): Promise<void> {
@@ -43,8 +43,8 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('analyticsAccepted', value);
   }
 
-  async initializeShowDappBetaModal(value: 'true' | 'false'): Promise<void> {
-    await localStorageManager.setItem('showDappBetaModal', value);
+  async initializeShowDAppBetaModal(value: boolean): Promise<void> {
+    await localStorageManager.setItem('showDappBetaModal', JSON.stringify(value));
   }
 
   async initializeWallet(walletName = 'TestAutomationWallet') {
@@ -60,7 +60,7 @@ class LocalStorageInitializer {
       'analyticsAccepted',
       wallet?.walletLocalStorageData?.analyticsAccepted ?? 'ACCEPTED'
     );
-    await this.initializeShowDappBetaModal('false');
+    await this.initializeShowDAppBetaModal(false);
     await initializeBrowserStorage(wallet);
     await this.initializeAppSettings();
     await this.initializeKeyAgentData(walletName);
