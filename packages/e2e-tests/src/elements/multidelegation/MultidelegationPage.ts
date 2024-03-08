@@ -328,20 +328,25 @@ class MultidelegationPage {
   }
 
   async saveIDsOfStakePoolsInUse() {
-    const poolIDsToBeSaved = [];
+    const poolDataToBeSaved = [];
     const stakingPoolInfoItems = await this.stakingPoolInfoItems;
     for (const stakingPoolInfoItem of stakingPoolInfoItems) {
       await stakingPoolInfoItem.click();
       await StakePoolDetails.container.waitForDisplayed();
+      await StakePoolDetails.container.waitForStable();
       await StakePoolDetails.poolId.waitForDisplayed();
+      await StakePoolDetails.poolName.waitForDisplayed();
+      await StakePoolDetails.poolTicker.waitForDisplayed();
       const poolId = await StakePoolDetails.poolId.getText();
-      poolIDsToBeSaved.push(poolId);
+      const poolName = await StakePoolDetails.poolName.getText();
+      const poolTicker = await StakePoolDetails.poolTicker.getText();
+      const poolData = { poolId, poolName, poolTicker };
+      poolDataToBeSaved.push(poolData);
       (await isPopupMode())
         ? await new CommonDrawerElements().clickHeaderBackButton()
         : await new CommonDrawerElements().clickHeaderCloseButton();
     }
-
-    testContext.save('stakePoolsInUse', poolIDsToBeSaved);
+    testContext.saveWithOverride('stakePoolsInUse', poolDataToBeSaved);
   }
 
   async clickOnStakePoolWithTicker(poolTicker: string) {
