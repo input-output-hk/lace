@@ -10,7 +10,8 @@ import { BrowsePoolsHeader } from './BrowsePoolsHeader';
 import { useBrowsePoolsView, useQueryStakePools } from './hooks';
 import { PortfolioBar } from './PortfolioBar';
 import { StakePoolsGrid } from './StakePoolsGrid/StakePoolsGrid';
-import { StakePoolsList, StakePoolsListEmpty } from './StakePoolsList';
+import { StakePoolsList } from './StakePoolsList';
+import { StakePoolsSearchEmpty } from './StakePoolsSearchEmpty';
 import { BrowsePoolsView } from './types';
 
 const LACE_APP_ID = 'lace-app';
@@ -59,6 +60,7 @@ export const BrowsePools = () => {
       .sort(sortSelectedPools);
     return sort.order === SortDirection.desc ? result.reverse() : result;
   }, [selectedPortfolioStakePools, sort.order, sortSelectedPools]);
+  const fetching = status === 'fetching';
 
   return (
     <>
@@ -72,23 +74,25 @@ export const BrowsePools = () => {
           value={searchQuery}
           defaultValue={searchQuery}
           data-testid="search-input"
-          loading={status === 'fetching'}
+          loading={fetching}
         />
         <Box mt="$16" mb="$112">
           {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && poolsView === BrowsePoolsView.grid ? (
             <StakePoolsGrid
-              emptyPlaceholder={status !== 'fetching' && totalPoolsCount === 0 && <StakePoolsListEmpty />}
+              emptyPlaceholder={StakePoolsSearchEmpty}
               selectedPools={selectedList}
               pools={pools}
+              showSkeleton={fetching}
               loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
               sortField={sort.field}
             />
           ) : (
             <StakePoolsList
-              emptyPlaceholder={status !== 'fetching' && totalPoolsCount === 0 && <StakePoolsListEmpty />}
+              emptyPlaceholder={StakePoolsSearchEmpty}
               selectedPools={selectedList}
               pools={pools}
+              showSkeleton={fetching}
               loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
               translations={tableHeaderTranslations}
