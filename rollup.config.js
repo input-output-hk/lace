@@ -11,7 +11,7 @@ export default ({
   tsPluginOptions = {
     tsconfig: 'src/tsconfig.json',
     composite: false,
-    exclude: ['**/*.stories.tsx']
+    exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx']
   }
 } = {}) => ({
   input: 'src/index.ts',

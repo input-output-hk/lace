@@ -61,7 +61,7 @@ describe('Testing wallet info slice', () => {
 
   describe('environment names set correctly', () => {
     let useWalletInfoHook: UseStore<WalletInfoSlice>;
-    process.env.AVAILABLE_CHAINS = process.env.AVAILABLE_CHAINS || 'Mainnet,Preprod,Preview';
+    process.env.AVAILABLE_CHAINS = process.env.AVAILABLE_CHAINS || 'Mainnet,Preprod,Preview,Sanchonet';
 
     beforeEach(() => {
       useWalletInfoHook = create(mockWalletInfoStore);

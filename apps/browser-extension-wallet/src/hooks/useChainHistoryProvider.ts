@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { chainHistoryHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { logger } from '@lib/wallet-api-ui';
 
-export type NetworkType = 'Mainnet' | 'Preprod' | 'Preview';
+export type NetworkType = 'Mainnet' | 'Preprod' | 'Preview' | 'Sanchonet';
 
 type UseChainHistoryProviderArgs = {
   chainName: NetworkType;
