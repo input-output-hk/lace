@@ -154,7 +154,7 @@ export const WalletSetupWizard = ({
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
         analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         analytics.sendAliasEvent();
-        const addresses = await firstValueFrom(cardanoWallet.wallet.addresses$.pipe(filter((a) => a.length > 0)));
+        const addresses = await firstValueFrom(cardanoWallet?.wallet.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
           analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);

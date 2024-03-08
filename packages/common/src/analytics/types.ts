@@ -5,6 +5,7 @@ export enum PostHogAction {
   OnboardingAnalyticsLearnMoreClick = 'wallet | onboarding | analytics banner | learn more | click',
   OnboardingAnalyticsGotItClick = 'wallet | onboarding | help us improve your experience | got it | click',
   OnboardingMainViewPinExtensionClick = 'wallet | onboarding | lace main view | pin the wallet extension | click',
+  OnboardingMainViewMultiAddressModalGotItClick = 'wallet | onboarding | lace main view | multi-address modal | got it | click',
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
   OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
@@ -16,8 +17,6 @@ export enum PostHogAction {
   OnboardingHWDoneGoToWallet = 'onboarding | hardware wallet | all done | go to my wallet | click',
   // Restore wallet
   OnboardingRestoreClick = 'onboarding | restore wallet revamp | restore | click',
-  OnboardingRestoreWarningMultiAddressWalletOkClick = 'onboarding | restore wallet | warning multi-address wallet | ok | click',
-  OnboardingRestoreWarningMultiAddressWalletCancelClick = 'onboarding | restore wallet | warning multi-address wallet | cancel | click',
   OnboardingRestoreWalletNamePasswordNextClick = "onboarding | restore wallet revamp | let's set up your new wallet  | next | click",
   OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick = 'onboarding | restore wallet revamp | enter your recovery phrase | paste from clipboard | click',
   OnboardingRestoreHdWallet = 'onboarding | restore wallet | hd wallet',

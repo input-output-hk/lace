@@ -20,8 +20,6 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   },
   restore: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingRestoreClick,
-    RESTORE_MULTI_ADDR_CANCEL_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletCancelClick,
-    RESTORE_MULTI_ADDR_OK_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletOkClick,
     ENTER_WALLET: PostHogAction.OnboardingRestoreEnterWalletClick,
     WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNamePasswordNextClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
