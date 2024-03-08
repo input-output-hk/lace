@@ -1,11 +1,9 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
-import { getBackgroundStorageItem } from '../utils/browserStorage';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
-import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import ModalAssert from '../assert/modalAssert';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
@@ -40,6 +38,8 @@ import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
 import type { RecoveryPhrase } from '../types/onboarding';
 import { generateRandomString } from '../utils/textUtils';
+
+import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -530,21 +530,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
   await Modal.cancelButton.waitForDisplayed();
   await Modal.cancelButton.click();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
-  const newCreatedWallet: WalletConfig = {
-    password: 'N_8J@bne87A',
-    name: 'newCreatedWallet',
-    walletLocalStorageData: {
-      wallet: await localStorageManager.getItem('wallet'),
-      lock: await localStorageManager.getItem('lock'),
-      keyAgentData: await localStorageManager.getItem('keyAgentData'),
-      analyticsAccepted: await localStorageManager.getItem('analyticsAccepted'),
-      appSettings: defaultAppSettings
-    },
-    backgroundStorage: {
-      mnemonic: await getBackgroundStorageItem('mnemonic'),
-      keyAgentsByChain: await getBackgroundStorageItem('keyAgentsByChain')
-    }
-  };
+  const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
   testContext.save('newCreatedWallet', newCreatedWallet);
 });
 
