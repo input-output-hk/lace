@@ -16,7 +16,7 @@ import { BrowsePoolsView } from './types';
 const LACE_APP_ID = 'lace-app';
 
 export const BrowsePools = () => {
-  const { totalPoolsCount, loading, searchQuery, setSearchQuery, setSort, sort, pools, fetchPoolsByRange } =
+  const { totalPoolsCount, status, searchQuery, setSearchQuery, setSort, sort, pools, paginatePools } =
     useQueryStakePools();
   const { poolsView, switchPoolsView } = useBrowsePoolsView();
 
@@ -72,24 +72,24 @@ export const BrowsePools = () => {
           value={searchQuery}
           defaultValue={searchQuery}
           data-testid="search-input"
-          loading={loading}
+          loading={status === 'fetching'}
         />
         <Box mt="$16" mb="$112">
           {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && poolsView === BrowsePoolsView.grid ? (
             <StakePoolsGrid
-              emptyPlaceholder={!loading && totalPoolsCount === 0 && <StakePoolsListEmpty />}
+              emptyPlaceholder={status !== 'fetching' && totalPoolsCount === 0 && <StakePoolsListEmpty />}
               selectedPools={selectedList}
               pools={pools}
-              loadMoreData={fetchPoolsByRange}
+              loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
               sortField={sort.field}
             />
           ) : (
             <StakePoolsList
-              emptyPlaceholder={!loading && totalPoolsCount === 0 && <StakePoolsListEmpty />}
+              emptyPlaceholder={status !== 'fetching' && totalPoolsCount === 0 && <StakePoolsListEmpty />}
               selectedPools={selectedList}
               pools={pools}
-              loadMoreData={fetchPoolsByRange}
+              loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
               translations={tableHeaderTranslations}
               activeSort={sort}

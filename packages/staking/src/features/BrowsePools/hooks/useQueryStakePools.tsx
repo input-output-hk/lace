@@ -1,11 +1,25 @@
 import { PostHogAction } from '@lace/common';
 import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
-import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
+import { StakePoolDetails, mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
 import debounce from 'lodash/debounce';
-import { useCallback, useMemo } from 'react';
+import isEqual from 'lodash/isEqual';
+import { useCallback, useMemo, useRef } from 'react';
+import { ListRange } from 'react-virtuoso';
 import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
-import { StakePoolsListProps } from '../StakePoolsList';
 import { StakePoolSortOptions } from '../types';
+
+type QueryStatus = 'idle' | 'fetching' | 'paginating';
+
+type UseQueryStakePoolsResult = {
+  status: QueryStatus;
+  paginatePools: (range: ListRange) => Promise<void>;
+  pools: (StakePoolDetails | undefined)[];
+  searchQuery: string;
+  setSearchQuery: (searchString: string) => void;
+  setSort: (sortOptions: StakePoolSortOptions) => void;
+  sort: StakePoolSortOptions;
+  totalPoolsCount: number;
+};
 
 export const useQueryStakePools = () => {
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
@@ -17,23 +31,44 @@ export const useQueryStakePools = () => {
   } = useOutsideHandles();
 
   const { searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
-    searchQuery: store.searchQuery,
+    searchQuery: store.searchQuery || '',
     sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
     sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
   }));
+  const previousRequest = useRef<{ searchQuery: string; sortField: string; sortOrder: string } | null>(null);
+  const status = useMemo(() => {
+    const nextRequest = { searchQuery, sortField, sortOrder };
+    const requestChanged = !isEqual(previousRequest.current, nextRequest);
+    const statusIdle =
+      walletStoreStakePoolSearchResultsStatus === StateStatus.LOADED ||
+      walletStoreStakePoolSearchResultsStatus === StateStatus.IDLE;
 
-  const debouncedSearch = useMemo(() => debounce(fetchStakePools, SEARCH_DEBOUNCE_IN_MS), [fetchStakePools]);
+    return statusIdle ? 'idle' : requestChanged ? 'fetching' : 'paginating';
+  }, [searchQuery, sortField, sortOrder, walletStoreStakePoolSearchResultsStatus]);
 
-  const fetchPoolsByRange = useCallback(
-    ({ startIndex, endIndex }: Parameters<StakePoolsListProps['loadMoreData']>[0]) => {
-      if (startIndex !== endIndex) {
-        debouncedSearch({
-          limit: endIndex,
-          searchString: searchQuery ?? '',
-          skip: startIndex,
-          sort: { field: sortField, order: sortOrder },
-        });
-      }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(async (params: Required<Parameters<typeof fetchStakePools>[0]>) => {
+        await fetchStakePools(params);
+        previousRequest.current = {
+          searchQuery: params.searchString,
+          sortField: params.sort.field,
+          sortOrder: params.sort.order,
+        };
+      }, SEARCH_DEBOUNCE_IN_MS),
+    [fetchStakePools]
+  );
+
+  const paginatePools = useCallback(
+    async ({ startIndex, endIndex }) => {
+      if (startIndex === endIndex) return;
+
+      debouncedSearch({
+        limit: endIndex,
+        searchString: searchQuery ?? '',
+        skip: startIndex,
+        sort: { field: sortField, order: sortOrder },
+      });
     },
     [debouncedSearch, searchQuery, sortField, sortOrder]
   );
@@ -66,10 +101,9 @@ export const useQueryStakePools = () => {
     [portfolioMutators]
   );
 
-  return useMemo(
+  return useMemo<UseQueryStakePoolsResult>(
     () => ({
-      fetchPoolsByRange,
-      loading: walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING,
+      paginatePools,
       pools,
       searchQuery,
       setSearchQuery,
@@ -78,18 +112,9 @@ export const useQueryStakePools = () => {
         field: sortField,
         order: sortOrder,
       },
+      status,
       totalPoolsCount,
     }),
-    [
-      walletStoreStakePoolSearchResultsStatus,
-      pools,
-      fetchPoolsByRange,
-      setSearchQuery,
-      searchQuery,
-      setSort,
-      sortField,
-      sortOrder,
-      totalPoolsCount,
-    ]
+    [paginatePools, pools, searchQuery, setSearchQuery, setSort, sortField, sortOrder, status, totalPoolsCount]
   );
 };
