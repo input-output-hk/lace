@@ -105,7 +105,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see "Add stake pool" button is disabled
     Examples:
       | pools_after | pool_tickers                                         |
-      | 10          | 8BETA, ADACT, WOOF, TEKO, ADV, MOC2, SQRL, SEA, ALFA |
+      | 10          | 8BETA, SMAUG, WOOF, TEKO, ADV, MOC2, SQRL, SEA, ALFA |
 
   @LW-9493
   Scenario: Extended View - Staking - Manage staking remove button enabled when staking to 1 pool
@@ -146,6 +146,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
   Scenario Outline: Extended View - button <button> click on stake pool details drawer
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "<ticker>" into stake pool search bar
     And I click on the stake pool with ticker "<ticker>"
     Then I see "2" stake pool details buttons for <delegation> pool

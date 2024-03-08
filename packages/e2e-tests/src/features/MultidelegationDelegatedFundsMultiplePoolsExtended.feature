@@ -122,6 +122,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
   Scenario Outline: Extended View - button <button> click on stake pool details drawer
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "<pool>" into stake pool search bar
     And I click on the stake pool with ticker "<pool>"
     Then I see "<numberOfButtons>" stake pool details buttons for <delegation> pool

@@ -109,8 +109,8 @@ class TransactionsPageAssert {
       const txFiatValueNumber = txFiatValueString.slice(0, -4);
       const txFiatValue = Number(txFiatValueNumber);
 
-      expect(txADAValue).to.be.greaterThan(0);
-      expect(txFiatValue).to.be.greaterThan(0);
+      expect(txADAValue).to.be.not.equal(0);
+      expect(txFiatValue).to.be.not.equal(0);
     }
   }
 

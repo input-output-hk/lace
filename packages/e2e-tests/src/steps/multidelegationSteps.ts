@@ -456,3 +456,10 @@ When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
 Then(/^I see Expanded View banner$/, async () => {
   await StartStakingPageAssert.assertSeeExpandedViewBanner();
 });
+
+When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'grid' | 'list') => {
+  // TODO: remove `if` when USE_MULTI_DELEGATION_STAKING_GRID_VIEW is enabled by default
+  if (await MultidelegationPage.gridViewToggle.isExisting()) {
+    await MultidelegationPage.switchPoolsView(viewType);
+  }
+});

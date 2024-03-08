@@ -11,6 +11,7 @@ import CommonDrawerElements from '../CommonDrawerElements';
 import { StakePoolListColumnType } from '../../types/staking';
 
 class MultidelegationPage {
+  private ACTIVITY_TAB = '[data-testid="activity-tab"]';
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
   private DELEGATION_CARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
@@ -60,6 +61,8 @@ class MultidelegationPage {
   private TOOLTIP = 'div.ant-tooltip-inner';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private MANAGE_BTN = '[data-testid="manage-btn"]';
+  private GRID_VIEW_TOGGLE = '[data-testid="grid-view-toggle"]';
+  private LIST_VIEW_TOGGLE = '[data-testid="list-view-toggle"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -71,6 +74,18 @@ class MultidelegationPage {
 
   get browseTab() {
     return $(this.BROWSE_POOLS_TAB);
+  }
+
+  get activityTab() {
+    return $(this.ACTIVITY_TAB);
+  }
+
+  get gridViewToggle() {
+    return $(this.GRID_VIEW_TOGGLE);
+  }
+
+  get listViewToggle() {
+    return $(this.LIST_VIEW_TOGGLE);
   }
 
   get delegationCardStatusLabel() {
@@ -380,6 +395,21 @@ class MultidelegationPage {
   async clickManageButton() {
     await this.manageBtn.waitForClickable();
     await this.manageBtn.click();
+  }
+
+  async switchPoolsView(viewType: 'grid' | 'list') {
+    switch (viewType) {
+      case 'grid':
+        await this.gridViewToggle.waitForClickable();
+        await this.gridViewToggle.click();
+        break;
+      case 'list':
+        await this.listViewToggle.waitForClickable();
+        await this.listViewToggle.click();
+        break;
+      default:
+        throw new Error(`Unsupported view: ${viewType}`);
+    }
   }
 }
 
