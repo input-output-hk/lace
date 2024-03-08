@@ -5,7 +5,7 @@ import stakingExtendedPageObject from '../pageobject/stakingExtendedPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import { getStakePoolById, getStakePoolByName, StakePoolsData } from '../data/expectedStakePoolsData';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedActivityDetails, PoolData } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import webTester from '../actor/webTester';
 import StakingExitModalAssert from '../assert/stakingExitModalAssert';
@@ -133,10 +133,12 @@ When(/^I click on the "(.*)" column header$/, async (listHeader: string) => {
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (_ignored: 'with' | 'without') => {
+  // no need to distinguish between pools with/without metadata
+  // all information is saved in testContext/stakePoolsInUse
   const expectedActivityDetails: ExpectedActivityDetails = {
     transactionDescription: 'Delegation\n1 token',
     status: 'Success',
-    poolData: testContext.load('stakePoolsInUse') as PoolData[]
+    poolData: testContext.load('stakePoolsInUse')
   };
 
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);

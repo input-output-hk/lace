@@ -28,7 +28,7 @@ export const clearWalletRepository = async (): Promise<void> => {
   Logger.log(`Removed wallets: ${removedWallets}`);
 };
 
-export const getWalletsFromRepository = async (): Promise<string> =>
+export const getWalletsFromRepository = async (): Promise<any[]> =>
   await browser.execute(`
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
       return wallets;
