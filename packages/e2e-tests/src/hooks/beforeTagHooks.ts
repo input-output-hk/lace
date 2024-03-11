@@ -187,19 +187,23 @@ Before(
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultiAddressDiscoveryModal();
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultiAddressDiscoveryModal();
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedMulti);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultiAddressDiscoveryModal();
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedMulti);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultiAddressDiscoveryModal();
 });

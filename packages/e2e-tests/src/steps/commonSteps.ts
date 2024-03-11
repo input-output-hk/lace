@@ -321,3 +321,7 @@ When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixel
   const y = direction === 'down' ? Number(pixels) : -Number(pixels);
   await browser.scroll(0, y);
 });
+
+Given(/^I confirm multi-address discovery modal$/, async () => {
+  await settingsExtendedPageObject.multiAddressModalConfirm();
+});

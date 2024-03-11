@@ -81,6 +81,10 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('multidelegationFirstVisitSincePortfolioPersistence', 'false');
   };
 
+  disableShowingMultiAddressDiscoveryModal = async () => {
+    await localStorageManager.setItem('showMultiAddressModal', 'false');
+  };
+
   initialiseBasicLocalStorageData = async (
     walletName: string,
     chainName: 'Preprod' | 'Preview' | 'Mainnet'
