@@ -316,3 +316,7 @@ Then(/^I verify there are no errors in console logs$/, async () => {
 Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
   await browser.pause(delay);
 });
+
+Given(/^I confirm multi-address discovery modal$/, async () => {
+  await settingsExtendedPageObject.multiAddressModalConfirm();
+});
