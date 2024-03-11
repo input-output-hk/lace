@@ -7,12 +7,10 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import { Wallet } from '@lace/cardano';
 import { withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
-import { exposeApi, RemoteApiPropertyType
-} from '@cardano-sdk/web-extension';
+import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useFetchCoinPrice, 
-  useChainHistoryProvider } from '@hooks';
+import { useFetchCoinPrice, useChainHistoryProvider } from '@hooks';
 import {
   createTxInspector,
   TransactionSummaryInspection,
@@ -35,140 +33,138 @@ interface DappTransactionContainerProps {
   errorMessage?: string;
 }
 
-export const DappTransactionContainer = withAddressBookContext(({errorMessage}: DappTransactionContainerProps): React.ReactElement => {
-  const {
-    signTxRequest: { request: req, set: setSignTxRequest },
-    dappInfo
-  } = useViewsFlowContext();
-  const {
-    walletInfo,
-    inMemoryWallet,
-    blockchainProvider: { assetProvider },
-    walletUI: { cardanoCoin },
-    fetchNetworkInfo,
-    walletState
-  } = useWalletStore();
+export const DappTransactionContainer = withAddressBookContext(
+  ({ errorMessage }: DappTransactionContainerProps): React.ReactElement => {
+    const {
+      signTxRequest: { request: req, set: setSignTxRequest },
+      dappInfo
+    } = useViewsFlowContext();
+    const {
+      walletInfo,
+      inMemoryWallet,
+      blockchainProvider: { assetProvider },
+      walletUI: { cardanoCoin },
+      fetchNetworkInfo,
+      walletState
+    } = useWalletStore();
 
+    const { fiatCurrency } = useCurrencyStore();
+    const { priceResult } = useFetchCoinPrice();
 
+    const [{ chainName }] = useAppSettingsContext();
 
-  const { fiatCurrency } = useCurrencyStore();
-  const { priceResult } = useFetchCoinPrice();
+    const [fromAddressTokens, setFromAddressTokens] = useState<
+      Map<Cardano.PaymentAddress, TokenTransferValue> | undefined
+    >();
+    const [toAddressTokens, setToAddressTokens] = useState<
+      Map<Cardano.PaymentAddress, TokenTransferValue> | undefined
+    >();
+    const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
+      TransactionSummaryInspection | undefined
+    >();
 
-  const [{ chainName }] = useAppSettingsContext();
+    const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
-  const [fromAddressTokens, setFromAddressTokens] = useState<
-    Map<Cardano.PaymentAddress, TokenTransferValue> | undefined
-  >();
-  const [toAddressTokens, setToAddressTokens] = useState<Map<Cardano.PaymentAddress, TokenTransferValue> | undefined>();
-  const [transactionInspectionDetails, setTransactionInspectionDetails] = useState<
-    TransactionSummaryInspection | undefined
-  >();
-
-  const chainHistoryProvider = useChainHistoryProvider({ chainName });
-
-  const txInputResolver = useMemo(
-    () => utxoAndBackendChainHistoryResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
-    [inMemoryWallet, chainHistoryProvider]
-  );
-
-  const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
-  const txCollateral = useComputeTxCollateral(walletState, tx);
-
-  useEffect(() => {
-    fetchNetworkInfo();
-  }, [fetchNetworkInfo]);
-
-  useEffect(() => {
-    const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
-      setSignTxRequest(r);
-    });
-
-    const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-      {
-        api$: of({
-          async readyToSignTx(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
+    const txInputResolver = useMemo(
+      () => utxoAndBackendChainHistoryResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
+      [inMemoryWallet, chainHistoryProvider]
     );
 
-    return () => {
-      subscription.unsubscribe();
-      api.shutdown();
-    };
-  }, [setSignTxRequest]);
+    const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
+    const txCollateral = useComputeTxCollateral(walletState, tx);
 
-  const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
-  const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rewardAccountsAddresses = useMemo(
-    () => userRewardAccounts && userRewardAccounts.map((key) => key.address),
-    [userRewardAccounts]
-  );
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+    useEffect(() => {
+      fetchNetworkInfo();
+    }, [fetchNetworkInfo]);
 
-  useEffect(() => {
-    if (!req) {
-      setTransactionInspectionDetails(void 0);
-      return;
-    }
-    const getTxSummary = async () => {
-      const inspector = createTxInspector({
-        tokenTransfer: tokenTransferInspector({
-          inputResolver: txInputResolver,
-          fromAddressAssetProvider: createWalletAssetProvider({
-            assetProvider,
-            assetInfo$: inMemoryWallet.assetInfo$,
-            logger
-          }),
-          toAddressAssetProvider: createWalletAssetProvider({
-            assetProvider,
-            assetInfo$: inMemoryWallet.assetInfo$,
-            tx,
-            logger
-          })
-        }),
-        summary: transactionSummaryInspector({
-          addresses: userAddresses,
-          rewardAccounts: rewardAccountsAddresses,
-          inputResolver: txInputResolver,
-          protocolParameters,
-          assetProvider: createWalletAssetProvider({
-            assetProvider,
-            assetInfo$: inMemoryWallet.assetInfo$,
-            tx,
-            logger
-          })
-        })
+    useEffect(() => {
+      const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
+        setSignTxRequest(r);
       });
 
-      const { summary, tokenTransfer } = await inspector(tx as Wallet.Cardano.HydratedTx);
+      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
+        {
+          api$: of({
+            async readyToSignTx(): Promise<boolean> {
+              return Promise.resolve(true);
+            }
+          }),
+          baseChannel: DAPP_CHANNELS.userPrompt,
+          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
+        },
+        { logger: console, runtime }
+      );
 
+      return () => {
+        subscription.unsubscribe();
+        api.shutdown();
+      };
+    }, [setSignTxRequest]);
 
-      const { toAddress, fromAddress } = tokenTransfer;
-      setToAddressTokens(toAddress);
-      setFromAddressTokens(fromAddress);
-      setTransactionInspectionDetails(summary);
+    const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
+    const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+    const rewardAccountsAddresses = useMemo(
+      () => userRewardAccounts && userRewardAccounts.map((key) => key.address),
+      [userRewardAccounts]
+    );
+    const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
 
-    };
-    getTxSummary();
-  }, [
-    req,
-    walletInfo.addresses,
-    userAddresses,
-    rewardAccountsAddresses,
-    txInputResolver,
-    protocolParameters,
-    assetProvider,
-    inMemoryWallet.assetInfo$,
-    tx
-  ]);
+    useEffect(() => {
+      if (!req) {
+        setTransactionInspectionDetails(void 0);
+        return;
+      }
+      const getTxSummary = async () => {
+        const inspector = createTxInspector({
+          tokenTransfer: tokenTransferInspector({
+            inputResolver: txInputResolver,
+            fromAddressAssetProvider: createWalletAssetProvider({
+              assetProvider,
+              assetInfo$: inMemoryWallet.assetInfo$,
+              logger
+            }),
+            toAddressAssetProvider: createWalletAssetProvider({
+              assetProvider,
+              assetInfo$: inMemoryWallet.assetInfo$,
+              tx,
+              logger
+            })
+          }),
+          summary: transactionSummaryInspector({
+            addresses: userAddresses,
+            rewardAccounts: rewardAccountsAddresses,
+            inputResolver: txInputResolver,
+            protocolParameters,
+            assetProvider: createWalletAssetProvider({
+              assetProvider,
+              assetInfo$: inMemoryWallet.assetInfo$,
+              tx,
+              logger
+            })
+          })
+        });
 
-  return (
-    <div data-testid="layout-title">
+        const { summary, tokenTransfer } = await inspector(tx as Wallet.Cardano.HydratedTx);
+
+        const { toAddress, fromAddress } = tokenTransfer;
+        setToAddressTokens(toAddress);
+        setFromAddressTokens(fromAddress);
+        setTransactionInspectionDetails(summary);
+      };
+      getTxSummary();
+    }, [
+      req,
+      walletInfo.addresses,
+      userAddresses,
+      rewardAccountsAddresses,
+      txInputResolver,
+      protocolParameters,
+      assetProvider,
+      inMemoryWallet.assetInfo$,
+      tx
+    ]);
+
+    return (
       <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch">
         {req && transactionInspectionDetails && dappInfo ? (
           <DappTransaction
@@ -186,6 +182,6 @@ export const DappTransactionContainer = withAddressBookContext(({errorMessage}: 
           <Skeleton loading />
         )}
       </Flex>
-    </div>
-  );
-});
+    );
+  }
+);

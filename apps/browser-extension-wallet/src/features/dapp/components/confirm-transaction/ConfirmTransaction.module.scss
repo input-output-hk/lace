@@ -3,7 +3,7 @@
 
 .spaceBetween {
   justify-content: space-between;
-  padding-top: size_unit(2);
+  padding-top: size_unit(0);
 }
 
 .transactionContainer { 
@@ -15,12 +15,14 @@
 
 .actions {
   @extend %flex-column;
-  justify-content: center;
+  height: size_unit(17.12);
+  justify-content: space-between;
   padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
   border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
   position: sticky;
   bottom: 0;
   z-index: 10;
+  background-color: $theme-white;
   .actionBtn {
     width: 100%;
   }
