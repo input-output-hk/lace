@@ -10,7 +10,7 @@ export const BrowsePoolsPreferencesCardContainer = () => {
 
   const { sort, setSort } = useQueryStakePools();
   const [activeTab, setActiveTab] = useState<SortAndFilterTab>(SortAndFilterTab.sort);
-  // TODO move filters to the store + useQueryStakePools when SDK is ready
+  // TODO move filters to the store + useQueryStakePools when SDK is ready; https://input-output.atlassian.net/browse/LW-9242
   const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],

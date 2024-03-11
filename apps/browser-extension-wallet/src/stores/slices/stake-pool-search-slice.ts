@@ -40,7 +40,7 @@ const fetchStakePools =
         startAt: skip,
         limit: limit - skip + 1
       },
-      // @ts-expect-error TODO remove when ticker sort is available
+      // @ts-expect-error TODO remove when ticker sort is available; https://input-output.atlassian.net/browse/LW-9981
       sort: sort && {
         ...sort,
         ...(sort.field === 'ticker' ? { field: 'name' } : {})

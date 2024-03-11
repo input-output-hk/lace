@@ -46,7 +46,7 @@ export type StakePoolDetails = {
   ticker: string;
 };
 
-// TODO consider using SDK type
+// TODO consider using SDK type; https://input-output.atlassian.net/browse/LW-9242
 export enum PoolsFilter {
   Saturation = 'Saturation',
   ProfitMargin = 'ProfitMargin',

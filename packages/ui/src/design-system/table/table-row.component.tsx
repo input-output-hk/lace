@@ -17,7 +17,7 @@ export interface RowProps<T extends object> {
   selected?: boolean;
   onSelect?: () => void;
   onClick?: () => void;
-  // TODO fix conflicting prettier and eslint configuration in @lace/ui
+  // TODO fix conflicting prettier and eslint configuration in @lace/ui; https://input-output.atlassian.net/browse/LW-9997
   /* eslint-disable prettier/prettier */
   cellRenderers?: Partial<{
     [K in keyof T]: ({ value }: Readonly<{ value: T[K] }>) => ReactNode;
