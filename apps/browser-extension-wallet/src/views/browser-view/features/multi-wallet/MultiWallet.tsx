@@ -27,6 +27,7 @@ import { Providers } from './hardware-wallet/types';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useTranslation } from 'react-i18next';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
+import { useAnalyticsContext } from '@providers';
 
 const { newWallet } = walletRoutePaths;
 
@@ -39,6 +40,7 @@ interface ConfirmationDialog {
 export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
   const { t } = useTranslation();
   const { connectHardwareWallet, createHardwareWallet } = useWalletManager();
+  const analytics = useAnalyticsContext();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
   const hardwareWalletProviders = useMemo(
@@ -48,12 +50,13 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
       shouldShowDialog$,
       createWallet: async ({ account, connection, model, name }) => {
         try {
-          await createHardwareWallet({
+          const { source } = await createHardwareWallet({
             connectedDevice: model,
             deviceConnection: connection,
             name,
             accountIndex: account
           });
+          await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         } catch (error) {
           if (error instanceof WalletConflictError) {
             toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
@@ -63,7 +66,7 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
         }
       }
     }),
-    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$, t]
+    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$, t, analytics]
   );
 
   useEffect(() => {

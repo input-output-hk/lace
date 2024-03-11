@@ -152,6 +152,21 @@ export class PostHogClient {
     posthog.alias(alias, id);
   }
 
+  // $merge_dangerously is needed to ensure merge works on users with merge restrictions
+  // https://posthog.com/docs/product-analytics/identify
+  async sendMergeEvent(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> {
+    const id = await this.userIdService.generateWalletBasedUserId(extendedAccountPublicKey);
+    if (!id) {
+      console.debug('[ANALYTICS] Wallet-based ID not found');
+      return;
+    }
+
+    console.debug('[ANALYTICS] Merging wallet-based ID into current user');
+    posthog.capture('$merge_dangerously', {
+      alias: id
+    });
+  }
+
   async sendEvent(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const payload = {
       ...(await this.getEventMetadata()),
