@@ -92,6 +92,7 @@ export const WalletSetupNamePasswordStep = ({
       onNext={handleNextButtonClick}
       isNextEnabled={isNextButtonEnabled()}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
+      nextLabel={t('package.core.walletNameAndPasswordSetupStep.enterWallet')}
     >
       <div className={styles.walletPasswordAndNameContainer}>
         <WalletNameInput
