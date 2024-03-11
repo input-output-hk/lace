@@ -39,6 +39,12 @@ import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
 import type { RecoveryPhrase } from '../types/onboarding';
 import { generateRandomString } from '../utils/textUtils';
+import OnboardingRevampPageObject from '../pageobject/onboardingRevampPageObject';
+import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
+import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
+import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
+import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
+import watchVideoModal from '../elements/onboarding/watchVideoModal';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -126,8 +132,8 @@ When(
 
 Given(/^I click "Restore" button and confirm$/, async () => {
   await OnboardingMainPage.restoreWalletButton.click();
-  await Modal.confirmButton.waitForClickable();
-  await Modal.confirmButton.click();
+  // await Modal.confirmButton.waitForClickable();
+  // await Modal.confirmButton.click();
 });
 
 When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
@@ -536,7 +542,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
       wallet: await localStorageManager.getItem('wallet'),
       lock: await localStorageManager.getItem('lock'),
       keyAgentData: await localStorageManager.getItem('keyAgentData'),
-      analyticsAccepted: await localStorageManager.getItem('analyticsAccepted'),
+      analyticsStatus: await localStorageManager.getItem('analyticsStatus'),
       appSettings: defaultAppSettings
     },
     backgroundStorage: {
@@ -608,6 +614,55 @@ Given(/^I see current onboarding page in (light|dark) mode$/, async (mode: 'ligh
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
+Given(
+  /^I enter wallet name: "([^"]*)", password: "([^"]*)" and password confirmation: "([^"]*)"$/,
+  async (walletName: string, password: string, passwordConfirmation: string) => {
+    await OnboardingRevampPageObject.enterWalletName(walletName);
+    await OnboardingRevampPageObject.enterWalletPassword(password);
+    await OnboardingRevampPageObject.enterWalletPasswordConfirm(passwordConfirmation);
+  }
+);
+
 When(/^I restore previously changed mnemonic word$/, async () => {
   await OnboardingPageObject.restorePreviousMnemonicWord();
+});
+
+Given(
+  /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
+  async (flowType: 'Create' | 'Restore') => {
+    await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
+    await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage(flowType);
+  }
+);
+
+Given(/^I am on "Mnemonic writedown" page$/, async () => {
+  await OnboardingRevampPageObject.goToRecoveryPhrasePage();
+});
+
+Given(/^I click "Enter wallet" button$/, async () => {
+  await OnboardingRevampPageObject.clickEnterWalletButton();
+});
+
+Given(/^I enter mnemonic words on "Mnemonic writedown" page$/, async () => {
+  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
+});
+
+When(/^I click on "Watch video" link on "Mnemonic writedown" page$/, async () => {
+  await RecoveryPhrasePage.watchVideoLink.click();
+});
+
+When(/^I click "Read More" link in modal$/, async () => {
+  await watchVideoModal.readMoreLink.click();
+});
+
+Then(/^"Enter wallet" button is enabled$/, async () => {
+  await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
+});
+
+Then(/^"Wallet setup" page is displayed$/, async () => {
+  await onboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
+});
+
+Then(/^I see "Watch video" modal$/, async () => {
+  await onboardingWatchVideoModalAssert.assertSeeModal();
 });

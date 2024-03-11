@@ -34,13 +34,15 @@ export const AnalyticsConfirmationBanner = ({
     ? createPortal(
         <>
           <div className={styles.overlay} />
-          <div className={styles.confirmationBanner}>
+          <div className={styles.confirmationBanner} data-testid="analytics-banner-container">
             <div className={styles.confirmationBannerMessage}>{message}</div>
             <div className={styles.buttons}>
-              <Button onClick={handleConfirm} className={styles.secondaryButton}>
+              <Button onClick={handleConfirm} className={styles.secondaryButton} data-testid="analytics-accept-button">
                 {t('package.core.confirmationBanner.agree')}
               </Button>
-              <Button onClick={handleReject}>{t('package.core.confirmationBanner.reject')}</Button>
+              <Button onClick={handleReject} data-testid="analytics-reject-button">
+                {t('package.core.confirmationBanner.reject')}
+              </Button>
             </div>
           </div>
         </>,

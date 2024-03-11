@@ -10,6 +10,7 @@ import ToastMessage from '../elements/toastMessage';
 import { t } from '../utils/translationService';
 import { Logger } from '../support/logger';
 import onboardingPageObject from './onboardingPageObject';
+import { expect } from 'chai';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -164,6 +165,14 @@ class SettingsExtendedPageObject {
     await onboardingPageObject.waitUntilLoaderDisappears();
     await this.waitUntilSyncingModalDisappears();
     await this.closeWalletSyncedToast();
+    await this.multiAddressModalConfirm();
+  }
+
+  async multiAddressModalConfirm() {
+    if (await Modal.confirmButton.isDisplayed()) {
+      expect(await Modal.confirmButton.getText()).to.equal(t('staking', 'modals.beta.button').toString());
+      await Modal.confirmButton.click();
+    }
   }
 }
 
