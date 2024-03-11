@@ -7,7 +7,8 @@ import { closeAllTabsExceptOriginalOne } from '../utils/window';
 import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
-import { clearWalletRepository } from '../fixture/browserStorageInitializer';
+
+import { clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
