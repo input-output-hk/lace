@@ -4,4 +4,5 @@ export { SortAndFilter } from './SortAndFilter';
 export type { StakePoolSortOptions, TranslationsFor } from './types';
 export { MetricType, SortField, SortDirection } from './types';
 export type { StakePoolsListRowProps } from './StakePoolsList';
+export { StakePoolCardProgressBar } from './StakePoolCard';
 export { StakePoolsListRowSkeleton, config as stakePoolTableConfig } from './StakePoolsList';

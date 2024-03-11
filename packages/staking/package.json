@@ -94,7 +94,7 @@
     "@vanilla-extract/recipes": "^0.5.1",
     "@vanilla-extract/vite-plugin": "^3.9.3",
     "@vitest/coverage-c8": "^0.31.0",
-    "antd": "^4.17.3",
+    "antd": "^4.24.10",
     "babel-loader": "^8.3.0",
     "bignumber.js": "9.0.1",
     "concurrently": "^8.0.1",
