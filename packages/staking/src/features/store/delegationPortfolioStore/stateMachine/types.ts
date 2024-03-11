@@ -1,13 +1,13 @@
 import { Wallet } from '@lace/cardano';
 import { BrowsePoolsView, SortDirection, SortField } from 'features/BrowsePools';
-import { AdaSymbol } from '../types';
+import { AdaSymbol, StakePoolDetails } from '../types';
 import { Command } from './commands';
 
 export type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
 type PortfolioStakePoolBase = {
   id: Wallet.Cardano.Cip17Pool['id'];
-  displayData: Wallet.util.StakePool;
+  displayData: StakePoolDetails;
   stakePool: Wallet.Cardano.StakePool;
 };
 
@@ -22,7 +22,7 @@ export type DraftPortfolioStakePool = PortfolioStakePoolBase & {
 
 export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
   CurrentPortfolioSpecificProps & {
-    displayData: Wallet.util.StakePool & {
+    displayData: StakePoolDetails & {
       lastReward: bigint;
       totalRewards: bigint;
     };
