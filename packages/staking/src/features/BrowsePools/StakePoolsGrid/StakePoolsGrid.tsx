@@ -80,6 +80,8 @@ export const StakePoolsGrid = ({
     [setContainerWidthCb]
   );
 
+  const columnCount = numberOfItemsPerRow || 3;
+
   useResizeObserver<HTMLDivElement>({ onResize, ref });
 
   return (
@@ -99,7 +101,7 @@ export const StakePoolsGrid = ({
       )}
       {showEmptyPlaceholder && <EmptyPlaceholder />}
       {showSkeleton ? (
-        <StakePoolsGridSkeleton columnCount={numberOfItemsPerRow || 3} rowCount={2} />
+        <StakePoolsGridSkeleton columnCount={columnCount} rowCount={2} />
       ) : (
         <Grid<StakePoolDetails | undefined>
           rowHeight={STAKE_POOL_CARD_HEIGHT}
@@ -111,7 +113,7 @@ export const StakePoolsGrid = ({
             data ? (
               <StakePoolsGridItem sortField={sortField} {...data} />
             ) : (
-              <StakePoolCardSkeleton fadeScale={numberOfItemsPerRow || 3} index={index} />
+              <StakePoolCardSkeleton fadeScale={columnCount} index={index} />
             )
           }
         />

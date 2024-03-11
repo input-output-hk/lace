@@ -33,7 +33,7 @@ export const useBrowsePoolsPersistence = () => {
         stakingBrowserPreferencesPersistence.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)),
         walletStoreBlockchainProvider.stakePoolProvider
       ).then((selectedStakePools) => {
-        // TODO add a common store hydration command
+        // TODO add a common store hydration command; https://input-output.atlassian.net/browse/LW-9979
         portfolioMutators.executeCommand({ data: selectedStakePools, type: 'SelectPoolFromList' });
         portfolioMutators.executeCommand({
           data: stakingBrowserPreferencesPersistence.poolsView,
