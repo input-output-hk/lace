@@ -493,3 +493,19 @@ Then(/^stake pool list row skeleton (is|is not) displayed$/, async (status: 'is'
 Then(/^stake pool grid card skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {
   await MultidelegationPageAssert.assertSeeStakePoolGridCardSkeleton(status === 'is');
 });
+
+Then(/^stake pool (grid|list) view is displayed$/, async (view: 'grid' | 'list') => {
+  await MultidelegationPageAssert.assertSeeStakePoolViewType(view);
+});
+
+When(/^I select (\d+) stake pools from (grid|list) view$/, async (numberOfPools: number, viewType: 'grid' | 'list') => {
+  await MultidelegationPage.selectPoolsForDelegation(Number(numberOfPools), viewType);
+});
+
+When(/^I save tickers of selected pools in (grid|list) view$/, async (viewType: 'grid' | 'list') => {
+  await MultidelegationPage.saveTickers(viewType);
+});
+
+Then(/^previously selected pools are still selected in (grid|list) view$/, async (viewType: 'grid' | 'list') => {
+  await MultidelegationPageAssert.assertSeePreviouslySelectedStakePools(viewType);
+});

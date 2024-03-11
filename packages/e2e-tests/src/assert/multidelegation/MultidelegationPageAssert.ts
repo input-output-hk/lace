@@ -6,6 +6,7 @@ import { TestnetPatterns } from '../../support/patterns';
 import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponent';
 import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
 import Tooltip from '../../elements/Tooltip';
+import testContext from '../../utils/testContext';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -264,6 +265,31 @@ class MultidelegationPageAssert {
 
   assertSeeStakePoolGridCardSkeleton = async (shouldBeDisplayed: boolean) => {
     await MultidelegationPage.stakePoolCardSkeleton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  };
+
+  assertSeeStakePoolViewType = async (view: 'grid' | 'list') => {
+    const ariaChecked = 'aria-checked';
+    switch (view) {
+      case 'grid':
+        await MultidelegationPage.gridViewToggle.waitForStable();
+        await MultidelegationPage.gridContainer.waitForDisplayed();
+        expect(await MultidelegationPage.gridViewToggle.getAttribute(ariaChecked)).to.equal('true');
+        break;
+      case 'list':
+        await MultidelegationPage.listViewToggle.waitForStable();
+        await MultidelegationPage.listContainer.waitForDisplayed();
+        expect(await MultidelegationPage.listViewToggle.getAttribute(ariaChecked)).to.equal('true');
+        break;
+      default:
+        throw new Error(`Unsupported view: ${view}`);
+    }
+  };
+
+  assertSeePreviouslySelectedStakePools = async (view: 'grid' | 'list') => {
+    await MultidelegationPage.searchLoader.waitForDisplayed({ reverse: true });
+    const expectedTickers = testContext.load('selectedTickers') as string[];
+    const selectedTickers = await MultidelegationPage.getTickersOfSelectedPools(view);
+    expect(selectedTickers).to.deep.equal(expectedTickers);
   };
 }
 
