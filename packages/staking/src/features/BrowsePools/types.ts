@@ -12,7 +12,7 @@ export enum SaturationLevels {
   Oversaturated = 'oversaturated',
 }
 
-// TODO remove 'ticker', when it's included in SortFieldSDK
+// TODO remove 'ticker', when it's included in SortFieldSDK; https://input-output.atlassian.net/browse/LW-9981
 // APY is deprecated and replaced by ROS
 export type SortField = 'ticker' | Exclude<SortFieldSDK, 'apy' | 'lastRos' | 'name'>;
 
