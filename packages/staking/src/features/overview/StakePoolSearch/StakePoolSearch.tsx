@@ -104,15 +104,19 @@ const renderIcon = (
   };
   const formattedSaturation = Number(saturation);
   const saturationLevel = getSaturationLevel(formattedSaturation);
+  const isPoolOversaturated = isOversaturated(formattedSaturation);
 
-  const iconColor = isOversaturated(formattedSaturation) ? '#FF5470' : saturationColoursMap[saturationLevel];
-  const saturationTooltip =
-    saturationLevel === SaturationLevels.High
-      ? tooltipContent.gettingSaturated
-      : saturationLevel === SaturationLevels.Veryhigh
-      ? tooltipContent.saturated
-      : tooltipContent.overSaturation;
-  const saturationIcon = saturationLevel !== SaturationLevels.Medium && (
+  const iconColor = isPoolOversaturated ? '#FF5470' : saturationColoursMap[saturationLevel];
+
+  const saturationTooltipCopiesMap = {
+    [SaturationLevels.Medium]: '',
+    [SaturationLevels.High]: tooltipContent.gettingSaturated,
+    [SaturationLevels.Veryhigh]: tooltipContent.saturated,
+  };
+  const saturationTooltip = isPoolOversaturated
+    ? tooltipContent.overSaturation
+    : saturationTooltipCopiesMap[saturationLevel];
+  const saturationIcon = saturationTooltip && (
     <Tooltip title={saturationTooltip}>
       <Warning style={{ color: iconColor, fontSize: '16px' }} />
     </Tooltip>
