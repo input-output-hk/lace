@@ -11,11 +11,10 @@ import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetails
 import ChangingStakingPreferencesModal from '../elements/multidelegation/ChangingStakingPreferencesModal';
 import ManageStakingDrawer from '../elements/multidelegation/ManageStakingDrawer';
 import StakingConfirmationDrawer from '../elements/multidelegation/StakingConfirmationDrawer';
-import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import StakingPasswordDrawer from '../elements/multidelegation/StakingPasswordDrawer';
 import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccessDrawerAssert';
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
-import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
 import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
@@ -30,6 +29,7 @@ import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnType } from '../types/staking';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
+import OnboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -187,7 +187,7 @@ When(
     let password;
     switch (type) {
       case 'newly created':
-        password = String((testContext.load('newCreatedWallet') as WalletConfig).password);
+        password = OnboardingPageObject.validPassword;
         break;
       case 'incorrect':
         password = 'somePassword';
@@ -208,28 +208,6 @@ Then(/^(Initial|Switching) staking success drawer is displayed$/, async (process
 Then(/^I click "Close" button on staking success drawer$/, async () => {
   await StakingSuccessDrawer.clickCloseButton();
 });
-
-Then(
-  /^the transaction details are displayed for staking (with|without) metadata$/,
-  async (metadata: 'with' | 'without') => {
-    const expectedActivityDetails =
-      metadata === 'with'
-        ? {
-            transactionDescription: 'Delegation\n1 token',
-            status: 'Success',
-            poolName: String(testContext.load('poolName')),
-            poolTicker: String(testContext.load('poolTicker')),
-            poolID: String(testContext.load('poolID'))
-          }
-        : {
-            transactionDescription: 'Delegation\n1 token',
-            status: 'Success',
-            poolID: String(testContext.load('poolID'))
-          };
-
-    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
-  }
-);
 
 When(/^I save stake pool details$/, async () => {
   await StakePoolDetailsDrawer.saveStakePoolDetails();
@@ -477,4 +455,11 @@ When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
 
 Then(/^I see Expanded View banner$/, async () => {
   await StartStakingPageAssert.assertSeeExpandedViewBanner();
+});
+
+When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'grid' | 'list') => {
+  // TODO: remove `if` when USE_MULTI_DELEGATION_STAKING_GRID_VIEW is enabled by default
+  if (await MultidelegationPage.gridViewToggle.isExisting()) {
+    await MultidelegationPage.switchPoolsView(viewType);
+  }
 });
