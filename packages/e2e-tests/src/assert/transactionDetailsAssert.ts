@@ -10,9 +10,13 @@ export type ExpectedActivityDetails = {
   hash?: string;
   transactionData?: TransactionData[];
   status: string;
-  poolName?: string;
-  poolTicker?: string;
-  poolID?: string;
+  poolData?: PoolData[];
+};
+
+export type PoolData = {
+  poolName: string;
+  poolTicker: string;
+  poolId: string;
 };
 
 export type TransactionData = {
@@ -71,21 +75,30 @@ class TransactionsDetailsAssert {
         }
       }
     }
-    if (expectedActivityDetails.poolName) {
-      expect(await TransactionDetailsPage.transactionDetailsStakepoolName.getText()).to.equal(
-        expectedActivityDetails.poolName
-      );
+
+    if (expectedActivityDetails.poolData) {
+      await this.verifyPoolsData(expectedActivityDetails.poolData);
     }
-    if (expectedActivityDetails.poolTicker) {
-      expect(await TransactionDetailsPage.transactionDetailsStakepoolTicker.getText()).to.equal(
-        `(${expectedActivityDetails.poolTicker})`
-      );
+  }
+
+  async verifyPoolsData(poolData: PoolData[]) {
+    const expectedIds: string[] = [];
+    const expectedNames: string[] = [];
+    const expectedTickers: string[] = [];
+
+    for (const pool of poolData) {
+      expectedIds.push(pool.poolId);
+      expectedNames.push(pool.poolName);
+      expectedTickers.push(pool.poolTicker);
     }
-    if (expectedActivityDetails.poolID) {
-      expect(await TransactionDetailsPage.transactionDetailsStakePoolId.getText()).to.equal(
-        expectedActivityDetails.poolID
-      );
-    }
+
+    const actualIds: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolIds();
+    const actualNames: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolNames();
+    const actualTickers: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolTickers();
+
+    expect(actualIds).to.have.all.members(expectedIds);
+    expect(actualNames).to.have.all.members(expectedNames);
+    expect(actualTickers).to.have.all.members(expectedTickers);
   }
 
   async assertSeeActivityDetailsUnfolded(mode: 'extended' | 'popup') {

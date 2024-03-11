@@ -1757,6 +1757,6 @@
       "account": "Account \"{{accountName}}\" activated"
     },
     "popupHwAccountEnable": "Hardware wallets require the <0>expanded view</0> to enable accounts",
-    "walletAlreadyExists": "Wallet wasn't created because it already exists"
+    "walletAlreadyExists": "Wallet already exists"
   }
 }

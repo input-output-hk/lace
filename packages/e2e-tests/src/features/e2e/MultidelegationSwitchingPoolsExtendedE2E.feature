@@ -10,6 +10,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     When I open Overview tab
     And I wait until delegation info card shows staking to "<pools_before>" pool(s)
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I pick "<pools_after>" pools for delegation from browse pools view: "<pool_tickers>"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
@@ -34,6 +35,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata
     And I save identifiers of stake pools currently in use
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "OtherStakePool" into stake pool search bar
     And I click on the stake pool with ticker "OtherStakePool"
     Then I see stake pool details drawer for "OtherStakePool" stake pool
@@ -47,15 +49,17 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     When I click "Close" button on staking success drawer
     And I open Overview tab
     And I wait until "OtherStakePool" pool is on "Your pools" list
+    And I save identifiers of stake pools currently in use
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "Delegation"
     When I click on a transaction: 1
-    Then the transaction details are displayed for staking with metadata
+    Then The Tx details are displayed for Staking with metadata
 
   @LW-8435 @Testnet
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool without metadata
     And I save identifiers of stake pools currently in use
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "OtherNoMetadataStakePool" into stake pool search bar
     And I click on the stake pool with ticker "-"
     Then I see stake pool details drawer for stake pool without metadata
@@ -69,7 +73,9 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     When I click "Close" button on staking success drawer
     And I open Overview tab
     And I wait until "-" pool is on "Your pools" list
+    And I save identifiers of stake pools currently in use
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "Delegation"
     When I click on a transaction: 1
-#    Then the transaction details are displayed for staking without metadata # Bug LW-8672
+    Then The Tx details are displayed for Staking without metadata
+

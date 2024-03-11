@@ -1,11 +1,9 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
-import { getBackgroundStorageItem } from '../utils/browserStorage';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
-import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import ModalAssert from '../assert/modalAssert';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
@@ -45,6 +43,8 @@ import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWall
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
+
+import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -550,6 +550,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
       keyAgentsByChain: await getBackgroundStorageItem('keyAgentsByChain')
     }
   };
+  // const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
   testContext.save('newCreatedWallet', newCreatedWallet);
 });
 

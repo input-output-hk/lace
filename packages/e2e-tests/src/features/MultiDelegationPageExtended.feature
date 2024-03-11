@@ -24,12 +24,14 @@ Feature: Staking Page - Extended View
   Scenario: Extended View - Staking search control is displayed with appropriate content
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     Then I see the stake pool search control with appropriate content
 
   @LW-8448 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "<stake_pool_search_term>" into stake pool search bar
     Then there are <number_of_results> stake pools returned
     And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
@@ -48,6 +50,7 @@ Feature: Staking Page - Extended View
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "<stake_pool_search_term>" into stake pool search bar
     Then there are <number_of_results> stake pools returned
     And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
@@ -88,6 +91,7 @@ Feature: Staking Page - Extended View
   Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     When I hover over "<column_name>" column name in stake pool list
     Then tooltip for "<column_name>" column is displayed
     Examples:
@@ -106,6 +110,7 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     And I open Overview tab
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "ADA Ocean" into stake pool search bar
     And I click on the stake pool with ticker "OCEAN"
     And I click on "Stake all on this pool" button on stake pool details drawer
@@ -117,6 +122,7 @@ Feature: Staking Page - Extended View
   Scenario: Extended View - Selecting stakepool from list opens drawer with appropriate details
     And I am on Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "ADA Ocean" into stake pool search bar
     And I click on the stake pool with ticker "OCEAN"
     Then I see stake pool details drawer for "ADA Ocean" stake pool
@@ -125,6 +131,7 @@ Feature: Staking Page - Extended View
   Scenario: Extended View - Staking - Stakepool details drawer - Close drawer
     And I am on Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "ADA Ocean" into stake pool search bar
     And I click on the stake pool with ticker "OCEAN"
     And Stake pool details drawer is opened
@@ -135,5 +142,6 @@ Feature: Staking Page - Extended View
   Scenario: Extended View - Stake pool list item
     And I am on Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I wait for stake pool list to be populated
     Then each stake pool list item contains: checkbox, ticker, saturation, ROS, cost, margin, blocks, pledge and live stake
