@@ -188,3 +188,20 @@ Feature: Staking Page - Extended View
       | grid | I open Overview tab |
       | list | I refresh the page  |
       | list | I open Overview tab |
+
+  @LW-9996 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario: Extended View - Grid - display stake pool cards based on browser width
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to grid view on "Browse pools" tab
+    Then stake pool grid view is displayed
+    Then I see 5 stake pool cards in a row
+    When I resize the window to a width of: 1660 and a height of: 1080
+    Then I see 5 stake pool cards in a row
+    When I resize the window to a width of: 1659 and a height of: 1080
+    Then I see 4 stake pool cards in a row
+    When I resize the window to a width of: 1024 and a height of: 1080
+    Then I see 4 stake pool cards in a row
+    When I resize the window to a width of: 1023 and a height of: 1080
+    Then I see 3 stake pool cards in a row

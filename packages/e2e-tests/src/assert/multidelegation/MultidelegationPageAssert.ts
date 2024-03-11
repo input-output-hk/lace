@@ -7,6 +7,7 @@ import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponen
 import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
 import Tooltip from '../../elements/Tooltip';
 import testContext from '../../utils/testContext';
+import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridCard';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -290,6 +291,13 @@ class MultidelegationPageAssert {
     const expectedTickers = testContext.load('selectedTickers') as string[];
     const selectedTickers = await MultidelegationPage.getTickersOfSelectedPools(view);
     expect(selectedTickers).to.deep.equal(expectedTickers);
+  };
+
+  assertsSeeCardsInARow = async (expectedCardsCount: number) => {
+    const rowWidth = await MultidelegationPage.gridContainer.getSize('width');
+    const cardWidth = await new StakePoolGridCard(0).container.getSize('width');
+    const cardsInARow = Math.floor(rowWidth / cardWidth);
+    expect(cardsInARow).to.equal(expectedCardsCount);
   };
 }
 

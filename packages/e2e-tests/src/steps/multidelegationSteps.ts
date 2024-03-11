@@ -509,3 +509,7 @@ When(/^I save tickers of selected pools in (grid|list) view$/, async (viewType: 
 Then(/^previously selected pools are still selected in (grid|list) view$/, async (viewType: 'grid' | 'list') => {
   await MultidelegationPageAssert.assertSeePreviouslySelectedStakePools(viewType);
 });
+
+Then(/^I see (\d+) stake pool cards in a row$/, async (cardsCount: number) => {
+  await MultidelegationPageAssert.assertsSeeCardsInARow(Number(cardsCount));
+});
