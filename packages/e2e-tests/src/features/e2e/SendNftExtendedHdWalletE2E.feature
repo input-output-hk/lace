@@ -3,6 +3,7 @@ Feature: Send NFT HD wallets - Extended Browser View - E2E
 
   Background:
     Given Wallet is synced
+    And I confirm multi-address discovery modal
     And I am on NFTs extended page
     And I use a HD wallet with "Bison Coin" NFT in extended mode
 

@@ -47,6 +47,10 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('showDappBetaModal', JSON.stringify(value));
   }
 
+  async initializeShowMultiAddressDiscoveryModal(value: boolean): Promise<void> {
+    await localStorageManager.setItem('showMultiAddressModal', JSON.stringify(value));
+  }
+
   async initializeWallet(walletName = 'TestAutomationWallet') {
     // Pause fix for flaky tests where local storage keys are disappearing when executed right after opening the extension
     await browser.pause(500);
@@ -79,10 +83,6 @@ class LocalStorageInitializer {
 
   disableShowingMultidelegationPersistenceBanner = async () => {
     await localStorageManager.setItem('multidelegationFirstVisitSincePortfolioPersistence', 'false');
-  };
-
-  disableShowingMultiAddressDiscoveryModal = async () => {
-    await localStorageManager.setItem('showMultiAddressModal', 'false');
   };
 
   initialiseBasicLocalStorageData = async (
