@@ -14,8 +14,9 @@ import { UseWalletManager } from '@hooks/useWalletManager';
 import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent'>, []>().mockReturnValue({
-    sendMergeEvent: jest.fn().mockReturnValue('')
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
+    sendMergeEvent: jest.fn().mockReturnValue(''),
+    sendEventToPostHog: jest.fn().mockReturnValue('')
   })
 }));
 

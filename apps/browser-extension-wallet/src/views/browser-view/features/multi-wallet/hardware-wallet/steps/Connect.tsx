@@ -8,6 +8,8 @@ import { useHardwareWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 import { ErrorHandling } from './ErrorHandling';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 interface State {
   error?: 'notDetectedLedger' | 'notDetectedTrezor';
@@ -18,6 +20,7 @@ export const Connect = (): JSX.Element => {
   const history = useHistory();
   const { connect, data } = useHardwareWallet();
   const [state, setState] = useState<State>({});
+  const analytics = useAnalyticsContext();
 
   const walletSetupConnectHardwareWalletStepTranslations = {
     title: t('core.walletSetupConnectHardwareWalletStep.title'),
@@ -51,7 +54,10 @@ export const Connect = (): JSX.Element => {
         wallets={Wallet.AVAILABLE_WALLETS}
         onBack={() => history.push(walletRoutePaths.newWallet.root)}
         onConnect={handleConnect}
-        onNext={() => history.push(walletRoutePaths.newWallet.hardware.select)}
+        onNext={() => {
+          analytics.sendEventToPostHog(PostHogAction.MultiWalletHWConnectNextClick);
+          history.push(walletRoutePaths.newWallet.hardware.select);
+        }}
         isNextEnable={Boolean(data.connection)}
         translations={walletSetupConnectHardwareWalletStepTranslations}
         isHardwareWallet

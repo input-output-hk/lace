@@ -26,8 +26,9 @@ jest.mock('@hooks/useWalletManager', () => ({
 }));
 
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent'>, []>().mockReturnValue({
-    sendMergeEvent: jest.fn().mockReturnValue('')
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
+    sendMergeEvent: jest.fn().mockReturnValue(''),
+    sendEventToPostHog: jest.fn().mockReturnValue('')
   })
 }));
 

@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-handler-names */
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { NavigationButton, toast } from '@lace/common';
+import { NavigationButton, PostHogAction, toast } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
 import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
@@ -20,6 +20,7 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { Link } from 'react-router-dom';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { useAnalyticsContext } from '@providers';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
@@ -38,6 +39,7 @@ type EnableAccountHWSigningDialogData = {
 
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
   const accountsListLabel = useMemo(
     () => ({
       unlock: t('browserView.settings.wallet.accounts.unlockLabel'),
@@ -107,6 +109,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
 
   const activateAccount = useCallback(
     async (accountIndex: number) => {
+      analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchAccount);
       await activateWallet({
         walletId: wallet.walletId,
         accountIndex
@@ -114,7 +117,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       const accountName = accountsData.find((acc) => acc.accountNumber === accountIndex)?.label;
       closeDropdownAndShowAccountActivated(accountName);
     },
-    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated]
+    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics]
   );
 
   const editAccount = useCallback(
@@ -146,6 +149,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           accountIndex,
           metadata: { name }
         });
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount);
+
         clearTimeout(timeout);
         enableAccountHWSigningDialog.hide();
         closeDropdownAndShowAccountActivated(name);
@@ -153,7 +158,14 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         showHWErrorState();
       }
     },
-    [addAccount, wallet, enableAccountHWSigningDialog, closeDropdownAndShowAccountActivated, showHWErrorState]
+    [
+      addAccount,
+      wallet,
+      enableAccountHWSigningDialog,
+      closeDropdownAndShowAccountActivated,
+      showHWErrorState,
+      analytics
+    ]
   );
 
   const unlockAccount = useCallback(
@@ -187,23 +199,26 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           passphrase,
           metadata: { name: defaultAccountName(accountIndex) }
         });
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount);
+
         enableAccountPasswordDialog.hide();
         closeDropdownAndShowAccountActivated(name);
       } catch {
         enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
       }
     },
-    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated]
+    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated, analytics]
   );
 
   const lockAccount = useCallback(async () => {
+    analytics.sendEventToPostHog(PostHogAction.MultiWalletDisableAccount);
     await walletRepository.removeAccount({
       walletId: wallet.walletId,
       accountIndex: disableAccountConfirmation.data.accountNumber
     });
 
     disableAccountConfirmation.hide();
-  }, [walletRepository, disableAccountConfirmation, wallet.walletId]);
+  }, [walletRepository, disableAccountConfirmation, wallet.walletId, analytics]);
 
   const renameAccount = useCallback(
     async (newAccountName: string) => {

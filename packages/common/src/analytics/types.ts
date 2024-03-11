@@ -41,6 +41,40 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
   OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
   OnboardingCreatePassphraseIntroPlayVideoClick = 'onboarding | new wallet | passphrase intro | play video | click',
+  // Multi wallet
+  MultiWalletSwitchWallet = 'multiwallet | switch wallet | click',
+  MultiWalletSwitchAccount = 'multiwallet | switch account | click',
+  MultiWalletDisableAccount = 'multiwallet | disable account | click',
+  MultiWalletEnableAccount = 'multiwallet | enable account | click',
+  // Multi wallet Create new wallet
+  MultiWalletCreateClick = 'multiwallet | new wallet | create | click',
+  MultiWalletCreateWalletNamePasswordNextClick = 'multiwallet | new wallet | wallet name & password | next | click',
+  MultiWalletCreatePassphraseIntroPlayVideoClick = 'multiwallet | new wallet | passphrase intro | play video | click',
+  MultiwalletCreatePassphraseIntroNextClick = 'multiwallet | new wallet | passphrase intro | next | click',
+  MultiwalletCreateWritePassphrase01NextClick = 'multiwallet | new wallet | write passphrase #01 | next | click',
+  MultiwalletCreateWritePassphrase09NextClick = 'multiwallet | new wallet | write passphrase #09 | next | click',
+  MultiwalletCreateWritePassphrase17NextClick = 'multiwallet | new wallet | write passphrase #17 | next | click',
+  MultiwalletCreateEnterPassphrase01NextClick = 'multiwallet | new wallet | enter passphrase #01 | next | click',
+  MultiwalletCreateEnterPassphrase09NextClick = 'multiwallet | new wallet | enter passphrase #09 | next | click',
+  MultiwalletCreateEnterPassphrase17NextClick = 'multiwallet | new wallet | enter passphrase #17 | next | click',
+  MultiWalletCreateAdded = 'multiwallet | new wallet | added',
+
+  // Multi wallet Hardware wallet connect
+  MultiWalletHWClick = 'multiwallet | hardware wallet | connect | click',
+  MultiWalletHWConnectNextClick = 'multiwallet | hardware wallet | connect hw | next | click',
+  MultiWalletHWSelectAccountNextClick = 'multiwallet | hardware wallet | select hw account | next | click',
+  MultiWalletHWNameNextClick = 'multiwallet | hardware wallet | name hw wallet | next | click',
+  MultiWalletHWAdded = 'multiwallet | hardware wallet | added',
+
+  // Multi wallet Restore wallet
+  MultiWalletRestoreClick = 'multiwallet | restore wallet | restore | click',
+  MultiwalletRestoreRecoveryPhraseLengthNextClick = 'multiwallet | restore wallet | recovery phrase length | next | click',
+  MultiwalletRestoreEnterPassphrase01NextClick = 'multiwallet | restore wallet | enter passphrase #01 | next | click',
+  MultiwalletRestoreEnterPassphrase09NextClick = 'multiwallet | restore wallet | enter passphrase #09 | next | click',
+  MultiwalletRestoreEnterPassphrase17NextClick = 'multiwallet | restore wallet | enter passphrase #17 | next | click',
+  MultiwalletRestoreWalletNamePasswordNextClick = 'multiwallet | restore wallet | wallet name & password | next | click',
+  MultiWalletRestoreAdded = 'multiwallet | restore wallet | added',
+  MultiWalletRestoreHdWallet = 'multiwallet | restore wallet | hd wallet',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
@@ -195,6 +229,7 @@ export enum PostHogAction {
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
   UserWalletProfileNetworkSanchonetClick = 'user/wallet profile | network | sanchonet | click',
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
+  UserWalletProfileAddNewWalletClick = 'user/wallet profile | add new wallet | click',
   // Lace Logo
   WalletLaceClick = 'wallet | lace | click',
   WalletSessionStartPageview = 'wallet | session start | pageview',

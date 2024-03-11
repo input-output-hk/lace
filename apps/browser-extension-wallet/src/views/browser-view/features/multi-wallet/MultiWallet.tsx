@@ -21,7 +21,7 @@ import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
-import { NavigationButton, toast } from '@lace/common';
+import { NavigationButton, PostHogAction, toast } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { Providers } from './hardware-wallet/types';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
@@ -56,6 +56,7 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
             name,
             accountIndex: account
           });
+          await analytics.sendEventToPostHog(PostHogAction.MultiWalletHWAdded);
           await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         } catch (error) {
           if (error instanceof WalletConflictError) {
