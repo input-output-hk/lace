@@ -8,6 +8,7 @@ import { StakePoolDetails } from './types';
 export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Cardano.StakePool }): StakePoolDetails => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
 
+  // TODO do not use '-' as a fallback value; https://input-output.atlassian.net/browse/LW-10001
   return {
     activeStake: metrics?.stake.active
       ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.active.toString()))
