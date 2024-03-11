@@ -22,7 +22,7 @@
   position: sticky;
   bottom: 0;
   z-index: 10;
-  background-color: $theme-white;
+  background-color: var(--light-mode-body, var(--dark-mode-bg-black));
   .actionBtn {
     width: 100%;
   }
