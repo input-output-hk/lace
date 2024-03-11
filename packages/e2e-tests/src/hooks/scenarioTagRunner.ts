@@ -27,6 +27,5 @@ After({ tags: 'not @Pending and not @pending' }, async () => {
 
 AfterStep(async (scenario) => {
   scenario.result.status;
-  // if (scenario.result.status === 'FAILED') await browser.takeScreenshot();
-  await browser.takeScreenshot();
+  if (scenario.result.status === 'FAILED') await browser.takeScreenshot();
 });
