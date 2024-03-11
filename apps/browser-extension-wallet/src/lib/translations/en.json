@@ -1615,7 +1615,6 @@
       "writePassphraseSubtitle1": "Consider your recovery phrase as the master key to your wallet.",
       "writePassphraseSubtitle2": "Watch video.",
       "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly.",
-      "enterWallet": "Enter wallet",
       "copyToClipboard": "Copy to clipboard",
       "pasteFromClipboard": "Paste from clipboard"
     },

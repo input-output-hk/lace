@@ -27,7 +27,6 @@ export interface WalletSetupMnemonicStepProps {
     | 'writePassphraseSubtitle1'
     | 'writePassphraseSubtitle2'
     | 'passphraseError'
-    | 'enterWallet'
     | 'copyToClipboard'
     | 'pasteFromClipboard'
   >;
@@ -123,7 +122,6 @@ export const WalletSetupMnemonicStepRevamp = ({
             </Button>
           )
         }
-        nextLabel={mnemonicStage === 'input' && translations.enterWallet}
         isNextEnabled={isSubmitEnabled}
       >
         {mnemonicStage === 'writedown' ? (
