@@ -6,13 +6,13 @@ let actualLovelacesToAdaString: any;
 /* eslint-disable import/imports-first */
 /* eslint-disable max-len */
 /* eslint-disable no-magic-numbers */
-import { pendingTxTransformer } from '../pending-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
 import { TxCBOR } from '@cardano-sdk/core';
 import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
-import { getFormattedFiatAmount } from '../common-tx-transformer';
+import { getFormattedFiatAmount, txTransformer } from '../common-tx-transformer';
+import { TransactionActivityType } from '@lace/core';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -82,7 +82,7 @@ describe('Testing tx transformers utils', () => {
     test('should return parsed pending tx', async () => {
       mockLovelacesToAdaString.mockImplementation(actualLovelacesToAdaString);
       const date = new Date();
-      const result = await pendingTxTransformer({
+      const result = await txTransformer({
         tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
         walletAddresses: [
           {
@@ -106,7 +106,8 @@ describe('Testing tx transformers utils', () => {
             value: {
               coins: BigInt('2000000')
             }
-          })
+          }),
+        type: TransactionActivityType.outgoing
       });
       expect(result).toStrictEqual([
         {

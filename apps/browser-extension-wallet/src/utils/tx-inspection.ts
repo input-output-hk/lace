@@ -40,6 +40,7 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
       return TxDirections.Outgoing;
     case TransactionActivityType.self:
       return TxDirections.Self;
+    // should we default to outgoing?
   }
 };
 
@@ -54,7 +55,6 @@ const governanceCertificateInspection = (
 
   switch (true) {
     case signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative):
-      // TODO: can we map to Cip30TxType instead?
       return ConwayEraCertificatesTypes.RegisterDelegateRepresentative;
     case signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative):
       return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;
@@ -133,6 +133,7 @@ const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => async (t
   return !notOwnOutputs;
 };
 
+// TODO: inspectActionsTypes ?
 export const inspectTxType = async ({
   walletAddresses,
   tx,
@@ -141,7 +142,8 @@ export const inspectTxType = async ({
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
   inputResolver: Wallet.Cardano.InputResolver;
-}): Promise<Exclude<ActivityType, TransactionActivityType.rewards>> => {
+}): Promise<Exclude<ActivityType, TransactionActivityType.rewards>[]> => {
+  const types: Exclude<ActivityType, TransactionActivityType.rewards>[] = [];
   const { paymentAddresses, rewardAccounts } = getWalletAccounts(walletAddresses);
 
   const inspectionProperties = await createTxInspector({
@@ -158,7 +160,7 @@ export const inspectTxType = async ({
   })(tx);
 
   if (txIncludesConwayCertificates(tx.body.certificates)) {
-    return governanceCertificateInspection(tx.body.certificates);
+    types.push(governanceCertificateInspection(tx.body.certificates));
   }
 
   const withRewardsWithdrawal = isTxWithRewardsWithdrawal(
@@ -167,28 +169,23 @@ export const inspectTxType = async ({
     tx.body.withdrawals
   );
 
-  if (inspectionProperties.sent.inputs.length > 0 || withRewardsWithdrawal) {
-    switch (true) {
-      case !!inspectionProperties.delegation[0]?.poolId:
-        return DelegationActivityType.delegation;
-      case inspectionProperties.stakeKeyRegistration.length > 0:
-        return DelegationActivityType.delegationRegistration;
-      case inspectionProperties.stakeKeyDeregistration.length > 0:
-        return DelegationActivityType.delegationDeregistration;
-      // Voting procedures take priority over proposals
-      // TODO: use proper inspector when available on sdk side (LW-9569)
-      case tx.body.votingProcedures?.length > 0:
-        return ConwayEraGovernanceActions.vote;
-      case tx.body.proposalProcedures?.length > 0:
-        return cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]);
-      case inspectionProperties.selfTransaction:
-        return TransactionActivityType.self;
-      default:
-        return TransactionActivityType.outgoing;
-    }
+  if (inspectionProperties.sent.inputs.length === 0 && !withRewardsWithdrawal) {
+    types.push(TransactionActivityType.incoming);
+    return types;
   }
 
-  return TransactionActivityType.incoming;
+  if (inspectionProperties.delegation[0]?.poolId) types.push(DelegationActivityType.delegation);
+  if (inspectionProperties.stakeKeyRegistration.length > 0) types.push(DelegationActivityType.delegationRegistration);
+  if (inspectionProperties.stakeKeyDeregistration.length > 0)
+    types.push(DelegationActivityType.delegationDeregistration);
+  // TODO: use proper inspector when available on sdk side (LW-9569)
+  if (tx.body.votingProcedures?.length > 0) types.push(ConwayEraGovernanceActions.vote);
+  if (tx.body.proposalProcedures?.length > 0)
+    types.push(cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]));
+  if (inspectionProperties.selfTransaction) types.push(TransactionActivityType.self);
+  if (types.length === 0) types.push(TransactionActivityType.outgoing);
+
+  return types;
 };
 
 export const inspectTxValues = async ({

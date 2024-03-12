@@ -9,8 +9,6 @@ import memoize from 'lodash/memoize';
 import { Wallet } from '@lace/cardano';
 import { Reward, TxCBOR, epochSlotsCalc } from '@cardano-sdk/core';
 import {
-  pendingTxTransformer,
-  txHistoryTransformer,
   filterOutputsByTxDirection,
   isTxWithAssets,
   TransformedActivity,
@@ -19,6 +17,7 @@ import {
 import {
   ActivityAssetProp,
   ActivityStatus,
+  ActivityType,
   AssetActivityItemProps,
   AssetActivityListProps,
   DelegationActivityType,
@@ -43,6 +42,7 @@ import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver'
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { IBlockchainProvider } from './blockchain-provider-slice';
+import { txTransformer } from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
@@ -94,6 +94,30 @@ const FIAT_PRICE_DECIMAL_PLACES = 2;
 
 const getFiatAmount = (amount: BigNumber, fiatPrice: number) =>
   fiatPrice ? amount.times(new BigNumber(fiatPrice)).toFormat(FIAT_PRICE_DECIMAL_PLACES) : '';
+
+type TxWithTypeAndDirection = {
+  tx: Wallet.Cardano.HydratedTx;
+  type: Exclude<ActivityType, TransactionActivityType.rewards>;
+  direction: TxDirections;
+};
+
+const extendTxWithTypeAndDirection = async ({
+  tx,
+  keyHashAddresses,
+  inputResolver
+}: {
+  tx: Wallet.Cardano.HydratedTx;
+  keyHashAddresses: Wallet.KeyManagement.GroupedAddress[];
+  inputResolver: Wallet.Cardano.InputResolver;
+}): Promise<TxWithTypeAndDirection> => {
+  // Note that TxInFlight at type level does not expose its inputs with address,
+  // which would prevent `inspectTxType` from determining whether tx is incoming or outgoing.
+  // However at runtime, the "address" property is present (ATM) and the call below works.
+  // SDK Ticket LW-8767 should fix the type of Input in TxInFlight to contain the address
+  const [type] = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver });
+  const direction = getTxDirection({ type });
+  return { tx, type, direction };
+};
 
 const initialState = {
   walletActivities: [] as AssetActivityListProps[],
@@ -161,13 +185,14 @@ const mapWalletActivities = memoize(
       throw new Error('TODO: implement script address support');
     }
     const historicTransactionMapper = async ({
-      tx
-    }: {
-      tx: Wallet.Cardano.HydratedTx;
-    }): Promise<ExtendedActivityProps[]> => {
+      tx,
+      type,
+      direction
+    }: TxWithTypeAndDirection): Promise<ExtendedActivityProps[]> => {
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
       const date = slotTimeCalc(tx.blockHeader.slot);
-      const transformedTransaction = await txHistoryTransformer({
+
+      const transformedTransaction = await txTransformer({
         tx,
         walletAddresses: keyHashAddresses,
         fiatCurrency,
@@ -175,6 +200,9 @@ const mapWalletActivities = memoize(
         date,
         protocolParameters,
         cardanoCoin,
+        status: Wallet.TransactionStatus.SUCCESS,
+        direction,
+        type,
         resolveInput
       });
 
@@ -195,6 +223,12 @@ const mapWalletActivities = memoize(
     };
 
     const pendingTransactionMapper = async (tx: Wallet.TxInFlight): Promise<ExtendedActivityProps[]> => {
+      const { type } = await extendTxWithTypeAndDirection({
+        tx: tx as unknown as Wallet.Cardano.HydratedTx,
+        keyHashAddresses,
+        inputResolver
+      });
+
       let date;
       try {
         const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
@@ -202,14 +236,18 @@ const mapWalletActivities = memoize(
       } catch {
         date = new Date();
       }
-      const transformedTransaction = await pendingTxTransformer({
+
+      const transformedTransaction = await txTransformer({
         tx,
         walletAddresses: keyHashAddresses,
-        fiatPrice: cardanoFiatPrice,
         fiatCurrency,
+        fiatPrice: cardanoFiatPrice,
         protocolParameters,
         cardanoCoin,
         date,
+        status: Wallet.TransactionStatus.PENDING,
+        direction: TxDirections.Outgoing,
+        type,
         resolveInput
       });
 
@@ -230,30 +268,23 @@ const mapWalletActivities = memoize(
       return transformedTransaction.map((tt) => extendWithClickHandler(tt));
     };
 
-    const filterTransactionByAssetId = async (txs: Wallet.Cardano.HydratedTx[]) => {
-      const txsWithType = await Promise.all(
-        txs.map(async (tx) => {
-          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver });
-          return { tx, type };
-        })
-      );
-      return txsWithType.filter(({ tx, type }) => {
+    const filterTransactionByAssetId = (txs: TxWithTypeAndDirection[]) =>
+      txs.filter(({ tx, type }) => {
         const direction = getTxDirection({ type });
         const paymentAddresses: Wallet.Cardano.PaymentAddress[] = addresses.map((addr) => addr.address);
         return filterOutputsByTxDirection(tx.body.outputs, direction, paymentAddresses).some((output) =>
           isTxWithAssets(Wallet.Cardano.AssetId(assetDetails.id), output?.value?.assets)
         );
       });
-    };
 
     /**
      * Sanitizes historical transactions data
      */
     const getHistoricalTransactions = async () => {
-      const filtered =
-        !assetDetails || assetDetails?.id === cardanoCoin.id
-          ? transactions.history.map((tx) => ({ tx }))
-          : await filterTransactionByAssetId(transactions.history);
+      const extended = await Promise.all(
+        transactions.history.map((tx) => extendTxWithTypeAndDirection({ tx, keyHashAddresses, inputResolver }))
+      );
+      const filtered = assetDetails?.id === cardanoCoin.id ? extended : filterTransactionByAssetId(extended);
       return flatten(await Promise.all(filtered.map((tx) => historicTransactionMapper(tx))));
     };
 
