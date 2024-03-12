@@ -13,6 +13,7 @@ import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { filter, firstValueFrom } from 'rxjs';
 import { isScriptAddress } from '@cardano-sdk/wallet';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const wordList = wordlists.english;
 
@@ -24,9 +25,8 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
   const history = useHistory();
   const { data, setMnemonic } = useRestoreWallet();
-  const { createWallet } = useWalletManager();
+  const { createWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
-
   const isValidMnemonic = useMemo(
     () => Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(data.mnemonic)),
     [data.mnemonic]
@@ -55,7 +55,9 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       event.preventDefault();
       try {
         const { source, wallet } = await createWallet(data);
-        await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded);
+        await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
+          $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+        });
         await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
@@ -72,7 +74,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       clearSecrets();
       history.push(walletRoutePaths.assets);
     },
-    [data, clearSecrets, createWallet, history, t, analytics]
+    [data, clearSecrets, createWallet, history, t, analytics, walletRepository]
   );
 
   return (

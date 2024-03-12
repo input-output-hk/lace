@@ -194,7 +194,10 @@ export const HardwareWalletFlow = ({
     try {
       setStayOnAllDonePage(false);
       const posthogProperties = await getHWPersonProperties(connectedDevice, deviceConnection);
-      await sendAnalytics(postHogOnboardingActions.hw.DONE_GO_TO_WALLET, posthogProperties);
+      await sendAnalytics(postHogOnboardingActions.hw.DONE_GO_TO_WALLET, {
+        ...posthogProperties,
+        $set: { walletAccountsQty: '1' }
+      });
     } catch {
       console.error('We were not able to send the analytics event');
     } finally {

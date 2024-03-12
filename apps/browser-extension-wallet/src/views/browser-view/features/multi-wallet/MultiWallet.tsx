@@ -28,6 +28,7 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useTranslation } from 'react-i18next';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const { newWallet } = walletRoutePaths;
 
@@ -39,7 +40,7 @@ interface ConfirmationDialog {
 
 export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
   const { t } = useTranslation();
-  const { connectHardwareWallet, createHardwareWallet } = useWalletManager();
+  const { connectHardwareWallet, createHardwareWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
@@ -56,7 +57,9 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
             name,
             accountIndex: account
           });
-          await analytics.sendEventToPostHog(PostHogAction.MultiWalletHWAdded);
+          await analytics.sendEventToPostHog(PostHogAction.MultiWalletHWAdded, {
+            $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+          });
           await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         } catch (error) {
           if (error instanceof WalletConflictError) {

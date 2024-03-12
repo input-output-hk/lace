@@ -535,7 +535,9 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Finish && (
         <WalletSetupFinalStep
           onFinish={() => {
-            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
+            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET, {
+              $set: { walletAccountsQty: '1' }
+            });
             goToMyWallet();
           }}
           translations={walletSetupFinalStepTranslations}

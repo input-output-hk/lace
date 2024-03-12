@@ -21,6 +21,7 @@ import { Link } from 'react-router-dom';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useAnalyticsContext } from '@providers';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
@@ -149,8 +150,9 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           accountIndex,
           metadata: { name }
         });
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount);
-
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
+          $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+        });
         clearTimeout(timeout);
         enableAccountHWSigningDialog.hide();
         closeDropdownAndShowAccountActivated(name);
@@ -164,7 +166,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       enableAccountHWSigningDialog,
       closeDropdownAndShowAccountActivated,
       showHWErrorState,
-      analytics
+      analytics,
+      walletRepository
     ]
   );
 
@@ -199,24 +202,26 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           passphrase,
           metadata: { name: defaultAccountName(accountIndex) }
         });
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount);
-
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
+          $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+        });
         enableAccountPasswordDialog.hide();
         closeDropdownAndShowAccountActivated(name);
       } catch {
         enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
       }
     },
-    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated, analytics]
+    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated, analytics, walletRepository]
   );
 
   const lockAccount = useCallback(async () => {
-    analytics.sendEventToPostHog(PostHogAction.MultiWalletDisableAccount);
     await walletRepository.removeAccount({
       walletId: wallet.walletId,
       accountIndex: disableAccountConfirmation.data.accountNumber
     });
-
+    analytics.sendEventToPostHog(PostHogAction.MultiWalletDisableAccount, {
+      $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+    });
     disableAccountConfirmation.hide();
   }, [walletRepository, disableAccountConfirmation, wallet.walletId, analytics]);
 

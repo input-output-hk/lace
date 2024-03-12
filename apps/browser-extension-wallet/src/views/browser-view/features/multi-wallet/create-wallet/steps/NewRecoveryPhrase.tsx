@@ -9,6 +9,7 @@ import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks/useWalletManager';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { PostHogAction } from '@lace/common';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const wordList = wordlists.english;
 
@@ -25,7 +26,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
   const history = useHistory();
   const { t } = useTranslation();
   const { generatedMnemonic, data } = useCreateWallet();
-  const { createWallet } = useWalletManager();
+  const { createWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
   const [state, setState] = useState<State>(() => ({
     isResetMnemonicModalOpen: false,
@@ -52,11 +53,13 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   const saveWallet = useCallback(async () => {
     const { source } = await createWallet(data);
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded);
+    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
+      $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+    });
     await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
     clearSecrets();
     history.push(walletRoutePaths.assets);
-  }, [data, createWallet, history, clearSecrets, analytics]);
+  }, [data, createWallet, history, clearSecrets, analytics, walletRepository]);
 
   return (
     <>
