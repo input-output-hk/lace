@@ -61,17 +61,26 @@ const transactionMetadataTransformer = (
 ): TransactionActivityDetail['activity']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
+const hasPhase2ValidationFailed = (tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx) =>
+  'inputSource' in tx && tx.inputSource === Wallet.Cardano.InputSource.collaterals;
+
 const shouldIncludeFee = (
+  tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx,
   type: ActivityType,
   delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
-) =>
-  !(
+) => {
+  if (hasPhase2ValidationFailed(tx)) {
+    return false;
+  }
+
+  return !(
     type === DelegationActivityType.delegationRegistration ||
     // Existence of any (new) delegationInfo means that this "de-registration"
     // activity is accompanied by a "delegation" activity, which carries the fees.
     // However, fees should be shown if de-registration activity is standalone.
     (type === DelegationActivityType.delegationDeregistration && !!delegationInfo?.length)
   );
+};
 
 const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
   const filters: Wallet.QueryStakePoolsArgs = {
@@ -235,7 +244,7 @@ const buildGetActivityDetail =
     let transaction: ActivityDetail['activity'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
-      fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
+      fee: shouldIncludeFee(tx, type, delegationInfo) ? feeInAda : undefined,
       deposit,
       depositReclaim,
       addrInputs: inputs,

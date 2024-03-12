@@ -25,7 +25,7 @@ import { PriceResult } from '@hooks';
 import { formatPercentages } from '@lace/common';
 import { depositPaidWithSymbol } from '@src/features/dapp/components/confirm-transaction/utils';
 
-const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType } = Wallet.Cardano;
+const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType, InputSource } = Wallet.Cardano;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -98,7 +98,17 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
   ];
 };
 
-const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityStatus => {
+const hasPhase2ValidationFailed = (tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx) =>
+  'inputSource' in tx && tx.inputSource === InputSource.collaterals;
+
+const transformTransactionStatus = (
+  tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx,
+  status: Wallet.TransactionStatus
+): ActivityStatus => {
+  if (hasPhase2ValidationFailed(tx)) {
+    return ActivityStatus.ERROR;
+  }
+
   const statuses = {
     [Wallet.TransactionStatus.PENDING]: ActivityStatus.PENDING,
     [Wallet.TransactionStatus.ERROR]: ActivityStatus.ERROR,
@@ -107,6 +117,53 @@ const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityS
   };
   return statuses[status];
 };
+
+type GetTxFormattedAmount = (
+  args: Pick<
+    TxTransformerInput,
+    'walletAddresses' | 'tx' | 'direction' | 'resolveInput' | 'cardanoCoin' | 'fiatCurrency' | 'fiatPrice'
+  >
+) => Promise<{
+  amount: string;
+  fiatAmount: string;
+}>;
+
+const getTxFormattedAmount: GetTxFormattedAmount = async ({
+  resolveInput,
+  tx,
+  walletAddresses,
+  direction,
+  cardanoCoin,
+  fiatCurrency,
+  fiatPrice
+}) => {
+  if (hasPhase2ValidationFailed(tx)) {
+    return {
+      amount: Wallet.util.getFormattedAmount({ amount: tx.body.totalCollateral.toString(), cardanoCoin }),
+      fiatAmount: getFormattedFiatAmount({
+        amount: new BigNumber(tx.body.totalCollateral?.toString() ?? '0'),
+        fiatCurrency,
+        fiatPrice
+      })
+    };
+  }
+
+  const outputAmount = await getTransactionTotalAmount({
+    addresses: walletAddresses,
+    inputs: tx.body.inputs,
+    outputs: tx.body.outputs,
+    fee: tx.body.fee,
+    direction,
+    withdrawals: tx.body.withdrawals,
+    resolveInput
+  });
+
+  return {
+    amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
+    fiatAmount: getFormattedFiatAmount({ amount: outputAmount, fiatCurrency, fiatPrice })
+  };
+};
+
 /**
   Simplifies the transaction object to be used in the activity list
 
@@ -145,15 +202,7 @@ export const txTransformer = async ({
     tx: tx as unknown as Wallet.Cardano.HydratedTx,
     direction
   });
-  const outputAmount = await getTransactionTotalAmount({
-    addresses: walletAddresses,
-    inputs: tx.body.inputs,
-    outputs: tx.body.outputs,
-    fee: tx.body.fee,
-    direction,
-    withdrawals: tx.body.withdrawals,
-    resolveInput
-  });
+
   const formattedDate = dayjs().isSame(date, 'day')
     ? 'Today'
     : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
@@ -168,14 +217,24 @@ export const txTransformer = async ({
         .sort((a, b) => Number(b.val) - Number(a.val))
     : [];
 
+  const formattedAmount = await getTxFormattedAmount({
+    cardanoCoin,
+    fiatCurrency,
+    resolveInput,
+    tx,
+    walletAddresses,
+    direction,
+    fiatPrice
+  });
+
   const baseTransformedActivity = {
     id: tx.id.toString(),
     deposit,
     depositReclaim,
     fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-    status: transformTransactionStatus(status),
-    amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
-    fiatAmount: getFormattedFiatAmount({ amount: outputAmount, fiatCurrency, fiatPrice }),
+    status: transformTransactionStatus(tx, status),
+    amount: formattedAmount.amount,
+    fiatAmount: formattedAmount.fiatAmount,
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,
     date,
