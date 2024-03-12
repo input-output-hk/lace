@@ -1738,6 +1738,30 @@
       "footer.save": "Save",
       "footer.cancel": "Cancel"
     },
+    "enable": {
+      "title": "Enable account",
+      "inMemory": {
+        "headline": "Confirm action",
+        "description": "Enter password to confirm this action.",
+        "passwordPlaceholder": "Password",
+        "wrongPassword": "Wrong Password",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "hw": {
+        "headline": "Confirm with Your Hardware Wallet",
+        "description": "Connect and unlock your device. Then, follow instructions to confirm your action.",
+        "errorHeadline": "Sorry! Something went wrong",
+        "errorDescription": "Please ensure your device is properly connected and unlocked.",
+        "errorHelpLink": "Having trouble?",
+        "buttons": {
+          "waiting": "Waiting for {{device}}",
+          "signing": "Signing in progress",
+          "cancel": "Cancel",
+          "tryAgain": "Try again"
+        }
+      }
+    },
     "disable": {
       "title": "Hold up!",
       "description": "Are you sure you want to disable this account? You can re-enable it later",

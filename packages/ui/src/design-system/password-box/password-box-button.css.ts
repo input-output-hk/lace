@@ -9,7 +9,6 @@ export const inputButton = style([
   {
     background: vars.colors.$input_button_bgColor,
     border: 'none',
-    marginLeft: `-60px`,
     cursor: 'pointer',
     flex: 'none',
 
