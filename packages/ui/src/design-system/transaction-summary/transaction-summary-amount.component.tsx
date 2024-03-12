@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
+import classNames from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import { Tooltip } from '../tooltip';
 import * as Typography from '../typography';
-import classNames from 'classnames';
 
 import * as cx from './transaction-summary.css';
 

@@ -39,7 +39,7 @@ export const TransactionSummary = ({
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Normal
+            <Typography.Body.Small
               className={classNames(styles.label, {
                 [styles.positiveBalance]: !transactionAmount.includes('-'),
                 [styles.negativeBalance]: transactionAmount.includes('-'),
@@ -47,7 +47,7 @@ export const TransactionSummary = ({
               data-testId="dapp-transaction-amount-value"
             >
               {transactionAmount} {cardanoSymbol}
-            </Typography.Body.Normal>
+            </Typography.Body.Small>
           </Flex>
         </Cell>
       </Grid>
