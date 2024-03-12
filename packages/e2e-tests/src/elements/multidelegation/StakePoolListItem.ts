@@ -2,7 +2,9 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 export class StakePoolListItem {
-  private LIST_ITEM = '[data-testid="stake-pool-list-scroll-wrapper"] [data-testid="stake-pool-item"]';
+  private SELECTED_POOLS_LIST = '[data-testid="selected-pools-list"]';
+  private AVAILABLE_POOLS_LIST = '[data-testid="stake-pool-list-scroll-wrapper"]';
+  private LIST_ITEM = '[data-testid="stake-pool-item"]';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private TICKER = '[data-testid="stake-pool-list-ticker"]';
   private ROS = '[data-testid="stake-pool-list-apy"]';
@@ -15,8 +17,10 @@ export class StakePoolListItem {
 
   protected listItem;
 
-  constructor(index = 0) {
-    this.listItem = $$(this.LIST_ITEM)[index];
+  constructor(index = 0, isOnSelectedPoolsList = false) {
+    this.listItem = $(isOnSelectedPoolsList ? this.SELECTED_POOLS_LIST : this.AVAILABLE_POOLS_LIST).$$(this.LIST_ITEM)[
+      index
+    ];
   }
 
   get container(): ChainablePromiseElement<WebdriverIO.Element | undefined> {
@@ -57,5 +61,10 @@ export class StakePoolListItem {
 
   get liveStake(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.listItem.$(this.LIVE_STAKE);
+  }
+
+  async clickOnCheckbox(): Promise<void> {
+    await this.checkbox.waitForClickable();
+    await this.checkbox.click();
   }
 }

@@ -11,5 +11,8 @@ interface Props {
 const defaultFadeScale = 5;
 
 export const StakePoolCardSkeleton = ({ index = 0, fadeScale = defaultFadeScale }: Props) => (
-  <Card.Greyed className={cn(styles.card, styles.skeleton({ [`fade${fadeScale}`]: index % (fadeScale + 1) }))} />
+  <Card.Greyed
+    className={cn(styles.card, styles.skeleton({ [`fade${fadeScale}`]: index % (fadeScale + 1) }))}
+    data-testid="stake-pool-card-skeleton"
+  />
 );
