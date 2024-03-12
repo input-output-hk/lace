@@ -101,7 +101,7 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Mnemonic info - Back button click
     Given I navigate to "Mnemonic info" page
     When I click "Back" button during wallet setup
-    Then "Wallet password" page is displayed in onboarding flow
+    Then "Wallet name and password" page is displayed in onboarding flow
 
   @LW-3015
   Scenario: Create Wallet - Mnemonic info - Next button click
@@ -367,7 +367,7 @@ Feature: Onboarding - Create wallet
     Then I see current onboarding page in <mode> mode
     When I enter wallet name: "someWallet"
     And I click "Next" button during wallet setup
-    When "Wallet password" page is displayed in onboarding flow
+    When "Wallet name and password" page is displayed in onboarding flow
     Then I see current onboarding page in <mode> mode
     And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup

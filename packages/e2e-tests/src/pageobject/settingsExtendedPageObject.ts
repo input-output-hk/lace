@@ -170,7 +170,7 @@ class SettingsExtendedPageObject {
 
   async multiAddressModalConfirm() {
     if (await Modal.confirmButton.isDisplayed()) {
-      expect(await Modal.confirmButton.getText()).to.equal(t('staking', 'modals.beta.button').toString());
+      expect(await Modal.confirmButton.getText()).to.equal((await t('modals.beta.button', 'staking')).toString());
       await Modal.confirmButton.click();
     }
   }

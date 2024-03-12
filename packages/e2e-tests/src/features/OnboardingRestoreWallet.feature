@@ -368,7 +368,7 @@ Feature: Onboarding - Restore wallet
     And I click "Next" button during wallet setup
     Then "Recovery phrase length page" is displayed and 24 words checkbox is checked
     When I click "Back" button during wallet setup
-    Then "Wallet password" page is displayed in onboarding flow
+    Then "Wallet name and password" page is displayed in onboarding flow
 
   @LW-5838 @LW-5839
   Scenario: Restore Wallet - "Recovery phrase length page" restore 12 words happy path
@@ -449,7 +449,7 @@ Feature: Onboarding - Restore wallet
     Then I see current onboarding page in <mode> mode
     When I enter wallet name: "someWallet"
     And I click "Next" button during wallet setup
-    When "Wallet password" page is displayed in onboarding flow
+    When "Wallet name and password" page is displayed in onboarding flow
     Then I see current onboarding page in <mode> mode
     And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup

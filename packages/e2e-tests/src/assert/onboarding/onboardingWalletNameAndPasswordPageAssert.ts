@@ -2,8 +2,13 @@ import OnboardingWalletPasswordPage from '../../elements/onboarding/walletPasswo
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import OnboardingCommonAssert from './onboardingCommonAssert';
+import OnboardingWalletNamePage from '../../elements/onboarding/walletNamePage';
 
-class OnboardingWalletPasswordPageAssert extends OnboardingCommonAssert {
+class OnboardingWalletNameAndPasswordPageAssert extends OnboardingCommonAssert {
+  async assertSeeWalletNameInput() {
+    await OnboardingWalletNamePage.walletNameInput.waitForDisplayed();
+  }
+
   async assertSeePasswordInput() {
     await OnboardingWalletPasswordPage.walletPasswordInput.waitForDisplayed();
   }
@@ -31,11 +36,31 @@ class OnboardingWalletPasswordPageAssert extends OnboardingCommonAssert {
     expect(numberOfBars.toString()).to.equal(complexityBarLength);
   }
 
-  async assertSeePasswordPage(flow: 'onboarding' | 'forgot_password') {
-    await this.assertSeeStepTitle(await t('core.walletSetupRegisterStep.titlePassword'));
-    await this.assertSeeStepSubtitle(await t('core.walletSetupRegisterStep.passwordDescription'));
+  async assertSeeWalletNameError(expectedMessage: string, shouldBeDisplayed = true) {
+    const nameError = await OnboardingWalletNamePage.walletNameError;
+    await nameError.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await nameError.getText()).to.equal(expectedMessage);
+    }
+  }
+
+  async assertSeeWalletNamePage() {
+    await this.assertSeeWalletNameInput();
+    await this.assertSeeStepTitle(await t('core.walletSetupRegisterStep.title'));
+    await this.assertSeeStepSubtitle(await t('core.walletSetupRegisterStep.description'));
+
+    await this.assertSeeBackButton();
+    await this.assertSeeNextButton();
+    await this.assertNextButtonEnabled(false);
+
+    await this.assertSeeLegalLinks();
+    await this.assertSeeHelpAndSupportButton();
+  }
+
+  async assertSeeNameAndPasswordPage(flow: 'onboarding' | 'forgot_password') {
+    await this.assertSeeStepTitle(await t('package.core.walletNameAndPasswordSetupStep.title'));
+    await this.assertSeeStepSubtitle(await t('package.core.walletNameAndPasswordSetupStep.description'));
     await this.assertSeePasswordInput();
-    await this.assertSeePasswordConfirmInput();
 
     if (flow === 'onboarding') {
       await this.assertSeeBackButton(); // LW-3323
@@ -48,4 +73,4 @@ class OnboardingWalletPasswordPageAssert extends OnboardingCommonAssert {
   }
 }
 
-export default new OnboardingWalletPasswordPageAssert();
+export default new OnboardingWalletNameAndPasswordPageAssert();

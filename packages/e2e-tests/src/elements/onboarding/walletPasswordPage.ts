@@ -2,8 +2,8 @@ import CommonOnboardingElements from './commonOnboardingElements';
 
 class OnboardingWalletPasswordPage extends CommonOnboardingElements {
   private SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
-  private PASSWORD_INPUT = 'input[data-testid="wallet-setup-password-step-password"]';
-  private PASSWORD_CONFIRM_INPUT = 'input[data-testid="wallet-setup-password-step-confirm-password"]';
+  private PASSWORD_INPUT = 'input[data-testid="wallet-password-verification-input"]';
+  private PASSWORD_CONFIRM_INPUT = 'input[data-testid="wallet-password-confirmation-input"]';
   private PASSWORD_CONFIRM_ERROR = '[data-testid="wallet-setup-register-password-conf-error"]';
   private COMPLEXITY_BARS_ACTIVE = '[data-testid="bar-level-active"]';
   private PASSWORD_FEEDBACK = '[data-testid="password-feedback"]';
@@ -11,9 +11,11 @@ class OnboardingWalletPasswordPage extends CommonOnboardingElements {
   get subtitle() {
     return $(this.SUBTITLE);
   }
+
   get walletPasswordInput() {
     return $(this.PASSWORD_INPUT);
   }
+
   get walletPasswordConfirmInput() {
     return $(this.PASSWORD_CONFIRM_INPUT);
   }

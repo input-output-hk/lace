@@ -1,6 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
+import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
@@ -23,9 +23,7 @@ import OnboardingPageObject from '../pageobject/onboardingPageObject';
 import OnboardingRecoveryPhraseLengthPageAssert from '../assert/onboarding/onboardingRecoveryPhraseLengthPageAssert';
 import OnboardingWalletCreationPageAssert from '../assert/onboarding/onboardingWalletCreationPageAssert';
 import OnboardingWalletNamePage from '../elements/onboarding/walletNamePage';
-import OnboardingWalletNamePageAssert from '../assert/onboarding/onboardingWalletNamePageAssert';
 import OnboardingWalletPasswordPage from '../elements/onboarding/walletPasswordPage';
-import OnboardingWalletPasswordPageAssert from '../assert/onboarding/onboardingWalletPasswordPageAssert';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
@@ -43,8 +41,10 @@ import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWall
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
-
-import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
+import analyticsBanner from '../elements/analyticsBanner';
+import { getBackgroundStorageItem } from '../utils/browserStorage';
+import localStorageManager from '../utils/localStorageManager';
+import OnboardingWalletNameAndPasswordPageAssert from '../assert/onboarding/onboardingWalletNameAndPasswordPageAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -156,27 +156,31 @@ When(
 );
 
 Then(/^Name error "([^"]*)" is displayed/, async (nameError: string) => {
-  await OnboardingWalletNamePageAssert.assertSeeWalletNameError(await t(nameError));
+  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNameError(await t(nameError));
 });
 
 Then(
   // eslint-disable-next-line max-len
   /^Password recommendation: "([^"]*)", complexity bar level: "(\d{0,4})" and password confirmation error: "([^"]*)" are displayed$/,
   async (passwordErr: string, complexityBar: 0 | 1 | 2 | 3 | 4, passwordConfErr: string) => {
-    await OnboardingWalletPasswordPageAssert.assertSeePasswordConfirmationError(
+    await OnboardingWalletNameAndPasswordPageAssert.assertSeePasswordConfirmationError(
       await t(passwordConfErr),
       passwordConfErr !== 'empty'
     );
-    await OnboardingWalletPasswordPageAssert.assertSeePasswordRecommendation(
+    await OnboardingWalletNameAndPasswordPageAssert.assertSeePasswordRecommendation(
       await t(passwordErr),
       passwordErr !== 'empty'
     );
-    await OnboardingWalletPasswordPageAssert.assertSeeComplexityBar(complexityBar);
+    await OnboardingWalletNameAndPasswordPageAssert.assertSeeComplexityBar(complexityBar);
   }
 );
 
 Then(/^"Get started" page is displayed$/, async () => {
   await OnboardingMainPageAssert.assertSeeMainPage();
+});
+
+Then(/^I accept analytics banner on "Get started" page$/, async () => {
+  await analyticsBanner.agreeButton.click();
 });
 
 Then(/^"Legal page" is displayed$/, async () => {
@@ -232,12 +236,12 @@ Then(/^Creating wallet page finishes in < (\d*)s$/, async (duration: number) => 
 });
 
 Then(/^"Name your wallet" page is displayed$/, async () => {
-  await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
+  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
 });
 
-Then(/^"Wallet password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
+Then(/^"Wallet name and password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
   const expectedFlow = flow === 'forgot password' ? 'forgot_password' : 'onboarding';
-  await OnboardingWalletPasswordPageAssert.assertSeePasswordPage(expectedFlow);
+  await OnboardingWalletNameAndPasswordPageAssert.assertSeeNameAndPasswordPage(expectedFlow);
 });
 
 Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
@@ -263,7 +267,7 @@ Given(/^I am on "Help us improve your experience" page$/, async () => {
 
 Given(/^I am on "Name your wallet" page$/, async () => {
   await OnboardingPageObject.openNameYourWalletPage();
-  await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
+  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
 });
 
 Given(/^I am on "Connect Hardware Wallet" page$/, async () => {
@@ -596,7 +600,7 @@ Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (s
 
 Then(/^wallet name error "([^"]*)" (is|is not) displayed$/, async (errorText: string, isDisplayed: 'is' | 'is not') => {
   const expectedMessage = await t(errorText);
-  await OnboardingWalletNamePageAssert.assertSeeWalletNameError(expectedMessage, isDisplayed === 'is');
+  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNameError(expectedMessage, isDisplayed === 'is');
 });
 
 When(/^I click "Help and support" button during wallet setup$/, async () => {
