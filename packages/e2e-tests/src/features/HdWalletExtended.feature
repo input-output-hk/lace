@@ -2,9 +2,8 @@
 Feature: HD wallet - extended view
 
   Background:
-    Given Lace is ready for test
-    And I confirm multi-address discovery modal
-    
+    Given Wallet is synced
+
   @LW-7550
   Scenario: Tokens - HD wallet assets discovered in Lace
     Then I see total wallet balance in ADA is "10019.03"

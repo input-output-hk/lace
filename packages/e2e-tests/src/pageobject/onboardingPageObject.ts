@@ -9,16 +9,17 @@ import { browser } from '@wdio/globals';
 import AnalyticsPage from '../elements/onboarding/analyticsPage';
 import Modal from '../elements/modal';
 import OnboardingDataCollectionPageAssert from '../assert/onboarding/onboardingDataCollectionPageAssert';
-import OnboardingWalletNamePageAssert from '../assert/onboarding/onboardingWalletNamePageAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import testContext from '../utils/testContext';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
+import OnboardingWalletNameAndPasswordPageAssert from '../assert/onboarding/onboardingWalletNameAndPasswordPageAssert';
 
 class OnboardingPageObject {
   public validPassword = 'N_8J@bne87A';
+
   async openLegalPage() {
     await this.acceptTCCheckbox();
   }
@@ -258,6 +259,7 @@ class OnboardingPageObject {
         await RecoveryPhraseLengthPage.radioButton24wordsButton.click();
     }
   }
+
   async restoreWallet() {
     const commonOnboardingElements = new CommonOnboardingElements();
 
@@ -267,7 +269,7 @@ class OnboardingPageObject {
     await this.openAndAcceptTermsOfUsePage();
     await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
     await AnalyticsPage.nextButton.click();
-    await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
+    await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
     await this.fillWalletNameInput('ValidName');
     await commonOnboardingElements.nextButton.click();
     await this.fillPasswordPage(this.validPassword, this.validPassword);
@@ -284,6 +286,9 @@ class OnboardingPageObject {
     await browser.pause(500);
     if (await WalletCreationPage.walletLoader.isDisplayed()) {
       await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 15_000, reverse: true });
+    }
+    if (await WalletCreationPage.mainLoaderText.isDisplayed()) {
+      await WalletCreationPage.mainLoaderText.waitForDisplayed({ timeout: 55_000, reverse: true });
     }
   }
 }

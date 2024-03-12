@@ -43,6 +43,7 @@ import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixt
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.multiAddressModalConfirm();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
 });
