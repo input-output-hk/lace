@@ -85,6 +85,7 @@ export interface UseWalletManager {
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<WalletManagerActivateProps | undefined>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
+  getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -677,6 +678,32 @@ export const useWalletManager = (): UseWalletManager => {
     [walletLock, loadWallet]
   );
 
+  const getMnemonic = useCallback(
+    async (passphrase: Uint8Array) => {
+      const { wallet } = cardanoWallet.source;
+      switch (wallet.type) {
+        case WalletType.InMemory: {
+          const keyMaterialBytes = await Wallet.KeyManagement.emip3decrypt(
+            Buffer.from(wallet.encryptedSecrets.keyMaterial, 'hex'),
+            passphrase
+          );
+
+          const keyMaterialBuffer = Buffer.from(keyMaterialBytes);
+
+          const mnemonic = keyMaterialBuffer.toString('utf8').split(' ');
+          clearBytes(passphrase);
+          clearBytes(keyMaterialBytes);
+          clearBytes(keyMaterialBuffer);
+          return mnemonic;
+        }
+        case WalletType.Ledger:
+        case WalletType.Trezor:
+          throw new Error('Mnemonic is not available for hardware wallets');
+      }
+    },
+    [cardanoWallet]
+  );
+
   const addAccount = useCallback(
     async ({ wallet, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
       const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
@@ -704,6 +731,7 @@ export const useWalletManager = (): UseWalletManager => {
     deleteWallet,
     switchNetwork,
     walletManager,
-    walletRepository
+    walletRepository,
+    getMnemonic
   };
 };

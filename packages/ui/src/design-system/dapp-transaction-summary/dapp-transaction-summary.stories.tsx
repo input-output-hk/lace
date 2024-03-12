@@ -38,21 +38,18 @@ const items = [
     imageSrc: token1,
     balance: '-200.00',
     tokenName: 'Maui',
-    metadataHash: '3442348',
     recipient: '',
   },
   {
     imageSrc: '',
     balance: '-10.00',
     tokenName: 'HairMaui',
-    metadataHash: '3438888',
     recipient: '',
   },
   {
     imageSrc: token2,
     balance: '-1000.00',
     tokenName: 'Lapisluzzz',
-    metadataHash: '3430008',
     recipient: '',
   },
   {
@@ -66,7 +63,6 @@ const items = [
     imageSrc: '',
     balance: '-20780.00',
     tokenName: 'HelloSand',
-    metadataHash: '3430008',
     recipient: '',
   },
 ];
@@ -84,7 +80,6 @@ const Example = (): JSX.Element => (
         imageSrc={value.imageSrc}
         balance={value.balance}
         tokenName={value.tokenName}
-        metadataHash={value.metadataHash}
       />
     ))}
   </Layout>
@@ -106,7 +101,6 @@ const MainComponents = (): JSX.Element => (
               imageSrc={value.imageSrc}
               balance={value.balance}
               tokenName={value.tokenName}
-              metadataHash={value.metadataHash}
             />
           ))}
         </>

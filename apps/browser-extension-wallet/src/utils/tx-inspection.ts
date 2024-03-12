@@ -9,8 +9,17 @@ import {
   totalAddressOutputsValueInspector
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { ActivityType, TransactionActivityType } from '@lace/core';
+import {
+  ActivityType,
+  DelegationActivityType,
+  TransactionActivityType,
+  ConwayEraGovernanceActions,
+  ConwayEraCertificatesTypes,
+  Cip1694GovernanceActivityType
+} from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
+
+const { CertificateType, GovernanceActionType, Vote, VoterType } = Wallet.Cardano;
 
 const hasWalletStakeAddress = (
   withdrawals: Wallet.Cardano.HydratedTx['body']['withdrawals'],
@@ -23,16 +32,99 @@ interface TxTypeProps {
 
 export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
   switch (type) {
-    case 'incoming':
+    case TransactionActivityType.incoming:
       return TxDirections.Incoming;
-    case 'rewards':
+    case ConwayEraGovernanceActions.vote:
+    case TransactionActivityType.rewards:
+    case TransactionActivityType.outgoing:
       return TxDirections.Outgoing;
-    case 'outgoing':
-      return TxDirections.Outgoing;
-    case 'self':
+    case TransactionActivityType.self:
       return TxDirections.Self;
   }
 };
+
+const governanceCertificateInspection = (
+  certificates: Wallet.Cardano.Certificate[]
+): ConwayEraCertificatesTypes | ConwayEraGovernanceActions => {
+  const signedCertificateTypenames: Wallet.Cardano.CertificateType[] = certificates.reduce(
+    (acc, cert) => [...acc, cert.__typename],
+    []
+  );
+  // Assumes single certificate only, should update
+
+  switch (true) {
+    case signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative):
+      // TODO: can we map to Cip30TxType instead?
+      return ConwayEraCertificatesTypes.RegisterDelegateRepresentative;
+    case signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative):
+      return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;
+    case signedCertificateTypenames.includes(CertificateType.UpdateDelegateRepresentative):
+      return ConwayEraCertificatesTypes.UpdateDelegateRepresentative;
+    case signedCertificateTypenames.includes(CertificateType.StakeVoteDelegation):
+      return ConwayEraCertificatesTypes.StakeVoteDelegation;
+    case signedCertificateTypenames.includes(CertificateType.StakeRegistrationDelegation):
+      return ConwayEraCertificatesTypes.StakeRegistrationDelegation;
+    case signedCertificateTypenames.includes(CertificateType.VoteRegistrationDelegation):
+      return ConwayEraCertificatesTypes.VoteRegistrationDelegation;
+    case signedCertificateTypenames.includes(CertificateType.VoteDelegation):
+      return ConwayEraCertificatesTypes.VoteDelegation;
+    case signedCertificateTypenames.includes(CertificateType.StakeVoteRegistrationDelegation):
+      return ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation;
+    case signedCertificateTypenames.includes(CertificateType.AuthorizeCommitteeHot):
+      return ConwayEraCertificatesTypes.AuthorizeCommitteeHot;
+    case signedCertificateTypenames.includes(CertificateType.ResignCommitteeCold):
+      return ConwayEraCertificatesTypes.ResignCommitteeCold;
+  }
+};
+
+// Assumes single procedure only
+export const cip1694GovernanceActionsInspection = (
+  procedure: Wallet.Cardano.ProposalProcedure
+): Cip1694GovernanceActivityType => {
+  switch (procedure.governanceAction.__typename) {
+    case GovernanceActionType.parameter_change_action:
+      return Cip1694GovernanceActivityType.ParameterChangeAction;
+    case GovernanceActionType.hard_fork_initiation_action:
+      return Cip1694GovernanceActivityType.HardForkInitiationAction;
+    case GovernanceActionType.treasury_withdrawals_action:
+      return Cip1694GovernanceActivityType.TreasuryWithdrawalsAction;
+    case GovernanceActionType.no_confidence:
+      return Cip1694GovernanceActivityType.NoConfidence;
+    case GovernanceActionType.update_committee:
+      return Cip1694GovernanceActivityType.UpdateCommittee;
+    case GovernanceActionType.new_constitution:
+      return Cip1694GovernanceActivityType.NewConstitution;
+    case GovernanceActionType.info_action:
+      return Cip1694GovernanceActivityType.InfoAction;
+  }
+};
+
+const getWalletAccounts = (walletAddresses: Wallet.KeyManagement.GroupedAddress[]) =>
+  walletAddresses.reduce(
+    (acc, curr) => ({
+      paymentAddresses: [...acc.paymentAddresses, curr.address],
+      rewardAccounts: [...acc.rewardAccounts, curr.rewardAccount]
+    }),
+    { paymentAddresses: [], rewardAccounts: [] }
+  );
+
+const txIncludesConwayCertificates = (certificates?: Wallet.Cardano.Certificate[]) =>
+  certificates?.length > 0
+    ? certificates.some((certificate) =>
+        Object.values(ConwayEraCertificatesTypes).includes(
+          certificate.__typename as unknown as ConwayEraCertificatesTypes
+        )
+      )
+    : false;
+
+const isTxWithRewardsWithdrawal = (
+  totalWithdrawals: bigint,
+  walletAddresses: Wallet.KeyManagement.GroupedAddress[],
+  txWithdrawals?: Wallet.Cardano.Withdrawal[]
+) =>
+  totalWithdrawals > BigInt(0) &&
+  txWithdrawals.length > 0 &&
+  walletAddresses.some((addr) => hasWalletStakeAddress(txWithdrawals, addr.rewardAccount));
 
 const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => async (tx: Wallet.Cardano.HydratedTx) => {
   const notOwnInputs = tx.body.inputs.some((input) => !addresses.includes(input.address));
@@ -49,14 +141,8 @@ export const inspectTxType = async ({
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
   inputResolver: Wallet.Cardano.InputResolver;
-}): Promise<TransactionActivityType> => {
-  const { paymentAddresses, rewardAccounts } = walletAddresses.reduce(
-    (acc, curr) => ({
-      paymentAddresses: [...acc.paymentAddresses, curr.address],
-      rewardAccounts: [...acc.rewardAccounts, curr.rewardAccount]
-    }),
-    { paymentAddresses: [], rewardAccounts: [] }
-  );
+}): Promise<Exclude<ActivityType, TransactionActivityType.rewards>> => {
+  const { paymentAddresses, rewardAccounts } = getWalletAccounts(walletAddresses);
 
   const inspectionProperties = await createTxInspector({
     sent: sentInspector({
@@ -71,26 +157,38 @@ export const inspectTxType = async ({
     selfTransaction: selfTxInspector(paymentAddresses)
   })(tx);
 
-  const withRewardsWithdrawal =
-    inspectionProperties.totalWithdrawals > BigInt(0) &&
-    walletAddresses.some((addr) => hasWalletStakeAddress(tx.body.withdrawals, addr.rewardAccount));
+  if (txIncludesConwayCertificates(tx.body.certificates)) {
+    return governanceCertificateInspection(tx.body.certificates);
+  }
+
+  const withRewardsWithdrawal = isTxWithRewardsWithdrawal(
+    inspectionProperties.totalWithdrawals,
+    walletAddresses,
+    tx.body.withdrawals
+  );
 
   if (inspectionProperties.sent.inputs.length > 0 || withRewardsWithdrawal) {
     switch (true) {
       case !!inspectionProperties.delegation[0]?.poolId:
-        return 'delegation';
+        return DelegationActivityType.delegation;
       case inspectionProperties.stakeKeyRegistration.length > 0:
-        return 'delegationRegistration';
+        return DelegationActivityType.delegationRegistration;
       case inspectionProperties.stakeKeyDeregistration.length > 0:
-        return 'delegationDeregistration';
+        return DelegationActivityType.delegationDeregistration;
+      // Voting procedures take priority over proposals
+      // TODO: use proper inspector when available on sdk side (LW-9569)
+      case tx.body.votingProcedures?.length > 0:
+        return ConwayEraGovernanceActions.vote;
+      case tx.body.proposalProcedures?.length > 0:
+        return cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]);
       case inspectionProperties.selfTransaction:
-        return 'self';
+        return TransactionActivityType.self;
       default:
-        return 'outgoing';
+        return TransactionActivityType.outgoing;
     }
   }
 
-  return 'incoming';
+  return TransactionActivityType.incoming;
 };
 
 export const inspectTxValues = async ({
@@ -114,4 +212,59 @@ export const inspectTxValues = async ({
   })(tx);
 
   return inspectionProperties.totalOutputsValue;
+};
+
+export enum VoterTypeEnum {
+  CONSTITUTIONAL_COMMITTEE = 'constitutionalCommittee',
+  SPO = 'spo',
+  DREP = 'drep'
+}
+
+export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterTypeEnum => {
+  switch (voterType) {
+    case VoterType.ccHotKeyHash:
+    case VoterType.ccHotScriptHash:
+      return VoterTypeEnum.CONSTITUTIONAL_COMMITTEE;
+    case VoterType.stakePoolKeyHash:
+      return VoterTypeEnum.SPO;
+    case VoterType.dRepKeyHash:
+    case VoterType.dRepScriptHash:
+      return VoterTypeEnum.DREP;
+    default:
+      return VoterTypeEnum.DREP;
+  }
+};
+
+export enum CredentialType {
+  KeyHash = 'KeyHash',
+  ScriptHash = 'ScriptHash'
+}
+
+export const getCredentialType = (credentialType: Wallet.Cardano.CredentialType): CredentialType => {
+  switch (credentialType) {
+    case Wallet.Cardano.CredentialType.KeyHash:
+      return CredentialType.KeyHash;
+    case Wallet.Cardano.CredentialType.ScriptHash:
+      return CredentialType.ScriptHash;
+    default:
+      return CredentialType.ScriptHash;
+  }
+};
+
+export enum VotesEnum {
+  YES = 'yes',
+  NO = 'no',
+  ABSTAIN = 'abstain'
+}
+
+export const getVote = (vote: Wallet.Cardano.Vote): VotesEnum => {
+  switch (vote) {
+    case Vote.yes:
+      return VotesEnum.YES;
+    case Vote.no:
+      return VotesEnum.NO;
+    case Vote.abstain:
+    default:
+      return VotesEnum.ABSTAIN;
+  }
 };

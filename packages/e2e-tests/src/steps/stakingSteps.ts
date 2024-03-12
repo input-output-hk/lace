@@ -5,7 +5,7 @@ import stakingExtendedPageObject from '../pageobject/stakingExtendedPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import { getStakePoolById, getStakePoolByName, StakePoolsData } from '../data/expectedStakePoolsData';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import webTester from '../actor/webTester';
 import StakingExitModalAssert from '../assert/stakingExitModalAssert';
@@ -131,21 +131,15 @@ When(/^I click on the "(.*)" column header$/, async (listHeader: string) => {
   await stakingExtendedPageObject.clickStakePoolListHeader(listHeader);
 });
 
-Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {
-  const expectedActivityDetails =
-    metadata === 'with'
-      ? {
-          transactionDescription: 'Delegation\n1 token',
-          status: 'Success',
-          poolName: String(testContext.load('poolName')),
-          poolTicker: String(testContext.load('poolTicker')),
-          poolID: String(testContext.load('poolID'))
-        }
-      : {
-          transactionDescription: 'Delegation\n1 token',
-          status: 'Success',
-          poolID: String(testContext.load('poolID'))
-        };
+// eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (_ignored: 'with' | 'without') => {
+  // no need to distinguish between pools with/without metadata
+  // all information is saved in testContext/stakePoolsInUse
+  const expectedActivityDetails: ExpectedActivityDetails = {
+    transactionDescription: 'Delegation\n1 token',
+    status: 'Success',
+    poolData: testContext.load('stakePoolsInUse')
+  };
 
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
 });

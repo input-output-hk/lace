@@ -3,7 +3,7 @@ import { Flex } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { MetricType } from '../types';
-import { getSaturationLevel } from './config';
+import { getSaturationLevel } from '../utils';
 import * as styles from './StakePoolCellRenderer.css';
 import { StakePoolsListRowProps } from './types';
 

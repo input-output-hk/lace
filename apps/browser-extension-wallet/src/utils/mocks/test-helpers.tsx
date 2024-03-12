@@ -43,7 +43,8 @@ export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentD
 export const mockKeyAgentsByChain = {
   Mainnet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Mainnet } },
   Preprod: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preprod } },
-  Preview: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preview } }
+  Preview: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preview } },
+  Sanchonet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Sanchonet } }
 };
 
 export const mockWalletState: ObservableWalletState = {
@@ -632,7 +633,8 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getAliasProperties: jest.fn(),
   userId$: new Subject() as any,
   isNewSession: jest.fn(() => true),
-  resetToDefaultValues: jest.fn()
+  resetToDefaultValues: jest.fn(),
+  generateWalletBasedUserId: jest.fn()
 };
 
 export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
@@ -645,7 +647,8 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   getExperimentVariant: jest.fn(),
   subscribeToDistinctIdUpdate: jest.fn(),
   shutdown: jest.fn(),
-  sendSessionStartEvent: jest.fn()
+  sendSessionStartEvent: jest.fn(),
+  sendMergeEvent: jest.fn()
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {
@@ -653,5 +656,6 @@ export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototyp
   setOptedInForEnhancedAnalytics: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
-  sendAliasEvent: jest.fn()
+  sendAliasEvent: jest.fn(),
+  sendMergeEvent: jest.fn()
 };

@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable react/no-multi-comp */
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
@@ -7,11 +8,13 @@ import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
-import styles from './AssetActivityItem.module.scss';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { useTranslate } from '@src/ui/hooks';
-import { ActivityTypeIcon, ActivityType } from '../ActivityDetail';
+import { DelegationActivityType, TransactionActivityType } from '../ActivityDetail/types';
+import type { ActivityType } from '../ActivityDetail/types';
+import styles from './AssetActivityItem.module.scss';
+import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
@@ -62,11 +65,10 @@ export interface AssetActivityItemProps {
   assets?: ActivityAssetProp[];
 }
 
-const DelegationTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
 const DELEGATION_ASSET_NUMBER = 1;
 
 interface ActivityStatusIconProps {
-  status: string;
+  status: ActivityStatus;
   type: ActivityType;
 }
 
@@ -78,7 +80,7 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
     case ActivityStatus.SUCCESS:
       return <ActivityTypeIcon type={type} />;
     case ActivityStatus.SPENDABLE:
-      return <ActivityTypeIcon type="rewards" />;
+      return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.ERROR:
@@ -87,17 +89,12 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
   }
 };
 
-const translationTypes = {
-  delegation: 'package.core.assetActivityItem.entry.name.delegation',
-  delegationDeregistration: 'package.core.assetActivityItem.entry.name.delegationDeregistration',
-  delegationRegistration: 'package.core.assetActivityItem.entry.name.delegationRegistration',
-  rewards: 'package.core.assetActivityItem.entry.name.rewards',
-  incoming: 'package.core.assetActivityItem.entry.name.incoming',
-  outgoing: 'package.core.assetActivityItem.entry.name.outgoing',
-  self: 'package.core.assetActivityItem.entry.name.self'
-};
-
-const negativeBalanceStyling: Set<ActivityType> = new Set(['outgoing', 'delegationRegistration', 'self', 'delegation']);
+const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
+  TransactionActivityType.outgoing,
+  DelegationActivityType.delegationRegistration,
+  TransactionActivityType.self,
+  DelegationActivityType.delegation
+]);
 
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
 export const AssetActivityItem = ({
@@ -117,7 +114,7 @@ export const AssetActivityItem = ({
 
   const getText = useCallback(
     (items: number): { text: string; suffix: string } => {
-      if (DelegationTransactionTypes.has(type) || type === 'self') return { text: amount, suffix: '' };
+      if (type in DelegationActivityType || type === TransactionActivityType.self) return { text: amount, suffix: '' };
 
       const assetsIdsText = assets
         ?.slice(0, items)
@@ -162,15 +159,16 @@ export const AssetActivityItem = ({
   const isPendingTx = status === ActivityStatus.PENDING;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
-  const assetAmountContent = DelegationTransactionTypes.has(type) ? (
-    <p data-testid="tokens-amount" className={styles.description}>
-      {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
-    </p>
-  ) : (
-    <p data-testid="tokens-amount" className={styles.description}>
-      {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
-    </p>
-  );
+  const assetAmountContent =
+    type in DelegationActivityType ? (
+      <p data-testid="tokens-amount" className={styles.description}>
+        {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
+      </p>
+    ) : (
+      <p data-testid="tokens-amount" className={styles.description}>
+        {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
+      </p>
+    );
   const descriptionContent = formattedTimestamp ? (
     <p data-testid="timestamp" className={styles.description}>
       {formattedTimestamp}
@@ -193,9 +191,9 @@ export const AssetActivityItem = ({
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
-            {isPendingTx && type !== 'self' && !DelegationTransactionTypes.has(type)
+            {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationActivityType)
               ? t('package.core.assetActivityItem.entry.name.sending')
-              : t(translationTypes[type])}
+              : t(`package.core.assetActivityItem.entry.name.${type}`)}
           </h6>
           {descriptionContent}
         </div>

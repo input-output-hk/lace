@@ -2,6 +2,7 @@
 import React from 'react';
 import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
+
 import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWithAmount } from '@cardano-sdk/core';
 
 import { DappTransactionHeader, DappTransactionHeaderProps, TransactionTypes } from '../DappTransactionHeader';

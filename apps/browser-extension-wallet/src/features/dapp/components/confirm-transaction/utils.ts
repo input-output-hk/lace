@@ -1,53 +1,18 @@
+/* eslint-disable sonarjs/no-small-switch */
+/* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
-import { CardanoTxOut } from '@src/types';
-import { RemoteApiPropertyType, exposeApi } from '@cardano-sdk/web-extension';
+import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
 import type { UserPromptService } from '@lib/scripts/background/services';
-import { DAPP_CHANNELS } from '@src/utils/constants';
+import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
-import { sectionTitle, DAPP_VIEWS } from '../../config';
+import { VoterTypeEnum, getVoterType } from '@src/utils/tx-inspection';
 
 const { CertificateType } = Wallet.Cardano;
 
-export enum TxType {
-  Send = 'Send',
-  Mint = 'Mint',
-  Burn = 'Burn',
-  DRepRegistration = 'DRepRegistration',
-  DRepRetirement = 'DRepRetirement',
-  VoteDelegation = 'VoteDelegation',
-  VotingProcedures = 'VotingProcedures'
-}
+const DAPP_TOAST_DURATION = 50;
 
-export const getTitleKey = (txType: TxType): string => {
-  if (txType === TxType.DRepRegistration) {
-    return 'core.drepRegistration.title';
-  }
-
-  if (txType === TxType.DRepRetirement) {
-    return 'core.drepRetirement.title';
-  }
-
-  if (txType === TxType.VoteDelegation) {
-    return 'core.voteDelegation.title';
-  }
-
-  if (txType === TxType.VotingProcedures) {
-    return 'core.votingProcedures.title';
-  }
-
-  return sectionTitle[DAPP_VIEWS.CONFIRM_TX];
-};
-
-/**
- * Signing with dapp connector is a 2 step process:
- * 1. Open UI window and expose a SigningCoordinator
- * 2. Sign
- *
- * This function exposes an `allowSignTx` observable, which emits a single `true` value to
- * the service worker to indicate that the UI has loaded and `SigningCoordinator` is ready to sign
- */
 export const readyToSign = (): void => {
   exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
     {
@@ -63,17 +28,23 @@ export const readyToSign = (): void => {
   );
 };
 
-export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.AssetId[] => {
-  const assetIds: Wallet.Cardano.AssetId[] = [];
-  const assetMaps = outputs.map((output) => output.value.assets);
-  for (const asset of assetMaps) {
-    if (asset) {
-      for (const id of asset.keys()) {
-        !assetIds.includes(id) && assetIds.push(id);
-      }
-    }
+export const disallowSignTx = async (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+  close = false
+): Promise<void> => {
+  await req.reject('User declined to sign');
+  close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+};
+
+export const allowSignTx = async (
+  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+  callback?: () => void
+): Promise<void> => {
+  if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
+    throw new Error('Invalid state: expected hw wallet');
   }
-  return assetIds;
+  await req.sign();
+  callback && callback();
 };
 
 export const certificateInspectorFactory =
@@ -85,47 +56,93 @@ export const votingProceduresInspector = async (
   tx: Wallet.Cardano.Tx
 ): Promise<Wallet.Cardano.VotingProcedures | undefined> => tx?.body?.votingProcedures;
 
-export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<TxType> => {
+// eslint-disable-next-line complexity
+export const proposalProceduresInspector = async (
+  tx: Wallet.Cardano.Tx
+): Promise<Wallet.Cardano.ProposalProcedure[] | undefined> => tx?.body?.proposalProcedures;
+
+export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxType> => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
     votingProcedures: votingProceduresInspector,
+    proposalProcedures: proposalProceduresInspector,
     dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
     dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
-    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation)
+    dRepUpdate: certificateInspectorFactory(CertificateType.UpdateDelegateRepresentative),
+    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation),
+    voteRegistrationDelegation: certificateInspectorFactory(CertificateType.VoteRegistrationDelegation),
+    stakeVoteDelegation: certificateInspectorFactory(CertificateType.StakeVoteDelegation),
+    stakeRegistrationDelegation: certificateInspectorFactory(CertificateType.StakeRegistrationDelegation),
+    stakeVoteDelegationRegistration: certificateInspectorFactory(CertificateType.StakeVoteRegistrationDelegation)
   });
 
-  const { minted, burned, dRepRegistration, dRepRetirement, voteDelegation, votingProcedures } = await inspector(
-    tx as Wallet.Cardano.HydratedTx
-  );
+  const {
+    minted,
+    burned,
+    votingProcedures,
+    dRepRegistration,
+    dRepRetirement,
+    dRepUpdate,
+    voteDelegation,
+    stakeVoteDelegation,
+    voteRegistrationDelegation,
+    stakeRegistrationDelegation,
+    stakeVoteDelegationRegistration,
+    proposalProcedures
+  } = await inspector(tx as Wallet.Cardano.HydratedTx);
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
+  if (proposalProcedures) {
+    return Wallet.Cip30TxType.ProposalProcedures;
+  }
+
   if (votingProcedures) {
-    return TxType.VotingProcedures;
+    return Wallet.Cip30TxType.VotingProcedures;
   }
 
   if (isMintTransaction) {
-    return TxType.Mint;
+    return Wallet.Cip30TxType.Mint;
   }
 
   if (isBurnTransaction) {
-    return TxType.Burn;
+    return Wallet.Cip30TxType.Burn;
   }
 
   if (dRepRegistration) {
-    return TxType.DRepRegistration;
+    return Wallet.Cip30TxType.DRepRegistration;
   }
 
   if (dRepRetirement) {
-    return TxType.DRepRetirement;
+    return Wallet.Cip30TxType.DRepRetirement;
   }
 
   if (voteDelegation) {
-    return TxType.VoteDelegation;
+    return Wallet.Cip30TxType.VoteDelegation;
   }
 
-  return TxType.Send;
+  if (stakeVoteDelegation) {
+    return Wallet.Cip30TxType.StakeVoteDelegation;
+  }
+
+  if (voteRegistrationDelegation) {
+    return Wallet.Cip30TxType.VoteRegistrationDelegation;
+  }
+
+  if (stakeRegistrationDelegation) {
+    return Wallet.Cip30TxType.StakeRegistrationDelegation;
+  }
+
+  if (stakeVoteDelegationRegistration) {
+    return Wallet.Cip30TxType.StakeVoteDelegationRegistration;
+  }
+
+  if (dRepUpdate) {
+    return Wallet.Cip30TxType.DRepUpdate;
+  }
+
+  return Wallet.Cip30TxType.Send;
 };
 
 export const drepIDasBech32FromHash = (value: Wallet.Crypto.Hash28ByteBase16): Wallet.Cardano.DRepID =>
@@ -139,9 +156,34 @@ export const pubDRepKeyToHash = async (
   return Wallet.Crypto.Hash28ByteBase16.fromEd25519KeyHashHex(drepKeyHex);
 };
 
-export const getOwnRetirementMessageKey = (isOwnRetirement: boolean | undefined): string => {
-  if (isOwnRetirement === undefined) {
-    return '';
+export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): string => {
+  switch (coinId.name) {
+    case cardanoCoin.name:
+      return Wallet.util.getFormattedAmount({
+        amount: deposit.toString(),
+        cardanoCoin: coinId
+      });
+    default:
+      throw new Error(`coinId ${coinId.name} not supported`);
   }
-  return isOwnRetirement ? 'core.drepRetirement.isOwnRetirement' : 'core.drepRetirement.isNotOwnRetirement';
 };
+
+export const hasValidDrepRegistration = (history: Wallet.Cardano.HydratedTx[]): boolean => {
+  for (const transaction of history) {
+    const drepRegistrationOrRetirementCerticicate = transaction.body.certificates?.find((cert) =>
+      [CertificateType.UnregisterDelegateRepresentative, CertificateType.RegisterDelegateRepresentative].includes(
+        cert.__typename
+      )
+    );
+
+    if (drepRegistrationOrRetirementCerticicate) {
+      return drepRegistrationOrRetirementCerticicate.__typename === CertificateType.RegisterDelegateRepresentative;
+    }
+  }
+  return false;
+};
+
+export const getDRepId = (voter: Wallet.Cardano.Voter): Wallet.Cardano.DRepID | string =>
+  getVoterType(voter.__typename) === VoterTypeEnum.DREP
+    ? drepIDasBech32FromHash(voter.credential.hash)
+    : voter.credential.hash.toString();

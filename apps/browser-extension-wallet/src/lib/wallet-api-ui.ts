@@ -12,7 +12,7 @@ import {
   walletManagerChannel,
   walletManagerProperties,
   walletRepositoryProperties
-} from '../../../../node_modules/@cardano-sdk/web-extension/dist/cjs';
+} from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { firstValueFrom } from 'rxjs';
 import { runtime } from 'webextension-polyfill';

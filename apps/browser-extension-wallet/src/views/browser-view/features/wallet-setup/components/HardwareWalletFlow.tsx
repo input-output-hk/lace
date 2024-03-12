@@ -202,8 +202,10 @@ export const HardwareWalletFlow = ({
       if (isAnalyticsAccepted) {
         await analytics.sendAliasEvent();
       }
-      // Workaround to enable staking with Ledger right after the onboarding LW-5564
-      window.location.reload();
+
+      if (typeof deviceConnection === 'object') {
+        deviceConnection.transport.close();
+      }
     }
   };
 

@@ -11,7 +11,7 @@ export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
   onChange: (words: string[]) => void;
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
   onStepNext?: (currentStep: number) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
@@ -43,14 +43,14 @@ export const WalletSetupMnemonicVerificationStep = ({
     onCancel();
   };
 
-  const handleNext = () => {
+  const handleNext = (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
     if (onStepNext) onStepNext(mnemonicStep);
     if (mnemonicStep < mnemonicSteps - 1) {
       setMnemonicStep(mnemonicStep + 1);
       return;
     }
 
-    onSubmit();
+    onSubmit(event);
   };
 
   const getStepInfoText = () => {

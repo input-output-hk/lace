@@ -1,5 +1,4 @@
 import { Then, When } from '@cucumber/cucumber';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import extendedView from '../page/extendedView';
@@ -39,7 +38,8 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import { clearWalletRepository } from '../fixture/browserStorageInitializer';
+import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -61,11 +61,11 @@ Then(/I navigate to home page on (popup|extended) view/, async (viewType: string
 });
 
 Then(/^I close the drawer by clicking close button$/, async () => {
-  await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
+  await SimpleTxSideDrawerPageObject.clickCloseDrawerButton();
 });
 
 Then(/^I close the drawer by clicking back button$/, async () => {
-  await simpleTxSideDrawerPageObject.clickBackDrawerButton();
+  await SimpleTxSideDrawerPageObject.clickBackDrawerButton();
 });
 
 Then(/^I close wallet synced toast/, async () => {
@@ -148,7 +148,13 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await cleanBrowserStorage();
   await clearWalletRepository();
   await localStorageManager.cleanLocalStorage();
-  await localStorageInitializer.initializeWallet(walletName);
+  if (walletName === 'newCreatedWallet') {
+    const wallets = String(testContext.load('newCreatedWallet'));
+    await addAndActivateWalletInRepository(wallets);
+    await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
+  } else {
+    await localStorageInitializer.initializeWallet(walletName);
+  }
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();

@@ -1,0 +1,29 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../src/styles/rules/flex.scss';
+
+.spaceBetween {
+  justify-content: space-between;
+  padding-top: size_unit(0);
+}
+
+.transactionContainer { 
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.actions {
+  @extend %flex-column;
+  height: size_unit(17.12);
+  justify-content: space-between;
+  padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background-color: var(--light-mode-body, var(--dark-mode-bg-black));
+  .actionBtn {
+    width: 100%;
+  }
+}
