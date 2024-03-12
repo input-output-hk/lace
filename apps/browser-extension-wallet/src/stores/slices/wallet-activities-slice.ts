@@ -284,7 +284,8 @@ const mapWalletActivities = memoize(
       const extended = await Promise.all(
         transactions.history.map((tx) => extendTxWithTypeAndDirection({ tx, keyHashAddresses, inputResolver }))
       );
-      const filtered = assetDetails?.id === cardanoCoin.id ? extended : filterTransactionByAssetId(extended);
+      const filtered =
+        !assetDetails || assetDetails?.id === cardanoCoin.id ? extended : filterTransactionByAssetId(extended);
       return flatten(await Promise.all(filtered.map((tx) => historicTransactionMapper(tx))));
     };
 

@@ -45,18 +45,18 @@ export const ConfirmTransactionContent = ({ tx, txTypes, onError }: Props): Reac
     []
   );
 
+  const supportedTxTypes = txTypes.filter((type) => !!containerPerTypeMap[type]);
+
   return (
     <>
-      {txTypes.length > 0 ? (
-        txTypes.map((type) => {
-          const Container = containerPerTypeMap[type] || null;
+      {supportedTxTypes.length > 0 ? (
+        supportedTxTypes.map((type) => {
+          const Container = containerPerTypeMap[type];
           return (
-            Container && (
-              <>
-                <div className={styles.title}>{t('core.${type}.title')}</div>
-                <Container tx={tx} key={type} {...(type === Wallet.Cip30TxType.DRepRetirement && { onError })} />
-              </>
-            )
+            <div className={styles.container} key={type}>
+              <div className={styles.title}>{t(`core.${type}.title`)}</div>
+              <Container tx={tx} {...(type === Wallet.Cip30TxType.DRepRetirement && { onError })} />
+            </div>
           );
         })
       ) : (

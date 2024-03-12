@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +36,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const disallowSignTx = useDisallowSignTx();
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
   const [txTypes, setTxTypes] = useState<Wallet.Cip30TxType[]>();
-  const tx = req?.transaction.toCore();
+  const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
 
   useEffect(() => {
     const fetchTxType = async () => {

@@ -10,6 +10,15 @@
   padding: 0;
 }
 
+.container {
+  &:not(:last-child) {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+    padding-bottom: size_unit(4);
+  }
+}
+
 .title {
   align-items: center;
   color: var(--text-color-primary);
