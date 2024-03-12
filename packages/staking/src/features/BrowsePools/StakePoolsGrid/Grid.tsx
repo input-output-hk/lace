@@ -37,7 +37,6 @@ export const Grid = <T extends Record<string, unknown> | undefined>({
 
   useEffect(() => {
     if (tableReference && initialRowsCount !== undefined && numberOfItemsPerRow !== undefined) {
-      console.debug('xxx grid:', { initialRowsCount, numberOfItemsPerRow });
       loadMoreData({ endIndex: Math.max(initialRowsCount, 1) * numberOfItemsPerRow, startIndex: 0 });
     }
   }, [initialRowsCount, loadMoreData, numberOfItemsPerRow, rowHeight]);
