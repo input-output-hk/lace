@@ -633,7 +633,8 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getAliasProperties: jest.fn(),
   userId$: new Subject() as any,
   isNewSession: jest.fn(() => true),
-  resetToDefaultValues: jest.fn()
+  resetToDefaultValues: jest.fn(),
+  generateWalletBasedUserId: jest.fn()
 };
 
 export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
@@ -646,7 +647,8 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   getExperimentVariant: jest.fn(),
   subscribeToDistinctIdUpdate: jest.fn(),
   shutdown: jest.fn(),
-  sendSessionStartEvent: jest.fn()
+  sendSessionStartEvent: jest.fn(),
+  sendMergeEvent: jest.fn()
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {
@@ -654,5 +656,6 @@ export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototyp
   setOptedInForEnhancedAnalytics: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
-  sendAliasEvent: jest.fn()
+  sendAliasEvent: jest.fn(),
+  sendMergeEvent: jest.fn()
 };

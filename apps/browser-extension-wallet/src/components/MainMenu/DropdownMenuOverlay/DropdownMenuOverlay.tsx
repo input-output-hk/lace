@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, VFC } from 'react';
+import React, { ReactNode, useCallback, useState, VFC } from 'react';
 import { Menu, MenuProps } from 'antd';
 import {
   AddNewWalletLink,
@@ -49,6 +49,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     sendAnalyticsEvent(PostHogAction.UserWalletProfileNetworkClick);
   };
 
+  const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
+
   topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
 
   return (
@@ -77,10 +79,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
           </Links>
         </div>
       )}
-      {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={() => setCurrentSection(Sections.Main)} />}
-      {currentSection === Sections.WalletAccounts && (
-        <WalletAccounts onBack={() => setCurrentSection(Sections.Main)} isPopup={isPopup} />
-      )}
+      {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={goBackToMainSection} />}
+      {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={goBackToMainSection} isPopup={isPopup} />}
     </Menu>
   );
 };

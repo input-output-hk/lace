@@ -7,7 +7,7 @@ import { SkeletonButton } from './skeleton-button';
 
 import type { ButtonProps } from './skeleton-button';
 
-type Props = Omit<ButtonProps, 'className' | 'icon'>;
+type Props = Omit<ButtonProps, 'className'>;
 
 export const CallToAction = forwardRef<HTMLButtonElement, Props>(
   (props, forwardReference): JSX.Element => {

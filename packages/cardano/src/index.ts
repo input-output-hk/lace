@@ -2,7 +2,6 @@ export * as Wallet from '@wallet';
 
 export * from '@ui/hooks';
 
-export * from '@ui/components/StakePoolSearch';
 export * from '@ui/components/StakingConfirmationInfo';
 export * from '@ui/components/NetworkInfo';
 export * from '@ui/components/Voting';

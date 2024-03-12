@@ -3,14 +3,6 @@ export enum BrowsePoolsView {
   table = 'table',
 }
 
-export enum SaturationLevels {
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
-  Veryhigh = 'veryHigh',
-  Oversaturated = 'oversaturated',
-}
-
 export enum MetricType {
   ticker = 'ticker',
   saturation = 'saturation',

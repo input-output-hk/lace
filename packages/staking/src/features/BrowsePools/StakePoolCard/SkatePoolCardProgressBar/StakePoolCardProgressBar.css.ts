@@ -1,4 +1,5 @@
 import { style, sx } from '@lace/ui';
+import { recipe } from '@vanilla-extract/recipes';
 import { theme } from '../../../theme';
 
 export const wrapper = sx({
@@ -16,26 +17,25 @@ export const bar = style([
   },
 ]);
 
-export const progress = style([
-  sx({
-    borderRadius: '$medium',
-    height: '$4',
-  }),
-  {
-    backgroundRepeat: 'no-repeat',
+export const progress = recipe({
+  base: style([
+    sx({
+      borderRadius: '$medium',
+      height: '$4',
+    }),
+    {
+      backgroundRepeat: 'no-repeat',
+    },
+  ]),
+  variants: {
+    level: {
+      high: { backgroundImage: theme.colors.$dataOrangeGradient },
+      medium: { backgroundImage: theme.colors.$dataGreenGradient },
+      veryHigh: { backgroundImage: theme.colors.$dataPinkGradient },
+    },
   },
-]);
+});
 
 export const progressValue = style({
   color: theme.colors.$poolCardProgressBarValue,
-});
-
-export const progressMedium = style({
-  backgroundImage: theme.colors.$dataGreenGradient,
-});
-export const progressHigh = style({
-  backgroundImage: theme.colors.$dataOrangeGradient,
-});
-export const progressVeryHigh = style({
-  backgroundImage: theme.colors.$dataPinkGradient,
 });
