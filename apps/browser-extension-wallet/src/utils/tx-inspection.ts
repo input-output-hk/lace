@@ -44,59 +44,58 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
   }
 };
 
-const governanceCertificateInspection = (
-  certificates: Wallet.Cardano.Certificate[]
-): ConwayEraCertificatesTypes | ConwayEraGovernanceActions => {
+const governanceCertificateInspection = (certificates: Wallet.Cardano.Certificate[]): ConwayEraCertificatesTypes[] => {
   const signedCertificateTypenames: Wallet.Cardano.CertificateType[] = certificates.reduce(
     (acc, cert) => [...acc, cert.__typename],
     []
   );
-  // Assumes single certificate only, should update
+  const types: ConwayEraCertificatesTypes[] = [];
 
-  switch (true) {
-    case signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative):
-      return ConwayEraCertificatesTypes.RegisterDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative):
-      return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.UpdateDelegateRepresentative):
-      return ConwayEraCertificatesTypes.UpdateDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.StakeVoteDelegation):
-      return ConwayEraCertificatesTypes.StakeVoteDelegation;
-    case signedCertificateTypenames.includes(CertificateType.StakeRegistrationDelegation):
-      return ConwayEraCertificatesTypes.StakeRegistrationDelegation;
-    case signedCertificateTypenames.includes(CertificateType.VoteRegistrationDelegation):
-      return ConwayEraCertificatesTypes.VoteRegistrationDelegation;
-    case signedCertificateTypenames.includes(CertificateType.VoteDelegation):
-      return ConwayEraCertificatesTypes.VoteDelegation;
-    case signedCertificateTypenames.includes(CertificateType.StakeVoteRegistrationDelegation):
-      return ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation;
-    case signedCertificateTypenames.includes(CertificateType.AuthorizeCommitteeHot):
-      return ConwayEraCertificatesTypes.AuthorizeCommitteeHot;
-    case signedCertificateTypenames.includes(CertificateType.ResignCommitteeCold):
-      return ConwayEraCertificatesTypes.ResignCommitteeCold;
-  }
+  if (signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative))
+    types.push(ConwayEraCertificatesTypes.RegisterDelegateRepresentative);
+  if (signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative))
+    types.push(ConwayEraCertificatesTypes.UnregisterDelegateRepresentative);
+  if (signedCertificateTypenames.includes(CertificateType.UpdateDelegateRepresentative))
+    types.push(ConwayEraCertificatesTypes.UpdateDelegateRepresentative);
+  if (signedCertificateTypenames.includes(CertificateType.StakeVoteDelegation))
+    types.push(ConwayEraCertificatesTypes.StakeVoteDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.StakeRegistrationDelegation))
+    types.push(ConwayEraCertificatesTypes.StakeRegistrationDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.VoteRegistrationDelegation))
+    types.push(ConwayEraCertificatesTypes.VoteRegistrationDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.VoteDelegation))
+    types.push(ConwayEraCertificatesTypes.VoteDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.StakeVoteRegistrationDelegation))
+    types.push(ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.AuthorizeCommitteeHot))
+    types.push(ConwayEraCertificatesTypes.AuthorizeCommitteeHot);
+  if (signedCertificateTypenames.includes(CertificateType.ResignCommitteeCold))
+    types.push(ConwayEraCertificatesTypes.ResignCommitteeCold);
+
+  return types;
 };
 
-// Assumes single procedure only
 export const cip1694GovernanceActionsInspection = (
   procedure: Wallet.Cardano.ProposalProcedure
-): Cip1694GovernanceActivityType => {
-  switch (procedure.governanceAction.__typename) {
-    case GovernanceActionType.parameter_change_action:
-      return Cip1694GovernanceActivityType.ParameterChangeAction;
-    case GovernanceActionType.hard_fork_initiation_action:
-      return Cip1694GovernanceActivityType.HardForkInitiationAction;
-    case GovernanceActionType.treasury_withdrawals_action:
-      return Cip1694GovernanceActivityType.TreasuryWithdrawalsAction;
-    case GovernanceActionType.no_confidence:
-      return Cip1694GovernanceActivityType.NoConfidence;
-    case GovernanceActionType.update_committee:
-      return Cip1694GovernanceActivityType.UpdateCommittee;
-    case GovernanceActionType.new_constitution:
-      return Cip1694GovernanceActivityType.NewConstitution;
-    case GovernanceActionType.info_action:
-      return Cip1694GovernanceActivityType.InfoAction;
-  }
+): Cip1694GovernanceActivityType[] => {
+  const types: Cip1694GovernanceActivityType[] = [];
+
+  if (procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action)
+    types.push(Cip1694GovernanceActivityType.ParameterChangeAction);
+  if (procedure.governanceAction.__typename === GovernanceActionType.hard_fork_initiation_action)
+    types.push(Cip1694GovernanceActivityType.HardForkInitiationAction);
+  if (procedure.governanceAction.__typename === GovernanceActionType.treasury_withdrawals_action)
+    types.push(Cip1694GovernanceActivityType.TreasuryWithdrawalsAction);
+  if (procedure.governanceAction.__typename === GovernanceActionType.no_confidence)
+    types.push(Cip1694GovernanceActivityType.NoConfidence);
+  if (procedure.governanceAction.__typename === GovernanceActionType.update_committee)
+    types.push(Cip1694GovernanceActivityType.UpdateCommittee);
+  if (procedure.governanceAction.__typename === GovernanceActionType.new_constitution)
+    types.push(Cip1694GovernanceActivityType.NewConstitution);
+  if (procedure.governanceAction.__typename === GovernanceActionType.info_action)
+    types.push(Cip1694GovernanceActivityType.InfoAction);
+
+  return types;
 };
 
 const getWalletAccounts = (walletAddresses: Wallet.KeyManagement.GroupedAddress[]) =>
@@ -160,7 +159,7 @@ export const inspectTxType = async ({
   })(tx);
 
   if (txIncludesConwayCertificates(tx.body.certificates)) {
-    types.push(governanceCertificateInspection(tx.body.certificates));
+    types.push(...governanceCertificateInspection(tx.body.certificates));
   }
 
   const withRewardsWithdrawal = isTxWithRewardsWithdrawal(
@@ -181,7 +180,7 @@ export const inspectTxType = async ({
   // TODO: use proper inspector when available on sdk side (LW-9569)
   if (tx.body.votingProcedures?.length > 0) types.push(ConwayEraGovernanceActions.vote);
   if (tx.body.proposalProcedures?.length > 0)
-    types.push(cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]));
+    types.push(...cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]));
   if (inspectionProperties.selfTransaction) types.push(TransactionActivityType.self);
   if (types.length === 0) types.push(TransactionActivityType.outgoing);
 
