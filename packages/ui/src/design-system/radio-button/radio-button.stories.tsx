@@ -28,20 +28,24 @@ export default {
   ],
 } as Meta;
 
-const getOptions = (label = ''): { value: string; label: string }[] => [
-  { value: `option-${uuid()}`, label },
+const getOptions = (
+  label = '',
+): { value: string; label: string; tooltipText: string }[] => [
+  { value: `option-${uuid()}`, label, tooltipText: 'test Tooltip text' },
 ];
 const getOptionsWithIcon = (): {
   value: string;
   label: string;
   icon: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
   onIconClick: () => void;
+  tooltipText: string;
 }[] => [
   {
     value: 'option',
     label: 'Label',
     icon: DocumentDownload,
     onIconClick: (): void => void 0,
+    tooltipText: 'Test tooltip text lorem ipsum dolor sit amet',
   },
 ];
 
@@ -193,10 +197,26 @@ export const Overview = (): JSX.Element => {
   const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
   const option = [{ value: 'singleOption', label: 'Label' }];
   const options = [
-    { value: 'label01', label: 'Label' },
-    { value: 'label02', label: 'Label' },
-    { value: 'label03', label: 'Label' },
-    { value: 'label04', label: 'Label' },
+    {
+      value: 'label01',
+      label: 'Label',
+      tooltipText: 'Tooltip text 1',
+    },
+    {
+      value: 'label02',
+      label: 'Label',
+      tooltipText: 'Tooltip text 2',
+    },
+    {
+      value: 'label03',
+      label: 'Label',
+      tooltipText: 'Tooltip text 3',
+    },
+    {
+      value: 'label04',
+      label: 'Label',
+      tooltipText: 'Tooltip text 4',
+    },
   ];
 
   const [radioValue, setRadioValue] = React.useState(options[1].value);
