@@ -9,6 +9,7 @@ import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
 import { TransactionAssets, SummaryExpander, DappTransactionSummary } from '@lace/ui';
+import classNames from 'classnames';
 
 interface GroupedAddressAssets {
   nfts: Array<AssetInfoWithAmount>;
@@ -113,20 +114,20 @@ export const DappAddressSections = ({
           {[...groupedFromAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address}>
-                <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-title">
+                <Text className={styles.label} data-testid="dapp-transaction-from-address-title">
                   {t('package.core.dappTransaction.address')}
                 </Text>
-                <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-address">
+                <Text className={styles.value} data-testid="dapp-transaction-from-address-address">
                   {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
                 </Text>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
                 <>
                   <div className={styles.tokenCount}>
-                    <Title level={5} data-testid="dapp-transaction-tokens-title">
+                    <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
                       {t('package.core.dappTransaction.tokens')}
                     </Title>
-                    <Title level={5}>
+                    <Title level={5} className={styles.value}>
                       -{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
                     </Title>
                   </div>
@@ -164,20 +165,20 @@ export const DappAddressSections = ({
           {[...groupedToAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address}>
-                <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address-title">
+                <Text className={styles.label} data-testid="dapp-transaction-to-address-title">
                   {t('package.core.dappTransaction.address')}
                 </Text>
-                <Text className={styles.addressInfo} data-testid="dapp-transaction-to-address">
+                <Text className={styles.value} data-testid="dapp-transaction-to-address">
                   {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
                 </Text>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
                 <>
                   <div className={styles.tokenCount}>
-                    <Title level={5} data-testid="dapp-transaction-tokens-title">
+                    <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
                       {t('package.core.dappTransaction.tokens')}
                     </Title>
-                    <Title level={5} className={styles.positiveAmount}>
+                    <Title level={5} className={classNames(styles.value, styles.positiveAmount)}>
                       {getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
                     </Title>
                   </div>
@@ -195,10 +196,10 @@ export const DappAddressSections = ({
               {addressData.nfts.length > 0 && (
                 <>
                   <div className={styles.tokenCount}>
-                    <Title level={5} data-testid="dapp-transaction-nfts-title">
+                    <Title level={5} className={styles.label} data-testid="dapp-transaction-nfts-title">
                       {t('package.core.dappTransaction.nfts')}
                     </Title>
-                    <Title level={5} className={styles.positiveAmount}>
+                    <Title level={5} className={classNames(styles.value, styles.positiveAmount)}>
                       {addressData.nfts.length} {itemsCountCopy}
                     </Title>
                   </div>
