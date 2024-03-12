@@ -182,7 +182,7 @@ class TopNavigationAssert {
   }
 
   async assertSeeWalletName(expectedWalletName: string) {
-    await MenuHeader.menuWalletName.waitForStable();
+    await MenuHeader.menuWalletName.waitForDisplayed();
     expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
   }
 

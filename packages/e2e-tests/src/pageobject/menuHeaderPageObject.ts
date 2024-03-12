@@ -16,7 +16,7 @@ class MenuHeaderPageObject {
 
   async openMenu() {
     await this.clickMenuButton();
-    await MenuHeader.menuContainer.waitForStable();
+    await MenuHeader.menuContainer.waitForDisplayed();
   }
 
   async closeMenu() {

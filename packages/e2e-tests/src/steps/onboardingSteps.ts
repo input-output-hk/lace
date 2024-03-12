@@ -1,6 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
@@ -42,9 +42,8 @@ import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
 import analyticsBanner from '../elements/analyticsBanner';
-import { getBackgroundStorageItem } from '../utils/browserStorage';
-import localStorageManager from '../utils/localStorageManager';
 import OnboardingWalletNameAndPasswordPageAssert from '../assert/onboarding/onboardingWalletNameAndPasswordPageAssert';
+import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -532,29 +531,12 @@ Then(/^I do not see autocomplete options list$/, async () => {
 
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingPageObject.openAllDonePage();
-  await OnboardingAllDonePageAssert.assertSeeAllDonePage();
-  await OnboardingAllDonePage.nextButton.click();
+  await OnboardingRevampPageObject.goToMenmonicVerificationPage('Create', mnemonicWords);
+  await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage('Create');
+  await OnboardingRevampPageObject.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
-  await Modal.cancelButton.waitForDisplayed();
-  await Modal.cancelButton.click();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
-  const newCreatedWallet: WalletConfig = {
-    password: 'N_8J@bne87A',
-    name: 'newCreatedWallet',
-    walletLocalStorageData: {
-      wallet: await localStorageManager.getItem('wallet'),
-      lock: await localStorageManager.getItem('lock'),
-      keyAgentData: await localStorageManager.getItem('keyAgentData'),
-      analyticsStatus: await localStorageManager.getItem('analyticsStatus'),
-      appSettings: defaultAppSettings
-    },
-    backgroundStorage: {
-      mnemonic: await getBackgroundStorageItem('mnemonic'),
-      keyAgentsByChain: await getBackgroundStorageItem('keyAgentsByChain')
-    }
-  };
-  // const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
+  const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
   testContext.save('newCreatedWallet', newCreatedWallet);
 });
 

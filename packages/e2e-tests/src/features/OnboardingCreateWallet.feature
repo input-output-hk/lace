@@ -15,19 +15,19 @@ Feature: Onboarding - Create wallet
     Given I click "Create" button on wallet setup page
     Then "Next" button is disabled during onboarding process
 
-  @LW-2429 @Obsolete
+  @LW-2429 @Pending @Obsolete
   Scenario: Create wallet - Legal page - accept T&C - next button enabled
     Given I click "Create" button on wallet setup page
     When I accept "T&C" checkbox
     Then "Next" button is enabled during onboarding process
 
-  @LW-2430 @Obsolete
+  @LW-2430 @Pending @Obsolete
   Scenario: Create wallet - Legal page - accept T&C - back button
     Given I click "Create" button on wallet setup page
     When I click "Back" button during wallet setup
     Then "Get started" page is displayed
 
-  @LW-2431 @Obsolete
+  @LW-2431 @Pending @Obsolete
   Scenario: Create wallet - Help us improve your experience page displayed
     Given I click "Create" button on wallet setup page
     And I am on "Legal page"
@@ -117,7 +117,7 @@ Feature: Onboarding - Create wallet
     Then I see "Watch video" modal
     When I click "Read More" link in modal
     # Given I navigate to "Mnemonic info" page
-    When I click "here." link on "Keeping your wallet secure" page
+    # When I click "here." link on "Keeping your wallet secure" page
     Then I see a "FAQ" article with title "What is my recovery phrase?"
 
   @LW-2251

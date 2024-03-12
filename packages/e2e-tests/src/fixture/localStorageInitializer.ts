@@ -39,8 +39,8 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('unconfirmedTransactions', `[${value}]`);
   }
 
-  async initializeAnalyticsAccepted(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
-    await localStorageManager.setItem('analyticsAccepted', value);
+  async initializeAnalyticsStatus(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
+    await localStorageManager.setItem('analyticsStatus', value);
   }
 
   async initializeShowDAppBetaModal(value: boolean): Promise<void> {
@@ -89,7 +89,7 @@ class LocalStorageInitializer {
     walletName: string,
     chainName: 'Preprod' | 'Preview' | 'Mainnet'
   ): Promise<void> => {
-    await this.initializeAnalyticsAccepted('ACCEPTED');
+    await this.initializeAnalyticsStatus('ACCEPTED');
     await this.initializeShowDAppBetaModal(false);
     await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
     await localStorageManager.setItem('appSettings', `{"chainName":"${chainName}"}`);

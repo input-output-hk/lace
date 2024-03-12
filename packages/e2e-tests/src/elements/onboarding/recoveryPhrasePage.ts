@@ -3,7 +3,7 @@ import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { ChainablePromiseElement } from 'webdriverio';
 import CommonOnboardingElements from './commonOnboardingElements';
 
-export class RecoveryPhrasePage extends CommonOnboardingElements {
+class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
   private MNEMONIC_INPUT = '[data-testid="mnemonic-word-input"]';
   private MNEMONIC_WORD_AUTOCOMPLETE_OPTIONS = '.ant-select-item-option-content';
