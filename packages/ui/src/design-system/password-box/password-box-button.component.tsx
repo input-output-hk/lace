@@ -20,13 +20,13 @@ export const PasswordInputButton = ({
   return (
     <button className={cx.inputButton} onClick={onClick} disabled={disabled}>
       {isPasswordVisible ? (
-        <OpenEye
+        <CloseEye
           className={cn(cx.inputButtonIcon, {
             [cx.disabledInputButtonIcon]: disabled,
           })}
         />
       ) : (
-        <CloseEye
+        <OpenEye
           className={cn(cx.inputButtonIcon, {
             [cx.disabledInputButtonIcon]: disabled,
           })}

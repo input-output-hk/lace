@@ -41,16 +41,16 @@ export const PasswordInput = ({
   );
 
   return (
-    <>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Form.Field
-          name="field"
-          className={cn(cx.container, {
-            [cx.disabledContainer]: disabled,
-            [containerClassName]: containerClassName,
-          })}
-          style={containerStyle}
-        >
+    <div className={cx.root}>
+      <Form.Field
+        name="field"
+        className={cn(cx.container, {
+          [cx.disabledContainer]: disabled,
+          [containerClassName]: containerClassName,
+        })}
+        style={containerStyle}
+      >
+        <Flex justifyContent="space-between" alignItems="center">
           <Form.Control asChild>
             <input
               type={isPasswordVisible ? 'text' : 'password'}
@@ -69,21 +69,21 @@ export const PasswordInput = ({
           >
             {label}
           </Form.Label>
-        </Form.Field>
-        <PasswordInputButton
-          onClick={(event): void => {
-            event.preventDefault();
-            setIsPasswordVisible(!isPasswordVisible);
-          }}
-          disabled={disabled}
-          isPasswordVisible={isPasswordVisible}
-        />
-      </Flex>
+          <PasswordInputButton
+            onClick={(event): void => {
+              event.preventDefault();
+              setIsPasswordVisible(!isPasswordVisible);
+            }}
+            disabled={disabled}
+            isPasswordVisible={isPasswordVisible}
+          />
+        </Flex>
+      </Form.Field>
       {errorMessage && (
         <Typography.Label className={cx.errorMessage}>
           {errorMessage}
         </Typography.Label>
       )}
-    </>
+    </div>
   );
 };
