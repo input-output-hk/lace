@@ -8,7 +8,7 @@ import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { useDisallowSignTx, useSignWithHardwareWallet, useOnBeforeUnload } from './hooks';
-import { getTxType } from './utils';
+import { getTxTypes } from './utils';
 import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
@@ -33,18 +33,19 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const { walletType, isHardwareWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
   const [confirmTransactionError, setConfirmTransactionError] = useState(false);
-  const disallowSignTx = useDisallowSignTx(req);
-  const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
-  const [txType, setTxType] = useState<Wallet.Cip30TxType>();
+  const disallowSignTx = useDisallowSignTx();
+  const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
+  const [txTypes, setTxTypes] = useState<Wallet.Cip30TxType[]>();
+  const tx = req?.transaction.toCore();
 
   useEffect(() => {
     const fetchTxType = async () => {
-      if (!req) return;
-      const type = await getTxType(req.transaction.toCore());
-      setTxType(type);
+      if (!tx) return;
+      const types = await getTxTypes(tx);
+      setTxTypes(types);
     };
     fetchTxType();
-  }, [req]);
+  }, [tx]);
 
   const onConfirm = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
@@ -88,13 +89,9 @@ export const ConfirmTransaction = (): React.ReactElement => {
   useOnBeforeUnload(disallowSignTx);
 
   return (
-    <Layout
-      layoutClassname={cn(confirmTransactionError && styles.layoutError)}
-      pageClassname={styles.spaceBetween}
-      title={!confirmTransactionError && txType && t(`core.${txType}.title`)}
-    >
-      {req && txType ? (
-        <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />
+    <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
+      {req && txTypes?.length ? (
+        <ConfirmTransactionContent txTypes={txTypes} tx={tx} onError={() => setConfirmTransactionError(true)} />
       ) : (
         <Skeleton loading />
       )}

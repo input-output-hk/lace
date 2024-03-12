@@ -28,6 +28,7 @@ import { cleanup, render } from '@testing-library/react';
 import { ConfirmTransactionContent } from '../ConfirmTransactionContent';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
+import { buildMockTx } from '@src/utils/mocks/tx';
 
 jest.mock('antd', () => {
   const original = jest.requireActual('antd');
@@ -137,6 +138,8 @@ jest.mock('../DappTransactionContainer', () => {
   };
 });
 
+const tx = buildMockTx();
+
 describe('Testing ConfirmTransactionContent component', () => {
   afterEach(() => {
     cleanup();
@@ -146,7 +149,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepRegistration }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.DRepRegistration] }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -170,7 +175,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepRetirement, ...props }} />
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.DRepRetirement], ...props }} />
       ));
     });
 
@@ -193,7 +198,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepUpdate }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.DRepUpdate] }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -215,7 +222,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteDelegation }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.VoteDelegation] }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -237,7 +246,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VotingProcedures }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.VotingProcedures] }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -260,7 +271,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.ProposalProcedures }} />
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.ProposalProcedures] }} />
       ));
     });
 
@@ -284,7 +295,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteRegistrationDelegation }} />
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.VoteRegistrationDelegation] }} />
       ));
     });
 
@@ -308,7 +319,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeRegistrationDelegation }} />
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.StakeRegistrationDelegation] }} />
       ));
     });
 
@@ -332,7 +343,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeVoteDelegationRegistration }} />
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.StakeVoteDelegationRegistration] }} />
       ));
     });
 
@@ -356,7 +367,7 @@ describe('Testing ConfirmTransactionContent component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.StakeVoteDelegation }} />
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: [Wallet.Cip30TxType.StakeVoteDelegation] }} />
       ));
     });
 
@@ -379,7 +390,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: 'other' as Wallet.Cip30TxType }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent tx={tx} {...{ txTypes: ['other' as Wallet.Cip30TxType] }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();

@@ -163,7 +163,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
   test('should render ConfirmDRepRetirementContainer component with proper props', async () => {
     let queryByTestId: any;
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer tx={tx} {...props} />, {
         wrapper: getWrapper()
       }));
     });
@@ -192,7 +192,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer tx={tx} {...props} />, {
         wrapper: getWrapper()
       }));
     });
@@ -209,7 +209,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...props} />, {
+      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer tx={tx} {...props} />, {
         wrapper: getWrapper()
       }));
     });

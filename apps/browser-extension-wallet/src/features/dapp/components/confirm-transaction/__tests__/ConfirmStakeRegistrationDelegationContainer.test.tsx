@@ -137,7 +137,7 @@ describe('Testing ConfirmStakeRegistrationDelegationContainer component', () => 
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmStakeRegistrationDelegationContainer />, {
+      ({ queryByTestId } = render(<ConfirmStakeRegistrationDelegationContainer tx={tx} />, {
         wrapper: getWrapper()
       }));
     });

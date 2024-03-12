@@ -9,26 +9,27 @@ import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUs
 import { useViewsFlowContext } from '@providers';
 import { useWalletStore } from '@src/stores';
 
-export const VotingProceduresContainer = (): React.ReactElement => {
+export const VotingProceduresContainer = ({
+  tx
+}: {
+  tx: Wallet.Cardano.Tx<Wallet.Cardano.TxBody>;
+}): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    signTxRequest: { request },
-    dappInfo
-  } = useViewsFlowContext();
+  const { dappInfo } = useViewsFlowContext();
   const { walletState } = useWalletStore();
   const [votingProcedures, setVotingProcedures] = useState<Wallet.Cardano.VotingProcedures>([]);
   const [isNonRegisteredUserModalVisible, setIsNonRegisteredUserModalVisible] = useState<boolean>(false);
   const [userAckNonRegisteredState, setUserAckNonRegisteredState] = useState<boolean>(false);
-  const disallowSignTx = useDisallowSignTx(request);
+  const disallowSignTx = useDisallowSignTx();
 
   useEffect(() => {
     const getVotingProcedures = async () => {
-      const txVotingProcedures = await votingProceduresInspector(request.transaction.toCore());
+      const txVotingProcedures = await votingProceduresInspector(tx);
       setVotingProcedures(txVotingProcedures);
     };
 
     getVotingProcedures();
-  }, [request]);
+  }, [tx]);
 
   useEffect(() => {
     if (!walletState?.transactions.history || userAckNonRegisteredState) return;

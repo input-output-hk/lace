@@ -9,15 +9,16 @@ import { Skeleton } from 'antd';
 
 const { CertificateType } = Wallet.Cardano;
 
-export const ConfirmDRepRegistrationContainer = (): React.ReactElement => {
+export const ConfirmDRepRegistrationContainer = ({
+  tx
+}: {
+  tx: Wallet.Cardano.Tx<Wallet.Cardano.TxBody>;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const {
-    signTxRequest: { request },
-    dappInfo
-  } = useViewsFlowContext();
+  const { dappInfo } = useViewsFlowContext();
 
   const [certificate, setCertificate] = useState<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>();
 
@@ -25,12 +26,12 @@ export const ConfirmDRepRegistrationContainer = (): React.ReactElement => {
     const getCertificateData = async () => {
       const txCertificate = await certificateInspectorFactory<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>(
         CertificateType.RegisterDelegateRepresentative
-      )(request?.transaction.toCore());
+      )(tx);
       setCertificate(txCertificate);
     };
 
     getCertificateData();
-  }, [request]);
+  }, [tx]);
 
   if (!certificate) {
     return <Skeleton loading />;

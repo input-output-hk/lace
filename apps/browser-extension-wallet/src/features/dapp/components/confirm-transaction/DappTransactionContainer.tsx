@@ -20,7 +20,7 @@ import {
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 
 interface Props {
-  errorMessage?: string;
+  tx: Wallet.Cardano.Tx<Wallet.Cardano.TxBody>;
 }
 
 const convertMetadataArrayToObj = (arr: unknown[]): Record<string, unknown> => {
@@ -63,7 +63,7 @@ const getAssetNameFromMintMetadata = (asset: MintedAsset, metadata: Wallet.Carda
 };
 
 // eslint-disable-next-line complexity, sonarjs/cognitive-complexity
-export const DappTransactionContainer = withAddressBookContext(({ errorMessage }: Props): React.ReactElement => {
+export const DappTransactionContainer = withAddressBookContext(({ tx }: Props): React.ReactElement => {
   const {
     walletInfo,
     inMemoryWallet,
@@ -71,14 +71,10 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
     walletUI: { cardanoCoin },
     walletState
   } = useWalletStore();
-  const {
-    signTxRequest: { request },
-    dappInfo
-  } = useViewsFlowContext();
+  const { dappInfo } = useViewsFlowContext();
   const currencyStore = useCurrencyStore();
   const coinPrice = useFetchCoinPrice();
   const { list: addressList } = useAddressBookContext() as { list: AddressListType[] };
-  const tx = useMemo(() => request?.transaction.toCore(), [request?.transaction]);
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
 
@@ -216,7 +212,6 @@ export const DappTransactionContainer = withAddressBookContext(({ errorMessage }
     <DappTransaction
       transaction={txSummary}
       dappInfo={dappInfo}
-      errorMessage={errorMessage}
       fiatCurrencyCode={currencyStore.fiatCurrency?.code}
       fiatCurrencyPrice={coinPrice.priceResult?.cardano?.price}
       coinSymbol={cardanoCoin.symbol}

@@ -11,21 +11,22 @@ import { UpdateCommitteeActionContainer } from './proposal-procedures/UpdateComm
 import { useViewsFlowContext } from '@providers';
 import { SignTxData } from './types';
 
-export const ProposalProceduresContainer = (): React.ReactElement => {
+export const ProposalProceduresContainer = ({
+  tx
+}: {
+  tx: Wallet.Cardano.Tx<Wallet.Cardano.TxBody>;
+}): React.ReactElement => {
   const [proposalProcedures, setProposalProcedures] = useState<Wallet.Cardano.ProposalProcedure[]>([]);
-  const {
-    signTxRequest: { request },
-    dappInfo
-  } = useViewsFlowContext();
+  const { dappInfo } = useViewsFlowContext();
 
   useEffect(() => {
     const proposalProcedureData = async () => {
-      const procedures = await proposalProceduresInspector(request.transaction.toCore());
+      const procedures = await proposalProceduresInspector(tx);
       setProposalProcedures(procedures);
     };
 
     proposalProcedureData();
-  }, [request]);
+  }, [tx]);
 
   const containerPerTypeMap: Record<
     Wallet.Cardano.GovernanceActionType,

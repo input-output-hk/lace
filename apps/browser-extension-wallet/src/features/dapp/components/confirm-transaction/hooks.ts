@@ -9,9 +9,10 @@ import { CardanoTxOut } from '@src/types';
 import { config } from '@src/config';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { getTransactionAssetsId } from '@src/stores/slices';
-import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
+import { pubDRepKeyToHash, disallowSignTx } from './utils';
 import { useWalletStore } from '@stores';
-import { TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
+import { WalletType } from '@cardano-sdk/web-extension';
+import { useViewsFlowContext } from '@providers';
 
 export const useCreateAssetList = ({
   assets,
@@ -149,38 +150,39 @@ export const useCreateMintedAssetList = ({
   );
 };
 
-export const useDisallowSignTx = (
-  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): ((close?: boolean) => void) => useCallback((close) => disallowSignTx(req, close), [req]);
+export const useDisallowSignTx = (): ((close?: boolean) => void) => {
+  const {
+    signTxRequest: { request }
+  } = useViewsFlowContext();
 
-export const useAllowSignTx = (
-  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): (() => void) => useCallback(() => allowSignTx(req), [req]);
+  return useCallback((close) => disallowSignTx(request, close), [request]);
+};
 
-export const useSignWithHardwareWallet = (
-  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): {
+export const useSignWithHardwareWallet = (): {
   signWithHardwareWallet: () => Promise<void>;
   isConfirmingTx: boolean;
 } => {
-  const disallow = useDisallowSignTx(req);
+  const {
+    signTxRequest: { request }
+  } = useViewsFlowContext();
+  const disallow = useDisallowSignTx();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>(false);
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
-      if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
+      if (request.walletType !== WalletType.Ledger && request.walletType !== WalletType.Trezor) {
         throw new Error('Invalid state: expected hw wallet');
       }
-      await req.sign();
+      await request.sign();
       redirectToSignSuccess();
     } catch (error) {
       console.error('signWithHardwareWallet error', error);
       disallow(false);
       redirectToSignFailure();
     }
-  }, [disallow, redirectToSignFailure, redirectToSignSuccess, req]);
+  }, [disallow, redirectToSignFailure, redirectToSignSuccess, request]);
   return { isConfirmingTx, signWithHardwareWallet };
 };
 

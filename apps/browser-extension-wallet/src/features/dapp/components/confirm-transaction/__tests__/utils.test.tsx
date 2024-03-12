@@ -14,7 +14,7 @@ import * as Core from '@cardano-sdk/core';
 import {
   certificateInspectorFactory,
   votingProceduresInspector,
-  getTxType,
+  getTxTypes,
   drepIDasBech32FromHash,
   pubDRepKeyToHash,
   depositPaidWithSymbol,
@@ -82,70 +82,70 @@ describe('Testing utils', () => {
     expect(await votingProceduresInspector({ body: {} } as Wallet.Cardano.Tx)).toEqual(undefined);
   });
 
-  test('testing getTxType', async () => {
+  test('testing getTxTypes', async () => {
     const tx = { body: {} } as Wallet.Cardano.Tx;
     const txInspectorCurriedFnPayload = { minted: [], burned: [] } as unknown as any;
     const createTxInspectorSpy = jest
       .spyOn(Core, 'createTxInspector')
       .mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, proposalProcedures: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.ProposalProcedures);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.ProposalProcedures);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(1);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, votingProcedures: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.VotingProcedures);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.VotingProcedures);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(2);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, minted: { length: 1 } }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.Mint);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.Mint);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(3);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, burned: { length: 1 } }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.Burn);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.Burn);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(4);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, dRepRegistration: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.DRepRegistration);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.DRepRegistration);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(5);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, dRepRetirement: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.DRepRetirement);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.DRepRetirement);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(6);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, voteDelegation: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.VoteDelegation);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.VoteDelegation);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(7);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, dRepUpdate: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.DRepUpdate);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.DRepUpdate);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(8);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, stakeVoteDelegation: true }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.StakeVoteDelegation);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.StakeVoteDelegation);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(9);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({
       ...txInspectorCurriedFnPayload,
       voteRegistrationDelegation: true
     }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.VoteRegistrationDelegation);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.VoteRegistrationDelegation);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(10);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({
       ...txInspectorCurriedFnPayload,
       stakeRegistrationDelegation: true
     }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.StakeRegistrationDelegation);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.StakeRegistrationDelegation);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(11);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({
       ...txInspectorCurriedFnPayload,
       stakeVoteDelegationRegistration: true
     }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.StakeVoteDelegationRegistration);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.StakeVoteDelegationRegistration);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(12);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload }));
-    expect(await getTxType(tx)).toEqual(Wallet.Cip30TxType.Send);
+    expect(await getTxTypes(tx)).toEqual(Wallet.Cip30TxType.Send);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(13);
   });
 

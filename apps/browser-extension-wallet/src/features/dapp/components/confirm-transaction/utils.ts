@@ -2,7 +2,7 @@
 /* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
-import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
+import { RemoteApiPropertyType, TransactionWitnessRequest, exposeApi } from '@cardano-sdk/web-extension';
 import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
@@ -36,17 +36,6 @@ export const disallowSignTx = async (
   close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
 };
 
-export const allowSignTx = async (
-  req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
-  callback?: () => void
-): Promise<void> => {
-  if (req.walletType !== WalletType.Ledger && req.walletType !== WalletType.Trezor) {
-    throw new Error('Invalid state: expected hw wallet');
-  }
-  await req.sign();
-  callback && callback();
-};
-
 export const certificateInspectorFactory =
   <T extends Wallet.Cardano.Certificate>(type: Wallet.Cardano.CertificateType) =>
   async (tx: Wallet.Cardano.Tx): Promise<T | undefined> =>
@@ -61,7 +50,7 @@ export const proposalProceduresInspector = async (
   tx: Wallet.Cardano.Tx
 ): Promise<Wallet.Cardano.ProposalProcedure[] | undefined> => tx?.body?.proposalProcedures;
 
-export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxType> => {
+export const getTxTypes = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxType[]> => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
@@ -94,55 +83,23 @@ export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxTy
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
-  if (proposalProcedures) {
-    return Wallet.Cip30TxType.ProposalProcedures;
-  }
+  const types: Wallet.Cip30TxType[] = [];
+  if (proposalProcedures) types.push(Wallet.Cip30TxType.ProposalProcedures);
+  if (votingProcedures) types.push(Wallet.Cip30TxType.VotingProcedures);
+  if (isMintTransaction) types.push(Wallet.Cip30TxType.Mint);
+  if (isBurnTransaction) types.push(Wallet.Cip30TxType.Burn);
+  if (dRepRegistration) types.push(Wallet.Cip30TxType.DRepRegistration);
+  if (dRepRetirement) types.push(Wallet.Cip30TxType.DRepRetirement);
+  if (voteDelegation) types.push(Wallet.Cip30TxType.VoteDelegation);
+  if (stakeVoteDelegation) types.push(Wallet.Cip30TxType.StakeVoteDelegation);
+  if (voteRegistrationDelegation) types.push(Wallet.Cip30TxType.VoteRegistrationDelegation);
+  if (stakeRegistrationDelegation) types.push(Wallet.Cip30TxType.StakeRegistrationDelegation);
+  if (stakeVoteDelegationRegistration) types.push(Wallet.Cip30TxType.StakeVoteDelegationRegistration);
+  if (dRepUpdate) types.push(Wallet.Cip30TxType.DRepUpdate);
 
-  if (votingProcedures) {
-    return Wallet.Cip30TxType.VotingProcedures;
-  }
+  if (types.length === 0) types.push(Wallet.Cip30TxType.Send);
 
-  if (isMintTransaction) {
-    return Wallet.Cip30TxType.Mint;
-  }
-
-  if (isBurnTransaction) {
-    return Wallet.Cip30TxType.Burn;
-  }
-
-  if (dRepRegistration) {
-    return Wallet.Cip30TxType.DRepRegistration;
-  }
-
-  if (dRepRetirement) {
-    return Wallet.Cip30TxType.DRepRetirement;
-  }
-
-  if (voteDelegation) {
-    return Wallet.Cip30TxType.VoteDelegation;
-  }
-
-  if (stakeVoteDelegation) {
-    return Wallet.Cip30TxType.StakeVoteDelegation;
-  }
-
-  if (voteRegistrationDelegation) {
-    return Wallet.Cip30TxType.VoteRegistrationDelegation;
-  }
-
-  if (stakeRegistrationDelegation) {
-    return Wallet.Cip30TxType.StakeRegistrationDelegation;
-  }
-
-  if (stakeVoteDelegationRegistration) {
-    return Wallet.Cip30TxType.StakeVoteDelegationRegistration;
-  }
-
-  if (dRepUpdate) {
-    return Wallet.Cip30TxType.DRepUpdate;
-  }
-
-  return Wallet.Cip30TxType.Send;
+  return types;
 };
 
 export const drepIDasBech32FromHash = (value: Wallet.Crypto.Hash28ByteBase16): Wallet.Cardano.DRepID =>

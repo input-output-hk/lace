@@ -13,9 +13,10 @@ const { CertificateType } = Wallet.Cardano;
 
 interface Props {
   onError: () => void;
+  tx: Wallet.Cardano.Tx<Wallet.Cardano.TxBody>;
 }
 
-export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactElement => {
+export const ConfirmDRepRetirementContainer = ({ tx, onError }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin }
@@ -28,17 +29,17 @@ export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactE
   const { loading: loadingOwnPubDRepKeyHash, ownPubDRepKeyHash } = useGetOwnPubDRepKeyHash();
 
   useEffect(() => {
-    if (!request) return;
+    if (!tx) return;
     const getCertificateData = async () => {
       const txCertificate =
         await certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
           CertificateType.UnregisterDelegateRepresentative
-        )(request.transaction.toCore());
+        )(tx);
       setCertificate(txCertificate);
     };
 
     getCertificateData();
-  }, [request]);
+  }, [tx]);
 
   const isNotOwnDRepKey = certificate?.dRepCredential.hash !== ownPubDRepKeyHash;
 
