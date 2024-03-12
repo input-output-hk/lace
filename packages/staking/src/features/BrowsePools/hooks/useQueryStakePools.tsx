@@ -60,7 +60,7 @@ export const useQueryStakePools = () => {
   );
 
   const paginatePools = useCallback(
-    async ({ startIndex, endIndex }) => {
+    async ({ startIndex, endIndex }: { startIndex: number; endIndex: number }) => {
       if (startIndex === endIndex) return;
 
       debouncedSearch({

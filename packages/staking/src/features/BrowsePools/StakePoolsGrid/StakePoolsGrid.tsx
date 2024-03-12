@@ -42,17 +42,17 @@ export const StakePoolsGrid = ({
   const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<StakePoolsGridColumnCount>();
 
   const showEmptyPlaceholder = !showSkeleton && pools.length === 0;
-  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 667 });
-  const matchFourColumnsLayout = useMediaQuery({ maxWidth: 1659, minWidth: 1024 });
-  const matchFiveColumnsLayout = useMediaQuery({ minWidth: 1660 });
+  const matchTwoColumnsLayout = useMediaQuery({ maxWidth: 668 });
+  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1024, minWidth: 669 });
+  const matchFourColumnsLayout = useMediaQuery({ minWidth: 1025 });
 
   const numberOfItemsPerMediaQueryMap: Partial<Record<StakePoolsGridColumnCount, boolean>> = useMemo(
     () => ({
+      2: matchTwoColumnsLayout,
       3: matchThreeColumnsLayout,
       4: matchFourColumnsLayout,
-      5: matchFiveColumnsLayout,
     }),
-    [matchFiveColumnsLayout, matchFourColumnsLayout, matchThreeColumnsLayout]
+    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout]
   );
 
   const updateNumberOfItemsInRow = useCallback(() => {
@@ -100,7 +100,7 @@ export const StakePoolsGrid = ({
         </>
       )}
       {showEmptyPlaceholder && <EmptyPlaceholder />}
-      {showSkeleton ? (
+      {showSkeleton || !numberOfItemsPerRow ? (
         <StakePoolsGridSkeleton columnCount={columnCount} rowCount={2} />
       ) : (
         <Grid<StakePoolDetails | undefined>
