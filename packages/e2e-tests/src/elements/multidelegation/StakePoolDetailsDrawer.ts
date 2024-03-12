@@ -40,6 +40,7 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
   private STAKE_ALL_ON_THIS_POOL_BUTTON = '[data-testid="stake-pool-details-stake-btn"]';
   private MANAGE_DELEGATION_BUTTON = '[data-testid="stake-pool-details-manage-delegation-btn"]';
   private SELECT_POOL_FOR_MULTISTAKING_BUTTON = '[data-testid="stake-pool-details-select-for-multi-staking-btn"]';
+  private ADD_STAKING_POOL_BUTTON = '[data-testid="stake-pool-details-add-staking-pool-btn"]';
   private TOOLTIP = '.ant-tooltip';
 
   get container(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -176,6 +177,10 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
 
   get selectPoolForMultiStakingButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SELECT_POOL_FOR_MULTISTAKING_BUTTON);
+  }
+
+  get addStakingPollButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ADD_STAKING_POOL_BUTTON);
   }
 
   get manageDelegationButton() {
