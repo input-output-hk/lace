@@ -1,12 +1,12 @@
-/* eslint-disable no-magic-numbers */
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis, PostHogAction, ProgressBar } from '@lace/common';
+import { Ellipsis, PostHogAction } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
+import { StakePoolCardProgressBar } from 'features/BrowsePools';
+import { isOversaturated } from 'features/BrowsePools/utils';
 import { TFunction } from 'i18next';
-import inRange from 'lodash/inRange';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -19,40 +19,6 @@ import {
 } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
-
-// TODO: remove duplication once lw-9270 is merged (lw-9552)
-export enum SaturationLevels {
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
-  Veryhigh = 'veryHigh',
-  Oversaturated = 'oversaturated',
-}
-
-const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
-  [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
-  [SaturationLevels.Veryhigh]: [90, 100],
-  [SaturationLevels.High]: [70, 90],
-  [SaturationLevels.Medium]: [21, 70],
-  [SaturationLevels.Low]: [0, 21],
-};
-
-type Entries<T> = {
-  [K in keyof T]: [K, T[K]];
-}[keyof T][];
-
-export const getSaturationLevel = (saturation: number): SaturationLevels => {
-  let result = SaturationLevels.Low;
-  for (const [level, [min, max]] of Object.entries(saturationLevelsRangeMap) as Entries<
-    typeof saturationLevelsRangeMap
-  >) {
-    if (inRange(saturation, min, max)) {
-      result = level;
-      return result;
-    }
-  }
-  return result;
-};
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
@@ -168,8 +134,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
           {...{
             id,
             isDelegated: delegatingToThisPool,
-            isOversaturated:
-              saturation !== undefined && getSaturationLevel(Number(saturation)) === SaturationLevels.Oversaturated,
+            isOversaturated: saturation !== undefined && isOversaturated(Number(saturation)),
             logo,
             name,
             status,
@@ -184,17 +149,8 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
             </div>
             <div className={styles.saturationProgressContainer}>
               <div className={styles.saturationProgress}>
-                {/* TODO: fix colors once lw-9270 is merged (lw-9552) */}
-                <ProgressBar
-                  className={styles[getSaturationLevel(Number(saturation))]}
-                  duration={0}
-                  width={`${Math.min(Number(saturation), 100)}%`}
-                  dataTestId="saturation-progress-bar"
-                />
+                <StakePoolCardProgressBar percentage={saturation} />
               </div>
-              <span className={styles.saturation} data-testid="saturation-value">
-                {saturation}%
-              </span>
             </div>
           </div>
         )}

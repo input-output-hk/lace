@@ -7,6 +7,7 @@ import { WarningModal } from '@src/views/browser-view/components';
 import { useCreateWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks/useWalletManager';
+import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 
 const noop = (): void => void 0;
 
@@ -22,6 +23,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
   const { generatedMnemonic, data } = useCreateWallet();
   const { createWallet } = useWalletManager();
+  const analytics = useAnalyticsContext();
   const [state, setState] = useState<State>(() => ({
     isResetMnemonicModalOpen: false,
     resetMnemonicStage: 'writedown'
@@ -46,10 +48,11 @@ export const NewRecoveryPhrase = (): JSX.Element => {
   }, [data]);
 
   const saveWallet = useCallback(async () => {
-    await createWallet(data);
+    const { source } = await createWallet(data);
+    await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
     clearSecrets();
     history.push(walletRoutePaths.assets);
-  }, [data, createWallet, history, clearSecrets]);
+  }, [data, createWallet, history, clearSecrets, analytics]);
 
   return (
     <>

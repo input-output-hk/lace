@@ -11,11 +11,24 @@ import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
 import { UseWalletManager } from '@hooks/useWalletManager';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
 
 jest.mock('@hooks/useWalletManager', () => ({
   useWalletManager: jest.fn().mockReturnValue({
-    createWallet: jest.fn().mockResolvedValue(void 0) as UseWalletManager['createWallet']
+    createWallet: jest.fn().mockResolvedValue({
+      source: {
+        account: {
+          extendedAccountPublicKey: ''
+        }
+      }
+    }) as UseWalletManager['createWallet']
   } as UseWalletManager)
+}));
+
+jest.mock('@providers/AnalyticsProvider', () => ({
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent'>, []>().mockReturnValue({
+    sendMergeEvent: jest.fn().mockReturnValue('')
+  })
 }));
 
 const keepWalletSecureStep = async () => {

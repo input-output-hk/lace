@@ -47,7 +47,14 @@ export const StakePoolsList = ({
       )}
       {!showEmptyPlaceholder && <StakePoolsListHeader {...{ activeSort, setActiveSort, translations }} />}
       {selectedPools?.length > 0 && (
-        <Flex flexDirection="column" alignItems="stretch" mb="$24" pb="$16" className={styles.selectedPools}>
+        <Flex
+          flexDirection="column"
+          alignItems="stretch"
+          mb="$24"
+          pb="$16"
+          className={styles.selectedPools}
+          data-testid="selected-pools-list"
+        >
           {selectedPools.map((pool) => (
             <StakePoolsListRow key={pool.id} {...{ ...pool, selected: true }} />
           ))}

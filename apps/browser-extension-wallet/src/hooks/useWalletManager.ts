@@ -61,6 +61,7 @@ type WalletManagerAddAccountProps = {
   wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
+  passphrase?: Uint8Array;
 };
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
@@ -85,6 +86,7 @@ export interface UseWalletManager {
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<WalletManagerActivateProps | undefined>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
+  getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -100,6 +102,7 @@ const getHwExtendedAccountPublicKey = async (
 ) => {
   switch (walletType) {
     case WalletType.Ledger:
+      await Wallet.Ledger.LedgerKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
       return Wallet.Ledger.LedgerKeyAgent.getXpub({
         communicationType: Wallet.KeyManagement.CommunicationType.Web,
         deviceConnection: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined,
@@ -119,13 +122,13 @@ const getHwExtendedAccountPublicKey = async (
 
 const getExtendedAccountPublicKey = async (
   wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
-  accountIndex: number
+  accountIndex: number,
+  passphrase?: Uint8Array
 ) => {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (wallet.type) {
     case WalletType.InMemory: {
       // eslint-disable-next-line no-alert
-      const passphrase = Buffer.from(prompt('Please enter your passphrase'));
       const rootPrivateKeyBytes = await Wallet.KeyManagement.emip3decrypt(
         Buffer.from(wallet.encryptedSecrets.rootPrivateKeyBytes, 'hex'),
         passphrase
@@ -677,9 +680,35 @@ export const useWalletManager = (): UseWalletManager => {
     [walletLock, loadWallet]
   );
 
+  const getMnemonic = useCallback(
+    async (passphrase: Uint8Array) => {
+      const { wallet } = cardanoWallet.source;
+      switch (wallet.type) {
+        case WalletType.InMemory: {
+          const keyMaterialBytes = await Wallet.KeyManagement.emip3decrypt(
+            Buffer.from(wallet.encryptedSecrets.keyMaterial, 'hex'),
+            passphrase
+          );
+
+          const keyMaterialBuffer = Buffer.from(keyMaterialBytes);
+
+          const mnemonic = keyMaterialBuffer.toString('utf8').split(' ');
+          clearBytes(passphrase);
+          clearBytes(keyMaterialBytes);
+          clearBytes(keyMaterialBuffer);
+          return mnemonic;
+        }
+        case WalletType.Ledger:
+        case WalletType.Trezor:
+          throw new Error('Mnemonic is not available for hardware wallets');
+      }
+    },
+    [cardanoWallet]
+  );
+
   const addAccount = useCallback(
-    async ({ wallet, accountIndex, metadata }: WalletManagerAddAccountProps): Promise<void> => {
-      const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex);
+    async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
+      const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey,
@@ -704,6 +733,7 @@ export const useWalletManager = (): UseWalletManager => {
     deleteWallet,
     switchNetwork,
     walletManager,
-    walletRepository
+    walletRepository,
+    getMnemonic
   };
 };

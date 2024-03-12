@@ -25,10 +25,14 @@ export const StakePoolCard = ({
   selected,
   onClick,
 }: StakePoolCardProps) => (
-  <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)} onClick={onClick}>
+  <Card.Outlined
+    className={cn(styles.card, selected && styles.cardSelected)}
+    onClick={onClick}
+    data-testid="stake-pool-card"
+  >
     <Flex flexDirection="column">
       <Flex justifyContent="space-between" w="$fill">
-        <Text.Body.Normal weight="$medium" className={styles.title}>
+        <Text.Body.Normal weight="$medium" className={styles.title} data-testid="stake-pool-card-title">
           {title}
         </Text.Body.Normal>
         {shouldRenderMetric(metricType, metricValue) && (

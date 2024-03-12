@@ -1,15 +1,14 @@
 import { SortField as SortFieldSDK } from '@cardano-sdk/core';
+
 export enum BrowsePoolsView {
   grid = 'grid',
   table = 'table',
 }
 
 export enum SaturationLevels {
-  Low = 'low',
   Medium = 'medium',
   High = 'high',
   Veryhigh = 'veryHigh',
-  Oversaturated = 'oversaturated',
 }
 
 // TODO remove 'ticker', when it's included in SortFieldSDK; https://input-output.atlassian.net/browse/LW-9981

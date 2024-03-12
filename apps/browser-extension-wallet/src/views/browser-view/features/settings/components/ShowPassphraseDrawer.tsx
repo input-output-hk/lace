@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
-import { Wallet } from '@lace/cardano';
 import {
   Button,
   Drawer,
@@ -15,17 +14,12 @@ import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
 import { MnemonicWordsWritedown } from '@lace/core';
-import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useWalletManager } from '@hooks';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
 
 const showPassphraseButtonLabel = 'browserView.settings.security.showPassphraseDrawer.showPassphrase';
-
-const {
-  KeyManagement: { util, emip3decrypt }
-} = Wallet;
 
 interface GeneralSettingsDrawerProps {
   visible: boolean;
@@ -58,9 +52,7 @@ export const ShowPassphraseDrawer = ({
     isPasswordValid: true
   });
   const [password, setPassword] = useState<string>('');
-  const { unlockWallet: validatePassword } = useWalletManager();
-
-  const backgroundService = useBackgroundServiceAPIContext();
+  const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
 
   const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
 
@@ -75,12 +67,11 @@ export const ShowPassphraseDrawer = ({
 
   const getPassphrase = useCallback(
     async (userPassword) => {
-      const { mnemonic } = await backgroundService.getBackgroundStorage();
-      const parsedMnemonic = JSON.parse(mnemonic).data;
-      const decryptedMnemonic = await emip3decrypt(Buffer.from(parsedMnemonic), Buffer.from(userPassword));
-      setPassphrase(util.mnemonicToWords(decryptedMnemonic.toString()));
+      const mnemonic = await getMnemonic(Buffer.from(userPassword));
+
+      setPassphrase(mnemonic);
     },
-    [backgroundService]
+    [getMnemonic]
   );
 
   const handleVerifyPass = useCallback(async () => {

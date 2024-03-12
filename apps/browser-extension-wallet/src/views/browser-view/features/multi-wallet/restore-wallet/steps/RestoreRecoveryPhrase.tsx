@@ -11,6 +11,7 @@ import { useWalletManager } from '@hooks';
 import { toast } from '@lace/common';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
+import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 
 const wordList = wordlists.english;
 
@@ -19,6 +20,8 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   const history = useHistory();
   const { data, setMnemonic } = useRestoreWallet();
   const { createWallet } = useWalletManager();
+  const analytics = useAnalyticsContext();
+
   const isValidMnemonic = useMemo(
     () => Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(data.mnemonic)),
     [data.mnemonic]
@@ -42,21 +45,24 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
   };
 
-  const onSubmitForm = useCallback(async () => {
-    event.preventDefault();
-
-    try {
-      await createWallet(data);
-    } catch (error) {
-      if (error instanceof WalletConflictError) {
-        toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
-      } else {
-        throw error;
+  const onSubmitForm = useCallback(
+    async (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
+      event.preventDefault();
+      try {
+        const { source } = await createWallet(data);
+        await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+      } catch (error) {
+        if (error instanceof WalletConflictError) {
+          toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+        } else {
+          throw error;
+        }
       }
-    }
-    clearSecrets();
-    history.push(walletRoutePaths.assets);
-  }, [data, clearSecrets, createWallet, history, t]);
+      clearSecrets();
+      history.push(walletRoutePaths.assets);
+    },
+    [data, clearSecrets, createWallet, history, t, analytics]
+  );
 
   return (
     <WalletSetupMnemonicVerificationStep

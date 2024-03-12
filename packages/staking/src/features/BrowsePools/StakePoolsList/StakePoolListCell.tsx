@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import { StakePoolDetails } from '../../store';
 import { getFormattedStakePoolProp } from '../formatters';
 import { SortField } from '../types';
-import { getSaturationLevel } from './config';
+import { getSaturationLevel } from '../utils';
 import * as styles from './StakePoolListCell.css';
 
 type StakePoolListCellProps = Partial<StakePoolDetails> & {
