@@ -20,7 +20,6 @@ import {
   walletManagerProperties,
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
-import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
 import { ADA_HANDLE_POLICY_ID, HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, NotImplementedError } from '@cardano-sdk/core';
@@ -47,21 +46,15 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
     case Wallet.Cardano.ChainIds.Preview.networkMagic:
       return 'Preview';
     case Wallet.Cardano.ChainIds.Sanchonet.networkMagic:
-      throw new Error('TODO: add sanchonet option');
+      return 'Sanchonet';
     default:
       throw new Error(`Unknown network magic: ${chainId.networkMagic}`);
   }
 };
 
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-  create: async ({ chainId, accountIndex, provider }, wallet, { stores, witnesser }) => {
-    const chainName: Wallet.ChainName =
-      // provider.options are useless now, because they are bound to wallet (not to wallet per network).
-      // When we need to support custom provider URLs, add argument to WalletManager.switchNetwork
-      // and store it in wallet manager's storage for loading custom URL providers
-      provider?.type === (Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER as unknown as string)
-        ? chainIdToChainName(chainId)
-        : config().CHAIN;
+  create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
+    const chainName: Wallet.ChainName = chainIdToChainName(chainId);
     const providers = getProviders(chainName);
     if (wallet.type === WalletType.Script || typeof accountIndex !== 'number') {
       throw new NotImplementedError('Script wallet support is not implemented');

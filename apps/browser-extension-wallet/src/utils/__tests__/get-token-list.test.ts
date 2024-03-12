@@ -5,7 +5,7 @@ import { GetTokenListParams, getTokenList } from '../get-token-list';
 import { mockAsset, mockNft } from '../mocks/test-helpers';
 import { defaultCurrency } from '@providers/currency/constants';
 import { Wallet } from '@lace/cardano';
-import { NftMetadata } from '@cardano-sdk/core/dist/cjs/Asset';
+import { Asset } from '@cardano-sdk/core';
 import { PriceResult } from '@hooks';
 
 const testEnvironment = 'Preprod';
@@ -27,7 +27,7 @@ describe('getTokensList', () => {
         Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c43'),
         {
           ...mockNft,
-          nftMetadata: { name: undefined, image: undefined } as NftMetadata
+          nftMetadata: { name: undefined, image: undefined } as Asset.NftMetadata
         }
       ]
     ]),

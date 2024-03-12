@@ -2,6 +2,7 @@
 import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
+import { Flex, Text } from '@lace/ui';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Balance, CurrencyInfo } from '../../../outside-handles-provider';
@@ -69,22 +70,30 @@ export const StakePoolConfirmationBody = ({
         />
       </div>
       <Icon style={{ color: '#702BED', fontSize: '24px', margin: '12px 0px' }} component={ArrowDown} />
-      {stakePools.map((stakePool) => (
-        <div
-          key={stakePool.id}
-          className={cn(styles.item, styles.itemMulti)}
-          data-testid="sp-confirmation-delegate-to-container"
-        >
-          <ItemStatRenderer
-            img={stakePool.displayData.logo}
-            text={<EllipsizedPoolName stakePool={stakePool} />}
-            subText={<span>{stakePool.displayData.ticker}</span>}
-          />
-          <div className={styles.itemData}>
-            <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />
+      {stakePools.length > 0 ? (
+        stakePools.map((stakePool) => (
+          <div
+            key={stakePool.id}
+            className={cn(styles.item, styles.itemMulti)}
+            data-testid="sp-confirmation-delegate-to-container"
+          >
+            <ItemStatRenderer
+              img={stakePool.displayData.logo}
+              text={<EllipsizedPoolName stakePool={stakePool} />}
+              subText={<span>{stakePool.displayData.ticker}</span>}
+            />
+            <div className={styles.itemData}>
+              <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <Flex justifyContent="center">
+          <Text.Body.Large className={styles.noPoolsText} weight="$semibold">
+            {t('drawer.confirmation.noPools')}
+          </Text.Body.Large>
+        </Flex>
+      )}
     </div>
   );
 };

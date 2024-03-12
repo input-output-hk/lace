@@ -44,7 +44,7 @@ export class PostHogClient {
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
     const token = this.getApiToken(this.chain);
-    if (!token) throw new Error('posthog token has not been provided');
+    if (!token) throw new Error(`posthog token has not been provided for chain: ${this.chain.networkId}`);
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
 
     this.initSuccess = this.userIdService
@@ -150,6 +150,21 @@ export class PostHogClient {
     }
     console.debug('[ANALYTICS] Linking randomized ID with wallet-based ID');
     posthog.alias(alias, id);
+  }
+
+  // $merge_dangerously is needed to ensure merge works on users with merge restrictions
+  // https://posthog.com/docs/product-analytics/identify
+  async sendMergeEvent(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> {
+    const id = await this.userIdService.generateWalletBasedUserId(extendedAccountPublicKey);
+    if (!id) {
+      console.debug('[ANALYTICS] Wallet-based ID not found');
+      return;
+    }
+
+    console.debug('[ANALYTICS] Merging wallet-based ID into current user');
+    posthog.capture('$merge_dangerously', {
+      alias: id
+    });
   }
 
   async sendEvent(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {

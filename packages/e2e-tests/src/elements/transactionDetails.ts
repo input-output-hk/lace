@@ -49,6 +49,11 @@ class ActivityDetailsPage extends CommonDrawerElements {
   get transactionDetailsStakePoolId(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_STAKE_POOL_ID);
   }
+
+  get transactionDetailsStakePoolIds(): Promise<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_STAKE_POOL_ID);
+  }
+
   get transactionDetailsHash(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_HASH);
   }
@@ -157,8 +162,16 @@ class ActivityDetailsPage extends CommonDrawerElements {
     return $(this.TRANSACTION_DETAILS_POOL_NAME);
   }
 
+  get transactionDetailsStakepoolNames(): Promise<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_DETAILS_POOL_NAME);
+  }
+
   get transactionDetailsStakepoolTicker(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_POOL_TICKER);
+  }
+
+  get transactionDetailsStakepoolTickers(): Promise<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_DETAILS_POOL_TICKER);
   }
 
   async getTransactionSentTokensForBundle(index = 0): Promise<string[]> {
@@ -182,6 +195,27 @@ class ActivityDetailsPage extends CommonDrawerElements {
 
   async clickOutputsDropdown(): Promise<void> {
     await this.transactionDetailsOutputsDropdown.click();
+  }
+
+  async getTextValues(array: WebdriverIO.ElementArray): Promise<string[]> {
+    const values: string[] = [];
+    for (const pool of array) {
+      values.push(await pool.getText());
+    }
+    return values;
+  }
+
+  async getTransactionDetailsStakepoolNames(): Promise<string[]> {
+    return await this.getTextValues(await this.transactionDetailsStakepoolNames);
+  }
+
+  async getTransactionDetailsStakepoolTickers(): Promise<string[]> {
+    const tickers = await this.getTextValues(await this.transactionDetailsStakepoolTickers);
+    return tickers.map((s) => s.slice(1, -1));
+  }
+
+  async getTransactionDetailsStakepoolIds(): Promise<string[]> {
+    return await this.getTextValues(await this.transactionDetailsStakePoolIds);
   }
 }
 

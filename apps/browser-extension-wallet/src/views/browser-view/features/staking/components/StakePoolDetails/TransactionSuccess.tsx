@@ -41,7 +41,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
         description={
           isRestaking
             ? t('browserView.staking.details.switchedPools.subTitle')
-            : t('browserView.staking.details.success.title')
+            : t('browserView.staking.details.success.subTitle')
         }
       />
     </div>

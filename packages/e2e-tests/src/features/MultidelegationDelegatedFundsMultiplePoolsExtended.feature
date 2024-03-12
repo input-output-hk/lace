@@ -98,8 +98,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     Then all pools details are expanded
     When I remove "9" pools from delegation portfolio
     Then I see selected pools counter is showing "1"
-    And I see "Remove pool from portfolio" button is disabled for pool "1"
-    And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
+    And I see "Remove pool from portfolio" button is enabled for pool "1"
 
   @LW-9476
   Scenario: Extended View - Staking - Manage staking expanding and hiding all pools details
@@ -123,6 +122,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
   Scenario Outline: Extended View - button <button> click on stake pool details drawer
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I input "<pool>" into stake pool search bar
     And I click on the stake pool with ticker "<pool>"
     Then I see "<numberOfButtons>" stake pool details buttons for <delegation> pool

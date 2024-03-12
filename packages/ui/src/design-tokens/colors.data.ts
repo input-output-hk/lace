@@ -275,6 +275,15 @@ export const colors = {
   $action_card_container_borderColor: '',
   $action_card_icon_container_bgColor: '',
   $action_card_icon_container_borderColor: '',
+
+  $auto_suggest_container_background_color: '',
+  $auto_suggest_border_color: '',
+  $auto_suggest_loader_color: '',
+  $auto_suggest_check_color: '',
+  $auto_suggest_address_color: '',
+  $auto_suggest_initial_bgColor: '',
+  $auto_suggest_initial_color: '',
+
   $stake_pool_header_text_color: '',
   $stake_pool_item_bg_hover: '',
   $stake_pool_item_text_color: '',

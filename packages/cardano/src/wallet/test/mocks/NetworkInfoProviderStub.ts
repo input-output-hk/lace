@@ -2,7 +2,6 @@
 /* eslint-disable max-len */
 import { Cardano, NetworkInfoProvider, Seconds, EraSummary } from '@cardano-sdk/core';
 import { testnetEraSummaries } from '@cardano-sdk/util-dev';
-import { ProtocolParameters } from '@cardano-sdk/core/dist/cjs/Cardano';
 
 export const mockedNetworkInfo: {
   network: {
@@ -49,7 +48,7 @@ const mockCurrentProtocolParameters = {
   poolDeposit: 500_000_000,
   protocolVersion: { major: 5, minor: 0 },
   stakeKeyDeposit: 2_000_000
-} as ProtocolParameters;
+} as Cardano.ProtocolParameters;
 
 const mockGenesisParameters: Cardano.CompactGenesis = {
   activeSlotsCoefficient: 0.05,

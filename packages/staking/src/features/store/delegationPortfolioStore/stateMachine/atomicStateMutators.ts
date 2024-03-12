@@ -58,7 +58,6 @@ export const atomicStateMutators = {
   }),
   removePoolFromPreferences: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
-    if (state.draftPortfolio.length === 1) return {};
     return {
       draftPortfolio: state.draftPortfolio.filter((pool) => pool.id !== id),
     } as const;

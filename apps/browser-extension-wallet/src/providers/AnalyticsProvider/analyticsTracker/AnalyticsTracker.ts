@@ -81,6 +81,14 @@ export class AnalyticsTracker implements IAnalyticsTracker {
     await this.postHogClient?.sendAliasEvent();
   }
 
+  async sendMergeEvent(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> {
+    const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
+    if (shouldOmitEvent) return;
+    await this.userIdService?.extendLifespan();
+    await this.checkNewSessionStarted();
+    await this.postHogClient?.sendMergeEvent(extendedAccountPublicKey);
+  }
+
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const isEventExcluded = this.isEventExcluded(action);
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();

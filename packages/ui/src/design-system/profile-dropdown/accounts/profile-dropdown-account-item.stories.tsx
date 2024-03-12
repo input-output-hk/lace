@@ -36,6 +36,7 @@ export const Overview = (): JSX.Element => (
                   <AccountItem
                     label="Account #1"
                     unlockLabel="Unlock"
+                    isDeletable={true}
                     accountNumber={1}
                     isUnlocked={false}
                   />
@@ -46,6 +47,7 @@ export const Overview = (): JSX.Element => (
                   <AccountItem
                     label="Account #2"
                     unlockLabel="Unlock"
+                    isDeletable={false}
                     accountNumber={2}
                     isUnlocked
                   />

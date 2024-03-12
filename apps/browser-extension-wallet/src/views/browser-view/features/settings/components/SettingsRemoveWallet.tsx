@@ -35,7 +35,9 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
   const removeWallet = async () => {
     analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick);
     setDeletingWallet(true);
-    await deleteWallet();
+    const nextActiveWallet = await deleteWallet();
+    setDeletingWallet(false);
+    if (nextActiveWallet) return;
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
     // force reload to ensure all stores are cleaned up
     location.reload();

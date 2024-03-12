@@ -1,12 +1,14 @@
 import testContext from './testContext';
 import { StakePool, StakePoolsData } from '../data/expectedStakePoolsData';
+import { PoolData } from '../assert/transactionDetailsAssert';
 
 const stakePoolsWithMetadata = [StakePoolsData.adaocean, StakePoolsData.canadaStakes];
 const stakePoolsWithoutMetadata = [StakePoolsData.noMetadataPool1, StakePoolsData.noMetadataPool2];
 
 const isStakePoolInUse = async (stakePoolID: string): Promise<boolean> => {
-  const stakePoolIDsInUse = (await testContext.load('stakePoolsInUse')) as unknown[];
-  return stakePoolIDsInUse.includes(stakePoolID);
+  const stakePoolIDsInUse: PoolData[] = testContext.load('stakePoolsInUse');
+  const ids = stakePoolIDsInUse.map((s) => s.poolId);
+  return ids.includes(stakePoolID);
 };
 
 const getPoolFieldValue = async (stakePools: StakePool[], field: 'id' | 'name' | 'ticker') => {

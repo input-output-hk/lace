@@ -85,14 +85,36 @@ Given(
   async (walletType: 'single' | 'HD', nftName: string, mode: 'extended' | 'popup') => {
     const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
     if (!isNftDisplayed) {
-      const walletToLoad =
-        walletType === 'HD'
-          ? await nftsPageObject.getNonActiveNftHdWalletName()
-          : await nftsPageObject.getNonActiveNftWalletName();
+      let walletToLoad;
+      if (walletType === 'HD') {
+        walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
+      } else {
+        walletToLoad =
+          mode === 'extended'
+            ? await nftsPageObject.getNonActiveNftWalletName()
+            : await nftsPageObject.getNonActiveNft2WalletName();
+      }
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await mainMenuPageObject.navigateToSection('NFTs', mode);
       expect(await nftsPageObject.isNftDisplayed(nftName)).to.be.true;
+    }
+  }
+);
+
+Given(
+  /^I use a wallet with ADA handle "([^"]*)" NFT in (popup|extended) mode$/,
+  async (adahandle: string, mode: 'extended' | 'popup') => {
+    const isAdaHandle = await nftsPageObject.isNftDisplayed(adahandle);
+    if (!isAdaHandle) {
+      const walletToLoad =
+        mode === 'extended'
+          ? await nftsPageObject.getNonActiveAdaHandleWalletName()
+          : await nftsPageObject.getNonActiveAdaHandle2WalletName();
+      await localStorageInitializer.reInitializeWallet(walletToLoad);
+      await topNavigationAssert.assertWalletIsInSyncedStatus();
+      await mainMenuPageObject.navigateToSection('NFTs', mode);
+      expect(await nftsPageObject.isNftDisplayed(adahandle)).to.be.true;
     }
   }
 );
@@ -112,8 +134,11 @@ Then(/^each NFT has name and image displayed$/, async () => {
   await nftAssert.assertSeeEachNftItemOnNftsPage();
 });
 
-When(/^I open NFT receiving wallet$/, async () => {
-  const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
+When(/^I open NFT receiving wallet in (popup|extended) mode$/, async (mode: 'extended' | 'popup') => {
+  const walletToLoad =
+    mode === 'extended'
+      ? await nftsPageObject.getNonActiveNftWalletName()
+      : await nftsPageObject.getNonActiveNft2WalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 

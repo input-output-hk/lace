@@ -23,7 +23,38 @@
           "incoming": "Received",
           "outgoing": "Sent",
           "sending": "Sending",
-          "self": "Self Transaction"
+          "self": "Self Transaction",
+          "vote": "Vote Signing",
+          "HardForkInitiationAction": "Hard Fork Initiation Action",
+          "NewConstitution": "New Constitution Action",
+          "NoConfidence": "No Confidence Action",
+          "ParameterChangeAction": "Parameter Change Action",
+          "TreasuryWithdrawalsAction": "Treasury Withdrawals Action",
+          "UpdateCommittee": "Update Committee Action",
+          "InfoAction": "Info Action",
+          "UpdateDelegateRepresentativeCertificate": "Update DRep",
+          "StakeVoteDelegationCertificate": "Stake Vote Delegation Certificate",
+          "StakeRegistrationDelegationCertificate": "Stake Registration Delegation Certificate",
+          "VoteRegistrationDelegationCertificate": "Vote Registration Delegation Certificate",
+          "StakeVoteRegistrationDelegationCertificate": "Stake Vote Registration Delegation Certificate",
+          "ResignCommitteeColdCertificate": "Resign Committee",
+          "AuthorizeCommitteeHotCertificate": "Authorize Committee",
+          "RegisterDelegateRepresentativeCertificate": "DRep Registration",
+          "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
+          "VoteDelegationCertificate": "Vote Delegation",
+          "StakeRegistrationDelegateCertificate": "Stake Registration Delegation Certificate",
+          "StakeVoteRegistrationDelegateCertificate": "Stake Vote Registration Delegation Certificate",
+          "VoteRegistrationDelegateCertificate": "Vote Registration Delegation Certificate"
+        },
+        "certificates": {
+          "headings": {
+            "typename": "Certificate Type",
+            "anchor": "Anchor",
+            "drep": "DRep",
+            "deposit": "Deposit paid",
+            "coldCredential": "Cold credential",
+            "hotCredential": "Hot credential"
+          }
         }
       }
     },
@@ -32,7 +63,7 @@
       "sent": "Sent",
       "sending": "Sending",
       "header": "Summary of your activity",
-      "transactionHash": "Transaction Hash",
+      "transactionID": "Transaction ID",
       "status": "Status",
       "timestamp": "Timestamp",
       "inputs": "Inputs",
@@ -135,7 +166,7 @@
       "mainnet": "Mainnet",
       "preprod": "Preprod",
       "preview": "Preview",
-      "legacyTestnet": "Legacy Testnet",
+      "sanchonet": "Sanchonet",
       "custom": "Custom",
       "offline": "Offline",
       "error": "Your internet connection is not working. You can still navigate the wallet based on the latest connection you had.",
@@ -330,7 +361,7 @@
     "copyHandle": "Copy handle"
   },
   "dapp": {
-    "nowallet.btn": "Create or restore a wallet",
+    "dappErrorPage.closeButton": "Cancel",
     "connect.header": "Authorize DApp",
     "connect.btn.accept": "Authorize",
     "connect.btn.cancel": "Cancel",
@@ -369,6 +400,7 @@
     "delete.confirm": "Disconnect DApp",
     "noWallet.heading": "You don't have a wallet right now",
     "noWallet.description": "You'll need to create or restore a wallet to connect to a dApp or make a transaction.",
+    "noWallet.closeButton": "Create or restore a wallet",
     "educationBanner.title": "DApp Guide",
     "betaModal": {
       "header": "DApp connector is now in Beta",
@@ -792,7 +824,8 @@
         "accounts": {
           "title": "Accounts",
           "description": "Select account to activate.",
-          "unlockLabel": "Enable"
+          "unlockLabel": "Enable",
+          "lockLabel": "Disable"
         },
         "general": {
           "title": "Your keys",
@@ -1090,9 +1123,9 @@
           "title": "Cost",
           "tooltip": "The cost is not directly paid by the delegator; they are deducted from a pool's rewards, consisting of a fixed cost and a variable cost, which fund the pool's operational costs"
         },
-        "ros": {
+        "apy": {
           "title": "ROS",
-          "tooltip": "Estimated 'Return On Stake' based on previous pool performance"
+          "tooltip": "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation."
         },
         "saturation": {
           "title": "Saturation",
@@ -1187,6 +1220,306 @@
       "signedSuccessfully": "The transaction was signed successfully.",
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
+    },
+    "ProposalProcedures": {
+      "title": "Confirm Governance Action"
+    },
+    "ProposalProcedure": {
+      "dRepId": "DRep ID",
+      "txDetails": {
+        "deposit": "Deposit",
+        "rewardAccount": "Reward Account",
+        "title": "Transaction Details",
+        "txType": "Transaction Type"
+      },
+      "procedure": {
+        "anchor": {
+          "hash": "Anchor Hash",
+          "url": "Anchor URL"
+        },
+        "title": "Procedure",
+        "dRepId": "DRep ID"
+      },
+      "governanceAction": {
+        "actionId": {
+          "title": "Action ID",
+          "index": "Index",
+          "txId": "TX ID"
+        },
+        "hardForkInitiation": {
+          "title": "Hard Fork Initiation",
+          "protocolVersion": {
+            "major": "Protocol Version Major",
+            "minor": "Protocol Version Minor",
+            "patch": "Protocol Version Patch"
+          }
+        },
+        "newConstitutionAction": {
+          "title": "New Constitution Action",
+          "constitution": {
+            "title": "Constitution Details",
+            "anchor": {
+              "dataHash": "Anchor Data Hash",
+              "url": "Constitution Anchor URL"
+            },
+            "scriptHash": "Constitution Script Hash"
+          }
+        },
+        "infoAction": {
+          "title": "Info Action"
+        },
+        "noConfidenceAction": {
+          "title": "No Confidence"
+        },
+        "protocolParamUpdate": {
+          "title": "Protocol Parameter Update",
+          "memory": "Memory",
+          "step": "Step",
+          "networkGroup": {
+            "title": "Network Group",
+            "maxBBSize": "Max BB Size",
+            "maxTxSize": "Max Tx Size",
+            "maxBHSize": "Max BH Size",
+            "maxValSize": "Max Val Size",
+            "maxTxExUnits": "Max TX Ex Units",
+            "maxBlockExUnits": "Max BLK Ex Units",
+            "maxCollateralInputs": "Max Coll Inputs",
+            "tooltip": {
+              "maxBBSize": "Max block body size",
+              "maxTxSize": "Max transaction size",
+              "maxBHSize": "Max block header size",
+              "maxValSize": "Max size of a serialized asset value",
+              "maxTxExUnits": "Max script execution units in a single transaction",
+              "maxBlockExUnits": "Max script execution units in a single block",
+              "maxCollateralInputs": "Max number of collateral inputs"
+            }
+          },
+          "economicGroup": {
+            "title": "Economic Group",
+            "minFeeA": "Min Fee A",
+            "minFeeB": "Min Fee B",
+            "keyDeposit": "Key Deposit",
+            "poolDeposit": "Pool Deposit",
+            "rho": "Rho",
+            "tau": "Tau",
+            "minPoolCost": "Min Pool Cost",
+            "coinsPerUTxOByte": "Coins/UTxO Byte",
+            "prices": "Price",
+            "tooltip": {
+              "minFeeA": "Min fee coefficient",
+              "minFeeB": "Min fee constant",
+              "keyDeposit": "Delegation key Lovelace deposit",
+              "poolDeposit": "Pool registration Lovelace deposit",
+              "rho": "Monetary expansion",
+              "tau": "Treasury expansion",
+              "minPoolCost": "Min fixed rewards cut for pools",
+              "coinsPerUTxOByte": "Min Lovelace deposit per byte of serialized UTxO",
+              "prices": "Prices of Plutus execution units"
+            }
+          },
+          "technicalGroup": {
+            "title": "Technical Group",
+            "a0": "A0",
+            "eMax": "EMax",
+            "nOpt": "NOpt",
+            "costModels": "Cost Models",
+            "PlutusV1": "PlutusV1",
+            "PlutusV2": "PlutusV2",
+            "collateralPercentage": "Coll Percentage",
+            "tooltip": {
+              "a0": "Pool pledge influence",
+              "eMax": "Pool retirement maximum epoch",
+              "nOpt": "Desired number of pools",
+              "costModels": "Plutus execution cost models",
+              "collateralPercentage": "Proportion of collateral needed for scripts"
+            }
+          },
+          "governanceGroup": {
+            "title": "Governance Group",
+            "govActionLifetime": "Gov Act Lifetime",
+            "govActionDeposit": "Gov Act Deposit",
+            "drepDeposit": "DRep Deposit",
+            "drepActivity": "DRep Activity",
+            "ccMinSize": "CC Min Size",
+            "ccMaxTermLength": "CC Max Term Length",
+            "dRepVotingThresholds": {
+              "title": "Governance Voting Thresholds",
+              "motionNoConfidence": "Motion No Conf",
+              "committeeNormal": "Comm Normal",
+              "committeeNoConfidence": "Comm No Conf",
+              "updateConstitution": "Update Const",
+              "hardForkInitiation": "Hard Fork Init",
+              "ppNetworkGroup": "PP Network Grp",
+              "ppEconomicGroup": "PP Economic Grp",
+              "ppTechnicalGroup": "PP Technical Grp",
+              "ppGovernanceGroup": "PP Governance Grp",
+              "treasuryWithdrawal": "Treasury Withdraw"
+            },
+            "tooltip": {
+              "govActionLifetime": "governance action maximum lifetime in epochs",
+              "govActionDeposit": "governance action deposit",
+              "drepDeposit": "DRep deposit amount",
+              "drepActivity": "DRep activity period in epochs",
+              "ccMinSize": "Min constitutional committee size",
+              "ccMaxTermLength": "Max term length (in epochs) for the constitutional committee members",
+              "dRepVotingThresholds": {
+                "title": "Governance voting thresholds",
+                "motionNoConfidence": "1. Motion of no-confidence",
+                "committeeNormal": "2a. New committee/threshold (normal state)",
+                "committeeNoConfidence": "2b. New committee/threshold (state of no-confidence)",
+                "updateConstitution": "3. Update to the Constitution or proposal policy",
+                "hardForkInitiation": "4. Hard-fork initiation",
+                "ppNetworkGroup": "5a. Protocol parameter changes, network group",
+                "ppEconomicGroup": "5b. Protocol parameter changes, economic group",
+                "ppTechnicalGroup": "5c. Protocol parameter changes, technical group",
+                "ppGovernanceGroup": "5d. Protocol parameter changes, governance group",
+                "treasuryWithdrawal": "6. Treasury withdrawal"
+              }
+            }
+          }
+        },
+        "treasuryWithdrawals": {
+          "title": "Treasury Withdrawals",
+          "withdrawals": {
+            "lovelace": "Withdrawal Amount",
+            "rewardAccount": "Withdrawal Reward Account"
+          }
+        },
+        "updateCommitteeAction": {
+          "title": "Update Committee Action",
+          "membersToBeAdded": {
+            "title": "Members To Be Added",
+            "coldCredential": {
+              "hash": "Cold Credential Hash",
+              "epoch": "Epoch"
+            }
+          },
+          "membersToBeRemoved": {
+            "title": "Members To Be Removed",
+            "hash": "Hash"
+          },
+          "newQuorumThreshold": {
+            "title": "New Quorum Threshold",
+            "denominator": "Denominator",
+            "numerator": "Numerator"
+          }
+        }
+      }
+    },
+    "VotingProcedures": {
+      "title": "Confirm Vote",
+      "voterType": "Voter Type",
+      "procedureTitle": "Procedure",
+      "actionIdTitle": "Action ID",
+      "vote": "Vote",
+      "actionId": {
+        "index": "Index",
+        "txHash": "TX Hash"
+      },
+      "anchor": {
+        "hash": "Anchor Hash",
+        "url": "Anchor URL"
+      },
+      "dRepId": "DRep ID",
+      "voterTypes": {
+        "constitutionalCommittee": "Constitutional Committee",
+        "spo": "SPO",
+        "drep": "DRep"
+      },
+      "votes": {
+        "yes": "Yes",
+        "no": "No",
+        "abstain": "Abstain"
+      },
+      "NonRegisteredUserModal": {
+        "title": "You're not a registered DRep",
+        "description": "Proceeding with this vote won't have any impact. Do you still want to proceed?",
+        "cta": {
+          "ok": "Proceed anyway",
+          "cancel": "Cancel"
+        }
+      }
+    },
+    "DRepRegistration": {
+      "title": "Confirm DRep Registration",
+      "metadata": "Metadata",
+      "url": "URL",
+      "hash": "Hash",
+      "drepId": "DRep ID",
+      "depositPaid": "Deposit paid"
+    },
+    "DRepRetirement": {
+      "title": "Confirm DRep Retirement",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "depositReturned": "Deposit returned",
+      "drepIdMismatchScreen": {
+        "title": "DRep ID mismatch",
+        "description": "The presented DRepID does not match your wallet's DRepID",
+        "cancel": "Cancel"
+      }
+    },
+    "DRepUpdate": {
+      "title": "Confirm DRep Update",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "url": "URL",
+      "hash": "Hash"
+    },
+    "VoteDelegation": {
+      "title": "Confirm Vote Delegation",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes"
+    },
+    "StakeVoteDelegation": {
+      "title": "Confirm Staking & Vote Delegation",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes",
+      "stakeKeyHash": "Stake Key Hash",
+      "poolId": "Pool ID"
+    },
+    "StakeVoteDelegationRegistration": {
+      "title": "Confirm Vote Delegation & Staking",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes",
+      "stakeKeyHash": "Stake Key Hash",
+      "poolId": "Pool ID",
+      "depositPaid": "Deposit paid"
+    },
+    "StakeRegistrationDelegation": {
+      "title": "Confirm Staking",
+      "metadata": "Metadata",
+      "stakeKeyHash": "Stake Key Hash",
+      "poolId": "Pool ID",
+      "depositPaid": "Deposit paid"
+    },
+    "VoteRegistrationDelegation": {
+      "title": "Confirm Vote Delegation",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes",
+      "stakeKeyHash": "Stake Key Hash",
+      "depositPaid": "Deposit paid"
+    },
+    "Mint": {
+      "title": "Confirm transaction"
+    },
+    "Burn": {
+      "title": "Confirm transaction"
+    },
+    "Send": {
+      "title": "Confirm transaction"
     },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
@@ -1407,6 +1740,12 @@
       "description": "You'll have to start over.",
       "cancel": "Go back",
       "confirm": "Proceed"
-    }
+    },
+    "activated": {
+      "wallet": "Wallet \"{{walletName}}\" activated",
+      "account": "Account \"{{accountName}}\" activated"
+    },
+    "popupHwAccountEnable": "Hardware wallets require the <0>expanded view</0> to enable accounts",
+    "walletAlreadyExists": "Wallet already exists"
   }
 }

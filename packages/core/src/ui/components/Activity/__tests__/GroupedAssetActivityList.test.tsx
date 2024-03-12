@@ -4,9 +4,10 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { GroupedAssetActivityList, GroupedAssetActivityListProps } from '../GroupedAssetActivityList';
 import { AssetActivityItemProps } from '../AssetActivityItem';
+import { TransactionActivityType } from '../../ActivityDetail';
 
 const activityItem: AssetActivityItemProps = {
-  type: 'outgoing',
+  type: TransactionActivityType.outgoing,
   amount: '100 ADA',
   fiatAmount: '300 $',
   formattedTimestamp: 'FormattedTimestamp',

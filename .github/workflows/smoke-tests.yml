@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  TAGS: '@Smoke and @Testnet and not @Pending'
+  TAGS: '@Smoke and @Testnet'
   BROWSER: 'chrome'
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
@@ -40,15 +40,10 @@ jobs:
         if: always()
         working-directory: ./packages/e2e-tests/reports/allure/results
         run: |
-          pendingCount=`grep -r "@Pending" ../../../src/features | grep "@Smoke" | wc -l | xargs`
-          pending=`grep -r -h "@Pending" ../../../src/features -A 2 | grep "@Smoke" -A 2 |  grep -v -- "^--$" | sed "s/@Pending//g" | awk '{$1=$1};1' | sed "/^@/s/ /./g;/^#/s/ /./g" | xargs | sed "s/@[^ ]*/\n&/g" | sed "s/ /./"`
           echo "
           browser=${BROWSER}
           tags=${TAGS}
           platform=Linux
-          Pending.and.Smoke.Count=${pendingCount}
-          @Pending.and.Smoke.Scenarios=
-          ${pending}
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.4.0

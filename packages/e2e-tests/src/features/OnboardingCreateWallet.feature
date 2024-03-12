@@ -400,7 +400,7 @@ Feature: Onboarding - Create wallet
       | light |
 
   @LW-8500 @Pending
-  # Bug: LW-8890
+  @issue=LW-8890
   Scenario: Create Wallet - Mnemonic verification - incorrect word
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic verification" page with words 8 of 24

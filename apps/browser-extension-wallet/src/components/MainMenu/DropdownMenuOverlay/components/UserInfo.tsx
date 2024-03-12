@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
 import { Menu, Tooltip as AntdTooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { toast, addEllipsis } from '@lace/common';
+import { toast, addEllipsis, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
-import { useGetHandles } from '@hooks';
+import { useGetHandles, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@lace/ui';
-import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
+import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, WalletType } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
+import { Separator } from './Separator';
+import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -27,24 +30,98 @@ const overlayInnerStyle = {
 
 interface UserInfoProps {
   avatarVisible?: boolean;
-  onOpenWalletAccounts?: (walletAddress: string) => void;
+  onOpenWalletAccounts?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
 }
+
+const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [];
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { walletInfo } = useWalletStore();
+  const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
+  const { activateWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
+  const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
-  const walletName = addEllipsis(walletInfo.name.toString(), WALLET_NAME_MAX_LENGTH, 0);
+  const fullWalletName = cardanoWallet.source.wallet.metadata.name;
+  const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const handleName = handle?.nftMetadata?.name;
-  const handleImage = handle?.profilePic;
 
   const handleOnAddressCopy = () => {
     toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
     analytics.sendEventToPostHog(PostHogAction.UserWalletProfileWalletAddressClick);
   };
+
+  const getLastActiveAccount = useCallback(
+    (
+      wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+    ): Bip32WalletAccount<Wallet.AccountMetadata> => {
+      if (wallet.accounts.length === 1) return wallet.accounts[0];
+      if (wallet.walletId === cardanoWallet?.source.wallet.walletId) {
+        const currentlyActiveAccount = wallet.accounts.find(
+          ({ accountIndex }) => accountIndex === cardanoWallet.source.account?.accountIndex
+        );
+        if (currentlyActiveAccount) return currentlyActiveAccount;
+      }
+      if (typeof wallet.metadata.lastActiveAccountIndex !== 'undefined') {
+        const lastActiveAccount = wallet.accounts.find(
+          ({ accountIndex }) => accountIndex === wallet.metadata.lastActiveAccountIndex
+        );
+        if (lastActiveAccount) return lastActiveAccount;
+      }
+      // If last active account is deleted, fall back to any (1st) account
+      return wallet.accounts[0];
+    },
+    [cardanoWallet]
+  );
+
+  const renderBip32Wallet = useCallback(
+    (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
+      const lastActiveAccount = getLastActiveAccount(wallet);
+      return (
+        <ProfileDropdown.WalletOption
+          key={wallet.walletId}
+          title={wallet.metadata.name}
+          subtitle={lastActiveAccount.metadata.name}
+          id={`wallet-option-${wallet.walletId}`}
+          onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
+          onClick={async () => {
+            await activateWallet({
+              walletId: wallet.walletId,
+              accountIndex: lastActiveAccount.accountIndex
+            });
+            setIsDropdownMenuOpen(false);
+            toast.notify({
+              duration: TOAST_DEFAULT_DURATION,
+              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
+            });
+          }}
+          type={getUiWalletType(wallet.type)}
+        />
+      );
+    },
+    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, t]
+  );
+
+  const renderWallet = useCallback(
+    (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>, isLast: boolean) => (
+      <div key={wallet.walletId}>
+        {wallet.type !== WalletType.Script
+          ? renderBip32Wallet(wallet)
+          : (() => {
+              throw new Error('Script wallets are not implemented');
+            })()}
+        {wallet.walletId === cardanoWallet?.source.wallet.walletId ? (
+          <div className={styles.walletStatusInfo}>
+            <WalletStatusContainer />
+          </div>
+        ) : undefined}
+        {isLast ? undefined : <Separator />}
+      </div>
+    ),
+    [renderBip32Wallet, cardanoWallet?.source.wallet.walletId]
+  );
 
   return (
     <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
@@ -54,24 +131,10 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           [styles.multiWalletWrapper]: process.env.USE_MULTI_WALLET === 'true'
         })}
       >
-        <CopyToClipboard text={handleName || walletAddress}>
-          {process.env.USE_MULTI_WALLET === 'true' ? (
-            <ProfileDropdown.WalletOption
-              title={walletInfo.name}
-              subtitle="Account #0"
-              id={walletName}
-              profile={
-                handleImage
-                  ? {
-                      fallback: walletInfo.name,
-                      imageSrc: getAssetImageUrl(handleImage)
-                    }
-                  : undefined
-              }
-              onOpenAccountsMenu={() => onOpenWalletAccounts(walletAddress)}
-              type={process.env.USE_SHARED_WALLET === 'true' ? 'shared' : 'cold'}
-            />
-          ) : (
+        {process.env.USE_MULTI_WALLET === 'true' ? (
+          <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
+        ) : (
+          <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip
               overlayInnerStyle={overlayInnerStyle}
               placement="top"
@@ -82,10 +145,10 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
               }
             >
               <div className={styles.userInfo} onClick={handleOnAddressCopy}>
-                {avatarVisible && <UserAvatar walletName={walletName} />}
+                {avatarVisible && <UserAvatar walletName={activeWalletName} />}
                 <div className={styles.userMeta} data-testid="header-menu-user-details">
                   <p className={styles.walletName} data-testid="header-menu-wallet-name">
-                    {walletName}
+                    {activeWalletName}
                   </p>
                   <p className={styles.walletAddress} data-testid="header-menu-wallet-address">
                     {handleName || shortenedWalletAddress}
@@ -93,11 +156,13 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 </div>
               </div>
             </AntdTooltip>
-          )}
-        </CopyToClipboard>
-        <div className={styles.walletStatusInfo}>
-          <WalletStatusContainer />
-        </div>
+          </CopyToClipboard>
+        )}
+        {process.env.USE_MULTI_WALLET === 'true' ? undefined : (
+          <div className={styles.walletStatusInfo}>
+            <WalletStatusContainer />
+          </div>
+        )}
       </div>
     </Menu.ItemGroup>
   );

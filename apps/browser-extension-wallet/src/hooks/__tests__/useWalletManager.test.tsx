@@ -15,11 +15,14 @@ const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
+const mockLedgerGetXpub = jest.fn();
+const mockTrezorGetXpub = jest.fn();
+const mockInitializeTrezorTransport = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { LOCK_VALUE, useWalletManager } from '../useWalletManager';
+import { LOCK_VALUE, UseWalletManager, useWalletManager } from '../useWalletManager';
 import {
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
@@ -32,8 +35,10 @@ import * as localStorage from '@src/utils/local-storage';
 import * as AppSettings from '@providers/AppSettings';
 import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
-import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
+
+(walletApiUi as any).logger = console;
 
 jest.mock('@providers/AppSettings', () => ({
   ...jest.requireActual<any>('@providers/AppSettings'),
@@ -60,7 +65,14 @@ jest.mock('@lace/cardano', () => {
       ...actual.Wallet,
       Ledger: {
         LedgerKeyAgent: {
-          createWithDevice: mockLedgerCreateWithDevice
+          createWithDevice: mockLedgerCreateWithDevice,
+          getXpub: mockLedgerGetXpub
+        }
+      },
+      Trezor: {
+        TrezorKeyAgent: {
+          getXpub: mockTrezorGetXpub,
+          initializeTrezorTransport: mockInitializeTrezorTransport
         }
       },
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
@@ -95,6 +107,11 @@ const getWrapper =
         </DatabaseProvider>
       </AppSettingsProvider>
     );
+
+const render = () =>
+  renderHook(() => useWalletManager(), {
+    wrapper: getWrapper({})
+  }).result.current;
 
 describe('Testing useWalletManager hook', () => {
   beforeEach(() => {
@@ -363,19 +380,19 @@ describe('Testing useWalletManager hook', () => {
   describe('createHardwareWallet', () => {
     test('should use cardano manager to create wallet', async () => {
       const walletId = 'walletId';
-      mockLedgerCreateWithDevice.mockResolvedValue({
-        extendedAccountPublicKey: 'pubkey'
-      });
+      mockLedgerGetXpub.mockResolvedValue('pubkey');
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletRepository as any).addAccount = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
 
       const accountIndex = 1;
       const name = 'name';
-      const chainId = {
-        networkId: 0,
-        networkMagic: 0
-      };
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        currentChain: {
+          networkId: 0,
+          networkMagic: 0
+        }
+      }));
       const connectedDevice = 'Ledger' as any;
       const deviceConnection = 'deviceConnection' as any;
 
@@ -390,7 +407,6 @@ describe('Testing useWalletManager hook', () => {
         deviceConnection,
         accountIndex,
         name,
-        chainId,
         connectedDevice
       });
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
@@ -478,6 +494,11 @@ describe('Testing useWalletManager hook', () => {
 
   describe('deleteWallet', () => {
     const walletId = 'walletId';
+    let clearBackgroundStorage: jest.Mock;
+    let clearLocalStorage: jest.Mock;
+    let resetWalletLock: jest.Mock;
+    let setCardanoWallet: jest.Mock;
+    let deleteWallet: UseWalletManager['deleteWallet'];
 
     beforeEach(() => {
       (walletApiUi.walletManager as any).activeWalletId$ = of({ walletId });
@@ -491,21 +512,17 @@ describe('Testing useWalletManager hook', () => {
         setCardanoCoin: jest.fn(),
         setAddressesDiscoveryCompleted: () => {}
       }));
-    });
-
-    test('should shutdown wallet, delete data from the LS, indexed DB and background storage, reset lock and current chain ', async () => {
-      const clearBackgroundStorage = jest.fn();
-      const clearLocalStorage = jest.fn();
+      clearBackgroundStorage = jest.fn();
+      clearLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'clearLocalStorage').mockImplementation(clearLocalStorage);
 
-      const resetWalletLock = jest.fn();
-      const setCardanoWallet = jest.fn();
+      resetWalletLock = jest.fn();
+      setCardanoWallet = jest.fn();
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         resetWalletLock,
         setCardanoWallet
       }));
-
-      const {
+      ({
         result: {
           current: { deleteWallet }
         }
@@ -515,8 +532,12 @@ describe('Testing useWalletManager hook', () => {
             clearBackgroundStorage
           } as unknown as BackgroundServiceAPIProviderProps['value']
         })
-      });
-      expect(deleteWallet).toBeDefined();
+      }));
+    });
+
+    test('should shutdown wallet, delete data from the LS, indexed DB and background storage, reset lock and current chain ', async () => {
+      (walletApiUi.walletRepository as any).wallets$ = of([]);
+
       await deleteWallet();
       expect(walletApiUi.walletManager.deactivate).toBeCalledTimes(1);
       expect(walletApiUi.walletManager.destroyData).toBeCalled();
@@ -537,6 +558,24 @@ describe('Testing useWalletManager hook', () => {
       });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
+    });
+
+    test('should activate another wallet if exists after deletion', async () => {
+      const remainingWallet = {
+        type: WalletType.InMemory,
+        walletId: 'remaining-wallet-id',
+        accounts: [{ accountIndex: 1 }]
+      };
+      (walletApiUi.walletRepository as any).wallets$ = of([remainingWallet]);
+
+      await deleteWallet();
+
+      expect(walletApiUi.walletManager.activate).toBeCalledWith(
+        expect.objectContaining({
+          walletId: remainingWallet.walletId,
+          accountIndex: remainingWallet.accounts[0].accountIndex
+        })
+      );
     });
   });
 
@@ -630,6 +669,121 @@ describe('Testing useWalletManager hook', () => {
 
       await switchNetwork('Preprod');
       expect(setAddressesDiscoveryCompleted).toBeCalledWith(false);
+    });
+  });
+
+  describe('addAccount', () => {
+    describe('for existing bip32 wallet', () => {
+      const extendedAccountPublicKey =
+        '12b608b67a743891656d6463f72aa6e5f0e62ba6dc47e32edfebafab1acf0fa9f3033c2daefa3cb2ac16916b08c7e7424d4e1aafae2206d23c4d002299c07128';
+      const walletTypes = [
+        {
+          type: WalletType.InMemory,
+          walletProps: {
+            encryptedSecrets: {
+              rootPrivateKeyBytes:
+                '8403cf9d8267a7169381dd476f4fda48e1926fec8942ec51892e428e152fbed4835711cccb7efcae379627f477abb46c883f6b0c221f3aea40f9d931d2e8fdc69f85f16eb91ca380fc2e1edc2543e4dd71c1866208ea6c6960bca99f974e25776067e9a242b0e4066b96bd4d89ca99db5bd77bb65573b9cbeef85222ceed6d5a4dc516213ace986f03b183365505119b9a0abdc4375bfdf2363d7433'
+            }
+          },
+          prepare: () => {
+            global.prompt = jest.fn(() => 'passphrase1');
+            mockEmip3decrypt.mockImplementationOnce(
+              jest.requireActual('@lace/cardano').Wallet.KeyManagement.emip3decrypt
+            );
+          }
+        },
+        {
+          type: WalletType.Trezor,
+          prepare: () => mockTrezorGetXpub.mockResolvedValueOnce(extendedAccountPublicKey)
+        },
+        {
+          type: WalletType.Ledger,
+          prepare: () => mockLedgerGetXpub.mockResolvedValueOnce(extendedAccountPublicKey)
+        }
+      ];
+
+      beforeEach(() => {
+        walletApiUi.walletRepository.addAccount = jest.fn().mockResolvedValueOnce(void 0);
+      });
+
+      it.each(walletTypes)(
+        'derives extended account public key for $type wallet and adds new account into the repository',
+        async ({ type, walletProps, prepare }) => {
+          prepare();
+          const walletId = 'bip32-wallet-id';
+          const addAccountProps = {
+            wallet: { walletId, type, ...walletProps } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+            accountIndex: 0,
+            metadata: { name: 'new account' }
+          };
+
+          const { addAccount } = render();
+          await addAccount(addAccountProps);
+          expect(walletApiUi.walletRepository.addAccount).toBeCalledWith({
+            walletId,
+            accountIndex: addAccountProps.accountIndex,
+            metadata: addAccountProps.metadata,
+            extendedAccountPublicKey
+          });
+        }
+      );
+    });
+  });
+
+  describe('activateWallet', () => {
+    const walletId = 'walletId';
+    const accountIndex = 1;
+    const originalMetadata = { name: 'wallet' };
+
+    beforeEach(() => {
+      walletApiUi.walletRepository.wallets$ = of([
+        {
+          walletId,
+          metadata: originalMetadata
+        } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+      ]);
+      walletApiUi.walletManager.deactivate = jest.fn().mockResolvedValueOnce(void 0);
+      walletApiUi.walletRepository.updateWalletMetadata = jest.fn().mockResolvedValueOnce(void 0);
+      walletApiUi.walletManager.activate = jest.fn().mockResolvedValueOnce(void 0);
+      walletApiUi.walletManager.deactivate = jest.fn().mockResolvedValueOnce(void 0);
+    });
+
+    it('does not re-activate an already active wallet', async () => {
+      walletApiUi.walletManager.activeWalletId$ = of({ walletId, accountIndex } as WalletManagerActivateProps<
+        any,
+        any
+      >);
+
+      const { activateWallet } = render();
+      await activateWallet({ walletId, accountIndex });
+
+      expect(walletApiUi.walletRepository.updateWalletMetadata).not.toBeCalled();
+      expect(walletApiUi.walletManager.activate).not.toBeCalled();
+      expect(walletApiUi.walletManager.deactivate).not.toBeCalled();
+    });
+
+    it('stores lastActiveAccountIndex in wallet metadata and activates wallet via WalletManager', async () => {
+      walletApiUi.walletManager.activeWalletId$ = of({ walletId: 'otherId' } as WalletManagerActivateProps<any, any>);
+
+      const { activateWallet } = render();
+      await activateWallet({ walletId, accountIndex });
+
+      expect(walletApiUi.walletRepository.updateWalletMetadata).toBeCalledWith({
+        walletId,
+        metadata: {
+          ...originalMetadata,
+          lastActiveAccountIndex: accountIndex
+        }
+      });
+
+      expect(walletApiUi.walletManager.activate).toBeCalledWith({
+        walletId,
+        accountIndex,
+        chainId: expect.objectContaining({
+          networkMagic: expect.anything(),
+          networkId: expect.anything()
+        })
+      });
     });
   });
 });

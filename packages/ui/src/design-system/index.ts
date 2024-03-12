@@ -23,8 +23,8 @@ export * as TransactionSummary from './transaction-summary';
 export { ToastBar } from './toast-bar';
 export * from './tooltip';
 export { Message } from './message';
+export { Metadata, MetadataLink } from './metadata';
 export { PasswordBox } from './password-box';
-export { Metadata } from './metadata';
 export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
@@ -46,4 +46,5 @@ export type {
 export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
+export * from './auto-suggest-box';
 export * from './table';

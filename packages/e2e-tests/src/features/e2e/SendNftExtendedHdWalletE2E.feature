@@ -8,7 +8,7 @@ Feature: Send NFT HD wallets - Extended Browser View - E2E
 
   @LW-7551
   Scenario: Extended-view - Send NFT HD wallets E2E
-    And I'm sending the NFT with name: "Bison Coin" with HD wallet
+    And I'm sending the NFT with name: "Bison Coin" with HD wallet in extended mode
     When I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed in extended mode
     When I close the drawer by clicking close button

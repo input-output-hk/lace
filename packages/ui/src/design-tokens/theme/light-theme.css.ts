@@ -400,6 +400,15 @@ const colors: Colors = {
   $action_card_icon_container_bgColor: lightColorScheme.$primary_white,
   $action_card_icon_container_borderColor: lightColorScheme.$primary_light_grey,
 
+  $auto_suggest_container_background_color:
+    lightColorScheme.$primary_light_grey,
+  $auto_suggest_border_color: lightColorScheme.$primary_light_grey_plus,
+  $auto_suggest_loader_color: lightColorScheme.$primary_accent_purple,
+  $auto_suggest_check_color: lightColorScheme.$secondary_data_green,
+  $auto_suggest_address_color: lightColorScheme.$primary_dark_grey,
+  $auto_suggest_initial_bgColor: lightColorScheme.$primary_accent_purple_0_3,
+  $auto_suggest_initial_color: lightColorScheme.$primary_accent_purple,
+
   $stake_pool_item_bg_hover: lightColorScheme.$primary_light_grey,
   $stake_pool_header_text_color: lightColorScheme.$primary_dark_grey,
   $stake_pool_item_text_color: lightColorScheme.$primary_black,

@@ -54,7 +54,7 @@ export const BrowsePools = () => {
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
 
   const tableHeaderTranslations = {
-    apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
+    apy: t('browsePools.stakePoolTableBrowser.tableHeader.apy.title'),
     blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost.title'),
     liveStake: t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.title'),

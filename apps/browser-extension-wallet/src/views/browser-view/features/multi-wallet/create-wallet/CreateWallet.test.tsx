@@ -7,6 +7,29 @@ import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { StoreProvider } from '@src/stores';
+import { APP_MODE_BROWSER } from '@src/utils/constants';
+import { AppSettingsProvider, DatabaseProvider } from '@providers';
+import { UseWalletManager } from '@hooks/useWalletManager';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
+
+jest.mock('@providers/AnalyticsProvider', () => ({
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent'>, []>().mockReturnValue({
+    sendMergeEvent: jest.fn().mockReturnValue('')
+  })
+}));
+
+jest.mock('@hooks/useWalletManager', () => ({
+  useWalletManager: jest.fn().mockReturnValue({
+    createWallet: jest.fn().mockResolvedValue({
+      source: {
+        account: {
+          extendedAccountPublicKey: ''
+        }
+      }
+    }) as UseWalletManager['createWallet']
+  } as UseWalletManager)
+}));
 
 const keepWalletSecureStep = async () => {
   const nextButton = getNextButton();
@@ -61,10 +84,16 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     providers.createWallet.mockResolvedValue(void 0);
 
     render(
-      <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
-        <CreateWallet providers={providers as Providers} />
-        {createAssetsRoute()}
-      </MemoryRouter>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+              <CreateWallet providers={providers as Providers} />
+              {createAssetsRoute()}
+            </MemoryRouter>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
     await setupStep();
@@ -74,10 +103,16 @@ describe('Multi Wallet Setup/Create Wallet', () => {
 
   test('should emit correct value for shouldShowDialog', async () => {
     render(
-      <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
-        <CreateWallet providers={providers as Providers} />
-        {createAssetsRoute()}
-      </MemoryRouter>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+              <CreateWallet providers={providers as Providers} />
+              {createAssetsRoute()}
+            </MemoryRouter>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
     const nameInput = screen.getByTestId('wallet-name-input');

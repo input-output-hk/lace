@@ -13,16 +13,33 @@ import { AddressInput } from '../elements/AddressInput';
 class NftsPageObject {
   async clickNftItemOnNftsPage(nftName: string, clickType: 'left' | 'right' = 'left') {
     const nftNameElement = await NftsPage.getNftName(nftName);
+    await nftNameElement.waitForStable();
     await nftNameElement.click({ button: clickType });
   }
 
-  async progressWithSendUntilPasswordPage(nftName: string, hdWallet = false): Promise<any> {
+  async progressWithSendUntilPasswordPage(
+    nftName: string,
+    mode: string,
+    hdWallet = false,
+    adaHandle = false
+  ): Promise<any> {
     await this.clickNftItemOnNftsPage(nftName);
     await NftDetails.sendNFTButton.waitForClickable();
     await NftDetails.sendNFTButton.click();
-    const receiverWallet = hdWallet
-      ? getTestWallet(await this.getNonActiveNftHdWalletName())
-      : getTestWallet(await this.getNonActiveNftWalletName());
+    let receiverWallet;
+    if (hdWallet) {
+      receiverWallet = getTestWallet(await this.getNonActiveNftHdWalletName());
+    } else if (adaHandle) {
+      receiverWallet =
+        mode === 'extended'
+          ? getTestWallet(await this.getNonActiveAdaHandleWalletName())
+          : getTestWallet(await this.getNonActiveAdaHandle2WalletName());
+    } else {
+      receiverWallet =
+        mode === 'extended'
+          ? getTestWallet(await this.getNonActiveNftWalletName())
+          : getTestWallet(await this.getNonActiveNft2WalletName());
+    }
     const receiverAddress = extensionUtils.isMainnet()
       ? String(receiverWallet.mainnetAddress)
       : String(receiverWallet.address);
@@ -44,6 +61,24 @@ class NftsPageObject {
     return testContext.load('activeWallet') === TestWalletName.WalletReceiveNftE2E
       ? TestWalletName.WalletSendNftE2E
       : TestWalletName.WalletReceiveNftE2E;
+  }
+
+  async getNonActiveNft2WalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveNft2E2E
+      ? TestWalletName.WalletSendNft2E2E
+      : TestWalletName.WalletReceiveNft2E2E;
+  }
+
+  async getNonActiveAdaHandleWalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveAdaHandleE2E
+      ? TestWalletName.WalletSendAdaHandleE2E
+      : TestWalletName.WalletReceiveAdaHandleE2E;
+  }
+
+  async getNonActiveAdaHandle2WalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveAdaHandle2E2E
+      ? TestWalletName.WalletSendAdaHandle2E2E
+      : TestWalletName.WalletReceiveAdaHandle2E2E;
   }
 
   async getNonActiveNftHdWalletName(): Promise<string> {

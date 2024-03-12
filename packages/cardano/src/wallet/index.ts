@@ -18,6 +18,7 @@ export {
   StakeSummary,
   SortField,
   EraSummary,
+  HandleResolution,
   TxSubmissionError
 } from '@cardano-sdk/core';
 
@@ -49,7 +50,7 @@ export {
 
 export * as KeyManagement from '@cardano-sdk/key-management';
 export * as Ledger from '@cardano-sdk/hardware-ledger';
-export * as Trezor from '../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
+export * as Trezor from '@cardano-sdk/hardware-trezor';
 
 export { HexBlob, Percent, BigIntMath } from '@cardano-sdk/util';
 export * as Crypto from '@cardano-sdk/crypto';

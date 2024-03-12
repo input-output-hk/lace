@@ -172,14 +172,17 @@ When(/^I click "(Copy|Delete|Edit)" button on address details page$/, async (but
   switch (button) {
     case 'Copy':
       testContext.save('address', await AddressDetails.address.getText());
+      await AddressDetails.copyButton.waitForStable();
       await AddressDetails.copyButton.waitForClickable();
       await AddressDetails.copyButton.click();
       break;
     case 'Delete':
+      await AddressDetails.deleteButton.waitForStable();
       await AddressDetails.deleteButton.waitForClickable();
       await AddressDetails.deleteButton.click();
       break;
     case 'Edit':
+      await AddressDetails.editButton.waitForStable();
       await AddressDetails.editButton.waitForClickable();
       await AddressDetails.editButton.click();
       break;
@@ -321,7 +324,11 @@ Then(
   /^I see review handle drawer in (extended|popup) mode for handle: "([^"]*)"$/,
   async (mode: 'extended' | 'popup', handleName: string) => {
     const previousAddress = String(getTestWallet(testContext.load('activeWallet')).address);
-    const newAddress = String(getTestWallet(await nftsPageObject.getNonActiveNftWalletName()).address);
+    const receiverWallet =
+      mode === 'extended'
+        ? getTestWallet(await nftsPageObject.getNonActiveAdaHandleWalletName())
+        : getTestWallet(await nftsPageObject.getNonActiveAdaHandle2WalletName());
+    const newAddress = String(receiverWallet.address);
     await ReviewAddressDrawerAssert.assertSeeReviewAddressDrawer(mode, handleName, previousAddress, newAddress);
   }
 );

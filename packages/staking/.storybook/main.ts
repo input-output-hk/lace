@@ -31,6 +31,9 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
+  core: {
+    builder: '@storybook/builder-vite',
+  },
   async viteFinal(baseConfig) {
     const userConfig: UserConfig = {
       plugins: [

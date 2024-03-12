@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { Wallet } from '@lace/cardano';
-import * as HardwareLedger from '../../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
-import * as HardwareTrezor from '../../../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
+import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
+import * as HardwareTrezor from '@cardano-sdk/hardware-trezor';
 import { PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletType } from '@cardano-sdk/web-extension';
 

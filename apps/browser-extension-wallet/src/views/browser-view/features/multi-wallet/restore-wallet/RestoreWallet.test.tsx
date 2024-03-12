@@ -7,6 +7,29 @@ import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { createAssetsRoute, fillMnemonic, getNextButton, setupStep } from '../tests/utils';
 import { Subject } from 'rxjs';
+import { StoreProvider } from '@src/stores';
+import { APP_MODE_BROWSER } from '@src/utils/constants';
+import { AppSettingsProvider, DatabaseProvider } from '@providers';
+import { UseWalletManager } from '@hooks/useWalletManager';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
+
+jest.mock('@hooks/useWalletManager', () => ({
+  useWalletManager: jest.fn().mockReturnValue({
+    createWallet: jest.fn().mockResolvedValue({
+      source: {
+        account: {
+          extendedAccountPublicKey: ''
+        }
+      }
+    }) as UseWalletManager['createWallet']
+  } as UseWalletManager)
+}));
+
+jest.mock('@providers/AnalyticsProvider', () => ({
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent'>, []>().mockReturnValue({
+    sendMergeEvent: jest.fn().mockReturnValue('')
+  })
+}));
 
 const keepWalletSecureStep = async () => {
   const nextButton = getNextButton();
@@ -68,10 +91,16 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
     providers.createWallet.mockResolvedValue(void 0);
 
     render(
-      <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.setup]}>
-        <RestoreWallet providers={providers as Providers} />
-        {createAssetsRoute()}
-      </MemoryRouter>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.setup]}>
+              <RestoreWallet providers={providers as Providers} />
+              {createAssetsRoute()}
+            </MemoryRouter>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
     await setupStep();

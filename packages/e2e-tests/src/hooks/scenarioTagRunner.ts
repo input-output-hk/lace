@@ -7,14 +7,15 @@ import { closeAllTabsExceptOriginalOne } from '../utils/window';
 import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
-import { clearWalletRepository } from '../fixture/browserStorageInitializer';
+
+import { clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
   // use Before hooks in feature steps file, see AddressBook.ts as an example
 });
 
-After(async () => {
+After({ tags: 'not @Pending and not @pending' }, async () => {
   await clearWalletRepository();
   await networkManager.closeOpenedCdpSessions();
   await consoleManager.closeOpenedCdpSessions();

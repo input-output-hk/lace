@@ -15,6 +15,7 @@ export interface WalletUI {
   cardanoCoin: Wallet.CoinId;
   appMode: AppMode;
   networkConnection: NetworkConnectionStates;
+  isDropdownMenuOpen: boolean;
   areBalancesVisible: boolean;
   canManageBalancesVisibility: boolean;
   getHiddenBalancePlaceholder: (placeholderLength?: number, placeholderChar?: string) => string;

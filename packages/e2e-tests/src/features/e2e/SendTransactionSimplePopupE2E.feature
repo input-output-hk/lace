@@ -8,7 +8,7 @@ Feature: Send Simple Transactions - Popup view - E2E
   Scenario: Popup-view - Send ADA (single asset) E2E
     And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
-    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
+    And I fill bundle 1 with "WalletReceiveSimpleTransaction2E2E" address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page
@@ -22,13 +22,13 @@ Feature: Send Simple Transactions - Popup view - E2E
     When I navigate to Transactions popup page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransactionE2E" address
-    When I open wallet: "WalletReceiveSimpleTransactionE2E" in: popup mode
+    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransaction2E2E" address
+    When I open wallet: "WalletReceiveSimpleTransaction2E2E" in: popup mode
     And Wallet is synced
     And I navigate to Transactions popup page
     Then the Received transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransactionE2E" address
+    Then The Tx details are displayed as "package.core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransaction2E2E" address
 
   @LW-4678
   Scenario: Popup-view - Self Transaction E2E
@@ -51,7 +51,7 @@ Feature: Send Simple Transactions - Popup view - E2E
   @LW-5895
   Scenario: Popup View - transaction details - Hash does not contain cexplorer link until transaction is confirmed
     When I click "Send" button on Tokens page in popup mode
-    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
+    And I fill bundle 1 with "WalletReceiveSimpleTransaction2E2E" address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page

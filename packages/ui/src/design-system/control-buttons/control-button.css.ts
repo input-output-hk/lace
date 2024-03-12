@@ -115,6 +115,7 @@ export const container = recipe({
         paddingRight: vars.spacing.$24,
       },
       [Scheme.ExtraSmall]: {
+        minWidth: vars.spacing.$60,
         height: vars.spacing.$24,
         paddingTop: vars.spacing.$2,
         paddingBottom: vars.spacing.$2,
@@ -176,6 +177,10 @@ export const label = recipe({
       },
       [Scheme.ExtraSmall]: {
         color: vars.colors.$control_buttons_label_color_extra_small,
+      },
+    },
+    sizeScheme: {
+      [Scheme.ExtraSmall]: {
         fontWeight: vars.fontWeights.$regular,
         fontSize: vars.fontSizes.$12,
       },

@@ -19,7 +19,7 @@ export const DelegationTooltip = ({
         description={
           <Box w="$148">
             <Flex justifyContent="space-between">
-              <Box>{t('browsePools.stakePoolTableBrowser.tableHeader.ros.title')}</Box>
+              <Box>{t('browsePools.stakePoolTableBrowser.tableHeader.apy.title')}</Box>
               <Box>{apy ? `${apy}%` : '-'}</Box>
             </Flex>
             <Flex justifyContent="space-between">

@@ -37,7 +37,7 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   @LW-2512 @Mainnet
   Scenario: Popup-view - Send NFT - Password screen
     Given I am on NFTs popup page
-    When I'm sending the NFT with name: "Ibilecoin"
+    When I'm sending the NFT with name: "Ibilecoin" in popup mode
     Then The password screen is displayed:
       | Title: "Enter wallet" |
       | Input: Password       |
@@ -47,7 +47,7 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   @LW-2513 @Mainnet
   Scenario: Popup-view - Send NFT - User enters invalid password
     Given I am on NFTs popup page
-    And I'm sending the NFT with name: "Ibilecoin"
+    And I'm sending the NFT with name: "Ibilecoin" in popup mode
     When I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 

@@ -52,3 +52,7 @@ export const editIcon = sx({
 export const deleteIcon = sx({
   color: '$profile_dropdown_account_item_delete_icon_color',
 });
+
+export const tooltipStyle = style({
+  left: '70px !important',
+});

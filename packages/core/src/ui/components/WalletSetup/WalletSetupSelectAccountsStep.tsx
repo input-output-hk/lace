@@ -51,7 +51,7 @@ export const WalletSetupSelectAccountsStep = ({
           >
             <Radio checked={selectedAccount === index} />
             <p>
-              {t('core.walletSetupSelectAccountsStep.account')} {index + 1} {index === 0 && '- Default'}
+              {t('core.walletSetupSelectAccountsStep.account')} {index} {index === 0 && '- Default'}
             </p>
           </div>
         ))}

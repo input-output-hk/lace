@@ -63,6 +63,7 @@ export const WalletSetupWalletNameStep = ({
         label={translations.walletName}
         value={walletName}
         onChange={handleNameChange}
+        autoFocus
       />
       {isDirty && walletName && !isNameValid && (
         <p className={styles.formError} data-testid="wallet-setup-register-name-error">

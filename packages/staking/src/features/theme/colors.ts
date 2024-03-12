@@ -23,6 +23,7 @@ export const colorsContract = {
   $poolCardProgressBarValue: '',
   $poolCardSelectedBorderColor: '',
   $poolItemEvenBackground: '',
+  $preferencesDrawerNoPoolsTextColor: '',
   $preferencesPoolCardBorderColor: '',
   $preferencesPoolCardDataIconColor: '',
   $preferencesPoolCardDataTextColor: '',
@@ -65,6 +66,7 @@ export const lightThemeColors: typeof colorsContract = {
   $poolCardProgressBarValue: lightColorScheme.$primary_grey,
   $poolCardSelectedBorderColor: lightColorScheme.$primary_accent_purple,
   $poolItemEvenBackground: lightColorScheme.$primary_light_grey_0_56,
+  $preferencesDrawerNoPoolsTextColor: lightColorScheme.$primary_dark_grey,
   $preferencesPoolCardBorderColor: lightColorScheme.$primary_light_grey_plus,
   $preferencesPoolCardDataIconColor: lightColorScheme.$primary_grey,
   $preferencesPoolCardDataTextColor: lightColorScheme.$primary_dark_grey,
@@ -107,6 +109,7 @@ export const darkThemeColors: typeof colorsContract = {
   $poolCardProgressBarValue: darkColorScheme.$primary_light_grey,
   $poolCardSelectedBorderColor: darkColorScheme.$primary_accent_purple,
   $poolItemEvenBackground: darkColorScheme.$primary_light_black,
+  $preferencesDrawerNoPoolsTextColor: darkColorScheme.$primary_light_grey,
   $preferencesPoolCardBorderColor: darkColorScheme.$primary_mid_black,
   // TODO: use darkColorScheme instead
   $preferencesPoolCardDataIconColor: lightColorScheme.$primary_grey,

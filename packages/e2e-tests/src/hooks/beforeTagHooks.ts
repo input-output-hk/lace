@@ -19,6 +19,8 @@ const popupViewWalletInitialization = async (walletName = TestWalletName.TestAut
   await networkManager.logFailedRequests();
 };
 
+Before({ tags: '@pending or @Pending' }, async () => 'skipped');
+
 Before(
   {
     tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding'
@@ -67,13 +69,28 @@ Before(
 );
 
 Before(
-  { tags: '@SendSimpleTransaction-Extended-E2E or @SendTransactionDapp-E2E' },
+  { tags: '@SendSimpleTransaction-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendSimpleTransactionE2E)
 );
 
 Before(
   { tags: '@SendSimpleTransaction-Popup-E2E' },
-  async () => await popupViewWalletInitialization(TestWalletName.WalletSendSimpleTransactionE2E)
+  async () => await popupViewWalletInitialization(TestWalletName.WalletSendSimpleTransaction2E2E)
+);
+
+Before(
+  { tags: '@Analytics-SendSimpleTransaction-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletAnalyticsSendSimpleTransactionE2E)
+);
+
+Before(
+  { tags: '@Analytics-SendSimpleTransaction-Popup-E2E' },
+  async () => await popupViewWalletInitialization(TestWalletName.WalletAnalyticsSendSimpleTransaction2E2E)
+);
+
+Before(
+  { tags: '@SendTransactionDapp-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletSendDappTransactionE2E)
 );
 
 Before(
@@ -86,7 +103,10 @@ Before(
   async () => await extendedViewWalletInitialization(TestWalletName.WalletCollateral)
 );
 
-Before({ tags: '@Collateral-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral));
+Before(
+  { tags: '@Collateral-popup' },
+  async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral2)
+);
 
 Before(
   { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
@@ -99,13 +119,23 @@ Before(
 );
 
 Before(
-  { tags: '@SendNft-Extended-E2E or @AdaHandleSend' },
+  { tags: '@SendNft-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendNftE2E)
 );
 
 Before(
   { tags: '@SendNft-Popup-E2E' },
-  async () => await popupViewWalletInitialization(TestWalletName.WalletSendNftE2E)
+  async () => await popupViewWalletInitialization(TestWalletName.WalletSendNft2E2E)
+);
+
+Before(
+  { tags: '@AdaHandleSend-extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletSendAdaHandleE2E)
+);
+
+Before(
+  { tags: '@AdaHandleSend-popup' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletSendAdaHandle2E2E)
 );
 
 Before(

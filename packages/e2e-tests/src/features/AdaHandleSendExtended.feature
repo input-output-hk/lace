@@ -1,18 +1,18 @@
-@AdaHandleSend @Testnet
+@AdaHandleSend-extended @Testnet
 Feature: ADA handle - extended view
 
   Background:
     Given Wallet is synced
     And I am on NFTs extended page
     And Address book is empty
-    And I use a single wallet with "$handletosend" NFT in extended mode
+    And I use a wallet with ADA handle "$handletosend" NFT in extended mode
 
   @LW-7073
   Scenario: Extended view - Ada handle transfer e2e, review flow
     Given I validate that handle: "$handletosend" is listed on the Receive screen
     And I add address with name: "$handletosend" and address: "$handletosend" to address book in extended mode
     And I navigate to NFTs extended page
-    And I'm sending the NFT with name: "$handletosend"
+    And I'm sending the ADA handle with name: "$handletosend" in extended mode
     And I enter correct password and confirm the transaction
     And The Transaction submitted screen is displayed in extended mode
     And I close the drawer by clicking close button
@@ -51,8 +51,8 @@ Feature: ADA handle - extended view
     And I enter a value of: 1 to the "tADA" asset in bundle 1
     And I click "Add bundle" button on "Send" page
     And click on the coin selector for "tADA" asset in bundle 2
-    And click on an token with name: "Ibilecoin"
-    And I enter a value of: 1 to the "Ibilecoin" asset in bundle 2
+    And click on an token with name: "LaceCoin"
+    And I enter a value of: 1 to the "LaceCoin" asset in bundle 2
     And I remove bundle 2
     Then I see 1 bundle rows
     And the "tADA" asset is displayed in bundle 1
