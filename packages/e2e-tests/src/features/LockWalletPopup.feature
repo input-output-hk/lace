@@ -1,10 +1,10 @@
-@LockWallet-popup @Mainnet @Testnet
+@LockWallet-popup @Mainnet @Testnet @Pending
 Feature: Wallet locking / unlocking - Popup view
 
   Background:
     Given Lace is ready for test
 
-  @LW-3038 @Pending
+  @LW-3038
   Scenario: Popup view - Lock screen button opens lock screen
     And I lock my wallet
     Then I see unlock wallet screen
