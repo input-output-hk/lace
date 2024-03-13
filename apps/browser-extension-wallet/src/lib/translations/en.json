@@ -1619,6 +1619,11 @@
       "copyToClipboard": "Copy to clipboard",
       "pasteFromClipboard": "Paste from clipboard"
     },
+    "walletSetupMnemonicIntroStep": {
+      "title": "Keeping your wallet secure",
+      "description": "Consider your recovery phrase as the master key to your wallet, and the only way to access your funds.",
+      "link": "Read More."
+    },
     "mnemonicVideoPopupContent": {
       "title": "Keeping your wallet secure",
       "description": "Learn about what is a recovery phrase, and how to keep it safe from the video below.",
