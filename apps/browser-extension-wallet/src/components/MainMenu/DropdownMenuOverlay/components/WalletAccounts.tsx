@@ -151,7 +151,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           metadata: { name }
         });
         analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
-          $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+          // eslint-disable-next-line camelcase
+          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
         });
         clearTimeout(timeout);
         enableAccountHWSigningDialog.hide();
@@ -203,7 +204,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           metadata: { name: defaultAccountName(accountIndex) }
         });
         analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
-          $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+          // eslint-disable-next-line camelcase
+          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
         });
         enableAccountPasswordDialog.hide();
         closeDropdownAndShowAccountActivated(name);
@@ -220,7 +222,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       accountIndex: disableAccountConfirmation.data.accountNumber
     });
     analytics.sendEventToPostHog(PostHogAction.MultiWalletDisableAccount, {
-      $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });
     disableAccountConfirmation.hide();
   }, [walletRepository, disableAccountConfirmation, wallet.walletId, analytics]);

@@ -58,7 +58,8 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
             accountIndex: account
           });
           await analytics.sendEventToPostHog(PostHogAction.MultiWalletHWAdded, {
-            $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+            // eslint-disable-next-line camelcase
+            $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
           });
           await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         } catch (error) {

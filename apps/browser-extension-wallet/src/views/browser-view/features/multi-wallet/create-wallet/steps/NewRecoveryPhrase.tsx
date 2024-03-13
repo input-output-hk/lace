@@ -54,7 +54,8 @@ export const NewRecoveryPhrase = (): JSX.Element => {
   const saveWallet = useCallback(async () => {
     const { source } = await createWallet(data);
     await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
-      $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });
     await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
     clearSecrets();

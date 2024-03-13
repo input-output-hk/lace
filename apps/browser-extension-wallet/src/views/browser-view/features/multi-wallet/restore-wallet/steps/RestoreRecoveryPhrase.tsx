@@ -56,7 +56,8 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       try {
         const { source, wallet } = await createWallet(data);
         await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
-          $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+          // eslint-disable-next-line camelcase
+          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
         });
         await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));

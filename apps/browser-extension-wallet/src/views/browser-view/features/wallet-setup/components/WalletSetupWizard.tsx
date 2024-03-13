@@ -536,7 +536,8 @@ export const WalletSetupWizard = ({
         <WalletSetupFinalStep
           onFinish={() => {
             sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET, {
-              $set: { walletAccountsQty: '1' }
+              // eslint-disable-next-line camelcase
+              $set: { wallet_accounts_quantity: '1' }
             });
             goToMyWallet();
           }}

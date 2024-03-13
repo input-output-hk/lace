@@ -38,7 +38,8 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
     const nextActiveWallet = await deleteWallet();
     setDeletingWallet(false);
     analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
-      $set: { walletAccountsQty: await getWalletAccountsQtyString(walletRepository) }
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });
     if (nextActiveWallet) return;
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });

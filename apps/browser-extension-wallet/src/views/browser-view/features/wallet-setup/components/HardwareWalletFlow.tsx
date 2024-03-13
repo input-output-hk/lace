@@ -196,7 +196,8 @@ export const HardwareWalletFlow = ({
       const posthogProperties = await getHWPersonProperties(connectedDevice, deviceConnection);
       await sendAnalytics(postHogOnboardingActions.hw.DONE_GO_TO_WALLET, {
         ...posthogProperties,
-        $set: { walletAccountsQty: '1' }
+        // eslint-disable-next-line camelcase
+        $set: { wallet_accounts_quantity: '1' }
       });
     } catch {
       console.error('We were not able to send the analytics event');
