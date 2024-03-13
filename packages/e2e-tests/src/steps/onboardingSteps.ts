@@ -653,3 +653,12 @@ Then(/^"Wallet setup" page is displayed$/, async () => {
 Then(/^I see "Watch video" modal$/, async () => {
   await onboardingWatchVideoModalAssert.assertSeeModal();
 });
+
+Then(
+  /^"Mnemonic verification" page is displayed from "(Create wallet|Restore wallet|Forgot password)" flow$/,
+  async (flow) => {
+    await (flow === 'Create wallet'
+      ? onboardingWatchVideoModalAssert.assertSeeModal()
+      : onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage('Restore'));
+  }
+);

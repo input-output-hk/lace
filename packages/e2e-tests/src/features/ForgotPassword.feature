@@ -67,8 +67,6 @@ Feature: Forgot password
     Then "Wallet name and password" page is displayed in forgot password flow
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    Then I am on "Mnemonic verification" last page from "Forgot password" and filled all words
     When I add characters "asd" in word 7
     Then "Next" button is disabled during onboarding process
 
@@ -83,19 +81,10 @@ Feature: Forgot password
     Then "Wallet name and password" page is displayed in forgot password flow
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 8 of 24
-    When I fill passphrase fields using 24 words mnemonic on 8/24 page
-    And I click "Next" button during wallet setup
-    And I fill passphrase fields using 24 words mnemonic on 16/24 page
-    And I click "Next" button during wallet setup
-    And I fill passphrase fields using 24 words mnemonic on 24/24 page
+    Then "Mnemonic verification" page is displayed from "Forgot password" flow
+    And I enter mnemonic words on "Mnemonic writedown" page
     And I click "Back" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 16 of 24
-    When I click "Back" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 8 of 24
-    When I click "Back" button during wallet setup
-    Then "Recovery phrase length page" is displayed and 24 words checkbox is checked
+    Then "Wallet name and password" page is displayed in forgot password flow
 
   @LW-2489
   Scenario Outline: "Forgot password?" - cancel restoration flow - <expected_page> page
@@ -104,17 +93,16 @@ Feature: Forgot password
     And I see unlock wallet screen
     When I click on "Forgot password?" button on unlock screen
     And I click on "Proceed" button on "Forgot password?" modal
+    And all wallet related data is removed
     And I switch to tab with restore wallet process
     And I am on <expected_page> page of restoration flow
     And I leave "Forgot password" flow
+    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
-    And all wallet related data is removed
     Examples:
-      | expected_page               |
-      | password                    |
-      | mnemonic verification 8/24  |
-      | mnemonic verification 16/24 |
-      | mnemonic verification 24/24 |
+      | expected_page         |
+      | password              |
+      | mnemonic verification |
 
     # this test should be executed as the last one in this suite
     # opening onboarding page & closing other tabs breaks webdriver session

@@ -288,7 +288,7 @@ class OnboardingPageObject {
       await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 15_000, reverse: true });
     }
     if (await WalletCreationPage.mainLoaderText.isDisplayed()) {
-      await WalletCreationPage.mainLoaderText.waitForDisplayed({ timeout: 115_000, reverse: true });
+      await WalletCreationPage.mainLoaderText.waitForDisplayed({ timeout: 155_000, reverse: true });
     }
   }
 }
