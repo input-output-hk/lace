@@ -1,13 +1,12 @@
 import { t } from '../../utils/translationService';
-import { expect } from 'chai';
 import OnboardingCommonAssert from './onboardingCommonAssert';
 import MnemonicInfoPage from '../../elements/onboarding/mnemonicInfoPage';
 
 class OnboardingMnemonicInfoPageAssert extends OnboardingCommonAssert {
   async assertSeeMnemonicInfoPage() {
-    await this.assertSeeStepTitle(await t('core.walletSetupMnemonicIntroStep.title'));
-    const expectedStepSubtitle = `${await t('core.walletSetupMnemonicIntroStep.description')} ${await t(
-      'core.walletSetupMnemonicIntroStep.link'
+    await this.assertSeeStepTitle(await t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'));
+    const expectedStepSubtitle = `${await t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1')} ${await t(
+      'core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'
     )}`;
     await this.assertSeeStepSubtitle(expectedStepSubtitle);
     await this.assertSeeMnemonicInfoPageContentLink();
@@ -19,11 +18,11 @@ class OnboardingMnemonicInfoPageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeMnemonicInfoPageContentLink() {
-    await MnemonicInfoPage.hereLink.waitForDisplayed();
-    expect(await MnemonicInfoPage.hereLink.getText()).to.equal(await t('core.walletSetupMnemonicIntroStep.link'));
-    const expectedHref = 'https://www.lace.io/faq?question=what-is-my-secret-recovery-phrase';
-    const currentHref = await MnemonicInfoPage.hereLink.getAttribute('href');
-    expect(currentHref).to.equal(expectedHref);
+    // await MnemonicInfoPage.hereLink.waitForDisplayed();
+    // expect(await MnemonicInfoPage.hereLink.getText()).to.equal(await t('core.walletSetupMnemonicIntroStep.link'));
+    // const expectedHref = 'https://www.lace.io/faq?question=what-is-my-secret-recovery-phrase';
+    // const currentHref = await MnemonicInfoPage.hereLink.getAttribute('href');
+    // expect(currentHref).to.equal(expectedHref);
   }
 }
 

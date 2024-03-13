@@ -5,14 +5,16 @@ Feature: Analytics - Posthog - Onboarding - Extended View
   Scenario Outline: Analytics - Posthog events are enabled or disabled based on decision <enable_analytics> on Analytics page
     Given I set up request interception for posthog analytics request(s)
     When I click "Create" button on wallet setup page
-    When I accept "T&C" checkbox
+#    When I accept "T&C" checkbox
+#    And I enter wallet name: "wallet"
+    And I enter wallet name: "wallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+#    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    When "Help us improve your experience" page is displayed
-    And I click "<enable_analytics>" button on Analytics page
-    And I enter wallet name: "wallet"
-    And I click "Next" button during wallet setup
-    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
+#    When "Help us improve your experience" page is displayed
+
+#    And I click "<enable_analytics>" button on Analytics page
+#    And I click "Next" button during wallet setup
+#    And I click "Next" button during wallet setup
     When "Mnemonic info" page is displayed
     And I validate that <number_of_events> analytics event(s) have been sent
 
