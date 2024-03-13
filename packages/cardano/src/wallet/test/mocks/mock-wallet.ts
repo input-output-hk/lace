@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import { Cardano } from '@cardano-sdk/core';
 import { createStubStakePoolProvider } from '@cardano-sdk/util-dev';
-import { ObservableWallet, PersonalWallet, storage } from '@cardano-sdk/wallet';
+import { ObservableWallet, BaseWallet, createPersonalWallet, storage } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { assetsProviderStub } from './AssetsProviderStub';
 import { networkInfoProviderStub } from './NetworkInfoProviderStub';
@@ -26,7 +26,7 @@ const knownAddresses: KeyManagement.GroupedAddress = {
 };
 
 interface MockWallet {
-  wallet: PersonalWallet;
+  wallet: BaseWallet;
   address: Cardano.PaymentAddress;
   keyAgent: KeyManagement.InMemoryKeyAgent;
 }
@@ -44,7 +44,7 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
   const chainHistoryProvider = chainHistoryProviderStub();
   const rewardsProvider = rewardsHistoryProviderStub();
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
-  const wallet = new PersonalWallet(
+  const wallet = createPersonalWallet(
     { name },
     {
       assetProvider,

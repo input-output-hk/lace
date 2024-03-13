@@ -122,7 +122,8 @@ export const mockInMemoryWallet = {
       inFlight$: of([]),
       failed$: EMPTY,
       onChain$: EMPTY,
-      pending$: EMPTY
+      pending$: EMPTY,
+      signed$: EMPTY
     }
   } as Wallet.ObservableWallet['transactions'],
   eraSummaries$: of(mockWalletState.eraSummaries),
