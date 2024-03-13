@@ -6,6 +6,7 @@ const radioGroupRootBase = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
+    marginTop: '$8',
     gap: '$16',
   }),
   {
@@ -20,6 +21,7 @@ export const radioGroupRootWithIcon = styleVariants({
   withIcon: [
     radioGroupRootBase,
     {
+      marginTop: 0,
       gap: 0,
     },
   ],
@@ -27,7 +29,7 @@ export const radioGroupRootWithIcon = styleVariants({
 
 export const radioGroupItemWrapperSelector = style([]);
 
-export const withIcon = style([{ minHeight: 36 }]);
+export const withIcon = style([{ minHeight: 32 }]);
 
 export const radioGroupItem = style([
   {
@@ -85,7 +87,7 @@ export const radioGroupItemWrapper = style([
         height: vars.spacing.$fill,
         borderRadius: vars.radius.$tiny,
         position: 'absolute',
-        padding: `${vars.spacing.$6} ${vars.spacing.$8}`,
+        padding: `${vars.spacing.$1} ${vars.spacing.$4}`,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: '1',

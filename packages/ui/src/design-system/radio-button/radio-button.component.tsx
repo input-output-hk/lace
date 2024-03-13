@@ -81,7 +81,7 @@ export const RadioButtonGroup = ({
                   />
                 </RadixRadioGroup.Item>
                 {!!tooltipText && (
-                  <Tooltip label={tooltipText} delayDuration={800}>
+                  <Tooltip label={tooltipText} delayDuration={600}>
                     {labelContent}
                   </Tooltip>
                 )}
