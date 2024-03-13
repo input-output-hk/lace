@@ -44,6 +44,7 @@ import watchVideoModal from '../elements/onboarding/watchVideoModal';
 import analyticsBanner from '../elements/analyticsBanner';
 import OnboardingWalletNameAndPasswordPageAssert from '../assert/onboarding/onboardingWalletNameAndPasswordPageAssert';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
+import walletSetupPage from '../elements/onboarding/walletSetupPage';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -532,7 +533,7 @@ Then(/^I do not see autocomplete options list$/, async () => {
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
   await OnboardingRevampPageObject.goToMenmonicVerificationPage('Create', mnemonicWords);
-  await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage('Create');
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create');
   await OnboardingRevampPageObject.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
@@ -604,9 +605,9 @@ Given(/^I see current onboarding page in (light|dark) mode$/, async (mode: 'ligh
 Given(
   /^I enter wallet name: "([^"]*)", password: "([^"]*)" and password confirmation: "([^"]*)"$/,
   async (walletName: string, password: string, passwordConfirmation: string) => {
-    await OnboardingRevampPageObject.enterWalletName(walletName);
-    await OnboardingRevampPageObject.enterWalletPassword(password);
-    await OnboardingRevampPageObject.enterWalletPasswordConfirm(passwordConfirmation);
+    await walletSetupPage.setWalletNameInput(walletName);
+    await walletSetupPage.setWalletPasswordInput(password);
+    await walletSetupPage.setWalletPasswordConfirmInput(passwordConfirmation);
   }
 );
 
@@ -618,7 +619,7 @@ Given(
   /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
   async (flowType: 'Create' | 'Restore') => {
     await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
-    await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage(flowType);
+    await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage(flowType);
   }
 );
 
@@ -642,6 +643,19 @@ When(/^I click "Read More" link in modal$/, async () => {
   await watchVideoModal.readMoreLink.click();
 });
 
+When(/^I save mnemonic words$/, async () => {
+  mnemonicWordsForReference.push(...(await RecoveryPhrasePage.getMnemonicWordTexts()));
+});
+
+When(/^I enter saved mnemonic words$/, async () => {
+  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWordsForReference);
+});
+
+Then(/^"Mnemonic writedown" page is displayed$/, async () => {
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage();
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWords();
+});
+
 Then(/^"Enter wallet" button is enabled$/, async () => {
   await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
 });
@@ -658,7 +672,7 @@ Then(
   /^"Mnemonic verification" page is displayed from "(Create wallet|Restore wallet|Forgot password)" flow$/,
   async (flow) => {
     await (flow === 'Create wallet'
-      ? onboardingWatchVideoModalAssert.assertSeeModal()
-      : onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage('Restore'));
+      ? onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create')
+      : onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Restore'));
   }
 );

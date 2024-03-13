@@ -356,50 +356,19 @@ Feature: Onboarding - Create wallet
     When "Get started" page is displayed
     Then I see current onboarding page in <mode> mode
     And I click "Create" button on wallet setup page
-    When "Legal page" is displayed
+    When "Wallet setup" page is displayed
     Then I see current onboarding page in <mode> mode
-    And I accept "T&C" checkbox
+    And I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    When "Help us improve your experience" page is displayed
+    When "Mnemonic writedown" page is displayed
     Then I see current onboarding page in <mode> mode
+    And I save mnemonic words
     And I click "Next" button during wallet setup
-    When "Name your wallet" page is displayed
+    When "Mnemonic verification" page is displayed from "Create wallet" flow
     Then I see current onboarding page in <mode> mode
-    When I enter wallet name: "someWallet"
-    And I click "Next" button during wallet setup
-    When "Wallet name and password" page is displayed in onboarding flow
-    Then I see current onboarding page in <mode> mode
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    When "Mnemonic info" page is displayed
-    Then I see current onboarding page in <mode> mode
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 8 of 24
-    Then I see current onboarding page in <mode> mode
-    And I save the words
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 16 of 24
-    Then I see current onboarding page in <mode> mode
-    And I save the words
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 24 of 24
-    Then I see current onboarding page in <mode> mode
-    And I save the words
-    And I click "Next" button during wallet setup
-    When "Mnemonic verification" page is displayed with words 8 of 24
-    Then I see current onboarding page in <mode> mode
-    And I fill saved words 8 of 24
-    And I click "Next" button during wallet setup
-    When "Mnemonic verification" page is displayed with words 16 of 24
-    Then I see current onboarding page in <mode> mode
-    And I fill saved words 16 of 24
-    And I click "Next" button during wallet setup
-    When "Mnemonic verification" page is displayed with words 24 of 24
-    Then I see current onboarding page in <mode> mode
-    And I fill saved words 24 of 24
-    And I click "Next" button during wallet setup
-    Then "All done" page is displayed
-    Then I see current onboarding page in <mode> mode
+    And I enter saved mnemonic words
+    Then "Enter wallet" button is enabled
+    And I see current onboarding page in <mode> mode
     And I clear saved words
     Examples:
       | mode  |

@@ -20,9 +20,9 @@ class OnboardingRevampPageObject {
   }
 
   async goToRecoveryPhrasePage(): Promise<void> {
-    await this.enterWalletName('TestAutomationWallet');
-    await this.enterWalletPassword('N_8J@bne87A');
-    await this.enterWalletPasswordConfirm('N_8J@bne87A');
+    await WalletSetupPage.setWalletNameInput('TestAutomationWallet');
+    await WalletSetupPage.setWalletPasswordInput('N_8J@bne87A');
+    await WalletSetupPage.setWalletPasswordConfirmInput('N_8J@bne87A');
     await WalletSetupPage.nextButton.click();
   }
 
@@ -44,18 +44,6 @@ class OnboardingRevampPageObject {
     for (let i = 0; i < this.mnemonicWords.length; i++) {
       await mnemonicInputs[i].setValue(this.mnemonicWords[i]);
     }
-  }
-
-  async enterWalletName(walletName: string): Promise<void> {
-    await WalletSetupPage.setWalletNameInput(walletName);
-  }
-
-  async enterWalletPassword(password: string): Promise<void> {
-    await WalletSetupPage.walletPasswordInput.setValue(password);
-  }
-
-  async enterWalletPasswordConfirm(password: string): Promise<void> {
-    await WalletSetupPage.walletPasswordConfirmInput.setValue(password);
   }
 }
 
