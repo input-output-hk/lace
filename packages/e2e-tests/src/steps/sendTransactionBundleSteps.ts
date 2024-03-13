@@ -8,9 +8,9 @@ import transactionAssetSelectionAssert from '../assert/transaction/transactionAs
 import extensionUtils from '../utils/utils';
 import { shelley, byron } from '../data/AddressData';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
+import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -22,18 +22,18 @@ When(/^I remove bundle (\d)$/, async (index: number) => {
 
 When(/^I set multiple outputs for advanced transaction$/, async () => {
   await new AddressInput(1).fillAddress(shelley.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(1, Asset.CARDANO.name);
+  await TransactionNewPage.coinConfigure(1, Asset.CARDANO.name).fillTokenValue(1);
   await TransactionNewPage.addBundleButton.click();
   await new AddressInput(2).fillAddress(shelley.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(2, Asset.CARDANO.name, 2);
+  await TransactionNewPage.coinConfigure(2, Asset.CARDANO.name).fillTokenValue(2);
 });
 
 When(/^I set multiple outputs for advanced transaction with less than minimum value for Byron address$/, async () => {
   await new AddressInput(1).fillAddress(byron.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(1, Asset.CARDANO.ticker);
+  await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(1);
   await TransactionNewPage.addBundleButton.click();
   await new AddressInput(2).fillAddress(byron.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(2, Asset.CARDANO.ticker, 2);
+  await TransactionNewPage.coinConfigure(2, Asset.CARDANO.ticker).fillTokenValue(2);
 });
 
 Then(/^The Tx summary screen for 2 bundles is displayed for Byron with minimum value$/, async () => {
@@ -137,5 +137,5 @@ Then(
 );
 
 Then(/^I click "Close" button on send success drawer$/, async () => {
-  await simpleTxSideDrawerPageObject.clickCloseAllDoneDrawerButton();
+  await TransactionSubmittedPage.clickCloseButton();
 });

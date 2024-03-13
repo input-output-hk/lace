@@ -204,17 +204,15 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then the maximum available amount is displayed in bundle: 1 for "LaceCoin1" asset
     When I click "Add token or NFT" button for bundle 1
     And click on an token with name: "LaceCoin2"
-    And I click MAX button in bundle 1 for "LaceCoin1" asset
-    Then the maximum available amount is displayed in bundle: 1 for "LaceCoin1" asset
+    And I click MAX button in bundle 1 for "LaceCoin2" asset
+    Then the maximum available amount is displayed in bundle: 1 for "LaceCoin2" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I click on NFT with name: "Ibilecoin" in asset selector
-    And I click MAX button in bundle 1 for "Ibilecoin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I click on NFT with name: "Bison Coin" in asset selector
-    And I click MAX button in bundle 1 for "Bison Coin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
 
@@ -234,12 +232,10 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I click on NFT with name: "Ibilecoin" in asset selector
-    And I click MAX button in bundle 1 for "Ibilecoin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I click on NFT with name: "Bison Coin" in asset selector
-    And I click MAX button in bundle 1 for "Bison Coin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
 

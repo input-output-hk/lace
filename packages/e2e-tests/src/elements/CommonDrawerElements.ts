@@ -47,6 +47,17 @@ class CommonDrawerElements {
     await this.drawerHeaderCloseButton.waitForClickable();
     await this.drawerHeaderCloseButton.click();
   }
+
+  async clickCloseDrawerButton(): Promise<void> {
+    await this.drawerHeaderCloseButton.waitForClickable({ timeout: 15_000 });
+    await this.drawerHeaderCloseButton.click();
+  }
+
+  clickBackDrawerButton = async (): Promise<void> => {
+    const commonDrawerElements = new CommonDrawerElements();
+    await commonDrawerElements.drawerHeaderBackButton.waitForClickable({ timeout: 15_000 });
+    await commonDrawerElements.drawerHeaderBackButton.click();
+  };
 }
 
 export default CommonDrawerElements;
