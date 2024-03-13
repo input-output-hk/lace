@@ -47,5 +47,6 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   getUserId: RemoteApiPropertyType.MethodReturningPromise,
   userId$: RemoteApiPropertyType.HotObservable,
   isNewSession: RemoteApiPropertyType.MethodReturningPromise,
-  resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise
+  resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise,
+  generateWalletBasedUserId: RemoteApiPropertyType.MethodReturningPromise
 };

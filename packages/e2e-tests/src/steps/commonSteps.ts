@@ -318,6 +318,11 @@ Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
   await browser.pause(delay);
 });
 
+When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixels: number) => {
+  const y = direction === 'down' ? Number(pixels) : -Number(pixels);
+  await browser.scroll(0, y);
+});
+
 Given(/^I confirm multi-address discovery modal$/, async () => {
   await settingsExtendedPageObject.multiAddressModalConfirm();
 });

@@ -16,4 +16,5 @@ export interface UserIdService {
   extendLifespan(): Promise<void>;
   resetToDefaultValues(): Promise<void>;
   isNewSession(): Promise<boolean>;
+  generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): string;
 }

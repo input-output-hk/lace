@@ -24,7 +24,7 @@ export interface WalletSetupStepLayoutProps {
   description?: React.ReactNode;
   linkText?: React.ReactNode;
   stepInfoText?: string;
-  onNext?: () => void;
+  onNext?: (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
   onBack?: () => void;
   onSkip?: () => void;
   nextLabel?: string;
