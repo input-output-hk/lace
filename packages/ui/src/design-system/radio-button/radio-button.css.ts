@@ -66,7 +66,6 @@ export const radioGroupItem = style([
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)',
-        zIndex: '1',
         pointerEvents: 'none',
       },
       [`${radioGroupItemWrapperSelector} &[data-state=checked]::before`]: {
@@ -90,7 +89,6 @@ export const radioGroupItemWrapper = style([
         padding: `${vars.spacing.$1} ${vars.spacing.$4}`,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: '1',
         pointerEvents: 'none',
       },
     },

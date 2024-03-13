@@ -80,12 +80,13 @@ export const RadioButtonGroup = ({
                     className={cx.radioGroupIndicator}
                   />
                 </RadixRadioGroup.Item>
-                {!!tooltipText && (
-                  <Tooltip label={tooltipText} delayDuration={600}>
+                {tooltipText ? (
+                  <Tooltip label={tooltipText} delayDuration={800}>
                     {labelContent}
                   </Tooltip>
+                ) : (
+                  labelContent
                 )}
-                {!tooltipText && labelContent}
                 {Icon !== undefined && value === selectedValue && (
                   <Flex justifyContent="flex-end" className={cx.iconWrapper}>
                     <div className={cx.icon} onClick={onIconClick}>
