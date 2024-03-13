@@ -139,7 +139,7 @@ describe('AnalyticsTracker', () => {
         postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingAnalyticsAgreeClick);
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateClick);
       expect(mockedPostHogClient.sendEvent).not.toHaveBeenCalled();
     });
@@ -151,8 +151,8 @@ describe('AnalyticsTracker', () => {
         postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreDoneGoToWallet);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingAnalyticsAgreeClick);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreEnterWalletClick);
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
     });
 
@@ -162,7 +162,7 @@ describe('AnalyticsTracker', () => {
         postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingAnalyticsAgreeClick);
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
     });
   });

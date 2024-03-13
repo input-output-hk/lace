@@ -19,7 +19,6 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onChange: (words: string[]) => void;
   onCancel: () => void;
   onSubmit: () => void;
-  onStepNext?: (currentStep: number) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
   translations: TranslationsFor<
@@ -28,6 +27,7 @@ export interface WalletSetupMnemonicVerificationStepProps {
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
   onSetMnemonicLength?: (length: number) => void;
+  onPasteFromClipboard?: () => void;
 }
 
 export const WalletSetupMnemonicVerificationStepRevamp = ({
@@ -39,7 +39,8 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   defaultMnemonicLength = 24,
   isSubmitEnabled,
   translations,
-  suggestionList
+  suggestionList,
+  onPasteFromClipboard
 }: WalletSetupMnemonicVerificationStepProps): React.ReactElement => {
   const description = (
     <>
@@ -63,6 +64,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
     });
 
     onChange(newMnemonic);
+    onPasteFromClipboard?.();
   };
 
   return (

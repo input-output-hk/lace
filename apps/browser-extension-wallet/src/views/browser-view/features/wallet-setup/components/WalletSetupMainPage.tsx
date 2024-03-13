@@ -12,7 +12,8 @@ import {
   EnhancedAnalyticsOptInStatus,
   PostHogAction,
   postHogOnboardingActions,
-  PostHogProperties
+  PostHogProperties,
+  UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useLocalStorage } from '@hooks';
@@ -63,9 +64,19 @@ export const WalletSetupMainPage = (): ReactElement => {
   const handleAnalyticsChoice = async (isAccepted: boolean) => {
     const analyticsStatus = isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
     setDoesUserAllowAnalytics(analyticsStatus);
+    await analytics.setOptedInForEnhancedAnalytics(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
 
-    // TODO: https://input-output.atlassian.net/browse/LW-9761 send proper analytics
-    // The code removed here was sending analytics to PostHog and it's still useful. You can find it in git history of this file.
+    const postHogAnalyticsAgreeAction = postHogOnboardingActions.onboarding.ANALYTICS_AGREE_CLICK;
+    const postHogAnalyticsRejectAction = postHogOnboardingActions.onboarding.ANALYTICS_REJECT_CLICK;
+
+    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticsRejectAction;
+    const postHogProperties = {
+      // eslint-disable-next-line camelcase
+      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
+    };
+    await sendAnalytics({ postHogAction, postHogProperties });
   };
 
   const handleRestoreWallet = () => {
@@ -111,7 +122,15 @@ export const WalletSetupMainPage = (): ReactElement => {
         message={
           <>
             <span>{translate('analyticsConfirmationBanner.message')}</span>
-            <span className={styles.learnMore} onClick={() => setIsAnalyticsModalOpen(true)}>
+            <span
+              className={styles.learnMore}
+              onClick={() => {
+                setIsAnalyticsModalOpen(true);
+                sendAnalytics({
+                  postHogAction: postHogOnboardingActions.onboarding.LEARN_MORE_CLICK
+                });
+              }}
+            >
               {translate('analyticsConfirmationBanner.learnMore')}
             </span>
           </>
@@ -125,7 +144,12 @@ export const WalletSetupMainPage = (): ReactElement => {
         content={<WalletAnalyticsInfo />}
         visible={isAnalyticsModalOpen}
         confirmLabel={translate('core.walletAnalyticsInfo.gotIt')}
-        onConfirm={() => setIsAnalyticsModalOpen(false)}
+        onConfirm={() => {
+          setIsAnalyticsModalOpen(false);
+          sendAnalytics({
+            postHogAction: postHogOnboardingActions.onboarding.GOT_IT_CLICK
+          });
+        }}
       />
     </>
   );
