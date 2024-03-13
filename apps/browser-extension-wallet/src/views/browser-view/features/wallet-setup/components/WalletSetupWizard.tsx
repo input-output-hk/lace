@@ -146,6 +146,7 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
+        analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
@@ -208,24 +209,14 @@ export const WalletSetupWizard = ({
           onChange={setMnemonic}
           onCancel={moveBack}
           onSubmit={moveForward}
-          onStepNext={(step: number) => {
-            /* eslint-disable no-magic-numbers */
-            switch (step) {
-              case 0:
-                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK);
-                break;
-              case 1:
-                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK);
-                break;
-              case 2:
-                sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK);
-            }
-          }}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
           suggestionList={wordList}
           defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
           onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
+          onPasteFromClipboard={() =>
+            sendAnalytics(postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+          }
         />
       );
     }
@@ -240,20 +231,27 @@ export const WalletSetupWizard = ({
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
             translations={mnemonicVideoPopupContentTranslations}
-            onClickVideo={() => {
-              // TODO: https://input-output.atlassian.net/browse/LW-9761 handle analytics here based on the stage argument
-            }}
             videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
-            onClose={onClose}
+            onClose={() => {
+              onClose();
+              sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK);
+            }}
           />
         )}
         onNext={moveForward}
-        onStepNext={() => {
-          // TODO: https://input-output.atlassian.net/browse/LW-9761 handle analytics here based on the stage argument
+        onStepNext={(mnemonicStage) => {
+          mnemonicStage === 'writedown'
+            ? sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
+            : sendAnalytics(postHogOnboardingActions.create.ENTER_WALLET);
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
+        onWatchVideoClick={() => sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)}
+        onCopyToClipboard={() => sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)}
+        onPasteFromClipboard={() =>
+          sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+        }
       />
     );
   };

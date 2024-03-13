@@ -3,9 +3,12 @@ import { WarningModal } from '@views/browser/components';
 import { useTranslate } from '@lace/core';
 import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 export const MultiAddressBalanceVisibleModal = (): ReactElement => {
   const { walletState } = useWalletStore();
+  const analytics = useAnalyticsContext();
   const [showMultiAddressModal, { updateLocalStorage: setShowMultiAddressModal }] = useLocalStorage(
     'showMultiAddressModal',
     walletState.addresses.length > 1
@@ -14,7 +17,7 @@ export const MultiAddressBalanceVisibleModal = (): ReactElement => {
 
   const handleCloseModal = () => {
     setShowMultiAddressModal(false);
-    // TODO: add analytics event https://input-output.atlassian.net/browse/LW-9761
+    analytics.sendEventToPostHog(PostHogAction.OnboardingMainViewMultiAddressModalGotItClick);
   };
 
   return (

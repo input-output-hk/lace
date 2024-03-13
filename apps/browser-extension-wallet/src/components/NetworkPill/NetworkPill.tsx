@@ -73,5 +73,5 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
       );
     }
     return <></>;
-  }, [isOnline, isBackendFailing, environmentName, t, isExpandable]);
+  }, [isOnline, isBackendFailing, environmentName, t, isExpandable]); // eslint-disable-line react-hooks/exhaustive-deps
 };
