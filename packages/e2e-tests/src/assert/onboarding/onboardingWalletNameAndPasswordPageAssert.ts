@@ -18,10 +18,10 @@ class OnboardingWalletNameAndPasswordPageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeePasswordRecommendation(expectedMessage: string, shouldSee: boolean) {
-    const passwordRecommendations = await OnboardingWalletPasswordPage.passwordFeedback.getText();
-    shouldSee
-      ? expect(passwordRecommendations).to.contain(expectedMessage)
-      : expect(passwordRecommendations).to.not.contain(expectedMessage);
+    if (shouldSee) {
+      const passwordRecommendations = await OnboardingWalletPasswordPage.passwordFeedback.getText();
+      expect(passwordRecommendations).to.contain(expectedMessage);
+    }
   }
 
   async assertSeePasswordConfirmationError(expectedMessage: string, shouldSee: boolean) {

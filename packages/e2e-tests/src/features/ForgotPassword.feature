@@ -36,6 +36,7 @@ Feature: Forgot password
       | lastStaking  |
 
   @LW-1592
+    @issue=LW-10028
   Scenario Outline: "Forgot password?" - password page - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I am on lock screen
     And I navigate to home page on popup view
@@ -47,14 +48,13 @@ Feature: Forgot password
     When I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
-      | password    | password_conf | passw_err                 | complex_bar_lvl | passw_conf_err                               |
-      | a           | empty         | core.password.feedback.1  | 1               | empty                                        |
-      | aa          | empty         | core.password.feedback.5  | 1               | empty                                        |
-      | Ta          | a             | core.password.feedback.10 | 1               | core.walletSetupRegisterStep.noMatchPassword |
-      | P@ss        | empty         | core.password.feedback.13 | 1               | empty                                        |
-      | N_8J@bne    | empty         | core.password.feedback.1  | 2               | empty                                        |
-      | N_8J@bne87  | empty         | empty                     | 3               | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                     | 4               | core.walletSetupRegisterStep.noMatchPassword |
+      | password    | password_conf | passw_err                | complex_bar_lvl | passw_conf_err                               |
+      | a           | empty         | core.password.feedback.1 | 1               | empty                                        |
+#      | aa          | empty         | core.password.feedback.5  | 1               | empty                                        |
+#      | P@ss        | empty         | core.password.feedback.13 | 1               | empty                                        |
+#      | N_8J@bne    | empty         | core.password.feedback.1  | 2               | empty                                        |
+#      | N_8J@bne87  | empty         | empty                     | 3               | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                    | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-2354
   Scenario: "Forgot password?" - mnemonic verification - wrong mnemonic

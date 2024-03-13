@@ -4,7 +4,7 @@ class OnboardingWalletPasswordPage extends CommonOnboardingElements {
   private SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
   private PASSWORD_INPUT = 'input[data-testid="wallet-password-verification-input"]';
   private PASSWORD_CONFIRM_INPUT = 'input[data-testid="wallet-password-confirmation-input"]';
-  private PASSWORD_CONFIRM_ERROR = '[data-testid="wallet-setup-register-password-conf-error"]';
+  private PASSWORD_CONFIRM_ERROR = '[data-testid="wallet-password-confirmation-input-error"]';
   private COMPLEXITY_BARS_ACTIVE = '[data-testid="bar-level-active"]';
   private PASSWORD_FEEDBACK = '[data-testid="password-feedback"]';
 
