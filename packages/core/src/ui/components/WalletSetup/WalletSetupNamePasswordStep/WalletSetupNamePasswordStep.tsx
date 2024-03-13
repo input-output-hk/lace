@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLayout';
+import { WalletTimelineSteps } from '../WalletSetupStepLayout';
 import { PasswordVerification } from '@lace/common';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
 import { useTranslate } from '@src/ui/hooks';
@@ -14,6 +14,7 @@ import {
 } from './utils';
 import { WalletNameInput } from './WalletNameInput';
 import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
+import { WalletSetupStepLayoutRevamp } from '../../WalletSetupRevamp';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
@@ -85,7 +86,7 @@ export const WalletSetupNamePasswordStep = ({
   };
 
   return (
-    <WalletSetupStepLayout
+    <WalletSetupStepLayoutRevamp
       title={t('package.core.walletNameAndPasswordSetupStep.title')}
       description={t('package.core.walletNameAndPasswordSetupStep.description')}
       onBack={onBack}
@@ -121,6 +122,6 @@ export const WalletSetupNamePasswordStep = ({
           shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
         />
       </div>
-    </WalletSetupStepLayout>
+    </WalletSetupStepLayoutRevamp>
   );
 };

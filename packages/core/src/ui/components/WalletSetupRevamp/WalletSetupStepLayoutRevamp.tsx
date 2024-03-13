@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import styles from '../WalletSetup//WalletSetupStepLayout.module.scss';
+import styles from './WalletSetupStepLayoutRevamp.module.scss';
 import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
