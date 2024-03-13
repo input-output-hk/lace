@@ -21,7 +21,7 @@ export interface WalletSetupProps {
   initialStep?: WalletSetupSteps;
 }
 
-export const WalletSetup = ({ initialStep = WalletSetupSteps.Register }: WalletSetupProps): React.ReactElement => {
+export const WalletSetup = ({ initialStep = WalletSetupSteps.Mnemonic }: WalletSetupProps): React.ReactElement => {
   const history = useHistory();
   const { path } = useRouteMatch();
   const analytics = useAnalyticsContext();

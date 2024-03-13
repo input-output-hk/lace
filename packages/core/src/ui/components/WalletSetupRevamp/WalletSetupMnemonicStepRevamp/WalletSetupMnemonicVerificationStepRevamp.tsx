@@ -22,9 +22,7 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onStepNext?: (currentStep: number) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
-  translations: TranslationsFor<
-    'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'enterWallet' | 'pasteFromClipboard'
-  >;
+  translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard'>;
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
   onSetMnemonicLength?: (length: number) => void;
@@ -77,7 +75,6 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
         </Button>
       }
       currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
-      nextLabel={translations.enterWallet}
       isNextEnabled={isSubmitEnabled}
     >
       <div className={styles.mnemonicContainer}>
