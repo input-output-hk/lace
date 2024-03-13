@@ -1,4 +1,4 @@
-@OnboardingCreateWallet @Testnet @Mainnet
+@OnboardingCreateWallet @Onboarding @Testnet @Mainnet
 Feature: Onboarding - Create wallet
 
   @LW-2426

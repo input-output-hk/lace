@@ -1,4 +1,4 @@
-@OnboardingHardwareWallet @Testnet @Mainnet
+@OnboardingHardwareWallet @Onboarding @Testnet @Mainnet
 Feature: Onboarding - Hardware wallet
 
   @LW-3367
