@@ -44,7 +44,7 @@ class AddressForm {
   }
 
   async enterAddress(address: string) {
-    await this.addressInput.waitForClickable();
+    await this.addressInput.waitForStable();
     await setInputFieldValue(await this.addressInput, address);
   }
 
