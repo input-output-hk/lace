@@ -33,16 +33,23 @@ export interface WalletSetupMnemonicStepProps {
   >;
   suggestionList?: Array<string>;
   passphraseInfoLink?: string;
+  onWatchVideoClick?: () => void;
   renderVideoPopupContent: (params: { onClose: () => void }) => React.ReactNode;
+  onCopyToClipboard?: () => void;
+  onPasteFromClipboard?: () => void;
 }
 
 export const WalletSetupMnemonicStepRevamp = ({
   mnemonic,
   onReset,
   onNext,
+  onStepNext,
   translations,
   suggestionList,
-  renderVideoPopupContent
+  renderVideoPopupContent,
+  onWatchVideoClick,
+  onCopyToClipboard,
+  onPasteFromClipboard
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
   const initialMnemonicWordsConfirm = useMemo(() => mnemonic.map(() => ''), [mnemonic]);
   const [mnemonicStage, setMnemonicStage] = useState<MnemonicStage>('writedown');
@@ -70,6 +77,7 @@ export const WalletSetupMnemonicStepRevamp = ({
     });
 
     setMnemonicWordsConfirm(newMnemonic);
+    onPasteFromClipboard();
   };
 
   const handleBack = () => {
@@ -77,6 +85,7 @@ export const WalletSetupMnemonicStepRevamp = ({
   };
 
   const handleNext = () => {
+    onStepNext && onStepNext(mnemonicStage);
     if (mnemonicStage === 'input') {
       onNext();
       return;
@@ -89,7 +98,14 @@ export const WalletSetupMnemonicStepRevamp = ({
     mnemonicStage === 'writedown' ? (
       <>
         {translations.writePassphraseSubtitle1}{' '}
-        <span onClick={() => setVideoModalOpen(true)} className={styles.link} data-testid="find-out-more-link">
+        <span
+          onClick={() => {
+            setVideoModalOpen(true);
+            onWatchVideoClick?.();
+          }}
+          className={styles.link}
+          data-testid="find-out-more-link"
+        >
           {translations.writePassphraseSubtitle2}
         </span>
         <Dialog.Root open={videoModalOpen} setOpen={setVideoModalOpen}>
@@ -114,7 +130,13 @@ export const WalletSetupMnemonicStepRevamp = ({
         currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
         customAction={
           mnemonicStage === 'writedown' ? (
-            <Button type="link" onClick={async () => await writeMnemonicToClipboard(mnemonic)}>
+            <Button
+              type="link"
+              onClick={async () => {
+                await writeMnemonicToClipboard(mnemonic);
+                onCopyToClipboard();
+              }}
+            >
               {translations.copyToClipboard}
             </Button>
           ) : (
