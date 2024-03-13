@@ -561,6 +561,12 @@ export const useWalletManager = (): UseWalletManager => {
         if (wallets.length > 0) {
           walletToDelete = wallets[0];
         } else {
+          if (isForgotPasswordFlow) {
+            // Forgot Password flow deletes the wallet.
+            // If wallet was never created in the repository due to migrating a locked wallet,
+            // then we have to delete the 'lock' instead of wallet in the repository
+            resetWalletLock();
+          }
           logger.warn('No wallet to delete');
           return;
         }
