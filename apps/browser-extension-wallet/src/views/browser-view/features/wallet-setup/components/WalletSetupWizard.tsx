@@ -30,6 +30,7 @@ import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
+import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -72,7 +73,7 @@ export const WalletSetupWizard = ({
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-
+  const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
@@ -105,7 +106,9 @@ export const WalletSetupWizard = ({
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
-    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
+    forgotPasswordTitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordTitle'),
+    forgotPasswordSubtitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordSubtitle')
   };
 
   const walletSetupModeStepTranslations = {
@@ -160,10 +163,10 @@ export const WalletSetupWizard = ({
   }, [currentStep]);
 
   const handleCompleteCreation = useCallback(
-    async (walletName, password) => {
+    async (name, password) => {
       try {
         const wallet = await createWallet({
-          name: walletName,
+          name,
           mnemonic,
           password,
           chainId: DEFAULT_CHAIN_ID
@@ -266,7 +269,12 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
       {currentStep === WalletSetupSteps.Register && (
-        <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleSubmit} />
+        <WalletSetupNamePasswordStep
+          onBack={moveBack}
+          onNext={handleSubmit}
+          initialWalletName={walletName}
+          isForgotPassword={setupType === SetupType.FORGOT_PASSWORD}
+        />
       )}
       {currentStep === WalletSetupSteps.Create && (
         <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />

@@ -101,7 +101,9 @@
       "nameRequiredMessage": "Wallet name is required",
       "noMatchPassword": "Oops! The passwords don't match.",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
-      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger.",
+      "forgotPasswordTitle": "Set up your new password",
+      "forgotPasswordSubtitle": "You'll use this to log into your wallet and make transactions."
     },
     "dappTransaction": {
       "asset": "Asset",

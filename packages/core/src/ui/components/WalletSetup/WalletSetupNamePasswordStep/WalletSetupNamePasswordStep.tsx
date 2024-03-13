@@ -20,6 +20,7 @@ export interface WalletSetupNamePasswordStepProps {
   onNext: (params: WalletSetupNamePasswordSubmitParams) => void;
   initialWalletName?: string;
   onChange?: (state: { name: string; password: string }) => void;
+  isForgotPassword?: boolean;
 }
 
 const INITIAL_WALLET_NAME = 'Wallet 1';
@@ -28,12 +29,14 @@ export const WalletSetupNamePasswordStep = ({
   onBack,
   onNext,
   initialWalletName = INITIAL_WALLET_NAME,
-  onChange
+  onChange,
+  isForgotPassword = false
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
   const { t } = useTranslate();
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
+
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
 
@@ -84,10 +87,17 @@ export const WalletSetupNamePasswordStep = ({
     onNext({ walletName, password });
   };
 
+  const title = isForgotPassword
+    ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
+    : t('package.core.walletNameAndPasswordSetupStep.title');
+  const subtitle = isForgotPassword
+    ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
+    : t('package.core.walletNameAndPasswordSetupStep.description');
+
   return (
     <WalletSetupStepLayout
-      title={t('package.core.walletNameAndPasswordSetupStep.title')}
-      description={t('package.core.walletNameAndPasswordSetupStep.description')}
+      title={title}
+      description={subtitle}
       onBack={onBack}
       onNext={handleNextButtonClick}
       isNextEnabled={isNextButtonEnabled()}
