@@ -12,8 +12,7 @@ class OnboardingCommonAssert {
 
   async assertSeeStepTitle(expectedTitle: string): Promise<void> {
     await this.commonOnboardingElements.stepTitle.waitForDisplayed();
-    const stepTitle = await this.commonOnboardingElements.stepTitle.getText();
-    expect(stepTitle).to.equal(expectedTitle);
+    expect(await this.commonOnboardingElements.stepTitle.getText()).to.equal(expectedTitle);
   }
 
   async assertSeeStepSubtitle(expectedSubtitle: string): Promise<void> {
