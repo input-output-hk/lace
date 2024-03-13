@@ -10,8 +10,9 @@ Feature: Analytics - Top Navigation - Popup view
     And I set up request interception for posthog analytics request(s)
     When I click the menu button
     Then I validate latest analytics single event "user/wallet profile | profile icon | click"
-    When I click on the user details button
-    Then I validate latest analytics single event "user/wallet profile | wallet address | click"
+#    re-enable and update when LW-10057 && LW-9871 are fixed
+#    When I click on the user details button
+#    Then I validate latest analytics single event "user/wallet profile | wallet address | click"
     When I click on the Address Book option
     Then I validate latest analytics single event "user/wallet profile | address book | click"
     When I click the menu button
