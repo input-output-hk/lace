@@ -40,7 +40,7 @@ export const getHWPersonProperties = async (
   // TODO: Remove these hardcoded specs once we have a logic that will prevent additional interaction with 3rd party Trezor Connect popup
   const trezorSpecificationsHC: HardwareWalletPersonProperties = {
     // We are only accepting Model T for now
-    model: `${WalletType.Trezor} model T`
+    model: 'Trezor model T'
   };
   const HWSpecifications =
     connectedDevice === WalletType.Trezor
