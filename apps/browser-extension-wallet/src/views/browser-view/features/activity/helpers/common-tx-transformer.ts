@@ -4,7 +4,7 @@
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
-import { inspectTxValues, inspectTxType, getVoterType, getVote } from '@src/utils/tx-inspection';
+import { inspectTxValues, getVoterType, getVote } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
@@ -16,7 +16,9 @@ import {
   TxDetailsVotingProceduresTitles,
   TxDetailsProposalProceduresTitles,
   ConwayEraCertificatesTypes,
-  TxDetail
+  TxDetail,
+  ActivityType,
+  TransactionActivityType
 } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
@@ -37,6 +39,7 @@ export interface TxTransformerInput {
   date: Date;
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
+  type: Exclude<ActivityType, TransactionActivityType.rewards>;
   resolveInput: Wallet.Cardano.ResolveInput;
 }
 
@@ -132,6 +135,7 @@ export const txTransformer = async ({
   date,
   direction,
   status,
+  type,
   resolveInput
 }: TxTransformerInput): Promise<TransformedTransactionActivity[]> => {
   const implicitCoin = util.computeImplicitCoin(protocolParameters, tx.body);
@@ -183,16 +187,6 @@ export const txTransformer = async ({
       status === Wallet.TransactionStatus.PENDING ? capitalize(Wallet.TransactionStatus.PENDING) : formattedDate,
     formattedTimestamp
   };
-
-  // Note that TxInFlight at type level does not expose its inputs with address,
-  // which would prevent `inspectTxType` from determining whether tx is incoming or outgoing.
-  // However at runtime, the "address" property is present (ATM) and the call below works.
-  // SDK Ticket LW-8767 should fix the type of Input in TxInFlight to contain the address
-  const type = await inspectTxType({
-    walletAddresses,
-    tx: tx as unknown as Wallet.Cardano.HydratedTx,
-    inputResolver: { resolveInput }
-  });
 
   if (type === DelegationActivityType.delegation) {
     return splitDelegationTx(baseTransformedActivity);

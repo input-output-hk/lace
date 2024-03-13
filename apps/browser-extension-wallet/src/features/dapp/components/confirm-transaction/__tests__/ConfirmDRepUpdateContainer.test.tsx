@@ -118,7 +118,7 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepUpdateContainer />, {
+      ({ queryByTestId } = render(<ConfirmDRepUpdateContainer tx={tx} />, {
         wrapper: getWrapper()
       }));
     });

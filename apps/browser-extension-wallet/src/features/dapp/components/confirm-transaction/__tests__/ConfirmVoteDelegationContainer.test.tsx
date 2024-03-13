@@ -124,9 +124,16 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
     const dRep = certificate.dRep;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer />, {
-        wrapper: getWrapper()
-      }));
+      ({ queryByTestId } = render(
+        <ConfirmVoteDelegationContainer
+          tx={buildMockTx({
+            certificates: [certificate]
+          })}
+        />,
+        {
+          wrapper: getWrapper()
+        }
+      ));
     });
 
     expect(queryByTestId('ConfirmVoteDelegation')).toBeInTheDocument();
@@ -179,9 +186,16 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
     }));
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer />, {
-        wrapper: getWrapper()
-      }));
+      ({ queryByTestId } = render(
+        <ConfirmVoteDelegationContainer
+          tx={buildMockTx({
+            certificates: [certificate]
+          })}
+        />,
+        {
+          wrapper: getWrapper()
+        }
+      ));
     });
 
     expect(queryByTestId('ConfirmVoteDelegation')).toBeInTheDocument();
@@ -233,9 +247,16 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
     }));
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmVoteDelegationContainer />, {
-        wrapper: getWrapper()
-      }));
+      ({ queryByTestId } = render(
+        <ConfirmVoteDelegationContainer
+          tx={buildMockTx({
+            certificates: [certificate]
+          })}
+        />,
+        {
+          wrapper: getWrapper()
+        }
+      ));
     });
 
     expect(queryByTestId('ConfirmVoteDelegation')).toBeInTheDocument();

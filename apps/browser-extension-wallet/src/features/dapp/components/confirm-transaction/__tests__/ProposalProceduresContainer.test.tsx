@@ -149,7 +149,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ProposalProceduresContainer />));
+      ({ queryByTestId } = render(<ProposalProceduresContainer tx={tx} />));
     });
 
     expect(queryByTestId('HardForkInitiationActionContainer')).toBeInTheDocument();

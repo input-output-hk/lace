@@ -201,7 +201,7 @@ describe('Testing VotingProceduresContainer component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<VotingProceduresContainer />, {
+      ({ queryByTestId } = render(<VotingProceduresContainer tx={tx} />, {
         wrapper: getWrapper()
       }));
     });
@@ -267,7 +267,7 @@ describe('Testing VotingProceduresContainer component', () => {
     }));
 
     await act(async () => {
-      render(<VotingProceduresContainer />, {
+      render(<VotingProceduresContainer tx={tx} />, {
         wrapper: getWrapper()
       });
     });
@@ -304,7 +304,7 @@ describe('Testing VotingProceduresContainer component', () => {
     }));
 
     await act(async () => {
-      render(<VotingProceduresContainer />, {
+      render(<VotingProceduresContainer tx={tx} />, {
         wrapper: getWrapper()
       });
     });

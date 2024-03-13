@@ -6,13 +6,14 @@ const mockGetFormattedAmount = jest.fn();
 /* eslint-disable no-magic-numbers */
 /* eslint-disable import/imports-first */
 import * as txTransformers from '../common-tx-transformer';
-import * as txHistoryTransformers from '../tx-history-transformer';
+// import * as txHistoryTransformers from '../tx-history-transformer';
 import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { cardanoCoin } from '@src/utils/constants';
 import * as txInspection from '@src/utils/tx-inspection';
 import type { TxDirections } from '@src/types';
+import { TransactionActivityType } from '@lace/core';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -89,7 +90,7 @@ describe('Testing txHistoryTransformer function', () => {
 
   test('should return parsed incoming tx', async () => {
     mockGetFormattedAmount.mockReturnValueOnce('20.00 ADA');
-    const result: any = await txHistoryTransformers.txHistoryTransformer({
+    const result: any = await txTransformers.txTransformer({
       tx: txHistory,
       walletAddresses: [
         {
@@ -109,7 +110,8 @@ describe('Testing txHistoryTransformer function', () => {
       fiatPrice: 1,
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
       cardanoCoin,
-      resolveInput: () => Promise.resolve(null)
+      resolveInput: () => Promise.resolve(null),
+      type: TransactionActivityType.incoming
     });
 
     expect(result[0].status).toBe('success');
@@ -118,7 +120,7 @@ describe('Testing txHistoryTransformer function', () => {
 
   test('should return parsed outgoing tx', async () => {
     mockGetFormattedAmount.mockReturnValueOnce('30.00 ADA');
-    const result: any = await txHistoryTransformers.txHistoryTransformer({
+    const result: any = await txTransformers.txTransformer({
       tx: txHistory,
       walletAddresses: [
         {
@@ -138,7 +140,8 @@ describe('Testing txHistoryTransformer function', () => {
       fiatPrice: 1,
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
       cardanoCoin,
-      resolveInput: () => Promise.resolve(null)
+      resolveInput: () => Promise.resolve(null),
+      type: TransactionActivityType.outgoing
     });
 
     expect(result[0].status).toBe('success');
@@ -157,7 +160,7 @@ describe('Testing txHistoryTransformer function', () => {
     const inspectTxTypeSpy = jest.spyOn(txInspection, 'inspectTxType');
     const getTxDirectionSpy = jest.spyOn(txInspection, 'getTxDirection').mockReturnValueOnce(direction as TxDirections);
 
-    const props = {
+    const props: any = {
       tx: txHistory,
       walletAddresses: [
         {
@@ -177,9 +180,10 @@ describe('Testing txHistoryTransformer function', () => {
       fiatPrice: 1,
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
       cardanoCoin,
-      resolveInput: () => Promise.resolve(null)
+      resolveInput: () => Promise.resolve(null),
+      type: TransactionActivityType.outgoing
     };
-    const result: any = await txHistoryTransformers.txHistoryTransformer(props);
+    const result: any = await txTransformers.txTransformer(props);
 
     expect(inspectTxTypeSpy).toBeCalledWith({
       inputResolver: { resolveInput: props.resolveInput },

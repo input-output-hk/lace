@@ -246,7 +246,7 @@ describe('Testing DappTransactionContainer component', () => {
     } as Wallet.Cip30SignTxSummary;
 
     await act(async () => {
-      ({ queryByTestId } = render(<DappTransactionContainer {...props} />, {
+      ({ queryByTestId } = render(<DappTransactionContainer tx={tx} {...props} />, {
         wrapper: getWrapper()
       }));
     });

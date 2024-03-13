@@ -40,63 +40,62 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
       return TxDirections.Outgoing;
     case TransactionActivityType.self:
       return TxDirections.Self;
+    // should we default to outgoing?
   }
 };
 
-const governanceCertificateInspection = (
-  certificates: Wallet.Cardano.Certificate[]
-): ConwayEraCertificatesTypes | ConwayEraGovernanceActions => {
+const governanceCertificateInspection = (certificates: Wallet.Cardano.Certificate[]): ConwayEraCertificatesTypes[] => {
   const signedCertificateTypenames: Wallet.Cardano.CertificateType[] = certificates.reduce(
     (acc, cert) => [...acc, cert.__typename],
     []
   );
-  // Assumes single certificate only, should update
+  const types: ConwayEraCertificatesTypes[] = [];
 
-  switch (true) {
-    case signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative):
-      // TODO: can we map to Cip30TxType instead?
-      return ConwayEraCertificatesTypes.RegisterDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative):
-      return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.UpdateDelegateRepresentative):
-      return ConwayEraCertificatesTypes.UpdateDelegateRepresentative;
-    case signedCertificateTypenames.includes(CertificateType.StakeVoteDelegation):
-      return ConwayEraCertificatesTypes.StakeVoteDelegation;
-    case signedCertificateTypenames.includes(CertificateType.StakeRegistrationDelegation):
-      return ConwayEraCertificatesTypes.StakeRegistrationDelegation;
-    case signedCertificateTypenames.includes(CertificateType.VoteRegistrationDelegation):
-      return ConwayEraCertificatesTypes.VoteRegistrationDelegation;
-    case signedCertificateTypenames.includes(CertificateType.VoteDelegation):
-      return ConwayEraCertificatesTypes.VoteDelegation;
-    case signedCertificateTypenames.includes(CertificateType.StakeVoteRegistrationDelegation):
-      return ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation;
-    case signedCertificateTypenames.includes(CertificateType.AuthorizeCommitteeHot):
-      return ConwayEraCertificatesTypes.AuthorizeCommitteeHot;
-    case signedCertificateTypenames.includes(CertificateType.ResignCommitteeCold):
-      return ConwayEraCertificatesTypes.ResignCommitteeCold;
-  }
+  if (signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative))
+    types.push(ConwayEraCertificatesTypes.RegisterDelegateRepresentative);
+  if (signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative))
+    types.push(ConwayEraCertificatesTypes.UnregisterDelegateRepresentative);
+  if (signedCertificateTypenames.includes(CertificateType.UpdateDelegateRepresentative))
+    types.push(ConwayEraCertificatesTypes.UpdateDelegateRepresentative);
+  if (signedCertificateTypenames.includes(CertificateType.StakeVoteDelegation))
+    types.push(ConwayEraCertificatesTypes.StakeVoteDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.StakeRegistrationDelegation))
+    types.push(ConwayEraCertificatesTypes.StakeRegistrationDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.VoteRegistrationDelegation))
+    types.push(ConwayEraCertificatesTypes.VoteRegistrationDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.VoteDelegation))
+    types.push(ConwayEraCertificatesTypes.VoteDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.StakeVoteRegistrationDelegation))
+    types.push(ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation);
+  if (signedCertificateTypenames.includes(CertificateType.AuthorizeCommitteeHot))
+    types.push(ConwayEraCertificatesTypes.AuthorizeCommitteeHot);
+  if (signedCertificateTypenames.includes(CertificateType.ResignCommitteeCold))
+    types.push(ConwayEraCertificatesTypes.ResignCommitteeCold);
+
+  return types;
 };
 
-// Assumes single procedure only
 export const cip1694GovernanceActionsInspection = (
   procedure: Wallet.Cardano.ProposalProcedure
-): Cip1694GovernanceActivityType => {
-  switch (procedure.governanceAction.__typename) {
-    case GovernanceActionType.parameter_change_action:
-      return Cip1694GovernanceActivityType.ParameterChangeAction;
-    case GovernanceActionType.hard_fork_initiation_action:
-      return Cip1694GovernanceActivityType.HardForkInitiationAction;
-    case GovernanceActionType.treasury_withdrawals_action:
-      return Cip1694GovernanceActivityType.TreasuryWithdrawalsAction;
-    case GovernanceActionType.no_confidence:
-      return Cip1694GovernanceActivityType.NoConfidence;
-    case GovernanceActionType.update_committee:
-      return Cip1694GovernanceActivityType.UpdateCommittee;
-    case GovernanceActionType.new_constitution:
-      return Cip1694GovernanceActivityType.NewConstitution;
-    case GovernanceActionType.info_action:
-      return Cip1694GovernanceActivityType.InfoAction;
-  }
+): Cip1694GovernanceActivityType[] => {
+  const types: Cip1694GovernanceActivityType[] = [];
+
+  if (procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action)
+    types.push(Cip1694GovernanceActivityType.ParameterChangeAction);
+  if (procedure.governanceAction.__typename === GovernanceActionType.hard_fork_initiation_action)
+    types.push(Cip1694GovernanceActivityType.HardForkInitiationAction);
+  if (procedure.governanceAction.__typename === GovernanceActionType.treasury_withdrawals_action)
+    types.push(Cip1694GovernanceActivityType.TreasuryWithdrawalsAction);
+  if (procedure.governanceAction.__typename === GovernanceActionType.no_confidence)
+    types.push(Cip1694GovernanceActivityType.NoConfidence);
+  if (procedure.governanceAction.__typename === GovernanceActionType.update_committee)
+    types.push(Cip1694GovernanceActivityType.UpdateCommittee);
+  if (procedure.governanceAction.__typename === GovernanceActionType.new_constitution)
+    types.push(Cip1694GovernanceActivityType.NewConstitution);
+  if (procedure.governanceAction.__typename === GovernanceActionType.info_action)
+    types.push(Cip1694GovernanceActivityType.InfoAction);
+
+  return types;
 };
 
 const getWalletAccounts = (walletAddresses: Wallet.KeyManagement.GroupedAddress[]) =>
@@ -133,6 +132,7 @@ const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => async (t
   return !notOwnOutputs;
 };
 
+// TODO: inspectActionsTypes ?
 export const inspectTxType = async ({
   walletAddresses,
   tx,
@@ -141,7 +141,8 @@ export const inspectTxType = async ({
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
   inputResolver: Wallet.Cardano.InputResolver;
-}): Promise<Exclude<ActivityType, TransactionActivityType.rewards>> => {
+}): Promise<Exclude<ActivityType, TransactionActivityType.rewards>[]> => {
+  const types: Exclude<ActivityType, TransactionActivityType.rewards>[] = [];
   const { paymentAddresses, rewardAccounts } = getWalletAccounts(walletAddresses);
 
   const inspectionProperties = await createTxInspector({
@@ -158,7 +159,7 @@ export const inspectTxType = async ({
   })(tx);
 
   if (txIncludesConwayCertificates(tx.body.certificates)) {
-    return governanceCertificateInspection(tx.body.certificates);
+    types.push(...governanceCertificateInspection(tx.body.certificates));
   }
 
   const withRewardsWithdrawal = isTxWithRewardsWithdrawal(
@@ -167,28 +168,23 @@ export const inspectTxType = async ({
     tx.body.withdrawals
   );
 
-  if (inspectionProperties.sent.inputs.length > 0 || withRewardsWithdrawal) {
-    switch (true) {
-      case !!inspectionProperties.delegation[0]?.poolId:
-        return DelegationActivityType.delegation;
-      case inspectionProperties.stakeKeyRegistration.length > 0:
-        return DelegationActivityType.delegationRegistration;
-      case inspectionProperties.stakeKeyDeregistration.length > 0:
-        return DelegationActivityType.delegationDeregistration;
-      // Voting procedures take priority over proposals
-      // TODO: use proper inspector when available on sdk side (LW-9569)
-      case tx.body.votingProcedures?.length > 0:
-        return ConwayEraGovernanceActions.vote;
-      case tx.body.proposalProcedures?.length > 0:
-        return cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]);
-      case inspectionProperties.selfTransaction:
-        return TransactionActivityType.self;
-      default:
-        return TransactionActivityType.outgoing;
-    }
+  if (inspectionProperties.sent.inputs.length === 0 && !withRewardsWithdrawal) {
+    types.push(TransactionActivityType.incoming);
+    return types;
   }
 
-  return TransactionActivityType.incoming;
+  if (inspectionProperties.delegation[0]?.poolId) types.push(DelegationActivityType.delegation);
+  if (inspectionProperties.stakeKeyRegistration.length > 0) types.push(DelegationActivityType.delegationRegistration);
+  if (inspectionProperties.stakeKeyDeregistration.length > 0)
+    types.push(DelegationActivityType.delegationDeregistration);
+  // TODO: use proper inspector when available on sdk side (LW-9569)
+  if (tx.body.votingProcedures?.length > 0) types.push(ConwayEraGovernanceActions.vote);
+  if (tx.body.proposalProcedures?.length > 0)
+    types.push(...cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]));
+  if (inspectionProperties.selfTransaction) types.push(TransactionActivityType.self);
+  if (types.length === 0) types.push(TransactionActivityType.outgoing);
+
+  return types;
 };
 
 export const inspectTxValues = async ({

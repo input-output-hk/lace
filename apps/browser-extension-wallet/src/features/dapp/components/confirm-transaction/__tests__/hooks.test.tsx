@@ -6,7 +6,6 @@
 
 const mockPubDRepKeyToHash = jest.fn();
 const mockDisallowSignTx = jest.fn();
-const mockAllowSignTx = jest.fn();
 const mockEstablishDeviceConnection = jest.fn();
 const mockGetTransactionAssetsId = jest.fn();
 const mockGetAssetsInformation = jest.fn();
@@ -59,8 +58,7 @@ jest.mock('../utils.ts', () => {
     __esModule: true,
     ...original,
     pubDRepKeyToHash: mockPubDRepKeyToHash,
-    disallowSignTx: mockDisallowSignTx,
-    allowSignTx: mockAllowSignTx
+    disallowSignTx: mockDisallowSignTx
   };
 });
 
@@ -97,6 +95,23 @@ jest.mock('@lace/cardano', () => {
     }
   };
 });
+
+const mockSign = jest.fn().mockImplementation(async () => mockEstablishDeviceConnection());
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useViewsFlowContext: () => ({
+    signTxRequest: {
+      request: {
+        sign: mockSign as any,
+        requestContext: {} as any,
+        reject: jest.fn(),
+        signContext: {} as any,
+        transaction: {} as any,
+        walletType: WalletType.Ledger
+      } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
+    }
+  })
+}));
 
 const _listeners: { type: string; listener: EventListenerOrEventListenerObject }[] = [];
 
@@ -235,17 +250,7 @@ describe('Testing hooks', () => {
     const useRedirectionSpy = jest.spyOn(hooks, 'useRedirection').mockImplementation(() => redirectToSignFailure);
     mockEstablishDeviceConnection.mockReset();
     mockEstablishDeviceConnection.mockImplementation(async () => await true);
-    const mockSign = jest.fn().mockImplementation(async () => mockEstablishDeviceConnection());
-    const hook = renderHook(() =>
-      useSignWithHardwareWallet({
-        sign: mockSign as any,
-        requestContext: {} as any,
-        reject: jest.fn(),
-        signContext: {} as any,
-        transaction: {} as any,
-        walletType: WalletType.Ledger
-      } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>)
-    );
+    const hook = renderHook(() => useSignWithHardwareWallet());
     await hook.waitFor(() => {
       expect(hook.result.current.isConfirmingTx).toBeFalsy;
       expect(useRedirectionSpy).toHaveBeenLastCalledWith(dAppRoutePaths.dappTxSignSuccess);

@@ -9,16 +9,17 @@ import { Skeleton } from 'antd';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
-export const ConfirmStakeVoteRegistrationDelegationContainer = (): React.ReactElement => {
+export const ConfirmStakeVoteRegistrationDelegationContainer = ({
+  tx
+}: {
+  tx: Wallet.Cardano.Tx<Wallet.Cardano.TxBody>;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const {
     walletUI: { cardanoCoin },
     currentChain
   } = useWalletStore();
-  const {
-    signTxRequest: { request },
-    dappInfo
-  } = useViewsFlowContext();
+  const { dappInfo } = useViewsFlowContext();
   const [certificate, setCertificate] = useState<Wallet.Cardano.StakeVoteRegistrationDelegationCertificate>();
 
   useEffect(() => {
@@ -26,12 +27,12 @@ export const ConfirmStakeVoteRegistrationDelegationContainer = (): React.ReactEl
       const txCertificate =
         await certificateInspectorFactory<Wallet.Cardano.StakeVoteRegistrationDelegationCertificate>(
           CertificateType.StakeVoteRegistrationDelegation
-        )(request.transaction.toCore());
+        )(tx);
       setCertificate(txCertificate);
     };
 
     getCertificateData();
-  }, [request]);
+  }, [tx]);
 
   if (!certificate) {
     return <Skeleton loading />;
