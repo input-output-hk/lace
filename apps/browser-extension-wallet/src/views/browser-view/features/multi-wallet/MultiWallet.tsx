@@ -70,7 +70,15 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
         }
       }
     }),
-    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$, t, analytics]
+    [
+      connectHardwareWallet,
+      createHardwareWallet,
+      disconnectHardwareWallet$,
+      shouldShowDialog$,
+      t,
+      analytics,
+      walletRepository
+    ]
   );
 
   useEffect(() => {
