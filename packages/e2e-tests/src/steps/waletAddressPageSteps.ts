@@ -38,7 +38,7 @@ When(/^I see address card for handle: "([^"]*)"$/, async (handleName: string) =>
 When(
   /^I validate that handle: "([^"]*)" (is|is not) listed on the Receive screen$/,
   async (handleName: string, shouldBeListed: 'is' | 'is not') => {
-    await MenuHeader.receiveButton.waitForDisplayed();
+    await MenuHeader.receiveButton.waitForClickable();
     await MenuHeader.receiveButton.click();
     await walletAddressPageAssert.assertSeeAdaHandleAddressCardWithName(handleName, shouldBeListed === 'is');
     await simpleTxSideDrawerPageObject.clickCloseDrawerButton();

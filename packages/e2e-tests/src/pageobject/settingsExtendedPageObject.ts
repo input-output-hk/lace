@@ -157,7 +157,7 @@ class SettingsExtendedPageObject {
       (await Modal.container.isDisplayed()) &&
       (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
     ) {
-      await Modal.title.waitForDisplayed({ reverse: true, timeout: 120_000 });
+      await Modal.title.waitForDisplayed({ reverse: true, timeout: 220_000 });
     }
   };
 

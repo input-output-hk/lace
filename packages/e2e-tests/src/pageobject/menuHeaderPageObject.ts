@@ -42,6 +42,7 @@ class MenuHeaderPageObject {
   }
 
   async clickNetworkOption() {
+    await MenuHeader.menuNetworkLabel.waitForStable();
     await MenuHeader.menuNetworkLabel.click();
   }
 

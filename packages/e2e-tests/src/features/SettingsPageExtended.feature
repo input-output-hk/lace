@@ -348,6 +348,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Create" button on wallet setup page
     And I am on "All done" page
@@ -360,6 +361,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Restore" button and confirm
     And I am on "All done!" page from "Restore wallet" using "TAWalletNoFunds" wallet
@@ -374,6 +376,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     And I expect wallet repository and local storage to be empty
     And Mnemonic is not stored in background storage

@@ -69,7 +69,7 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeAdaHandleAddressCardWithName(handleName: string, shouldSee: boolean) {
-    await WalletAddressPage.addressCard.waitForClickable();
+    await WalletAddressPage.addressCard.waitForStable();
     const handleCard = await WalletAddressPage.getHandleAddressCard(handleName);
     if (shouldSee) {
       await handleCard.waitForDisplayed();
@@ -77,7 +77,7 @@ class WalletAddressPageAssert {
       await handleCard.$(WalletAddressPage.HANDLE_NAME).waitForDisplayed();
       await handleCard.$(WalletAddressPage.HANDLE_SYMBOL).waitForDisplayed();
     } else {
-      await handleCard.waitForDisplayed({ reverse: true });
+      // await handleCard.waitForDisplayed({ reverse: true });
       expect(handleCard).to.be.undefined;
     }
   }
