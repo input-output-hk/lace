@@ -3,6 +3,7 @@ import React from 'react';
 import * as RadixRadioGroup from '@radix-ui/react-radio-group';
 import cn from 'classnames';
 
+import { Button } from '..';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Tooltip } from '../tooltip';
@@ -91,9 +92,13 @@ export const RadioButtonGroup = ({
                 )}
                 {Icon !== undefined && value === selectedValue && (
                   <Flex justifyContent="flex-end" className={cx.iconWrapper}>
-                    <div className={cx.icon} onClick={onIconClick}>
+                    <button
+                      className={cx.iconButton}
+                      disabled={disabled}
+                      onClick={onIconClick}
+                    >
                       <Icon />
-                    </div>
+                    </button>
                   </Flex>
                 )}
               </Flex>

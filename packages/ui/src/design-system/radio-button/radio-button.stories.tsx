@@ -71,7 +71,9 @@ const MainComponents = (): JSX.Element => {
     {
       options: getOptions(1, label, icon),
       disabled: true,
-      onValueChange: (): undefined => undefined,
+      onValueChange: () => {
+        console.log('test');
+      },
     },
     {
       options: getOptions(1, label, icon),

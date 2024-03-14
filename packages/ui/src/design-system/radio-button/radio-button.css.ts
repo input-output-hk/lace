@@ -123,8 +123,9 @@ export const iconWrapper = style([
   },
 ]);
 
-export const icon = style([
+export const iconButton = style([
   sx({
+    backgroundColor: '$transparent',
     borderRadius: '$small',
     ml: '$24',
     color: '$radiobutton_icon_color',
@@ -137,9 +138,11 @@ export const icon = style([
       backgroundColor: vars.colors.$radiobutton_focus_color,
     },
 
-    ':hover': {
-      border: `1px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
-      backgroundColor: vars.colors.$radiobutton_icon_hover_color,
+    selectors: {
+      ['&:not(:disabled):hover']: {
+        border: `1px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+        backgroundColor: vars.colors.$radiobutton_icon_hover_color,
+      },
     },
 
     ':disabled': {
