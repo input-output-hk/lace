@@ -141,7 +141,6 @@ const List = ({
       selectedValue={value}
       options={options}
       onValueChange={(value: React.SetStateAction<string>): void => {
-        console.log('xxx value=', value);
         setValue(value);
       }}
     />

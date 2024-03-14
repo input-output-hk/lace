@@ -34,7 +34,6 @@ export const RadioButtonGroup = ({
   ...props
 }: Readonly<RadioButtonGroupProps>): JSX.Element => {
   const hasIcon = options.some(({ icon }) => Boolean(icon));
-  console.log({ hasIcon });
 
   return (
     <Box className={cn(className, cx.root)}>
