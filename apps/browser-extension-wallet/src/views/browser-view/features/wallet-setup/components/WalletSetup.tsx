@@ -1,10 +1,4 @@
-import {
-  useTranslate,
-  WalletSetupOptionsStep,
-  WalletSetupSteps,
-  WalletSetupFlowProvider,
-  WalletSetupFlow
-} from '@lace/core';
+import { WalletSetupOptionsStep, WalletSetupSteps, WalletSetupFlowProvider, WalletSetupFlow } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   PostHogAction,
@@ -24,6 +18,7 @@ import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import styles from './WalletSetup.module.scss';
 import { WalletSetupWizard } from './WalletSetupWizard';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
+import { useTranslation, Trans } from 'react-i18next';
 const userIdService = getUserIdService();
 
 // This initial step is needed for configure the step that we want to snapshot
@@ -37,7 +32,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   const [isConfirmRestoreOpen, setIsConfirmRestoreOpen] = useState(false);
   const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
   const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
-  const { t: translate, Trans } = useTranslate();
+  const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
 
   const walletSetupOptionsStepTranslations = {

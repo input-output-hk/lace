@@ -128,17 +128,17 @@ class DAppConnectorAssert {
   async assertSeeAuthorizePagePermissions() {
     await AuthorizeDAppPage.permissionsTitle.waitForDisplayed();
     expect(await AuthorizeDAppPage.permissionsTitle.getText()).to.equal(
-      `${await t('package.core.authorizeDapp.title', 'core')}:`
+      `${await t('core.authorizeDapp.title', 'core')}:`
     );
 
     await AuthorizeDAppPage.permissionsList.waitForDisplayed();
     const currentTexts = await AuthorizeDAppPage.permissionsListItems.map(async (option) => await option.getText());
 
     const expectedTexts = [
-      await t('package.core.authorizeDapp.seeNetwork', 'core'),
-      await t('package.core.authorizeDapp.seeWalletUtxo', 'core'),
-      await t('package.core.authorizeDapp.seeWalletBalance', 'core'),
-      await t('package.core.authorizeDapp.seeWalletAddresses', 'core')
+      await t('core.authorizeDapp.seeNetwork', 'core'),
+      await t('core.authorizeDapp.seeWalletUtxo', 'core'),
+      await t('core.authorizeDapp.seeWalletBalance', 'core'),
+      await t('core.authorizeDapp.seeWalletAddresses', 'core')
     ];
 
     expect(currentTexts).to.have.all.members(expectedTexts);
@@ -290,7 +290,7 @@ class DAppConnectorAssert {
 
     await ConfirmTransactionPage.transactionAmountTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionAmountTitle.getText()).to.equal(
-      await t('package.core.dappTransaction.sending', 'core')
+      await t('core.dappTransaction.sending', 'core')
     );
 
     await ConfirmTransactionPage.transactionAmountValue.waitForDisplayed();
@@ -298,7 +298,7 @@ class DAppConnectorAssert {
 
     await ConfirmTransactionPage.transactionFeeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionFeeTitle.getText()).to.equal(
-      await t('package.core.activityDetails.transactionFee', 'core')
+      await t('core.activityDetails.transactionFee', 'core')
     );
     await ConfirmTransactionPage.transactionFeeTooltipIcon.waitForDisplayed();
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();

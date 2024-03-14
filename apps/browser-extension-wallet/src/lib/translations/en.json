@@ -574,7 +574,7 @@
     "voting.snapshotExplanation": "A snapshot is taken to see which wallets are eligible to vote, <b>you need at least {{amount}}ADA to participate</b>",
     "voting.voteForChallenges": "Browse through the different proposals and challenges in the Catalyst app and vote for them",
     "voting.votePrompt": "Go vote!",
-    "voting.voting.canNotParticipate": "Can't participate",
+    "voting.canNotParticipate": "Can't participate",
     "sendReceive": {
       "sendAndReceiveAssetsAtTheSpeedOfLightPart1": "Send and receive assets",
       "sendAndReceiveAssetsAtTheSpeedOfLightPart2": "at the speed of light",

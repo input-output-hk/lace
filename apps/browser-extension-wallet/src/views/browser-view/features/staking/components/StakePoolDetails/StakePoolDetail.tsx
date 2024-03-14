@@ -14,8 +14,9 @@ import { useWalletStore } from '@src/stores';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { StakePoolCardProgressBar, utils } from '@lace/staking';
+import { TranslationKey } from '@lib/translations/types';
 
-const listItem = [
+const listItem: TranslationKey[] = [
   'browserView.staking.details.clickOnAPoolFromTheListInTheMainPage',
   'browserView.staking.details.clickOnTheStakeToThisPoolButtonInTheDetailPage',
   'browserView.staking.details.followTheIstructionsInTheStakingFlow'

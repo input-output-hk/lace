@@ -14,8 +14,8 @@ export const Collateral = ({ collateral, amountTransformer, coinSymbol }: Props)
     <TransactionSummary.Amount
       amount={`${collateral} ${coinSymbol}`}
       fiatPrice={amountTransformer(collateral)}
-      label={t('package.core.activityDetails.collateral')}
-      tooltip={t('package.core.activityDetails.collateralInfo')}
+      label={t('core.activityDetails.collateral')}
+      tooltip={t('core.activityDetails.collateralInfo')}
     />
   );
 };

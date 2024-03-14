@@ -22,13 +22,13 @@ Feature: Send Simple Transactions - Extended view - E2E
     When I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransactionE2E" address
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransactionE2E" address
     When I open wallet: "WalletReceiveSimpleTransactionE2E" in: extended mode
     And Wallet is synced
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransactionE2E" address
+    Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransactionE2E" address
 
   @LW-4677
   Scenario: Extended-view - Self Transaction E2E

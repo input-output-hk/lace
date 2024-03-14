@@ -5,6 +5,7 @@ import { DappTransactionFail } from '../components/DappTransactionFail';
 import { IViewAction, IViewState } from '../../../providers';
 import { DappConfirmData as ConfirmData } from '../components/ConfirmData';
 import { SignData } from '../components/SignData';
+import { TranslationKey } from '@lib/translations/types';
 export enum DAPP_VIEWS {
   CONNECT = 'connect',
   CONFIRM_TX = 'confirm-tx',
@@ -74,12 +75,12 @@ export const signDataViewsFlowState: IViewState<DAPP_VIEWS> = {
   }
 };
 
-export const sectionTitle: Record<string, string> = {
+export const sectionTitle: Record<DAPP_VIEWS, TranslationKey> = {
   [DAPP_VIEWS.CONNECT]: 'dapp.connect.header',
   [DAPP_VIEWS.CONFIRM_TX]: 'dapp.confirm.header',
   [DAPP_VIEWS.TX_SIGN]: 'dapp.sign.header',
   [DAPP_VIEWS.TX_SIGN_SUCCESS]: 'dapp.sign.success.header',
   [DAPP_VIEWS.TX_SIGN_FAILURE]: 'dapp.sign.failure.header',
-  [DAPP_VIEWS.CONFIRM_DATA]: 'dapp.confirm.header.confirmData',
-  [DAPP_VIEWS.SIGN_DATA]: 'dapp.confirm.header.signData'
+  [DAPP_VIEWS.CONFIRM_DATA]: 'dapp.confirmData.header',
+  [DAPP_VIEWS.SIGN_DATA]: 'dapp.signData.header'
 };

@@ -1,4 +1,6 @@
-export const passwordTranslationMap: Record<string, string> = {
+import { TranslationKey } from '@lib/translations/types';
+
+export const passwordTranslationMap: Record<string, TranslationKey> = {
   'feedback.1': 'core.password.feedback.1',
   'feedback.2': 'core.password.feedback.2',
   'feedback.3': 'core.password.feedback.3',

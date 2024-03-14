@@ -1,10 +1,11 @@
-import { WalletSetupOptionsStep, useTranslate } from '@lace/core';
+import { WalletSetupOptionsStep } from '@lace/core';
 import { walletRoutePaths } from '@routes';
 import React from 'react';
 import { useHistory } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 export const Home = (): JSX.Element => {
-  const { t: translate } = useTranslate();
+  const { t: translate } = useTranslation();
   const history = useHistory();
 
   const walletSetupOptionsStepTranslations = {

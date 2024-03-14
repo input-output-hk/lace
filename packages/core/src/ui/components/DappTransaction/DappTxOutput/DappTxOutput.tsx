@@ -16,7 +16,7 @@ export const DappTxOutput = ({ recipient, coins, assets }: DappTxOutputProps): R
     <div className={styles.body}>
       <div className={styles.detail}>
         <div data-testid="dapp-transaction-amount-title" className={styles.title}>
-          {t('package.core.dappTransaction.sending')}
+          {t('core.dappTransaction.sending')}
         </div>
         <div className={styles.value}>
           <div data-testid="dapp-transaction-amount-value" className={styles.bold}>
@@ -31,7 +31,7 @@ export const DappTxOutput = ({ recipient, coins, assets }: DappTxOutputProps): R
       </div>
       <div className={styles.detail}>
         <div data-testid="dapp-transaction-recipient-title" className={styles.title}>
-          {t('package.core.dappTransaction.recipient')}
+          {t('core.dappTransaction.recipient')}
         </div>
         <div data-testid="dapp-transaction-recipient-address" className={styles.value}>
           <Ellipsis className={styles.rightAligned} text={recipient} ellipsisInTheMiddle />

@@ -41,10 +41,7 @@ export const DappTransaction = ({
       <div data-testid="dapp-transaction-container" className={styles.details}>
         {type === Wallet.Cip30TxType.Mint && mintedAssets?.length > 0 && (
           <>
-            <DappTxHeader
-              title={t('package.core.dappTransaction.transaction')}
-              subtitle={t('package.core.dappTransaction.mint')}
-            />
+            <DappTxHeader title={t('core.dappTransaction.transaction')} subtitle={t('core.dappTransaction.mint')} />
             {mintedAssets.map((asset) => (
               <DappTxAsset key={asset.name} {...asset} />
             ))}
@@ -53,8 +50,8 @@ export const DappTransaction = ({
         {type === Wallet.Cip30TxType.Mint && burnedAssets?.length > 0 && (
           <>
             <DappTxHeader
-              title={burnedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
-              subtitle={t('package.core.dappTransaction.burn')}
+              title={burnedAssets?.length > 0 ? undefined : t('core.dappTransaction.transaction')}
+              subtitle={t('core.dappTransaction.burn')}
             />
             {burnedAssets.map((asset) => (
               <DappTxAsset key={asset.name} {...asset} />
@@ -63,10 +60,7 @@ export const DappTransaction = ({
         )}
         {type === Wallet.Cip30TxType.Send && (
           <>
-            <DappTxHeader
-              title={t('package.core.dappTransaction.transaction')}
-              subtitle={t('package.core.dappTransaction.send')}
-            />
+            <DappTxHeader title={t('core.dappTransaction.transaction')} subtitle={t('core.dappTransaction.send')} />
             {outputs.map((output) => (
               <DappTxOutput key={output.recipient} {...output} />
             ))}
