@@ -50,10 +50,6 @@ export const radioGroupItem = style([
     },
 
     selectors: {
-      // '&[data-state=unchecked]': {
-      //   border: 'none',
-      //   outline: `none`,
-      // },
       '&[data-state=checked]': {
         border: 'none',
         outline: `1px solid ${vars.colors.$radiobutton_indicator_backgroundColor}`,
