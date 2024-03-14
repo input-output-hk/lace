@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null */
-import isNumber from 'lodash/isNumber';
+import isEqual from 'lodash/isEqual';
 import { Wallet } from '@lace/cardano';
-import { StateStatus, StakePoolSearchSlice, BlockchainProviderSlice, ZustandHandlers, SliceCreator } from '../types';
+import { BlockchainProviderSlice, SliceCreator, StakePoolSearchSlice, StateStatus, ZustandHandlers } from '../types';
 
 const defaultFetchLimit = 100;
 
@@ -12,6 +12,7 @@ const fetchStakePools =
   }: ZustandHandlers<StakePoolSearchSlice & BlockchainProviderSlice>): StakePoolSearchSlice['fetchStakePools'] =>
   async ({ searchString, skip = 0, limit = defaultFetchLimit, sort }) => {
     const { totalResultCount: prevTotalCount, pageResults: prevPageResults } = get().stakePoolSearchResults || {};
+    const prevSort = get().stakePoolSearchResults.searchFilters;
     set({ stakePoolSearchResultsStatus: StateStatus.LOADING });
 
     let filtersValues = [];
@@ -48,10 +49,10 @@ const fetchStakePools =
     };
     const { totalResultCount, pageResults } = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
 
-    const stakePools: (Wallet.Cardano.StakePool | undefined)[] =
-      isNumber(prevTotalCount) && totalResultCount === prevTotalCount
-        ? [...prevPageResults]
-        : Array.from({ length: totalResultCount });
+    const paginating = isEqual(prevSort, sort) && prevTotalCount === totalResultCount;
+    const stakePools: (Wallet.Cardano.StakePool | undefined)[] = paginating
+      ? [...prevPageResults]
+      : Array.from({ length: totalResultCount });
 
     if (pageResults.length > 0) {
       stakePools.splice(skip, pageResults?.length, ...pageResults);
