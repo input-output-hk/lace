@@ -34,6 +34,7 @@ export const RadioButtonGroup = ({
   ...props
 }: Readonly<RadioButtonGroupProps>): JSX.Element => {
   const hasIcon = options.some(({ icon }) => Boolean(icon));
+  console.log({ hasIcon });
 
   return (
     <Box className={cn(className, cx.root)}>
@@ -42,11 +43,12 @@ export const RadioButtonGroup = ({
         value={selectedValue}
         disabled={disabled}
         onValueChange={onValueChange}
-        className={cx.radioGroupRootWithIcon[hasIcon ? 'withIcon' : 'default']}
+        className={cx.radioGroupRoot[hasIcon ? 'withIcon' : 'default']}
       >
         {options.map(
           ({ value, label, icon: Icon, onIconClick, tooltipText = '' }) => {
-            const labelContent = label && (
+            const hasLabel = !!label;
+            const labelContent = hasLabel && (
               <label
                 id={`radio-btn-label-id-${value}`}
                 htmlFor={`radio-btn-control-id-${value}`}
@@ -65,11 +67,12 @@ export const RadioButtonGroup = ({
               <Flex
                 alignItems="center"
                 key={value}
-                className={cn({
-                  [`${cx.radioGroupItemWrapper} ${cx.radioGroupItemWrapperSelector}`]:
-                    !!label,
-                  [cx.withIcon]: hasIcon,
-                })}
+                className={cn(
+                  cx.radioGroupItemWrapper[hasLabel ? 'withLabel' : 'default'],
+                  {
+                    [cx.withIcon]: hasIcon,
+                  },
+                )}
               >
                 <RadixRadioGroup.Item
                   id={`radio-btn-control-id-${value}`}

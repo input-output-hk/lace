@@ -16,7 +16,7 @@ const radioGroupRootBase = style([
   },
 ]);
 
-export const radioGroupRootWithIcon = styleVariants({
+export const radioGroupRoot = styleVariants({
   default: [radioGroupRootBase],
   withIcon: [
     radioGroupRootBase,
@@ -26,8 +26,6 @@ export const radioGroupRootWithIcon = styleVariants({
     },
   ],
 });
-
-export const radioGroupItemWrapperSelector = style([]);
 
 export const withIcon = style([{ minHeight: 32 }]);
 
@@ -52,48 +50,46 @@ export const radioGroupItem = style([
     },
 
     selectors: {
+      // '&[data-state=unchecked]': {
+      //   border: 'none',
+      //   outline: `none`,
+      // },
       '&[data-state=checked]': {
         border: 'none',
-      },
-      ['&[data-state=checked]:focus::before']: {
-        content: '',
-        border: `3px solid ${vars.colors.$radiobutton_focus_color}`,
-        width: vars.spacing.$16,
-        height: vars.spacing.$16,
-        borderRadius: vars.radius.$circle,
-        background: 'transparent',
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-        pointerEvents: 'none',
-      },
-      [`${radioGroupItemWrapperSelector} &[data-state=checked]::before`]: {
-        content: 'none',
+        outline: `1px solid ${vars.colors.$radiobutton_indicator_backgroundColor}`,
       },
     },
   },
 ]);
 
-export const radioGroupItemWrapper = style([
-  {
-    position: 'relative',
-    selectors: {
-      [`&:has(${radioGroupItem}[data-state=checked]:focus)::after`]: {
-        content: '',
-        border: `3px solid ${vars.colors.$radiobutton_focus_color}`,
-        width: vars.spacing.$fill,
-        height: vars.spacing.$fill,
-        borderRadius: vars.radius.$tiny,
-        position: 'absolute',
-        padding: `${vars.spacing.$1} ${vars.spacing.$4}`,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        pointerEvents: 'none',
-      },
+const defaultStyle = style({
+  borderRadius: vars.radius.$circle,
+  selectors: {
+    [`&:has(${radioGroupItem}:focus-visible)`]: {
+      outlineColor: vars.colors.$radiobutton_focus_color,
+      outlineWidth: 3,
+      outlineStyle: 'solid',
     },
   },
-]);
+});
+
+export const radioGroupItemWrapper = styleVariants({
+  default: [defaultStyle],
+  withLabel: [
+    defaultStyle,
+    {
+      borderRadius: 1,
+      selectors: {
+        [`&:has(${radioGroupItem}:focus-visible)`]: {
+          outlineOffset: '4px',
+          outlineColor: vars.colors.$radiobutton_focus_color,
+          outlineWidth: 3,
+          outlineStyle: 'solid',
+        },
+      },
+    },
+  ],
+});
 
 export const radioGroupIndicator = style([
   sx({
