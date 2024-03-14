@@ -146,12 +146,12 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        analytics.sendAliasEvent();
+        void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        void analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+          void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         }
       }
     },
@@ -184,7 +184,7 @@ export const WalletSetupWizard = ({
 
         if (setupType === SetupType.FORGOT_PASSWORD) {
           deleteFromLocalStorage('isForgotPasswordFlow');
-          goToMyWallet(wallet);
+          void goToMyWallet(wallet);
         } else {
           moveForward();
         }
@@ -234,7 +234,7 @@ export const WalletSetupWizard = ({
             videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
             onClose={() => {
               onClose();
-              sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK);
+              void sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK);
             }}
           />
         )}
