@@ -14,6 +14,7 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import * as Text from '../typography';
 
 import { RadioButtonGroup } from './';
 
@@ -82,23 +83,31 @@ const MainComponents = (): JSX.Element => {
   return (
     <>
       <Variants.Row>
-        {getRow('').map(item => (
+        {getRow('').map((item, index) => (
           <Variants.Cell key={item.options[0].value}>
-            <RadioButtonGroup {...item} />
+            {index < 4 ? (
+              <RadioButtonGroup {...item} />
+            ) : (
+              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+            )}
           </Variants.Cell>
         ))}
       </Variants.Row>
       <Variants.Row>
-        {getRow().map(item => (
+        {getRow('').map(item => (
           <Variants.Cell key={item.options[0].value}>
             <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
           </Variants.Cell>
         ))}
       </Variants.Row>
       <Variants.Row>
-        {getRow().map(item => (
+        {getRow().map((item, index) => (
           <Variants.Cell key={item.options[0].value}>
-            <RadioButtonGroup {...item} />
+            {index < 4 ? (
+              <RadioButtonGroup {...item} />
+            ) : (
+              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+            )}
           </Variants.Cell>
         ))}
       </Variants.Row>
