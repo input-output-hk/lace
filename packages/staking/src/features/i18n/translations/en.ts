@@ -24,7 +24,7 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.sortAndFilter.input.to': 'To',
   'browsePools.stakePoolTableBrowser.sortByTitle.blocks': 'Blocks produced',
   'browsePools.stakePoolTableBrowser.sortByTitle.cost': 'Cost',
-  'browsePools.stakePoolTableBrowser.sortByTitle.livestake': 'Live stake',
+  'browsePools.stakePoolTableBrowser.sortByTitle.livestake': 'Live Stake',
   'browsePools.stakePoolTableBrowser.sortByTitle.margin': 'Margin',
   'browsePools.stakePoolTableBrowser.sortByTitle.performance': 'Performance',
   'browsePools.stakePoolTableBrowser.sortByTitle.pledge': 'Pledge',
