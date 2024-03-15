@@ -178,8 +178,8 @@ Then(/^"Get started" page is displayed$/, async () => {
   await OnboardingMainPageAssert.assertSeeMainPage();
 });
 
-Then(/^I accept analytics banner on "Get started" page$/, async () => {
-  await analyticsBanner.agreeButton.click();
+Then(/^I (accept|reject) analytics banner on "Get started" page$/, async (action: 'accept' | 'reject') => {
+  action === 'accept' ? await analyticsBanner.agreeButton.click() : await analyticsBanner.rejectButton.click();
 });
 
 Then(/^"Legal page" is displayed$/, async () => {
@@ -615,9 +615,9 @@ When(/^I restore previously changed mnemonic word$/, async () => {
 });
 
 Given(
-  /^I go to "Mnemonic verification" page from "(Create|Restore)" wallet$/,
-  async (flowType: 'Create' | 'Restore') => {
-    await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
+  /^I go to "Mnemonic verification" page from "(Create|Restore)" wallet with (correct|shuffled) mnemonics$/,
+  async (flowType: 'Create' | 'Restore', needShuffle: 'correct' | 'shuffled') => {
+    await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords, needShuffle === 'shuffled');
     await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage(flowType);
   }
 );

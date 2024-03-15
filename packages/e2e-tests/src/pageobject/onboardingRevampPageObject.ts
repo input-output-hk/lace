@@ -1,6 +1,7 @@
 import WalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
+import { shuffle } from '../utils/arrayUtils';
 
 class OnboardingRevampPageObject {
   private mnemonicWords: string[] = [];
@@ -9,10 +10,15 @@ class OnboardingRevampPageObject {
     return this.mnemonicWords;
   }
 
-  async goToMenmonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWords: string[] = []): Promise<void> {
+  async goToMenmonicVerificationPage(
+    flowType: 'Create' | 'Restore',
+    mnemonicWords: string[] = [],
+    needsShuffle = false
+  ): Promise<void> {
     await this.goToRecoveryPhrasePage();
     if (flowType === 'Create') {
       await this.collectMnemonicWords();
+      if (needsShuffle) await this.shuffleMnemonicWords();
       await this.enterMnemonicWords();
     } else {
       await this.enterMnemonicWords(mnemonicWords);
@@ -29,6 +35,10 @@ class OnboardingRevampPageObject {
   async collectMnemonicWords(): Promise<void> {
     this.mnemonicWords = await RecoveryPhrasePage.getMnemonicWordTexts();
     await WalletSetupPage.nextButton.click();
+  }
+
+  async shuffleMnemonicWords(): Promise<void> {
+    this.mnemonicWords = shuffle(this.mnemonicWords);
   }
 
   async clickEnterWalletButton(): Promise<void> {

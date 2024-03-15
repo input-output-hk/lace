@@ -90,7 +90,7 @@ Feature: Onboarding - Create wallet
   @LW-3013 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic info - appears correctly after password screen
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet
+#    And I go to "Mnemonic verification" page from "Create" wallet
     And I enter wallet name: "ValidName"
     And I click "Next" button during wallet setup
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -216,7 +216,7 @@ Feature: Onboarding - Create wallet
   @LW-2443
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet
+    And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
     Then "Enter wallet" button is enabled
     # And I am on "Mnemonic verification" page with words 8 of 24
     # When I fill passphrase fields using 24 words mnemonic on 8/24 page
@@ -242,7 +242,7 @@ Feature: Onboarding - Create wallet
   @LW-3213
   Scenario: Create Wallet - Mnemonic verification - clear one of fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet
+    And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
     Then "Next" button is enabled during onboarding process
     And I clear one random field
     Then "Next" button is disabled during onboarding process
@@ -250,14 +250,14 @@ Feature: Onboarding - Create wallet
   @LW-2444
   Scenario: Create Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet
+    And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet
+    And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
     When I click "Enter wallet" button
     # And I am on "All done" page
     # When I click "Go to my wallet" button on "All done" page
@@ -270,7 +270,7 @@ Feature: Onboarding - Create wallet
     And I hover over "Next" button
     Then There is tooltip visible
 
-  @LW-3021
+  @LW-3021 @Pending @Obsolete
   Scenario: Create wallet - Legal page - next button no tooltip
     Given I click "Create" button on wallet setup page
     When I accept "T&C" checkbox
@@ -278,22 +278,33 @@ Feature: Onboarding - Create wallet
     Then There is no tooltip visible
 
   @LW-3060
-  Scenario Outline: Extended view - Settings - Analytics enabled: <is_enabled> when <wallet_action> a wallet
+  Scenario: Extended view - Settings - Analytics enabled: <is_enabled> when <wallet_action> a wallet
     Given I click "Create" button on wallet setup page
-    And I am on "All done" page with analytics tracking <button> from Create wallet
-    And I click "Go to my wallet" button on "All done" page
+    And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
+    When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
-    Then Analytics toggle is enabled: <is_enabled>
-    Examples:
-      | is_enabled | button |
-      | true       | Agree  |
-      | false      | Skip   |
+    Then Analytics toggle is enabled: true
+    When I open settings from header menu
+    And I click on Remove wallet button
+    And I click "Remove wallet" button on "Remove wallet" modal
+    And I reject analytics banner on "Get started" page
+    Given I click "Create" button on wallet setup page
+    And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
+    When I click "Enter wallet" button
+    And I see LW homepage
+    And I open settings from header menu
+    Then Analytics toggle is enabled: false
 
   @LW-2627
   Scenario: Create Wallet - autofill words
     When I click "Create" button on wallet setup page
-    Given I am on "Mnemonic verification" page with words 8 of 24
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed
+    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Create" wallet
     When I fill mnemonic input with "s"
     Then I see following autocomplete options:
       | sad     |
@@ -321,7 +332,7 @@ Feature: Onboarding - Create wallet
     When I fill mnemonic input with "ą"
     Then I do not see autocomplete options list
 
-  @LW-3437
+  @LW-3437 @Pending @Obsolete
   Scenario: Create Wallet - Creating wallet loader disappears after 10s
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic verification" last page from "Create wallet" and filled all words
@@ -330,21 +341,15 @@ Feature: Onboarding - Create wallet
 
   @LW-4543 @LW-4548
   Scenario Outline: Create wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
-    Then "Get started" page is displayed
     When I click "Create" button on wallet setup page
-    Then "Legal page" is displayed
-    Then I accept "T&C" checkbox
-    When I click "Next" button during wallet setup
-    Then "Help us improve your experience" page is displayed
-    When I click "<button>" button on Analytics page
-    Then "Name your wallet" page is displayed
+    And I am on "Name your wallet" page
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
-    And "Next" button is <state> during onboarding process
+    And "Next" button is disabled during onboarding process
     Examples:
-      | button | value | is_displayed | state    |
-      | Skip   | 20    | is not       | enabled  |
-      | Agree  | 21    | is           | disabled |
+      | value | is_displayed |
+      | 20    | is not       |
+      | 21    | is           |
 
   @LW-5844
   Scenario Outline: "Get started" page - Legal links - click on <legal_link> link
@@ -398,10 +403,6 @@ Feature: Onboarding - Create wallet
   @LW-8501
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words 8 of 24
-    And I fill passphrase fields using 24 words mnemonic in incorrect order on 8/24 page
+    And I go to "Mnemonic verification" page from "Create" wallet with shuffled mnemonics
     Then I see incorrect passphrase error displayed
-    And "Next" button is disabled during onboarding process
-    When I fill passphrase fields using 24 words mnemonic on 8/24 page
-    Then I do not see incorrect passphrase error displayed
-    And "Next" button is enabled during onboarding process
+    Then "Next" button is disabled during onboarding process

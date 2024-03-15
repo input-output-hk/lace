@@ -8,6 +8,7 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
     await this.assertNextButtonEnabled(true);
     await this.assertNextButtonTextEquals(await t('core.walletSetupMnemonicStepRevamp.enterWallet'));
   }
+
   async assertSeeMnemonicVerificationPage(flowType: 'Create' | 'Restore') {
     const subtitle =
       flowType === 'Create'
@@ -26,6 +27,7 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
       )}`
     );
   }
+
   async assertSeeMnemonicWords() {
     expect(await recoveryPhrasePage.mnemonicWords.length).to.equal(24);
   }
