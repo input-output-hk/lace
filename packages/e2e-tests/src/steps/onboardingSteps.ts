@@ -22,8 +22,7 @@ import OnboardingMnemonicPageAssert from '../assert/onboarding/onboardingMnemoni
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
 import OnboardingRecoveryPhraseLengthPageAssert from '../assert/onboarding/onboardingRecoveryPhraseLengthPageAssert';
 import OnboardingWalletCreationPageAssert from '../assert/onboarding/onboardingWalletCreationPageAssert';
-import OnboardingWalletNamePage from '../elements/onboarding/walletNamePage';
-import OnboardingWalletPasswordPage from '../elements/onboarding/walletPasswordPage';
+import OnboardingWalletNameAndPasswordPage from '../elements/onboarding/walletNameAndPasswordPage';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
@@ -199,21 +198,21 @@ Then(/^"Help us improve your experience" page is displayed$/, async () => {
   await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
 });
 
-Then(/^"Mnemonic writedown" page is displayed with words (8|16|24) of 24$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicWriteDownPage(expectedWords);
-});
+// Then(/^"Mnemonic writedown" page is displayed with words (8|16|24) of 24$/, async (expectedWords: number) => {
+//   await OnboardingMnemonicPageAssert.assertSeeMnemonicWriteDownPage(expectedWords);
+// });
 
-Then(/^"Mnemonic verification" page is displayed with words (8|16|24) of 24$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 24);
-});
+// Then(/^"Mnemonic verification" page is displayed with words (8|16|24) of 24$/, async (expectedWords: number) => {
+//   await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 24);
+// });
 
-Then(/^"Mnemonic verification" page is displayed with words (8|12) of 12$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 12);
-});
+// Then(/^"Mnemonic verification" page is displayed with words (8|12) of 12$/, async (expectedWords: number) => {
+//   await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 12);
+// });
 
-Then(/^"Mnemonic verification" page is displayed with words (8|15) of 15$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 15);
-});
+// Then(/^"Mnemonic verification" page is displayed with words (8|15) of 15$/, async (expectedWords: number) => {
+//   await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 15);
+// });
 
 Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
   await OnboardingConnectHWPageAssert.assertSeeConnectHardwareWalletPage();
@@ -266,7 +265,7 @@ Given(/^I am on "Help us improve your experience" page$/, async () => {
 });
 
 Given(/^I am on "Name your wallet" page$/, async () => {
-  await OnboardingPageObject.openNameYourWalletPage();
+  // await OnboardingPageObject.openNameYourWalletPage();
   await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
 });
 
@@ -331,9 +330,9 @@ Given(
       ? OnboardingAnalyticsPage.skipButton.click()
       : OnboardingAnalyticsPage.nextButton.click());
     await OnboardingPageObject.fillWalletNameInput('Test wallet');
-    await OnboardingWalletNamePage.nextButton.click();
+    await OnboardingWalletNameAndPasswordPage.nextButton.click();
     await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
-    await OnboardingWalletPasswordPage.nextButton.click();
+    await OnboardingWalletNameAndPasswordPage.nextButton.click();
     await OnboardingMnemonicInfoPage.nextButton.click();
     switch (onboardingType) {
       case 'Create':
@@ -513,9 +512,9 @@ Then(/^I navigate to "Mnemonic info" page$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
   await OnboardingPageObject.openNameYourWalletPage();
   await OnboardingPageObject.fillWalletNameInput('ValidName');
-  await OnboardingWalletNamePage.nextButton.click();
+  await OnboardingWalletNameAndPasswordPage.nextButton.click();
   await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
-  await OnboardingWalletPasswordPage.nextButton.click();
+  await OnboardingWalletNameAndPasswordPage.nextButton.click();
 });
 
 Then(/^I see following autocomplete options:$/, async (options: DataTable) => {
@@ -616,9 +615,16 @@ When(/^I restore previously changed mnemonic word$/, async () => {
 });
 
 Given(
-  /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
+  /^I go to "Mnemonic verification" page from "(Create|Restore)" wallet$/,
   async (flowType: 'Create' | 'Restore') => {
     await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
+    await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage(flowType);
+  }
+);
+
+Given(
+  /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
+  async (flowType: 'Create' | 'Restore') => {
     await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage(flowType);
   }
 );

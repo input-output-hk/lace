@@ -5,7 +5,7 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Get started page displayed
     Then "Get started" page is displayed
 
-  @LW-2427
+  @LW-2427 @Pending @Obsolete
   Scenario: Create wallet - Legal page displayed
     Given I click "Create" button on wallet setup page
     Then "Legal page" is displayed
@@ -34,7 +34,7 @@ Feature: Onboarding - Create wallet
     When I click "Next" button during wallet setup
     Then "Help us improve your experience" page is displayed
 
-  @LW-4661
+  @LW-4661 @Pending @Obsolete
   Scenario: Create wallet - Help us improve your experience - Privacy Policy link
     Given I click "Create" button on wallet setup page
     And I am on "Lace terms of use" page and accept terms
@@ -42,7 +42,7 @@ Feature: Onboarding - Create wallet
     When I click on Privacy Policy link
     Then Privacy Policy is displayed in new tab
 
-  @LW-2432
+  @LW-2432 @Pending @Obsolete
   Scenario Outline: Create wallet - Help us improve your experience - <button> button
     Given I click "Create" button on wallet setup page
     And I am on "Lace terms of use" page and accept terms
@@ -57,9 +57,9 @@ Feature: Onboarding - Create wallet
   @LW-2433
   Scenario: Create Wallet - Name your wallet - back button
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Name your wallet" page is displayed
     When I click "Back" button during wallet setup
-    Then "Help us improve your experience" page is displayed
+    Then "Get started" page is displayed
 
   @LW-2434
   Scenario: Create Wallet - Name your wallet - next button disabled for empty wallet name
@@ -68,13 +68,14 @@ Feature: Onboarding - Create wallet
     When I enter wallet name: "empty"
     Then "Next" button is disabled during onboarding process
 
-  @LW-2975
+  @LW-2975 @Pending
+    @Issue=LW-10028
   Scenario Outline: Create Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Create" button on wallet setup page
     And I am on "Name your wallet" page
-    When I enter wallet name: "wallet"
-    When I click "Next" button during wallet setup
-    And I enter password: "<password>" and password confirmation: "<password_conf>"
+    When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
+#    When I click "Next" button during wallet setup
+#    And I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
       | password    | password_conf | passw_err                 | complex_bar_lvl | passw_conf_err                               |
@@ -86,10 +87,10 @@ Feature: Onboarding - Create wallet
       | N_8J@bne87  | empty         | empty                     | 3               | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                     | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
-  @LW-3013
+  @LW-3013 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic info - appears correctly after password screen
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And I go to "Mnemonic verification" page from "Create" wallet
     And I enter wallet name: "ValidName"
     And I click "Next" button during wallet setup
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -97,20 +98,20 @@ Feature: Onboarding - Create wallet
     Then "Mnemonic info" page is displayed
     And "Next" button is enabled during onboarding process
 
-  @LW-3014
+  @LW-3014 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic info - Back button click
     Given I navigate to "Mnemonic info" page
     When I click "Back" button during wallet setup
     Then "Wallet name and password" page is displayed in onboarding flow
 
-  @LW-3015
+  @LW-3015 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic info - Next button click
     Given I navigate to "Mnemonic info" page
     When I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 8 of 24
+#    Then "Mnemonic writedown" page is displayed with words 8 of 24
 
   @LW-1553
-  Scenario: Create Wallet - Mnemonic info - Subtitle link click
+  Scenario: Create Wallet - Mnemonic writedown - Subtitle link click
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic writedown" page
     When I click on "Watch video" link on "Mnemonic writedown" page
@@ -121,49 +122,48 @@ Feature: Onboarding - Create wallet
     Then I see a "FAQ" article with title "What is my recovery phrase?"
 
   @LW-2251
-  Scenario: Create Wallet - Mnemonic info - "Help and support" button click
-    Given I navigate to "Mnemonic info" page
+  Scenario: Create Wallet - Mnemonic writedown - "Help and support" button click
+    Given I click "Create" button on wallet setup page
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed
     When I click "Help and support" button during wallet setup
     Then I see "Help and support" page
 
   @LW-2435
-  Scenario: Create Wallet - Mnemonic writedown pages - next button
+  Scenario: Create Wallet - Mnemonic writedown page - next button
     Given I click "Create" button on wallet setup page
     And I am on "Name your wallet" page
-    And I enter wallet name: "ValidName"
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 8 of 24
+    Then "Mnemonic writedown" page is displayed
     When I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 16 of 24
-    When I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 24 of 24
+    Then "Mnemonic verification" page is displayed from "Create wallet" flow
 
-  @LW-2436
+  @LW-2436 @Pending @Obsolete
   Scenario Outline: Create Wallet - Mnemonic writedown - back button from <init_page> to <target_page> mnemonic writedown page
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic writedown" page with words <init_page> of 24
     When I click "Back" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words <target_page> of 24
+#    Then "Mnemonic writedown" page is displayed with words <target_page> of 24
     Examples:
       | init_page | target_page |
       | 16        | 8           |
       | 24        | 16          |
 
-  @LW-2437
+  @LW-2437 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic writedown - back button to start over and cancel
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic writedown" page with words 8 of 24
+    Then "Mnemonic writedown" page is displayed
     When I click "Back" button during wallet setup
     And I click "Cancel" button on "Are you sure you want to start again?" modal
-    Then "Mnemonic writedown" page is displayed with words 8 of 24
+#    Then "Mnemonic writedown" page is displayed with words 8 of 24
     And I save the words
     And Words 1 - 8 are the same
     And I clear saved words
 
-  @LW-2438
+  @LW-2438 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic writedown - back button to start over and new words
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic writedown" page with words 8 of 24
@@ -171,7 +171,7 @@ Feature: Onboarding - Create wallet
     And I click "OK" button on "Are you sure you want to start again?" modal
     Then "Mnemonic info" page is displayed
     When I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with words 8 of 24
+#    Then "Mnemonic writedown" page is displayed with words 8 of 24
     And I save the words
     And Words 1 - 8 are not the same
     And I clear saved words
@@ -179,31 +179,44 @@ Feature: Onboarding - Create wallet
   @LW-2439
   Scenario: Create Wallet - Mnemonic verification page displayed
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic writedown" page with words 24 of 24
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 8 of 24
+    Then "Mnemonic writedown" page is displayed
+    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Create" wallet
     And "Next" button is disabled during onboarding process
 
   @LW-2441
   Scenario: Create Wallet - Mnemonic verification - back button to start over and cancel
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words 8 of 24
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed
+    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Create" wallet
     And I click "Back" button during wallet setup
     When I click "Cancel" button on "Are you sure you want to start again?" modal
-    Then "Mnemonic verification" page is displayed with words 8 of 24
+    Then I am on "Mnemonic verification" page from "Create" wallet
 
   @LW-2442
   Scenario: Create Wallet - Mnemonic verification - back button to start over and new words
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words 8 of 24
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed
+    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Create" wallet
     And I click "Back" button during wallet setup
     When I click "OK" button on "Are you sure you want to start again?" modal
-    Then "Mnemonic writedown" page is displayed with words 8 of 24
+    Then "Mnemonic writedown" page is displayed
 
   @LW-2443
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page from "Create" wallet
+    And I go to "Mnemonic verification" page from "Create" wallet
     Then "Enter wallet" button is enabled
     # And I am on "Mnemonic verification" page with words 8 of 24
     # When I fill passphrase fields using 24 words mnemonic on 8/24 page
@@ -215,7 +228,7 @@ Feature: Onboarding - Create wallet
     # When I click "Next" button during wallet setup
     # Then "All done" page is displayed
 
-  @LW-3212
+  @LW-3212 @Pending @Obsolete
   Scenario Outline: Create Wallet - Mnemonic verification - all empty fields - next disabled - <init_page>
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic verification" page with words <init_page> of 24
@@ -227,36 +240,30 @@ Feature: Onboarding - Create wallet
       | 24        |
 
   @LW-3213
-  Scenario Outline: Create Wallet - Mnemonic verification - clear one of fields - next disabled - <init_page>
+  Scenario: Create Wallet - Mnemonic verification - clear one of fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words <init_page> of 24
-    When I fill passphrase fields using 24 words mnemonic on <init_page>/24 page
+    And I go to "Mnemonic verification" page from "Create" wallet
     Then "Next" button is enabled during onboarding process
     And I clear one random field
     Then "Next" button is disabled during onboarding process
-    Examples:
-      | init_page |
-      | 8         |
-      | 16        |
-      | 24        |
 
   @LW-2444
   Scenario: Create Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" last page from "Create wallet" and filled all words
+    And I go to "Mnemonic verification" page from "Create" wallet
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page from "Create" wallet
+    And I go to "Mnemonic verification" page from "Create" wallet
     When I click "Enter wallet" button
     # And I am on "All done" page
     # When I click "Go to my wallet" button on "All done" page
     Then I see LW homepage
 
-  @LW-3020
+  @LW-3020 @Pending @Obsolete
   Scenario: Create wallet - Legal page - next button tooltip
     Given I click "Create" button on wallet setup page
     Then "Next" button is disabled during onboarding process

@@ -3,7 +3,7 @@ import WalletUnlockPage from '../elements/walletUnlockPage';
 import ForgotPasswordModalAssert from '../assert/forgotPasswordModalAssert';
 import ForgotPasswordModal from '../elements/ForgotPasswordModal';
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
-import WalletPasswordPage from '../elements/onboarding/walletPasswordPage';
+import WalletPasswordPage from '../elements/onboarding/walletNameAndPasswordPage';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import extendedView from '../page/extendedView';

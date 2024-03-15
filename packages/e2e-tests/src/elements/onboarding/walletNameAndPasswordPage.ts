@@ -1,7 +1,10 @@
 import CommonOnboardingElements from './commonOnboardingElements';
+import { setInputFieldValue } from '../../utils/inputFieldUtils';
 
 class OnboardingWalletPasswordPage extends CommonOnboardingElements {
   private SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
+  private WALLET_NAME_INPUT = '[data-testid="wallet-name-input"]';
+  private WALLET_NAME_ERROR = '[data-testid="wallet-name-input-error"]';
   private PASSWORD_INPUT = 'input[data-testid="wallet-password-verification-input"]';
   private PASSWORD_CONFIRM_INPUT = 'input[data-testid="wallet-password-confirmation-input"]';
   private PASSWORD_CONFIRM_ERROR = '[data-testid="wallet-password-confirmation-input-error"]';
@@ -10,6 +13,18 @@ class OnboardingWalletPasswordPage extends CommonOnboardingElements {
 
   get subtitle() {
     return $(this.SUBTITLE);
+  }
+
+  get walletNameInput() {
+    return $(this.WALLET_NAME_INPUT);
+  }
+
+  get walletNameError() {
+    return $(this.WALLET_NAME_ERROR);
+  }
+
+  async setWalletNameInput(value: string): Promise<void> {
+    await setInputFieldValue(await this.walletNameInput, value);
   }
 
   get walletPasswordInput() {

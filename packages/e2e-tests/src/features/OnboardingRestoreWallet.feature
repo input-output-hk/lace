@@ -172,7 +172,7 @@ Feature: Onboarding - Restore wallet
   @LW-2464
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button and confirm
-    And I am on "Mnemonic verification" page from "Restore" wallet
+    And I go to "Mnemonic verification" page from "Restore" wallet
     When I click "Enter wallet" button
     # And I am on "Lace terms of use" page and accept terms
     # And I am on "Help us improve your experience" page

@@ -1,8 +1,7 @@
 import OnboardingLegalPage from '../elements/onboarding/legalPage';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
-import OnboardingWalletNamePage from '../elements/onboarding/walletNamePage';
 import OnboardingMnemonicPage from '../elements/onboarding/mnemonicPage';
-import OnboardingWalletPasswordPage from '../elements/onboarding/walletPasswordPage';
+import OnboardingWalletNameAndPasswordPage from '../elements/onboarding/walletNameAndPasswordPage';
 import RecoveryPhraseLengthPage from '../elements/onboarding/recoveryPhraseLengthPage';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
@@ -41,10 +40,10 @@ class OnboardingPageObject {
   async goToMnemonicWriteDownPage(length?: '12' | '15' | '24') {
     await this.openNameYourWalletPage();
     await this.fillWalletNameInput('ValidWalletName');
-    await OnboardingWalletNamePage.nextButton.click();
+    await OnboardingWalletNameAndPasswordPage.nextButton.click();
     await this.fillPasswordInput(this.validPassword);
     await this.fillPasswordConfirmationInput(this.validPassword);
-    await OnboardingWalletPasswordPage.nextButton.click();
+    await OnboardingWalletNameAndPasswordPage.nextButton.click();
     if (length) {
       await this.selectRecoveryPassphraseLength(length);
     }
@@ -191,15 +190,15 @@ class OnboardingPageObject {
   }
 
   async fillWalletNameInput(text: string) {
-    await OnboardingWalletNamePage.setWalletNameInput(text);
+    await OnboardingWalletNameAndPasswordPage.setWalletNameInput(text);
   }
 
   async fillPasswordInput(text: string) {
-    await OnboardingWalletPasswordPage.walletPasswordInput.setValue(text);
+    await OnboardingWalletNameAndPasswordPage.walletPasswordInput.setValue(text);
   }
 
   async fillPasswordConfirmationInput(text: string) {
-    await OnboardingWalletPasswordPage.walletPasswordConfirmInput.setValue(text);
+    await OnboardingWalletNameAndPasswordPage.walletPasswordConfirmInput.setValue(text);
   }
 
   async fillPasswordPage(password: string, passwordConfirmation: string) {

@@ -1,43 +1,42 @@
-import OnboardingWalletPasswordPage from '../../elements/onboarding/walletPasswordPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import OnboardingCommonAssert from './onboardingCommonAssert';
-import OnboardingWalletNamePage from '../../elements/onboarding/walletNamePage';
+import OnboardingWalletNameAndPasswordPage from '../../elements/onboarding/walletNameAndPasswordPage';
 
 class OnboardingWalletNameAndPasswordPageAssert extends OnboardingCommonAssert {
   async assertSeeWalletNameInput() {
-    await OnboardingWalletNamePage.walletNameInput.waitForDisplayed();
+    await OnboardingWalletNameAndPasswordPage.walletNameInput.waitForDisplayed();
   }
 
   async assertSeePasswordInput() {
-    await OnboardingWalletPasswordPage.walletPasswordInput.waitForDisplayed();
+    await OnboardingWalletNameAndPasswordPage.walletPasswordInput.waitForDisplayed();
   }
 
   async assertSeePasswordConfirmInput() {
-    await OnboardingWalletPasswordPage.walletPasswordConfirmInput.waitForDisplayed();
+    await OnboardingWalletNameAndPasswordPage.walletPasswordConfirmInput.waitForDisplayed();
   }
 
   async assertSeePasswordRecommendation(expectedMessage: string, shouldSee: boolean) {
     if (shouldSee) {
-      const passwordRecommendations = await OnboardingWalletPasswordPage.passwordFeedback.getText();
+      const passwordRecommendations = await OnboardingWalletNameAndPasswordPage.passwordFeedback.getText();
       expect(passwordRecommendations).to.contain(expectedMessage);
     }
   }
 
   async assertSeePasswordConfirmationError(expectedMessage: string, shouldSee: boolean) {
-    await OnboardingWalletPasswordPage.walletPasswordConfirmError.waitForDisplayed({ reverse: !shouldSee });
+    await OnboardingWalletNameAndPasswordPage.walletPasswordConfirmError.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await OnboardingWalletPasswordPage.walletPasswordConfirmError.getText()).to.equal(expectedMessage);
+      expect(await OnboardingWalletNameAndPasswordPage.walletPasswordConfirmError.getText()).to.equal(expectedMessage);
     }
   }
 
   async assertSeeComplexityBar(complexityBarLength: 0 | 1 | 2 | 3 | 4) {
-    const numberOfBars = await OnboardingWalletPasswordPage.getNumberOfActiveComplexityBars();
+    const numberOfBars = await OnboardingWalletNameAndPasswordPage.getNumberOfActiveComplexityBars();
     expect(numberOfBars.toString()).to.equal(complexityBarLength);
   }
 
   async assertSeeWalletNameError(expectedMessage: string, shouldBeDisplayed = true) {
-    const nameError = await OnboardingWalletNamePage.walletNameError;
+    const nameError = await OnboardingWalletNameAndPasswordPage.walletNameError;
     await nameError.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       expect(await nameError.getText()).to.equal(expectedMessage);
@@ -46,8 +45,8 @@ class OnboardingWalletNameAndPasswordPageAssert extends OnboardingCommonAssert {
 
   async assertSeeWalletNamePage() {
     await this.assertSeeWalletNameInput();
-    await this.assertSeeStepTitle(await t('core.walletSetupRegisterStep.title'));
-    await this.assertSeeStepSubtitle(await t('core.walletSetupRegisterStep.description'));
+    await this.assertSeeStepTitle(await t('package.core.walletNameAndPasswordSetupStep.title'));
+    await this.assertSeeStepSubtitle(await t('package.core.walletNameAndPasswordSetupStep.description'));
 
     await this.assertSeeBackButton();
     await this.assertSeeNextButton();
