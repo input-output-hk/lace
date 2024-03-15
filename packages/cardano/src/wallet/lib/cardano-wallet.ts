@@ -11,7 +11,7 @@ import {
   util as coreUtil,
   UtxoProvider
 } from '@cardano-sdk/core';
-import { ObservableWallet, PersonalWalletDependencies, storage, restoreKeyAgent } from '@cardano-sdk/wallet';
+import { ObservableWallet, BaseWalletDependencies, storage, restoreKeyAgent } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { AnyWallet, Bip32WalletAccount, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
@@ -58,7 +58,7 @@ export interface WalletProvidersDependencies {
 export interface CreatePersonalWallet {
   providers: WalletProvidersDependencies;
   name: string;
-  logger: PersonalWalletDependencies['logger'];
+  logger: BaseWalletDependencies['logger'];
   stores: storage.WalletStores;
   keyAgent: KeyManagement.AsyncKeyAgent;
 }

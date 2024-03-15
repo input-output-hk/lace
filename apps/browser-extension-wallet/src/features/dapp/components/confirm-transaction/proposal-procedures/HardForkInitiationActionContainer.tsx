@@ -79,8 +79,7 @@ export const HardForkInitiationActionContainer = ({
     },
     protocolVersion: {
       major: protocolVersion.major.toString(),
-      minor: protocolVersion.minor.toString(),
-      patch: protocolVersion.patch?.toString()
+      minor: protocolVersion.minor.toString()
     },
     ...(governanceActionId && {
       actionId: {
