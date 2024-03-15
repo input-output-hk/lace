@@ -68,7 +68,7 @@ export const StatusLogo = ({
       {isOversaturated && (
         <AntdTooltip overlayInnerStyle={overlayInnerStyle} placement="top" title={translations.saturated}>
           <div className={className} data-testid="stake-pool-badge-oversaturated">
-            <Icon style={{ fontSize: '17px', color: '#FC6133' }} component={WarningIon} />
+            <Icon style={{ fontSize: '17px', color: '#ff5470' }} component={WarningIon} />
           </div>
         </AntdTooltip>
       )}

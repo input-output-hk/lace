@@ -1,6 +1,5 @@
 import React from 'react';
 import { useWalletManager } from '@hooks';
-import { useWalletStore } from '@src/stores';
 import { Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from '../DropdownMenuOverlay.module.scss';
@@ -10,7 +9,6 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 export const LockWallet = (): React.ReactElement => {
   const { t } = useTranslation();
   const { lockWallet } = useWalletManager();
-  const { isInMemoryWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
 
   const handleLockWallet = () => {
@@ -19,12 +17,7 @@ export const LockWallet = (): React.ReactElement => {
   };
 
   return (
-    <Menu.Item
-      data-testid="header-menu-lock"
-      onClick={handleLockWallet}
-      className={styles.menuItem}
-      disabled={!isInMemoryWallet}
-    >
+    <Menu.Item data-testid="header-menu-lock" onClick={handleLockWallet} className={styles.menuItem} disabled>
       {t('browserView.topNavigationBar.links.lockWallet')}
     </Menu.Item>
   );
