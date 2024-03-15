@@ -6,7 +6,6 @@ import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
 import ToastMessage from '../elements/toastMessage';
 import MenuHeader from '../elements/menuHeader';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 When(/^I see handles listed on the "Receive" screen$/, async () => {
   await walletAddressPageAssert.assertSeeAdaHandleAddressCard();
@@ -41,7 +40,7 @@ When(
     await MenuHeader.receiveButton.waitForDisplayed();
     await MenuHeader.receiveButton.click();
     await walletAddressPageAssert.assertSeeAdaHandleAddressCardWithName(handleName, shouldBeListed === 'is');
-    await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
+    await walletAddressPage.clickCloseDrawerButton();
   }
 );
 
