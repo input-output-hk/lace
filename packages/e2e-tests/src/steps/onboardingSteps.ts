@@ -191,7 +191,7 @@ Then(/^"Recovery phrase length page" is displayed and 24 words checkbox is check
 });
 
 Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {
-  await OnboardingPageObject.selectRecoveryPassphraseLength(length);
+  await RecoveryPhrasePage.selectMnemonicLength(length);
 });
 
 Then(/^"Help us improve your experience" page is displayed$/, async () => {
@@ -453,7 +453,7 @@ Then(/^I fill saved words (8|16|24) of 24$/, async (pageNumber: string) => {
 });
 
 When(/^I fill mnemonic input with "([^"]*)"$/, async (value: string) => {
-  await OnboardingPageObject.fillMnemonicInput(value, 0, false);
+  await OnboardingRevampPageObject.enterMnemonicWord(value, 0, false);
 });
 
 When(/^I click on mnemonic input$/, async () => {
@@ -532,7 +532,7 @@ Then(/^I do not see autocomplete options list$/, async () => {
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
   await OnboardingRevampPageObject.goToMenmonicVerificationPage('Create', mnemonicWords);
-  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create');
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create', '24');
   await OnboardingRevampPageObject.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
@@ -618,14 +618,13 @@ Given(
   /^I go to "Mnemonic verification" page from "(Create|Restore)" wallet with (correct|shuffled) mnemonics$/,
   async (flowType: 'Create' | 'Restore', needShuffle: 'correct' | 'shuffled') => {
     await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords, needShuffle === 'shuffled');
-    await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage(flowType);
   }
 );
 
 Given(
   /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
   async (flowType: 'Create' | 'Restore') => {
-    await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage(flowType);
+    await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
   }
 );
 
@@ -637,8 +636,20 @@ Given(/^I click "Enter wallet" button$/, async () => {
   await OnboardingRevampPageObject.clickEnterWalletButton();
 });
 
-Given(/^I enter mnemonic words on "Mnemonic verification" page$/, async () => {
-  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
+Given(/^I enter (12|15|24) mnemonic words on "Mnemonic writedown" page$/, async () => {
+  async (mnemonicWordsLength: RecoveryPhrase) => {
+    switch (mnemonicWordsLength) {
+      case '12':
+        await OnboardingRevampPageObject.enterMnemonicWords(twelveMnemonicWords);
+        break;
+      case '15':
+        await OnboardingRevampPageObject.enterMnemonicWords(fifteenMnemonicWords);
+        break;
+      case '24':
+        await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
+        break;
+    }
+  };
 });
 
 When(/^I click on "Watch video" link on "Mnemonic writedown" page$/, async () => {
@@ -657,9 +668,8 @@ When(/^I enter saved mnemonic words$/, async () => {
   await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWordsForReference);
 });
 
-Then(/^"Mnemonic writedown" page is displayed$/, async () => {
-  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage();
-  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWords();
+Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mnemonicWordsLength: RecoveryPhrase) => {
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage(mnemonicWordsLength);
 });
 
 Then(/^"Enter wallet" button is enabled$/, async () => {
@@ -675,10 +685,10 @@ Then(/^I see "Watch video" modal$/, async () => {
 });
 
 Then(
-  /^"Mnemonic verification" page is displayed from "(Create wallet|Restore wallet|Forgot password)" flow$/,
-  async (flow) => {
+  /^"Mnemonic verification" page is displayed from "(Create wallet|Restore wallet|Forgot password)" flow with (12|15|24) words$/,
+  async (flow, mnemonicWordsLength: RecoveryPhrase) => {
     await (flow === 'Create wallet'
-      ? onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create')
-      : onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Restore'));
+      ? onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create', '24')
+      : onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Restore', mnemonicWordsLength));
   }
 );

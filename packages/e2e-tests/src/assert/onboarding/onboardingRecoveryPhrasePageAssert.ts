@@ -2,6 +2,7 @@ import recoveryPhrasePage from '../../elements/onboarding/recoveryPhrasePage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import OnboardingCommonAssert from './onboardingCommonAssert';
+import { RecoveryPhrase } from '../../types/onboarding';
 
 class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
   async assertEnterWalletButtonIsEnabled() {
@@ -9,27 +10,41 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
     await this.assertNextButtonTextEquals(await t('core.walletSetupMnemonicStepRevamp.enterWallet'));
   }
 
-  async assertSeeMnemonicVerificationPage(flowType: 'Create' | 'Restore') {
+  async assertSeeMnemonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWordsLength: RecoveryPhrase) {
     const subtitle =
       flowType === 'Create'
         ? await t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription')
         : `${await t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength')}\n12\n15\n24`;
     await this.assertSeeStepTitle(await t('core.walletSetupMnemonicStepRevamp.enterPassphrase'));
     await this.assertSeeStepSubtitle(subtitle);
-    // TODO: assertion for paste from clipboard
+    await recoveryPhrasePage.pasteFromClipboardButton.waitForDisplayed();
+    expect(await recoveryPhrasePage.pasteFromClipboardButton.getText()).to.equal(
+      await t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
+    );
+    await this.assertSeeMnemonicInputs(mnemonicWordsLength);
   }
 
-  async assertSeeMnemonicWritedownPage() {
+  async assertSeeMnemonicWritedownPage(mnemonicWordsLength: RecoveryPhrase) {
     await this.assertSeeStepTitle(await t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'));
     await this.assertSeeStepSubtitle(
       `${await t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1')} ${await t(
         'core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'
       )}`
     );
+    await recoveryPhrasePage.copyToClipboardButton.waitForDisplayed();
+    expect(await recoveryPhrasePage.copyToClipboardButton.getText()).to.equal(
+      await t('core.walletSetupMnemonicStepRevamp.copyToClipboard')
+    );
+    expect(await recoveryPhrasePage.mnemonicInputs.length).to.equal(mnemonicWordsLength);
+    await this.assertSeeMnemonicWords(mnemonicWordsLength);
   }
 
-  async assertSeeMnemonicWords() {
-    expect(await recoveryPhrasePage.mnemonicWords.length).to.equal(24);
+  async assertSeeMnemonicWords(mnemonicWordsLength: RecoveryPhrase) {
+    expect((await recoveryPhrasePage.mnemonicWords.length).toString()).to.equal(mnemonicWordsLength);
+  }
+
+  async assertSeeMnemonicInputs(mnemonicWordsLength: RecoveryPhrase) {
+    expect((await recoveryPhrasePage.mnemonicInputs.length).toString()).to.equal(mnemonicWordsLength);
   }
 }
 

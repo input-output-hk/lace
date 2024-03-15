@@ -1,6 +1,7 @@
 import WalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
+import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import { shuffle } from '../utils/arrayUtils';
 
 class OnboardingRevampPageObject {
@@ -44,6 +45,15 @@ class OnboardingRevampPageObject {
   async clickEnterWalletButton(): Promise<void> {
     await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
     await WalletSetupPage.nextButton.click();
+  }
+
+  async enterMnemonicWord(value: string, inputNumber = 0, shouldTriggerValidation = true) {
+    const inputs = await RecoveryPhrasePage.mnemonicInputs;
+    await clearInputFieldValue(inputs[inputNumber]);
+    await browser.keys(value);
+    if (shouldTriggerValidation) {
+      await RecoveryPhrasePage.stepTitle.click(); // Click outside input fields to trigger validation
+    }
   }
 
   async enterMnemonicWords(mnemonicWords: string[] = []): Promise<void> {

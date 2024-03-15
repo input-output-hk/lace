@@ -1,12 +1,12 @@
 @OnboardingRestoreWallet @Onboarding @Testnet @Mainnet
 Feature: Onboarding - Restore wallet
 
-  @LW-2448
+  @LW-2448 @Pending @Obsolete @LW-9804
   Scenario: Restore wallet - "Restoring a multi-address wallet?" popup displayed
     Given I click "Restore" button on wallet setup page
     Then "Restoring a multi-address wallet?" modal is displayed
 
-  @LW-2449
+  @LW-2449 @Pending @Obsolete @LW-9804
   Scenario: Restore wallet - "Restoring a multi-address wallet?" popup - cancel button click
     Given I click "Restore" button on wallet setup page
     When I click "Cancel" button on "Restoring a multi-address wallet?" modal
@@ -102,20 +102,8 @@ Feature: Onboarding - Restore wallet
     Given I click "Restore" button and confirm
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter mnemonic words on "Mnemonic verification" page
+    And I enter 24 mnemonic words on "Mnemonic writedown" page
     Then "Enter wallet" button is enabled
-    # And I am on "Lace terms of use" page and accept terms
-    # And I am on "Help us improve your experience" page
-    # When I click "Agree" button on Analytics page
-    # And "Name your wallet" page is displayed
-    # When I enter wallet name: "ValidName"
-    # And I click "Next" button during wallet setup
-    # And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    # And I click "Next" button during wallet setup
-    # And I click "Next" button during wallet setup
-    # And I am on "Mnemonic verification" last page from "Restore wallet" and filled all words
-    # And I click "Next" button during wallet setup
-    # Then "All done" page is displayed
 
   @LW-2463 @Pending @Obsolete
   Scenario: Restore Wallet  - Name your wallet - next button disabled for empty wallet name
@@ -153,21 +141,6 @@ Feature: Onboarding - Restore wallet
     Given I click "Restore" button and confirm
     And I go to "Mnemonic verification" page from "Restore" wallet with correct mnemonics
     When I click "Enter wallet" button
-    # And I am on "Lace terms of use" page and accept terms
-    # And I am on "Help us improve your experience" page
-    # When I click "Agree" button on Analytics page
-    # And "Name your wallet" page is displayed
-    # When I enter wallet name: "ValidName"
-    # And I click "Next" button during wallet setup
-    # And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    # And I click "Next" button during wallet setup
-    # And I click "Next" button during wallet setup
-    # And I am on "Mnemonic verification" last page from "Restore wallet" and filled all words
-    # And I click "Next" button during wallet setup
-    # # creating wallet page is displayed too quickly(?) and not detected by wdio
-    # # And "Creating wallet" page is displayed
-    # Then "All done" page is displayed
-    # When I click "Go to my wallet" button on "All done" page
     Then I see LW homepage
 
   @LW-3063
@@ -327,55 +300,21 @@ Feature: Onboarding - Restore wallet
     When I click "Back" button during wallet setup
     Then "Wallet name and password" page is displayed in onboarding flow
 
-  @LW-5838 @LW-5839
-  Scenario: Restore Wallet - "Recovery phrase length page" restore 12 words happy path
+  @LW-6080 @LW-5839 @LW-5838 @LW-5839
+  Scenario: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    Then "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    When I select 12 word passphrase length
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 8 of 12
-    When I fill passphrase fields using 12 words mnemonic on 8/12 page
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 12 of 12
-    When I fill passphrase fields using 12 words mnemonic on 12/12 page
-    And I click "Next" button during wallet setup
-    # creating wallet page is displayed too quickly(?) and not detected by wdio
-    # And "Creating wallet" page is displayed
-    Then "All done" page is displayed
-    When I click "Go to my wallet" button on "All done" page
+    And I select <mnemonicLength> word passphrase length
+    Then "Mnemonic verification" page is displayed from "Restore wallet" flow with <mnemonicLength> words
+    When I enter <mnemonicLength> mnemonic words on "Mnemonic writedown" page
+    Then "Enter wallet" button is enabled
+    When I click "Enter wallet" button
     Then I see LW homepage
-
-  @LW-6080 @LW-5839
-  Scenario: Restore Wallet - "Recovery phrase length page" restore 15 words happy path
-    Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    Then "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
-    And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I select 15 word passphrase length
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 8 of 15
-    When I fill passphrase fields using 15 words mnemonic on 8/15 page
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 15 of 15
-    When I fill passphrase fields using 15 words mnemonic on 15/15 page
-    And I click "Next" button during wallet setup
-    # creating wallet page is displayed too quickly(?) and not detected by wdio
-    # And "Creating wallet" page is displayed
-    Then "All done" page is displayed
-    When I click "Go to my wallet" button on "All done" page
-    Then I see LW homepage
+    Examples:
+      | mnemonicLength |
+      | 15             |
+      | 12             |
 
   @LW-6081
   Scenario Outline: Restore Wallet - error message is displayed for <mnemonicLength> passphrase length
@@ -404,38 +343,6 @@ Feature: Onboarding - Restore wallet
     When I enter mnemonic words on "Mnemonic verification" page
     And "Enter wallet" button is enabled
     Then I see current onboarding page in <mode> mode
-    # When "Legal page" is displayed
-    # Then I see current onboarding page in <mode> mode
-    # And I accept "T&C" checkbox
-    # And I click "Next" button during wallet setup
-    # When "Help us improve your experience" page is displayed
-    # Then I see current onboarding page in <mode> mode
-    # And I click "Next" button during wallet setup
-    # When "Name your wallet" page is displayed
-    # Then I see current onboarding page in <mode> mode
-    # When I enter wallet name: "someWallet"
-    # And I click "Next" button during wallet setup
-    # When "Wallet name and password" page is displayed in onboarding flow
-    # Then I see current onboarding page in <mode> mode
-    # And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    # And I click "Next" button during wallet setup
-    # When "Recovery phrase length page" is displayed and 24 words checkbox is checked
-    # Then I see current onboarding page in <mode> mode
-    # And I click "Next" button during wallet setup
-    # When "Mnemonic verification" page is displayed with words 8 of 24
-    # Then I see current onboarding page in <mode> mode
-    # And I fill passphrase fields using 24 words mnemonic on 8/24 page
-    # And I click "Next" button during wallet setup
-    # When "Mnemonic verification" page is displayed with words 16 of 24
-    # Then I see current onboarding page in <mode> mode
-    # And I fill passphrase fields using 24 words mnemonic on 16/24 page
-    # And I click "Next" button during wallet setup
-    # When "Mnemonic verification" page is displayed with words 24 of 24
-    # Then I see current onboarding page in <mode> mode
-    # And I fill passphrase fields using 24 words mnemonic on 24/24 page
-    # And I click "Next" button during wallet setup
-    # Then "All done" page is displayed
-    # Then I see current onboarding page in <mode> mode
     Examples:
       | mode  |
       | dark  |

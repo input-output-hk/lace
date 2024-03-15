@@ -81,8 +81,8 @@ Feature: Forgot password
     Then "Wallet name and password" page is displayed in forgot password flow
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed from "Forgot password" flow
-    And I enter mnemonic words on "Mnemonic verification" page
+    Then "Mnemonic verification" page is displayed from "Forgot password" flow with 24 words
+    And I enter 24 mnemonic words on "Mnemonic writedown" page
     And I click "Back" button during wallet setup
     Then "Wallet name and password" page is displayed in forgot password flow
 
