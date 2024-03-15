@@ -124,6 +124,24 @@ export const WalletSetupWizard = ({
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
+  const walletSetupNamePasswordStepTranslations = {
+    title: t('package.core.walletNameAndPasswordSetupStep.title'),
+    description: t('package.core.walletNameAndPasswordSetupStep.description'),
+    nameInputLabel: t('package.core.walletNameAndPasswordSetupStep.nameInputLabel'),
+    nameMaxLength: t('package.core.walletNameAndPasswordSetupStep.nameMaxLength'),
+    passwordInputLabel: t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel'),
+    confirmPasswordInputLabel: t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
+    nameRequiredMessage: t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
+    noMatchPassword: t('package.core.walletNameAndPasswordSetupStep.noMatchPassword'),
+    enterWallet: t('package.core.walletNameAndPasswordSetupStep.enterWallet'),
+    secondLevelPasswordStrengthFeedback: t(
+      'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
+    ),
+    firstLevelPasswordStrengthFeedback: t(
+      'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback'
+    )
+  };
+
   const moveBack = () => {
     const prevStep = walletSetupWizard[currentStep].prev;
 
@@ -258,7 +276,11 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
       {currentStep === WalletSetupSteps.Register && (
-        <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleSubmit} />
+        <WalletSetupNamePasswordStep
+          onBack={moveBack}
+          onNext={handleSubmit}
+          translations={walletSetupNamePasswordStepTranslations}
+        />
       )}
       {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
         <WarningModal

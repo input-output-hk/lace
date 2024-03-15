@@ -15,12 +15,24 @@ import {
 import { WalletNameInput } from './WalletNameInput';
 import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
 import { WalletSetupStepLayoutRevamp } from '../../WalletSetupRevamp';
+import { TranslationsFor } from '@ui/utils/types';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
   onNext: (params: WalletSetupNamePasswordSubmitParams) => void;
   initialWalletName?: string;
   onChange?: (state: { name: string; password: string }) => void;
+  translations: TranslationsFor<
+    | 'title'
+    | 'description'
+    | 'nameInputLabel'
+    | 'passwordInputLabel'
+    | 'confirmPasswordInputLabel'
+    | 'noMatchPassword'
+    | 'nameMaxLength'
+    | 'nameRequiredMessage'
+    | 'enterWallet'
+  >;
 }
 
 const INITIAL_WALLET_NAME = 'Wallet 1';
@@ -29,7 +41,8 @@ export const WalletSetupNamePasswordStep = ({
   onBack,
   onNext,
   initialWalletName = INITIAL_WALLET_NAME,
-  onChange
+  onChange,
+  translations
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
   const { t } = useTranslate();
   const [password, setPassword] = useState('');
@@ -43,15 +56,11 @@ export const WalletSetupNamePasswordStep = ({
   const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
 
   const passwordConfirmationErrorMessage =
-    passHasBeenValidated && password !== passwordConfirmation
-      ? t('package.core.walletNameAndPasswordSetupStep.noMatchPassword')
-      : '';
+    passHasBeenValidated && password !== passwordConfirmation ? translations.noMatchPassword : '';
 
   const walletNameErrorMessage = useMemo(() => {
-    const validationError = validateNameLength(walletName)
-      ? t('package.core.walletNameAndPasswordSetupStep.nameMaxLength')
-      : '';
-    return walletName ? validationError : t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage');
+    const validationError = validateNameLength(walletName) ? translations.nameMaxLength : '';
+    return walletName ? validationError : translations.nameRequiredMessage;
   }, [t, walletName]);
 
   const isNextButtonEnabled = () => {
@@ -87,18 +96,18 @@ export const WalletSetupNamePasswordStep = ({
 
   return (
     <WalletSetupStepLayoutRevamp
-      title={t('package.core.walletNameAndPasswordSetupStep.title')}
-      description={t('package.core.walletNameAndPasswordSetupStep.description')}
+      title={translations.title}
+      description={translations.description}
       onBack={onBack}
       onNext={handleNextButtonClick}
       isNextEnabled={isNextButtonEnabled()}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
-      nextLabel={t('package.core.walletNameAndPasswordSetupStep.enterWallet')}
+      nextLabel={translations.enterWallet}
     >
       <div className={styles.walletPasswordAndNameContainer}>
         <WalletNameInput
           value={walletName}
-          label={t('package.core.walletNameAndPasswordSetupStep.nameInputLabel')}
+          label={translations.nameInputLabel}
           onChange={handleNameChange}
           maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
           shouldShowErrorMessage={shouldShowNameErrorMessage}
@@ -107,7 +116,7 @@ export const WalletSetupNamePasswordStep = ({
         <PasswordVerification
           className={styles.input}
           value={password}
-          label={t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel')}
+          label={translations.passwordInputLabel}
           onChange={handlePasswordChange}
           level={score}
           feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]}
@@ -118,7 +127,7 @@ export const WalletSetupNamePasswordStep = ({
           isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}
           value={passwordConfirmation}
           onChange={handlePasswordConfirmationChange}
-          label={t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
+          label={translations.confirmPasswordInputLabel}
           errorMessage={passwordConfirmationErrorMessage}
           shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
         />
