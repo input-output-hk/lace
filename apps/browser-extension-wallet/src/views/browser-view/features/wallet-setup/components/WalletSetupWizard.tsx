@@ -207,7 +207,7 @@ export const WalletSetupWizard = ({
         <WalletSetupMnemonicVerificationStepRevamp
           mnemonic={mnemonic}
           onChange={setMnemonic}
-          onCancel={moveBack}
+          onCancel={setupType !== SetupType.FORGOT_PASSWORD && moveBack}
           onSubmit={moveForward}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
