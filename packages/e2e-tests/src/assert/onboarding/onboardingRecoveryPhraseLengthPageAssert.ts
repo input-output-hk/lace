@@ -5,8 +5,10 @@ import OnboardingCommonAssert from './onboardingCommonAssert';
 
 class OnboardingRecoveryPhraseLengthPageAssert extends OnboardingCommonAssert {
   async assertSeeRecoveryPhraseLengthPage() {
-    await this.assertSeeStepTitle(await t('core.walletSetupRecoveryPhraseLengthStep.title'));
-    await this.assertSeeStepSubtitle(await t('core.walletSetupRecoveryPhraseLengthStep.description'));
+    await this.assertSeeStepTitle(await t('core.walletSetupMnemonicStepRevamp.enterPassphrase'));
+    await this.assertSeeStepSubtitle(
+      `${await t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength')}\n12\n15\n24`
+    );
 
     await RecoveryPhraseLengthPage.radioButton12wordsButton.waitForExist();
     await RecoveryPhraseLengthPage.radioButton15wordsButton.waitForExist();
@@ -31,4 +33,5 @@ class OnboardingRecoveryPhraseLengthPageAssert extends OnboardingCommonAssert {
     await this.assertSeeHelpAndSupportButton();
   }
 }
+
 export default new OnboardingRecoveryPhraseLengthPageAssert();

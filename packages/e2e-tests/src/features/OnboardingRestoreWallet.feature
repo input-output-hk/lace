@@ -12,36 +12,36 @@ Feature: Onboarding - Restore wallet
     When I click "Cancel" button on "Restoring a multi-address wallet?" modal
     Then "Get started" page is displayed
 
-  @LW-2450
+  @LW-2450 @Pending @Obsolete
   Scenario: Restore wallet - Legal page displayed
     Given I click "Restore" button and confirm
     Then "Legal page" is displayed
 
-  @LW-2451
+  @LW-2451 @Pending @Obsolete
   Scenario: Restore wallet - Legal page - next button disabled
     Given I click "Restore" button and confirm
     Then "Next" button is disabled during onboarding process
 
-  @LW-2452
+  @LW-2452 @Pending @Obsolete
   Scenario: Restore wallet - Legal page - accept T&C - next button enabled
     Given I click "Restore" button and confirm
     When I accept "T&C" checkbox
     Then "Next" button is enabled during onboarding process
 
-  @LW-2453
+  @LW-2453 @Pending @Obsolete
   Scenario: Restore wallet - Legal page - accept T&C - back button
     Given I click "Restore" button and confirm
     When I click "Back" button during wallet setup
     Then "Get started" page is displayed
 
-  @LW-2454
+  @LW-2454 @Pending @Obsolete
   Scenario: Restore wallet - Help us improve your experience page displayed
     Given I click "Restore" button and confirm
     And I am on "Legal page"
     When I click "Next" button during wallet setup
     Then "Help us improve your experience" page is displayed
 
-  @LW-4663
+  @LW-4663 @Pending @Obsolete
   Scenario: Restore wallet - Help us improve your experience - Privacy Policy link
     Given I click "Restore" button and confirm
     And I am on "Lace terms of use" page and accept terms
@@ -49,7 +49,7 @@ Feature: Onboarding - Restore wallet
     When I click on Privacy Policy link
     Then Privacy Policy is displayed in new tab
 
-  @LW-2455
+  @LW-2455 @Pending @Obsolete
   Scenario Outline: Restore wallet - Help us improve your experience page - <button> button click
     Given I click "Restore" button and confirm
     And I am on "Lace terms of use" page and accept terms
@@ -61,7 +61,7 @@ Feature: Onboarding - Restore wallet
       | Skip   |
       | Agree  |
 
-  @LW-2456
+  @LW-2456 @Pending @Obsolete
   Scenario: Restore wallet - Help us improve your experience page - Back button click
     Given I click "Restore" button and confirm
     And I am on "Lace terms of use" page and accept terms
@@ -72,58 +72,37 @@ Feature: Onboarding - Restore wallet
   @LW-2457
   Scenario: Restore Wallet - Mnemonic writedown pages - next button
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed with words 8 of 24
+    Then I am on "Mnemonic verification" page from "Restore" wallet
     And "Next" button is disabled during onboarding process
 
   @LW-2459
   Scenario: Restore Wallet - happy path to "Name your wallet" page
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
+    And I am on "Name your wallet" page
 
   @LW-2460
   Scenario: Restore Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
-    And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I am on "Mnemonic verification" last page from "Restore wallet" and filled all words
+    And I go to "Mnemonic verification" page from "Restore" wallet with correct mnemonics
     When I add characters "asd" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2461
   Scenario: Restore Wallet - Name your wallet - back button
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
+    And I am on "Name your wallet" page
     When I click "Back" button during wallet setup
-    And I am on "Help us improve your experience" page
+    When "Get started" page is displayed
 
   @LW-2462 @Smoke
   Scenario: Restore Wallet - Name your wallet - happy path to "Enter wallet step"
     Given I click "Restore" button and confirm
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter mnemonic words on "Mnemonic writedown" page
+    And I enter mnemonic words on "Mnemonic verification" page
     Then "Enter wallet" button is enabled
     # And I am on "Lace terms of use" page and accept terms
     # And I am on "Help us improve your experience" page
@@ -138,7 +117,7 @@ Feature: Onboarding - Restore wallet
     # And I click "Next" button during wallet setup
     # Then "All done" page is displayed
 
-  @LW-2463
+  @LW-2463 @Pending @Obsolete
   Scenario: Restore Wallet  - Name your wallet - next button disabled for empty wallet name
     Given I click "Restore" button and confirm
     And I am on "Lace terms of use" page and accept terms
@@ -192,31 +171,31 @@ Feature: Onboarding - Restore wallet
     Then I see LW homepage
 
   @LW-3063
-  Scenario Outline: Extended view - Settings - Analytics enabled: <is_enabled> when <wallet_action> a wallet
+  Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet
     Given I click "Restore" button on wallet setup page
-    When I click "OK" button on "Restoring a multi-address wallet?" modal
-    Given I am on "All done" page with analytics tracking <button> from Restore wallet
-    And I click "Go to my wallet" button on "All done" page
+    And I go to "Mnemonic verification" page from "Restore" wallet with correct mnemonics
+    When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
-    Then Analytics toggle is enabled: <is_enabled>
-    Examples:
-      | is_enabled | button |
-      | true       | Agree  |
-      | false      | Skip   |
+    Then Analytics toggle is enabled: true
+    When I open settings from header menu
+    And I click on Remove wallet button
+    And I click "Remove wallet" button on "Remove wallet" modal
+    And I reject analytics banner on "Get started" page
+    Given I click "Restore" button on wallet setup page
+    And I go to "Mnemonic verification" page from "Restore" wallet with correct mnemonics
+    When I click "Enter wallet" button
+    And I see LW homepage
+    And I open settings from header menu
+    Then Analytics toggle is enabled: false
 
   @LW-2628
   Scenario: Restore Wallet - autofill words
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Restore" wallet
     When I fill mnemonic input with "s"
     Then I see following autocomplete options:
       | sad     |
@@ -247,15 +226,10 @@ Feature: Onboarding - Restore wallet
   @LW-4612
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - paste word exceeding the limit
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Restore" wallet
     When I fill mnemonic input with "abcdefghijklmnopqrstuvwxyz"
     Then the mnemonic input contains the word "abcdefghij"
     And the word in mnemonic input has only 10 characters
@@ -263,22 +237,17 @@ Feature: Onboarding - Restore wallet
   @LW-4613
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - add letter to mnemonic to exceed the limit
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    And "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Restore" wallet
     When I fill mnemonic input with "abcdefghij"
     And I add characters "x" in word 0
     Then the mnemonic input contains the word "abcdefghij"
     And the word in mnemonic input has only 10 characters
 
 
-  @LW-3440
+  @LW-3440 @Pending @Obsolete
   Scenario: Restore Wallet - Creating wallet loader disappears after 10s
     Given I click "Restore" button and confirm
     And I am on "Lace terms of use" page and accept terms
@@ -297,19 +266,14 @@ Feature: Onboarding - Restore wallet
   @LW-4546 @LW-4549
   Scenario Outline: Restore wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     Given I click "Restore" button and confirm
-    Then "Legal page" is displayed
-    Then I accept "T&C" checkbox
-    When I click "Next" button during wallet setup
-    Then "Help us improve your experience" page is displayed
-    When I click "<button>" button on Analytics page
-    Then "Name your wallet" page is displayed
+    And I am on "Name your wallet" page
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
-    And "Next" button is <state> during onboarding process
+    And "Next" button is disabled during onboarding process
     Examples:
-      | button | value | is_displayed | state    |
-      | Skip   | 20    | is not       | enabled  |
-      | Agree  | 21    | is           | disabled |
+      | value | is_displayed |
+      | 20    | is not       |
+      | 21    | is           |
 
   @LW-4743
   Scenario: Restore wallet - Enter and Escape buttons support
@@ -347,28 +311,19 @@ Feature: Onboarding - Restore wallet
   @LW-5835
   Scenario: Restore Wallet - "Recovery phrase length page" displayed
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    Then "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
+    Then I am on "Mnemonic verification" page from "Restore" wallet
     Then "Recovery phrase length page" is displayed and 24 words checkbox is checked
 
   @LW-5842
   Scenario: Restore Wallet - "Recovery phrase length page" back button
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    When I click "Agree" button on Analytics page
-    Then "Name your wallet" page is displayed
-    When I enter wallet name: "ValidName"
+    And I am on "Name your wallet" page
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Recovery phrase length page" is displayed and 24 words checkbox is checked
+    Then I am on "Mnemonic verification" page from "Restore" wallet
     When I click "Back" button during wallet setup
     Then "Wallet name and password" page is displayed in onboarding flow
 
@@ -446,7 +401,7 @@ Feature: Onboarding - Restore wallet
     And I click "Next" button during wallet setup
     When "Mnemonic verification" page is displayed from "Restore wallet" flow
     Then I see current onboarding page in <mode> mode
-    When I enter mnemonic words on "Mnemonic writedown" page
+    When I enter mnemonic words on "Mnemonic verification" page
     And "Enter wallet" button is enabled
     Then I see current onboarding page in <mode> mode
     # When "Legal page" is displayed

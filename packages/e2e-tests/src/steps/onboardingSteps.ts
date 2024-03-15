@@ -637,7 +637,7 @@ Given(/^I click "Enter wallet" button$/, async () => {
   await OnboardingRevampPageObject.clickEnterWalletButton();
 });
 
-Given(/^I enter mnemonic words on "Mnemonic writedown" page$/, async () => {
+Given(/^I enter mnemonic words on "Mnemonic verification" page$/, async () => {
   await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
 });
 

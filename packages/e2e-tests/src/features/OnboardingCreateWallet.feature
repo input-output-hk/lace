@@ -278,7 +278,7 @@ Feature: Onboarding - Create wallet
     Then There is no tooltip visible
 
   @LW-3060
-  Scenario: Extended view - Settings - Analytics enabled: <is_enabled> when <wallet_action> a wallet
+  Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet with correct mnemonics
     When I click "Enter wallet" button
