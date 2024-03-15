@@ -68,6 +68,8 @@ export enum PostHogAction {
 
   // Multi wallet Restore wallet
   MultiWalletRestoreClick = 'multiwallet | restore wallet | restore | click',
+  MultiWalletRestorePassphraseIntroPlayVideoClick = 'multiwallet | restore wallet | passphrase intro | play video | click',
+  MultiwalletRestorePassphraseIntroNextClick = 'multiwallet | restore wallet | passphrase intro | next | click',
   MultiwalletRestoreRecoveryPhraseLengthNextClick = 'multiwallet | restore wallet | recovery phrase length | next | click',
   MultiwalletRestoreEnterPassphrase01NextClick = 'multiwallet | restore wallet | enter passphrase #01 | next | click',
   MultiwalletRestoreEnterPassphrase09NextClick = 'multiwallet | restore wallet | enter passphrase #09 | next | click',

@@ -17,11 +17,11 @@ export const KeepWalletSecure = (): JSX.Element => {
     <View
       onBack={() => history.goBack()}
       onNext={() => {
-        analytics.sendEventToPostHog(PostHogAction.MultiwalletCreatePassphraseIntroNextClick);
+        analytics.sendEventToPostHog(PostHogAction.MultiwalletRestorePassphraseIntroNextClick);
         history.push(restore.selectRecoveryPhraseLength);
       }}
       onVideoClick={() => {
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletCreatePassphraseIntroPlayVideoClick);
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletRestorePassphraseIntroPlayVideoClick);
       }}
     />
   );
