@@ -6,9 +6,9 @@ Feature: Full experience - popup view
 
   @LW-4893
   Scenario: Popup View - hover over "Expand" button
-    Then "Expand" button is displayed without text
+    Then "Expand" button is displayed without tooltip
     When I hover over "Expand" button
-    Then "Expand" button is displayed with text
+    Then "Expand" button is displayed with tooltip
 
   @LW-3446
   Scenario Outline: Popup View - <page> opened - "Expand" button click
