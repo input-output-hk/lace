@@ -25,6 +25,10 @@ export const circle = sx({
   borderRadius: '$circle',
 });
 
+export const noBackground = style({
+  background: 'none',
+});
+
 export const image = style({
   width: '100%',
   height: '100%',

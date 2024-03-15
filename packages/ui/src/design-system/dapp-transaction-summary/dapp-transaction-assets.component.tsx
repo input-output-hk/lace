@@ -19,6 +19,7 @@ type Props = OmitClassName<'div'> & {
   tokenName?: string;
   coins?: string;
   testId?: string;
+  showImageBackground?: boolean;
 };
 
 const isImageBase64Encoded = (image: string): boolean => {
@@ -36,6 +37,7 @@ export const TransactionAssets = ({
   balance,
   tokenName,
   testId,
+  showImageBackground = true,
   ...props
 }: Readonly<Props>): JSX.Element => {
   const { theme } = useThemeVariant();
@@ -46,6 +48,8 @@ export const TransactionAssets = ({
   const getImageSource = (value: string | undefined): string => {
     if (value === '' || value === undefined) {
       return setThemeFallbackImagine;
+    } else if (value.startsWith('ipfs')) {
+      return value.replace('ipfs://', 'https://ipfs.io/ipfs/');
     } else if (isImageBase64Encoded(value)) {
       return `data:image/png;base64,${value}`;
     } else {
@@ -58,10 +62,11 @@ export const TransactionAssets = ({
       <Grid {...props} columns="$fitContent">
         <Cell>
           <UserProfile
-            fallback="L"
+            fallback={setThemeFallbackImagine}
             imageSrc={getImageSource(imageSrc)}
             alt={tokenName}
             radius="rounded"
+            background={showImageBackground ? undefined : 'none'}
           />
         </Cell>
         <Cell>

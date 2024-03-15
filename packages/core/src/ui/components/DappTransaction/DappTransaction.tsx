@@ -134,15 +134,22 @@ export const DappTransaction = ({
           transactionAmount={getStringFromLovelace(coins)}
         />
         <div className={styles.transactionAssetsContainer}>
-          {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => (
-            <TransactionAssets
-              testId="dapp-transaction-amount-value"
-              key={key}
-              imageSrc={assetWithAmount.assetInfo.tokenMetadata?.icon ?? undefined}
-              balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
-              tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
-            />
-          ))}
+          {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => {
+            const imageSrc =
+              assetWithAmount.assetInfo.tokenMetadata?.icon ??
+              assetWithAmount.assetInfo.nftMetadata?.image ??
+              undefined;
+            return (
+              <TransactionAssets
+                testId="dapp-transaction-amount-value"
+                key={key}
+                imageSrc={imageSrc}
+                balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
+                tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
+                showImageBackground={imageSrc === undefined}
+              />
+            );
+          })}
         </div>
 
         {collateral && (

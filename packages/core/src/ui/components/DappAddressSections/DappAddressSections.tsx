@@ -49,26 +49,35 @@ const charBeforeEllName = 9;
 const charAfterEllName = 0;
 
 const displayGroupedNFTs = (nfts: AssetInfoWithAmount[]) =>
-  nfts.map((nft: AssetInfoWithAmount) => (
-    <TransactionAssets
-      testId="dapp-transaction-nfts-container"
-      key={nft.assetInfo.fingerprint}
-      imageSrc={nft.assetInfo.tokenMetadata?.icon ?? undefined}
-      balance={Wallet.util.calculateAssetBalance(nft.amount, nft.assetInfo)}
-      tokenName={truncate(getAssetTokenName(nft), charBeforeEllName, charAfterEllName)}
-    />
-  ));
+  nfts.map((nft: AssetInfoWithAmount) => {
+    const imageSrc = nft.assetInfo.tokenMetadata?.icon ?? nft.assetInfo.nftMetadata?.image ?? undefined;
+    return (
+      <TransactionAssets
+        testId="dapp-transaction-nfts-container"
+        key={nft.assetInfo.fingerprint}
+        imageSrc={imageSrc}
+        balance={Wallet.util.calculateAssetBalance(nft.amount, nft.assetInfo)}
+        tokenName={truncate(getAssetTokenName(nft), charBeforeEllName, charAfterEllName)}
+        showImageBackground={imageSrc === undefined}
+      />
+    );
+  });
 
 const displayGroupedTokens = (tokens: AssetInfoWithAmount[]) =>
-  tokens.map((token: AssetInfoWithAmount) => (
-    <TransactionAssets
-      testId="dapp-transaction-token-container"
-      key={token.assetInfo.fingerprint}
-      imageSrc={token.assetInfo.tokenMetadata?.icon ?? undefined}
-      balance={Wallet.util.calculateAssetBalance(token.amount, token.assetInfo)}
-      tokenName={truncate(getAssetTokenName(token), charBeforeEllName, charAfterEllName)}
-    />
-  ));
+  tokens.map((token: AssetInfoWithAmount) => {
+    const imageSrc = token.assetInfo.tokenMetadata?.icon ?? token.assetInfo.nftMetadata?.image ?? undefined;
+
+    return (
+      <TransactionAssets
+        testId="dapp-transaction-token-container"
+        key={token.assetInfo.fingerprint}
+        imageSrc={token.assetInfo.tokenMetadata?.icon ?? token.assetInfo.nftMetadata?.image ?? undefined}
+        balance={Wallet.util.calculateAssetBalance(token.amount, token.assetInfo)}
+        tokenName={truncate(getAssetTokenName(token), charBeforeEllName, charAfterEllName)}
+        showImageBackground={imageSrc === undefined}
+      />
+    );
+  });
 
 const { Title, Text } = Typography;
 
