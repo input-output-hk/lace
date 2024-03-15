@@ -30,7 +30,7 @@ const buildRewardsByEpoch = async ({ rewardsHistory, stakePoolProvider, epochsCo
   const uniqPoolIds = uniqBy((rewards) => rewards.poolId, rewardsHistory.all)
     .map((reward) => reward.poolId)
     .filter(Boolean) as Wallet.Cardano.PoolId[];
-  const stakePoolsData = await getPoolInfos(uniqPoolIds, stakePoolProvider);
+  const stakePoolsData = await getPoolInfos({ poolIds: uniqPoolIds, stakePoolProvider });
   const rewardsHistoryWithMetadata = rewardsHistory.all.map((reward) => ({
     ...reward,
     metadata: stakePoolsData.find((poolInfo) => poolInfo.id === reward.poolId)?.metadata,

@@ -1,6 +1,17 @@
 import { Wallet } from '@lace/cardano';
+import sortBy from 'lodash/sortBy';
 
-export const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
+export const getPoolInfos = async ({
+  poolIds,
+  stakePoolProvider,
+  status,
+  preserveOrder,
+}: {
+  poolIds: Wallet.Cardano.PoolId[];
+  stakePoolProvider: Wallet.StakePoolProvider;
+  status?: Wallet.Cardano.StakePoolStatus[];
+  preserveOrder?: boolean;
+}) => {
   if (poolIds.length === 0) return [];
 
   const filters: Wallet.QueryStakePoolsArgs = {
@@ -9,6 +20,7 @@ export const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolPr
         _condition: 'or',
         values: poolIds.map((poolId) => ({ id: poolId })),
       },
+      status,
     },
     pagination: {
       limit: poolIds.length,
@@ -17,5 +29,5 @@ export const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolPr
   };
   const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
 
-  return pools;
+  return preserveOrder ? sortBy(pools, (pool) => poolIds.indexOf(pool.id)) : pools;
 };

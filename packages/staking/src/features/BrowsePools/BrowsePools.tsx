@@ -1,10 +1,9 @@
 import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
-import { SortDirection, SortField } from 'features/BrowsePools';
-import { useCallback, useMemo } from 'react';
+import { SortField } from 'features/BrowsePools';
 import { useTranslation } from 'react-i18next';
-import { StakePoolDetails, mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
 import { useBrowsePoolsView, useQueryStakePools } from './hooks';
@@ -22,8 +21,8 @@ export const BrowsePools = () => {
   const { poolsView, switchPoolsView } = useBrowsePoolsView();
 
   const { t } = useTranslation();
-  const { selectedPortfolioStakePools } = useDelegationPortfolioStore((store) => ({
-    selectedPortfolioStakePools: store.selectedPortfolio.map(({ stakePool }) => stakePool),
+  const { selectedPools } = useDelegationPortfolioStore((store) => ({
+    selectedPools: store.selectedPortfolio.map(({ displayData }) => displayData),
   }));
 
   const tableHeaderTranslations: Record<SortField, string> = {
@@ -37,29 +36,6 @@ export const BrowsePools = () => {
     ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker.title'),
   };
 
-  const sortSelectedPools = useCallback(
-    (pool1: StakePoolDetails, pool2: StakePoolDetails) => {
-      switch (sort.field) {
-        case 'ticker':
-          return (pool1.ticker || '-')?.localeCompare(pool2.ticker || '-');
-        case 'saturation':
-        case 'ros':
-          return Number(pool1[sort.field]) - Number(pool2[sort.field]);
-        case 'cost':
-          return (pool1.cost.number || '-')?.localeCompare(pool2.cost.number || '-');
-        default:
-          return 0;
-      }
-    },
-    [sort.field]
-  );
-
-  const selectedList = useMemo(() => {
-    const result = selectedPortfolioStakePools
-      .map((pool) => mapStakePoolToDisplayData({ stakePool: pool }))
-      .sort(sortSelectedPools);
-    return sort.order === SortDirection.desc ? result.reverse() : result;
-  }, [selectedPortfolioStakePools, sort.order, sortSelectedPools]);
   const fetching = status === 'fetching';
 
   return (
@@ -80,7 +56,7 @@ export const BrowsePools = () => {
           {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && poolsView === BrowsePoolsView.grid ? (
             <StakePoolsGrid
               emptyPlaceholder={StakePoolsSearchEmpty}
-              selectedPools={selectedList}
+              selectedPools={selectedPools}
               pools={pools}
               showSkeleton={fetching}
               loadMoreData={paginatePools}
@@ -90,7 +66,7 @@ export const BrowsePools = () => {
           ) : (
             <StakePoolsList
               emptyPlaceholder={StakePoolsSearchEmpty}
-              selectedPools={selectedList}
+              selectedPools={selectedPools}
               pools={pools}
               showSkeleton={fetching}
               loadMoreData={paginatePools}

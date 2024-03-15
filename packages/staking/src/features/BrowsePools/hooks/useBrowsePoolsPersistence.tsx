@@ -10,7 +10,7 @@ export const useBrowsePoolsPersistence = () => {
   const {
     stakingBrowserPreferencesPersistence,
     setStakingBrowserPreferencesPersistence,
-    walletStoreBlockchainProvider,
+    walletStoreBlockchainProvider: { stakePoolProvider },
   } = useOutsideHandles();
   const { portfolioMutators, poolsView, selectedPortfolio, storeReady } = useDelegationPortfolioStore((store) => ({
     poolsView: store.browsePoolsView || DEFAULT_BROWSE_POOLS_VIEW,
@@ -29,10 +29,16 @@ export const useBrowsePoolsPersistence = () => {
 
     if (stakingBrowserPreferencesPersistence) {
       // eslint-disable-next-line promise/catch-or-return
-      getPoolInfos(
-        stakingBrowserPreferencesPersistence.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)),
-        walletStoreBlockchainProvider.stakePoolProvider
-      ).then((selectedStakePools) => {
+      getPoolInfos({
+        poolIds: stakingBrowserPreferencesPersistence.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)),
+        preserveOrder: true,
+        stakePoolProvider,
+        status: [
+          Wallet.Cardano.StakePoolStatus.Activating,
+          Wallet.Cardano.StakePoolStatus.Active,
+          Wallet.Cardano.StakePoolStatus.Retiring,
+        ],
+      }).then((selectedStakePools) => {
         // TODO add a common store hydration command; https://input-output.atlassian.net/browse/LW-9979
         portfolioMutators.executeCommand({ data: selectedStakePools, type: 'SelectPoolFromList' });
         portfolioMutators.executeCommand({
@@ -44,12 +50,7 @@ export const useBrowsePoolsPersistence = () => {
     } else {
       storeHydrated.current = true;
     }
-  }, [
-    storeReady,
-    portfolioMutators,
-    walletStoreBlockchainProvider.stakePoolProvider,
-    stakingBrowserPreferencesPersistence,
-  ]);
+  }, [storeReady, portfolioMutators, stakePoolProvider, stakingBrowserPreferencesPersistence]);
 
   // Store -> LocalStorage
   useEffect(() => {
