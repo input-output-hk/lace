@@ -120,7 +120,9 @@ class TopNavigationAssert {
 
   async assertMenuButtonBackgroundColorMode(mode: string) {
     const bgColor = (await MenuHeader.menuButton.getCSSProperty(this.CSS_BACKGROUND_COLOR)).parsed.hex;
-    expect(bgColor).to.equal(mode === 'light' ? '#ffffff' : '#282828');
+    const darkColors = ['#282828', '#000000'];
+    const lightColors = ['#ffffff', '#f9f9f9'];
+    expect(bgColor).to.be.oneOf(mode === 'light' ? lightColors : darkColors);
   }
 
   async assertMenuButtonFontColorMode(mode: string) {

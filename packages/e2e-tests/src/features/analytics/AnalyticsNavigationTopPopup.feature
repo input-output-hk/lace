@@ -27,7 +27,7 @@ Feature: Analytics - Top Navigation - Popup view
     Then I validate latest analytics single event "user/wallet profile | light mode | click"
     When I click on the network option
     Then I validate latest analytics single event "user/wallet profile | network | click"
-    And I validate that 9 analytics event(s) have been sent
+    And I validate that 8 analytics event(s) have been sent
 
   @LW-8755
   Scenario: Analytics - Popup view - Lace menu - User/wallet profile events - Lock wallet

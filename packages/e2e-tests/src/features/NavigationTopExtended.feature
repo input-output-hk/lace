@@ -19,8 +19,7 @@ Feature: Top Navigation - Extended view
       | Transactions |
       | Staking      |
 
-  @LW-2320 @Mainnet @Testnet @Pending
-  @issue=LW-10045
+  @LW-2320 @Mainnet @Testnet
   Scenario: Avatar dropdown displayed on click with content
     When I click the menu button
     Then the dropdown menu is visible
