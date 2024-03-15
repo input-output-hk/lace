@@ -5,7 +5,6 @@ import { wordlists } from 'bip39';
 import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
-  WalletSetupCreationStep,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
   WalletSetupSteps,
@@ -121,11 +120,6 @@ export const WalletSetupWizard = ({
     fullNodeWalletDescription: t('core.walletSetupWalletModeStep.fullNodeWalletDescription')
   };
 
-  const walletSetupCreateStepTranslations = {
-    title: t('core.walletSetupCreateStep.title'),
-    description: t('core.walletSetupCreateStep.description')
-  };
-
   const mnemonicVideoPopupContentTranslations = {
     title: t('core.mnemonicVideoPopupContent.title'),
     description: t('core.mnemonicVideoPopupContent.description'),
@@ -148,7 +142,7 @@ export const WalletSetupWizard = ({
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
         void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         void analytics.sendAliasEvent();
-        const addresses = await firstValueFrom(cardanoWallet.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
+        const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
           void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
@@ -273,9 +267,6 @@ export const WalletSetupWizard = ({
           initialWalletName={walletName}
           isForgotPassword={setupType === SetupType.FORGOT_PASSWORD}
         />
-      )}
-      {currentStep === WalletSetupSteps.Create && (
-        <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />
       )}
       {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
         <WarningModal
