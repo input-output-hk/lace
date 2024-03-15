@@ -142,8 +142,7 @@ class TopNavigationAssert {
   }
 
   async assertSeeExpandButton(withTooltip = false) {
-    const expandButton = MenuHeader.expandButton;
-    await expandButton.waitForDisplayed();
+    await MenuHeader.expandButton.waitForDisplayed();
     if (withTooltip) {
       const expandButtonTooltip = MenuHeader.expandButtonTooltip;
       await expandButtonTooltip.waitForDisplayed();

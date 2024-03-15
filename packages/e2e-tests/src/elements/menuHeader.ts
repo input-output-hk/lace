@@ -6,7 +6,6 @@ export class MenuHeader {
     '[data-testid="profile-dropdown-trigger-menu"] [data-testid="profile-dropdown-trigger-menu-icon"]';
   private WALLET_NAME_ON_BUTTON = '//span[@data-testid="profile-dropdown-trigger-menu-title"]';
   private ACCOUNT_NAME_ON_BUTTON = '//span[@data-testid="profile-dropdown-trigger-menu-subtitle"]';
-  private AVATAR_ON_MENU = '[data-testid="header-menu"] [data-testid="wallet-option-icon"]';
   private CHEVRON_DOWN = '[data-testid="profile-dropdown-trigger-menu-chevron-down"]';
   private CHEVRON_UP = '[data-testid="profile-dropdown-trigger-menu-chevron-up"]';
   private CONTAINER = '//ul[@data-testid="header-menu"]';
@@ -41,10 +40,6 @@ export class MenuHeader {
 
   get accountNameOnButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ACCOUNT_NAME_ON_BUTTON);
-  }
-
-  get avatarOnMenu(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.AVATAR_ON_MENU);
   }
 
   get expandButton(): ChainablePromiseElement<WebdriverIO.Element> {
