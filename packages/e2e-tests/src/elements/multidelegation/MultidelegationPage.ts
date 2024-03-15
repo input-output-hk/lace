@@ -416,25 +416,25 @@ class MultidelegationPage {
   async hoverOverColumnWithName(columnName: StakePoolListColumnType) {
     switch (columnName) {
       case 'Ticker':
-        await this.columnHeaderTicker.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderTicker.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Saturation':
         await this.columnHeaderSaturation.moveTo();
         break;
       case 'ROS':
-        await this.columnHeaderROS.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderROS.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Cost':
-        await this.columnHeaderCost.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderCost.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Margin':
-        await this.columnHeaderMargin.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderMargin.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Blocks':
-        await this.columnHeaderBlocks.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderBlocks.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Pledge':
-        await this.columnHeaderPledge.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderPledge.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Live stake':
         await this.columnHeaderLiveStake.moveTo();

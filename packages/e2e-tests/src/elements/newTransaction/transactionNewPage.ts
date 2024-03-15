@@ -36,8 +36,8 @@ class TransactionNewPage extends CommonDrawerElements {
     return Banner;
   }
 
-  coinConfigure(index?: number): CoinConfigure {
-    return new CoinConfigure(index);
+  coinConfigure(bundleIndex = 1, assetName?: string): CoinConfigure {
+    return new CoinConfigure(bundleIndex, assetName);
   }
 
   transactionBundle(index?: number): TransactionBundle {

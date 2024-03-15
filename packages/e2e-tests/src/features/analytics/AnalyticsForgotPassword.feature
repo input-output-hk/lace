@@ -1,4 +1,4 @@
-@ForgotPassword @Mainnet @Testnet
+@ForgotPassword @Mainnet @Testnet @Pending
 Feature: Analytics - Forgot Password
 
   Background:

@@ -5,7 +5,6 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import drawerGeneralSettingsAssert from '../assert/settings/YourKeysDrawerAssert';
 import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import publicKeyDrawerAssert from '../assert/settings/PublicKeyDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
@@ -30,6 +29,7 @@ import SettingsPage from '../elements/settings/SettingsPage';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import type { NetworkType } from '../types/network';
+import CommonDrawerElements from '../elements/CommonDrawerElements';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -49,8 +49,8 @@ Then(
       await settingsExtendedPageObject.clickSettingsItem(await t(row[0]));
       await drawerCommonExtendedAssert.assertSeeDrawer(true);
       await (viewType === 'extended'
-        ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
-        : simpleTxSideDrawerPageObject.clickBackDrawerButton());
+        ? new CommonDrawerElements().clickCloseDrawerButton()
+        : new CommonDrawerElements().clickBackDrawerButton());
     }
   }
 );

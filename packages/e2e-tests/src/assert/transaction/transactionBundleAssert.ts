@@ -30,14 +30,14 @@ class TransactionBundleAssert {
     const tokenName = await new TransactionBundle(bundleIndex)
       .bundleAssetInput()
       .coinConfigure(bundleIndex, expectedName.replace('...', ''))
-      .getName();
+      .nameElement.getText();
     expect(tokenName).to.contain(expectedName);
   }
 
   async assertSeeAssetNameAndValueInBundle(expectedName: string, expectedValue: number, bundleIndex: number) {
     const asset = new TransactionBundle(bundleIndex).bundleAssetInput().coinConfigure(bundleIndex, expectedName);
 
-    const tokenName = await asset.getName();
+    const tokenName = await asset.nameElement.getText();
     const tokenValue = await asset.getAmount();
 
     expect(tokenName).to.contain(expectedName);
@@ -45,11 +45,11 @@ class TransactionBundleAssert {
   }
 
   async assertTokenNameNotPresentInBundleAndCoinConfigure(assetName: string, bundleIndex: number) {
-    await webTester.dontSeeWebElement(new CoinConfigure(bundleIndex, assetName));
+    await new CoinConfigure(bundleIndex, assetName).container.waitForDisplayed({ reverse: true });
   }
 
   async assertDeleteButtonForAssetNotPresentInBundle(assetName: string, bundleIndex: number) {
-    await webTester.dontSeeWebElement(new CoinConfigure(bundleIndex, assetName).assetRemoveButton());
+    await new CoinConfigure(bundleIndex, assetName).assetRemoveButton.waitForDisplayed({ reverse: true });
   }
 
   async assertInvalidAddressErrorIsDisplayed(index: number) {
@@ -59,11 +59,11 @@ class TransactionBundleAssert {
   async assertSetMaxAmountInBundleAndCoinConfigure(bundleIndex: number, assetName: string) {
     const bundle = new CoinConfigure(bundleIndex, assetName);
     const tokenBalance = Number(
-      String(await bundle.getBalanceValue())
+      String(await bundle.balanceValueElement.getText())
         .replace('Balance: ', '')
         .replace(',', '')
     );
-    const tokenInputAmount = Number(String(await bundle.getInputValue()).replace(',', ''));
+    const tokenInputAmount = Number(String(await bundle.input.getValue()).replace(',', ''));
     if (assetName === 'tADA' || assetName === 'ADA') {
       const fee = Number(await TransactionNewPage.getTransactionFeeValueInAda());
       expect(tokenBalance).to.be.greaterThan(tokenInputAmount + fee);
