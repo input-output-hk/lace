@@ -7,7 +7,6 @@ import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
 import AnalyticsPage from '../elements/onboarding/analyticsPage';
 import Modal from '../elements/modal';
-import OnboardingDataCollectionPageAssert from '../assert/onboarding/onboardingDataCollectionPageAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
@@ -266,7 +265,6 @@ class OnboardingPageObject {
     await Modal.confirmButton.waitForClickable();
     await Modal.confirmButton.click();
     await this.openAndAcceptTermsOfUsePage();
-    await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
     await AnalyticsPage.nextButton.click();
     await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
     await this.fillWalletNameInput('ValidName');

@@ -8,6 +8,23 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await OnboardingMainPage.logo.waitForDisplayed();
   }
 
+  async assertSeeAgreementText() {
+    await OnboardingMainPage.agreementText.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementText.getText()).to.equal(
+      'By proceeding you agree to Lace’s Terms of Service and Privacy Policy'
+    );
+  }
+
+  async assertSeeTermsOfServiceLink() {
+    await OnboardingMainPage.agreementTermsOfServiceLink.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementTermsOfServiceLink.getText()).to.equal('Terms of Service');
+  }
+
+  async assertSeePrivacyPolicyLink() {
+    await OnboardingMainPage.agreementPrivacyPolicyLink.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementPrivacyPolicyLink.getText()).to.equal('Privacy Policy');
+  }
+
   async assertSeeTitle() {
     await OnboardingMainPage.title.waitForDisplayed();
     expect(await OnboardingMainPage.title.getText()).to.equal(await t('core.walletSetupOptionsStep.title'));
@@ -78,6 +95,9 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await this.assertSeeRestoreWalletOption();
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();
+    await this.assertSeeAgreementText();
+    await this.assertSeeTermsOfServiceLink();
+    await this.assertSeePrivacyPolicyLink();
   }
 }
 

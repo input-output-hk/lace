@@ -2,7 +2,7 @@ import WalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
-import { shuffle } from '../utils/arrayUtils';
+import mainPage from '../elements/onboarding/mainPage';
 
 class OnboardingRevampPageObject {
   private mnemonicWords: string[] = [];
@@ -11,15 +11,26 @@ class OnboardingRevampPageObject {
     return this.mnemonicWords;
   }
 
-  async goToMenmonicVerificationPage(
-    flowType: 'Create' | 'Restore',
-    mnemonicWords: string[] = [],
-    needsShuffle = false
-  ): Promise<void> {
+  async clickOnLegalLink(link: string, isMainPage = false): Promise<void> {
+    switch (link) {
+      case 'Cookie policy':
+        await mainPage.cookiePolicyLink.click();
+        break;
+      case 'Privacy policy':
+        isMainPage ? await mainPage.agreementPrivacyPolicyLink.click() : await mainPage.privacyPolicyLink.click();
+        break;
+      case 'Terms of service':
+        isMainPage ? await mainPage.agreementTermsOfServiceLink.click() : await mainPage.termsOfServiceLink.click();
+        break;
+      default:
+        throw new Error(`Unsupported legal link - ${link}`);
+    }
+  }
+
+  async goToMenmonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWords: string[] = []): Promise<void> {
     await this.goToRecoveryPhrasePage();
     if (flowType === 'Create') {
       await this.collectMnemonicWords();
-      if (needsShuffle) await this.shuffleMnemonicWords();
       await this.enterMnemonicWords();
     } else {
       await this.enterMnemonicWords(mnemonicWords);
@@ -36,10 +47,6 @@ class OnboardingRevampPageObject {
   async collectMnemonicWords(): Promise<void> {
     this.mnemonicWords = await RecoveryPhrasePage.getMnemonicWordTexts();
     await WalletSetupPage.nextButton.click();
-  }
-
-  async shuffleMnemonicWords(): Promise<void> {
-    this.mnemonicWords = shuffle(this.mnemonicWords);
   }
 
   async clickEnterWalletButton(): Promise<void> {
@@ -62,6 +69,7 @@ class OnboardingRevampPageObject {
     }
     const mnemonicInputs = await RecoveryPhrasePage.mnemonicInputs;
     for (let i = 0; i < this.mnemonicWords.length; i++) {
+      await clearInputFieldValue(mnemonicInputs[i]);
       await mnemonicInputs[i].setValue(this.mnemonicWords[i]);
     }
   }

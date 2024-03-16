@@ -35,7 +35,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate latest analytics multiple events:
       | wallet \| session start \| pageview                         |
       | onboarding \| restore wallet \| analytics \| agree \| click |
-    When "Name your wallet" page is displayed
+    When "Wallet setup" page is displayed
     And I enter wallet name: "wallet"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | restore wallet | wallet name | next | click"
@@ -69,7 +69,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate latest analytics multiple events:
       | wallet \| session start \| pageview                     |
       | onboarding \| new wallet \| analytics \| agree \| click |
-    When "Name your wallet" page is displayed
+    When "Wallet setup" page is displayed
     And I enter wallet name: "wallet"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | new wallet | wallet name | next | click"

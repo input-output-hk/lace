@@ -35,8 +35,14 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
     expect(await recoveryPhrasePage.copyToClipboardButton.getText()).to.equal(
       await t('core.walletSetupMnemonicStepRevamp.copyToClipboard')
     );
-    expect(await recoveryPhrasePage.mnemonicInputs.length).to.equal(mnemonicWordsLength);
     await this.assertSeeMnemonicWords(mnemonicWordsLength);
+  }
+  async assertSeeMnemonicError(shouldBeDisplayed: boolean) {
+    await recoveryPhrasePage.errorMessage.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      const actualErrorText = await recoveryPhrasePage.errorMessage.getText();
+      expect(actualErrorText).to.equal(await t('core.walletSetupMnemonicStep.passphraseError'));
+    }
   }
 
   async assertSeeMnemonicWords(mnemonicWordsLength: RecoveryPhrase) {
