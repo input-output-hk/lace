@@ -56,7 +56,8 @@ Feature: Onboarding - Restore wallet
     And I am on "Help us improve your experience" page
     When I click "<button>" button on Analytics page
     Then "Wallet setup" page is displayed
-    Examples:
+
+    Examples: 
       | button |
       | Skip   |
       | Agree  |
@@ -86,7 +87,7 @@ Feature: Onboarding - Restore wallet
   @LW-2460
   Scenario: Restore Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Restore" button and confirm
-    And I go to "Mnemonic verification" page from "Restore wallet" flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow
     When I add characters "asd" in word 7
     Then "Next" button is disabled during onboarding process
 
@@ -118,35 +119,29 @@ Feature: Onboarding - Restore wallet
   @LW-2977
   Scenario Outline: Restore Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Restore" button and confirm
-    And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
-    And I click "Agree" button on Analytics page
     And "Wallet setup" page is displayed
-    When I enter wallet name: "wallet"
-    When I click "Next" button during wallet setup
-    And I enter password: "<password>" and password confirmation: "<password_conf>"
+    When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
-    Examples:
-      | password    | password_conf | passw_err                 | complex_bar_lvl | passw_conf_err                               |
-      | a           | empty         | core.password.feedback.1  | 1               | empty                                        |
-      | aa          | empty         | core.password.feedback.5  | 1               | empty                                        |
-      | Ta          | a             | core.password.feedback.10 | 1               | core.walletSetupRegisterStep.noMatchPassword |
-      | P@ss        | empty         | core.password.feedback.13 | 1               | empty                                        |
-      | N_8J@bne    | empty         | core.password.feedback.1  | 2               | empty                                        |
-      | N_8J@bne87  | empty         | empty                     | 3               | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                     | 4               | core.walletSetupRegisterStep.noMatchPassword |
+
+    Examples: 
+      | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
+      | a           |          | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | P@ss        |          | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | N_8J@bne    |          | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
+      | N_8J@bne87  |          | empty                                                                           |               3 | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-2464
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button and confirm
-    And I go to "Mnemonic verification" page from "Restore wallet" flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow
     When I click "Enter wallet" button
     Then I see LW homepage
 
   @LW-3063
   Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore wallet" flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow
     When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
@@ -156,7 +151,7 @@ Feature: Onboarding - Restore wallet
     And I click "Remove wallet" button on "Remove wallet" modal
     And I reject analytics banner on "Get started" page
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore wallet" flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow
     When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
@@ -219,7 +214,6 @@ Feature: Onboarding - Restore wallet
     Then the mnemonic input contains the word "abcdefghij"
     And the word in mnemonic input has only 10 characters
 
-
   @LW-3440 @Pending @Obsolete
   Scenario: Restore Wallet - Creating wallet loader disappears after 10s
     Given I click "Restore" button and confirm
@@ -243,10 +237,11 @@ Feature: Onboarding - Restore wallet
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
     And "Next" button is disabled during onboarding process
-    Examples:
+
+    Examples: 
       | value | is_displayed |
-      | 20    | is not       |
-      | 21    | is           |
+      |    20 | is not       |
+      |    21 | is           |
 
   @LW-4743 @Pending
   Scenario: Restore wallet - Enter and Escape buttons support
@@ -281,7 +276,7 @@ Feature: Onboarding - Restore wallet
     When I press keyboard Enter button
     Then I see LW homepage
 
-  @LW-5835 @Pending 
+  @LW-5835 @Pending
   Scenario: Restore Wallet - "Recovery phrase length page" displayed
     Given I click "Restore" button and confirm
     And I am on "Name your wallet" page
@@ -311,10 +306,11 @@ Feature: Onboarding - Restore wallet
     Then "Enter wallet" button is enabled
     When I click "Enter wallet" button
     Then I see LW homepage
-    Examples:
+
+    Examples: 
       | mnemonicLength |
-      | 15             |
-      | 12             |
+      |             15 |
+      |             12 |
 
   @LW-6081
   Scenario Outline: Restore Wallet - error message is displayed for <mnemonicLength> passphrase length
@@ -324,11 +320,12 @@ Feature: Onboarding - Restore wallet
     And I select <mnemonicLength> word passphrase length
     When I enter <mnemonicLength> incorrect mnemonic words on "Mnemonic verification" page
     Then I see incorrect passphrase error displayed
-    Examples:
+
+    Examples: 
       | mnemonicLength |
-      | 12             |
-      | 15             |
-      | 24             |
+      |             12 |
+      |             15 |
+      |             24 |
 
   @LW-4993
   Scenario Outline: Restore Wallet - <mode> theme applied to onboarding pages
@@ -340,12 +337,13 @@ Feature: Onboarding - Restore wallet
     Then I see current onboarding page in <mode> mode
     And I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    When "Mnemonic verification" page is displayed from "Restore wallet" flow
+    When "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     Then I see current onboarding page in <mode> mode
     When I enter 24 correct mnemonic words on "Mnemonic verification" page
     And "Enter wallet" button is enabled
     Then I see current onboarding page in <mode> mode
-    Examples:
+
+    Examples: 
       | mode  |
       | dark  |
       | light |

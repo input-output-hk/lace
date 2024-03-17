@@ -522,7 +522,7 @@ When(/^I restore previously changed mnemonic word$/, async () => {
 });
 
 Given(
-  /^I go to "Mnemonic verification" page from "(Create wallet|Restore wallet)" flow$/,
+  /^I go to "Mnemonic verification" page from "(Create|Restore)" wallet flow$/,
   async (flowType: 'Create' | 'Restore') => {
     await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
   }

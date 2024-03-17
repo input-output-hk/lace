@@ -186,7 +186,7 @@ Feature: Onboarding - Create wallet
   @LW-2443
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create wallet" flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     Then "Enter wallet" button is enabled
 
   @LW-3212 @Pending @Obsolete
@@ -203,7 +203,7 @@ Feature: Onboarding - Create wallet
   @LW-3213
   Scenario: Create Wallet - Mnemonic verification - clear one of fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create wallet" flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     Then "Next" button is enabled during onboarding process
     And I clear one random field
     Then "Next" button is disabled during onboarding process
@@ -211,14 +211,14 @@ Feature: Onboarding - Create wallet
   @LW-2444
   Scenario: Create Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create wallet" flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create wallet" flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     When I click "Enter wallet" button
     # And I am on "All done" page
     # When I click "Go to my wallet" button on "All done" page
@@ -241,7 +241,7 @@ Feature: Onboarding - Create wallet
   @LW-3060
   Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create wallet" flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
@@ -251,7 +251,7 @@ Feature: Onboarding - Create wallet
     And I click "Remove wallet" button on "Remove wallet" modal
     And I reject analytics banner on "Get started" page
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create wallet" flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
@@ -265,7 +265,7 @@ Feature: Onboarding - Create wallet
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
-    Then I am on "Mnemonic verification" page from "Create" wallet
+    Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     When I fill mnemonic input with "s"
     Then I see following autocomplete options:
       | sad     |
@@ -333,11 +333,11 @@ Feature: Onboarding - Create wallet
     Then I see current onboarding page in <mode> mode
     And I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
-    When "Mnemonic writedown" page is displayed
+    When "Mnemonic writedown" page is displayed with 24 words
     Then I see current onboarding page in <mode> mode
     And I save mnemonic words
     And I click "Next" button during wallet setup
-    When "Mnemonic verification" page is displayed from "Create wallet" flow
+    When "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     Then I see current onboarding page in <mode> mode
     And I enter saved mnemonic words
     Then "Enter wallet" button is enabled
