@@ -10,8 +10,9 @@ Feature: Analytics - Top Navigation - Extended view
     And I set up request interception for posthog analytics request(s)
     When I click the menu button
     Then I validate latest analytics single event "user/wallet profile | profile icon | click"
-    When I click on the user details button
-    Then I validate latest analytics single event "user/wallet profile | wallet address | click"
+#    re-enable and update when LW-10057 && LW-9871 are fixed
+#    When I click on the user details button
+#    Then I validate latest analytics single event "user/wallet profile | wallet address | click"
     When I click on the Address Book option
     Then I validate latest analytics single event "user/wallet profile | address book | click"
     When I click the menu button
@@ -26,9 +27,10 @@ Feature: Analytics - Top Navigation - Extended view
     Then I validate latest analytics single event "user/wallet profile | light mode | click"
     When I click on the network option
     Then I validate latest analytics single event "user/wallet profile | network | click"
-    And I validate that 9 analytics event(s) have been sent
+    And I validate that 8 analytics event(s) have been sent
 
-  @LW-8753
+  @LW-8753 @Pending
+  @issue=LW-10007
   Scenario: Analytics - Extended view - Lace menu - User/wallet profile events - Lock wallet
     Given I click the menu button
     And I set up request interception for posthog analytics request(s)

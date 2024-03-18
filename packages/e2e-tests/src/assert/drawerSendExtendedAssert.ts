@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-import webTester from '../actor/webTester';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { TestnetPatterns } from '../support/patterns';
@@ -98,7 +97,7 @@ class DrawerSendExtendedAssert {
       await TransactionNewPage.addBundleButton.waitForDisplayed();
     }
     await TransactionNewPage.addressInput().container.waitForDisplayed();
-    await webTester.seeWebElement(TransactionNewPage.coinConfigure().container());
+    await TransactionNewPage.coinConfigure().container.waitForDisplayed();
 
     await this.assertSeeTransactionCostsLabel();
     await this.assertSeeTransactionFeeLabel();
@@ -109,12 +108,12 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeCoinSelectorWithTitle(expectedTokenName: string) {
-    const tokenName = await new CoinConfigure().getName();
+    const tokenName = await new CoinConfigure().nameElement.getText();
     expect(tokenName).to.contain(expectedTokenName);
   }
 
   async assertSeeCoinSelectorWithTokenInputValue(expectedValue: number) {
-    const tokenValue = await new CoinConfigure().getBalanceValue();
+    const tokenValue = await new CoinConfigure().balanceValueElement.getText();
     expect(tokenValue).to.equal(expectedValue);
   }
 
@@ -188,7 +187,7 @@ class DrawerSendExtendedAssert {
 
   async assertTokensValueAmount(expectedValue: string) {
     const coinConfigure = new CoinConfigure();
-    const tokenAmount = (await coinConfigure.getInputValue()) as string;
+    const tokenAmount = await coinConfigure.input.getValue();
     expect(tokenAmount).to.equal(expectedValue);
   }
 
@@ -209,7 +208,7 @@ class DrawerSendExtendedAssert {
     const coinConfigure = new CoinConfigure();
     const addressInput = new AddressInput();
     expect(await addressInput.input.getValue()).to.be.empty;
-    expect(await webTester.getAttributeValue(coinConfigure.input().toJSLocator(), 'value')).to.equal('0.00');
+    expect(await coinConfigure.input.getValue()).to.equal('0.00');
   }
 
   async assertInsufficientBalanceErrorInBundle(bundleIndex: number, assetName: string, shouldSee: boolean) {
@@ -236,14 +235,14 @@ class DrawerSendExtendedAssert {
     const amountOfAssets = Number(testContext.load(`amountOfAssetsInBundle${bundleIndex}`));
     for (let i = 1; i <= amountOfAssets; i++) {
       const assetName = String(testContext.load(`bundle${bundleIndex}asset${i}`));
-      const bundle = new CoinConfigure(bundleIndex, assetName);
-      shouldBeSelected ? await webTester.seeWebElement(bundle) : await webTester.dontSeeWebElement(bundle);
+      const token = new CoinConfigure(bundleIndex, assetName);
+      await token.container.waitForDisplayed({ reverse: !shouldBeSelected });
     }
   }
 
   async assertAmountOfCharactersInAsset(assetType: string) {
     const savedTicker = String(testContext.load('savedTicker'));
-    const amountOfCharacters = String(await new CoinConfigure().getName()).replace('...', '').length;
+    const amountOfCharacters = String(await new CoinConfigure().nameElement.getText()).replace('...', '').length;
     if (assetType === 'Tokens') {
       savedTicker.length <= 5
         ? expect(savedTicker.length).to.equal(amountOfCharacters)
@@ -259,7 +258,9 @@ class DrawerSendExtendedAssert {
     const savedTicker = String(testContext.load('savedTicker'));
     if (isVisible) {
       if (assetType === 'Tokens') {
-        const textInTooltip = (await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string;
+        const tokenTooltip = await new CoinConfigure().tooltip;
+        await tokenTooltip.waitForDisplayed();
+        const textInTooltip = await tokenTooltip.getText();
         if (savedTicker.startsWith('asset1')) {
           const assetFirstSection = savedTicker.slice(0, 10);
           const assetLastSection = savedTicker.slice(savedTicker.length, -4);
@@ -269,24 +270,25 @@ class DrawerSendExtendedAssert {
           expect(textInTooltip).to.equal(savedTicker);
         }
       } else if (assetType === 'NFTs' && savedTicker.length > 10) {
-        expect((await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string).to.equal(
-          savedTicker
-        );
+        const nftTooltip = await new CoinConfigure().tooltip;
+        await nftTooltip.waitForDisplayed();
+        expect(await nftTooltip.getText()).to.equal(savedTicker);
       }
     } else {
-      await webTester.dontSeeWebElement(new CoinConfigure().tooltip());
+      await new CoinConfigure().tooltip.waitForDisplayed({ reverse: true });
     }
   }
 
   async assertTokenValueDisplayedInTooltip(isVisible: boolean, expectedValue: string) {
     const coinConfigure = new CoinConfigure();
-    await (isVisible
-      ? expect(await webTester.getTextValueFromElement(coinConfigure.tooltip())).to.equal(expectedValue)
-      : webTester.dontSeeWebElement(coinConfigure.tooltip()));
+    await coinConfigure.tooltip.waitForDisplayed({ reverse: !isVisible });
+    if (isVisible) {
+      expect(await coinConfigure.tooltip.getText()).to.equal(expectedValue);
+    }
   }
 
   async assertEnteredValue(expectedValue: string) {
-    expect(await $(new CoinConfigure().input().toJSLocator()).getValue()).to.equal(expectedValue);
+    expect(await new CoinConfigure().input.getValue()).to.equal(expectedValue);
   }
 
   async assertSeeAddressErrorBanner() {

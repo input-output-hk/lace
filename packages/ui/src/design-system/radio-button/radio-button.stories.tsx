@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { SVGProps } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDownload';
 import type { Meta } from '@storybook/react';
@@ -14,6 +14,7 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import * as Text from '../typography';
 
 import { RadioButtonGroup } from './';
 
@@ -28,43 +29,52 @@ export default {
   ],
 } as Meta;
 
-const getOptions = (label = ''): { value: string; label: string }[] => [
-  { value: `option-${uuid()}`, label },
-];
-const getOptionsWithIcon = (): {
+const getOptions = (
+  count: number,
+  label: string,
+  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
+): {
   value: string;
   label: string;
-  icon: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
+  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
   onIconClick: () => void;
-}[] => [
-  {
-    value: 'option',
-    label: 'Label',
-    icon: DocumentDownload,
+  tooltipText: string;
+  // eslint-disable-next-line max-params
+}[] =>
+  Array.from({ length: count }).map(_ => ({
+    value: `option-${uuid()}`,
+    label,
+    icon,
     onIconClick: (): void => void 0,
-  },
-];
+    tooltipText: 'Test tooltip text lorem ipsum dolor sit amet',
+  }));
 
 const MainComponents = (): JSX.Element => {
-  const getRow = (label?: string) => [
-    { options: getOptions(label), onValueChange: (): undefined => undefined },
+  const getRow = (
+    label = 'label',
+    icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
+  ) => [
     {
-      options: getOptions(label),
+      options: getOptions(1, label, icon),
+      onValueChange: (): undefined => undefined,
+    },
+    {
+      options: getOptions(1, label, icon),
       id: 'hover',
       onValueChange: (): undefined => undefined,
     },
     {
-      options: getOptions(label),
+      options: getOptions(1, label, icon),
       id: 'active',
       onValueChange: (): undefined => undefined,
     },
     {
-      options: getOptions(label),
+      options: getOptions(1, label, icon),
       disabled: true,
       onValueChange: (): undefined => undefined,
     },
     {
-      options: getOptions(label),
+      options: getOptions(1, label, icon),
       id: 'focus',
       onValueChange: (): undefined => undefined,
     },
@@ -73,9 +83,31 @@ const MainComponents = (): JSX.Element => {
   return (
     <>
       <Variants.Row>
-        {getRow().map(item => (
+        {getRow('').map((item, index) => (
           <Variants.Cell key={item.options[0].value}>
-            <RadioButtonGroup {...item} />
+            {index < 4 ? (
+              <RadioButtonGroup {...item} />
+            ) : (
+              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+            )}
+          </Variants.Cell>
+        ))}
+      </Variants.Row>
+      <Variants.Row>
+        {getRow('').map(item => (
+          <Variants.Cell key={item.options[0].value}>
+            <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
+          </Variants.Cell>
+        ))}
+      </Variants.Row>
+      <Variants.Row>
+        {getRow().map((item, index) => (
+          <Variants.Cell key={item.options[0].value}>
+            {index < 4 ? (
+              <RadioButtonGroup {...item} />
+            ) : (
+              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+            )}
           </Variants.Cell>
         ))}
       </Variants.Row>
@@ -87,14 +119,7 @@ const MainComponents = (): JSX.Element => {
         ))}
       </Variants.Row>
       <Variants.Row>
-        {getRow('Label').map(item => (
-          <Variants.Cell key={item.options[0].value}>
-            <RadioButtonGroup {...item} />
-          </Variants.Cell>
-        ))}
-      </Variants.Row>
-      <Variants.Row>
-        {getRow('Label').map(item => (
+        {getRow('Label', DocumentDownload).map(item => (
           <Variants.Cell key={item.options[0].value}>
             <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
           </Variants.Cell>
@@ -104,102 +129,59 @@ const MainComponents = (): JSX.Element => {
   );
 };
 
-const AdditionalVariants = (): JSX.Element => {
+const List = ({
+  icon,
+}: {
+  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
+}) => {
+  const options = useMemo(() => getOptions(4, 'Label', icon), []);
+  const [value, setValue] = React.useState(options[0].value);
   return (
-    <>
-      <Variants.Row>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={getOptions()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={getOptions()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={getOptions()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            disabled
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={getOptions()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            id="hover"
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={getOptions()}
-          />
-        </Variants.Cell>
-      </Variants.Row>
-      <Variants.Row>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={getOptionsWithIcon()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={getOptionsWithIcon()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={getOptionsWithIcon()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            disabled
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={getOptionsWithIcon()}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButtonGroup
-            id="hover"
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={getOptionsWithIcon()}
-          />
-        </Variants.Cell>
-      </Variants.Row>
-    </>
+    <RadioButtonGroup
+      selectedValue={value}
+      options={options}
+      onValueChange={(value: React.SetStateAction<string>): void => {
+        setValue(value);
+      }}
+    />
+  );
+};
+
+const VariantsSection = () => {
+  const withIconOptions = getOptions(1, 'Label', DocumentDownload);
+  return (
+    <Section title="Variants">
+      <Variants.Table
+        headers={['Base control with label', 'Base control', 'with icon']}
+      >
+        <Variants.Row>
+          <Variants.Cell>
+            <RadioButtonGroup
+              options={getOptions(1, 'Label')}
+              onValueChange={(): undefined => undefined}
+            />
+          </Variants.Cell>
+          <Variants.Cell>
+            <RadioButtonGroup
+              options={getOptions(1, '')}
+              onValueChange={(): undefined => undefined}
+            />
+          </Variants.Cell>
+          <Variants.Cell>
+            <RadioButtonGroup
+              options={withIconOptions}
+              selectedValue={withIconOptions[0].value}
+              onValueChange={(): undefined => undefined}
+            />
+          </Variants.Cell>
+        </Variants.Row>
+      </Variants.Table>
+    </Section>
   );
 };
 
 export const Overview = (): JSX.Element => {
   const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
-  const option = [{ value: 'singleOption', label: 'Label' }];
-  const options = [
-    { value: 'label01', label: 'Label' },
-    { value: 'label02', label: 'Label' },
-    { value: 'label03', label: 'Label' },
-    { value: 'label04', label: 'Label' },
-  ];
-
-  const [radioValue, setRadioValue] = React.useState(options[1].value);
 
   return (
     <Grid>
@@ -214,35 +196,39 @@ export const Overview = (): JSX.Element => {
           >
             <Flex mr="$8">
               <RadioButtonGroup
-                selectedValue={radioValue}
-                options={option}
-                onValueChange={(value: React.SetStateAction<string>): void => {
-                  setRadioValue(value);
-                }}
+                options={getOptions(1, 'Label')}
+                onValueChange={(): undefined => undefined}
               />
             </Flex>
           </Flex>
 
           <Divider my="$64" />
 
-          <Flex
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            w="$fill"
-            my="$32"
-          >
-            <Flex mr="$8">
-              <RadioButtonGroup
-                selectedValue={radioValue}
-                options={options}
-                onValueChange={(value: React.SetStateAction<string>): void => {
-                  setRadioValue(value);
-                }}
-              />
-            </Flex>
-          </Flex>
+          <Grid columns="$2">
+            <Cell>
+              <Variants.Table headers={['Light']}>
+                <Flex justifyContent={'space-around'} my={'$32'}>
+                  <List />
+                  <List icon={DocumentDownload} />
+                </Flex>
+              </Variants.Table>
+            </Cell>
+            <Cell>
+              <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+                <Variants.Table headers={['Dark']}>
+                  <Flex justifyContent={'space-around'} my={'$32'}>
+                    <List />
+                    <List icon={DocumentDownload} />
+                  </Flex>
+                </Variants.Table>
+              </LocalThemeProvider>
+            </Cell>
+          </Grid>
         </Section>
+
+        <Divider my="$64" />
+
+        <VariantsSection />
 
         <Divider my="$64" />
 
@@ -256,19 +242,6 @@ export const Overview = (): JSX.Element => {
             </Variants.Table>
           </LocalThemeProvider>
         </Section>
-
-        <Divider my="$64" />
-
-        <Section title="Additional Variants">
-          <Variants.Table headers={headers}>
-            <AdditionalVariants />
-          </Variants.Table>
-          <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-            <Variants.Table>
-              <AdditionalVariants />
-            </Variants.Table>
-          </LocalThemeProvider>
-        </Section>
       </Cell>
     </Grid>
   );
@@ -278,6 +251,6 @@ Overview.parameters = {
   pseudo: {
     hover: '#hover',
     active: '#active',
-    focus: '#focus',
+    focusVisible: '#focus',
   },
 };

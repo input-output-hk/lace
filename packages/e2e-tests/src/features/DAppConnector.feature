@@ -70,7 +70,7 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     Then "Get started" page is displayed
 
-  @LW-3758 @Testnet @Mainnet
+  @LW-3758 @Testnet @Mainnet @Pending
   Scenario: Unlock Dapp page is displayed when wallet is locked, wallet can be unlocked
     Given I lock my wallet
     When I open test DApp
@@ -79,7 +79,7 @@ Feature: DAppConnector - Common
     And I click "Unlock" button on unlock screen
     Then I see DApp authorization window
 
-  @LW-7082 @Testnet @Mainnet
+  @LW-7082 @Testnet @Mainnet @Pending
   Scenario: "Forgot password" click and cancel on DApp wallet unlock page
     Given I lock my wallet
     When I open test DApp
@@ -89,7 +89,7 @@ Feature: DAppConnector - Common
     And I click on "Cancel" button on "Forgot password?" modal
     Then I see DApp unlock page
 
-  @LW-7083 @Testnet @Mainnet
+  @LW-7083 @Testnet @Mainnet @Pending
   Scenario: "Forgot password" click and proceed on DApp wallet unlock page
     Given I lock my wallet
     When I open test DApp

@@ -5,7 +5,7 @@ import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { firstValueFrom } from 'rxjs';
 const {
   CertificateType,
-  StakeKeyStatus,
+  StakeCredentialStatus,
   RewardAccount,
   CredentialType: { KeyHash }
 } = Cardano;
@@ -14,8 +14,8 @@ const buildDelegationCertificates = (
   walletRewardAccount: Cardano.RewardAccountInfo,
   poolToDelegateId: Cardano.PoolId
 ): Cardano.Certificate[] => {
-  const { address: rewardAccount, keyStatus } = walletRewardAccount;
-  const isStakeKeyRegistered = keyStatus === StakeKeyStatus.Registered;
+  const { address: rewardAccount, credentialStatus } = walletRewardAccount;
+  const isStakeKeyRegistered = credentialStatus === StakeCredentialStatus.Registered;
 
   const stakeKeyHash = RewardAccount.toHash(rewardAccount);
   const stakeCredential = {

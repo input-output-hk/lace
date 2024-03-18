@@ -43,6 +43,11 @@ describe('Testing getTxInputsValueAndAddress function', () => {
       ]),
       total$: of([]),
       unspendable$: of([])
+    },
+    transactions: {
+      outgoing: {
+        signed$: of([])
+      }
     }
   } as ObservableWallet;
 
