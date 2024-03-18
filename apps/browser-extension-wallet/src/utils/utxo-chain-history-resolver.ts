@@ -5,7 +5,7 @@ import { Cardano } from '@cardano-sdk/core';
 
 interface UtxoAndBackendChainHistoryResolverArgs {
   utxo: Wallet.ObservableWallet['utxo'];
-  chainHistoryProvider?: any;
+  chainHistoryProvider: Wallet.ChainHistoryProvider;
 }
 
 export const utxoAndBackendChainHistoryResolver = ({

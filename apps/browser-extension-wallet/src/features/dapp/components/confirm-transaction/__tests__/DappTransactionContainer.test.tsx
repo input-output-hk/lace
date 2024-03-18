@@ -21,7 +21,7 @@ const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano
 const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
-// import { DappTransactionContainer } from '../DappTransactionContainer';
+import { DappTransactionContainer } from '../DappTransactionContainer';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
@@ -31,7 +31,6 @@ import { SignTxData } from '../types';
 import { getWrapper } from '../testing.utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 import { cardanoCoin } from '@src/utils/constants';
-import { DappTransactionContainer } from '../DappTransactionContainer';
 
 const { Cardano, Crypto } = Wallet;
 
