@@ -100,8 +100,10 @@
       "confirmPasswordInputLabel": "Confirm password",
       "nameRequiredMessage": "Wallet name is required",
       "noMatchPassword": "Oops! The passwords don't match.",
+      "enterWallet": "Enter wallet",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
-      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger.",
+      "next": "Next"
     },
     "dappTransaction": {
       "asset": "Asset",
@@ -1615,7 +1617,6 @@
       "writePassphraseSubtitle1": "Consider your recovery phrase as the master key to your wallet.",
       "writePassphraseSubtitle2": "Watch video.",
       "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly.",
-      "enterWallet": "Enter wallet",
       "copyToClipboard": "Copy to clipboard",
       "pasteFromClipboard": "Paste from clipboard"
     },

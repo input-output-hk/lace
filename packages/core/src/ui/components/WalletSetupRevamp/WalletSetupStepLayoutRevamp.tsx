@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import styles from '../WalletSetup//WalletSetupStepLayout.module.scss';
+import styles from './WalletSetupStepLayoutRevamp.module.scss';
 import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
@@ -39,8 +39,8 @@ const removeLegalAndAnalyticsStep = (
 
 const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, flow: WalletSetupFlow) => {
   const inMemoryWalletSteps = [
-    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
     { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('package.core.walletSetupStep.recoveryPhrase') },
+    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
     { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.enterWallet') }
   ];
 
