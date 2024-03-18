@@ -1,7 +1,8 @@
 import AboutLaceWidget from './extendedView/AboutLaceWidget';
 import { SettingsLink } from './SettingsLink';
+import CommonDrawerElements from '../CommonDrawerElements';
 
-class SettingsPage {
+class SettingsPage extends CommonDrawerElements {
   private readonly WALLET_HEADER = '[data-testid="wallet-settings-heading"]';
   private readonly SECURITY_HEADER = '[data-testid="security-settings-heading"]';
   private readonly SUPPORT_HEADER = '[data-testid="support-settings-heading"]';

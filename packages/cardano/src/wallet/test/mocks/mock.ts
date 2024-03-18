@@ -49,7 +49,7 @@ export const stakePoolMock: Cardano.StakePool = {
 
 export const rewardAcountMock: Partial<Cardano.RewardAccountInfo> = {
   address: Cardano.RewardAccount('stake_test1urm7tqwy3d5e3kxp424cvtcgr8zaprkszk38jntyzu5t4mqalgvfg'),
-  keyStatus: Cardano.StakeKeyStatus.Registered,
+  credentialStatus: Cardano.StakeCredentialStatus.Registered,
 
   delegatee: {
     nextNextEpoch: stakePoolMock

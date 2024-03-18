@@ -11,10 +11,12 @@ import type { ControlButtonProps } from './control-button.data';
 
 interface Props extends ControlButtonProps {
   size?: 'extraSmall' | 'small';
+  testId?: string;
 }
 
 export const Icon = ({
   size = 'small',
+  testId,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
@@ -30,6 +32,7 @@ export const Icon = ({
           fontSize: size,
         }),
       }}
+      data-testid={testId}
     />
   );
 };

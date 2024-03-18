@@ -2,7 +2,6 @@ import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
 import SettingsPage from '../elements/settings/SettingsPage';
 import NetworkDrawer from '../elements/settings/NetworkDrawer';
 import menuHeaderPageObject from './menuHeaderPageObject';
-import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import { browser } from '@wdio/globals';
@@ -123,9 +122,7 @@ class SettingsExtendedPageObject {
   switchNetworkAndCloseDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
     await this.switchNetworkWithoutClosingDrawer(network);
     await this.waitUntilHdWalletSynced();
-    await (mode === 'extended'
-      ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
-      : simpleTxSideDrawerPageObject.clickBackDrawerButton());
+    await (mode === 'extended' ? NetworkDrawer.clickCloseDrawerButton() : NetworkDrawer.clickBackDrawerButton());
   };
 
   removeWallet = async () => {
