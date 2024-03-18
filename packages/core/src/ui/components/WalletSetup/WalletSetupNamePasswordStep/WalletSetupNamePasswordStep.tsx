@@ -31,7 +31,7 @@ export interface WalletSetupNamePasswordStepProps {
     | 'noMatchPassword'
     | 'nameMaxLength'
     | 'nameRequiredMessage'
-    | 'enterWallet'
+    | 'confirmButton'
   >;
 }
 
@@ -61,7 +61,7 @@ export const WalletSetupNamePasswordStep = ({
   const walletNameErrorMessage = useMemo(() => {
     const validationError = validateNameLength(walletName) ? translations.nameMaxLength : '';
     return walletName ? validationError : translations.nameRequiredMessage;
-  }, [t, walletName]);
+  }, [t, walletName, translations.nameMaxLength, translations.nameRequiredMessage]);
 
   const isNextButtonEnabled = () => {
     const hasMinimumLevelRequired = score >= MINIMUM_PASSWORD_LEVEL_REQUIRED;
@@ -102,7 +102,7 @@ export const WalletSetupNamePasswordStep = ({
       onNext={handleNextButtonClick}
       isNextEnabled={isNextButtonEnabled()}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
-      nextLabel={translations.enterWallet}
+      nextLabel={translations.confirmButton}
     >
       <div className={styles.walletPasswordAndNameContainer}>
         <WalletNameInput

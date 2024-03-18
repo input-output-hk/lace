@@ -19,7 +19,7 @@ export const Setup = (): JSX.Element => {
     confirmPasswordInputLabel: t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
     nameRequiredMessage: t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
     noMatchPassword: t('package.core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    enterWallet: t('package.core.walletNameAndPasswordSetupStep.enterWallet'),
+    confirmButton: t('package.core.walletNameAndPasswordSetupStep.next'),
     secondLevelPasswordStrengthFeedback: t(
       'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
     ),

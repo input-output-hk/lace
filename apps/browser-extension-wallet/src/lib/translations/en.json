@@ -102,7 +102,8 @@
       "noMatchPassword": "Oops! The passwords don't match.",
       "enterWallet": "Enter wallet",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
-      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger.",
+      "next": "Next"
     },
     "dappTransaction": {
       "asset": "Asset",
