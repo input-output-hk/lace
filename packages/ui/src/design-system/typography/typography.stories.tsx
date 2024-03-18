@@ -92,7 +92,9 @@ export const Overview = (): JSX.Element => (
     <Cell>
       <Section title="Colors">
         <ColorSchemaTable
-          headers={['Primary', 'Secondary', 'Highlight', 'Error']}
+          headers={colors.map(
+            color => color.charAt(0).toUpperCase() + color.slice(1),
+          )}
         >
           <Variants.Row>
             {colors.map(color => (
