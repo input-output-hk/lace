@@ -66,7 +66,12 @@ export const DappTransactionContainer = withAddressBookContext(
     const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
     const txInputResolver = useMemo(
-      () => utxoAndBackendChainHistoryResolver({ utxo: inMemoryWallet.utxo, chainHistoryProvider }),
+      () =>
+        utxoAndBackendChainHistoryResolver({
+          utxo: inMemoryWallet.utxo,
+          transactions: inMemoryWallet.transactions,
+          chainHistoryProvider
+        }),
       [inMemoryWallet, chainHistoryProvider]
     );
 
