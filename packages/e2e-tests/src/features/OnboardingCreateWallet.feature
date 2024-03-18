@@ -70,7 +70,7 @@ Feature: Onboarding - Create wallet
     When I click "Back" button during wallet setup
     Then "Wallet setup" page is displayed
 
-  @LW-3015 @Pending @Obsolete
+  @LW-3015 @Pending
   Scenario: Create Wallet - Mnemonic info - Next button click
     Given I navigate to "Mnemonic info" page
     When I click "Next" button during wallet setup
