@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './profile-dropdown-wallet-status.css';
 

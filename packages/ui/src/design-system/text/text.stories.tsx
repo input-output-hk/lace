@@ -15,7 +15,7 @@ import { Label } from './label.component';
 import { PageHeading } from './page-heading.component';
 import { SubHeading } from './subheading.component';
 
-import type { TypographyVariants } from './typography.css';
+import type { TypographyVariants } from './text.css';
 import type { Theme } from '../../design-tokens';
 
 const subtitle = `As the visual representation of language, typography's main task is to communicate information. Lace defines a set of styles you can use to apply a consistent typographic style across your platform.`;

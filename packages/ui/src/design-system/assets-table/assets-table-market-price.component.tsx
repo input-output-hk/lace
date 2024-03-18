@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './assets-table-market-price.css';
 
@@ -18,15 +18,13 @@ export const MarketPrice = ({
 }: Readonly<Props>): JSX.Element => {
   return (
     <Flex flexDirection="column" alignItems="center" className={cx.container}>
-      <Typography.Body.Large weight="$semibold">
-        {tokenPrice}
-      </Typography.Body.Large>
-      <Typography.Body.Normal
+      <Text.Body.Large weight="$semibold">{tokenPrice}</Text.Body.Large>
+      <Text.Body.Normal
         weight="$semibold"
         color={priceTrend === 'up' ? 'success' : 'error'}
       >
         {priceChange}
-      </Typography.Body.Normal>
+      </Text.Body.Normal>
     </Flex>
   );
 };

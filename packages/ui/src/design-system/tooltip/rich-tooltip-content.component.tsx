@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './rich-tooltip-content.css';
 import * as cx2 from './tooltip-content.css';
@@ -28,10 +28,10 @@ export const RichTooltipContent = ({
         <Box className={cx.dot} style={customDotStyle} />
       </Flex>
       <Flex flexDirection="column" gap="$4">
-        <Typography.Body.Normal weight="$bold">{title}</Typography.Body.Normal>
-        <Typography.Body.Small color="secondary" weight="$semibold">
+        <Text.Body.Normal weight="$bold">{title}</Text.Body.Normal>
+        <Text.Body.Small color="secondary" weight="$semibold">
           {description}
-        </Typography.Body.Small>
+        </Text.Body.Small>
       </Flex>
     </Flex>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './flow-card-details.css';
 
@@ -19,15 +19,13 @@ export const Details = ({ title, subtitle }: Readonly<Props>): JSX.Element => {
       className={cx.container}
     >
       {title === undefined ? undefined : (
-        <Typography.Body.Large weight="$semibold">
-          {title}
-        </Typography.Body.Large>
+        <Text.Body.Large weight="$semibold">{title}</Text.Body.Large>
       )}
 
       {subtitle === undefined ? undefined : (
-        <Typography.Body.Normal color="secondary" weight="$semibold">
+        <Text.Body.Normal color="secondary" weight="$semibold">
           {subtitle}
-        </Typography.Body.Normal>
+        </Text.Body.Normal>
       )}
     </Flex>
   );

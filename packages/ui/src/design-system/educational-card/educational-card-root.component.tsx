@@ -3,7 +3,7 @@ import React from 'react';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Grid } from '../grid';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './educational-card-root.css';
 

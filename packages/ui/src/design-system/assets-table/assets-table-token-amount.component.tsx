@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './assets-table-token-amount.css';
 
@@ -16,10 +16,10 @@ export const TokenAmount = ({
 }: Readonly<Props>): JSX.Element => {
   return (
     <Flex flexDirection="column" alignItems="flex-end" className={cx.container}>
-      <Typography.Body.Large weight="$semibold">{amount}</Typography.Body.Large>
-      <Typography.Body.Normal color="secondary" weight="$semibold">
+      <Text.Body.Large weight="$semibold">{amount}</Text.Body.Large>
+      <Text.Body.Normal color="secondary" weight="$semibold">
         {fiatPrice}
-      </Typography.Body.Normal>
+      </Text.Body.Normal>
     </Flex>
   );
 };

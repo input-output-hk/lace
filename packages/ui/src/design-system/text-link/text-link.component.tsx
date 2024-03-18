@@ -3,7 +3,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './text-link.css';
 

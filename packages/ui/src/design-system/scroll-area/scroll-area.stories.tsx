@@ -6,7 +6,7 @@ import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
 import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Cell, Grid } from '../grid';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { ScrollArea } from './scroll-area.component';
 

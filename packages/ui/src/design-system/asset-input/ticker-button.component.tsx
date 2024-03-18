@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ReactComponent as ChevronRight } from '@lace/icons/dist/ChevronRightComponent';
 
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './ticker-button.css';
 

@@ -5,7 +5,7 @@ import cn from 'classnames';
 
 import { sx } from '../../design-tokens';
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './text-box.css';
 
@@ -71,9 +71,9 @@ export const TextBox = ({
       </Form.Field>
     </Flex>
     {errorMessage && (
-      <Typography.Label color="error" className={cx.errorMessage}>
+      <Text.Label color="error" className={cx.errorMessage}>
         {errorMessage}
-      </Typography.Label>
+      </Text.Label>
     )}
   </Form.Root>
 );

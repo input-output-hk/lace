@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './transaction-summary.css';
 
@@ -21,15 +21,13 @@ export const Other = ({
   return (
     <Grid {...props} columns="$2">
       <Cell>
-        <Typography.Body.Normal weight="$semibold">
-          {label}
-        </Typography.Body.Normal>
+        <Text.Body.Normal weight="$semibold">{label}</Text.Body.Normal>
       </Cell>
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">
-          <Typography.Body.Normal weight="$medium" className={cx.text}>
+          <Text.Body.Normal weight="$medium" className={cx.text}>
             {text}
-          </Typography.Body.Normal>
+          </Text.Body.Normal>
         </Flex>
       </Cell>
     </Grid>

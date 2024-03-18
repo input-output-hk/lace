@@ -3,9 +3,9 @@ import React, { forwardRef } from 'react';
 
 import classNames from 'classnames';
 
-import { bold, medium, regular, semibold, typography } from './typography.css';
+import { bold, medium, regular, semibold, typography } from './text.css';
 
-import type { TypographyVariants } from './typography.css';
+import type { TypographyVariants } from './text.css';
 import type { Theme } from '../../design-tokens';
 
 type FontWeights = keyof Theme['fontWeights'];

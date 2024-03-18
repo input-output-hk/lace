@@ -2,7 +2,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './max-button.css';
 

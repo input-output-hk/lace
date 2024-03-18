@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './tooltip-content.css';
 
@@ -13,9 +13,9 @@ export const TooltipContent = ({
 }: Readonly<TooltipContentProps>): JSX.Element => {
   return (
     <div className={cx.tooltipContent}>
-      <Typography.Body.Normal color="secondary" weight="$semibold">
+      <Text.Body.Normal color="secondary" weight="$semibold">
         {label}
-      </Typography.Body.Normal>
+      </Text.Body.Normal>
     </div>
   );
 };

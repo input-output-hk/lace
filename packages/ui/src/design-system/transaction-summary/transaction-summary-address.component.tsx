@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './transaction-summary.css';
 
@@ -23,22 +23,22 @@ export const Address = ({
   return (
     <Grid {...props} columns="$2">
       <Cell>
-        <Typography.Body.Normal
+        <Text.Body.Normal
           weight="$semibold"
           {...(testID != undefined && { 'data-testid': `${testID}-label` })}
         >
           {label}
-        </Typography.Body.Normal>
+        </Text.Body.Normal>
       </Cell>
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">
-          <Typography.Address
+          <Text.Address
             weight="$medium"
             className={cx.text}
             {...(testID != undefined && { 'data-testid': `${testID}-value` })}
           >
             {address}
-          </Typography.Address>
+          </Text.Address>
         </Flex>
       </Cell>
     </Grid>

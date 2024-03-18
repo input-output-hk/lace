@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { AmountInput } from './amount-input.component';
 import * as cx from './asset-input.css';

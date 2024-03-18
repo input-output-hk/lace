@@ -6,7 +6,7 @@ import { ReactComponent as UploadIcon } from '@lace/icons/dist/UploadGradientCom
 import { Box } from '../box';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './file-upload.css';
 

@@ -4,7 +4,7 @@ import { Box } from '../box';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import { Image } from '../profile-picture';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './flow-card-profile.css';
 
@@ -29,14 +29,14 @@ export const Profile = ({
         </Cell>
         <Cell>
           <Flex justifyContent="center" flexDirection="column" h="$fill">
-            <Typography.Body.Large color="primary" weight="$semibold">
+            <Text.Body.Large color="primary" weight="$semibold">
               {name}
-            </Typography.Body.Large>
+            </Text.Body.Large>
             {description === undefined ? undefined : (
               <Box>
-                <Typography.Body.Normal color="secondary" weight="$semibold">
+                <Text.Body.Normal color="secondary" weight="$semibold">
                   {description}
-                </Typography.Body.Normal>
+                </Text.Body.Normal>
               </Box>
             )}
           </Flex>

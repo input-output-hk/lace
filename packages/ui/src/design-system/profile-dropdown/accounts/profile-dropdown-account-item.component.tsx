@@ -6,7 +6,7 @@ import { Tooltip } from 'antd';
 import * as ControlButtons from '../../control-buttons';
 import { Flex } from '../../flex';
 import * as ProfilePicture from '../../profile-picture';
-import * as Text from '../../typography';
+import { Text } from '../../text';
 
 import * as cx from './profile-dropdown-account-item.css';
 

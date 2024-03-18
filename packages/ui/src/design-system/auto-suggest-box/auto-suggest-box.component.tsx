@@ -7,7 +7,7 @@ import cn from 'classnames';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { ScrollArea } from '../scroll-area';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { CloseButton } from './auto-suggest-box-close-button.component';
 import { Icon } from './auto-suggest-box-icon.component';

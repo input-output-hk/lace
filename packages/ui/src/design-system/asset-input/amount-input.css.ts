@@ -1,5 +1,5 @@
 import { style, vars } from '../../design-tokens';
-import { bold } from '../typography/typography.css';
+import { bold } from '../text/text.css';
 
 const inputTypography = style({
   fontFamily: vars.fontFamily.$nova,

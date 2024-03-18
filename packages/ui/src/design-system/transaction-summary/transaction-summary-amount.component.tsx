@@ -5,8 +5,8 @@ import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
+import { Text } from '../text';
 import { Tooltip } from '../tooltip';
-import * as Typography from '../typography';
 
 import * as cx from './transaction-summary.css';
 
@@ -37,12 +37,12 @@ export const Amount = ({
     <Grid {...props} data-testid={makeTestId(testId, 'root')} columns="$2">
       <Cell>
         <Flex>
-          <Typography.Body.Normal
+          <Text.Body.Normal
             weight="$semibold"
             data-testid={makeTestId(testId, 'label')}
           >
             {label}
-          </Typography.Body.Normal>
+          </Text.Body.Normal>
           {tooltip !== undefined && (
             <Box ml="$8" className={cx.tooltip}>
               <Tooltip label={tooltip}>
@@ -59,19 +59,19 @@ export const Amount = ({
       </Cell>
       <Cell>
         <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-          <Typography.Body.Normal
+          <Text.Body.Normal
             weight="$medium"
             className={cx.text}
             data-testid={makeTestId(testId, 'amount')}
           >
             {amount}
-          </Typography.Body.Normal>
-          <Typography.Body.Normal
+          </Text.Body.Normal>
+          <Text.Body.Normal
             className={cx.secondaryText}
             data-testid={makeTestId(testId, 'fiat')}
           >
             {fiatPrice}
-          </Typography.Body.Normal>
+          </Text.Body.Normal>
         </Flex>
       </Cell>
     </Grid>

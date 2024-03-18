@@ -5,7 +5,7 @@ import cn from 'classnames';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { UserProfile } from '../profile-picture';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './profile-dropdown-wallet-card.css';
 import { WalletIcon } from './profile-dropdown-wallet-icon.component';
