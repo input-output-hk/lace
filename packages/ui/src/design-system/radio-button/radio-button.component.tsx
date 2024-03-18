@@ -13,6 +13,7 @@ export interface RadioButtonGroupOption {
   label: React.ReactNode | string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   onIconClick?: () => void;
+  tooltipText?: string;
 }
 
 export interface RadioButtonGroupProps {

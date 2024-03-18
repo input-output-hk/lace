@@ -136,8 +136,7 @@ describe('Testing ProposalProceduresContainer component', () => {
           },
           protocolVersion: {
             major: hardForkInitiationAction.protocolVersion.major.toString(),
-            minor: hardForkInitiationAction.protocolVersion.minor.toString(),
-            patch: hardForkInitiationAction.protocolVersion.patch?.toString()
+            minor: hardForkInitiationAction.protocolVersion.minor.toString()
           },
           actionId: {
             index: hardForkInitiationAction.governanceActionId.actionIndex.toString(),

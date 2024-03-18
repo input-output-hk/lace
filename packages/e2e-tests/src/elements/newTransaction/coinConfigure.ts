@@ -1,9 +1,9 @@
 /* eslint-disable no-undef */
-import webTester, { LocatorStrategy } from '../../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from '../webElement';
 import { ChainablePromiseElement } from 'webdriverio';
+import { setInputFieldValue } from '../../utils/inputFieldUtils';
+import { browser } from '@wdio/globals';
 
-export class CoinConfigure extends WebElement {
+export class CoinConfigure {
   protected CONTAINER_BUNDLE = '//div[@data-testid="asset-bundle-container"]';
   protected CONTAINER = '//div[@data-testid="coin-configure"]';
   private TOKEN_NAME = '//div[@data-testid="coin-configure-text"]';
@@ -15,75 +15,103 @@ export class CoinConfigure extends WebElement {
   private TOOLTIP = 'div.ant-tooltip-inner';
   private MAX_BUTTON = '//button[@data-testid="max-bttn"]';
 
-  constructor(bundleIndex?: number, assetName?: string) {
-    super();
+  constructor(bundleIndex = 1, assetName?: string) {
     this.CONTAINER =
       typeof assetName === 'undefined'
-        ? this.CONTAINER
+        ? `(${this.CONTAINER_BUNDLE})[${bundleIndex}]${this.CONTAINER}`
         : `(${this.CONTAINER_BUNDLE})[${bundleIndex}]//div[contains(@data-testid-title,"${assetName}")]`;
   }
 
-  container(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}`, 'xpath');
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}`);
   }
 
-  nameElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_NAME}`, 'xpath');
+  get nameElement(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TOKEN_NAME}`);
   }
 
-  balanceValueElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_VALUE}`, 'xpath');
+  get balanceValueElement(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TOKEN_VALUE}`);
   }
 
-  balanceFiatValueElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_FIAT_VALUE}`, 'xpath');
+  get balanceFiatValueElement(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TOKEN_FIAT_VALUE}`);
   }
 
-  input(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_INPUT}`, 'xpath');
+  get input(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TOKEN_INPUT}`);
   }
 
-  assetRemoveButton(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}/following-sibling::${this.ASSET_REMOVE_BUTTON.slice(2)}`, 'xpath');
+  get assetRemoveButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(String(`${this.CONTAINER}/following-sibling::${this.ASSET_REMOVE_BUTTON.slice(2)}`));
   }
 
   get insufficientBalanceError(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}${this.INSUFFICIENT_BALANCE_ERROR}`);
   }
 
-  assetMaxButton(): WebElement {
-    return Factory.fromSelector(`(${this.CONTAINER}${this.MAX_BUTTON})`, 'xpath');
+  get assetMaxButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.MAX_BUTTON}`);
   }
 
-  tooltip(): WebElement {
-    return Factory.fromSelector(`${this.TOOLTIP}`, 'css selector');
+  get tooltip(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TOOLTIP);
   }
 
-  async getName(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.nameElement());
-  }
+  getAmount = async (): Promise<number> => {
+    const value = await $(`${this.CONTAINER}${this.TOKEN_INPUT}`).getValue();
+    return Number(value);
+  };
 
-  async getAmount(): Promise<number> {
-    return Number(await $(`${this.CONTAINER}${this.TOKEN_INPUT}`).getValue());
-  }
+  fillTokenValue = async (valueToEnter: number): Promise<void> => {
+    await this.input.waitForClickable();
+    await setInputFieldValue(await this.input, String(valueToEnter));
+  };
 
-  async getBalanceValue(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.balanceValueElement());
-  }
+  fillTokenValueUsingKeys = async (valueToEnter: number): Promise<void> => {
+    await this.input.waitForClickable();
+    await this.input.click();
+    await browser.keys(String(valueToEnter));
+  };
 
-  async getFiatBalanceValue(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.balanceFiatValueElement());
-  }
+  fillTokenValueWithoutClearingField = async (valueToEnter: number): Promise<void> => {
+    await this.input.waitForClickable();
+    await this.input.click();
+    for (const digit of valueToEnter.toString()) {
+      await browser.pause(50);
+      await browser.keys(digit);
+    }
+  };
 
-  async getInputValue(): Promise<string | number> {
-    return await webTester.getAttributeValueFromElement(this.input(), 'value');
-  }
+  hoverOverTheTokenValue = async (): Promise<void> => {
+    await this.input.waitForStable();
+    await this.input.moveTo();
+  };
 
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
+  hoverOverTheTokenName = async (): Promise<void> => {
+    await this.nameElement.waitForStable();
+    await this.nameElement.moveTo();
+  };
 
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
-  }
+  clickRemoveAssetButton = async (): Promise<void> => {
+    await this.assetRemoveButton.click();
+  };
+
+  clickMaxButton = async (): Promise<void> => {
+    await this.input.waitForStable();
+    await this.input.waitForClickable();
+    await this.input.clearValue();
+    await this.input.moveTo();
+    await this.assetMaxButton.click();
+  };
+
+  clickToLoseFocus = async (): Promise<void> => {
+    await this.container.click();
+  };
+
+  clickCoinSelectorName = async (): Promise<void> => {
+    await this.nameElement.waitForClickable();
+    await this.nameElement.click();
+    await browser.pause(500);
+  };
 }

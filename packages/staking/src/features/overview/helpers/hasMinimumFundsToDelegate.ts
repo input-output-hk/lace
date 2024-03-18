@@ -9,8 +9,10 @@ export const hasMinimumFundsToDelegate = ({
   stakeKeyDeposit: number;
   totalCoinBalance: string;
 }) => {
-  const alreadyStaking = rewardAccounts.some(({ keyStatus }) =>
-    [Wallet.Cardano.StakeKeyStatus.Registering, Wallet.Cardano.StakeKeyStatus.Registered].includes(keyStatus)
+  const alreadyStaking = rewardAccounts.some(({ credentialStatus }) =>
+    [Wallet.Cardano.StakeCredentialStatus.Registering, Wallet.Cardano.StakeCredentialStatus.Registered].includes(
+      credentialStatus
+    )
   );
   const totalBalance = Number(totalCoinBalance);
   const arbitraryFeeValue = 0.5;

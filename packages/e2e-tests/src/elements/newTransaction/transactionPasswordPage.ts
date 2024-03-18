@@ -34,6 +34,13 @@ class TransactionPasswordPage {
   get buttonLoader() {
     return $(this.BUTTON_LOADER);
   }
+
+  fillPasswordAndConfirm = async (password: string) => {
+    await this.passwordInput.setValue(password);
+    await this.nextButton.waitForClickable();
+    await this.nextButton.click();
+    await this.buttonLoader.waitForDisplayed({ timeout: 20_000, reverse: true });
+  };
 }
 
 export default new TransactionPasswordPage();

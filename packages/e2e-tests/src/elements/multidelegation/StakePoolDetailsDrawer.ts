@@ -15,8 +15,8 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
   private LIVE_STAKE_TITLE = '[data-testid="live-stake-title"]';
   private LIVE_STAKE_VALUE = '[data-testid="live-stake-value"]';
   private SATURATION_TITLE = '[data-testid="saturation-title"]';
-  private SATURATION_VALUE = '[data-testid="saturation-value"]';
-  private SATURATION_PROGRESS_BAR = '[data-testid="saturation-progress-bar"]';
+  private SATURATION_VALUE = '[data-testid="stake-pool-card-saturation-value"]';
+  private SATURATION_PROGRESS_BAR = '[data-testid="stake-pool-card-saturation-bar"]';
   private DELEGATORS_TITLE = '[data-testid="delegators-title"]';
   private DELEGATORS_VALUE = '[data-testid="delegators-value"]';
   private ROS_TITLE = '[data-testid="apy-title"]';

@@ -20,6 +20,7 @@ export const radioGroupRoot = styleVariants({
   withIcon: [
     radioGroupRootBase,
     {
+      marginTop: 0,
       gap: 0,
     },
   ],
@@ -136,6 +137,7 @@ export const iconWrapper = style([
 
 export const iconButton = style([
   sx({
+    backgroundColor: '$transparent',
     borderRadius: '$small',
     color: '$radiobutton_icon_text_color',
     width: '$40',
