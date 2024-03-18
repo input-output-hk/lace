@@ -390,6 +390,12 @@ export const processExpandedViewCases: Handler = (params) =>
                   activeDrawerStep: DrawerManagementStep.Success,
                 })
               ),
+              HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Failure
@@ -558,6 +564,12 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Success,
               })),
+              HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Failure
