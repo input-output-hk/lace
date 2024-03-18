@@ -6,8 +6,7 @@ const radioGroupRootBase = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    marginTop: '$8',
-    gap: '$16',
+    gap: '$24',
   }),
   {
     fontFamily: vars.fontFamily.$nova,
@@ -21,26 +20,27 @@ export const radioGroupRoot = styleVariants({
   withIcon: [
     radioGroupRootBase,
     {
-      marginTop: 0,
       gap: 0,
     },
   ],
 });
 
-export const withIcon = style([{ minHeight: 32 }]);
+export const withIcon = style([
+  { minHeight: 40, marginTop: 0, marginBottom: 0 },
+]);
 
 export const radioGroupItem = style([
   {
-    width: vars.spacing.$16,
-    height: vars.spacing.$16,
+    width: vars.spacing.$20,
+    height: vars.spacing.$20,
     padding: vars.spacing.$0,
     borderRadius: vars.radius.$circle,
     background: vars.colors.$radiobutton_unchecked_bgColor,
-    border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
+    border: `1.5px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
     position: 'relative',
 
     ':hover': {
-      border: `1px solid ${vars.colors.$radiobutton_hover_color}`,
+      border: `1.5px solid ${vars.colors.$radiobutton_hover_color}`,
       background: vars.colors.$radiobutton_checked_bgColor,
     },
 
@@ -52,7 +52,6 @@ export const radioGroupItem = style([
     selectors: {
       '&[data-state=checked]': {
         border: 'none',
-        outline: `1px solid ${vars.colors.$radiobutton_indicator_backgroundColor}`,
       },
     },
   },
@@ -74,6 +73,7 @@ export const radioGroupItemWrapper = styleVariants({
   withLabel: [
     defaultStyle,
     {
+      padding: '1px 2px',
       borderRadius: 1,
       selectors: {
         [`&:has(${radioGroupItem}:focus-visible)`]: {
@@ -100,14 +100,25 @@ export const radioGroupIndicator = style([
     position: 'relative',
     backgroundColor: vars.colors.$radiobutton_indicator_backgroundColor,
 
-    '::after': {
-      content: '',
-      display: 'flex',
-      alignSelf: 'center',
-      width: vars.spacing.$8,
-      height: vars.spacing.$8,
-      borderRadius: '50%',
-      backgroundColor: vars.colors.$radiobutton_indicator_check_color,
+    selectors: {
+      '&:active::after': {
+        content: '',
+        display: 'flex',
+        alignSelf: 'center',
+        width: vars.spacing.$8,
+        height: vars.spacing.$8,
+        borderRadius: '50%',
+        backgroundColor: vars.colors.$radiobutton_indicator_check_color,
+      },
+      '&::after': {
+        content: '',
+        display: 'flex',
+        alignSelf: 'center',
+        width: vars.spacing.$10,
+        height: vars.spacing.$10,
+        borderRadius: '50%',
+        backgroundColor: vars.colors.$radiobutton_indicator_check_color,
+      },
     },
   },
 ]);
@@ -115,8 +126,8 @@ export const radioGroupIndicator = style([
 export const iconWrapper = style([
   sx({
     marginLeft: '$18',
-    width: '$32',
-    height: '$32',
+    width: '$40',
+    height: '$40',
   }),
   {
     flexGrow: 1,
@@ -125,14 +136,17 @@ export const iconWrapper = style([
 
 export const iconButton = style([
   sx({
-    backgroundColor: '$transparent',
     borderRadius: '$small',
-    ml: '$24',
-    color: '$radiobutton_icon_color',
+    color: '$radiobutton_icon_text_color',
+    width: '$40',
+    height: '$40',
+    paddingTop: '$4',
+    backgroundColor: '$radiobutton_icon_color',
   }),
   {
-    padding: '6px 6px 0 6px',
-    border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
+    // padding: '6px 6px 0 6px',
+
+    border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
 
     ':focus': {
       backgroundColor: vars.colors.$radiobutton_focus_color,
@@ -140,15 +154,21 @@ export const iconButton = style([
 
     selectors: {
       ['&:not(:disabled):hover']: {
-        border: `1px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+        border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
         backgroundColor: vars.colors.$radiobutton_icon_hover_color,
+      },
+      ['&:not(:disabled):active']: {
+        border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+        backgroundColor: vars.colors.$radiobutton_icon_active,
       },
     },
 
     ':disabled': {
       cursor: 'not-allowed',
       opacity: '20%',
+      border: `1.5px solid ${vars.colors.$radiobutton_icon_disabled_border_color}`,
     },
+    outline: 'none',
   },
 ]);
 
@@ -163,10 +183,11 @@ export const root = style([
   },
 ]);
 
-export const label = style({
-  fontSize: '15px',
-  lineHeight: '1',
-  paddingLeft: '15px',
+export const label = sx({
+  fontSize: '$18',
+  fontWeight: '$medium',
+  lineHeight: '$16',
+  paddingLeft: '$16',
   display: 'flex',
 });
 
