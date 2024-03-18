@@ -145,3 +145,63 @@ Feature: Staking Page - Extended View
     And I switch to list view on "Browse pools" tab
     And I wait for stake pool list to be populated
     Then each stake pool list item contains: checkbox, ticker, saturation, ROS, cost, margin, blocks, pledge and live stake
+
+  @LW-9985 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario: Extended View - Stake pool list - display skeleton while loading list elements
+    And I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I wait for stake pool list to be populated
+    When I scroll down 500 pixels
+    Then stake pool list row skeleton is displayed
+    When I wait 500 milliseconds
+    Then stake pool list row skeleton is not displayed
+
+  @LW-9986 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario: Extended View - Stake pool grid - display skeleton while loading grid cards
+    And I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to grid view on "Browse pools" tab
+    When I scroll down 500 pixels
+    Then stake pool grid card skeleton is displayed
+    When I wait 500 milliseconds
+    Then stake pool grid card skeleton is not displayed
+
+  @LW-9995 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario Outline: Extended View - Browse pools - preserve selected pools and view type
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to <view> view on "Browse pools" tab
+    Then stake pool <view> view is displayed
+    When I select 5 stake pools from <view> view
+    And I save tickers of selected pools in <view> view
+    When <action>
+    And I open Browse pools tab
+    Then stake pool <view> view is displayed
+    And previously selected pools are still selected in <view> view
+    Examples:
+      | view | action              |
+      | grid | I refresh the page  |
+      | grid | I open Overview tab |
+      | list | I refresh the page  |
+      | list | I open Overview tab |
+
+  @LW-9996 @Testnet @Mainnet @skip
+  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  Scenario: Extended View - Grid - display stake pool cards based on browser width
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to grid view on "Browse pools" tab
+    Then stake pool grid view is displayed
+    Then I see 5 stake pool cards in a row
+    When I resize the window to a width of: 1660 and a height of: 1080
+    Then I see 5 stake pool cards in a row
+    When I resize the window to a width of: 1659 and a height of: 1080
+    Then I see 4 stake pool cards in a row
+    When I resize the window to a width of: 1024 and a height of: 1080
+    Then I see 4 stake pool cards in a row
+    When I resize the window to a width of: 1023 and a height of: 1080
+    Then I see 3 stake pool cards in a row

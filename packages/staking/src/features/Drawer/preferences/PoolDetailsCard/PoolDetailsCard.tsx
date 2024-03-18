@@ -58,7 +58,7 @@ export const PoolDetailsCard = ({
           <Text.SubHeading data-testid="pool-details-name">{name}</Text.SubHeading>
         </Flex>
         <ControlButton.Icon
-          data-testid={`pool-details-icon-${expand ? 'up' : 'down'}`}
+          testId={`pool-details-icon-${expand ? 'up' : 'down'}`}
           icon={expand ? <ChevronUpIcon /> : <ChevronDownIcon />}
           onClick={() => setExpand((prevExpand) => !prevExpand)}
         />

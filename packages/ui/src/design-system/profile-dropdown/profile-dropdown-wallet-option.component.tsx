@@ -27,12 +27,6 @@ export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   onOpenAccountsMenu?: () => void;
 };
 
-const makeTestId = (namespace = '', path = ''): string => {
-  return namespace === ''
-    ? namespace
-    : `profile-dropdown-wallet-option-${namespace}${path}`;
-};
-
 export const WalletOption = ({
   id,
   disabled,
@@ -50,7 +44,7 @@ export const WalletOption = ({
       id={id}
       disabled={disabled}
       className={classNames(cx.button, cx.container, className)}
-      data-testid={makeTestId(id)}
+      data-testid="wallet-option-item"
     >
       <Flex alignItems="center" justifyContent="space-between" w="$fill">
         <WalletCard
@@ -61,7 +55,7 @@ export const WalletOption = ({
           }}
           subtitle={subtitle}
           type={type}
-          testId={makeTestId(id)}
+          testId="wallet-option"
         />
         {type !== 'shared' && (
           <Box ml="$10">
@@ -80,6 +74,7 @@ export const WalletOption = ({
                 icon={<ChevronRight />}
                 size="extraSmall"
                 as="div"
+                testId="wallet-option-accounts-menu-button"
               />
             </Flex>
           </Box>

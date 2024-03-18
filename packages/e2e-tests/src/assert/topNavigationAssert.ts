@@ -27,24 +27,13 @@ class TopNavigationAssert {
 
   async assertSeeMenuButton() {
     await MenuHeader.menuButton.waitForDisplayed();
-    await this.assertSeeAvatarWithNameInitialOnMenuButton();
-  }
-
-  async assertSeeAvatarWithNameInitialOnMenuButton() {
-    const expectedInitial = await extensionUtils.getWalletInitialFromLocalStorage();
     await MenuHeader.avatarOnButton.waitForDisplayed();
-    expect(await MenuHeader.avatarOnButton.getText()).to.equal(expectedInitial);
-  }
-
-  async assertSeeAvatarWithWalletInitialOnMenu() {
-    const expectedInitial = await extensionUtils.getWalletInitialFromLocalStorage();
-    await MenuHeader.avatarOnMenu.waitForDisplayed();
-    expect(await MenuHeader.avatarOnMenu.getText()).to.equal(expectedInitial);
+    await MenuHeader.walletNameOnButton.waitForDisplayed();
+    await MenuHeader.accountNameOnButton.waitForDisplayed();
   }
 
   async assertDropdownVisible() {
-    await this.assertSeeAvatarWithWalletInitialOnMenu();
-    await MenuHeader.menuWalletAddress.waitForDisplayed();
+    await MenuHeader.menuWalletAccount.waitForDisplayed();
     await MenuHeader.menuAddressBookButton.waitForDisplayed();
     expect(await MenuHeader.menuAddressBookButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addressBook')
@@ -131,12 +120,14 @@ class TopNavigationAssert {
 
   async assertMenuButtonBackgroundColorMode(mode: string) {
     const bgColor = (await MenuHeader.menuButton.getCSSProperty(this.CSS_BACKGROUND_COLOR)).parsed.hex;
-    expect(bgColor).to.equal(mode === 'light' ? '#efefef' : '#333333');
+    const darkColors = ['#282828', '#000000'];
+    const lightColors = ['#ffffff', '#f9f9f9'];
+    expect(bgColor).to.be.oneOf(mode === 'light' ? lightColors : darkColors);
   }
 
   async assertMenuButtonFontColorMode(mode: string) {
     const fontColor = (await MenuHeader.menuButton.getCSSProperty(this.CSS_COLOR)).parsed.hex;
-    expect(fontColor).to.equal(mode === 'light' ? '#3d3b39' : '#ffffff');
+    expect(fontColor).to.equal(mode === 'light' ? '#6f7786' : '#a9a9a9');
   }
 
   async assertMenuBackgroundColorMode(mode: string) {
@@ -150,11 +141,13 @@ class TopNavigationAssert {
       : await MenuHeader.chevronDown.waitForDisplayed();
   }
 
-  async assertSeeExpandButton(withText = false) {
-    const expandButton = MenuHeader.expandButton;
-    await expandButton.waitForDisplayed();
-    const expectedText = withText ? await t('expandPopup') : '';
-    expect(await expandButton.getText()).to.equal(expectedText);
+  async assertSeeExpandButton(withTooltip = false) {
+    await MenuHeader.expandButton.waitForDisplayed();
+    if (withTooltip) {
+      const expandButtonTooltip = MenuHeader.expandButtonTooltip;
+      await expandButtonTooltip.waitForDisplayed();
+      expect(await expandButtonTooltip.getText()).to.equal(await t('expandPopup'));
+    }
   }
 
   async assertSeeCurrentNetworkInUserMenu(networkName = 'Preprod') {

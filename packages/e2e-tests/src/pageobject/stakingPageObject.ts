@@ -1,6 +1,5 @@
 import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
-import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import { browser } from '@wdio/globals';
 import StakingPage from '../elements/staking/stakingPage';
 
@@ -26,9 +25,7 @@ class StakingPageObject {
     await this.clickPoolNameInStakingInfoComponent();
     await StakePoolDetails.poolId.waitForDisplayed();
     const poolId = await StakePoolDetails.poolId.getText();
-    await (mode === 'popup'
-      ? simpleTxSideDrawerPageObject.clickBackDrawerButton()
-      : simpleTxSideDrawerPageObject.clickCloseDrawerButton());
+    await (mode === 'popup' ? StakePoolDetails.clickBackDrawerButton() : StakePoolDetails.clickCloseDrawerButton());
     return poolId;
   }
 }

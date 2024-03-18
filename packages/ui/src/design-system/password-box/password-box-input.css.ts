@@ -1,14 +1,21 @@
 import { globalStyle, vars, style } from '../../design-tokens';
 
+export const root = style({
+  position: 'relative',
+  width: vars.spacing.$fill,
+});
+
 export const container = style({
   background: vars.colors.$input_container_bgColor,
-  paddingTop: vars.spacing.$12,
-  maxHeight: vars.spacing.$52,
+  paddingBottom: vars.spacing.$6,
+  paddingTop: vars.spacing.$6,
+  paddingRight: vars.spacing.$6,
   borderRadius: vars.radius.$medium,
-  width: vars.spacing.$380,
+  width: vars.spacing.$fill,
+  position: 'relative',
 
   ':hover': {
-    outline: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
+    outline: `1px solid ${vars.colors.$input_container_hover_outline_color}`,
   },
 });
 
@@ -20,6 +27,8 @@ export const disabledContainer = style({
 
 export const input = style({
   width: 'calc(100% - 90px)',
+  position: 'relative',
+  top: '6px',
   fontSize: vars.fontSizes.$18,
   fontFamily: vars.fontFamily.$nova,
   padding: `${vars.spacing.$10} ${vars.spacing.$20}`,
@@ -41,9 +50,8 @@ export const largeDots = style({
 });
 
 export const label = style({
-  position: 'relative',
+  position: 'absolute',
   left: vars.spacing.$20,
-  top: '-40px',
   transitionDuration: '0.2s',
   pointerEvents: 'none',
   fontFamily: vars.fontFamily.$nova,
@@ -57,6 +65,8 @@ export const disabledLabel = style({
 });
 
 export const errorMessage = style({
+  position: 'absolute', // required to not change the overall height of the password box (causing jumping)
+  bottom: '-20px', // not sure how to use negative values of spacing vars
   color: vars.colors.$input_error_message_color,
   marginLeft: vars.spacing.$20,
   fontWeight: vars.fontWeights.$semibold,
@@ -65,11 +75,11 @@ export const errorMessage = style({
 globalStyle(
   `${input}:focus + ${label}, ${input}:not(:placeholder-shown) + ${label}`,
   {
-    top: '-56px',
+    top: '10px',
     fontSize: vars.fontSizes.$12,
   },
 );
 
 globalStyle(`${container}:has(${input}:focus)`, {
-  outline: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
+  outline: `1px solid ${vars.colors.$input_container_focused_outline_color}`,
 });

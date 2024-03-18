@@ -38,7 +38,6 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 Given(/^Lace is ready for test$/, async () => {
@@ -61,11 +60,11 @@ Then(/I navigate to home page on (popup|extended) view/, async (viewType: string
 });
 
 Then(/^I close the drawer by clicking close button$/, async () => {
-  await SimpleTxSideDrawerPageObject.clickCloseDrawerButton();
+  await new CommonDrawerElements().clickCloseDrawerButton();
 });
 
 Then(/^I close the drawer by clicking back button$/, async () => {
-  await SimpleTxSideDrawerPageObject.clickBackDrawerButton();
+  await new CommonDrawerElements().clickBackDrawerButton();
 });
 
 Then(/^I close wallet synced toast/, async () => {
@@ -188,8 +187,8 @@ When(/^I click on "Expand" button$/, async () => {
   await MenuHeader.clickOnExpandButton();
 });
 
-Then(/^"Expand" button is displayed (with|without) text$/, async (withText: string) => {
-  await topNavigationAssert.assertSeeExpandButton(withText === 'with');
+Then(/^"Expand" button is displayed (with|without) tooltip$/, async (withTooltip: 'with' | 'without') => {
+  await topNavigationAssert.assertSeeExpandButton(withTooltip === 'with');
 });
 
 When(/^I hover over "Expand" button$/, async () => {
@@ -315,4 +314,9 @@ Then(/^I verify there are no errors in console logs$/, async () => {
 
 Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
   await browser.pause(delay);
+});
+
+When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixels: number) => {
+  const y = direction === 'down' ? Number(pixels) : -Number(pixels);
+  await browser.scroll(0, y);
 });

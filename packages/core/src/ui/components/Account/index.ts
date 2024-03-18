@@ -1,3 +1,4 @@
 export * from './EditAccount';
 export * from './DisableAccountConfirmation';
-export { useAccountDataModal } from './hooks';
+export * from './EnableAccountPasswordPrompt';
+export * from './EnableAccountConfirmWithHW';

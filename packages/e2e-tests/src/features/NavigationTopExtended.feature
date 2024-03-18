@@ -31,7 +31,8 @@ Feature: Top Navigation - Extended view
     Then wallet sync status component is visible
     And sync status displays "Wallet synced" state
 
-  @LW-2322 @Mainnet @Testnet
+  @LW-2322 @Mainnet @Testnet @Pending
+  @issue=LW-10057
   Scenario: Avatar dropdown wallet address copy functions as expected
     Given I close wallet synced toast
     When I click the menu button

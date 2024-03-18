@@ -29,9 +29,9 @@ export type ProtocolParameters = Cardano.ProtocolParameters;
 export {
   BalanceTracker as Balance,
   RewardsHistory,
-  PersonalWallet,
+  createPersonalWallet,
   storage,
-  PersonalWalletProps,
+  BaseWalletProps,
   ObservableWallet,
   PollingConfig,
   createWalletUtil,
@@ -45,7 +45,7 @@ export {
   InitializeTxResult,
   InitializeTxPropsValidationResult,
   MinimumCoinQuantityPerOutput,
-  UnsignedTx
+  UnwitnessedTx
 } from '@cardano-sdk/tx-construction';
 
 export * as KeyManagement from '@cardano-sdk/key-management';

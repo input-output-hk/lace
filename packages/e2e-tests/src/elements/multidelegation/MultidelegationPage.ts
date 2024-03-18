@@ -9,6 +9,9 @@ import testContext from '../../utils/testContext';
 import { isPopupMode } from '../../utils/pageUtils';
 import CommonDrawerElements from '../CommonDrawerElements';
 import { StakePoolListColumnType } from '../../types/staking';
+import { StakePoolListItem } from './StakePoolListItem';
+import { StakePoolGridCard } from './StakePoolGridCard';
+import StakePoolDetailsDrawer from './StakePoolDetailsDrawer';
 
 class MultidelegationPage {
   private ACTIVITY_TAB = '[data-testid="activity-tab"]';
@@ -63,6 +66,12 @@ class MultidelegationPage {
   private MANAGE_BTN = '[data-testid="manage-btn"]';
   private GRID_VIEW_TOGGLE = '[data-testid="grid-view-toggle"]';
   private LIST_VIEW_TOGGLE = '[data-testid="list-view-toggle"]';
+  private STAKE_POOLS_GRID_CONTAINER = '[data-testid="stake-pools-grid-container"]';
+  private STAKE_POOLS_LIST_CONTAINER = '[data-testid="stake-pools-list-container"]';
+  private STAKE_POOL_LIST_ROW_SKELETON = '[data-testid="stake-pool-list-row-skeleton"]';
+  private STAKE_POOL_CARD_SKELETON = '[data-testid="stake-pool-card-skeleton"]';
+  private SELCECTED_STAKE_POOLS_IN_GRID_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-card"]';
+  private SELCECTED_STAKE_POOLS_IN_LIST_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-item"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -86,6 +95,14 @@ class MultidelegationPage {
 
   get listViewToggle() {
     return $(this.LIST_VIEW_TOGGLE);
+  }
+
+  get gridContainer() {
+    return $(this.STAKE_POOLS_GRID_CONTAINER);
+  }
+
+  get listContainer() {
+    return $(this.STAKE_POOLS_LIST_CONTAINER);
   }
 
   get delegationCardStatusLabel() {
@@ -256,6 +273,22 @@ class MultidelegationPage {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_VALUE);
   }
 
+  get stakePoolListRowSkeleton() {
+    return $(this.STAKE_POOL_LIST_ROW_SKELETON);
+  }
+
+  get stakePoolCardSkeleton() {
+    return $(this.STAKE_POOL_CARD_SKELETON);
+  }
+
+  get selectedPoolsInGridView() {
+    return $$(this.SELCECTED_STAKE_POOLS_IN_GRID_VIEW);
+  }
+
+  get selectedPoolsInListView() {
+    return $$(this.SELCECTED_STAKE_POOLS_IN_LIST_VIEW);
+  }
+
   async getPoolByTicker(ticker: string) {
     return (await this.displayedPools.find(
       async (item) => (await item.$(this.POOL_TICKER).getText()) === ticker
@@ -294,6 +327,32 @@ class MultidelegationPage {
       await this.markStakePoolWithTicker(ticker);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);
+    }
+  }
+
+  async selectPoolsForDelegation(numberOfPools: number, viewType: 'grid' | 'list') {
+    await this.searchLoader.waitForDisplayed({ reverse: true });
+    await browser.pause(500);
+    switch (viewType) {
+      case 'grid':
+        for (let i = 0; i < numberOfPools; i++) {
+          await new StakePoolGridCard(i).click();
+          if (i === 0) {
+            await StakePoolDetailsDrawer.selectPoolForMultiStakingButton.waitForClickable();
+            await StakePoolDetailsDrawer.selectPoolForMultiStakingButton.click();
+          } else {
+            await StakePoolDetailsDrawer.addStakingPollButton.waitForClickable();
+            await StakePoolDetailsDrawer.addStakingPollButton.click();
+          }
+        }
+        break;
+      case 'list':
+        for (let i = 0; i < numberOfPools; i++) {
+          await new StakePoolListItem(i).clickOnCheckbox();
+        }
+        break;
+      default:
+        throw new Error(`Unsupported view: ${viewType}`);
     }
   }
 
@@ -357,25 +416,25 @@ class MultidelegationPage {
   async hoverOverColumnWithName(columnName: StakePoolListColumnType) {
     switch (columnName) {
       case 'Ticker':
-        await this.columnHeaderTicker.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderTicker.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Saturation':
         await this.columnHeaderSaturation.moveTo();
         break;
       case 'ROS':
-        await this.columnHeaderROS.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderROS.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Cost':
-        await this.columnHeaderCost.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderCost.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Margin':
-        await this.columnHeaderMargin.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderMargin.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Blocks':
-        await this.columnHeaderBlocks.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderBlocks.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Pledge':
-        await this.columnHeaderPledge.moveTo({ xOffset: 1, yOffset: 1 });
+        await this.columnHeaderPledge.moveTo({ xOffset: -20, yOffset: 1 });
         break;
       case 'Live stake':
         await this.columnHeaderLiveStake.moveTo();
@@ -402,14 +461,48 @@ class MultidelegationPage {
       case 'grid':
         await this.gridViewToggle.waitForClickable();
         await this.gridViewToggle.click();
+        await this.gridViewToggle.waitForStable();
         break;
       case 'list':
         await this.listViewToggle.waitForClickable();
         await this.listViewToggle.click();
+        await this.listViewToggle.waitForStable();
         break;
       default:
         throw new Error(`Unsupported view: ${viewType}`);
     }
+  }
+
+  async getTickersOfSelectedPools(viewType: 'grid' | 'list') {
+    const tickers: string[] = [];
+    switch (viewType) {
+      case 'grid':
+        {
+          await this.selectedPoolsInGridView[0].waitForStable();
+          const selectedPools = await this.selectedPoolsInGridView;
+          for (const pool of selectedPools) {
+            const ticker = await new StakePoolGridCard(pool.index, true).title.getText();
+            tickers.push(ticker);
+          }
+        }
+        break;
+      case 'list': {
+        const selectedPools = await this.selectedPoolsInListView;
+        for (const pool of selectedPools) {
+          const ticker = await new StakePoolListItem(pool.index, true).ticker.getText();
+          tickers.push(ticker);
+        }
+        break;
+      }
+      default:
+        throw new Error(`Unsupported view: ${viewType}`);
+    }
+    return tickers;
+  }
+
+  async saveTickers(viewType: 'grid' | 'list') {
+    const selectedTickers = await this.getTickersOfSelectedPools(viewType);
+    testContext.save('selectedTickers', selectedTickers);
   }
 }
 

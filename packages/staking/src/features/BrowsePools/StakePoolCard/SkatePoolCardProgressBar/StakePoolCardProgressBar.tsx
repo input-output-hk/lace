@@ -24,10 +24,10 @@ export const StakePoolCardProgressBar = ({ percentage, dataTestId }: Props) => {
       justifyContent="space-between"
       className={styles.wrapper}
     >
-      <div className={styles.bar}>
+      <div className={styles.bar} data-testid="stake-pool-card-saturation-bar">
         <div className={styles.progress({ level: saturationLevel })} style={{ backgroundSize: `${progressWidth}%` }} />
       </div>
-      <Text.Body.Small weight="$medium" className={styles.progressValue}>
+      <Text.Body.Small weight="$medium" className={styles.progressValue} data-testid="stake-pool-card-saturation-value">
         {!Number.isNaN(percentageNumber) ? `${percentage}%` : t('browsePools.stakePoolGrid.notAvailable')}
       </Text.Body.Small>
     </Flex>

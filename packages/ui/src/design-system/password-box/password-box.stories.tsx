@@ -86,7 +86,7 @@ const MainComponents = (): JSX.Element => (
           value="Input Text"
           defaultIsPasswordVisible
           errorMessage="Error"
-          rootStyle={{ width: '200px', marginTop: '20px' }}
+          rootStyle={{ width: '200px' }}
         />
       </Variants.Cell>
       <Variants.Cell>
@@ -139,6 +139,7 @@ export const Overview = (): JSX.Element => {
               onChange={(event): void => {
                 setValue(event.target.value);
               }}
+              rootStyle={{ width: '500px' }}
             />
           </Flex>
         </Section>
