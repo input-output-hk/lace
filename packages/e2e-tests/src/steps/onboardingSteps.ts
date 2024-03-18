@@ -2,7 +2,6 @@ import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { switchToLastWindow } from '../utils/window';
-import { shuffle } from '../utils/arrayUtils';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import Modal from '../elements/modal';
@@ -13,7 +12,6 @@ import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert'
 import OnboardingConnectHWPageAssert from '../assert/onboarding/onboardingConnectHWPageAssert';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMainPageAssert from '../assert/onboarding/onboardingMainPageAssert';
-import OnboardingMnemonicInfoPage from '../elements/onboarding/mnemonicInfoPage';
 import OnboardingMnemonicPage from '../elements/onboarding/mnemonicPage';
 import OnboardingMnemonicPageAssert from '../assert/onboarding/onboardingMnemonicPageAssert';
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
@@ -260,85 +258,6 @@ Given(/^I am on "All done!" page from "Restore wallet" using "([^"]*)" wallet$/,
   await OnboardingPageObject.openAllDonePageFromWalletRestore(getTestWallet(walletName).mnemonic ?? []);
 });
 
-Given(
-  /^I am on "Enter your secret passphrase" with (12|15|24) words page from "Restore wallet" process$/,
-  async (length: RecoveryPhrase) => {
-    await OnboardingPageObject.goToMnemonicWriteDownPage(length);
-  }
-);
-
-Given(/^I fill passphrase with incorrect mnemonic (12|15|24) words on each page$/, async (length: RecoveryPhrase) => {
-  const invalidMnemonic = [...invalidMnemonicWords];
-  switch (length) {
-    case '12':
-      invalidMnemonic.splice(12);
-      break;
-    case '15':
-      invalidMnemonic.splice(15);
-      break;
-    case '24':
-      break;
-  }
-  await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
-});
-
-Given(
-  /^I fill passphrase fields using 24 words mnemonic on (8\/24|16\/24|24\/24) page$/,
-  async (pageNumber: string) => {
-    switch (pageNumber) {
-      case '8/24':
-        await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 0);
-        break;
-      case '16/24':
-        await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 8);
-        break;
-      case '24/24':
-        await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 16);
-        break;
-    }
-  }
-);
-
-Given(
-  /^I fill passphrase fields using 24 words mnemonic in incorrect order on (8\/24|16\/24|24\/24) page$/,
-  async (pageNumber: string) => {
-    const shuffledWords = shuffle([...mnemonicWords]);
-    switch (pageNumber) {
-      case '8/24':
-        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 0);
-        break;
-      case '16/24':
-        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 8);
-        break;
-      case '24/24':
-        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 16);
-        break;
-    }
-  }
-);
-
-Given(/^I fill passphrase fields using 12 words mnemonic on (8\/12|12\/12) page$/, async (pageNumber: string) => {
-  switch (pageNumber) {
-    case '8/12':
-      await OnboardingPageObject.fillMnemonicFields(twelveMnemonicWords, 0);
-      break;
-    case '12/12':
-      await OnboardingPageObject.fillMnemonicFields(twelveMnemonicWords, 8);
-      break;
-  }
-});
-
-Given(/^I fill passphrase fields using 15 words mnemonic on (8\/15|15\/15) page$/, async (pageNumber: string) => {
-  switch (pageNumber) {
-    case '8/15':
-      await OnboardingPageObject.fillMnemonicFields(fifteenMnemonicWords, 0);
-      break;
-    case '15/15':
-      await OnboardingPageObject.fillMnemonicFields(fifteenMnemonicWords, 8);
-      break;
-  }
-});
-
 Then(/^I save the words$/, async () => {
   mnemonicWordsForReference.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
 });
@@ -391,10 +310,6 @@ Then(/^I see Lace extension main page in (extended|popup) mode$/, async (mode: '
     await TopNavigationAssert.assertSeeExpandButton(false);
   }
   await TokensPageAssert.assertSeeTitle();
-});
-
-Then(/^I hover over "Next" button$/, async () => {
-  await OnboardingPageObject.hoverOverNextButton();
 });
 
 Then(/^I change one random field$/, async () => {
@@ -482,10 +397,6 @@ Then(/^wallet name error "([^"]*)" (is|is not) displayed$/, async (errorText: st
 
 When(/^I click "Help and support" button during wallet setup$/, async () => {
   await new CommonOnboardingElements().helpAndSupportButton.click();
-});
-
-When(/^I click "here." link on "Keeping your wallet secure" page$/, async () => {
-  await OnboardingMnemonicInfoPage.hereLink.click();
 });
 
 Given(/^I restore a wallet$/, async () => {

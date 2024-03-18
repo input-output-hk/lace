@@ -83,8 +83,6 @@ Feature: Onboarding - Create wallet
     When I click on "Watch video" link on "Mnemonic writedown" page
     Then I see "Watch video" modal
     When I click "Read More" link in modal
-    # Given I navigate to "Mnemonic info" page
-    # When I click "here." link on "Keeping your wallet secure" page
     Then I see a "FAQ" article with title "What is my recovery phrase?"
 
   @LW-2251
@@ -220,20 +218,6 @@ Feature: Onboarding - Create wallet
     # When I click "Go to my wallet" button on "All done" page
     Then I see LW homepage
 
-  @LW-3020 @Pending @Obsolete
-  Scenario: Create wallet - Legal page - next button tooltip
-    Given I click "Create" button on wallet setup page
-    Then "Next" button is disabled during onboarding process
-    And I hover over "Next" button
-    Then There is tooltip visible
-
-  @LW-3021 @Pending @Obsolete
-  Scenario: Create wallet - Legal page - next button no tooltip
-    Given I click "Create" button on wallet setup page
-    When I accept "T&C" checkbox
-    And I hover over "Next" button
-    Then There is no tooltip visible
-
   @LW-3060
   Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
     Given I click "Create" button on wallet setup page
@@ -344,12 +328,11 @@ Feature: Onboarding - Create wallet
       | dark  |
       | light |
 
-  @LW-8500 @Pending
+  @LW-8500
   @issue=LW-8890
   Scenario: Create Wallet - Mnemonic verification - incorrect word
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words 8 of 24
-    When I fill passphrase fields using 24 words mnemonic on 8/24 page
+    And I go to "Mnemonic verification" page from "Create" wallet flow
     And I change one random field
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process
