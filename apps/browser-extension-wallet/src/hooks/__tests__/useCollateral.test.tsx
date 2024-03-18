@@ -21,7 +21,8 @@ import i18n from '@lib/i18n';
 import { Wallet } from '@lace/cardano';
 import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
-import { SignedTx, TxInspection } from '@cardano-sdk/tx-construction';
+import { TxInspection } from '@cardano-sdk/tx-construction';
+import { WitnessedTx } from '@cardano-sdk/key-management';
 import { Cardano, HandleResolution, TxCBOR } from '@cardano-sdk/core';
 import { WalletType } from '@cardano-sdk/web-extension';
 
@@ -36,7 +37,7 @@ const signedTx = {
     handles: [] as HandleResolution[],
     handleResolutions: [] as HandleResolution[]
   }
-} as SignedTx;
+} as WitnessedTx;
 const utxo = [{ txId: signedTx.tx.id }, { value: { coins: COLLATERAL_AMOUNT_LOVELACES } }];
 const available$ = new BehaviorSubject([utxo]);
 

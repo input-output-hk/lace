@@ -1,5 +1,7 @@
+/* eslint-disable no-undef */
 import webTester, { LocatorStrategy } from '../../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from '../webElement';
+import { ChainablePromiseElement } from 'webdriverio';
 
 export class TokenSearchResult extends WebElement {
   protected CONTAINER = '//div[@data-testid="coin-search-row"]';
@@ -23,8 +25,8 @@ export class TokenSearchResult extends WebElement {
     return Factory.fromSelector(`${this.CONTAINER}`, 'xpath');
   }
 
-  searchInput(): WebElement {
-    return Factory.fromSelector(`${this.TOKEN_SEARCH_INPUT}`, 'xpath');
+  get searchInput(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TOKEN_SEARCH_INPUT);
   }
 
   iconElement(): WebElement {

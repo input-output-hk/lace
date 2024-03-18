@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 
-import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
@@ -44,7 +43,7 @@ class NftsPageObject {
       ? String(receiverWallet.mainnetAddress)
       : String(receiverWallet.address);
     await new AddressInput().fillAddress(receiverAddress);
-    await simpleTxSideDrawerPageObject.fillTokenValue('1');
+    await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
     await TransactionNewPage.reviewTransactionButton.waitForClickable({ timeout: 15_000 });
     await TransactionNewPage.reviewTransactionButton.click();
     await TransactionSummaryPage.confirmButton.waitForClickable();

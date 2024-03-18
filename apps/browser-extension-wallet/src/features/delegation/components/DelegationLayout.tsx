@@ -73,7 +73,7 @@ export const DelegationLayout = ({
   const stakePoolSearchTranslations = {
     gettingSaturated: t('cardano.stakePoolSearch.gettingSaturated'),
     saturated: t('cardano.stakePoolSearch.saturated'),
-    overSaturation: t('cardano.stakePoolSearch.overSaturation'),
+    overSaturation: t('cardano.stakePoolSearch.overSaturated'),
     staking: t('cardano.stakePoolSearch.staking'),
     searchPlaceholder: t('cardano.stakePoolSearch.searchPlaceholder')
   };
