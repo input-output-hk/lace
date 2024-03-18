@@ -2,11 +2,10 @@ import { styleVariants } from '@vanilla-extract/css';
 
 import { style, sx, vars } from '../../design-tokens';
 
-const radioGroupRootBase = style([
+export const radioGroupRoot = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
-    gap: '$24',
   }),
   {
     fontFamily: vars.fontFamily.$nova,
@@ -15,22 +14,11 @@ const radioGroupRootBase = style([
   },
 ]);
 
-export const radioGroupRoot = styleVariants({
-  default: [radioGroupRootBase],
-  withIcon: [
-    radioGroupRootBase,
-    {
-      marginTop: 0,
-      gap: 0,
-    },
-  ],
+export const radioGroupItemWrapper = style({
+  minHeight: 42,
 });
 
-export const withIcon = style([
-  { minHeight: 40, marginTop: 0, marginBottom: 0 },
-]);
-
-export const radioGroupItem = style([
+export const radioGroupIndicatorWrapper = style([
   {
     width: vars.spacing.$20,
     height: vars.spacing.$20,
@@ -39,6 +27,7 @@ export const radioGroupItem = style([
     background: vars.colors.$radiobutton_unchecked_bgColor,
     border: `1.5px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
     position: 'relative',
+    outline: 'none',
 
     ':hover': {
       border: `1.5px solid ${vars.colors.$radiobutton_hover_color}`,
@@ -61,7 +50,7 @@ export const radioGroupItem = style([
 const defaultStyle = style({
   borderRadius: vars.radius.$circle,
   selectors: {
-    [`&:has(${radioGroupItem}:focus-visible)`]: {
+    [`&:has(${radioGroupIndicatorWrapper}:focus-visible)`]: {
       outlineColor: vars.colors.$radiobutton_focus_color,
       outlineWidth: 3,
       outlineStyle: 'solid',
@@ -69,15 +58,18 @@ const defaultStyle = style({
   },
 });
 
-export const radioGroupItemWrapper = styleVariants({
+export const radioGroupItem = styleVariants({
   default: [defaultStyle],
   withLabel: [
     defaultStyle,
     {
+      minHeight: 24,
+      display: 'flex',
+      alignItems: 'center',
       padding: '1px 2px',
       borderRadius: 1,
       selectors: {
-        [`&:has(${radioGroupItem}:focus-visible)`]: {
+        [`&:has(${radioGroupIndicatorWrapper}:focus-visible)`]: {
           outlineOffset: '4px',
           outlineColor: vars.colors.$radiobutton_focus_color,
           outlineWidth: 3,
@@ -137,7 +129,6 @@ export const iconWrapper = style([
 
 export const iconButton = style([
   sx({
-    backgroundColor: '$transparent',
     borderRadius: '$small',
     color: '$radiobutton_icon_text_color',
     width: '$40',
@@ -146,14 +137,11 @@ export const iconButton = style([
     backgroundColor: '$radiobutton_icon_color',
   }),
   {
-    // padding: '6px 6px 0 6px',
-
     border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
-
+    outline: 'none',
     ':focus': {
       backgroundColor: vars.colors.$radiobutton_focus_color,
     },
-
     selectors: {
       ['&:not(:disabled):hover']: {
         border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
@@ -164,13 +152,11 @@ export const iconButton = style([
         backgroundColor: vars.colors.$radiobutton_icon_active,
       },
     },
-
     ':disabled': {
       cursor: 'not-allowed',
       opacity: '20%',
       border: `1.5px solid ${vars.colors.$radiobutton_icon_disabled_border_color}`,
     },
-    outline: 'none',
   },
 ]);
 

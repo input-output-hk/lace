@@ -10,8 +10,7 @@ import type { Meta } from '@storybook/react';
 import { v4 as uuid } from 'uuid';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
-import { Box } from '../box';
-import { page, Section, usePortalContainer, Variants } from '../decorators';
+import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
@@ -20,6 +19,8 @@ import * as Text from '../typography';
 import * as styles from './radio-button.stories.css';
 
 import { RadioButtonGroup } from './';
+
+import type { RadioButtonGroupOption } from './';
 
 export default {
   title: 'Input Fields/Radio button',
@@ -36,25 +37,18 @@ const getOptions = (
   count: number,
   label: string,
   icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
-): {
-  value: string;
-  label: string;
-  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
-  onIconClick: () => void;
-  tooltipText: string;
   // eslint-disable-next-line max-params
-}[] =>
+): RadioButtonGroupOption[] =>
   Array.from({ length: count }).map(_ => ({
     value: `option-${uuid()}`,
     label,
     icon,
     onIconClick: (): void => void 0,
-    tooltipText: 'Test tooltip text lorem ipsum dolor sit amet',
   }));
 
 const MainComponents = (): JSX.Element => {
   const getRow = (
-    label = 'label',
+    label = 'Label',
     icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
   ) => [
     {
@@ -74,9 +68,7 @@ const MainComponents = (): JSX.Element => {
     {
       options: getOptions(1, label, icon),
       disabled: true,
-      onValueChange: () => {
-        console.log('test');
-      },
+      onValueChange: (): undefined => undefined,
     },
     {
       options: getOptions(1, label, icon),
@@ -188,7 +180,7 @@ const VariantsSection = () => {
 };
 
 export const Overview = (): JSX.Element => {
-  const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
+  const headers = ['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused'];
 
   return (
     <Grid>
@@ -201,12 +193,10 @@ export const Overview = (): JSX.Element => {
             w="$fill"
             my="$32"
           >
-            <Flex mr="$8">
-              <RadioButtonGroup
-                options={getOptions(1, 'Label')}
-                onValueChange={(): undefined => undefined}
-              />
-            </Flex>
+            <RadioButtonGroup
+              options={getOptions(1, 'Label')}
+              onValueChange={(): undefined => undefined}
+            />
           </Flex>
 
           <Divider my="$64" />
