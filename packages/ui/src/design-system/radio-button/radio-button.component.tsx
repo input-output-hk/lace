@@ -3,7 +3,6 @@ import React from 'react';
 import * as RadixRadioGroup from '@radix-ui/react-radio-group';
 import cn from 'classnames';
 
-import { Button } from '..';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Tooltip } from '../tooltip';
