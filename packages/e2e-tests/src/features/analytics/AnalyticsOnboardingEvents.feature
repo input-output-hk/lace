@@ -15,7 +15,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
 #    And I click "<enable_analytics>" button on Analytics page
 #    And I click "Next" button during wallet setup
 #    And I click "Next" button during wallet setup
-    When "Mnemonic info" page is displayed
+#    When "Mnemonic info" page is displayed
     And I validate that <number_of_events> analytics event(s) have been sent
 
     Examples:

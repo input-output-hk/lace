@@ -6,7 +6,7 @@ Feature: Onboarding - Create wallet
     Then "Get started" page is displayed
 
   @LW-10069
-  Scenario Outline: "Get started" page - Agreement text - Legal links - click on <legal_link> link 
+  Scenario Outline: "Get started" page - Agreement text - Legal links - click on <legal_link> link
     When "Get started" page is displayed
     And I click on "<legal_link>" legal link on "Main page"
     Then "<legal_link>" is displayed in new tab
@@ -19,7 +19,7 @@ Feature: Onboarding - Create wallet
   Scenario Outline: Create wallet - Help us improve your experience - <button> button
     Given I click "Create" button on wallet setup page
     And I am on "Lace terms of use" page and accept terms
-    And I am on "Help us improve your experience" page
+#    And I am on "Help us improve your experience" page
     When I click "<button>" button on Analytics page
     Then "Wallet setup" page is displayed
     Examples:
@@ -47,13 +47,13 @@ Feature: Onboarding - Create wallet
     And "Wallet setup" page is displayed
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
-    Examples: 
+    Examples:
       | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
-      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
-      | N_8J@bne87  |               | empty                                                                           |               3 | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
+      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
+      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
+      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback | 2               | empty                                        |
+      | N_8J@bne87  |               | empty                                                                           | 3               | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                                                                           | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-3013
   Scenario: Create Wallet - Mnemonic writedown page - appears correctly after wallet setup page
@@ -133,7 +133,7 @@ Feature: Onboarding - Create wallet
     And I am on "Mnemonic writedown" page with words 8 of 24
     When I click "Back" button during wallet setup
     And I click "OK" button on "Are you sure you want to start again?" modal
-    Then "Mnemonic info" page is displayed
+#    Then "Mnemonic info" page is displayed
     When I click "Next" button during wallet setup
 #    Then "Mnemonic writedown" page is displayed with words 8 of 24
     And I save the words

@@ -28,7 +28,7 @@ Before(
   },
   async () => {
     await extendedView.visit();
-    await analyticsBanner.agreeButton.click();
+    if (await analyticsBanner.agreeButton.isExisting()) await analyticsBanner.agreeButton.click();
   }
 );
 
