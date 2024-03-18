@@ -5,6 +5,7 @@ import { wordlists } from 'bip39';
 import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
+  WalletSetupCreationStep,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStep,
   WalletSetupSteps,
@@ -22,7 +23,8 @@ import { config } from '@src/config';
 
 import { Fallback } from './Fallback';
 
-import { deleteFromLocalStorage } from '@src/utils/local-storage';
+import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
+import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import * as process from 'process';
@@ -66,9 +68,12 @@ export const WalletSetupWizard = ({
   initialStep = WalletSetupSteps.Register
 }: WalletSetupWizardProps): React.ReactElement => {
   const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(initialStep);
+  const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
+  const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
+  const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
@@ -102,6 +107,7 @@ export const WalletSetupWizard = ({
     writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
     writePassphraseSubtitle2: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'),
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
+    enterWallet: t('core.walletSetupMnemonicStepRevamp.enterWallet'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
     pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
@@ -117,29 +123,16 @@ export const WalletSetupWizard = ({
     fullNodeWalletDescription: t('core.walletSetupWalletModeStep.fullNodeWalletDescription')
   };
 
+  const walletSetupCreateStepTranslations = {
+    title: t('core.walletSetupCreateStep.title'),
+    description: t('core.walletSetupCreateStep.description')
+  };
+
   const mnemonicVideoPopupContentTranslations = {
     title: t('core.mnemonicVideoPopupContent.title'),
     description: t('core.mnemonicVideoPopupContent.description'),
     linkText: t('core.mnemonicVideoPopupContent.link'),
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
-  };
-
-  const walletSetupNamePasswordStepTranslations = {
-    title: t('package.core.walletNameAndPasswordSetupStep.title'),
-    description: t('package.core.walletNameAndPasswordSetupStep.description'),
-    nameInputLabel: t('package.core.walletNameAndPasswordSetupStep.nameInputLabel'),
-    nameMaxLength: t('package.core.walletNameAndPasswordSetupStep.nameMaxLength'),
-    passwordInputLabel: t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel'),
-    confirmPasswordInputLabel: t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
-    nameRequiredMessage: t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
-    noMatchPassword: t('package.core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    confirmButton: t('package.core.walletNameAndPasswordSetupStep.enterWallet'),
-    secondLevelPasswordStrengthFeedback: t(
-      'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
-    ),
-    firstLevelPasswordStrengthFeedback: t(
-      'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback'
-    )
   };
 
   const moveBack = () => {
@@ -152,12 +145,16 @@ export const WalletSetupWizard = ({
     }
   };
 
+  const skipTo = (walletStep: WalletSetupSteps) => {
+    setCurrentStep(walletStep);
+  };
+
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
         analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         analytics.sendAliasEvent();
-        const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
+        const addresses = await firstValueFrom(cardanoWallet?.wallet.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
           analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
@@ -169,46 +166,58 @@ export const WalletSetupWizard = ({
 
   const moveForward = useCallback(() => {
     const nextStep = walletSetupWizard[currentStep].next;
-    setCurrentStep(nextStep);
-  }, [currentStep]);
+    if (nextStep) {
+      setCurrentStep(nextStep);
+    } else if (currentStep === WalletSetupSteps.Create) {
+      goToMyWallet();
+    }
+  }, [currentStep, goToMyWallet]);
 
-  const handleCompleteCreation = useCallback(
-    async (walletName, password) => {
-      try {
-        const wallet = await createWallet({
-          name: walletName,
-          mnemonic,
-          password,
-          chainId: DEFAULT_CHAIN_ID
-        });
-        setWalletInstance(wallet);
+  const handleCompleteCreation = useCallback(async () => {
+    try {
+      const wallet = await createWallet({
+        name: walletName,
+        mnemonic,
+        password,
+        chainId: DEFAULT_CHAIN_ID
+      });
+      setWalletInstance(wallet);
 
-        wallet.wallet.addresses$.subscribe((addresses) => {
-          if (addresses.length === 0) return;
-          const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-          if (setupType === SetupType.RESTORE && hdWalletDiscovered) {
-            analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-          }
-        });
-
-        if (setupType === SetupType.FORGOT_PASSWORD) {
-          deleteFromLocalStorage('isForgotPasswordFlow');
-          goToMyWallet(wallet);
-        } else {
-          moveForward();
+      wallet.wallet.addresses$.subscribe((addresses) => {
+        if (addresses.length === 0) return;
+        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+        if (setupType === SetupType.RESTORE && hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         }
-      } catch (error) {
-        console.error('Error completing wallet creation', error);
-        throw new Error(error);
-      }
-    },
-    [createWallet, mnemonic, analytics, setupType, goToMyWallet, moveForward]
-  );
+      });
 
-  const handleSubmit = async (result: { password: string; walletName: string }) => {
-    await handleCompleteCreation(result.walletName, result.password);
+      if (setupType === SetupType.FORGOT_PASSWORD) {
+        deleteFromLocalStorage('isForgotPasswordFlow');
+        goToMyWallet(wallet);
+      } else {
+        moveForward();
+      }
+    } catch (error) {
+      console.error('Error completing wallet creation', error);
+      throw new Error(error);
+    }
+  }, [createWallet, walletName, mnemonic, password, analytics, setupType, goToMyWallet, moveForward]);
+
+  const handleNamePasswordStepNextButtonClick = (result: { password: string; walletName: string }) => {
+    setWalletName(result.walletName);
+    setPassword(result.password);
+    sendAnalytics(postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK);
+    skipTo(WalletSetupSteps.Mnemonic);
   };
 
+  useEffect(() => {
+    if (password && currentStep === WalletSetupSteps.Create && !walletIsCreating) {
+      setWalletIsCreating(true);
+      handleCompleteCreation();
+    }
+  }, [password, currentStep, handleCompleteCreation, walletIsCreating]);
+
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const renderedMnemonicStep = () => {
     if ([SetupType.RESTORE, SetupType.FORGOT_PASSWORD].includes(setupType)) {
       const isMnemonicSubmitEnabled = util.validateMnemonic(util.joinMnemonicWords(mnemonic));
@@ -235,7 +244,7 @@ export const WalletSetupWizard = ({
         mnemonic={mnemonic}
         onReset={(resetStage) => {
           setResetMnemonicStage(resetStage);
-          resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : onCancel();
+          resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : skipTo(WalletSetupSteps.Register);
         }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
@@ -276,11 +285,10 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
       {currentStep === WalletSetupSteps.Register && (
-        <WalletSetupNamePasswordStep
-          onBack={moveBack}
-          onNext={handleSubmit}
-          translations={walletSetupNamePasswordStepTranslations}
-        />
+        <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
+      )}
+      {currentStep === WalletSetupSteps.Create && (
+        <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} />
       )}
       {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
         <WarningModal

@@ -1,10 +1,14 @@
 import { WalletSetupSteps, WalletSetupWizard } from './wallet-steps.common';
 
 export const walletSetupWizard: WalletSetupWizard = {
-  [WalletSetupSteps.Mnemonic]: {
-    next: WalletSetupSteps.Register
-  },
   [WalletSetupSteps.Register]: {
+    next: WalletSetupSteps.Mnemonic
+  },
+  [WalletSetupSteps.Mnemonic]: {
+    prev: WalletSetupSteps.Register,
+    next: WalletSetupSteps.Create
+  },
+  [WalletSetupSteps.Create]: {
     prev: WalletSetupSteps.Mnemonic
   }
 };
