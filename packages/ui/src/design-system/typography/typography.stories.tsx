@@ -83,6 +83,7 @@ const colors: TypographyVariants['color'][] = [
   'primary',
   'secondary',
   'highlight',
+  'success',
   'error',
 ];
 
