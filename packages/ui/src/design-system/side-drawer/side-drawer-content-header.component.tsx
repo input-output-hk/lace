@@ -32,9 +32,7 @@ export const Header = ({
         </Flex>
       )}
       <Flex justifyContent="center" w="$fill">
-        <Typography.Body.Large weight="$bold" className={cx.text}>
-          {text}
-        </Typography.Body.Large>
+        <Typography.Body.Large weight="$bold">{text}</Typography.Body.Large>
       </Flex>
       <Flex w="$40">
         <Close>

@@ -28,10 +28,8 @@ export const RichTooltipContent = ({
         <Box className={cx.dot} style={customDotStyle} />
       </Flex>
       <Flex flexDirection="column" gap="$4">
-        <Typography.Body.Normal weight="$bold" className={cx.title}>
-          {title}
-        </Typography.Body.Normal>
-        <Typography.Body.Small weight="$semibold" className={cx.description}>
+        <Typography.Body.Normal weight="$bold">{title}</Typography.Body.Normal>
+        <Typography.Body.Small color="secondary" weight="$semibold">
           {description}
         </Typography.Body.Small>
       </Flex>

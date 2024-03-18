@@ -42,9 +42,7 @@ export const SummaryExpander = ({
           [cx.expanded]: open,
         })}
       >
-        <Typography.Body.Large className={cx.title} weight="$bold">
-          {title}
-        </Typography.Body.Large>
+        <Typography.Body.Large weight="$bold">{title}</Typography.Body.Large>
 
         <Collapsible.Trigger asChild>
           <Trigger open={open} disabled={disabled} {...props} />

@@ -14,7 +14,9 @@ type Props = BaseProps & {
 export const Metadata = ({ text, ...props }: Readonly<Props>): JSX.Element => {
   return (
     <MetadataBase {...props}>
-      <Typography.Address className={cx.text}>{text}</Typography.Address>
+      <Typography.Address weight="$medium" className={cx.text}>
+        {text}
+      </Typography.Address>
     </MetadataBase>
   );
 };

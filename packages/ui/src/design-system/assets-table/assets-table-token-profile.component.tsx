@@ -27,14 +27,11 @@ export const TokenProfile = ({
           </Box>
         </Cell>
         <Cell>
-          <Typography.Body.Large weight="$semibold" className={cx.name}>
+          <Typography.Body.Large weight="$semibold">
             {name}
           </Typography.Body.Large>
           <Box>
-            <Typography.Body.Normal
-              weight="$semibold"
-              className={cx.description}
-            >
+            <Typography.Body.Normal color="secondary" weight="$semibold">
               {description}
             </Typography.Body.Normal>
           </Box>

@@ -19,13 +19,13 @@ export const Details = ({ title, subtitle }: Readonly<Props>): JSX.Element => {
       className={cx.container}
     >
       {title === undefined ? undefined : (
-        <Typography.Body.Large weight="$semibold" className={cx.title}>
+        <Typography.Body.Large weight="$semibold">
           {title}
         </Typography.Body.Large>
       )}
 
       {subtitle === undefined ? undefined : (
-        <Typography.Body.Normal weight="$semibold" className={cx.subtitle}>
+        <Typography.Body.Normal color="secondary" weight="$semibold">
           {subtitle}
         </Typography.Body.Normal>
       )}

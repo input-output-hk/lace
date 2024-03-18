@@ -16,10 +16,8 @@ export const TokenAmount = ({
 }: Readonly<Props>): JSX.Element => {
   return (
     <Flex flexDirection="column" alignItems="flex-end" className={cx.container}>
-      <Typography.Body.Large weight="$semibold" className={cx.amount}>
-        {amount}
-      </Typography.Body.Large>
-      <Typography.Body.Normal weight="$semibold" className={cx.fiatPrice}>
+      <Typography.Body.Large weight="$semibold">{amount}</Typography.Body.Large>
+      <Typography.Body.Normal color="secondary" weight="$semibold">
         {fiatPrice}
       </Typography.Body.Normal>
     </Flex>

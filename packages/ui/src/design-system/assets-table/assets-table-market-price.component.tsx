@@ -18,7 +18,7 @@ export const MarketPrice = ({
 }: Readonly<Props>): JSX.Element => {
   return (
     <Flex flexDirection="column" alignItems="center" className={cx.container}>
-      <Typography.Body.Large weight="$semibold" className={cx.text}>
+      <Typography.Body.Large weight="$semibold">
         {tokenPrice}
       </Typography.Body.Large>
       <Typography.Body.Normal

@@ -24,7 +24,6 @@ export const Metadata = ({
     <Grid {...props} columns="$2">
       <Cell>
         <Typography.Body.Large
-          className={cx.label}
           weight="$bold"
           {...(testID != undefined && { 'data-testid': `${testID}-label` })}
         >
@@ -34,6 +33,7 @@ export const Metadata = ({
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">
           <Typography.Body.Normal
+            weight="$medium"
             className={cx.text}
             {...(testID != undefined && { 'data-testid': `${testID}-value` })}
           >

@@ -42,7 +42,7 @@ export const Root = ({
         <Flex className={classNames(cx.icon, cx.box)}>{icon}</Flex>
         <Flex className={cx.box}>
           <Toast.Title className="ToastTitle">
-            <Typography.Body.Small weight="$semibold" className={cx.title}>
+            <Typography.Body.Small weight="$semibold">
               {title}
             </Typography.Body.Small>
           </Toast.Title>

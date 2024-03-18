@@ -106,17 +106,13 @@ export const colors = {
   $toggle_switch_thumb_bgColor: '',
 
   $assets_table_container_bgColor_hover: '',
-  $assets_table_label_primary_color: '',
-  $assets_table_label_secondary_color: '',
 
   $dialog_container_bgColor: '',
   $dialog_description_color: '',
 
   $side_drawer_container_bgColor: '',
   $side_drawer_separator_bgColor: '',
-  $side_drawer_head_title_color: '',
   $side_drawer_content_title_color: '',
-  $side_drawer_content_description_color: '',
 
   $search_box_container_bgColor: '',
   $search_box_container_bgColor_pressed: '',
@@ -133,8 +129,6 @@ export const colors = {
   $search_box_clear_button_label_color_pressed: '',
 
   $flow_card_container_bgColor: '',
-  $flow_card_label_primary_color: '',
-  $flow_card_label_secondary_color: '',
 
   $icon_button_container_bgColor: '',
   $icon_button_container_bgColor_hover: '',
@@ -143,7 +137,6 @@ export const colors = {
   $icon_button_label_color: '',
   $icon_button_label_color_pressed: '',
 
-  $summary_expander_label_color: '',
   $summary_expander_container_borderColor: '',
   $summary_expander_trigger_container_bgColor: '',
   $summary_expander_trigger_container_bgColor_hover: '',
@@ -154,18 +147,14 @@ export const colors = {
   $summary_expander_trigger_label_color: '',
   $summary_expander_trigger_label_color_pressed: '',
 
-  $transaction_summary_label_color: '',
   $transaction_summary_secondary_label_color: '',
 
   $toast_bar_container_bgColor: '',
-  $toast_bar_label_color: '',
   $toast_bar_icon_container_bgColor: '',
   $toast_bar_icon_label_color: '',
 
   $tooltip_container_bgColor: '',
   $tooltip_title_dot_bgColor: '',
-  $tooltip_title_color: '',
-  $tooltip_label_color: '',
 
   $message_title_color: '',
   $message_description_color: '',
@@ -177,13 +166,11 @@ export const colors = {
   $input_button_bgColor: '',
   $input_button_icon_color: '',
   $input_label_color: '',
-  $input_error_message_color: '',
 
   $text_primary: '',
   $text_secondary: '',
   $text_on_gradient: '',
 
-  $metadata_label_color: '',
   $metadata_secondary_label_color: '',
 
   $text_link_label_color_visited: '',

@@ -13,7 +13,7 @@ export const TooltipContent = ({
 }: Readonly<TooltipContentProps>): JSX.Element => {
   return (
     <div className={cx.tooltipContent}>
-      <Typography.Body.Normal weight="$semibold" className={cx.label}>
+      <Typography.Body.Normal color="secondary" weight="$semibold">
         {label}
       </Typography.Body.Normal>
     </div>

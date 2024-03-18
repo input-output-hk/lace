@@ -24,7 +24,7 @@ export const Address = ({
     <Grid {...props} columns="$2">
       <Cell>
         <Typography.Body.Normal
-          className={cx.label}
+          weight="$semibold"
           {...(testID != undefined && { 'data-testid': `${testID}-label` })}
         >
           {label}
@@ -33,6 +33,7 @@ export const Address = ({
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">
           <Typography.Address
+            weight="$medium"
             className={cx.text}
             {...(testID != undefined && { 'data-testid': `${testID}-value` })}
           >

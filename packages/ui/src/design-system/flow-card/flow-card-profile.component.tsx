@@ -29,15 +29,12 @@ export const Profile = ({
         </Cell>
         <Cell>
           <Flex justifyContent="center" flexDirection="column" h="$fill">
-            <Typography.Body.Large weight="$semibold" className={cx.name}>
+            <Typography.Body.Large color="primary" weight="$semibold">
               {name}
             </Typography.Body.Large>
             {description === undefined ? undefined : (
               <Box>
-                <Typography.Body.Normal
-                  weight="$semibold"
-                  className={cx.description}
-                >
+                <Typography.Body.Normal color="secondary" weight="$semibold">
                   {description}
                 </Typography.Body.Normal>
               </Box>

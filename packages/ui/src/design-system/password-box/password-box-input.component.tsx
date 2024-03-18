@@ -80,7 +80,7 @@ export const PasswordInput = ({
         </Flex>
       </Form.Field>
       {errorMessage && (
-        <Typography.Label className={cx.errorMessage}>
+        <Typography.Label color="error" className={cx.errorMessage}>
           {errorMessage}
         </Typography.Label>
       )}

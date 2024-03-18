@@ -3,8 +3,6 @@ import React from 'react';
 import { Box } from '../box';
 import * as Typography from '../typography';
 
-import * as cx from './side-drawer-content-headline.css';
-
 interface Props {
   title: string;
   description?: string;
@@ -15,12 +13,10 @@ export const Headline = ({
   description,
 }: Readonly<Props>): JSX.Element => (
   <Box>
-    <Typography.SubHeading weight="$bold" className={cx.title}>
-      {title}
-    </Typography.SubHeading>
+    <Typography.SubHeading weight="$bold">{title}</Typography.SubHeading>
     {description !== undefined && (
       <Box mt="$8">
-        <Typography.Body.Normal weight="$medium" className={cx.description}>
+        <Typography.Body.Normal color="secondary" weight="$medium">
           {description}
         </Typography.Body.Normal>
       </Box>

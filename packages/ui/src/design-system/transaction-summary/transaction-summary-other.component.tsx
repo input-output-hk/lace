@@ -21,13 +21,13 @@ export const Other = ({
   return (
     <Grid {...props} columns="$2">
       <Cell>
-        <Typography.Body.Normal className={cx.label}>
+        <Typography.Body.Normal weight="$semibold">
           {label}
         </Typography.Body.Normal>
       </Cell>
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">
-          <Typography.Body.Normal className={cx.text}>
+          <Typography.Body.Normal weight="$medium" className={cx.text}>
             {text}
           </Typography.Body.Normal>
         </Flex>

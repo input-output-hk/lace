@@ -71,7 +71,7 @@ export const TextBox = ({
       </Form.Field>
     </Flex>
     {errorMessage && (
-      <Typography.Label className={cx.errorMessage}>
+      <Typography.Label color="error" className={cx.errorMessage}>
         {errorMessage}
       </Typography.Label>
     )}

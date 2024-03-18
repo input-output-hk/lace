@@ -38,8 +38,8 @@ export const Amount = ({
       <Cell>
         <Flex>
           <Typography.Body.Normal
+            weight="$semibold"
             data-testid={makeTestId(testId, 'label')}
-            className={cx.label}
           >
             {label}
           </Typography.Body.Normal>
@@ -60,6 +60,7 @@ export const Amount = ({
       <Cell>
         <Flex flexDirection="column" alignItems="flex-end" h="$fill">
           <Typography.Body.Normal
+            weight="$medium"
             className={cx.text}
             data-testid={makeTestId(testId, 'amount')}
           >

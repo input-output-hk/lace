@@ -149,7 +149,9 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
             </Select.Content>
           </Popover.Content>
           {Boolean(errorMessage) && (
-            <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
+            <Text.Label color="error" className={cx.errorMessage}>
+              {errorMessage}
+            </Text.Label>
           )}
         </Box>
       </Select.Root>
