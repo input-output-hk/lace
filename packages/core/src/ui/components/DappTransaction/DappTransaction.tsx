@@ -94,10 +94,8 @@ const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
   return assetWithAmount.assetInfo.tokenMetadata?.ticker ?? getFallbackName(assetWithAmount);
 };
 
-const getStringFromLovelace = (value: bigint): string => Wallet.util.lovelacesToAdaString(value.toString());
-
 const getTxType = (coins: bigint): TransactionType => {
-  const balance = getStringFromLovelace(coins);
+  const balance = Wallet.util.lovelacesToAdaString(coins.toString());
   return balance.includes('-') === true ? 'Send' : 'Receive';
 };
 
@@ -131,7 +129,7 @@ export const DappTransaction = ({
         <DappTransactionSummary
           title={t('package.core.dappTransaction.transactionSummary')}
           cardanoSymbol={coinSymbol}
-          transactionAmount={getStringFromLovelace(coins)}
+          transactionAmount={Wallet.util.lovelacesToAdaString(coins.toString())}
         />
         <div className={styles.transactionAssetsContainer}>
           {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => {
@@ -167,38 +165,34 @@ export const DappTransaction = ({
 
         {returnedDeposit !== BigInt(0) && (
           <TransactionFee
-            fee={`+${getStringFromLovelace(fee)}`}
+            fee={`+${Wallet.util.lovelacesToAdaString(returnedDeposit.toString())}`}
             testId="returned-deposit"
             label={t('package.core.dappTransaction.returnedDeposit')}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
             displayFiat={false}
+            amountTransformer={() =>
+              `${Wallet.util.lovelacesToAdaString(returnedDeposit.toString())} ${fiatCurrencyCode}`
+            }
           />
         )}
 
         {deposit !== BigInt(0) && (
           <TransactionFee
             testId="deposit"
-            fee={`-${getStringFromLovelace(deposit)}`}
+            fee={`-${Wallet.util.lovelacesToAdaString(deposit.toString())}`}
             label={t('package.core.dappTransaction.deposit')}
-            amountTransformer={(ada: string) =>
-              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-            }
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
             displayFiat={false}
+            amountTransformer={() => `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${fiatCurrencyCode}`}
           />
         )}
 
         <TransactionFee
           testId="fee"
-          fee={`-${getStringFromLovelace(fee)}`}
-          amountTransformer={(ada: string) =>
-            `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
-          }
+          fee={`-${Wallet.util.lovelacesToAdaString(fee.toString())}`}
+          amountTransformer={() => `${Wallet.util.lovelacesToAdaString(fee.toString())} ${fiatCurrencyCode}`}
           coinSymbol={coinSymbol}
           className={styles.feeContainer}
           displayFiat={false}
