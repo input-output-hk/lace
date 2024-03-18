@@ -26,6 +26,7 @@ import {
 } from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
 import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
 import { getCollateral } from '@cardano-sdk/core';
+import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 
 /**
  * validates if the transaction is confirmed
@@ -60,9 +61,6 @@ const transactionMetadataTransformer = (
   metadata: Wallet.Cardano.TxMetadata
 ): TransactionActivityDetail['activity']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
-
-const hasPhase2ValidationFailed = (tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx) =>
-  'inputSource' in tx && tx.inputSource === Wallet.Cardano.InputSource.collaterals;
 
 const shouldIncludeFee = (
   tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx,

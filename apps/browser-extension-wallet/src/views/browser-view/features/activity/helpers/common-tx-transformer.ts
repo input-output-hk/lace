@@ -24,8 +24,9 @@ import isEmpty from 'lodash/isEmpty';
 import { PriceResult } from '@hooks';
 import { formatPercentages } from '@lace/common';
 import { depositPaidWithSymbol } from '@src/features/dapp/components/confirm-transaction/utils';
+import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 
-const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType, InputSource } = Wallet.Cardano;
+const { util, GovernanceActionType, PlutusLanguageVersion, CertificateType } = Wallet.Cardano;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -97,9 +98,6 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
     }
   ];
 };
-
-const hasPhase2ValidationFailed = (tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx) =>
-  'inputSource' in tx && tx.inputSource === InputSource.collaterals;
 
 const transformTransactionStatus = (
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx,
