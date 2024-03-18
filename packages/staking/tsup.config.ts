@@ -25,7 +25,7 @@ const tsupConfig = defineConfig([
       '.png': 'dataurl',
     },
     name: 'lace/staking',
-    outDir: './dist',
+    outDir: './dist-next',
     sourcemap: true,
   },
 ]);

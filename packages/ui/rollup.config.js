@@ -6,6 +6,8 @@ import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import copy from 'rollup-plugin-copy';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
+import { retargetOutputToTmpDirectory as retargetOutputToTemporaryDirectory } from '../../rollup.config';
+
 import packageJson from './package.json';
 
 export default () => ({
@@ -27,15 +29,19 @@ export default () => ({
   ],
   output: [
     {
-      file: packageJson.main,
+      file: retargetOutputToTemporaryDirectory(packageJson.main),
       format: 'cjs',
       sourcemap: true,
     },
     {
-      file: packageJson.module,
+      file: retargetOutputToTemporaryDirectory(packageJson.module),
       format: 'esm',
       sourcemap: true,
     },
   ],
-  external: [/node_modules/],
+  external: [
+    ...Object.keys(packageJson.dependencies),
+    /@lace\/icons/,
+    /@vanilla-extract/,
+  ],
 });

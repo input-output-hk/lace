@@ -16,7 +16,7 @@
   "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "run -T rollup -c rollup.config.js",
+    "build": "run -T rollup -c rollup.config.js && ../../scripts/conclude-build.sh dist",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "yarn exec rm -rf node_modules",
     "format": "yarn prettier --write '**/*.tsx'",
@@ -27,7 +27,7 @@
     "test-storybook:ci": "NODE_OPTIONS=--openssl-legacy-provider; export STORYBOOK_TEST=1; concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"yarn build-storybook && http-server storybook-static --port 6006\" \"wait-on http://127.0.0.1:6006/ && yarn test-storybook\"",
     "test:coverage": "yarn test --coverage",
     "typecheck": "tsc --noEmit",
-    "watch": "yarn build --watch"
+    "watch": "../../scripts/watch-and-run.sh src \"yarn build\""
   },
   "resolutions": {
     "@storybook/addon-actions": "^6.5.16",
@@ -64,8 +64,10 @@
     "@vanilla-extract/recipes": "^0.3.0",
     "@vanilla-extract/sprinkles": "^1.5.1",
     "classnames": "^2.3.2",
+    "lodash": "^4.17.21",
     "polished": "^4.2.2",
     "react-responsive": "^9.0.2",
+    "react-virtuoso": "^4.6.3",
     "recharts": "^2.6.2"
   },
   "devDependencies": {
@@ -104,6 +106,7 @@
     "eslint-plugin-unicorn": "^45.0.2",
     "http-server": "^14.1.1",
     "jest-image-snapshot": "^6.1.0",
+    "nodemon": "^3.1.0",
     "prettier": "^2.4.1",
     "rollup-plugin-copy": "^3.4.0",
     "storybook-addon-pseudo-states": "^1.15.2",
@@ -112,5 +115,8 @@
     "wait-on": "^7.0.1",
     "webpack": "^5.76.1",
     "webpack-dev-server": "^4.11.1"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
   }
 }

@@ -31,7 +31,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && tsup",
+    "build": "echo Building... && tsc && tsup && ../../scripts/conclude-build.sh dist",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; storybook build",
     "cleanup": "yarn exec rm -rf dist node_modules && yarn exec rm -rf ../../.cache/eslintcache",
     "dev": "NODE_OPTIONS=--openssl-legacy-provider; storybook dev -p 6006",
@@ -46,7 +46,7 @@
     "test:all": "yarn test:unit --coverage && yarn test:vr",
     "test:coverage": "yarn test --coverage",
     "test:unit": "vitest run",
-    "watch": "tsup --watch"
+    "watch": "../../scripts/watch-and-run.sh src \"yarn build\""
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",

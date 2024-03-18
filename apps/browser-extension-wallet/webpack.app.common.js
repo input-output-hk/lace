@@ -3,7 +3,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const { merge } = require('webpack-merge');
-const commonConfig = require('./webpack.common');
+const commonConfig = require('./webpack.shared.common');
 require('dotenv-defaults').config({
   path: './.env',
   encoding: 'utf8',

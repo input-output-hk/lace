@@ -1,4 +1,4 @@
-import rollupBase from '../../rollup.config';
+import rollupBase, { retargetOutputToTmpDirectory } from '../../rollup.config';
 import packageJson from './package.json';
 
 export default (args) => {
@@ -8,12 +8,12 @@ export default (args) => {
     ...baseConfig,
     output: [
       {
-        file: packageJson.main,
+        file: retargetOutputToTmpDirectory(packageJson.main),
         format: 'cjs',
         sourcemap: true
       },
       {
-        file: packageJson.module,
+        file: retargetOutputToTmpDirectory(packageJson.module),
         format: 'esm',
         sourcemap: true
       }

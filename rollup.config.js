@@ -7,6 +7,12 @@ import postcss from 'rollup-plugin-postcss';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 import svgr from '@svgr/rollup';
 
+/**
+ * @param {string} outPath
+ * @param {RegExp} distRegex
+ */
+export const retargetOutputToTmpDirectory = (outPath, distRegex = /dist/) => outPath.replace(distRegex, 'dist-next');
+
 export default ({
   tsPluginOptions = {
     tsconfig: 'src/tsconfig.json',

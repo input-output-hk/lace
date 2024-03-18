@@ -19,10 +19,10 @@
     "apps/*"
   ],
   "scripts": {
-    "base-command-for-build-scripts": "wsrun --prefix -trame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
+    "base-command-for-build-scripts": "wsrun --prefix -trame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${SKIP_APP:+-x \"@lace/$APP_NAME\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
     "build": "yarn base-command-for-build-scripts -c build",
-    "build-deps": "EXCLUDE_APP=true yarn build",
+    "build-deps": "SKIP_APP=true yarn build",
     "cardano:lint": "yarn eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
     "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/",
     "cleanup": "yarn workspaces foreach run cleanup && yarn exec rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
@@ -41,8 +41,8 @@
     "test": "yarn workspaces foreach run test",
     "test:coverage": "yarn workspaces foreach run test:coverage",
     "version": "standard-version",
-    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*DTS.*Build success)' -c watch",
-    "watch-deps": "EXCLUDE_APP=true yarn watch"
+    "watch": "yarn base-command-for-build-scripts --done-criteria '(webpack [\\d\\.]+ compiled)|(.* built successfully!)' -c watch",
+    "watch-deps": "SKIP_APP=true yarn watch"
   },
   "lint-staged": {
     "*(apps/**/*.{js,ts,tsx}|packages/!(ui)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
@@ -164,6 +164,7 @@
     "node-gyp": "^9.4.0",
     "node-polyfill-webpack-plugin": "^3.0.0",
     "node-sass": "^7.0.1",
+    "nodemon": "^3.1.0",
     "p-retry": "5.1.2",
     "postcss": "8.3.6",
     "prettier": "^2.3.2",

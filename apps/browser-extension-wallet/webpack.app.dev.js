@@ -1,7 +1,7 @@
 const { merge } = require('webpack-merge');
 
-const createDevConfig = require('./webpack.common.dev');
-const appConfig = require('./webpack.common.app');
+const createDevConfig = require('./webpack.shared.dev');
+const appConfig = require('./webpack.app.common');
 require('dotenv-defaults').config({
   path: './.env',
   encoding: 'utf8',
