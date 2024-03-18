@@ -1,7 +1,5 @@
 import React from 'react';
 
-import classNames from 'classnames';
-
 import { Flex } from '../flex';
 import * as Typography from '../typography';
 
@@ -25,10 +23,7 @@ export const MarketPrice = ({
       </Typography.Body.Large>
       <Typography.Body.Normal
         weight="$semibold"
-        className={classNames({
-          [cx.down]: priceTrend === 'down',
-          [cx.up]: priceTrend === 'up',
-        })}
+        color={priceTrend === 'up' ? 'success' : 'error'}
       >
         {priceChange}
       </Typography.Body.Normal>

@@ -179,10 +179,6 @@ const colors: Colors = {
   $assets_table_container_bgColor_hover: lightColorScheme.$primary_light_grey,
   $assets_table_label_primary_color: lightColorScheme.$primary_black,
   $assets_table_label_secondary_color: lightColorScheme.$primary_dark_grey,
-  $assets_table_market_price_trend_up_label_color:
-    lightColorScheme.$secondary_data_green,
-  $assets_table_market_price_trend_down_label_color:
-    lightColorScheme.$secondary_data_pink,
 
   $dialog_container_bgColor: lightColorScheme.$primary_white,
   $dialog_description_color: lightColorScheme.$primary_black,
