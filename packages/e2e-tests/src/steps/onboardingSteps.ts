@@ -24,7 +24,6 @@ import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import CommonAssert from '../assert/commonAssert';
-
 import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
 import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
@@ -37,7 +36,6 @@ import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
 import analyticsBanner from '../elements/analyticsBanner';
-import OnboardingWalletNameAndPasswordPageAssert from '../assert/onboarding/onboardingWalletNameAndPasswordPageAssert';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 import walletSetupPage from '../elements/onboarding/walletSetupPage';
 
@@ -151,22 +149,22 @@ When(
 );
 
 Then(/^Name error "([^"]*)" is displayed/, async (nameError: string) => {
-  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNameError(await t(nameError));
+  await onboardingWalletSetupPageAssert.assertSeeWalletNameError(await t(nameError));
 });
 
 Then(
   // eslint-disable-next-line max-len
   /^Password recommendation: "([^"]*)", complexity bar level: "(\d{0,4})" and password confirmation error: "([^"]*)" are displayed$/,
   async (passwordErr: string, complexityBar: 0 | 1 | 2 | 3 | 4, passwordConfErr: string) => {
-    await OnboardingWalletNameAndPasswordPageAssert.assertSeePasswordConfirmationError(
+    await onboardingWalletSetupPageAssert.assertSeePasswordConfirmationError(
       await t(passwordConfErr),
       passwordConfErr !== 'empty'
     );
-    await OnboardingWalletNameAndPasswordPageAssert.assertSeePasswordRecommendation(
+    await onboardingWalletSetupPageAssert.assertSeePasswordRecommendation(
       await t(passwordErr),
       passwordErr !== 'empty'
     );
-    await OnboardingWalletNameAndPasswordPageAssert.assertSeeComplexityBar(complexityBar);
+    await onboardingWalletSetupPageAssert.assertSeeComplexityBar(complexityBar);
   }
 );
 
@@ -198,11 +196,6 @@ Then(/^Creating wallet page finishes in < (\d*)s$/, async (duration: number) => 
   await OnboardingWalletCreationPageAssert.assertCreatingWalletDuration(duration);
 });
 
-Then(/^"Wallet name and password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
-  const expectedFlow = flow === 'forgot password' ? 'forgot_password' : 'onboarding';
-  await OnboardingWalletNameAndPasswordPageAssert.assertSeeNameAndPasswordPage(expectedFlow);
-});
-
 Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
   await ModalAssert.assertSeeRestoringMultiAddressWalletModal();
 });
@@ -213,11 +206,6 @@ Then(/^I accept "T&C" checkbox$/, async () => {
 
 Given(/^I am on "Lace terms of use" page and accept terms$/, async () => {
   await OnboardingPageObject.openAndAcceptTermsOfUsePage();
-});
-
-Given(/^I am on "Name your wallet" page$/, async () => {
-  // await OnboardingPageObject.openNameYourWalletPage();
-  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
 });
 
 Given(/^I am on "Connect Hardware Wallet" page$/, async () => {
@@ -489,7 +477,7 @@ Then(
 
 Then(/^wallet name error "([^"]*)" (is|is not) displayed$/, async (errorText: string, isDisplayed: 'is' | 'is not') => {
   const expectedMessage = await t(errorText);
-  await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNameError(expectedMessage, isDisplayed === 'is');
+  await onboardingWalletSetupPageAssert.assertSeeWalletNameError(expectedMessage, isDisplayed === 'is');
 });
 
 When(/^I click "Help and support" button during wallet setup$/, async () => {
@@ -528,7 +516,7 @@ Given(
   }
 );
 
-Given(/^I am on "Mnemonic writedown" page$/, async () => {
+Given(/^I go to "Mnemonic writedown" page$/, async () => {
   await OnboardingRevampPageObject.goToRecoveryPhrasePage();
 });
 

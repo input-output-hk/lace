@@ -37,28 +37,23 @@ Feature: Onboarding - Create wallet
   @LW-2434
   Scenario: Create Wallet - Name your wallet - next button disabled for empty wallet name
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     When I enter wallet name: "empty"
     Then "Next" button is disabled during onboarding process
 
-  @LW-2975 @Pending
-    @Issue=LW-10028
+  @LW-2975
   Scenario Outline: Create Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
-#    When I click "Next" button during wallet setup
-#    And I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
-    Examples:
-      | password    | password_conf | passw_err                 | complex_bar_lvl | passw_conf_err                               |
-      | a           | empty         | core.password.feedback.1  | 1               | empty                                        |
-      | aa          | empty         | core.password.feedback.5  | 1               | empty                                        |
-      | Ta          | a             | core.password.feedback.10 | 1               | core.walletSetupRegisterStep.noMatchPassword |
-      | P@ss        | empty         | core.password.feedback.13 | 1               | empty                                        |
-      | N_8J@bne    | empty         | core.password.feedback.1  | 2               | empty                                        |
-      | N_8J@bne87  | empty         | empty                     | 3               | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                     | 4               | core.walletSetupRegisterStep.noMatchPassword |
+    Examples: 
+      | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
+      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
+      | N_8J@bne87  |               | empty                                                                           |               3 | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-3013
   Scenario: Create Wallet - Mnemonic writedown page - appears correctly after wallet setup page
@@ -68,11 +63,12 @@ Feature: Onboarding - Create wallet
     Then "Mnemonic writedown" page is displayed with 24 words
     And "Next" button is enabled during onboarding process
 
-  @LW-3014 @Pending @Obsolete
-  Scenario: Create Wallet - Mnemonic info - Back button click
-    Given I navigate to "Mnemonic info" page
+  @LW-3014
+  Scenario: Create Wallet - Mnemonic writedown - Back button click
+    Given I click "Create" button on wallet setup page
+    Given I go to "Mnemonic writedown" page
     When I click "Back" button during wallet setup
-    Then "Wallet name and password" page is displayed in onboarding flow
+    Then "Wallet setup" page is displayed
 
   @LW-3015 @Pending @Obsolete
   Scenario: Create Wallet - Mnemonic info - Next button click
@@ -83,7 +79,7 @@ Feature: Onboarding - Create wallet
   @LW-1553
   Scenario: Create Wallet - Mnemonic writedown - Subtitle link click
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic writedown" page
+    And I go to "Mnemonic writedown" page
     When I click on "Watch video" link on "Mnemonic writedown" page
     Then I see "Watch video" modal
     When I click "Read More" link in modal
@@ -94,7 +90,7 @@ Feature: Onboarding - Create wallet
   @LW-2251
   Scenario: Create Wallet - Mnemonic writedown - "Help and support" button click
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -104,7 +100,7 @@ Feature: Onboarding - Create wallet
   @LW-2435
   Scenario: Create Wallet - Mnemonic writedown page - next button
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -149,7 +145,7 @@ Feature: Onboarding - Create wallet
   @LW-2439
   Scenario: Create Wallet - Mnemonic verification page displayed
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -160,7 +156,7 @@ Feature: Onboarding - Create wallet
   @LW-2441
   Scenario: Create Wallet - Mnemonic verification - back button to start over and cancel
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -173,7 +169,7 @@ Feature: Onboarding - Create wallet
   @LW-2442
   Scenario: Create Wallet - Mnemonic verification - back button to start over and new words
     Given I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -260,7 +256,7 @@ Feature: Onboarding - Create wallet
   @LW-2627
   Scenario: Create Wallet - autofill words
     When I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -303,7 +299,7 @@ Feature: Onboarding - Create wallet
   @LW-4543 @LW-4548
   Scenario Outline: Create wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     When I click "Create" button on wallet setup page
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
     And "Next" button is disabled during onboarding process

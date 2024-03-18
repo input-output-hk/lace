@@ -1,6 +1,4 @@
-/* eslint-disable no-undef */
 import CommonOnboardingElements from './commonOnboardingElements';
-import { ChainablePromiseElement } from 'webdriverio';
 import { setInputFieldValue } from '../../utils/inputFieldUtils';
 
 class WalletSetupPage extends CommonOnboardingElements {
@@ -11,16 +9,17 @@ class WalletSetupPage extends CommonOnboardingElements {
   private PASSWORD_CONFIRM_INPUT = 'input[data-testid="wallet-password-confirmation-input"]';
   private PASSWORD_CONFIRM_ERROR = '[data-testid="wallet-password-confirmation-input-error"]';
   private COMPLEXITY_BARS_ACTIVE = '[data-testid="bar-level-active"]';
+  private PASSWORD_FEEDBACK = '[data-testid="password-feedback"]';
 
-  get subtitle(): ChainablePromiseElement<WebdriverIO.Element> {
+  get subtitle() {
     return $(this.SUBTITLE);
   }
 
-  get walletNameInput(): ChainablePromiseElement<WebdriverIO.Element> {
+  get walletNameInput() {
     return $(this.WALLET_NAME_INPUT);
   }
 
-  get walletNameError(): ChainablePromiseElement<WebdriverIO.Element> {
+  get walletNameError() {
     return $(this.WALLET_NAME_ERROR);
   }
 
@@ -38,6 +37,10 @@ class WalletSetupPage extends CommonOnboardingElements {
 
   get walletPasswordConfirmError() {
     return $(this.PASSWORD_CONFIRM_ERROR);
+  }
+
+  get passwordFeedback() {
+    return $(this.PASSWORD_FEEDBACK);
   }
 
   async setWalletNameInput(value: string): Promise<void> {

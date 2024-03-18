@@ -73,7 +73,7 @@ Feature: Onboarding - Restore wallet
   @LW-2457
   Scenario: Restore Wallet - Mnemonic writedown page - next button
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -82,8 +82,7 @@ Feature: Onboarding - Restore wallet
   @LW-2459
   Scenario: Restore Wallet - happy path to "Name your wallet" page
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
-
+    And "Wallet setup" page is displayed
   @LW-2460
   Scenario: Restore Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Restore" button and confirm
@@ -94,7 +93,7 @@ Feature: Onboarding - Restore wallet
   @LW-2461
   Scenario: Restore Wallet - Name your wallet - back button
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     When I click "Back" button during wallet setup
     When "Get started" page is displayed
 
@@ -122,13 +121,12 @@ Feature: Onboarding - Restore wallet
     And "Wallet setup" page is displayed
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
-
     Examples: 
       | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
-      | a           |          | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | P@ss        |          | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | N_8J@bne    |          | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
-      | N_8J@bne87  |          | empty                                                                           |               3 | empty                                        |
+      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
+      | N_8J@bne87  |               | empty                                                                           |               3 | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-2464
@@ -160,7 +158,7 @@ Feature: Onboarding - Restore wallet
   @LW-2628
   Scenario: Restore Wallet - autofill words
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -194,7 +192,7 @@ Feature: Onboarding - Restore wallet
   @LW-4612
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - paste word exceeding the limit
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -205,7 +203,7 @@ Feature: Onboarding - Restore wallet
   @LW-4613
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - add letter to mnemonic to exceed the limit
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -233,7 +231,7 @@ Feature: Onboarding - Restore wallet
   @LW-4546 @LW-4549
   Scenario Outline: Restore wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
     And "Next" button is disabled during onboarding process
@@ -279,7 +277,7 @@ Feature: Onboarding - Restore wallet
   @LW-5835 @Pending
   Scenario: Restore Wallet - "Recovery phrase length page" displayed
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -288,12 +286,12 @@ Feature: Onboarding - Restore wallet
   @LW-5842
   Scenario: Restore Wallet - "Recovery phrase length page" back button
     Given I click "Restore" button and confirm
-    And I am on "Name your wallet" page
+    And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I click "Back" button during wallet setup
-    Then "Wallet name and password" page is displayed in onboarding flow
+    Then "Wallet setup" page is displayed
 
   @LW-6080 @LW-5839 @LW-5838 @LW-5839
   Scenario: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path

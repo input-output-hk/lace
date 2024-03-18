@@ -99,7 +99,7 @@ Feature: DAppConnector - Common
     And I click on "Proceed" button on "Forgot password?" modal
     Then I see DApp no wallet page
     When I switch to tab with restore wallet process
-    Then "Wallet name and password" page is displayed in forgot password flow
+    Then "Wallet setup" page is displayed
 
   @LW-4060
   Scenario Outline: DApp connector window displayed in <theme> mode
