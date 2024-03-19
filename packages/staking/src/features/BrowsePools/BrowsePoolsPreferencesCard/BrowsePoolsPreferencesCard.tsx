@@ -11,7 +11,7 @@ import {
   ToggleButtonGroup,
 } from '@lace/ui';
 import cn from 'classnames';
-import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools';
+import { SortField, StakePoolSortOptions } from 'features/BrowsePools';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +60,7 @@ export const BrowsePoolsPreferencesCard = ({
   const handleIconClick = useCallback(() => {
     const newSort: StakePoolSortOptions = {
       field: sortBy,
-      order: direction === SortDirection.desc ? SortDirection.asc : SortDirection.desc,
+      order: direction === 'desc' ? 'asc' : 'desc',
     };
     onSortChange(newSort);
   }, [direction, onSortChange, sortBy]);
@@ -113,7 +113,7 @@ export const BrowsePoolsPreferencesCard = ({
   };
 
   const sortingOptions: RadioButtonGroupOption[] = useMemo(() => {
-    const icon = direction === SortDirection.asc ? SortDirectionAscIcon : SortDirectionDescIcon;
+    const icon = direction === 'asc' ? SortDirectionAscIcon : SortDirectionDescIcon;
     return [
       {
         icon,

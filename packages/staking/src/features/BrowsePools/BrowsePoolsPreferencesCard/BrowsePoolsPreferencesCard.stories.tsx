@@ -1,6 +1,6 @@
 import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, ThemeColorScheme, Variants } from '@lace/ui';
 import { action } from '@storybook/addon-actions';
-import { SortDirection, StakePoolSortOptions } from 'features/BrowsePools';
+import { StakePoolSortOptions } from 'features/BrowsePools';
 import { useCallback, useState } from 'react';
 import type { Meta } from '@storybook/react';
 
@@ -16,7 +16,7 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [sort, setSort] = useState<StakePoolSortOptions>({
     field: 'saturation',
-    order: SortDirection.asc,
+    order: 'asc',
   });
   const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],

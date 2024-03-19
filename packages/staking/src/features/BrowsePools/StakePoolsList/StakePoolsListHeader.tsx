@@ -1,5 +1,5 @@
 import { Table } from '@lace/ui';
-import { SortDirection, SortField, StakePoolSortOptions, TranslationsFor } from 'features/BrowsePools/types';
+import { SortField, StakePoolSortOptions, TranslationsFor } from 'features/BrowsePools/types';
 import { TranslationKey } from 'features/i18n';
 import { en } from 'features/i18n/translations';
 import { useTranslation } from 'react-i18next';
@@ -34,10 +34,7 @@ export const StakePoolsListHeader = ({ translations, setActiveSort, activeSort }
 
   const onSortChange = (field: SortField) => {
     const sortField = field as unknown as SortField;
-    const order =
-      sortField === activeSort?.field && activeSort?.order === SortDirection.asc
-        ? SortDirection.desc
-        : SortDirection.asc;
+    const order = sortField === activeSort?.field && activeSort?.order === 'asc' ? 'desc' : 'asc';
 
     analytics.sendEventToPostHog(analyticsActionsMap[field]);
     setActiveSort({ field: sortField, order });

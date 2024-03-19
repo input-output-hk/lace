@@ -1,4 +1,4 @@
-import { SortField as SortFieldSDK } from '@cardano-sdk/core';
+import { SortField as SortFieldSDK, SortOrder as SortOrderSDK } from '@cardano-sdk/core';
 
 export enum BrowsePoolsView {
   grid = 'grid',
@@ -14,15 +14,11 @@ export enum SaturationLevels {
 // TODO remove 'ticker', when it's included in SortFieldSDK; https://input-output.atlassian.net/browse/LW-9981
 // APY is deprecated and replaced by ROS
 export type SortField = 'ticker' | Exclude<SortFieldSDK, 'apy' | 'lastRos' | 'name'>;
-
-export enum SortDirection {
-  asc = 'asc',
-  desc = 'desc',
-}
+export type SortOrder = SortOrderSDK;
 
 export type StakePoolSortOptions = {
   field: SortField;
-  order: SortDirection;
+  order: SortOrder;
 };
 
 export type TranslationsFor<T extends string> = Record<T, string>;

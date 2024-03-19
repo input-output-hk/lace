@@ -4,7 +4,6 @@ import { Box, Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
 import {
   mapStakePoolToDisplayData,
-  SortDirection,
   SortField,
   StakePoolsListRowProps,
   StakePoolsListRowSkeleton,
@@ -34,7 +33,7 @@ type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
   field: 'ticker',
-  order: SortDirection.desc
+  order: 'desc'
 };
 
 const searchDebounce = 300;
@@ -110,8 +109,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   };
 
   const onSortChange = (sortField: SortField) => {
-    const order =
-      sortField === sort?.field && sort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
+    const order = sortField === sort?.field && sort?.order === 'asc' ? 'desc' : 'asc';
 
     setSort({ field: sortField, order });
   };
