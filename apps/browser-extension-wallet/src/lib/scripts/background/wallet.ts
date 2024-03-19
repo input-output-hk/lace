@@ -1,7 +1,7 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of, combineLatest, map, EMPTY } from 'rxjs';
 import { getProviders } from './config';
-import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery, PersonalWallet, storage } from '@cardano-sdk/wallet';
+import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery, createPersonalWallet, storage } from '@cardano-sdk/wallet';
 import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import {
@@ -69,7 +69,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
-    return new PersonalWallet(
+    return createPersonalWallet(
       { name: walletAccount.metadata.name },
       {
         logger,
@@ -129,6 +129,7 @@ const storesFactory: StoresFactory = {
       rewardsBalances: new storage.PouchDbRewardsBalancesStore(`${baseDbName}RewardsBalances`, logger),
       rewardsHistory: new storage.PouchDbRewardsHistoryStore(`${baseDbName}RewardsHistory`, logger),
       stakePools: new storage.PouchDbStakePoolsStore(`${baseDbName}StakePools`, logger),
+      signedTransactions: new storage.PouchDbSignedTransactionsStore(baseDbName, 'signedTransactions', logger),
       tip: new storage.PouchDbTipStore(docsDbName, 'tip', logger),
       transactions: new storage.PouchDbTransactionsStore(
         {

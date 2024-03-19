@@ -13,11 +13,9 @@ export const dot = recipe({
   ],
   variants: {
     level: {
-      high: sx({ backgroundColor: '$data_yellow' }),
-      low: sx({ backgroundColor: '$data_blue' }),
+      high: sx({ backgroundColor: '$data_orange' }),
       medium: sx({ backgroundColor: '$data_green' }),
-      oversaturated: sx({ backgroundColor: '$data_pink' }),
-      veryHigh: sx({ backgroundColor: '$data_orange' }),
+      veryHigh: sx({ backgroundColor: '$data_pink' }),
     },
   },
 });
