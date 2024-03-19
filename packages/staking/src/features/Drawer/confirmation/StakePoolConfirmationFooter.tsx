@@ -25,6 +25,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     isMultidelegationSupportedByDevice,
+    walletManagerExecuteWithPassword,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
@@ -63,7 +64,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     // HW-WALLET
     setIsConfirmingTx(true);
     try {
-      await signAndSubmitTransaction();
+      await walletManagerExecuteWithPassword(signAndSubmitTransaction);
       setIsRestaking(currentPortfolio.length > 0);
       portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
     } catch (error: any) {
