@@ -27,26 +27,33 @@ class OnboardingRevampPageObject {
     }
   }
 
-  async goToMenmonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWords: string[] = []): Promise<void> {
-    await this.goToRecoveryPhrasePage();
+  async goToMenmonicVerificationPage(
+    flowType: 'Create' | 'Restore',
+    mnemonicWords: string[] = [],
+    fillValues = true
+  ): Promise<void> {
     if (flowType === 'Create') {
       await this.collectMnemonicWords();
-      await this.enterMnemonicWords();
-    } else {
-      await this.enterMnemonicWords(mnemonicWords);
-    }
+      await RecoveryPhrasePage.nextButton.click();
+      if (fillValues) await this.enterMnemonicWords();
+    } else if (fillValues) await this.enterMnemonicWords(mnemonicWords);
   }
-
-  async goToRecoveryPhrasePage(): Promise<void> {
-    await WalletSetupPage.setWalletNameInput('TestAutomationWallet');
-    await WalletSetupPage.setWalletPasswordInput('N_8J@bne87A');
-    await WalletSetupPage.setWalletPasswordConfirmInput('N_8J@bne87A');
-    await WalletSetupPage.nextButton.click();
+  async goToWalletSetupPage(
+    flowType: 'Create' | 'Restore',
+    mnemonicWords: string[] = [],
+    fillValues = true
+  ): Promise<void> {
+    await this.goToMenmonicVerificationPage(flowType, mnemonicWords);
+    await RecoveryPhrasePage.nextButton.click();
+    if (fillValues) {
+      await WalletSetupPage.setWalletNameInput('TestAutomationWallet');
+      await WalletSetupPage.setWalletPasswordInput('N_8J@bne87A');
+      await WalletSetupPage.setWalletPasswordConfirmInput('N_8J@bne87A');
+    }
   }
 
   async collectMnemonicWords(): Promise<void> {
     this.mnemonicWords = await RecoveryPhrasePage.getMnemonicWordTexts();
-    await WalletSetupPage.nextButton.click();
   }
 
   async clickEnterWalletButton(): Promise<void> {

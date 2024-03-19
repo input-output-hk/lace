@@ -7,7 +7,7 @@ import { RecoveryPhrase } from '../../types/onboarding';
 class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
   async assertEnterWalletButtonIsEnabled() {
     await this.assertNextButtonEnabled(true);
-    await this.assertNextButtonTextEquals(await t('core.walletSetupMnemonicStepRevamp.enterWallet'));
+    await this.assertNextButtonTextEquals(await t('package.core.walletNameAndPasswordSetupStep.enterWallet'));
   }
 
   async assertSeeMnemonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWordsLength: RecoveryPhrase) {

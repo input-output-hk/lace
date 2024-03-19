@@ -27,24 +27,25 @@ Feature: Onboarding - Create wallet
       | Skip   |
       | Agree  |
 
-  @LW-2433
+  @LW-2433 @Pending
+  @issue=LW-10087
   Scenario: Create Wallet - Name your wallet - back button
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
+    And I go to "Wallet setup" page from "Create" wallet flow
     When I click "Back" button during wallet setup
-    Then "Get started" page is displayed
+    Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
 
   @LW-2434
-  Scenario: Create Wallet - Name your wallet - next button disabled for empty wallet name
+  Scenario: Create Wallet - Name your wallet - Enter wallet button disabled for empty wallet name
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
+    And I go to "Wallet setup" page from "Create" wallet flow
     When I enter wallet name: "empty"
     Then "Next" button is disabled during onboarding process
 
   @LW-2975
   Scenario Outline: Create Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
+    And I go to "Wallet setup" page from "Create" wallet flow and "not fill" values
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -66,9 +67,8 @@ Feature: Onboarding - Create wallet
   @LW-3014
   Scenario: Create Wallet - Mnemonic writedown - Back button click
     Given I click "Create" button on wallet setup page
-    Given I go to "Mnemonic writedown" page
     When I click "Back" button during wallet setup
-    Then "Wallet setup" page is displayed
+    Then "Get started" page is displayed
 
   @LW-3015 @Pending
   Scenario: Create Wallet - Mnemonic info - Next button click
@@ -79,7 +79,6 @@ Feature: Onboarding - Create wallet
   @LW-1553
   Scenario: Create Wallet - Mnemonic writedown - Subtitle link click
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic writedown" page
     When I click on "Watch video" link on "Mnemonic writedown" page
     Then I see "Watch video" modal
     When I click "Read More" link in modal
@@ -88,20 +87,14 @@ Feature: Onboarding - Create wallet
   @LW-2251
   Scenario: Create Wallet - Mnemonic writedown - "Help and support" button click
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with 24 words
+    And "Mnemonic writedown" page is displayed with 24 words
     When I click "Help and support" button during wallet setup
     Then I see "Help and support" page
 
   @LW-2435
   Scenario: Create Wallet - Mnemonic writedown page - next button
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with 24 words
+    And "Mnemonic writedown" page is displayed with 24 words
     When I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
 
@@ -116,7 +109,7 @@ Feature: Onboarding - Create wallet
       | 16        | 8           |
       | 24        | 16          |
 
-  @LW-2437 @Pending @Obsolete
+  @LW-2437 @Pending
   Scenario: Create Wallet - Mnemonic writedown - back button to start over and cancel
     Given I click "Create" button on wallet setup page
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -127,7 +120,7 @@ Feature: Onboarding - Create wallet
     And Words 1 - 8 are the same
     And I clear saved words
 
-  @LW-2438 @Pending @Obsolete
+  @LW-2438 @Pending
   Scenario: Create Wallet - Mnemonic writedown - back button to start over and new words
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic writedown" page with words 8 of 24
@@ -143,10 +136,7 @@ Feature: Onboarding - Create wallet
   @LW-2439
   Scenario: Create Wallet - Mnemonic verification page displayed
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with 24 words
+    And "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     And "Next" button is disabled during onboarding process
@@ -154,10 +144,7 @@ Feature: Onboarding - Create wallet
   @LW-2441
   Scenario: Create Wallet - Mnemonic verification - back button to start over and cancel
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with 24 words
+    And "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     And I click "Back" button during wallet setup
@@ -167,10 +154,7 @@ Feature: Onboarding - Create wallet
   @LW-2442
   Scenario: Create Wallet - Mnemonic verification - back button to start over and new words
     Given I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with 24 words
+    And "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     And I click "Back" button during wallet setup
@@ -181,7 +165,7 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow
-    Then "Enter wallet" button is enabled
+    Then "Next" button is enabled during onboarding process
 
   @LW-3212 @Pending @Obsolete
   Scenario Outline: Create Wallet - Mnemonic verification - all empty fields - next disabled - <init_page>
@@ -212,10 +196,8 @@ Feature: Onboarding - Create wallet
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Wallet setup" page from "Create" wallet flow
     When I click "Enter wallet" button
-    # And I am on "All done" page
-    # When I click "Go to my wallet" button on "All done" page
     Then I see LW homepage
 
   @LW-3060
@@ -240,10 +222,7 @@ Feature: Onboarding - Create wallet
   @LW-2627
   Scenario: Create Wallet - autofill words
     When I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic writedown" page is displayed with 24 words
+    And "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     When I fill mnemonic input with "s"

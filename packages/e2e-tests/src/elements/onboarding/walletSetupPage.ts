@@ -48,11 +48,11 @@ class WalletSetupPage extends CommonOnboardingElements {
   }
 
   async setWalletPasswordInput(value: string): Promise<void> {
-    await this.walletPasswordInput.setValue(value);
+    await setInputFieldValue(await this.walletPasswordInput, value);
   }
 
   async setWalletPasswordConfirmInput(value: string): Promise<void> {
-    await this.walletPasswordConfirmInput.setValue(value);
+    await setInputFieldValue(await this.walletPasswordConfirmInput, value);
   }
 
   getNumberOfActiveComplexityBars(): Promise<number> {

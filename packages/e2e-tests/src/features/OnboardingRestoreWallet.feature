@@ -119,7 +119,7 @@ Feature: Onboarding - Restore wallet
   @LW-2977
   Scenario Outline: Restore Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Restore" button and confirm
-    And "Wallet setup" page is displayed
+    And I go to "Wallet setup" page from "Restore" wallet flow and "not fill" values
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -133,7 +133,7 @@ Feature: Onboarding - Restore wallet
   @LW-2464
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button and confirm
-    And I go to "Mnemonic verification" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow
     When I click "Enter wallet" button
     Then I see LW homepage
 
@@ -193,10 +193,7 @@ Feature: Onboarding - Restore wallet
   @LW-4612
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - paste word exceeding the limit
     Given I click "Restore" button and confirm
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
+    And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "abcdefghijklmnopqrstuvwxyz"
     Then the mnemonic input contains the word "abcdefghij"
     And the word in mnemonic input has only 10 characters
@@ -204,16 +201,13 @@ Feature: Onboarding - Restore wallet
   @LW-4613
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - add letter to mnemonic to exceed the limit
     Given I click "Restore" button and confirm
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
-    Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
+    And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "abcdefghij"
     And I add characters "x" in word 0
     Then the mnemonic input contains the word "abcdefghij"
     And the word in mnemonic input has only 10 characters
 
-  @LW-3440 @Pending @Obsolete
+  @LW-3440 @Pending
   Scenario: Restore Wallet - Creating wallet loader disappears after 10s
     Given I click "Restore" button and confirm
     And I am on "Lace terms of use" page and accept terms
@@ -232,15 +226,14 @@ Feature: Onboarding - Restore wallet
   @LW-4546 @LW-4549
   Scenario Outline: Restore wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     Given I click "Restore" button and confirm
-    And "Wallet setup" page is displayed
+    And I go to "Wallet setup" page from "Restore" wallet flow
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
-    And "Next" button is disabled during onboarding process
-
+    And "Next" button is <is_disabled> during onboarding process
     Examples:
-      | value | is_displayed |
-      | 20    | is not       |
-      | 21    | is           |
+      | value | is_displayed | is_disabled |
+      | 20    | is not       | enabled     |
+      | 21    | is           | disabled    |
 
   @LW-4743 @Pending
   Scenario: Restore wallet - Enter and Escape buttons support
@@ -297,11 +290,11 @@ Feature: Onboarding - Restore wallet
   @LW-6080 @LW-5839 @LW-5838 @LW-5839
   Scenario Outline: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path
     Given I click "Restore" button and confirm
-    When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     And I select <mnemonicLength> word passphrase length
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with <mnemonicLength> words
     When I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
+    And I click "Next" button during wallet setup
+    When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     Then "Enter wallet" button is enabled
     When I click "Enter wallet" button
     Then I see LW homepage
