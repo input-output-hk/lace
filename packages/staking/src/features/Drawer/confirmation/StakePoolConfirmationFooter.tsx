@@ -42,7 +42,8 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
 
-    if (!isInMemory) {
+    const isMultidelegation = draftPortfolio && draftPortfolio.length > 1;
+    if (!isInMemory && isMultidelegation) {
       const isSupported = await isMultidelegationSupportedByDevice(walletType);
       if (!isSupported) {
         throw new Error('MULTIDELEGATION_NOT_SUPPORTED');
@@ -50,7 +51,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     }
     const signedTx = await delegationTxBuilder.build().sign();
     await inMemoryWallet.submitTx(signedTx);
-  }, [delegationTxBuilder, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType]);
+  }, [delegationTxBuilder, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType, draftPortfolio]);
 
   const handleSubmission = useCallback(async () => {
     setOpenPoolsManagementConfirmationModal(null);
@@ -73,7 +74,14 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     } finally {
       setIsConfirmingTx(false);
     }
-  }, [currentPortfolio, isInMemory, portfolioMutators, setIsRestaking, signAndSubmitTransaction]);
+  }, [
+    currentPortfolio,
+    isInMemory,
+    portfolioMutators,
+    setIsRestaking,
+    signAndSubmitTransaction,
+    walletManagerExecuteWithPassword,
+  ]);
 
   const onClick = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
