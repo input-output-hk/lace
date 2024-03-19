@@ -39,6 +39,7 @@ export const DappTransactionContainer = withAddressBookContext(
       signTxRequest: { request: req, set: setSignTxRequest },
       dappInfo
     } = useViewsFlowContext();
+
     const {
       walletInfo,
       inMemoryWallet,
@@ -110,7 +111,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
 
     useEffect(() => {
-      if (!req) {
+      if (!req || !protocolParameters) {
         setTransactionInspectionDetails(void 0);
         return;
       }
