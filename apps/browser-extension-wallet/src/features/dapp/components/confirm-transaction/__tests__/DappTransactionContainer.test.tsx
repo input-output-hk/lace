@@ -44,6 +44,7 @@ const walletInfo = {
 const mockedAssetsInfo = new Map([['id', 'data']]);
 const assetInfo$ = new BehaviorSubject(mockedAssetsInfo);
 const available$ = new BehaviorSubject([]);
+const rewardAccounts$ = new BehaviorSubject([{ address: 'address', credentialStatus: 'REGISTERED', rewardBalance: 1 }]);
 
 const inMemoryWallet = {
   assetInfo$,
@@ -51,6 +52,9 @@ const inMemoryWallet = {
     utxo: {
       available$
     }
+  },
+  delegation: {
+    rewardAccounts$
   }
 };
 
