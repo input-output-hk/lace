@@ -35,7 +35,7 @@
     "start": "node dist/index.js",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
-    "test:coverage": "yarn test --coverage",
+    "test:coverage": "yarn test --coverage --silent",
     "typecheck": "tsc --noEmit",
     "watch": "yarn build --watch"
   },

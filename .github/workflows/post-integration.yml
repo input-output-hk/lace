@@ -21,7 +21,7 @@ jobs:
           name: lightwallet
           path: apps/browser-extension-wallet/dist
       - name: Run unit tests, generate test coverage report
-        run: yarn test:coverage --maxWorkers=2
+        run: yarn test:coverage --maxWorkers=2 --silent
       - name: Upload Coveralls report
         uses: coverallsapp/github-action@v2
         with:

@@ -5,6 +5,7 @@ import cn from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
+import { Tooltip } from '../tooltip';
 
 import * as cx from './radio-button.css';
 
@@ -13,6 +14,7 @@ export interface RadioButtonGroupOption {
   label: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   onIconClick?: () => void;
+  tooltipText?: string;
 }
 
 export interface RadioButtonGroupProps {
@@ -40,26 +42,12 @@ export const RadioButtonGroup = ({
         value={selectedValue}
         disabled={disabled}
         onValueChange={onValueChange}
-        className={cx.radioGroupRootWithIcon[hasIcon ? 'withIcon' : 'default']}
+        className={cx.radioGroupRoot[hasIcon ? 'withIcon' : 'default']}
       >
-        {options.map(({ value, label, icon: Icon, onIconClick }) => (
-          <Flex
-            alignItems="center"
-            key={value}
-            className={cn({
-              [`${cx.radioGroupItemWrapper} ${cx.radioGroupItemWrapperSelector}`]:
-                !!label,
-              [cx.withIcon]: hasIcon,
-            })}
-          >
-            <RadixRadioGroup.Item
-              id={`radio-btn-control-id-${value}`}
-              value={value}
-              className={cx.radioGroupItem}
-            >
-              <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
-            </RadixRadioGroup.Item>
-            {label && (
+        {options.map(
+          ({ value, label, icon: Icon, onIconClick, tooltipText = '' }) => {
+            const hasLabel = !!label;
+            const labelContent = hasLabel && (
               <label
                 id={`radio-btn-label-id-${value}`}
                 htmlFor={`radio-btn-control-id-${value}`}
@@ -72,16 +60,50 @@ export const RadioButtonGroup = ({
                   {label}
                 </Box>
               </label>
-            )}
-            {Icon !== undefined && value === selectedValue && (
-              <Flex justifyContent="flex-end" className={cx.iconWrapper}>
-                <div className={cx.icon} onClick={onIconClick}>
-                  <Icon />
-                </div>
+            );
+
+            return (
+              <Flex
+                alignItems="center"
+                key={value}
+                className={cn(
+                  cx.radioGroupItemWrapper[hasLabel ? 'withLabel' : 'default'],
+                  {
+                    [cx.withIcon]: hasIcon,
+                  },
+                )}
+              >
+                <RadixRadioGroup.Item
+                  id={`radio-btn-control-id-${value}`}
+                  value={value}
+                  className={cx.radioGroupItem}
+                >
+                  <RadixRadioGroup.Indicator
+                    className={cx.radioGroupIndicator}
+                  />
+                </RadixRadioGroup.Item>
+                {tooltipText ? (
+                  <Tooltip label={tooltipText} delayDuration={800}>
+                    {labelContent}
+                  </Tooltip>
+                ) : (
+                  labelContent
+                )}
+                {Icon !== undefined && value === selectedValue && (
+                  <Flex justifyContent="flex-end" className={cx.iconWrapper}>
+                    <button
+                      className={cx.iconButton}
+                      disabled={disabled}
+                      onClick={onIconClick}
+                    >
+                      <Icon />
+                    </button>
+                  </Flex>
+                )}
               </Flex>
-            )}
-          </Flex>
-        ))}
+            );
+          },
+        )}
       </RadixRadioGroup.Root>
     </Box>
   );

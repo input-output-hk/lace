@@ -34,7 +34,7 @@
     "prestart": "yarn build",
     "start": "node dist/index.js",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
-    "test:coverage": "yarn test --coverage",
+    "test:coverage": "yarn test --coverage --silent",
     "watch": "yarn build --watch"
   },
   "dependencies": {

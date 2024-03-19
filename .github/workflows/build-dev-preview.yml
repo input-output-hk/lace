@@ -26,7 +26,7 @@ jobs:
         env:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
-        run: yarn test:coverage --maxWorkers=2
+        run: yarn test:coverage --maxWorkers=2 --silent
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
