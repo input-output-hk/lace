@@ -60,7 +60,7 @@ export const WalletSetupNamePasswordStep = ({
   const walletNameErrorMessage = useMemo(() => {
     const validationError = validateNameLength(walletName) ? translations.nameMaxLength : '';
     return walletName ? validationError : translations.nameRequiredMessage;
-  }, [t, walletName, translations.nameMaxLength, translations.nameRequiredMessage]);
+  }, [walletName, translations.nameMaxLength, translations.nameRequiredMessage]);
 
   const isNextButtonEnabled = () => {
     const hasMinimumLevelRequired = score >= MINIMUM_PASSWORD_LEVEL_REQUIRED;
