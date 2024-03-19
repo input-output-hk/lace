@@ -44,7 +44,6 @@ export const DappTransactionContainer = withAddressBookContext(
       inMemoryWallet,
       blockchainProvider: { assetProvider },
       walletUI: { cardanoCoin },
-      fetchNetworkInfo,
       walletState
     } = useWalletStore();
 
@@ -77,10 +76,6 @@ export const DappTransactionContainer = withAddressBookContext(
 
     const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
     const txCollateral = useComputeTxCollateral(walletState, tx);
-
-    useEffect(() => {
-      fetchNetworkInfo();
-    }, [fetchNetworkInfo]);
 
     useEffect(() => {
       const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {

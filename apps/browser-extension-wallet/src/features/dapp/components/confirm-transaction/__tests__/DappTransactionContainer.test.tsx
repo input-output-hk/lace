@@ -78,8 +78,8 @@ jest.mock('@src/utils/get-assets-information', (): typeof GetAssetsInformation =
   getAssetsInformation: mockGetAssetsInformation
 }));
 
-jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
-  ...jest.requireActual<typeof CurrencyProvider>('@providers/currency'),
+jest.mock('@providers', (): typeof CurrencyProvider => ({
+  ...jest.requireActual<typeof CurrencyProvider>('@providers'),
   useCurrencyStore: mockUseCurrencyStore
 }));
 
