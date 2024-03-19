@@ -187,8 +187,8 @@ When(/^I click on "Expand" button$/, async () => {
   await MenuHeader.clickOnExpandButton();
 });
 
-Then(/^"Expand" button is displayed (with|without) text$/, async (withText: string) => {
-  await topNavigationAssert.assertSeeExpandButton(withText === 'with');
+Then(/^"Expand" button is displayed (with|without) tooltip$/, async (withTooltip: 'with' | 'without') => {
+  await topNavigationAssert.assertSeeExpandButton(withTooltip === 'with');
 });
 
 When(/^I hover over "Expand" button$/, async () => {

@@ -2,23 +2,26 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 export class MenuHeader {
-  private AVATAR_ON_BUTTON = '[data-testid="header-menu-button"] [data-testid="user-avatar"]';
-  private AVATAR_ON_MENU = '[data-testid="header-menu"] [data-testid="user-avatar"]';
-  private CHEVRON_DOWN = '[data-testid="chevron-down"]';
-  private CHEVRON_UP = '[data-testid="chevron-up"]';
+  private AVATAR_ON_BUTTON =
+    '[data-testid="profile-dropdown-trigger-menu"] [data-testid="profile-dropdown-trigger-menu-icon"]';
+  private WALLET_NAME_ON_BUTTON = '//span[@data-testid="profile-dropdown-trigger-menu-title"]';
+  private ACCOUNT_NAME_ON_BUTTON = '//span[@data-testid="profile-dropdown-trigger-menu-subtitle"]';
+  private CHEVRON_DOWN = '[data-testid="profile-dropdown-trigger-menu-chevron-down"]';
+  private CHEVRON_UP = '[data-testid="profile-dropdown-trigger-menu-chevron-up"]';
   private CONTAINER = '//ul[@data-testid="header-menu"]';
   private LOGO_SELECTOR = '//*[@data-testid="header-logo"]';
   private NETWORK_PILL = '[data-testid="network-pill"]';
   private OFFLINE_NETWORK_PILL = '[data-testid="network-offline-indicator"]';
-  private MENU_BUTTON = '//button[@data-testid="header-menu-button"]';
+  private MENU_BUTTON = '//button[@data-testid="profile-dropdown-trigger-menu"]';
   private MENU_ADDRESS_BOOK_BUTTON = '//li[@data-testid="header-menu-address-book"]';
   private MENU_SETTINGS_BUTTON = '//li[@data-testid="header-menu-settings"]';
   private MENU_LOCK_BUTTON = '//li[@data-testid="header-menu-lock"]';
-  private MENU_USER_DETAILS = '//div[@data-testid="header-menu-user-details"]';
-  private MENU_WALLET_NAME = '//p[@data-testid="header-menu-wallet-name"]';
-  private MENU_WALLET_ADDRESS = '//p[@data-testid="header-menu-wallet-address"]';
+  private MENU_WALLET_OPTION_ITEM = '//button[@data-testid="wallet-option-item"]';
+  private MENU_WALLET_OPTION_NAME = '//span[@data-testid="wallet-option-title"]';
+  private MENU_WALLET_OPTION_ACCOUNT = '//span[@data-testid="wallet-option-subtitle"]';
   private MENU_WALLET_STATUS = '//p[@data-testid="header-wallet-status"]';
   private EXPAND_BUTTON = '[data-testid="expand-button"]';
+  private EXPAND_BUTTON_TOOLTIP = '.ant-tooltip-inner';
   private MENU_THEME_LABEL = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"]';
   private MENU_THEME_SWITCHER = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"] button';
   private MENU_NETWORK_LABEL = '[data-testid="header-menu-network-choice-label"]';
@@ -31,12 +34,20 @@ export class MenuHeader {
     return $(this.AVATAR_ON_BUTTON);
   }
 
-  get avatarOnMenu(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.AVATAR_ON_MENU);
+  get walletNameOnButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.WALLET_NAME_ON_BUTTON);
+  }
+
+  get accountNameOnButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ACCOUNT_NAME_ON_BUTTON);
   }
 
   get expandButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EXPAND_BUTTON);
+  }
+
+  get expandButtonTooltip(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.EXPAND_BUTTON_TOOLTIP);
   }
 
   get logo(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -68,15 +79,15 @@ export class MenuHeader {
   }
 
   get menuUserDetailsButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.MENU_USER_DETAILS);
+    return $(this.MENU_WALLET_OPTION_ITEM);
   }
 
   get menuWalletName(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.MENU_WALLET_NAME);
+    return $(this.MENU_WALLET_OPTION_NAME);
   }
 
-  get menuWalletAddress(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.MENU_WALLET_ADDRESS);
+  get menuWalletAccount(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_WALLET_OPTION_ACCOUNT);
   }
 
   get menuAddressBookButton(): ChainablePromiseElement<WebdriverIO.Element> {
