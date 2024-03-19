@@ -33,7 +33,7 @@
     "prepare": "ts-patch install -s",
     "prestart": "yarn build",
     "start": "node dist/index.js",
-    "test": "NODE_ENV=test jest -c ./test/jest.config.js",
+    "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
     "test:coverage": "yarn test --coverage --silent",
     "tsc:declarationOnly": "tsc --project ./src/tsconfig.declarationOnly.json",
     "watch": "yarn build --watch"
