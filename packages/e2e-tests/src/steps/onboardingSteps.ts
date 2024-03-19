@@ -343,8 +343,8 @@ Then(/^I do not see autocomplete options list$/, async () => {
 
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingRevampPageObject.goToMenmonicVerificationPage('Create', mnemonicWords);
-  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create', '24');
+  await OnboardingRevampPageObject.goToWalletSetupPage('Create', mnemonicWords);
+  await onboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
   await OnboardingRevampPageObject.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
@@ -487,7 +487,7 @@ Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mn
 });
 
 Then(/^"Enter wallet" button is enabled$/, async () => {
-  await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
+  await onboardingWalletSetupPageAssert.assertEnterWalletButtonIsEnabled();
 });
 
 Then(/^"Wallet setup" page is displayed$/, async () => {

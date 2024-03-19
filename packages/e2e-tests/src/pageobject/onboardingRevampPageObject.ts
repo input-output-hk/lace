@@ -1,8 +1,8 @@
 import WalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
-import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import mainPage from '../elements/onboarding/mainPage';
+import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 
 class OnboardingRevampPageObject {
   private mnemonicWords: string[] = [];
@@ -57,7 +57,7 @@ class OnboardingRevampPageObject {
   }
 
   async clickEnterWalletButton(): Promise<void> {
-    await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
+    await onboardingWalletSetupPageAssert.assertEnterWalletButtonIsEnabled();
     await WalletSetupPage.nextButton.click();
   }
 

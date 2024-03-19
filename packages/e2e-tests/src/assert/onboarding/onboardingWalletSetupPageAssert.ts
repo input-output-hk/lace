@@ -12,6 +12,11 @@ class OnboardingWalletSetupPageAssert extends OnboardingCommonAssert {
     await walletSetupPage.walletPasswordInput.waitForDisplayed();
   }
 
+  async assertEnterWalletButtonIsEnabled() {
+    await this.assertNextButtonEnabled(true);
+    await this.assertNextButtonTextEquals(await t('package.core.walletNameAndPasswordSetupStep.enterWallet'));
+  }
+
   async assertSeePasswordConfirmInput() {
     await walletSetupPage.walletPasswordConfirmInput.waitForDisplayed();
   }
@@ -49,7 +54,7 @@ class OnboardingWalletSetupPageAssert extends OnboardingCommonAssert {
     await this.assertSeeWalletNameInput();
     await this.assertSeePasswordInput();
     await this.assertSeeBackButton();
-    await this.assertSeeNextButton();
+    await this.assertEnterWalletButtonIsEnabled();
 
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();
