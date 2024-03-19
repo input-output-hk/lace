@@ -549,10 +549,29 @@ export const useWalletManager = (): UseWalletManager => {
    * @returns active wallet id after deleting the wallet
    */
   const deleteWallet = useCallback(
+    // eslint-disable-next-line max-statements
     async (isForgotPasswordFlow = false): Promise<WalletManagerActivateProps | undefined> => {
-      const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
-      await walletManager.deactivate();
-      await walletRepository.removeWallet(activeWallet.walletId);
+      let walletToDelete: Pick<WalletManagerActivateProps, 'walletId'> = await firstValueFrom(
+        walletManager.activeWalletId$
+      );
+      if (walletToDelete) {
+        await walletManager.deactivate();
+      } else {
+        const wallets = await firstValueFrom(walletRepository.wallets$);
+        if (wallets.length > 0) {
+          walletToDelete = wallets[0];
+        } else {
+          if (isForgotPasswordFlow) {
+            // Forgot Password flow deletes the wallet.
+            // If wallet was never created in the repository due to migrating a locked wallet,
+            // then we have to delete the 'lock' instead of wallet in the repository
+            resetWalletLock();
+          }
+          logger.warn('No wallet to delete');
+          return;
+        }
+      }
+      await walletRepository.removeWallet(walletToDelete.walletId);
 
       const wallets = await firstValueFrom(walletRepository.wallets$);
       if (wallets.length > 0) {
@@ -607,7 +626,7 @@ export const useWalletManager = (): UseWalletManager => {
       clearNftsFolders();
 
       for (const chainName of AVAILABLE_CHAINS) {
-        await walletManager.destroyData(activeWallet.walletId, chainIdFromName(chainName));
+        await walletManager.destroyData(walletToDelete.walletId, chainIdFromName(chainName));
       }
     },
     [

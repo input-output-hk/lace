@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Cardano } from '@cardano-sdk/core';
-import { PersonalWallet } from '@cardano-sdk/wallet';
+import { BaseWallet } from '@cardano-sdk/wallet';
 import { InitializeTxProps } from '@cardano-sdk/tx-construction';
 import * as mocks from '../../test/mocks';
 import { buildTransaction } from '../build-transaction';
@@ -11,7 +11,7 @@ const sendToAddress = Cardano.PaymentAddress(
 
 // FIXME: wallet not settling error LW-6126
 describe.skip('Testing build-transaction', () => {
-  let wallet: PersonalWallet;
+  let wallet: BaseWallet;
 
   beforeEach(async () => {
     ({ wallet } = await mocks.mockWallet());

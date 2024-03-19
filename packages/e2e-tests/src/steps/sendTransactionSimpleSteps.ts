@@ -34,11 +34,11 @@ import TransactionSummaryPage from '../elements/newTransaction/transactionSummar
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
-import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
 import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
+import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -111,7 +111,7 @@ When(/click on one of the contacts on the dropdown/, async () => {
 When(
   /^click on the remove button for the "([^"]*)" asset in bundle (\d)$/,
   async (assetName: string, bundleIndex: number) => {
-    await transactionExtendedPageObject.clickRemoveAssetButton(assetName, bundleIndex);
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).clickRemoveAssetButton();
   }
 );
 
@@ -132,7 +132,7 @@ Then(/^the "([^"]*)" asset is not displayed in bundle (\d)$/, async (assetName: 
 
 When(/^I click MAX button in bundle (\d) for "([^"]*)" asset$/, async (bundleIndex: number, assetName: string) => {
   assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
-  await transactionExtendedPageObject.clickMaxButton(bundleIndex, assetName);
+  await TransactionNewPage.coinConfigure(bundleIndex, assetName).clickMaxButton();
 });
 
 When(/^I select amount: (\d*) of asset type: (Tokens|NFTs)$/, async (amount: number, assetType: 'Tokens' | 'NFTs') => {
@@ -167,10 +167,13 @@ Then(/I enter more or less characters than the required for an address in the bu
   await addressInput.addToAddress('a');
 });
 
-Then(/click on the coin selector for "([^"]*)" asset in bundle (\d)/, async (assetName: string, index: number) => {
-  assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
-  await transactionExtendedPageObject.clickCoinSelectorName(assetName, index);
-});
+Then(
+  /click on the coin selector for "([^"]*)" asset in bundle (\d)/,
+  async (assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).clickCoinSelectorName();
+  }
+);
 
 Then(/^coin selector contains two tabs: tokens & nfts$/, async () => {
   await TransactionAssetSelectionAssert.assertSeeTokenSelectionPageButtons();
@@ -237,10 +240,8 @@ When(
           await transactionExtendedPageObject.clickCoinConfigureTokenSearchResult(entry.assetName);
           break;
       }
-      await transactionExtendedPageObject.fillTokenValue(
-        Number.parseFloat(entry.amount),
-        entry.ticker ? entry.ticker : entry.assetName,
-        bundleIndex
+      await TransactionNewPage.coinConfigure(bundleIndex, entry.ticker ? entry.ticker : entry.assetName).fillTokenValue(
+        Number.parseFloat(entry.amount)
       );
     }
   }
@@ -254,18 +255,21 @@ When(
 );
 
 When(/^I click to loose focus from value field$/, async () => {
-  await transactionExtendedPageObject.clickToLoseFocus();
+  await TransactionNewPage.coinConfigure().clickToLoseFocus();
 });
 
 When(/^I hover over the ticker for "([^"]*)" asset in bundle (\d)$/, async (assetName: string, bundleIndex: number) => {
-  await transactionExtendedPageObject.hoverOverTheTokenName(bundleIndex, assetName);
+  if (assetName.length > 5) {
+    assetName = assetName.slice(0, 5);
+  }
+  await TransactionNewPage.coinConfigure(bundleIndex, assetName).hoverOverTheTokenName();
 });
 
 Then(
   /^I enter a value of: ([^"]*) to the "([^"]*)" asset in bundle (\d)$/,
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
     assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
-    await transactionExtendedPageObject.fillTokenValue(Number.parseFloat(valueToEnter), assetName, bundleIndex);
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(Number.parseFloat(valueToEnter));
   }
 );
 
@@ -275,23 +279,21 @@ Then(/^I click on transaction drawer background to lose focus$/, async () => {
 
 Then(/^I enter a value of: ([^"]*) to the "([^"]*)" asset$/, async (valueToEnter: string, assetName: string) => {
   assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
-  await transactionExtendedPageObject.fillTokenValue(Number.parseFloat(valueToEnter), assetName);
+  await TransactionNewPage.coinConfigure(1, assetName).fillTokenValue(Number.parseFloat(valueToEnter));
 });
 
 Then(
   /^I enter a value of: ([^"]*) to the "([^"]*)" asset in bundle (\d) without clearing input$/,
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
-    await transactionExtendedPageObject.fillTokenValueWithoutClearingField(
-      Number.parseFloat(valueToEnter),
-      assetName,
-      bundleIndex
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValueWithoutClearingField(
+      Number.parseFloat(valueToEnter)
     );
   }
 );
 
 Then(/^I hover over the value for "([^"]*)" asset in bundle (\d)$/, async (assetName: string, bundleIndex: number) => {
   assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
-  await transactionExtendedPageObject.hoverOverTheTokenValue(bundleIndex, assetName);
+  await TransactionNewPage.coinConfigure(bundleIndex, assetName).hoverOverTheTokenValue();
 });
 
 Then(
@@ -300,13 +302,13 @@ Then(
     const tokenBalance: string = testContext.load(`${assetName}tokenBalance`);
     const value = Number.parseFloat(tokenBalance) * (Number.parseFloat(percentage) * (1 / 100));
     const valueToEnter = Number.parseFloat(value.toPrecision(2));
-    await transactionExtendedPageObject.fillTokenValueUsingKeys(valueToEnter, assetName, bundleIndex);
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValueUsingKeys(valueToEnter);
   }
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () => {
   await new AddressInput().fillAddress(shelley.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(1);
+  await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
 });
 
 Then(
@@ -314,13 +316,13 @@ Then(
   async (network: 'Preprod' | 'Mainnet') => {
     const address = network === 'Mainnet' ? shelley.getMainnetAddress() : shelley.getTestnetAddress();
     await new AddressInput().fillAddress(address);
-    await transactionExtendedPageObject.fillTokenValue(1);
+    await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
   }
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
   await new AddressInput().fillAddress(byron.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(0.5);
+  await TransactionNewPage.coinConfigure(1).fillTokenValue(0.5);
 });
 
 Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
@@ -349,7 +351,7 @@ Then(/^The Transaction error screen is displayed in (extended|popup) mode$/, asy
 
 Then(/^The Transaction submitted screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await transactionSubmittedAssert.assertSeeTransactionSubmittedPage(mode);
-  await transactionExtendedPageObject.saveTransactionHash();
+  await TransactionSubmittedPage.saveTransactionHash();
 });
 
 Then(/^the 'Send' screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
@@ -622,7 +624,7 @@ When(/^I click "View transaction" button on submitted transaction page$/, async 
 Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {
   const password =
     type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
-  await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
+  await TransactionPasswordPage.fillPasswordAndConfirm(password);
 });
 
 Then(

@@ -66,7 +66,7 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const deposit =
-    rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.Cardano.StakeKeyStatus.Registered
+    rewardAccounts && rewardAccounts[0]?.credentialStatus !== Wallet.Cardano.StakeCredentialStatus.Registered
       ? protocolParameters?.stakeKeyDeposit
       : undefined;
 
