@@ -14,7 +14,6 @@ export interface WalletSetupStepLayoutRevampProps {
   belowContentText?: React.ReactNode;
   description?: React.ReactNode;
   linkText?: React.ReactNode;
-  stepInfoText?: string;
   onNext?: () => void;
   onBack?: () => void;
   customAction?: React.ReactNode;
@@ -70,7 +69,6 @@ export const WalletSetupStepLayoutRevamp = ({
   title,
   description,
   linkText,
-  stepInfoText,
   belowContentText,
   onNext,
   onBack,
@@ -125,14 +123,11 @@ export const WalletSetupStepLayoutRevamp = ({
         </div>
         {belowContentText}
         <div className={styles.footer} data-testid="wallet-setup-step-footer">
-          {onBack ? (
+          {onBack && (
             <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
               {backLabel || defaultLabel.back}
             </Button>
-          ) : (
-            <div />
           )}
-          {stepInfoText && <p data-testid="step-info-text">{stepInfoText}</p>}
           {customAction}
           {onNext && (
             <span ref={nextButtonContainerRef}>

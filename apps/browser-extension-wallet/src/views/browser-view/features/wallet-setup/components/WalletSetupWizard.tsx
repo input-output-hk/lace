@@ -29,6 +29,7 @@ import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
+import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -71,7 +72,7 @@ export const WalletSetupWizard = ({
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-
+  const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
@@ -104,7 +105,9 @@ export const WalletSetupWizard = ({
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
-    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
+    forgotPasswordTitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordTitle'),
+    forgotPasswordSubtitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordSubtitle')
   };
 
   const walletSetupModeStepTranslations = {
@@ -125,8 +128,14 @@ export const WalletSetupWizard = ({
   };
 
   const walletSetupNamePasswordStepTranslations = {
-    title: t('package.core.walletNameAndPasswordSetupStep.title'),
-    description: t('package.core.walletNameAndPasswordSetupStep.description'),
+    title:
+      setupType === SetupType.FORGOT_PASSWORD
+        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
+        : t('package.core.walletNameAndPasswordSetupStep.title'),
+    description:
+      setupType === SetupType.FORGOT_PASSWORD
+        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
+        : t('package.core.walletNameAndPasswordSetupStep.description'),
     nameInputLabel: t('package.core.walletNameAndPasswordSetupStep.nameInputLabel'),
     nameMaxLength: t('package.core.walletNameAndPasswordSetupStep.nameMaxLength'),
     passwordInputLabel: t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel'),
@@ -155,12 +164,12 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        analytics.sendAliasEvent();
+        void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        void analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+          void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         }
       }
     },
@@ -173,10 +182,10 @@ export const WalletSetupWizard = ({
   }, [currentStep]);
 
   const handleCompleteCreation = useCallback(
-    async (walletName, password) => {
+    async (name, password) => {
       try {
         const wallet = await createWallet({
-          name: walletName,
+          name,
           mnemonic,
           password,
           chainId: DEFAULT_CHAIN_ID
@@ -193,7 +202,7 @@ export const WalletSetupWizard = ({
 
         if (setupType === SetupType.FORGOT_PASSWORD) {
           deleteFromLocalStorage('isForgotPasswordFlow');
-          goToMyWallet(wallet);
+          void goToMyWallet(wallet);
         } else {
           moveForward();
         }
@@ -216,7 +225,7 @@ export const WalletSetupWizard = ({
         <WalletSetupMnemonicVerificationStepRevamp
           mnemonic={mnemonic}
           onChange={setMnemonic}
-          onCancel={moveBack}
+          onCancel={setupType !== SetupType.FORGOT_PASSWORD && moveBack}
           onSubmit={moveForward}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
@@ -243,7 +252,7 @@ export const WalletSetupWizard = ({
             videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
             onClose={() => {
               onClose();
-              sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK);
+              void sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK);
             }}
           />
         )}
@@ -279,6 +288,7 @@ export const WalletSetupWizard = ({
         <WalletSetupNamePasswordStep
           onBack={moveBack}
           onNext={handleSubmit}
+          initialWalletName={walletName}
           translations={walletSetupNamePasswordStepTranslations}
         />
       )}
