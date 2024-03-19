@@ -6,7 +6,7 @@ import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   MnemonicVideoPopupContent,
-  WalletSetupNamePasswordStep,
+  WalletSetupNamePasswordStepRevamp,
   WalletSetupSteps,
   walletSetupWizard
 } from '@lace/core';
@@ -19,9 +19,7 @@ import {
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
-
 import { Fallback } from './Fallback';
-
 import { deleteFromLocalStorage } from '@src/utils/local-storage';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
@@ -276,7 +274,7 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
       {currentStep === WalletSetupSteps.Register && (
-        <WalletSetupNamePasswordStep
+        <WalletSetupNamePasswordStepRevamp
           onBack={moveBack}
           onNext={handleSubmit}
           translations={walletSetupNamePasswordStepTranslations}

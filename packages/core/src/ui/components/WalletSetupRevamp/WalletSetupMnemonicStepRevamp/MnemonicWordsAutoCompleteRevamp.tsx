@@ -2,15 +2,15 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { AutoComplete, Input, InputRef } from 'antd';
 import classnames from 'classnames';
-import { wordListSearch } from '../../utils/word-list-search';
-import { MnemonicWordContainer } from '../WalletSetup/MnemonicWordContainer';
-import styles from './MnemonicWordsAutoComplete.module.scss';
+import { wordListSearch } from '../../../utils/word-list-search';
+import styles from '../../MnemonicWordsAutoComplete/MnemonicWordsAutoComplete.module.scss';
+import { MnemonicWordContainerRevamp } from './MnemonicWordContainerRevamp';
 
 const AUTO_COMPLETE_DROPDOWN_OFFSET_X = -43;
 const AUTO_COMPLETE_DROPDOWN_OFFSET_Y = 16;
 const DEFAULT_INPUT_MAX_LENGTH = 10;
 
-export interface MnemonicWordsAutoCompleteProps {
+export interface MnemonicWordsAutoCompleteRevampProps {
   idx?: number;
   value: string;
   onChange: (words: string) => void;
@@ -18,17 +18,21 @@ export interface MnemonicWordsAutoCompleteProps {
   wordList?: Array<string>;
   max?: number;
   focus?: boolean;
+  className?: string;
+  handlePaste?: () => void;
 }
 
-export const MnemonicWordsAutoComplete = ({
+export const MnemonicWordsAutoCompleteRevamp = ({
   idx = 1,
   value,
   wordList = [],
   onChange,
   onDropdownVisibleChange,
   max = DEFAULT_INPUT_MAX_LENGTH,
-  focus = false
-}: MnemonicWordsAutoCompleteProps): React.ReactElement => {
+  focus = false,
+  className,
+  handlePaste
+}: MnemonicWordsAutoCompleteRevampProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputRef>(null);
   const [options, setOptions] = useState<Array<{ value: string; label: string }>>([]);
@@ -96,7 +100,7 @@ export const MnemonicWordsAutoComplete = ({
   }, [options, value, max]);
 
   return (
-    <MnemonicWordContainer ref={containerRef} number={idx}>
+    <MnemonicWordContainerRevamp ref={containerRef} number={idx} className={className}>
       <AutoComplete
         popupClassName={styles.dropdown}
         className={styles.autoComplete}
@@ -112,12 +116,14 @@ export const MnemonicWordsAutoComplete = ({
         dropdownMatchSelectWidth={containerRef?.current?.offsetWidth}
         onBlur={resetState}
         onFocus={getOptions}
+        autoFocus={idx === 1}
         onDropdownVisibleChange={onDropdownVisibleChange}
       >
         <div className={styles.autocompleteContent} data-testid={`mnemonic-word-input-${idx}`}>
           <Input
             data-testid="mnemonic-word-input"
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             className={classnames(styles.input, { [styles.focus]: isMaskVisible })}
             value={value?.slice(0, max)}
             onChange={handleChange}
@@ -136,6 +142,6 @@ export const MnemonicWordsAutoComplete = ({
           )}
         </div>
       </AutoComplete>
-    </MnemonicWordContainer>
+    </MnemonicWordContainerRevamp>
   );
 };
