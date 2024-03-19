@@ -13,6 +13,10 @@
   justify-content: start !important;
   gap: size_unit(0.75) !important;
   margin: size_unit(2) size_unit(2) 0 0;
+
+  &:nth-child(4n) {
+    margin-right: 0;
+  }
 }
 
 .blur {

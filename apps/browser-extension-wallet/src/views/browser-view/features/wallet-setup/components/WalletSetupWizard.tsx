@@ -127,6 +127,30 @@ export const WalletSetupWizard = ({
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
+  const walletSetupNamePasswordStepTranslations = {
+    title:
+      setupType === SetupType.FORGOT_PASSWORD
+        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
+        : t('package.core.walletNameAndPasswordSetupStep.title'),
+    description:
+      setupType === SetupType.FORGOT_PASSWORD
+        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
+        : t('package.core.walletNameAndPasswordSetupStep.description'),
+    nameInputLabel: t('package.core.walletNameAndPasswordSetupStep.nameInputLabel'),
+    nameMaxLength: t('package.core.walletNameAndPasswordSetupStep.nameMaxLength'),
+    passwordInputLabel: t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel'),
+    confirmPasswordInputLabel: t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
+    nameRequiredMessage: t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
+    noMatchPassword: t('package.core.walletNameAndPasswordSetupStep.noMatchPassword'),
+    confirmButton: t('package.core.walletNameAndPasswordSetupStep.enterWallet'),
+    secondLevelPasswordStrengthFeedback: t(
+      'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
+    ),
+    firstLevelPasswordStrengthFeedback: t(
+      'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback'
+    )
+  };
+
   const moveBack = () => {
     const prevStep = walletSetupWizard[currentStep].prev;
 
@@ -265,7 +289,7 @@ export const WalletSetupWizard = ({
           onBack={moveBack}
           onNext={handleSubmit}
           initialWalletName={walletName}
-          isForgotPassword={setupType === SetupType.FORGOT_PASSWORD}
+          translations={walletSetupNamePasswordStepTranslations}
         />
       )}
       {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
