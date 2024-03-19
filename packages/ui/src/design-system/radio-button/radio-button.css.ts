@@ -20,17 +20,19 @@ export const radioGroupItemWrapper = style({
 
 export const radioGroupIndicatorWrapper = style([
   {
+    display: 'flex',
+    flexShrink: 0,
     width: vars.spacing.$20,
     height: vars.spacing.$20,
     padding: vars.spacing.$0,
     borderRadius: vars.radius.$circle,
     background: vars.colors.$radiobutton_unchecked_bgColor,
-    border: `1.5px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
+    border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
     position: 'relative',
     outline: 'none',
 
     ':hover': {
-      border: `1.5px solid ${vars.colors.$radiobutton_hover_color}`,
+      border: `1px solid ${vars.colors.$radiobutton_hover_color}`,
       background: vars.colors.$radiobutton_checked_bgColor,
     },
 
@@ -97,7 +99,6 @@ export const radioGroupIndicator = style([
       '&:active::after': {
         content: '',
         display: 'flex',
-        alignSelf: 'center',
         width: vars.spacing.$8,
         height: vars.spacing.$8,
         borderRadius: '50%',
@@ -106,7 +107,6 @@ export const radioGroupIndicator = style([
       '&::after': {
         content: '',
         display: 'flex',
-        alignSelf: 'center',
         width: vars.spacing.$10,
         height: vars.spacing.$10,
         borderRadius: '50%',
@@ -133,29 +133,32 @@ export const iconButton = style([
     color: '$radiobutton_icon_text_color',
     width: '$40',
     height: '$40',
-    paddingTop: '$4',
     backgroundColor: '$radiobutton_icon_color',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   }),
   {
-    border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+    fontSize: 24,
+    border: `2px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
     outline: 'none',
     ':focus': {
       backgroundColor: vars.colors.$radiobutton_focus_color,
     },
     selectors: {
       ['&:not(:disabled):hover']: {
-        border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+        border: `2px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
         backgroundColor: vars.colors.$radiobutton_icon_hover_color,
       },
       ['&:not(:disabled):active']: {
-        border: `1.5px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+        border: `2px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
         backgroundColor: vars.colors.$radiobutton_icon_active,
       },
     },
     ':disabled': {
       cursor: 'not-allowed',
       opacity: '20%',
-      border: `1.5px solid ${vars.colors.$radiobutton_icon_disabled_border_color}`,
+      border: `2px solid ${vars.colors.$radiobutton_icon_disabled_border_color}`,
     },
   },
 ]);

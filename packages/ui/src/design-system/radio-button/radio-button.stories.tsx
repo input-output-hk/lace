@@ -77,6 +77,7 @@ const MainComponents = (): JSX.Element => {
     },
   ];
 
+  // TODO: remove className and use color in <Text.Body.Normal className={styles.note}> after https://input-output.atlassian.net/browse/LW-9760
   return (
     <>
       <Variants.Row>
@@ -105,7 +106,9 @@ const MainComponents = (): JSX.Element => {
             {index < 4 ? (
               <RadioButtonGroup {...item} />
             ) : (
-              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+              <Text.Body.Normal className={styles.note}>
+                * only checked state supported
+              </Text.Body.Normal>
             )}
           </Variants.Cell>
         ))}
