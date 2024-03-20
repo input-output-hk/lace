@@ -137,9 +137,8 @@ class DAppConnectorPageObject {
         await browser.pause(1000);
         // await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
       }
-
-      if (!isAuthorized) await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
     }
+    if (!isAuthorized) await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
   }
 }
 
