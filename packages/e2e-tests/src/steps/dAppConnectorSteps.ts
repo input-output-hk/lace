@@ -248,11 +248,11 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
     try {
       switch (runButton) {
         case 'Send ADA':
-          await TestDAppPage.sendAdaRunButton.waitForClickable();
+          await TestDAppPage.sendAdaRunButton.scrollIntoView();
           await TestDAppPage.sendAdaRunButton.click();
           break;
         case 'Send Token':
-          await TestDAppPage.sendTokenRunButton.waitForClickable();
+          await TestDAppPage.sendTokenRunButton.scrollIntoView();
           await TestDAppPage.sendTokenRunButton.click();
           break;
         default:
@@ -260,7 +260,7 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
       }
       await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
         interval: 1000,
-        timeout: 16_000,
+        timeout: 6000,
         timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
       });
       break;
