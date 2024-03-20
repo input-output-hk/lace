@@ -262,14 +262,15 @@ Feature: Onboarding - Create wallet
   @LW-4543 @LW-4548
   Scenario Outline: Create wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     When I click "Create" button on wallet setup page
-    And "Wallet setup" page is displayed
+    And I go to "Wallet setup" page from "Create" wallet flow
+    Then "Wallet setup" page is displayed
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
-    And "Next" button is disabled during onboarding process
+    And "Next" button is <is_disabled> during onboarding process
     Examples:
-      | value | is_displayed |
-      | 20    | is not       |
-      | 21    | is           |
+      | value | is_displayed | is_disabled |
+      | 20    | is not       | enabled     |
+      | 21    | is           | disabled    |
 
   @LW-5844
   Scenario Outline: "Get started" page - Legal links - click on <legal_link> link
@@ -286,12 +287,8 @@ Feature: Onboarding - Create wallet
   Scenario Outline: Create Wallet - <mode> theme applied to onboarding pages
     Given I set <mode> theme mode in Local Storage
     When "Get started" page is displayed
-    Then I see current onboarding page in <mode> mode
     And I click "Create" button on wallet setup page
-    When "Wallet setup" page is displayed
     Then I see current onboarding page in <mode> mode
-    And I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     When "Mnemonic writedown" page is displayed with 24 words
     Then I see current onboarding page in <mode> mode
     And I save mnemonic words
@@ -299,6 +296,10 @@ Feature: Onboarding - Create wallet
     When "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     Then I see current onboarding page in <mode> mode
     And I enter saved mnemonic words
+    And I click "Next" button during wallet setup
+    When "Wallet setup" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     Then "Enter wallet" button is enabled
     And I see current onboarding page in <mode> mode
     And I clear saved words
@@ -322,8 +323,6 @@ Feature: Onboarding - Create wallet
   @LW-8501
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
-    And I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
     When I enter 24 incorrect mnemonic words on "Mnemonic verification" page

@@ -133,7 +133,7 @@ When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
 
 When(/^I enter wallet name with size of: ([^"]*) characters$/, async (numberOfCharacters: number) => {
   const walletName = await generateRandomString(numberOfCharacters);
-  await OnboardingPageObject.fillWalletNameInput(walletName);
+  await walletSetupPage.setWalletNameInput(walletName);
 });
 
 When(
@@ -425,7 +425,7 @@ Given(
   async (
     endPage: 'Mnemonic verification' | 'Wallet setup',
     flowType: 'Create' | 'Restore',
-    fillValues?: 'fill' | 'not fill'
+    fillValues: 'fill' | 'not fill'
   ) => {
     if (!fillValues) fillValues = 'fill';
     switch (endPage) {

@@ -10,6 +10,7 @@ class WalletSetupPage extends CommonOnboardingElements {
   private PASSWORD_CONFIRM_ERROR = '[data-testid="wallet-password-confirmation-input-error"]';
   private COMPLEXITY_BARS_ACTIVE = '[data-testid="bar-level-active"]';
   private PASSWORD_FEEDBACK = '[data-testid="password-feedback"]';
+  private ENTER_WALLET_BUTTON = '[data-testid="wallet-setup-step-btn-next"]';
 
   get subtitle() {
     return $(this.SUBTITLE);
@@ -41,6 +42,10 @@ class WalletSetupPage extends CommonOnboardingElements {
 
   get passwordFeedback() {
     return $(this.PASSWORD_FEEDBACK);
+  }
+
+  get enterWalletButton() {
+    return $(this.ENTER_WALLET_BUTTON);
   }
 
   async setWalletNameInput(value: string): Promise<void> {

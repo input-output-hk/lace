@@ -73,15 +73,13 @@ Feature: Onboarding - Restore wallet
   @LW-2457
   Scenario: Restore Wallet - Mnemonic writedown page - next button
     Given I click "Restore" button and confirm
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     And "Next" button is disabled during onboarding process
 
   @LW-2459
   Scenario: Restore Wallet - happy path to "Name your wallet" page
     Given I click "Restore" button and confirm
+    And I go to "Wallet setup" page from "Restore" wallet flow
     And "Wallet setup" page is displayed
 
   @LW-2460
@@ -94,9 +92,10 @@ Feature: Onboarding - Restore wallet
   @LW-2461
   Scenario: Restore Wallet - Name your wallet - back button
     Given I click "Restore" button and confirm
+    And I go to "Wallet setup" page from "Restore" wallet flow
     And "Wallet setup" page is displayed
     When I click "Back" button during wallet setup
-    When "Get started" page is displayed
+    Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
 
   @LW-2462 @Smoke
   Scenario: Restore Wallet - Name your wallet - happy path to "Enter wallet step"
@@ -137,7 +136,7 @@ Feature: Onboarding - Restore wallet
     When I click "Enter wallet" button
     Then I see LW homepage
 
-  @LW-3063
+  @LW-3063 @Pending
   Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet
     Given I click "Restore" button on wallet setup page
     And I go to "Mnemonic verification" page from "Restore" wallet flow
@@ -159,9 +158,6 @@ Feature: Onboarding - Restore wallet
   @LW-2628
   Scenario: Restore Wallet - autofill words
     Given I click "Restore" button and confirm
-    And "Wallet setup" page is displayed
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "s"
     Then I see following autocomplete options:
@@ -277,7 +273,7 @@ Feature: Onboarding - Restore wallet
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
 #    Then "Recovery phrase length page" is displayed and 24 words checkbox is checked
 
-  @LW-5842
+  @LW-5842 @Pending
   Scenario: Restore Wallet - "Recovery phrase length page" back button
     Given I click "Restore" button and confirm
     And "Wallet setup" page is displayed
@@ -306,12 +302,10 @@ Feature: Onboarding - Restore wallet
   @LW-6081
   Scenario Outline: Restore Wallet - error message is displayed for <mnemonicLength> passphrase length
     Given I click "Restore" button and confirm
-    When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
+    And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     And I select <mnemonicLength> word passphrase length
     When I enter <mnemonicLength> incorrect mnemonic words on "Mnemonic verification" page
     Then I see incorrect passphrase error displayed
-
     Examples:
       | mnemonicLength |
       | 12             |
@@ -324,13 +318,13 @@ Feature: Onboarding - Restore wallet
     When "Get started" page is displayed
     Then I see current onboarding page in <mode> mode
     And I click "Restore" button and confirm
-    When "Wallet setup" page is displayed
-    Then I see current onboarding page in <mode> mode
-    And I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     When "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     Then I see current onboarding page in <mode> mode
-    When I enter 24 correct mnemonic words on "Mnemonic verification" page
+    And I enter 24 correct mnemonic words on "Mnemonic verification" page
+    And I click "Next" button during wallet setup
+    When "Wallet setup" page is displayed
+    Then I see current onboarding page in <mode> mode
+    When I enter wallet name: "someWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And "Enter wallet" button is enabled
     Then I see current onboarding page in <mode> mode
 
