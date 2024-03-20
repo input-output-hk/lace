@@ -2,12 +2,17 @@ import { styleVariants } from '@vanilla-extract/css';
 
 import { style, sx, vars } from '../../design-tokens';
 
+const radioItemOutlineWidth = 3;
+const radioItemOutlineOffset = 4;
+const radioGroupPadding = radioItemOutlineOffset + radioItemOutlineWidth;
+
 export const radioGroupRoot = style([
   sx({
     display: 'flex',
     flexDirection: 'column',
   }),
   {
+    padding: radioGroupPadding,
     fontFamily: vars.fontFamily.$nova,
     fontWeight: vars.fontWeights.$semibold,
     flexGrow: 1,
@@ -15,7 +20,7 @@ export const radioGroupRoot = style([
 ]);
 
 export const radioGroupItemWrapper = style({
-  minHeight: 42,
+  minHeight: 40,
 });
 
 export const radioGroupIndicatorWrapper = style([
@@ -68,13 +73,13 @@ export const radioGroupItem = styleVariants({
       minHeight: 24,
       display: 'flex',
       alignItems: 'center',
-      padding: '1px 2px',
       borderRadius: 1,
+      padding: '0 4px',
       selectors: {
         [`&:has(${radioGroupIndicatorWrapper}:focus-visible)`]: {
-          outlineOffset: '4px',
+          outlineOffset: radioItemOutlineOffset,
           outlineColor: vars.colors.$radiobutton_focus_color,
-          outlineWidth: 3,
+          outlineWidth: radioItemOutlineWidth,
           outlineStyle: 'solid',
         },
       },
