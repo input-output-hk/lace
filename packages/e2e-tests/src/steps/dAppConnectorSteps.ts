@@ -248,9 +248,11 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
     try {
       switch (runButton) {
         case 'Send ADA':
+          await TestDAppPage.sendAdaRunButton.waitForClickable();
           await TestDAppPage.sendAdaRunButton.click();
           break;
         case 'Send Token':
+          await TestDAppPage.sendTokenRunButton.waitForClickable();
           await TestDAppPage.sendTokenRunButton.click();
           break;
         default:
