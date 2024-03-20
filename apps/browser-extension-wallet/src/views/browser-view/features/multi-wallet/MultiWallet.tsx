@@ -21,13 +21,14 @@ import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
-import { NavigationButton, toast } from '@lace/common';
+import { NavigationButton, PostHogAction, toast } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { Providers } from './hardware-wallet/types';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useTranslation } from 'react-i18next';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const { newWallet } = walletRoutePaths;
 
@@ -39,7 +40,7 @@ interface ConfirmationDialog {
 
 export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
   const { t } = useTranslation();
-  const { connectHardwareWallet, createHardwareWallet } = useWalletManager();
+  const { connectHardwareWallet, createHardwareWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
@@ -56,6 +57,10 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
             name,
             accountIndex: account
           });
+          await analytics.sendEventToPostHog(PostHogAction.MultiWalletHWAdded, {
+            // eslint-disable-next-line camelcase
+            $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+          });
           await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
         } catch (error) {
           if (error instanceof WalletConflictError) {
@@ -66,7 +71,15 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
         }
       }
     }),
-    [connectHardwareWallet, createHardwareWallet, disconnectHardwareWallet$, shouldShowDialog$, t, analytics]
+    [
+      connectHardwareWallet,
+      createHardwareWallet,
+      disconnectHardwareWallet$,
+      shouldShowDialog$,
+      t,
+      analytics,
+      walletRepository
+    ]
   );
 
   useEffect(() => {
