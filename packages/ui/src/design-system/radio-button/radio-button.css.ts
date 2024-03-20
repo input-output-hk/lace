@@ -123,11 +123,11 @@ export const radioGroupIndicator = style([
 
 export const iconWrapper = style([
   sx({
-    marginLeft: '$18',
     width: '$40',
     height: '$40',
   }),
   {
+    marginLeft: 52,
     flexGrow: 1,
   },
 ]);
