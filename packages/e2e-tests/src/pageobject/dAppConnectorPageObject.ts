@@ -132,6 +132,7 @@ class DAppConnectorPageObject {
           await this.closeDappConnectorWindowHandle();
         }
         await TestDAppPage.refreshButton.click();
+        await browser.pause(1000);
         // await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
       }
     }
