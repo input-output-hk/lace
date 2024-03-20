@@ -70,6 +70,7 @@ export const WalletSetupWizard = ({
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
+  const [isBackFromPasswordStep, setIsBackFromPasswordStep] = useState(false);
   const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -162,7 +163,6 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
         void analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
@@ -243,6 +243,7 @@ export const WalletSetupWizard = ({
         onReset={(resetStage) => {
           setResetMnemonicStage(resetStage);
           resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : onCancel();
+          resetStage === 'input' && setIsBackFromPasswordStep(false);
         }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
@@ -268,6 +269,7 @@ export const WalletSetupWizard = ({
         onPasteFromClipboard={() =>
           sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
         }
+        isBackFromNextStep={isBackFromPasswordStep}
       />
     );
   };
@@ -284,7 +286,10 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupNamePasswordStepRevamp
-          onBack={moveBack}
+          onBack={() => {
+            setIsBackFromPasswordStep(true);
+            moveBack();
+          }}
           onNext={handleSubmit}
           initialWalletName={walletName}
           translations={walletSetupNamePasswordStepTranslations}

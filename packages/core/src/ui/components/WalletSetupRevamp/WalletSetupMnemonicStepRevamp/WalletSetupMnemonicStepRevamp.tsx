@@ -6,7 +6,7 @@ import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import styles from '../../WalletSetup/WalletSetupOption.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { hasEmptyString } from '@ui/components/WalletSetup/WalletSetupMnemonicVerificationStep';
+import { hasEmptyString } from './WalletSetupMnemonicVerificationStepRevamp';
 import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
@@ -19,7 +19,7 @@ export interface WalletSetupMnemonicStepProps {
   onReset: (mnemonicStage?: MnemonicStage) => void;
   onNext: () => void;
   onStepNext?: (currentStage: MnemonicStage) => void;
-  mnemonicWordsInStep?: number;
+  isBackFromNextStep?: boolean;
   translations: TranslationsFor<
     | 'writePassphraseTitle'
     | 'enterPassphraseDescription'
@@ -48,7 +48,8 @@ export const WalletSetupMnemonicStepRevamp = ({
   renderVideoPopupContent,
   onWatchVideoClick,
   onCopyToClipboard,
-  onPasteFromClipboard
+  onPasteFromClipboard,
+  isBackFromNextStep = false
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
   const initialMnemonicWordsConfirm = useMemo(() => mnemonic.map(() => ''), [mnemonic]);
   const [mnemonicStage, setMnemonicStage] = useState<MnemonicStage>('writedown');
@@ -57,9 +58,9 @@ export const WalletSetupMnemonicStepRevamp = ({
 
   // reset the state on mnemonic change
   useEffect(() => {
-    setMnemonicStage('writedown');
-    setMnemonicWordsConfirm(initialMnemonicWordsConfirm);
-  }, [initialMnemonicWordsConfirm, mnemonic]);
+    setMnemonicStage(isBackFromNextStep ? 'input' : 'writedown');
+    setMnemonicWordsConfirm(isBackFromNextStep ? mnemonic : initialMnemonicWordsConfirm);
+  }, [initialMnemonicWordsConfirm, isBackFromNextStep, mnemonic]);
 
   const pasteRecoveryPhrase = async (offset = 0) => {
     const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
