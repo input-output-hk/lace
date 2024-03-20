@@ -156,7 +156,7 @@ export const iconButton = style([
         backgroundColor: vars.colors.$radiobutton_icon_hover_color,
       },
       ['&:not(:disabled):active']: {
-        border: `2px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+        border: `2px solid ${vars.colors.$radiobutton_icon_active_border_color}`,
         backgroundColor: vars.colors.$radiobutton_icon_active,
       },
     },

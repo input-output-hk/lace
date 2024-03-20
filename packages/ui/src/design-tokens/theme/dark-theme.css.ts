@@ -361,7 +361,7 @@ const colors: Colors = {
   $radiobutton_icon_active_border_color: darkColorScheme.$primary_light_black,
   $radiobutton_icon_text_color: darkColorScheme.$primary_white,
   $radiobutton_icon_disabled_border_color: darkColorScheme.$primary_mid_grey,
-  $radiobutton_icon_hover_color: darkColorScheme.$primary_mid_grey,
+  $radiobutton_icon_hover_color: darkColorScheme.$primary_dark_grey,
   $radiobutton_icon_hover_border_color: darkColorScheme.$primary_mid_grey,
 
   $select_border: darkColorScheme.$primary_grey,
