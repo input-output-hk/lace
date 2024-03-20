@@ -121,10 +121,12 @@ class DAppConnectorPageObject {
     mode: 'Always' | 'Only once'
   ) {
     let retries = 3;
+    let isAuthorized = false;
     while (retries) {
       try {
         await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
         retries = 0;
+        isAuthorized = true;
       } catch (error) {
         retries--;
         Logger.log(`Failed to authorize Dapp. Retries left ${retries}. Error:\n${error}`);
@@ -135,6 +137,8 @@ class DAppConnectorPageObject {
         await browser.pause(1000);
         // await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
       }
+
+      if (!isAuthorized) await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
     }
   }
 }
