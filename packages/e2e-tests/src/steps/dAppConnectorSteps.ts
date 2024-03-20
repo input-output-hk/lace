@@ -248,11 +248,9 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
     try {
       switch (runButton) {
         case 'Send ADA':
-          await TestDAppPage.sendAdaRunButton.scrollIntoView();
           await TestDAppPage.sendAdaRunButton.click();
           break;
         case 'Send Token':
-          await TestDAppPage.sendTokenRunButton.scrollIntoView();
           await TestDAppPage.sendTokenRunButton.click();
           break;
         default:
@@ -266,6 +264,7 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
       break;
     } catch {
       Logger.log('Failed to open modal. Retry will be executed');
+      await browser.refresh();
       retries--;
     }
   }
