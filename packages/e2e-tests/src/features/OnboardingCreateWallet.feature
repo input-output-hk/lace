@@ -59,8 +59,6 @@ Feature: Onboarding - Create wallet
   @LW-3013
   Scenario: Create Wallet - Mnemonic writedown page - appears correctly after wallet setup page
     Given I click "Create" button on wallet setup page
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
     And "Next" button is enabled during onboarding process
 
@@ -204,6 +202,8 @@ Feature: Onboarding - Create wallet
   Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I click "Next" button during wallet setup
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu
@@ -214,6 +214,8 @@ Feature: Onboarding - Create wallet
     And I reject analytics banner on "Get started" page
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I click "Next" button during wallet setup
+    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
     And I see LW homepage
     And I open settings from header menu

@@ -38,6 +38,7 @@ class OnboardingRevampPageObject {
       if (fillValues) await this.enterMnemonicWords();
     } else if (fillValues) await this.enterMnemonicWords(mnemonicWords);
   }
+
   async goToWalletSetupPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
