@@ -7,14 +7,21 @@ import styles from '../DropdownMenuOverlay.module.scss';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
+import { PostHogAction } from '@lace/common';
 
-export const AddNewWalletLink = ({ isPopup }: { isPopup: boolean }): React.ReactElement => {
+interface Props {
+  isPopup?: boolean;
+  sendAnalyticsEvent?: (event: PostHogAction) => void;
+}
+
+export const AddNewWalletLink = ({ isPopup, sendAnalyticsEvent }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { setBackgroundPage } = useBackgroundPage();
 
   const openNewWallet = () => {
+    sendAnalyticsEvent(PostHogAction.UserWalletProfileAddNewWalletClick);
     if (isPopup) {
       backgroundServices.handleOpenBrowser({ section: BrowserViewSections.NEW_WALLET });
     } else {

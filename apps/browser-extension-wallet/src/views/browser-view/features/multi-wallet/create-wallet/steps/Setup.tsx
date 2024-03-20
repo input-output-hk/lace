@@ -4,10 +4,13 @@ import React from 'react';
 import { useHistory } from 'react-router';
 import { useCreateWallet } from '../context';
 import { useTranslation } from 'react-i18next';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 export const Setup = (): JSX.Element => {
   const history = useHistory();
   const { setName, setPassword, onChange, data } = useCreateWallet();
+  const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
   const translations = {
@@ -34,6 +37,7 @@ export const Setup = (): JSX.Element => {
       onChange={onChange}
       onBack={() => history.push(walletRoutePaths.newWallet.root)}
       onNext={({ password, walletName }) => {
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateWalletNamePasswordNextClick);
         setName(walletName);
         setPassword(password);
         history.push(walletRoutePaths.newWallet.create.keepSecure);
