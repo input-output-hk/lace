@@ -113,7 +113,7 @@ export const DappAddressSections = ({
           {[...groupedFromAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address}>
-                <Text className={styles.addressInfo} data-testId="dapp-transaction-from-address-title">
+                <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-title">
                   {t('package.core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.addressInfo} data-testid="dapp-transaction-from-address-address">

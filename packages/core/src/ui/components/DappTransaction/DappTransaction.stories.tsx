@@ -17,20 +17,50 @@ type Story = StoryObj<typeof DappTransaction>;
 
 const data: ComponentProps<typeof DappTransaction> = {
   dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
+    name: 'Mint'
   },
-  transaction: {
-    fee: '0.17',
-    outputs: [
-      {
-        coins: '1',
-        recipient:
-          'addr_test1qrl0s3nqfljv8dfckn7c4wkzu5rl6wn4hakkddcz2mczt3szlqss933x0aag07qcgspcaglmay6ufl4y4lalmlpe02mqhl0fx2'
+  coinSymbol: 'tAda',
+  fiatCurrencyCode: 'usd',
+  fromAddress: new Map(),
+  toAddress: new Map(),
+  txInspectionDetails: {
+    assets: new Map(),
+    // eslint-disable-next-line no-magic-numbers
+    coins: 1_171_000 as unknown as bigint,
+    // eslint-disable-next-line no-magic-numbers
+    collateral: 150_000 as unknown as bigint,
+    // eslint-disable-next-line no-magic-numbers
+    deposit: 1_000_000 as unknown as bigint,
+    // eslint-disable-next-line no-magic-numbers
+    fee: 170_000 as unknown as bigint,
+    // eslint-disable-next-line no-magic-numbers
+    returnedDeposit: 90_000 as unknown as bigint,
+
+    unresolved: {
+      inputs: [
+        {
+          index: 0,
+          txId: Wallet.Cardano.TransactionId('bb217abaca60fc0ca68c1555eca6a96d2478547818ae76ce6836133f3cc546e0')
+        }
+      ],
+      value: {
+        assets: new Map([
+          [
+            Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
+            // eslint-disable-next-line no-magic-numbers
+            4 as unknown as bigint
+          ],
+          [
+            Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
+            // eslint-disable-next-line no-magic-numbers
+            7 as unknown as bigint
+          ]
+        ]),
+
+        // eslint-disable-next-line no-magic-numbers
+        coins: 11_171_000 as unknown as bigint
       }
-    ],
-    type: Wallet.Cip30TxType.Mint
+    }
   }
 };
 
