@@ -3,7 +3,7 @@ import React from 'react';
 import * as RadixUIAvatar from '@radix-ui/react-avatar';
 import classNames from 'classnames';
 
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './user-profile.css';
 

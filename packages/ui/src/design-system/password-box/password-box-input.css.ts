@@ -67,7 +67,6 @@ export const disabledLabel = style({
 export const errorMessage = style({
   position: 'absolute', // required to not change the overall height of the password box (causing jumping)
   bottom: '-20px', // not sure how to use negative values of spacing vars
-  color: vars.colors.$input_error_message_color,
   marginLeft: vars.spacing.$20,
   fontWeight: vars.fontWeights.$semibold,
 });

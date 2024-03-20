@@ -15,11 +15,3 @@ export const image = sx({
     smallScreen: '$24',
   },
 });
-
-export const name = sx({
-  color: '$flow_card_label_primary_color',
-});
-
-export const description = sx({
-  color: '$flow_card_label_secondary_color',
-});

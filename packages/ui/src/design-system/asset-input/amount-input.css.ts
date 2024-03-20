@@ -1,5 +1,5 @@
 import { style, vars } from '../../design-tokens';
-import { bold } from '../typography/typography.css';
+import { bold } from '../text/text.css';
 
 const inputTypography = style({
   fontFamily: vars.fontFamily.$nova,
@@ -33,7 +33,7 @@ export const amountInput = style([
     appearance: 'none',
     outline: 'none',
     minWidth: vars.spacing.$40,
-    color: vars.colors.$bundle_input_primary_label_color,
+    color: vars.colors.$text_primary,
     '::placeholder': {
       color: vars.colors.$bundle_input_secondary_label_color,
     },

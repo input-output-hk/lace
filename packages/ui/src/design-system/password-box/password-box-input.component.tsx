@@ -4,7 +4,7 @@ import * as Form from '@radix-ui/react-form';
 import cn from 'classnames';
 
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { PasswordInputButton } from './password-box-button.component';
 import * as cx from './password-box-input.css';
@@ -80,9 +80,9 @@ export const PasswordInput = ({
         </Flex>
       </Form.Field>
       {errorMessage && (
-        <Typography.Label className={cx.errorMessage}>
+        <Text.Label color="error" className={cx.errorMessage}>
           {errorMessage}
-        </Typography.Label>
+        </Text.Label>
       )}
     </div>
   );

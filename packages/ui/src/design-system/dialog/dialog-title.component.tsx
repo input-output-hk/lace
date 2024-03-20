@@ -3,7 +3,7 @@ import React from 'react';
 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './dialog-title.css';
 
@@ -16,7 +16,9 @@ export const Title = ({
 }: Readonly<DialogTitleProps>): JSX.Element => (
   <AlertDialog.Title asChild>
     {typeof children === 'string' ? (
-      <Text.SubHeading className={cx.dialogTitle}>{children}</Text.SubHeading>
+      <Text.SubHeading weight="$bold" className={cx.dialogTitle}>
+        {children}
+      </Text.SubHeading>
     ) : (
       children
     )}

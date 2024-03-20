@@ -6,7 +6,7 @@ import * as Select from '@radix-ui/react-select';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './auto-suggest-box-suggestion.css';
 

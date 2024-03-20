@@ -1,9 +1,5 @@
 import { style, sx } from '../../design-tokens';
 
-export const label = sx({
-  color: '$tooltip_label_color',
-});
-
 export const tooltipContent = style([
   sx({
     background: '$tooltip_container_bgColor',

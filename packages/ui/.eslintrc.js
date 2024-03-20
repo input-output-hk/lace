@@ -125,6 +125,7 @@ module.exports = {
         allowMappedTypes: 'in-unions-and-intersections',
       },
     ],
+    '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/prefer-enum-initializers': 'error',
     '@typescript-eslint/prefer-readonly': 'error',
     '@typescript-eslint/promise-function-async': 'error',

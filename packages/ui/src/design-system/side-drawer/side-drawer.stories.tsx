@@ -16,8 +16,8 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import * as ProfilePicutre from '../profile-picture';
+import { Text } from '../text';
 import { ToggleSwitch } from '../toggle-switch';
-import * as Typography from '../typography';
 
 import { Close } from './side-drawer-close.component';
 import { Body } from './side-drawer-content-body.component';
@@ -180,9 +180,7 @@ const CTAButtonAndSelection = ({
                     })}
                     style={{ background: 'white' }}
                   >
-                    <Typography.Body.Normal weight="$bold">
-                      3
-                    </Typography.Body.Normal>
+                    <Text.Body.Normal weight="$bold">3</Text.Body.Normal>
                   </div>
                 </div>
                 <Box ml="$8">
@@ -220,9 +218,9 @@ const TwoCTAButtonAndToggleSwitch = ({
               <Flex alignItems="center">
                 <ProfilePicutre.Image imageSrc={cardanoImage} />
                 <Box ml="$12">
-                  <Typography.SubHeading weight="$bold">
+                  <Text.SubHeading weight="$bold">
                     Section title
-                  </Typography.SubHeading>
+                  </Text.SubHeading>
                 </Box>
               </Flex>
             </Cell>
@@ -248,11 +246,11 @@ export const Overview = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
     <Grid columns="$1">
       <Cell>
         <Section title="Break me if needed">
-          <Typography.Body.Large>
+          <Text.Body.Large>
             When using this component you can break the instance, then edit the
             content to suit your needs. The below examples are not comprehensive
             but illustrative.
-          </Typography.Body.Large>
+          </Text.Body.Large>
         </Section>
 
         <Divider my="$64" />

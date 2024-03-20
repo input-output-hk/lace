@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './profile-dropdown-wallet-status.css';
 
@@ -32,7 +32,7 @@ export const WalletStatus = ({
         justifyContent="center"
         mr="$8"
       />
-      <Text.Label weight="$medium" className={cx.label}>
+      <Text.Label color="secondary" weight="$medium">
         {label}
       </Text.Label>
     </Flex>

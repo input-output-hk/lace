@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './educational-card-item.css';
 
@@ -32,7 +32,7 @@ export const Item = ({
     </Flex>
     <Box>
       <Box mb="$8">
-        <Text.Body.Normal weight="$medium" className={cx.label}>
+        <Text.Body.Normal weight="$medium" color="secondary">
           {label}
         </Text.Body.Normal>
       </Box>

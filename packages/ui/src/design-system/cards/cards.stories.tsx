@@ -6,7 +6,7 @@ import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { Scheme } from './types';
 
@@ -57,7 +57,7 @@ export const Overview = (): JSX.Element => {
                 alignItems={'center'}
                 justifyContent={'center'}
               >
-                <Typography.Body.Large>{variant}</Typography.Body.Large>
+                <Text.Body.Large>{variant}</Text.Body.Large>
               </Flex>
             </Component>
           </Variants.Cell>

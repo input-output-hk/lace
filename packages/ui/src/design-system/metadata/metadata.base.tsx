@@ -1,11 +1,9 @@
 import React from 'react';
 
 import { Flex } from '../flex';
-import { Grid, Cell } from '../grid';
+import { Cell, Grid } from '../grid';
+import { Text } from '../text';
 import { Tooltip } from '../tooltip';
-import * as Typography from '../typography';
-
-import * as cx from './metadata.css';
 
 import type { OmitClassName } from '../../types';
 
@@ -24,15 +22,11 @@ export const MetadataBase = ({
     <Grid {...props} columns="$6">
       <Cell colStart="$1" colEnd="$3">
         {tooltip == undefined ? (
-          <Typography.Body.Normal className={cx.label}>
-            {label}
-          </Typography.Body.Normal>
+          <Text.Body.Normal weight="$semibold">{label}</Text.Body.Normal>
         ) : (
           <Tooltip label={tooltip}>
             <div>
-              <Typography.Body.Normal className={cx.label}>
-                {label}
-              </Typography.Body.Normal>
+              <Text.Body.Normal weight="$semibold">{label}</Text.Body.Normal>
             </div>
           </Tooltip>
         )}

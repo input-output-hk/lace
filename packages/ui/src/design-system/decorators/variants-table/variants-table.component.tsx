@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
-import * as Text from '../../typography';
+import { Text } from '../../text';
 
 import * as cx from './variants-table.css';
 

@@ -7,7 +7,7 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './checkbox.stories.css';
 

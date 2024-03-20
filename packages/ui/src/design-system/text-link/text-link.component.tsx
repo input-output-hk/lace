@@ -3,7 +3,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './text-link.css';
 
@@ -29,7 +29,8 @@ export const TextLink = ({
     >
       <Flex alignItems="center" justifyContent="center">
         <Text.Button
-          className={classNames(cx.labelSelector, cx.label)}
+          color="highlight"
+          className={classNames(cx.label)}
           weight="$semibold"
         >
           {label}

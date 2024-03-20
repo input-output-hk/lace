@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import * as IconButton from '../icon-buttons';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { Progress } from './toast-bar-progress.component';
 import * as cx from './toast-bar-root.css';
@@ -42,9 +42,7 @@ export const Root = ({
         <Flex className={classNames(cx.icon, cx.box)}>{icon}</Flex>
         <Flex className={cx.box}>
           <Toast.Title className="ToastTitle">
-            <Typography.Body.Small weight="$semibold" className={cx.title}>
-              {title}
-            </Typography.Body.Small>
+            <Text.Body.Small weight="$semibold">{title}</Text.Body.Small>
           </Toast.Title>
         </Flex>
         <Toast.Action className="ToastAction" asChild altText={closeAltText}>

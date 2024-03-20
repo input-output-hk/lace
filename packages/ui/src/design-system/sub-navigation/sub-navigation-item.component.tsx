@@ -4,7 +4,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import classNames from 'classnames';
 
 import { Box } from '../box';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './sub-navigation-item.css';
 
