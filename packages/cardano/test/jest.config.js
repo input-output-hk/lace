@@ -29,10 +29,13 @@ module.exports = createJestConfig({
     '!src/wallet/**/mock.ts'
   ],
   setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
-  globals: {
-    'ts-jest': {
-      tsconfig: './src/tsconfig.json'
-    }
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: './src/tsconfig.json'
+      }
+    ]
   },
   workerThreads: true
 });

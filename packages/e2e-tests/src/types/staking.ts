@@ -6,4 +6,4 @@ export type StakePoolListColumnType =
   | 'Margin'
   | 'Blocks'
   | 'Pledge'
-  | 'Live stake';
+  | 'Live Stake';

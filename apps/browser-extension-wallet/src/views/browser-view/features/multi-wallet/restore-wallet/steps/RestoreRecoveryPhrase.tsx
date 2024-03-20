@@ -6,22 +6,27 @@ import { Wallet } from '@lace/cardano';
 import { useHistory } from 'react-router-dom';
 import { useRestoreWallet } from '../context';
 import { walletRoutePaths } from '@routes';
-import noop from 'lodash/noop';
 import { useWalletManager } from '@hooks';
-import { toast } from '@lace/common';
+import { PostHogAction, toast } from '@lace/common';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
+import { filter, firstValueFrom } from 'rxjs';
+import { isScriptAddress } from '@cardano-sdk/wallet';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const wordList = wordlists.english;
+
+const PASSPHRASE_STEP_1 = 0;
+const PASSPHRASE_STEP_2 = 1;
+const PASSPHRASE_STEP_3 = 2;
 
 export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
   const history = useHistory();
   const { data, setMnemonic } = useRestoreWallet();
-  const { createWallet } = useWalletManager();
+  const { createWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
-
   const isValidMnemonic = useMemo(
     () => Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(data.mnemonic)),
     [data.mnemonic]
@@ -49,8 +54,17 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     async (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
       event.preventDefault();
       try {
-        const { source } = await createWallet(data);
+        const { source, wallet } = await createWallet(data);
+        await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
+          // eslint-disable-next-line camelcase
+          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+        });
         await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+        const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
+        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+        if (hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreHdWallet);
+        }
       } catch (error) {
         if (error instanceof WalletConflictError) {
           toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
@@ -61,7 +75,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       clearSecrets();
       history.push(walletRoutePaths.assets);
     },
-    [data, clearSecrets, createWallet, history, t, analytics]
+    [data, clearSecrets, createWallet, history, t, analytics, walletRepository]
   );
 
   return (
@@ -73,7 +87,18 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
         history.goBack();
       }}
       onSubmit={onSubmitForm}
-      onStepNext={noop}
+      onStepNext={(currentStep) => {
+        switch (currentStep) {
+          case PASSPHRASE_STEP_1:
+            analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreEnterPassphrase01NextClick);
+            break;
+          case PASSPHRASE_STEP_2:
+            analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreEnterPassphrase09NextClick);
+            break;
+          case PASSPHRASE_STEP_3:
+            analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreEnterPassphrase17NextClick);
+        }
+      }}
       isSubmitEnabled={isValidMnemonic}
       translations={walletSetupMnemonicStepTranslations}
       suggestionList={wordList}

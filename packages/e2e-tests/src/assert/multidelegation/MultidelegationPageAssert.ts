@@ -213,7 +213,7 @@ class MultidelegationPageAssert {
       case 'Pledge':
         expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.pledge.tooltip', 'staking');
         break;
-      case 'Live stake':
+      case 'Live Stake':
         expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.tooltip', 'staking');
         break;
       default:

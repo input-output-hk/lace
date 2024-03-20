@@ -8,6 +8,13 @@ import { walletRoutePaths } from '@routes';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { createAssetsRoute, getNextButton } from '../tests/utils';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
+
+jest.mock('@providers/AnalyticsProvider', () => ({
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendEventToPostHog'>, []>().mockReturnValue({
+    sendEventToPostHog: jest.fn().mockReturnValue('')
+  })
+}));
 
 const connectHardwareWalletStep = async () => {
   const nextButton = getNextButton();
