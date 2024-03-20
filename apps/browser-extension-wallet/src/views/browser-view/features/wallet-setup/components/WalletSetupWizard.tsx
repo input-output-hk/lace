@@ -535,7 +535,10 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Finish && (
         <WalletSetupFinalStep
           onFinish={() => {
-            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
+            sendAnalytics(postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET, {
+              // eslint-disable-next-line camelcase
+              $set: { wallet_accounts_quantity: '1' }
+            });
             goToMyWallet();
           }}
           translations={walletSetupFinalStepTranslations}

@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useHardwareWallet } from '../context';
 import { ErrorHandling } from './ErrorHandling';
 import { walletRoutePaths } from '@routes';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 interface State {
   error?: 'common';
@@ -17,6 +19,7 @@ export const NameWallet = (): JSX.Element => {
   const { createWallet, setName, data, resetConnection } = useHardwareWallet();
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
   const [state, setState] = useState<State>({});
+  const analytics = useAnalyticsContext();
 
   const walletSetupWalletNameStepTranslations = {
     maxCharacters: t('core.walletSetupWalletNameStep.maxCharacters'),
@@ -44,9 +47,10 @@ export const NameWallet = (): JSX.Element => {
 
   const handleOnNext = useCallback(
     async (name: string) => {
+      analytics.sendEventToPostHog(PostHogAction.MultiWalletHWNameNextClick);
       setName(name);
     },
-    [setName]
+    [setName, analytics]
   );
 
   const onRetry = useCallback(() => {
