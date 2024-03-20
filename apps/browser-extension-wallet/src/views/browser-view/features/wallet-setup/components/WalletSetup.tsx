@@ -55,7 +55,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Mnemonic }: WalletS
   }, []);
   // reset values in user ID service if the background storage and local storage are manually removed
   useEffect(() => {
-    clearUserIdService();
+    void clearUserIdService();
   }, [clearUserIdService]);
 
   const clearWallet = useCallback(() => {

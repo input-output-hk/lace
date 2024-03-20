@@ -17,11 +17,11 @@ const MNEMONIC_LENGTHS = [12, 15, 24];
 export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
   onChange: (words: string[]) => void;
-  onCancel: () => void;
   onSubmit: () => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
   translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard'>;
+  onCancel?: () => void;
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
   onSetMnemonicLength?: (length: number) => void;

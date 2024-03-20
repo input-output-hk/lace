@@ -48,6 +48,7 @@ export const WalletSetupNamePasswordStep = ({
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
+
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
 
