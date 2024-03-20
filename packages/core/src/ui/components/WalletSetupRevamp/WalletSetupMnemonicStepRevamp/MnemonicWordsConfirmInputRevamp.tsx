@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './MnemonicWordsConfirmInputRevamp.module.scss';
-import { MnemonicWordsAutoComplete } from '../../MnemonicWordsAutoComplete';
+import { MnemonicWordsAutoCompleteRevamp } from './MnemonicWordsAutoCompleteRevamp';
 
 export interface MnemonicWordsConfirmInputProps {
   words: string[];
@@ -22,7 +22,7 @@ export const MnemonicWordsConfirmInputRevamp = ({
 }: MnemonicWordsConfirmInputProps): React.ReactElement => (
   <div className={styles.container}>
     {words.map((word, index) => (
-      <MnemonicWordsAutoComplete
+      <MnemonicWordsAutoCompleteRevamp
         handlePaste={() => handlePaste(index)}
         value={word}
         onChange={(value) => {

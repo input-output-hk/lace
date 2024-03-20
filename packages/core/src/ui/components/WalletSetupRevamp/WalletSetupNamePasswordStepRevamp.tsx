@@ -1,20 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLayout';
 import { PasswordVerification } from '@lace/common';
-import { passwordComplexity } from '@src/ui/utils/password-complexity';
-import { useTranslate } from '@src/ui/hooks';
-import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
-import styles from './styles.module.scss';
+import { WalletTimelineSteps } from '../WalletSetup/WalletSetupStepLayout';
+import { BarStates, WalletSetupNamePasswordSubmitParams } from '../WalletSetup/WalletSetupNamePasswordStep/types';
 import {
   getComplexityBarStateList,
   MINIMUM_PASSWORD_LEVEL_REQUIRED,
   passwordStrengthFeedbackMap,
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
-} from './utils';
-import { WalletNameInput } from './WalletNameInput';
-import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
+} from '../WalletSetup/WalletSetupNamePasswordStep/utils';
+import { WalletNameInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
+import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
+import { WalletSetupStepLayoutRevamp } from '../WalletSetupRevamp';
 import { TranslationsFor } from '@ui/utils/types';
+import { useTranslate } from '@ui/hooks';
+import { passwordComplexity } from '@ui/utils/password-complexity';
+import styles from '../WalletSetup/WalletSetupNamePasswordStep/styles.module.scss';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
@@ -36,7 +37,7 @@ export interface WalletSetupNamePasswordStepProps {
 
 const INITIAL_WALLET_NAME = 'Wallet 1';
 
-export const WalletSetupNamePasswordStep = ({
+export const WalletSetupNamePasswordStepRevamp = ({
   onBack,
   onNext,
   initialWalletName = INITIAL_WALLET_NAME,
@@ -47,7 +48,6 @@ export const WalletSetupNamePasswordStep = ({
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
-
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
 
@@ -95,7 +95,7 @@ export const WalletSetupNamePasswordStep = ({
   };
 
   return (
-    <WalletSetupStepLayout
+    <WalletSetupStepLayoutRevamp
       title={translations.title}
       description={translations.description}
       onBack={onBack}
@@ -132,6 +132,6 @@ export const WalletSetupNamePasswordStep = ({
           shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
         />
       </div>
-    </WalletSetupStepLayout>
+    </WalletSetupStepLayoutRevamp>
   );
 };

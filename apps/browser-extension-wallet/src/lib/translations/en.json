@@ -1612,7 +1612,7 @@
       "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
     },
     "walletSetupMnemonicStepRevamp": {
-      "writePassphraseTitle": "Save your recovery phrase",
+      "writePassphraseTitle": "Start by saving your recovery phrase",
       "enterPassphrase": "Enter your recovery passphrase",
       "enterPassphraseLength": "Choose recovery phrase length",
       "enterPassphraseDescription": "Let's check you've got the correct recovery phrase. Type each word in the right order or paste from clipboard to verify it.",
