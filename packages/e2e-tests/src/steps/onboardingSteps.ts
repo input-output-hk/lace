@@ -421,19 +421,22 @@ When(/^I restore previously changed mnemonic word$/, async () => {
 });
 
 Given(
-  /^I go to "(Mnemonic verification|Wallet setup)" page from "(Create|Restore)" wallet flow(?: and "(fill|not fill)" values)?$/,
+  /^I go to "(Mnemonic verification|Wallet setup)" page(?: with wallet ([^"]*))? from "(Create|Restore)" wallet flow(?: and "(fill|not fill)" values)?$/,
   async (
     endPage: 'Mnemonic verification' | 'Wallet setup',
+    walletName: string,
     flowType: 'Create' | 'Restore',
     fillValues: 'fill' | 'not fill'
   ) => {
     if (!fillValues) fillValues = 'fill';
+    let mnemonicsToUse = mnemonicWords;
+    if (walletName) mnemonicsToUse = getTestWallet(walletName).mnemonic ?? [];
     switch (endPage) {
       case 'Mnemonic verification':
-        await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords, fillValues === 'fill');
+        await OnboardingRevampPageObject.goToMnemonicVerificationPage(flowType, mnemonicsToUse, fillValues === 'fill');
         break;
       case 'Wallet setup':
-        await OnboardingRevampPageObject.goToWalletSetupPage(flowType, mnemonicWords, fillValues === 'fill');
+        await OnboardingRevampPageObject.goToWalletSetupPage(flowType, mnemonicsToUse, fillValues === 'fill');
         break;
     }
   }

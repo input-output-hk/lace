@@ -27,7 +27,7 @@ class OnboardingRevampPageObject {
     }
   }
 
-  async goToMenmonicVerificationPage(
+  async goToMnemonicVerificationPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
     fillValues = true
@@ -43,7 +43,7 @@ class OnboardingRevampPageObject {
     mnemonicWords: string[] = [],
     fillValues = true
   ): Promise<void> {
-    await this.goToMenmonicVerificationPage(flowType, mnemonicWords);
+    await this.goToMnemonicVerificationPage(flowType, mnemonicWords);
     await RecoveryPhrasePage.nextButton.click();
     if (fillValues) {
       await WalletSetupPage.setWalletNameInput('TestAutomationWallet');
