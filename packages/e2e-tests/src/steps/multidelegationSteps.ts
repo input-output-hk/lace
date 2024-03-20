@@ -232,14 +232,14 @@ Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, 
 });
 
 When(
-  /^I hover over "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live stake)" column name in stake pool list$/,
+  /^I hover over "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column name in stake pool list$/,
   async (columnName: StakePoolListColumnType) => {
     await MultidelegationPage.hoverOverColumnWithName(columnName);
   }
 );
 
 Then(
-  /^tooltip for "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live stake)" column is displayed$/,
+  /^tooltip for "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column is displayed$/,
   async (columnName: StakePoolListColumnType) => {
     await MultidelegationPageAssert.assertSeeTooltipForColumn(columnName);
   }
@@ -491,3 +491,10 @@ Then(/^previously selected pools are still selected in (grid|list) view$/, async
 Then(/^I see (\d+) stake pool cards in a row$/, async (cardsCount: number) => {
   await MultidelegationPageAssert.assertsSeeCardsInARow(Number(cardsCount));
 });
+
+When(
+  /^I click on stake pools table "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column header$/,
+  async (headerName: StakePoolListColumnType) => {
+    await MultidelegationPage.clickOnColumnWithName(headerName);
+  }
+);

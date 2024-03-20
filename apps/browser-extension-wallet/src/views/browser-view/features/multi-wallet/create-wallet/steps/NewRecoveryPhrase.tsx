@@ -8,10 +8,14 @@ import { useCreateWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks/useWalletManager';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-
-const noop = (): void => void 0;
+import { PostHogAction } from '@lace/common';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const wordList = wordlists.english;
+
+const PASSPHRASE_STEP_1 = 0;
+const PASSPHRASE_STEP_2 = 1;
+const PASSPHRASE_STEP_3 = 2;
 
 interface State {
   isResetMnemonicModalOpen: boolean;
@@ -22,7 +26,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
   const history = useHistory();
   const { t } = useTranslation();
   const { generatedMnemonic, data } = useCreateWallet();
-  const { createWallet } = useWalletManager();
+  const { createWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
   const [state, setState] = useState<State>(() => ({
     isResetMnemonicModalOpen: false,
@@ -49,10 +53,14 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   const saveWallet = useCallback(async () => {
     const { source } = await createWallet(data);
+    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+    });
     await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
     clearSecrets();
     history.push(walletRoutePaths.assets);
-  }, [data, createWallet, history, clearSecrets, analytics]);
+  }, [data, createWallet, history, clearSecrets, analytics, walletRepository]);
 
   return (
     <>
@@ -62,7 +70,24 @@ export const NewRecoveryPhrase = (): JSX.Element => {
           setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }))
         }
         onNext={saveWallet}
-        onStepNext={noop}
+        onStepNext={(stage: MnemonicStage, step: number) => {
+          switch (step) {
+            case PASSPHRASE_STEP_1:
+              stage === 'input'
+                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase01NextClick)
+                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase01NextClick);
+              break;
+            case PASSPHRASE_STEP_2:
+              stage === 'input'
+                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase09NextClick)
+                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase09NextClick);
+              break;
+            case PASSPHRASE_STEP_3:
+              stage === 'input'
+                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase17NextClick)
+                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase17NextClick);
+          }
+        }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
