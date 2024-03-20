@@ -70,7 +70,7 @@ export const WalletSetupWizard = ({
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const [isBackFromPasswordStep, setIsBackFromPasswordStep] = useState(false);
+  const [isBackFromNextStep, setIsBackFromNextStep] = useState(false);
   const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -243,7 +243,7 @@ export const WalletSetupWizard = ({
         onReset={(resetStage) => {
           setResetMnemonicStage(resetStage);
           resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : onCancel();
-          resetStage === 'input' && setIsBackFromPasswordStep(false);
+          resetStage === 'input' && setIsBackFromNextStep(false);
         }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
@@ -269,7 +269,7 @@ export const WalletSetupWizard = ({
         onPasteFromClipboard={() =>
           sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
         }
-        isBackFromNextStep={isBackFromPasswordStep}
+        isBackFromNextStep={isBackFromNextStep}
       />
     );
   };
@@ -287,7 +287,7 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupNamePasswordStepRevamp
           onBack={() => {
-            setIsBackFromPasswordStep(true);
+            setIsBackFromNextStep(true);
             moveBack();
           }}
           onNext={handleSubmit}
