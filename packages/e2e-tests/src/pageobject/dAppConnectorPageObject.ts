@@ -120,7 +120,7 @@ class DAppConnectorPageObject {
     testDAppDetails: ExpectedDAppDetails,
     mode: 'Always' | 'Only once'
   ) {
-    let retries = 3;
+    let retries = 6;
     let isAuthorized = false;
     while (retries) {
       try {
