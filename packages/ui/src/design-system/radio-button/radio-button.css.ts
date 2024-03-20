@@ -182,7 +182,7 @@ export const root = style([
 export const label = sx({
   fontSize: '$18',
   fontWeight: '$medium',
-  lineHeight: '$16',
+  lineHeight: '$24',
   paddingLeft: '$16',
   display: 'flex',
 });
