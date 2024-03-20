@@ -14,6 +14,7 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import { TooltipContent } from '../tooltip';
 import * as Text from '../typography';
 
 import * as styles from './radio-button.stories.css';
@@ -201,6 +202,47 @@ export const Overview = (): JSX.Element => {
               onValueChange={(): undefined => undefined}
             />
           </Flex>
+
+          <Divider my="$64" />
+
+          <Grid columns="$2">
+            <Cell>
+              <Variants.Table headers={['Light with Tooltip']}>
+                <Flex
+                  my={'$32'}
+                  flexDirection={'column'}
+                  gap="$0"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <TooltipContent label="Tooltip sample" />
+                  <RadioButtonGroup
+                    options={getOptions(1, 'Label')}
+                    onValueChange={(): undefined => undefined}
+                  />
+                </Flex>
+              </Variants.Table>
+            </Cell>
+            <Cell>
+              <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+                <Variants.Table headers={['Dark with Tooltip']}>
+                  <Flex
+                    my={'$32'}
+                    flexDirection={'column'}
+                    gap="$0"
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                  >
+                    <TooltipContent label="Tooltip sample" />
+                    <RadioButtonGroup
+                      options={getOptions(1, 'Label')}
+                      onValueChange={(): undefined => undefined}
+                    />
+                  </Flex>
+                </Variants.Table>
+              </LocalThemeProvider>
+            </Cell>
+          </Grid>
 
           <Divider my="$64" />
 
