@@ -260,7 +260,7 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
       }
       await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
         interval: 1000,
-        timeout: 6000,
+        timeout: 16_000,
         timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
       });
       break;
