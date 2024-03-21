@@ -520,3 +520,10 @@ h5 {
   display: grid;
   grid-template-columns: size_unit(5) 1fr;
 }
+
+.customNodeContainer {
+  margin-top: size_unit(8);
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  grid-gap: 8px;
+}

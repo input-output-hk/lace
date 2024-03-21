@@ -1,5 +1,5 @@
-import React, { MouseEvent, useCallback } from 'react';
-import { Button, toast } from '@lace/common';
+import React, { MouseEvent, useCallback, useEffect, useState } from 'react';
+import { toast, Button } from '@lace/common';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Radio, RadioChangeEvent } from 'antd';
@@ -11,6 +11,8 @@ import { config } from '@src/config';
 import { useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { TextBox } from '@lace/ui';
+import { setBackgroundStorage, getBackgroundStorage } from '@lib/scripts/background/storage';
 
 const { AVAILABLE_CHAINS } = config();
 
@@ -45,6 +47,15 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
   const { environmentName } = useWalletStore();
   const { switchNetwork, reloadWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
+  const [customSubmitTxUrl, setCustomSubmitTxUrl] = useState<string>();
+
+  useEffect(() => {
+    getBackgroundStorage()
+      .then((storage) => {
+        setCustomSubmitTxUrl(storage.customSubmitTxUrl);
+      })
+      .catch(console.error);
+  }, []);
 
   const getNetworkName = useCallback(
     (chainName: Wallet.ChainName) => {
@@ -83,9 +94,15 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
 
   const handleCustomTxSubmitEndpoint = async (event: MouseEvent) => {
     try {
-      // 1 check if the input field is empty, background storage field customSubmitTxUrl needs to be set to undefined
-      // 2 if is something update it.
+      await setBackgroundStorage({ customSubmitTxUrl: customSubmitTxUrl || undefined });
       await reloadWallet();
+      toast.notify({
+        text: customSubmitTxUrl
+          ? t('browserView.settings.wallet.network.usingCustomTxSubmitEndpoint')
+          : t('browserView.settings.wallet.network.usingStandardTxSubmitEndpoint'),
+        withProgressBar: true,
+        icon: SwithIcon
+      });
     } catch (error) {
       console.error('Error switching TxSubmit endpoint', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
@@ -113,16 +130,17 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
           </a>
         ))}
       </Radio.Group>
-
-      <input type="text" ref={(val) => (this.customUrl = val)} name="customUrl" />
-      <Button
-        size="medium"
-        className={styles.settingsButton}
-        onClick={handleCustomTxSubmitEndpoint}
-        data-testid="settings-wallet-wallet-sync-cta"
-      >
-        {t('browserView.settings.wallet.walletSync.ctaLabel')}
-      </Button>
+      <div className={styles.customNodeContainer}>
+        <TextBox
+          label={`${t('browserView.settings.wallet.network.changeTxSubmitEndpointInputLabel')}`}
+          w="$fill"
+          value={customSubmitTxUrl}
+          onChange={(event) => setCustomSubmitTxUrl(event.target.value)}
+        />
+        <Button onClick={handleCustomTxSubmitEndpoint}>{`${t(
+          'browserView.settings.wallet.network.changeTxSubmitEndpointButtonText'
+        )}`}</Button>
+      </div>
     </>
   );
 };
