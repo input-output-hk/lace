@@ -1,5 +1,7 @@
-import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
-import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
+import { ReactComponent as SortAlphabeticalAscIcon } from '@lace/icons/dist/SortAlphabeticalAscComponent';
+import { ReactComponent as SortAlphabeticalDescIcon } from '@lace/icons/dist/SortAlphabeticalDescComponent';
+import { ReactComponent as SortNumericalAscIcon } from '@lace/icons/dist/SortNumericalAscComponent';
+import { ReactComponent as SortNumericalDescIcon } from '@lace/icons/dist/SortNumericalDescComponent';
 import {
   Card,
   Flex,
@@ -113,52 +115,53 @@ export const BrowsePoolsPreferencesCard = ({
   };
 
   const sortingOptions: RadioButtonGroupOption[] = useMemo(() => {
-    const icon = direction === 'asc' ? SortDirectionAscIcon : SortDirectionDescIcon;
+    const iconAlphabetical = direction === 'asc' ? SortAlphabeticalAscIcon : SortAlphabeticalDescIcon;
+    const iconNumerical = direction === 'asc' ? SortNumericalAscIcon : SortNumericalDescIcon;
     return [
       {
-        icon,
+        icon: iconAlphabetical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ticker'),
         onIconClick: handleIconClick,
         value: 'ticker',
       },
       {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
         onIconClick: handleIconClick,
         value: 'saturation',
       },
       USE_ROS_STAKING_COLUMN && {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.title'),
         onIconClick: handleIconClick,
         value: 'ros',
       },
       {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.cost'),
         onIconClick: handleIconClick,
         value: 'cost',
       },
       {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.margin'),
         onIconClick: handleIconClick,
         value: 'margin',
       },
       {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.blocks'),
         onIconClick: handleIconClick,
         value: 'blocks',
       },
       {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.pledge'),
         onIconClick: handleIconClick,
         value: 'pledge',
       },
       {
-        icon,
+        icon: iconNumerical,
         label: t('browsePools.stakePoolTableBrowser.sortByTitle.livestake'),
         onIconClick: handleIconClick,
         value: 'liveStake',
