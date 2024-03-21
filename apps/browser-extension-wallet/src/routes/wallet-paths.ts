@@ -48,6 +48,9 @@ export const walletRoutePaths = {
   },
   sharedWallet: {
     root: '/add-shared-wallet'
+  },
+  nami: {
+    root: '/nami'
   }
 };
 
