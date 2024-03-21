@@ -88,13 +88,13 @@ class DAppConnectorPageObject {
       await removeDappButton.click();
       // eslint-disable-next-line no-console
       console.log('removeDappButton3');
-      await RemoveDAppModal.confirmButton.waitForClickable();
+      await RemoveDAppModal.confirmButton.waitForStable();
       // eslint-disable-next-line no-console
       console.log('removeDappButton4');
       await RemoveDAppModal.confirmButton.click();
       // eslint-disable-next-line no-console
       console.log('removeDappButton5');
-
+      await browser.pause(5000);
       await ToastMessage.container.waitForDisplayed();
       // eslint-disable-next-line no-console
       console.log('removeDappButton10');
