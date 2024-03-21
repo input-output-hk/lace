@@ -28,6 +28,7 @@ import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
+import { Nami } from '../features/nami';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -57,6 +58,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.nfts,
     component: NftsLayout
+  },
+  {
+    path: routes.nami.root,
+    component: Nami
   }
 ];
 
@@ -166,6 +171,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   if (!isLoadingWalletInfo && !deletingWallet && (cardanoWallet === null || stayOnAllDonePage)) {
     return (
       <Switch>
+        <Route path={routes.nami.root} component={Nami} />
         <Route path={'/setup'} component={WalletSetup} />
         <Route path="*" render={() => <Redirect to={'/setup'} />} />
       </Switch>
@@ -191,6 +197,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
         <MultiAddressBalanceVisibleModal />
       </>
     );
+  }
+
+  if (location.pathname.startsWith(routes.nami.root)) {
+    return <Nami />;
   }
 
   return <MainLoader />;
