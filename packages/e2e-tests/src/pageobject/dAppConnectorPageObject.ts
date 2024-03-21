@@ -77,9 +77,10 @@ class DAppConnectorPageObject {
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
     await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
+    await AuthorizedDappsPage.drawerHeaderSubtitle.waitForStable();
 
     for (const removeDappButton of await AuthorizedDappsPage.dAppRemoveButtons) {
-      await removeDappButton.waitForClickable();
+      await removeDappButton.waitForStable();
       await removeDappButton.click();
       await RemoveDAppModal.confirmButton.waitForClickable();
       await RemoveDAppModal.confirmButton.click();

@@ -72,9 +72,8 @@ Feature: Onboarding - Hardware wallet
   Scenario: Hardware wallet - Connect Hardware Wallet - back button click
     Given I click "Connect" button on wallet setup page
     And I click "OK" button on "Limited support for DApp" modal
-    And I am on "Connect Hardware Wallet" page
+    And "Connect Hardware Wallet" page is displayed
     When I click "Back" button during wallet setup
-    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
 
   @LW-4993
