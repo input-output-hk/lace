@@ -21,6 +21,9 @@ export const radioGroupRoot = style([
 
 export const radioGroupItemWrapper = style({
   minHeight: 40,
+  alignItems: 'stretch',
+  flexDirection: 'column',
+  justifyContent: 'center',
 });
 
 export const radioGroupIndicatorWrapper = style([
@@ -127,7 +130,7 @@ export const iconWrapper = style([
     height: '$40',
   }),
   {
-    marginLeft: 52,
+    marginLeft: 16,
     flexGrow: 1,
   },
 ]);
@@ -147,9 +150,6 @@ export const iconButton = style([
     fontSize: 24,
     border: `2px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
     outline: 'none',
-    ':focus': {
-      backgroundColor: vars.colors.$radiobutton_focus_color,
-    },
     selectors: {
       ['&:not(:disabled):hover']: {
         border: `2px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,

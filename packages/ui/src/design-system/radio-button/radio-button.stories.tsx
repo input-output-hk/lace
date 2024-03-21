@@ -10,6 +10,7 @@ import type { Meta } from '@storybook/react';
 import { v4 as uuid } from 'uuid';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
@@ -124,7 +125,13 @@ const MainComponents = (): JSX.Element => {
       <Variants.Row>
         {getRow('Label', DocumentDownload).map(item => (
           <Variants.Cell key={item.options[0].value}>
-            <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
+            <Box className={styles.withIconWrapper}>
+              <RadioButtonGroup
+                {...item}
+                selectedValue={item.options[0].value}
+                className={styles.radioGroupWithIcon}
+              />
+            </Box>
           </Variants.Cell>
         ))}
       </Variants.Row>
@@ -134,15 +141,18 @@ const MainComponents = (): JSX.Element => {
 
 const List = ({
   icon,
-}: {
+  radioButtonClassName,
+}: Readonly<{
   icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
-}) => {
+  radioButtonClassName?: string;
+}>) => {
   const options = useMemo(() => getOptions(4, 'Label', icon), []);
   const [value, setValue] = React.useState(options[0].value);
   return (
     <RadioButtonGroup
       selectedValue={value}
       options={options}
+      className={radioButtonClassName}
       onValueChange={(value: React.SetStateAction<string>): void => {
         setValue(value);
       }}
@@ -171,11 +181,14 @@ const VariantsSection = () => {
             />
           </Variants.Cell>
           <Variants.Cell>
-            <RadioButtonGroup
-              options={withIconOptions}
-              selectedValue={withIconOptions[0].value}
-              onValueChange={(): undefined => undefined}
-            />
+            <Box className={styles.withIconWrapper}>
+              <RadioButtonGroup
+                options={withIconOptions}
+                selectedValue={withIconOptions[0].value}
+                onValueChange={(): undefined => undefined}
+                className={styles.radioGroupWithIcon}
+              />
+            </Box>
           </Variants.Cell>
         </Variants.Row>
       </Variants.Table>
@@ -251,7 +264,12 @@ export const Overview = (): JSX.Element => {
               <Variants.Table headers={['Light']}>
                 <Flex justifyContent={'space-around'} my={'$32'}>
                   <List />
-                  <List icon={DocumentDownload} />
+                  <Box className={styles.withIconWrapper}>
+                    <List
+                      icon={DocumentDownload}
+                      radioButtonClassName={styles.radioGroupWithIcon}
+                    />
+                  </Box>
                 </Flex>
               </Variants.Table>
             </Cell>
@@ -260,7 +278,12 @@ export const Overview = (): JSX.Element => {
                 <Variants.Table headers={['Dark']}>
                   <Flex justifyContent={'space-around'} my={'$32'}>
                     <List />
-                    <List icon={DocumentDownload} />
+                    <Box className={styles.withIconWrapper}>
+                      <List
+                        icon={DocumentDownload}
+                        radioButtonClassName={styles.radioGroupWithIcon}
+                      />
+                    </Box>
                   </Flex>
                 </Variants.Table>
               </LocalThemeProvider>

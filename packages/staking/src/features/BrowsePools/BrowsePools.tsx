@@ -1,7 +1,6 @@
 import { Search } from '@lace/common';
 import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
-import { SortField } from 'features/BrowsePools';
 import { useTranslation } from 'react-i18next';
 import { useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
@@ -24,17 +23,6 @@ export const BrowsePools = () => {
   const { selectedPools } = useDelegationPortfolioStore((store) => ({
     selectedPools: store.selectedPortfolio.map(({ displayData }) => displayData),
   }));
-
-  const tableHeaderTranslations: Record<SortField, string> = {
-    blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
-    cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost.title'),
-    liveStake: t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.title'),
-    margin: t('browsePools.stakePoolTableBrowser.tableHeader.margin.title'),
-    pledge: t('browsePools.stakePoolTableBrowser.tableHeader.pledge.title'),
-    ros: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
-    saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
-    ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker.title'),
-  };
 
   const fetching = status === 'fetching';
 
@@ -71,7 +59,6 @@ export const BrowsePools = () => {
               showSkeleton={fetching}
               loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
-              translations={tableHeaderTranslations}
               activeSort={sort}
               setActiveSort={setSort}
             />

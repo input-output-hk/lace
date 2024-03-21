@@ -3,7 +3,7 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
 import { StakePoolDetails } from '../../store';
-import { SortField, StakePoolSortOptions, TranslationsFor } from '../types';
+import { StakePoolSortOptions } from '../types';
 import { config } from './config';
 import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';
@@ -15,7 +15,6 @@ export type StakePoolsListProps = {
   pools: (StakePoolDetails | undefined)[];
   selectedPools: StakePoolDetails[];
   loadMoreData: (range: ListRange) => void;
-  translations: TranslationsFor<SortField>;
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
   emptyPlaceholder: () => ReactElement;
@@ -27,7 +26,6 @@ export const StakePoolsList = ({
   loadMoreData,
   pools,
   selectedPools,
-  translations,
   activeSort,
   setActiveSort,
   showSkeleton,
@@ -45,7 +43,7 @@ export const StakePoolsList = ({
           </Text.Body.Normal>
         </Box>
       )}
-      {!showEmptyPlaceholder && <StakePoolsListHeader {...{ activeSort, setActiveSort, translations }} />}
+      {!showEmptyPlaceholder && <StakePoolsListHeader {...{ activeSort, setActiveSort }} />}
       {selectedPools?.length > 0 && (
         <Flex
           flexDirection="column"

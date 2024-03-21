@@ -38,7 +38,7 @@ export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolDe
       data={data}
       selected={poolAlreadySelected}
       onClick={onClick}
-      selectionDisabledMessage={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
+      selectionDisabledMessage={t('browsePools.tooltips.maxNumberPoolsSelected')}
       dataTestId="stake-pool"
       withSelection
       keyProp={id}

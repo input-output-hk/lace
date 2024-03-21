@@ -37,75 +37,65 @@ type KeysStructure = {
       selected: '';
       notAvailable: '';
     };
-    stakePoolTableBrowser: {
-      sortAndFilter: {
+    tooltips: {
+      blocks: '';
+      cost: '';
+      liveStake: '';
+      margin: '';
+      pledge: '';
+      ros: '';
+      saturation: '';
+      ticker: '';
+      maxNumberPoolsSelected: '';
+    };
+    tableHeaders: {
+      blocks: '';
+      cost: '';
+      liveStake: '';
+      margin: '';
+      pledge: '';
+      ros: '';
+      saturation: '';
+      ticker: '';
+    };
+    preferencesCard: {
+      headers: {
+        sorting: '';
+        filters: '';
+        moreOptions: '';
+      };
+      sort: {
+        blocks: '';
+        cost: '';
+        liveStake: '';
+        margin: '';
+        pledge: '';
+        ros: '';
+        saturation: '';
+        ticker: '';
+      };
+      filter: {
         input: {
           from: '';
-          to: '';
           select: '';
+          to: '';
         };
-        headers: {
-          sorting: '';
-          filters: '';
-          moreOptions: '';
-        };
-      };
-      sortByTitle: {
-        ticker: '';
-        saturation: '';
         ros: {
-          title: '';
           lastEpoch: '';
           other: '';
+          title: '';
         };
-        cost: '';
-        margin: '';
-        blocks: '';
-        pledge: '';
-        livestake: '';
-        profitMargin: '';
         performance: '';
+        profitMargin: '';
+        saturation: '';
       };
+    };
+    stakePoolTableBrowser: {
       searchInputPlaceholder: '';
-      tableHeader: {
-        ticker: {
-          title: '';
-          tooltip: '';
-        };
-        ros: {
-          title: '';
-          tooltip: '';
-        };
-        cost: {
-          title: '';
-          tooltip: '';
-        };
-        saturation: {
-          title: '';
-          tooltip: '';
-        };
-        margin: {
-          title: '';
-          tooltip: '';
-        };
-        blocks: {
-          title: '';
-          tooltip: '';
-        };
-        pledge: {
-          title: '';
-          tooltip: '';
-        };
-        liveStake: {
-          title: '';
-          tooltip: '';
-        };
-      };
       emptyMessage: '';
       stake: '';
       unselect: '';
       addPool: '';
-      disabledTooltip: '';
     };
   };
   drawer: {

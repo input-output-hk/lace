@@ -1,7 +1,6 @@
 import { Table } from '@lace/ui';
-import { SortField, StakePoolSortOptions, TranslationsFor } from 'features/BrowsePools/types';
-import { TranslationKey } from 'features/i18n';
-import { en } from 'features/i18n/translations';
+import { SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
@@ -16,21 +15,55 @@ export interface TableHeaders {
 export type StakePoolsListHeaderProps = {
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
-  translations: TranslationsFor<SortField>;
 };
 
-export const StakePoolsListHeader = ({ translations, setActiveSort, activeSort }: StakePoolsListHeaderProps) => {
+export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsListHeaderProps) => {
   const { t } = useTranslation();
+
+  const tableHeaderTranslations: Record<SortField, { label: string; tooltipText: string }> = useMemo(
+    () => ({
+      blocks: {
+        label: t('browsePools.tableHeaders.blocks'),
+        tooltipText: t('browsePools.tooltips.blocks'),
+      },
+      cost: {
+        label: t('browsePools.tableHeaders.cost'),
+        tooltipText: t('browsePools.tooltips.cost'),
+      },
+      liveStake: {
+        label: t('browsePools.tableHeaders.liveStake'),
+        tooltipText: t('browsePools.tooltips.liveStake'),
+      },
+      margin: {
+        label: t('browsePools.tableHeaders.margin'),
+        tooltipText: t('browsePools.tooltips.margin'),
+      },
+      pledge: {
+        label: t('browsePools.tableHeaders.pledge'),
+        tooltipText: t('browsePools.tooltips.pledge'),
+      },
+      ros: {
+        label: t('browsePools.tableHeaders.ros'),
+        tooltipText: t('browsePools.tooltips.ros'),
+      },
+      saturation: {
+        label: t('browsePools.tableHeaders.saturation'),
+        tooltipText: t('browsePools.tooltips.saturation'),
+      },
+
+      ticker: {
+        label: t('browsePools.tableHeaders.ticker'),
+        tooltipText: t('browsePools.tooltips.ticker'),
+      },
+    }),
+    [t]
+  );
+
   const { analytics } = useOutsideHandles();
-  const headers: TableHeaders[] = config.columns.map((column) => {
-    const translationKey = `browsePools.stakePoolTableBrowser.tableHeader.${column}.tooltip` as TranslationKey;
-    const tooltipText = t(translationKey);
-    return {
-      label: translations[column],
-      ...(translationKey in en && { tooltipText }),
-      value: column,
-    };
-  });
+  const headers: TableHeaders[] = config.columns.map((column) => ({
+    ...tableHeaderTranslations[column],
+    value: column,
+  }));
 
   const onSortChange = (field: SortField) => {
     const sortField = field as unknown as SortField;
