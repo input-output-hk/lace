@@ -1,3 +1,4 @@
+/* eslint-disable no-new */
 import { WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
 import {
@@ -18,9 +19,28 @@ import {
   networkInfoHttpProvider,
   rewardsHttpProvider,
   stakePoolHttpProvider,
-  txSubmitHttpProvider,
-  utxoHttpProvider
+  utxoHttpProvider,
+  TxSubmitApiProvider,
+  txSubmitHttpProvider
 } from '@cardano-sdk/cardano-services-client';
+
+const createTxSubmitProvider = (
+  httpProviderConfig: CreateHttpProviderConfig<Provider>,
+  customSubmitTxUrl?: string
+): TxSubmitProvider => {
+  if (customSubmitTxUrl) {
+    httpProviderConfig.logger.info(`Using custom TxSubmit api URL ${customSubmitTxUrl}`);
+
+    const url = new URL(customSubmitTxUrl);
+
+    return new TxSubmitApiProvider(
+      { baseUrl: url, path: url.pathname },
+      { logger: httpProviderConfig.logger, adapter: httpProviderConfig.adapter }
+    );
+  }
+
+  return txSubmitHttpProvider(httpProviderConfig);
+};
 
 export type AllProviders = {
   assetProvider: AssetProvider;
@@ -35,9 +55,14 @@ export type AllProviders = {
 export interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
   baseUrl: string;
+  customSubmitTxUrl?: string;
 }
 
-export const createProviders = ({ axiosAdapter, baseUrl }: ProvidersConfig): WalletProvidersDependencies => {
+export const createProviders = ({
+  axiosAdapter,
+  baseUrl,
+  customSubmitTxUrl
+}: ProvidersConfig): WalletProvidersDependencies => {
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = {
     baseUrl,
     logger: console,
@@ -47,7 +72,7 @@ export const createProviders = ({ axiosAdapter, baseUrl }: ProvidersConfig): Wal
   return {
     assetProvider: assetInfoHttpProvider(httpProviderConfig),
     networkInfoProvider: networkInfoHttpProvider(httpProviderConfig),
-    txSubmitProvider: txSubmitHttpProvider(httpProviderConfig),
+    txSubmitProvider: createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl),
     stakePoolProvider: stakePoolHttpProvider(httpProviderConfig),
     utxoProvider: utxoHttpProvider(httpProviderConfig),
     chainHistoryProvider: chainHistoryHttpProvider(httpProviderConfig),

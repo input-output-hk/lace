@@ -207,6 +207,9 @@ export enum PostHogAction {
   SettingsFaqsClick = 'settings | faqs | click',
   SettingsWalletHdWalletSyncSyncClick = 'settings | wallet | hd wallet sync | sync | click',
   SettingsWalletHdWalletSyncSyncNewAddresses = 'settings | wallet | hd wallet sync | sync | new addresses',
+  SettingsCustomSubmitApiClick = 'settings | custom submit api | click',
+  SettingsCustomSubmitApiXClick = 'settings | custom submit api | x | click',
+  SettingsCustomSubmitApiEnableClick = 'settings | custom submit api | enable | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

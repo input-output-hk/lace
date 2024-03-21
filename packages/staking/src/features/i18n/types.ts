@@ -134,6 +134,7 @@ type KeysStructure = {
         title: '';
         subTitle: '';
       };
+      customSubmitApiWarning: '';
     };
     details: {
       metrics: {
