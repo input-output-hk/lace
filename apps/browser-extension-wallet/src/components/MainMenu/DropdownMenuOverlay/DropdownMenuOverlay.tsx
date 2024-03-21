@@ -64,7 +64,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         >
           {topSection}
           <Links>
-            {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink isPopup={isPopup} />}
+            {process.env.USE_MULTI_WALLET === 'true' && (
+              <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
+            )}
             {process.env.USE_SHARED_WALLET === 'true' && <AddSharedWalletLink isPopup={isPopup} />}
             <AddressBookLink />
             <SettingsLink />

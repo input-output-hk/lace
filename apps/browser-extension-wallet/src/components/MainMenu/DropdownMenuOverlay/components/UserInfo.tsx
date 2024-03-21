@@ -87,6 +87,8 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           id={`wallet-option-${wallet.walletId}`}
           onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
           onClick={async () => {
+            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+
             await activateWallet({
               walletId: wallet.walletId,
               accountIndex: lastActiveAccount.accountIndex
@@ -101,7 +103,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
         />
       );
     },
-    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, t]
+    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, analytics, t]
   );
 
   const renderWallet = useCallback(

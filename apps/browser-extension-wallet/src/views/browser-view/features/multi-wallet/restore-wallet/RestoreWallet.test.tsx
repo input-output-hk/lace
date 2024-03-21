@@ -1,33 +1,39 @@
-import React from 'react';
-import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { RestoreWallet } from './RestoreWallet';
-import { MemoryRouter } from 'react-router-dom';
-import { Providers } from './types';
-import { walletRoutePaths } from '@routes';
-import { createAssetsRoute, fillMnemonic, getNextButton, setupStep } from '../tests/utils';
-import { Subject } from 'rxjs';
-import { StoreProvider } from '@src/stores';
-import { APP_MODE_BROWSER } from '@src/utils/constants';
-import { AppSettingsProvider, DatabaseProvider } from '@providers';
-import { UseWalletManager } from '@hooks/useWalletManager';
-import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
-
-jest.mock('@hooks/useWalletManager', () => ({
+/* eslint-disable import/imports-first */
+import { Subject, of } from 'rxjs';
+jest.doMock('@hooks/useWalletManager', () => ({
   useWalletManager: jest.fn().mockReturnValue({
     createWallet: jest.fn().mockResolvedValue({
       source: {
         account: {
           extendedAccountPublicKey: ''
         }
-      }
-    }) as UseWalletManager['createWallet']
+      },
+      wallet: { addresses$: of([{}]) }
+    }) as UseWalletManager['createWallet'],
+    walletRepository: {
+      wallets$: of([{}])
+    } as UseWalletManager['walletRepository']
   } as UseWalletManager)
 }));
 
+import React from 'react';
+import '@testing-library/jest-dom';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { Providers } from './types';
+import { walletRoutePaths } from '@routes';
+import { createAssetsRoute, fillMnemonic, getNextButton, setupStep } from '../tests/utils';
+import { StoreProvider } from '@src/stores';
+import { APP_MODE_BROWSER } from '@src/utils/constants';
+import { AppSettingsProvider, DatabaseProvider } from '@providers';
+import { UseWalletManager } from '@hooks/useWalletManager';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
+import { RestoreWallet } from './RestoreWallet';
+
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent'>, []>().mockReturnValue({
-    sendMergeEvent: jest.fn().mockReturnValue('')
+  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
+    sendMergeEvent: jest.fn().mockReturnValue(''),
+    sendEventToPostHog: jest.fn().mockReturnValue('')
   })
 }));
 
