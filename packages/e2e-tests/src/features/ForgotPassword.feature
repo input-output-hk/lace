@@ -35,7 +35,7 @@ Feature: Forgot password
       | keyAgentData |
       | lastStaking  |
 
-  @LW-1592 @Pending
+  @LW-1592
   Scenario Outline: "Forgot password?" - password page - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I am on lock screen
     And I navigate to home page on popup view
@@ -46,7 +46,7 @@ Feature: Forgot password
     And I go to "Wallet setup" page from "Restore" wallet flow and "not fill" values
     When I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
-    Examples: 
+    Examples:
       | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
       | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
       | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |

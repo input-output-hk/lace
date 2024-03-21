@@ -1,7 +1,7 @@
 import OnboardingLegalPage from '../elements/onboarding/legalPage';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMnemonicPage from '../elements/onboarding/mnemonicPage';
-import OnboardingWalletNameAndPasswordPage from '../elements/onboarding/walletNameAndPasswordPage';
+import OnboardingWalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhraseLengthPage from '../elements/onboarding/recoveryPhraseLengthPage';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
@@ -39,10 +39,10 @@ class OnboardingPageObject {
   async goToMnemonicWriteDownPage(length?: '12' | '15' | '24') {
     await this.openNameYourWalletPage();
     await this.fillWalletNameInput('ValidWalletName');
-    await OnboardingWalletNameAndPasswordPage.nextButton.click();
+    await OnboardingWalletSetupPage.nextButton.click();
     await this.fillPasswordInput(this.validPassword);
     await this.fillPasswordConfirmationInput(this.validPassword);
-    await OnboardingWalletNameAndPasswordPage.nextButton.click();
+    await OnboardingWalletSetupPage.nextButton.click();
     if (length) {
       await this.selectRecoveryPassphraseLength(length);
     }
@@ -189,15 +189,15 @@ class OnboardingPageObject {
   }
 
   async fillWalletNameInput(text: string) {
-    await OnboardingWalletNameAndPasswordPage.setWalletNameInput(text);
+    await OnboardingWalletSetupPage.setWalletNameInput(text);
   }
 
   async fillPasswordInput(text: string) {
-    await OnboardingWalletNameAndPasswordPage.walletPasswordInput.setValue(text);
+    await OnboardingWalletSetupPage.walletPasswordInput.setValue(text);
   }
 
   async fillPasswordConfirmationInput(text: string) {
-    await OnboardingWalletNameAndPasswordPage.walletPasswordConfirmInput.setValue(text);
+    await OnboardingWalletSetupPage.walletPasswordConfirmInput.setValue(text);
   }
 
   async fillPasswordPage(password: string, passwordConfirmation: string) {

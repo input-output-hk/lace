@@ -3,7 +3,7 @@ import WalletUnlockPage from '../elements/walletUnlockPage';
 import ForgotPasswordModalAssert from '../assert/forgotPasswordModalAssert';
 import ForgotPasswordModal from '../elements/ForgotPasswordModal';
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
-import WalletPasswordPage from '../elements/onboarding/walletNameAndPasswordPage';
+import WalletSetupPage from '../elements/onboarding/walletSetupPage';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import extendedView from '../page/extendedView';
@@ -54,7 +54,7 @@ Then(/^I am on (.*) page of restoration flow$/, async (expectedPage: string) => 
       break;
     case 'mnemonic verification':
       await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
-      await WalletPasswordPage.nextButton.click();
+      await WalletSetupPage.nextButton.click();
       break;
     default:
       throw new Error(`Unknown page: ${expectedPage}`);

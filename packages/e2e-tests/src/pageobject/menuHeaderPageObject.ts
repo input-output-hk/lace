@@ -38,6 +38,7 @@ class MenuHeaderPageObject {
 
   async clickLockWallet() {
     await this.openMenu();
+    await MenuHeader.menuLockButton.scrollIntoView();
     await MenuHeader.menuLockButton.click();
   }
 
