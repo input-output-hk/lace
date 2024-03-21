@@ -115,7 +115,9 @@
       "sending": "Sending",
       "transaction": "Transaction",
       "transactionSummary": "Transaction Summary",
-      "origin": "Origin"
+      "origin": "Origin",
+      "fromAddress": "From address",
+      "toAddress": "To address"
     }
   },
   "tab.main.title": "Tab extension",
