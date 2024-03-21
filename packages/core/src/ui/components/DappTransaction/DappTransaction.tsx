@@ -51,9 +51,11 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
       tokens: []
     };
 
-    const addressAssets = value.assets;
-    group.coins.push(value.coins);
+    if (value.coins !== BigInt(0)) {
+      group.coins.push(value.coins);
+    }
 
+    const addressAssets = value.assets;
     for (const [, asset] of addressAssets) {
       if (asset.assetInfo.supply === BigInt(1)) {
         group.nfts.push(asset);
