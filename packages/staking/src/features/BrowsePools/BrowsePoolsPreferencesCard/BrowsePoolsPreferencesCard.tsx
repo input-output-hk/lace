@@ -71,9 +71,9 @@ export const BrowsePoolsPreferencesCard = ({
     (field: string) =>
       onSortChange({
         field: field as unknown as SortField,
-        order: direction,
+        order: 'asc',
       }),
-    [direction, onSortChange]
+    [onSortChange]
   );
 
   const getFilters = (filterOption: FilterOption) => {
