@@ -13,7 +13,7 @@ import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import testContext from '../utils/testContext';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
-import OnboardingWalletNameAndPasswordPageAssert from '../assert/onboarding/onboardingWalletNameAndPasswordPageAssert';
+import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 
 class OnboardingPageObject {
   public validPassword = 'N_8J@bne87A';
@@ -266,7 +266,7 @@ class OnboardingPageObject {
     await Modal.confirmButton.click();
     await this.openAndAcceptTermsOfUsePage();
     await AnalyticsPage.nextButton.click();
-    await OnboardingWalletNameAndPasswordPageAssert.assertSeeWalletNamePage();
+    await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
     await this.fillWalletNameInput('ValidName');
     await commonOnboardingElements.nextButton.click();
     await this.fillPasswordPage(this.validPassword, this.validPassword);

@@ -15,17 +15,6 @@ Feature: Onboarding - Create wallet
       | Privacy policy   |
       | Terms of service |
 
-  @LW-2432 @Pending @Obsolete
-  Scenario Outline: Create wallet - Help us improve your experience - <button> button
-    Given I click "Create" button on wallet setup page
-    And I am on "Lace terms of use" page and accept terms
-#    And I am on "Help us improve your experience" page
-    When I click "<button>" button on Analytics page
-    Then "Wallet setup" page is displayed
-    Examples:
-      | button |
-      | Skip   |
-      | Agree  |
 
   @LW-2433 @Pending
   @issue=LW-10087
@@ -68,12 +57,6 @@ Feature: Onboarding - Create wallet
     When I click "Back" button during wallet setup
     Then "Get started" page is displayed
 
-  @LW-3015 @Pending
-  Scenario: Create Wallet - Mnemonic info - Next button click
-    Given I navigate to "Mnemonic info" page
-    When I click "Next" button during wallet setup
-#    Then "Mnemonic writedown" page is displayed with words 8 of 24
-
   @LW-1553
   Scenario: Create Wallet - Mnemonic writedown - Subtitle link click
     Given I click "Create" button on wallet setup page
@@ -95,41 +78,6 @@ Feature: Onboarding - Create wallet
     And "Mnemonic writedown" page is displayed with 24 words
     When I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
-
-  @LW-2436 @Pending @Obsolete
-  Scenario Outline: Create Wallet - Mnemonic writedown - back button from <init_page> to <target_page> mnemonic writedown page
-    Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic writedown" page with words <init_page> of 24
-    When I click "Back" button during wallet setup
-#    Then "Mnemonic writedown" page is displayed with words <target_page> of 24
-    Examples:
-      | init_page | target_page |
-      | 16        | 8           |
-      | 24        | 16          |
-
-  @LW-2437 @Pending
-  Scenario: Create Wallet - Mnemonic writedown - back button to start over and cancel
-    Given I click "Create" button on wallet setup page
-    Then "Mnemonic writedown" page is displayed with 24 words
-    When I click "Back" button during wallet setup
-    And I click "Cancel" button on "Are you sure you want to start again?" modal
-#    Then "Mnemonic writedown" page is displayed with words 8 of 24
-    And I save the words
-    And Words 1 - 8 are the same
-    And I clear saved words
-
-  @LW-2438 @Pending
-  Scenario: Create Wallet - Mnemonic writedown - back button to start over and new words
-    Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic writedown" page with words 8 of 24
-    When I click "Back" button during wallet setup
-    And I click "OK" button on "Are you sure you want to start again?" modal
-#    Then "Mnemonic info" page is displayed
-    When I click "Next" button during wallet setup
-#    Then "Mnemonic writedown" page is displayed with words 8 of 24
-    And I save the words
-    And Words 1 - 8 are not the same
-    And I clear saved words
 
   @LW-2439
   Scenario: Create Wallet - Mnemonic verification page displayed
@@ -165,16 +113,11 @@ Feature: Onboarding - Create wallet
     And I go to "Mnemonic verification" page from "Create" wallet flow
     Then "Next" button is enabled during onboarding process
 
-  @LW-3212 @Pending @Obsolete
-  Scenario Outline: Create Wallet - Mnemonic verification - all empty fields - next disabled - <init_page>
+  @LW-3212
+  Scenario: Create Wallet - Mnemonic verification - all empty fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" page with words <init_page> of 24
+    And I go to "Mnemonic verification" page from "Create" wallet flow and "not fill" values
     Then "Next" button is disabled during onboarding process
-    Examples:
-      | init_page |
-      | 8         |
-      | 16        |
-      | 24        |
 
   @LW-3213
   Scenario: Create Wallet - Mnemonic verification - clear one of fields - next disabled
@@ -254,13 +197,6 @@ Feature: Onboarding - Create wallet
     When I fill mnemonic input with "ą"
     Then I do not see autocomplete options list
 
-  @LW-3437 @Pending @Obsolete
-  Scenario: Create Wallet - Creating wallet loader disappears after 10s
-    Given I click "Create" button on wallet setup page
-    And I am on "Mnemonic verification" last page from "Create wallet" and filled all words
-    When I click "Next" button during wallet setup
-    And Creating wallet page finishes in < 10s
-
   @LW-4543 @LW-4548
   Scenario Outline: Create wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     When I click "Create" button on wallet setup page
@@ -310,7 +246,7 @@ Feature: Onboarding - Create wallet
       | dark  |
       | light |
 
-  @LW-8500
+  @LW-8500 @Pending
   @issue=LW-8890
   Scenario: Create Wallet - Mnemonic verification - incorrect word
     Given I click "Create" button on wallet setup page

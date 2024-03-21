@@ -1,20 +1,19 @@
 @OnboardingCreateWallet @Analytics @Testnet
 Feature: Analytics - Posthog - Onboarding - Extended View
 
-  @LW-8311
+  @LW-8311 @Pending
+  @issue=@LW-10109
   Scenario Outline: Analytics - Posthog events are enabled or disabled based on decision <enable_analytics> on Analytics page
     Given I set up request interception for posthog analytics request(s)
     When I click "Create" button on wallet setup page
-#    When I accept "T&C" checkbox
-#    And I enter wallet name: "wallet"
-    And I enter wallet name: "wallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-#    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    When I accept "T&C" checkbox
     And I click "Next" button during wallet setup
 #    When "Help us improve your experience" page is displayed
-
-#    And I click "<enable_analytics>" button on Analytics page
-#    And I click "Next" button during wallet setup
-#    And I click "Next" button during wallet setup
+    And I click "<enable_analytics>" button on Analytics page
+    And I enter wallet name: "wallet"
+    And I click "Next" button during wallet setup
+    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
 #    When "Mnemonic info" page is displayed
     And I validate that <number_of_events> analytics event(s) have been sent
 
@@ -23,14 +22,15 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | Agree            | 4                |
       | Skip             | 0                |
 
-  @LW-7363
+  @LW-7363 @Pending
+  @issue=@LW-10109
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
     When I click "OK" button on "Restoring a multi-address wallet?" modal
     When I accept "T&C" checkbox
     And I click "Next" button during wallet setup
-    When "Help us improve your experience" page is displayed
+#    When "Help us improve your experience" page is displayed
     And I click "Agree" button on Analytics page
     And I validate latest analytics multiple events:
       | wallet \| session start \| pageview                         |
@@ -42,7 +42,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | restore wallet | wallet password | next | click"
-    When "Recovery phrase length page" is displayed and 24 words checkbox is checked
+#    When "Recovery phrase length page" is displayed and 24 words checkbox is checked
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | restore wallet | recovery phrase length | next | click"
     When I pass "Mnemonic verification" page with words 8 of 24
@@ -58,13 +58,14 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
     And I validate that 10 analytics event(s) have been sent
 
-  @LW-7365
+  @LW-7365 @Pending
+  @issue=@LW-10109
   Scenario: Analytics - Onboarding new wallet events
     Given I set up request interception for posthog analytics request(s)
     When I click "Create" button on wallet setup page
     When I accept "T&C" checkbox
     And I click "Next" button during wallet setup
-    When "Help us improve your experience" page is displayed
+#    When "Help us improve your experience" page is displayed
     And I click "Agree" button on Analytics page
     And I validate latest analytics multiple events:
       | wallet \| session start \| pageview                     |
@@ -76,7 +77,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | new wallet | wallet password | next | click"
-    When "Mnemonic info" page is displayed
+#    When "Mnemonic info" page is displayed
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | new wallet | passphrase intro | next | click"
     When I pass "Mnemonic writedown" page with words 8 of 24

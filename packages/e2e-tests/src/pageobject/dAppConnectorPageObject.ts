@@ -77,27 +77,14 @@ class DAppConnectorPageObject {
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
     await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
-    await AuthorizedDappsPage.drawerHeaderSubtitle.waitForStable();
 
     for (const removeDappButton of await AuthorizedDappsPage.dAppRemoveButtons) {
-      // eslint-disable-next-line no-console
-      console.log('removeDappButton1');
-      await removeDappButton.waitForStable();
-      // eslint-disable-next-line no-console
-      console.log('removeDappButton2');
+      await removeDappButton.waitForClickable();
       await removeDappButton.click();
-      // eslint-disable-next-line no-console
-      console.log('removeDappButton3');
-      await RemoveDAppModal.confirmButton.waitForStable();
-      // eslint-disable-next-line no-console
-      console.log('removeDappButton4');
+      await RemoveDAppModal.confirmButton.waitForClickable();
       await RemoveDAppModal.confirmButton.click();
-      // eslint-disable-next-line no-console
-      console.log('removeDappButton5');
-      await browser.pause(5000);
+
       await ToastMessage.container.waitForDisplayed();
-      // eslint-disable-next-line no-console
-      console.log('removeDappButton10');
     }
   }
 
@@ -148,7 +135,6 @@ class DAppConnectorPageObject {
         }
         await TestDAppPage.refreshButton.click();
         await browser.pause(1000);
-        // await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
       }
     }
     if (!isAuthorized) await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);

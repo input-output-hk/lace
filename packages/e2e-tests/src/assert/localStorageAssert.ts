@@ -6,9 +6,6 @@ import { getNumWalletsInRepository } from '../fixture/walletRepositoryInitialize
 
 class LocalStorageAssert {
   assertWalletIsDeleted = async () => {
-    // expect(JSON.parse(await localStorageManager.getItem('wallet'))).to.be.null;
-    // expect(JSON.parse(await localStorageManager.getItem('analyticsStatus'))).to.be.null;
-    await browser.pause(500);
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('unconfirmedTransactions'))).to.be.null;
     expect(await getNumWalletsInRepository()).to.be.eq(0);

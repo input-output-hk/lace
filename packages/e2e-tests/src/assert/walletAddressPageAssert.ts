@@ -77,7 +77,6 @@ class WalletAddressPageAssert {
       await handleCard.$(WalletAddressPage.HANDLE_NAME).waitForDisplayed();
       await handleCard.$(WalletAddressPage.HANDLE_SYMBOL).waitForDisplayed();
     } else {
-      // await handleCard.waitForDisplayed({ reverse: true });
       expect(handleCard).to.be.undefined;
     }
   }
