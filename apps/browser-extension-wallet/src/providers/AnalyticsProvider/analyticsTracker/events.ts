@@ -36,8 +36,8 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   forgot_password: {
     WALLET_PASSWORD_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordNextClick,
     RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick,
-    ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase01NextClick,
-    ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase09NextClick,
-    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase17NextClick
+    RECOVERY_PASSPHRASE_VERIFICATION_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseNextClick,
+    NAME_PASSWORD_ENTER_WALLET_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterWalletClick,
+    PASTE_FROM_CLIPBOARD_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhrasePasteFromClipboardClick
   }
 };

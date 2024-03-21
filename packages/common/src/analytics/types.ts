@@ -243,9 +243,9 @@ export enum PostHogAction {
   UnlockWalletForgotPasswordCancelClick = 'unlock wallet | forgot password? | cancel | click',
   UnlockWalletForgotPasswordNextClick = 'unlock wallet | forgot password? | set up your password | next | click',
   UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick = 'unlock wallet | forgot password? | recovery phrase length | next | click',
-  UnlockWalletForgotPasswordEnterPassphrase01NextClick = 'unlock wallet | forgot password? | enter passphrase #01 | next | click',
-  UnlockWalletForgotPasswordEnterPassphrase09NextClick = 'unlock wallet | forgot password? | enter passphrase #09 | next | click',
-  UnlockWalletForgotPasswordEnterPassphrase17NextClick = 'unlock wallet | forgot password? | enter passphrase #17 | next | click'
+  UnlockWalletForgotPasswordRecoveryPhraseNextClick = 'unlock wallet | forgot password? | enter your recovery phrase | next | click',
+  UnlockWalletForgotPasswordEnterWalletClick = 'unlock wallet | forgot password? | set up your password | enter wallet | click',
+  UnlockWalletForgotPasswordRecoveryPhrasePasteFromClipboardClick = 'unlock wallet | forgot password? | enter your recovery phrase | paste from clipboard | click'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
