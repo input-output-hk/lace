@@ -379,7 +379,12 @@ const colors: Colors = {
   $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
   $radiobutton_unchecked_bgColor: 'transparent',
   $radiobutton_checked_bgColor: 'transparent',
-  $radiobutton_icon_color: lightColorScheme.$primary_grey,
+  $radiobutton_icon_active: lightColorScheme.$primary_light_grey_plus_0_56,
+  $radiobutton_icon_active_border_color:
+    lightColorScheme.$primary_light_grey_plus,
+  $radiobutton_icon_color: lightColorScheme.$primary_white,
+  $radiobutton_icon_text_color: lightColorScheme.$primary_black,
+  $radiobutton_icon_disabled_border_color: lightColorScheme.$primary_grey,
   $radiobutton_icon_hover_color: lightColorScheme.$primary_light_grey,
   $radiobutton_icon_hover_border_color:
     lightColorScheme.$primary_light_grey_plus,
