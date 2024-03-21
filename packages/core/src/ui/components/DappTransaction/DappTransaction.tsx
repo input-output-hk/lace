@@ -52,16 +52,13 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
     };
 
     const addressAssets = value.assets;
+    group.coins.push(value.coins);
 
-    if (addressAssets.size === 0) {
-      group.coins.push(value.coins);
-    } else {
-      for (const [, asset] of addressAssets) {
-        if (asset.assetInfo.supply === BigInt(1)) {
-          group.nfts.push(asset);
-        } else {
-          group.tokens.push(asset);
-        }
+    for (const [, asset] of addressAssets) {
+      if (asset.assetInfo.supply === BigInt(1)) {
+        group.nfts.push(asset);
+      } else {
+        group.tokens.push(asset);
       }
     }
 
