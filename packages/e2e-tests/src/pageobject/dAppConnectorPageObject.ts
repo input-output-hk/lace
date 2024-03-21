@@ -80,12 +80,24 @@ class DAppConnectorPageObject {
     await AuthorizedDappsPage.drawerHeaderSubtitle.waitForStable();
 
     for (const removeDappButton of await AuthorizedDappsPage.dAppRemoveButtons) {
+      // eslint-disable-next-line no-console
+      console.log('removeDappButton1');
       await removeDappButton.waitForStable();
+      // eslint-disable-next-line no-console
+      console.log('removeDappButton2');
       await removeDappButton.click();
+      // eslint-disable-next-line no-console
+      console.log('removeDappButton3');
       await RemoveDAppModal.confirmButton.waitForClickable();
+      // eslint-disable-next-line no-console
+      console.log('removeDappButton4');
       await RemoveDAppModal.confirmButton.click();
+      // eslint-disable-next-line no-console
+      console.log('removeDappButton5');
 
       await ToastMessage.container.waitForDisplayed();
+      // eslint-disable-next-line no-console
+      console.log('removeDappButton10');
     }
   }
 
