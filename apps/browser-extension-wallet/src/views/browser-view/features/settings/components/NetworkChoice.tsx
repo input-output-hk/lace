@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { toast } from '@lace/common';
+import React, { MouseEvent, useCallback } from 'react';
+import { Button, toast } from '@lace/common';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Radio, RadioChangeEvent } from 'antd';
@@ -43,7 +43,7 @@ const walletProfileEventByNetworkName: Record<Wallet.ChainName, networkEventUser
 export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-profile' }): React.ReactElement => {
   const { t } = useTranslation();
   const { environmentName } = useWalletStore();
-  const { switchNetwork } = useWalletManager();
+  const { switchNetwork, reloadWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
 
   const getNetworkName = useCallback(
@@ -81,24 +81,48 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
     return event;
   };
 
+  const handleCustomTxSubmitEndpoint = async (event: MouseEvent) => {
+    try {
+      // 1 check if the input field is empty, background storage field customSubmitTxUrl needs to be set to undefined
+      // 2 if is something update it.
+      await reloadWallet();
+    } catch (error) {
+      console.error('Error switching TxSubmit endpoint', error);
+      toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
+    }
+    return event;
+  };
+
   return (
-    <Radio.Group
-      className={styles.radioGroup}
-      onChange={handleNetworkChange}
-      value={environmentName}
-      data-testid={'network-choice-radio-group'}
-    >
-      {AVAILABLE_CHAINS.map((network) => (
-        <a className={styles.radio} key={network}>
-          <Radio
-            value={network}
-            className={styles.radioLabel}
-            data-testid={`network-${network.toLowerCase()}-radio-button`}
-          >
-            {getNetworkName(network as Wallet.ChainName)}
-          </Radio>
-        </a>
-      ))}
-    </Radio.Group>
+    <>
+      <Radio.Group
+        className={styles.radioGroup}
+        onChange={handleNetworkChange}
+        value={environmentName}
+        data-testid={'network-choice-radio-group'}
+      >
+        {AVAILABLE_CHAINS.map((network) => (
+          <a className={styles.radio} key={network}>
+            <Radio
+              value={network}
+              className={styles.radioLabel}
+              data-testid={`network-${network.toLowerCase()}-radio-button`}
+            >
+              {getNetworkName(network as Wallet.ChainName)}
+            </Radio>
+          </a>
+        ))}
+      </Radio.Group>
+
+      <input type="text" ref={(val) => (this.customUrl = val)} name="customUrl" />
+      <Button
+        size="medium"
+        className={styles.settingsButton}
+        onClick={handleCustomTxSubmitEndpoint}
+        data-testid="settings-wallet-wallet-sync-cta"
+      >
+        {t('browserView.settings.wallet.walletSync.ctaLabel')}
+      </Button>
+    </>
   );
 };

@@ -85,6 +85,12 @@ export interface UseWalletManager {
    */
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<WalletManagerActivateProps | undefined>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
+
+  /**
+   * Force the wallet to recreate all providers and reload. This is useful for changing
+   * provider properties or configurations without switching the wallet.
+   */
+  reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
 }
@@ -588,7 +594,7 @@ export const useWalletManager = (): UseWalletManager => {
       deleteFromLocalStorage('userInfo');
       deleteFromLocalStorage('keyAgentData');
       await backgroundService.clearBackgroundStorage({
-        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
+        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration', 'customSubmitTxUrl']
       });
       resetWalletLock();
       setCardanoWallet();
@@ -634,6 +640,12 @@ export const useWalletManager = (): UseWalletManager => {
       getCurrentChainId
     ]
   );
+
+  const reloadWallet = useCallback(async (): Promise<void> => {
+    const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
+
+    await walletManager.activate(activeWallet, true);
+  }, []);
 
   /**
    * Deactivates current wallet and activates it again with the new network
@@ -745,6 +757,7 @@ export const useWalletManager = (): UseWalletManager => {
     connectHardwareWallet,
     saveHardwareWallet,
     deleteWallet,
+    reloadWallet,
     switchNetwork,
     walletManager,
     walletRepository,
