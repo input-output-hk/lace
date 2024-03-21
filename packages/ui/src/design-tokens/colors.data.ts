@@ -263,9 +263,13 @@ export const colors = {
   $radiobutton_unchecked_borderColor: '',
   $radiobutton_unchecked_bgColor: '',
   $radiobutton_checked_bgColor: '',
+  $radiobutton_icon_active: '',
+  $radiobutton_icon_active_border_color: '',
   $radiobutton_icon_color: '',
+  $radiobutton_icon_disabled_border_color: '',
   $radiobutton_icon_hover_color: '',
   $radiobutton_icon_hover_border_color: '',
+  $radiobutton_icon_text_color: '',
 
   $select_border: '',
   $select_icon_color: '',

@@ -14,9 +14,14 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import { TooltipContent } from '../tooltip';
 import * as Text from '../typography';
 
+import * as styles from './radio-button.stories.css';
+
 import { RadioButtonGroup } from './';
+
+import type { RadioButtonGroupOption } from './';
 
 export default {
   title: 'Input Fields/Radio button',
@@ -33,25 +38,18 @@ const getOptions = (
   count: number,
   label: string,
   icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
-): {
-  value: string;
-  label: string;
-  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
-  onIconClick: () => void;
-  tooltipText: string;
   // eslint-disable-next-line max-params
-}[] =>
+): RadioButtonGroupOption[] =>
   Array.from({ length: count }).map(_ => ({
     value: `option-${uuid()}`,
     label,
     icon,
     onIconClick: (): void => void 0,
-    tooltipText: 'Test tooltip text lorem ipsum dolor sit amet',
   }));
 
 const MainComponents = (): JSX.Element => {
   const getRow = (
-    label = 'label',
+    label = 'Label',
     icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
   ) => [
     {
@@ -80,6 +78,7 @@ const MainComponents = (): JSX.Element => {
     },
   ];
 
+  // TODO: remove className and use color in <Text.Body.Normal className={styles.note}> after https://input-output.atlassian.net/browse/LW-9760
   return (
     <>
       <Variants.Row>
@@ -88,7 +87,9 @@ const MainComponents = (): JSX.Element => {
             {index < 4 ? (
               <RadioButtonGroup {...item} />
             ) : (
-              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+              <Text.Body.Normal className={styles.note}>
+                * only focussed state supported
+              </Text.Body.Normal>
             )}
           </Variants.Cell>
         ))}
@@ -106,7 +107,9 @@ const MainComponents = (): JSX.Element => {
             {index < 4 ? (
               <RadioButtonGroup {...item} />
             ) : (
-              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+              <Text.Body.Normal className={styles.note}>
+                * only checked state supported
+              </Text.Body.Normal>
             )}
           </Variants.Cell>
         ))}
@@ -181,7 +184,7 @@ const VariantsSection = () => {
 };
 
 export const Overview = (): JSX.Element => {
-  const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
+  const headers = ['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused'];
 
   return (
     <Grid>
@@ -194,13 +197,52 @@ export const Overview = (): JSX.Element => {
             w="$fill"
             my="$32"
           >
-            <Flex mr="$8">
-              <RadioButtonGroup
-                options={getOptions(1, 'Label')}
-                onValueChange={(): undefined => undefined}
-              />
-            </Flex>
+            <RadioButtonGroup
+              options={getOptions(1, 'Label')}
+              onValueChange={(): undefined => undefined}
+            />
           </Flex>
+
+          <Divider my="$64" />
+
+          <Grid columns="$2">
+            <Cell>
+              <Variants.Table headers={['Light with Tooltip']}>
+                <Flex
+                  my={'$32'}
+                  flexDirection={'column'}
+                  gap="$0"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <TooltipContent label="Tooltip sample" />
+                  <RadioButtonGroup
+                    options={getOptions(1, 'Label')}
+                    onValueChange={(): undefined => undefined}
+                  />
+                </Flex>
+              </Variants.Table>
+            </Cell>
+            <Cell>
+              <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+                <Variants.Table headers={['Dark with Tooltip']}>
+                  <Flex
+                    my={'$32'}
+                    flexDirection={'column'}
+                    gap="$0"
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                  >
+                    <TooltipContent label="Tooltip sample" />
+                    <RadioButtonGroup
+                      options={getOptions(1, 'Label')}
+                      onValueChange={(): undefined => undefined}
+                    />
+                  </Flex>
+                </Variants.Table>
+              </LocalThemeProvider>
+            </Cell>
+          </Grid>
 
           <Divider my="$64" />
 
