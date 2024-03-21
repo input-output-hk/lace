@@ -22,14 +22,6 @@ export default new (class WebTester {
     await this.seeElement(element.toJSLocator());
   }
 
-  async dontSeeElement(selector: string, timeout = 3000) {
-    Logger.log(`Don't see element ${selector}`);
-    const startTime = Date.now();
-    await this.seeElement(selector, true, timeout);
-    const duration = (Date.now() - startTime) / 1000;
-    Logger.log(`Element not in display after: ${duration}s`);
-  }
-
   async clickOnElement(selector: string, locatorStrategy?: LocatorStrategy): Promise<void> {
     Logger.log(`Click on ${selector} [strategy=${locatorStrategy ?? 'css selector'}]`);
     const element = await $(selector);
