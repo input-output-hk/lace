@@ -10,19 +10,21 @@ export type Props = Pick<
 > &
   typeof Tooltip.Root & {
     label: string;
+    zIndex?: number;
   };
 
 export const Root = ({
   label,
   side = 'top',
   align = 'center',
+  zIndex,
   children,
 }: Readonly<Props>): JSX.Element => {
   return (
-    <Tooltip.Root>
+    <Tooltip.Root open>
       {children}
       <Tooltip.Portal>
-        <Tooltip.Content side={side} align={align}>
+        <Tooltip.Content style={{ zIndex }} side={side} align={align}>
           <TooltipContent label={label} />
         </Tooltip.Content>
       </Tooltip.Portal>

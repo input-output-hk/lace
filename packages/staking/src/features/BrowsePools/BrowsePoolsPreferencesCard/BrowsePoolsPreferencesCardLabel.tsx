@@ -10,8 +10,10 @@ export const BrowsePoolsPreferencesCardLabel = ({ text, tooltip }: BrowsePoolsPr
     return content;
   }
 
+  // zIndex is aligned with legacy side-panel
+  // Please follow: apps/browser-extension-wallet/src/views/browser-view/components/CollapsiblePanelContainer/CollapsiblePanelContainer.module.scss
   return (
-    <Tooltip label={tooltip} delayDuration={800} align="start">
+    <Tooltip label={tooltip} delayDuration={800} align="start" zIndex={201}>
       {content}
     </Tooltip>
   );
