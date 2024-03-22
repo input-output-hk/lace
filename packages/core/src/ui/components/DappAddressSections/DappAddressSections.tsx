@@ -8,7 +8,7 @@ import { Typography } from 'antd';
 import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
-import { TransactionAssets, SummaryExpander, DappTransactionSummary } from '@lace/ui';
+import { TransactionAssets, SummaryExpander, DappTransactionSummary, Tooltip } from '@lace/ui';
 import classNames from 'classnames';
 
 interface GroupedAddressAssets {
@@ -118,7 +118,9 @@ export const DappAddressSections = ({
                   {t('package.core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.value} data-testid="dapp-transaction-from-address-address">
-                  {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                  <Tooltip label={address}>
+                    <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
+                  </Tooltip>
                 </Text>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
@@ -169,7 +171,9 @@ export const DappAddressSections = ({
                   {t('package.core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.value} data-testid="dapp-transaction-to-address">
-                  {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                  <Tooltip label={address}>
+                    <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
+                  </Tooltip>
                 </Text>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
