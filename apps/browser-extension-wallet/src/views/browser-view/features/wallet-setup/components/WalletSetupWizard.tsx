@@ -243,7 +243,7 @@ export const WalletSetupWizard = ({
           onPasteFromClipboard={() =>
             sendAnalytics(
               setupType === SetupType.FORGOT_PASSWORD
-                ? postHogOnboardingActions.forgot_password.PASTE_FROM_CLIPBOARD_CLICK
+                ? postHogOnboardingActions.forgot_password.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK
                 : postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK
             )
           }
