@@ -40,7 +40,7 @@ const Layout = ({
 enum Columns {
   ticker = 'ticker',
   saturation = 'saturation',
-  apy = 'apy',
+  ros = 'ros',
   cost = 'cost',
   margin = 'margin',
   blocks = 'blocks',
@@ -61,7 +61,7 @@ interface TableSortOptions {
 const columnsTitles = {
   [Columns.ticker]: 'Ticker',
   [Columns.saturation]: 'Saturation',
-  [Columns.apy]: 'ROS',
+  [Columns.ros]: 'ROS',
   [Columns.cost]: 'Cost',
   [Columns.margin]: 'Margin',
   [Columns.blocks]: 'Blocks',
@@ -122,7 +122,7 @@ const MainComponents = ({
     {
       [Columns.ticker]: 'TKRNM',
       [Columns.saturation]: '123.45%',
-      [Columns.apy]: '3,45%',
+      [Columns.ros]: '3,45%',
       [Columns.cost]: '340',
       [Columns.margin]: '3.45%',
       [Columns.blocks]: '1,210',
@@ -132,7 +132,7 @@ const MainComponents = ({
     {
       [Columns.ticker]: 'TKRNM',
       [Columns.saturation]: '52.45%',
-      [Columns.apy]: '121,45%',
+      [Columns.ros]: '121,45%',
       [Columns.cost]: '170',
       [Columns.margin]: '1.45%',
       [Columns.blocks]: '5,320',

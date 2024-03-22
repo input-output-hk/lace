@@ -1,18 +1,19 @@
 import { PostHogAction } from '@lace/common';
 import { StakePoolCard } from 'features/BrowsePools/StakePoolCard';
-import { MetricType, SortField } from 'features/BrowsePools/types';
-import get from 'lodash/get';
 import React from 'react';
 import { useOutsideHandles } from '../../outside-handles-provider';
-import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
-import { StakePoolsGridItemProps } from './types';
+import { MAX_POOLS_COUNT, StakePoolDetails, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
+import { getFormattedStakePoolProp } from '../formatters';
+import { SortField } from '../types';
+
+type StakePoolsGridItemProps = StakePoolDetails & {
+  sortField: SortField;
+};
 
 export const StakePoolsGridItem = ({
   stakePool,
   hexId,
   id,
-  saturation,
-  ticker,
   sortField,
   ...data
 }: StakePoolsGridItemProps): React.ReactElement => {
@@ -29,15 +30,13 @@ export const StakePoolsGridItem = ({
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailClick);
   };
 
-  const metricType = sortField === SortField.name ? MetricType.ticker : MetricType[sortField];
-
   return (
     <StakePoolCard
       key={id}
-      metricType={metricType}
-      metricValue={get(data, metricType)}
-      saturation={saturation}
-      title={ticker}
+      metricType={sortField}
+      metricValue={getFormattedStakePoolProp(data, sortField)}
+      saturation={data.saturation}
+      title={data.ticker}
       onClick={onClick}
       selected={poolAlreadySelected}
     />

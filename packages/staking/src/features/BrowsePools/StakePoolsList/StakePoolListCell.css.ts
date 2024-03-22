@@ -1,7 +1,6 @@
 import { sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
 import { theme } from 'features/theme';
-import type { RecipeVariants } from '@vanilla-extract/recipes';
 
 export const dot = recipe({
   base: [
@@ -19,5 +18,3 @@ export const dot = recipe({
     },
   },
 });
-
-export type DotVariants = Required<NonNullable<RecipeVariants<typeof dot>>>;

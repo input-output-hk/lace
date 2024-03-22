@@ -3,14 +3,13 @@ import debounce from 'lodash/debounce';
 import { Box, Table } from '@lace/ui';
 import { Wallet } from '@lace/cardano';
 import {
-  MetricType,
-  SortDirection,
+  mapStakePoolToDisplayData,
   SortField,
-  StakePoolSortOptions,
-  TranslationsFor,
-  stakePoolTableConfig,
   StakePoolsListRowProps,
-  StakePoolsListRowSkeleton
+  StakePoolsListRowSkeleton,
+  StakePoolSortOptions,
+  stakePoolTableConfig,
+  TranslationsFor
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search } from '@lace/common';
@@ -33,13 +32,11 @@ type stakePoolsTableProps = {
 type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: SortField.name,
-  order: SortDirection.desc
+  field: 'ticker',
+  order: 'desc'
 };
 
 const searchDebounce = 300;
-
-const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
 
 export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): React.ReactElement => {
   const componentRef = useRef<HTMLDivElement | null>(null);
@@ -56,14 +53,11 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     resetStakePools,
     fetchStakePools
   } = useWalletStore(stakePoolResultsSelector);
-  const {
-    walletUI: { cardanoCoin },
-    blockchainProvider
-  } = useWalletStore();
+  const { blockchainProvider } = useWalletStore();
 
-  const tableHeaderTranslations: TranslationsFor<MetricType> = {
+  const tableHeaderTranslations: TranslationsFor<SortField> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.title'),
-    apy: t('cardano.stakePoolTableBrowser.tableHeader.apy.title'),
+    ros: t('cardano.stakePoolTableBrowser.tableHeader.ros.title'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.title'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.title'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.title'),
@@ -71,9 +65,9 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.title'),
     liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake.title')
   };
-  const tableHeaderTooltipsTranslations: TranslationsFor<MetricType> = {
+  const tableHeaderTooltipsTranslations: TranslationsFor<SortField> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.tooltip'),
-    apy: t('cardano.stakePoolTableBrowser.tableHeader.apy.tooltip'),
+    ros: t('cardano.stakePoolTableBrowser.tableHeader.ros.tooltip'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost.tooltip'),
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.tooltip'),
@@ -104,11 +98,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     setSearchValue(searchString);
   };
   const list = useMemo(
-    () =>
-      pageResults?.map((pool) =>
-        pool ? Wallet.util.stakePoolTransformer({ stakePool: pool, cardanoCoin }) : undefined
-      ),
-    [cardanoCoin, pageResults]
+    () => pageResults?.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
+    [pageResults]
   );
 
   const onPoolClick = (pool: Wallet.Cardano.StakePool) => {
@@ -117,12 +108,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     setIsDrawerVisible(true);
   };
 
-  const onSortChange = (field: MetricType) => {
-    // TODO: remove once updated on sdk side (LW-9530)
-    if (!Object.keys(SortField).includes(field)) return;
-    const sortField = field as unknown as SortField;
-    const order =
-      sortField === sort?.field && sort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
+  const onSortChange = (sortField: SortField) => {
+    const order = sortField === sort?.field && sort?.order === 'asc' ? 'desc' : 'asc';
 
     setSort({ field: sortField, order });
   };
@@ -131,8 +118,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     const translationKey = `cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`;
     const tooltipText = t(translationKey);
     return {
-      label: tableHeaderTranslations[column as MetricType],
-      ...(tableHeaderTooltipsTranslations[column as MetricType] && { tooltipText }),
+      label: tableHeaderTranslations[column as SortField],
+      ...(tableHeaderTooltipsTranslations[column as SortField] && { tooltipText }),
       value: column
     };
   });
@@ -162,7 +149,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           dataTestId="stake-pool"
           headers={headers}
           isActiveSortItem={isActiveSortItem}
-          isSortingAvailable={isSortingAvailable}
           onSortChange={onSortChange}
           order={sort?.order}
         />
@@ -175,15 +161,14 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
             if (!props) {
               return <StakePoolsListRowSkeleton index={index} columns={stakePoolTableConfig.columns} />;
             }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { stakePool, hexId, id, ...data } = props;
+            const { stakePool } = props;
             return (
-              <Table.Row<typeof data, MetricType>
+              <Table.Row<StakePoolsListRowProps>
                 onClick={() => onPoolClick(stakePool)}
                 columns={stakePoolTableConfig.columns}
                 cellRenderers={stakePoolTableConfig.renderer}
                 dataTestId="stake-pool"
-                data={data}
+                data={props}
               />
             );
           }}

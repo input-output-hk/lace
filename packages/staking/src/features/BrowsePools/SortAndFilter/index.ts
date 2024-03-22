@@ -1,1 +1,0 @@
-export { SortAndFilter } from './SortAndFilter';

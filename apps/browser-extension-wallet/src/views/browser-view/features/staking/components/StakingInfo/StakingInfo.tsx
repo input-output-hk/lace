@@ -29,7 +29,7 @@ type stakingInfoPanelProps = {
   name?: string;
   totalRewards: string;
   lastReward: string;
-  apy?: string | number;
+  ros?: string | number;
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
@@ -47,7 +47,7 @@ export const StakingInfo = ({
   name,
   totalRewards,
   lastReward,
-  apy,
+  ros,
   ticker,
   onStakePoolSelect,
   popupView,
@@ -80,9 +80,9 @@ export const StakingInfo = ({
           <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
             <Stats
               text={t('browserView.staking.stakingInfo.stats.ros')}
-              value={formatNumericValue(apy, '%')}
+              value={formatNumericValue(ros, '%')}
               popupView
-              dataTestid="stats-apy"
+              dataTestid="stats-ros"
             />
             <Stats
               text={t('browserView.staking.stakingInfo.stats.Fee')}

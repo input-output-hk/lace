@@ -14,7 +14,7 @@ export interface StakePool {
   ticker?: string;
   logo?: string;
   retired?: boolean;
-  apy?: string;
+  ros?: string;
   liveStake: { number: string; unit?: string };
   cost: { number: string; unit?: string };
   saturation?: string;
@@ -47,7 +47,7 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
       ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
       : { number: '-', unit: '' },
     ...(metrics && {
-      ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
+      ...(metrics.ros && { ros: formatPercentages(metrics.ros.valueOf()) }),
       saturation: formatPercentages(metrics.saturation.valueOf()),
       blocks: metrics?.blocksCreated?.toString()
     }),
