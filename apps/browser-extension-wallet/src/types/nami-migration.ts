@@ -10,8 +10,9 @@ export interface State {
 export interface Account {
   index: number;
   name: string;
-  extendedPublicKey: string;
-  collaterals: { [K in Networks]?: Collateral };
+  extendedAccountPublicKey: string;
+  collaterals: Record<Networks, Collateral | undefined>;
+  paymentAddresses: Record<Networks, string>;
 }
 
 export interface HarwareWallet extends Account {
@@ -26,7 +27,7 @@ export interface Collateral {
   };
 }
 
-export type Networks = 'mainnet' | 'preview' | 'preprod' | 'testnet';
+export type Networks = 'mainnet' | 'preview' | 'preprod';
 
 interface Analytics {
   enabled: boolean;

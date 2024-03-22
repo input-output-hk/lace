@@ -2,27 +2,71 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
 import '@testing-library/jest-dom';
-import { run } from '../nami-migration-runner';
-import { AnyWallet, Bip32WalletAccount, WalletManager, WalletRepository, WalletType } from '@cardano-sdk/web-extension';
+import { run, WalletManager, WalletRepository, AnyWallet, CollateralRepository } from '../nami-migration-runner';
+import { Bip32WalletAccount, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { state } from './nami-migration-runner.fixture';
 import { BehaviorSubject } from 'rxjs';
 
-type WalletRepositoryMock = WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
-type WalletMock = AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
-type WalletManagerMock = WalletManager<any, any>;
-
 test('fresh install', async () => {
-  const walletRepository: WalletRepositoryMock = {
+  const walletRepository: WalletRepository = {
     wallets$: new BehaviorSubject([]),
-    addWallet: jest.fn().mockResolvedValueOnce('0000000')
-  } as unknown as WalletRepositoryMock;
+    addWallet: jest
+      .fn()
+      .mockResolvedValueOnce('0000000')
+      .mockResolvedValueOnce('1111111')
+      .mockResolvedValueOnce('2222222')
+  } as unknown as WalletRepository;
 
-  const walletManager: WalletManagerMock = {
+  const walletManager: WalletManager = {
     activate: jest.fn()
-  } as unknown as WalletManagerMock;
+  } as unknown as WalletManager;
 
-  await run(walletRepository, walletManager, state);
+  const collateralRepository: CollateralRepository = jest.fn();
+
+  await run({ walletRepository, walletManager, collateralRepository, state });
+
+  expect(collateralRepository).toHaveBeenNthCalledWith(1, {
+    walletId: '0000000',
+    accountIndex: 0,
+    chainId: Wallet.Cardano.ChainIds.Mainnet,
+    utxo: [
+      {
+        txId: Wallet.Cardano.TransactionId('5aeae083cceb3a930f3402d367096d2d524d03abf915fd9452cc59b3063a6aad'),
+        index: 0,
+        address:
+          'addr1qymlvzkhufx0f94vqtfsmfa7yzxtwql8ga8aq5yk6u98gn593a82g73tm9n0l6vehusxn3fxwwxhrssgmvnwnlaa6p4qw7srzg'
+      },
+      {
+        address:
+          'addr1qymlvzkhufx0f94vqtfsmfa7yzxtwql8ga8aq5yk6u98gn593a82g73tm9n0l6vehusxn3fxwwxhrssgmvnwnlaa6p4qw7srzg',
+        value: {
+          coins: BigInt('5000000')
+        }
+      }
+    ]
+  });
+
+  expect(collateralRepository).toHaveBeenNthCalledWith(2, {
+    chainId: Wallet.Cardano.ChainIds.Preview,
+    walletId: '1111111',
+    accountIndex: 0,
+    utxo: [
+      {
+        txId: Wallet.Cardano.TransactionId('5aeae083cceb3a930f3402d367096d2d524d03abf915fd9452cc59b3063a6aad'),
+        index: 0,
+        address:
+          'addr_test1qr5g8x8lpu6ydhe5ytggl6vrlt6prtdzzk7nljh6uf23ktknjausjhrf7f92l3ze9pp5njhkwrv45phhryjxjhtmq7rqsd7r7n'
+      },
+      {
+        address:
+          'addr_test1qr5g8x8lpu6ydhe5ytggl6vrlt6prtdzzk7nljh6uf23ktknjausjhrf7f92l3ze9pp5njhkwrv45phhryjxjhtmq7rqsd7r7n',
+        value: {
+          coins: BigInt('5000000')
+        }
+      }
+    ]
+  });
 
   expect(walletManager.activate).toHaveBeenCalledWith({
     walletId: '0000000',
@@ -82,8 +126,8 @@ test('fresh install', async () => {
 });
 
 test('lace already installed and has no conflict', async () => {
-  const walletRepository: WalletRepositoryMock = {
-    wallets$: new BehaviorSubject<WalletMock[]>([
+  const walletRepository: WalletRepository = {
+    wallets$: new BehaviorSubject<AnyWallet[]>([
       {
         accounts: [
           {
@@ -94,15 +138,63 @@ test('lace already installed and has no conflict', async () => {
         type: WalletType.InMemory,
         walletId: '0000000'
       }
-    ] as WalletMock[]),
-    addWallet: jest.fn().mockResolvedValueOnce('0000000')
-  } as unknown as WalletRepositoryMock;
+    ] as AnyWallet[]),
+    addWallet: jest
+      .fn()
+      .mockResolvedValueOnce('0000000')
+      .mockResolvedValueOnce('1111111')
+      .mockResolvedValueOnce('2222222')
+  } as unknown as WalletRepository;
 
-  const walletManager: WalletManagerMock = {
+  const walletManager: WalletManager = {
     activate: jest.fn()
-  } as unknown as WalletManagerMock;
+  } as unknown as WalletManager;
 
-  await run(walletRepository, walletManager, state);
+  const collateralRepository: CollateralRepository = jest.fn();
+
+  await run({ walletRepository, walletManager, collateralRepository, state });
+
+  expect(collateralRepository).toHaveBeenNthCalledWith(1, {
+    walletId: '0000000',
+    accountIndex: 0,
+    chainId: Wallet.Cardano.ChainIds.Mainnet,
+    utxo: [
+      {
+        txId: Wallet.Cardano.TransactionId('5aeae083cceb3a930f3402d367096d2d524d03abf915fd9452cc59b3063a6aad'),
+        index: 0,
+        address:
+          'addr1qymlvzkhufx0f94vqtfsmfa7yzxtwql8ga8aq5yk6u98gn593a82g73tm9n0l6vehusxn3fxwwxhrssgmvnwnlaa6p4qw7srzg'
+      },
+      {
+        address:
+          'addr1qymlvzkhufx0f94vqtfsmfa7yzxtwql8ga8aq5yk6u98gn593a82g73tm9n0l6vehusxn3fxwwxhrssgmvnwnlaa6p4qw7srzg',
+        value: {
+          coins: BigInt('5000000')
+        }
+      }
+    ]
+  });
+
+  expect(collateralRepository).toHaveBeenNthCalledWith(2, {
+    chainId: Wallet.Cardano.ChainIds.Preview,
+    walletId: '1111111',
+    accountIndex: 0,
+    utxo: [
+      {
+        txId: Wallet.Cardano.TransactionId('5aeae083cceb3a930f3402d367096d2d524d03abf915fd9452cc59b3063a6aad'),
+        index: 0,
+        address:
+          'addr_test1qr5g8x8lpu6ydhe5ytggl6vrlt6prtdzzk7nljh6uf23ktknjausjhrf7f92l3ze9pp5njhkwrv45phhryjxjhtmq7rqsd7r7n'
+      },
+      {
+        address:
+          'addr_test1qr5g8x8lpu6ydhe5ytggl6vrlt6prtdzzk7nljh6uf23ktknjausjhrf7f92l3ze9pp5njhkwrv45phhryjxjhtmq7rqsd7r7n',
+        value: {
+          coins: BigInt('5000000')
+        }
+      }
+    ]
+  });
 
   expect(walletManager.activate).toHaveBeenCalledWith({
     walletId: '0000000',
@@ -162,8 +254,8 @@ test('lace already installed and has no conflict', async () => {
 });
 
 test('some accounts existing conflict', async () => {
-  const walletRepository: WalletRepositoryMock = {
-    wallets$: new BehaviorSubject<WalletMock[]>([
+  const walletRepository: WalletRepository = {
+    wallets$: new BehaviorSubject<AnyWallet[]>([
       {
         accounts: [
           {
@@ -186,16 +278,40 @@ test('some accounts existing conflict', async () => {
         type: WalletType.Ledger,
         walletId: '111111'
       }
-    ] as WalletMock[]),
-    addWallet: jest.fn(),
+    ] as AnyWallet[]),
+    addWallet: jest.fn().mockResolvedValueOnce('2222222'),
     addAccount: jest.fn()
-  } as unknown as WalletRepositoryMock;
+  } as unknown as WalletRepository;
 
-  const walletManager: WalletManagerMock = {
+  const walletManager: WalletManager = {
     activate: jest.fn()
-  } as unknown as WalletManagerMock;
+  } as unknown as WalletManager;
 
-  await run(walletRepository, walletManager, state);
+  const collateralRepository: CollateralRepository = jest.fn();
+
+  await run({ walletRepository, walletManager, collateralRepository, state });
+
+  expect(collateralRepository).toHaveBeenCalledTimes(1);
+  expect(collateralRepository).toHaveBeenCalledWith({
+    chainId: Wallet.Cardano.ChainIds.Preview,
+    accountIndex: 0,
+    walletId: '2222222',
+    utxo: [
+      {
+        txId: Wallet.Cardano.TransactionId('5aeae083cceb3a930f3402d367096d2d524d03abf915fd9452cc59b3063a6aad'),
+        index: 0,
+        address:
+          'addr_test1qr5g8x8lpu6ydhe5ytggl6vrlt6prtdzzk7nljh6uf23ktknjausjhrf7f92l3ze9pp5njhkwrv45phhryjxjhtmq7rqsd7r7n'
+      },
+      {
+        address:
+          'addr_test1qr5g8x8lpu6ydhe5ytggl6vrlt6prtdzzk7nljh6uf23ktknjausjhrf7f92l3ze9pp5njhkwrv45phhryjxjhtmq7rqsd7r7n',
+        value: {
+          coins: BigInt('5000000')
+        }
+      }
+    ]
+  });
 
   expect(walletManager.activate).not.toHaveBeenCalled();
 
@@ -222,8 +338,8 @@ test('some accounts existing conflict', async () => {
 });
 
 test('all accounts existing conflict', async () => {
-  const walletRepository: WalletRepositoryMock = {
-    wallets$: new BehaviorSubject<WalletMock[]>([
+  const walletRepository: WalletRepository = {
+    wallets$: new BehaviorSubject<AnyWallet[]>([
       {
         accounts: [
           {
@@ -256,17 +372,20 @@ test('all accounts existing conflict', async () => {
         type: WalletType.Ledger,
         walletId: '111111'
       }
-    ] as WalletMock[]),
+    ] as AnyWallet[]),
     addWallet: jest.fn(),
     addAccount: jest.fn()
-  } as unknown as WalletRepositoryMock;
+  } as unknown as WalletRepository;
 
-  const walletManager: WalletManagerMock = {
+  const walletManager: WalletManager = {
     activate: jest.fn()
-  } as unknown as WalletManagerMock;
+  } as unknown as WalletManager;
 
-  await run(walletRepository, walletManager, state);
+  const collateralRepository: CollateralRepository = jest.fn();
 
+  await run({ walletRepository, walletManager, collateralRepository, state });
+
+  expect(collateralRepository).not.toHaveBeenCalled();
   expect(walletManager.activate).not.toHaveBeenCalled();
   expect(walletRepository.addAccount).not.toHaveBeenCalled();
   expect(walletRepository.addWallet).not.toHaveBeenCalled();
