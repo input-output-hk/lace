@@ -119,7 +119,10 @@
       "fromAddress": "From address",
       "toAddress": "To address",
       "deposit": "Deposit",
-      "returnedDeposit": "Returned deposit"
+      "returnedDeposit": "Returned deposit",
+      "address": "Address",
+      "nfts": "NFTs",
+      "tokens": "Tokens"
     }
   },
   "tab.main.title": "Tab extension",
