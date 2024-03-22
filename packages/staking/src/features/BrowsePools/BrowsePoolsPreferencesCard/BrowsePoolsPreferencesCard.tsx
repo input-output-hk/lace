@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { USE_MULTI_DELEGATION_STAKING_FILTERS, USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
 import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
 import * as styles from './BrowsePoolsPreferencesCard.css';
+import { BrowsePoolsPreferencesCardLabel } from './BrowsePoolsPreferencesCardLabel';
 import { FilterOption, SelectOption, SortAndFilterTab } from './types';
 
 export interface SortAndFilterProps {
@@ -120,49 +121,84 @@ export const BrowsePoolsPreferencesCard = ({
     return [
       {
         icon: iconAlphabetical,
-        label: t('browsePools.preferencesCard.sort.ticker'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.ticker')}
+            text={t('browsePools.preferencesCard.sort.ticker')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'ticker',
       },
       {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.saturation'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.saturation')}
+            text={t('browsePools.preferencesCard.sort.saturation')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'saturation',
       },
       USE_ROS_STAKING_COLUMN && {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.ros'),
+        label: <BrowsePoolsPreferencesCardLabel text={t('browsePools.preferencesCard.sort.ros')} />,
         onIconClick: handleIconClick,
         value: 'ros',
       },
       {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.cost'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.cost')}
+            text={t('browsePools.preferencesCard.sort.cost')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'cost',
       },
       {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.margin'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.margin')}
+            text={t('browsePools.preferencesCard.sort.margin')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'margin',
       },
       {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.blocks'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.blocks')}
+            text={t('browsePools.preferencesCard.sort.blocks')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'blocks',
       },
       {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.pledge'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.pledge')}
+            text={t('browsePools.preferencesCard.sort.pledge')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'pledge',
       },
       {
         icon: iconNumerical,
-        label: t('browsePools.preferencesCard.sort.liveStake'),
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.liveStake')}
+            text={t('browsePools.preferencesCard.sort.liveStake')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'liveStake',
       },
