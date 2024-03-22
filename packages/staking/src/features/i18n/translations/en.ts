@@ -55,7 +55,8 @@ export const en: Translations = {
   'browsePools.tooltips.maxNumberPoolsSelected': 'Maximum number of pools selected',
   'browsePools.tooltips.pledge':
     'The amount of stake that a pool operator contributes to a pool. Pools with higher pledge amounts earn more rewards for themselves and their delegators. Pools that do not honor their pledge earn zero rewards and accrue low ranking.',
-  'browsePools.tooltips.ros': '',
+  'browsePools.tooltips.ros':
+    "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation.",
   'browsePools.tooltips.saturation': 'Once a pool reaches the point of saturation, it will offer diminishing rewards.',
   'browsePools.tooltips.ticker': 'Refers to the unique identifier of a staking pool',
   'drawer.confirmation.button.confirm': 'Next',

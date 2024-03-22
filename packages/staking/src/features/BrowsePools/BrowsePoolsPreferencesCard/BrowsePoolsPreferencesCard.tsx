@@ -143,7 +143,12 @@ export const BrowsePoolsPreferencesCard = ({
       },
       USE_ROS_STAKING_COLUMN && {
         icon: iconNumerical,
-        label: <BrowsePoolsPreferencesCardLabel text={t('browsePools.preferencesCard.sort.ros')} />,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.ros')}
+            text={t('browsePools.preferencesCard.sort.ros')}
+          />
+        ),
         onIconClick: handleIconClick,
         value: 'ros',
       },
