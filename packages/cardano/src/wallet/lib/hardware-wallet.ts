@@ -24,17 +24,11 @@ const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> =
   [WalletType.Ledger]: async () =>
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
   ...(AVAILABLE_WALLETS.includes(WalletType.Trezor) && {
-    [WalletType.Trezor]: async () => {
-      const isTrezorInitialized = await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
+    [WalletType.Trezor]: async () =>
+      await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
         manifest,
         communicationType: DEFAULT_COMMUNICATION_TYPE
-      });
-
-      // initializeTrezorTransport would still succeed even when device is not connected
-      await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE);
-
-      return isTrezorInitialized;
-    }
+      })
   })
 };
 

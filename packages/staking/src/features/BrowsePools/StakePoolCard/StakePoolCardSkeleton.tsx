@@ -5,10 +5,10 @@ import * as styles from './StakePoolCard.css';
 
 interface Props {
   index?: number;
-  fadeScale?: 3 | 4 | 5;
+  fadeScale?: 2 | 3 | 4;
 }
 
-const defaultFadeScale = 5;
+const defaultFadeScale = 4;
 
 export const StakePoolCardSkeleton = ({ index = 0, fadeScale = defaultFadeScale }: Props) => (
   <Card.Greyed

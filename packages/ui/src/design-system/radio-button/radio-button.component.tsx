@@ -85,6 +85,7 @@ export const RadioButtonGroup = ({
                       className={cx.iconButton}
                       disabled={disabled}
                       onClick={onIconClick}
+                      tabIndex={-1}
                     >
                       <Icon />
                     </button>

@@ -1,5 +1,7 @@
-import { ReactComponent as SortDirectionAscIcon } from '@lace/icons/dist/SortDirectionAscComponent';
-import { ReactComponent as SortDirectionDescIcon } from '@lace/icons/dist/SortDirectionDescComponent';
+import { ReactComponent as SortAlphabeticalAscIcon } from '@lace/icons/dist/SortAlphabeticalAscComponent';
+import { ReactComponent as SortAlphabeticalDescIcon } from '@lace/icons/dist/SortAlphabeticalDescComponent';
+import { ReactComponent as SortNumericalAscIcon } from '@lace/icons/dist/SortNumericalAscComponent';
+import { ReactComponent as SortNumericalDescIcon } from '@lace/icons/dist/SortNumericalDescComponent';
 import {
   Card,
   Flex,
@@ -11,26 +13,29 @@ import {
   ToggleButtonGroup,
 } from '@lace/ui';
 import cn from 'classnames';
-import { MetricType, SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools';
+import { SortField, StakePoolSortOptions } from 'features/BrowsePools';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as styles from './SortAndFilter.css';
-import { FilterOption, FilterValues, PoolsFilter, SelectOption, SortAndFilterTab } from './types';
+import { USE_MULTI_DELEGATION_STAKING_FILTERS, USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
+import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
+import * as styles from './BrowsePoolsPreferencesCard.css';
+import { BrowsePoolsPreferencesCardLabel } from './BrowsePoolsPreferencesCardLabel';
+import { FilterOption, SelectOption, SortAndFilterTab } from './types';
 
 export interface SortAndFilterProps {
   activeTab: SortAndFilterTab;
   sort: StakePoolSortOptions;
-  filter: FilterValues;
+  filter: QueryStakePoolsFilters;
   onSortChange: (value: StakePoolSortOptions) => void;
-  onFilterChange: (filters: FilterValues) => void;
+  onFilterChange: (filters: QueryStakePoolsFilters) => void;
   onTabChange: (section: SortAndFilterTab) => void;
 }
 
 // TODO consider moving this kind of responsibility to the parent component
 const ON_CHANGE_DEBOUNCE = 400;
 
-export const SortAndFilter = ({
+export const BrowsePoolsPreferencesCard = ({
   activeTab,
   filter,
   sort,
@@ -39,7 +44,7 @@ export const SortAndFilter = ({
   onSortChange,
 }: SortAndFilterProps) => {
   const { t } = useTranslation();
-  const [localFilters, setLocalFilters] = useState<FilterValues>(filter);
+  const [localFilters, setLocalFilters] = useState<QueryStakePoolsFilters>(filter);
   const { field: sortBy, order: direction } = sort;
 
   const debouncedFilterChange = useMemo(() => debounce(onFilterChange, ON_CHANGE_DEBOUNCE), [onFilterChange]);
@@ -58,7 +63,7 @@ export const SortAndFilter = ({
   const handleIconClick = useCallback(() => {
     const newSort: StakePoolSortOptions = {
       field: sortBy,
-      order: direction === SortDirection.desc ? SortDirection.asc : SortDirection.desc,
+      order: direction === 'desc' ? 'asc' : 'desc',
     };
     onSortChange(newSort);
   }, [direction, onSortChange, sortBy]);
@@ -67,9 +72,9 @@ export const SortAndFilter = ({
     (field: string) =>
       onSortChange({
         field: field as unknown as SortField,
-        order: direction,
+        order: 'asc',
       }),
-    [direction, onSortChange]
+    [onSortChange]
   );
 
   const getFilters = (filterOption: FilterOption) => {
@@ -103,7 +108,7 @@ export const SortAndFilter = ({
         showArrow
         withOutline
         className={styles.selectGroup}
-        placeholder={t('browsePools.stakePoolTableBrowser.sortAndFilter.input.select')}
+        placeholder={t('browsePools.preferencesCard.filter.input.select')}
         options={filterOption.opts as SelectOption[]}
         selectedValue={selectedValue}
       />
@@ -111,116 +116,157 @@ export const SortAndFilter = ({
   };
 
   const sortingOptions: RadioButtonGroupOption[] = useMemo(() => {
-    const icon = direction === SortDirection.asc ? SortDirectionAscIcon : SortDirectionDescIcon;
+    const iconAlphabetical = direction === 'asc' ? SortAlphabeticalAscIcon : SortAlphabeticalDescIcon;
+    const iconNumerical = direction === 'asc' ? SortNumericalAscIcon : SortNumericalDescIcon;
     return [
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.ticker'),
+        icon: iconAlphabetical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.ticker')}
+            text={t('browsePools.preferencesCard.sort.ticker')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.ticker,
+        value: 'ticker',
       },
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.saturation')}
+            text={t('browsePools.preferencesCard.sort.saturation')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.saturation,
+        value: 'saturation',
+      },
+      USE_ROS_STAKING_COLUMN && {
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.ros')}
+            text={t('browsePools.preferencesCard.sort.ros')}
+          />
+        ),
+        onIconClick: handleIconClick,
+        value: 'ros',
       },
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.title'),
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.cost')}
+            text={t('browsePools.preferencesCard.sort.cost')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.apy,
+        value: 'cost',
       },
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.cost'),
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.margin')}
+            text={t('browsePools.preferencesCard.sort.margin')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.cost,
+        value: 'margin',
       },
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.margin'),
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.blocks')}
+            text={t('browsePools.preferencesCard.sort.blocks')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.margin,
+        value: 'blocks',
       },
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.blocks'),
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.pledge')}
+            text={t('browsePools.preferencesCard.sort.pledge')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.blocks,
+        value: 'pledge',
       },
       {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.pledge'),
+        icon: iconNumerical,
+        label: (
+          <BrowsePoolsPreferencesCardLabel
+            tooltip={t('browsePools.tooltips.liveStake')}
+            text={t('browsePools.preferencesCard.sort.liveStake')}
+          />
+        ),
         onIconClick: handleIconClick,
-        value: MetricType.pledge,
+        value: 'liveStake',
       },
-      {
-        icon,
-        label: t('browsePools.stakePoolTableBrowser.sortByTitle.livestake'),
-        onIconClick: handleIconClick,
-        value: MetricType.liveStake,
-      },
-    ];
+    ].filter(Boolean) as RadioButtonGroupOption[];
   }, [direction, handleIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(() => {
-    const fromLabel = t('browsePools.stakePoolTableBrowser.sortAndFilter.input.from');
-    const toLabel = t('browsePools.stakePoolTableBrowser.sortAndFilter.input.to');
+    const fromLabel = t('browsePools.preferencesCard.filter.input.from');
+    const toLabel = t('browsePools.preferencesCard.filter.input.to');
 
     return [
       {
         key: PoolsFilter.Saturation,
         opts: [fromLabel, toLabel],
-        title: t('browsePools.stakePoolTableBrowser.sortByTitle.saturation'),
+        title: t('browsePools.preferencesCard.filter.saturation'),
         type: 'input',
       },
       {
         key: PoolsFilter.ProfitMargin,
         opts: [fromLabel, toLabel],
-        title: t('browsePools.stakePoolTableBrowser.sortByTitle.profitMargin'),
+        title: t('browsePools.preferencesCard.filter.profitMargin'),
         type: 'input',
       },
       {
         key: PoolsFilter.Performance,
         opts: [fromLabel, toLabel],
-        title: t('browsePools.stakePoolTableBrowser.sortByTitle.performance'),
+        title: t('browsePools.preferencesCard.filter.performance'),
         type: 'input',
       },
       {
         key: PoolsFilter.Ros,
         opts: [
           {
-            label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.lastEpoch'),
+            label: t('browsePools.preferencesCard.filter.ros.lastEpoch'),
             selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch',
             value: 'lastepoch',
           },
           {
-            label: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.other'),
+            label: t('browsePools.preferencesCard.filter.ros.other'),
             selected: localFilters[PoolsFilter.Ros][0] === 'lastepoch',
             value: 'other',
           },
         ],
-        title: t('browsePools.stakePoolTableBrowser.sortByTitle.ros.title'),
+        title: t('browsePools.preferencesCard.filter.ros.title'),
         type: 'select',
       },
     ];
   }, [localFilters, t]);
 
   return (
-    <Card.Outlined className={styles.card}>
+    <Card.Outlined>
       <Flex flexDirection="column" justifyContent="flex-start" alignItems="stretch" my="$32" mx="$32" gap="$20">
-        <Text.SubHeading weight="$bold">
-          {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.moreOptions')}
-        </Text.SubHeading>
-        <ToggleButtonGroup.Root value={activeTab} onValueChange={(value) => onTabChange(value as SortAndFilterTab)}>
-          <ToggleButtonGroup.Item value={SortAndFilterTab.sort}>
-            {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.sorting')}
-          </ToggleButtonGroup.Item>
-          <ToggleButtonGroup.Item value={SortAndFilterTab.filter}>
-            {t('browsePools.stakePoolTableBrowser.sortAndFilter.headers.filters')}
-          </ToggleButtonGroup.Item>
-        </ToggleButtonGroup.Root>
+        <Text.SubHeading weight="$bold">{t('browsePools.preferencesCard.headers.moreOptions')}</Text.SubHeading>
+        {USE_MULTI_DELEGATION_STAKING_FILTERS && (
+          <ToggleButtonGroup.Root value={activeTab} onValueChange={(value) => onTabChange(value as SortAndFilterTab)}>
+            <ToggleButtonGroup.Item value={SortAndFilterTab.sort}>
+              {t('browsePools.preferencesCard.headers.sorting')}
+            </ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item value={SortAndFilterTab.filter}>
+              {t('browsePools.preferencesCard.headers.filters')}
+            </ToggleButtonGroup.Item>
+          </ToggleButtonGroup.Root>
+        )}
         {activeTab === SortAndFilterTab.sort ? (
           <RadioButtonGroup
             className={styles.radioGroup}

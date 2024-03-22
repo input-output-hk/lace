@@ -23,7 +23,7 @@ export interface StakePool {
   ticker?: string;
   logo?: string;
   retired?: boolean;
-  apy?: number | string;
+  ros?: number | string;
   size?: string;
   saturation?: number | string;
   fee?: number | string;
@@ -43,7 +43,7 @@ export type stakePoolDetailsSelectorProps = {
   activeStake: { number: string; unit?: string };
   liveStake: { number: string; unit?: string };
   ticker: string;
-  apy: number | string;
+  ros: number | string;
   status: Wallet.Cardano.StakePool['status'];
   fee: string;
   contact: Wallet.Cardano.PoolContactData;

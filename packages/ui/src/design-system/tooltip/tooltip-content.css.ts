@@ -7,11 +7,12 @@ export const label = sx({
 export const tooltipContent = style([
   sx({
     background: '$tooltip_container_bgColor',
-    margin: '$10',
     borderRadius: '$small',
     boxShadow: '$tooltip',
-    padding: '$16',
     maxWidth: '$214',
+    padding: '$8',
+    paddingLeft: '$16',
+    paddingRight: '$16',
   }),
   {
     position: 'relative',

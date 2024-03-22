@@ -37,9 +37,14 @@ export const getHWPersonProperties = async (
   connectedDevice: Wallet.HardwareWallets,
   deviceConnection: Wallet.DeviceConnection
 ): Promise<PostHogProperties> => {
+  // TODO: Remove these hardcoded specs once we have a logic that will prevent additional interaction with 3rd party Trezor Connect popup
+  const trezorSpecificationsHC: HardwareWalletPersonProperties = {
+    // We are only accepting Model T for now
+    model: 'Trezor model T'
+  };
   const HWSpecifications =
     connectedDevice === WalletType.Trezor
-      ? await getTrezorSpecifications()
+      ? trezorSpecificationsHC
       : await getLedgerSpecifications(deviceConnection as HardwareLedger.LedgerKeyAgent['deviceConnection']);
   return {
     $set_once: {

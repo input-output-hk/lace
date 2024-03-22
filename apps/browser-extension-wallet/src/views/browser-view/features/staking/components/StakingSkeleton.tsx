@@ -6,12 +6,13 @@ import isNumber from 'lodash/isNumber';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { NetworkInfo } from '@lace/cardano';
-import styles from './Staking.modules.scss';
 import { stakingInfoSelector } from '@stores/selectors/staking-selectors';
 import { EducationalList, SectionLayout } from '@src/views/browser-view/components';
 import { useWalletStore } from '@stores';
-import { useFetchCoinPrice, useBalances } from '@src/hooks';
+import { useBalances, useFetchCoinPrice } from '@src/hooks';
 import LightBulb from '@src/assets/icons/light.svg';
+import { BrowsePoolsPreferencesCard } from '@lace/staking';
+import { Flex } from '@lace/ui';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.ReactElement => {
@@ -70,14 +71,13 @@ export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.
   ];
 
   const sidePanel = (
-    <>
+    <Flex flexDirection="column" alignItems="stretch" gap="$32">
+      <BrowsePoolsPreferencesCard />
       <Skeleton loading={!networkInfo}>
         <NetworkInfo {...networkInfo} translations={translations} />
       </Skeleton>
-      <div className={styles.educationalList}>
-        <EducationalList items={educationalItems} title={t('browserView.sidePanel.aboutStaking')} />
-      </div>
-    </>
+      <EducationalList items={educationalItems} title={t('browserView.sidePanel.aboutStaking')} />
+    </Flex>
   );
 
   return (

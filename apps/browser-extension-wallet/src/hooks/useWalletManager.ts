@@ -109,10 +109,6 @@ const getHwExtendedAccountPublicKey = async (
         accountIndex
       });
     case WalletType.Trezor:
-      await Wallet.Trezor.TrezorKeyAgent.initializeTrezorTransport({
-        manifest: Wallet.manifest,
-        communicationType: Wallet.KeyManagement.CommunicationType.Web
-      });
       return Wallet.Trezor.TrezorKeyAgent.getXpub({
         communicationType: Wallet.KeyManagement.CommunicationType.Web,
         accountIndex

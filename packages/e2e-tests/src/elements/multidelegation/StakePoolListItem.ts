@@ -7,7 +7,7 @@ export class StakePoolListItem {
   private LIST_ITEM = '[data-testid="stake-pool-item"]';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private TICKER = '[data-testid="stake-pool-list-ticker"]';
-  private ROS = '[data-testid="stake-pool-list-apy"]';
+  private ROS = '[data-testid="stake-pool-list-ros"]';
   private SATURATION = '[data-testid="stake-pool-list-saturation"]';
   private COST = '[data-testid="stake-pool-list-cost"]';
   private MARGIN = '[data-testid="stake-pool-list-margin"]';
