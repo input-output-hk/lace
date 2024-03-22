@@ -56,8 +56,7 @@ export const en: Translations = {
   'browsePools.tooltips.pledge':
     'The amount of stake that a pool operator contributes to a pool. Pools with higher pledge amounts earn more rewards for themselves and their delegators. Pools that do not honor their pledge earn zero rewards and accrue low ranking.',
   'browsePools.tooltips.ros': '',
-  'browsePools.tooltips.saturation':
-    'Saturation measures the stake in the pool and indicates the point at which rewards stop increasing with increases in stake. This capping mechanism encourages decentralization by discouraging users from delegating to an oversaturated pool.',
+  'browsePools.tooltips.saturation': 'Once a pool reaches the point of saturation, it will offer diminishing rewards.',
   'browsePools.tooltips.ticker': 'Refers to the unique identifier of a staking pool',
   'drawer.confirmation.button.confirm': 'Next',
   'drawer.confirmation.button.confirmWithDevice': 'Confirm with {{hardwareWallet}}',
