@@ -21,7 +21,7 @@ export const Root = ({
   children,
 }: Readonly<Props>): JSX.Element => {
   return (
-    <Tooltip.Root open>
+    <Tooltip.Root>
       {children}
       <Tooltip.Portal>
         <Tooltip.Content style={{ zIndex }} side={side} align={align}>
