@@ -136,7 +136,7 @@ export const WalletSetupMnemonicStepRevamp = ({
                 await writeMnemonicToClipboard(mnemonic);
                 onCopyToClipboard();
               }}
-              data-testid="copy-to-clipboard"
+              data-testid="copy-to-clipboard-button"
             >
               {translations.copyToClipboard}
             </Button>
