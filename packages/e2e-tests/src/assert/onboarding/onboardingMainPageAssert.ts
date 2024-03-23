@@ -9,6 +9,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await OnboardingMainPage.logo.waitForDisplayed();
   }
 
+  // ToDo LW-10073 - add reading copy from translations
   async assertSeeAgreementText() {
     await OnboardingMainPage.agreementText.waitForDisplayed();
     expect(await OnboardingMainPage.agreementText.getText()).to.equal(
@@ -16,11 +17,13 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     );
   }
 
+  // ToDo LW-10073 - add reading copy from translations
   async assertSeeTermsOfServiceLink() {
     await OnboardingMainPage.agreementTermsOfServiceLink.waitForDisplayed();
     expect(await OnboardingMainPage.agreementTermsOfServiceLink.getText()).to.equal('Terms of Service');
   }
 
+  // ToDo LW-10073 - add reading copy from translations
   async assertSeePrivacyPolicyLink() {
     await OnboardingMainPage.agreementPrivacyPolicyLink.waitForDisplayed();
     expect(await OnboardingMainPage.agreementPrivacyPolicyLink.getText()).to.equal('Privacy Policy');

@@ -141,7 +141,7 @@ export const WalletSetupMnemonicStepRevamp = ({
               {translations.copyToClipboard}
             </Button>
           ) : (
-            <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard">
+            <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
               {translations.pasteFromClipboard}
             </Button>
           )

@@ -14,8 +14,8 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_LENGTH_SELECTOR_15 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="15"]';
   private MNEMONIC_LENGTH_SELECTOR_24 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="24"]';
   private WATCH_VIDEO_LINK = '[data-testid="find-out-more-link"]';
-  private COPY_TO_CLIPBOARD_BUTTON = '[data-testid="copy-to-clipboard"]';
-  private PASTE_FROM_CLIPBOARD_BUTTON = '[data-testid="paste-from-clipboard"]';
+  private COPY_TO_CLIPBOARD_BUTTON = '[data-testid="copy-to-clipboard-button"]';
+  private PASTE_FROM_CLIPBOARD_BUTTON = '[data-testid="paste-from-clipboard-button"]';
 
   get mnemonicAutocompleteDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MNEMONIC_AUTOCOMPLETE_DROPDOWN);

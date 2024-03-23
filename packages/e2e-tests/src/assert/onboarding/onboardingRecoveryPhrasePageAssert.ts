@@ -41,7 +41,7 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeMnemonicWords(mnemonicWordsLength: RecoveryPhrase) {
-    expect((await recoveryPhrasePage.mnemonicWords.length).toString()).to.equal(mnemonicWordsLength);
+    expect(String(await recoveryPhrasePage.mnemonicWords.length)).to.equal(mnemonicWordsLength);
   }
 
   async assertSeeMnemonicInputs(mnemonicWordsLength: RecoveryPhrase) {
