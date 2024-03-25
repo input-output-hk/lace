@@ -72,7 +72,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       onBack={onCancel}
       onNext={onSubmit}
       customAction={
-        <Button type="link" onClick={() => pasteRecoveryPhrase()}>
+        <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
           {translations.pasteFromClipboard}
         </Button>
       }

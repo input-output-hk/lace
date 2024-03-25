@@ -348,10 +348,11 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Create" button on wallet setup page
-    And I am on "All done" page
-    When I click "Go to my wallet" button on "All done" page
+    And I go to "Wallet setup" page from "Create" wallet flow
+    When I click "Enter wallet" button
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 
@@ -360,10 +361,11 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Restore" button and confirm
-    And I am on "All done!" page from "Restore wallet" using "TAWalletNoFunds" wallet
-    And I click "Go to my wallet" button on "All done" page
+    And I go to "Wallet setup" page with wallet TAWalletNoFunds from "Restore" wallet flow
+    When I click "Enter wallet" button
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 
@@ -374,6 +376,6 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    Then "Get started" page is displayed
+    Then I see Analytics banner
     And I expect wallet repository and local storage to be empty
     And Mnemonic is not stored in background storage

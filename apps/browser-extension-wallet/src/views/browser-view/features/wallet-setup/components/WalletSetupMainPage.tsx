@@ -121,7 +121,7 @@ export const WalletSetupMainPage = (): ReactElement => {
       <AnalyticsConfirmationBanner
         message={
           <>
-            <span>{translate('analyticsConfirmationBanner.message')}</span>
+            <span data-testid="analytic-banner-message">{translate('analyticsConfirmationBanner.message')}</span>
             <span
               className={styles.learnMore}
               onClick={() => {
@@ -130,6 +130,7 @@ export const WalletSetupMainPage = (): ReactElement => {
                   postHogAction: postHogOnboardingActions.onboarding.LEARN_MORE_CLICK
                 });
               }}
+              data-testid="analytic-banner-learn-more"
             >
               {translate('analyticsConfirmationBanner.learnMore')}
             </span>

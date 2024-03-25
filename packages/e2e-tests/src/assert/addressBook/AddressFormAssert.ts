@@ -25,6 +25,7 @@ class AddressFormAssert {
   assertSeeAddressError = async (shouldBeDisplayed: boolean, expectedAddressError?: string) => {
     await AddressForm.addressError.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
+      await AddressForm.addressError.waitForStable();
       expect(await AddressForm.addressError.getText()).to.equal(expectedAddressError);
     }
   };

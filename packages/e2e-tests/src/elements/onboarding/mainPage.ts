@@ -17,8 +17,8 @@ class OnboardingMainPage extends CommonOnboardingElements {
   private RESTORE_WALLET_DESCRIPTION = '[data-testid="restore-wallet-description"]';
   private RESTORE_WALLET_BUTTON = '[data-testid="restore-wallet-button"]';
   private AGREEMENT_TEXT = '[data-testid="agreement-text"]';
-  private PRIVACY_POLICY_LINK = '[data-testid="privacy-policy-link"]';
-  private TERMS_OF_SERVICE_LINK = '[data-testid="terms-of-service-link"]';
+  private AGREEMENT_TERMS_OF_SERVICE_LINK = '[data-testid="agreement-terms-of-service-link"]';
+  private AGREEMENT_PRIVACY_POLICY_LINK = '[data-testid="agreement-privacy-policy-link"]';
 
   get logo() {
     return $(this.LOGO_IMAGE);
@@ -84,12 +84,12 @@ class OnboardingMainPage extends CommonOnboardingElements {
     return $(this.AGREEMENT_TEXT);
   }
 
-  get privacyPolicyLink() {
-    return $(this.PRIVACY_POLICY_LINK);
+  get agreementTermsOfServiceLink() {
+    return $(this.AGREEMENT_TERMS_OF_SERVICE_LINK);
   }
 
-  get termsOfServiceLink() {
-    return $(this.TERMS_OF_SERVICE_LINK);
+  get agreementPrivacyPolicyLink() {
+    return $(this.AGREEMENT_PRIVACY_POLICY_LINK);
   }
 }
 

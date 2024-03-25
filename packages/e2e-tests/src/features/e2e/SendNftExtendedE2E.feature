@@ -1,4 +1,4 @@
-@SendNft-Extended-E2E @Testnet
+@SendNft-Extended-E2E @E2E @Testnet
 Feature: Send NFT - Extended Browser View - E2E
 
   Background:
