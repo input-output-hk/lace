@@ -1,13 +1,13 @@
 import { PostHogAction } from '@lace/common';
-import { MetricType } from 'features/BrowsePools/types';
+import { SortField } from 'features/BrowsePools/types';
 
-export const analyticsActionsMap: Record<MetricType, PostHogAction> = {
-  [MetricType.ticker]: PostHogAction.StakingBrowsePoolsTickerClick,
-  [MetricType.apy]: PostHogAction.StakingBrowsePoolsRosClick,
-  [MetricType.saturation]: PostHogAction.StakingBrowsePoolsSaturationClick,
-  [MetricType.cost]: PostHogAction.StakingBrowsePoolsCostClick,
-  [MetricType.margin]: PostHogAction.StakingBrowsePoolsMarginClick,
-  [MetricType.blocks]: PostHogAction.StakingBrowsePoolsBlocksClick,
-  [MetricType.pledge]: PostHogAction.StakingBrowsePoolsPledgeClick,
-  [MetricType.liveStake]: PostHogAction.StakingBrowsePoolsLiveStakeClick,
+export const analyticsActionsMap: Record<SortField, PostHogAction> = {
+  blocks: PostHogAction.StakingBrowsePoolsBlocksClick,
+  cost: PostHogAction.StakingBrowsePoolsCostClick,
+  liveStake: PostHogAction.StakingBrowsePoolsLiveStakeClick,
+  margin: PostHogAction.StakingBrowsePoolsMarginClick,
+  pledge: PostHogAction.StakingBrowsePoolsPledgeClick,
+  ros: PostHogAction.StakingBrowsePoolsRosClick,
+  saturation: PostHogAction.StakingBrowsePoolsSaturationClick,
+  ticker: PostHogAction.StakingBrowsePoolsTickerClick,
 };

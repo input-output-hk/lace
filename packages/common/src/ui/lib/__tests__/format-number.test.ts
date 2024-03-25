@@ -42,8 +42,8 @@ describe('getNumberWithUnit', () => {
     }
   );
 
-  test('returns the same value and no unit in case of a NaN value', () => {
-    expect(getNumberWithUnit('asd')).toEqual({ number: 'asd' });
+  test('returns the same value and empty string as the unit in case of a NaN value', () => {
+    expect(getNumberWithUnit('asd')).toEqual({ number: 'asd', unit: '' });
   });
 
   test('formats negatives and decimal values', () => {
