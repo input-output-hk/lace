@@ -133,6 +133,8 @@ export enum PostHogAction {
   StakingBrowsePoolsProducedBlocksClick = 'staking | browse pools | produced blocks | click',
   StakingBrowsePoolsPledgeClick = 'staking | browse pools | pledge | click',
   StakingBrowsePoolsLiveStakeClick = 'staking | browse pools | live-stake | click',
+  StakingBrowsePoolsToggleGridViewClick = 'staking | browse pools | toggle | grid view | click',
+  StakingBrowsePoolsToggleListViewClick = 'staking | browse pools | toggle | list view | click',
   StakingChangingStakingPreferencesFineByMeClick = 'staking | changing staking preferences? | fine by me | click',
   StakingChangingStakingPreferencesCancelClick = 'staking | changing staking preferences? | cancel | click',
   StakingManageDelegationDelegationRatioSliderMinusClick = 'staking | manage delegation | delegation ratio slider | - | click',
