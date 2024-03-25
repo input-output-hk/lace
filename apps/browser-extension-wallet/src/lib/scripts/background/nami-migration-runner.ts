@@ -1,4 +1,4 @@
-import * as Nami from '@types';
+import type * as Nami from '@xsy/nami-migration-tool';
 import * as Extension from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { HexBlob } from '@cardano-sdk/util';
@@ -8,6 +8,7 @@ import { WalletId } from '@cardano-sdk/web-extension';
 export type WalletRepository = Extension.WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 export type AddWalletProps = Extension.AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 export type AnyWallet = Extension.AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WalletManager = Extension.WalletManager<any, any>;
 export type CollateralRepository = (args: {
   walletId: WalletId;

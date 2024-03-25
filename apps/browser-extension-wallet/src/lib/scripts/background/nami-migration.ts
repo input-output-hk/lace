@@ -1,7 +1,7 @@
 import { runtime, tabs } from 'webextension-polyfill';
 import { walletRoutePaths } from '@routes/wallet-paths';
+import type * as Nami from '@xsy/nami-migration-tool';
 import { walletRepository, walletManager, getBaseDbName } from './wallet';
-import * as Nami from '@types';
 
 import { run, CollateralRepository } from './nami-migration-runner';
 import { currencyCode } from '@providers/currency/constants';

@@ -1,4 +1,4 @@
-import * as Nami from '@types';
+import type * as Nami from '@xsy/nami-migration-tool';
 
 export const state: Nami.State = {
   encryptedPrivateKey:

@@ -10602,6 +10602,7 @@ __metadata:
     "@types/w3c-web-hid": ^1.0.3
     "@types/webextension-polyfill": 0.8.0
     "@vespaiach/axios-fetch-adapter": ^0.3.0
+    "@xsy/nami-migration-tool": ./xsy-nami-migration-tool-0.0.1.tgz
     antd: ^4.24.10
     are-you-es5: ^2.1.2
     axios: 0.21.4
@@ -21843,6 +21844,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xsy/nami-migration-tool@file:./xsy-nami-migration-tool-0.0.1.tgz::locator=%40lace%2Fbrowser-extension-wallet%40workspace%3Aapps%2Fbrowser-extension-wallet":
+  version: 0.0.1
+  resolution: "@xsy/nami-migration-tool@file:./xsy-nami-migration-tool-0.0.1.tgz::locator=%40lace%2Fbrowser-extension-wallet%40workspace%3Aapps%2Fbrowser-extension-wallet"
+  dependencies:
+    dotenv: ^16.4.5
+    webextension-polyfill: ^0.10.0
+  checksum: d17d9c1db604b33556300f4f7f40a5324e379feb4068f515323e95aaac97f149b442cdc8264c1455f8d145f0bac88c7f98345d6ee6b917282251248a4c33b762
+  languageName: node
+  linkType: hard
+
 "@xtuc/ieee754@npm:^1.2.0":
   version: 1.2.0
   resolution: "@xtuc/ieee754@npm:1.2.0"
@@ -28635,6 +28646,13 @@ __metadata:
   version: 16.3.1
   resolution: "dotenv@npm:16.3.1"
   checksum: 15d75e7279018f4bafd0ee9706593dd14455ddb71b3bcba9c52574460b7ccaf67d5cf8b2c08a5af1a9da6db36c956a04a1192b101ee102a3e0cf8817bbcf3dfd
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.4.5":
+  version: 16.4.5
+  resolution: "dotenv@npm:16.4.5"
+  checksum: 301a12c3d44fd49888b74eb9ccf9f07a1f5df43f489e7fcb89647a2edcd84c42d6bc349dc8df099cd18f07c35c7b04685c1a4f3e6a6a9e6b30f8d48c15b7f49c
   languageName: node
   linkType: hard
 
@@ -52276,6 +52294,13 @@ __metadata:
   version: 0.8.0
   resolution: "webextension-polyfill@npm:0.8.0"
   checksum: 56286e6216e15834fdcdc3dcf611000d96b49c9d925de3d657eb5f1e294074180dd3efe78a0966223eb311ac3a0ac5fdf71d324b836bf05724455ffd6c7c98c3
+  languageName: node
+  linkType: hard
+
+"webextension-polyfill@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "webextension-polyfill@npm:0.10.0"
+  checksum: 4a59036bda571360c2c0b2fb03fe1dc244f233946bcf9a6766f677956c40fd14d270aaa69cdba95e4ac521014afbe4008bfa5959d0ac39f91c990eb206587f91
   languageName: node
   linkType: hard
 
