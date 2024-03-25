@@ -69,13 +69,13 @@ Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => 
 });
 
 Then(
-  /^I see DApp connector "Confirm transaction" page with: "([^"]*)", "([^"]*)" assets and receiving wallet "([^"]*)"$/,
+  /^I see DApp connector "Confirm transaction" page with: "([^"]*)" tADA, "([^"]*)" assets and receiving wallet "([^"]*)"$/,
   async (adaValue: string, assetValue: string, walletName: string) => {
     await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
 
     const expectedTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: adaValue,
+      amountADA: Number(adaValue),
       amountAsset: assetValue,
       recipientAddress: String(getTestWallet(walletName).address)
     };
@@ -90,7 +90,7 @@ Then(
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: '3.00 ADA',
+      amountADA: 3,
       amountAsset: '0',
       recipientAddress: String(getTestWallet('WalletReceiveDappTransactionE2E').address)
     };

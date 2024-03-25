@@ -28,7 +28,7 @@ export type ExpectedDAppDetails = {
 
 export type ExpectedTransactionData = {
   typeOfTransaction: string;
-  amountADA: string;
+  amountADA: number;
   amountAsset?: string;
   recipientAddress: string;
 };
@@ -268,14 +268,16 @@ class DAppConnectorAssert {
     await ConfirmTransactionPage.transactionType.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionType.getText()).to.equal(expectedTransactionData.typeOfTransaction);
 
-    await ConfirmTransactionPage.transactionAmountValue.waitForDisplayed();
-    expect(await ConfirmTransactionPage.transactionAmountValue.getText()).to.equal(expectedTransactionData.amountADA);
-
     await ConfirmTransactionPage.transactionFeeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionFeeTitle.getText()).to.equal(
       await t('package.core.activityDetails.transactionFee', 'core')
     );
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
+    const fee = Number((await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ')[0]);
+
+    await ConfirmTransactionPage.transactionAmountValue.waitForDisplayed();
+    const totalAdaAmount = (expectedTransactionData.amountADA - fee).toFixed(2);
+    expect(await ConfirmTransactionPage.transactionAmountValue.getText()).to.equal(`${totalAdaAmount} tADA`);
 
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
