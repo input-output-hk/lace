@@ -14,7 +14,6 @@ import {
   validAddress6
 } from '../data/AddressData';
 import coinConfigureAssert from '../assert/coinConfigureAssert';
-import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import transactionSummaryAssert from '../assert/transaction/transactionSummaryAssert';
 import transactionPasswordExtendedAssert from '../assert/transaction/transactionPasswordExtendedAssert';
 import transactionSubmittedAssert from '../assert/transaction/transactionSubmittedAssert';
@@ -116,7 +115,7 @@ When(
 );
 
 When(/^I enter "([^"]*)" in asset search input$/, async (assetName: string) => {
-  await transactionExtendedPageObject.searchAsset(assetName);
+  await TokenSelectionPage.searchAsset(assetName);
 });
 
 Then(
@@ -184,13 +183,13 @@ Then(/^click on the (Tokens|NFTs) button in the coin selector dropdown$/, async 
 });
 
 Then(/click on an token with name: "([^"]*)"/, async (tokenName: string) => {
-  await transactionExtendedPageObject.clickCoinConfigureTokenSearchResult(tokenName);
+  await TokenSelectionPage.clickOnToken(tokenName);
 });
 
 Then(
   /^Token with name: "([^"]*)" (is displayed|is not displayed) in coin selector$/,
   async (tokenName: string, state: string) => {
-    await coinConfigureAssert.assertTokenDisplayed(tokenName, state === 'is displayed');
+    await TransactionAssetSelectionAssert.assertAssetIsPresentInTokenList(tokenName, state === 'is displayed');
   }
 );
 
@@ -237,7 +236,7 @@ When(
           break;
         case 'Token':
           await new AssetInput(bundleIndex).clickAddAssetButton();
-          await transactionExtendedPageObject.clickCoinConfigureTokenSearchResult(entry.assetName);
+          await TokenSelectionPage.clickOnToken(entry.assetName);
           break;
       }
       await TransactionNewPage.coinConfigure(bundleIndex, entry.ticker ? entry.ticker : entry.assetName).fillTokenValue(
