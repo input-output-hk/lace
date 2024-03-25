@@ -25,6 +25,8 @@ class OnboardingWalletSetupPageAssert extends OnboardingCommonAssert {
     if (shouldSee) {
       const passwordRecommendations = await walletSetupPage.passwordFeedback.getText();
       expect(passwordRecommendations).to.contain(expectedMessage);
+    } else {
+      await walletSetupPage.passwordFeedback.waitForDisplayed({ reverse: true });
     }
   }
 
