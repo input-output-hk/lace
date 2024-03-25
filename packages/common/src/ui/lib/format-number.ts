@@ -18,9 +18,9 @@ type FormatPercentagesOptions = {
  * @param number The number string to be formatted and to get its unit
  * @returns An object with the formatted number and its corresponding unit
  */
-export const getNumberWithUnit = (number: BigNumber.Value): { number: string; unit?: string } => {
+export const getNumberWithUnit = (number: BigNumber.Value): { number: string; unit: string } => {
   const bigNumber = new BigNumber(number);
-  if (bigNumber.isNaN()) return { number: number.toString() };
+  if (bigNumber.isNaN()) return { number: number.toString(), unit: '' };
 
   const { unit, unitThreshold } = getNumberUnit(bigNumber);
   const threshold = unitThreshold === UnitThreshold.ZERO ? 1 : unitThreshold;

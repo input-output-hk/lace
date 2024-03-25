@@ -4,6 +4,6 @@ export type DistributionItem = {
   name: string;
   percentage: number;
   color: PieChartColor;
-  apy?: string;
+  ros?: string;
   saturation?: string;
 };

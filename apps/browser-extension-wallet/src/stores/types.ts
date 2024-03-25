@@ -72,12 +72,13 @@ export interface NetworkSlice {
 }
 
 export interface StakePoolSearchSlice {
-  stakePoolSearchResults: Omit<Wallet.StakePoolSearchResults, 'pageResults'> & {
+  stakePoolSearchResults: {
     skip?: number;
     limit?: number;
     searchQuery?: string;
     searchFilters?: StakePoolSortOptions;
     pageResults: (Wallet.Cardano.StakePool | undefined)[];
+    totalResultCount: number | null;
   };
   stakePoolSearchResultsStatus: StateStatus;
   selectedStakePool: Wallet.Cardano.StakePool;

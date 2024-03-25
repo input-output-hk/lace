@@ -10,13 +10,19 @@ import type { Meta } from '@storybook/react';
 import { v4 as uuid } from 'uuid';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { Box } from '../box';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import { TooltipContent } from '../tooltip';
 import * as Text from '../typography';
 
+import * as styles from './radio-button.stories.css';
+
 import { RadioButtonGroup } from './';
+
+import type { RadioButtonGroupOption } from './';
 
 export default {
   title: 'Input Fields/Radio button',
@@ -33,25 +39,18 @@ const getOptions = (
   count: number,
   label: string,
   icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
-): {
-  value: string;
-  label: string;
-  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
-  onIconClick: () => void;
-  tooltipText: string;
   // eslint-disable-next-line max-params
-}[] =>
+): RadioButtonGroupOption[] =>
   Array.from({ length: count }).map(_ => ({
     value: `option-${uuid()}`,
     label,
     icon,
     onIconClick: (): void => void 0,
-    tooltipText: 'Test tooltip text lorem ipsum dolor sit amet',
   }));
 
 const MainComponents = (): JSX.Element => {
   const getRow = (
-    label = 'label',
+    label = 'Label',
     icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
   ) => [
     {
@@ -80,6 +79,7 @@ const MainComponents = (): JSX.Element => {
     },
   ];
 
+  // TODO: remove className and use color in <Text.Body.Normal className={styles.note}> after https://input-output.atlassian.net/browse/LW-9760
   return (
     <>
       <Variants.Row>
@@ -88,7 +88,9 @@ const MainComponents = (): JSX.Element => {
             {index < 4 ? (
               <RadioButtonGroup {...item} />
             ) : (
-              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+              <Text.Body.Normal className={styles.note}>
+                * only focussed state supported
+              </Text.Body.Normal>
             )}
           </Variants.Cell>
         ))}
@@ -106,7 +108,9 @@ const MainComponents = (): JSX.Element => {
             {index < 4 ? (
               <RadioButtonGroup {...item} />
             ) : (
-              <Text.Body.Small>* only checked state supported</Text.Body.Small>
+              <Text.Body.Normal className={styles.note}>
+                * only checked state supported
+              </Text.Body.Normal>
             )}
           </Variants.Cell>
         ))}
@@ -121,7 +125,13 @@ const MainComponents = (): JSX.Element => {
       <Variants.Row>
         {getRow('Label', DocumentDownload).map(item => (
           <Variants.Cell key={item.options[0].value}>
-            <RadioButtonGroup {...item} selectedValue={item.options[0].value} />
+            <Box className={styles.withIconWrapper}>
+              <RadioButtonGroup
+                {...item}
+                selectedValue={item.options[0].value}
+                className={styles.radioGroupWithIcon}
+              />
+            </Box>
           </Variants.Cell>
         ))}
       </Variants.Row>
@@ -131,15 +141,18 @@ const MainComponents = (): JSX.Element => {
 
 const List = ({
   icon,
-}: {
+  radioButtonClassName,
+}: Readonly<{
   icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
-}) => {
+  radioButtonClassName?: string;
+}>) => {
   const options = useMemo(() => getOptions(4, 'Label', icon), []);
   const [value, setValue] = React.useState(options[0].value);
   return (
     <RadioButtonGroup
       selectedValue={value}
       options={options}
+      className={radioButtonClassName}
       onValueChange={(value: React.SetStateAction<string>): void => {
         setValue(value);
       }}
@@ -168,11 +181,14 @@ const VariantsSection = () => {
             />
           </Variants.Cell>
           <Variants.Cell>
-            <RadioButtonGroup
-              options={withIconOptions}
-              selectedValue={withIconOptions[0].value}
-              onValueChange={(): undefined => undefined}
-            />
+            <Box className={styles.withIconWrapper}>
+              <RadioButtonGroup
+                options={withIconOptions}
+                selectedValue={withIconOptions[0].value}
+                onValueChange={(): undefined => undefined}
+                className={styles.radioGroupWithIcon}
+              />
+            </Box>
           </Variants.Cell>
         </Variants.Row>
       </Variants.Table>
@@ -181,7 +197,7 @@ const VariantsSection = () => {
 };
 
 export const Overview = (): JSX.Element => {
-  const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
+  const headers = ['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused'];
 
   return (
     <Grid>
@@ -194,13 +210,52 @@ export const Overview = (): JSX.Element => {
             w="$fill"
             my="$32"
           >
-            <Flex mr="$8">
-              <RadioButtonGroup
-                options={getOptions(1, 'Label')}
-                onValueChange={(): undefined => undefined}
-              />
-            </Flex>
+            <RadioButtonGroup
+              options={getOptions(1, 'Label')}
+              onValueChange={(): undefined => undefined}
+            />
           </Flex>
+
+          <Divider my="$64" />
+
+          <Grid columns="$2">
+            <Cell>
+              <Variants.Table headers={['Light with Tooltip']}>
+                <Flex
+                  my={'$32'}
+                  flexDirection={'column'}
+                  gap="$0"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <TooltipContent label="Tooltip sample" />
+                  <RadioButtonGroup
+                    options={getOptions(1, 'Label')}
+                    onValueChange={(): undefined => undefined}
+                  />
+                </Flex>
+              </Variants.Table>
+            </Cell>
+            <Cell>
+              <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+                <Variants.Table headers={['Dark with Tooltip']}>
+                  <Flex
+                    my={'$32'}
+                    flexDirection={'column'}
+                    gap="$0"
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                  >
+                    <TooltipContent label="Tooltip sample" />
+                    <RadioButtonGroup
+                      options={getOptions(1, 'Label')}
+                      onValueChange={(): undefined => undefined}
+                    />
+                  </Flex>
+                </Variants.Table>
+              </LocalThemeProvider>
+            </Cell>
+          </Grid>
 
           <Divider my="$64" />
 
@@ -209,7 +264,12 @@ export const Overview = (): JSX.Element => {
               <Variants.Table headers={['Light']}>
                 <Flex justifyContent={'space-around'} my={'$32'}>
                   <List />
-                  <List icon={DocumentDownload} />
+                  <Box className={styles.withIconWrapper}>
+                    <List
+                      icon={DocumentDownload}
+                      radioButtonClassName={styles.radioGroupWithIcon}
+                    />
+                  </Box>
                 </Flex>
               </Variants.Table>
             </Cell>
@@ -218,7 +278,12 @@ export const Overview = (): JSX.Element => {
                 <Variants.Table headers={['Dark']}>
                   <Flex justifyContent={'space-around'} my={'$32'}>
                     <List />
-                    <List icon={DocumentDownload} />
+                    <Box className={styles.withIconWrapper}>
+                      <List
+                        icon={DocumentDownload}
+                        radioButtonClassName={styles.radioGroupWithIcon}
+                      />
+                    </Box>
                   </Flex>
                 </Variants.Table>
               </LocalThemeProvider>

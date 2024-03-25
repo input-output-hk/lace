@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { BrowsePoolsView, StakePoolSortOptions } from 'features/BrowsePools';
 import { StakePoolWithLogo } from './types';
 
 export type CancelDrawer = {
@@ -116,9 +117,31 @@ export type HwSkipToDeviceFailure = {
   type: 'HwSkipToDeviceFailure';
 };
 
+export type SetSort = {
+  type: 'SetSort';
+  data: StakePoolSortOptions;
+};
+
+export type SetSearchQuery = {
+  type: 'SetSearchQuery';
+  data: string;
+};
+
+export type SetBrowsePoolsView = {
+  type: 'SetBrowsePoolsView';
+  data: BrowsePoolsView;
+};
+
 export type ActivityCommand = GoToOverview | GoToBrowsePools;
 
-export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools | GoToActivity;
+export type OverviewCommand =
+  | ShowDelegatedPoolDetails
+  | ManagePortfolio
+  | GoToBrowsePools
+  | GoToActivity
+  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view) - https://input-output.atlassian.net/browse/LW-9979
+  | SelectPoolFromList
+  | SetBrowsePoolsView;
 
 export type BrowsePoolsCommand =
   | SelectPoolFromList
@@ -127,7 +150,10 @@ export type BrowsePoolsCommand =
   | GoToActivity
   | GoToOverview
   | ClearSelections
-  | CreateNewPortfolio;
+  | CreateNewPortfolio
+  | SetSort
+  | SetSearchQuery
+  | SetBrowsePoolsView;
 
 export type CurrentPoolDetailsCommand = CancelDrawer;
 

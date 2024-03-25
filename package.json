@@ -41,7 +41,7 @@
     "test": "yarn workspaces foreach run test",
     "test:coverage": "yarn workspaces foreach run test:coverage",
     "version": "standard-version",
-    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*DTS.*Build success)' -c watch",
+    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*CJS.*Build success)' -c watch",
     "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {

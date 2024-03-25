@@ -1,4 +1,5 @@
 /* eslint-disable react/no-multi-comp */
+import type { ReactNode } from 'react';
 import React from 'react';
 
 import cn from 'classnames';
@@ -8,25 +9,20 @@ import { Tooltip } from '../tooltip';
 
 import * as cx from './table.css';
 
-export interface RowProps<
-  T extends object,
-  K extends Extract<keyof Partial<T>, string>,
-> {
-  columns: K[];
+export interface RowProps<T extends object> {
+  columns: (string & keyof T)[];
   data: T;
   selectionDisabledMessage?: string;
   withSelection?: boolean;
   selected?: boolean;
   onSelect?: () => void;
   onClick?: () => void;
-  cellRenderers?: Partial<
-    Record<
-      K,
-      React.FunctionComponent<{
-        value?: T[K];
-      }>
-    >
-  >;
+  // TODO fix conflicting prettier and eslint configuration in @lace/ui; https://input-output.atlassian.net/browse/LW-9997
+  /* eslint-disable prettier/prettier */
+  cellRenderers?: Partial<{
+    [K in keyof T]: ({ value }: Readonly<{ value: T[K] }>) => ReactNode;
+  }>;
+  /* eslint-enable prettier/prettier */
   dataTestId?: string;
   keyProp?: string;
 }
@@ -49,10 +45,7 @@ const ConditionalTooltipWrapper = ({
   </>
 );
 
-export const Row = <
-  T extends object,
-  K extends Extract<keyof Partial<T>, string>,
->({
+export const Row = <T extends object>({
   columns,
   cellRenderers,
   data,
@@ -63,7 +56,7 @@ export const Row = <
   selectionDisabledMessage = '',
   dataTestId = 'table',
   keyProp,
-}: Readonly<RowProps<T, K>>): JSX.Element => {
+}: Readonly<RowProps<T>>): JSX.Element => {
   const isSelectionAllowed = typeof onSelect === 'function';
 
   return (

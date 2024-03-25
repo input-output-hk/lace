@@ -157,7 +157,8 @@ export const HardwareWalletFlow = ({
         await analytics.sendAliasEvent();
       }
 
-      if (typeof deviceConnection === 'object') {
+      // Check if app reloading workaround can be removed with this in LW-9970
+      if (connectedDevice !== WalletType.Trezor && typeof deviceConnection === 'object') {
         deviceConnection.transport.close();
       }
     }
