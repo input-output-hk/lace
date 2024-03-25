@@ -21,6 +21,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { USE_MULTI_DELEGATION_STAKING_FILTERS, USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
 import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
+import { getDefaultSortOrderByField } from '../utils';
 import * as styles from './BrowsePoolsPreferencesCard.css';
 import { BrowsePoolsPreferencesCardLabel } from './BrowsePoolsPreferencesCardLabel';
 import { FilterOption, SelectOption, SortAndFilterTab } from './types';
@@ -89,7 +90,7 @@ export const BrowsePoolsPreferencesCard = ({
 
       onSortChange({
         field: sortField,
-        order: 'asc',
+        order: getDefaultSortOrderByField(sortField),
       });
     },
     [analytics, onSortChange]
