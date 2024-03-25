@@ -298,6 +298,10 @@ export const colors = {
   $stake_pool_header_text_color: '',
   $stake_pool_item_bg_hover: '',
   $stake_pool_item_text_color: '',
+
+  $info_bar_container_bgColor: '',
+  $info_bar_message_color: '',
+  $info_bar_icon_color: '',
 };
 
 export type Colors = typeof colors;
