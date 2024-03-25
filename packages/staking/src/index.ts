@@ -16,6 +16,7 @@ export {
   StakePoolsListRowSkeleton,
   getSaturationLevel,
   isOversaturated,
+  getDefaultSortOrderByField,
 } from './features/BrowsePools';
 export { mapStakePoolToDisplayData } from './features/store';
 /* eslint-enable import/export */
