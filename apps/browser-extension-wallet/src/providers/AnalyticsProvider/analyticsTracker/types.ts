@@ -59,7 +59,6 @@ export type PostHogActionsKeys =
   | 'RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK'
   | 'RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK'
   | 'RECOVERY_PASSPHRASE_VERIFICATION_NEXT_CLICK';
-
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {

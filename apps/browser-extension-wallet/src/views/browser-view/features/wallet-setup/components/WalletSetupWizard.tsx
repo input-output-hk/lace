@@ -211,7 +211,8 @@ export const WalletSetupWizard = ({
     },
     [createWallet, mnemonic, analytics, setupType, goToMyWallet, moveForward]
   );
-
+  
+  
   const handleSubmit = async (result: { password: string; walletName: string }) => {
     sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
     await handleCompleteCreation(result.walletName, result.password);
