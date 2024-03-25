@@ -41,7 +41,7 @@
     "test": "yarn workspaces foreach run test",
     "test:coverage": "yarn workspaces foreach run test:coverage",
     "version": "standard-version",
-    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*DTS.*Build success)' -c watch",
+    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*CJS.*Build success)' -c watch",
     "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {
@@ -190,7 +190,7 @@
     "stylelint-order": "^6.0.3",
     "swc-loader": "0.2.3",
     "terser-webpack-plugin": "5.3.6",
-    "ts-jest": "28.0.7",
+    "ts-jest": "29.1.2",
     "ts-patch": "^2.0.1",
     "typedoc": "^0.21.5",
     "typescript": "^4.3.5",

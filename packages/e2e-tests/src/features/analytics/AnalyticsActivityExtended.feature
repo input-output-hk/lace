@@ -1,4 +1,4 @@
-@Transactions-Extended @Testnet @Mainnet
+@Transactions-Extended @Analytics @Testnet @Mainnet
 Feature: Transactions - Extended view
 
   Background:

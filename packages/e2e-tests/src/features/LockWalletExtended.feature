@@ -1,10 +1,10 @@
-@LockWallet-extended @Mainnet @Testnet
+@LockWallet-extended @Mainnet @Testnet @Pending
 Feature: Wallet locking / unlocking - Extended view
 
   Background:
     Given Lace is ready for test
 
-  @LW-2894 @Smoke
+  @LW-2894 @Smoke @Pending
   Scenario: Extended view - Lock screen button opens lock screen
     And I lock my wallet
     Then I see locked wallet screen

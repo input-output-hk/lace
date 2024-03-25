@@ -3,7 +3,6 @@
 import { browser } from '@wdio/globals';
 import { WebElement } from '../elements/webElement';
 import { Logger } from '../support/logger';
-import { clearInputFieldValue } from '../utils/inputFieldUtils';
 
 export type LocatorStrategy = 'css selector' | 'xpath';
 
@@ -23,66 +22,6 @@ export default new (class WebTester {
     await this.seeElement(element.toJSLocator());
   }
 
-  async dontSeeElement(selector: string, timeout = 3000) {
-    Logger.log(`Don't see element ${selector}`);
-    const startTime = Date.now();
-    await this.seeElement(selector, true, timeout);
-    const duration = (Date.now() - startTime) / 1000;
-    Logger.log(`Element not in display after: ${duration}s`);
-  }
-
-  async dontSeeWebElement(element: WebElement, timeout = 3000) {
-    await this.dontSeeElement(element.toJSLocator(), timeout);
-  }
-
-  // ugly but resolves some webdriver vs react issues
-  // simple setValue() just does not work!
-  async fillField(selector: string, value: string) {
-    try {
-      await this.clearInputText(selector);
-      await value.split('').reduce(async (prev: Promise<string>, current: string) => {
-        const nextString = `${await prev}${current}`;
-        await $(selector).addValue(current);
-        await $(selector).waitUntil(
-          async () => {
-            const text = (await $(selector).getValue()).replace(',', '');
-            return text === nextString;
-          },
-          {
-            timeout: 5000,
-            interval: 100
-          }
-        );
-
-        return nextString;
-      }, Promise.resolve(''));
-    } catch (error) {
-      Logger.log(`SetInputValue Error: ${error}`);
-    }
-  }
-
-  // workaround because $(selector).clearValue() does not work
-  async clearInputText(selector: string): Promise<void> {
-    const selectorValue = await $(selector).getValue();
-    if (selectorValue !== null) {
-      await clearInputFieldValue(selector);
-    }
-  }
-
-  // eslint-disable-next-line no-undef
-  async clearInputWebElement(selector: WebdriverIO.Element): Promise<void> {
-    const elementValue = await selector.getValue();
-    if (elementValue !== null) {
-      await selector.click();
-      process.platform === 'darwin' ? await browser.keys(['Command', 'a']) : await browser.keys(['Control', 'a']);
-      await browser.keys('Backspace');
-    }
-  }
-
-  async fillComponent(component: WebElement, value: string) {
-    await this.fillField(component.toJSLocator(), value);
-  }
-
   async clickOnElement(selector: string, locatorStrategy?: LocatorStrategy): Promise<void> {
     Logger.log(`Click on ${selector} [strategy=${locatorStrategy ?? 'css selector'}]`);
     const element = await $(selector);
@@ -93,20 +32,6 @@ export default new (class WebTester {
       .catch(() => {
         throw new Error(`Element ${selector} not clickable`);
       });
-  }
-
-  async hoverOnElement(selector: string, pauseAfterMs?: number): Promise<void> {
-    Logger.log(`Hover on ${selector}`);
-    const element = await $(selector);
-    await element.moveTo();
-    if (pauseAfterMs) {
-      Logger.log(`Pause for ${pauseAfterMs}ms after hover`);
-      await browser.pause(pauseAfterMs);
-    }
-  }
-
-  async hoverOnWebElement(element: WebElement, pauseAfterMs?: number): Promise<void> {
-    await this.hoverOnElement(element.toJSLocator(), pauseAfterMs);
   }
 
   async clickElement(element: WebElement, retries?: number): Promise<void> {
@@ -132,17 +57,6 @@ export default new (class WebTester {
       .catch(() => {
         throw new Error(`error while getting text from element : ${selector}`);
       });
-  }
-
-  async getAttributeValue(selector: string, attribute: string) {
-    Logger.log(`Getting attribute ${attribute} for selector ${selector}`);
-    const element = await $(selector);
-    await element.waitForDisplayed();
-    return element.getAttribute(attribute);
-  }
-
-  async getAttributeValueFromElement(element: WebElement, attribute: string): Promise<string | number> {
-    return await this.getAttributeValue(element.toJSLocator(), attribute);
   }
 
   async waitUntilSeeElement(element: WebElement, timeoutMs = 3000) {

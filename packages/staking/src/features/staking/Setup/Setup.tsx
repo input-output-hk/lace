@@ -1,11 +1,12 @@
 import { useObservable } from '@lace/common';
+import { useBrowsePoolsPersistence } from 'features/BrowsePools';
+import { initI18n } from 'features/i18n';
+import { useOutsideHandles } from 'features/outside-handles-provider';
+import { useDelegationPortfolioStore } from 'features/store';
 import { useEffect } from 'react';
-import { initI18n } from '../../i18n';
-import '../reset.css';
-import { useOutsideHandles } from '../../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../../store';
 import { StakingProps } from '../types';
 import { SetupBase, SetupBaseProps } from './SetupBase';
+import '../reset.css';
 
 initI18n();
 
@@ -22,6 +23,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
   const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);
   const delegationPortfolio = useObservable(walletStoreInMemoryWallet.delegation.portfolio$);
 
+  // TODO: remove after we introduce a common hydration setter (cardanoCoin, browsePoolsView, currentPortfolio, view) https://input-output.atlassian.net/browse/LW-9979
   useEffect(() => {
     if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
     portfolioMutators.setCardanoCoinSymbol(currentChain);
@@ -41,6 +43,8 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     portfolioMutators,
     view,
   ]);
+
+  useBrowsePoolsPersistence();
 
   return (
     <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>

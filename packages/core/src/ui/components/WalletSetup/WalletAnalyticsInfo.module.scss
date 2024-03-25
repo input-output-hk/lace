@@ -1,0 +1,19 @@
+@import '../../styles/theme.scss';
+
+.container {
+  text-align: start;
+}
+
+.description {
+  margin-bottom: size_unit(2);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+  .flex {
+    display: flex;
+    gap: size_unit(1);
+  }
+}

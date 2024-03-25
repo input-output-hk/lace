@@ -16,6 +16,7 @@ export enum WalletTimelineSteps {
   CONNECT_WALLET,
   NAME_WALLET
 }
+
 export interface WalletSetupStepLayoutProps {
   title: React.ReactNode;
   children?: React.ReactNode;
@@ -148,7 +149,7 @@ export const WalletSetupStepLayout = ({
             </Button>
           )}
           {onNext && (
-            <span ref={nextButtonContainerRef}>
+            <div ref={nextButtonContainerRef}>
               <Tooltip
                 visible={!isNextEnabled && !!toolTipText}
                 title={!isNextEnabled && toolTipText}
@@ -164,7 +165,7 @@ export const WalletSetupStepLayout = ({
                   {nextLabel || defaultLabel.next}
                 </Button>
               </Tooltip>
-            </span>
+            </div>
           )}
         </div>
       </div>

@@ -1,12 +1,12 @@
 /* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
 import testContext from '../../utils/testContext';
+import { generateRandomString } from '../../utils/textUtils';
+import { TokenSearchResult } from './tokenSearchResult';
 
 class TokenSelectionPage extends CommonDrawerElements {
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
   private TOKEN_ROW = '//div[@data-testid="coin-search-row"]';
-  private TOKEN_INFO = '//div[@data-testid="coin-search-row-info"]';
-  private TOKEN_ICON = '//div[@data-testid="coin-search-row-icon"]';
   private NFTS_BUTTON = '//input[@data-testid="asset-selector-button-nfts"]';
   private ASSET_SELECTOR_CONTAINER = '//div[@data-testid="asset-selector"]';
   private NFT_CONTAINER = '[data-testid="nft-item"]';
@@ -21,10 +21,19 @@ class TokenSelectionPage extends CommonDrawerElements {
   private CLEAR_BUTTON = '[data-testid="clear-button"]';
   private SELECT_MULTIPLE_BUTTON = '[data-testid="select-multiple-button"]';
   private ADD_TO_TRANSACTION_BUTTON = '[data-testid="add-to-transaction-button"]';
+  private SEARCH_INPUT = '[data-testid="asset-selector"] [data-testid="search-input"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
 
   get tokensButton() {
     return $(this.TOKENS_BUTTON).parentElement().parentElement();
+  }
+
+  get nftsButton() {
+    return $(this.NFTS_BUTTON).parentElement().parentElement();
+  }
+
+  get searchInput() {
+    return $(this.SEARCH_INPUT);
   }
 
   get nftImages() {
@@ -35,32 +44,8 @@ class TokenSelectionPage extends CommonDrawerElements {
     return $$(this.TOKEN_ROW);
   }
 
-  tokenItemInfo(index: number) {
-    return $(`(${this.TOKEN_INFO})[${index}]`);
-  }
-
-  tokenName(index: number) {
-    return $(String(`(${this.TOKEN_ROW})[${index}]//h6`));
-  }
-
-  tokenTicker(index: number) {
-    return $(String(`(${this.TOKEN_ROW})[${index}]//p`));
-  }
-
-  tokenTickerFromName(assetName: string) {
-    return $(String(`${this.TOKEN_ROW}//h6[text() = '${assetName}']/following-sibling::p`));
-  }
-
-  grayedOutTokenIcon(index: number) {
-    return $(String(`(${this.TOKEN_ICON})[${index}]//div[contains(@class, 'overlay')]`));
-  }
-
-  checkmarkInSelectedToken(index: number) {
-    return $(String(`(${this.TOKEN_ICON})[${index}]//*[name()='svg']`));
-  }
-
-  get nftsButton() {
-    return $(this.NFTS_BUTTON).parentElement().parentElement();
+  tokenItem(nameOrIndex: string | number) {
+    return new TokenSearchResult(nameOrIndex);
   }
 
   get assetSelectorContainer() {
@@ -144,12 +129,12 @@ class TokenSelectionPage extends CommonDrawerElements {
 
   addAmountOfAssets = async (amount: number, assetType: string) => {
     for (let i = 1; i <= amount; i++) {
-      assetType === 'Tokens' ? await this.tokenItemInfo(i).click() : await this.nftNames[i].click();
+      assetType === 'Tokens' ? await this.tokenItem(i).container.click() : await this.nftNames[i].click();
     }
   };
 
   deselectToken = async (assetType: string, index: number) => {
-    assetType === 'Tokens' ? await this.tokenItemInfo(index).click() : await this.nftNames[index].click();
+    assetType === 'Tokens' ? await this.tokenItem(index).container.click() : await this.nftNames[index].click();
   };
 
   saveSelectedTokens = async (assetType: string, bundle: number) => {
@@ -158,11 +143,11 @@ class TokenSelectionPage extends CommonDrawerElements {
 
     for (let i = 1; i <= amountOfAssets; i++) {
       if (assetType === 'Tokens') {
-        const tokenName = String(await this.tokenName(i).getText()).slice(0, 6);
+        const tokenName = String(await this.tokenItem(i).name.getText()).slice(0, 6);
         const asset =
           tokenName === 'asset1'
-            ? String(await this.tokenName(i).getText()).slice(0, 10)
-            : String(await this.tokenTicker(i).getText()).slice(0, 10);
+            ? String(await this.tokenItem(i).name.getText()).slice(0, 10)
+            : String(await this.tokenItem(i).ticker.getText()).slice(0, 10);
         testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
       } else {
         const asset = String(await this.nftNames[i].getText()).slice(0, 10);
@@ -174,9 +159,7 @@ class TokenSelectionPage extends CommonDrawerElements {
   saveTicker = async (assetType: string, assetName: string) => {
     if (assetType === 'Token') {
       assetName =
-        assetName.slice(0, 6) === 'asset1'
-          ? assetName.slice(0, 10)
-          : String(await this.tokenTickerFromName(assetName).getText());
+        assetName.slice(0, 6) === 'asset1' ? assetName.slice(0, 10) : await this.tokenItem(assetName).ticker.getText();
     }
     testContext.save('savedTicker', String(assetName));
   };
@@ -185,9 +168,8 @@ class TokenSelectionPage extends CommonDrawerElements {
     const tokenInfo = [];
     const numberOfTokens = await this.tokens.length;
     for (let tokenIndex = 1; tokenIndex <= numberOfTokens; tokenIndex++) {
-      const tokenDetailsText = await this.tokenItemInfo(tokenIndex).getText();
-      const tokenDetailsArray = tokenDetailsText.split('\n');
-      const tokenDetails = { name: tokenDetailsArray[0], ticker: tokenDetailsArray[1] };
+      const token = this.tokenItem(tokenIndex);
+      const tokenDetails = { name: await token.name.getText(), ticker: await token.ticker.getText() };
       tokenInfo.push(tokenDetails);
     }
     return tokenInfo;
@@ -200,6 +182,17 @@ class TokenSelectionPage extends CommonDrawerElements {
       nftInfo.push(await this.nftNames[i].getText());
     }
     return nftInfo;
+  };
+
+  searchAsset = async (assetName: string) => {
+    if (assetName === 'random characters') {
+      assetName = await generateRandomString(10);
+    }
+    await this.searchInput.setValue(assetName);
+  };
+
+  clickOnToken = async (tokenName: string) => {
+    await this.tokenItem(tokenName).container.click();
   };
 }
 

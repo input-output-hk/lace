@@ -77,7 +77,8 @@
       "recoveryPhrase": "Recovery phrase",
       "connectWallet": "Connect wallet",
       "nameWallet": "Name wallet",
-      "allDone": "All done"
+      "allDone": "All done",
+      "enterWallet": "Enter wallet"
     },
     "assetSelectorOverlay": {
       "youDonthaveAnyTokens": "You don't have any tokens.",
@@ -404,18 +405,6 @@
       "seeWalletBalance": "See your wallet balance",
       "seeWalletAddresses": "See your wallet different addresses, including reward accounts"
     },
-    "walletNameAndPasswordSetupStep": {
-      "title": "Let's set up your new wallet",
-      "description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
-      "nameInputLabel": "Wallet name",
-      "nameMaxLength": "Max. 20 characters",
-      "passwordInputLabel": "Password",
-      "confirmPasswordInputLabel": "Confirm password",
-      "nameRequiredMessage": "Wallet name is required",
-      "noMatchPassword": "Oops! The passwords don't match.",
-      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
-      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
-    },
     "dappTransaction": {
       "asset": "Asset",
       "burn": "Burn",
@@ -427,6 +416,10 @@
       "send": "Send",
       "sending": "Sending",
       "transaction": "Transaction"
+    },
+    "confirmationBanner": {
+      "agree": "Agree",
+      "reject": "Reject"
     }
   }
 }

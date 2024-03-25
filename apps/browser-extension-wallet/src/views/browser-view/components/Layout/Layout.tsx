@@ -12,6 +12,9 @@ import { DrawerContent, DrawerUIContainer } from '../Drawer';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { LeftSidePanel } from '../LeftSidePanel';
 import styles from './Layout.module.scss';
+import { PinExtension } from '@views/browser/features/wallet-setup/components/PinExtension';
+import { useLocalStorage } from '@hooks';
+import { useWalletStore } from '@stores';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,12 +24,17 @@ interface LayoutProps {
 
 const toastThrottle = 500;
 const isFlexible = process.env.USE_DESKTOP_LAYOUT === 'true';
+const PIN_EXTENSION_TIMEOUT = 5000;
 
 export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: LayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const [, setDrawerConfig] = useDrawer();
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const { walletState } = useWalletStore();
+
+  const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
+  const [showMultiAddressModal] = useLocalStorage('showMultiAddressModal', true);
 
   useEffect(() => {
     const openDrawer = async () => {
@@ -50,6 +58,17 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
     return () => subscription.unsubscribe();
   }, [backgroundServices, setTheme]);
 
+  useEffect(() => {
+    if (showMultiAddressModal && walletState.addresses.length > 1) return;
+
+    const timer = window.setTimeout(() => {
+      setShowPinExtension(false);
+    }, PIN_EXTENSION_TIMEOUT);
+
+    // eslint-disable-next-line consistent-return
+    return () => window.clearTimeout(timer);
+  }, [setShowPinExtension, showMultiAddressModal, walletState.addresses.length]);
+
   const debouncedToast = useMemo(() => debounce(toast.notify, toastThrottle), []);
   const showNetworkError = useCallback(
     () => debouncedToast({ text: t('general.errors.networkError') }),
@@ -64,6 +83,11 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
       className={classnames(styles.layoutGridContainer, isFullWidth && styles.fullWidth, isFlexible && styles.flexible)}
     >
       <LeftSidePanel theme={theme.name} />
+      {showPinExtension && (
+        <div className={styles.pinExtension}>
+          <PinExtension />
+        </div>
+      )}
       {children}
       <DrawerUIContainer defaultContent={drawerUIDefaultContent} />
     </div>

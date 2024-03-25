@@ -42,7 +42,7 @@ Feature: Staking Page - Extended View
       | NED#                   | 0                 |                   |
       | PAN                    | 1                 | PANL              |
       | 123456                 | 0                 |                   |
-      | WO                     | 2                 | WOTA              |
+      | WO                     | 2                 | WOOF              |
       | £££                    | 0                 |                   |
       | Amso                   | 0                 |                   |
 
@@ -88,7 +88,7 @@ Feature: Staking Page - Extended View
     Then I see the Network Info component with the expected content
 
   @LW-8499 @Testnet @Mainnet
-  Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
+  Scenario Outline: Extended View - Staking - Show tooltip for <column_name> column in browse pools section
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
@@ -103,7 +103,7 @@ Feature: Staking Page - Extended View
       | Margin      |
       | Blocks      |
       | Pledge      |
-      | Live stake  |
+      | Live Stake  |
 
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details

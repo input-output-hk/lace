@@ -2,7 +2,13 @@ import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { DrawerDefaultStep, DrawerStep, isDrawerVisible, useDelegationPortfolioStore, useStakingStore } from '../store';
+import {
+  DrawerDefaultStep,
+  DrawerStep,
+  isDrawerVisibleSelector,
+  useDelegationPortfolioStore,
+  useStakingStore,
+} from '../store';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -28,7 +34,7 @@ export const StakePoolDetailsDrawer = ({
   const { setExitStakingVisible } = useStakingStore();
   const { activeDrawerStep, drawerVisible, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     activeDrawerStep: store.activeDrawerStep,
-    drawerVisible: isDrawerVisible(store),
+    drawerVisible: isDrawerVisibleSelector(store),
     portfolioMutators: store.mutators,
   }));
 

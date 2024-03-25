@@ -1,23 +1,5 @@
 @import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
 
-.confirmResetContent {
-  display: flex;
-  flex-direction: column;
-
-  p {
-    font-weight: 300;
-    font-size: var(--body);
-    line-height: size_unit(3);
-    text-align: center;
-    color: var(--text-color-secondary);
-
-    b {
-      font-weight: inherit;
-      color: var(--primary-default, #7f5af0);
-    }
-  }
-}
-
 :global(.ant-input-password > input[type='password']) {
   letter-spacing: size_unit(0.75) !important;
   color: var(--text-color-primary, #3d3b39) !important;
@@ -26,7 +8,6 @@
 :global {
   .ant-input-password > input[type='password'],
   .ant-input-password > input[type='text'] {
-    width: 380px;
     transition: none !important;
   }
 
@@ -35,4 +16,14 @@
     letter-spacing: 4px !important;
     color: var(--text-color-primary, #3d3b39) !important;
   }
+}
+
+.learnMore {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: size_unit(0.5);
+}
+
+.analyticsModalTitle {
+  text-align: start;
 }

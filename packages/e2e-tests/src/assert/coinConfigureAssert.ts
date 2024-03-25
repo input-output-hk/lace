@@ -1,14 +1,13 @@
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { Logger } from '../support/logger';
-import webTester from '../actor/webTester';
 import { expect } from 'chai';
-import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
+import { t } from '../utils/translationService';
 
 class CoinConfigureAssert {
   async assertSeeNonEmptyBalanceInCoinConfigure() {
-    const balance = ((await new CoinConfigure().getBalanceValue()) as string).replace('Balance: ', '').replace(',', '');
+    const balance = (await new CoinConfigure().balanceValueElement.getText()).replace('Balance: ', '').replace(',', '');
     expect(Number(balance)).to.be.greaterThan(0);
-    const balanceFiat = await new CoinConfigure().getFiatBalanceValue();
+    const balanceFiat = await new CoinConfigure().balanceFiatValueElement.getText();
     if (balanceFiat !== '-') {
       expect(Number(balanceFiat)).to.be.greaterThan(0);
     } else {
@@ -16,24 +15,22 @@ class CoinConfigureAssert {
     }
   }
 
-  async assertTokenDisplayed(tokenName: string, shouldBeDisplayed: boolean) {
-    const token = await $(new TokenSearchResult(tokenName).toJSLocator());
-    await token.waitForDisplayed({ reverse: !shouldBeDisplayed });
-  }
-
   async assertSeeCoinConfigure() {
     const coinConfigure = new CoinConfigure();
-    await webTester.seeWebElement(coinConfigure.nameElement());
-    await webTester.seeWebElement(coinConfigure.balanceValueElement());
-    await webTester.seeWebElement(coinConfigure.input());
-    await webTester.seeWebElement(coinConfigure.balanceFiatValueElement());
+    await coinConfigure.nameElement.waitForDisplayed();
+    await coinConfigure.balanceValueElement.waitForDisplayed();
+    await coinConfigure.input.waitForDisplayed();
+    await coinConfigure.balanceFiatValueElement.waitForDisplayed();
   }
 
   async assertSeeMaxButton(shouldSee: boolean, index?: number) {
     const coinConfigure = new CoinConfigure(index);
-    await (shouldSee
-      ? webTester.seeWebElement(coinConfigure.assetMaxButton())
-      : webTester.dontSeeWebElement(coinConfigure.assetMaxButton()));
+    await coinConfigure.assetMaxButton.waitForDisplayed({ reverse: !shouldSee });
+    if (shouldSee) {
+      expect(await coinConfigure.assetMaxButton.getText()).to.equal(
+        await t('package.core.assetInput.maxButton', 'core')
+      );
+    }
   }
 }
 

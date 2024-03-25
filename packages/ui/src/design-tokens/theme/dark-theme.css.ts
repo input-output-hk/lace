@@ -352,14 +352,17 @@ const colors: Colors = {
   $radiobutton_hover_color: darkColorScheme.$primary_light_grey,
   $radiobutton_indicator_backgroundColor:
     darkColorScheme.$primary_accent_purple,
-  $radiobutton_indicator_check_color: darkColorScheme.$primary_black,
+  $radiobutton_indicator_check_color: darkColorScheme.$primary_mid_black,
   $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
   $radiobutton_unchecked_bgColor: 'transparent',
   $radiobutton_checked_bgColor: darkColorScheme.$primary_grey,
-  $radiobutton_icon_color: darkColorScheme.$primary_white,
-  $radiobutton_icon_hover_color: darkColorScheme.$primary_grey,
-  $radiobutton_icon_hover_border_color:
-    darkColorScheme.$primary_light_grey_plus,
+  $radiobutton_icon_color: 'transparent',
+  $radiobutton_icon_active: darkColorScheme.$primary_light_black,
+  $radiobutton_icon_active_border_color: darkColorScheme.$primary_light_black,
+  $radiobutton_icon_text_color: darkColorScheme.$primary_white,
+  $radiobutton_icon_disabled_border_color: darkColorScheme.$primary_mid_grey,
+  $radiobutton_icon_hover_color: darkColorScheme.$primary_dark_grey,
+  $radiobutton_icon_hover_border_color: darkColorScheme.$primary_mid_grey,
 
   $select_border: darkColorScheme.$primary_grey,
   $select_icon_color: darkColorScheme.$primary_light_grey_plus_0_56,

@@ -2,7 +2,6 @@ import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
 import SettingsPage from '../elements/settings/SettingsPage';
 import NetworkDrawer from '../elements/settings/NetworkDrawer';
 import menuHeaderPageObject from './menuHeaderPageObject';
-import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import { browser } from '@wdio/globals';
@@ -10,6 +9,7 @@ import ToastMessage from '../elements/toastMessage';
 import { t } from '../utils/translationService';
 import { Logger } from '../support/logger';
 import onboardingPageObject from './onboardingPageObject';
+import { expect } from 'chai';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -38,7 +38,10 @@ class SettingsExtendedPageObject {
 
   clickOnPrivacyPolicy = async () => await SettingsPage.privacyPolicyLink.element.click();
 
-  clickOnRemoveWallet = async () => await SettingsPage.removeWalletButton.click();
+  clickOnRemoveWallet = async () => {
+    await SettingsPage.removeWalletButton.waitForStable();
+    await SettingsPage.removeWalletButton.click();
+  };
 
   clickOnShowPublicKey = async () => {
     await YourKeysDrawer.showPublicKeyButton.waitForStable();
@@ -122,9 +125,7 @@ class SettingsExtendedPageObject {
   switchNetworkAndCloseDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
     await this.switchNetworkWithoutClosingDrawer(network);
     await this.waitUntilHdWalletSynced();
-    await (mode === 'extended'
-      ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
-      : simpleTxSideDrawerPageObject.clickBackDrawerButton());
+    await (mode === 'extended' ? NetworkDrawer.clickCloseDrawerButton() : NetworkDrawer.clickBackDrawerButton());
   };
 
   removeWallet = async () => {
@@ -156,7 +157,7 @@ class SettingsExtendedPageObject {
       (await Modal.container.isDisplayed()) &&
       (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
     ) {
-      await Modal.title.waitForDisplayed({ reverse: true, timeout: 120_000 });
+      await Modal.title.waitForDisplayed({ reverse: true, timeout: 220_000 });
     }
   };
 
@@ -164,6 +165,14 @@ class SettingsExtendedPageObject {
     await onboardingPageObject.waitUntilLoaderDisappears();
     await this.waitUntilSyncingModalDisappears();
     await this.closeWalletSyncedToast();
+    await this.multiAddressModalConfirm();
+  }
+
+  async multiAddressModalConfirm() {
+    if (await Modal.confirmButton.isDisplayed()) {
+      expect(await Modal.confirmButton.getText()).to.equal(await t('modals.beta.button', 'staking'));
+      await Modal.confirmButton.click();
+    }
   }
 }
 

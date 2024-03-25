@@ -6,7 +6,6 @@ import transactionBundleAssert from '../assert/transaction/transactionBundleAsse
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
 import TransactionDetailsPage from '../elements/transactionDetails';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
@@ -86,7 +85,7 @@ When(
         expectedValue = expectedPoolData[0].poolId;
       }
       if (actualValue !== expectedValue) {
-        await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
+        await TransactionDetailsPage.clickCloseDrawerButton();
       } else {
         break;
       }

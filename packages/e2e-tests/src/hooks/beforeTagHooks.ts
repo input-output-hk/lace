@@ -4,6 +4,7 @@ import localStorageInitializer from '../fixture/localStorageInitializer';
 import popupView from '../page/popupView';
 import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
+import analyticsBanner from '../elements/analyticsBanner';
 
 const extendedViewWalletInitialization = async (walletName = TestWalletName.TestAutomationWallet): Promise<void> => {
   await extendedView.visit();
@@ -25,7 +26,10 @@ Before(
   {
     tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding'
   },
-  async () => await extendedView.visit()
+  async () => {
+    await extendedView.visit();
+    if (await analyticsBanner.agreeButton.isExisting()) await analyticsBanner.agreeButton.click();
+  }
 );
 
 Before(
@@ -183,19 +187,23 @@ Before(
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedMulti);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedMulti);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });

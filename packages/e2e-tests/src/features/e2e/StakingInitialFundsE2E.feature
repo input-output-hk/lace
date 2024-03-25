@@ -1,4 +1,4 @@
-@Staking-initial-E2E @Testnet
+@Staking-initial-E2E @E2E @Testnet
 Feature: Delegating funds to new pool E2E
 
   @LW-2685 @Smoke
@@ -7,8 +7,9 @@ Feature: Delegating funds to new pool E2E
     And Wallet is synced
     When I open header menu
     Then I don't see any toast message
-    And I click on the user details button
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    And I click "Receive" button on page header
+    When I click "Copy" button on "Receive" page for default wallet address
+    Then I see a toast with text: "Address copied"
     When I open wallet: "WalletSendingAdaToStakingE2E" in: extended mode
     And Wallet is synced
     And I click "Send" button on page header

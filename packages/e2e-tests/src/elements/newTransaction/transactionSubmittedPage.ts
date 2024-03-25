@@ -1,4 +1,6 @@
 import CommonDrawerElements from '../CommonDrawerElements';
+import { Logger } from '../../support/logger';
+import testContext from '../../utils/testContext';
 
 class TransactionSubmittedPage extends CommonDrawerElements {
   private IMAGE = '[data-testid="result-message-img"]';
@@ -31,6 +33,16 @@ class TransactionSubmittedPage extends CommonDrawerElements {
   get closeButton() {
     return $(this.CLOSE_BUTTON);
   }
+
+  clickCloseButton = async () => {
+    await this.closeButton.click();
+  };
+
+  saveTransactionHash = async () => {
+    const txHashValue = await this.txHash.getText();
+    Logger.log(`saving tx hash: ${txHashValue}`);
+    testContext.save('txHashValue', txHashValue);
+  };
 }
 
 export default new TransactionSubmittedPage();

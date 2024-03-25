@@ -1,3 +1,5 @@
+@import '../../../styles/theme.scss';
+
 .walletPasswordAndNameContainer {
   display: flex;
   flex-direction: column;
@@ -34,4 +36,13 @@
 
 .paddingLeft {
   padding-left: 24px !important;
+}
+
+.input {
+  width: 100% !important;
+  max-width: none !important;
+
+  :global(.ant-input-suffix) {
+    margin-left: size_unit(2);
+  }
 }

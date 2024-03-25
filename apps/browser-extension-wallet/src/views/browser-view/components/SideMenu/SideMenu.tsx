@@ -30,9 +30,9 @@ export const SideMenu = (): React.ReactElement => {
     return () => unregisterListener();
   }, [listen]);
 
-  const sendAnalytics = (postHogAction?: PostHogAction) => {
+  const sendAnalytics = (postHogAction?: PostHogAction): void => {
     if (postHogAction) {
-      analytics.sendEventToPostHog(postHogAction);
+      void analytics.sendEventToPostHog(postHogAction);
     }
   };
 

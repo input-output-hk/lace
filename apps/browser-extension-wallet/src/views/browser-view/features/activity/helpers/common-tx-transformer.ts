@@ -549,12 +549,6 @@ export const governanceProposalsTransformer = ({
           details: [procedure.governanceAction.protocolVersion.minor.toString()]
         }
       );
-      if (procedure.governanceAction.protocolVersion.patch) {
-        transformedProposal.push({
-          title: 'protocolVersionPatch',
-          details: [procedure.governanceAction.protocolVersion.patch.toString()]
-        });
-      }
     }
 
     if (procedure.governanceAction.__typename === GovernanceActionType.parameter_change_action) {

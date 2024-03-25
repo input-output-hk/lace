@@ -26,8 +26,8 @@ import { Portal } from '../features/wallet-setup/components/Portal';
 import { MultiWallet } from '../features/multi-wallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
-import { DappBetaModal } from '../features/dapp';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
+import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -188,7 +188,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
           </Switch>
         )}
         <StakingWarningModals />
-        <DappBetaModal />
+        <MultiAddressBalanceVisibleModal />
       </>
     );
   }

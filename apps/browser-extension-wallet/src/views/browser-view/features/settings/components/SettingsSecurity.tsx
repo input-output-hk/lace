@@ -31,7 +31,7 @@ export const SettingsSecurity = ({
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
-  const [analyticsAccepted, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
+  const [analyticsStatus, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
@@ -116,7 +116,7 @@ export const SettingsSecurity = ({
           addon={
             <Switch
               testId="settings-analytics-switch"
-              checked={analyticsAccepted === EnhancedAnalyticsOptInStatus.OptedIn}
+              checked={analyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn}
               onChange={handleAnalyticsChoice}
               className={styles.analyticsSwitch}
             />
