@@ -66,11 +66,10 @@ export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsLi
   }));
 
   const onSortChange = (field: SortField) => {
-    const sortField = field as unknown as SortField;
-    const order = sortField === activeSort?.field && activeSort?.order === 'asc' ? 'desc' : 'asc';
+    const order = field === activeSort?.field && activeSort?.order === 'asc' ? 'desc' : 'asc';
 
     analytics.sendEventToPostHog(analyticsActionsMap[field]);
-    setActiveSort({ field: sortField, order });
+    setActiveSort({ field, order });
   };
 
   const isActiveSortItem = (value: string) => value === activeSort?.field;
