@@ -1,3 +1,4 @@
+import { PostHogAction } from '@lace/common';
 import { ReactComponent as SortAlphabeticalAscIcon } from '@lace/icons/dist/SortAlphabeticalAscComponent';
 import { ReactComponent as SortAlphabeticalDescIcon } from '@lace/icons/dist/SortAlphabeticalDescComponent';
 import { ReactComponent as SortNumericalAscIcon } from '@lace/icons/dist/SortNumericalAscComponent';
@@ -14,6 +15,7 @@ import {
 } from '@lace/ui';
 import cn from 'classnames';
 import { SortField, StakePoolSortOptions } from 'features/BrowsePools';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +37,17 @@ export interface SortAndFilterProps {
 // TODO consider moving this kind of responsibility to the parent component
 const ON_CHANGE_DEBOUNCE = 400;
 
+const PostHogActionsMap: Record<SortField, PostHogAction> = {
+  blocks: PostHogAction.StakingBrowsePoolsMoreOptionsSortingProducedBlocksClick,
+  cost: PostHogAction.StakingBrowsePoolsMoreOptionsSortingCostClick,
+  liveStake: PostHogAction.StakingBrowsePoolsMoreOptionsSortingLiveStakeClick,
+  margin: PostHogAction.StakingBrowsePoolsMoreOptionsSortingMarginClick,
+  pledge: PostHogAction.StakingBrowsePoolsMoreOptionsSortingPledgeClick,
+  ros: PostHogAction.StakingBrowsePoolsMoreOptionsSortingROSClick,
+  saturation: PostHogAction.StakingBrowsePoolsMoreOptionsSortingSaturationClick,
+  ticker: PostHogAction.StakingBrowsePoolsMoreOptionsSortingTickerClick,
+};
+
 export const BrowsePoolsPreferencesCard = ({
   activeTab,
   filter,
@@ -44,6 +57,7 @@ export const BrowsePoolsPreferencesCard = ({
   onSortChange,
 }: SortAndFilterProps) => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const [localFilters, setLocalFilters] = useState<QueryStakePoolsFilters>(filter);
   const { field: sortBy, order: direction } = sort;
 
@@ -69,12 +83,16 @@ export const BrowsePoolsPreferencesCard = ({
   }, [direction, onSortChange, sortBy]);
 
   const handleSortChange = useCallback(
-    (field: string) =>
+    (field: string) => {
+      const sortField = field as unknown as SortField;
+      analytics.sendEventToPostHog(PostHogActionsMap[sortField]);
+
       onSortChange({
-        field: field as unknown as SortField,
+        field: sortField,
         order: 'asc',
-      }),
-    [onSortChange]
+      });
+    },
+    [analytics, onSortChange]
   );
 
   const getFilters = (filterOption: FilterOption) => {
