@@ -269,7 +269,7 @@ Feature: Onboarding - Create wallet
     When I enter 24 correct mnemonic words on "Mnemonic verification" page
     Then "Next" button is enabled during onboarding process
 
-  @LW-9999
+  @LW-10138
   Scenario: Create Wallet - Analytics banner is displayed correctly
     Given I enable showing Analytics consent banner
     Then I see Analytics banner displayed correctly
