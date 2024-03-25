@@ -95,7 +95,6 @@ export const HardwareWalletFlow = ({
         connectedDevice
       });
       setWalletCreated(cardanoWallet);
-      navigateTo('finish');
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });
       showHardwareWalletError('common');
