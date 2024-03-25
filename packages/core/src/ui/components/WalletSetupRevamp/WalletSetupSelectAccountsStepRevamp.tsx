@@ -17,12 +17,14 @@ export interface WalletSetupSelectAccountsStepRevampProps {
   onSubmit: (accountIndex: number, name: string) => void;
   isHardwareWallet?: boolean;
   wallet?: string;
+  isNextLoading?: boolean;
 }
 
 export const WalletSetupSelectAccountsStepRevamp = ({
   accounts,
   onBack,
-  onSubmit
+  onSubmit,
+  isNextLoading
 }: WalletSetupSelectAccountsStepRevampProps): React.ReactElement => {
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>('0');
   const [walletName, setWalletName] = useState(INITIAL_WALLET_NAME);
@@ -51,13 +53,14 @@ export const WalletSetupSelectAccountsStepRevamp = ({
       description={<div className={styles.subtitle}>{t('core.walletSetupSelectAccountsStep.chooseWalletName')}</div>}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
       isHardwareWallet
+      isNextLoading={isNextLoading}
     >
       <Box mt="$32">
         <div>
           <Input
             dataTestId="wallet-setup-register-name-input"
             className={styles.inputName}
-            label="Wallet Name"
+            label={t('core.walletSetupSelectAccountsStep.walletName')}
             value={walletName}
             onChange={handleNameChange}
           />

@@ -2,12 +2,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable react/no-multi-comp */
 import { useWalletManager, useTimeSpentOnPage, useLocalStorage } from '@hooks';
-import {
-  WalletSetupCreationStep,
-  WalletSetupFinalStep,
-  WalletSetupConnectHardwareWalletStep,
-  WalletSetupSelectAccountsStepRevamp
-} from '@lace/core';
+import { WalletSetupSelectAccountsStepRevamp, WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
 import React, { useState, useCallback, useEffect } from 'react';
 import { Switch, Route, useHistory, useLocation, Redirect } from 'react-router-dom';
 import { Wallet } from '@lace/cardano';
@@ -23,7 +18,6 @@ import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { SendOnboardingAnalyticsEvent } from '../types';
 import { WalletType } from '@cardano-sdk/web-extension';
-import { useWalletStore } from '@src/stores';
 
 const { CHAIN } = config();
 const { AVAILABLE_WALLETS } = Wallet;
@@ -33,7 +27,7 @@ export interface HardwareWalletFlowProps {
   sendAnalytics: SendOnboardingAnalyticsEvent;
 }
 
-type HardwareWalletStep = 'connect' | 'setup' | 'create' | 'finish';
+type HardwareWalletStep = 'connect' | 'setup';
 
 const TOTAL_ACCOUNTS = 50;
 
@@ -55,8 +49,8 @@ export const HardwareWalletFlow = ({
   const [deviceConnection, setDeviceConnection] = useState<Wallet.DeviceConnection>();
   const [connectedDevice, setConnectedDevice] = useState<Wallet.HardwareWallets | undefined>();
   const [accountIndex, setAccountIndex] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { createHardwareWallet, connectHardwareWallet, saveHardwareWallet } = useWalletManager();
-  const { setStayOnAllDonePage } = useWalletStore();
   const { updateEnteredAtTime } = useTimeSpentOnPage();
   const analytics = useAnalyticsContext();
 
@@ -80,20 +74,6 @@ export const HardwareWalletFlow = ({
     )
   };
 
-  const walletSetupFinalStepTranslations = {
-    title: t('core.walletSetupFinalStep.title'),
-    description: t('core.walletSetupFinalStep.description'),
-    close: t('core.walletSetupFinalStep.close'),
-    followTwitter: t('core.walletSetupFinalStep.followTwitter'),
-    followYoutube: t('core.walletSetupFinalStep.followYoutube'),
-    followDiscord: t('core.walletSetupFinalStep.followDiscord')
-  };
-
-  const walletSetupCreateStepTranslations = {
-    title: t('core.walletSetupCreateStep.title'),
-    description: t('core.walletSetupCreateStep.description')
-  };
-
   const navigateTo = useCallback(
     (nexthPath: string) => {
       history.replace(route(nexthPath));
@@ -108,7 +88,6 @@ export const HardwareWalletFlow = ({
 
   const handleCreateWallet = async (name: string) => {
     try {
-      setStayOnAllDonePage(true);
       const cardanoWallet = await createHardwareWallet({
         accountIndex,
         deviceConnection,
@@ -116,7 +95,6 @@ export const HardwareWalletFlow = ({
         connectedDevice
       });
       setWalletCreated(cardanoWallet);
-      navigateTo('finish');
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });
       showHardwareWalletError('common');
@@ -142,7 +120,6 @@ export const HardwareWalletFlow = ({
 
   const handleGoToMyWalletClick = async () => {
     try {
-      setStayOnAllDonePage(false);
       const posthogProperties = await getHWPersonProperties(connectedDevice, deviceConnection);
       await sendAnalytics(postHogOnboardingActions.hw.DONE_GO_TO_WALLET, {
         ...posthogProperties,
@@ -175,9 +152,18 @@ export const HardwareWalletFlow = ({
     };
   }, [onHardwareWalletDisconnect]);
 
+  const handleEnterWallet = async (account: number, name: string) => {
+    sendAnalytics(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
+    setAccountIndex(account);
+    setIsSubmitting(true);
+    await handleCreateWallet(name);
+    setIsSubmitting(false);
+    await handleGoToMyWalletClick();
+  };
+
   const hardwareWalletStepRenderFunctions: Record<HardwareWalletStep, () => JSX.Element> = {
     connect: () => (
-      <WalletSetupConnectHardwareWalletStep
+      <WalletSetupConnectHardwareWalletStepRevamp
         wallets={AVAILABLE_WALLETS}
         onBack={onCancel}
         onConnect={handleConnect}
@@ -193,23 +179,10 @@ export const HardwareWalletFlow = ({
     setup: () => (
       <WalletSetupSelectAccountsStepRevamp
         accounts={TOTAL_ACCOUNTS}
+        isNextLoading={isSubmitting}
         onBack={showStartOverDialog}
-        onSubmit={(account: number, name: string) => {
-          sendAnalytics(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
-          setAccountIndex(account);
-          handleCreateWallet(name);
-          navigateTo('create');
-        }}
+        onSubmit={handleEnterWallet}
         wallet={connectedDevice}
-      />
-    ),
-    create: () => <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} isHardwareWallet />,
-    finish: () => (
-      <WalletSetupFinalStep
-        onFinish={handleGoToMyWalletClick}
-        onRender={() => navigator.hid.removeEventListener('disconnect', onHardwareWalletDisconnect)}
-        translations={walletSetupFinalStepTranslations}
-        isHardwareWallet
       />
     )
   };
@@ -249,8 +222,6 @@ export const HardwareWalletFlow = ({
         <Switch>
           <Route path={route('connect')}>{hardwareWalletStepRenderFunctions.connect()}</Route>
           <Route path={route('setup')}>{hardwareWalletStepRenderFunctions.setup()}</Route>
-          <Route path={route('create')}>{hardwareWalletStepRenderFunctions.create()}</Route>
-          <Route path={route('finish')}>{hardwareWalletStepRenderFunctions.finish()}</Route>
           <Redirect from="/" to={route('connect')} />
         </Switch>
       </WalletSetupLayout>
