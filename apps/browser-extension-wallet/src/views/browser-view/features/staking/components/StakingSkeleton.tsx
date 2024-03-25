@@ -71,7 +71,7 @@ export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.
   ];
 
   const sidePanel = (
-    <Flex flexDirection="column" alignItems="stretch" gap="$32">
+    <Flex flexDirection="column" alignItems="stretch" gap="$32" mb={'$112'}>
       <BrowsePoolsPreferencesCard />
       <Skeleton loading={!networkInfo}>
         <NetworkInfo {...networkInfo} translations={translations} />
