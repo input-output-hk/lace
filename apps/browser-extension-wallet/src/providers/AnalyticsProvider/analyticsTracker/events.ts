@@ -11,8 +11,8 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   create: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingCreateClick,
     SAVE_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseNextClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.OnboardingCreateEnterRecoveryPhraseNextClick,
     ENTER_WALLET: PostHogAction.OnboardingCreateEnterWalletClick,
-    WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingCreateWalletNamePasswordNextClick,
     RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseIntroPlayVideoClick,
     RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.OnboardingCreateKeepWalletSecureGotItClick,
     RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseCopyToClipboardClick,
@@ -21,7 +21,7 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   restore: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingRestoreClick,
     ENTER_WALLET: PostHogAction.OnboardingRestoreEnterWalletClick,
-    WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNamePasswordNextClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterRecoveryPhraseNextClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
       PostHogAction.OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick
   },
@@ -34,9 +34,7 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   },
   // eslint-disable-next-line camelcase
   forgot_password: {
-    WALLET_PASSWORD_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordNextClick,
-    RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick,
-    RECOVERY_PASSPHRASE_VERIFICATION_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseNextClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseNextClick,
     ENTER_WALLET: PostHogAction.UnlockWalletForgotPasswordEnterWalletClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
       PostHogAction.UnlockWalletForgotPasswordRecoveryPhrasePasteFromClipboardClick

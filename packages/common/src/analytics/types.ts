@@ -17,19 +17,19 @@ export enum PostHogAction {
   OnboardingHWDoneGoToWallet = 'onboarding | hardware wallet | all done | go to my wallet | click',
   // Restore wallet
   OnboardingRestoreClick = 'onboarding | restore wallet revamp | restore | click',
-  OnboardingRestoreWalletNamePasswordNextClick = "onboarding | restore wallet revamp | let's set up your new wallet  | next | click",
+  OnboardingRestoreEnterRecoveryPhraseNextClick = 'onboarding | restore wallet revamp |  enter your recovery phrase  | next | click',
   OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick = 'onboarding | restore wallet revamp | enter your recovery phrase | paste from clipboard | click',
   OnboardingRestoreHdWallet = 'onboarding | restore wallet | hd wallet',
-  OnboardingRestoreEnterWalletClick = 'onboarding | restore wallet revamp | enter your recovery phrase | enter wallet | click',
+  OnboardingRestoreEnterWalletClick = "onboarding | restore wallet revamp | let's set up your new wallet | enter wallet | click",
   // Create new wallet
   OnboardingCreateClick = 'onboarding | new wallet revamp | create | click',
-  OnboardingCreateWalletNamePasswordNextClick = "onboarding | new wallet revamp | let's set up your new wallet | next | click",
   OnboardingCreateSaveRecoveryPhraseNextClick = 'onboarding | new wallet revamp | save your recovery phrase | next | click',
+  OnboardingCreateEnterRecoveryPhraseNextClick = 'onboarding | new wallet revamp | enter your recovery phrase | next | click',
   OnboardingCreateSaveRecoveryPhraseIntroPlayVideoClick = 'onboarding | new wallet revamp | save your recovery phrase | watch video | click',
   OnboardingCreateSaveRecoveryPhraseCopyToClipboardClick = 'onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click',
   OnboardingCreateKeepWalletSecureGotItClick = 'onboarding | new wallet revamp | keeping your wallet secure | got it | click',
   OnboardingCreateEnterRecoveryPhrasePasteFromClipboardClick = 'onboarding | new wallet revamp | enter your recovery phrase | paste from clipboard | click',
-  OnboardingCreateEnterWalletClick = 'onboarding | new wallet revamp | enter your recovery phrase | enter wallet | click',
+  OnboardingCreateEnterWalletClick = "onboarding | new wallet revamp | let's set up your new wallet | enter wallet | click",
   // Multi wallet
   MultiWalletSwitchWallet = 'multiwallet | switch wallet | click',
   MultiWalletSwitchAccount = 'multiwallet | switch account | click',
