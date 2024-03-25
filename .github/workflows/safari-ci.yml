@@ -12,9 +12,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download Lace dist artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lace
           path: apps/browser-extension-wallet/dist
@@ -28,7 +28,7 @@ jobs:
         run: packages/e2e-tests/tools/convertChromeExtToSafari.sh
         shell: bash
       - name: Upload unsigned Safari build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lace-safari
           path: packages/e2e-tests/wallet-extension-safari-build/Lace/wallet-extension-safari-build/extension-build/Build/Products/Release
