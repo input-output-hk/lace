@@ -511,3 +511,7 @@ Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (s
 Then(/^I see Analytics banner displayed correctly$/, async () => {
   await OnboardingAnalyticsBannerAssert.assertBannerIsDisplayedCorrectly();
 });
+
+Then(/^I (see|do not see) Analytics banner$/, async (shouldSee: 'see' | 'do not see') => {
+  await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(shouldSee === 'see');
+});

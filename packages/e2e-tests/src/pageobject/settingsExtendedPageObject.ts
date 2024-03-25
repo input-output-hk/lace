@@ -38,7 +38,10 @@ class SettingsExtendedPageObject {
 
   clickOnPrivacyPolicy = async () => await SettingsPage.privacyPolicyLink.element.click();
 
-  clickOnRemoveWallet = async () => await SettingsPage.removeWalletButton.click();
+  clickOnRemoveWallet = async () => {
+    await SettingsPage.removeWalletButton.waitForStable();
+    await SettingsPage.removeWalletButton.click();
+  };
 
   clickOnShowPublicKey = async () => {
     await YourKeysDrawer.showPublicKeyButton.waitForStable();
