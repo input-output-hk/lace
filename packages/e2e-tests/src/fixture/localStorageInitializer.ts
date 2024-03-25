@@ -48,7 +48,7 @@ class LocalStorageInitializer {
   }
 
   async initializeShowMultiAddressDiscoveryModal(value: boolean): Promise<void> {
-    await localStorageManager.setItem('showMultiAddressModal', JSON.stringify(value));
+    await localStorageManager.setItem('showMultiAddressModal', `${value}`);
   }
 
   async initializeWallet(walletName = 'TestAutomationWallet') {

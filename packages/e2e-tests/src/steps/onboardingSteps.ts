@@ -431,6 +431,8 @@ Given(
       case 'Wallet setup':
         await OnboardingRevampPageObject.goToWalletSetupPage(flowType, mnemonicsToUse, fillValues === 'fill');
         break;
+      default:
+        throw new Error(`Unsupported page name: ${endPage}`);
     }
   }
 );

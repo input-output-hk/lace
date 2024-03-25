@@ -26,7 +26,7 @@ export const MnemonicVideoPopupContent = ({
         </h1>
         <p className={styles.description} data-testid="watch-video-description">
           {translations.description}{' '}
-          <a href={urls.faq.secretPassphrase} target="_blank" data-testid="faq-secret-passphrase-url">
+          <a href={urls.faq.secretPassphrase} target="_blank" data-testid="read-more-link">
             {translations.linkText}
           </a>
         </p>

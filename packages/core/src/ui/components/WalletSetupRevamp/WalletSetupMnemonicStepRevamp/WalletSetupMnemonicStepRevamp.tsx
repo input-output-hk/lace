@@ -104,7 +104,7 @@ export const WalletSetupMnemonicStepRevamp = ({
             onWatchVideoClick?.();
           }}
           className={styles.link}
-          data-testid="find-out-more-link"
+          data-testid="watch-video-link"
         >
           {translations.writePassphraseSubtitle2}
         </span>

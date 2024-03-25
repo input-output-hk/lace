@@ -1,6 +1,6 @@
 import WalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
-import { clearInputFieldValue } from '../utils/inputFieldUtils';
+import { setInputFieldValue } from '../utils/inputFieldUtils';
 import mainPage from '../elements/onboarding/mainPage';
 import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 
@@ -64,8 +64,7 @@ class OnboardingRevampPageObject {
 
   async enterMnemonicWord(value: string, inputNumber = 0, shouldTriggerValidation = true) {
     const inputs = await RecoveryPhrasePage.mnemonicInputs;
-    await clearInputFieldValue(inputs[inputNumber]);
-    await browser.keys(value);
+    await setInputFieldValue(inputs[inputNumber], value);
     if (shouldTriggerValidation) {
       await RecoveryPhrasePage.stepTitle.click(); // Click outside input fields to trigger validation
     }
@@ -77,7 +76,6 @@ class OnboardingRevampPageObject {
     }
     const mnemonicInputs = await RecoveryPhrasePage.mnemonicInputs;
     for (let i = 0; i < this.mnemonicWords.length; i++) {
-      await clearInputFieldValue(mnemonicInputs[i]);
       await mnemonicInputs[i].setValue(this.mnemonicWords[i]);
     }
   }
