@@ -13,10 +13,6 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('lastStaking', JSON.stringify({}));
   }
 
-  async initializeTrackingConsent(allowAnalytics: boolean): Promise<void> {
-    await localStorageManager.setItem('doesUserAllowAnalytics', JSON.stringify(allowAnalytics));
-  }
-
   async initializeMode(mode: 'light' | 'dark'): Promise<void> {
     await localStorageManager.setItem('mode', mode);
   }

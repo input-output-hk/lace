@@ -57,7 +57,6 @@ Then(
 
 Then(/my local storage is fully initialized/, async () => {
   await localStorageInitializer.initializeLastStaking();
-  await localStorageInitializer.initializeTrackingConsent(true);
   await localStorageInitializer.initializeMode('light');
 });
 
