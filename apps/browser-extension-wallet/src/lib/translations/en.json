@@ -1586,20 +1586,8 @@
       "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue.",
       "connectDeviceFull": "Just connect your device to your computer and unlock it to continue. If you're using a Ledger device, make sure you open the Cardano App."
     },
-    "walletSetupCreateStep": {
-      "title": "Creating your wallet",
-      "description": "Your Lace wallet will be all set up in a few seconds."
-    },
     "walletSetupRestoreStep": {
       "title": "Restoring your wallet"
-    },
-    "walletSetupFinalStep": {
-      "title": "Hurray! All done :)",
-      "description": "It's time to start your Web3 journey. Plus you can follow us to stay up to date on all our latest news and content.",
-      "close": "Go to my wallet",
-      "followTwitter": "Follow us on Twitter",
-      "followYoutube": "Follow us on Youtube",
-      "followDiscord": "Join us on Discord"
     },
     "walletSetupMnemonicStep": {
       "writePassphrase": "Write down your secret passphrase",
@@ -1680,6 +1668,7 @@
       "maxCharacters": "Max. 20 characters",
       "chooseWalletName": "Choose a name to help identify your wallet and which account you would like to export. You can change this later!",
       "enterWallet": "Enter wallet",
+      "walletName": "Wallet name",
       "selectAccount": "Select Account",
       "exportKeys": "Next",
       "chooseAccountToExport": "Choose which account you would like to export.",
