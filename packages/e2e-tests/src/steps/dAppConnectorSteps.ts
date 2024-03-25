@@ -28,7 +28,7 @@ When(/^I open test DApp$/, async () => {
 
 Then(/^I see DApp authorization window$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage();
 });
 
 Then(/^I see DApp collateral window$/, async () => {
@@ -43,7 +43,7 @@ Then(/^I see DApp insufficient funds window$/, async () => {
 
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage();
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
@@ -69,7 +69,7 @@ Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => 
 });
 
 Then(
-  /^I see DApp connector "Confirm transaction" page with: "([^"]*)" tADA, "([^"]*)" assets and receiving wallet "([^"]*)"$/,
+  /^I see DApp connector "Confirm transaction" page with: "([^"]*)" tADA - fee, "([^"]*)" assets and receiving wallet "([^"]*)"$/,
   async (adaValue: string, assetValue: string, walletName: string) => {
     await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
 
@@ -90,7 +90,7 @@ Then(
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: 3,
+      amountADA: -3,
       amountAsset: '0',
       recipientAddress: String(getTestWallet('WalletReceiveDappTransactionE2E').address)
     };
