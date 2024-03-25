@@ -6,7 +6,6 @@ import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import Modal from '../elements/modal';
 import ModalAssert from '../assert/modalAssert';
-import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import OnboardingAnalyticsPage from '../elements/onboarding/analyticsPage';
 import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert';
 import OnboardingConnectHWPageAssert from '../assert/onboarding/onboardingConnectHWPageAssert';
@@ -98,8 +97,8 @@ When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'B
 });
 
 When(/^I click "Go to my wallet" button on "All done" page$/, async () => {
-  await OnboardingAllDonePage.nextButton.waitForClickable();
-  await OnboardingAllDonePage.nextButton.click();
+  await RecoveryPhrasePage.nextButton.waitForClickable();
+  await RecoveryPhrasePage.nextButton.click();
 });
 
 When(

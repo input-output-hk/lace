@@ -9,7 +9,6 @@ import AnalyticsPage from '../elements/onboarding/analyticsPage';
 import Modal from '../elements/modal';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
-import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import testContext from '../utils/testContext';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
@@ -274,7 +273,7 @@ class OnboardingPageObject {
     await commonOnboardingElements.nextButton.click();
     await this.openMnemonicVerificationLastPage(getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []);
     await commonOnboardingElements.nextButton.click();
-    await OnboardingAllDonePage.nextButton.click();
+    await commonOnboardingElements.nextButton.click();
     await Modal.cancelButton.waitForClickable();
     await Modal.cancelButton.click();
   }
