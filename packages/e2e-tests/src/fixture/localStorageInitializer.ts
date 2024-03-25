@@ -85,6 +85,10 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('multidelegationFirstVisitSincePortfolioPersistence', 'false');
   };
 
+  enableShowingAnalyticsBanner = async () => {
+    await localStorageManager.setItem('analyticsStatus', '');
+  };
+
   initialiseBasicLocalStorageData = async (
     walletName: string,
     chainName: 'Preprod' | 'Preview' | 'Mainnet'

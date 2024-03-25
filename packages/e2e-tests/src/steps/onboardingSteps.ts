@@ -34,6 +34,7 @@ import watchVideoModal from '../elements/onboarding/watchVideoModal';
 import analyticsBanner from '../elements/analyticsBanner';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
+import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -504,4 +505,8 @@ Then(
 
 Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (state: 'enabled' | 'disabled') => {
   await new OnboardingCommonAssert().assertNextButtonEnabled(state === 'enabled');
+});
+
+Then(/^I see Analytics banner displayed correctly$/, async () => {
+  await OnboardingAnalyticsBannerAssert.assertBannerIsDisplayedCorrectly();
 });

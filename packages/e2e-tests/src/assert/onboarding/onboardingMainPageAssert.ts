@@ -2,7 +2,7 @@ import OnboardingMainPage from '../../elements/onboarding/mainPage';
 import OnboardingCommonAssert from '../onboarding/onboardingCommonAssert';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
-import analyticsBanner from '../../elements/analyticsBanner';
+import OnboardingAnalyticsBannerAssert from './onboardingAnalyticsBannerAssert';
 
 class OnboardingMainPageAssert extends OnboardingCommonAssert {
   async assertSeeLogo() {
@@ -91,7 +91,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeMainPage() {
-    await analyticsBanner.agreeButton.waitForDisplayed({ reverse: true });
+    await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(false);
     await this.assertSeeLogo();
     await this.assertSeeTitle();
     await this.assertSeeSubtitle();

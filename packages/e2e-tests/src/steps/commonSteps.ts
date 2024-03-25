@@ -288,6 +288,11 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
+Given(/^I enable showing Analytics consent banner$/, async () => {
+  await localStorageInitializer.enableShowingAnalyticsBanner();
+  await browser.refresh();
+});
+
 Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: string) => {
   await commonAssert.assertClipboardContainsAddressOfWallet(walletName);
 });

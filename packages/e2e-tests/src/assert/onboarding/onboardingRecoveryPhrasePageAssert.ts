@@ -32,6 +32,7 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
     );
     await this.assertSeeMnemonicWords(mnemonicWordsLength);
   }
+
   async assertSeeMnemonicError(shouldBeDisplayed: boolean) {
     await recoveryPhrasePage.errorMessage.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
