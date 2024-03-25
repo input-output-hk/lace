@@ -181,7 +181,7 @@ export const DappTransaction = ({
         {deposit !== BigInt(0) && (
           <TransactionFee
             testId="deposit"
-            fee={`-${Wallet.util.lovelacesToAdaString(deposit.toString())}`}
+            fee={Wallet.util.lovelacesToAdaString(deposit.toString())}
             label={t('package.core.dappTransaction.deposit')}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
@@ -192,7 +192,7 @@ export const DappTransaction = ({
 
         <TransactionFee
           testId="fee"
-          fee={`-${Wallet.util.lovelacesToAdaString(fee.toString())}`}
+          fee={Wallet.util.lovelacesToAdaString(fee.toString())}
           amountTransformer={() => `${Wallet.util.lovelacesToAdaString(fee.toString())} ${fiatCurrencyCode}`}
           coinSymbol={coinSymbol}
           className={styles.feeContainer}
