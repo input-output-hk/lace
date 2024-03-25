@@ -159,9 +159,7 @@ class TokenSelectionPage extends CommonDrawerElements {
   saveTicker = async (assetType: string, assetName: string) => {
     if (assetType === 'Token') {
       assetName =
-        assetName.slice(0, 6) === 'asset1'
-          ? assetName.slice(0, 10)
-          : String(await this.tokenItem(assetName).name.getText());
+        assetName.slice(0, 6) === 'asset1' ? assetName.slice(0, 10) : await this.tokenItem(assetName).ticker.getText();
     }
     testContext.save('savedTicker', String(assetName));
   };
