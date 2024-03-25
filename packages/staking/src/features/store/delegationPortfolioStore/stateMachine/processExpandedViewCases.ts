@@ -41,6 +41,9 @@ import {
   RemoveStakePool,
   SelectPoolFromDetails,
   SelectPoolFromList,
+  SetBrowsePoolsView,
+  SetSearchQuery,
+  SetSort,
   ShowDelegatedPoolDetails,
   ShowPoolDetailsFromList,
   UnselectPoolFromDetails,
@@ -96,6 +99,21 @@ export const processExpandedViewCases: Handler = (params) =>
             activeDrawerStep: DrawerManagementStep.Preferences,
             draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
           })),
+          SelectPoolFromList: handler<SelectPoolFromList, StateBrowsePools, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.selectPools({
+                stakePools: data,
+                state,
+              }),
+            })
+          ),
+          SetBrowsePoolsView: handler<SetBrowsePoolsView, StateOverview, StateOverview>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              browsePoolsView: data,
+            })
+          ),
           ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails, StateOverview, StateCurrentPoolDetails>(
             ({ state, command: { data } }) => ({
               ...state,
@@ -169,6 +187,23 @@ export const processExpandedViewCases: Handler = (params) =>
               }),
             })
           ),
+          SetBrowsePoolsView: handler<SetBrowsePoolsView, StateBrowsePools, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              browsePoolsView: data,
+            })
+          ),
+          SetSearchQuery: handler<SetSearchQuery, StateBrowsePools, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              searchQuery: data,
+            })
+          ),
+          SetSort: handler<SetSort, StateBrowsePools, StateBrowsePools>(({ state, command: { data } }) => ({
+            ...state,
+            sortField: data.field,
+            sortOrder: data.order,
+          })),
           ShowPoolDetailsFromList: handler<ShowPoolDetailsFromList, StateBrowsePools, StatePoolDetails>(
             ({ state, command: { data } }) => ({
               ...state,

@@ -10,7 +10,7 @@ export const DelegationTooltip = ({
 }: Readonly<TooltipContentRendererProps<DistributionItem & { fill?: string }>>): ReactElement | null => {
   const { t } = useTranslation();
   if (active && payload) {
-    const { apy, saturation, fill } = payload;
+    const { ros, saturation, fill } = payload;
 
     return (
       <RichTooltipContent
@@ -19,11 +19,11 @@ export const DelegationTooltip = ({
         description={
           <Box w="$148">
             <Flex justifyContent="space-between">
-              <Box>{t('browsePools.stakePoolTableBrowser.tableHeader.apy.title')}</Box>
-              <Box>{apy ? `${apy}%` : '-'}</Box>
+              <Box>{t('browsePools.tableHeaders.ros')}</Box>
+              <Box>{ros ? `${ros}%` : '-'}</Box>
             </Flex>
             <Flex justifyContent="space-between">
-              <Box>{t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title')}</Box>
+              <Box>{t('browsePools.tableHeaders.saturation')}</Box>
               <Box>{saturation ? `${saturation}%` : '-'}</Box>
             </Flex>
           </Box>

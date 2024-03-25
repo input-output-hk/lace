@@ -89,7 +89,7 @@ export const NetworkInfo = ({
           </div>
         </div>
         {/*
-        TODO: uncomment when values are available
+        TODO: uncomment when values are available. Remember that APY is deprecated. Please use ROS - https://input-output.atlassian.net/browse/LW-9975
         <div className={styles.stats}>
           <div className={styles.label} data-testid="network-avg-apy-label">
             {translations.averageApy}

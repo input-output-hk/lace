@@ -1,10 +1,5 @@
 import inRange from 'lodash/inRange';
-
-export enum SaturationLevels {
-  Medium = 'medium',
-  High = 'high',
-  Veryhigh = 'veryHigh',
-}
+import { SaturationLevels } from './types';
 
 const mediumUpperBound = 90;
 const highUpperBound = 95;
