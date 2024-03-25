@@ -54,6 +54,7 @@ class WalletAddressPage extends CommonDrawerElements {
 
   async clickCopyButtonForHandle(handleName: string) {
     const addressCard = await this.getHandleAddressCard(handleName);
+    await addressCard.waitForStable();
     await addressCard.scrollIntoView();
     await addressCard.moveTo();
     await addressCard.$(this.COPY_BUTTON).click();

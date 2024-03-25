@@ -299,6 +299,7 @@ Then(/^I click "(Confirm|Cancel)" button on "Sign transaction" page$/, async (bu
 });
 
 Then(/^I click "Close" button on DApp "All done" page$/, async () => {
+  await AllDonePage.closeButton.waitForStable();
   await AllDonePage.closeButton.click();
 });
 

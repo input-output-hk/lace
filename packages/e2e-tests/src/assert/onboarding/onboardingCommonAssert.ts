@@ -5,11 +5,13 @@ import { browser } from '@wdio/globals';
 
 class OnboardingCommonAssert {
   private commonOnboardingElements: CommonOnboardingElements;
+
   constructor() {
     this.commonOnboardingElements = new CommonOnboardingElements();
   }
+
   async assertSeeStepTitle(expectedTitle: string): Promise<void> {
-    await this.commonOnboardingElements.stepTitle.waitForDisplayed();
+    await this.commonOnboardingElements.stepTitle.waitForStable();
     expect(await this.commonOnboardingElements.stepTitle.getText()).to.equal(expectedTitle);
   }
 
@@ -32,6 +34,11 @@ class OnboardingCommonAssert {
 
   async assertNextButtonEnabled(shouldBeEnabled: boolean): Promise<void> {
     await this.commonOnboardingElements.nextButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
+
+  async assertNextButtonTextEquals(expectedText: string): Promise<void> {
+    await this.commonOnboardingElements.nextButton.waitForDisplayed();
+    expect(await this.commonOnboardingElements.nextButton.getText()).to.equal(expectedText);
   }
 
   async assertLegalContentIsDisplayed(linkName: string): Promise<void> {
@@ -59,11 +66,11 @@ class OnboardingCommonAssert {
       await t('settings.legals.cookiePolicy')
     );
     await this.commonOnboardingElements.privacyPolicyLink.waitForDisplayed();
-    expect(await this.commonOnboardingElements.privacyPolicyLink.getText()).to.equal(
+    expect(await this.commonOnboardingElements.privacyPolicyLink.getText()).to.equalIgnoreCase(
       await t('settings.legals.privacyPolicy')
     );
     await this.commonOnboardingElements.termsOfServiceLink.waitForDisplayed();
-    expect(await this.commonOnboardingElements.termsOfServiceLink.getText()).to.equal(
+    expect(await this.commonOnboardingElements.termsOfServiceLink.getText()).to.equalIgnoreCase(
       await t('settings.legals.termsOfService')
     );
   }

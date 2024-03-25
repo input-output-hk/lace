@@ -1,0 +1,73 @@
+@import '../../styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/mixins';
+@import '../../../../../common/src/ui/styles/theme.scss';
+
+.walletSetupStepLayout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  position: relative;
+
+  .sideTimelineContainer {
+    width: 204px;
+    border-right: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+    margin: size_unit(5) 0;
+
+    .activeText {
+      @include text-bodySmall-semi-bold;
+    }
+  }
+
+  .title, .subtitle {
+    margin: 0
+  }
+
+  .container {
+    flex: 1;
+    height: 100%;
+    padding: size_unit(5);
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(2);
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: size_unit(3);
+
+      h1 {
+        @include text-heading;
+        color: var(--text-color-primary, #3d3b39);
+      }
+
+      p {
+        font-size: var(--body) !important;
+        line-height: size_unit(3) !important;
+        color: var(--text-color-primary, #3d3b39);
+      }
+    }
+
+    .content {
+      flex: 1;
+      @include scroll-bar-style;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: size_unit(2);
+
+      button {
+        min-width: 116px !important;
+      }
+
+      p {
+        font-weight: 600;
+        font-size: var(--bodySmall);
+        line-height: 20px;
+        color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+      }
+    }
+  }
+}

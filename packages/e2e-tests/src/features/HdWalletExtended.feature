@@ -2,7 +2,7 @@
 Feature: HD wallet - extended view
 
   Background:
-    Given Lace is ready for test
+    Given Wallet is synced
 
   @LW-7550
   Scenario: Tokens - HD wallet assets discovered in Lace

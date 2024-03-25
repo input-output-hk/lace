@@ -1,4 +1,4 @@
-@Transactions-Popup @Testnet @Mainnet
+@Transactions-Popup @Analytics @Testnet @Mainnet
 Feature: Transactions - Extended view
 
   Background:
@@ -27,4 +27,3 @@ Feature: Transactions - Extended view
     And I click on a transaction hash
     Then I validate latest analytics single event "activity | activity detail | transaction hash | click"
     And I validate that 1 analytics event(s) have been sent
-    

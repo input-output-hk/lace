@@ -584,7 +584,6 @@ export const useWalletManager = (): UseWalletManager => {
       if (!isForgotPasswordFlow) {
         deleteFromLocalStorage('appSettings');
       }
-      deleteFromLocalStorage('showDappBetaModal');
       deleteFromLocalStorage('lastStaking');
       deleteFromLocalStorage('userInfo');
       deleteFromLocalStorage('keyAgentData');
