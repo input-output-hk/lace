@@ -38,7 +38,10 @@ class SettingsExtendedPageObject {
 
   clickOnPrivacyPolicy = async () => await SettingsPage.privacyPolicyLink.element.click();
 
-  clickOnRemoveWallet = async () => await SettingsPage.removeWalletButton.click();
+  clickOnRemoveWallet = async () => {
+    await SettingsPage.removeWalletButton.waitForStable();
+    await SettingsPage.removeWalletButton.click();
+  };
 
   clickOnShowPublicKey = async () => {
     await YourKeysDrawer.showPublicKeyButton.waitForStable();
@@ -154,7 +157,7 @@ class SettingsExtendedPageObject {
       (await Modal.container.isDisplayed()) &&
       (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
     ) {
-      await Modal.title.waitForDisplayed({ reverse: true, timeout: 120_000 });
+      await Modal.title.waitForDisplayed({ reverse: true, timeout: 220_000 });
     }
   };
 
@@ -167,7 +170,7 @@ class SettingsExtendedPageObject {
 
   async multiAddressModalConfirm() {
     if (await Modal.confirmButton.isDisplayed()) {
-      expect(await Modal.confirmButton.getText()).to.equal(t('staking', 'modals.beta.button').toString());
+      expect(await Modal.confirmButton.getText()).to.equal(await t('modals.beta.button', 'staking'));
       await Modal.confirmButton.click();
     }
   }

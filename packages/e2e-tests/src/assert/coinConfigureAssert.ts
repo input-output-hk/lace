@@ -1,7 +1,6 @@
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { Logger } from '../support/logger';
 import { expect } from 'chai';
-import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
 import { t } from '../utils/translationService';
 
 class CoinConfigureAssert {
@@ -14,11 +13,6 @@ class CoinConfigureAssert {
     } else {
       Logger.log('Fiat balance = "-", skipping validation');
     }
-  }
-
-  async assertTokenDisplayed(tokenName: string, shouldBeDisplayed: boolean) {
-    const token = await $(new TokenSearchResult(tokenName).toJSLocator());
-    await token.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
   async assertSeeCoinConfigure() {

@@ -1,11 +1,12 @@
 import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, ThemeColorScheme, Variants } from '@lace/ui';
 import { action } from '@storybook/addon-actions';
-import { SortDirection, SortField, StakePoolSortOptions } from 'features/BrowsePools';
+import { StakePoolSortOptions } from 'features/BrowsePools';
 import { useCallback, useState } from 'react';
 import type { Meta } from '@storybook/react';
 
-import { SortAndFilter } from './SortAndFilter';
-import { FilterValues, PoolsFilter, SortAndFilterTab } from './types';
+import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
+import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
+import { SortAndFilterTab } from './types';
 
 export default {
   title: 'Cards/Stake Pool Sorting & Filter',
@@ -14,10 +15,10 @@ export default {
 const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [sort, setSort] = useState<StakePoolSortOptions>({
-    field: SortField.saturation,
-    order: SortDirection.asc,
+    field: 'saturation',
+    order: 'asc',
   });
-  const [filter, setFilter] = useState<FilterValues>({
+  const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
     [PoolsFilter.Performance]: ['', ''],
@@ -33,7 +34,7 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   );
 
   const handleFilterChange = useCallback(
-    (options: FilterValues) => {
+    (options) => {
       action('FilterChange')(options);
       setFilter(options);
     },
@@ -41,14 +42,16 @@ const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   );
 
   return (
-    <SortAndFilter
-      activeTab={activeTab}
-      sort={sort}
-      filter={filter}
-      onTabChange={setActiveTab}
-      onSortChange={handleSortChange}
-      onFilterChange={handleFilterChange}
-    />
+    <Box w="$342">
+      <BrowsePoolsPreferencesCard
+        activeTab={activeTab}
+        sort={sort}
+        filter={filter}
+        onTabChange={setActiveTab}
+        onSortChange={handleSortChange}
+        onFilterChange={handleFilterChange}
+      />
+    </Box>
   );
 };
 

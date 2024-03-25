@@ -1,9 +1,9 @@
 import { sx } from '@lace/ui';
 
-export const stakePoolsTable = sx({
-  alignItems: { minimumScreen: 'stretch' },
-  display: { minimumScreen: 'flex' },
-  flexDirection: { minimumScreen: 'column' },
+export const browsePools = sx({
+  alignItems: 'stretch',
+  display: 'flex',
+  flexDirection: 'column',
 });
 
 export const searchBar = sx({

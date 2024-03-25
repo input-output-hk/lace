@@ -1,4 +1,4 @@
-@MainNavigation-Extended @Mainnet @Testnet
+@MainNavigation-Extended @Analytics @Mainnet @Testnet
 Feature: Analytics - Main Navigation - Extended view
 
   Background:
@@ -11,5 +11,4 @@ Feature: Analytics - Main Navigation - Extended view
     When I click on the logo icon
     Then I validate latest analytics single event "wallet | lace | click"
     And I validate that 1 analytics event(s) have been sent
-    
-    
+

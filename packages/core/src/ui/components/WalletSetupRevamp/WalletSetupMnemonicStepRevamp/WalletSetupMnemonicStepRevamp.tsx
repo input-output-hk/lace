@@ -104,7 +104,7 @@ export const WalletSetupMnemonicStepRevamp = ({
             onWatchVideoClick?.();
           }}
           className={styles.link}
-          data-testid="find-out-more-link"
+          data-testid="watch-video-link"
         >
           {translations.writePassphraseSubtitle2}
         </span>
@@ -136,11 +136,12 @@ export const WalletSetupMnemonicStepRevamp = ({
                 await writeMnemonicToClipboard(mnemonic);
                 onCopyToClipboard();
               }}
+              data-testid="copy-to-clipboard-button"
             >
               {translations.copyToClipboard}
             </Button>
           ) : (
-            <Button type="link" onClick={() => pasteRecoveryPhrase()}>
+            <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
               {translations.pasteFromClipboard}
             </Button>
           )

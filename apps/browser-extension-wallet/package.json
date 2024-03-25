@@ -34,7 +34,7 @@
     "prepare": "ts-patch install -s",
     "prettier": "run -T prettier --write .",
     "test": "run -T jest --config test/jest.config.js",
-    "test:coverage": "run -T test --coverage",
+    "test:coverage": "NODE_OPTIONS=\"--max-old-space-size=8192\" run -T test --coverage --silent",
     "test:e2e": "yarn exec echo \"No e2e tests on this app yet!\"",
     "watch": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack --config webpack.app.dev.js --progress --watch"
   },

@@ -1,37 +1,25 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import Modal from '../elements/modal';
 import ModalAssert from '../assert/modalAssert';
-import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
-import OnboardingAllDonePageAssert from '../assert/onboarding/onboardingAllDonePageAssert';
 import OnboardingAnalyticsPage from '../elements/onboarding/analyticsPage';
 import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert';
 import OnboardingConnectHWPageAssert from '../assert/onboarding/onboardingConnectHWPageAssert';
-import OnboardingDataCollectionPageAssert from '../assert/onboarding/onboardingDataCollectionPageAssert';
-import OnboardingLegalPageAssert from '../assert/onboarding/onboardingLegalPageAssert';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMainPageAssert from '../assert/onboarding/onboardingMainPageAssert';
-import OnboardingMnemonicInfoPage from '../elements/onboarding/mnemonicInfoPage';
-import OnboardingMnemonicInfoPageAssert from '../assert/onboarding/onboardingMnemonicInfoPageAssert';
-import OnboardingMnemonicPage from '../elements/onboarding/mnemonicPage';
 import OnboardingMnemonicPageAssert from '../assert/onboarding/onboardingMnemonicPageAssert';
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
-import OnboardingRecoveryPhraseLengthPageAssert from '../assert/onboarding/onboardingRecoveryPhraseLengthPageAssert';
 import OnboardingWalletCreationPageAssert from '../assert/onboarding/onboardingWalletCreationPageAssert';
-import OnboardingWalletNamePage from '../elements/onboarding/walletNamePage';
-import OnboardingWalletNamePageAssert from '../assert/onboarding/onboardingWalletNamePageAssert';
-import OnboardingWalletPasswordPage from '../elements/onboarding/walletPasswordPage';
-import OnboardingWalletPasswordPageAssert from '../assert/onboarding/onboardingWalletPasswordPageAssert';
+import OnboardingWalletSetupPage from '../elements/onboarding/walletSetupPage';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import CommonAssert from '../assert/commonAssert';
-import { shuffle } from '../utils/arrayUtils';
 import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
 import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
@@ -39,12 +27,13 @@ import type { RecoveryPhrase } from '../types/onboarding';
 import { generateRandomString } from '../utils/textUtils';
 import OnboardingRevampPageObject from '../pageobject/onboardingRevampPageObject';
 import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingRecoveryPhrasePageAssert';
-import onboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
-import localStorageManager from '../utils/localStorageManager';
-import { getBackgroundStorageItem } from '../utils/browserStorage';
+import analyticsBanner from '../elements/analyticsBanner';
+import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
+import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
+import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -108,8 +97,8 @@ When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'B
 });
 
 When(/^I click "Go to my wallet" button on "All done" page$/, async () => {
-  await OnboardingAllDonePage.nextButton.waitForClickable();
-  await OnboardingAllDonePage.nextButton.click();
+  await RecoveryPhrasePage.nextButton.waitForClickable();
+  await RecoveryPhrasePage.nextButton.click();
 });
 
 When(
@@ -132,8 +121,6 @@ When(
 
 Given(/^I click "Restore" button and confirm$/, async () => {
   await OnboardingMainPage.restoreWalletButton.click();
-  // await Modal.confirmButton.waitForClickable();
-  // await Modal.confirmButton.click();
 });
 
 When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
@@ -142,7 +129,7 @@ When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
 
 When(/^I enter wallet name with size of: ([^"]*) characters$/, async (numberOfCharacters: number) => {
   const walletName = await generateRandomString(numberOfCharacters);
-  await OnboardingPageObject.fillWalletNameInput(walletName);
+  await OnboardingWalletSetupPage.setWalletNameInput(walletName);
 });
 
 When(
@@ -156,22 +143,22 @@ When(
 );
 
 Then(/^Name error "([^"]*)" is displayed/, async (nameError: string) => {
-  await OnboardingWalletNamePageAssert.assertSeeWalletNameError(await t(nameError));
+  await OnboardingWalletSetupPageAssert.assertSeeWalletNameError(await t(nameError));
 });
 
 Then(
   // eslint-disable-next-line max-len
   /^Password recommendation: "([^"]*)", complexity bar level: "(\d{0,4})" and password confirmation error: "([^"]*)" are displayed$/,
   async (passwordErr: string, complexityBar: 0 | 1 | 2 | 3 | 4, passwordConfErr: string) => {
-    await OnboardingWalletPasswordPageAssert.assertSeePasswordConfirmationError(
+    await OnboardingWalletSetupPageAssert.assertSeePasswordConfirmationError(
       await t(passwordConfErr),
       passwordConfErr !== 'empty'
     );
-    await OnboardingWalletPasswordPageAssert.assertSeePasswordRecommendation(
+    await OnboardingWalletSetupPageAssert.assertSeePasswordRecommendation(
       await t(passwordErr),
       passwordErr !== 'empty'
     );
-    await OnboardingWalletPasswordPageAssert.assertSeeComplexityBar(complexityBar);
+    await OnboardingWalletSetupPageAssert.assertSeeComplexityBar(complexityBar);
   }
 );
 
@@ -179,36 +166,12 @@ Then(/^"Get started" page is displayed$/, async () => {
   await OnboardingMainPageAssert.assertSeeMainPage();
 });
 
-Then(/^"Legal page" is displayed$/, async () => {
-  await OnboardingLegalPageAssert.assertSeeLegalPage();
-});
-
-Then(/^"Recovery phrase length page" is displayed and 24 words checkbox is checked$/, async () => {
-  await OnboardingRecoveryPhraseLengthPageAssert.assertSeeRecoveryPhraseLengthPage();
+Then(/^I (accept|reject) analytics banner on "Get started" page$/, async (action: 'accept' | 'reject') => {
+  action === 'accept' ? await analyticsBanner.agreeButton.click() : await analyticsBanner.rejectButton.click();
 });
 
 Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {
-  await OnboardingPageObject.selectRecoveryPassphraseLength(length);
-});
-
-Then(/^"Help us improve your experience" page is displayed$/, async () => {
-  await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
-});
-
-Then(/^"Mnemonic writedown" page is displayed with words (8|16|24) of 24$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicWriteDownPage(expectedWords);
-});
-
-Then(/^"Mnemonic verification" page is displayed with words (8|16|24) of 24$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 24);
-});
-
-Then(/^"Mnemonic verification" page is displayed with words (8|12) of 12$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 12);
-});
-
-Then(/^"Mnemonic verification" page is displayed with words (8|15) of 15$/, async (expectedWords: number) => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicVerificationWordsPage(expectedWords, 15);
+  await RecoveryPhrasePage.selectMnemonicLength(length);
 });
 
 Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
@@ -219,25 +182,12 @@ Then(/^I click Trezor wallet icon$/, async () => {
   await OnboardingConnectHardwareWalletPage.trezorButton.click();
 });
 
-Then(/^"All done" page is displayed$/, async () => {
-  await OnboardingAllDonePageAssert.assertSeeAllDonePage();
-});
-
 Then(/^"Creating wallet" page is displayed$/, async () => {
   await OnboardingWalletCreationPageAssert.assertSeeCreatingWalletPage();
 });
 
 Then(/^Creating wallet page finishes in < (\d*)s$/, async (duration: number) => {
   await OnboardingWalletCreationPageAssert.assertCreatingWalletDuration(duration);
-});
-
-Then(/^"Name your wallet" page is displayed$/, async () => {
-  await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
-});
-
-Then(/^"Wallet password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
-  const expectedFlow = flow === 'forgot password' ? 'forgot_password' : 'onboarding';
-  await OnboardingWalletPasswordPageAssert.assertSeePasswordPage(expectedFlow);
 });
 
 Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
@@ -248,22 +198,8 @@ Then(/^I accept "T&C" checkbox$/, async () => {
   await OnboardingPageObject.acceptTCCheckbox();
 });
 
-Given(/^I am on "Legal page"$/, async () => {
-  await OnboardingPageObject.openLegalPage();
-  await OnboardingLegalPageAssert.assertSeeLegalPage();
-});
-
 Given(/^I am on "Lace terms of use" page and accept terms$/, async () => {
   await OnboardingPageObject.openAndAcceptTermsOfUsePage();
-});
-
-Given(/^I am on "Help us improve your experience" page$/, async () => {
-  await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
-});
-
-Given(/^I am on "Name your wallet" page$/, async () => {
-  await OnboardingPageObject.openNameYourWalletPage();
-  await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
 });
 
 Given(/^I am on "Connect Hardware Wallet" page$/, async () => {
@@ -314,121 +250,8 @@ Given(
   }
 );
 
-Given(/^I am on "All done" page$/, async () => {
-  await OnboardingPageObject.openAllDonePage();
-  await OnboardingAllDonePageAssert.assertSeeAllDonePage();
-});
-
-Given(
-  /^I am on "All done" page with analytics tracking (Skip|Agree) from (Create|Restore) wallet$/,
-  async (isTrackingEnabled: 'Skip' | 'Agree', onboardingType: 'Create' | 'Restore') => {
-    await OnboardingPageObject.openAndAcceptTermsOfUsePage();
-    await (isTrackingEnabled === 'Skip'
-      ? OnboardingAnalyticsPage.skipButton.click()
-      : OnboardingAnalyticsPage.nextButton.click());
-    await OnboardingPageObject.fillWalletNameInput('Test wallet');
-    await OnboardingWalletNamePage.nextButton.click();
-    await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
-    await OnboardingWalletPasswordPage.nextButton.click();
-    await OnboardingMnemonicInfoPage.nextButton.click();
-    switch (onboardingType) {
-      case 'Create':
-        await OnboardingPageObject.openMnemonicVerificationLastPage();
-        break;
-      case 'Restore':
-        await OnboardingPageObject.openMnemonicVerificationLastPage(mnemonicWords);
-        break;
-    }
-    await OnboardingMnemonicPage.nextButton.click();
-    await OnboardingAllDonePageAssert.assertSeeAllDonePage();
-  }
-);
-
 Given(/^I am on "All done!" page from "Restore wallet" using "([^"]*)" wallet$/, async (walletName: string) => {
   await OnboardingPageObject.openAllDonePageFromWalletRestore(getTestWallet(walletName).mnemonic ?? []);
-});
-
-Given(
-  /^I am on "Enter your secret passphrase" with (12|15|24) words page from "Restore wallet" process$/,
-  async (length: RecoveryPhrase) => {
-    await OnboardingPageObject.goToMnemonicWriteDownPage(length);
-  }
-);
-
-Given(/^I fill passphrase with incorrect mnemonic (12|15|24) words on each page$/, async (length: RecoveryPhrase) => {
-  const invalidMnemonic = [...invalidMnemonicWords];
-  switch (length) {
-    case '12':
-      invalidMnemonic.splice(12);
-      break;
-    case '15':
-      invalidMnemonic.splice(15);
-      break;
-    case '24':
-      break;
-  }
-  await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
-});
-
-Given(
-  /^I fill passphrase fields using 24 words mnemonic on (8\/24|16\/24|24\/24) page$/,
-  async (pageNumber: string) => {
-    switch (pageNumber) {
-      case '8/24':
-        await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 0);
-        break;
-      case '16/24':
-        await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 8);
-        break;
-      case '24/24':
-        await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 16);
-        break;
-    }
-  }
-);
-
-Given(
-  /^I fill passphrase fields using 24 words mnemonic in incorrect order on (8\/24|16\/24|24\/24) page$/,
-  async (pageNumber: string) => {
-    const shuffledWords = shuffle([...mnemonicWords]);
-    switch (pageNumber) {
-      case '8/24':
-        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 0);
-        break;
-      case '16/24':
-        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 8);
-        break;
-      case '24/24':
-        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 16);
-        break;
-    }
-  }
-);
-
-Given(/^I fill passphrase fields using 12 words mnemonic on (8\/12|12\/12) page$/, async (pageNumber: string) => {
-  switch (pageNumber) {
-    case '8/12':
-      await OnboardingPageObject.fillMnemonicFields(twelveMnemonicWords, 0);
-      break;
-    case '12/12':
-      await OnboardingPageObject.fillMnemonicFields(twelveMnemonicWords, 8);
-      break;
-  }
-});
-
-Given(/^I fill passphrase fields using 15 words mnemonic on (8\/15|15\/15) page$/, async (pageNumber: string) => {
-  switch (pageNumber) {
-    case '8/15':
-      await OnboardingPageObject.fillMnemonicFields(fifteenMnemonicWords, 0);
-      break;
-    case '15/15':
-      await OnboardingPageObject.fillMnemonicFields(fifteenMnemonicWords, 8);
-      break;
-  }
-});
-
-Then(/^I save the words$/, async () => {
-  mnemonicWordsForReference.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
 });
 
 Then(/^I clear saved words$/, async () => {
@@ -450,7 +273,7 @@ Then(/^I fill saved words (8|16|24) of 24$/, async (pageNumber: string) => {
 });
 
 When(/^I fill mnemonic input with "([^"]*)"$/, async (value: string) => {
-  await OnboardingPageObject.fillMnemonicInput(value, 0, false);
+  await OnboardingRevampPageObject.enterMnemonicWord(value, 0, false);
 });
 
 When(/^I click on mnemonic input$/, async () => {
@@ -481,18 +304,6 @@ Then(/^I see Lace extension main page in (extended|popup) mode$/, async (mode: '
   await TokensPageAssert.assertSeeTitle();
 });
 
-Then(/^There is tooltip visible$/, async () => {
-  await OnboardingLegalPageAssert.assertTooltipVisible();
-});
-
-Then(/^There is no tooltip visible$/, async () => {
-  await OnboardingLegalPageAssert.assertNoTooltipVisible();
-});
-
-Then(/^I hover over "Next" button$/, async () => {
-  await OnboardingPageObject.hoverOverNextButton();
-});
-
 Then(/^I change one random field$/, async () => {
   await OnboardingPageObject.changeRandomMnemonicField();
 });
@@ -501,17 +312,13 @@ Then(/^I clear one random field$/, async () => {
   await OnboardingPageObject.clearRandomMnemonicField();
 });
 
-Then(/^"Mnemonic info" page is displayed$/, async () => {
-  await OnboardingMnemonicInfoPageAssert.assertSeeMnemonicInfoPage();
-});
-
 Then(/^I navigate to "Mnemonic info" page$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
   await OnboardingPageObject.openNameYourWalletPage();
   await OnboardingPageObject.fillWalletNameInput('ValidName');
-  await OnboardingWalletNamePage.nextButton.click();
+  await OnboardingWalletSetupPage.nextButton.click();
   await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
-  await OnboardingWalletPasswordPage.nextButton.click();
+  await OnboardingWalletSetupPage.nextButton.click();
 });
 
 Then(/^I see following autocomplete options:$/, async (options: DataTable) => {
@@ -528,29 +335,12 @@ Then(/^I do not see autocomplete options list$/, async () => {
 
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingPageObject.openAllDonePage();
-  await OnboardingAllDonePageAssert.assertSeeAllDonePage();
-  await OnboardingAllDonePage.nextButton.click();
+  await OnboardingRevampPageObject.goToWalletSetupPage('Create', mnemonicWords);
+  await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
+  await OnboardingRevampPageObject.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
-  await Modal.cancelButton.waitForDisplayed();
-  await Modal.cancelButton.click();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
-  const newCreatedWallet: WalletConfig = {
-    password: 'N_8J@bne87A',
-    name: 'newCreatedWallet',
-    walletLocalStorageData: {
-      wallet: await localStorageManager.getItem('wallet'),
-      lock: await localStorageManager.getItem('lock'),
-      keyAgentData: await localStorageManager.getItem('keyAgentData'),
-      analyticsStatus: await localStorageManager.getItem('analyticsStatus'),
-      appSettings: defaultAppSettings
-    },
-    backgroundStorage: {
-      mnemonic: await getBackgroundStorageItem('mnemonic'),
-      keyAgentsByChain: await getBackgroundStorageItem('keyAgentsByChain')
-    }
-  };
-  // const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
+  const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
   testContext.save('newCreatedWallet', newCreatedWallet);
 });
 
@@ -566,20 +356,22 @@ When(/^I click on Privacy Policy link$/, async () => {
   await OnboardingAnalyticsPage.privacyPolicyLinkWithinDescription.click();
 });
 
-Then(/^Privacy Policy is displayed in new tab$/, async () => {
-  await switchToLastWindow();
-  await OnboardingDataCollectionPageAssert.assertSeePrivacyPolicy();
-});
-
 When(
-  /^I click on "(Cookie policy|Privacy policy|Terms of service)" legal link$/,
+  /^I click on "(Cookie policy|Privacy policy|Terms of service)" legal link"$/,
   async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service') => {
     await OnboardingPageObject.clickOnLegalLink(link);
   }
 );
 
+When(
+  /^I click on "(Cookie policy|Privacy policy|Terms of service)" legal link(?: on "(Main page)")?$/,
+  async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service', page?: 'Main page') => {
+    await OnboardingRevampPageObject.clickOnLegalLink(link, page === 'Main page');
+  }
+);
+
 Then(/^I (do not see|see) incorrect passphrase error displayed$/, async (shouldBeDisplayed: 'do not see' | 'see') => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicError(shouldBeDisplayed === 'see');
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicError(shouldBeDisplayed === 'see');
 });
 
 Then(
@@ -590,21 +382,13 @@ Then(
   }
 );
 
-Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (state: 'enabled' | 'disabled') => {
-  await OnboardingLegalPageAssert.assertNextButtonEnabled(state === 'enabled');
-});
-
 Then(/^wallet name error "([^"]*)" (is|is not) displayed$/, async (errorText: string, isDisplayed: 'is' | 'is not') => {
   const expectedMessage = await t(errorText);
-  await OnboardingWalletNamePageAssert.assertSeeWalletNameError(expectedMessage, isDisplayed === 'is');
+  await OnboardingWalletSetupPageAssert.assertSeeWalletNameError(expectedMessage, isDisplayed === 'is');
 });
 
 When(/^I click "Help and support" button during wallet setup$/, async () => {
   await new CommonOnboardingElements().helpAndSupportButton.click();
-});
-
-When(/^I click "here." link on "Keeping your wallet secure" page$/, async () => {
-  await OnboardingMnemonicInfoPage.hereLink.click();
 });
 
 Given(/^I restore a wallet$/, async () => {
@@ -618,9 +402,9 @@ Given(/^I see current onboarding page in (light|dark) mode$/, async (mode: 'ligh
 Given(
   /^I enter wallet name: "([^"]*)", password: "([^"]*)" and password confirmation: "([^"]*)"$/,
   async (walletName: string, password: string, passwordConfirmation: string) => {
-    await OnboardingRevampPageObject.enterWalletName(walletName);
-    await OnboardingRevampPageObject.enterWalletPassword(password);
-    await OnboardingRevampPageObject.enterWalletPasswordConfirm(passwordConfirmation);
+    await OnboardingWalletSetupPage.setWalletNameInput(walletName);
+    await OnboardingWalletSetupPage.setWalletPasswordInput(password);
+    await OnboardingWalletSetupPage.setWalletPasswordConfirmInput(passwordConfirmation);
   }
 );
 
@@ -629,24 +413,55 @@ When(/^I restore previously changed mnemonic word$/, async () => {
 });
 
 Given(
-  /^I am on "Mnemonic verification" page from "(Create|Restore)" wallet$/,
-  async (flowType: 'Create' | 'Restore') => {
-    await OnboardingRevampPageObject.goToMenmonicVerificationPage(flowType, mnemonicWords);
-    await onboardingRecoveryPhrasePageAssert.seeMnemonicVerificationPage(flowType);
+  /^I go to "(Mnemonic verification|Wallet setup)" page(?: with wallet ([^"]*))? from "(Create|Restore)" wallet flow(?: and "(fill|not fill)" values)?$/,
+  async (
+    endPage: 'Mnemonic verification' | 'Wallet setup',
+    walletName: string,
+    flowType: 'Create' | 'Restore',
+    fillValues: 'fill' | 'not fill'
+  ) => {
+    if (!fillValues) fillValues = 'fill';
+    let mnemonicsToUse = mnemonicWords;
+    if (walletName) mnemonicsToUse = getTestWallet(walletName).mnemonic ?? [];
+    switch (endPage) {
+      case 'Mnemonic verification':
+        await OnboardingRevampPageObject.goToMnemonicVerificationPage(flowType, mnemonicsToUse, fillValues === 'fill');
+        break;
+      case 'Wallet setup':
+        await OnboardingRevampPageObject.goToWalletSetupPage(flowType, mnemonicsToUse, fillValues === 'fill');
+        break;
+      default:
+        throw new Error(`Unsupported page name: ${endPage}`);
+    }
   }
 );
-
-Given(/^I am on "Mnemonic writedown" page$/, async () => {
-  await OnboardingRevampPageObject.goToRecoveryPhrasePage();
-});
 
 Given(/^I click "Enter wallet" button$/, async () => {
   await OnboardingRevampPageObject.clickEnterWalletButton();
 });
 
-Given(/^I enter mnemonic words on "Mnemonic writedown" page$/, async () => {
-  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWords);
-});
+Given(
+  /^I enter (12|15|24) (correct|incorrect) mnemonic words on "Mnemonic verification" page$/,
+  async (mnemonicWordsLength: RecoveryPhrase, isCorrect: 'correct' | 'incorrect') => {
+    switch (mnemonicWordsLength) {
+      case '12':
+        await OnboardingRevampPageObject.enterMnemonicWords(
+          isCorrect === 'correct' ? twelveMnemonicWords : invalidMnemonicWords.slice(0, 12)
+        );
+        break;
+      case '15':
+        await OnboardingRevampPageObject.enterMnemonicWords(
+          isCorrect === 'correct' ? fifteenMnemonicWords : invalidMnemonicWords.slice(0, 15)
+        );
+        break;
+      case '24':
+        await OnboardingRevampPageObject.enterMnemonicWords(
+          isCorrect === 'correct' ? mnemonicWords : invalidMnemonicWords
+        );
+        break;
+    }
+  }
+);
 
 When(/^I click on "Watch video" link on "Mnemonic writedown" page$/, async () => {
   await RecoveryPhrasePage.watchVideoLink.click();
@@ -656,14 +471,47 @@ When(/^I click "Read More" link in modal$/, async () => {
   await watchVideoModal.readMoreLink.click();
 });
 
+When(/^I save mnemonic words$/, async () => {
+  mnemonicWordsForReference.push(...(await RecoveryPhrasePage.getMnemonicWordTexts()));
+});
+
+When(/^I enter saved mnemonic words$/, async () => {
+  await OnboardingRevampPageObject.enterMnemonicWords(mnemonicWordsForReference);
+});
+
+Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mnemonicWordsLength: RecoveryPhrase) => {
+  await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage(mnemonicWordsLength);
+});
+
 Then(/^"Enter wallet" button is enabled$/, async () => {
-  await onboardingRecoveryPhrasePageAssert.assertEnterWalletButtonIsEnabled();
+  await OnboardingWalletSetupPageAssert.assertEnterWalletButtonIsEnabled();
 });
 
 Then(/^"Wallet setup" page is displayed$/, async () => {
-  await onboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
+  await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
 });
 
 Then(/^I see "Watch video" modal$/, async () => {
   await onboardingWatchVideoModalAssert.assertSeeModal();
+});
+
+Then(
+  /^"Mnemonic verification" page is displayed from "(Create wallet|Restore wallet|Forgot password)" flow with (12|15|24) words$/,
+  async (flow, mnemonicWordsLength: RecoveryPhrase) => {
+    await (flow === 'Create wallet'
+      ? onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Create', '24')
+      : onboardingRecoveryPhrasePageAssert.assertSeeMnemonicVerificationPage('Restore', mnemonicWordsLength));
+  }
+);
+
+Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (state: 'enabled' | 'disabled') => {
+  await new OnboardingCommonAssert().assertNextButtonEnabled(state === 'enabled');
+});
+
+Then(/^I see Analytics banner displayed correctly$/, async () => {
+  await OnboardingAnalyticsBannerAssert.assertBannerIsDisplayedCorrectly();
+});
+
+Then(/^I (see|do not see) Analytics banner$/, async (shouldSee: 'see' | 'do not see') => {
+  await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(shouldSee === 'see');
 });

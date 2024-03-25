@@ -38,10 +38,12 @@ class MenuHeaderPageObject {
 
   async clickLockWallet() {
     await this.openMenu();
+    await MenuHeader.menuLockButton.scrollIntoView();
     await MenuHeader.menuLockButton.click();
   }
 
   async clickNetworkOption() {
+    await MenuHeader.menuNetworkLabel.waitForStable();
     await MenuHeader.menuNetworkLabel.click();
   }
 

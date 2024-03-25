@@ -47,13 +47,5 @@ module.exports = createJestConfig({
     '!src/utils/test-utils.ts',
     '!src/utils/fake-api-request.ts'
   ],
-  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
-  transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        tsconfig: './src/tsconfig.json'
-      }
-    ]
-  }
+  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock']
 });

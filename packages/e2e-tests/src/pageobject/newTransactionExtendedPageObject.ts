@@ -1,37 +1,22 @@
 import webTester from '../actor/webTester';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import { Asset } from '../data/Asset';
 import extensionUtils from '../utils/utils';
 import { byron, shelley } from '../data/AddressData';
-import { generateRandomString } from '../utils/textUtils';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
 
 export default new (class NewTransactionExtendedPageObject {
-  clickCoinConfigureTokenSearchResult = async (tokenName: string) => {
-    await webTester.clickElement(new TokenSearchResult(tokenName).container());
-  };
-
   clickRemoveBundleButton = async (outputIndex: number) => {
     await webTester.clickElement(new TransactionBundle(outputIndex).bundleRemoveButton());
-  };
-
-  searchAsset = async (assetName: string) => {
-    if (assetName === 'random characters') {
-      assetName = await generateRandomString(10);
-    }
-    await new TokenSearchResult().searchInput.setValue(assetName);
   };
 
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
     await new AddressInput(bundleIndex).fillAddress(byron.getAddress());
     await new AssetInput(bundleIndex).clickAddAssetButton();
-    await this.clickCoinConfigureTokenSearchResult(
-      extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name
-    );
+    await TokenSelectionPage.clickOnToken(extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name);
     await TransactionNewPage.coinConfigure(bundleIndex, Asset.CARDANO.ticker).fillTokenValue(assetValue1);
     await TransactionNewPage.coinConfigure(
       bundleIndex,
@@ -62,9 +47,7 @@ export default new (class NewTransactionExtendedPageObject {
   async setOneBundleWithMultipleAssets() {
     await new AddressInput(1).fillAddress(shelley.getAddress());
     await new AssetInput(1).clickAddAssetButton();
-    await this.clickCoinConfigureTokenSearchResult(
-      extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name
-    );
+    await TokenSelectionPage.clickOnToken(extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name);
     await new AssetInput(1).clickAddAssetButton();
     await TokenSelectionPage.clickNFTsButton();
     await TokenSelectionPage.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
@@ -87,7 +70,7 @@ export default new (class NewTransactionExtendedPageObject {
     let tokensCount = tokens.length;
     for (const token of tokens) {
       tokensCount--;
-      await this.clickCoinConfigureTokenSearchResult(token.name);
+      await TokenSelectionPage.clickOnToken(token.name);
       if (tokensCount) {
         await new AssetInput(bundleIndex).clickAddAssetButton();
         await TokenSelectionPage.clickTokensButton();

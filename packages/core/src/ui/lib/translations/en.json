@@ -116,6 +116,14 @@
       "copiedToClipboard": "Copied to clipboard",
       "pools": "Pool(s)",
       "self": "Self Transaction",
+      "collateral": {
+        "label": "Collateral",
+        "tooltip": {
+          "info": "Amount set as collateral to cover contract execution failure. In case of no failure collateral remains unspent.",
+          "success": "Amount set as collateral. Since this Tx was successful collateral was not used"
+        },
+        "error": "Since the transaction was unsuccessful, collateral has been used to cover the costs incurred from the contract execution failure."
+      },
       "RegisterDelegateRepresentativeCertificate": "DRep Registration",
       "UnregisterDelegateRepresentativeCertificate": "DRep De-Registration",
       "UpdateDelegateRepresentativeCertificate": "DRep Update",

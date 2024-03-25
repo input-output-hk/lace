@@ -19,14 +19,14 @@ export const MnemonicVideoPopupContent = ({
   const videoRef = useRef<HTMLIFrameElement>();
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-testid="watch-video-container">
       <div className={styles.content} data-testid="wallet-setup-step-header">
         <h1 className={styles.title} data-testid="watch-video-title">
           {translations.title}
         </h1>
         <p className={styles.description} data-testid="watch-video-description">
           {translations.description}{' '}
-          <a href={urls.faq.secretPassphrase} target="_blank" data-testid="faq-secret-passphrase-url">
+          <a href={urls.faq.secretPassphrase} target="_blank" data-testid="read-more-link">
             {translations.linkText}
           </a>
         </p>

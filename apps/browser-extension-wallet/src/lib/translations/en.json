@@ -88,8 +88,14 @@
       "multipleAddresses": "Multiple addresses",
       "pools": "Pool(s)",
       "epoch": "Epoch",
-      "collateral": "Collateral",
-      "collateralInfo": "Amount set as collateral to cover contract execution failure. In case of no failure collateral remains unspent."
+      "collateral": {
+        "label": "Collateral",
+        "tooltip": {
+          "info": "Amount set as collateral to cover contract execution failure. In case of no failure collateral remains unspent.",
+          "success": "Amount set as collateral. Since this Tx was successful collateral was not used"
+        },
+        "error": "Since the transaction was unsuccessful, collateral has been used to cover the costs incurred from the contract execution failure."
+      }
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",
@@ -1122,7 +1128,7 @@
           "title": "Cost",
           "tooltip": "The cost is not directly paid by the delegator; they are deducted from a pool's rewards, consisting of a fixed cost and a variable cost, which fund the pool's operational costs"
         },
-        "apy": {
+        "ros": {
           "title": "ROS",
           "tooltip": "An estimation of the potential rewards you will earn per epoch if you delegate the intended amount of stake. The system looks at the pool's parameters and historical performance data to calculate potential rewards, assuming that the pool reaches optimal saturation."
         },
@@ -1586,20 +1592,8 @@
       "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue.",
       "connectDeviceFull": "Just connect your device to your computer and unlock it to continue. If you're using a Ledger device, make sure you open the Cardano App."
     },
-    "walletSetupCreateStep": {
-      "title": "Creating your wallet",
-      "description": "Your Lace wallet will be all set up in a few seconds."
-    },
     "walletSetupRestoreStep": {
       "title": "Restoring your wallet"
-    },
-    "walletSetupFinalStep": {
-      "title": "Hurray! All done :)",
-      "description": "It's time to start your Web3 journey. Plus you can follow us to stay up to date on all our latest news and content.",
-      "close": "Go to my wallet",
-      "followTwitter": "Follow us on Twitter",
-      "followYoutube": "Follow us on Youtube",
-      "followDiscord": "Join us on Discord"
     },
     "walletSetupMnemonicStep": {
       "writePassphrase": "Write down your secret passphrase",
@@ -1680,6 +1674,7 @@
       "maxCharacters": "Max. 20 characters",
       "chooseWalletName": "Choose a name to help identify your wallet and which account you would like to export. You can change this later!",
       "enterWallet": "Enter wallet",
+      "walletName": "Wallet name",
       "selectAccount": "Select Account",
       "exportKeys": "Next",
       "chooseAccountToExport": "Choose which account you would like to export.",
