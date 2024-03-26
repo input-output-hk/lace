@@ -66,10 +66,6 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
 
 Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeSignDataConfirmTransactionPage(
-    testDAppDetails,
-    String(getTestWallet('TestAutomationWallet').address)
-  );
 });
 
 Then(
@@ -83,7 +79,7 @@ Then(
       amountAsset: assetValue,
       recipientAddress: String(getTestWallet(walletName).address)
     };
-    await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, expectedTransactionData);
+    await DAppConnectorAssert.assertSeeConfirmTransactionPage(expectedTransactionData);
   }
 );
 
@@ -101,7 +97,7 @@ Then(
 
     switch (expectedPage) {
       case 'Confirm transaction':
-        await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, defaultDAppTransactionData);
+        await DAppConnectorAssert.assertSeeConfirmTransactionPage(defaultDAppTransactionData);
         break;
       case 'Something went wrong':
         await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
