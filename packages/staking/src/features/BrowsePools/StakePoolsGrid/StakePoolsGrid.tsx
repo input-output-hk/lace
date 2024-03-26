@@ -104,6 +104,7 @@ export const StakePoolsGrid = ({
         <StakePoolsGridSkeleton columnCount={columnCount} rowCount={2} />
       ) : (
         <Grid<StakePoolDetails | undefined>
+          parentRef={ref}
           rowHeight={STAKE_POOL_CARD_HEIGHT}
           numberOfItemsPerRow={numberOfItemsPerRow}
           scrollableTargetId={scrollableTargetId}
