@@ -88,11 +88,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   useOnBeforeUnload(disallowSignTx);
 
   return (
-    <Layout
-      layoutClassname={cn(confirmTransactionError && styles.layoutError)}
-      pageClassname={styles.spaceBetween}
-      title={!confirmTransactionError && txType && t(`core.${txType}.title`)}
-    >
+    <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
       {req && txType ? (
         <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />
       ) : (
