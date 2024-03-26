@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/no-multi-comp */
 import { Flex, useVisibleItemsCount } from '@lace/ui';
 import debounce from 'lodash/debounce';
