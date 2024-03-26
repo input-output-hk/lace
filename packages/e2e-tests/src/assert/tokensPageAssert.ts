@@ -140,15 +140,19 @@ class TokensPageAssert {
   async assertSeeValueSubtractedAda(tokenName: string, subtractedAmount: string, fee: string) {
     const expectedValue =
       Number.parseFloat(await testContext.load(`${Asset.getByName(tokenName)?.ticker}tokenBalance`)) -
-      Number.parseFloat(subtractedAmount) -
+      Number.parseFloat(subtractedAmount) +
       Number.parseFloat(fee);
     const expectedValueRounded = Number.parseFloat(expectedValue.toFixed(2));
     Logger.log(`waiting for token: ${tokenName} with value: ${expectedValueRounded}`);
     await browser.waitUntil(
-      async () =>
-        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded + 0.01 ||
-        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded - 0.01 ||
-        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded,
+      async () => {
+        const tokenValueAsFloat = await TokensPage.getTokenBalanceAsFloatByName(tokenName);
+        return (
+          tokenValueAsFloat === expectedValueRounded + 0.01 ||
+          tokenValueAsFloat === expectedValueRounded - 0.01 ||
+          tokenValueAsFloat === expectedValueRounded
+        );
+      },
       {
         timeout: 120_000,
         interval: 3000,
