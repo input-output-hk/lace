@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import recoveryPhrasePage from '../../elements/onboarding/recoveryPhrasePage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
@@ -5,6 +6,27 @@ import OnboardingCommonAssert from './onboardingCommonAssert';
 import { RecoveryPhrase } from '../../types/onboarding';
 
 class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
+  async assertSeeMnemonicInputWithText(mnemonicIndex: number, expectedText: string) {
+    const currentMnemonicInput = (await recoveryPhrasePage.mnemonicInputs[mnemonicIndex]) as WebdriverIO.Element;
+    expect(await currentMnemonicInput?.getValue()).to.equal(expectedText);
+  }
+
+  async assertMnemonicInputLength(mnemonicIndex: number, expectedLength: number) {
+    const currentMnemonicInput = (await recoveryPhrasePage.mnemonicInputs[mnemonicIndex]) as WebdriverIO.Element;
+    const currentMnemonicInputLength = currentMnemonicInput ? (await currentMnemonicInput.getValue()).length : 0;
+    expect(currentMnemonicInputLength).to.equal(expectedLength);
+  }
+
+  async assertSeeMnemonicAutocompleteOptions(expectedOptions: string[]) {
+    await recoveryPhrasePage.mnemonicAutocompleteDropdown.waitForDisplayed();
+    const actualOptions = await recoveryPhrasePage.getMnemonicAutocompleteOptionsValues();
+    expect(actualOptions).to.deep.equal(expectedOptions);
+  }
+
+  async assertNotSeeMnemonicAutocompleteOptions() {
+    await recoveryPhrasePage.mnemonicAutocompleteDropdown.waitForDisplayed({ reverse: true, timeout: 1000 });
+  }
+
   async assertSeeMnemonicVerificationPage(flowType: 'Create' | 'Restore', mnemonicWordsLength: RecoveryPhrase) {
     const subtitle =
       flowType === 'Create'

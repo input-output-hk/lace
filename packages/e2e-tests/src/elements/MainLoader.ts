@@ -1,18 +1,23 @@
 class MainLoader {
   private MAIN_LOADER_COMPONENT = '[data-testid="main-loader"]';
-  private MAIN_LOADER_IMAGE = '[data-testid="main-image"]';
-  private MAIN_LOADER_TEXT = '[data-testid="main-text"]';
+  private MAIN_LOADER_TEXT = '[data-testid="main-loader-text"]';
 
-  get component() {
+  get mainLoaderComponent() {
     return $(this.MAIN_LOADER_COMPONENT);
   }
 
-  get image() {
-    return $(this.MAIN_LOADER_IMAGE);
+  get mainLoaderText() {
+    return $(this.MAIN_LOADER_TEXT);
   }
 
-  get text() {
-    return $(this.MAIN_LOADER_TEXT);
+  async waitUntilLoaderDisappears() {
+    await browser.pause(500);
+    if (await this.mainLoaderComponent.isDisplayed()) {
+      await this.mainLoaderComponent.waitForDisplayed({ timeout: 15_000, reverse: true });
+    }
+    if (await this.mainLoaderText.isDisplayed()) {
+      await this.mainLoaderText.waitForDisplayed({ timeout: 255_000, reverse: true });
+    }
   }
 }
 
