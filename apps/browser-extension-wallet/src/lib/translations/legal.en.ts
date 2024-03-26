@@ -1,7 +1,5 @@
-import { Translations } from './types';
-
 // multiline strings are not allowed in the json files
-export const legal: Pick<Translations, 'legal'> = {
+export const legal = {
   legal: `
   <div>
     <p>

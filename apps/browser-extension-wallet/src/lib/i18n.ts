@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable unicorn/prefer-module */
 import { Language } from '@lace/common';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';

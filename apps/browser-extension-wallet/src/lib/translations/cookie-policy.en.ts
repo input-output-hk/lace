@@ -1,6 +1,4 @@
-import { Translations } from './types';
-
-export const cookiePolicy: Pick<Translations, 'cookiePolicy'> = {
+export const cookiePolicy = {
   cookiePolicy: `
   <div>
     <heading>Last Updated: April 12, 2023</heading>
