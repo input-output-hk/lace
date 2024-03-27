@@ -1,3 +1,4 @@
+import isNumber from 'lodash/isNumber';
 import { PickByValue } from 'utility-types';
 import { StakePoolDetails } from '../store';
 
@@ -28,14 +29,15 @@ const isNumberWithUnitKey = (key: keyof StakePoolDetails): key is NumberWithUnit
 const isPercentageKey = (key: keyof StakePoolDetails): key is PercentageStakePoolKey =>
   percentageStakePoolKeys.has(key as PercentageStakePoolKey);
 
-export const formatNumberWithUnit = (value: { number: string; unit: string }): string => `${value.number}${value.unit}`;
+export const formatNumberWithUnit = (value: { number: string; unit: string }): string =>
+  `${value.number || '-'}${value.unit}`;
 
 export const getFormattedStakePoolProp = (
   stakePool: Pick<StakePoolDetails, StakePoolFormattableKey>,
   key: StakePoolFormattableKey
 ): string => {
   const value = stakePool[key];
-  if (value === '-') return value;
+  if (!value && !isNumber(value)) return value;
 
   if (isNumberWithUnitKey(key)) {
     return formatNumberWithUnit(stakePool[key]);
