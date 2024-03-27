@@ -10,7 +10,7 @@ Feature: Send Transactions from Dapp - E2E
     And I open and authorize test DApp with "Only once" setting
     And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp
     When I click "Send ADA" "Run" button in test DApp
-    Then I see DApp connector "Confirm transaction" page with: "3.00 ADA", "0" assets and receiving wallet "WalletReceiveDappTransactionE2E"
+    Then I see DApp connector "Confirm transaction" page with: "-3.00" tADA - fee, "0" assets and receiving wallet "WalletReceiveDappTransactionE2E"
     And I save fee value on DApp "Confirm transaction" page
     And I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page
@@ -41,7 +41,7 @@ Feature: Send Transactions from Dapp - E2E
     And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp
     And I click "Send Token" button in test DApp
     When I click "Send Token" "Run" button in test DApp
-    Then I see DApp connector "Confirm transaction" page with: "1.38 ADA", "2 LaceCoin2" assets and receiving wallet "WalletReceiveDappTransactionE2E"
+    Then I see DApp connector "Confirm transaction" page with: "-1.38" tADA - fee, "-2 LaceCoin2" assets and receiving wallet "WalletReceiveDappTransactionE2E"
     And I save fee value on DApp "Confirm transaction" page
     And I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page
@@ -70,7 +70,7 @@ Feature: Send Transactions from Dapp - E2E
     And I open and authorize test DApp with "Only once" setting
     And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp
     When I click "Send ADA" "Run" button in test DApp
-    Then I see DApp connector "Confirm transaction" page with: "3.00 ADA", "0" assets and receiving wallet "WalletReceiveDappTransactionE2E"
+    Then I see DApp connector "Confirm transaction" page with: "-3.00" tADA - fee, "0" assets and receiving wallet "WalletReceiveDappTransactionE2E"
     And I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page
     And I fill correct password

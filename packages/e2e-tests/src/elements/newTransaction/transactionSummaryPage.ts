@@ -74,8 +74,7 @@ class TransactionSummaryPage extends CommonDrawerElements {
   }
 
   async saveFeeValue() {
-    let feeValue = await this.transactionFeeValueAda.getText();
-    feeValue = feeValue.replace('ADA', '');
+    const [feeValue] = (await this.transactionFeeValueAda.getText()).split(' ');
     testContext.save('feeValue', feeValue);
   }
 }

@@ -19,6 +19,11 @@ const mockWithAddressBookContext = jest.fn((children) => children);
 const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
 const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
 const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
+const mockUseChainHistoryProvider = jest.fn().mockReturnValue({
+  transactionsByAddress: jest.fn().mockResolvedValue([]),
+  transactionsByHashes: jest.fn().mockResolvedValue([]),
+  blocksByHashes: jest.fn().mockResolvedValue([])
+});
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { DappTransactionContainer } from '../DappTransactionContainer';
@@ -35,7 +40,8 @@ import { cardanoCoin } from '@src/utils/constants';
 const { Cardano, Crypto } = Wallet;
 
 const assetProvider = {
-  getAssets: jest.fn(() => ['assets'])
+  getAssets: jest.fn(() => ['assets']),
+  getAsset: jest.fn(() => 'asset')
 };
 const walletInfo = {
   name: 'wall',
@@ -44,6 +50,19 @@ const walletInfo = {
 const mockedAssetsInfo = new Map([['id', 'data']]);
 const assetInfo$ = new BehaviorSubject(mockedAssetsInfo);
 const available$ = new BehaviorSubject([]);
+const signed$ = new BehaviorSubject([]);
+const rewardAccounts$ = new BehaviorSubject([
+  {
+    // eslint-disable-next-line unicorn/consistent-destructuring
+    address: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
+    credentialStatus: 'REGISTERED',
+    rewardBalance: 1
+  }
+]);
+const protocolParameters$ = new BehaviorSubject({
+  stakeKeyDeposit: 1,
+  poolDeposit: 1
+});
 
 const inMemoryWallet = {
   assetInfo$,
@@ -51,7 +70,19 @@ const inMemoryWallet = {
     utxo: {
       available$
     }
-  }
+  },
+  utxo: {
+    available$
+  },
+  transactions: {
+    outgoing: {
+      signed$
+    }
+  },
+  delegation: {
+    rewardAccounts$
+  },
+  protocolParameters$
 };
 
 jest.mock('@src/stores', () => ({
@@ -77,6 +108,11 @@ jest.mock('@src/utils/get-assets-information', (): typeof GetAssetsInformation =
 jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
   ...jest.requireActual<typeof CurrencyProvider>('@providers/currency'),
   useCurrencyStore: mockUseCurrencyStore
+}));
+
+jest.mock('@hooks/useChainHistoryProvider', (): typeof CurrencyProvider => ({
+  ...jest.requireActual<any>('@hooks/useChainHistoryProvider'),
+  useChainHistoryProvider: mockUseChainHistoryProvider
 }));
 
 jest.mock('@lace/core', () => {
@@ -142,8 +178,8 @@ const request = {
   } as any
 } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
-jest.mock('@providers', () => ({
-  ...jest.requireActual<any>('@providers'),
+jest.mock('@providers/ViewFlowProvider', () => ({
+  ...jest.requireActual<any>('@providers/ViewFlowProvider'),
   useViewsFlowContext: mockUseViewsFlowContext
 }));
 
@@ -166,14 +202,14 @@ describe('Testing DappTransactionContainer component', () => {
     mockSkeleton.mockImplementation(() => <span data-testid="skeleton" />);
     mockUseViewsFlowContext.mockReset();
     mockUseViewsFlowContext.mockImplementation(() => ({
-      signTxRequest: { request },
+      signTxRequest: { request, set: jest.fn() },
       dappInfo
     }));
   });
 
   afterEach(() => {
     jest.resetModules();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     cleanup();
   });
 
@@ -183,83 +219,120 @@ describe('Testing DappTransactionContainer component', () => {
     const errorMessage = 'errorMessage';
     const props = { errorMessage };
 
-    const txSummary = {
-      burnedAssets: [],
-      collateral: '1.00',
-      fee: '0.17',
-      mintedAssets: [
+    const toAddress = new Map([
+      [
+        // eslint-disable-next-line unicorn/consistent-destructuring
+        Wallet.Cardano.PaymentAddress(
+          'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz'
+        ),
         {
-          amount: '3',
-          name: 'asset1rqluyux4nxv6kjashz626c8usp8g88unmqwnyh',
-          ticker: 'asset1rqluyux4nxv6kjashz626c8usp8g88unmqwnyh'
+          assets: new Map([
+            [
+              '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
+              {
+                amount: BigInt(9),
+                assetInfo: {
+                  assetId: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
+                  fingerprint: 'asset1rqluyux4nxv6kjashz626c8usp8g88unmqwnyh',
+                  name: '54534c41',
+                  nftMetadata: null,
+                  policyId: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82',
+                  quantity: BigInt(3),
+                  supply: BigInt(3)
+                }
+              }
+            ],
+            [
+              '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+              {
+                amount: BigInt(4),
+                assetInfo: {
+                  assetId: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+                  fingerprint: 'asset1cvmyrfrc7lpht2hcjwr9lulzyyjv27uxh3kcz0',
+                  name: '',
+                  policyId: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+                  quantity: BigInt(0),
+                  supply: BigInt(0)
+                }
+              }
+            ]
+          ]),
+          coins: BigInt(9_000_000)
         }
       ],
-      outputs: [
+      [
+        // eslint-disable-next-line unicorn/consistent-destructuring
+        Wallet.Cardano.PaymentAddress(
+          'addr_test1qq585l3hyxgj3nas2v3xymd23vvartfhceme6gv98aaeg9muzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q2g7k3g'
+        ),
         {
-          coins: '5.00',
-          recipient:
-            'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz'
-        },
-        {
-          assets: [
-            {
-              amount: '3',
-              name: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
-              ticker: undefined
-            },
-            {
-              amount: '4',
-              name: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
-              ticker: undefined
-            }
-          ],
-          coins: '2.00',
-          recipient:
-            'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz'
-        },
-        {
-          assets: [
-            {
-              amount: '6',
-              name: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
-              ticker: undefined
-            }
-          ],
-          coins: '2.00',
-          recipient:
-            'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz'
-        },
-        {
-          assets: [
-            {
-              amount: '1',
-              name: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
-              ticker: undefined
-            }
-          ],
-          coins: '2.00',
-          recipient:
-            'addr_test1qq585l3hyxgj3nas2v3xymd23vvartfhceme6gv98aaeg9muzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q2g7k3g'
+          assets: new Map([
+            [
+              '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
+              {
+                amount: BigInt(1),
+                assetInfo: {
+                  assetId: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41',
+                  fingerprint: 'asset1rqluyux4nxv6kjashz626c8usp8g88unmqwnyh',
+                  name: '54534c41',
+                  nftMetadata: null,
+                  policyId: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82',
+                  quantity: BigInt(3),
+                  supply: BigInt(3)
+                }
+              }
+            ]
+          ]),
+          coins: BigInt(2_000_000)
         }
-      ],
-      type: 'Mint'
-    } as Wallet.Cip30SignTxSummary;
+      ]
+    ]);
+
+    const txInspectionDetails = {
+      assets: new Map(),
+      coins: BigInt(0),
+      collateral: BigInt(0),
+      deposit: BigInt(1000),
+      fee: BigInt(170_000),
+      returnedDeposit: BigInt(0),
+      unresolved: {
+        inputs: [
+          {
+            address:
+              'addr_test1qq585l3hyxgj3nas2v3xymd23vvartfhceme6gv98aaeg9muzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q2g7k3g',
+            index: 0,
+            txId: 'bb217abaca60fc0ca68c1555eca6a96d2478547818ae76ce6836133f3cc546e0'
+          }
+        ],
+        value: {
+          assets: new Map([
+            ['6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7', BigInt(4)],
+            ['659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41', BigInt(7)]
+          ]),
+
+          coins: BigInt(11_171_000)
+        }
+      }
+    };
 
     await act(async () => {
       ({ queryByTestId } = render(<DappTransactionContainer {...props} />, {
         wrapper: getWrapper()
       }));
     });
-
     expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+
     expect(mockDappTransaction).toHaveBeenLastCalledWith(
       {
         dappInfo,
-        transaction: txSummary,
+        toAddress,
+        fromAddress: new Map(),
         fiatCurrencyCode: 'usd',
         fiatCurrencyPrice: 2,
         errorMessage,
-        coinSymbol: 'ADA'
+        coinSymbol: 'ADA',
+        collateral: BigInt(1_000_000),
+        txInspectionDetails
       },
       {}
     );
@@ -273,23 +346,6 @@ describe('Testing DappTransactionContainer component', () => {
       signTxRequest: {},
       dappInfo
     }));
-
-    const signTxData = { tx: { body: {} } } as unknown as SignTxData;
-
-    await act(async () => {
-      ({ queryByTestId } = render(<DappTransactionContainer {...({ signTxData } as any)} />, {
-        wrapper: getWrapper()
-      }));
-    });
-
-    expect(queryByTestId('DappTransaction')).not.toBeInTheDocument();
-    expect(queryByTestId('skeleton')).toBeInTheDocument();
-  });
-
-  test('should render loader in case there is no txSummary', async () => {
-    let queryByTestId: any;
-
-    mockUseCurrencyStore.mockRestore();
 
     const signTxData = { tx: { body: {} } } as unknown as SignTxData;
 

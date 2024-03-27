@@ -13,6 +13,7 @@ interface Props {
   alt?: string;
   delayMs?: number;
   radius?: 'circle' | 'rounded';
+  background?: 'none';
 }
 
 export const UserProfile = ({
@@ -21,11 +22,13 @@ export const UserProfile = ({
   alt,
   delayMs = 600,
   radius = 'circle',
+  background,
 }: Readonly<Props>): JSX.Element => (
   <RadixUIAvatar.Root
     className={classNames(cx.root, {
       [cx.rounded]: radius === 'rounded',
       [cx.circle]: radius === 'circle',
+      [cx.noBackground]: background === 'none',
     })}
   >
     <RadixUIAvatar.Image className={cx.image} src={imageSrc} alt={alt} />

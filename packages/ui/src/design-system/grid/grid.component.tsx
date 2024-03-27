@@ -9,13 +9,15 @@ export type Props = PropsWithChildren<{
   columns?: GridVariants['columns'];
   rows?: GridVariants['rows'];
   gutters?: GridVariants['gutters'];
+  alignItems?: GridVariants['alignItems'];
 }>;
 
 export const Grid = ({
   columns = '$none',
   children,
   rows = '$none',
+  alignItems,
   gutters = '$16',
 }: Readonly<Props>): JSX.Element => (
-  <div className={grid({ columns, rows, gutters })}>{children}</div>
+  <div className={grid({ columns, rows, gutters, alignItems })}>{children}</div>
 );

@@ -184,7 +184,6 @@ describe('Testing ConfirmTransaction component', () => {
       }));
     });
 
-    expect(queryByTestId(testIds.layoutTitle)).toHaveTextContent(txType);
     expect(queryByTestId('ConfirmTransactionContent')).toBeInTheDocument();
     expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith(
       {

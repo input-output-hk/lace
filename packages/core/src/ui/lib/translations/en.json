@@ -415,6 +415,16 @@
       "recipient": "Recipient",
       "send": "Send",
       "sending": "Sending",
+      "toAddress": "To address",
+      "fromAddress": "From address",
+      "tokens": "Tokens",
+      "nfts": "NFTs",
+      "address": "Address",
+      "origin": "Origin",
+      "transactionSummary": "Transaction Summary",
+      "deposit": "Deposit",
+      "returnedDeposit": "Returned deposit",
+      "items": "item(s)",
       "transaction": "Transaction"
     },
     "confirmationBanner": {

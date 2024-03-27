@@ -252,8 +252,17 @@ const colors: Colors = {
     lightColorScheme.$primary_light_grey_plus,
 
   $transaction_summary_label_color: lightColorScheme.$primary_black,
+  $transaction_summary_amount_color: lightColorScheme.$primary_black,
+  $transaction_summary_highlighted_amount_color:
+    lightColorScheme.$secondary_data_green,
   $transaction_summary_secondary_label_color:
     lightColorScheme.$primary_dark_grey,
+  $dapp_transaction_summary_positive_balance_label_color:
+    lightColorScheme.$secondary_data_green,
+
+  $dapp_transaction_summary_type_label_color:
+    lightColorScheme.$primary_accent_purple,
+  $dapp_transaction_summary_label: lightColorScheme.$primary_dark_grey,
 
   $toast_bar_container_bgColor: lightColorScheme.$primary_white,
   $toast_bar_label_color: lightColorScheme.$primary_black,

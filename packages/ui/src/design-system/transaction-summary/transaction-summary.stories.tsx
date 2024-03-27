@@ -56,15 +56,20 @@ const Example = (): JSX.Element => (
               <Amount amount="102.00 ADA" fiatPrice="84.45 USD" />
             </Cell>
             <Cell>
-              <Amount amount="102.00 ADA" fiatPrice="84.45 USD" />
-            </Cell>
-            <Cell>
               <Amount
                 label="With Tooltip"
                 tooltip="This is a sample tooltip text"
                 amount="102.00 ADA"
                 fiatPrice="84.45 USD"
                 data-testid="sample"
+              />
+            </Cell>
+            <Cell>
+              <Amount
+                label="Received"
+                amount="102.00 ADA"
+                fiatPrice="84.45 USD"
+                highlightPositiveAmount
               />
             </Cell>
           </Grid>

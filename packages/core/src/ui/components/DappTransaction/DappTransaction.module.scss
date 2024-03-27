@@ -1,52 +1,23 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/_typography.scss';
 
-.dappInfo {
-  margin: size_unit(1) 0px;
-}
-
 .details {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  justify-content: space-between;
-  margin: size_unit(4) 0 size_unit(2) 0px;
-  padding: size_unit(3) 0;
-  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  gap: size_unit(3);
 }
 
 .error {
   margin: size_unit(2) 0px;
 }
 
-
-.warningAlert {
-  flex-direction: row;
-  background: var(--lace-cream);
-  display: flex;
-  align-items: center;
-  border-radius: size_unit(2);
-  padding: size_unit(2) size_unit(3);
-  gap: size_unit(3);
-
-  svg {
-    height: size_unit(3);
-    width: size_unit(3);
-    color: var(--data-orange);
-  }
-
-  p {
-    @include text-body-semi-bold;
-    margin: 0;
-  }
+.feeContainer {
+  padding-bottom: size_unit(2.5);
 }
 
-.feeContainer {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  @include text-body-semi-bold;
-  color: var(--text-color-primary);
+.depositContainer {
+  padding-bottom: size_unit(1.8) !important;
+}
+
+.transactionAssetsContainer {
+  margin-bottom: size_unit(2.5);
 }

@@ -102,8 +102,7 @@ class DAppConnectorPageObject {
   }
 
   async saveDappTransactionFeeValue() {
-    let feeValue = await ConfirmTransactionPage.transactionFeeValueAda.getText();
-    feeValue = feeValue.replace(' ADA', '').replace('Fee: ', '');
+    const [feeValue] = (await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ');
     await testContext.save('feeValueDAppTx', feeValue);
   }
 

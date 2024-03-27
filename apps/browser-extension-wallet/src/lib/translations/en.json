@@ -123,7 +123,16 @@
       "recipient": "Recipient",
       "send": "Send",
       "sending": "Sending",
-      "transaction": "Transaction"
+      "transaction": "Transaction",
+      "transactionSummary": "Transaction Summary",
+      "origin": "Origin",
+      "fromAddress": "From address",
+      "toAddress": "To address",
+      "deposit": "Deposit",
+      "returnedDeposit": "Returned deposit",
+      "address": "Address",
+      "nfts": "NFTs",
+      "tokens": "Tokens"
     }
   },
   "tab.main.title": "Tab extension",
