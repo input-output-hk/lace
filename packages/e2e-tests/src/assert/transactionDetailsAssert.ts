@@ -156,7 +156,9 @@ class TransactionsDetailsAssert {
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
+      await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
       await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
+      await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForStable();
 
       const txDetailsInputADAValueString = await TransactionDetailsPage.transactionDetailsInputAdaAmount.getText();
       const txDetailsInputADAValue = Number(txDetailsInputADAValueString.split(' ', 1));
