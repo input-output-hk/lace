@@ -136,6 +136,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     }
     const mnemonicInputs = await this.mnemonicInputs;
     for (let i = 0; i < this.mnemonicWordsList.length; i++) {
+      await clearInputFieldValue(mnemonicInputs[i]);
       await mnemonicInputs[i].setValue(this.mnemonicWordsList[i]);
     }
   }
