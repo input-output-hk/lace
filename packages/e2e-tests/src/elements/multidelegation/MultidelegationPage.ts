@@ -12,6 +12,7 @@ import { StakePoolListColumnType } from '../../types/staking';
 import { StakePoolListItem } from './StakePoolListItem';
 import { StakePoolGridCard } from './StakePoolGridCard';
 import StakePoolDetailsDrawer from './StakePoolDetailsDrawer';
+import MoreOptionsComponent from './MoreOptionsComponent';
 
 class MultidelegationPage {
   private ACTIVITY_TAB = '[data-testid="activity-tab"]';
@@ -287,6 +288,10 @@ class MultidelegationPage {
 
   get selectedPoolsInListView() {
     return $$(this.SELCECTED_STAKE_POOLS_IN_LIST_VIEW);
+  }
+
+  get moreOptionsComponent(): typeof MoreOptionsComponent {
+    return MoreOptionsComponent;
   }
 
   async getPoolByTicker(ticker: string) {

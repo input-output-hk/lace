@@ -205,3 +205,9 @@ Feature: Staking Page - Extended View
     Then I see 4 stake pool cards in a row
     When I resize the window to a width of: 1023 and a height of: 1080
     Then I see 3 stake pool cards in a row
+
+  @LW-10143 @Testnet @Mainnet
+  Scenario: Extended View - Staking - More options - Sorting options are displayed
+    When I am on Staking extended page
+    And I open Browse pools tab
+    Then "More options" component with stake pool sorting options is displayed

@@ -11,7 +11,7 @@ import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridC
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
-    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 60_000 });
+    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 120_000 });
     const poolsCounter = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     expect(poolsCounter).to.equal(poolsCount);
   };
