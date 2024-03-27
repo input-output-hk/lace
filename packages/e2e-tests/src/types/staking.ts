@@ -7,3 +7,13 @@ export type StakePoolListColumnType =
   | 'Blocks'
   | 'Pledge'
   | 'Live Stake';
+
+export type StakePoolSortingOptionType =
+  | 'Ticker'
+  | 'Saturation'
+  | 'ROS'
+  | 'Cost'
+  | 'Margin'
+  | 'Produced blocks'
+  | 'Pledge'
+  | 'Live Stake';
