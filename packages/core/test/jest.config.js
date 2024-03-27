@@ -18,7 +18,8 @@ module.exports = createJestConfig({
     'src/ui/hooks/**/*.{ts,tsx}',
     'src/ui/lib/**/*.{ts,tsx}',
     'src/ui/utils/**/*.{ts,tsx}',
-    'src/wallet/**/*.{ts,tsx}'
+    'src/wallet/**/*.{ts,tsx}',
+    '!src/**/*.stories.{ts,tsx}'
   ],
   setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock']
 });
