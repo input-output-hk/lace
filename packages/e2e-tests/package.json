@@ -9,7 +9,6 @@
     "test:local:chrome": "../../node_modules/.bin/wdio run wdio.conf.chrome.ts",
     "test:local:edge": "../../node_modules/.bin/wdio run wdio.conf.edge.ts",
     "cleanup": "rm -rf node_modules logs reports screenshots",
-    "test:coverage": "yarn exec echo 'disabled due to lack of a framebuffer. Please use test:local for local testing'",
     "lint": "run -T eslint -c .eslintrc.js .",
     "lint:fix": "run -T eslint -c .eslintrc.js . --fix",
     "pack-chrome-extension": "node ./src/utils/packExtension.ts",
