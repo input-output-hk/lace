@@ -20,7 +20,9 @@
     "build:babel": "babel --extensions .tsx ./tmp --out-dir dist/ --config-file ./babel.config.js",
     "build:cleanup": "rm -rf ./tmp",
     "build:svgr": "svgr ./raw --out-dir ./tmp --typescript",
-    "build:tsc": "tsc --project tsconfig.json"
+    "build:tsc": "tsc --project tsconfig.json",
+    "test": "echo \"@lace/icons: no test specified\"",
+    "test:coverage": "echo \"@lace/icons: no test specified\""
   },
   "devDependencies": {
     "@babel/cli": "^7.22.10",

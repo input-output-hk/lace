@@ -9,7 +9,7 @@ const {
   RewardAccount,
   CredentialType: { KeyHash },
   CertificateType,
-  StakeKeyStatus
+  StakeCredentialStatus
 } = Cardano;
 describe('Testing buildDelegation', () => {
   const poolId = Cardano.PoolId('pool185g59xpqzt7gf0ljr8v8f3akl95qnmardf2f8auwr3ffx7atjj5');
@@ -33,7 +33,7 @@ describe('Testing buildDelegation', () => {
     const wallet = {
       ...mockObservableWallet,
       delegation: {
-        rewardAccounts$: of([{ ...rewardAcountMock, keyStatus: StakeKeyStatus.Unregistered }])
+        rewardAccounts$: of([{ ...rewardAcountMock, credentialStatus: StakeCredentialStatus.Unregistered }])
       }
     } as unknown as ObservableWallet;
     const { certificates } = await buildDelegation(wallet, poolId);
@@ -48,7 +48,7 @@ describe('Testing buildDelegation', () => {
       delegation: { rewardAccounts$: of([rewardAcountMock]) }
     } as unknown as ObservableWallet;
     const walletRewardAccount = (await firstValueFrom(wallet.delegation.rewardAccounts$))[0];
-    walletRewardAccount.keyStatus = StakeKeyStatus.Registered;
+    walletRewardAccount.credentialStatus = StakeCredentialStatus.Registered;
     const { certificates } = await buildDelegation(wallet, poolId);
 
     expect(certificates).toContainEqual(delegationCertificate);

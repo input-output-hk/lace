@@ -1,21 +1,55 @@
 import React from 'react';
 import { useTranslate } from '@src/ui/hooks';
-import { TransactionSummary } from '@lace/ui';
+import { Box, TransactionSummary, InfoBar } from '@lace/ui';
+import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
+
+export enum CollateralStatus {
+  REVIEW = 'review',
+  SUCCESS = 'success',
+  ERROR = 'error',
+  NONE = 'none'
+}
 
 export interface Props {
   collateral: string;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
+  status?: CollateralStatus;
 }
-export const Collateral = ({ collateral, amountTransformer, coinSymbol }: Props): React.ReactElement => {
+
+export const Collateral = ({
+  collateral,
+  amountTransformer,
+  coinSymbol,
+  status = CollateralStatus.REVIEW
+}: Props): React.ReactElement => {
   const { t } = useTranslate();
 
+  const getTooltipText = (): string => {
+    switch (status) {
+      case 'review':
+      case 'error':
+        return t('package.core.activityDetails.collateral.tooltip.info');
+      case 'success':
+        return t('package.core.activityDetails.collateral.tooltip.success');
+    }
+
+    return '';
+  };
+
   return (
-    <TransactionSummary.Amount
-      amount={`${collateral} ${coinSymbol}`}
-      fiatPrice={amountTransformer(collateral)}
-      label={t('core.activityDetails.collateral')}
-      tooltip={t('core.activityDetails.collateralInfo')}
-    />
+    <>
+      <TransactionSummary.Amount
+        amount={`${collateral} ${coinSymbol}`}
+        fiatPrice={amountTransformer(collateral)}
+        label={t('package.core.activityDetails.collateral.label')}
+        tooltip={getTooltipText()}
+      />
+      {status === CollateralStatus.ERROR && (
+        <Box mt="$32">
+          <InfoBar icon={<InfoIcon />} message={t('package.core.activityDetails.collateral.error')} />
+        </Box>
+      )}
+    </>
   );
 };

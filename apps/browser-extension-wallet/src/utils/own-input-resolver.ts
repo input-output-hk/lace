@@ -2,14 +2,14 @@
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { Wallet } from '@lace/cardano';
 
-type Args = Pick<ObservableWalletState, 'addresses'> & {
+export type HistoricalOwnInputResolverArgs = Pick<ObservableWalletState, 'addresses'> & {
   transactions: Pick<ObservableWalletState['transactions'], 'history'>;
 };
 
 export const createHistoricalOwnInputResolver = ({
   transactions: { history: txs },
   addresses
-}: Args): Wallet.Cardano.InputResolver => ({
+}: HistoricalOwnInputResolverArgs): Wallet.Cardano.InputResolver => ({
   async resolveInput({ txId, index }: Wallet.Cardano.TxIn) {
     for (const tx of txs) {
       if (txId !== tx.id) {

@@ -38,11 +38,11 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.multiAddressModalConfirm();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
 });
@@ -61,11 +61,11 @@ Then(/I navigate to home page on (popup|extended) view/, async (viewType: string
 });
 
 Then(/^I close the drawer by clicking close button$/, async () => {
-  await SimpleTxSideDrawerPageObject.clickCloseDrawerButton();
+  await new CommonDrawerElements().clickCloseDrawerButton();
 });
 
 Then(/^I close the drawer by clicking back button$/, async () => {
-  await SimpleTxSideDrawerPageObject.clickBackDrawerButton();
+  await new CommonDrawerElements().clickBackDrawerButton();
 });
 
 Then(/^I close wallet synced toast/, async () => {
@@ -188,8 +188,8 @@ When(/^I click on "Expand" button$/, async () => {
   await MenuHeader.clickOnExpandButton();
 });
 
-Then(/^"Expand" button is displayed (with|without) text$/, async (withText: string) => {
-  await topNavigationAssert.assertSeeExpandButton(withText === 'with');
+Then(/^"Expand" button is displayed (with|without) tooltip$/, async (withTooltip: 'with' | 'without') => {
+  await topNavigationAssert.assertSeeExpandButton(withTooltip === 'with');
 });
 
 When(/^I hover over "Expand" button$/, async () => {
@@ -288,6 +288,11 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
+Given(/^I enable showing Analytics consent banner$/, async () => {
+  await localStorageInitializer.enableShowingAnalyticsBanner();
+  await browser.refresh();
+});
+
 Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: string) => {
   await commonAssert.assertClipboardContainsAddressOfWallet(walletName);
 });
@@ -320,4 +325,8 @@ Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
 When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixels: number) => {
   const y = direction === 'down' ? Number(pixels) : -Number(pixels);
   await browser.scroll(0, y);
+});
+
+Given(/^I confirm multi-address discovery modal$/, async () => {
+  await settingsExtendedPageObject.multiAddressModalConfirm();
 });

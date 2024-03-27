@@ -17,7 +17,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       cost,
       hexId,
       metadata: { description = '', name = '', ticker = '', homepage, ext } = {},
-      metrics: { apy, delegators, stake, saturation, blocksCreated } = {},
+      metrics: { ros, delegators, stake, saturation, blocksCreated } = {},
       margin,
       owners,
       logo,
@@ -45,7 +45,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
         : { number: '-' },
       ticker,
       status,
-      apy: apy && formatPercentages(apy),
+      ros: ros && formatPercentages(ros),
       fee: Wallet.util.lovelacesToAdaString(cost.toString()),
       contact: {
         primary: homepage,

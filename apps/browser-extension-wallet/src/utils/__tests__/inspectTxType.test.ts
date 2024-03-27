@@ -43,8 +43,8 @@ const createStubInputResolver = (
 });
 
 jest.mock('@cardano-sdk/core', () => ({
-  ...jest.requireActual<any>('@cardano-sdk/core'),
-  createTxInspector: jest.fn(jest.requireActual<any>('@cardano-sdk/core').createTxInspector)
+  ...jest.requireActual<any>('@cardano-sdk/core'), // eslint-disable-line @typescript-eslint/no-explicit-any
+  createTxInspector: jest.fn(jest.requireActual<any>('@cardano-sdk/core').createTxInspector) // eslint-disable-line @typescript-eslint/no-explicit-any
 }));
 
 describe('testing tx-inspection utils', () => {

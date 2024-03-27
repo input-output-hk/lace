@@ -1,14 +1,11 @@
 import TokenSelectionPage from '../../elements/newTransaction/tokenSelectionPage';
-import webTester from '../../actor/webTester';
 import { TokenSearchResult } from '../../elements/newTransaction/tokenSearchResult';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 
 class TransactionAssetSelectionAssert {
-  async assertAssetIsPresentInTokenList(assetName: string, shouldBeVisible: boolean) {
-    await (shouldBeVisible
-      ? webTester.waitUntilSeeElement(new TokenSearchResult(assetName).container())
-      : webTester.dontSeeWebElement(new TokenSearchResult(assetName).container()));
+  async assertAssetIsPresentInTokenList(assetName: string, shouldBeDisplayed: boolean) {
+    await new TokenSearchResult(assetName).container.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
   async assertAssetsAreSelected(shouldBeSelected: boolean, amount: number, assetType: string) {
@@ -19,10 +16,10 @@ class TransactionAssetSelectionAssert {
 
   async assertSpecificAssetSelected(shouldBeSelected: boolean, assetType: string, index: number) {
     if (assetType === 'Tokens') {
-      await TokenSelectionPage.grayedOutTokenIcon(index).waitForDisplayed({
+      await TokenSelectionPage.tokenItem(index).grayedOutTokenIcon.waitForDisplayed({
         reverse: !shouldBeSelected
       });
-      await TokenSelectionPage.checkmarkInSelectedToken(index).waitForDisplayed({
+      await TokenSelectionPage.tokenItem(index).checkmarkInSelectedToken.waitForDisplayed({
         reverse: !shouldBeSelected
       });
     } else {

@@ -2,10 +2,31 @@ import OnboardingMainPage from '../../elements/onboarding/mainPage';
 import OnboardingCommonAssert from '../onboarding/onboardingCommonAssert';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
+import OnboardingAnalyticsBannerAssert from './onboardingAnalyticsBannerAssert';
 
 class OnboardingMainPageAssert extends OnboardingCommonAssert {
   async assertSeeLogo() {
     await OnboardingMainPage.logo.waitForDisplayed();
+  }
+
+  // ToDo LW-10073 - add reading copy from translations
+  async assertSeeAgreementText() {
+    await OnboardingMainPage.agreementText.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementText.getText()).to.equal(
+      'By proceeding you agree to Lace’s Terms of Service and Privacy Policy'
+    );
+  }
+
+  // ToDo LW-10073 - add reading copy from translations
+  async assertSeeTermsOfServiceLink() {
+    await OnboardingMainPage.agreementTermsOfServiceLink.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementTermsOfServiceLink.getText()).to.equal('Terms of Service');
+  }
+
+  // ToDo LW-10073 - add reading copy from translations
+  async assertSeePrivacyPolicyLink() {
+    await OnboardingMainPage.agreementPrivacyPolicyLink.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementPrivacyPolicyLink.getText()).to.equal('Privacy Policy');
   }
 
   async assertSeeTitle() {
@@ -70,6 +91,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeMainPage() {
+    await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(false);
     await this.assertSeeLogo();
     await this.assertSeeTitle();
     await this.assertSeeSubtitle();
@@ -78,6 +100,9 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await this.assertSeeRestoreWalletOption();
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();
+    await this.assertSeeAgreementText();
+    await this.assertSeeTermsOfServiceLink();
+    await this.assertSeePrivacyPolicyLink();
   }
 }
 

@@ -48,3 +48,4 @@ export { ActionCard } from './action-card';
 export { Loader } from './loader';
 export * from './auto-suggest-box';
 export * from './table';
+export { InfoBar } from './info-bar';

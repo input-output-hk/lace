@@ -4,7 +4,7 @@ import { CustomConflictError, ensureHandleOwnerHasntChanged } from '@src/utils/v
 import { Asset, Cardano, HandleProvider } from '@cardano-sdk/core';
 
 jest.mock('@src/utils/validators', () => ({
-  ...jest.requireActual<any>('@src/utils/validators'),
+  ...jest.requireActual<any>('@src/utils/validators'), // eslint-disable-line @typescript-eslint/no-explicit-any
   ensureHandleOwnerHasntChanged: jest.fn()
 }));
 

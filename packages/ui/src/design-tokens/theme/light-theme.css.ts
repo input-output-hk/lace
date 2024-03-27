@@ -379,7 +379,12 @@ const colors: Colors = {
   $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
   $radiobutton_unchecked_bgColor: 'transparent',
   $radiobutton_checked_bgColor: 'transparent',
-  $radiobutton_icon_color: lightColorScheme.$primary_grey,
+  $radiobutton_icon_active: lightColorScheme.$primary_light_grey_plus_0_56,
+  $radiobutton_icon_active_border_color:
+    lightColorScheme.$primary_light_grey_plus,
+  $radiobutton_icon_color: lightColorScheme.$primary_white,
+  $radiobutton_icon_text_color: lightColorScheme.$primary_black,
+  $radiobutton_icon_disabled_border_color: lightColorScheme.$primary_grey,
   $radiobutton_icon_hover_color: lightColorScheme.$primary_light_grey,
   $radiobutton_icon_hover_border_color:
     lightColorScheme.$primary_light_grey_plus,
@@ -419,6 +424,10 @@ const colors: Colors = {
   $stake_pool_item_bg_hover: lightColorScheme.$primary_light_grey,
   $stake_pool_header_text_color: lightColorScheme.$primary_dark_grey,
   $stake_pool_item_text_color: lightColorScheme.$primary_black,
+
+  $info_bar_container_bgColor: lightColorScheme.$secondary_cream,
+  $info_bar_icon_color: lightColorScheme.$secondary_data_pink,
+  $info_bar_message_color: lightColorScheme.$primary_black,
 };
 
 export const elevation: Elevation = {

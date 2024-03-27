@@ -40,7 +40,7 @@ export const CreateCollateral = ({
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
-  const [collateralTx, setCollateralTx] = useState<{ fee: bigint; tx: Wallet.UnsignedTx }>();
+  const [collateralTx, setCollateralTx] = useState<{ fee: bigint; tx: Wallet.UnwitnessedTx }>();
 
   useEffect(() => {
     const getTx = async () => {

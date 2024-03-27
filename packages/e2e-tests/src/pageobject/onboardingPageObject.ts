@@ -1,24 +1,22 @@
 import OnboardingLegalPage from '../elements/onboarding/legalPage';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
-import OnboardingWalletNamePage from '../elements/onboarding/walletNamePage';
 import OnboardingMnemonicPage from '../elements/onboarding/mnemonicPage';
-import OnboardingWalletPasswordPage from '../elements/onboarding/walletPasswordPage';
+import OnboardingWalletSetupPage from '../elements/onboarding/walletSetupPage';
 import RecoveryPhraseLengthPage from '../elements/onboarding/recoveryPhraseLengthPage';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
 import AnalyticsPage from '../elements/onboarding/analyticsPage';
 import Modal from '../elements/modal';
-import OnboardingDataCollectionPageAssert from '../assert/onboarding/onboardingDataCollectionPageAssert';
-import OnboardingWalletNamePageAssert from '../assert/onboarding/onboardingWalletNamePageAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
-import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import testContext from '../utils/testContext';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
+import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 
 class OnboardingPageObject {
   public validPassword = 'N_8J@bne87A';
+
   async openLegalPage() {
     await this.acceptTCCheckbox();
   }
@@ -40,10 +38,10 @@ class OnboardingPageObject {
   async goToMnemonicWriteDownPage(length?: '12' | '15' | '24') {
     await this.openNameYourWalletPage();
     await this.fillWalletNameInput('ValidWalletName');
-    await OnboardingWalletNamePage.nextButton.click();
+    await OnboardingWalletSetupPage.nextButton.click();
     await this.fillPasswordInput(this.validPassword);
     await this.fillPasswordConfirmationInput(this.validPassword);
-    await OnboardingWalletPasswordPage.nextButton.click();
+    await OnboardingWalletSetupPage.nextButton.click();
     if (length) {
       await this.selectRecoveryPassphraseLength(length);
     }
@@ -190,15 +188,15 @@ class OnboardingPageObject {
   }
 
   async fillWalletNameInput(text: string) {
-    await OnboardingWalletNamePage.setWalletNameInput(text);
+    await OnboardingWalletSetupPage.setWalletNameInput(text);
   }
 
   async fillPasswordInput(text: string) {
-    await OnboardingWalletPasswordPage.walletPasswordInput.setValue(text);
+    await OnboardingWalletSetupPage.walletPasswordInput.setValue(text);
   }
 
   async fillPasswordConfirmationInput(text: string) {
-    await OnboardingWalletPasswordPage.walletPasswordConfirmInput.setValue(text);
+    await OnboardingWalletSetupPage.walletPasswordConfirmInput.setValue(text);
   }
 
   async fillPasswordPage(password: string, passwordConfirmation: string) {
@@ -258,6 +256,7 @@ class OnboardingPageObject {
         await RecoveryPhraseLengthPage.radioButton24wordsButton.click();
     }
   }
+
   async restoreWallet() {
     const commonOnboardingElements = new CommonOnboardingElements();
 
@@ -265,9 +264,8 @@ class OnboardingPageObject {
     await Modal.confirmButton.waitForClickable();
     await Modal.confirmButton.click();
     await this.openAndAcceptTermsOfUsePage();
-    await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
     await AnalyticsPage.nextButton.click();
-    await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
+    await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
     await this.fillWalletNameInput('ValidName');
     await commonOnboardingElements.nextButton.click();
     await this.fillPasswordPage(this.validPassword, this.validPassword);
@@ -275,7 +273,7 @@ class OnboardingPageObject {
     await commonOnboardingElements.nextButton.click();
     await this.openMnemonicVerificationLastPage(getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []);
     await commonOnboardingElements.nextButton.click();
-    await OnboardingAllDonePage.nextButton.click();
+    await commonOnboardingElements.nextButton.click();
     await Modal.cancelButton.waitForClickable();
     await Modal.cancelButton.click();
   }
@@ -284,6 +282,9 @@ class OnboardingPageObject {
     await browser.pause(500);
     if (await WalletCreationPage.walletLoader.isDisplayed()) {
       await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 15_000, reverse: true });
+    }
+    if (await WalletCreationPage.mainLoaderText.isDisplayed()) {
+      await WalletCreationPage.mainLoaderText.waitForDisplayed({ timeout: 255_000, reverse: true });
     }
   }
 }

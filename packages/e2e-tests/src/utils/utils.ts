@@ -1,4 +1,3 @@
-import localStorageManager from './localStorageManager';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
 
@@ -10,12 +9,6 @@ class ExtensionUtils {
 
   async getUserAgent(): Promise<string> {
     return await browser.execute('navigator.userAgent', []);
-  }
-
-  async getWalletInitialFromLocalStorage(): Promise<string> {
-    const wallet = JSON.parse(await localStorageManager.getItem('wallet'));
-    const walletName = wallet.name;
-    return walletName.charAt(0);
   }
 
   getNetwork(): { name: string; id: number } {

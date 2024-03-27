@@ -32,6 +32,7 @@ module.exports = {
     'max-len': 'off', // prettier is already handling this automatically,
     // note: prod webpack config strips console logs anyway, nevertheless
     // we don't want the dev build to be spammed by needless logging
+    '@typescript-eslint/no-explicit-any': ['error'],
     'no-console': ['error', { allow: ['warn', 'error', 'info', 'debug'] }],
     'lodash/import-scope': ['error', 'method']
   },

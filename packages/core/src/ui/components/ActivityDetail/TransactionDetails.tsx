@@ -20,6 +20,7 @@ import {
   TxDetails,
   TxDetail
 } from './types';
+import { Collateral, CollateralStatus } from './Collateral';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -49,6 +50,10 @@ export interface TransactionDetailsProps {
    * Transaction total output
    */
   totalOutput?: string;
+  /**
+   * Transaction collateral
+   */
+  collateral?: string;
   /**
    * Transaction fee
    */
@@ -125,7 +130,8 @@ export const TransactionDetails = ({
   sendAnalyticsOutputs,
   proposalProcedures,
   votingProcedures,
-  certificates
+  certificates,
+  collateral
 }: TransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -218,6 +224,21 @@ export const TransactionDetails = ({
         } as unknown as TxDetail<TxDetailsVotingProceduresTitles>)
     )
   );
+
+  const getCollateralStatus = (): CollateralStatus => {
+    switch (status) {
+      case ActivityStatus.SPENDABLE:
+        return CollateralStatus.NONE;
+      case ActivityStatus.PENDING:
+        return CollateralStatus.REVIEW;
+      case ActivityStatus.SUCCESS:
+        return CollateralStatus.SUCCESS;
+      case ActivityStatus.ERROR:
+        return CollateralStatus.ERROR;
+      default:
+        return CollateralStatus.REVIEW;
+    }
+  };
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
     <div className={styles.details}>
@@ -370,6 +391,16 @@ export const TransactionDetails = ({
               <span>&nbsp;{includedTime}</span>
             </div>
           </div>
+          {collateral && (
+            <Box mb="$32" data-testid="tx-collateral">
+              <Collateral
+                collateral={collateral}
+                amountTransformer={amountTransformer}
+                coinSymbol={coinSymbol}
+                status={getCollateralStatus()}
+              />
+            </Box>
+          )}
           {fee && fee !== '-' && (
             <Box mb="$32" data-testid="tx-fee">
               <TransactionFee fee={fee} amountTransformer={amountTransformer} coinSymbol={coinSymbol} />

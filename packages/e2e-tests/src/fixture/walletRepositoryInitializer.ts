@@ -13,7 +13,7 @@ export const getNumWalletsInRepository = async (): Promise<number> =>
 export const clearWalletRepository = async (): Promise<void> => {
   Logger.log('Removing wallets');
   await switchToWindowWithLace(0);
-  const removedWallets = await browser.execute(`
+  await browser.execute(`
     return (async () => {
       await window.walletManager.deactivate();
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
@@ -23,7 +23,6 @@ export const clearWalletRepository = async (): Promise<void> => {
       return JSON.stringify(wallets);
     })()
   `);
-  Logger.log(`Removed wallets: ${removedWallets}`);
 };
 
 export const getWalletsFromRepository = async (): Promise<any[]> =>

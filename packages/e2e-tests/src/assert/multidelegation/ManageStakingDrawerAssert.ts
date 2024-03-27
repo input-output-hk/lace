@@ -33,6 +33,7 @@ class ManageStakingDrawerAssert {
 
   assertSeeOnlyFirstPoolDetailsExpanded = async () => {
     await ManageStakingDrawer.infoCard.waitForDisplayed();
+    await ManageStakingDrawer.infoCard.waitForStable();
     expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(1);
     await this.assertSeePoolDetails(0);
   };

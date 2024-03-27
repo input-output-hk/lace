@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -50,12 +50,12 @@ jobs:
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
       - name: Save Lace extension build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lace-build
           path: ./apps/browser-extension-wallet/dist
       - name: Save Core build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: core-build
           path: ./packages/core/dist
@@ -70,29 +70,29 @@ jobs:
         shell: pwsh
         run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
       - name: Get built extension
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lace-build
           path: ./apps/browser-extension-wallet/dist
       - name: Get Core build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core-build
           path: ./packages/core/dist
       - name: Node modules cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./packages/e2e-tests/node_modules
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
@@ -126,7 +126,7 @@ jobs:
           platform=Windows
           " > environment.properties
       - name: Publish artifacts (logs, reports, screenshots)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-artifacts
@@ -144,9 +144,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: test-artifacts
           path: ./packages/e2e-tests

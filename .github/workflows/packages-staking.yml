@@ -21,16 +21,16 @@ jobs:
       - name: Setup Build Essential
         run: apt-get update && apt-get install build-essential -y
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'yarn'
       - name: Node modules cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             node_modules
@@ -45,7 +45,7 @@ jobs:
       - name: Run tests
         run: yarn workspace @lace/staking test:unit --coverage
       - name: Upload test coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: staking-coverage
           path: packages/staking/coverage
@@ -55,7 +55,7 @@ jobs:
 #      - name: Build Ladle
 #        run: yarn workspace @lace/staking story:build
 #      - name: Upload Ladle artifacts
-#        uses: actions/upload-artifact@v3
+#        uses: actions/upload-artifact@v4
 #        with:
 #          name: staking-ladle
 #          path: packages/staking/build
@@ -63,7 +63,7 @@ jobs:
 #        continue-on-error: true
 #        run: yarn workspace @lace/staking test:vr
 #      - name: Upload visual regression
-#        uses: actions/upload-artifact@v3
+#        uses: actions/upload-artifact@v4
 #        with:
 #          name: staking-visual-regression
 #          path: packages/staking/.lostpixel

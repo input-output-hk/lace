@@ -31,6 +31,7 @@ type TransactionActivity = {
   includedUtcTime?: string;
   totalOutput?: string;
   fee?: string;
+  collateral?: string;
   depositReclaim?: string;
   deposit?: string;
   addrInputs?: TxOutputInput[];

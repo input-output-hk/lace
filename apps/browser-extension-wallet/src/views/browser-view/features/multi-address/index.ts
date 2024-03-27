@@ -1,0 +1,1 @@
+export { MultiAddressBalanceVisibleModal } from './MultiAddressBalanceVisibleModal';
