@@ -29,7 +29,7 @@ export const en: Translations = {
   'browsePools.preferencesCard.sort.pledge': 'Pledge',
   'browsePools.preferencesCard.sort.ros': 'ROS',
   'browsePools.preferencesCard.sort.saturation': 'Saturation',
-  'browsePools.preferencesCard.sort.ticker': 'Ticker name',
+  'browsePools.preferencesCard.sort.ticker': 'Ticker',
   'browsePools.stakePoolGrid.notAvailable': 'N/A',
   'browsePools.stakePoolGrid.selected': 'Selected',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
