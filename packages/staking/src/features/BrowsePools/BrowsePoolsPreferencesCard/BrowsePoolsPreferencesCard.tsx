@@ -135,8 +135,18 @@ export const BrowsePoolsPreferencesCard = ({
   };
 
   const sortingOptions: RadioButtonGroupOption[] = useMemo(() => {
-    const iconAlphabetical = direction === 'asc' ? SortAlphabeticalAscIcon : SortAlphabeticalDescIcon;
-    const iconNumerical = direction === 'asc' ? SortNumericalAscIcon : SortNumericalDescIcon;
+    const iconAlphabetical =
+      direction === 'asc' ? (
+        <SortAlphabeticalAscIcon data-testid="sort-asc" />
+      ) : (
+        <SortAlphabeticalDescIcon data-testid="sort-desc" />
+      );
+    const iconNumerical =
+      direction === 'asc' ? (
+        <SortNumericalAscIcon data-testid="sort-asc" />
+      ) : (
+        <SortNumericalDescIcon data-testid="sort-desc" />
+      );
     return [
       {
         icon: iconAlphabetical,
