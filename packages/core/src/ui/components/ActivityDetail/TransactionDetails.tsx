@@ -404,7 +404,7 @@ export const TransactionDetails = ({
           {fee && fee !== '-' && (
             <Box mb="$32" data-testid="tx-fee">
               <TransactionFee
-                tooltipInfo={t('package.core.activityDetails.transactionFeeInfo')}
+                tooltipInfo={t('core.activityDetails.transactionFeeInfo')}
                 fee={fee}
                 amountTransformer={amountTransformer}
                 coinSymbol={coinSymbol}
