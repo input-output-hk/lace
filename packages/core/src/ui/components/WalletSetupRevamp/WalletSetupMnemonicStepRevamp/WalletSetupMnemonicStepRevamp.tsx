@@ -11,6 +11,7 @@ import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
+import isEqual from 'lodash/isEqual';
 
 export type MnemonicStage = 'writedown' | 'input';
 
@@ -118,7 +119,8 @@ export const WalletSetupMnemonicStepRevamp = ({
 
   const isSubmitEnabled =
     mnemonicStage === 'writedown' ||
-    Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(mnemonicConfirm));
+    (Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(mnemonicConfirm)) &&
+      isEqual(mnemonic, mnemonicConfirm));
 
   return (
     <>
