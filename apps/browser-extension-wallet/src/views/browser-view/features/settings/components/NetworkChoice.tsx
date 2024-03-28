@@ -130,7 +130,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
           </a>
         ))}
       </Radio.Group>
-      <div className={styles.customNodeContainer}>
+      <div className={styles.customApiContainer}>
         <TextBox
           label={`${t('browserView.settings.wallet.network.changeTxSubmitEndpointInputLabel')}`}
           w="$fill"
