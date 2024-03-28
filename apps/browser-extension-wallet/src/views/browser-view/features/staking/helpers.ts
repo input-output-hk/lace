@@ -29,6 +29,12 @@ export const isMultidelegationSupportedByDevice = async (
       );
     }
     case WalletType.Trezor: {
+      // To allow checks once the app is refreshed. It won't affect the user flow
+      // TODO: Smarter Trezor initialization logic after onboarding revamp LW-9808
+      await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
+        manifest: Wallet.manifest,
+        communicationType: Wallet.KeyManagement.CommunicationType.Web
+      });
       const trezorInfo = await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(
         Wallet.KeyManagement.CommunicationType.Web
       );
