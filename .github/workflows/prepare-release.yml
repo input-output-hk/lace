@@ -1,0 +1,22 @@
+name: Prepare-release
+
+on:
+  push:
+    branches:
+      - tmp/release/extension/**
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        env:
+          CI: 'true'
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          CARDANO_SERVICES_URL_MAINNET: ${{ vars.CARDANO_SERVICES_URL_LIVE_MAINNET }}
+          CARDANO_SERVICES_URL_PREPROD: ${{ vars.CARDANO_SERVICES_URL_LIVE_PREPROD }}
+          CARDANO_SERVICES_URL_PREVIEW: ${{ vars.CARDANO_SERVICES_URL_LIVE_PREVIEW }}
