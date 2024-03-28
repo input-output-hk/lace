@@ -22,7 +22,7 @@ export const mapPortfolioToDisplayData = ({
     fee: Wallet.util.lovelacesToAdaString(item.displayData.stakePool.cost.toString()),
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
-    name: item.displayData.name || '-',
+    name: item.displayData.name,
     status: ((): 'retired' | 'saturated' | 'retiring' | undefined => {
       if (item.stakePool.status === 'retired') return 'retired';
       if (item.stakePool.status === 'retiring') return 'retiring';

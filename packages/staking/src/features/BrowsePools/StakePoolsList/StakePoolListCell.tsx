@@ -26,10 +26,9 @@ export const StakePoolListCell = ({ sortField, ...stakePool }: StakePoolListCell
 
   const formattedValue = getFormattedStakePoolProp(stakePool as StakePoolDetails, sortField);
 
-  // TODO do not use '-' as a fallback value; https://input-output.atlassian.net/browse/LW-10001
-  if (sortField === 'saturation' && stakePool.saturation && stakePool.saturation !== '-') {
+  if (sortField === 'saturation' && stakePool.saturation) {
     return <SaturationCell saturation={stakePool.saturation}>{formattedValue}</SaturationCell>;
   }
 
-  return <>{formattedValue}</>;
+  return <>{formattedValue || '-'}</>;
 };
