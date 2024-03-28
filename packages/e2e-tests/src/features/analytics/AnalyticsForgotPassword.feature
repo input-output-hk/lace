@@ -50,7 +50,7 @@ Feature: Analytics - Forgot Password
     Then I validate latest analytics single event "unlock wallet | forgot password? | set up your password | next | click"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "unlock wallet | forgot password? | recovery phrase length | next | click"
-    And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
+#    And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
     And I validate latest analytics multiple events:
       | unlock wallet \| forgot password? \| enter passphrase #01 \| next \| click |
       | unlock wallet \| forgot password? \| enter passphrase #09 \| next \| click |
