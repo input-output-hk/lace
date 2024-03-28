@@ -66,11 +66,11 @@ class OnboardingCommonAssert {
       await t('settings.legals.cookiePolicy')
     );
     await this.commonOnboardingElements.privacyPolicyLink.waitForDisplayed();
-    expect(await this.commonOnboardingElements.privacyPolicyLink.getText()).to.equalIgnoreCase(
+    expect(await this.commonOnboardingElements.privacyPolicyLink.getText()).to.equal(
       await t('settings.legals.privacyPolicy')
     );
     await this.commonOnboardingElements.termsOfServiceLink.waitForDisplayed();
-    expect(await this.commonOnboardingElements.termsOfServiceLink.getText()).to.equalIgnoreCase(
+    expect(await this.commonOnboardingElements.termsOfServiceLink.getText()).to.equal(
       await t('settings.legals.termsOfService')
     );
   }
