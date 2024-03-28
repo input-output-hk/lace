@@ -12,7 +12,7 @@ export const fetchPoolsInfo = async ({
       ...(searchString && {
         identifier: {
           _condition: 'or',
-          values: [{ name: searchString }, { ticker: searchString }]
+          values: [{ name: searchString }, { ticker: searchString }, { id: Wallet.Cardano.PoolId(searchString) }]
         }
       }),
       pledgeMet: true,
