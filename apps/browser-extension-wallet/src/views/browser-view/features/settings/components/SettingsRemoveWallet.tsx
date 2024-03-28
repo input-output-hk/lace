@@ -29,18 +29,18 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
     setIsRemoveWalletAlertVisible(!isRemoveWalletAlertVisible);
 
     analytics.sendEventToPostHog(
-      isRemoveWalletAlertVisible ? PostHogAction.SettingsHoldUpBackClick : PostHogAction.SettingsRemoveWalletClick
+      isRemoveWalletAlertVisible ? PostHogAction.SettingsHoldUpBackClick : PostHogAction.SettingsHoldUpRemoveWalletClick
     );
   };
 
   const removeWallet = async () => {
     setDeletingWallet(true);
-    const nextActiveWallet = await deleteWallet();
-    setDeletingWallet(false);
-    analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
+    await analytics.sendEventToPostHog(PostHogAction.SettingsRemoveWalletClick, {
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });
+    const nextActiveWallet = await deleteWallet();
+    setDeletingWallet(false);
     if (nextActiveWallet) return;
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
     // force reload to ensure all stores are cleaned up
