@@ -80,7 +80,7 @@ export const sectionTitle: Record<DAPP_VIEWS, TranslationKey> = {
   [DAPP_VIEWS.CONFIRM_TX]: 'dapp.confirm.header',
   [DAPP_VIEWS.TX_SIGN]: 'dapp.sign.header',
   [DAPP_VIEWS.TX_SIGN_SUCCESS]: 'dapp.sign.success.header',
-  [DAPP_VIEWS.TX_SIGN_FAILURE]: 'dapp.sign.failure.header',
-  [DAPP_VIEWS.CONFIRM_DATA]: 'dapp.confirmData.header',
-  [DAPP_VIEWS.SIGN_DATA]: 'dapp.signData.header'
+  [DAPP_VIEWS.TX_SIGN_FAILURE]: 'dapp.sign.failure.title',
+  [DAPP_VIEWS.CONFIRM_DATA]: 'dapp.confirm.header.confirmData',
+  [DAPP_VIEWS.SIGN_DATA]: 'dapp.confirm.header.signData'
 };

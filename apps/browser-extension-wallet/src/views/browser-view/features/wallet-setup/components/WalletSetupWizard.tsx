@@ -129,25 +129,21 @@ export const WalletSetupWizard = ({
   const walletSetupNamePasswordStepTranslations = {
     title:
       setupType === SetupType.FORGOT_PASSWORD
-        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
-        : t('package.core.walletNameAndPasswordSetupStep.title'),
+        ? t('core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
+        : t('core.walletNameAndPasswordSetupStep.title'),
     description:
       setupType === SetupType.FORGOT_PASSWORD
-        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
-        : t('package.core.walletNameAndPasswordSetupStep.description'),
-    nameInputLabel: t('package.core.walletNameAndPasswordSetupStep.nameInputLabel'),
-    nameMaxLength: t('package.core.walletNameAndPasswordSetupStep.nameMaxLength'),
-    passwordInputLabel: t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel'),
-    confirmPasswordInputLabel: t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
-    nameRequiredMessage: t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
-    noMatchPassword: t('package.core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    confirmButton: t('package.core.walletNameAndPasswordSetupStep.enterWallet'),
-    secondLevelPasswordStrengthFeedback: t(
-      'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
-    ),
-    firstLevelPasswordStrengthFeedback: t(
-      'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback'
-    )
+        ? t('core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
+        : t('core.walletNameAndPasswordSetupStep.description'),
+    nameInputLabel: t('core.walletNameAndPasswordSetupStep.nameInputLabel'),
+    nameMaxLength: t('core.walletNameAndPasswordSetupStep.nameMaxLength'),
+    passwordInputLabel: t('core.walletNameAndPasswordSetupStep.passwordInputLabel'),
+    confirmPasswordInputLabel: t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
+    nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
+    noMatchPassword: t('core.walletNameAndPasswordSetupStep.noMatchPassword'),
+    confirmButton: t('core.walletNameAndPasswordSetupStep.enterWallet'),
+    secondLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'),
+    firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
   const moveBack = () => {
