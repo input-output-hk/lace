@@ -92,10 +92,6 @@ export const DelegationContent = (): React.ReactElement => {
     );
 
   useEffect(() => {
-    const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
-    const isHardwareWalletPopupTransition = !isInMemoryWallet && hasPersistedHwStakepool;
-    // `hasPersistedHwStakepool` will get immidiately unset once the HW transition is over.
-    if (isHardwareWalletPopupTransition) return;
     if (searchValue?.length !== 0 && searchValue?.length < MIN_CHARS_TO_SEARCH) return;
     fetchStakePools({ searchString: searchValue || '', limit: MAX_ITEMS_TO_SHOW });
   }, [searchValue, fetchStakePools, isInMemoryWallet, blockchainProvider]);
