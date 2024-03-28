@@ -27,7 +27,7 @@ export const SettingsSecurity = ({
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const { t } = useTranslation();
-  const { isWalletLocked, isInMemoryWallet } = useWalletStore();
+  const { isWalletLocked, isInMemoryWallet, hasKeyMaterial } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -54,8 +54,8 @@ export const SettingsSecurity = ({
   };
 
   const isMnemonicAvailable = useCallback(async () => {
-    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet);
-  }, [isInMemoryWallet, isWalletLocked]);
+    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet || !hasKeyMaterial);
+  }, [isInMemoryWallet, isWalletLocked, hasKeyMaterial]);
 
   const handleCloseShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(false);
