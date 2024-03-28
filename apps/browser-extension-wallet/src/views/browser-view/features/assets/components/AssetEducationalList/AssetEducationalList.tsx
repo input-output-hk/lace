@@ -5,6 +5,8 @@ import LightBulb from '@assets/icons/light.svg';
 import Video from '@assets/icons/video.svg';
 import { EducationalList } from '@src/views/browser-view/components/EducationalList';
 
+const faqKey = 'educationalBanners.title.faq';
+
 export const AssetEducationalList = (): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -17,7 +19,7 @@ export const AssetEducationalList = (): React.ReactElement => {
         link: `${process.env.WEBSITE_URL}/glossary?term=asset`
       },
       {
-        title: t('educationalBanners.title.faq'),
+        title: t(faqKey),
         subtitle: t('educationalBanners.subtitle.howToSendReceiveFunds'),
         src: LightBulb,
         link: `${process.env.WEBSITE_URL}/faq?question=how-do-i-send-and-receive-digital-assets`
@@ -33,6 +35,24 @@ export const AssetEducationalList = (): React.ReactElement => {
         subtitle: t('educationalBanners.subtitle.connectingDApps'),
         src: Video,
         link: `${process.env.WEBSITE_URL}/learn?video=connecting-to-dapps-with-lace`
+      },
+      {
+        title: t(faqKey),
+        subtitle: t('educationalBanners.subtitle.conwayEra'),
+        src: LightBulb,
+        link: `${process.env.WEBSITE_URL}/faq?question=how-is-the-conway-ledger-era-also-called-governance-era-supported-by-lace`
+      },
+      {
+        title: t(faqKey),
+        subtitle: t('educationalBanners.subtitle.governanceFeatures'),
+        src: LightBulb,
+        link: `${process.env.WEBSITE_URL}/faq?question=what-type-of-governance-actions-are-supported-by-lace`
+      },
+      {
+        title: t(faqKey),
+        subtitle: t('educationalBanners.subtitle.governanceActions'),
+        src: LightBulb,
+        link: `${process.env.WEBSITE_URL}/faq?question=what-type-of-governance-actions-are-supported-by-lace`
       }
     ],
     [t]
