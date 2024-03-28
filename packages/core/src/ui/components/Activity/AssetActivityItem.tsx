@@ -162,11 +162,11 @@ export const AssetActivityItem = ({
   const assetAmountContent =
     type in DelegationActivityType ? (
       <p data-testid="tokens-amount" className={styles.description}>
-        {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
+        {DELEGATION_ASSET_NUMBER} {t('core.assetActivityItem.entry.token')}
       </p>
     ) : (
       <p data-testid="tokens-amount" className={styles.description}>
-        {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
+        {pluralize('core.assetActivityItem.entry.token', assetsNumber, true)}
       </p>
     );
   const descriptionContent = formattedTimestamp ? (
@@ -192,8 +192,8 @@ export const AssetActivityItem = ({
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
             {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationActivityType)
-              ? t('package.core.assetActivityItem.entry.name.sending')
-              : t(`package.core.assetActivityItem.entry.name.${type}`)}
+              ? t('core.assetActivityItem.entry.name.sending')
+              : t(`core.assetActivityItem.entry.name.${type}`)}
           </h6>
           {descriptionContent}
         </div>

@@ -38,10 +38,10 @@ export const AnalyticsConfirmationBanner = ({
             <div className={styles.confirmationBannerMessage}>{message}</div>
             <div className={styles.buttons}>
               <Button onClick={handleConfirm} className={styles.secondaryButton} data-testid="analytics-accept-button">
-                {t('package.core.confirmationBanner.agree')}
+                {t('core.confirmationBanner.agree')}
               </Button>
               <Button onClick={handleReject} data-testid="analytics-reject-button">
-                {t('package.core.confirmationBanner.reject')}
+                {t('core.confirmationBanner.reject')}
               </Button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-export default {
+export const cookiePolicy = {
   cookiePolicy: `
   <div>
     <heading>Last Updated: April 12, 2023</heading>

@@ -29,12 +29,12 @@ export const AssetActivityList = ({
         <div className={styles.header}>
           {!isDrawerView && (
             <p data-testid="transaction-date" className={styles.title}>
-              {title ?? t('package.core.assetActivityList.title')}
+              {title ?? t('core.assetActivityList.title')}
             </p>
           )}
           {onExpand && (
             <Button data-testid="expand-button" onClick={onExpand} type="text">
-              {t('package.core.assetActivityList.viewAll')}
+              {t('core.assetActivityList.viewAll')}
             </Button>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { toast, ToastProps } from '@lace/common';
 import ErrorIcon from '../assets/icons/address-error-icon.component.svg';
+import { TranslationKey } from '@lib/translations/types';
 
 export const TOAST_DEFAULT_DURATION = 3;
 
@@ -8,7 +9,7 @@ export interface ActionExecutionArgs {
   successMessage?: string;
   toastDuration?: number;
   shouldDisplayToastOnSuccess?: boolean;
-  getErrorMessage?: (error: Error) => string;
+  getErrorMessage?: (error: Error) => TranslationKey;
 }
 
 export const useActionExecution = (

@@ -197,7 +197,7 @@ export const AssetInput = ({
                 className={styles.maxBtn}
                 disabled={hasReachedMaxAmount}
               >
-                {t('package.core.assetInput.maxButton')}
+                {t('core.assetInput.maxButton')}
               </Button>
             </div>
           )}

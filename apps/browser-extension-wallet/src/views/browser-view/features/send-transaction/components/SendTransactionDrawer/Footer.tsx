@@ -38,8 +38,9 @@ import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { TranslationKey } from '@lib/translations/types';
 
-export const nextStepBtnLabels: Partial<Record<Sections, string>> = {
+export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
   [Sections.SUMMARY]: 'browserView.transaction.send.footer.confirm',
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',

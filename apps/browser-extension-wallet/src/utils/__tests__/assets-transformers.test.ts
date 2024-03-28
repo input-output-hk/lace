@@ -11,6 +11,7 @@ import * as formatNumber from '@src/utils/format-number';
 import * as transformers from '@src/api/transformers';
 import { TokenPrice } from '@lib/scripts/types';
 import BigNumber from 'bignumber.js';
+import { CurrencyInfo } from '@src/types';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<typeof import('@lace/cardano')>('@lace/cardano');
@@ -224,7 +225,7 @@ describe('Testing assets transformers', () => {
     const fiatCurrency = {
       code: 'fiatCurrency.code',
       symbol: 'fiatCurrency.symbol'
-    };
+    } as unknown as CurrencyInfo;
 
     const params = {
       token,

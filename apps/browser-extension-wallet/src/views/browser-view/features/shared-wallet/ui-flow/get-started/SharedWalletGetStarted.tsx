@@ -1,8 +1,9 @@
 import React from 'react';
-import { useTranslate, SharedWalletGetStartedOptions } from '@lace/core';
+import { SharedWalletGetStartedOptions } from '@lace/core';
+import { useTranslation } from 'react-i18next';
 
 export const SharedWalletGetStarted = (): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <SharedWalletGetStartedOptions

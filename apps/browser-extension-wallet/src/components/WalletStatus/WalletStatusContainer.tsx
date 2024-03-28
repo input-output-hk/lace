@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSyncStatus } from '@src/stores';
 import { WalletStatus, Status } from './WalletStatus';
+import { TranslationKey } from '@lib/translations/types';
 
-const DEFAULT_WALLET_STATUS = {
+const DEFAULT_WALLET_STATUS: { status: Status; text: TranslationKey } = {
   status: Status.SYNCING,
   text: 'browserView.topNavigationBar.walletStatus.walletSyncing'
 };

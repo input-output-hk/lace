@@ -16,14 +16,14 @@ export const AuthorizeDapp = ({ dappInfo, warningBanner }: AuthorizeDappProps): 
       <DappInfo {...dappInfo} className={styles.dappInfo} />
       {warningBanner}
       <div className={styles.title} data-testid="authorize-dapp-title">
-        {t('package.core.authorizeDapp.title')}:
+        {t('core.authorizeDapp.title')}:
       </div>
       <div className={styles.permissions} data-testid="authorize-dapp-permissions">
         <ul className={styles.list}>
-          <li>{t('package.core.authorizeDapp.seeNetwork')}</li>
-          <li>{t('package.core.authorizeDapp.seeWalletUtxo')}</li>
-          <li>{t('package.core.authorizeDapp.seeWalletBalance')}</li>
-          <li>{t('package.core.authorizeDapp.seeWalletAddresses')}</li>
+          <li>{t('core.authorizeDapp.seeNetwork')}</li>
+          <li>{t('core.authorizeDapp.seeWalletUtxo')}</li>
+          <li>{t('core.authorizeDapp.seeWalletBalance')}</li>
+          <li>{t('core.authorizeDapp.seeWalletAddresses')}</li>
         </ul>
       </div>
     </div>

@@ -36,6 +36,7 @@ import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokens
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
+import { TranslationKey } from '@lib/translations/types';
 
 export const useHandleClose = (): {
   onClose: () => void;
@@ -230,7 +231,10 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   );
 };
 
-export const useGetHeaderText = (): Record<Sections, { title: string; subtitle?: string; name?: string }> => {
+export const useGetHeaderText = (): Record<
+  Sections,
+  { title?: TranslationKey; subtitle?: TranslationKey; name?: string }
+> => {
   const { addressToEdit } = useAddressBookStore();
 
   return {
@@ -243,9 +247,9 @@ export const useGetHeaderText = (): Record<Sections, { title: string; subtitle?:
       title: 'browserView.transaction.send.confirmationTitle',
       subtitle: 'browserView.transaction.send.signTransactionWithPassword'
     },
-    [Sections.SUCCESS_TX]: { title: '' },
-    [Sections.FAIL_TX]: { title: '' },
-    [Sections.UNAUTHORIZED_TX]: { title: '' },
+    [Sections.SUCCESS_TX]: {},
+    [Sections.FAIL_TX]: {},
+    [Sections.UNAUTHORIZED_TX]: {},
     [Sections.ADDRESS_LIST]: { title: 'browserView.transaction.send.drawer.addressBook' },
     [Sections.ADDRESS_FORM]: { title: 'browserView.transaction.send.drawer.addressForm' },
     [Sections.ASSET_PICKER]: { title: 'core.coinInputSelection.assetSelection' },

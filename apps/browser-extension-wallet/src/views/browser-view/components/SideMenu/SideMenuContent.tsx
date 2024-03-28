@@ -3,7 +3,7 @@ import { Menu, MenuProps } from 'antd';
 import classnames from 'classnames';
 import { MenuItemList } from '@utils/constants';
 import { SideMenuItemConfig } from '@types';
-import { useTranslate } from '@lace/core';
+import { useTranslation } from 'react-i18next';
 import { SideMenuLabel } from './SideMenuLabel';
 import { SideMenuItem } from '@views/browser/components/SideMenu/SideMenuItem';
 import styles from './SideMenuContent.module.scss';
@@ -40,7 +40,7 @@ export const SideMenuContent = ({
   onMouseLeave,
   menuItemClassName
 }: SideMenuContentProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <Menu

@@ -15,6 +15,7 @@ import { mockBlockchainProviders } from '@src/utils/mocks/blockchain-providers';
 import create, { SetState, GetState } from 'zustand';
 import { cardanoCoin } from '@src/utils/constants';
 import { mockInMemoryWallet, mockWalletInfoTestnet, mockWalletState } from '@src/utils/mocks/test-helpers';
+import { currencyCode } from '@providers/currency/constants';
 
 const mockActivitiesSlice = (
   set: SetState<WalletActivitiesSlice>,
@@ -58,7 +59,7 @@ describe('Testing wallet activities slice', () => {
 
     await act(async () => {
       await result.current.getWalletActivities({
-        fiatCurrency: { code: 'USD', symbol: '$' },
+        fiatCurrency: { code: currencyCode.USD, symbol: '$' },
         cardanoFiatPrice: 1
       });
     });

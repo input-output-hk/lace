@@ -6,9 +6,9 @@ export const MINIMUM_PASSWORD_LEVEL_REQUIRED = 3;
 export const WALLET_NAME_INPUT_MAX_LENGTH = 30;
 
 export const passwordStrengthFeedbackMap: Record<number, string> = {
-  0: 'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback',
-  1: 'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback',
-  2: 'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
+  0: 'core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback',
+  1: 'core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback',
+  2: 'core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
 };
 
 export const nameShouldHaveRightLengthRegex = /^.{1,20}$/;
