@@ -5,6 +5,7 @@ import { mergeConfig, UserConfig } from 'vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import svgrPlugin from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import turbosnap from 'vite-plugin-turbosnap';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 // TODO to be removed when @lace/icons properly supports ESM
 import commonjs from 'vite-plugin-commonjs';
@@ -47,6 +48,9 @@ const config: StorybookConfig = {
           esbuildOptions: { loader: { '.css': 'empty' } },
         }),
         tsconfigPaths(),
+        turbosnap({
+          rootDir: baseConfig.root ?? process.cwd(),
+        }),
       ],
       resolve: {
         alias: [
