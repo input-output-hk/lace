@@ -209,7 +209,13 @@ export const WalletSetupWizard = ({
   );
 
   const handleSubmit = async (result: { password: string; walletName: string }) => {
+    sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
     await handleCompleteCreation(result.walletName, result.password);
+  };
+
+  const handleMnemonicVerification = () => {
+    sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+    moveForward();
   };
 
   const renderedMnemonicStep = () => {
@@ -220,14 +226,14 @@ export const WalletSetupWizard = ({
           mnemonic={mnemonic}
           onChange={setMnemonic}
           onCancel={setupType !== SetupType.FORGOT_PASSWORD && moveBack}
-          onSubmit={moveForward}
+          onSubmit={handleMnemonicVerification}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
           suggestionList={wordList}
           defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
           onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
           onPasteFromClipboard={() =>
-            sendAnalytics(postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+            sendAnalytics(postHogOnboardingActions[setupType]?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
           }
         />
       );
@@ -255,7 +261,7 @@ export const WalletSetupWizard = ({
         onStepNext={(mnemonicStage) => {
           mnemonicStage === 'writedown'
             ? sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
-            : sendAnalytics(postHogOnboardingActions.create.ENTER_WALLET);
+            : sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
