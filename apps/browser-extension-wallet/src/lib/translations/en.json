@@ -883,7 +883,11 @@
           "title": "Network",
           "description": "Switch from mainnet to testnet",
           "drawerDescription": "Select the network you would like your wallet to operate on.",
-          "networkSwitched": "Switched network"
+          "networkSwitched": "Switched network",
+          "usingCustomTxSubmitEndpoint": "Lace has switched to a custom TxSubmitApi endpoint",
+          "usingStandardTxSubmitEndpoint": "Lace has reverted to the default TxSubmitApi endpoint",
+          "changeTxSubmitEndpointInputLabel": "Custom TxSubmitApi endpoint",
+          "changeTxSubmitEndpointButtonText": "Set"
         },
         "authorizedDApps.title": "Authorized DApps",
         "authorizedDApps.description": "See and manage authorized DApps",

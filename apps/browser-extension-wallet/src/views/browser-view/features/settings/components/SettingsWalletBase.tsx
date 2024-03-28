@@ -18,6 +18,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import uniq from 'lodash/uniq';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
+import { CustomSubmitApiDrawer } from '@views/browser/features/settings/components/CustomSubmitApiDrawer';
 
 const { Title } = Typography;
 
@@ -26,7 +27,8 @@ export enum SettingsDrawer {
   collateral = 'collateral',
   dappList = 'dappList',
   general = 'general',
-  networkChoice = 'networkChoice'
+  networkChoice = 'networkChoice',
+  customSubmitApi = 'customSubmitApi'
 }
 
 export type SettingsSearchParams<AdditionalDrawers extends string> = {
@@ -108,9 +110,14 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const handleOpenGeneralSettingsDrawer = () =>
     handleOpenDrawer(SettingsDrawer.general, PostHogAction.SettingsYourKeysClick);
 
+  const handleOpenCustomSubmitApiDrawer = () =>
+    handleOpenDrawer(SettingsDrawer.customSubmitApi, PostHogAction.SettingsCustomSubmitApiClick);
+
   const handleCloseNetworkChoiceDrawer = () => handleCloseDrawer(PostHogAction.SettingsNetworkXClick);
 
   const handleCloseGeneralSettingsDrawer = () => handleCloseDrawer(PostHogAction.SettingsYourKeysShowPublicKeyXClick);
+
+  const handleCloseCustomSubmitApiDrawer = () => handleCloseDrawer(PostHogAction.SettingsCustomSubmitApiXClick);
 
   const handleSendAnalyticsEvent = (postHogEvent: PostHogAction) => analytics.sendEventToPostHog(postHogEvent);
 
@@ -153,6 +160,11 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         popupView={popupView}
         sendAnalyticsEvent={handleSendAnalyticsEvent}
       />
+      <CustomSubmitApiDrawer
+        visible={activeDrawer === SettingsDrawer.customSubmitApi}
+        onClose={handleCloseCustomSubmitApiDrawer}
+        popupView={popupView}
+      />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
@@ -186,6 +198,13 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
             </SettingsLink>
           </>
         )}
+        <SettingsLink
+          description="Send transactions through a local Cardano node and cardano-submit-api"
+          onClick={handleOpenCustomSubmitApiDrawer}
+          addon="Disabled"
+        >
+          Custom Submit API
+        </SettingsLink>
         {authorizedAppsEnabled && (
           <>
             <DappListDrawer

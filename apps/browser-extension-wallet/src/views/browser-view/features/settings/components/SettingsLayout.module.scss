@@ -520,3 +520,15 @@ h5 {
   display: grid;
   grid-template-columns: size_unit(5) 1fr;
 }
+
+.customApiContainer {
+  margin-top: size_unit(4);
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  grid-gap: size_unit(2);
+  align-items: center;
+
+  svg {
+    font-size: 18px;
+  }
+}

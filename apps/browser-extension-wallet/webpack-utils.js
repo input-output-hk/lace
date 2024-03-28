@@ -25,8 +25,8 @@ const transformManifest = (content, mode) => {
       .replace(
         '$LOCALHOST_CONNECT_SRC',
         mode === 'development'
-          ? 'http://localhost:3000 http://localhost:3001 http://localhost:8080 ws://localhost:3000 ws://0.0.0.0:3000/ws wss://localhost:3000  ws://localhost:3001 ws://0.0.0.0:3001/ws wss://localhost:3001'
-          : ''
+          ? 'http://localhost:3000 http://localhost:3001 http://localhost:8080 http://localhost:8090 ws://localhost:3000 ws://0.0.0.0:3000/ws wss://localhost:3000  ws://localhost:3001 ws://0.0.0.0:3001/ws wss://localhost:3001'
+          : 'http://localhost:8090'
       );
 
     if (process.env.LACE_EXTENSION_KEY) {
