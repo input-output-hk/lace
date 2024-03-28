@@ -1,13 +1,13 @@
 import { Skeleton } from 'antd';
 import dayjs from 'dayjs';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AssetTable, IRow, SendReceive } from '@lace/core';
 import { CONTENT_LAYOUT_ID } from '@components/Layout/ContentLayout';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { APP_MODE_POPUP, AppMode, LACE_APP_ID } from '@src/utils/constants';
 import { compactNumberWithUnit } from '@src/utils/format-number';
-import { FundWalletBanner, PortfolioBalance } from '@src/views/browser-view/components';
+import { EmptySearch, FundWalletBanner, PortfolioBalance } from '@src/views/browser-view/components';
 import { useCurrencyStore } from '@providers/currency';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
@@ -18,8 +18,11 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
 import { SendFlowTriggerPoints } from '../../../send-transaction';
+import { SearchBox } from '@lace/ui';
+import { IAssetDetails } from '@views/browser/features/assets/types';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
+const SEARCH_ASSET_LENGTH = 10;
 
 export interface AssetsPortfolioProps {
   appMode: AppMode;
@@ -34,6 +37,16 @@ export interface AssetsPortfolioProps {
   isBalanceLoading?: boolean;
   isLoadingFirstTime?: boolean;
 }
+
+const searchTokens = (data: IAssetDetails[] | IRow[], searchValue: string) => {
+  const fields = ['name', 'policyId', 'fingerprint']; // Fields to search
+  const lowerSearchValue = searchValue.toLowerCase();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data.filter((item: any) =>
+    fields.some((field) => field in item && item[field] && item[field].toLowerCase().includes(lowerSearchValue))
+  );
+};
 
 export const AssetsPortfolio = ({
   appMode,
@@ -55,6 +68,14 @@ export const AssetsPortfolio = ({
   const { fiatCurrency } = useCurrencyStore();
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [currentAssets, setCurrentAssets] = useState<{
+    data: IRow[];
+    total: number;
+  }>({
+    data: assetList,
+    total: totalAssets
+  });
 
   const isPopupView = appMode === APP_MODE_POPUP;
 
@@ -63,6 +84,13 @@ export const AssetsPortfolio = ({
     () => new BigNumber(portfolioTotalBalance).isNaN() || isBalanceLoading,
     [isBalanceLoading, portfolioTotalBalance]
   );
+
+  useEffect(() => {
+    setCurrentAssets({
+      data: searchValue ? currentAssets.data : assetList,
+      total: searchValue ? currentAssets.total : totalAssets
+    });
+  }, [assetList, currentAssets.data, currentAssets.total, searchValue, totalAssets]);
 
   const handleRedirectToReceive = () => {
     analytics.sendEventToPostHog(PostHogAction.ReceiveClick);
@@ -85,6 +113,12 @@ export const AssetsPortfolio = ({
     [coinPrice]
   );
 
+  const handleSearch = (value: string) => {
+    const filteredAssets = searchTokens(assetList, value);
+    setSearchValue(value);
+    setCurrentAssets({ data: filteredAssets, total: filteredAssets.length });
+  };
+
   return (
     <Skeleton loading={isLoadingFirstTime}>
       <SectionTitle
@@ -105,7 +139,7 @@ export const AssetsPortfolio = ({
           isBalanceVisible={areBalancesVisible || portfolioBalanceAsBigNumber.eq(0)}
         />
       </div>
-      {isPopupView && totalAssets > 0 && (
+      {isPopupView && currentAssets.total > 0 && (
         <SendReceive
           leftButtonOnClick={openSend}
           rightButtonOnClick={handleRedirectToReceive}
@@ -118,25 +152,38 @@ export const AssetsPortfolio = ({
           }}
         />
       )}
-      <Skeleton loading={isPortfolioBalanceLoading || !assetList}>
-        {portfolioBalanceAsBigNumber.gt(0) ? (
-          <AssetTable
-            rows={assetList}
-            onRowClick={onRowClick}
-            totalItems={totalAssets}
-            scrollableTargetId={isPopupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
-            onLoad={onTableScroll}
-            popupView={isPopupView}
-          />
-        ) : (
-          <FundWalletBanner
-            title={t('browserView.assets.welcome')}
-            subtitle={t('browserView.assets.startYourWeb3Journey')}
-            prompt={t('browserView.fundWalletBanner.prompt')}
-            walletAddress={walletInfo.addresses[0].address.toString()}
-          />
-        )}
-      </Skeleton>
+      {assetList?.length > SEARCH_ASSET_LENGTH && (
+        <SearchBox
+          placeholder={t('browserView.assets.searchPlaceholder')}
+          onChange={(text) => handleSearch(text)}
+          data-testid="assets-search-input"
+          value={searchValue}
+          onClear={() => setSearchValue('')}
+        />
+      )}
+      {currentAssets.total > 0 ? (
+        <Skeleton loading={isPortfolioBalanceLoading || !currentAssets.data}>
+          {portfolioBalanceAsBigNumber.gt(0) ? (
+            <AssetTable
+              rows={currentAssets.data}
+              onRowClick={onRowClick}
+              totalItems={currentAssets.total}
+              scrollableTargetId={isPopupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
+              onLoad={onTableScroll}
+              popupView={isPopupView}
+            />
+          ) : (
+            <FundWalletBanner
+              title={t('browserView.assets.welcome')}
+              subtitle={t('browserView.assets.startYourWeb3Journey')}
+              prompt={t('browserView.fundWalletBanner.prompt')}
+              walletAddress={walletInfo.addresses[0].address.toString()}
+            />
+          )}
+        </Skeleton>
+      ) : (
+        <EmptySearch text={t('browserView.assets.emptySearch')} />
+      )}
     </Skeleton>
   );
 };

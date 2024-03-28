@@ -8,3 +8,4 @@ export * from './SideMenu';
 export * from './WarningModal';
 export * from './SocialNetworks';
 export * from './WalletUsedAddressesDrawer';
+export * from './EmptySearch';
