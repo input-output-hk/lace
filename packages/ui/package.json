@@ -18,7 +18,7 @@
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
-    "cleanup": "yarn exec rm -rf node_modules",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "format": "yarn prettier --write '**/*.tsx'",
     "lint": "eslint .",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
