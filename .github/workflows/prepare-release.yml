@@ -20,3 +20,9 @@ jobs:
           CARDANO_SERVICES_URL_MAINNET: ${{ vars.CARDANO_SERVICES_URL_LIVE_MAINNET }}
           CARDANO_SERVICES_URL_PREPROD: ${{ vars.CARDANO_SERVICES_URL_LIVE_PREPROD }}
           CARDANO_SERVICES_URL_PREVIEW: ${{ vars.CARDANO_SERVICES_URL_LIVE_PREVIEW }}
+
+      - name: Upload build
+        uses: actions/upload-artifact@v3
+        with:
+          name: lightwallet
+          path: apps/browser-extension-wallet/dist
