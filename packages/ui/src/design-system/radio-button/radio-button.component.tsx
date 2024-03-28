@@ -11,7 +11,7 @@ import * as cx from './radio-button.css';
 export interface RadioButtonGroupOption {
   value: string;
   label: React.ReactNode;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: JSX.Element;
   onIconClick?: () => void;
   tooltipText?: string;
 }
@@ -60,6 +60,7 @@ export const RadioButtonGroup = ({
                   id={`radio-btn-control-id-${value}`}
                   value={value}
                   className={cx.radioGroupIndicatorWrapper}
+                  data-testid={`radio-btn-test-id-${value}`}
                 >
                   <RadixRadioGroup.Indicator
                     className={cx.radioGroupIndicator}
@@ -87,7 +88,7 @@ export const RadioButtonGroup = ({
                       onClick={onIconClick}
                       tabIndex={-1}
                     >
-                      <Icon />
+                      {Icon}
                     </button>
                   </Flex>
                 )}

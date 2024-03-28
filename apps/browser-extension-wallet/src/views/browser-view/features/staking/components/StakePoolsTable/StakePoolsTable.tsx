@@ -9,7 +9,8 @@ import {
   StakePoolsListRowSkeleton,
   StakePoolSortOptions,
   stakePoolTableConfig,
-  TranslationsFor
+  TranslationsFor,
+  getDefaultSortOrderByField
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search } from '@lace/common';
@@ -109,7 +110,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   };
 
   const onSortChange = (sortField: SortField) => {
-    const order = sortField === sort?.field && sort?.order === 'asc' ? 'desc' : 'asc';
+    const inverseOrder = sort?.order === 'asc' ? 'desc' : 'asc';
+    const order = sortField !== sort?.field ? getDefaultSortOrderByField(sortField) : inverseOrder;
 
     setSort({ field: sortField, order });
   };

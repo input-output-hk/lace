@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
+import { getDefaultSortOrderByField } from '../utils';
 import { config } from './config';
 
 export interface TableHeaders {
@@ -66,7 +67,8 @@ export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsLi
   }));
 
   const onSortChange = (field: SortField) => {
-    const order = field === activeSort?.field && activeSort?.order === 'asc' ? 'desc' : 'asc';
+    const inverseOrder = activeSort?.order === 'asc' ? 'desc' : 'asc';
+    const order = field !== activeSort?.field ? getDefaultSortOrderByField(field) : inverseOrder;
 
     analytics.sendEventToPostHog(analyticsActionsMap[field]);
     setActiveSort({ field, order });
