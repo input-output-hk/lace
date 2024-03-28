@@ -96,7 +96,6 @@ export const WalletSetupWizard = ({
 
   const walletSetupMnemonicStepTranslations = {
     writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
-    body: t('core.walletSetupMnemonicStepRevamp.body'),
     enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
     enterPassphraseDescription: t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription'),
     writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
@@ -104,9 +103,7 @@ export const WalletSetupWizard = ({
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
-    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
-    forgotPasswordTitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordTitle'),
-    forgotPasswordSubtitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordSubtitle')
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
   };
 
   const walletSetupModeStepTranslations = {
