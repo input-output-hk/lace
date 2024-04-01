@@ -96,8 +96,8 @@ class OnboardingMainPage extends CommonOnboardingElements {
     return $(this.AGREEMENT_PRIVACY_POLICY_LINK);
   }
 
-  async clickOnLegalLink(link: string, isMainPage = false): Promise<void> {
-    switch (link) {
+  async clickOnLegalLink(linkText: string, isMainPage = false): Promise<void> {
+    switch (linkText) {
       case 'Cookie policy':
         await this.cookiePolicyLink.click();
         break;
@@ -108,7 +108,7 @@ class OnboardingMainPage extends CommonOnboardingElements {
         isMainPage ? await this.agreementTermsOfServiceLink.click() : await this.termsOfServiceLink.click();
         break;
       default:
-        throw new Error(`Unsupported legal link - ${link}`);
+        throw new Error(`Unsupported legal link text - ${linkText}`);
     }
   }
 
