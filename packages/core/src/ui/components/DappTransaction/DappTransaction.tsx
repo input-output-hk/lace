@@ -30,6 +30,8 @@ export interface DappTransactionProps {
   /** tokens send to being sent to or from the user */
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
+  ownAddresses?: string[];
+  addressToNameMap?: Map<string, string>;
   collateral?: bigint;
 }
 
@@ -57,6 +59,7 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
 
     const addressAssets = value.assets;
     for (const [, asset] of addressAssets) {
+      // NFTs are unique, so there is only a supply of 1
       if (asset.assetInfo.supply === BigInt(1)) {
         group.nfts.push(asset);
       } else {
@@ -110,7 +113,9 @@ export const DappTransaction = ({
   fiatCurrencyCode,
   fiatCurrencyPrice,
   coinSymbol,
-  dappInfo
+  dappInfo,
+  ownAddresses = [],
+  addressToNameMap = new Map()
 }: DappTransactionProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -205,6 +210,8 @@ export const DappTransaction = ({
           groupedFromAddresses={groupedFromAddresses}
           groupedToAddresses={groupedToAddresses}
           coinSymbol={coinSymbol}
+          ownAddresses={ownAddresses}
+          addressToNameMap={addressToNameMap}
         />
       </div>
     </div>
