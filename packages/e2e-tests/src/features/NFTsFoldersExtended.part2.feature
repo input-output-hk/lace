@@ -80,7 +80,7 @@ Feature: NFT - Folders - Extended view
     And I click NFT with name "Ibilecoin"
     And I click NFT with name "Bison Coin"
     When I click "Add selected NFTs" button on "Select NFTs" page
-    Then I see a toast with text: "NFTs added to folder"
+    Then I see a toast with message: "NFTs added to folder"
     And I see "Sample NFT folder" NFT folder page in extended mode
     And I see NFT with name "Ibilecoin" on the NFT folder page
     And I see NFT with name "Bison Coin" on the NFT folder page
@@ -121,7 +121,7 @@ Feature: NFT - Folders - Extended view
     And I see NFT with name "LaceNFT" on the NFT folder page
     And I right click on the NFT with name "LaceNFT" on the NFT folder page
     When I click "Remove from folder" option in NFT context menu
-    Then I see a toast with text: "NFT removed"
+    Then I see a toast with message: "NFT removed"
     And I see NFT with name "Ibilecoin" on the NFT folder page
     And I do not see NFT with name "LaceNFT" on the NFT folder page
     And I close the drawer by clicking close button

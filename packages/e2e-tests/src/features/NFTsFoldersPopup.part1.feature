@@ -72,7 +72,7 @@ Feature: NFT - Folders - Popup view
     And I enter a folder name "new folder name" into "Folder name" input
     Then "Confirm" button is enabled on "Rename your folder" drawer
     When I click "Confirm" button in "Rename your folder" drawer
-    Then I see a toast with text: "Folder renamed successfully"
+    Then I see a toast with message: "Folder renamed successfully"
     And I do not see "Rename your folder" drawer in popup mode
     And A gallery view showing my NFTs is displayed
     And I see folder with name "new folder name" on the NFTs page
@@ -104,7 +104,7 @@ Feature: NFT - Folders - Popup view
     And I right click on the NFT folder with name "Sample NFT folder"
     When I click "Delete" option in NFT folder context menu
     When I click "Confirm" button in delete folder modal
-    Then I see a toast with text: "Folder deleted successfully"
+    Then I see a toast with message: "Folder deleted successfully"
     And I do not see delete folder modal
     And A gallery view showing my NFTs is displayed
     And I do not see folder with name "Sample NFT folder" on the NFTs page
@@ -222,7 +222,7 @@ Feature: NFT - Folders - Popup view
     And I click NFT with name "Ibilecoin"
     And I click NFT with name "Bison Coin"
     And I click "Next" button on "Select NFTs" page
-    Then I see a toast with text: "Folder created successfully"
+    Then I see a toast with message: "Folder created successfully"
     And I do not see "Select NFTs" page in popup mode
     And I see folder with name "Sample NFT folder" on the NFTs page
     When I left click on the NFT folder with name "Sample NFT folder"

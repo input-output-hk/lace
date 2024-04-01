@@ -64,7 +64,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then address form is filled with "shelley" address
     When I fill address form with "WalletName" name
     And I click "Save" button on "Add address" drawer in send flow
-    And I see a toast with text: "Address added"
+    And I see a toast with message: "Address added"
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu

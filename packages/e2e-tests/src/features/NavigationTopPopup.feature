@@ -23,7 +23,7 @@ Feature: Top Navigation - Popup view
     When I click the menu button
     Then the dropdown menu is visible
     When I click on the user details button
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with message: "Copied to clipboard"
 
   @LW-4599 @Testnet
   Scenario: Popup View - network id is visible for Testnet
@@ -73,7 +73,7 @@ Feature: Top Navigation - Popup view
     When I click the menu button
     And I click on the network option
     When I click on "Preview" radio button
-    Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I see a toast with message: "Switched network"
     And Lace is loaded properly
 
   @LW-6079 @Testnet @Mainnet
@@ -94,7 +94,7 @@ Feature: Top Navigation - Popup view
     Given I close wallet synced toast
     When I am in the offline network mode: true
     Then I see network id with status: offline
-    And I see a toast with message: "general.errors.networkError"
+    And I see a toast with message: "Network Error"
     When I click the menu button
     Then wallet sync status component is visible
     And sync status displays "Not synced to the blockchain" state

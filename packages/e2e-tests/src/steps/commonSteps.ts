@@ -39,6 +39,7 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import toastMessage from '../elements/toastMessage';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -124,8 +125,10 @@ Then(
 
 Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
   await settingsExtendedPageObject.closeWalletSyncedToast();
-  await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
-  if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+  await ToastMessageAssert.assertSeeToastMessage(toastText, shouldSee === 'see');
+  shouldSee ?? (await toastMessage.clickCloseButton());
+  await ToastMessageAssert.assertSeeToastMessage(toastText, false);
+  if (toastText === 'Copied to clipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
 });
 
 Then(/^I don't see any toast message$/, async () => {

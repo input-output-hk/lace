@@ -34,7 +34,7 @@ Feature: Send Simple Transactions - Popup view - E2E
   Scenario: Popup-view - Self Transaction E2E
     And I click "Receive" button on Tokens page in popup mode
     And I click "Copy" button on "Receive" page for default wallet address
-    Then I see a toast with message: "core.infoWallet.addressCopied"
+    Then I see a toast with message: "Address copied"
     And I close the drawer by clicking close button
     And I click "Send" button on Tokens page in popup mode
     And I fill bundle 1 with "CopiedAddress" address with following assets:
@@ -60,7 +60,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     When I click "View transaction" button on submitted transaction page
     And I click on a transaction: 1
     And I click on a transaction hash
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with message: "Copied to clipboard"
     And I see 1 opened tab(s)
     When I wait for the transaction history to be loaded and all transactions to be confirmed
     And I click on a transaction hash and save hash information
