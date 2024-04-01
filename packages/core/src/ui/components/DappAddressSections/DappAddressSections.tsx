@@ -1,8 +1,8 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import React from 'react';
-import { truncate, addEllipsis } from '@lace/common';
+import { addEllipsis, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
-import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
+import { AssetInfoWithAmount, Cardano } from '@cardano-sdk/core';
 import { Typography } from 'antd';
 
 import styles from './DappAddressSections.module.scss';
