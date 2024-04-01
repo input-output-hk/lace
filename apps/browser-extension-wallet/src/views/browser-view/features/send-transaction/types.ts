@@ -37,6 +37,7 @@ export interface BuiltTxData {
     outputs: Set<Wallet.Cardano.TxOut & { handleResolution?: HandleResolution }>;
     fee: Wallet.Cardano.Lovelace;
     handleResolutions?: HandleResolution[];
+    validityInterval?: Wallet.Cardano.ValidityInterval;
   };
   error?: string;
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];

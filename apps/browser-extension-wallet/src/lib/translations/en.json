@@ -1568,7 +1568,11 @@
       "txFee": "Transaction fee",
       "metaData": "Metadata",
       "deposit": "Deposit",
-      "output": "Bundle"
+      "output": "Bundle",
+      "expiresBy": "Expires by",
+      "expiresByTooltip": "This transaction can be added to the blockchain until the specified time. After this, it will automatically expire and no longer be valid.",
+      "noLimit": "No limit",
+      "utc": "UTC"
     },
     "sendReceive": {
       "send": "Send",

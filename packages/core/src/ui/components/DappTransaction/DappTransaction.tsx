@@ -11,7 +11,7 @@ import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
-import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
+import { TransactionType, DappTransactionSummary, TransactionAssets, DappTransactionTextField, Flex } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
@@ -27,6 +27,7 @@ export interface DappTransactionProps {
   fiatCurrencyCode?: string;
   fiatCurrencyPrice?: number;
   coinSymbol?: string;
+  expiresBy?: { utcDate: string; utcTime: string };
   /** tokens send to being sent to or from the user */
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
@@ -110,7 +111,8 @@ export const DappTransaction = ({
   fiatCurrencyCode,
   fiatCurrencyPrice,
   coinSymbol,
-  dappInfo
+  dappInfo,
+  expiresBy
 }: DappTransactionProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -119,6 +121,17 @@ export const DappTransaction = ({
 
   const isFromAddressesEnabled = groupedFromAddresses.size > 0;
   const isToAddressesEnabled = groupedToAddresses.size > 0;
+
+  const expireByText = expiresBy ? (
+    <Flex flexDirection="column" alignItems="flex-end">
+      <span>{expiresBy.utcDate}</span>
+      <span>
+        {expiresBy.utcTime} {t('core.outputSummaryList.utc')}
+      </span>
+    </Flex>
+  ) : (
+    t('core.outputSummaryList.noLimit')
+  );
 
   return (
     <div>
@@ -161,6 +174,14 @@ export const DappTransaction = ({
             displayFiat={false}
           />
         )}
+
+        <div className={styles.depositContainer}>
+          <DappTransactionTextField
+            text={expireByText}
+            label={t('core.outputSummaryList.expiresBy')}
+            tooltip={t('core.outputSummaryList.expiresByTooltip')}
+          />
+        </div>
 
         {returnedDeposit !== BigInt(0) && (
           <TransactionFee

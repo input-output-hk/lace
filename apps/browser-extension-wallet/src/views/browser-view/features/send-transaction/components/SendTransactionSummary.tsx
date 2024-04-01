@@ -17,6 +17,7 @@ import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers'
 import { useObservable, Banner } from '@lace/common';
 import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 const { Text } = Typography;
 
@@ -98,7 +99,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
+    const { builtTxData: { uiTx: { fee, outputs, validityInterval } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
     const {
       inMemoryWallet,
@@ -113,6 +114,7 @@ export const SendTransactionSummary = withAddressBookContext(
     const { fiatCurrency } = useCurrencyStore();
 
     const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+    const eraSummaries = useObservable(inMemoryWallet.eraSummaries$);
 
     const outputSummaryListTranslation = {
       recipientAddress: t('core.outputSummaryList.recipientAddress'),
@@ -120,7 +122,11 @@ export const SendTransactionSummary = withAddressBookContext(
       output: t('core.outputSummaryList.output'),
       metadata: t('core.outputSummaryList.metaData'),
       deposit: t('core.outputSummaryList.deposit'),
-      txFee: t('core.outputSummaryList.txFee')
+      txFee: t('core.outputSummaryList.txFee'),
+      expiresBy: t('core.outputSummaryList.expiresBy'),
+      expiresByTooltip: t('core.outputSummaryList.expiresByTooltip'),
+      noLimit: t('core.outputSummaryList.noLimit'),
+      utc: t('core.outputSummaryList.utc')
     };
 
     const addressToNameMap = useMemo(
@@ -140,6 +146,7 @@ export const SendTransactionSummary = withAddressBookContext(
       <>
         <OutputSummaryList
           rows={rows as OutputSummaryProps[]}
+          expiresBy={eraSlotDateTime(eraSummaries, validityInterval?.invalidHereafter)}
           txFee={{
             ...getFee(fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
             tootipText: t('send.theAmountYoullBeChargedToProcessYourTransaction')

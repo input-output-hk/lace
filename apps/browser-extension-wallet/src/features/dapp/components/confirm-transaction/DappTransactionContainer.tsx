@@ -28,6 +28,7 @@ import { useCurrencyStore, useAppSettingsContext } from '@providers';
 import { logger, signingCoordinator } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 interface DappTransactionContainerProps {
   errorMessage?: string;
@@ -106,6 +107,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
     const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
     const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+    const eraSummaries = useObservable(inMemoryWallet?.eraSummaries$);
 
     useEffect(() => {
       if (!req || !protocolParameters) {
@@ -175,6 +177,7 @@ export const DappTransactionContainer = withAddressBookContext(
             errorMessage={errorMessage}
             toAddress={toAddressTokens}
             collateral={txCollateral}
+            expiresBy={eraSlotDateTime(eraSummaries, tx.body.validityInterval?.invalidHereafter)}
           />
         ) : (
           <Skeleton loading />

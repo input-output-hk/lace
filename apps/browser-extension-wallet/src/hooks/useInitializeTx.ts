@@ -85,7 +85,8 @@ export const useInitializeTx = (
             fee: inspection.inputSelection.fee,
             hash: inspection.hash,
             outputs: inspection.inputSelection.outputs,
-            handleResolutions: inspection.handleResolutions
+            handleResolutions: inspection.handleResolutions,
+            validityInterval: inspection.body.validityInterval
           },
           tx,
           totalMinimumCoins,

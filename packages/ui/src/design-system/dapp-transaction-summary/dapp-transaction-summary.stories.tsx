@@ -13,6 +13,7 @@ import { Grid, Cell } from '../grid';
 
 import { TransactionAssets } from './dapp-transaction-assets.component';
 import { TransactionSummary } from './dapp-transaction-summary.component';
+import { TransactionTextField } from './dapp-transaction-text-field.component';
 import { TransactionType } from './dapp-transaction-type.component';
 
 const subtitle = `Control that displays data items in rows.`;
@@ -82,6 +83,13 @@ const Example = (): JSX.Element => (
         tokenName={value.tokenName}
       />
     ))}
+    <Box mt="$10">
+      <TransactionTextField
+        tooltip="This is a sample tooltip text"
+        label="Expires by"
+        text="No limit"
+      />
+    </Box>
   </Layout>
 );
 
@@ -104,6 +112,9 @@ const MainComponents = (): JSX.Element => (
             />
           ))}
         </>
+        <Box mt="$10">
+          <TransactionTextField label="Expires by" text="No limit" />
+        </Box>
       </Layout>
     </Variants.Cell>
   </Variants.Row>
