@@ -12,9 +12,24 @@
 }
 
 .scroll {
+  overflow: auto;
   height: 200px;
-  width: 100%;
+  padding: 0 4px;
   color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
+}
+.scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+  border-radius: 6px;
+  background: transparent;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef)); 
 }
 
 .track {
