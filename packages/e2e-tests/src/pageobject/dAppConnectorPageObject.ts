@@ -14,6 +14,7 @@ import NoWalletModal from '../elements/dappConnector/noWalletModal';
 import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
 import { Logger } from '../support/logger';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
+import { getTextFromElementArray } from '../utils/getTextFromArray';
 
 class DAppConnectorPageObject {
   TEST_DAPP_URL = this.getTestDAppUrl();
@@ -51,11 +52,40 @@ class DAppConnectorPageObject {
     await browser.switchWindow(this.TEST_DAPP_NAME);
   }
 
+  async expandSectionInDappTransactionWindow(section: 'Origin' | 'From address' | 'To address') {
+    await ConfirmTransactionPage.transactionOriginSectionExpanderButton.waitForDisplayed();
+    await browser.pause(1000);
+    switch (section) {
+      case 'Origin':
+        await ConfirmTransactionPage.transactionOriginSectionExpanderButton.click();
+        break;
+      case 'From address':
+        await ConfirmTransactionPage.transactionFromSectionExpanderButton.click();
+        break;
+      case 'To address':
+        await ConfirmTransactionPage.transactionToSectionExpanderButton.scrollIntoView();
+        await ConfirmTransactionPage.transactionToSectionExpanderButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported section name: ${section}`);
+    }
+  }
+
   async clickButtonInDAppAuthorizationWindow(button: 'Authorize' | 'Cancel') {
     await AuthorizeDappPage.authorizeButton.waitForDisplayed();
     button === 'Authorize'
       ? await AuthorizeDappPage.authorizeButton.click()
       : await AuthorizeDappPage.cancelButton.click();
+  }
+
+  async getTransactionToAssetsRows() {
+    const textArray = await getTextFromElementArray(await ConfirmTransactionPage.transactionToAssetsRows);
+    return textArray.map((str) => str.replace(/\n/g, ' '));
+  }
+
+  async getTransactionFromAssetsRows() {
+    const textArray = await getTextFromElementArray(await ConfirmTransactionPage.transactionFromAssetsRows);
+    return textArray.map((str) => str.replace(/\n/g, ' '));
   }
 
   async clickButtonInDAppAuthorizationModal(button: 'Always' | 'Only once') {

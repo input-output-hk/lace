@@ -17,6 +17,7 @@ export interface Props {
   displayFiat?: boolean;
   className?: string;
   status?: CollateralStatus;
+  testId?: string;
 }
 
 export const Collateral = ({
@@ -25,6 +26,7 @@ export const Collateral = ({
   coinSymbol,
   displayFiat,
   className,
+  testId,
   status = CollateralStatus.REVIEW
 }: Props): React.ReactElement => {
   const { t } = useTranslate();
@@ -50,6 +52,7 @@ export const Collateral = ({
         tooltip={getTooltipText()}
         displayFiat={displayFiat}
         className={className}
+        data-testid={testId ?? 'collateral'}
       />
       {status === CollateralStatus.ERROR && (
         <Box mt="$32">

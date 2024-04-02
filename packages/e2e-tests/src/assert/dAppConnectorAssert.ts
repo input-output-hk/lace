@@ -19,6 +19,8 @@ import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 import ErrorDAppModal from '../elements/dappConnector/errorDAppModal';
+import { getTextFromElementArray } from '../utils/getTextFromArray';
+import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -28,9 +30,7 @@ export type ExpectedDAppDetails = {
 
 export type ExpectedTransactionData = {
   typeOfTransaction: string;
-  amountADA: number;
-  amountAsset?: string;
-  recipientAddress: string;
+  assetsDetails: string[];
 };
 
 class DAppConnectorAssert {
@@ -40,15 +40,27 @@ class DAppConnectorAssert {
     await commonDappPageElements.betaPill.waitForDisplayed();
     expect(await commonDappPageElements.betaPill.getText()).to.equal(await t('core.dapp.beta'));
   }
+  async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
+    const currentDAppUrl = new URL(expectedDappDetails.url);
+    const commonDappPageElements = new CommonDappPageElements();
+    await commonDappPageElements.pageTitle.waitForDisplayed();
+    expect(await commonDappPageElements.pageTitle.getText()).to.equal(await t(expectedTitleKey));
+    await commonDappPageElements.dAppLogo.waitForDisplayed({ reverse: !expectedDappDetails.hasLogo });
+    await commonDappPageElements.dAppName.waitForDisplayed();
+    expect(await commonDappPageElements.dAppName.getText()).to.equal(expectedDappDetails.name);
+    await commonDappPageElements.dAppUrl.waitForDisplayed();
+    const expectedUrl = `${currentDAppUrl.protocol}//${currentDAppUrl.host}`;
+    expect(await commonDappPageElements.dAppUrl.getText()).to.equal(expectedUrl);
+  }
 
-  async assertSeeAuthorizeDAppPage() {
+  async assertSeeAuthorizeDAppPage(expectedDappDetails: ExpectedDAppDetails) {
     await this.assertSeeHeader();
+    await this.assertSeeTitleAndDappDetails('dapp.connect.header', expectedDappDetails);
     await AuthorizeDAppPage.banner.container.waitForDisplayed();
     await AuthorizeDAppPage.banner.icon.waitForDisplayed();
     await AuthorizeDAppPage.banner.description.waitForDisplayed();
     expect(await AuthorizeDAppPage.banner.description.getText()).to.equal(await t('core.authorizeDapp.warning'));
     await this.assertSeeAuthorizePagePermissions();
-
     await AuthorizeDAppPage.authorizeButton.waitForDisplayed();
     expect(await AuthorizeDAppPage.authorizeButton.getText()).to.equal(await t('dapp.connect.btn.accept'));
     await AuthorizeDAppPage.cancelButton.waitForDisplayed();
@@ -259,31 +271,54 @@ class DAppConnectorAssert {
     }
   }
 
-  async assertSeeConfirmTransactionPage(expectedTransactionData: ExpectedTransactionData) {
+  async assertSeeConfirmTransactionPage({ assetsDetails, typeOfTransaction }: ExpectedTransactionData) {
     await this.assertSeeHeader();
     await ConfirmTransactionPage.transactionTypeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionTypeTitle.getText()).to.equal(
       await t('package.core.dappTransaction.transaction')
     );
     await ConfirmTransactionPage.transactionType.waitForDisplayed();
-    expect(await ConfirmTransactionPage.transactionType.getText()).to.equal(expectedTransactionData.typeOfTransaction);
+    expect(await ConfirmTransactionPage.transactionType.getText()).to.equal(typeOfTransaction);
 
+    await ConfirmTransactionPage.transactionOriginSectionExpanderButton.waitForDisplayed();
+    await ConfirmTransactionPage.transactionOriginLabel.waitForDisplayed();
+    expect(await ConfirmTransactionPage.transactionOriginLabel.getText()).to.equal(
+      await t('package.core.dappTransaction.origin')
+    );
+    await DAppConnectorPageObject.expandSectionInDappTransactionWindow('Origin');
+    expect(await ConfirmTransactionPage.transactionOrigin.getText()).to.equal(DAppConnectorPageObject.TEST_DAPP_NAME);
     await ConfirmTransactionPage.transactionFeeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionFeeTitle.getText()).to.equal(
       await t('package.core.activityDetails.transactionFee', 'core')
     );
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
-    const fee = Number((await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ')[0]);
 
-    await ConfirmTransactionPage.transactionAmountValue.waitForDisplayed();
-    const totalAdaAmount = (expectedTransactionData.amountADA - fee).toFixed(2);
-    expect(await ConfirmTransactionPage.transactionAmountValue.getText()).to.equal(`${totalAdaAmount} tADA`);
+    const adjustedAssetsList = await this.adjustAssetList(assetsDetails);
+    expect(await getTextFromElementArray(await ConfirmTransactionPage.transactionSummaryAssetsRows)).to.deep.equal(
+      adjustedAssetsList
+    );
+
+    await ConfirmTransactionPage.transactionFromSectionExpanderButton.waitForDisplayed();
+    expect(await ConfirmTransactionPage.transactionFromSectionExpanderLabel.getText()).to.equal(
+      await t('package.core.dappTransaction.fromAddress')
+    );
+    await ConfirmTransactionPage.transactionToSectionExpanderButton.waitForDisplayed();
+    expect(await ConfirmTransactionPage.transactionToSectionExpanderLabel.getText()).to.equal(
+      await t('package.core.dappTransaction.toAddress')
+    );
 
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
 
     await ConfirmTransactionPage.cancelButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.cancelButton.getText()).to.equal(await t('dapp.confirm.btn.cancel'));
+  }
+
+  async assertSeeConfirmFromAddressTransactionPage(section: 'To address' | 'From address', assets: string[]) {
+    const adjustedAssetsList = await this.adjustAssetList(assets);
+    section === 'To address'
+      ? expect(await DAppConnectorPageObject.getTransactionToAssetsRows()).to.deep.equal(adjustedAssetsList)
+      : expect(await DAppConnectorPageObject.getTransactionFromAssetsRows()).to.deep.equal(adjustedAssetsList);
   }
 
   async assertSeeSignTransactionPage() {
@@ -345,6 +380,30 @@ class DAppConnectorAssert {
     const enable = await browser.execute(() => window.cardano.lace.enable());
     expect(enable).not.to.be.empty;
   }
+
+  adjustAssetList = async (assetsList: string[]) =>
+    await Promise.all(
+      assetsList.map(async (asset) => {
+        if (asset.includes('- FEE')) {
+          return await this.subtractFee(asset);
+        } else if (asset.includes('Address')) {
+          return this.shortenAddress(asset);
+        }
+        return asset;
+      })
+    );
+  subtractFee = async (entry: string) => {
+    const fee = Number((await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ')[0]);
+    const [amount, currency] = entry.split(' ');
+    const amountIncludingFee = (Number(amount) - fee).toFixed(2);
+    return `${amountIncludingFee} ${currency}`;
+  };
+
+  shortenAddress = (wallet: string) => {
+    const [addressLabel, walletValue] = wallet.split(' ');
+    const fullAddress = String(getTestWallet(walletValue).address);
+    return `${addressLabel} ${fullAddress.slice(0, 8)}...${fullAddress.slice(-8)}`;
+  };
 }
 
 export default new DAppConnectorAssert();

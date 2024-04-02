@@ -126,6 +126,7 @@ export const DappTransaction = ({
       <div data-testid="dapp-transaction-container" className={styles.details}>
         <DappTransactionHeader transactionType={getTxType(coins)} name={dappInfo.name} />
         <DappTransactionSummary
+          testId="dapp-transaction-summary-row"
           title={t('package.core.dappTransaction.transactionSummary')}
           cardanoSymbol={coinSymbol}
           transactionAmount={Wallet.util.lovelacesToAdaString(coins.toString())}
@@ -138,7 +139,7 @@ export const DappTransaction = ({
               undefined;
             return (
               <TransactionAssets
-                testId="dapp-transaction-amount-value"
+                testId="dapp-transaction-summary-row"
                 key={key}
                 imageSrc={imageSrc}
                 balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
@@ -151,6 +152,7 @@ export const DappTransaction = ({
 
         {collateral !== undefined && collateral !== BigInt(0) && (
           <Collateral
+            testId="collateral"
             collateral={Wallet.util.lovelacesToAdaString(collateral.toString())}
             amountTransformer={amountTransformer({
               price: fiatCurrencyPrice,
