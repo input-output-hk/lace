@@ -26,7 +26,7 @@ Feature: Analytics - PostHog - Staking - Extended View
     Then I validate latest analytics single event "staking | browse pools | ticker | click"
     When I click on stake pools table "Saturation" column header
     Then I validate latest analytics single event "staking | browse pools | saturation | click"
-    # TODO: Uncomment when LW-9827 is resolved
+    # TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
     # When I click on stake pools table "ROS" column header
     # Then I validate latest analytics single event "staking | browse pools | ros | click"
     When I click on stake pools table "Cost" column header
@@ -49,7 +49,7 @@ Feature: Analytics - PostHog - Staking - Extended View
     And I set up request interception for posthog analytics request(s)
     When I select "Saturation" sorting option from "More options" component
     Then I validate latest analytics single event "staking | browse pools | more options sorting | saturation | click"
-    # TODO: Uncomment when LW-9827 is resolved
+    # TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
     # When I select "ROS" sorting option from "More options" component
     # Then I validate latest analytics single event "staking | browse pools | more options sorting | ros | click"
     When I select "Cost" sorting option from "More options" component
