@@ -22,7 +22,7 @@ import { SearchBox } from '@lace/ui';
 import { IAssetDetails } from '@views/browser/features/assets/types';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
-const SEARCH_ASSET_LENGTH = 10;
+const MIN_ASSETS_COUNT_FOR_SEARCH = 10;
 
 export interface AssetsPortfolioProps {
   appMode: AppMode;
@@ -38,16 +38,16 @@ export interface AssetsPortfolioProps {
   isLoadingFirstTime?: boolean;
 }
 
-const searchTokens = (data: IAssetDetails[] | IRow[], searchValue: string) => {
-  const fields = ['name', 'policyId', 'fingerprint']; // Fields to search
+const searchTokens = (data: IAssetDetails[], searchValue: string) => {
+  const fields = ['name', 'policyId', 'fingerprint'] as const;
   const lowerSearchValue = searchValue.toLowerCase();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return data.filter((item: any) =>
+  return data.filter((item) =>
     fields.some((field) => field in item && item[field] && item[field].toLowerCase().includes(lowerSearchValue))
   );
 };
 
+// eslint-disable-next-line complexity
 export const AssetsPortfolio = ({
   appMode,
   assetList,
@@ -152,18 +152,27 @@ export const AssetsPortfolio = ({
           }}
         />
       )}
-      {assetList?.length > SEARCH_ASSET_LENGTH && (
+      {assetList?.length > MIN_ASSETS_COUNT_FOR_SEARCH && (
         <SearchBox
           placeholder={t('browserView.assets.searchPlaceholder')}
-          onChange={(text) => handleSearch(text)}
+          onChange={handleSearch}
           data-testid="assets-search-input"
           value={searchValue}
           onClear={() => setSearchValue('')}
         />
       )}
-      {currentAssets.total > 0 ? (
+      {searchValue && currentAssets.total === 0 && <EmptySearch text={t('browserView.assets.emptySearch')} />}
+      {!searchValue && currentAssets.total === 0 && (
+        <FundWalletBanner
+          title={t('browserView.assets.welcome')}
+          subtitle={t('browserView.assets.startYourWeb3Journey')}
+          prompt={t('browserView.fundWalletBanner.prompt')}
+          walletAddress={walletInfo.addresses[0].address.toString()}
+        />
+      )}
+      {
         <Skeleton loading={isPortfolioBalanceLoading || !currentAssets.data}>
-          {portfolioBalanceAsBigNumber.gt(0) ? (
+          {currentAssets.total > 0 && (
             <AssetTable
               rows={currentAssets.data}
               onRowClick={onRowClick}
@@ -172,18 +181,9 @@ export const AssetsPortfolio = ({
               onLoad={onTableScroll}
               popupView={isPopupView}
             />
-          ) : (
-            <FundWalletBanner
-              title={t('browserView.assets.welcome')}
-              subtitle={t('browserView.assets.startYourWeb3Journey')}
-              prompt={t('browserView.fundWalletBanner.prompt')}
-              walletAddress={walletInfo.addresses[0].address.toString()}
-            />
           )}
         </Skeleton>
-      ) : (
-        <EmptySearch text={t('browserView.assets.emptySearch')} />
-      )}
+      }
     </Skeleton>
   );
 };
