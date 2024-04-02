@@ -403,7 +403,12 @@ export const TransactionDetails = ({
           )}
           {fee && fee !== '-' && (
             <Box mb="$32" data-testid="tx-fee">
-              <TransactionFee fee={fee} amountTransformer={amountTransformer} coinSymbol={coinSymbol} />
+              <TransactionFee
+                tooltipInfo={t('package.core.activityDetails.transactionFeeInfo')}
+                fee={fee}
+                amountTransformer={amountTransformer}
+                coinSymbol={coinSymbol}
+              />
             </Box>
           )}
           {deposit && renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}
