@@ -37,7 +37,7 @@ When(/^I see address card for handle: "([^"]*)"$/, async (handleName: string) =>
 When(
   /^I validate that handle: "([^"]*)" (is|is not) listed on the Receive screen$/,
   async (handleName: string, shouldBeListed: 'is' | 'is not') => {
-    await MenuHeader.receiveButton.waitForDisplayed();
+    await MenuHeader.receiveButton.waitForClickable();
     await MenuHeader.receiveButton.click();
     await walletAddressPageAssert.assertSeeAdaHandleAddressCardWithName(handleName, shouldBeListed === 'is');
     await walletAddressPage.clickCloseDrawerButton();
@@ -63,6 +63,7 @@ Then(/^I see a toast with text: "(Handle|Address) copied"$/, async (action: stri
 
   await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
   await ToastMessage.clickCloseButton();
+  await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), false);
 });
 
 Then(/^I see ADA handle with custom image on the "Wallet Address" page$/, async () => {

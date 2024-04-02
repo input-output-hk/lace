@@ -77,6 +77,7 @@ class TopNavigationAssert {
 
   async assertWalletIsInSyncedStatus() {
     await settingsExtendedPageObject.waitUntilHdWalletSynced();
+    await settingsExtendedPageObject.multiAddressModalConfirm();
     await this.assertLogoPresent();
     await MenuHeader.menuButton.waitForDisplayed();
     await MenuHeader.menuButton.click();
@@ -174,7 +175,7 @@ class TopNavigationAssert {
   }
 
   async assertSeeWalletName(expectedWalletName: string) {
-    await MenuHeader.menuWalletName.waitForDisplayed();
+    await MenuHeader.menuWalletName.waitForStable();
     expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
   }
 

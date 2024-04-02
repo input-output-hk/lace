@@ -86,7 +86,7 @@ export const SendTransactionLayout = withAddressBookContext(
               }
             : {})
         }),
-      [setIsDrawerVisible, onClose, isPopupView, currentSection, shouldAssetPickerDisplayFooter, setSection]
+      [setIsDrawerVisible, onClose, isPopupView, currentSection, shouldAssetPickerDisplayFooter, setSection] // eslint-disable-line react-hooks/exhaustive-deps
     );
 
     useEffect(() => changeOnCloseDrawer(), [changeOnCloseDrawer]);

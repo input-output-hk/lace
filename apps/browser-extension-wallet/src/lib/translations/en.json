@@ -88,8 +88,14 @@
       "multipleAddresses": "Multiple addresses",
       "pools": "Pool(s)",
       "epoch": "Epoch",
-      "collateral": "Collateral",
-      "collateralInfo": "Amount set as collateral to cover contract execution failure. In case of no failure collateral remains unspent."
+      "collateral": {
+        "label": "Collateral",
+        "tooltip": {
+          "info": "Amount set as collateral to cover contract execution failure. In case of no failure collateral remains unspent.",
+          "success": "Amount set as collateral. Since this Tx was successful collateral was not used"
+        },
+        "error": "Since the transaction was unsuccessful, collateral has been used to cover the costs incurred from the contract execution failure."
+      }
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",
@@ -100,8 +106,12 @@
       "confirmPasswordInputLabel": "Confirm password",
       "nameRequiredMessage": "Wallet name is required",
       "noMatchPassword": "Oops! The passwords don't match.",
+      "enterWallet": "Enter wallet",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
-      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger.",
+      "forgotPasswordTitle": "Set up your new password",
+      "forgotPasswordSubtitle": "You'll use this to log into your wallet and make transactions.",
+      "next": "Next"
     },
     "dappTransaction": {
       "asset": "Asset",
@@ -113,7 +123,16 @@
       "recipient": "Recipient",
       "send": "Send",
       "sending": "Sending",
-      "transaction": "Transaction"
+      "transaction": "Transaction",
+      "transactionSummary": "Transaction Summary",
+      "origin": "Origin",
+      "fromAddress": "From address",
+      "toAddress": "To address",
+      "deposit": "Deposit",
+      "returnedDeposit": "Returned deposit",
+      "address": "Address",
+      "nfts": "NFTs",
+      "tokens": "Tokens"
     }
   },
   "tab.main.title": "Tab extension",
@@ -402,13 +421,6 @@
     "noWallet.description": "You'll need to create or restore a wallet to connect to a dApp or make a transaction.",
     "noWallet.closeButton": "Create or restore a wallet",
     "educationBanner.title": "DApp Guide",
-    "betaModal": {
-      "header": "DApp connector is now in Beta",
-      "content.1": "This feature is now available in Lace but we're still ironing out the kinks, so you may have issues connecting to a DApp or signing transactions.",
-      "content.2": "Please bear with us while we work on improving your experience.",
-      "btn.close": "Got it",
-      "btn.learnMore": "Learn more"
-    },
     "transactions.confirm.title": "Confirm transaction",
     "collateral.set.header": "Set Collateral",
     "collateral.create.header": "Create Collateral",
@@ -443,6 +455,11 @@
           "button": "Connect"
         }
       }
+    },
+    "multiAddressWallet.modal": {
+      "title": "Multi-address wallet balance is now visible!",
+      "content": "Lace supports multi-address wallets created by other applications, so now, you can see and spend tokens that are not owned by the displayed address. We just discovered and restored all your addresses. Moving forward, you may sync new addresses of your HD wallet from Settings",
+      "confirm": "Got it"
     },
     "welcome": "Welcome!",
     "addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
@@ -491,9 +508,6 @@
     "walletSetup.mnemonicResetModal.content": "In order to keep you safe, we'll show you a new set of 24 words.",
     "walletSetup.mnemonicResetModal.cancel": "Cancel",
     "walletSetup.mnemonicResetModal.confirm": "OK",
-    "walletSetup.confirmRestoreModal.header": "Multi-address wallet balance is now visible!",
-    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of addresses when you restore your wallet.",
-    "walletSetup.confirmRestoreModal.confirm": "OK",
     "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
     "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
     "walletSetup.confirmExperimentalHwDapp.confirm": "OK",
@@ -1191,6 +1205,10 @@
       "registered": "Registered"
     }
   },
+  "analyticsConfirmationBanner": {
+    "message": "Help us improve the quality and performance of Lace by sharing analytics data from your browser.",
+    "learnMore": "Learn more"
+  },
   "core": {
     "general": {
       "saveButton": "Save",
@@ -1565,22 +1583,14 @@
     "walletBasicInfo": {
       "balance": "Balance"
     },
-    "walletSetupLegalStep": {
-      "title": "Lace Terms of Use",
-      "toolTipText": "Please read and accept the terms"
-    },
-    "walletSetupAnalyticsStep": {
-      "title": "Give us a hand to improve your experience",
-      "description": "By sharing analytics data from your browser, you can help us improve the quality and performance of Lace. For more information on our privacy practices, please see our",
-      "back": "Back",
-      "agree": "Agree",
-      "optionsTitle": "Lace will:",
-      "optionsFooter1": "For more information on our privacy practices, please see our",
-      "privacyPolicy": "Privacy Policy.",
-      "allowOptout": "Only collect pseudonymous analytics info",
-      "collectPrivateKeys": "Not access your private keys",
-      "collectIp": "Not record your IP address",
-      "personalData": "Not sell your personal data"
+    "walletAnalyticsInfo": {
+      "title": "Help us improve your experience",
+      "description": "Please opt in to share your data with us. We'll collect anonymous analytics info from your browser extension to\n        help us improve the quality and performance of Lace.",
+      "gotIt": "Got it",
+      "allowOptout": "Always allow you to opt-out via Settings",
+      "collectPrivateKeys": "Never collect private keys",
+      "collectIp": "Never collect your IP address",
+      "personalData": "Never sell your personal data"
     },
     "walletSetupConnectHardwareWalletStep": {
       "title": "Connect hardware wallet",
@@ -1591,20 +1601,8 @@
       "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue.",
       "connectDeviceFull": "Just connect your device to your computer and unlock it to continue. If you're using a Ledger device, make sure you open the Cardano App."
     },
-    "walletSetupCreateStep": {
-      "title": "Creating your wallet",
-      "description": "Your Lace wallet will be all set up in a few seconds."
-    },
     "walletSetupRestoreStep": {
       "title": "Restoring your wallet"
-    },
-    "walletSetupFinalStep": {
-      "title": "Hurray! All done :)",
-      "description": "It's time to start your Web3 journey. Plus you can follow us to stay up to date on all our latest news and content.",
-      "close": "Go to my wallet",
-      "followTwitter": "Follow us on Twitter",
-      "followYoutube": "Follow us on Youtube",
-      "followDiscord": "Join us on Discord"
     },
     "walletSetupMnemonicStep": {
       "writePassphrase": "Write down your secret passphrase",
@@ -1616,16 +1614,36 @@
       "passphraseInfo3": "Find out more.",
       "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
     },
+    "walletSetupMnemonicStepRevamp": {
+      "writePassphraseTitle": "Start by saving your recovery phrase",
+      "enterPassphrase": "Enter your recovery passphrase",
+      "enterPassphraseLength": "Choose recovery phrase length",
+      "enterPassphraseDescription": "Let's check you've got the correct recovery phrase. Type each word in the right order or paste from clipboard to verify it.",
+      "writePassphraseSubtitle1": "Consider your recovery phrase as the master key to your wallet.",
+      "writePassphraseSubtitle2": "Watch video.",
+      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly.",
+      "copyToClipboard": "Copy to clipboard",
+      "pasteFromClipboard": "Paste from clipboard"
+    },
     "walletSetupMnemonicIntroStep": {
       "title": "Keeping your wallet secure",
       "description": "Consider your recovery phrase as the master key to your wallet, and the only way to access your funds.",
       "link": "Read More."
     },
+    "mnemonicVideoPopupContent": {
+      "title": "Keeping your wallet secure",
+      "description": "Learn about what is a recovery phrase, and how to keep it safe from the video below.",
+      "link": "Read More.",
+      "closeButton": "Got it"
+    },
     "walletSetupMnemonicVerificationStep": {
       "enterPassphrase": "Enter your secret passphrase"
     },
+    "walletSetupMnemonicVerificationStepRevamp": {
+      "enterPassphrase": "Enter your recovery phrase"
+    },
     "walletSetupOptionsStep": {
-      "title": "Hello Web3",
+      "title": "Let's explore Web3 together",
       "subTitle": "Choose an option to get started",
       "newWallet": {
         "title": "New wallet",
@@ -1661,6 +1679,11 @@
       "validationMessage": "8+ characters with at least 1 uppercase letter, 1 lowercase letter, 1 number"
     },
     "walletSetupSelectAccountsStep": {
+      "setupLaceWallet": "Let's set up your Lace wallet",
+      "maxCharacters": "Max. 20 characters",
+      "chooseWalletName": "Choose a name to help identify your wallet and which account you would like to export. You can change this later!",
+      "enterWallet": "Enter wallet",
+      "walletName": "Wallet name",
       "selectAccount": "Select Account",
       "exportKeys": "Next",
       "chooseAccountToExport": "Choose which account you would like to export.",

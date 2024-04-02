@@ -12,7 +12,8 @@ export type Metadata = {
 
 export enum EnhancedAnalyticsOptInStatus {
   OptedIn = 'ACCEPTED',
-  OptedOut = 'REJECTED'
+  OptedOut = 'REJECTED',
+  NotSet = 'NOT_SET'
 }
 
 export enum UserTrackingType {
@@ -37,29 +38,27 @@ export enum TxCreationType {
   External = 'external'
 }
 
-export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
+export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password' | 'onboarding';
 export type PostHogActionsKeys =
   | 'SETUP_OPTION_CLICK'
   | 'ANALYTICS_AGREE_CLICK'
-  | 'ANALYTICS_SKIP_CLICK'
-  | 'LACE_TERMS_OF_USE_NEXT_CLICK'
+  | 'LEARN_MORE_CLICK'
+  | 'ANALYTICS_REJECT_CLICK'
   | 'WALLET_NAME_NEXT_CLICK'
-  | 'WALLET_PASSWORD_NEXT_CLICK'
-  | 'PASSPHRASE_INTRO_NEXT_CLICK'
-  | 'WRITE_PASSPHRASE_01_NEXT_CLICK'
-  | 'WRITE_PASSPHRASE_09_NEXT_CLICK'
-  | 'WRITE_PASSPHRASE_17_NEXT_CLICK'
-  | 'ENTER_PASSPHRASE_01_NEXT_CLICK'
-  | 'ENTER_PASSPHRASE_09_NEXT_CLICK'
-  | 'ENTER_PASSPHRASE_17_NEXT_CLICK'
-  | 'RESTORE_MULTI_ADDR_OK_CLICK'
-  | 'RESTORE_MULTI_ADDR_CANCEL_CLICK'
-  | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
+  | 'SAVE_RECOVERY_PHRASE_NEXT_CLICK'
+  | 'ENTER_RECOVERY_PHRASE_NEXT_CLICK'
+  | 'ENTER_WALLET'
+  | 'GOT_IT_CLICK'
+  | 'PIN_EXTENSION_CLICK'
   | 'CONNECT_HW_NEXT_CLICK'
-  | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
+  | 'SETUP_HW_WALLET_NEXT_CLICK'
   | 'DONE_GO_TO_WALLET'
   | 'WALLET_NAME_PASSWORD_NEXT_CLICK'
-  | 'PASSPHRASE_INTRO_PLAY_VIDEO_CLICK';
+  | 'RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK'
+  | 'RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK'
+  | 'RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK'
+  | 'RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK'
+  | 'RECOVERY_PASSPHRASE_VERIFICATION_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {

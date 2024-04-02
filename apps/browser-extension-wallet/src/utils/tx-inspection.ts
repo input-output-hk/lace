@@ -19,7 +19,7 @@ import {
 } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
-const { CertificateType, GovernanceActionType, Vote, VoterType } = Wallet.Cardano;
+const { CertificateType, GovernanceActionType, Vote, VoterType, InputSource } = Wallet.Cardano;
 
 const hasWalletStakeAddress = (
   withdrawals: Wallet.Cardano.HydratedTx['body']['withdrawals'],
@@ -142,6 +142,10 @@ export const inspectTxType = async ({
   tx: Wallet.Cardano.HydratedTx;
   inputResolver: Wallet.Cardano.InputResolver;
 }): Promise<Exclude<ActivityType, TransactionActivityType.rewards>> => {
+  if (tx.inputSource === InputSource.collaterals) {
+    return TransactionActivityType.outgoing;
+  }
+
   const { paymentAddresses, rewardAccounts } = getWalletAccounts(walletAddresses);
 
   const inspectionProperties = await createTxInspector({

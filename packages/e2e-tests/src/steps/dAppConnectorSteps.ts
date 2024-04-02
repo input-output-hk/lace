@@ -28,7 +28,7 @@ When(/^I open test DApp$/, async () => {
 
 Then(/^I see DApp authorization window$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage();
 });
 
 Then(/^I see DApp collateral window$/, async () => {
@@ -43,7 +43,7 @@ Then(/^I see DApp insufficient funds window$/, async () => {
 
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage();
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
@@ -66,24 +66,20 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
 
 Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeSignDataConfirmTransactionPage(
-    testDAppDetails,
-    String(getTestWallet('TestAutomationWallet').address)
-  );
 });
 
 Then(
-  /^I see DApp connector "Confirm transaction" page with: "([^"]*)", "([^"]*)" assets and receiving wallet "([^"]*)"$/,
+  /^I see DApp connector "Confirm transaction" page with: "([^"]*)" tADA - fee, "([^"]*)" assets and receiving wallet "([^"]*)"$/,
   async (adaValue: string, assetValue: string, walletName: string) => {
     await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
 
     const expectedTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: adaValue,
+      amountADA: Number(adaValue),
       amountAsset: assetValue,
       recipientAddress: String(getTestWallet(walletName).address)
     };
-    await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, expectedTransactionData);
+    await DAppConnectorAssert.assertSeeConfirmTransactionPage(expectedTransactionData);
   }
 );
 
@@ -94,14 +90,14 @@ Then(
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: '3.00 ADA',
+      amountADA: -3,
       amountAsset: '0',
       recipientAddress: String(getTestWallet('WalletReceiveDappTransactionE2E').address)
     };
 
     switch (expectedPage) {
       case 'Confirm transaction':
-        await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, defaultDAppTransactionData);
+        await DAppConnectorAssert.assertSeeConfirmTransactionPage(defaultDAppTransactionData);
         break;
       case 'Something went wrong':
         await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
@@ -299,6 +295,7 @@ Then(/^I click "(Confirm|Cancel)" button on "Sign transaction" page$/, async (bu
 });
 
 Then(/^I click "Close" button on DApp "All done" page$/, async () => {
+  await AllDonePage.closeButton.waitForStable();
   await AllDonePage.closeButton.click();
 });
 

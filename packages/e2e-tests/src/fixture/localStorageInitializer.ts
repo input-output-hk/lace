@@ -13,10 +13,6 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('lastStaking', JSON.stringify({}));
   }
 
-  async initializeTrackingConsent(allowAnalytics: boolean): Promise<void> {
-    await localStorageManager.setItem('doesUserAllowAnalytics', JSON.stringify(allowAnalytics));
-  }
-
   async initializeMode(mode: 'light' | 'dark'): Promise<void> {
     await localStorageManager.setItem('mode', mode);
   }
@@ -39,12 +35,16 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('unconfirmedTransactions', `[${value}]`);
   }
 
-  async initializeAnalyticsAccepted(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
-    await localStorageManager.setItem('analyticsAccepted', value);
+  async initializeAnalyticsStatus(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
+    await localStorageManager.setItem('analyticsStatus', value);
   }
 
   async initializeShowDAppBetaModal(value: boolean): Promise<void> {
     await localStorageManager.setItem('showDappBetaModal', JSON.stringify(value));
+  }
+
+  async initializeShowMultiAddressDiscoveryModal(value: boolean): Promise<void> {
+    await localStorageManager.setItem('showMultiAddressModal', `${value}`);
   }
 
   async initializeWallet(walletName = 'TestAutomationWallet') {
@@ -56,10 +56,8 @@ class LocalStorageInitializer {
       await localStorageManager.setItem('lock', String(wallet?.walletLocalStorageData?.lock));
     testContext.saveWithOverride('activeWallet', walletName);
     await localStorageManager.setItem('wallet', String(wallet?.walletLocalStorageData?.wallet));
-    await localStorageManager.setItem(
-      'analyticsAccepted',
-      wallet?.walletLocalStorageData?.analyticsAccepted ?? 'ACCEPTED'
-    );
+    await localStorageManager.setItem('analyticsStatus', wallet?.walletLocalStorageData?.analyticsStatus ?? 'ACCEPTED');
+    await localStorageManager.setItem('showPinExtension', 'false');
     await this.initializeShowDAppBetaModal(false);
     await initializeBrowserStorage(wallet);
     await this.initializeAppSettings();
@@ -83,11 +81,15 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('multidelegationFirstVisitSincePortfolioPersistence', 'false');
   };
 
+  enableShowingAnalyticsBanner = async () => {
+    await localStorageManager.setItem('analyticsStatus', '');
+  };
+
   initialiseBasicLocalStorageData = async (
     walletName: string,
     chainName: 'Preprod' | 'Preview' | 'Mainnet'
   ): Promise<void> => {
-    await this.initializeAnalyticsAccepted('ACCEPTED');
+    await this.initializeAnalyticsStatus('ACCEPTED');
     await this.initializeShowDAppBetaModal(false);
     await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
     await localStorageManager.setItem('appSettings', `{"chainName":"${chainName}"}`);

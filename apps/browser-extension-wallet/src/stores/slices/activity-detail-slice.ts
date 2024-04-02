@@ -24,6 +24,9 @@ import {
   governanceProposalsTransformer,
   votingProceduresTransformer
 } from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
+import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
+import { getCollateral } from '@cardano-sdk/core';
+import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 
 /**
  * validates if the transaction is confirmed
@@ -60,16 +63,22 @@ const transactionMetadataTransformer = (
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
 const shouldIncludeFee = (
+  tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx,
   type: ActivityType,
   delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
-) =>
-  !(
+) => {
+  if (hasPhase2ValidationFailed(tx)) {
+    return false;
+  }
+
+  return !(
     type === DelegationActivityType.delegationRegistration ||
     // Existence of any (new) delegationInfo means that this "de-registration"
     // activity is accompanied by a "delegation" activity, which carries the fees.
     // However, fees should be shown if de-registration activity is standalone.
     (type === DelegationActivityType.delegationDeregistration && !!delegationInfo?.length)
   );
+};
 
 const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
   const filters: Wallet.QueryStakePoolsArgs = {
@@ -89,6 +98,22 @@ const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider:
   return pools;
 };
 
+const computeCollateral = async (
+  { addresses, transactions }: HistoricalOwnInputResolverArgs,
+  tx?: Wallet.Cardano.Tx
+): Promise<bigint> => {
+  const inputResolver = createHistoricalOwnInputResolver({
+    addresses,
+    transactions
+  });
+
+  return await getCollateral(
+    tx,
+    inputResolver,
+    addresses.map((addr) => addr.address)
+  );
+};
+
 /**
  * fetches asset information
  */
@@ -106,7 +131,8 @@ const buildGetActivityDetail =
       inMemoryWallet: wallet,
       walletUI: { cardanoCoin },
       activityDetail,
-      walletInfo
+      walletInfo,
+      walletState
     } = get();
 
     set({ fetchingActivityInfo: true });
@@ -204,6 +230,8 @@ const buildGetActivityDetail =
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
+    const collateral = await computeCollateral(walletState, tx);
+    const collateralInAda = collateral > 0 ? Wallet.util.lovelacesToAdaString(collateral.toString()) : undefined;
 
     // Delegation tx additional data (LW-3324)
 
@@ -214,7 +242,7 @@ const buildGetActivityDetail =
     let transaction: ActivityDetail['activity'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
-      fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
+      fee: shouldIncludeFee(tx, type, delegationInfo) ? feeInAda : undefined,
       deposit,
       depositReclaim,
       addrInputs: inputs,
@@ -230,7 +258,8 @@ const buildGetActivityDetail =
         fiatCurrency,
         proposalProcedures: tx.body.proposalProcedures
       }),
-      certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates)
+      certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates),
+      collateral: collateralInAda
     };
 
     if (type === DelegationActivityType.delegation && delegationInfo) {

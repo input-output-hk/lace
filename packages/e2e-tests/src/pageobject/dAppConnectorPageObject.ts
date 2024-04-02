@@ -40,6 +40,7 @@ class DAppConnectorPageObject {
     await browser.pause(1000);
     await browser.switchToWindow((await browser.getWindowHandles())[handleNumber - 1]);
   }
+
   async closeDappConnectorWindowHandle() {
     await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
     await browser.closeWindow();
@@ -101,8 +102,7 @@ class DAppConnectorPageObject {
   }
 
   async saveDappTransactionFeeValue() {
-    let feeValue = await ConfirmTransactionPage.transactionFeeValueAda.getText();
-    feeValue = feeValue.replace(' ADA', '').replace('Fee: ', '');
+    const [feeValue] = (await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ');
     await testContext.save('feeValueDAppTx', feeValue);
   }
 
@@ -114,20 +114,29 @@ class DAppConnectorPageObject {
     await this.switchToTestDAppWindow();
     await DAppConnectorAssert.waitUntilBalanceNotEmpty();
   }
+
   async switchToDappConnectorPopupAndAuthorizeWithRetry(
     testDAppDetails: ExpectedDAppDetails,
     mode: 'Always' | 'Only once'
   ) {
-    try {
-      await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
-    } catch (error) {
-      Logger.log(`Failed to authorize Dapp. Retry will be executed. Error:\n${error}`);
-      if ((await browser.getWindowHandles()).length === 3) {
-        await this.closeDappConnectorWindowHandle();
+    let retries = 6;
+    let isAuthorized = false;
+    while (retries) {
+      try {
+        await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
+        retries = 0;
+        isAuthorized = true;
+      } catch (error) {
+        retries--;
+        Logger.log(`Failed to authorize Dapp. Retries left ${retries}. Error:\n${error}`);
+        if ((await browser.getWindowHandles()).length === 3) {
+          await this.closeDappConnectorWindowHandle();
+        }
+        await TestDAppPage.refreshButton.click();
+        await browser.pause(1000);
       }
-      await TestDAppPage.refreshButton.click();
-      await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
     }
+    if (!isAuthorized) await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
   }
 }
 

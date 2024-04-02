@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName, ExperimentsConfigStatus } from './types';
 
@@ -10,12 +10,6 @@ type ExperimentsContext = {
 
 // eslint-disable-next-line unicorn/no-null
 const ExperimentsContext = createContext<ExperimentsContext | null>(null);
-
-export const useExperimentsContext = (): ExperimentsContext => {
-  const postHogClientContext = useContext(ExperimentsContext);
-  if (postHogClientContext === null) throw new Error('ExperimentsContext not defined');
-  return postHogClientContext;
-};
 
 interface ExperimentsProviderProps {
   children: React.ReactNode;

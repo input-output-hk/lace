@@ -1,4 +1,4 @@
-@Staking-SwitchingPools-Extended-E2E @Testnet @Pending
+@Staking-SwitchingPools-Extended-E2E @E2E @Testnet @Pending
 Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   Background:
