@@ -20,13 +20,16 @@ jobs:
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
+      - name: Log vars context
+        run: echo '${{ toJSON(vars) }}'
+
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
           CARDANO_SERVICES_URL_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && vars.CARDANO_SERVICES_URL_LIVE_MAINNET || vars.CARDANO_SERVICES_URL_DEV_MAINNET }}
           CARDANO_SERVICES_URL_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && vars.CARDANO_SERVICES_URL_LIVE_PREPROD || vars.CARDANO_SERVICES_URL_DEV_PREPROD }}
           CARDANO_SERVICES_URL_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && vars.CARDANO_SERVICES_URL_LIVE_PREVIEW || vars.CARDANO_SERVICES_URL_DEV_PREVIEW }}
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
           POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
           POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
@@ -51,6 +54,6 @@ jobs:
       - name: Upload Coveralls report
         uses: coverallsapp/github-action@v2
         with:
-          github-token: ${{ secrets.COVERALLS_REPO_TOKEN  }}
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
           allow-empty: true
           compare-ref: main

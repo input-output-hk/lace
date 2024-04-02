@@ -40,11 +40,13 @@ module.exports =
         cache: { type: 'filesystem' },
         plugins: [
           new Dotenv({
-            path: '.env',
+            path: './.env',
             safe: false,
             silent: false,
+            defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.devpreview' : true,
             systemvars: true,
-            allowEmptyValues: true
+            allowEmptyValues: true,
+            override: true
           }),
           new CopyPlugin({
             patterns: [
