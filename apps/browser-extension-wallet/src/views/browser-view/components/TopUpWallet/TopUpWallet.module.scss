@@ -1,0 +1,22 @@
+.titleBadge {
+  border-radius: 16px;
+  background: var(--Gradient-Lace, linear-gradient(94deg, #FF92E1 -18.3%, #FDC300 118.89%));
+  display: flex;
+  align-items: center; 
+  justify-content: center;   
+  padding: 0 8px;
+  height: 20px;
+}
+.badgeCaption {
+  color: var(--White, #FFF);  
+}
+
+.scroll {
+  height: 200px;
+  width: 100%;
+  color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
+}
+
+.track {
+  min-width: 6px;
+}

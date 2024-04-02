@@ -42,4 +42,4 @@ export const container = style([
   },
 ]);
 
-export const label = sx({ color: '$buttons_cta_label_color' });
+export const labelAndIcon = sx({ color: '$buttons_cta_label_color' });

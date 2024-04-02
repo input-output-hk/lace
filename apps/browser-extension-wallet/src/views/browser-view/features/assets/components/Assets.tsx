@@ -7,7 +7,7 @@ import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { useCurrencyStore } from '@providers/currency';
 import { cardanoTransformer, assetTransformer } from '@src/utils/assets-transformers';
-import { SectionLayout, Layout } from '@src/views/browser-view/components';
+import { SectionLayout, Layout, TopUpWalletCard } from '@src/views/browser-view/components';
 import { useDrawer } from '@src/views/browser-view/stores';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { walletRoutePaths } from '@routes';
@@ -27,6 +27,7 @@ import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
 import { AssetActivityDetails } from './AssetActivityDetails/AssetActivityDetails';
 import { AssetEducationalList } from './AssetEducationalList/AssetEducationalList';
+import { Flex } from '@lace/ui';
 
 const LIST_CHUNK_SIZE = 12;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -306,7 +307,15 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     </>
   ) : (
     <Layout>
-      <SectionLayout hasCredit={fullAssetList?.length > 0} sidePanelContent={<AssetEducationalList />}>
+      <SectionLayout
+        hasCredit={fullAssetList?.length > 0}
+        sidePanelContent={
+          <Flex flexDirection="column" gap="$28">
+            <TopUpWalletCard />
+            <AssetEducationalList />
+          </Flex>
+        }
+      >
         {topSection}
         {assetsPortfolio}
         {drawers}

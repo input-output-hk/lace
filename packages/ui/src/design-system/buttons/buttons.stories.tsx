@@ -57,7 +57,7 @@ const Buttons = (): JSX.Element => (
     </Variants.Row>
     <Variants.Row>
       <Variants.Cell>
-        <CallToAction label="Label" />
+        <CallToAction label="Label" icon={<QuestionMark />} />
       </Variants.Cell>
       <Variants.Cell>
         <CallToAction label="Label" id="hover" />

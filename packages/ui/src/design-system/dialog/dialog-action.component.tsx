@@ -7,12 +7,14 @@ import * as Button from '../buttons';
 export interface DialogActionProps {
   onClick: () => void;
   label: string;
+  disabled?: boolean;
   cancel?: boolean;
 }
 
 export const Action = ({
   onClick,
   label,
+  disabled,
   cancel = false,
 }: Readonly<DialogActionProps>): JSX.Element => {
   const Wrapper = cancel ? AlertDialog.Cancel : AlertDialog.Action;
@@ -20,7 +22,7 @@ export const Action = ({
 
   return (
     <Wrapper asChild onClick={onClick}>
-      <ActionButton w="$fill" label={label} />
+      <ActionButton w="$fill" label={label} disabled={disabled} />
     </Wrapper>
   );
 };

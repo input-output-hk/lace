@@ -28,11 +28,11 @@ export const scrollbar = style({
 
   selectors: {
     '&[data-orientation="vertical"]': {
-      width: scrollbarSize,
+      minWidth: scrollbarSize,
     },
     '&[data-orientation="horizontal"]': {
       flexDirection: 'column',
-      height: scrollbarSize,
+      minHeight: scrollbarSize,
     },
   },
 });
