@@ -1,61 +1,67 @@
-@Analytics-Staking-SwitchingPools-Extended-E2E @Analytics @Testnet @Pending
-Feature: Analytics - Posthog - Switching pools - Extended View
+@Staking-NonDelegatedFunds-Extended @Analytics @Testnet
+Feature: Analytics - PostHog - Staking - Extended View
 
   Background:
     Given Wallet is synced
 
-  @LW-7868
-  Scenario: Analytics - Extended View - Staking - Success screen - Close drawer
-    Given I set up request interception for posthog analytics request(s)
-    And I save token: "Cardano" balance
+  @LW-10147
+  Scenario: Analytics - Extended View - Staking - switching between views
     When I navigate to Staking extended page
-    Then I validate latest analytics single event "staking | staking | click"
-    Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to the search bar
-    And I wait for single search result
-    And I click stake pool with name "OtherStakePool"
-    Then I validate latest analytics single event "staking | staking | stake pool | click"
-    Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    When I click "Stake on this pool" button on stake pool details drawer
-    Then I validate latest analytics single event "staking | stake pool detail | stake on this pool | click"
-    And I click "Fine by me" button on "Switching pool?" modal
-    Then I validate latest analytics single event "staking | switching pool? | fine by me | click"
-    Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
-    And I click "Next" button on staking confirmation drawer
-    Then I validate latest analytics single event "staking | manage delegation | stake pool confirmation | next | click"
-    And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed in extended mode
-    And I validate latest analytics multiple events:
-      | staking \| manage delegation \| hurray! \| view |
-      | staking \| manage delegation \| password confirmation \| confirm \| click |
-    When I click "Close" button on staking success drawer
-    Then I validate latest analytics single event "staking | manage delegation | hurray! | close | click"
-    And I validate that 8 analytics event(s) have been sent
+    And I open Browse pools tab
+    And I set up request interception for posthog analytics request(s)
+    And I switch to list view on "Browse pools" tab
+    Then I validate latest analytics single event "staking | browse pools | toggle | list view | click"
+    # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+    # When I switch to grid view on "Browse pools" tab
+    # Then I validate latest analytics single event "staking | browse pools | toggle | grid view | click"
+    And I validate that 1 analytics event(s) have been sent
 
-  @LW-7869
-  Scenario: Analytics - Extended View - Staking - Success screen - Close drawer by clicking X button
-    Given I set up request interception for posthog analytics request(s)
-    And I save token: "Cardano" balance
+  @LW-10148
+  Scenario: Analytics - Extended View - Staking - List View - click on column headers
     When I navigate to Staking extended page
-    Then I validate latest analytics single event "staking | staking | click"
-    Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to the search bar
-    And I wait for single search result
-    And I click stake pool with name "OtherStakePool"
-    Then I validate latest analytics single event "staking | staking | stake pool | click"
-    Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    When I click "Stake on this pool" button on stake pool details drawer
-    Then I validate latest analytics single event "staking | stake pool detail | stake on this pool | click"
-    And I click "Fine by me" button on "Switching pool?" modal
-    Then I validate latest analytics single event "staking | switching pool? | fine by me | click"
-    Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
-    And I click "Next" button on staking confirmation drawer
-    Then I validate latest analytics single event "staking | manage delegation | stake pool confirmation | next | click"
-    And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed in extended mode
-    And I validate latest analytics multiple events:
-      | staking \| manage delegation \| hurray! \| view |
-      | staking \| manage delegation \| password confirmation \| confirm \| click |
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "staking | manage delegation | hurray! | x | click"
-    And I validate that 8 analytics event(s) have been sent
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I set up request interception for posthog analytics request(s)
+    And I click on stake pools table "Ticker" column header
+    Then I validate latest analytics single event "staking | browse pools | ticker | click"
+    When I click on stake pools table "Saturation" column header
+    Then I validate latest analytics single event "staking | browse pools | saturation | click"
+    # TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+    # When I click on stake pools table "ROS" column header
+    # Then I validate latest analytics single event "staking | browse pools | ros | click"
+    When I click on stake pools table "Cost" column header
+    Then I validate latest analytics single event "staking | browse pools | cost | click"
+    When I click on stake pools table "Margin" column header
+    Then I validate latest analytics single event "staking | browse pools | margin | click"
+    When I click on stake pools table "Blocks" column header
+    Then I validate latest analytics single event "staking | browse pools | blocks | click"
+    When I click on stake pools table "Pledge" column header
+    Then I validate latest analytics single event "staking | browse pools | pledge | click"
+    When I click on stake pools table "Live Stake" column header
+    Then I validate latest analytics single event "staking | browse pools | live-stake | click"
+    And I validate that 7 analytics event(s) have been sent
+
+  @LW-10149
+  Scenario: Analytics - Extended View - Staking - More options - Sorting - select each option
+    When I navigate to Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I set up request interception for posthog analytics request(s)
+    When I select "Saturation" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | saturation | click"
+    # TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+    # When I select "ROS" sorting option from "More options" component
+    # Then I validate latest analytics single event "staking | browse pools | more options sorting | ros | click"
+    When I select "Cost" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | cost | click"
+    When I select "Margin" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | margin | click"
+    When I select "Produced blocks" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | produced blocks | click"
+    When I select "Pledge" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | pledge | click"
+    When I select "Live Stake" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | live-stake | click"
+    And I select "Ticker" sorting option from "More options" component
+    Then I validate latest analytics single event "staking | browse pools | more options sorting | ticker | click"
+    And I validate that 7 analytics event(s) have been sent
