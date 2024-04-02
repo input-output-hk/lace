@@ -1,11 +1,6 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
 const commonConfig = require('./webpack.common');
-require('dotenv-defaults').config({
-  path: './.env',
-  encoding: 'utf8',
-  defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
-});
 
 // service worker script (background.ts) needs a separate webpack config,
 // because it needs a different loader for WASM

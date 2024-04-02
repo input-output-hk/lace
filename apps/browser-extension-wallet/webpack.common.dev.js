@@ -3,11 +3,6 @@ const { merge } = require('webpack-merge');
 const CopyPlugin = require('copy-webpack-plugin');
 const { transformManifest } = require('./webpack-utils');
 const Dotenv = require('dotenv-webpack');
-require('dotenv-defaults').config({
-  path: './.env',
-  encoding: 'utf8',
-  defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
-});
 
 const serverConfig = (RUN_DEV_SERVER, port) =>
   RUN_DEV_SERVER
@@ -48,7 +43,6 @@ module.exports =
             path: '.env',
             safe: false,
             silent: false,
-            defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.devpreview' : true,
             systemvars: true,
             allowEmptyValues: true
           }),

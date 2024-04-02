@@ -14,6 +14,9 @@ jobs:
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
+          CARDANO_SERVICES_URL_MAINNET: ${{ vars.CARDANO_SERVICES_URL_DEV_MAINNET }}
+          CARDANO_SERVICES_URL_PREPROD: ${{ vars.CARDANO_SERVICES_URL_DEV_PREPROD }}
+          CARDANO_SERVICES_URL_PREVIEW: ${{ vars.CARDANO_SERVICES_URL_DEV_PREVIEW }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
       - name: Upload build
         uses: actions/upload-artifact@v4

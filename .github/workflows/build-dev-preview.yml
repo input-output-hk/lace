@@ -18,6 +18,9 @@ jobs:
         uses: ./.github/shared/build
         with:
           BUILD_DEV_PREVIEW: 'true'
+          CARDANO_SERVICES_URL_MAINNET: ${{ vars.CARDANO_SERVICES_URL_DEV_MAINNET }}
+          CARDANO_SERVICES_URL_PREPROD: ${{ vars.CARDANO_SERVICES_URL_DEV_PREPROD }}
+          CARDANO_SERVICES_URL_PREVIEW: ${{ vars.CARDANO_SERVICES_URL_DEV_PREVIEW }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues

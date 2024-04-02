@@ -13,32 +13,41 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
+          CARDANO_SERVICES_URL_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && vars.CARDANO_SERVICES_URL_LIVE_MAINNET || vars.CARDANO_SERVICES_URL_DEV_MAINNET }}
+          CARDANO_SERVICES_URL_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && vars.CARDANO_SERVICES_URL_LIVE_PREPROD || vars.CARDANO_SERVICES_URL_DEV_PREPROD }}
+          CARDANO_SERVICES_URL_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && vars.CARDANO_SERVICES_URL_LIVE_PREVIEW || vars.CARDANO_SERVICES_URL_DEV_PREVIEW }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
           POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
           POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
           POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
+
       - name: Check for linter issues
         run: yarn lint
+
       - name: Run unit tests, generate test coverage report
         env:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
           NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn test:coverage --maxWorkers=2 --silent
+
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
           name: lace
           path: apps/browser-extension-wallet/dist
+
       - name: Upload Coveralls report
         uses: coverallsapp/github-action@v2
         with:

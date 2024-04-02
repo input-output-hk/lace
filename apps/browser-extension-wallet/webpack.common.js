@@ -1,6 +1,5 @@
 const path = require('path');
 const { NormalModuleReplacementPlugin, ProvidePlugin, IgnorePlugin, EnvironmentPlugin } = require('webpack');
-const Dotenv = require('dotenv-webpack');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
@@ -81,14 +80,6 @@ module.exports = () => {
         typescript: {
           configFile: 'src/tsconfig.json'
         }
-      }),
-      new Dotenv({
-        path: '.env',
-        safe: false,
-        silent: false,
-        defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.devpreview' : true,
-        systemvars: true,
-        allowEmptyValues: true
       }),
       new EnvironmentPlugin({
         APP_VERSION: app_version,

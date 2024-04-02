@@ -5,6 +5,15 @@ inputs:
     description: 'Build developer preview of Lace'
     required: false
     default: 'false'
+  CARDANO_SERVICES_URL_MAINNET:
+    description: 'Cardano services mainnet url'
+    required: true
+  CARDANO_SERVICES_URL_PREPROD:
+    description: 'Cardano services preprod url'
+    required: true
+  CARDANO_SERVICES_URL_PREVIEW:
+    description: 'Cardano services preview url'
+    required: true
   LACE_EXTENSION_KEY:
     description: 'Public extended manifest key'
     required: true
@@ -32,6 +41,7 @@ runs:
       with:
         node-version-file: '.nvmrc'
         cache: 'yarn'
+
     - name: Node modules cache
       uses: actions/cache@v4
       with:
@@ -39,13 +49,18 @@ runs:
           node_modules
           **/node_modules
         key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
     - name: Install dependencies
       shell: bash
       run: yarn install --immutable --inline-builds
+
     - name: Build dist version
       shell: bash
       env:
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
+        CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVIICES_URL_MAINNET }}
+        CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVIICES_URL_PREPROD }}
+        CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVIICES_URL_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
         POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
