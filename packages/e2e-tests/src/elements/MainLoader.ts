@@ -15,9 +15,6 @@ class MainLoader {
     if (await this.mainLoaderComponent.isDisplayed()) {
       await this.mainLoaderComponent.waitForDisplayed({ timeout: 150_000, reverse: true });
     }
-    if (await this.mainLoaderText.isDisplayed()) {
-      await this.mainLoaderText.waitForDisplayed({ timeout: 255_000, reverse: true });
-    }
   }
 }
 

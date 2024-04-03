@@ -11,7 +11,6 @@ import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert'
 import OnboardingConnectHWPageAssert from '../assert/onboarding/onboardingConnectHWPageAssert';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMainPageAssert from '../assert/onboarding/onboardingMainPageAssert';
-import OnboardingPageObject from '../pageobject/onboardingPageObject';
 import OnboardingWalletSetupPage from '../elements/onboarding/walletSetupPage';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import TokensPageAssert from '../assert/tokensPageAssert';
@@ -38,7 +37,6 @@ const twelveMnemonicWords: string[] = getTestWallet(TestWalletName.TwelveWordsMn
 const fifteenMnemonicWords: string[] = getTestWallet(TestWalletName.FifteenWordsMnemonic).mnemonic ?? [];
 
 const mnemonicWordsForReference: string[] = [];
-// const validPassword = 'N_8J@bne87A';
 
 When(
   /^I click "(Create|Connect|Restore)" button on wallet setup page$/,
@@ -121,23 +119,13 @@ Given(/^I click "Restore" button and confirm$/, async () => {
 });
 
 When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
-  await OnboardingPageObject.fillWalletNameInput(walletName === 'empty' ? '' : walletName);
+  await OnboardingWalletSetupPage.setWalletNameInput(walletName === 'empty' ? '' : walletName);
 });
 
 When(/^I enter wallet name with size of: ([^"]*) characters$/, async (numberOfCharacters: number) => {
   const walletName = await generateRandomString(numberOfCharacters);
   await OnboardingWalletSetupPage.setWalletNameInput(walletName);
 });
-
-When(
-  /^I enter password: "([^"]*)" and password confirmation: "([^"]*)"$/,
-  async (password: string, passwordConf: string) => {
-    await OnboardingPageObject.fillPasswordPage(
-      password === 'empty' ? '' : password,
-      passwordConf === 'empty' ? '' : passwordConf
-    );
-  }
-);
 
 Then(/^Name error "([^"]*)" is displayed/, async (nameError: string) => {
   await OnboardingWalletSetupPageAssert.assertSeeWalletNameError(await t(nameError));
@@ -183,21 +171,6 @@ Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
   await ModalAssert.assertSeeRestoringMultiAddressWalletModal();
 });
 
-Then(/^I accept "T&C" checkbox$/, async () => {
-  await OnboardingPageObject.acceptTCCheckbox();
-});
-
-Given(/^I pass "Mnemonic writedown" page with words (8|16|24) of 24$/, async (expectedWords: number) => {
-  if (String(expectedWords) === '8') {
-    mnemonicWords.length = 0;
-  }
-  mnemonicWords.push(...(await OnboardingPageObject.passMnemonicWriteDownPage()));
-});
-
-Given(/^I pass "Mnemonic verification" page with words (8|16|24) of 24$/, async (expectedWords: number) => {
-  await OnboardingPageObject.passMnemonicVerificationPage(mnemonicWords, expectedWords);
-});
-
 Then(/^I clear saved words$/, async () => {
   mnemonicWordsForReference.length = 0;
 });
@@ -211,7 +184,7 @@ When(/^I click on mnemonic input$/, async () => {
 });
 
 When(/^I add characters "([^"]*)" in word ([0-7])$/, async (characters: string, inputNumber: number) => {
-  await OnboardingPageObject.addCharToMnemonicField(characters, inputNumber);
+  await RecoveryPhrasePage.addCharToMnemonicField(characters, inputNumber);
 });
 
 Then(/^I see LW homepage$/, async () => {
@@ -247,7 +220,7 @@ Then(/^I see following autocomplete options:$/, async (options: DataTable) => {
 });
 
 Then(/^I click header to loose focus$/, async () => {
-  await RecoveryPhrasePage.clickHeaderToLooseFocus();
+  await RecoveryPhrasePage.clickHeaderToLoseFocus();
 });
 
 Then(/^I do not see autocomplete options list$/, async () => {
@@ -280,7 +253,9 @@ When(/^I click on Privacy Policy link$/, async () => {
 When(
   /^I click on "(Cookie policy|Privacy policy|Terms of service)" legal link(?: on "(Main page)")?$/,
   async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service', page?: 'Main page') => {
-    await OnboardingMainPage.clickOnLegalLink(link, page === 'Main page');
+    page === 'Main page'
+      ? await OnboardingMainPage.clickOnLegalLink(link)
+      : await new CommonOnboardingElements().clickOnLegalLinkOnFooter(link);
   }
 );
 
@@ -311,7 +286,7 @@ Given(/^I restore a wallet$/, async () => {
     'Restore',
     getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []
   );
-  OnboardingWalletSetupPage.clickEnterWalletButton();
+  await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
 });
 

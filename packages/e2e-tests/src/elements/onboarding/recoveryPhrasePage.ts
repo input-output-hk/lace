@@ -85,8 +85,12 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     await inputs[0].click();
   }
 
-  async clickHeaderToLooseFocus() {
+  async clickHeaderToLoseFocus() {
     await this.stepHeader.click();
+  }
+  async addCharToMnemonicField(characters: string, inputNumber: number) {
+    const inputs = await this.mnemonicInputs;
+    await inputs[inputNumber].addValue(characters);
   }
 
   async changeRandomMnemonicField() {
@@ -149,8 +153,10 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     if (flowType === 'Create') {
       this.mnemonicWordsList = await this.getMnemonicWordTexts();
       await this.nextButton.click();
-      if (fillValues) await this.enterMnemonicWords();
-    } else if (fillValues) await this.enterMnemonicWords(mnemonicWords);
+    }
+    if (fillValues) {
+      flowType === 'Create' ? await this.enterMnemonicWords() : await this.enterMnemonicWords(mnemonicWords);
+    }
   }
 }
 

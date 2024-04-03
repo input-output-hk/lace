@@ -29,8 +29,9 @@ import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnType, StakePoolSortingOptionType } from '../types/staking';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
-import OnboardingPageObject from '../pageobject/onboardingPageObject';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
+
+const validPassword = 'N_8J@bne87A';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -188,7 +189,7 @@ When(
     let password;
     switch (type) {
       case 'newly created':
-        password = OnboardingPageObject.validPassword;
+        password = validPassword;
         break;
       case 'incorrect':
         password = 'somePassword';
