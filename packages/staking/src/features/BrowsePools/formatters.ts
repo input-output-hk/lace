@@ -1,5 +1,4 @@
-import isNumber from 'lodash/isNumber';
-import { PickByValue } from 'utility-types';
+import isNil from 'lodash/isNil';
 import { StakePoolDetails } from '../store';
 
 type StakePoolFormattableKey = keyof Pick<
@@ -18,8 +17,8 @@ type StakePoolFormattableKey = keyof Pick<
   | 'ticker'
 >;
 type PercentageStakePoolKey = ('saturation' | 'ros' | 'margin') & StakePoolFormattableKey;
-type NumberWithUnitStakePoolKey = keyof PickByValue<StakePoolDetails, { number: string; unit: string }> &
-  StakePoolFormattableKey;
+
+type NumberWithUnitStakePoolKey = ('activeStake' | 'cost' | 'liveStake' | 'pledge') & StakePoolFormattableKey;
 
 const percentageStakePoolKeys = new Set<PercentageStakePoolKey>(['saturation', 'ros', 'margin']);
 const numberWithUnitStakePoolKeys = new Set<NumberWithUnitStakePoolKey>(['activeStake', 'cost', 'liveStake', 'pledge']);
@@ -29,15 +28,14 @@ const isNumberWithUnitKey = (key: keyof StakePoolDetails): key is NumberWithUnit
 const isPercentageKey = (key: keyof StakePoolDetails): key is PercentageStakePoolKey =>
   percentageStakePoolKeys.has(key as PercentageStakePoolKey);
 
-export const formatNumberWithUnit = (value: { number: string; unit: string }): string =>
-  `${value.number || '-'}${value.unit}`;
+export const formatNumberWithUnit = (value: { number: string; unit: string } | undefined): string =>
+  value ? `${value.number ?? '-'}${value.unit}` : '-';
 
 export const getFormattedStakePoolProp = (
   stakePool: Pick<StakePoolDetails, StakePoolFormattableKey>,
   key: StakePoolFormattableKey
 ): string => {
-  const value = stakePool[key];
-  if (!value && !isNumber(value)) return value;
+  if (isNil(stakePool[key])) return '-';
 
   if (isNumberWithUnitKey(key)) {
     return formatNumberWithUnit(stakePool[key]);
@@ -47,5 +45,5 @@ export const getFormattedStakePoolProp = (
     return `${stakePool[key]}%`;
   }
 
-  return stakePool[key];
+  return stakePool[key] ?? '-';
 };

@@ -22,13 +22,11 @@ const SaturationCell = ({ children: formattedValue, saturation }: { children: Re
 };
 
 export const StakePoolListCell = ({ sortField, ...stakePool }: StakePoolListCellProps) => {
-  if (!stakePool[sortField]) return null;
-
   const formattedValue = getFormattedStakePoolProp(stakePool as StakePoolDetails, sortField);
 
   if (sortField === 'saturation' && stakePool.saturation) {
     return <SaturationCell saturation={stakePool.saturation}>{formattedValue}</SaturationCell>;
   }
 
-  return <>{formattedValue || '-'}</>;
+  return <>{formattedValue ?? '-'}</>;
 };
