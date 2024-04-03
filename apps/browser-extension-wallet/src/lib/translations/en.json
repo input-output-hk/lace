@@ -508,9 +508,6 @@
     "walletSetup.mnemonicResetModal.content": "In order to keep you safe, we'll show you a new set of 24 words.",
     "walletSetup.mnemonicResetModal.cancel": "Cancel",
     "walletSetup.mnemonicResetModal.confirm": "OK",
-    "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
-    "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
-    "walletSetup.confirmExperimentalHwDapp.confirm": "OK",
     "crypto": {
       "emptyDashboard.welcome": "Welcome",
       "emptyDashboard.addSomeFundsYoStartYourJourney": "Add some funds to start your journey",
@@ -684,16 +681,11 @@
       }
     },
     "onboarding": {
-      "commonError": {
-        "title": "Oops! Something went wrong",
-        "description": "Please check your hardware device.",
-        "ok": "OK"
-      },
-      "notDetectedError": {
-        "title": "Failed to detect device",
-        "description": "Please make sure your device is unlocked and the Cardano app is open.",
-        "agree": "Agree",
-        "trezorDescription": "Please make sure your device is unlocked."
+      "errorDialog": {
+        "title": "Opps! Something went wrong",
+        "cta": "OK",
+        "messageDeviceDisconnected": "Please check your hardware device connection and for Ledger, if Cardano App is open",
+        "messagePublicKeyExportRejected": "Public key export unsuccessful. User declined action on hardware wallet device"
       },
       "startOver": {
         "title": "Are you sure you want to start again?",
@@ -1601,6 +1593,22 @@
       "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue.",
       "connectDeviceFull": "Just connect your device to your computer and unlock it to continue. If you're using a Ledger device, make sure you open the Cardano App."
     },
+    "walletSetupConnectHardwareWalletStepRevamp": {
+      "title": "Connect your device",
+      "subTitleLedgerOnly": "Lace supports Ledger Nano X, Nano S, Nano S Plus. Unlock your device and open the Cardano app.",
+      "subTitle": "Lace supports Ledger Nano X, Nano S, Nano S Plus, Trezor Model T. Unlock your device and for Ledger, open the Cardano app.",
+      "errorMessage": {
+        "userGestureRequired": "It appears the page reload interrupted the search for connected hardware wallet devices.",
+        "devicePickerRejected": "No hardware wallet device was chosen.",
+        "deviceLocked": "Your hardware wallet device seems to be locked. Please unlock it to proceed.",
+        "cardanoAppNotOpen": "Cardano App is not open on your hardware wallet device. Please open it to proceed."
+      },
+      "errorCta": "Try again"
+    },
+    "walletSetupCreateStep": {
+      "title": "Creating your wallet",
+      "description": "Confirm exporting your public key on your hardware wallet device to create your Lace wallet."
+    },
     "walletSetupRestoreStep": {
       "title": "Restoring your wallet"
     },
@@ -1787,6 +1795,19 @@
       "description": "You'll have to start over.",
       "cancel": "Go back",
       "confirm": "Proceed"
+    },
+    "errorDialog": {
+      "commonError": {
+        "title": "Oops! Something went wrong",
+        "description": "Please check your hardware device.",
+        "ok": "OK"
+      },
+      "notDetectedError": {
+        "title": "Failed to detect device",
+        "description": "Please make sure your device is unlocked and the Cardano app is open.",
+        "agree": "Agree",
+        "trezorDescription": "Please make sure your device is unlocked."
+      }
     },
     "activated": {
       "wallet": "Wallet \"{{walletName}}\" activated",
