@@ -13,7 +13,7 @@ Feature: Analytics - PostHog - Staking - Extended View
     Then I validate latest analytics single event "staking | browse pools | toggle | list view | click"
     When I switch to grid view on "Browse pools" tab
     Then I validate latest analytics single event "staking | browse pools | toggle | grid view | click"
-    And I validate that 1 analytics event(s) have been sent
+    And I validate that 2 analytics event(s) have been sent
 
   @LW-10148
   Scenario: Analytics - Extended View - Staking - List View - click on column headers

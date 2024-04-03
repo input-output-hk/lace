@@ -98,7 +98,7 @@ Feature: Staking Page - Extended View
       | column_name |
       | Ticker      |
       | Saturation  |
-#      | ROS         | #TODO: Uncomment when LW-9827 is resolved
+#      | ROS         | #TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
       | Cost        |
       | Margin      |
       | Blocks      |
@@ -186,6 +186,12 @@ Feature: Staking Page - Extended View
       | list | I refresh the page  |
       | list | I open Overview tab |
 
+  @LW-10143 @Testnet @Mainnet
+  Scenario: Extended View - Staking - More options - Sorting options are displayed
+    When I am on Staking extended page
+    And I open Browse pools tab
+    Then "More options" component with stake pool sorting options is displayed
+
   @LW-9996 @Testnet @Mainnet
   Scenario: Extended View - Grid - display stake pool cards based on browser width
     When I am on Staking extended page
@@ -197,13 +203,8 @@ Feature: Staking Page - Extended View
     Then I see 5 stake pool cards in a row
     When I resize the window to a width of: 1659 and a height of: 1080
     Then I see 4 stake pool cards in a row
-    When I resize the window to a width of: 1024 and a height of: 1080
+    When I resize the window to a width of: 668 and a height of: 1080
     Then I see 4 stake pool cards in a row
-    When I resize the window to a width of: 1023 and a height of: 1080
+    When I resize the window to a width of: 667 and a height of: 1080
     Then I see 3 stake pool cards in a row
 
-  @LW-10143 @Testnet @Mainnet
-  Scenario: Extended View - Staking - More options - Sorting options are displayed
-    When I am on Staking extended page
-    And I open Browse pools tab
-    Then "More options" component with stake pool sorting options is displayed
