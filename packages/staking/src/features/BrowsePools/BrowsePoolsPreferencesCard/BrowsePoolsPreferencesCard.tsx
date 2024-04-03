@@ -112,6 +112,7 @@ export const BrowsePoolsPreferencesCard = ({
               label={opt}
               value={localFilters[filterOption.key][idx]}
               onChange={(e) => handleFilterChange(filterOption.key, idx, e.target.value)}
+              data-testid={`filter-${filterOption.key}-${opt.toLowerCase()}`}
             />
           ))}
         </Flex>
@@ -285,13 +286,15 @@ export const BrowsePoolsPreferencesCard = ({
   return (
     <Card.Outlined>
       <Flex flexDirection="column" justifyContent="flex-start" alignItems="stretch" my="$32" mx="$32" gap="$20">
-        <Text.SubHeading weight="$bold">{t('browsePools.preferencesCard.headers.moreOptions')}</Text.SubHeading>
+        <Text.SubHeading weight="$bold" data-testid="stake-pools-more-options-label">
+          {t('browsePools.preferencesCard.headers.moreOptions')}
+        </Text.SubHeading>
         {USE_MULTI_DELEGATION_STAKING_FILTERS && (
           <ToggleButtonGroup.Root value={activeTab} onValueChange={(value) => onTabChange(value as SortAndFilterTab)}>
-            <ToggleButtonGroup.Item value={SortAndFilterTab.sort}>
+            <ToggleButtonGroup.Item value={SortAndFilterTab.sort} data-testid="stake-pools-sorting-toggle">
               {t('browsePools.preferencesCard.headers.sorting')}
             </ToggleButtonGroup.Item>
-            <ToggleButtonGroup.Item value={SortAndFilterTab.filter}>
+            <ToggleButtonGroup.Item value={SortAndFilterTab.filter} data-testid="stake-pools-filters-toggle">
               {t('browsePools.preferencesCard.headers.filters')}
             </ToggleButtonGroup.Item>
           </ToggleButtonGroup.Root>
@@ -306,8 +309,16 @@ export const BrowsePoolsPreferencesCard = ({
         ) : (
           <Flex flexDirection="column" justifyContent="stretch" alignItems="stretch">
             {filterOptions.map((filterOption) => (
-              <Flex flexDirection="column" m="$4" key={filterOption.title} alignItems="stretch">
-                <Text.Body.Small weight="$medium">{filterOption.title}</Text.Body.Small>
+              <Flex
+                flexDirection="column"
+                m="$4"
+                key={filterOption.title}
+                alignItems="stretch"
+                data-testid={`filter-${filterOption.key}-section`}
+              >
+                <Text.Body.Small weight="$medium" data-testid={`filter-${filterOption.key}-label`}>
+                  {filterOption.title}
+                </Text.Body.Small>
                 {getFilters(filterOption)}
               </Flex>
             ))}
