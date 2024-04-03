@@ -40,6 +40,7 @@ class DAppConnectorAssert {
     await commonDappPageElements.betaPill.waitForDisplayed();
     expect(await commonDappPageElements.betaPill.getText()).to.equal(await t('core.dapp.beta'));
   }
+
   async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
     const currentDAppUrl = new URL(expectedDappDetails.url);
     const commonDappPageElements = new CommonDappPageElements();
@@ -293,9 +294,9 @@ class DAppConnectorAssert {
     );
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
 
-    const adjustedAssetsList = await this.adjustAssetList(assetsDetails);
+    const parsedAssetsList = await this.parseDappCucumberAssetList(assetsDetails);
     expect(await getTextFromElementArray(await ConfirmTransactionPage.transactionSummaryAssetsRows)).to.deep.equal(
-      adjustedAssetsList
+      parsedAssetsList
     );
 
     await ConfirmTransactionPage.transactionFromSectionExpanderButton.waitForDisplayed();
@@ -315,10 +316,12 @@ class DAppConnectorAssert {
   }
 
   async assertSeeConfirmFromAddressTransactionPage(section: 'To address' | 'From address', assets: string[]) {
-    const adjustedAssetsList = await this.adjustAssetList(assets);
-    section === 'To address'
-      ? expect(await DAppConnectorPageObject.getTransactionToAssetsRows()).to.deep.equal(adjustedAssetsList)
-      : expect(await DAppConnectorPageObject.getTransactionFromAssetsRows()).to.deep.equal(adjustedAssetsList);
+    const adjustedAssetsList = await this.parseDappCucumberAssetList(assets);
+    const expectedAssets =
+      section === 'To address'
+        ? await DAppConnectorPageObject.getTransactionToAssetsRows()
+        : await DAppConnectorPageObject.getTransactionFromAssetsRows();
+    expect(expectedAssets).to.deep.equal(adjustedAssetsList);
   }
 
   async assertSeeSignTransactionPage() {
@@ -381,25 +384,25 @@ class DAppConnectorAssert {
     expect(enable).not.to.be.empty;
   }
 
-  adjustAssetList = async (assetsList: string[]) =>
+  parseDappCucumberAssetList = async (assetsList: string[]) =>
     await Promise.all(
       assetsList.map(async (asset) => {
         if (asset.includes('- FEE')) {
-          return await this.subtractFee(asset);
+          return await this.subtractFeeFromCucumberListElement(asset);
         } else if (asset.includes('Address')) {
-          return this.shortenAddress(asset);
+          return this.shortenAddressFromCucumberListElement(asset);
         }
         return asset;
       })
     );
-  subtractFee = async (entry: string) => {
+  subtractFeeFromCucumberListElement = async (entry: string) => {
     const fee = Number((await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ')[0]);
     const [amount, currency] = entry.split(' ');
     const amountIncludingFee = (Number(amount) - fee).toFixed(2);
     return `${amountIncludingFee} ${currency}`;
   };
 
-  shortenAddress = (wallet: string) => {
+  shortenAddressFromCucumberListElement = (wallet: string) => {
     const [addressLabel, walletValue] = wallet.split(' ');
     const fullAddress = String(getTestWallet(walletValue).address);
     return `${addressLabel} ${fullAddress.slice(0, 8)}...${fullAddress.slice(-8)}`;

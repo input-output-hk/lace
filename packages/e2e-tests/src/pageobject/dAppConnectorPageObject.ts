@@ -54,7 +54,6 @@ class DAppConnectorPageObject {
 
   async expandSectionInDappTransactionWindow(section: 'Origin' | 'From address' | 'To address') {
     await ConfirmTransactionPage.transactionOriginSectionExpanderButton.waitForDisplayed();
-    await browser.pause(1000);
     switch (section) {
       case 'Origin':
         await ConfirmTransactionPage.transactionOriginSectionExpanderButton.click();
