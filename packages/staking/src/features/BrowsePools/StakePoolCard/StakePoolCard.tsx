@@ -18,7 +18,7 @@ const shouldRenderMetric = (sortField: SortField, metricValue?: string): metricV
   !!metricValue && !['ros', 'ticker', 'saturation'].includes(sortField);
 
 export const StakePoolCard = ({
-  title = '-',
+  title,
   metricType,
   metricValue,
   saturation,
@@ -33,7 +33,7 @@ export const StakePoolCard = ({
     <Flex flexDirection="column">
       <Flex justifyContent="space-between" w="$fill">
         <Text.Body.Normal weight="$medium" className={styles.title} data-testid="stake-pool-card-title">
-          {title}
+          {title || '-'}
         </Text.Body.Normal>
         {shouldRenderMetric(metricType, metricValue) && (
           <PoolMetric metricType={metricType} metricValue={metricValue} />
