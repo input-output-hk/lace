@@ -29,13 +29,13 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
     setIsRemoveWalletAlertVisible(!isRemoveWalletAlertVisible);
 
     analytics.sendEventToPostHog(
-      isRemoveWalletAlertVisible ? PostHogAction.SettingsHoldUpBackClick : PostHogAction.SettingsHoldUpRemoveWalletClick
+      isRemoveWalletAlertVisible ? PostHogAction.SettingsHoldUpBackClick : PostHogAction.SettingsRemoveWalletClick
     );
   };
 
   const removeWallet = async () => {
     setDeletingWallet(true);
-    await analytics.sendEventToPostHog(PostHogAction.SettingsRemoveWalletClick, {
+    await analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });

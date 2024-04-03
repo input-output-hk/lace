@@ -170,8 +170,7 @@ Feature: Analytics - Settings - Extended View
     Then I validate that 2 analytics event(s) have been sent
 
   # this test should be executed as the last one in this suite
-  @LW-8559 @Pending
-  @issue=LW-10150
+  @LW-8559
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
     When I open settings from header menu
     And I set up request interception for posthog analytics request(s)
