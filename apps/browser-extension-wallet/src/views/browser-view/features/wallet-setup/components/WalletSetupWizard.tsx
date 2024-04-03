@@ -156,7 +156,6 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        void analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
@@ -206,8 +205,9 @@ export const WalletSetupWizard = ({
   );
 
   const handleSubmit = async (result: { password: string; walletName: string }) => {
-    sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
+    void sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
     await handleCompleteCreation(result.walletName, result.password);
+    void analytics.sendAliasEvent();
   };
 
   const handleMnemonicVerification = () => {
