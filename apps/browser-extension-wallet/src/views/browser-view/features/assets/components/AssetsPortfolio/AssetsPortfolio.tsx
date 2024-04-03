@@ -1,6 +1,6 @@
 import { Skeleton } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AssetTable, IRow, SendReceive } from '@lace/core';
 import { CONTENT_LAYOUT_ID } from '@components/Layout/ContentLayout';
@@ -113,11 +113,14 @@ export const AssetsPortfolio = ({
     [coinPrice]
   );
 
-  const handleSearch = (value: string) => {
-    const filteredAssets = searchTokens(assetList, value);
-    setSearchValue(value);
-    setCurrentAssets({ data: filteredAssets, total: filteredAssets.length });
-  };
+  const handleSearch = useCallback(
+    (value: string) => {
+      const filteredAssets = searchTokens(assetList, value);
+      setSearchValue(value);
+      setCurrentAssets({ data: filteredAssets, total: filteredAssets.length });
+    },
+    [assetList]
+  );
 
   return (
     <Skeleton loading={isLoadingFirstTime}>
