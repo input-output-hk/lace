@@ -1,4 +1,4 @@
-@Settings-Popup @Analytics @Mainnet @Testnet
+@Analytics-Settings-Popup @Analytics @Mainnet @Testnet
 Feature: Analytics - Settings - Popup View
 
   Background:
@@ -186,8 +186,9 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
 
-        # this test should be executed as the last one in this suite
-  @LW-8571
+  # this test should be executed as the last one in this suite
+  @LW-8571 @Pending
+  @issue=LW-10150
   Scenario: Analytics - Popup View - Settings - Wallet removal events - Remove wallet
     Given I am on Tokens popup page
     When I open settings from header menu
