@@ -91,7 +91,8 @@ const transformedStakePool = {
   saturation: '5.12',
   ticker: 'STTST',
   blocks: '20',
-  stakePool: cardanoStakePoolMock.pageResults[0]
+  stakePool: cardanoStakePoolMock.pageResults[0],
+  fee: '6.04'
 };
 
 describe('Testing transformers', () => {
