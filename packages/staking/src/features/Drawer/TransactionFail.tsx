@@ -43,7 +43,8 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     sendEvent: () => {},
   };
-  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
+  const { portfolioMutators, draftPortfolio } = useDelegationPortfolioStore((store) => ({
+    draftPortfolio: store.draftPortfolio,
     portfolioMutators: store.mutators,
   }));
 
@@ -66,7 +67,8 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
 
-    if (!isInMemory) {
+    const isMultidelegation = draftPortfolio && draftPortfolio.length > 1;
+    if (!isInMemory && isMultidelegation) {
       const isSupported = await isMultidelegationSupportedByDevice(walletType);
       if (!isSupported) {
         throw new Error('MULTIDELEGATION_NOT_SUPPORTED');
