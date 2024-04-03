@@ -46,7 +46,7 @@ export const AssetEducationalList = (): React.ReactElement => {
         title: t(faqKey),
         subtitle: t('educationalBanners.subtitle.governanceFeatures'),
         src: LightBulb,
-        link: `${process.env.WEBSITE_URL}/faq?question=what-type-of-governance-actions-are-supported-by-lace`
+        link: `${process.env.WEBSITE_URL}/faq?question=what-type-of-governance-features-are-supported-in-lace-using-the-govtool-in-the-current`
       },
       {
         title: t(faqKey),
