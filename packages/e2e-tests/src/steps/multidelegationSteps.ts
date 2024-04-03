@@ -27,9 +27,10 @@ import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
-import { StakePoolListColumnType } from '../types/staking';
+import { StakePoolListColumnType, StakePoolSortingOptionType } from '../types/staking';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import OnboardingPageObject from '../pageobject/onboardingPageObject';
+import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -458,10 +459,7 @@ Then(/^I see Expanded View banner$/, async () => {
 });
 
 When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'grid' | 'list') => {
-  // TODO: remove `if` when USE_MULTI_DELEGATION_STAKING_GRID_VIEW is enabled by default
-  if (await MultidelegationPage.gridViewToggle.isExisting()) {
-    await MultidelegationPage.switchPoolsView(viewType);
-  }
+  await MultidelegationPage.switchPoolsView(viewType);
 });
 
 Then(/^stake pool list row skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {
@@ -496,5 +494,18 @@ When(
   /^I click on stake pools table "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column header$/,
   async (headerName: StakePoolListColumnType) => {
     await MultidelegationPage.clickOnColumnWithName(headerName);
+  }
+);
+
+When(
+  /^I select "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option from "More options" component$/,
+  async (sortingOption: StakePoolSortingOptionType) => {
+    await MultidelegationPage.moreOptionsComponent.selectSortingOption(sortingOption);
+  }
+);
+Then(
+  /^"More options" component with stake pool (sorting|filtering) options is displayed$/,
+  async (tab: 'sorting' | 'filtering') => {
+    await MoreOptionsComponentAssert.assertSeeMoreOptionsComponent(tab);
   }
 );
