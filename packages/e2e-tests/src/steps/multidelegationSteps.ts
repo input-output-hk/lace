@@ -459,10 +459,7 @@ Then(/^I see Expanded View banner$/, async () => {
 });
 
 When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'grid' | 'list') => {
-  // TODO: remove `if` when USE_MULTI_DELEGATION_STAKING_GRID_VIEW is enabled by default
-  if (await MultidelegationPage.gridViewToggle.isExisting()) {
-    await MultidelegationPage.switchPoolsView(viewType);
-  }
+  await MultidelegationPage.switchPoolsView(viewType);
 });
 
 Then(/^stake pool list row skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {
