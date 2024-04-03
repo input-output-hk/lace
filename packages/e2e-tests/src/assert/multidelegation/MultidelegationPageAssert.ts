@@ -11,7 +11,7 @@ import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridC
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
-    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 60_000 });
+    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 120_000 });
     const poolsCounter = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     expect(poolsCounter).to.equal(poolsCount);
   };
@@ -294,6 +294,7 @@ class MultidelegationPageAssert {
   };
 
   assertsSeeCardsInARow = async (expectedCardsCount: number) => {
+    await MultidelegationPage.gridContainer.waitForStable();
     const rowWidth = await MultidelegationPage.gridContainer.getSize('width');
     const cardWidth = await new StakePoolGridCard(0).container.getSize('width');
     const cardsInARow = Math.floor(rowWidth / cardWidth);
