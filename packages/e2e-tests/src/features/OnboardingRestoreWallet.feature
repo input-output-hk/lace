@@ -147,7 +147,7 @@ Feature: Onboarding - Restore wallet
     Then I see LW homepage
 
   @LW-5835
-  Scenario: Restore Wallet - "Recovery phrase length page" displayed
+  Scenario: Restore Wallet - "Recovery phrase page" displayed
     Given I click "Restore" button on wallet setup page
     And I go to "Mnemonic verification" page from "Restore" wallet flow and "not fill" values
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -160,7 +160,7 @@ Feature: Onboarding - Restore wallet
     When I click "Back" button during wallet setup
     Then "Get started" page is displayed
 
-  @LW-6080 @LW-5839 @LW-5838 @LW-5839
+  @LW-6080 @LW-5839 @LW-5838
   Scenario Outline: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path
     Given I click "Restore" button and confirm
     And I select <mnemonicLength> word passphrase length
