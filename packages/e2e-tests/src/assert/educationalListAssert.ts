@@ -36,12 +36,23 @@ class EducationalListAssert {
     const glossaryTranslation = await t(this.glossaryTranslationPath);
     const videoTranslation = await t(this.videoTranslationPath);
     const expectedTitle = await t('browserView.sidePanel.aboutYourWallet');
-    const expectedTitles = [glossaryTranslation, faqTranslation, videoTranslation, videoTranslation];
+    const expectedTitles = [
+      glossaryTranslation,
+      faqTranslation,
+      videoTranslation,
+      videoTranslation,
+      faqTranslation,
+      faqTranslation,
+      faqTranslation
+    ];
     const expectedSubtitles = [
       await t('educationalBanners.subtitle.whatIsADigitalAsset'),
       await t('educationalBanners.subtitle.howToSendReceiveFunds'),
       await t('educationalBanners.subtitle.secureSelfCustody'),
-      await t('educationalBanners.subtitle.connectingDApps')
+      await t('educationalBanners.subtitle.connectingDApps'),
+      await t('educationalBanners.subtitle.conwayEra'),
+      await t('educationalBanners.subtitle.governanceFeatures'),
+      await t('educationalBanners.subtitle.governanceActions')
     ];
     await this.assertSeeWidget(expectedTitle, expectedTitles, expectedSubtitles);
   }
