@@ -10844,6 +10844,7 @@ __metadata:
     "@vanilla-extract/css": ^1.11.1
     "@vanilla-extract/esbuild-plugin": ^2.2.2
     "@vanilla-extract/recipes": ^0.5.1
+    "@vanilla-extract/sprinkles": ^1.5.1
     "@vanilla-extract/vite-plugin": ^3.9.3
     "@vitest/coverage-c8": ^0.31.0
     antd: ^4.24.10
