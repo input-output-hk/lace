@@ -130,13 +130,15 @@ const opacityProperties = defineProperties({
   },
 });
 
-export const sx = createSprinkles(
+// colors should be defined in specific package e.g. createSprinkles(...sprinklesConfig, packageColorProperties)
+export const sprinklesConfig = [
   responsiveProperties,
   typographyProperties,
-  colorProperties,
   radiusProperties,
   elevationProperties,
   opacityProperties,
-);
+] as const;
+
+export const sx = createSprinkles(...sprinklesConfig, colorProperties);
 
 export type Sx = Parameters<typeof sx>[0];
