@@ -21,4 +21,8 @@ jobs:
           name: lightwallet
           path: apps/browser-extension-wallet/dist
       - name: Run unit tests
+        env:
+          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
+          DEFAULT_CHAIN: 'Preprod'
+          NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn test --maxWorkers=2 --silent
