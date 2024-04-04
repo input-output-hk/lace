@@ -92,18 +92,28 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
   const formattedCost = getNumberWithUnit(fee);
   const metricsData = useMemo(() => {
     const metrics = [
-      { t: metricsTranslations.activeStake, testId: 'active-stake', unit: activeStake.unit, value: activeStake.number },
-      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake.unit, value: liveStake.number },
-      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
-      { t: metricsTranslations.ros, testId: 'ros', unit: '%', value: ros || '-' },
+      {
+        t: metricsTranslations.activeStake,
+        testId: 'active-stake',
+        unit: activeStake?.unit,
+        value: activeStake?.number
+      },
+      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake?.unit, value: liveStake?.number },
+      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators },
+      { t: metricsTranslations.ros, testId: 'ros', unit: '%', value: ros },
       { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
-      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
-      { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
+      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost?.unit, value: formattedCost?.number },
+      {
+        t: metricsTranslations.pledge,
+        testId: 'pledge',
+        unit: formattedPledge?.unit,
+        value: formattedPledge?.number
+      },
       { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin }
     ];
 
     if (popupView) {
-      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' });
+      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation });
     }
 
     return metrics;

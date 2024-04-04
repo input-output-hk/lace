@@ -55,7 +55,7 @@ export const PoolDetailsCard = ({
       <Flex justifyContent="space-between" alignItems="center" my="$24" mx="$32">
         <Flex alignItems="center" gap="$24">
           <Box className={styles.poolIndicator} style={{ backgroundColor: color }} />
-          <Text.SubHeading data-testid="pool-details-name">{name}</Text.SubHeading>
+          <Text.SubHeading data-testid="pool-details-name">{name || '-'}</Text.SubHeading>
         </Flex>
         <ControlButton.Icon
           testId={`pool-details-icon-${expand ? 'up' : 'down'}`}
