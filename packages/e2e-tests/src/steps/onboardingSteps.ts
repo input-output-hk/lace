@@ -30,6 +30,7 @@ import analyticsBanner from '../elements/analyticsBanner';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
+import { shuffle } from '../utils/arrayUtils';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -407,4 +408,9 @@ Then(/^I see Analytics banner displayed correctly$/, async () => {
 
 Then(/^I (see|do not see) Analytics banner$/, async (shouldSee: 'see' | 'do not see') => {
   await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(shouldSee === 'see');
+});
+
+When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order$/, async () => {
+  const shuffledWords = shuffle([...mnemonicWordsForReference]);
+  await RecoveryPhrasePage.enterMnemonicWords(shuffledWords);
 });
