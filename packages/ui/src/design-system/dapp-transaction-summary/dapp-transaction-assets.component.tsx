@@ -8,6 +8,7 @@ import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import { UserProfile } from '../profile-picture';
 import { Text } from '../text';
+import { Tooltip } from '../tooltip';
 
 import * as styles from './dapp-transaction-summary.css';
 
@@ -16,6 +17,12 @@ import type { OmitClassName } from '../../types';
 type Props = OmitClassName<'div'> & {
   imageSrc: string | undefined;
   balance: string;
+  assetId: string;
+  policyId: string;
+  translations: {
+    assetId: string;
+    policyId: string;
+  };
   tokenName?: string;
   coins?: string;
   testId?: string;
@@ -35,6 +42,9 @@ const isImageBase64Encoded = (image: string): boolean => {
 export const TransactionAssets = ({
   imageSrc,
   balance,
+  assetId,
+  policyId,
+  translations,
   tokenName,
   testId,
   showImageBackground = true,
@@ -58,17 +68,27 @@ export const TransactionAssets = ({
     }
   };
 
+  const tooltipLabel = (
+    <div>
+      {translations.assetId} {assetId}
+      <br />
+      {translations.policyId} {policyId}
+    </div>
+  );
+
   return (
     <div className={styles.assetsContainer} data-testid={testId}>
       <Grid {...props} columns="$fitContent">
         <Cell>
-          <UserProfile
-            fallback={setThemeFallbackImagine}
-            imageSrc={getImageSource(imageSrc)}
-            alt={tokenName}
-            radius="rounded"
-            background={showImageBackground ? undefined : 'none'}
-          />
+          <Tooltip label={tooltipLabel}>
+            <UserProfile
+              fallback={setThemeFallbackImagine}
+              imageSrc={getImageSource(imageSrc)}
+              alt={tokenName}
+              radius="rounded"
+              background={showImageBackground ? undefined : 'none'}
+            />
+          </Tooltip>
         </Cell>
         <Cell>
           <Flex
@@ -76,14 +96,16 @@ export const TransactionAssets = ({
             alignItems="center"
             className={styles.balanceDetailContainer}
           >
-            <Text.Body.Small
-              color={isNegativeBalance ? 'primary' : 'success'}
-              weight="$semibold"
-            >
-              <span>
-                {balance} {tokenName}
-              </span>
-            </Text.Body.Small>
+            <Tooltip label={tooltipLabel}>
+              <Text.Body.Small
+                color={isNegativeBalance ? 'primary' : 'success'}
+                weight="$semibold"
+              >
+                <span>
+                  {balance} {tokenName}
+                </span>
+              </Text.Body.Small>
+            </Tooltip>
           </Flex>
         </Cell>
       </Grid>

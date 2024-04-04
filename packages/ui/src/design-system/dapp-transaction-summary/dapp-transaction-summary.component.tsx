@@ -2,11 +2,11 @@
 import React from 'react';
 
 import { ReactComponent as CardanoLogoComponent } from '@lace/icons/dist/CardanoLogoComponent';
-import classNames from 'classnames';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import { Text } from '../text';
+import { Tooltip } from '../tooltip';
 
 import * as styles from './dapp-transaction-summary.css';
 
@@ -15,6 +15,7 @@ import type { OmitClassName } from '../../types';
 type Props = OmitClassName<'div'> & {
   testId?: string;
   transactionAmount: string;
+  adaTooltip: string;
   title?: string;
   cardanoSymbol?: string;
 };
@@ -22,6 +23,7 @@ type Props = OmitClassName<'div'> & {
 export const TransactionSummary = ({
   testId,
   transactionAmount,
+  adaTooltip,
   title,
   cardanoSymbol,
   ...props
@@ -35,16 +37,20 @@ export const TransactionSummary = ({
     <div className={styles.txAmountContainer} data-testid={testId}>
       <Grid {...props} alignItems="$center" columns="$2">
         <Cell>
-          <CardanoLogoComponent className={styles.cardanoIcon} />
+          <Tooltip label={adaTooltip}>
+            <CardanoLogoComponent className={styles.cardanoIcon} />
+          </Tooltip>
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Text.Body.Small
-              color={transactionAmount.includes('-') ? 'primary' : 'success'}
-              weight="$semibold"
-            >
-              {transactionAmount} {cardanoSymbol}
-            </Text.Body.Small>
+            <Tooltip label={adaTooltip}>
+              <Text.Body.Small
+                color={transactionAmount.includes('-') ? 'primary' : 'success'}
+                weight="$semibold"
+              >
+                {transactionAmount} {cardanoSymbol}
+              </Text.Body.Small>
+            </Tooltip>
           </Flex>
         </Cell>
       </Grid>
