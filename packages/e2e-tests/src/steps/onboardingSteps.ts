@@ -216,6 +216,10 @@ Then(/^I clear one random field$/, async () => {
   await RecoveryPhrasePage.clearRandomMnemonicField();
 });
 
+Then(/^I clear all mnemonic input fields$/, async () => {
+  await RecoveryPhrasePage.clearAllMnemonicFields();
+});
+
 Then(/^I see following autocomplete options:$/, async (options: DataTable) => {
   await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicAutocompleteOptions(dataTableAsStringArray(options));
 });
@@ -371,6 +375,10 @@ When(/^I save mnemonic words$/, async () => {
 
 When(/^I enter saved mnemonic words$/, async () => {
   await RecoveryPhrasePage.enterMnemonicWords(mnemonicWordsForReference);
+});
+
+When(/^I enter saved mnemonic words in random order?$/, async () => {
+  await RecoveryPhrasePage.enterMnemonicWords(mnemonicWordsForReference.sort(() => Math.random() - 0.5));
 });
 
 Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mnemonicWordsLength: RecoveryPhrase) => {

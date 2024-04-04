@@ -20,16 +20,16 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
     And I go to "Mnemonic verification" page from "Restore" wallet flow
-    And I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
-    And I click "Next" button during wallet setup
-    And "Wallet setup" page is displayed
+    Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
+    When I click "Next" button during wallet setup
+    Then "Wallet setup" page is displayed
     And I validate latest analytics single event "onboarding | restore wallet revamp |  enter your recovery phrase  | next | click"
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
-    And I validate latest analytics multiple events:
+    Then I validate latest analytics multiple events:
       | onboarding \| restore wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | $create_alias                                                                                |
-    Then I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
+    And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
 
   @LW-7365
   Scenario: Analytics - Onboarding new wallet events
@@ -37,17 +37,17 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     When I enable showing Analytics consent banner
     And I set up request interception for posthog analytics request(s)
     And I accept analytics banner on "Get started" page
-    And I validate latest analytics single event "wallet | onboarding | analytics banner | agree | click"
+    Then I validate latest analytics single event "wallet | onboarding | analytics banner | agree | click"
     When I click "Create" button on wallet setup page
-    And I validate latest analytics single event "onboarding | new wallet revamp | create | click"
-    And I go to "Mnemonic verification" page from "Create" wallet flow
-    And I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | next | click"
-    And I click "Next" button during wallet setup
-    When "Wallet setup" page is displayed
+    Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
+    When I go to "Mnemonic verification" page from "Create" wallet flow
+    Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | next | click"
+    When I click "Next" button during wallet setup
+    Then "Wallet setup" page is displayed
     And I validate latest analytics single event "onboarding | new wallet revamp | enter your recovery phrase | next | click"
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
-    And I validate latest analytics multiple events:
+    Then I validate latest analytics multiple events:
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | $create_alias                                                                                |
     And I validate that 6 analytics event(s) have been sent

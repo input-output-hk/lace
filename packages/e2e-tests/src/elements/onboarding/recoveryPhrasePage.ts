@@ -88,6 +88,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   async clickHeaderToLoseFocus() {
     await this.stepHeader.click();
   }
+
   async addCharToMnemonicField(characters: string, inputNumber: number) {
     const inputs = await this.mnemonicInputs;
     await inputs[inputNumber].addValue(characters);
@@ -106,6 +107,13 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     const randomFieldNo = Math.floor(Math.random() * 8);
     const inputs = await this.mnemonicInputs;
     await clearInputFieldValue(inputs[randomFieldNo]);
+  }
+
+  async clearAllMnemonicFields() {
+    const inputs = await this.mnemonicInputs;
+    for (let i = 0; i < this.mnemonicWordsList.length; i++) {
+      await clearInputFieldValue(inputs[i]);
+    }
   }
 
   async restorePreviousMnemonicWord() {
