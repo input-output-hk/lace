@@ -286,7 +286,7 @@ class DAppConnectorAssert {
     expect(await ConfirmTransactionPage.transactionOriginLabel.getText()).to.equal(
       await t('package.core.dappTransaction.origin')
     );
-    await DAppConnectorPageObject.expandSectionInDappTransactionWindow('Origin');
+    await ConfirmTransactionPage.expandSectionInDappTransactionWindow('Origin');
     expect(await ConfirmTransactionPage.transactionOrigin.getText()).to.equal(DAppConnectorPageObject.TEST_DAPP_NAME);
     await ConfirmTransactionPage.transactionFeeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionFeeTitle.getText()).to.equal(
@@ -319,8 +319,8 @@ class DAppConnectorAssert {
     const adjustedAssetsList = await this.parseDappCucumberAssetList(assets);
     const expectedAssets =
       section === 'To address'
-        ? await DAppConnectorPageObject.getTransactionToAssetsRows()
-        : await DAppConnectorPageObject.getTransactionFromAssetsRows();
+        ? await ConfirmTransactionPage.getAssetsToAddressSection()
+        : await ConfirmTransactionPage.getAssetsFromAddressSection();
     expect(expectedAssets).to.deep.equal(adjustedAssetsList);
   }
 

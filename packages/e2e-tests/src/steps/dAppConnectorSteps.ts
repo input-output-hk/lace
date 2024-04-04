@@ -154,7 +154,7 @@ Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async
 Then(
   /^I expand "(Origin|From address|To address)" section in DApp transaction window$/,
   async (section: 'Origin' | 'From address' | 'To address') => {
-    await DAppConnectorPageObject.expandSectionInDappTransactionWindow(section);
+    await ConfirmTransactionPage.expandSectionInDappTransactionWindow(section);
   }
 );
 

@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import CommonDappPageElements from './commonDappPageElements';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
+import { getTextFromElementArray } from '../../utils/getTextFromArray';
 
 class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_TYPE_TITLE = '[data-testid="dapp-transaction-title"]';
@@ -98,6 +99,34 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   }
   get transactionToAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_TO_ROW);
+  }
+
+  async getAssetsFromAddressSection() {
+    const textArray = await getTextFromElementArray(await this.transactionToAssetsRows);
+    return textArray.map((str) => str.replace(/\n/g, ' '));
+  }
+
+  async getAssetsToAddressSection() {
+    const textArray = await getTextFromElementArray(await this.transactionFromAssetsRows);
+    return textArray.map((str) => str.replace(/\n/g, ' '));
+  }
+
+  async expandSectionInDappTransactionWindow(section: 'Origin' | 'From address' | 'To address') {
+    await this.transactionOriginSectionExpanderButton.waitForDisplayed();
+    switch (section) {
+      case 'Origin':
+        await this.transactionOriginSectionExpanderButton.click();
+        break;
+      case 'From address':
+        await this.transactionFromSectionExpanderButton.click();
+        break;
+      case 'To address':
+        await this.transactionToSectionExpanderButton.scrollIntoView();
+        await this.transactionToSectionExpanderButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported section name: ${section}`);
+    }
   }
 }
 
