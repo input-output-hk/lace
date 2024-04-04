@@ -4,6 +4,12 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
+  logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log github context
+        run: echo '${{ toJSON(github.envent.pull_request_target) }}'
+
   triage:
     if: github.event.pull_request_target.draft == false
     permissions:
