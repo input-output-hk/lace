@@ -143,7 +143,9 @@ export const BrowsePoolsPreferencesCard = ({
         label: (
           <BrowsePoolsPreferencesCardLabel
             tooltip={t('browsePools.tooltips.ticker')}
-            text={t('browsePools.preferencesCard.sort.ticker')}
+            text={t('browsePools.header.poolsCount', {
+              poolsCount: 1,
+            })}
           />
         ),
         onIconClick: handleIconClick,
