@@ -41,7 +41,7 @@ export const RadioButtonGroup = ({
         onValueChange={onValueChange}
         className={cx.radioGroupRoot}
       >
-        {options.map(({ value, label, icon: Icon, onIconClick }) => {
+        {options.map(({ value, label, icon, onIconClick }) => {
           const hasLabel = Boolean(label);
 
           return (
@@ -80,7 +80,7 @@ export const RadioButtonGroup = ({
                     </Box>
                   </label>
                 )}
-                {Icon !== undefined && value === selectedValue && (
+                {icon !== undefined && value === selectedValue && (
                   <Flex justifyContent="flex-end" className={cx.iconWrapper}>
                     <button
                       className={cx.iconButton}
@@ -89,7 +89,7 @@ export const RadioButtonGroup = ({
                       tabIndex={-1}
                       id={`radio-btn-sorting-id-${value}`}
                     >
-                      {Icon}
+                      {icon}
                     </button>
                   </Flex>
                 )}
