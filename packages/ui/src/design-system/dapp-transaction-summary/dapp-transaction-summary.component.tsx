@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 import React from 'react';
 
-import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
+import { ReactComponent as CardanoLogoComponent } from '@lace/icons/dist/CardanoLogoComponent';
+import classNames from 'classnames';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
@@ -34,7 +35,7 @@ export const TransactionSummary = ({
     <div className={styles.txAmountContainer} data-testid={testId}>
       <Grid {...props} alignItems="$center" columns="$2">
         <Cell>
-          <AdaComponent className={styles.adaIcon} />
+          <CardanoLogoComponent className={styles.cardanoIcon} />
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
