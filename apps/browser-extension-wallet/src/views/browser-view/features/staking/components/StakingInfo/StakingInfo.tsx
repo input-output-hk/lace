@@ -21,15 +21,15 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
 type stakingInfoPanelProps = {
   className?: string;
   coinBalance: number;
-  fee?: string | number;
+  fee: string;
   fiat: number;
   id: string;
   logo?: string;
-  margin?: string | number;
+  margin: string;
   name?: string;
   totalRewards: string;
   lastReward: string;
-  ros?: string | number;
+  ros?: string;
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;

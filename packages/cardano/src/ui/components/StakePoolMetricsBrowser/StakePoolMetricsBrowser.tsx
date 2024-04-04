@@ -1,10 +1,11 @@
 import React from 'react';
+import isNil from 'lodash/isNil';
 import cn from 'classnames';
 import styles from './StakePoolMetricsBrowser.module.scss';
 
 const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
   <>
-    {val ?? '-'} {val !== undefined && <span className={styles.suffix}>{suffix}</span>}
+    {val ?? '-'} {!isNil(val) && <span className={styles.suffix}>{suffix}</span>}
   </>
 );
 

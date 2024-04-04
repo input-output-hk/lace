@@ -43,12 +43,7 @@ jobs:
       - name: Build dependencies of Staking Center
         run: yarn staking build-deps
       - name: Run tests
-        run: yarn workspace @lace/staking test:unit --coverage
-      - name: Upload test coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: staking-coverage
-          path: packages/staking/coverage
+        run: yarn workspace @lace/staking test:unit
       - name: Build Staking dist
         run: yarn workspace @lace/staking build
 #        TODO fix ladle build

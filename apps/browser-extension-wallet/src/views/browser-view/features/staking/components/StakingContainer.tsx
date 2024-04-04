@@ -134,7 +134,9 @@ export const StakingContainer = (): React.ReactElement => {
           isMultidelegationSupportedByDevice
         }}
       >
-        <StakingSkeleton>{multiDelegationEnabled ? <MultiDelegationStaking /> : <Staking />}</StakingSkeleton>
+        <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>
+          {multiDelegationEnabled ? <MultiDelegationStaking /> : <Staking />}
+        </StakingSkeleton>
       </OutsideHandlesProvider>
     </Layout>
   );

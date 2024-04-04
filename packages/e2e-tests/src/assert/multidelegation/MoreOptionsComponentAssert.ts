@@ -40,11 +40,12 @@ class MoreOptionsComponentAssert {
     expect(await MoreOptionsComponent.saturationOption.label.getText()).to.equal(
       await t('browsePools.preferencesCard.sort.saturation', 'staking')
     );
-    await MoreOptionsComponent.rosOption.radioButton.waitForDisplayed();
-    await MoreOptionsComponent.rosOption.label.waitForDisplayed();
-    expect(await MoreOptionsComponent.rosOption.label.getText()).to.equal(
-      await t('browsePools.preferencesCard.sort.ros', 'staking')
-    );
+    // TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+    // await MoreOptionsComponent.rosOption.radioButton.waitForDisplayed();
+    // await MoreOptionsComponent.rosOption.label.waitForDisplayed();
+    // expect(await MoreOptionsComponent.rosOption.label.getText()).to.equal(
+    //   await t('browsePools.preferencesCard.sort.ros', 'staking')
+    // );
     await MoreOptionsComponent.costOption.radioButton.waitForDisplayed();
     await MoreOptionsComponent.costOption.label.waitForDisplayed();
     expect(await MoreOptionsComponent.costOption.label.getText()).to.equal(

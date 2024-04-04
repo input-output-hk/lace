@@ -11,10 +11,9 @@ Feature: Analytics - PostHog - Staking - Extended View
     And I set up request interception for posthog analytics request(s)
     And I switch to list view on "Browse pools" tab
     Then I validate latest analytics single event "staking | browse pools | toggle | list view | click"
-    # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
-    # When I switch to grid view on "Browse pools" tab
-    # Then I validate latest analytics single event "staking | browse pools | toggle | grid view | click"
-    And I validate that 1 analytics event(s) have been sent
+    When I switch to grid view on "Browse pools" tab
+    Then I validate latest analytics single event "staking | browse pools | toggle | grid view | click"
+    And I validate that 2 analytics event(s) have been sent
 
   @LW-10148
   Scenario: Analytics - Extended View - Staking - List View - click on column headers

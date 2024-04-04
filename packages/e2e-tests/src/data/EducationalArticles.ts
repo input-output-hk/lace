@@ -30,6 +30,20 @@ export const faqArticles: Record<string, Record<string, string>> = {
   'Does stake distribution remain the same?': {
     question: 'does-stake-distribution-remain-the-same',
     title: 'Does stake distribution remain the same?'
+  },
+  'How is the Conway Ledger era (also called governance era) supported by Lace?': {
+    question: 'how-is-the-conway-ledger-era-also-called-governance-era-supported-by-lace',
+    title: 'How is the Conway Ledger era (also called governance era) supported by Lace?'
+  },
+  'What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment?':
+    {
+      question: 'what-type-of-governance-features-are-supported-in-lace-using-the-govtool-in-the-current',
+      title:
+        'What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment?'
+    },
+  'What type of governance actions are supported by Lace?': {
+    question: 'what-type-of-governance-actions-are-supported-by-lace',
+    title: 'What type of governance actions are supported by Lace?'
   }
 };
 

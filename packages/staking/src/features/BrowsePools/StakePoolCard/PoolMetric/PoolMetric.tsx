@@ -30,7 +30,7 @@ export const PoolMetric = ({ metricType, metricValue }: PoolMetricProps) => (
   <Flex alignItems="center" gap="$4" className={styles.metric} data-testid="stake-pool-metric">
     {iconsByType[metricType]}
     <Text.Body.Small weight="$medium" data-testid="stake-pool-metric-value">
-      {metricValue}
+      {metricValue ?? '-'}
     </Text.Body.Small>
   </Flex>
 );
