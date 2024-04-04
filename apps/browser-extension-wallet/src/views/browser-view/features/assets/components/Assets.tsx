@@ -28,7 +28,7 @@ import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
 import { AssetActivityDetails } from './AssetActivityDetails/AssetActivityDetails';
 import { AssetEducationalList } from './AssetEducationalList/AssetEducationalList';
 import { Flex } from '@lace/ui';
-import { USE_BANXA_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
+import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
 
 const LIST_CHUNK_SIZE = 12;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -312,7 +312,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         hasCredit={fullAssetList?.length > 0}
         sidePanelContent={
           <Flex flexDirection="column" gap="$28">
-            {USE_BANXA_TOPUP && <TopUpWalletCard />}
+            {USE_FOOR_TOPUP && <TopUpWalletCard />}
             <AssetEducationalList />
           </Flex>
         }

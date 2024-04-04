@@ -1,2 +1,2 @@
-export * from './TopUpWalletButton';
+export * from './TopUpWalletButtonConfirmation';
 export * from './TopUpWalletCard';

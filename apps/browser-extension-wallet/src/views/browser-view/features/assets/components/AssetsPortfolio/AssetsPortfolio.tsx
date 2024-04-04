@@ -9,7 +9,7 @@ import { CONTENT_LAYOUT_ID } from '@components/Layout/ContentLayout';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { APP_MODE_POPUP, AppMode, LACE_APP_ID } from '@src/utils/constants';
 import { compactNumberWithUnit } from '@src/utils/format-number';
-import { FundWalletBanner, PortfolioBalance, TopUpWalletButton } from '@src/views/browser-view/components';
+import { FundWalletBanner, PortfolioBalance, TopUpWalletButtonConfirmation } from '@src/views/browser-view/components';
 import { useCurrencyStore } from '@providers/currency';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
@@ -20,7 +20,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
 import { SendFlowTriggerPoints } from '../../../send-transaction';
-import { USE_BANXA_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
+import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
 import { Flex } from '@lace/ui';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
@@ -123,9 +123,9 @@ export const AssetsPortfolio = ({
           }}
         />
       )}
-      {!isPopupView && isScreenTooSmallForSidePanel && USE_BANXA_TOPUP && (
+      {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && (
         <Flex w={'$214'} flexDirection={'column'} alignItems={'stretch'}>
-          <TopUpWalletButton />
+          <TopUpWalletButtonConfirmation />
         </Flex>
       )}
       <Skeleton loading={isPortfolioBalanceLoading || !assetList}>

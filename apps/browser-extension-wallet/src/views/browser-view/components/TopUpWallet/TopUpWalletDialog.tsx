@@ -19,7 +19,15 @@ export const TopUpWalletDialog = ({
   const { t } = useTranslation();
 
   return (
-    <Dialog.Root open={open} setOpen={onCancel} zIndex={1000} onCloseAutoFocusRef={triggerRef}>
+    <Dialog.Root
+      open={open}
+      setOpen={() => {
+        setAgreed(false);
+        onCancel();
+      }}
+      zIndex={1000}
+      onCloseAutoFocusRef={triggerRef}
+    >
       <Dialog.Title>{t('browserView.assets.topupWallet.modal.title')}</Dialog.Title>
       <Dialog.Description>
         <Box className={styles.scroll}>
@@ -28,11 +36,18 @@ export const TopUpWalletDialog = ({
       </Dialog.Description>
       <Checkbox
         label={t('browserView.assets.topupWallet.modal.checkbox')}
-        onClick={() => setAgreed(!agreed)}
+        onClick={() => setAgreed((prev) => !prev)}
         checked={agreed}
       />
       <Dialog.Actions>
-        <Dialog.Action cancel label={t('browserView.assets.topupWallet.modal.cancel')} onClick={onCancel} />
+        <Dialog.Action
+          cancel
+          label={t('browserView.assets.topupWallet.modal.cancel')}
+          onClick={() => {
+            setAgreed(false);
+            onCancel();
+          }}
+        />
         <Dialog.Action
           label={t('browserView.assets.topupWallet.modal.confirm')}
           onClick={onConfirm}
