@@ -1,13 +1,17 @@
-import { style, sx } from '@lace/ui';
-import { theme } from 'features/theme';
+import { style } from '@lace/ui';
+import { sx } from 'features/theme';
 
-export const textBoxLeft = style({
-  borderBottomRightRadius: 0,
-  borderRightColor: theme.colors.$browsePoolsFilterInputRightBorderColor,
-  borderRightStyle: 'solid',
-  borderRightWidth: 2,
-  borderTopRightRadius: 0,
-});
+export const textBoxLeft = style([
+  sx({
+    borderRightColor: '$browsePoolsFilterInputRightBorderColor',
+  }),
+  {
+    borderBottomRightRadius: 0,
+    borderRightStyle: 'solid',
+    borderRightWidth: 2,
+    borderTopRightRadius: 0,
+  },
+]);
 
 export const textBoxRight = style({
   borderBottomLeftRadius: 0,
