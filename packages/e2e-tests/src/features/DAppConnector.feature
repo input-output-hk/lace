@@ -147,6 +147,7 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     And I close all remaining tabs except current one
     And I remove wallet
+    Then I accept analytics banner on "Get started" page
     And I restore a wallet
     And Wallet is synced
     And I switch network to: "Preprod" in extended mode

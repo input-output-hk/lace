@@ -86,6 +86,7 @@ export const RadioButtonGroup = ({
                       disabled={disabled}
                       onClick={onIconClick}
                       tabIndex={-1}
+                      id={`radio-btn-sorting-id-${value}`}
                     >
                       <Icon />
                     </button>

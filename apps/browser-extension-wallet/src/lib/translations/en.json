@@ -1071,7 +1071,10 @@
       "stakingAndDelegation": "What are staking & delegation?",
       "howManyPools": "How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?",
       "ledgerSupport": "Do Ledger hardware wallets support multi-staking?",
-      "stakeDistribution": "Does stake distribution remain the same?"
+      "stakeDistribution": "Does stake distribution remain the same?",
+      "conwayEra": "How is the Conway Ledger era (also called governance era) supported by Lace?",
+      "governanceFeatures": "What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment?",
+      "governanceActions": "What type of governance actions are supported by Lace?"
     }
   },
   "migrations": {

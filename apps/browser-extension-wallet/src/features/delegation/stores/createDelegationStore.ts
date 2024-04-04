@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import BigNumber from 'bignumber.js';
+import isNil from 'lodash/isNil';
 import create, { StateSelector } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
@@ -16,7 +17,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       id,
       cost,
       hexId,
-      metadata: { description = '', name = '', ticker = '', homepage, ext } = {},
+      metadata: { description, name, ticker, homepage, ext } = {},
       metrics: { ros, delegators, stake, saturation, blocksCreated } = {},
       margin,
       owners,
@@ -24,11 +25,11 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       status,
       pledge
     } = selectedStakePool;
-    const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
+    const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '';
 
     return {
       // TODO: a lot of this is repeated in `stakePoolTransformer`. Have only one place to parse this info
-      delegators: new BigNumber(delegators).toFormat() || '-',
+      ...(!isNil(delegators) && { delegators: new BigNumber(delegators).toFormat() }),
       description,
       hexId: hexId.toString(),
       id: id.toString(),
@@ -36,22 +37,22 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       margin: calcMargin,
       name,
       owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
-      saturation: saturation && formatPercentages(saturation),
-      activeStake: stake?.active
-        ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.active?.toString()))
-        : { number: '-' },
-      liveStake: stake?.live
-        ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.live?.toString()))
-        : { number: '-' },
+      ...(!isNil(saturation) && { saturation: formatPercentages(saturation) }),
+      ...(!isNil(stake?.active) && {
+        activeStake: getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake.active.toString()))
+      }),
+      ...(!isNil(stake?.live) && {
+        liveStake: getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake.live.toString()))
+      }),
       ticker,
       status,
-      ros: ros && formatPercentages(ros),
+      ...(!isNil(ros) && { ros: formatPercentages(ros) }),
       fee: Wallet.util.lovelacesToAdaString(cost.toString()),
       contact: {
         primary: homepage,
         ...ext?.pool.contact
       },
-      blocks: new BigNumber(blocksCreated).toFormat() || '-',
+      ...(!isNil(blocksCreated) && { blocks: new BigNumber(blocksCreated).toFormat() }),
       pledge: Wallet.util.lovelacesToAdaString(pledge.toString())
     };
   }

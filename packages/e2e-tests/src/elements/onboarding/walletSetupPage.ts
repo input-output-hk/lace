@@ -1,5 +1,7 @@
 import CommonOnboardingElements from './commonOnboardingElements';
 import { setInputFieldValue } from '../../utils/inputFieldUtils';
+import recoveryPhrasePage from './recoveryPhrasePage';
+import onboardingWalletSetupPageAssert from '../../assert/onboarding/onboardingWalletSetupPageAssert';
 
 class WalletSetupPage extends CommonOnboardingElements {
   private SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
@@ -60,8 +62,26 @@ class WalletSetupPage extends CommonOnboardingElements {
     await setInputFieldValue(await this.walletPasswordConfirmInput, value);
   }
 
+  async clickEnterWalletButton(): Promise<void> {
+    await onboardingWalletSetupPageAssert.assertEnterWalletButtonIsEnabled();
+    await this.nextButton.click();
+  }
+
   getNumberOfActiveComplexityBars(): Promise<number> {
     return this.activeComplexityBars.length;
+  }
+  async goToWalletSetupPage(
+    flowType: 'Create' | 'Restore',
+    mnemonicWords: string[] = [],
+    fillValues = true
+  ): Promise<void> {
+    await recoveryPhrasePage.goToMnemonicVerificationPage(flowType, mnemonicWords);
+    await recoveryPhrasePage.nextButton.click();
+    if (fillValues) {
+      await this.setWalletNameInput('TestAutomationWallet');
+      await this.setWalletPasswordInput('N_8J@bne87A');
+      await this.setWalletPasswordConfirmInput('N_8J@bne87A');
+    }
   }
 }
 

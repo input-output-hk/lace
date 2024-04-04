@@ -21,6 +21,8 @@ export interface StakePool {
   logo?: string;
   pledgeMet?: boolean;
   retired?: boolean;
+  margin: string;
+  fee: string;
   onClick?: () => unknown;
 }
 

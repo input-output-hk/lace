@@ -98,7 +98,7 @@ Feature: Staking Page - Extended View
       | column_name |
       | Ticker      |
       | Saturation  |
-#      | ROS         | #TODO: Uncomment when LW-9827 is resolved
+#      | ROS         | #TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
       | Cost        |
       | Margin      |
       | Blocks      |
@@ -146,8 +146,7 @@ Feature: Staking Page - Extended View
     And I wait for stake pool list to be populated
     Then each stake pool list item contains: checkbox, ticker, saturation, ROS, cost, margin, blocks, pledge and live stake
 
-  @LW-9985 @Testnet @Mainnet @skip
-  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  @LW-9985 @Testnet @Mainnet
   Scenario: Extended View - Stake pool list - display skeleton while loading list elements
     And I am on Staking extended page
     And I open Browse pools tab
@@ -158,8 +157,7 @@ Feature: Staking Page - Extended View
     When I wait 500 milliseconds
     Then stake pool list row skeleton is not displayed
 
-  @LW-9986 @Testnet @Mainnet @skip
-  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  @LW-9986 @Testnet @Mainnet
   Scenario: Extended View - Stake pool grid - display skeleton while loading grid cards
     And I am on Staking extended page
     And I open Browse pools tab
@@ -169,8 +167,7 @@ Feature: Staking Page - Extended View
     When I wait 500 milliseconds
     Then stake pool grid card skeleton is not displayed
 
-  @LW-9995 @Testnet @Mainnet @skip
-  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  @LW-9995 @Testnet @Mainnet
   Scenario Outline: Extended View - Browse pools - preserve selected pools and view type
     When I am on Staking extended page
     And I open Browse pools tab
@@ -189,8 +186,13 @@ Feature: Staking Page - Extended View
       | list | I refresh the page  |
       | list | I open Overview tab |
 
-  @LW-9996 @Testnet @Mainnet @skip
-  # TODO: enable when USE_MULTI_DELEGATION_STAKING_GRID_VIEW=true by default
+  @LW-10143 @Testnet @Mainnet
+  Scenario: Extended View - Staking - More options - Sorting options are displayed
+    When I am on Staking extended page
+    And I open Browse pools tab
+    Then "More options" component with stake pool sorting options is displayed
+
+  @LW-9996 @Testnet @Mainnet
   Scenario: Extended View - Grid - display stake pool cards based on browser width
     When I am on Staking extended page
     And I open Browse pools tab
@@ -201,7 +203,8 @@ Feature: Staking Page - Extended View
     Then I see 5 stake pool cards in a row
     When I resize the window to a width of: 1659 and a height of: 1080
     Then I see 4 stake pool cards in a row
-    When I resize the window to a width of: 1024 and a height of: 1080
+    When I resize the window to a width of: 668 and a height of: 1080
     Then I see 4 stake pool cards in a row
-    When I resize the window to a width of: 1023 and a height of: 1080
+    When I resize the window to a width of: 667 and a height of: 1080
     Then I see 3 stake pool cards in a row
+

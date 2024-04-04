@@ -24,26 +24,26 @@ export type DelegationPortfolioStore = DelegationPortfolioState & {
 };
 
 export type StakePoolDetails = {
-  activeStake: { number: string; unit: string };
-  blocks: string;
+  activeStake?: { number: string; unit: string };
+  blocks?: string;
   contact: Wallet.Cardano.PoolContactData;
   cost: { number: string; unit: string };
-  delegators: string;
-  description: string;
+  delegators?: string;
+  description?: string;
   hexId: Wallet.Cardano.PoolIdHex;
   id: string;
-  liveStake: { number: string; unit: string };
+  liveStake?: { number: string; unit: string };
   logo: string;
   margin: string;
-  name: string;
+  name?: string;
   owners: string[];
   pledge: { number: string; unit: string };
   retired: boolean;
-  ros: string;
-  saturation: string;
+  ros?: string;
+  saturation?: string;
   stakePool: Wallet.Cardano.StakePool;
   status: Wallet.Cardano.StakePoolStatus;
-  ticker: string;
+  ticker?: string;
 };
 
 // TODO consider using SDK type; https://input-output.atlassian.net/browse/LW-9242
