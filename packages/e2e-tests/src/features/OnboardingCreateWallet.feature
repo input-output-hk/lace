@@ -260,11 +260,12 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
     Then "Mnemonic writedown" page is displayed with 24 words
+    And I save mnemonic words
     And I click "Next" button during wallet setup
-    When I enter 24 incorrect mnemonic words on "Mnemonic verification" page
+    When I fill passphrase fields using saved 24 words mnemonic in incorrect order
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process
-    When I enter 24 correct mnemonic words on "Mnemonic verification" page
+    When I enter saved mnemonic words
     Then "Next" button is enabled during onboarding process
 
   @LW-10138
