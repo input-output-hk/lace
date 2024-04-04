@@ -259,8 +259,8 @@ Feature: Onboarding - Create wallet
   @LW-8501
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
-    When "Mnemonic writedown" page is displayed with 24 words
-    And I save mnemonic words
+    Then "Mnemonic writedown" page is displayed with 24 words
+    When I save mnemonic words
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     When I enter saved mnemonic words
