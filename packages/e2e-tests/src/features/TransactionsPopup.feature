@@ -9,7 +9,8 @@ Feature: Transactions - Popup view
     When I navigate to Transactions popup page
     Then Transactions section is displayed
 
-  @LW-2541 @LW-2543 @LW-2544 @Testnet
+  @LW-2541 @LW-2543 @LW-2544 @Testnet @Pending
+  @issue=LW-101212
   Scenario: Popup View - Transactions tab - Counter matches the number of rows, transactions are loaded and skeleton disappears
     When I navigate to Transactions popup page
     And Transactions section is displayed
