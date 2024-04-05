@@ -109,13 +109,6 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     await clearInputFieldValue(inputs[randomFieldNo]);
   }
 
-  async clearAllMnemonicFields() {
-    const inputs = await this.mnemonicInputs;
-    for (let i = 0; i < this.mnemonicWordsList.length; i++) {
-      await clearInputFieldValue(inputs[i]);
-    }
-  }
-
   async restorePreviousMnemonicWord() {
     const mnemonic = testContext.load('mnemonic') as { value: string; index: number };
     await this.enterMnemonicWord(mnemonic.value, mnemonic.index);
