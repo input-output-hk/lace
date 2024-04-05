@@ -1,6 +1,8 @@
 import { style } from '@vanilla-extract/css';
 import { sx } from 'features/theme';
 
+export const selectableRow = style({});
+
 export const row = style([
   sx({
     alignItems: 'center',
@@ -12,13 +14,8 @@ export const row = style([
   {
     flex: 1,
     gridTemplateColumns: 'repeat(auto-fit, minmax(0px, 1fr))',
-  },
-]);
-
-export const selectable = style([
-  {
     selectors: {
-      [`&${row}`]: {
+      [`${selectableRow}.&`]: {
         gridTemplateColumns: '28px repeat(auto-fit, minmax(0px, 1fr))',
       },
     },
@@ -31,7 +28,7 @@ export const cell = style([
   }),
   {
     selectors: {
-      [`${selectable} &:first-child`]: {
+      [`${selectableRow} &:first-child`]: {
         justifyContent: 'flex-end',
         padding: 0,
       },
