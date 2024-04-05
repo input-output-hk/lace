@@ -10942,9 +10942,9 @@ __metadata:
     "@svgr/webpack": ^6.5.1
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
-    "@vanilla-extract/css": ^1.10.0
+    "@vanilla-extract/css": ^1.11.1
     "@vanilla-extract/css-utils": ^0.1.3
-    "@vanilla-extract/recipes": ^0.3.0
+    "@vanilla-extract/recipes": ^0.5.1
     "@vanilla-extract/rollup-plugin": ^1.2.0
     "@vanilla-extract/sprinkles": ^1.5.1
     "@vanilla-extract/webpack-plugin": ^2.2.0
@@ -20877,15 +20877,6 @@ __metadata:
   version: 1.0.3
   resolution: "@vanilla-extract/private@npm:1.0.3"
   checksum: 866a71ba6804edeb0735684e7723ba78f5cf0bb40d4fb538fe6bf7d73928099e341312337b2a510ac0ce96ff8a4b39eb7f7a5fad0c842532353dd20e7278f29b
-  languageName: node
-  linkType: hard
-
-"@vanilla-extract/recipes@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@vanilla-extract/recipes@npm:0.3.0"
-  peerDependencies:
-    "@vanilla-extract/css": ^1.0.0
-  checksum: 9e7d989bf6e16d11fd6c972bec5d8d6c4efee5fe84070108db87570992e596dc937a6c5f9061fe10b564c1c64f53abf77a41bd589b1da5993c7f8d7b7811acfd
   languageName: node
   linkType: hard
 
