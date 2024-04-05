@@ -95,9 +95,9 @@ export const OverviewPopup = () => {
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
           arrangement="vertical"
-          distribution={displayData.map(({ color, name = '-', onChainPercentage, ros, saturation }) => ({
+          distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
             color,
-            name,
+            name: name || '-',
             percentage: onChainPercentage,
             ros: ros ? String(ros) : undefined,
             saturation: saturation ? String(saturation) : undefined,

@@ -16,9 +16,8 @@ Feature: Onboarding - Create wallet
       | Terms of service |
 
 
-  @LW-2433 @Pending
-  @issue=LW-10087
-  Scenario: Create Wallet - Name your wallet - back button
+  @LW-2433
+  Scenario: Create Wallet - Wallet setup page - back button
     Given I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow
     When I click "Back" button during wallet setup
@@ -246,8 +245,7 @@ Feature: Onboarding - Create wallet
       | dark  |
       | light |
 
-  @LW-8500 @Pending
-  @issue=LW-8890
+  @LW-8500
   Scenario: Create Wallet - Mnemonic verification - incorrect word
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow
@@ -262,11 +260,12 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
     Then "Mnemonic writedown" page is displayed with 24 words
+    And I save mnemonic words
     And I click "Next" button during wallet setup
-    When I enter 24 incorrect mnemonic words on "Mnemonic verification" page
+    When I fill passphrase fields using saved 24 words mnemonic in incorrect order
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process
-    When I enter 24 correct mnemonic words on "Mnemonic verification" page
+    When I enter saved mnemonic words
     Then "Next" button is enabled during onboarding process
 
   @LW-10138

@@ -85,10 +85,15 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
 
   const metricsData = useMemo(() => {
     const metrics = [
-      { t: metricsTranslations.activeStake, testId: 'active-stake', unit: activeStake.unit, value: activeStake.number },
-      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake.unit, value: liveStake.number },
-      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
-      { t: metricsTranslations.ros, testId: 'ros', unit: '%', value: ros || '-' },
+      {
+        t: metricsTranslations.activeStake,
+        testId: 'active-stake',
+        unit: activeStake?.unit,
+        value: activeStake?.number,
+      },
+      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake?.unit, value: liveStake?.number },
+      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators },
+      { t: metricsTranslations.ros, testId: 'ros', unit: '%', value: ros },
       { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
       { t: metricsTranslations.cost, testId: 'cost', unit: cost.unit, value: cost.number },
       { t: metricsTranslations.pledge, testId: 'pledge', unit: pledge.unit, value: pledge.number },
@@ -96,20 +101,20 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     ];
 
     if (popupView) {
-      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' });
+      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation });
     }
 
     return metrics;
   }, [
-    activeStake.number,
-    activeStake.unit,
+    activeStake?.number,
+    activeStake?.unit,
     ros,
     blocks,
     delegators,
     cost.number,
     cost.unit,
-    liveStake.number,
-    liveStake.unit,
+    liveStake?.number,
+    liveStake?.unit,
     margin,
     metricsTranslations.activeStake,
     metricsTranslations.ros,
@@ -174,7 +179,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               {t('drawer.details.information')}
             </div>
             <div className={styles.body} data-testid="stake-pool-details-information-description">
-              {description}
+              {description || '-'}
             </div>
           </div>
           {socialNetworks.some((sns) => sns.href) && (

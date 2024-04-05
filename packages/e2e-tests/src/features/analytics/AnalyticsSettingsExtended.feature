@@ -1,4 +1,4 @@
-@Settings-Extended @Analytics
+@Analytics-Settings-Extended @Analytics
 Feature: Analytics - Settings - Extended View
 
   Background:
@@ -37,6 +37,7 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | authorized dapps | trash bin icon | click"
     When I click "Back" button in DApp removal confirmation modal
     Then I validate latest analytics single event "settings | authorized dapps | hold up! | back | click"
+    And I de-authorize all DApps in extended mode
 
   @LW-8551
   Scenario: Analytics - Extended view - Settings - Authorized dapps events - Disconnect Dapp
@@ -168,7 +169,7 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
 
-        # this test should be executed as the last one in this suite
+  # this test should be executed as the last one in this suite
   @LW-8559
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
     When I open settings from header menu
