@@ -55,6 +55,10 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
   const { createHardwareWalletRevamped, saveHardwareWallet } = useWalletManager();
   const { updateEnteredAtTime } = useTimeSpentOnPage();
   const analytics = useAnalyticsContext();
+  const [enhancedAnalyticsStatus] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
+  );
 
   const walletSetupCreateStepTranslations = useMemo(() => makeWalletSetupCreateStepTranslations(t), [t]);
 
@@ -91,10 +95,11 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
     [navigateTo]
   );
 
-  const [enhancedAnalyticsStatus] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
+  const closeConnection = () => {
+    if (connection.type === WalletType.Ledger) {
+      void connection.value.transport.close();
+    }
+  };
 
   const handleCreateWallet = async (accountIndex: number, name: string) => {
     void analytics.sendEventToPostHog(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
@@ -130,21 +135,23 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
       await analytics.sendAliasEvent();
     }
 
-    if (connection.type === WalletType.Ledger) {
-      void connection.value.transport.close();
-    }
+    closeConnection();
+  };
+
+  const cleanupConnectionState = () => {
+    setConnection(undefined);
+    navigateTo('connect');
+    closeConnection();
   };
 
   const onRetry = () => {
     setErrorDialogCode(undefined);
-    setConnection(undefined);
-    navigateTo('connect');
+    cleanupConnectionState();
   };
 
   const handleStartOver = () => {
     setIsStartOverDialogVisible(false);
-    setConnection(undefined);
-    navigateTo('connect');
+    cleanupConnectionState();
   };
 
   return (

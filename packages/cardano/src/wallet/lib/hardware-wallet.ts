@@ -22,15 +22,17 @@ export const manifest: KeyManagement.TrezorConfig['manifest'] = {
   email: process.env.EMAIL_ADDRESS
 };
 
+const initializeTrezor = () =>
+  HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
+    manifest,
+    communicationType: DEFAULT_COMMUNICATION_TYPE
+  });
+
 const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> = {
   [WalletType.Ledger]: async () =>
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
   ...(AVAILABLE_WALLETS.includes(WalletType.Trezor) && {
-    [WalletType.Trezor]: async () =>
-      await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
-        manifest,
-        communicationType: DEFAULT_COMMUNICATION_TYPE
-      })
+    [WalletType.Trezor]: async () => await initializeTrezor()
   })
 };
 
@@ -57,10 +59,7 @@ export const connectDeviceRevamped = async (usbDevice: USBDevice): Promise<Hardw
     };
   }
   if (isTrezorHWSupported() && isDeviceDescribedBy(usbDevice, ...trezorDescriptors)) {
-    await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
-      manifest,
-      communicationType: DEFAULT_COMMUNICATION_TYPE
-    });
+    await initializeTrezor();
     return {
       type: WalletType.Trezor
     };
@@ -69,15 +68,17 @@ export const connectDeviceRevamped = async (usbDevice: USBDevice): Promise<Hardw
   throw new Error('Could not recognize the device');
 };
 
+const invalidDeviceError = new Error('Invalid device type');
+
 export const getHwExtendedAccountPublicKey = async (
   walletType: HardwareWallets,
   accountIndex: number,
-  deviceConnection?: LedgerConnection
+  ledgerConnection?: LedgerConnection
 ): Promise<Bip32PublicKeyHex> => {
   if (walletType === WalletType.Ledger) {
     return HardwareLedger.LedgerKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
-      deviceConnection,
+      deviceConnection: ledgerConnection,
       accountIndex
     });
   }
@@ -87,7 +88,7 @@ export const getHwExtendedAccountPublicKey = async (
       accountIndex
     });
   }
-  throw new Error('Invalid device type');
+  throw invalidDeviceError;
 };
 
 type DeviceSpec = {
@@ -122,5 +123,45 @@ export const getDeviceSpec = async (connection: HardwareWalletConnection): Promi
     };
   }
 
-  throw new Error('Invalid device type');
+  throw invalidDeviceError;
+};
+
+type SoftwareVersion = {
+  major: number;
+  minor: number;
+  patch: number;
+};
+
+const parseStringVersion = (version: string) => {
+  const [major, minor, patch] = version.split('.').map((n) => Number.parseInt(n, 10));
+  return {
+    major,
+    minor,
+    patch
+  };
+};
+
+export const getDeviceSoftwareVersion = async (type: HardwareWallets): Promise<SoftwareVersion> => {
+  if (type === WalletType.Ledger) {
+    const connection = await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(DEFAULT_COMMUNICATION_TYPE);
+    const { cardanoAppVersion } = await getDeviceSpec({
+      type,
+      value: connection
+    });
+    return parseStringVersion(cardanoAppVersion);
+  }
+  if (isTrezorHWSupported() && type === WalletType.Trezor) {
+    // To allow checks once the app is refreshed. It won't affect the user flow
+    // TODO: Smarter Trezor initialization logic after onboarding revamp LW-9808
+    // TODO: Reuse getDeviceSpec to get version
+    await initializeTrezor();
+    const features = await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE);
+    return {
+      major: features.major_version,
+      minor: features.minor_version,
+      patch: features.patch_version
+    };
+  }
+
+  throw invalidDeviceError;
 };
