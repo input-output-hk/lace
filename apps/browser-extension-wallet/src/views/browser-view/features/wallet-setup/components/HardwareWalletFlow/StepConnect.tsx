@@ -7,13 +7,21 @@ import { TFunction, useTranslation } from 'react-i18next';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
-type ConnectionError = 'userGestureRequired' | 'devicePickerRejected' | 'deviceLocked' | 'cardanoAppNotOpen';
+type ConnectionError =
+  | 'userGestureRequired'
+  | 'devicePickerRejected'
+  | 'deviceLocked'
+  | 'deviceBusy'
+  | 'cardanoAppNotOpen'
+  | 'generic';
 
 const connectionSubtitleErrorTranslationsMap: Record<ConnectionError, string> = {
   cardanoAppNotOpen: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.cardanoAppNotOpen',
   deviceLocked: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceLocked',
+  deviceBusy: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceBusy',
   devicePickerRejected: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.devicePickerRejected',
-  userGestureRequired: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.userGestureRequired'
+  userGestureRequired: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.userGestureRequired',
+  generic: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.generic'
 };
 
 const makeTranslations = ({ connectionError, t }: { connectionError: ConnectionError; t: TFunction }) => ({
@@ -30,9 +38,12 @@ const parseConnectionError = (error: Error): ConnectionError | null => {
     if (error.message.includes('user gesture')) return 'userGestureRequired';
     if (error.message.includes('No device selected')) return 'devicePickerRejected';
   }
-  if (error.message === 'Timeout. Connecting too long.') return 'deviceLocked';
-  if (error.message.includes('Cannot communicate with Ledger Cardano App')) return 'cardanoAppNotOpen';
-  return null;
+  if (error.message === 'Timeout. Connecting too long.') return 'deviceBusy';
+  if (error.message.includes('Cannot communicate with Ledger Cardano App')) {
+    if (error.message.includes('General error 0x5515')) return 'deviceLocked';
+    if (error.message.includes('General error 0x6e01')) return 'cardanoAppNotOpen';
+  }
+  return 'generic';
 };
 
 const threeSecondsTimeout = 3000;
@@ -95,8 +106,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
           return;
         }
 
-        const parsedConnectionError = parseConnectionError(error);
-        if (parsedConnectionError) setConnectionError(parsedConnectionError);
+        setConnectionError(parseConnectionError(error));
       }
     })();
   }, [connect, discoveryState, requestHardwareWalletConnection, onUsbDeviceChange, onConnected]);

@@ -1604,7 +1604,9 @@
         "userGestureRequired": "It appears the page reload interrupted the search for connected hardware wallet devices.",
         "devicePickerRejected": "No hardware wallet device was chosen.",
         "deviceLocked": "Your hardware wallet device seems to be locked. Please unlock it to proceed.",
-        "cardanoAppNotOpen": "Cardano App is not open on your hardware wallet device. Please open it to proceed."
+        "deviceBusy": "Your hardware wallet device seems to be busy with some other App. Please ensure it is free to connect.",
+        "cardanoAppNotOpen": "Cardano App is not open on your hardware wallet device. Please open it to proceed.",
+        "generic": "Something went wring. Please try again."
       },
       "errorCta": "Try again"
     },
