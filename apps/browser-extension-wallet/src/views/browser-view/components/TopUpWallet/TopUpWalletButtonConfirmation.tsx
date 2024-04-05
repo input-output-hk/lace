@@ -5,26 +5,44 @@ import { Button } from '@lace/ui';
 import { TopUpWalletDialog } from './TopUpWalletDialog';
 import { useTranslation } from 'react-i18next';
 import { BANXA_URL } from './config';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
-export const TopUpWalletButtonConfirmation = (): React.ReactElement => {
+interface TopUpWalletButtonConfirmationProps {
+  btnClickAnalyticsAction: PostHogAction;
+}
+
+export const TopUpWalletButtonConfirmation = ({
+  btnClickAnalyticsAction
+}: TopUpWalletButtonConfirmationProps): React.ReactElement => {
   const dialogTriggerReference = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
 
   return (
     <>
       <Button.CallToAction
         icon={<AdaComponentTransparent />}
         label={t('browserView.assets.topupWallet.buyButton.caption')}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          analytics.sendEventToPostHog(btnClickAnalyticsAction);
+          setOpen(true);
+        }}
         ref={dialogTriggerReference}
       />
 
       <TopUpWalletDialog
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerGoBackClick);
+          setOpen(false);
+        }}
         open={open}
         triggerRef={dialogTriggerReference}
-        onConfirm={() => tabs.create({ url: BANXA_URL })}
+        onConfirm={() => {
+          analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerContinueClick);
+          tabs.create({ url: BANXA_URL });
+        }}
       />
     </>
   );

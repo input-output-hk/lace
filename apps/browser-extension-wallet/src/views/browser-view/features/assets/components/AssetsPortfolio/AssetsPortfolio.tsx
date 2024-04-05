@@ -125,7 +125,7 @@ export const AssetsPortfolio = ({
       )}
       {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && (
         <Flex w={'$214'} flexDirection={'column'} alignItems={'stretch'}>
-          <TopUpWalletButtonConfirmation />
+          <TopUpWalletButtonConfirmation btnClickAnalyticsAction={PostHogAction.TokenTokensWeb3JourneyBuyAdaClick} />
         </Flex>
       )}
       <Skeleton loading={isPortfolioBalanceLoading || !assetList}>

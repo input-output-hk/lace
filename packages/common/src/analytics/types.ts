@@ -241,6 +241,11 @@ export enum PostHogAction {
   TokenTokensTokenRowClick = 'token | tokens | token row | click',
   TokenTokenDetailViewAllClick = 'token | token detail | view all | click',
   TokenTokenDetailXClick = 'token | token detail | x | click',
+  TokenTokensTopYourWalletBuyAdaClick = 'token | tokens | top your wallet | buy ada | click',
+  TokenBuyAdaDisclaimerGoBackClick = 'token | buy ada | disclaimer | go back | click',
+  TokenBuyAdaDisclaimerAgreeClick = 'token | buy ada | disclaimer | agree | click',
+  TokenBuyAdaDisclaimerContinueClick = 'token | buy ada | disclaimer | continue | click',
+  TokenTokensWeb3JourneyBuyAdaClick = 'token | tokens | web 3 journey | buy ada | click',
   // Activities
   ActivityActivityClick = 'activity | activity | click',
   ActivityActivityActivityRowClick = 'activity | activity | activity row | click',

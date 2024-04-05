@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Box, Checkbox, Dialog, Text } from '@lace/ui';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 interface TopUpWalletDialogProps {
   open: boolean;
@@ -17,6 +19,7 @@ export const TopUpWalletDialog = ({
 }: TopUpWalletDialogProps): React.ReactElement => {
   const [agreed, setAgreed] = useState(false);
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
 
   return (
     <Dialog.Root
@@ -36,7 +39,10 @@ export const TopUpWalletDialog = ({
       </Dialog.Description>
       <Checkbox
         label={t('browserView.assets.topupWallet.modal.checkbox')}
-        onClick={() => setAgreed((prev) => !prev)}
+        onClick={() => {
+          !agreed && analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerAgreeClick);
+          setAgreed((prev) => !prev);
+        }}
         checked={agreed}
       />
       <Dialog.Actions>
