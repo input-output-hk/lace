@@ -56,7 +56,8 @@ const data: ComponentProps<typeof TransactionDetails> = {
   openExternalLink: (url) => window.open(url, '_blank', 'noopener,noreferrer'),
   handleOpenExternalHashLink: () => {
     console.log('handle on hash click', '639a43144dc2c0ead16f2fb753360f4b4f536502dbdb8aa5e424b00abb7534ff');
-  }
+  },
+  ownAddresses: []
 };
 
 const stakeVoteDelegationCertificate = [
