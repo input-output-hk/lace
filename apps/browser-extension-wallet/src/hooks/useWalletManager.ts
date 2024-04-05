@@ -200,8 +200,10 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
 export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
   await Wallet.connectDevice(model);
 
-const requestHardwareWalletConnection = ({ ledgerOnly }: { ledgerOnly: boolean }): Promise<USBDevice> =>
-  navigator.usb.requestDevice({ filters: ledgerOnly ? [Wallet.ledgerDescriptor] : Wallet.supportedHwUsbDescriptors });
+const requestHardwareWalletConnection = ({ trezorSupported }: { trezorSupported: boolean }): Promise<USBDevice> =>
+  navigator.usb.requestDevice({
+    filters: trezorSupported ? Wallet.supportedHwUsbDescriptors : [Wallet.ledgerDescriptor]
+  });
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
   Wallet.connectDeviceRevamped(usbDevice);

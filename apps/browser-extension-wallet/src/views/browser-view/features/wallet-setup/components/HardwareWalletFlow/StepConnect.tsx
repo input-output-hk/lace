@@ -54,13 +54,13 @@ const useConnectHardwareWalletRevampedWithTimeout = (connect: UseWalletManager['
     [connect]
   );
 
-type Props = {
+type StepConnectProps = {
   onBack: () => void;
   onConnected: (result?: Wallet.HardwareWalletConnection) => void;
   onUsbDeviceChange: (usbDevice: USBDevice) => void;
 };
 
-export const StepConnect: VFC<Props> = ({ onBack, onConnected, onUsbDeviceChange }) => {
+export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbDeviceChange }) => {
   const { t } = useTranslation();
   const [discoveryState, setDiscoveryState] = useState<'idle' | 'requested' | 'running'>('requested');
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
@@ -81,7 +81,7 @@ export const StepConnect: VFC<Props> = ({ onBack, onConnected, onUsbDeviceChange
       setDiscoveryState('running');
       let connectionResult: Wallet.HardwareWalletConnection;
       try {
-        const usbDevice = await requestHardwareWalletConnection({ ledgerOnly: !isTrezorHWSupported() });
+        const usbDevice = await requestHardwareWalletConnection({ trezorSupported: isTrezorHWSupported() });
         onUsbDeviceChange(usbDevice);
         connectionResult = await connect(usbDevice);
         onConnected(connectionResult);
