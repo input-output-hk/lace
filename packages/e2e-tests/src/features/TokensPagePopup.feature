@@ -4,7 +4,8 @@ Feature: LW: Tokens tab - popup view
   Background:
     Given Wallet is synced
 
-  @LW-2343 @Testnet @Mainnet
+  @LW-2343 @Testnet @Mainnet @Pending
+  @issue=LW-10211
   Scenario: Tokens title and counter
     When I see Tokens counter with total number of tokens displayed
     Then Tokens counter matches the number of wallet tokens

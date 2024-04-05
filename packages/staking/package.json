@@ -43,8 +43,7 @@
     "prettier:check": "yarn run -T prettier --check '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "prettier:fix": "yarn run -T prettier --write --loglevel warn '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "test": "echo 'Staking package runs tests in its own CI'",
-    "test:all": "yarn test:unit --coverage --silent && yarn test:vr",
-    "test:coverage": "yarn test --coverage --silent",
+    "test:all": "yarn test:unit && yarn test:vr",
     "test:unit": "vitest run",
     "watch": "tsup --watch"
   },
@@ -74,8 +73,8 @@
   "devDependencies": {
     "@babel/core": "^7.21.0",
     "@cardano-sdk/core": "0.30.0",
-    "@cardano-sdk/input-selection": "0.12.25",
-    "@cardano-sdk/tx-construction": "0.18.1",
+    "@cardano-sdk/input-selection": "0.12.26",
+    "@cardano-sdk/tx-construction": "0.18.2",
     "@cardano-sdk/util": "0.15.0",
     "@storybook/addon-actions": "^7.6.7",
     "@storybook/addon-essentials": "^7.6.7",
@@ -121,11 +120,11 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
-    "@cardano-sdk/input-selection": "0.12.25",
-    "@cardano-sdk/tx-construction": "0.18.1",
+    "@cardano-sdk/input-selection": "0.12.26",
+    "@cardano-sdk/tx-construction": "0.18.2",
     "@cardano-sdk/util": "0.15.0",
-    "@cardano-sdk/wallet": "0.35.1",
-    "@cardano-sdk/web-extension": "0.26.0",
+    "@cardano-sdk/wallet": "0.35.2",
+    "@cardano-sdk/web-extension": "0.26.1",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",

@@ -565,12 +565,6 @@ export const cardanoStakePoolSelectedDetails = {
     'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
   ],
   saturation: '5.12',
-  activeStake: {
-    number: '-'
-  },
-  liveStake: {
-    number: '-'
-  },
   ros: '69.00',
   status: 'active',
   ticker: 'STTST',

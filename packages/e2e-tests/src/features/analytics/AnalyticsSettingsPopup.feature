@@ -187,8 +187,7 @@ Feature: Analytics - Settings - Popup View
     Then I validate that 2 analytics event(s) have been sent
 
   # this test should be executed as the last one in this suite
-  @LW-8571 @Pending
-  @issue=LW-10150
+  @LW-8571
   Scenario: Analytics - Popup View - Settings - Wallet removal events - Remove wallet
     Given I am on Tokens popup page
     When I open settings from header menu

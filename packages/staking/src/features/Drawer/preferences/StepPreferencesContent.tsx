@@ -53,7 +53,7 @@ export const StepPreferencesContent = () => {
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
-      displayData: { name, ros, saturation },
+      displayData: { name = '', ros, saturation },
       id,
       sliderIntegerPercentage,
     } = draftPool;
@@ -127,7 +127,7 @@ export const StepPreferencesContent = () => {
             <PoolDetailsCard
               key={id}
               color={color}
-              name={name}
+              name={name || ''}
               onRemove={createRemovePoolFromPortfolio(id)}
               actualPercentage={onChainPercentage}
               savedPercentage={savedIntegerPercentage}
