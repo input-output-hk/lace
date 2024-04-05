@@ -1,4 +1,4 @@
-import { style } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
 import { sx } from 'features/theme';
 
 // TODO use new @lace/ui Grid when available: https://input-output.atlassian.net/browse/LW-9791

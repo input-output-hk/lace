@@ -14,6 +14,7 @@ const colorProperties = defineProperties({
     borderRightColor: theme.colors,
     borderTopColor: theme.colors,
     color: theme.colors,
+    outlineColor: theme.colors,
   },
 });
 

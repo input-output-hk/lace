@@ -1,14 +1,17 @@
-import { style, sx, vars } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 
 export const row = style([
-  {
+  sx({
     alignItems: 'center',
     display: 'grid',
-    flex: '1',
-    gap: vars.spacing.$10,
+    gap: '$10',
+    height: '$44',
+    minHeight: '$44',
+  }),
+  {
+    flex: 1,
     gridTemplateColumns: 'repeat(auto-fit, minmax(0px, 1fr))',
-    height: vars.spacing.$44,
-    minHeight: vars.spacing.$44,
   },
 ]);
 

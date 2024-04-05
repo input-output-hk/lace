@@ -1,4 +1,4 @@
-import { style } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
 import { sx } from 'features/theme';
 
 export const textBoxLeft = style([
