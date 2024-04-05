@@ -92,7 +92,7 @@
     "@testing-library/react-hooks": "^8.0.1",
     "@tsconfig/create-react-app": "^1.0.3",
     "@vanilla-extract/esbuild-plugin": "^2.2.2",
-    "@vanilla-extract/vite-plugin": "^3.9.3",
+    "@vanilla-extract/vite-plugin": "^3.9.5",
     "@vitest/coverage-c8": "^0.31.0",
     "antd": "^4.24.10",
     "babel-loader": "^8.3.0",
