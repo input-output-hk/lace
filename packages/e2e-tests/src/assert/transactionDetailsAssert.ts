@@ -111,9 +111,11 @@ class TransactionsDetailsAssert {
       await TransactionDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
       await TransactionDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
       await TransactionDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
       const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
+      if (!txType.includes('Stake Key Registration')) {
+        await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
+      }
       if (txType.includes('Delegation')) {
         await TransactionDetailsPage.transactionDetailsStakepoolName.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsStakepoolTicker.waitForDisplayed();

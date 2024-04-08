@@ -48,7 +48,7 @@ export const WalletSetupSelectAccountsStepRevamp = ({
       title={t('core.walletSetupSelectAccountsStep.setupLaceWallet')}
       onBack={onBack}
       onNext={() => onSubmit(Number(selectedAccount), walletName)}
-      isNextEnabled={Number(selectedAccount) >= 0}
+      isNextEnabled={Number(selectedAccount) >= 0 && !!walletName && isNameValid}
       nextLabel={t('core.walletSetupSelectAccountsStep.enterWallet')}
       description={<div className={styles.subtitle}>{t('core.walletSetupSelectAccountsStep.chooseWalletName')}</div>}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
