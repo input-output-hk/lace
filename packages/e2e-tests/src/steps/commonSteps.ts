@@ -26,6 +26,7 @@ import {
 } from '../utils/window';
 import { Given } from '@wdio/cucumber-framework';
 import tokensPageObject from '../pageobject/tokensPageObject';
+import ToastMessage from '../elements/toastMessage';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
@@ -104,6 +105,10 @@ When(
   }
 );
 
+When(/^I close a toast message$/, async () => {
+  await ToastMessage.clickCloseButton();
+});
+
 // TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
   await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
@@ -130,9 +135,9 @@ Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: strin
     'Address copied': 'core.infoWallet.addressCopied',
     'NFTs added to folder': 'browserView.nfts.folderDrawer.toast.update',
     'NFT removed': 'browserView.nfts.folderDrawer.toast.delete',
-    'Folder created': 'browserView.nfts.folderDrawer.toast.create',
-    'Folder deleted': 'browserView.nfts.deleteFolderSuccess',
-    'Folder renamed': 'browserView.nfts.renameFolderSuccess',
+    'Folder created successfully': 'browserView.nfts.folderDrawer.toast.create',
+    'Folder deleted successfully': 'browserView.nfts.deleteFolderSuccess',
+    'Folder renamed successfully': 'browserView.nfts.renameFolderSuccess',
     'Edited successfully': 'browserView.addressBook.toast.editAddress',
     'Address added': 'browserView.addressBook.toast.addAddress',
     'Given address already exists': 'addressBook.errors.givenAddressAlreadyExist',

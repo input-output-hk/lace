@@ -88,7 +88,7 @@ Feature: General Settings - Popup View
     When I open settings from header menu
     And I click on "Network" setting
     When I click on "Preprod" radio button
-    Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I don't see a toast with text: "Switched network"
     And I close the drawer by clicking back button
     When I navigate to Tokens popup page
     Then I see network id: "Preprod"
@@ -99,7 +99,7 @@ Feature: General Settings - Popup View
     When I open settings from header menu
     And I click on "Network" setting
     When I click on "Mainnet" radio button
-    Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I don't see a toast with text: "Switched network"
     And I close the drawer by clicking back button
     When I navigate to Tokens popup page
     Then I do not see network id: "Mainnet"

@@ -2,7 +2,7 @@
 Feature: General Settings - Extended Browser View
 
   Background:
-    Given Lace is ready for test
+    Given Wallet is synced
 
   @LW-2324 @Smoke @Mainnet @Testnet
   Scenario: Extended View - Visibility of Settings page and its content
@@ -79,7 +79,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on "Network" setting
     When I click on "Preprod" radio button
-    Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I don't see a toast with text: "Switched network"
     And I close the drawer by clicking close button
     When I navigate to Tokens extended page
     Then I see network id: "Preprod"
@@ -90,7 +90,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on "Network" setting
     When I click on "Mainnet" radio button
-    Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I don't see a toast with text: "Switched network"
     And I close the drawer by clicking close button
     When I navigate to Tokens extended page
     Then I do not see network id: "Mainnet"

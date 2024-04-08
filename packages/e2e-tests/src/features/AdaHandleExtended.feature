@@ -79,18 +79,23 @@ Feature: ADA handle - extended view
     And I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for default wallet address
     Then I see a toast with text: "Address copied"
+    And I close a toast message
     And Clipboard contains address of wallet: "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for handle: "$cde"
     Then I see a toast with text: "Handle copied"
+    And I close a toast message
     And Clipboard contains text: "$cde"
     When I click "Copy" button on "Receive" page for handle: "$t_h_1"
     Then I see a toast with text: "Handle copied"
+    And I close a toast message
     And Clipboard contains text: "$t_h_1"
     When I click "Copy" button on "Receive" page for handle: "$test_handle_1"
     Then I see a toast with text: "Handle copied"
+    And I close a toast message
     And Clipboard contains text: "$test_handle_1"
     When I click "Copy" button on "Receive" page for handle: "$test_handle_3"
     Then I see a toast with text: "Handle copied"
+    And I close a toast message
     And Clipboard contains text: "$test_handle_3"
 
   @LW-7427 @LW-7426
