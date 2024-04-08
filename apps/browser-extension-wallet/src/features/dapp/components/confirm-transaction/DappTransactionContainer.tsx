@@ -7,9 +7,6 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import { Wallet } from '@lace/cardano';
 import { withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { runtime } from 'webextension-polyfill';
 import { useFetchCoinPrice, useChainHistoryProvider } from '@hooks';
 import {
   createTxInspector,
@@ -21,11 +18,9 @@ import {
 } from '@cardano-sdk/core';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
-import type { UserPromptService } from '@lib/scripts/background/services';
-import { of, take } from 'rxjs';
 
 import { useCurrencyStore, useAppSettingsContext } from '@providers';
-import { logger, signingCoordinator } from '@lib/wallet-api-ui';
+import { logger } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
 
@@ -36,7 +31,7 @@ interface DappTransactionContainerProps {
 export const DappTransactionContainer = withAddressBookContext(
   ({ errorMessage }: DappTransactionContainerProps): React.ReactElement => {
     const {
-      signTxRequest: { request: req, set: setSignTxRequest },
+      signTxRequest: { request: req },
       dappInfo
     } = useViewsFlowContext();
 
@@ -77,30 +72,6 @@ export const DappTransactionContainer = withAddressBookContext(
 
     const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
     const txCollateral = useComputeTxCollateral(walletState, tx);
-
-    useEffect(() => {
-      const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
-        setSignTxRequest(r);
-      });
-
-      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-        {
-          api$: of({
-            async readyToSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger: console, runtime }
-      );
-
-      return () => {
-        subscription.unsubscribe();
-        api.shutdown();
-      };
-    }, [setSignTxRequest]);
 
     const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
     const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
