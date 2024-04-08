@@ -104,9 +104,6 @@ class OnboardingMainPage extends CommonOnboardingElements {
       case 'Terms of service':
         await this.agreementTermsOfServiceLink.click();
         break;
-      case 'Cookie policy':
-        await this.cookiePolicyLink.click();
-        break;
       default:
         throw new Error(`Unsupported legal link text - ${linkText}`);
     }
