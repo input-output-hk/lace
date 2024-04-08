@@ -1,4 +1,4 @@
-import { TestWalletName, getTestWallet } from '../../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../../support/walletConfiguration';
 import CommonOnboardingElements from './commonOnboardingElements';
 import recoveryPhrasePage from './recoveryPhrasePage';
 import walletSetupPage from './walletSetupPage';
@@ -103,6 +103,9 @@ class OnboardingMainPage extends CommonOnboardingElements {
         break;
       case 'Terms of service':
         await this.agreementTermsOfServiceLink.click();
+        break;
+      case 'Cookie policy':
+        await this.cookiePolicyLink.click();
         break;
       default:
         throw new Error(`Unsupported legal link text - ${linkText}`);
