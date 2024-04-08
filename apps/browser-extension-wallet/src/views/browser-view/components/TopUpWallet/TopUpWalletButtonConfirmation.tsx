@@ -8,13 +8,7 @@ import { BANXA_URL } from './config';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
 
-interface TopUpWalletButtonConfirmationProps {
-  btnClickAnalyticsAction: PostHogAction;
-}
-
-export const TopUpWalletButtonConfirmation = ({
-  btnClickAnalyticsAction
-}: TopUpWalletButtonConfirmationProps): React.ReactElement => {
+export const TopUpWalletButtonConfirmation = (): React.ReactElement => {
   const dialogTriggerReference = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -26,7 +20,7 @@ export const TopUpWalletButtonConfirmation = ({
         icon={<AdaComponentTransparent />}
         label={t('browserView.assets.topupWallet.buyButton.caption')}
         onClick={() => {
-          analytics.sendEventToPostHog(btnClickAnalyticsAction);
+          analytics.sendEventToPostHog(PostHogAction.TokenTokensTopYourWalletBuyAdaClick);
           setOpen(true);
         }}
         ref={dialogTriggerReference}

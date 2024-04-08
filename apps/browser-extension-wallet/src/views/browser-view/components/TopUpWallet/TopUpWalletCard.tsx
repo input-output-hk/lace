@@ -3,7 +3,6 @@ import { Card, Flex, Text } from '@lace/ui';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
 import { TopUpWalletButtonConfirmation } from './TopUpWalletButtonConfirmation';
-import { PostHogAction } from '@lace/common';
 
 export const TopUpWalletCard = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -21,7 +20,7 @@ export const TopUpWalletCard = (): React.ReactElement => {
         </Flex>
         <Text.Body.Normal weight="$medium">{t('browserView.assets.topupWallet.card.content')}</Text.Body.Normal>
         <Flex mt="$10" flexDirection="column" alignItems="stretch">
-          <TopUpWalletButtonConfirmation btnClickAnalyticsAction={PostHogAction.TokenTokensTopYourWalletBuyAdaClick} />
+          <TopUpWalletButtonConfirmation />
         </Flex>
       </Flex>
     </Card.Outlined>
