@@ -44,12 +44,6 @@ export interface CreateWallet {
   chainId?: Wallet.Cardano.ChainId;
 }
 
-export interface SetWallet {
-  walletInstance: Wallet.CardanoWallet;
-  chainName?: Wallet.ChainName;
-  mnemonicVerificationFrequency?: string;
-}
-
 export interface CreateHardwareWallet {
   accountIndex?: number;
   name: string;
