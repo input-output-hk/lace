@@ -24,7 +24,6 @@ for (const lang of Object.values(Language)) {
 i18n.use(initReactI18next).init({
   fallbackLng: DEFAULT_LANG,
   interpolation: {
-    // not needed for react as it escapes by default
     escapeValue: false
   },
   lng: Language.en,
