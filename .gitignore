@@ -31,3 +31,6 @@ result
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Typescript reports
+tsconfig.tsbuildinfo

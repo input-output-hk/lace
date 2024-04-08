@@ -39,6 +39,7 @@
     "prestorybook:build": "yarn build",
     "storybook:build": "ENV=development build-storybook --log-level error",
     "test": "yarn workspaces foreach run test",
+    "type-check": "tsc --noEmit",
     "version": "standard-version",
     "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*CJS.*Build success)' -c watch",
     "watch-deps": "EXCLUDE_APP=true yarn watch"
