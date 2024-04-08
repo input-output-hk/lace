@@ -685,7 +685,8 @@
         "title": "Opps! Something went wrong",
         "cta": "OK",
         "messageDeviceDisconnected": "Please check your hardware device connection and for Ledger, if Cardano App is open",
-        "messagePublicKeyExportRejected": "Public key export unsuccessful. User declined action on hardware wallet device"
+        "messagePublicKeyExportRejected": "Public key export unsuccessful. User declined action on hardware wallet device.",
+        "messageGeneric": "Try reconnecting you device again"
       },
       "startOver": {
         "title": "Are you sure you want to start again?",

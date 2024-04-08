@@ -7,6 +7,29 @@ import { TFunction, useTranslation } from 'react-i18next';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
+const threeSecondsTimeout = 3000;
+const timeoutErrorMessage = 'Timeout. Connecting too long.';
+
+const isTimeoutError = (error: Error): boolean => error.message === timeoutErrorMessage;
+
+const useConnectHardwareWalletWithTimeout = (connect: UseWalletManager['connectHardwareWalletRevamped']) =>
+  useCallback(
+    async (usbDevice: USBDevice) => {
+      const result = await Promise.race([
+        connect(usbDevice),
+        // eslint-disable-next-line promise/avoid-new
+        new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), threeSecondsTimeout))
+      ]);
+
+      if (result === 'timeout') {
+        throw new Error(timeoutErrorMessage);
+      }
+
+      return result;
+    },
+    [connect]
+  );
+
 type ConnectionError =
   | 'userGestureRequired'
   | 'devicePickerRejected'
@@ -38,32 +61,13 @@ const parseConnectionError = (error: Error): ConnectionError | null => {
     if (error.message.includes('user gesture')) return 'userGestureRequired';
     if (error.message.includes('No device selected')) return 'devicePickerRejected';
   }
-  if (error.message === 'Timeout. Connecting too long.') return 'deviceBusy';
+  if (isTimeoutError(error)) return 'deviceBusy';
   if (error.message.includes('Cannot communicate with Ledger Cardano App')) {
     if (error.message.includes('General error 0x5515')) return 'deviceLocked';
     if (error.message.includes('General error 0x6e01')) return 'cardanoAppNotOpen';
   }
   return 'generic';
 };
-
-const threeSecondsTimeout = 3000;
-const useConnectHardwareWalletRevampedWithTimeout = (connect: UseWalletManager['connectHardwareWalletRevamped']) =>
-  useCallback(
-    async (usbDevice: USBDevice) => {
-      const result = await Promise.race([
-        connect(usbDevice),
-        // eslint-disable-next-line promise/avoid-new
-        new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), threeSecondsTimeout))
-      ]);
-
-      if (result === 'timeout') {
-        throw new Error('Timeout. Connecting too long.');
-      }
-
-      return result;
-    },
-    [connect]
-  );
 
 type StepConnectProps = {
   onBack: () => void;
@@ -78,7 +82,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
   const { requestHardwareWalletConnection, connectHardwareWalletRevamped } = useWalletManager();
 
   const translations = makeTranslations({ connectionError, t });
-  const connect = useConnectHardwareWalletRevampedWithTimeout(connectHardwareWalletRevamped);
+  const connect = useConnectHardwareWalletWithTimeout(connectHardwareWalletRevamped);
 
   const onRetry = useCallback(() => {
     setDiscoveryState('requested');
