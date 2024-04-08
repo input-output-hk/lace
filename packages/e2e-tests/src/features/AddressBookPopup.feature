@@ -15,7 +15,7 @@ Feature: Address book - popup view
     And I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
     And I click "Copy" button on address details page
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
     And address is saved to clipboard
 
   @LW-4475
@@ -68,11 +68,11 @@ Feature: Address book - popup view
     And I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And "Done" button is enabled on "Edit address" drawer
     Then I click "Done" button on "Edit address" drawer
-    And I see a toast with message: "<toast_message>"
-    Examples:
-      | wallet_name | wallet_address | toast_message                               |
-      | Byron       | Byron          | addressBook.errors.givenNameAlreadyExist    |
-      | SomeWallet  | Byron          | addressBook.errors.givenAddressAlreadyExist |
+    And I see a toast with text: "<toast_message>"
+    Examples: 
+      | wallet_name | wallet_address | toast_message                |
+      | Byron       | Byron          | Given name already exists    |
+      | SomeWallet  | Byron          | Given address already exists |
 
   @LW-4534
   Scenario: Popup-view - Address Book - Edit address and click back button
@@ -155,11 +155,11 @@ Feature: Address book - popup view
     When I click "Add address" button on address book page
     And I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "<toast_message>"
-    Examples:
-      | wallet_name | wallet_address | toast_message                               |
-      | Byron       | Byron          | addressBook.errors.givenNameAlreadyExist    |
-      | SomeWallet  | Byron          | addressBook.errors.givenAddressAlreadyExist |
+    Then I see a toast with text: "<toast_message>"
+    Examples: 
+      | wallet_name | wallet_address | toast_message                |
+      | Byron       | Byron          | Given name already exists    |
+      | SomeWallet  | Byron          | Given address already exists |
 
   @LW-4784 @Pending
   @issue=LW-7419

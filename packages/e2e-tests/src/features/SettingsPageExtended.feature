@@ -65,7 +65,7 @@ Feature: General Settings - Extended Browser View
     And I click on "Your keys" setting
     And I click on Show public key button
     And I click "Copy" button on "Show public key" page
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
     And I see that content of "TestAutomationWallet" public key is in clipboard
 
   @LW-2674 @Mainnet @Testnet
@@ -126,7 +126,7 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Toast displayed after switching network
     Given I am on Settings extended page
     When I switch network to: "Preview" without closing drawer
-    Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I see a toast with text: "Switched network"
 
   @LW-2718 @Testnet
   Scenario: Extended View - Settings - Token/NFTs updated after network switching

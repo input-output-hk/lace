@@ -37,7 +37,7 @@ Feature: ADA handle - extended view
     When I fill address form with "AH 1 edited" name and "$test_handle_3" address
     Then Green tick icon is displayed next to ADA handle
     And I click "Done" button on "Edit address" drawer
-    And I see a toast with message: "browserView.addressBook.toast.editAddress"
+    And I see a toast with text: "Edited successfully"
     And I see address row with name "AH 1 edited" and address "$test_handle_3" on the list in extended mode
 
   @LW-7337
@@ -58,7 +58,7 @@ Feature: ADA handle - extended view
     When I fill address form with "AH 1 edited" name and "$test_handle_2" address
     Then Green tick icon is displayed next to ADA handle
     And I click "Done" button on "Edit address" drawer
-    And I see a toast with message: "addressBook.errors.givenAddressAlreadyExist"
+    And I see a toast with text: "Given address already exists"
 
   @LW-7140 @LW-7136
   Scenario: Extended View - Ada handles displayed and sorted by handle length

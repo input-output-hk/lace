@@ -122,10 +122,36 @@ Then(
   }
 );
 
-Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
+Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
   await settingsExtendedPageObject.closeWalletSyncedToast();
-  await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
-  if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+
+  const toastTextToTranslationKeyMap: { [key: string]: string } = {
+    'Handle copied': 'core.infoWallet.handleCopied',
+    'Address copied': 'core.infoWallet.addressCopied',
+    'NFTs added to folder': 'browserView.nfts.folderDrawer.toast.update',
+    'NFT removed': 'browserView.nfts.folderDrawer.toast.delete',
+    'Folder created': 'browserView.nfts.folderDrawer.toast.create',
+    'Folder deleted': 'browserView.nfts.deleteFolderSuccess',
+    'Folder renamed': 'browserView.nfts.renameFolderSuccess',
+    'Edited successfully': 'browserView.addressBook.toast.editAddress',
+    'Address added': 'browserView.addressBook.toast.addAddress',
+    'Given address already exists': 'addressBook.errors.givenAddressAlreadyExist',
+    'Given name already exists': 'addressBook.errors.givenNameAlreadyExist',
+    'Switched network': 'browserView.settings.wallet.network.networkSwitched',
+    'Network Error': 'general.errors.networkError',
+    'Copied to clipboard': 'general.clipboard.copiedToClipboard'
+  };
+
+  const translationKey = toastTextToTranslationKeyMap[toastText];
+  if (!translationKey) {
+    throw new Error(`Unsupported toast text: ${toastText}`);
+  }
+
+  await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), shouldSee === 'see');
+
+  if (translationKey === 'general.clipboard.copiedToClipboard') {
+    Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+  }
 });
 
 Then(/^I don't see any toast message$/, async () => {
