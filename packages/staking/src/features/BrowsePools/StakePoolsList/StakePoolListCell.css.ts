@@ -6,8 +6,8 @@ export const dot = recipe({
   base: [
     {
       borderRadius: theme.radius.$circle,
-      height: '7px',
-      width: '7px',
+      height: 7,
+      width: 7,
     },
   ],
   variants: {
