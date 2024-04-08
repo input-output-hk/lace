@@ -2,8 +2,7 @@
   "name": "$WALLET_MANIFEST_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
   "version": "1.10.0",
-  "manifest_version": 3,
-  "key": "$LACE_EXTENSION_KEY",
+  "manifest_version": 2,
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",
@@ -11,16 +10,13 @@
     "128": "icon128.png"
   },
   "background": {
-    "service_worker": "./js/background.js"
+    "scripts": ["./js/background.js"]
   },
-  "action": {
+  "browser_action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["webRequest", "storage", "tabs", "unlimitedStorage"],
-  "host_permissions": ["<all_urls>"],
-  "content_security_policy": {
-    "extension_pages": "default-src 'self' $LOCALHOST_DEFAULT_SRC; frame-src https://connect.trezor.io/ https://www.youtube-nocookie.com; script-src 'self' 'wasm-unsafe-eval' $LOCALHOST_SCRIPT_SRC; font-src 'self' https://use.typekit.net; object-src 'self'; connect-src $CARDANO_SERVICES_URLS $ADA_HANDLE_URLS https://coingecko.live-mainnet.eks.lw.iog.io https://muesliswap.live-mainnet.eks.lw.iog.io $LOCALHOST_CONNECT_SRC https://eu.posthog.com/ https://use.typekit.net data:; style-src * 'unsafe-inline'; img-src * data:;"
-  },
+  "permissions": ["webRequest", "storage", "tabs", "unlimitedStorage", "nativeMessaging"],
+  "content_security_policy": "default-src 'self'; frame-src https://connect.trezor.io/ https://www.youtube-nocookie.com; script-src 'self' 'wasm-unsafe-eval'; font-src 'self' https://use.typekit.net; object-src 'self'; connect-src https://dev-mainnet.lw.iog.io https://dev-preprod.lw.iog.io https://dev-preview.lw.iog.io https://backend.dev-sanchonet.eks.lw.iog.io https://api.handle.me https://preprod.api.handle.me https://preview.api.handle.me https://coingecko.live-mainnet.eks.lw.iog.io https://muesliswap.live-mainnet.eks.lw.iog.io https://eu.posthog.com/ https://use.typekit.net data:; style-src * 'unsafe-inline'; img-src * data:;",
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
@@ -34,10 +30,5 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": ["/js/inject.js"],
-      "matches": ["http://*/*", "https://*/*", "<all_urls>"]
-    }
-  ]
+  "web_accessible_resources": ["/js/inject.js"]
 }

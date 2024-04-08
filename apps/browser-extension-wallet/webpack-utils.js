@@ -11,7 +11,7 @@ const transformManifest = (content, mode) => {
       const date = new Date();
       manifest.version = `${manifest.version}.${date.getMonth()}${date.getDate()}`;
     }
-    manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages
+    manifest.content_security_policy = manifest.content_security_policy
       .replace(
         '$CARDANO_SERVICES_URLS',
         `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW} ${process.env.CARDANO_SERVICES_URL_SANCHONET}`
@@ -29,11 +29,6 @@ const transformManifest = (content, mode) => {
           : ''
       );
 
-    if (process.env.LACE_EXTENSION_KEY) {
-      manifest.key = manifest.key.replace('$LACE_EXTENSION_KEY', process.env.LACE_EXTENSION_KEY);
-    } else {
-      delete manifest.key;
-    }
     return JSON.stringify(manifest);
   } catch (error) {
     throw new Error(error);
