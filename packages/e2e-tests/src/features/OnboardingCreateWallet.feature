@@ -210,9 +210,9 @@ Feature: Onboarding - Create wallet
       | 21    | is           | disabled    |
 
   @LW-5844
-  Scenario Outline: "Get started" page - Legal links - click on <legal_link> link
+  Scenario Outline: "Get started" page - Legal links in footer - click on <legal_link> link
     When "Get started" page is displayed
-    And I click on "<legal_link>" legal link on "Main page"
+    And I click on "<legal_link>" legal link
     Then "<legal_link>" is displayed in new tab
     Examples:
       | legal_link       |
