@@ -10675,7 +10675,6 @@ __metadata:
     react-dom: 17.0.2
     rollup-plugin-polyfill-node: ^0.8.0
     rxjs: 7.4.0
-    typescript: ^4.3.5
     webextension-polyfill: 0.8.0
   peerDependencies:
     react: 17.0.2
@@ -10697,7 +10696,6 @@ __metadata:
     react-copy-to-clipboard: 5.0.4
     react-dom: 17.0.2
     react-tooltip: 4.2.7
-    typescript: ^4.3.5
   peerDependencies:
     react: 17.0.2
     react-dom: 17.0.2
@@ -10749,7 +10747,6 @@ __metadata:
     sass: ^1.68.0
     storybook: ^7.4.3
     tsconfig-paths-webpack-plugin: 3.5.2
-    typescript: ^4.3.5
     uuid: ^8.3.2
     zxcvbn: ^4.4.2
   peerDependencies:
@@ -10790,7 +10787,6 @@ __metadata:
     flat: 5.0.2
     npm-run-all: 4.1.5
     ts-node: 10.9.1
-    typescript: 4.9.5
     wdio-intercept-service: 4.4.0
     webdriverio: 8.32.3
   languageName: unknown
@@ -10807,7 +10803,6 @@ __metadata:
     "@babel/preset-react": ^7.23.3
     "@babel/preset-typescript": ^7.22.5
     "@svgr/cli": ^8.1.0
-    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -10871,7 +10866,6 @@ __metadata:
     recharts: ^2.9.2
     storybook: ^7.6.7
     tsup: ^6.7.0
-    typescript: ^4.9.5
     use-resize-observer: ^9.1.0
     utility-types: ^3.10.0
     vite-plugin-commonjs: ^0.10.1
@@ -37633,7 +37627,7 @@ __metadata:
     ts-jest: 29.1.2
     ts-patch: ^2.0.1
     typedoc: ^0.21.5
-    typescript: ^4.3.5
+    typescript: ^5.4.4
     typescript-transform-paths: 3.3.1
     webpack: 5.76.0
     webpack-cli: 4.7.2
@@ -50631,16 +50625,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.9.5, typescript@npm:^4.9.5":
-  version: 4.9.5
-  resolution: "typescript@npm:4.9.5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: ee000bc26848147ad423b581bd250075662a354d84f0e06eb76d3b892328d8d4440b7487b5a83e851b12b255f55d71835b008a66cbf8f255a11e4400159237db
-  languageName: node
-  linkType: hard
-
 "typescript@npm:^3.5.3":
   version: 3.9.10
   resolution: "typescript@npm:3.9.10"
@@ -50648,16 +50632,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 46c842e2cd4797b88b66ef06c9c41dd21da48b95787072ccf39d5f2aa3124361bc4c966aa1c7f709fae0509614d76751455b5231b12dbb72eb97a31369e1ff92
-  languageName: node
-  linkType: hard
-
-"typescript@npm:^4.3.5":
-  version: 4.3.5
-  resolution: "typescript@npm:4.3.5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: bab033b5e2b0790dd35b77fd005df976ef80b8d84fd2c6e63cc31808151875beae9216e5a315fe7068e8499905c3c354248fe83272cdfc13b7705635f0c66c97
   languageName: node
   linkType: hard
 
@@ -50671,13 +50645,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
-  version: 4.9.5
-  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
+"typescript@npm:^5.4.4":
+  version: 5.4.4
+  resolution: "typescript@npm:5.4.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 1f8f3b6aaea19f0f67cba79057674ba580438a7db55057eb89cc06950483c5d632115c14077f6663ea76fd09fce3c190e6414bb98582ec80aa5a4eaf345d5b68
+  checksum: a7b54515d2adfc75c8d14188af0216b6b9ae3c192c9732797c24b1d14608eac1c83be7b1c65ce6f4ced0f2c40583f11b495fe1ba3d982afadbcc523517d183c8
   languageName: node
   linkType: hard
 
@@ -50691,16 +50665,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.3.5#~builtin<compat/typescript>":
-  version: 4.3.5
-  resolution: "typescript@patch:typescript@npm%3A4.3.5#~builtin<compat/typescript>::version=4.3.5&hash=dba6d9"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 365df18cf979c971ef9543b2acaa8694377a803f98e1804c41d0ede0b09d7046cb0cd98f2eaf3884b0fe923c01a60af1f653841bd8805c9715d5479c09a4ebe4
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
   version: 4.9.4
   resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=289587"
@@ -50708,6 +50672,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 2160f7ad975c59b2f5816817d3916be1d156c5688a7517602b3b640c5015e740f4ba933996ac85371d68f7bbdd41602150fb8b68334122ac637fdb5418085e7a
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@^5.4.4#~builtin<compat/typescript>":
+  version: 5.4.4
+  resolution: "typescript@patch:typescript@npm%3A5.4.4#~builtin<compat/typescript>::version=5.4.4&hash=5da071"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 34e8fe6b892736204c6c72ae9e3027fb37f23e34cf748340712101cbe9c55527c379c4d275c407e5c66ff73eca56c7425b1fb4ac5b23dc7a62413cf6a8af98e8
   languageName: node
   linkType: hard
 

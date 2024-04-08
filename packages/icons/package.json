@@ -30,7 +30,6 @@
     "@babel/plugin-transform-modules-commonjs": "^7.23.3",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.22.5",
-    "@svgr/cli": "^8.1.0",
-    "typescript": "^4.9.5"
+    "@svgr/cli": "^8.1.0"
   }
 }
