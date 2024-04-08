@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 interface InlineInfo {
   name: string;
-  value: string;
+  value: React.ReactNode;
   showCopyIcon?: boolean;
   onClick?: () => void;
 }
@@ -25,13 +25,14 @@ export const InlineInfoList = ({ items }: InlineInfoListProps): React.ReactEleme
         <div className={styles.valueContainer}>
           <h5
             data-testid="info-list-item-value"
+            id={`$copy-${value}`}
             className={classNames(styles.value, { [styles.link]: !!onClick })}
             onClick={onClick}
           >
             {value}
           </h5>
           {showCopyIcon && (
-            <CopyToClipboard text={value}>
+            <CopyToClipboard text={document.querySelector(`#copy-${value}`).textContent}>
               <CopyIcon className={styles.copyButton} data-testid="info-list-item-copy-btn" />
             </CopyToClipboard>
           )}

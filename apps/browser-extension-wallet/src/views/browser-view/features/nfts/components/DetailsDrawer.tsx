@@ -30,10 +30,6 @@ export const DetailsDrawer = ({
     () => (isNil(assetsInfo) ? undefined : assetsInfo.get(selectedNft?.assetId)),
     [selectedNft, assetsInfo]
   );
-  const nftDetailTranslation = {
-    tokenInformation: t('core.nftDetail.tokenInformation'),
-    attributes: t('core.nftDetail.attributes')
-  };
 
   return (
     <Drawer
@@ -54,11 +50,7 @@ export const DetailsDrawer = ({
     >
       {selectedNft && assetInfo && (
         <div className={styles.wrapper}>
-          <NftDetail
-            {...nftDetailSelector(assetInfo)}
-            amount={selectedNft.amount}
-            translations={nftDetailTranslation}
-          />
+          <NftDetail {...nftDetailSelector(assetInfo)} amount={selectedNft.amount} />
         </div>
       )}
     </Drawer>

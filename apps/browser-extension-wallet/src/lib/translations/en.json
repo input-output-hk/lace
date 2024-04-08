@@ -972,6 +972,7 @@
       "copyAddress": "Copy address"
     },
     "nfts": {
+      "searchPlaceholder": "Search by name, policy ID or asset ID",
       "fundWalletBanner": {
         "title": "You don't have any NFTs yet",
         "subtitle": "Use this address or scan the QR code to transfer your NFTs",
@@ -1548,6 +1549,7 @@
       "title": "NFT detail",
       "tokenInformation": "Token Information",
       "attributes": "Attributes",
+      "directory": "Directory",
       "sendNFT": "Send NFT"
     },
     "outputSummaryList": {

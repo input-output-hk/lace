@@ -14,8 +14,9 @@ import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/cons
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
+import { withNftsFoldersContext } from '../context';
 
-export const NftDetail = (): React.ReactElement => {
+export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
   const { inMemoryWallet } = useWalletStore();
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
@@ -32,11 +33,6 @@ export const NftDetail = (): React.ReactElement => {
   const bigintBalance = assetsBalance?.assets?.get(assetId) || BigInt(1);
 
   const amount = useMemo(() => Wallet.util.calculateAssetBalance(bigintBalance, assetInfo), [assetInfo, bigintBalance]);
-
-  const nftDetailTranslation = {
-    tokenInformation: t('core.nftDetail.tokenInformation'),
-    attributes: t('core.nftDetail.attributes')
-  };
 
   const handleOpenSend = () => {
     // eslint-disable-next-line camelcase
@@ -64,10 +60,9 @@ export const NftDetail = (): React.ReactElement => {
         <NftDetailView
           {...nftDetailSelector(assetInfo)}
           amount={amount}
-          translations={nftDetailTranslation}
           title={<h2 className={styles.secondaryTitle}>{assetInfo.nftMetadata?.name ?? assetInfo.fingerprint}</h2>}
         />
       )}
     </Drawer>
   );
-};
+});
