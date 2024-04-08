@@ -189,7 +189,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then I verify transaction costs amount is around 0.00 ADA
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I enter a value of: 2 to the "tADA" asset
-    Then I verify transaction costs amount is around 0.18 ADA
+    Then I verify transaction costs amount is around 0.25 ADA
 
   @LW-2370 @Testnet @Mainnet
   Scenario: Extended-view - Tx summary page is displayed

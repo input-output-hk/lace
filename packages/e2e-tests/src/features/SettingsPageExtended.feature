@@ -2,7 +2,7 @@
 Feature: General Settings - Extended Browser View
 
   Background:
-    Given Lace is ready for test
+    Given Wallet is synced
 
   @LW-2324 @Smoke @Mainnet @Testnet
   Scenario: Extended View - Visibility of Settings page and its content
