@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Flex, Text } from '@lace/ui';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
-import { TopUpWalletButtonConfirmation } from './TopUpWalletButtonConfirmation';
+import { TopUpWalletButton } from './TopUpWalletButton';
 
 export const TopUpWalletCard = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ export const TopUpWalletCard = (): React.ReactElement => {
         </Flex>
         <Text.Body.Normal weight="$medium">{t('browserView.assets.topupWallet.card.content')}</Text.Body.Normal>
         <Flex mt="$10" flexDirection="column" alignItems="stretch">
-          <TopUpWalletButtonConfirmation />
+          <TopUpWalletButton />
         </Flex>
       </Flex>
     </Card.Outlined>

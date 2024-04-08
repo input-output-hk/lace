@@ -8,7 +8,7 @@ import { BANXA_URL } from './config';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
 
-export const TopUpWalletButtonConfirmation = (): React.ReactElement => {
+export const TopUpWalletButton = (): React.ReactElement => {
   const dialogTriggerReference = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
