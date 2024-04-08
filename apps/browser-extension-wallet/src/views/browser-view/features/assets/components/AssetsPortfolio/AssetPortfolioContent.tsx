@@ -13,7 +13,7 @@ import styles from './AssetsPortfolio.module.scss';
 const MIN_ASSETS_COUNT_FOR_SEARCH = 10;
 
 const searchTokens = (data: IAssetDetails[], searchValue: string) => {
-  const fields = ['name', 'policyId', 'fingerprint'] as const;
+  const fields = ['name', 'policyId', 'fingerprint', 'ticker'] as const;
   const lowerSearchValue = searchValue.toLowerCase();
 
   return data.filter((item) =>
