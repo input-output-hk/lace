@@ -15,6 +15,11 @@ const makeWalletSetupCreateStepTranslations = (t: TFunction) => ({
   description: t('core.walletSetupCreateStep.description')
 });
 
+enum CreationState {
+  Idle = 'Idle',
+  Working = 'Working'
+}
+
 export type WalletData = {
   accountIndex: number;
   name: string;
@@ -28,7 +33,7 @@ type StepCreateProps = {
 
 export const StepCreate: VFC<StepCreateProps> = ({ connection, onError, walletData }) => {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<'idle' | 'working'>('idle');
+  const [status, setStatus] = useState<CreationState>(CreationState.Idle);
   const { createHardwareWalletRevamped, saveHardwareWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const [enhancedAnalyticsStatus] = useLocalStorage(
@@ -40,8 +45,8 @@ export const StepCreate: VFC<StepCreateProps> = ({ connection, onError, walletDa
 
   useEffect(() => {
     (async () => {
-      if (status !== 'idle') return;
-      setStatus('working');
+      if (status !== CreationState.Idle) return;
+      setStatus(CreationState.Working);
 
       void analytics.sendEventToPostHog(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
 

@@ -19,23 +19,32 @@ export interface HardwareWalletFlowProps {
 const TOTAL_ACCOUNTS = 50;
 const route = (path: FlowStep) => `${walletRoutePaths.setup.hardware}/${path}`;
 
-type FlowStep = 'connect' | 'setup' | 'create';
-type ErrorDialogCode = 'deviceDisconnected' | 'publicKeyExportRejected' | 'generic';
+enum FlowStep {
+  Connect = 'Connect',
+  Setup = 'Setup',
+  Create = 'Create'
+}
+
+enum ErrorDialogCode {
+  DeviceDisconnected = 'DeviceDisconnected',
+  PublicKeyExportRejected = 'PublicKeyExportRejected',
+  Generic = 'Generic'
+}
 
 const commonErrorDialogTranslationKeys = {
   title: 'browserView.onboarding.errorDialog.title',
   confirm: 'browserView.onboarding.errorDialog.cta'
 };
 const ErrorDialog = makeErrorDialog<ErrorDialogCode>({
-  deviceDisconnected: {
+  [ErrorDialogCode.DeviceDisconnected]: {
     ...commonErrorDialogTranslationKeys,
     description: 'browserView.onboarding.errorDialog.messageDeviceDisconnected'
   },
-  publicKeyExportRejected: {
+  [ErrorDialogCode.PublicKeyExportRejected]: {
     ...commonErrorDialogTranslationKeys,
     description: 'browserView.onboarding.errorDialog.messagePublicKeyExportRejected'
   },
-  generic: {
+  [ErrorDialogCode.Generic]: {
     ...commonErrorDialogTranslationKeys,
     description: 'browserView.onboarding.errorDialog.messageGeneric'
   }
@@ -57,7 +66,7 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
   useEffect(() => {
     const onHardwareWalletDisconnect = (event: USBConnectionEvent) => {
       if (event.device !== connectedUsbDevice || !connection) return;
-      setErrorDialogCode('deviceDisconnected');
+      setErrorDialogCode(ErrorDialogCode.DeviceDisconnected);
     };
 
     navigator.usb.addEventListener('disconnect', onHardwareWalletDisconnect);
@@ -78,7 +87,7 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
       if (result) {
         setConnection(result);
       }
-      navigateTo('setup');
+      navigateTo(FlowStep.Setup);
     },
     [navigateTo]
   );
@@ -94,12 +103,12 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
       accountIndex,
       name
     });
-    navigateTo('create');
+    navigateTo(FlowStep.Create);
   };
 
   const cleanupConnectionState = () => {
     setConnection(undefined);
-    navigateTo('connect');
+    navigateTo(FlowStep.Connect);
     closeConnection();
   };
 
@@ -114,14 +123,14 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
   };
 
   const onWalletCreateError = (error: Error) => {
-    let errorCode: ErrorDialogCode = 'generic';
+    let errorCode: ErrorDialogCode = ErrorDialogCode.Generic;
 
     const ledgerPkRejection =
       error.message.includes('Failed to export extended account public key') &&
       error.message.includes('Action rejected by user');
     const trezorPkRejection = error.message.includes('Trezor transport failed');
     if (ledgerPkRejection || trezorPkRejection) {
-      errorCode = 'publicKeyExportRejected';
+      errorCode = ErrorDialogCode.PublicKeyExportRejected;
     }
 
     setErrorDialogCode(errorCode);
@@ -138,24 +147,24 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
       />
       <WalletSetupLayout>
         <Switch>
-          <Route path={route('connect')}>
+          <Route path={route(FlowStep.Connect)}>
             <StepConnect onBack={onCancel} onConnected={onConnected} onUsbDeviceChange={setConnectedUsbDevice} />
           </Route>
           {!!connection && (
             <>
-              <Route path={route('setup')}>
+              <Route path={route(FlowStep.Setup)}>
                 <WalletSetupSelectAccountsStepRevamp
                   accounts={TOTAL_ACCOUNTS}
                   onBack={() => setIsStartOverDialogVisible(true)}
                   onSubmit={onAccountAndNameSubmit}
                 />
               </Route>
-              <Route path={route('create')}>
+              <Route path={route(FlowStep.Create)}>
                 <StepCreate connection={connection} onError={onWalletCreateError} walletData={walletData} />
               </Route>
             </>
           )}
-          <Redirect from="/" to={route('connect')} />
+          <Redirect from="/" to={route(FlowStep.Connect)} />
         </Switch>
       </WalletSetupLayout>
     </>

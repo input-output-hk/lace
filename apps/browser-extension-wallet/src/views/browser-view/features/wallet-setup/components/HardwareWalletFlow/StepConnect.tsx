@@ -69,6 +69,12 @@ const parseConnectionError = (error: Error): ConnectionError | null => {
   return 'generic';
 };
 
+enum DiscoveryState {
+  Idle = 'Idle',
+  Requested = 'Requested',
+  Running = 'Running'
+}
+
 type StepConnectProps = {
   onBack: () => void;
   onConnected: (result?: Wallet.HardwareWalletConnection) => void;
@@ -77,7 +83,7 @@ type StepConnectProps = {
 
 export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbDeviceChange }) => {
   const { t } = useTranslation();
-  const [discoveryState, setDiscoveryState] = useState<'idle' | 'requested' | 'running'>('requested');
+  const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(DiscoveryState.Requested);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
   const { requestHardwareWalletConnection, connectHardwareWalletRevamped } = useWalletManager();
 
@@ -85,24 +91,24 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
   const connect = useConnectHardwareWalletWithTimeout(connectHardwareWalletRevamped);
 
   const onRetry = useCallback(() => {
-    setDiscoveryState('requested');
+    setDiscoveryState(DiscoveryState.Requested);
     setConnectionError(null);
   }, []);
 
   useEffect(() => {
     (async () => {
-      if (discoveryState !== 'requested') return;
+      if (discoveryState !== DiscoveryState.Requested) return;
 
-      setDiscoveryState('running');
+      setDiscoveryState(DiscoveryState.Running);
       let connectionResult: Wallet.HardwareWalletConnection;
       try {
         const usbDevice = await requestHardwareWalletConnection({ trezorSupported: isTrezorHWSupported() });
         onUsbDeviceChange(usbDevice);
         connectionResult = await connect(usbDevice);
         onConnected(connectionResult);
-        setDiscoveryState('idle');
+        setDiscoveryState(DiscoveryState.Idle);
       } catch (error) {
-        setDiscoveryState('idle');
+        setDiscoveryState(DiscoveryState.Idle);
         console.error('ERROR connecting hardware wallet', error);
 
         if (error.innerError?.innerError?.message === 'The device is already open.') {
@@ -119,7 +125,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
     <WalletSetupConnectHardwareWalletStepRevamp
       onBack={onBack}
       translations={translations}
-      state={discoveryState === 'idle' && !!connectionError ? 'error' : 'loading'}
+      state={discoveryState === DiscoveryState.Idle && !!connectionError ? 'error' : 'loading'}
       onRetry={connectionError ? onRetry : undefined}
     />
   );
