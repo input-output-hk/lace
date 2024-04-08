@@ -40,25 +40,34 @@ export const connectDevice = async (model: HardwareWallets): Promise<DeviceConne
 
 type Descriptor = Partial<USBDevice>;
 type DescriptorEntries<T extends Descriptor> = [keyof T, T[keyof T]][];
-const isDeviceDescribedBy = (device: USBDevice, ...descriptors: Descriptor[]) =>
+const isDeviceDescribedBy = (device: USBDevice, descriptors: Descriptor[]) =>
   descriptors.some((descriptor) =>
     (Object.entries(descriptor) as DescriptorEntries<Descriptor>).every(([key, value]) => device[key] === value)
   );
 
-export const ledgerDescriptor = { vendorId: ledgerUSBVendorId };
-// eslint-disable-next-line unicorn/numeric-separators-style, unicorn/number-literal-case
-const trezorModelTProductId = 0x53c1;
+const ledgerNanoSProductId = 4117;
+const ledgerNanoSPlusProductId = 20_501;
+const ledgerNanoXProductId = 16_401;
+export const ledgerDescriptors = [ledgerNanoSProductId, ledgerNanoSPlusProductId, ledgerNanoXProductId].map(
+  (productId) => ({
+    vendorId: ledgerUSBVendorId,
+    productId
+  })
+);
+
+// eslint-disable-next-line unicorn/number-literal-case
+const trezorModelTProductId = 0x53_c1;
 const trezorDescriptors = TREZOR_USB_DESCRIPTORS.filter(({ productId }) => productId === trezorModelTProductId);
-export const supportedHwUsbDescriptors = [ledgerDescriptor, ...trezorDescriptors];
+export const supportedHwUsbDescriptors = [...ledgerDescriptors, ...trezorDescriptors];
 
 export const connectDeviceRevamped = async (usbDevice: USBDevice): Promise<HardwareWalletConnection> => {
-  if (isDeviceDescribedBy(usbDevice, ledgerDescriptor)) {
+  if (isDeviceDescribedBy(usbDevice, ledgerDescriptors)) {
     return {
       type: WalletType.Ledger,
       value: await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(DEFAULT_COMMUNICATION_TYPE, usbDevice)
     };
   }
-  if (isTrezorHWSupported() && isDeviceDescribedBy(usbDevice, ...trezorDescriptors)) {
+  if (isTrezorHWSupported() && isDeviceDescribedBy(usbDevice, trezorDescriptors)) {
     await initializeTrezor();
     return {
       type: WalletType.Trezor

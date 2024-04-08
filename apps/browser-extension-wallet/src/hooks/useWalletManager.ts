@@ -202,7 +202,7 @@ export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Prom
 
 const requestHardwareWalletConnection = ({ trezorSupported }: { trezorSupported: boolean }): Promise<USBDevice> =>
   navigator.usb.requestDevice({
-    filters: trezorSupported ? Wallet.supportedHwUsbDescriptors : [Wallet.ledgerDescriptor]
+    filters: trezorSupported ? Wallet.supportedHwUsbDescriptors : Wallet.ledgerDescriptors
   });
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
