@@ -123,4 +123,4 @@ Feature: Transactions - Extended view
     And I wait for the transaction history to be loaded and all transactions to be confirmed
     When the Sent transaction is displayed with value: "24.79 tADA" and tokens count 1
     When I click on a transaction: 1
-    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 24.79 and wallet: "WalletReceiveSimpleTransactionE2E" address
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "WalletReceiveSimpleTransactionE2E" address

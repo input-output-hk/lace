@@ -1,6 +1,8 @@
 import { Wallet } from '@lace/cardano';
 import { EnhancedAnalyticsOptInStatus, TxCreationType } from '../providers/AnalyticsProvider/analyticsTracker/types';
 import { StakingBrowserPreferences } from '@lace/staking';
+import { currencyCode } from '@providers/currency/constants';
+import { ADASymbols } from '@src/utils/constants';
 
 export interface WalletStorage {
   name: string;
@@ -15,7 +17,7 @@ export interface AppSettings {
 }
 
 export interface CurrencyInfo {
-  code: string;
+  code: currencyCode | ADASymbols;
   symbol: string;
 }
 

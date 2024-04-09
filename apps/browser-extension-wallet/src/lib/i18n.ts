@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable unicorn/prefer-module */
 import { Language } from '@lace/common';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import * as translations from './translations';
 
 type I18NextResources = Partial<Record<Language, { translation: string }>>;
 
@@ -13,9 +12,7 @@ for (const lang of Object.values(Language)) {
   Object.assign(resources, {
     [lang]: {
       translation: {
-        ...require(`./translations/${lang}.json`),
-        ...require(`./translations/legal.${lang}.ts`).default,
-        ...require(`./translations/cookie-policy.${lang}.ts`).default
+        ...translations[lang]
       }
     }
   });

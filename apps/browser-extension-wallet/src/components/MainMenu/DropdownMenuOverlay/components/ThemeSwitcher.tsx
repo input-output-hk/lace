@@ -9,6 +9,7 @@ import MoonIcon from '../../../../assets/icons/moon.component.svg';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { themes, useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { TranslationKey } from '@lib/translations/types';
 
 type ThemeAnalyticsEvents<T> = Record<themes, T>;
 
@@ -26,7 +27,7 @@ const userWalletProfileThemeEvent: ThemeAnalyticsEvents<
   light: PostHogAction.UserWalletProfileLightModeClick
 };
 
-const modeTranslate: Record<string, string> = {
+const modeTranslate: Record<string, TranslationKey> = {
   light: 'browserView.sideMenu.mode.light',
   dark: 'browserView.sideMenu.mode.dark'
 };

@@ -105,17 +105,17 @@ export const DappAddressSections = ({
 }: DappAddressSectionProps): React.ReactElement => {
   const { t } = useTranslate();
 
-  const itemsCountCopy = t('package.core.dappTransaction.items');
+  const itemsCountCopy = t('core.dappTransaction.items');
 
   return (
     <>
-      <SummaryExpander title={t('package.core.dappTransaction.fromAddress')} disabled={!isFromAddressesEnabled}>
+      <SummaryExpander title={t('core.dappTransaction.fromAddress')} disabled={!isFromAddressesEnabled}>
         <div className={styles.summaryContent}>
           {[...groupedFromAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address}>
                 <Text className={styles.label} data-testid="dapp-transaction-from-address-title">
-                  {t('package.core.dappTransaction.address')}
+                  {t('core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.value} data-testid="dapp-transaction-from-address-address">
                   <Tooltip label={address}>
@@ -127,7 +127,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount}>
                     <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
-                      {t('package.core.dappTransaction.tokens')}
+                      {t('core.dappTransaction.tokens')}
                     </Title>
                     <Title level={5} className={styles.value}>
                       -{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
@@ -148,7 +148,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount}>
                     <Title level={5} data-testid="dapp-transaction-nfts-title">
-                      {t('package.core.dappTransaction.nfts')}
+                      {t('core.dappTransaction.nfts')}
                     </Title>
                     <Title level={5}>
                       -{addressData.nfts.length} {itemsCountCopy}
@@ -162,13 +162,13 @@ export const DappAddressSections = ({
         </div>
       </SummaryExpander>
 
-      <SummaryExpander title={t('package.core.dappTransaction.toAddress')} disabled={!isToAddressesEnabled}>
+      <SummaryExpander title={t('core.dappTransaction.toAddress')} disabled={!isToAddressesEnabled}>
         <div>
           {[...groupedToAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address}>
                 <Text className={styles.label} data-testid="dapp-transaction-to-address-title">
-                  {t('package.core.dappTransaction.address')}
+                  {t('core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.value} data-testid="dapp-transaction-to-address">
                   <Tooltip label={address}>
@@ -180,7 +180,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount}>
                     <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
-                      {t('package.core.dappTransaction.tokens')}
+                      {t('core.dappTransaction.tokens')}
                     </Title>
                     <Title level={5} className={classNames(styles.value, styles.positiveAmount)}>
                       {getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
@@ -201,7 +201,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount}>
                     <Title level={5} className={styles.label} data-testid="dapp-transaction-nfts-title">
-                      {t('package.core.dappTransaction.nfts')}
+                      {t('core.dappTransaction.nfts')}
                     </Title>
                     <Title level={5} className={classNames(styles.value, styles.positiveAmount)}>
                       {addressData.nfts.length} {itemsCountCopy}
