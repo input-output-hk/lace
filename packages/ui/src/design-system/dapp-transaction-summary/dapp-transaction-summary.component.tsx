@@ -13,12 +13,14 @@ import * as styles from './dapp-transaction-summary.css';
 import type { OmitClassName } from '../../types';
 
 type Props = OmitClassName<'div'> & {
+  testId?: string;
   transactionAmount: string;
   title?: string;
   cardanoSymbol?: string;
 };
 
 export const TransactionSummary = ({
+  testId,
   transactionAmount,
   title,
   cardanoSymbol,
@@ -32,7 +34,7 @@ export const TransactionSummary = ({
         </Typography.Body.Large>
       </Flex>
     )}
-    <div className={styles.txAmountContainer}>
+    <div className={styles.txAmountContainer} data-testid={testId}>
       <Grid {...props} alignItems="$center" columns="$2">
         <Cell>
           <AdaComponent className={styles.adaIcon} />
@@ -44,7 +46,6 @@ export const TransactionSummary = ({
                 [styles.positiveBalance]: !transactionAmount.includes('-'),
                 [styles.negativeBalance]: transactionAmount.includes('-'),
               })}
-              data-testId="dapp-transaction-amount-value"
             >
               {transactionAmount} {cardanoSymbol}
             </Typography.Body.Small>
