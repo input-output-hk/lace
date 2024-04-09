@@ -21,6 +21,7 @@ import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFun
 import ErrorDAppModal from '../elements/dappConnector/errorDAppModal';
 import { getTextFromElementArray } from '../utils/getTextFromArray';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
+import { parseDappCucumberAssetList } from '../utils/dappConnectorUtils';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -294,7 +295,7 @@ class DAppConnectorAssert {
     );
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
 
-    const parsedAssetsList = await this.parseDappCucumberAssetList(assetsDetails);
+    const parsedAssetsList = await parseDappCucumberAssetList(assetsDetails);
     expect(await getTextFromElementArray(await ConfirmTransactionPage.transactionSummaryAssetsRows)).to.deep.equal(
       parsedAssetsList
     );
@@ -316,7 +317,7 @@ class DAppConnectorAssert {
   }
 
   async assertSeeConfirmFromAddressTransactionPage(section: 'To address' | 'From address', assets: string[]) {
-    const adjustedAssetsList = await this.parseDappCucumberAssetList(assets);
+    const adjustedAssetsList = await parseDappCucumberAssetList(assets);
     const expectedAssets =
       section === 'To address'
         ? await ConfirmTransactionPage.getAssetsToAddressSection()
@@ -383,30 +384,6 @@ class DAppConnectorAssert {
     const enable = await browser.execute(() => window.cardano.lace.enable());
     expect(enable).not.to.be.empty;
   }
-
-  parseDappCucumberAssetList = async (assetsList: string[]) =>
-    await Promise.all(
-      assetsList.map(async (asset) => {
-        if (asset.includes('- FEE')) {
-          return await this.subtractFeeFromCucumberListElement(asset);
-        } else if (asset.includes('Address')) {
-          return this.shortenAddressFromCucumberListElement(asset);
-        }
-        return asset;
-      })
-    );
-  subtractFeeFromCucumberListElement = async (entry: string) => {
-    const fee = Number((await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ')[0]);
-    const [amount, currency] = entry.split(' ');
-    const amountIncludingFee = (Number(amount) - fee).toFixed(2);
-    return `${amountIncludingFee} ${currency}`;
-  };
-
-  shortenAddressFromCucumberListElement = (wallet: string) => {
-    const [addressLabel, walletValue] = wallet.split(' ');
-    const fullAddress = String(getTestWallet(walletValue).address);
-    return `${addressLabel} ${fullAddress.slice(0, 8)}...${fullAddress.slice(-8)}`;
-  };
 }
 
 export default new DAppConnectorAssert();
