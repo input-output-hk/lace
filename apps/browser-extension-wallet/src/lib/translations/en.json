@@ -182,6 +182,7 @@
   "core.dappTransaction.sending": "Sending",
   "core.dappTransaction.transactionSummary": "Transaction Summary",
   "core.dappTransaction.origin": "Origin",
+  "core.dappTransaction.fromAddress": "From address",
   "tab.main.title": "Tab extension",
   "general.buttons.back": "Back",
   "general.button.cancel": "Cancel",
