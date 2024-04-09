@@ -71,7 +71,8 @@ Feature: LW: Tokens tab - extended view
       | FAQ      | What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment? |
       | FAQ      | What type of governance actions are supported by Lace?                                                              |
 
-  @LW-4878 @Testnet @Mainnet
+  @LW-4878 @Testnet @Mainnet @Pending
+  @issue=LW-10242
   Scenario: Extended-view - Tokens details - Enter and Escape buttons support
     And I click token with name: "Cardano"
     And The Token details screen is displayed for token "Cardano" with ticker "tADA" in extended mode

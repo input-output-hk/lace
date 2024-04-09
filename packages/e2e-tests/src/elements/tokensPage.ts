@@ -20,6 +20,7 @@ class TokensPage {
   private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
   private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
+  private TOKEN_ROW_SKELETON = '.ant-skeleton';
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
@@ -96,6 +97,10 @@ class TokensPage {
 
   get openedEyeIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.OPENED_EYE_ICON);
+  }
+
+  get tokenRowSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TOKEN_ROW_SKELETON);
   }
 
   async getRows(): Promise<WebdriverIO.ElementArray> {
