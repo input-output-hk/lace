@@ -13,6 +13,7 @@ import { useBalances, useFetchCoinPrice } from '@src/hooks';
 import LightBulb from '@src/assets/icons/light.svg';
 import { BrowsePoolsPreferencesCard } from '@lace/staking';
 import { Flex } from '@lace/ui';
+import { useTheme } from '@providers';
 
 type StakingSkeletonProps = {
   children: ReactNode;
@@ -25,6 +26,7 @@ export const StakingSkeleton = ({ children, multiDelegationEnabled }: StakingSke
   const { networkInfo, fetchNetworkInfo } = useWalletStore(stakingInfoSelector);
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
+  const { theme } = useTheme();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -77,7 +79,7 @@ export const StakingSkeleton = ({ children, multiDelegationEnabled }: StakingSke
 
   const sidePanel = (
     <Flex flexDirection="column" alignItems="stretch" gap="$32" mb="$112">
-      {multiDelegationEnabled && <BrowsePoolsPreferencesCard />}
+      {multiDelegationEnabled && <BrowsePoolsPreferencesCard theme={theme.name} />}
       <Skeleton loading={!networkInfo}>
         <NetworkInfo {...networkInfo} translations={translations} />
       </Skeleton>

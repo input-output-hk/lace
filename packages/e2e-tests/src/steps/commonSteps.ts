@@ -40,8 +40,10 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import MainLoader from '../elements/MainLoader';
 
 Given(/^Lace is ready for test$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.multiAddressModalConfirm();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -49,6 +51,7 @@ Given(/^Lace is ready for test$/, async () => {
 });
 
 Then(/^Lace is loaded properly$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
 });

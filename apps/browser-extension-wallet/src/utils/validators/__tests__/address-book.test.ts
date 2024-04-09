@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import { AddressBookSchema } from '@lib/storage';
 
 const mockIsAddress = jest.fn();
@@ -7,7 +8,7 @@ const mockIsAddress = jest.fn();
 import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '@types';
 import * as addressBook from '../address-book';
-import i18n from 'i18next';
+import i18n, { TFunction } from 'i18next';
 import { Cardano, HandleProvider, Asset } from '@cardano-sdk/core';
 
 jest.mock('@lace/cardano', () => {
@@ -34,13 +35,23 @@ describe('Testing address book validator', () => {
   describe('Address Book Name validations', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      translate = jest.fn((arg) => arg);
+      translate = jest.fn((arg: any) => arg);
     });
     test('should return valid true when name is not longer than 20 characters', () => {
-      expect(addressBook.validateAddressBookName('asdsad', translate)).toEqual<ValidationResult>({ valid: true });
+      expect(
+        addressBook.validateAddressBookName(
+          'asdsad',
+          translate as unknown as TFunction<'translation', undefined, 'translation'>
+        )
+      ).toEqual<ValidationResult>({ valid: true });
     });
     test('should return valid false and an error message when name is longer than 20 characters', () => {
-      expect(addressBook.validateAddressBookName('123456789012345678901', translate)).toEqual<ValidationResult>({
+      expect(
+        addressBook.validateAddressBookName(
+          '123456789012345678901',
+          translate as unknown as TFunction<'translation', undefined, 'translation'>
+        )
+      ).toEqual<ValidationResult>({
         valid: false,
         message: 'addressBook.errors.nameTooLong'
       });
@@ -96,7 +107,9 @@ describe('Testing address book validator', () => {
   describe('validateWalletAddress', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      jest.spyOn(i18n, 't').mockImplementation((str: string) => str);
+      jest
+        .spyOn(i18n, 't')
+        .mockImplementation(((str: string) => str) as unknown as TFunction<'translation', undefined, 'translation'>);
     });
     test('should return proper error in case there is no address', () => {
       expect(addressBook.validateWalletAddress('')).toEqual('browserView.addressBook.form.addressMissing');
@@ -144,7 +157,9 @@ describe('Testing address book validator', () => {
   describe('validateWalletName', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      jest.spyOn(i18n, 't').mockImplementation((str: string) => str);
+      jest
+        .spyOn(i18n, 't')
+        .mockImplementation(((str: string) => str) as unknown as TFunction<'translation', undefined, 'translation'>);
     });
     test('should return proper error in case there is no name', () => {
       expect(addressBook.validateWalletName('')).toEqual('browserView.addressBook.form.nameMissing');

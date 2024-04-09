@@ -27,5 +27,5 @@
     }
   },
   "references": [{ "path": "../../../packages/core/src" }, { "path": "../../../packages/cardano/src" }],
-  "include": ["**/*", "../test/types/*.d.ts"]
+  "include": ["**/*", "../test/types/*.d.ts", "**/*.json"]
 }

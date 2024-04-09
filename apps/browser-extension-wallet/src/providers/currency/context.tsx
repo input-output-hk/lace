@@ -16,7 +16,7 @@ export const CurrencyStoreProvider = ({ children }: ICurrencyStoreProvider): Rea
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const currency = getValueFromLocalStorage('currency', getCurrencyInfo(currencyCode.usd));
+  const currency = getValueFromLocalStorage('currency', getCurrencyInfo(currencyCode.USD));
   const createStore = () => createCurrencyStore(currency.code, cardanoCoin);
   return <Provider createStore={createStore}>{children}</Provider>;
 };

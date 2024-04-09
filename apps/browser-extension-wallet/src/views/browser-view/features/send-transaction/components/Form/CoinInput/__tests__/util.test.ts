@@ -4,6 +4,8 @@ import { mockAsset } from '@src/utils/mocks/test-helpers';
 import { getADACoinProperties, getAssetFiatValue, getAssetProperties, getMaxSpendableAmount } from '../util';
 import { SpentBalances } from '../../../../types';
 import { PriceResult } from '@hooks';
+import { CurrencyInfo } from '@src/types';
+import { currencyCode } from '@providers/currency/constants';
 
 describe('CoinInput util', () => {
   describe('getMaxSpendableAmount', () => {
@@ -184,7 +186,7 @@ describe('CoinInput util', () => {
       tokens: new Map([[mockAsset.assetId, { priceInAda: 10 }]]),
       cardano: { price: 0.5 }
     } as PriceResult;
-    const fiatCurrency = { symbol: '$', code: 'USD' };
+    const fiatCurrency: CurrencyInfo = { symbol: '$', code: currencyCode.USD };
 
     test('returns the formatted fiat value string if all the required parameters are present', () => {
       expect(getAssetFiatValue(assetInputItem, assetInfo, prices, fiatCurrency)).toEqual('= 25.000 USD');
