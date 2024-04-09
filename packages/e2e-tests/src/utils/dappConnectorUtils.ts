@@ -14,7 +14,7 @@ const shortenAddressFromCucumberListElement = (wallet: string) => {
   return `${addressLabel} ${fullAddress.slice(0, 8)}...${fullAddress.slice(-8)}`;
 };
 
-export const parseDappCucumberAssetList = async (assetsList: string[]): Promise<void> => {
+export const parseDappCucumberAssetList = async (assetsList: string[]): Promise<string[]> =>
   await Promise.all(
     assetsList.map(async (asset) => {
       if (asset.includes('- FEE')) {
@@ -25,4 +25,3 @@ export const parseDappCucumberAssetList = async (assetsList: string[]): Promise<
       return asset;
     })
   );
-};
