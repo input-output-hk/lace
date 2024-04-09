@@ -94,6 +94,7 @@ class TransactionsDetailsAssert {
       expectedTickers.push(pool.poolTicker);
     }
 
+    await TransactionDetailsPage.transactionDetails.waitForStable();
     const actualIds: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolIds();
     const actualNames: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolNames();
     const actualTickers: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolTickers();
