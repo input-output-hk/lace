@@ -3,18 +3,13 @@ on:
   push:
     branches:
       - main
-      - release/**/*
-      - feat/*
-      - feat-*
-      - fix/*
-      - fix-*
-      - lw-*
+      - release/**
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
   sonarcloud:
     name: SonarCloud Code Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
