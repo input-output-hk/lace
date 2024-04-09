@@ -277,7 +277,7 @@ class DAppConnectorAssert {
     await this.assertSeeHeader();
     await ConfirmTransactionPage.transactionTypeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionTypeTitle.getText()).to.equal(
-      await t('core.dappTransaction.transaction')
+      await t('core.dappTransaction.transaction', 'core')
     );
     await ConfirmTransactionPage.transactionType.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionType.getText()).to.equal(typeOfTransaction);
@@ -285,7 +285,7 @@ class DAppConnectorAssert {
     await ConfirmTransactionPage.transactionOriginSectionExpanderButton.waitForDisplayed();
     await ConfirmTransactionPage.transactionOriginLabel.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionOriginLabel.getText()).to.equal(
-      await t('package.core.dappTransaction.origin')
+      await t('core.dappTransaction.origin', 'core')
     );
     await ConfirmTransactionPage.expandSectionInDappTransactionWindow('Origin');
     expect(await ConfirmTransactionPage.transactionOrigin.getText()).to.equal(DAppConnectorPageObject.TEST_DAPP_NAME);
@@ -302,11 +302,11 @@ class DAppConnectorAssert {
 
     await ConfirmTransactionPage.transactionFromSectionExpanderButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionFromSectionExpanderLabel.getText()).to.equal(
-      await t('package.core.dappTransaction.fromAddress')
+      await t('core.dappTransaction.fromAddress', 'core')
     );
     await ConfirmTransactionPage.transactionToSectionExpanderButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionToSectionExpanderLabel.getText()).to.equal(
-      await t('package.core.dappTransaction.toAddress')
+      await t('core.dappTransaction.toAddress', 'core')
     );
 
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
