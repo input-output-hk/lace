@@ -180,6 +180,8 @@
   "core.dappTransaction.quantity": "Quantity",
   "core.dappTransaction.send": "Send",
   "core.dappTransaction.sending": "Sending",
+  "core.dappTransaction.transactionSummary": "Transaction Summary",
+  "core.dappTransaction.origin": "Origin",
   "tab.main.title": "Tab extension",
   "general.buttons.back": "Back",
   "general.button.cancel": "Cancel",
