@@ -3,7 +3,6 @@ import cn from 'classnames';
 import { Dropdown } from 'antd';
 import { Button, addEllipsis } from '@lace/common';
 import { DropdownMenuOverlay } from '../MainMenu';
-
 import ChevronNormal from '../../assets/icons/chevron-down.component.svg';
 import ChevronSmall from '../../assets/icons/chevron-down-small.component.svg';
 import styles from './DropdownMenu.module.scss';
@@ -12,8 +11,7 @@ import { UserAvatar } from '../MainMenu/DropdownMenuOverlay/components';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@lace/ui';
-import { useGetHandles } from '@hooks';
-import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
+import { useWalletAvatar } from '@hooks';
 import { getActiveWalletSubtitle } from '@src/utils/get-wallet-subtitle';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
@@ -28,9 +26,9 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
     walletUI: { isDropdownMenuOpen = false },
     setIsDropdownMenuOpen
   } = useWalletStore();
-  const [handle] = useGetHandles();
-  const handleImage = handle?.profilePic;
+
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
+  const { activeWalletAvatar } = useWalletAvatar();
 
   const sendAnalyticsEvent = (event: PostHogAction) => {
     analytics.sendEventToPostHog(event);
@@ -66,10 +64,10 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
             subtitle={getActiveWalletSubtitle(cardanoWallet.source.account)}
             active={isDropdownMenuOpen}
             profile={
-              handleImage
+              activeWalletAvatar
                 ? {
                     fallback: walletName,
-                    imageSrc: getAssetImageUrl(handleImage)
+                    imageSrc: activeWalletAvatar
                   }
                 : undefined
             }
@@ -85,7 +83,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
           data-testid="header-menu-button"
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
-            <UserAvatar walletName={walletName} isPopup={isPopup} />
+            <UserAvatar walletName={walletName} isPopup={isPopup} avatar={activeWalletAvatar} />
             <Chevron
               className={cn(styles.chevron, { [styles.open]: isDropdownMenuOpen })}
               data-testid={`chevron-${isDropdownMenuOpen ? 'up' : 'down'}`}

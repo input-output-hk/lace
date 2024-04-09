@@ -148,6 +148,7 @@ export enum PostHogAction {
   NFTsCreateFolderClick = 'nft | nfts | create folder | click',
   NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
   NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
+  NFTDetailSetAsAvatarClick = 'nft | nft detail | set as your wallet avatar | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
