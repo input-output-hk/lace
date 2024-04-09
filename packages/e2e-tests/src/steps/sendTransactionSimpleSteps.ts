@@ -269,6 +269,9 @@ Then(
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
     assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
     await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(Number.parseFloat(valueToEnter));
+    // workaround for test automation only to fire all events after finished typing
+    await TransactionNewPage.clickDrawerBackground();
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).balanceFiatValueElement.click();
   }
 );
 
