@@ -1543,7 +1543,8 @@
       "title": "Confirm transaction"
     },
     "destinationAddressInput": {
-      "recipientAddress": "Recipient's address or $handle"
+      "recipientAddress": "Recipient's address or $handle",
+      "recipientAddressNoHandle": "Recipient's address"
     },
     "editAddressForm": {
       "walletName": "Wallet name",
