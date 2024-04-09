@@ -51,7 +51,6 @@
     "flat": "5.0.2",
     "npm-run-all": "4.1.5",
     "ts-node": "10.9.1",
-    "typescript": "4.9.5",
     "wdio-intercept-service": "4.4.0",
     "webdriverio": "8.32.3"
   }
