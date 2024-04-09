@@ -88,6 +88,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   async clickHeaderToLoseFocus() {
     await this.stepHeader.click();
   }
+
   async addCharToMnemonicField(characters: string, inputNumber: number) {
     const inputs = await this.mnemonicInputs;
     await inputs[inputNumber].addValue(characters);

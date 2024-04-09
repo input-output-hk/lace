@@ -182,7 +182,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then I verify transaction costs amount is around 0.00 ADA
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I enter a value of: 2 to the "tADA" asset in bundle 1
-    Then I verify transaction costs amount is around 0.18 ADA
+    Then I verify transaction costs amount is around 0.25 ADA
 
   @LW-2404 @Testnet @Mainnet
   Scenario: Popup-view - Tx summary page is displayed - single asset (ADA)

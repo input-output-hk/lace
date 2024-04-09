@@ -78,6 +78,10 @@ export const EnableAccountPasswordPrompt = ({
             label={translations.passwordPlaceholder}
             data-testid="enable-account-password-input"
             onChange={(e) => setCurrentPassword(e.target.value)}
+            onSubmit={(event): void => {
+              event.preventDefault();
+              onConfirm(Buffer.from(currentPassword));
+            }}
             errorMessage={wasPasswordIncorrect ? translations.wrongPassword : undefined}
             rootStyle={{ width: '100%' }}
           />
