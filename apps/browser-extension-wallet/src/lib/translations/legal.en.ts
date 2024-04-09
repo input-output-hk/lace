@@ -1,5 +1,5 @@
 // multiline strings are not allowed in the json files
-export default {
+export const legal = {
   legal: `
   <div>
     <p>

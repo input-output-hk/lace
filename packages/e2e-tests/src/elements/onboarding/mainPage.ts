@@ -1,4 +1,4 @@
-import { TestWalletName, getTestWallet } from '../../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../../support/walletConfiguration';
 import CommonOnboardingElements from './commonOnboardingElements';
 import recoveryPhrasePage from './recoveryPhrasePage';
 import walletSetupPage from './walletSetupPage';

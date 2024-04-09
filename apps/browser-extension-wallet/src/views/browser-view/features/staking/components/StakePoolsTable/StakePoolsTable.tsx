@@ -112,9 +112,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     setSort({ field: sortField, order });
   };
 
-  const headers = stakePoolTableConfig.columns.map((column) => {
-    const translationKey = `cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`;
-    const tooltipText = t(translationKey);
+  const headers = stakePoolTableConfig.columns.map((column: SortField) => {
+    const tooltipText = t(`cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`);
     return {
       label: tableHeaderTranslations[column as SortField],
       ...(tableHeaderTooltipsTranslations[column as SortField] && { tooltipText }),
