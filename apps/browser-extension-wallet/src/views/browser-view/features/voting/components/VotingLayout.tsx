@@ -15,11 +15,12 @@ import {
 import { useWalletStore } from '@src/stores';
 import { ActionableAlert, Button, MultiStepProgressLine, DrawerHeader, DrawerNavigation, Drawer } from '@lace/common';
 import classnames from 'classnames';
+import { TranslationKey } from '@lib/translations/types';
 
 const votingPhases = ['registration', 'snapshot', 'voting'] as const;
 type VotingPhase = typeof votingPhases[number];
 
-const votingPhaseName: Record<VotingPhase, string> = {
+const votingPhaseName: Record<VotingPhase, TranslationKey> = {
   registration: 'browserView.voting.registration',
   snapshot: 'browserView.voting.snapshot',
   voting: 'browserView.voting.voting'
@@ -116,7 +117,9 @@ export const VotingLayout = (): React.ReactElement => {
           />
         </p>
         <div className={classnames([styles.badge, hasEnoughBalance ? styles.promptBadge : styles.neutralBadge])}>
-          {translate(hasEnoughBalance ? 'browserView.voting.votePrompt' : 'browserView.voting.canNotParticipate')}
+          {hasEnoughBalance
+            ? translate('browserView.voting.votePrompt')
+            : translate('browserView.voting.canNotParticipate')}
         </div>
       </>
     )

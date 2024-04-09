@@ -8,7 +8,6 @@ import {
   ActivityStatus,
   TxOutputInput,
   TxSummary,
-  useTranslate,
   RewardsDetails,
   TransactionActivityType,
   DelegationActivityType
@@ -19,6 +18,8 @@ import { useWalletStore } from '@stores';
 import { ActivityDetail as ActivityDetailType } from '@src/types';
 import { useCurrencyStore } from '@providers';
 import { TransactionDetailsProxy } from './TransactionDetailsProxy';
+import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '@lib/translations/types';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -79,19 +80,19 @@ interface ActivityDetailProps {
   price: PriceResult;
 }
 
-const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
-  if (type === DelegationActivityType.delegationRegistration) return t('package.core.activityDetails.registration');
-  if (type === DelegationActivityType.delegationDeregistration) return t('package.core.activityDetails.deregistration');
-  if (type === TransactionActivityType.incoming) return t('package.core.activityDetails.received');
-  if (type === TransactionActivityType.outgoing) return t('package.core.activityDetails.sent');
-  return t(`package.core.activityDetails.${type}`);
+const getTypeLabel = (type: ActivityType): TranslationKey => {
+  if (type === DelegationActivityType.delegationRegistration) return 'core.activityDetails.registration';
+  if (type === DelegationActivityType.delegationDeregistration) return 'core.activityDetails.deregistration';
+  if (type === TransactionActivityType.incoming) return 'core.activityDetails.received';
+  if (type === TransactionActivityType.outgoing) return 'core.activityDetails.sent';
+  return `core.activityDetails.${type}`;
 };
 
 export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => {
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const { getActivityDetail, activityDetail, fetchingActivityInfo, walletActivities } = useWalletStore();
   const [activityInfo, setActivityInfo] = useState<ActivityDetailType>();
   const { fiatCurrency } = useCurrencyStore();
@@ -118,8 +119,8 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
 
   const name =
     activityInfo.status === ActivityStatus.PENDING
-      ? t('package.core.activityDetails.sending')
-      : getTypeLabel(activityInfo.type, t);
+      ? t('core.activityDetails.sending')
+      : t(getTypeLabel(activityInfo.type));
 
   const amountTransformer = (ada: string) =>
     `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`;

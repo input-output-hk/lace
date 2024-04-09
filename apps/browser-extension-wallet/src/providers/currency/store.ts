@@ -3,7 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { currencyCode, currencyMap, defaultCurrency, currencies } from './constants';
 import { CurrencyInfo } from '@src/types';
 import { saveValueInLocalStorage } from '../../utils/local-storage';
-import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
+import { ADASymbols, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 
 export interface ICurrencyStore {
   fiatCurrency: CurrencyInfo;
@@ -13,22 +13,24 @@ export interface ICurrencyStore {
 
 export const getSupportedCurrencies = (): CurrencyInfo[] =>
   Object.entries(
-    process.env.USE_MULTI_CURRENCY === 'true' ? currencies : { [currencyCode.usd]: currencies[currencyCode.usd] }
+    process.env.USE_MULTI_CURRENCY === 'true' ? currencies : { [currencyCode.USD]: currencies[currencyCode.USD] }
   )
-    .map(([code, symbol]) => ({
-      code,
-      symbol
-    }))
+    .map(
+      ([code, symbol]: [currencyCode, string]): CurrencyInfo => ({
+        code,
+        symbol
+      })
+    )
     .sort((a, b) => a.code.localeCompare(b.code));
 
-export const getCurrencyInfo = (code: string, cardanoCoin?: Wallet.CoinId): CurrencyInfo => {
+export const getCurrencyInfo = (code: currencyCode | ADASymbols, cardanoCoin?: Wallet.CoinId): CurrencyInfo => {
   if (process.env.USE_MULTI_CURRENCY !== 'true') {
     return defaultCurrency;
   }
 
   if (code === CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet]) {
     return {
-      code: code as currencyCode,
+      code,
       symbol: cardanoCoin.symbol
     };
   }
@@ -44,7 +46,7 @@ export const getCurrencyInfo = (code: string, cardanoCoin?: Wallet.CoinId): Curr
 };
 
 export const createCurrencyStore = (
-  currentFiatCurrency: string | undefined,
+  currentFiatCurrency: currencyCode | ADASymbols | undefined,
   cardanoCoin: Wallet.CoinId
 ): UseStore<ICurrencyStore> =>
   create<ICurrencyStore>((set) => ({

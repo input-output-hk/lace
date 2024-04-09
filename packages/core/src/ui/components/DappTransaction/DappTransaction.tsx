@@ -127,7 +127,7 @@ export const DappTransaction = ({
         <DappTransactionHeader transactionType={getTxType(coins)} name={dappInfo.name} />
         <DappTransactionSummary
           testId="dapp-transaction-summary-row"
-          title={t('package.core.dappTransaction.transactionSummary')}
+          title={t('core.dappTransaction.transactionSummary')}
           cardanoSymbol={coinSymbol}
           transactionAmount={Wallet.util.lovelacesToAdaString(coins.toString())}
         />
@@ -168,7 +168,7 @@ export const DappTransaction = ({
           <TransactionFee
             fee={Wallet.util.lovelacesToAdaString(returnedDeposit.toString())}
             testId="returned-deposit"
-            label={t('package.core.dappTransaction.returnedDeposit')}
+            label={t('core.dappTransaction.returnedDeposit')}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
             displayFiat={false}
@@ -182,7 +182,7 @@ export const DappTransaction = ({
           <TransactionFee
             testId="deposit"
             fee={Wallet.util.lovelacesToAdaString(deposit.toString())}
-            label={t('package.core.dappTransaction.deposit')}
+            label={t('core.dappTransaction.deposit')}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
             displayFiat={false}

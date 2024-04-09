@@ -2,9 +2,9 @@ import { Wallet } from '@lace/cardano';
 
 export const LACE_APP_ID = 'lace-app';
 
-type ADAEnumType = 'ADA' | 'tADA';
+export type ADASymbols = 'ADA' | 'tADA';
 
-export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADAEnumType } = {
+export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADASymbols } = {
   [Wallet.Cardano.NetworkId.Mainnet]: 'ADA',
   [Wallet.Cardano.NetworkId.Testnet]: 'tADA'
 };

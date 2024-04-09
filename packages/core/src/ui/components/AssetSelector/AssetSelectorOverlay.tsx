@@ -54,8 +54,8 @@ const getTokensContent = (
       <ListEmptyState
         message={
           <>
-            {t('package.core.assetSelectorOverlay.youDonthaveAnyTokens')}
-            <br /> {t('package.core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted')}
+            {t('core.assetSelectorOverlay.youDonthaveAnyTokens')}
+            <br /> {t('core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted')}
           </>
         }
         icon="sad-face"
@@ -64,9 +64,9 @@ const getTokensContent = (
 
   switch (true) {
     case (!params.tokens || params.tokens?.length === 0) && !params.hasUsedAllTokens:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
     case params.hasUsedAllTokens:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
     default:
       return params.tokens.map(({ id, ...item }, idx) => (
         <TokenItem
@@ -96,8 +96,8 @@ const getNftsContent = (
       <ListEmptyState
         message={
           <>
-            {t('package.core.assetSelectorOverlay.noNFTs')}
-            <br /> {t('package.core.assetSelectorOverlay.addFundsToStartYourWeb3Journey')}
+            {t('core.assetSelectorOverlay.noNFTs')}
+            <br /> {t('core.assetSelectorOverlay.addFundsToStartYourWeb3Journey')}
           </>
         }
         icon="sad-face"
@@ -112,9 +112,9 @@ const getNftsContent = (
 
   switch (true) {
     case (!nftList || nftList.length === 0) && !params.hasUsedAllNFTs:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
     case params.hasUsedAllNFTs:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
     default:
       return <NftList {...params.nftListConfig} items={nftList} />;
   }

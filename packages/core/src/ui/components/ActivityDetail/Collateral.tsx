@@ -35,9 +35,9 @@ export const Collateral = ({
     switch (status) {
       case 'review':
       case 'error':
-        return t('package.core.activityDetails.collateral.tooltip.info');
+        return t('core.activityDetails.collateral.tooltip.info');
       case 'success':
-        return t('package.core.activityDetails.collateral.tooltip.success');
+        return t('core.activityDetails.collateral.tooltip.success');
     }
 
     return '';
@@ -48,7 +48,7 @@ export const Collateral = ({
       <TransactionSummary.Amount
         amount={`${collateral} ${coinSymbol}`}
         fiatPrice={amountTransformer(collateral)}
-        label={t('package.core.activityDetails.collateral.label')}
+        label={t('core.activityDetails.collateral.label')}
         tooltip={getTooltipText()}
         displayFiat={displayFiat}
         className={className}
@@ -56,7 +56,7 @@ export const Collateral = ({
       />
       {status === CollateralStatus.ERROR && (
         <Box mt="$32">
-          <InfoBar icon={<InfoIcon />} message={t('package.core.activityDetails.collateral.error')} />
+          <InfoBar icon={<InfoIcon />} message={t('core.activityDetails.collateral.error')} />
         </Box>
       )}
     </>

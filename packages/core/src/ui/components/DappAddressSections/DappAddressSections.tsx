@@ -105,12 +105,12 @@ export const DappAddressSections = ({
 }: DappAddressSectionProps): React.ReactElement => {
   const { t } = useTranslate();
 
-  const itemsCountCopy = t('package.core.dappTransaction.items');
+  const itemsCountCopy = t('core.dappTransaction.items');
 
   return (
     <>
       <SummaryExpander
-        title={t('package.core.dappTransaction.fromAddress')}
+        title={t('core.dappTransaction.fromAddress')}
         disabled={!isFromAddressesEnabled}
         testId="dapp-transaction-from-section-expander"
       >
@@ -119,7 +119,7 @@ export const DappAddressSections = ({
             <>
               <div key={address} className={styles.address} data-testid="dapp-transaction-from-row">
                 <Text className={styles.label} data-testid="dapp-transaction-address-title">
-                  {t('package.core.dappTransaction.address')}
+                  {t('core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.value} data-testid="dapp-transaction-address">
                   <Tooltip label={address}>
@@ -131,7 +131,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-from-row">
                     <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
-                      {t('package.core.dappTransaction.tokens')}
+                      {t('core.dappTransaction.tokens')}
                     </Title>
                     <Title level={5} className={styles.value} data-testid="dapp-transaction-tokens-value">
                       -{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
@@ -153,7 +153,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-from-row">
                     <Title level={5} data-testid="dapp-transaction-nfts-title">
-                      {t('package.core.dappTransaction.nfts')}
+                      {t('core.dappTransaction.nfts')}
                     </Title>
                     <Title level={5} data-testid="dapp-transaction-nfts-amount-value">
                       -{addressData.nfts.length} {itemsCountCopy}
@@ -168,7 +168,7 @@ export const DappAddressSections = ({
       </SummaryExpander>
 
       <SummaryExpander
-        title={t('package.core.dappTransaction.toAddress')}
+        title={t('core.dappTransaction.toAddress')}
         disabled={!isToAddressesEnabled}
         testId="dapp-transaction-to-section-expander"
       >
@@ -177,7 +177,7 @@ export const DappAddressSections = ({
             <>
               <div key={address} className={styles.address} data-testid="dapp-transaction-to-row">
                 <Text className={styles.label} data-testid="dapp-transaction-address-title">
-                  {t('package.core.dappTransaction.address')}
+                  {t('core.dappTransaction.address')}
                 </Text>
                 <Text className={styles.value} data-testid="dapp-transaction-address">
                   <Tooltip label={address}>
@@ -189,7 +189,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-to-row">
                     <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
-                      {t('package.core.dappTransaction.tokens')}
+                      {t('core.dappTransaction.tokens')}
                     </Title>
                     <Title
                       level={5}
@@ -215,7 +215,7 @@ export const DappAddressSections = ({
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-to-row">
                     <Title level={5} className={styles.label} data-testid="dapp-transaction-nfts-title">
-                      {t('package.core.dappTransaction.nfts')}
+                      {t('core.dappTransaction.nfts')}
                     </Title>
                     <Title
                       level={5}
