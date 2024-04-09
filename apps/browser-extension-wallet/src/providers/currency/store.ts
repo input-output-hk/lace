@@ -3,7 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { currencyCode, currencyMap, defaultCurrency, currencies } from './constants';
 import { CurrencyInfo } from '@src/types';
 import { saveValueInLocalStorage } from '../../utils/local-storage';
-import { ADAEnumType, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
+import { ADASymbols, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 
 export interface ICurrencyStore {
   fiatCurrency: CurrencyInfo;
@@ -23,7 +23,7 @@ export const getSupportedCurrencies = (): CurrencyInfo[] =>
     )
     .sort((a, b) => a.code.localeCompare(b.code));
 
-export const getCurrencyInfo = (code: currencyCode | ADAEnumType, cardanoCoin?: Wallet.CoinId): CurrencyInfo => {
+export const getCurrencyInfo = (code: currencyCode | ADASymbols, cardanoCoin?: Wallet.CoinId): CurrencyInfo => {
   if (process.env.USE_MULTI_CURRENCY !== 'true') {
     return defaultCurrency;
   }
@@ -46,7 +46,7 @@ export const getCurrencyInfo = (code: currencyCode | ADAEnumType, cardanoCoin?: 
 };
 
 export const createCurrencyStore = (
-  currentFiatCurrency: currencyCode | ADAEnumType | undefined,
+  currentFiatCurrency: currencyCode | ADASymbols | undefined,
   cardanoCoin: Wallet.CoinId
 ): UseStore<ICurrencyStore> =>
   create<ICurrencyStore>((set) => ({

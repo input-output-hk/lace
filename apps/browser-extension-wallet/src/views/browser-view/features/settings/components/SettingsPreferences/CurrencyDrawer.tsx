@@ -7,7 +7,7 @@ import SwithIcon from '@src/assets/icons/edit.component.svg';
 import ErrorIcon from '@src/assets/icons/address-error-icon.component.svg';
 import styles from '../SettingsLayout.module.scss';
 import { useCurrencyStore } from '@providers';
-import { ADAEnumType, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
+import { ADASymbols, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 import { currencyCode } from '@providers/currency/constants';
 
 const { Text } = Typography;
@@ -47,7 +47,7 @@ export const CurrencyDrawer = ({
   };
 
   const cardanoCurrency = { code: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet] };
-  const currenciesList: { code: currencyCode | ADAEnumType }[] = [cardanoCurrency, ...supportedCurrencies];
+  const currenciesList: { code: currencyCode | ADASymbols }[] = [cardanoCurrency, ...supportedCurrencies];
 
   return (
     <Drawer
