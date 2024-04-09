@@ -73,30 +73,39 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   get confirmButton() {
     return $(this.CONFIRM_BUTTON);
   }
+
   get cancelButton() {
     return $(this.CANCEL_BUTTON);
   }
+
   get transactionToSectionExpanderButton() {
     return $(this.TRANSACTION_TO_SECTION_EXPANDER_BUTTON);
   }
+
   get transactionToSectionExpanderLabel() {
     return $(this.TRANSACTION_TO_SECTION_EXPANDER_LABEL);
   }
+
   get transactionFromSectionExpanderButton() {
     return $(this.TRANSACTION_FROM_SECTION_EXPANDER_BUTTON);
   }
+
   get transactionFromSectionExpanderLabel() {
     return $(this.TRANSACTION_FROM_SECTION_EXPANDER_LABEL);
   }
+
   get transactionOriginSectionExpanderButton() {
     return $(this.TRANSACTION_ORIGIN_EXPANDER_BUTTON);
   }
+
   get transactionSummaryAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_SUMMARY_ROW);
   }
+
   get transactionFromAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_FROM_ROW);
   }
+
   get transactionToAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_TO_ROW);
   }
