@@ -33,13 +33,7 @@ jobs:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
           NODE_OPTIONS: '--max_old_space_size=8192'
-        run: |
-          echo '=============================='
-          echo 'Node.js version is:'
-          node --version || true
-          type node || true
-          echo '=============================='
-          yarn test --maxWorkers=2 --silent
+        run: yarn test --maxWorkers=2 --silent
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
