@@ -107,7 +107,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
 
   const onSortChange = (sortField: SortField) => {
     const inverseOrder = sort?.order === 'asc' ? 'desc' : 'asc';
-    console.debug({ sortField });
     const order = sortField !== sort?.field ? getDefaultSortOrderByField(sortField) : inverseOrder;
 
     setSort({ field: sortField, order });
