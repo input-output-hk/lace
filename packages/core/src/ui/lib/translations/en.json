@@ -1,5 +1,5 @@
 {
-  "package.core": {
+  "core": {
     "addressBook": {
       "addressHandleTooltip": "The linked address to this handle has changed, click to update or delete."
     },

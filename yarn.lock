@@ -7192,7 +7192,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:7.15.3, @babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:7.15.3, @babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
   version: 7.15.3
   resolution: "@babel/runtime@npm:7.15.3"
   dependencies:
@@ -11086,7 +11086,7 @@ __metadata:
     fake-indexeddb: 3.1.3
     fork-ts-checker-webpack-plugin: ^7.2.1
     graphql-tag: 2.12.5
-    i18next: 20.4.0
+    i18next: ^22.5.1
     intersection-observer-polyfill: 0.1.0
     jest-webextension-mock: ^3.7.19
     lodash: 4.17.21
@@ -11097,7 +11097,7 @@ __metadata:
     process: ^0.11.10
     react: 17.0.2
     react-dom: 17.0.2
-    react-i18next: 11.11.4
+    react-i18next: ^12.3.1
     react-lottie: ^1.2.3
     react-router: 5.2.0
     react-router-dom: 5.2.0
@@ -11142,7 +11142,7 @@ __metadata:
     react-dom: 17.0.2
     rollup-plugin-polyfill-node: ^0.8.0
     rxjs: 7.4.0
-    typescript: ^4.3.5
+    typescript: ^4.9.5
     webextension-polyfill: 0.8.0
   peerDependencies:
     react: 17.0.2
@@ -11164,7 +11164,7 @@ __metadata:
     react-copy-to-clipboard: 5.0.4
     react-dom: 17.0.2
     react-tooltip: 4.2.7
-    typescript: ^4.3.5
+    typescript: ^4.9.5
   peerDependencies:
     react: 17.0.2
     react-dom: 17.0.2
@@ -11205,13 +11205,13 @@ __metadata:
     axios-cache-adapter: 2.7.3
     classnames: ^2.3.1
     debounce-promise: ^3.1.2
-    i18next: 20.4.0
+    i18next: ^22.5.1
     jest-mock-extended: 3.0.4
     lodash: 4.17.21
     react: 17.0.2
     react-copy-to-clipboard: 5.0.4
     react-dom: 17.0.2
-    react-i18next: 11.11.4
+    react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
     sass: ^1.68.0
     storybook: ^7.4.3
@@ -34699,15 +34699,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:20.4.0":
-  version: 20.4.0
-  resolution: "i18next@npm:20.4.0"
-  dependencies:
-    "@babel/runtime": ^7.12.0
-  checksum: e2e3697132317f241b6290d4d0b549b0e445a9b400666505f549d62d38cd2f8347fb511e79c6f88f59021f0c9976c6f18cfe345fa3f223c110a3b0072a256f66
-  languageName: node
-  linkType: hard
-
 "i18next@npm:^22.5.1":
   version: 22.5.1
   resolution: "i18next@npm:22.5.1"
@@ -38392,7 +38383,7 @@ __metadata:
     ts-jest: 29.1.2
     ts-patch: ^2.0.1
     typedoc: ^0.21.5
-    typescript: ^4.3.5
+    typescript: ^4.9.5
     typescript-transform-paths: 3.3.1
     webpack: 5.76.0
     webpack-cli: 4.7.2
@@ -45607,19 +45598,6 @@ __metadata:
   version: 3.2.0
   resolution: "react-fast-compare@npm:3.2.0"
   checksum: 8ef272c825ae329f61633ce4ce7f15aa5b84e5214d88bc0823880236e03e985a13195befa2c7a4eda7db3b017dc7985729152d88445823f652403cf36c2b86aa
-  languageName: node
-  linkType: hard
-
-"react-i18next@npm:11.11.4":
-  version: 11.11.4
-  resolution: "react-i18next@npm:11.11.4"
-  dependencies:
-    "@babel/runtime": ^7.14.5
-    html-parse-stringify: ^3.0.1
-  peerDependencies:
-    i18next: ">= 19.0.0"
-    react: ">= 16.8.0"
-  checksum: 5630bfe1b39e6ce893fcccfba62cd42db92d130c0d00f181ec3bc68884ee0db3c698d0b6320d05dc783e5e32c14f7e547bb8aa034788a5f317563ad32f29edf9
   languageName: node
   linkType: hard
 
