@@ -10,7 +10,8 @@ import {
   StakePoolSortOptions,
   stakePoolTableConfig,
   TranslationsFor,
-  getDefaultSortOrderByField
+  getDefaultSortOrderByField,
+  DEFAULT_SORT_OPTIONS
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search } from '@lace/common';
@@ -31,11 +32,6 @@ type stakePoolsTableProps = {
 };
 
 type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
-
-const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'ticker',
-  order: 'desc'
-};
 
 const searchDebounce = 300;
 
@@ -111,6 +107,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
 
   const onSortChange = (sortField: SortField) => {
     const inverseOrder = sort?.order === 'asc' ? 'desc' : 'asc';
+    console.debug({ sortField });
     const order = sortField !== sort?.field ? getDefaultSortOrderByField(sortField) : inverseOrder;
 
     setSort({ field: sortField, order });

@@ -2,7 +2,7 @@ import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, ThemeColorScheme, V
 import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 import { expect, userEvent, waitFor, within } from '@storybook/test';
-import { StakePoolSortOptions } from 'features/BrowsePools';
+import { DEFAULT_SORT_OPTIONS, StakePoolSortOptions } from 'features/BrowsePools';
 import { useCallback, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -17,10 +17,7 @@ const meta: Meta<typeof BrowsePoolsPreferencesCard> = {
 export default meta;
 const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [sort, setSort] = useState<StakePoolSortOptions>({
-    field: 'ticker',
-    order: 'asc',
-  });
+  const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
