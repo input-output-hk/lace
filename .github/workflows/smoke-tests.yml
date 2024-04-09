@@ -14,6 +14,9 @@ jobs:
   smokeTests:
     name: Smoke Tests
     runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
