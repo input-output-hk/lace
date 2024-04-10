@@ -274,9 +274,6 @@ class DAppConnectorAssert {
   }
 
   async assertSeeConfirmTransactionPage({ assetsDetails, typeOfTransaction }: ExpectedTransactionData) {
-    // TODO
-    // remove when https://input-output.atlassian.net/browse/LW-9917 is fixed
-    await browser.pause(3000);
     await this.assertSeeHeader();
     await ConfirmTransactionPage.transactionTypeTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionTypeTitle.getText()).to.equal(
