@@ -122,17 +122,17 @@ export const AssetTable = ({
 
   const columns: ColumnsType<IAssetColumn> = [
     {
-      title: popupView ? '' : t('package.core.assetTable.columns.token'),
+      title: popupView ? '' : t('core.assetTable.columns.token'),
       dataIndex: 'token',
       key: 'token',
       width: '45%'
     },
-    { title: popupView ? '' : t('package.core.assetTable.columns.balance'), dataIndex: 'balance', key: 'balance' }
+    { title: popupView ? '' : t('core.assetTable.columns.balance'), dataIndex: 'balance', key: 'balance' }
   ];
 
   if (!popupView)
     columns.splice(1, 0, {
-      title: t('package.core.assetTable.columns.price'),
+      title: t('core.assetTable.columns.price'),
       dataIndex: 'price',
       key: 'price'
     });

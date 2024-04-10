@@ -61,7 +61,7 @@ export const TransactionAssets = ({
   };
 
   return (
-    <div className={styles.assetsContainer}>
+    <div className={styles.assetsContainer} data-testid={testId}>
       <Grid {...props} columns="$fitContent">
         <Cell>
           <UserProfile
@@ -84,7 +84,7 @@ export const TransactionAssets = ({
                 [styles.negativeBalance]: isNegativeBalance,
               })}
             >
-              <span data-testid={testId}>
+              <span>
                 {balance} {tokenName}
               </span>
             </Typography.Body.Small>
