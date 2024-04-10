@@ -27,7 +27,7 @@ import { SearchBox } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useNftSearch } from '@hooks/useNftSearch';
 
-const SEARCH_ASSET_LENGTH = 10;
+const MIN_ASSET_COUNT_FOR_SEARCH = 10;
 
 export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const redirectToNftDetail = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
@@ -174,7 +174,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
           <div className={styles.content} data-testid="nft-list-container">
             {items.length > 0 ? (
               <>
-                {items.length >= SEARCH_ASSET_LENGTH && (
+                {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
                   <SearchBox
                     placeholder={t('browserView.nfts.searchPlaceholder')}
                     onChange={(value) => handleNftSearch(nfts, value)}
@@ -184,15 +184,10 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
                   />
                 )}
                 <Skeleton loading={isSearching}>
-                  {searchValue !== '' &&
-                    (filteredResults.length > 0 ? (
-                      <NftList items={filteredResults} rows={2} />
-                    ) : (
-                      <ListEmptyState
-                        message={t('package.core.assetSelectorOverlay.noMatchingResult')}
-                        icon="sad-face"
-                      />
-                    ))}
+                  {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={2} />}
+                  {searchValue !== '' && filteredResults.length === 0 && (
+                    <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+                  )}
                   {searchValue === '' && <NftList items={items} rows={2} />}
                 </Skeleton>
               </>

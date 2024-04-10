@@ -25,7 +25,7 @@ export const InlineInfoList = ({ items }: InlineInfoListProps): React.ReactEleme
         <div className={styles.valueContainer}>
           <h5
             data-testid="info-list-item-value"
-            id={`$copy-${value}`}
+            id={showCopyIcon && `$copy-${value}`}
             className={classNames(styles.value, { [styles.link]: !!onClick })}
             onClick={onClick}
           >

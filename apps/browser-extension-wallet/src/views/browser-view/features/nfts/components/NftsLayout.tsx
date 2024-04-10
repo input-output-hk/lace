@@ -34,9 +34,9 @@ import { useNftSearch } from '@hooks/useNftSearch';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
-const SEARCH_ASSET_LENGTH = 10;
+const MIN_ASSET_COUNT_FOR_SEARCH = 10;
 
-// eslint-disable-next-line max-statements
+// eslint-disable-next-line max-statements, complexity
 export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const { walletInfo, inMemoryWallet, blockchainProvider, environmentName } = useWalletStore();
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
@@ -240,7 +240,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
             <div className={styles.content} data-testid="nft-list-container">
               {items.length > 0 ? (
                 <>
-                  {items.length >= SEARCH_ASSET_LENGTH && (
+                  {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
                     <SearchBox
                       placeholder={t('browserView.nfts.searchPlaceholder')}
                       onChange={(value) => handleNftSearch(nfts, value)}
@@ -250,17 +250,13 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                     />
                   )}
                   <Skeleton loading={isSearching}>
-                    {searchValue !== '' &&
-                      (filteredResults.length > 0 ? (
-                        <NftList items={filteredResults} rows={4} />
-                      ) : (
-                        <div className={styles.noResults}>
-                          <ListEmptyState
-                            message={t('package.core.assetSelectorOverlay.noMatchingResult')}
-                            icon="sad-face"
-                          />
-                        </div>
-                      ))}
+                    {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={4} />}
+                    {searchValue !== '' && filteredResults.length === 0 && (
+                      <ListEmptyState
+                        message={t('package.core.assetSelectorOverlay.noMatchingResult')}
+                        icon="sad-face"
+                      />
+                    )}
                     {searchValue === '' && <NftList items={items} rows={4} />}
                   </Skeleton>
                 </>
