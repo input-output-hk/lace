@@ -449,6 +449,8 @@
   "browserView.assets.startYourWeb3Journey": "Start your Web3 journey. Just add some digital assets to get started.",
   "browserView.assets.totalWalletBalance": "Total wallet balance",
   "browserView.assets.portfolioBalanceToolTip": "Approximate value of all tokens with available fiat pair",
+  "browserView.assets.emptySearch": "No results matching your search",
+  "browserView.assets.searchPlaceholder": "Search by name, policy ID or fingerprint",
   "browserView.assetDetails.title": "Token detail",
   "browserView.assetDetails.price": "Price",
   "browserView.assetDetails.assetPrice": "Token price",
