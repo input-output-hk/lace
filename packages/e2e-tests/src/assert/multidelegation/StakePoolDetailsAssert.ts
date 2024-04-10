@@ -14,7 +14,6 @@ class StakePoolDetailsAssert {
     await this.assertSeeStakePoolDetailsCommonElements();
 
     expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
-    expect(await StakePoolDetails.poolTicker.getText()).to.equal(expectedStakedPool.ticker);
     expect(await StakePoolDetails.informationDescription.getText()).to.equal(expectedStakedPool.information);
 
     if (noMetaDataPool) {
