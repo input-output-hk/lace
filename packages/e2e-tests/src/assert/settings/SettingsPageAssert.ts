@@ -179,8 +179,8 @@ class SettingsPageAssert {
     await SettingsPage.aboutLaceWidget.twitter.icon.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.youtube.element.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.youtube.icon.waitForDisplayed();
-    await SettingsPage.aboutLaceWidget.medium.element.waitForDisplayed();
-    await SettingsPage.aboutLaceWidget.medium.icon.waitForDisplayed();
+    await SettingsPage.aboutLaceWidget.discord.element.waitForDisplayed();
+    await SettingsPage.aboutLaceWidget.discord.icon.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.github.element.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.github.icon.waitForDisplayed();
   }
