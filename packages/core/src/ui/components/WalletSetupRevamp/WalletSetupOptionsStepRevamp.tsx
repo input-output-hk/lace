@@ -66,7 +66,7 @@ export const WalletSetupOptionsStepRevamp = ({
       </div>
     </div>
     <div className={styles.legal} data-testid="agreement-text">
-      By proceeding you agree to Lace’s{' '}
+      By clicking the Create, Connect or Restore button above, you agree with Lace’s{' '}
       <a href={TERMS_OF_USE_URL} target="_blank" className={styles.link} data-testid="agreement-terms-of-service-link">
         Terms of Service
       </a>{' '}
