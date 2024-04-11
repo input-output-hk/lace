@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers, promise/avoid-new */
 import React from 'react';
 import type { Meta } from '@storybook/react';
 
@@ -40,7 +39,7 @@ const addressBook = [
 
 const handleResolution =
   'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g' as Wallet.Cardano.PaymentAddress;
-let timeout: NodeJS.Timeout;
+let timeout: number;
 
 const validateAddress: ValidateAddress = async (address) => {
   if (!address) {
@@ -51,10 +50,12 @@ const validateAddress: ValidateAddress = async (address) => {
       if (timeout) {
         clearTimeout(timeout);
       }
-      timeout = setTimeout(() => {
+      const twoSeconds = 2000;
+      timeout = window.setTimeout(() => {
         clearTimeout(timeout);
-        resolve(Math.random() < 0.5 ? { isValid: true, handleResolution } : { isValid: false });
-      }, 2000);
+        const factor = 0.5;
+        resolve(Math.random() < factor ? { isValid: true, handleResolution } : { isValid: false });
+      }, twoSeconds);
     });
   }
   return {
