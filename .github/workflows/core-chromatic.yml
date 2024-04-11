@@ -52,7 +52,7 @@ jobs:
 
       - name: 🌍 Publish to Chromatic
         if: github.ref != 'refs/heads/main'
-        uses: chromaui/action@v1
+        uses: chromaui/action@v11
         with:
           projectToken: ${{ secrets.CHROMATIC_LACE_CORE_TOKEN }}
           workingDir: ./packages/core
@@ -61,7 +61,7 @@ jobs:
 
       - name: 🌍 Publish to Chromatic and auto accept changes
         if: github.ref == 'refs/heads/main'
-        uses: chromaui/action@v1
+        uses: chromaui/action@v11
         with:
           projectToken: ${{ secrets.CHROMATIC_LACE_CORE_TOKEN }}
           autoAcceptChanges: true
