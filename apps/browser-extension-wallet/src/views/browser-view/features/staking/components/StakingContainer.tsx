@@ -27,7 +27,10 @@ export const StakingContainer = (): React.ReactElement => {
 
   const analytics = useAnalyticsContext();
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, {
+      selectedPoolIds: [],
+      poolsView: 0
+    });
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
