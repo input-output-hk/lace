@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { PropsWithChildren, useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import isNumber from 'lodash/isNumber';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -13,13 +13,20 @@ import { useBalances, useFetchCoinPrice } from '@src/hooks';
 import LightBulb from '@src/assets/icons/light.svg';
 import { BrowsePoolsPreferencesCard } from '@lace/staking';
 import { Flex } from '@lace/ui';
+import { useTheme } from '@providers';
+
+type StakingSkeletonProps = {
+  children: ReactNode;
+  multiDelegationEnabled: boolean;
+};
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.ReactElement => {
+export const StakingSkeleton = ({ children, multiDelegationEnabled }: StakingSkeletonProps): React.ReactElement => {
   const { t } = useTranslation();
   const { networkInfo, fetchNetworkInfo } = useWalletStore(stakingInfoSelector);
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
+  const { theme } = useTheme();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -72,7 +79,7 @@ export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.
 
   const sidePanel = (
     <Flex flexDirection="column" alignItems="stretch" gap="$32" mb="$112">
-      <BrowsePoolsPreferencesCard />
+      {multiDelegationEnabled && <BrowsePoolsPreferencesCard theme={theme.name} />}
       <Skeleton loading={!networkInfo}>
         <NetworkInfo {...networkInfo} translations={translations} />
       </Skeleton>

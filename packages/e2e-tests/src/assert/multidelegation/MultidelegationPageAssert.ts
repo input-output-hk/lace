@@ -294,6 +294,7 @@ class MultidelegationPageAssert {
   };
 
   assertsSeeCardsInARow = async (expectedCardsCount: number) => {
+    await MultidelegationPage.gridContainer.waitForStable();
     const rowWidth = await MultidelegationPage.gridContainer.getSize('width');
     const cardWidth = await new StakePoolGridCard(0).container.getSize('width');
     const cardsInARow = Math.floor(rowWidth / cardWidth);

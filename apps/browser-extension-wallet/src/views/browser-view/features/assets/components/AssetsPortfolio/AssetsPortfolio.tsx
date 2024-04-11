@@ -2,12 +2,11 @@ import { Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AssetTable, IRow, SendReceive } from '@lace/core';
-import { CONTENT_LAYOUT_ID } from '@components/Layout/ContentLayout';
+import { IRow, SendReceive } from '@lace/core';
 import { SectionTitle } from '@components/Layout/SectionTitle';
-import { APP_MODE_POPUP, AppMode, LACE_APP_ID } from '@src/utils/constants';
+import { APP_MODE_POPUP, AppMode } from '@src/utils/constants';
 import { compactNumberWithUnit } from '@src/utils/format-number';
-import { FundWalletBanner, PortfolioBalance } from '@src/views/browser-view/components';
+import { PortfolioBalance } from '@src/views/browser-view/components';
 import { useCurrencyStore } from '@providers/currency';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
@@ -18,6 +17,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
 import { SendFlowTriggerPoints } from '../../../send-transaction';
+import { AssetPortfolioContent } from './AssetPortfolioContent';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -49,7 +49,6 @@ export const AssetsPortfolio = ({
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const {
-    walletInfo,
     walletUI: { canManageBalancesVisibility, areBalancesVisible }
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
@@ -105,7 +104,7 @@ export const AssetsPortfolio = ({
           isBalanceVisible={areBalancesVisible || portfolioBalanceAsBigNumber.eq(0)}
         />
       </div>
-      {isPopupView && totalAssets > 0 && (
+      {isPopupView && portfolioBalanceAsBigNumber.gt(0) && (
         <SendReceive
           leftButtonOnClick={openSend}
           rightButtonOnClick={handleRedirectToReceive}
@@ -118,25 +117,14 @@ export const AssetsPortfolio = ({
           }}
         />
       )}
-      <Skeleton loading={isPortfolioBalanceLoading || !assetList}>
-        {portfolioBalanceAsBigNumber.gt(0) ? (
-          <AssetTable
-            rows={assetList}
-            onRowClick={onRowClick}
-            totalItems={totalAssets}
-            scrollableTargetId={isPopupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
-            onLoad={onTableScroll}
-            popupView={isPopupView}
-          />
-        ) : (
-          <FundWalletBanner
-            title={t('browserView.assets.welcome')}
-            subtitle={t('browserView.assets.startYourWeb3Journey')}
-            prompt={t('browserView.fundWalletBanner.prompt')}
-            walletAddress={walletInfo.addresses[0].address.toString()}
-          />
-        )}
-      </Skeleton>
+      <AssetPortfolioContent
+        totalAssets={totalAssets}
+        assetList={assetList}
+        isPortfolioBalanceLoading={isPortfolioBalanceLoading}
+        onRowClick={onRowClick}
+        onTableScroll={onTableScroll}
+        isPopupView={isPopupView}
+      />
     </Skeleton>
   );
 };

@@ -1,5 +1,5 @@
 import inRange from 'lodash/inRange';
-import { SaturationLevels } from './types';
+import { SaturationLevels, SortField, SortOrder } from './types';
 
 const mediumUpperBound = 90;
 const highUpperBound = 95;
@@ -28,3 +28,6 @@ export const getSaturationLevel = (saturation: number): SaturationLevels => {
   }
   return SaturationLevels.Medium;
 };
+
+export const getDefaultSortOrderByField = (field: SortField): SortOrder =>
+  ['ticker', 'cost', 'margin'].includes(field) ? 'asc' : 'desc';

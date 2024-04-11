@@ -29,8 +29,9 @@ import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnType, StakePoolSortingOptionType } from '../types/staking';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
-import OnboardingPageObject from '../pageobject/onboardingPageObject';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
+
+const validPassword = 'N_8J@bne87A';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -188,7 +189,7 @@ When(
     let password;
     switch (type) {
       case 'newly created':
-        password = OnboardingPageObject.validPassword;
+        password = validPassword;
         break;
       case 'incorrect':
         password = 'somePassword';
@@ -459,10 +460,7 @@ Then(/^I see Expanded View banner$/, async () => {
 });
 
 When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'grid' | 'list') => {
-  // TODO: remove `if` when USE_MULTI_DELEGATION_STAKING_GRID_VIEW is enabled by default
-  if (await MultidelegationPage.gridViewToggle.isExisting()) {
-    await MultidelegationPage.switchPoolsView(viewType);
-  }
+  await MultidelegationPage.switchPoolsView(viewType);
 });
 
 Then(/^stake pool list row skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {

@@ -96,7 +96,6 @@ export const WalletSetupWizard = ({
 
   const walletSetupMnemonicStepTranslations = {
     writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
-    body: t('core.walletSetupMnemonicStepRevamp.body'),
     enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
     enterPassphraseDescription: t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription'),
     writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
@@ -104,9 +103,7 @@ export const WalletSetupWizard = ({
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
-    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
-    forgotPasswordTitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordTitle'),
-    forgotPasswordSubtitle: t('core.walletSetupMnemonicStepRevamp.forgotPasswordSubtitle')
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
   };
 
   const walletSetupModeStepTranslations = {
@@ -129,25 +126,21 @@ export const WalletSetupWizard = ({
   const walletSetupNamePasswordStepTranslations = {
     title:
       setupType === SetupType.FORGOT_PASSWORD
-        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
-        : t('package.core.walletNameAndPasswordSetupStep.title'),
+        ? t('core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
+        : t('core.walletNameAndPasswordSetupStep.title'),
     description:
       setupType === SetupType.FORGOT_PASSWORD
-        ? t('package.core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
-        : t('package.core.walletNameAndPasswordSetupStep.description'),
-    nameInputLabel: t('package.core.walletNameAndPasswordSetupStep.nameInputLabel'),
-    nameMaxLength: t('package.core.walletNameAndPasswordSetupStep.nameMaxLength'),
-    passwordInputLabel: t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel'),
-    confirmPasswordInputLabel: t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
-    nameRequiredMessage: t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
-    noMatchPassword: t('package.core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    confirmButton: t('package.core.walletNameAndPasswordSetupStep.enterWallet'),
-    secondLevelPasswordStrengthFeedback: t(
-      'package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'
-    ),
-    firstLevelPasswordStrengthFeedback: t(
-      'package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback'
-    )
+        ? t('core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
+        : t('core.walletNameAndPasswordSetupStep.description'),
+    nameInputLabel: t('core.walletNameAndPasswordSetupStep.nameInputLabel'),
+    nameMaxLength: t('core.walletNameAndPasswordSetupStep.nameMaxLength'),
+    passwordInputLabel: t('core.walletNameAndPasswordSetupStep.passwordInputLabel'),
+    confirmPasswordInputLabel: t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
+    nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
+    noMatchPassword: t('core.walletNameAndPasswordSetupStep.noMatchPassword'),
+    confirmButton: t('core.walletNameAndPasswordSetupStep.enterWallet'),
+    secondLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'),
+    firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
   const moveBack = () => {
@@ -163,7 +156,6 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
       if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        void analytics.sendAliasEvent();
         const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
         const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
         if (hdWalletDiscovered) {
@@ -213,8 +205,9 @@ export const WalletSetupWizard = ({
   );
 
   const handleSubmit = async (result: { password: string; walletName: string }) => {
-    sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
+    void sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
     await handleCompleteCreation(result.walletName, result.password);
+    void analytics.sendAliasEvent();
   };
 
   const handleMnemonicVerification = () => {

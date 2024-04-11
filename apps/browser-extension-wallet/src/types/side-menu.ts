@@ -1,9 +1,10 @@
+import { TranslationKey } from '@lib/translations/types';
 import { MenuItemList } from '@utils/constants';
 import { FC, SVGProps } from 'react';
 
 export interface SideMenuItemConfig {
   id: MenuItemList;
-  label: string;
+  label: TranslationKey;
   testId: string;
   path: string;
   regularIcon: FC<SVGProps<SVGSVGElement>>;

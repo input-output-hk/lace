@@ -27,14 +27,13 @@
   ],
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
-    "cleanup": "yarn exec rm -rf dist node_modules coverage .rollup.cache src/dist",
+    "cleanup": "yarn exec rm -rf dist node_modules .rollup.cache src/dist",
     "lint": "cd ../.. && yarn common:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
     "prestart": "yarn build",
     "start": "node dist/index.js",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
-    "test:coverage": "yarn test --coverage --silent",
     "watch": "yarn build --watch"
   },
   "dependencies": {
@@ -50,7 +49,7 @@
     "react-tooltip": "4.2.7"
   },
   "devDependencies": {
-    "typescript": "^4.3.5"
+    "typescript": "^4.9.5"
   },
   "peerDependencies": {
     "react": "17.0.2",
