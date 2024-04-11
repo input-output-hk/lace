@@ -37,7 +37,6 @@ export const createQueue = (batchTasks: number, intervalBetweenBatch: number): T
         if (sent >= batchTasks) {
           // Reset the sent count
           sent = 0;
-          // eslint-disable-next-line promise/avoid-new
           await new Promise((resolve) => setTimeout(resolve, intervalBetweenBatch));
         }
         execute();
