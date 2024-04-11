@@ -67,7 +67,6 @@ const NonSSLBanner = () => {
 const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) => {
   const api$ = of({
     allowOrigin(origin: cip30.Origin): Promise<'deny' | 'just-once' | 'allow'> {
-      /* eslint-disable-next-line promise/avoid-new */
       if (!url.startsWith(origin)) {
         return Promise.reject();
       }
