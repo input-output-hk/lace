@@ -24,7 +24,6 @@ const useConnectHardwareWalletWithTimeout = (connect: UseWalletManager['connectH
     async (usbDevice: USBDevice) => {
       const result = await Promise.race([
         connect(usbDevice),
-        // eslint-disable-next-line promise/avoid-new
         new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), threeSecondsTimeout))
       ]);
 
