@@ -37,7 +37,7 @@ jobs:
           sed -i "s/\"version\": \"[0-9.]*\"/\"version\": \"${{ inputs.version }}\"/g" apps/browser-extension-wallet/manifest.json
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v6
         with:
           commit-message: 'chore(${{ inputs.app }}): bump version to ${{ inputs.version }}'
           title: Release version ${{ inputs.version }} for ${{ inputs.app }}
