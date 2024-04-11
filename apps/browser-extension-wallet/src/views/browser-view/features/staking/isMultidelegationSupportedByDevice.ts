@@ -15,13 +15,16 @@ export enum TrezorMultidelegationFirmwareMinVersion {
 }
 
 export const isMultidelegationSupportedByDevice = async (walletType: Wallet.HardwareWallets): Promise<boolean> => {
-  const version = await Wallet.getDeviceSoftwareVersion(walletType);
+  const version = await Wallet.initConnectionAndGetSoftwareVersion(walletType);
   const expectedVersion =
     walletType === WalletType.Ledger ? LedgerMultidelegationMinAppVersion : TrezorMultidelegationFirmwareMinVersion;
 
-  return (
-    version.major >= expectedVersion.MAJOR &&
-    version.minor >= expectedVersion.MINOR &&
-    version.patch >= expectedVersion.PATCH
-  );
+  const higherOnMajor = version.major > expectedVersion.MAJOR;
+  const higherOnMinor = version.major === expectedVersion.MAJOR && version.minor > expectedVersion.MINOR;
+  const higherOrEqualOnPatch =
+    version.major === expectedVersion.MAJOR &&
+    version.minor === expectedVersion.MINOR &&
+    version.patch >= expectedVersion.PATCH;
+
+  return higherOnMajor || higherOnMinor || higherOrEqualOnPatch;
 };

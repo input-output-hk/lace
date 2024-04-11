@@ -32,8 +32,8 @@ enum ErrorDialogCode {
 }
 
 const commonErrorDialogTranslationKeys = {
-  title: 'browserView.onboarding.errorDialog.title',
-  confirm: 'browserView.onboarding.errorDialog.cta'
+  title: 'browserView.onboarding.errorDialog.title' as const,
+  confirm: 'browserView.onboarding.errorDialog.cta' as const
 };
 const ErrorDialog = makeErrorDialog<ErrorDialogCode>({
   [ErrorDialogCode.DeviceDisconnected]: {

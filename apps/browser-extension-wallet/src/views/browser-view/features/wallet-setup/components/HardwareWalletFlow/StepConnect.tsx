@@ -2,10 +2,17 @@
 import { UseWalletManager, useWalletManager } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
+import { TranslationKey } from '@lib/translations/types';
+import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState, VFC } from 'react';
-import { TFunction, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
+
+const requestHardwareWalletConnection = (): Promise<USBDevice> =>
+  navigator.usb.requestDevice({
+    filters: isTrezorHWSupported() ? Wallet.supportedHwUsbDescriptors : Wallet.ledgerDescriptors
+  });
 
 const threeSecondsTimeout = 3000;
 const timeoutErrorMessage = 'Timeout. Connecting too long.';
@@ -38,7 +45,7 @@ type ConnectionError =
   | 'cardanoAppNotOpen'
   | 'generic';
 
-const connectionSubtitleErrorTranslationsMap: Record<ConnectionError, string> = {
+const connectionSubtitleErrorTranslationsMap: Record<ConnectionError, TranslationKey> = {
   cardanoAppNotOpen: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.cardanoAppNotOpen',
   deviceLocked: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceLocked',
   deviceBusy: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceBusy',
@@ -85,7 +92,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
   const { t } = useTranslation();
   const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(DiscoveryState.Requested);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
-  const { requestHardwareWalletConnection, connectHardwareWalletRevamped } = useWalletManager();
+  const { connectHardwareWalletRevamped } = useWalletManager();
 
   const translations = makeTranslations({ connectionError, t });
   const connect = useConnectHardwareWalletWithTimeout(connectHardwareWalletRevamped);
@@ -102,7 +109,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
       setDiscoveryState(DiscoveryState.Running);
       let connectionResult: Wallet.HardwareWalletConnection;
       try {
-        const usbDevice = await requestHardwareWalletConnection({ trezorSupported: isTrezorHWSupported() });
+        const usbDevice = await requestHardwareWalletConnection();
         onUsbDeviceChange(usbDevice);
         connectionResult = await connect(usbDevice);
         onConnected(connectionResult);
@@ -119,7 +126,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
         setConnectionError(parseConnectionError(error));
       }
     })();
-  }, [connect, discoveryState, requestHardwareWalletConnection, onUsbDeviceChange, onConnected]);
+  }, [connect, discoveryState, onUsbDeviceChange, onConnected]);
 
   return (
     <WalletSetupConnectHardwareWalletStepRevamp

@@ -82,7 +82,6 @@ export interface UseWalletManager {
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   createHardwareWalletRevamped: CreateHardwareWalletRevamped;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
-  requestHardwareWalletConnection: typeof requestHardwareWalletConnection;
   connectHardwareWalletRevamped: typeof connectHardwareWalletRevamped;
   saveHardwareWallet: (wallet: Wallet.CardanoWallet, chainName?: Wallet.ChainName) => Promise<void>;
   /**
@@ -193,11 +192,6 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
 /** Connects a hardware wallet device */
 export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
   await Wallet.connectDevice(model);
-
-const requestHardwareWalletConnection = ({ trezorSupported }: { trezorSupported: boolean }): Promise<USBDevice> =>
-  navigator.usb.requestDevice({
-    filters: trezorSupported ? Wallet.supportedHwUsbDescriptors : Wallet.ledgerDescriptors
-  });
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
   Wallet.connectDeviceRevamped(usbDevice);
@@ -754,7 +748,6 @@ export const useWalletManager = (): UseWalletManager => {
     createHardwareWallet,
     createHardwareWalletRevamped,
     connectHardwareWallet,
-    requestHardwareWalletConnection,
     connectHardwareWalletRevamped,
     saveHardwareWallet,
     deleteWallet,

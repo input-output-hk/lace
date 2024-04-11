@@ -1,8 +1,9 @@
 import { Wallet } from '@lace/cardano';
-import { WalletSetupCreationStep } from '@lace/core';
+import { WalletSetupHWCreationStep } from '@lace/core';
 import { EnhancedAnalyticsOptInStatus, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { TFunction } from 'i18next';
 import React, { VFC, useMemo, useEffect, useState } from 'react';
-import { TFunction, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useLocalStorage, useWalletManager } from '@hooks';
 import { config } from '@src/config';
 import { useAnalyticsContext } from '@providers';
@@ -90,5 +91,5 @@ export const StepCreate: VFC<StepCreateProps> = ({ connection, onError, walletDa
     walletData
   ]);
 
-  return <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} isHardwareWallet />;
+  return <WalletSetupHWCreationStep translations={walletSetupCreateStepTranslations} />;
 };

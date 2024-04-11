@@ -1,3 +1,4 @@
+import { TranslationKey } from '@lib/translations/types';
 import React from 'react';
 import { Modal, Typography } from 'antd';
 import { Button } from '@lace/common';
@@ -6,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
-type TranslationKeys = Record<'title' | 'description' | 'confirm', string>;
+type TranslationKeys = Record<'title' | 'description' | 'confirm', TranslationKey>;
 
 interface ErrorDialogProps<ErrorCode extends string> {
   visible: boolean;

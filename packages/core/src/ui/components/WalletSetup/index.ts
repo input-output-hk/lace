@@ -3,7 +3,6 @@ export * from './WalletSetupStepLayout';
 export * from './WalletSetupRegisterStep';
 export * from './WalletSetupMnemonicIntroStep';
 export * from './WalletSetupMnemonicStep';
-export * from './WalletSetupCreationStep';
 export * from './WalletSetupModeStep';
 export * from './WalletSetupFinalStep';
 export * from './WalletSetupMnemonicVerificationStep';

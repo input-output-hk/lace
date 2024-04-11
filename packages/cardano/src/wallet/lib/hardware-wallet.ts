@@ -45,15 +45,23 @@ const isDeviceDescribedBy = (device: USBDevice, descriptors: Descriptor[]) =>
     (Object.entries(descriptor) as DescriptorEntries<Descriptor>).every(([key, value]) => device[key] === value)
   );
 
-const ledgerNanoSProductId = 4117;
-const ledgerNanoSPlusProductId = 20_501;
-const ledgerNanoXProductId = 16_401;
-export const ledgerDescriptors = [ledgerNanoSProductId, ledgerNanoSPlusProductId, ledgerNanoXProductId].map(
-  (productId) => ({
-    vendorId: ledgerUSBVendorId,
-    productId
-  })
-);
+const ledgerNanoSWithNoAppOpenProductId = 4113;
+const ledgerNanoSWithCardanoAppOpenProductId = 4117;
+const ledgerNanoSPlusWithNoAppOpenProductId = 20_497;
+const ledgerNanoSPlusWithCardanoAppOpenProductId = 20_501;
+const ledgerNanoXWithNoAppOpenProductId = 16_401;
+const ledgerNanoXWithCardanoAppOpenProductId = 16_405;
+export const ledgerDescriptors = [
+  ledgerNanoSWithNoAppOpenProductId,
+  ledgerNanoSWithCardanoAppOpenProductId,
+  ledgerNanoSPlusWithNoAppOpenProductId,
+  ledgerNanoSPlusWithCardanoAppOpenProductId,
+  ledgerNanoXWithNoAppOpenProductId,
+  ledgerNanoXWithCardanoAppOpenProductId
+].map((productId) => ({
+  vendorId: ledgerUSBVendorId,
+  productId
+}));
 
 // eslint-disable-next-line unicorn/number-literal-case
 const trezorModelTProductId = 0x53_c1;
@@ -141,28 +149,15 @@ type SoftwareVersion = {
   patch: number;
 };
 
-const parseStringVersion = (version: string) => {
-  const [major, minor, patch] = version.split('.').map((n) => Number.parseInt(n, 10));
-  return {
-    major,
-    minor,
-    patch
-  };
-};
-
-export const getDeviceSoftwareVersion = async (type: HardwareWallets): Promise<SoftwareVersion> => {
+export const initConnectionAndGetSoftwareVersion = async (type: HardwareWallets): Promise<SoftwareVersion> => {
   if (type === WalletType.Ledger) {
     const connection = await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(DEFAULT_COMMUNICATION_TYPE);
-    const { cardanoAppVersion } = await getDeviceSpec({
-      type,
-      value: connection
-    });
-    return parseStringVersion(cardanoAppVersion);
+    const { version } = await connection.getVersion();
+    return version;
   }
   if (isTrezorHWSupported() && type === WalletType.Trezor) {
     // To allow checks once the app is refreshed. It won't affect the user flow
     // TODO: Smarter Trezor initialization logic after onboarding revamp LW-9808
-    // TODO: Reuse getDeviceSpec to get version
     await initializeTrezor();
     const features = await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE);
     return {
