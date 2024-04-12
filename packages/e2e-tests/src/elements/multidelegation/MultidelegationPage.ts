@@ -604,6 +604,7 @@ class MultidelegationPage {
     const columnContent: string[] = [];
 
     await this.listContainer.waitForStable();
+    await browser.pause(500);
 
     for (let i = 0; i < poolLimit; i++) {
       const displayedPoolsCounter = await this.displayedPools.length;
