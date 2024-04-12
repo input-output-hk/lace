@@ -8,6 +8,9 @@ import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListI
 import Tooltip from '../../elements/Tooltip';
 import testContext from '../../utils/testContext';
 import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridCard';
+import { StakePoolListColumnName } from '../../types/staking';
+import { SortingOrder } from '../../types/sortingOrder';
+import { mapColumnNameStringToEnum, sortColumnContent } from '../../utils/stakePoolListContent';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -299,6 +302,39 @@ class MultidelegationPageAssert {
     const cardWidth = await new StakePoolGridCard(0).container.getSize('width');
     const cardsInARow = Math.floor(rowWidth / cardWidth);
     expect(cardsInARow).to.equal(expectedCardsCount);
+  };
+
+  assertSeeColumnSortingIndicator = async (column: StakePoolListColumnName, order: 'ascending' | 'descending') => {
+    await (
+      await MultidelegationPage.getColumnSortingIndicator(mapColumnNameStringToEnum(column), order)
+    ).waitForDisplayed();
+  };
+
+  assertSeeStakePoolsSorted = async (
+    stakePoolsDisplayType: 'list rows' | 'cards',
+    sortingOption: StakePoolListColumnName,
+    order: SortingOrder,
+    poolLimit?: number
+  ) => {
+    await MultidelegationPage.waitForPoolsCounterToBeGreaterThanZero();
+    poolLimit ??= await MultidelegationPage.getNumberOfPoolsFromCounter();
+    if (stakePoolsDisplayType === 'cards') {
+      // TODO: add code to handle grid cards
+      throw new Error('Please add validation for grid cards sorting');
+    } else {
+      const columnContent = await MultidelegationPage.extractColumnContent(
+        mapColumnNameStringToEnum(sortingOption),
+        poolLimit
+      );
+      const sortedColumnContent = await sortColumnContent(
+        columnContent,
+        mapColumnNameStringToEnum(sortingOption),
+        order
+      );
+
+      expect(columnContent).to.not.be.empty;
+      expect(columnContent).to.deep.equal(sortedColumnContent);
+    }
   };
 }
 

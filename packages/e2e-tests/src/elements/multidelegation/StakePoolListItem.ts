@@ -3,7 +3,6 @@ import { ChainablePromiseElement } from 'webdriverio';
 
 export class StakePoolListItem {
   private SELECTED_POOLS_LIST = '[data-testid="selected-pools-list"]';
-  private AVAILABLE_POOLS_LIST = '[data-testid="stake-pool-list-scroll-wrapper"]';
   private LIST_ITEM = '[data-testid="stake-pool-item"]';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private TICKER = '[data-testid="stake-pool-list-ticker"]';
@@ -18,9 +17,9 @@ export class StakePoolListItem {
   protected listItem;
 
   constructor(index = 0, isOnSelectedPoolsList = false) {
-    this.listItem = $(isOnSelectedPoolsList ? this.SELECTED_POOLS_LIST : this.AVAILABLE_POOLS_LIST).$$(this.LIST_ITEM)[
-      index
-    ];
+    this.listItem = $(
+      isOnSelectedPoolsList ? `${this.SELECTED_POOLS_LIST} ${this.LIST_ITEM}` : `[data-item-index="${index}"]`
+    );
   }
 
   get container(): ChainablePromiseElement<WebdriverIO.Element | undefined> {

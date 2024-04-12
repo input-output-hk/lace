@@ -192,6 +192,35 @@ Feature: Staking Page - Extended View
     And I open Browse pools tab
     Then "More options" component with stake pool sorting options is displayed
 
+  @LW-10139 @Testnet @Mainnet
+  Scenario: Extended View - Staking - List View - Stake pool list default sorting by ticker
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    Then stake pool list view is displayed
+    And ascending sorting indicator is displayed for "Ticker" column
+    And stake pool list rows are sorted by "Ticker" in ascending order
+
+  @LW-10141 @Testnet @Mainnet @test
+  Scenario Outline: Extended View - Staking - List View - default sorting order for column - <column>
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    Then stake pool list view is displayed
+    When I click on stake pools table "<column>" column header
+    And <order> sorting indicator is displayed for "<column>" column
+    Then stake pool list rows are sorted by "<column>" in <order> order
+    Examples:
+      | column      | order       |
+      | Saturation  | descending  |
+#      | ROS         | descending  | #TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+      | Cost        | ascending   |
+      | Margin      | ascending   |
+      | Blocks      | descending  |
+      | Pledge      | descending  |
+      | Live Stake  | descending  |
+#      | Ticker      | ascending   | # Tested in LW-10139
+
   @LW-9996 @Testnet @Mainnet
   Scenario: Extended View - Grid - display stake pool cards based on browser width
     When I am on Staking extended page
