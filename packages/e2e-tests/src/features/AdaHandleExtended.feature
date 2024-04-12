@@ -1,7 +1,7 @@
 @AdaHandle-extended @Testnet
 Feature: ADA handle - extended view
 
-  Background:
+  Background: 
     Given Wallet is synced
     And all NFT folders are removed
 
@@ -149,8 +149,7 @@ Feature: ADA handle - extended view
     And I see ADA handle NFT with custom image on the Select NFT page
     And the corresponding custom images are displayed
 
-  @LW-5025 @LW-5028 @LW-5030 @Pending
-  @issue=LW-9885
+  @LW-5025 @LW-5028 @LW-5030 @Pending @issue=LW-9885
   Scenario: Extended View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on page header
     And I enter "$test_handle_3" in the bundle 1 recipient's address
