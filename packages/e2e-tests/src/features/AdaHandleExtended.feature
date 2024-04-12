@@ -1,7 +1,7 @@
 @AdaHandle-extended @Testnet
 Feature: ADA handle - extended view
 
-  Background: 
+  Background:
     Given Wallet is synced
     And all NFT folders are removed
 

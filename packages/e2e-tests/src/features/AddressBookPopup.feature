@@ -1,7 +1,7 @@
 @AddressBook-popup @Mainnet @Testnet
 Feature: Address book - popup view
 
-  Background: 
+  Background:
     Given Lace is ready for test
 
   @LW-4473
@@ -28,7 +28,7 @@ Feature: Address book - popup view
     Then I see a toast with text: "Edited successfully"
     And I see address row with name "<wallet_name>" and address "<address_label>" on the list in popup mode
 
-    Examples: 
+    Examples:
       | edited_address | wallet_name  | address                                                                                                            | address_label  |
       | Shelley        | Shelley_edit | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       | addr_tes...6ja |
       | Byron          | Byron_edit   | 37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp | 37btjrVy...Dzp |
@@ -50,7 +50,7 @@ Feature: Address book - popup view
     Then Contact "<name_error>" name error and "<address_error>" address error are displayed
     And "Done" button is disabled on "Edit address" drawer
 
-    Examples: 
+    Examples:
       | wallet_name               | address                                                                                                         | name_error                       | address_error                       |
       | empty                     | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Name field is required           | empty                               |
       | too_long_name_123456789   | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Max 20 Characters                | empty                               |
@@ -72,7 +72,7 @@ Feature: Address book - popup view
     Then I click "Done" button on "Edit address" drawer
     And I see a toast with text: "<toast_message>"
 
-    Examples: 
+    Examples:
       | wallet_name | wallet_address | toast_message                |
       | Byron       | Byron          | Given name already exists    |
       | SomeWallet  | Byron          | Given address already exists |
@@ -115,7 +115,7 @@ Feature: Address book - popup view
     Then I see a toast with text: "Address added"
     And I see address row with name "<wallet_name>" and address "<wallet_address>" on the list in popup mode
 
-    Examples: 
+    Examples:
       | wallet_name          | wallet_address |
       | Byron_man            | Byron          |
       | Shelley_man          | Shelley        |
@@ -132,11 +132,11 @@ Feature: Address book - popup view
     Then Contact "<name_error>" name error and "<address_error>" address error are displayed
     And "Save address" button is disabled on "Add new address" drawer
 
-    Examples: 
+    Examples:
       | wallet_name               | address                                                                  | name_error                       | address_error                       |
       | too_long_name_123456789   | addr_invalid                                                             | Max 20 Characters                | Invalid Cardano address             |
       | name_ok                   | addr_invalid                                                             | empty                            | Invalid Cardano address             |
-      | too_long_name_123456789   |    2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | Max 20 Characters                | empty                               |
+      | too_long_name_123456789   | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf    | Max 20 Characters                | empty                               |
       | "name followed by space " | "2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf " | Name has unnecessary white space | Address has unnecessary white space |
       | " name preceded by space" | " 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf" | Name has unnecessary white space | Address has unnecessary white space |
 
@@ -149,7 +149,7 @@ Feature: Address book - popup view
     Then Contact "<name_error>" name error and "<address_error>" address error are displayed
     And "Save address" button is disabled on "Add new address" drawer
 
-    Examples: 
+    Examples:
       | wallet_name | wallet_name2 | address                                                               | address2                                                              | name_error             | address_error             |
       | name_ok     | empty        | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | Name field is required | empty                     |
       | name_ok     | name_ok      | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | empty                                                                 | empty                  | Address field is required |
@@ -163,7 +163,7 @@ Feature: Address book - popup view
     And I click "Save address" button on "Add new address" drawer
     Then I see a toast with text: "<toast_message>"
 
-    Examples: 
+    Examples:
       | wallet_name | wallet_address | toast_message                |
       | Byron       | Byron          | Given name already exists    |
       | SomeWallet  | Byron          | Given address already exists |
