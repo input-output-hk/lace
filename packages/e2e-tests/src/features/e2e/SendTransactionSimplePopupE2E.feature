@@ -1,4 +1,4 @@
-@SendSimpleTransaction-Popup-E2E @Testnet
+@SendSimpleTransaction-Popup-E2E @E2E @Testnet
 Feature: Send Simple Transactions - Popup view - E2E
 
   Background:
@@ -22,13 +22,13 @@ Feature: Send Simple Transactions - Popup view - E2E
     When I navigate to Transactions popup page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransaction2E2E" address
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransaction2E2E" address
     When I open wallet: "WalletReceiveSimpleTransaction2E2E" in: popup mode
     And Wallet is synced
     And I navigate to Transactions popup page
     Then the Received transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransaction2E2E" address
+    Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransaction2E2E" address
 
   @LW-4678
   Scenario: Popup-view - Self Transaction E2E

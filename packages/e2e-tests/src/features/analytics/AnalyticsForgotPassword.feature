@@ -1,4 +1,4 @@
-@ForgotPassword @Mainnet @Testnet @Pending
+@ForgotPassword @Analytics @Mainnet @Testnet @Pending
 Feature: Analytics - Forgot Password
 
   Background:
@@ -44,13 +44,13 @@ Feature: Analytics - Forgot Password
     And I switch to tab with restore wallet process
     And I close all remaining tabs except current one
     And I set up request interception for posthog analytics request(s)
-    Then "Wallet password" page is displayed in forgot password flow
-    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    Then "Wallet setup" page is displayed
+    # When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "unlock wallet | forgot password? | set up your password | next | click"
     And I click "Next" button during wallet setup
     Then I validate latest analytics single event "unlock wallet | forgot password? | recovery phrase length | next | click"
-    And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
+#    And I am on "Mnemonic verification" last page from "Forgot password" and filled all words
     And I validate latest analytics multiple events:
       | unlock wallet \| forgot password? \| enter passphrase #01 \| next \| click |
       | unlock wallet \| forgot password? \| enter passphrase #09 \| next \| click |

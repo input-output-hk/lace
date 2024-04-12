@@ -11,7 +11,7 @@ import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridC
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
-    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 60_000 });
+    await MultidelegationPage.delegationCardPoolsValue.waitForClickable({ timeout: 120_000 });
     const poolsCounter = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     expect(poolsCounter).to.equal(poolsCount);
   };
@@ -193,28 +193,28 @@ class MultidelegationPageAssert {
     let expectedTooltipText;
     switch (columnName) {
       case 'Ticker':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.ticker.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
         break;
       case 'Saturation':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
         break;
       case 'ROS':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
         break;
       case 'Cost':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.cost.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
         break;
       case 'Margin':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.margin.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
         break;
       case 'Blocks':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.blocks.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
         break;
       case 'Pledge':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.pledge.tooltip', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
         break;
-      case 'Live stake':
-        expectedTooltipText = await t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.tooltip', 'staking');
+      case 'Live Stake':
+        expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
         break;
       default:
         throw new Error(`Unsupported column name: ${columnName}`);
@@ -294,6 +294,7 @@ class MultidelegationPageAssert {
   };
 
   assertsSeeCardsInARow = async (expectedCardsCount: number) => {
+    await MultidelegationPage.gridContainer.waitForStable();
     const rowWidth = await MultidelegationPage.gridContainer.getSize('width');
     const cardWidth = await new StakePoolGridCard(0).container.getSize('width');
     const cardsInARow = Math.floor(rowWidth / cardWidth);

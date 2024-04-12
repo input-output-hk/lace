@@ -38,7 +38,6 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
         delegators: 20,
         livePledge: BigInt('2000000000'),
         saturation: Percent(0.0512),
-        apy: Percent(0.013),
         ros: Percent(0.69),
         lastRos: Percent(0.88),
         size: {
@@ -65,7 +64,7 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
 };
 
 const transformedStakePool = {
-  apy: '1.30',
+  ros: '69.00',
   cost: {
     number: '6.04',
     unit: ''
@@ -92,7 +91,8 @@ const transformedStakePool = {
   saturation: '5.12',
   ticker: 'STTST',
   blocks: '20',
-  stakePool: cardanoStakePoolMock.pageResults[0]
+  stakePool: cardanoStakePoolMock.pageResults[0],
+  fee: '6.04'
 };
 
 describe('Testing transformers', () => {

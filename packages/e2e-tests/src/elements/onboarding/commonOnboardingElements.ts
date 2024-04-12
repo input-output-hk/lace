@@ -57,4 +57,20 @@ export default class CommonOnboardingElements {
     await this.backButton.waitForClickable();
     await this.backButton.click();
   }
+
+  async clickOnLegalLinkOnFooter(linkText: string): Promise<void> {
+    switch (linkText) {
+      case 'Cookie policy':
+        await this.cookiePolicyLink.click();
+        break;
+      case 'Privacy policy':
+        await this.privacyPolicyLink.click();
+        break;
+      case 'Terms of service':
+        await this.termsOfServiceLink.click();
+        break;
+      default:
+        throw new Error(`Unsupported legal link text - ${linkText}`);
+    }
+  }
 }

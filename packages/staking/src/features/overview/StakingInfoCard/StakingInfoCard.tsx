@@ -47,7 +47,7 @@ export type StakingInfoCardProps = {
   name?: string;
   totalRewards: string;
   lastReward: string;
-  apy?: string | number;
+  ros?: string | number;
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
@@ -77,10 +77,10 @@ export const StakingInfoCard = ({
   id,
   logo,
   margin,
-  name,
+  name = '',
   totalRewards,
   lastReward,
-  apy,
+  ros,
   ticker,
   onStakePoolSelect,
   popupView,
@@ -112,9 +112,9 @@ export const StakingInfoCard = ({
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
           <Stats
             text={t('overview.stakingInfoCard.ros')}
-            value={apy && formatNumericValue(apy, '%', 1)}
+            value={ros && formatNumericValue(ros, '%', 1)}
             popupView
-            dataTestid="stats-apy"
+            dataTestid="stats-ros"
           />
           <Stats
             text={t('overview.stakingInfoCard.fee')}

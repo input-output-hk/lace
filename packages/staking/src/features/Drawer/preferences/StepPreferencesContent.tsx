@@ -53,20 +53,20 @@ export const StepPreferencesContent = () => {
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
-      displayData: { name, apy, saturation },
+      displayData: { name = '', ros, saturation },
       id,
       sliderIntegerPercentage,
     } = draftPool;
 
     return {
-      apy: apy ? String(apy) : undefined,
       cardanoCoinSymbol,
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
-      name: name || '-',
+      name,
       onChainPercentage: draftPool?.onChainPercentage,
       percentage: sliderIntegerPercentage,
-      saturation: saturation ? String(saturation) : undefined,
+      ros,
+      saturation,
       savedIntegerPercentage: draftPool?.savedIntegerPercentage || undefined,
       sliderIntegerPercentage,
       stakeValue: balancesBalance
@@ -127,7 +127,7 @@ export const StepPreferencesContent = () => {
             <PoolDetailsCard
               key={id}
               color={color}
-              name={name}
+              name={name || ''}
               onRemove={createRemovePoolFromPortfolio(id)}
               actualPercentage={onChainPercentage}
               savedPercentage={savedIntegerPercentage}

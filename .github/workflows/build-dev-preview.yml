@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -22,13 +22,13 @@ jobs:
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues
         run: yarn lint
-      - name: Run unit tests, generate test coverage report
+      - name: Run unit tests
         env:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
-        run: yarn test:coverage --maxWorkers=2
+        run: yarn test --maxWorkers=2 --silent
       - name: Upload build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Lace (Developer Preview)
           path: apps/browser-extension-wallet/dist

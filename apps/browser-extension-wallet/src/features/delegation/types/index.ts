@@ -23,7 +23,7 @@ export interface StakePool {
   ticker?: string;
   logo?: string;
   retired?: boolean;
-  apy?: number | string;
+  ros?: number | string;
   size?: string;
   saturation?: number | string;
   fee?: number | string;
@@ -31,22 +31,22 @@ export interface StakePool {
 }
 
 export type stakePoolDetailsSelectorProps = {
-  delegators: number | string;
-  description: string;
+  delegators?: string;
+  description?: string;
   hexId: string;
   id: string;
   logo?: string;
   margin: number | string;
-  name: string;
+  name?: string;
   owners: string[];
-  saturation: number | string;
-  activeStake: { number: string; unit?: string };
-  liveStake: { number: string; unit?: string };
-  ticker: string;
-  apy: number | string;
+  saturation?: string;
+  activeStake?: { number: string; unit?: string };
+  liveStake?: { number: string; unit?: string };
+  ticker?: string;
+  ros?: string;
   status: Wallet.Cardano.StakePool['status'];
   fee: string;
   contact: Wallet.Cardano.PoolContactData;
-  blocks: number | string;
+  blocks?: string;
   pledge: string;
 };

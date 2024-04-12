@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
-import { BrowsePoolsView, StakePoolSortOptions } from 'features/BrowsePools/types';
+import { StakePoolSortOptions, StakingBrowserPreferences } from 'features/BrowsePools';
 import type { IAnalyticsTracker } from '@lace/common';
 
 type WalletBalance = {
@@ -38,13 +38,6 @@ export enum StateStatus {
   LOADING = 'loading',
   LOADED = 'loaded',
   ERROR = 'error',
-}
-
-export interface StakingBrowserPreferences {
-  sortOptions: StakePoolSortOptions;
-  searchQuery?: string;
-  poolsView: BrowsePoolsView;
-  selectedPoolsIds: string[];
 }
 
 export interface IBlockchainProvider {

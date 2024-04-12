@@ -10,7 +10,7 @@ export const grid = style([
   }),
   {
     '@media': {
-      'screen and (min-width: 1024px)': {
+      'screen and (min-width: 668px)': {
         gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
       },
       'screen and (min-width: 1660px)': {

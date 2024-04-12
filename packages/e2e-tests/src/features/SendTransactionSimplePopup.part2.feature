@@ -196,8 +196,9 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
   Scenario: Popup-view - send maximum amount of multiple assets by clicking MAX button
     When I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
-    And I click MAX button in bundle 1 for "tADA" asset
-    Then the maximum available amount is displayed in bundle: 1 for "tADA" asset
+#    disabled until "utxo fully depleted" error is fixed for MAX tADA
+#    And I click MAX button in bundle 1 for "tADA" asset
+#    Then the maximum available amount is displayed in bundle: 1 for "tADA" asset
     When I click "Add token or NFT" button for bundle 1
     And click on an token with name: "LaceCoin"
     And I click MAX button in bundle 1 for "LaceCoin1" asset

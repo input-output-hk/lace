@@ -10,20 +10,19 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
       - name: Upload build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lightwallet
           path: apps/browser-extension-wallet/dist
-      - name: Run unit tests, generate test coverage report
-        run: yarn test:coverage --maxWorkers=2
-      - name: Upload Coveralls report
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.COVERALLS_REPO_TOKEN  }}
-          allow-empty: true
+      - name: Run unit tests
+        env:
+          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
+          DEFAULT_CHAIN: 'Preprod'
+          NODE_OPTIONS: '--max_old_space_size=8192'
+        run: yarn test --maxWorkers=2 --silent

@@ -132,27 +132,25 @@ describe('AnalyticsTracker', () => {
   });
 
   describe('excluded events', () => {
-    it('should ommit sending onboarding | new wallet events', async () => {
+    it('should omit sending onboarding | new wallet events', async () => {
       const tracker = new AnalyticsTracker({
         isPostHogEnabled: true,
         excludedEvents: 'onboarding | new wallet',
         postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateClick);
       expect(mockedPostHogClient.sendEvent).not.toHaveBeenCalled();
     });
 
-    it('should ommit sending excluded events', async () => {
+    it('should omit sending excluded events', async () => {
       const tracker = new AnalyticsTracker({
         isPostHogEnabled: true,
         excludedEvents: 'onboarding | new wallet',
         postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreDoneGoToWallet);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreEnterWalletClick);
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
     });
 
@@ -162,7 +160,7 @@ describe('AnalyticsTracker', () => {
         postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
-      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingAnalyticsAgreeClick);
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
     });
   });

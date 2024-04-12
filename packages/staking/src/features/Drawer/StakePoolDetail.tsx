@@ -32,7 +32,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       id,
       hexId,
       owners = [],
-      apy,
+      ros,
       saturation,
       activeStake,
       liveStake,
@@ -66,13 +66,13 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
 
   const metricsTranslations = {
     activeStake: t('drawer.details.metrics.activeStake'),
-    apy: t('drawer.details.metrics.apy'),
     blocks: t('drawer.details.metrics.blocks'),
     cost: t('drawer.details.metrics.cost'),
     delegators: t('drawer.details.metrics.delegators'),
     liveStake: t('drawer.details.metrics.liveStake'),
     margin: t('drawer.details.metrics.margin'),
     pledge: t('drawer.details.metrics.pledge'),
+    ros: t('drawer.details.metrics.ros'),
     saturation: t('drawer.details.metrics.saturation'),
   };
 
@@ -85,10 +85,15 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
 
   const metricsData = useMemo(() => {
     const metrics = [
-      { t: metricsTranslations.activeStake, testId: 'active-stake', unit: activeStake.unit, value: activeStake.number },
-      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake.unit, value: liveStake.number },
-      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
-      { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
+      {
+        t: metricsTranslations.activeStake,
+        testId: 'active-stake',
+        unit: activeStake?.unit,
+        value: activeStake?.number,
+      },
+      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake?.unit, value: liveStake?.number },
+      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators },
+      { t: metricsTranslations.ros, testId: 'ros', unit: '%', value: ros },
       { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
       { t: metricsTranslations.cost, testId: 'cost', unit: cost.unit, value: cost.number },
       { t: metricsTranslations.pledge, testId: 'pledge', unit: pledge.unit, value: pledge.number },
@@ -96,23 +101,23 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     ];
 
     if (popupView) {
-      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' });
+      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation });
     }
 
     return metrics;
   }, [
-    activeStake.number,
-    activeStake.unit,
-    apy,
+    activeStake?.number,
+    activeStake?.unit,
+    ros,
     blocks,
     delegators,
     cost.number,
     cost.unit,
-    liveStake.number,
-    liveStake.unit,
+    liveStake?.number,
+    liveStake?.unit,
     margin,
     metricsTranslations.activeStake,
-    metricsTranslations.apy,
+    metricsTranslations.ros,
     metricsTranslations.blocks,
     metricsTranslations.cost,
     metricsTranslations.delegators,
@@ -174,7 +179,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               {t('drawer.details.information')}
             </div>
             <div className={styles.body} data-testid="stake-pool-details-information-description">
-              {description}
+              {description || '-'}
             </div>
           </div>
           {socialNetworks.some((sns) => sns.href) && (

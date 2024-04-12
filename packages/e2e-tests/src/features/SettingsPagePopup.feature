@@ -323,6 +323,6 @@ Feature: General Settings - Popup View
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
     And I switch to last window
-    Then "Get started" page is displayed
+    Then I see Analytics banner
     And I expect wallet repository and local storage to be empty
     And Mnemonic is not stored in background storage

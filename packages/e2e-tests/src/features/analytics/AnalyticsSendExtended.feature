@@ -42,7 +42,8 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I open and authorize test DApp with "Only once" setting
     And I set send to wallet address to: "WalletAnalyticsReceiveSimpleTransactionE2E" in test DApp
     And I click "Send ADA" "Run" button in test DApp
-    And I see DApp connector "Confirm transaction" page with: "3.00 ADA", "0" assets and receiving wallet "WalletAnalyticsReceiveSimpleTransactionE2E"
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
+      | -3.00 tADA - FEE |
     And I set up request interception for posthog analytics request(s)
     When I click "Confirm" button on "Confirm transaction" page
     Then I validate latest analytics single event "send | transaction summary | confirm | click"

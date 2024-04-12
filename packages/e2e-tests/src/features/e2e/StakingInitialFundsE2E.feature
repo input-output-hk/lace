@@ -1,4 +1,4 @@
-@Staking-initial-E2E @Testnet
+@Staking-initial-E2E @E2E @Testnet
 Feature: Delegating funds to new pool E2E
 
   @LW-2685 @Smoke
@@ -30,6 +30,7 @@ Feature: Delegating funds to new pool E2E
     And I disable showing Multidelegation beta banner
     And I navigate to Staking extended page
     And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
     And I pick "4" pools for delegation from browse pools view: "ZZZG3, YATP, XSP, CENT"
     And I click "Next" button on staking portfolio bar
     And I click on "Next" button on staking preferences drawer

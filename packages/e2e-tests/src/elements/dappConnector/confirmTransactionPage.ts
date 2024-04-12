@@ -1,85 +1,141 @@
 /* eslint-disable no-undef */
-import { ChainablePromiseElement } from 'webdriverio';
 import CommonDappPageElements from './commonDappPageElements';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
+import { getTextFromElementArray } from '../../utils/getTextFromArray';
 
 class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_TYPE_TITLE = '[data-testid="dapp-transaction-title"]';
   private TRANSACTION_TYPE = '[data-testid="dapp-transaction-type"]';
-  private TRANSACTION_AMOUNT_TITLE = '[data-testid="dapp-transaction-amount-title"]';
-  private TRANSACTION_AMOUNT_VALUE = '[data-testid="dapp-transaction-amount-value"]';
-  private TRANSACTION_AMOUNT_FEE_TITLE = '[data-testid="tx-amount-fee-label"]';
-  private TRANSACTION_AMOUNT_FEE_TITLE_TOOLTIP_ICON = '[data-testid="tx-amount-fee-tooltip-icon"]';
-  private TRANSACTION_AMOUNT_FEE_VALUE_ADA = '[data-testid="tx-amount-fee-amount"]';
-  private TRANSACTION_AMOUNT_FEE_VALUE_FIAT = '[data-testid="tx-amount-fee-fiat"]';
-  private TRANSACTION_AMOUNT_ASSET = '[data-testid="dapp-transaction-asset"]';
-  private TRANSACTION_RECIPIENT_TITLE = '[data-testid="dapp-transaction-recipient-title"]';
-  private TRANSACTION_RECIPIENT_ADDRESS_TITLE = '[data-testid="dapp-transaction-recipient-address-title"]';
-  private TRANSACTION_RECIPIENT_ADDRESS = '[data-testid="dapp-transaction-recipient-address"]';
-  private TRANSACTION_DATA_TITLE = '[data-testid="dapp-transaction-data-title"]';
-  private TRANSACTION_DATA = '[data-testid="dapp-transaction-data"]';
+  private TRANSACTION_SUMMARY_ROW = '[data-testid="dapp-transaction-summary-row"]';
+  private TRANSACTION_FROM_ROW = '[data-testid="dapp-transaction-from-row"]';
+  private TRANSACTION_TO_ROW = '[data-testid="dapp-transaction-to-row"]';
+  private TRANSACTION_ORIGIN = '[data-testid="dapp-transaction-origin"]';
+  private TRANSACTION_ORIGIN_LABEL = '[data-testid="dapp-transaction-origin-expander"] [data-testid="expander-title"]';
+  private TRANSACTION_ORIGIN_EXPANDER_BUTTON =
+    '[data-testid="dapp-transaction-origin-expander"] [data-testid="expander-button"]';
+  private TRANSACTION_RETURNED_DEPOSIT_TITLE = '[data-testid="tx-amount-returned-deposit-label"]';
+  private TRANSACTION_RETURNED_DEPOSIT_ADA = '[data-testid="tx-amount-returned-deposit-amount"]';
+  private TRANSACTION_DEPOSIT_TITLE = '[data-testid="tx-amount-deposit-label"]';
+  private TRANSACTION_DEPOSIT_ADA = '[data-testid="tx-amount-deposit-amount"]';
+  private TRANSACTION_FEE_TITLE = '[data-testid="tx-amount-fee-label"]';
+  private TRANSACTION_FEE_ADA = '[data-testid="tx-amount-fee-amount"]';
+  private TRANSACTION_TO_SECTION_EXPANDER_BUTTON =
+    '[data-testid="dapp-transaction-to-section-expander"] [data-testid="expander-button"]';
+  private TRANSACTION_TO_SECTION_EXPANDER_LABEL =
+    '[data-testid="dapp-transaction-to-section-expander"] [data-testid="expander-title"]';
+  private TRANSACTION_FROM_SECTION_EXPANDER_BUTTON =
+    '[data-testid="dapp-transaction-from-section-expander"] [data-testid="expander-button"]';
+  private TRANSACTION_FROM_SECTION_EXPANDER_LABEL =
+    '[data-testid="dapp-transaction-from-section-expander"] [data-testid="expander-title"]';
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
 
-  get transactionTypeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+  get transactionOrigin() {
+    return $(this.TRANSACTION_ORIGIN);
+  }
+
+  get transactionOriginLabel() {
+    return $(this.TRANSACTION_ORIGIN_LABEL);
+  }
+
+  get transactionFeeTitle() {
+    return $(this.TRANSACTION_FEE_TITLE);
+  }
+
+  get transactionFeeValueAda() {
+    return $(this.TRANSACTION_FEE_ADA);
+  }
+
+  get transactionDepositTitle() {
+    return $(this.TRANSACTION_DEPOSIT_TITLE);
+  }
+
+  get transactionDepositValueAda() {
+    return $(this.TRANSACTION_DEPOSIT_ADA);
+  }
+
+  get transactionReturnedDepositValueAda() {
+    return $(this.TRANSACTION_RETURNED_DEPOSIT_ADA);
+  }
+
+  get transactionReturnedDepositTitle() {
+    return $(this.TRANSACTION_RETURNED_DEPOSIT_TITLE);
+  }
+
+  get transactionTypeTitle() {
     return $(this.TRANSACTION_TYPE_TITLE);
   }
 
-  get transactionType(): ChainablePromiseElement<WebdriverIO.Element> {
+  get transactionType() {
     return $(this.TRANSACTION_TYPE);
   }
 
-  get transactionAmountTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_TITLE);
-  }
-
-  get transactionAmountValue(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_VALUE);
-  }
-  get transactionFeeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_FEE_TITLE);
-  }
-
-  get transactionFeeTooltipIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_FEE_TITLE_TOOLTIP_ICON);
-  }
-
-  get transactionFeeValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_FEE_VALUE_ADA);
-  }
-
-  get transactionFeeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_FEE_VALUE_FIAT);
-  }
-
-  get transactionAmountAsset(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_ASSET);
-  }
-
-  get transactionRecipientTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_RECIPIENT_TITLE);
-  }
-
-  get transactionRecipientAddressTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_RECIPIENT_ADDRESS_TITLE);
-  }
-
-  get transactionRecipientAddress(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_RECIPIENT_ADDRESS);
-  }
-
-  get transactionDataTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_DATA_TITLE);
-  }
-
-  get transactionData(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_DATA);
-  }
-
-  get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get confirmButton() {
     return $(this.CONFIRM_BUTTON);
   }
-  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
+
+  get cancelButton() {
     return $(this.CANCEL_BUTTON);
+  }
+
+  get transactionToSectionExpanderButton() {
+    return $(this.TRANSACTION_TO_SECTION_EXPANDER_BUTTON);
+  }
+
+  get transactionToSectionExpanderLabel() {
+    return $(this.TRANSACTION_TO_SECTION_EXPANDER_LABEL);
+  }
+
+  get transactionFromSectionExpanderButton() {
+    return $(this.TRANSACTION_FROM_SECTION_EXPANDER_BUTTON);
+  }
+
+  get transactionFromSectionExpanderLabel() {
+    return $(this.TRANSACTION_FROM_SECTION_EXPANDER_LABEL);
+  }
+
+  get transactionOriginSectionExpanderButton() {
+    return $(this.TRANSACTION_ORIGIN_EXPANDER_BUTTON);
+  }
+
+  get transactionSummaryAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_SUMMARY_ROW);
+  }
+
+  get transactionFromAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_FROM_ROW);
+  }
+
+  get transactionToAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_TO_ROW);
+  }
+
+  async getAssetsFromAddressSection() {
+    const textArray = await getTextFromElementArray(await this.transactionFromAssetsRows);
+    return textArray.map((str) => str.replace(/\n/g, ' '));
+  }
+
+  async getAssetsToAddressSection() {
+    const textArray = await getTextFromElementArray(await this.transactionToAssetsRows);
+    return textArray.map((str) => str.replace(/\n/g, ' '));
+  }
+
+  async expandSectionInDappTransactionWindow(section: 'Origin' | 'From address' | 'To address') {
+    await this.transactionOriginSectionExpanderButton.waitForDisplayed();
+    switch (section) {
+      case 'Origin':
+        await this.transactionOriginSectionExpanderButton.click();
+        break;
+      case 'From address':
+        await this.transactionFromSectionExpanderButton.click();
+        break;
+      case 'To address':
+        await this.transactionToSectionExpanderButton.scrollIntoView();
+        await this.transactionToSectionExpanderButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported section name: ${section}`);
+    }
   }
 }
 

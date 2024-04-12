@@ -216,8 +216,17 @@ const colors: Colors = {
   $summary_expander_trigger_container_borderColor:
     darkColorScheme.$primary_mid_grey,
 
+  $transaction_summary_amount_color: darkColorScheme.$primary_white,
+  $transaction_summary_highlighted_amount_color:
+    darkColorScheme.$secondary_data_green,
   $transaction_summary_secondary_label_color:
     darkColorScheme.$primary_light_grey,
+  $dapp_transaction_summary_positive_balance_label_color:
+    darkColorScheme.$secondary_data_green,
+
+  $dapp_transaction_summary_type_label_color:
+    darkColorScheme.$primary_accent_purple,
+  $dapp_transaction_summary_label: darkColorScheme.$primary_white,
 
   $toast_bar_container_bgColor: darkColorScheme.$primary_dark_grey,
   $toast_bar_icon_container_bgColor: darkColorScheme.$primary_grey,
@@ -328,14 +337,17 @@ const colors: Colors = {
   $radiobutton_hover_color: darkColorScheme.$primary_light_grey,
   $radiobutton_indicator_backgroundColor:
     darkColorScheme.$primary_accent_purple,
-  $radiobutton_indicator_check_color: darkColorScheme.$primary_black,
+  $radiobutton_indicator_check_color: darkColorScheme.$primary_mid_black,
   $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
   $radiobutton_unchecked_bgColor: 'transparent',
   $radiobutton_checked_bgColor: darkColorScheme.$primary_grey,
-  $radiobutton_icon_color: darkColorScheme.$primary_white,
-  $radiobutton_icon_hover_color: darkColorScheme.$primary_grey,
-  $radiobutton_icon_hover_border_color:
-    darkColorScheme.$primary_light_grey_plus,
+  $radiobutton_icon_color: 'transparent',
+  $radiobutton_icon_active: darkColorScheme.$primary_light_black,
+  $radiobutton_icon_active_border_color: darkColorScheme.$primary_light_black,
+  $radiobutton_icon_text_color: darkColorScheme.$primary_white,
+  $radiobutton_icon_disabled_border_color: darkColorScheme.$primary_mid_grey,
+  $radiobutton_icon_hover_color: darkColorScheme.$primary_dark_grey,
+  $radiobutton_icon_hover_border_color: darkColorScheme.$primary_mid_grey,
 
   $select_border: darkColorScheme.$primary_grey,
   $select_icon_color: darkColorScheme.$primary_light_grey_plus_0_56,
@@ -369,6 +381,10 @@ const colors: Colors = {
   $stake_pool_item_bg_hover: darkColorScheme.$primary_dark_grey_plus,
   $stake_pool_header_text_color: darkColorScheme.$primary_white,
   $stake_pool_item_text_color: darkColorScheme.$primary_light_grey,
+
+  $info_bar_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
+  $info_bar_icon_color: darkColorScheme.$secondary_data_pink,
+  $info_bar_message_color: darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {

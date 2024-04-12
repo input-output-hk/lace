@@ -14,9 +14,10 @@ export interface StakePool {
   ticker?: string;
   logo?: string;
   retired?: boolean;
-  apy?: string;
-  liveStake: { number: string; unit?: string };
+  ros?: string;
+  liveStake?: { number: string; unit?: string };
   cost: { number: string; unit?: string };
+  fee: string;
   saturation?: string;
   blocks?: string;
   isStakingPool?: boolean;
@@ -41,17 +42,16 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
     owners: owners ? owners.map((owner: Cardano.RewardAccount) => owner.toString()) : [],
     retired: status === Cardano.StakePoolStatus.Retired,
     description: metadata?.description,
-    ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
-    cost: cost ? getNumberWithUnit(lovelacesToAdaString(cost.toString())) : { number: '-', unit: '' },
-    liveStake: metrics?.stake.live
-      ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
-      : { number: '-', unit: '' },
+    margin: formatPercentages(margin.numerator / margin.denominator),
+    fee: lovelacesToAdaString(cost.toString()),
+    cost: getNumberWithUnit(lovelacesToAdaString(cost.toString())),
     ...(metrics && {
-      ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
+      liveStake: getNumberWithUnit(lovelacesToAdaString(metrics.stake.live.toString())),
+      ros: formatPercentages(metrics.ros.valueOf()),
       saturation: formatPercentages(metrics.saturation.valueOf()),
       blocks: metrics?.blocksCreated?.toString()
     }),
-    pledge: pledge ? getNumberWithUnit(lovelacesToAdaString(pledge.toString())) : { number: '-', unit: '' },
+    pledge: getNumberWithUnit(lovelacesToAdaString(pledge.toString())),
     ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() }),
     stakePool
   };

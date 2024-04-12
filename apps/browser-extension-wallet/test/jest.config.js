@@ -31,26 +31,5 @@ module.exports = createJestConfig({
     '<rootDir>/test/__mocks__/ResizeObserver.js',
     '<rootDir>/test/helpers/assertions.js'
   ],
-  collectCoverageFrom: [
-    'src/components/**/*.{ts,tsx}',
-    'src/features/**/*.{ts,tsx}',
-    'src/lib/**/*.{ts,tsx}',
-    'src/hooks/**/*.{ts,tsx}',
-    'src/provider/**/*.{ts,tsx}',
-    'src/utils/**/*.{ts,tsx}',
-    '!src/lib/**/background.ts',
-    '!src/utils/mocks/*.{ts,tsx}',
-    '!src/utils/token-prices-lovelace-list.ts',
-    '!src/utils/test-ids.ts',
-    '!src/utils/get-polling-config.ts',
-    '!src/utils/test-helpers.tsx',
-    '!src/utils/test-utils.ts',
-    '!src/utils/fake-api-request.ts'
-  ],
-  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
-  globals: {
-    'ts-jest': {
-      tsconfig: './src/tsconfig.json'
-    }
-  }
+  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock']
 });

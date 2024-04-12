@@ -47,6 +47,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const handleName = handle?.nftMetadata?.name;
+  const activeWalletId = cardanoWallet.source.wallet.walletId;
 
   const handleOnAddressCopy = () => {
     toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
@@ -87,6 +88,11 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           id={`wallet-option-${wallet.walletId}`}
           onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
           onClick={async () => {
+            if (activeWalletId === wallet.walletId) {
+              return;
+            }
+            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+
             await activateWallet({
               walletId: wallet.walletId,
               accountIndex: lastActiveAccount.accountIndex
@@ -101,7 +107,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
         />
       );
     },
-    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, t]
+    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, analytics, t, activeWalletId]
   );
 
   const renderWallet = useCallback(

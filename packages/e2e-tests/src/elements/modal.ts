@@ -2,7 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class Modal {
-  private CONTAINER = '.ant-modal-content';
+  private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="delete-address-modal-title"]';
   private DESCRIPTION = '[data-testid="delete-address-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-address-modal-cancel"]';
@@ -13,19 +13,19 @@ class Modal {
   }
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TITLE);
+    return this.container.$(this.TITLE);
   }
 
   get description(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DESCRIPTION);
+    return this.container.$(this.DESCRIPTION);
   }
 
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CANCEL_BUTTON);
+    return this.container.$(this.CANCEL_BUTTON);
   }
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONFIRM_BUTTON);
+    return this.container.$(this.CONFIRM_BUTTON);
   }
 
   buttonWithText(value: string): ChainablePromiseElement<WebdriverIO.Element> {

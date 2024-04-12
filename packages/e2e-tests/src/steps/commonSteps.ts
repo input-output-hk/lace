@@ -39,14 +39,18 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import MainLoader from '../elements/MainLoader';
 
 Given(/^Lace is ready for test$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.multiAddressModalConfirm();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
 });
 
 Then(/^Lace is loaded properly$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
 });
@@ -287,6 +291,11 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
+Given(/^I enable showing Analytics consent banner$/, async () => {
+  await localStorageInitializer.enableShowingAnalyticsBanner();
+  await browser.refresh();
+});
+
 Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: string) => {
   await commonAssert.assertClipboardContainsAddressOfWallet(walletName);
 });
@@ -319,4 +328,8 @@ Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
 When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixels: number) => {
   const y = direction === 'down' ? Number(pixels) : -Number(pixels);
   await browser.scroll(0, y);
+});
+
+Given(/^I confirm multi-address discovery modal$/, async () => {
+  await settingsExtendedPageObject.multiAddressModalConfirm();
 });

@@ -18,6 +18,7 @@ export type Props = OmitClassName<'button'> &
     onOpenChange?: (open: boolean) => void;
     title: string;
     disabled?: boolean;
+    testId?: string;
   }>;
 
 export const SummaryExpander = ({
@@ -25,6 +26,7 @@ export const SummaryExpander = ({
   onOpenChange,
   title,
   disabled,
+  testId,
   children,
   ...props
 }: Readonly<Props>): JSX.Element => {
@@ -34,6 +36,7 @@ export const SummaryExpander = ({
       open={open}
       onOpenChange={onOpenChange}
       disabled={disabled}
+      data-testid={testId ?? 'expander'}
     >
       <Flex
         alignItems="center"
@@ -42,9 +45,10 @@ export const SummaryExpander = ({
           [cx.expanded]: open,
         })}
       >
-        <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
-
-        <Collapsible.Trigger asChild>
+        <Text.Body.Large weight="$bold" data-testid="expander-title">
+          {title}
+        </Text.Body.Large>
+        <Collapsible.Trigger asChild data-testid="expander-button">
           <Trigger open={open} disabled={disabled} {...props} />
         </Collapsible.Trigger>
       </Flex>

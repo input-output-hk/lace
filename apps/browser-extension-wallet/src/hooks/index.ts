@@ -21,3 +21,4 @@ export * from './useAssetInfo';
 export * from './useUpdateAddressStatus';
 export * from './useOnAddressSave';
 export * from './useAppInit';
+export * from './useChainHistoryProvider';

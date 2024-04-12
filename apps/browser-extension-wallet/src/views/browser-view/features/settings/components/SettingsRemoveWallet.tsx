@@ -12,6 +12,7 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import cn from 'classnames';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const { Title, Text } = Typography;
 
@@ -19,7 +20,7 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
   const { t } = useTranslation();
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
-  const { deleteWallet } = useWalletManager();
+  const { deleteWallet, walletRepository } = useWalletManager();
   const { walletInfo, setDeletingWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
@@ -33,8 +34,11 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
   };
 
   const removeWallet = async () => {
-    analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick);
     setDeletingWallet(true);
+    await analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+    });
     const nextActiveWallet = await deleteWallet();
     setDeletingWallet(false);
     if (nextActiveWallet) return;

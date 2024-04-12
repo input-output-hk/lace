@@ -25,6 +25,8 @@ export type TransactionData = {
   assets?: string[];
 };
 
+const stakeKeyRegistration = 'Stake Key Registration';
+
 class TransactionsDetailsAssert {
   waitForTransactionsLoaded = async () => {
     await browser.waitUntil(async () => (await TransactionsPage.rows).length > 1, {
@@ -37,9 +39,7 @@ class TransactionsDetailsAssert {
     await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(
-        await t('package.core.activityDetails.header')
-      );
+      expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t('core.activityDetails.header'));
     }
   }
 
@@ -92,6 +92,7 @@ class TransactionsDetailsAssert {
       expectedTickers.push(pool.poolTicker);
     }
 
+    await TransactionDetailsPage.transactionDetails.waitForStable();
     const actualIds: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolIds();
     const actualNames: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolNames();
     const actualTickers: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolTickers();
@@ -113,9 +114,11 @@ class TransactionsDetailsAssert {
       await TransactionDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
       await TransactionDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
       await TransactionDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
       const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
+      if (!txType.includes(stakeKeyRegistration)) {
+        await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
+      }
       if (txType.includes('Delegation')) {
         await TransactionDetailsPage.transactionDetailsStakepoolName.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsStakepoolTicker.waitForDisplayed();
@@ -156,10 +159,13 @@ class TransactionsDetailsAssert {
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
+      await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
       await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
+      await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForStable();
 
       const txDetailsInputADAValueString = await TransactionDetailsPage.transactionDetailsInputAdaAmount.getText();
       const txDetailsInputADAValue = Number(txDetailsInputADAValueString.split(' ', 1));
+      const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
 
       const txDetailsInputFiatValueString = await TransactionDetailsPage.transactionDetailsInputFiatAmount.getText();
       const txDetailsInputFiatValue = Number(txDetailsInputFiatValueString.slice(1).split(' ', 1));
@@ -170,18 +176,20 @@ class TransactionsDetailsAssert {
       const txDetailsOutputFiatValueString = await TransactionDetailsPage.transactionDetailsOutputFiatAmount.getText();
       const txDetailsOutputFiatValue = Number(txDetailsOutputFiatValueString.slice(1).split(' ', 1));
 
-      const txDetailsFeeADAValueString = await TransactionDetailsPage.transactionDetailsFeeADA.getText();
-      const txDetailsFeeADAValue = Number(txDetailsFeeADAValueString.split(' ', 1));
+      if (!txType.includes(stakeKeyRegistration)) {
+        const txDetailsFeeADAValueString = await TransactionDetailsPage.transactionDetailsFeeADA.getText();
+        const txDetailsFeeADAValue = Number(txDetailsFeeADAValueString.split(' ', 1));
+        expect(txDetailsFeeADAValue).to.be.greaterThan(0);
 
-      const txDetailsFeeFiatValueString = await TransactionDetailsPage.transactionDetailsFeeFiat.getText();
-      const txDetailsFeeFiatValue = Number(txDetailsFeeFiatValueString.slice(1).split(' ', 1));
+        const txDetailsFeeFiatValueString = await TransactionDetailsPage.transactionDetailsFeeFiat.getText();
+        const txDetailsFeeFiatValue = Number(txDetailsFeeFiatValueString.slice(1).split(' ', 1));
+        expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
+      }
 
       expect(txDetailsInputADAValue).to.be.greaterThan(0);
       expect(txDetailsInputFiatValue).to.be.greaterThan(0);
       expect(txDetailsOutputADAValue).to.be.greaterThan(0);
       expect(txDetailsOutputFiatValue).to.be.greaterThan(0);
-      expect(txDetailsFeeADAValue).to.be.greaterThan(0);
-      expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
 
       await TransactionDetailsPage.closeActivityDetails(mode);
     }
@@ -217,8 +225,8 @@ class TransactionsDetailsAssert {
       if ((await TransactionsPage.transactionsTableItemType(i).getText()) !== 'Self Transaction') {
         await TransactionsPage.clickOnTransactionRow(i);
         await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
-        const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
-        if (!txType.includes('Delegation')) {
+        const txType = (await TransactionDetailsPage.transactionDetailsDescription.getText()).split('\n')[0];
+        if (!['Delegation', stakeKeyRegistration].includes(txType)) {
           const tokensAmountSummary =
             (await TransactionDetailsPage.getTransactionSentTokensWithoutDuplicates()).length + 1;
           let tokensDescriptionAmount = await TransactionDetailsPage.transactionDetailsAmountOfTokens.getText();

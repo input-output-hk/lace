@@ -7,10 +7,12 @@ class AdaHandleAssert {
 
   async assertSeeCustomImage(imageElement: WebdriverIO.Element) {
     await imageElement.scrollIntoView();
+    await imageElement.waitForStable();
     await browser.waitUntil(async () => (await imageElement.getAttribute('src')) === this.customHandleSrcValue, {
       timeout: 10_000,
       timeoutMsg: 'failed while waiting for ada handle image'
     });
   }
 }
+
 export default new AdaHandleAssert();

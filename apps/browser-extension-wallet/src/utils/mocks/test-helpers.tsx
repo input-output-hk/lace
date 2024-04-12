@@ -282,7 +282,6 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         saturation: Percent(0.0512),
         stake: undefined,
         size: undefined,
-        apy: Percent(0.013),
         ros: Percent(0.69),
         lastRos: Percent(0.88)
       },
@@ -566,13 +565,7 @@ export const cardanoStakePoolSelectedDetails = {
     'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
   ],
   saturation: '5.12',
-  apy: '1.30',
-  activeStake: {
-    number: '-'
-  },
-  liveStake: {
-    number: '-'
-  },
+  ros: '69.00',
   status: 'active',
   ticker: 'STTST',
   blocks: '20',
@@ -580,7 +573,6 @@ export const cardanoStakePoolSelectedDetails = {
 };
 
 export const transformedStakePool = {
-  apy: '1.30',
   cost: '2.00% + 6ADA',
   description: 'This is the STTST description',
   fee: '6.04',

@@ -2,6 +2,7 @@ name: Lace Staking Chromatic
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - packages/staking/**
   push:
@@ -12,21 +13,22 @@ on:
 
 jobs:
   chromatic-deployment:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 🧰 Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'yarn'
 
       - name: 📝 Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ~/.yarn/berry/cache

@@ -52,7 +52,8 @@ export const TransactionDetailsProxy = withAddressBookContext(
       metadata,
       proposalProcedures,
       votingProcedures,
-      certificates
+      certificates,
+      collateral
     } = activityInfo.activity;
     const txSummary = useMemo(
       () =>
@@ -104,6 +105,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
         certificates={certificates}
         handleOpenExternalHashLink={handleOpenExternalHashLink}
         openExternalLink={openExternalLink}
+        collateral={collateral}
       />
     );
   }

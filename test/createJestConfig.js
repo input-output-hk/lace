@@ -31,7 +31,11 @@ const createJestConfig = (jestConfig) => {
     transform: {
       ...jestConfig.transform,
       ...esmExceptions.transform,
-      '^.+\\.(ts|tsx)$': 'ts-jest'
+      '^.+\\.(ts|tsx)$': [
+        'ts-jest', {
+          tsconfig: `${rootDir}/src/tsconfig.json`
+        }
+     ]
     },
     transformIgnorePatterns: [...transformIgnorePatterns, ...esmExceptions.transformIgnorePatterns]
   };

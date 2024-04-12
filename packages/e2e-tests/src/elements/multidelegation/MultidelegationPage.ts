@@ -12,6 +12,7 @@ import { StakePoolListColumnType } from '../../types/staking';
 import { StakePoolListItem } from './StakePoolListItem';
 import { StakePoolGridCard } from './StakePoolGridCard';
 import StakePoolDetailsDrawer from './StakePoolDetailsDrawer';
+import MoreOptionsComponent from './MoreOptionsComponent';
 
 class MultidelegationPage {
   private ACTIVITY_TAB = '[data-testid="activity-tab"]';
@@ -34,7 +35,7 @@ class MultidelegationPage {
   private POOL_TICKER = '[data-testid="stake-pool-list-ticker"]';
   private COLUMN_HEADER_TICKER = '[data-testid="stake-pool-list-header-ticker"]';
   private COLUMN_HEADER_SATURATION = '[data-testid="stake-pool-list-header-saturation"]';
-  private COLUMN_HEADER_ROS = '[data-testid="stake-pool-list-header-apy"]';
+  private COLUMN_HEADER_ROS = '[data-testid="stake-pool-list-header-ros"]';
   private COLUMN_HEADER_COST = '[data-testid="stake-pool-list-header-cost"]';
   private COLUMN_HEADER_MARGIN = '[data-testid="stake-pool-list-header-margin"]';
   private COLUMN_HEADER_BLOCKS = '[data-testid="stake-pool-list-header-blocks"]';
@@ -46,8 +47,8 @@ class MultidelegationPage {
   private DELEGATED_POOL_LOGO = '[data-testid="stake-pool-logo"]';
   private DELEGATED_POOL_NAME = '[data-testid="stake-pool-name"]';
   private DELEGATED_POOL_TICKER = '[data-testid="stake-pool-ticker"]';
-  private DELEGATED_POOL_ROS_TITLE = '[data-testid="stats-apy-container"] [data-testid="stats-title"]';
-  private DELEGATED_POOL_ROS_VALUE = '[data-testid="stats-apy-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_ROS_TITLE = '[data-testid="stats-ros-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_ROS_VALUE = '[data-testid="stats-ros-container"] [data-testid="stats-value"]';
   private DELEGATED_POOL_FEE_TITLE = '[data-testid="stats-fee-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_FEE_VALUE = '[data-testid="stats-fee-container"] [data-testid="stats-value"]';
   private DELEGATED_POOL_MARGIN_TITLE = '[data-testid="stats-margin-container"] [data-testid="stats-title"]';
@@ -289,6 +290,10 @@ class MultidelegationPage {
     return $$(this.SELCECTED_STAKE_POOLS_IN_LIST_VIEW);
   }
 
+  get moreOptionsComponent(): typeof MoreOptionsComponent {
+    return MoreOptionsComponent;
+  }
+
   async getPoolByTicker(ticker: string) {
     return (await this.displayedPools.find(
       async (item) => (await item.$(this.POOL_TICKER).getText()) === ticker
@@ -414,30 +419,64 @@ class MultidelegationPage {
   }
 
   async hoverOverColumnWithName(columnName: StakePoolListColumnType) {
+    let header;
     switch (columnName) {
       case 'Ticker':
-        await this.columnHeaderTicker.moveTo({ xOffset: -20, yOffset: 1 });
+        header = await this.columnHeaderTicker;
         break;
       case 'Saturation':
-        await this.columnHeaderSaturation.moveTo();
+        header = await this.columnHeaderSaturation;
         break;
       case 'ROS':
-        await this.columnHeaderROS.moveTo({ xOffset: -20, yOffset: 1 });
+        header = await this.columnHeaderROS;
         break;
       case 'Cost':
-        await this.columnHeaderCost.moveTo({ xOffset: -20, yOffset: 1 });
+        header = await this.columnHeaderCost;
         break;
       case 'Margin':
-        await this.columnHeaderMargin.moveTo({ xOffset: -20, yOffset: 1 });
+        header = await this.columnHeaderMargin;
         break;
       case 'Blocks':
-        await this.columnHeaderBlocks.moveTo({ xOffset: -20, yOffset: 1 });
+        header = await this.columnHeaderBlocks;
         break;
       case 'Pledge':
-        await this.columnHeaderPledge.moveTo({ xOffset: -20, yOffset: 1 });
+        header = await this.columnHeaderPledge;
         break;
-      case 'Live stake':
-        await this.columnHeaderLiveStake.moveTo();
+      case 'Live Stake':
+        header = await this.columnHeaderLiveStake;
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${columnName}`);
+    }
+    // make hovering over ANTD component more stable
+    await header?.$('span span span').moveTo();
+  }
+
+  async clickOnColumnWithName(columnName: StakePoolListColumnType) {
+    switch (columnName) {
+      case 'Ticker':
+        await this.columnHeaderTicker.click();
+        break;
+      case 'Saturation':
+        await this.columnHeaderSaturation.click();
+        break;
+      case 'ROS':
+        await this.columnHeaderROS.click();
+        break;
+      case 'Cost':
+        await this.columnHeaderCost.click();
+        break;
+      case 'Margin':
+        await this.columnHeaderMargin.click();
+        break;
+      case 'Blocks':
+        await this.columnHeaderBlocks.click();
+        break;
+      case 'Pledge':
+        await this.columnHeaderPledge.click();
+        break;
+      case 'Live Stake':
+        await this.columnHeaderLiveStake.click();
         break;
       default:
         throw new Error(`Unsupported column name: ${columnName}`);

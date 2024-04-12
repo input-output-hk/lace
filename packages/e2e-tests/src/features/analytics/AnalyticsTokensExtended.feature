@@ -1,4 +1,4 @@
-@Tokens-extended @Testnet @Mainnet
+@Tokens-extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Tokens tab - extended view
 
   Background:

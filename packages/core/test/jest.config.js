@@ -13,17 +13,5 @@ module.exports = createJestConfig({
   roots: ['<rootDir>/src'],
   testTimeout: 60000,
   testEnvironment: 'jsdom',
-  collectCoverageFrom: [
-    'src/ui/components/**/*.{ts,tsx}',
-    'src/ui/hooks/**/*.{ts,tsx}',
-    'src/ui/lib/**/*.{ts,tsx}',
-    'src/ui/utils/**/*.{ts,tsx}',
-    'src/wallet/**/*.{ts,tsx}'
-  ],
-  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
-  globals: {
-    'ts-jest': {
-      tsconfig: './src/tsconfig.json'
-    }
-  }
+  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock']
 });

@@ -1,14 +1,11 @@
 import TokenSelectionPage from '../../elements/newTransaction/tokenSelectionPage';
-import webTester from '../../actor/webTester';
 import { TokenSearchResult } from '../../elements/newTransaction/tokenSearchResult';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 
 class TransactionAssetSelectionAssert {
-  async assertAssetIsPresentInTokenList(assetName: string, shouldBeVisible: boolean) {
-    await (shouldBeVisible
-      ? webTester.waitUntilSeeElement(new TokenSearchResult(assetName).container())
-      : webTester.dontSeeWebElement(new TokenSearchResult(assetName).container()));
+  async assertAssetIsPresentInTokenList(assetName: string, shouldBeDisplayed: boolean) {
+    await new TokenSearchResult(assetName).container.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
   async assertAssetsAreSelected(shouldBeSelected: boolean, amount: number, assetType: string) {
@@ -19,10 +16,10 @@ class TransactionAssetSelectionAssert {
 
   async assertSpecificAssetSelected(shouldBeSelected: boolean, assetType: string, index: number) {
     if (assetType === 'Tokens') {
-      await TokenSelectionPage.grayedOutTokenIcon(index).waitForDisplayed({
+      await TokenSelectionPage.tokenItem(index).grayedOutTokenIcon.waitForDisplayed({
         reverse: !shouldBeSelected
       });
-      await TokenSelectionPage.checkmarkInSelectedToken(index).waitForDisplayed({
+      await TokenSelectionPage.tokenItem(index).checkmarkInSelectedToken.waitForDisplayed({
         reverse: !shouldBeSelected
       });
     } else {
@@ -48,7 +45,7 @@ class TransactionAssetSelectionAssert {
     await TokenSelectionPage.neutralFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(
-        await t('package.core.assetSelectorOverlay.usedAllAssets')
+        await t('core.assetSelectorOverlay.usedAllAssets')
       );
     }
   }
@@ -58,7 +55,7 @@ class TransactionAssetSelectionAssert {
     await TokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(
-        await t('package.core.assetSelectorOverlay.noMatchingResult')
+        await t('core.assetSelectorOverlay.noMatchingResult')
       );
     }
   }
@@ -67,11 +64,11 @@ class TransactionAssetSelectionAssert {
     await TokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
     await TokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      const messageForTokens = `${await t('package.core.assetSelectorOverlay.youDonthaveAnyTokens')}\n${await t(
-        'package.core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted'
+      const messageForTokens = `${await t('core.assetSelectorOverlay.youDonthaveAnyTokens')}\n${await t(
+        'core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted'
       )}`;
-      const messageForNFTs = `${await t('package.core.assetSelectorOverlay.noNFTs')}\n${await t(
-        'package.core.assetSelectorOverlay.addFundsToStartYourWeb3Journey.'
+      const messageForNFTs = `${await t('core.assetSelectorOverlay.noNFTs')}\n${await t(
+        'core.assetSelectorOverlay.addFundsToStartYourWeb3Journey.'
       )}`;
       const expectedMessage = assetType === 'tokens' ? messageForTokens : messageForNFTs;
       expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(expectedMessage);

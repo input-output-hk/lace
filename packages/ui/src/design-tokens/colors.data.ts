@@ -147,7 +147,13 @@ export const colors = {
   $summary_expander_trigger_label_color: '',
   $summary_expander_trigger_label_color_pressed: '',
 
+  $transaction_summary_amount_color: '',
+  $transaction_summary_highlighted_amount_color: '',
   $transaction_summary_secondary_label_color: '',
+  $dapp_transaction_summary_positive_balance_label_color: '',
+
+  $dapp_transaction_summary_type_label_color: '',
+  $dapp_transaction_summary_label: '',
 
   $toast_bar_container_bgColor: '',
   $toast_bar_icon_container_bgColor: '',
@@ -238,9 +244,13 @@ export const colors = {
   $radiobutton_unchecked_borderColor: '',
   $radiobutton_unchecked_bgColor: '',
   $radiobutton_checked_bgColor: '',
+  $radiobutton_icon_active: '',
+  $radiobutton_icon_active_border_color: '',
   $radiobutton_icon_color: '',
+  $radiobutton_icon_disabled_border_color: '',
   $radiobutton_icon_hover_color: '',
   $radiobutton_icon_hover_border_color: '',
+  $radiobutton_icon_text_color: '',
 
   $select_border: '',
   $select_icon_color: '',
@@ -272,6 +282,10 @@ export const colors = {
   $stake_pool_header_text_color: '',
   $stake_pool_item_bg_hover: '',
   $stake_pool_item_text_color: '',
+
+  $info_bar_container_bgColor: '',
+  $info_bar_message_color: '',
+  $info_bar_icon_color: '',
 };
 
 export type Colors = typeof colors;

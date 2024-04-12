@@ -1,7 +1,6 @@
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { Logger } from '../support/logger';
 import { expect } from 'chai';
-import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
 import { t } from '../utils/translationService';
 
 class CoinConfigureAssert {
@@ -16,11 +15,6 @@ class CoinConfigureAssert {
     }
   }
 
-  async assertTokenDisplayed(tokenName: string, shouldBeDisplayed: boolean) {
-    const token = await $(new TokenSearchResult(tokenName).toJSLocator());
-    await token.waitForDisplayed({ reverse: !shouldBeDisplayed });
-  }
-
   async assertSeeCoinConfigure() {
     const coinConfigure = new CoinConfigure();
     await coinConfigure.nameElement.waitForDisplayed();
@@ -33,9 +27,7 @@ class CoinConfigureAssert {
     const coinConfigure = new CoinConfigure(index);
     await coinConfigure.assetMaxButton.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await coinConfigure.assetMaxButton.getText()).to.equal(
-        await t('package.core.assetInput.maxButton', 'core')
-      );
+      expect(await coinConfigure.assetMaxButton.getText()).to.equal(await t('core.assetInput.maxButton', 'core'));
     }
   }
 }

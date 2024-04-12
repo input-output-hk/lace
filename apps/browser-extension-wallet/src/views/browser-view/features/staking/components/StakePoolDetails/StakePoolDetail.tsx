@@ -13,9 +13,10 @@ import { useWalletStore } from '@src/stores';
 
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { StakePoolCardProgressBar, utils } from '@lace/staking';
+import { isOversaturated, StakePoolCardProgressBar } from '@lace/staking';
+import { TranslationKey } from '@lib/translations/types';
 
-const listItem = [
+const listItem: TranslationKey[] = [
   'browserView.staking.details.clickOnAPoolFromTheListInTheMainPage',
   'browserView.staking.details.clickOnTheStakeToThisPoolButtonInTheDetailPage',
   'browserView.staking.details.followTheIstructionsInTheStakingFlow'
@@ -33,7 +34,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     id,
     hexId,
     owners = [],
-    apy,
+    ros,
     saturation,
     activeStake,
     liveStake,
@@ -74,7 +75,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     liveStake: t('cardano.stakePoolMetricsBrowser.liveStake'),
     saturation: t('cardano.stakePoolMetricsBrowser.saturation'),
     delegators: t('cardano.stakePoolMetricsBrowser.delegators'),
-    apy: t('cardano.stakePoolMetricsBrowser.ros'),
+    ros: t('cardano.stakePoolMetricsBrowser.ros'),
     blocks: t('cardano.stakePoolMetricsBrowser.blocks'),
     cost: t('cardano.stakePoolMetricsBrowser.cost'),
     margin: t('cardano.stakePoolMetricsBrowser.margin'),
@@ -92,25 +93,35 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
   const formattedCost = getNumberWithUnit(fee);
   const metricsData = useMemo(() => {
     const metrics = [
-      { t: metricsTranslations.activeStake, testId: 'active-stake', unit: activeStake.unit, value: activeStake.number },
-      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake.unit, value: liveStake.number },
-      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
-      { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
+      {
+        t: metricsTranslations.activeStake,
+        testId: 'active-stake',
+        unit: activeStake?.unit,
+        value: activeStake?.number
+      },
+      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake?.unit, value: liveStake?.number },
+      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators },
+      { t: metricsTranslations.ros, testId: 'ros', unit: '%', value: ros },
       { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
-      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
-      { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
+      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost?.unit, value: formattedCost?.number },
+      {
+        t: metricsTranslations.pledge,
+        testId: 'pledge',
+        unit: formattedPledge?.unit,
+        value: formattedPledge?.number
+      },
       { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin }
     ];
 
     if (popupView) {
-      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' });
+      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation });
     }
 
     return metrics;
   }, [
     activeStake.number,
     activeStake.unit,
-    apy,
+    ros,
     blocks,
     delegators,
     formattedCost.number,
@@ -121,13 +132,13 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     liveStake.unit,
     margin,
     metricsTranslations.activeStake,
-    metricsTranslations.apy,
     metricsTranslations.blocks,
     metricsTranslations.cost,
     metricsTranslations.delegators,
     metricsTranslations.liveStake,
     metricsTranslations.margin,
     metricsTranslations.pledge,
+    metricsTranslations.ros,
     metricsTranslations.saturation,
     popupView,
     saturation
@@ -144,7 +155,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
             id,
             status,
             isDelegated: isDelegatingToThisPool,
-            isOversaturated: saturation !== undefined && utils.isOversaturated(Number(saturation))
+            isOversaturated: saturation !== undefined && isOversaturated(Number(saturation))
           }}
           translations={statusLogoTranslations}
         />

@@ -21,15 +21,15 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
 type stakingInfoPanelProps = {
   className?: string;
   coinBalance: number;
-  fee?: string | number;
+  fee: string;
   fiat: number;
   id: string;
   logo?: string;
-  margin?: string | number;
+  margin: string;
   name?: string;
   totalRewards: string;
   lastReward: string;
-  apy?: string | number;
+  ros?: string;
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
@@ -47,7 +47,7 @@ export const StakingInfo = ({
   name,
   totalRewards,
   lastReward,
-  apy,
+  ros,
   ticker,
   onStakePoolSelect,
   popupView,
@@ -80,9 +80,9 @@ export const StakingInfo = ({
           <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
             <Stats
               text={t('browserView.staking.stakingInfo.stats.ros')}
-              value={formatNumericValue(apy, '%')}
+              value={formatNumericValue(ros, '%')}
               popupView
-              dataTestid="stats-apy"
+              dataTestid="stats-ros"
             />
             <Stats
               text={t('browserView.staking.stakingInfo.stats.Fee')}

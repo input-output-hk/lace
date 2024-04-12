@@ -3,23 +3,26 @@
 
 .spaceBetween {
   justify-content: space-between;
-  padding-top: size_unit(2);
+  padding-top: size_unit(0);
 }
 
-.layoutError {
-  padding: 0;
+.transactionContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
 }
 
 .actions {
   @extend %flex-column;
-  background-color: var(--bg-color-body);
-  gap: size_unit(1);
-  padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
-  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  margin: size_unit(4) size_unit(-3) size_unit(-2) size_unit(-3);
+  justify-content: space-between;
+  padding: size_unit(3) 0;
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
   position: sticky;
   bottom: 0;
   z-index: 10;
+  gap: size_unit(1);
+  background-color: var(--light-mode-body, var(--dark-mode-bg-black));
   .actionBtn {
     width: 100%;
   }

@@ -2,54 +2,57 @@
 import { Box, Text } from '@lace/ui';
 import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
 import useResizeObserver, { ObservedSize } from 'use-resize-observer';
+import { StakePoolDetails } from '../../store';
 import { STAKE_POOL_CARD_HEIGHT, StakePoolCardSkeleton } from '../StakePoolCard';
-import { StakePoolsListRowProps } from '../StakePoolsList/types';
 import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
 import { StakePoolsGridItem } from './StakePoolsGridItem';
+import { StakePoolsGridSkeleton } from './StakePoolsGridSkeleton';
+import { StakePoolsGridColumnCount } from './types';
 
 const DEFAULT_DEBOUNCE = 200;
 
-type numOfItemsType = 3 | 4 | 5;
-
 export type StakePoolsGridProps = {
   scrollableTargetId: string;
-  pools: (StakePoolsListRowProps | undefined)[];
-  selectedPools: StakePoolsListRowProps[];
+  pools: (StakePoolDetails | undefined)[];
+  selectedPools: StakePoolDetails[];
   loadMoreData: (range: ListRange) => void;
-  emptyPlaceholder?: React.ReactNode;
+  emptyPlaceholder: () => ReactElement;
+  showSkeleton?: boolean;
   sortField: SortField;
 };
 
 export const StakePoolsGrid = ({
-  emptyPlaceholder,
+  emptyPlaceholder: EmptyPlaceholder,
   loadMoreData,
   pools,
   selectedPools,
   sortField,
+  showSkeleton,
   scrollableTargetId,
 }: StakePoolsGridProps) => {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
-  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<numOfItemsType>();
+  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<StakePoolsGridColumnCount>();
 
-  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1023 });
-  const matchFourColumnsLayout = useMediaQuery({ maxWidth: 1659, minWidth: 1024 });
-  const matchFiveColumnsLayout = useMediaQuery({ minWidth: 1660 });
+  const showEmptyPlaceholder = !showSkeleton && pools.length === 0;
+  const matchTwoColumnsLayout = useMediaQuery({ maxWidth: 668 });
+  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1024, minWidth: 669 });
+  const matchFourColumnsLayout = useMediaQuery({ minWidth: 1025 });
 
-  const numberOfItemsPerMediaQueryMap: Partial<Record<numOfItemsType, boolean>> = useMemo(
+  const numberOfItemsPerMediaQueryMap: Partial<Record<StakePoolsGridColumnCount, boolean>> = useMemo(
     () => ({
+      2: matchTwoColumnsLayout,
       3: matchThreeColumnsLayout,
       4: matchFourColumnsLayout,
-      5: matchFiveColumnsLayout,
     }),
-    [matchFiveColumnsLayout, matchFourColumnsLayout, matchThreeColumnsLayout]
+    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout]
   );
 
   const updateNumberOfItemsInRow = useCallback(() => {
@@ -57,7 +60,7 @@ export const StakePoolsGrid = ({
 
     const result = Number(
       Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0]
-    ) as numOfItemsType;
+    ) as StakePoolsGridColumnCount;
 
     setNumberOfItemsPerRow(result);
   }, [numberOfItemsPerMediaQueryMap]);
@@ -77,14 +80,13 @@ export const StakePoolsGrid = ({
     [setContainerWidthCb]
   );
 
-  useResizeObserver<HTMLDivElement>({ onResize, ref });
+  const columnCount = numberOfItemsPerRow || 3;
 
-  const poolsLength = pools.length;
-  const selectedPoolsLength = selectedPools?.length;
+  useResizeObserver<HTMLDivElement>({ onResize, ref });
 
   return (
     <div ref={ref} data-testid="stake-pools-grid-container">
-      {selectedPoolsLength > 0 && (
+      {selectedPools?.length > 0 && (
         <>
           <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
             {t('browsePools.stakePoolGrid.selected')}
@@ -97,21 +99,26 @@ export const StakePoolsGrid = ({
           <Box className={styles.separator} />
         </>
       )}
-      {!(selectedPoolsLength > 0 && selectedPoolsLength === poolsLength) && emptyPlaceholder}
-      <Grid<StakePoolsListRowProps | undefined>
-        rowHeight={STAKE_POOL_CARD_HEIGHT}
-        numberOfItemsPerRow={numberOfItemsPerRow}
-        scrollableTargetId={scrollableTargetId}
-        loadMoreData={loadMoreData}
-        items={pools}
-        itemContent={(index, data) =>
-          data ? (
-            <StakePoolsGridItem sortField={sortField} {...data} />
-          ) : (
-            <StakePoolCardSkeleton fadeScale={numberOfItemsPerRow || 3} index={index} />
-          )
-        }
-      />
+      {showEmptyPlaceholder && <EmptyPlaceholder />}
+      {showSkeleton || !numberOfItemsPerRow ? (
+        <StakePoolsGridSkeleton columnCount={columnCount} rowCount={2} />
+      ) : (
+        <Grid<StakePoolDetails | undefined>
+          parentRef={ref}
+          rowHeight={STAKE_POOL_CARD_HEIGHT}
+          numberOfItemsPerRow={numberOfItemsPerRow}
+          scrollableTargetId={scrollableTargetId}
+          loadMoreData={loadMoreData}
+          items={pools}
+          itemContent={(index, data) =>
+            data ? (
+              <StakePoolsGridItem sortField={sortField} {...data} />
+            ) : (
+              <StakePoolCardSkeleton fadeScale={columnCount} index={index} />
+            )
+          }
+        />
+      )}
     </div>
   );
 };

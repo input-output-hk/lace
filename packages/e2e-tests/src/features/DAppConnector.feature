@@ -62,6 +62,7 @@ Feature: DAppConnector - Common
   @LW-3807 @Testnet @Mainnet
   Scenario: "No wallet" modal displayed after trying to connect Dapp when there is no wallet
     Given I remove wallet
+    And I accept analytics banner on "Get started" page
     And "Get started" page is displayed
     When I open test DApp
     Then I see DApp no wallet page
@@ -98,19 +99,7 @@ Feature: DAppConnector - Common
     And I click on "Proceed" button on "Forgot password?" modal
     Then I see DApp no wallet page
     When I switch to tab with restore wallet process
-    Then "Wallet password" page is displayed in forgot password flow
-
-  @LW-7083 @Testnet @Mainnet @Pending
-  Scenario: "Forgot password" click and proceed on DApp wallet unlock page
-    Given I lock my wallet
-    When I open test DApp
-    Then I see DApp unlock page
-    When I click on "Forgot password?" button on unlock screen
-    Then I see "Forgot password?" modal
-    And I click on "Proceed" button on "Forgot password?" modal
-    Then I see DApp no wallet page
-    When I switch to tab with restore wallet process
-    Then "Wallet password" page is displayed in forgot password flow
+    Then "Wallet setup" page is displayed
 
   @LW-4060
   Scenario Outline: DApp connector window displayed in <theme> mode
@@ -158,6 +147,7 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     And I close all remaining tabs except current one
     And I remove wallet
+    Then I accept analytics banner on "Get started" page
     And I restore a wallet
     And Wallet is synced
     And I switch network to: "Preprod" in extended mode
@@ -200,25 +190,25 @@ Feature: DAppConnector - Common
     And I verify there are no errors in console logs
     And I see Lace wallet info in DApp when connected
 
-    @LW-8403 @LW-8406
-    Scenario: Automatically trigger collateral setup - happy path
-      Given I am on Settings extended page
-      And I see collateral as: "Inactive" in settings
-      And I click on "Collateral" setting
-      And all elements of Inactive collateral drawer are displayed
-      And I open and authorize test DApp with "Only once" setting
-      When I click "Set Collateral" button in test DApp
-      Then I see DApp collateral window
-      When I click "Confirm" button in DApp collateral window
-      And I see DApp connector "All done" page
-      And I click "Close" button on DApp "All done" page
-      And I don't see DApp window
-      And I switch to window with Lace
-      Then all elements of Active collateral drawer are displayed
-      When I click "Reclaim collateral" button on collateral drawer
-      And I switch to window with DApp
-      And I click "Set Collateral" button in test DApp
-      Then I see DApp collateral window
+  @LW-8403 @LW-8406
+  Scenario: Automatically trigger collateral setup - happy path
+    Given I am on Settings extended page
+    And I see collateral as: "Inactive" in settings
+    And I click on "Collateral" setting
+    And all elements of Inactive collateral drawer are displayed
+    And I open and authorize test DApp with "Only once" setting
+    When I click "Set Collateral" button in test DApp
+    Then I see DApp collateral window
+    When I click "Confirm" button in DApp collateral window
+    And I see DApp connector "All done" page
+    And I click "Close" button on DApp "All done" page
+    And I don't see DApp window
+    And I switch to window with Lace
+    Then all elements of Active collateral drawer are displayed
+    When I click "Reclaim collateral" button on collateral drawer
+    And I switch to window with DApp
+    And I click "Set Collateral" button in test DApp
+    Then I see DApp collateral window
 
   @LW-8404
   Scenario: Automatically trigger collateral setup - click cancel on Collateral modal

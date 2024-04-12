@@ -11,10 +11,11 @@ class WalletAddressPageAssert {
   async assertSeeWalletAddressPage(mode: 'extended' | 'popup') {
     await WalletAddressPage.drawerHeaderTitle.waitForClickable();
     if (mode === 'extended') {
-      await WalletAddressPage.drawerNavigationTitle.waitForDisplayed();
+      await WalletAddressPage.drawerNavigationTitle.waitForStable();
       expect(await WalletAddressPage.drawerNavigationTitle.getText()).to.equal(await t('qrInfo.receive'));
       expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.title'));
     } else {
+      await WalletAddressPage.drawerHeaderTitle.waitForStable();
       expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.receive'));
     }
     await WalletAddressPage.drawerHeaderCloseButton.waitForDisplayed();
@@ -68,7 +69,7 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeAdaHandleAddressCardWithName(handleName: string, shouldSee: boolean) {
-    await WalletAddressPage.addressCard.waitForClickable();
+    await WalletAddressPage.addressCard.waitForStable();
     const handleCard = await WalletAddressPage.getHandleAddressCard(handleName);
     if (shouldSee) {
       await handleCard.waitForDisplayed();

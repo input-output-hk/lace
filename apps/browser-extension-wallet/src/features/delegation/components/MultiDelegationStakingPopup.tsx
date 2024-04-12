@@ -1,4 +1,4 @@
-import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
+import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
 import {
   useAnalyticsContext,
@@ -89,7 +89,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();
