@@ -1266,7 +1266,7 @@
   "core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceLocked": "Your hardware wallet device seems to be locked. Please unlock it to proceed.",
   "core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceBusy": "Your hardware wallet device seems to be busy with some other App. Please ensure it is free to connect.",
   "core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.cardanoAppNotOpen": "Cardano App is not open on your hardware wallet device. Please open it to proceed.",
-  "core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.generic": "Something went wring. Please try again.",
+  "core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.generic": "Something went wrong. Please try again.",
   "core.walletSetupConnectHardwareWalletStepRevamp.errorCta": "Try again",
   "core.walletSetupCreateStep.title": "Creating your wallet",
   "core.walletSetupCreateStep.description": "Confirm exporting your public key on your hardware wallet device to create your Lace wallet.",
