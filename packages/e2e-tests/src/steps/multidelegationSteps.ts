@@ -244,7 +244,7 @@ When(
 Then(
   /^tooltip for "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column is displayed$/,
   async (columnName: StakePoolListColumnName) => {
-    await MultidelegationPageAssert.assertSeeTooltipForColumn(columnName);
+    await MultidelegationPageAssert.assertSeeTooltipForColumn(mapColumnNameStringToEnum(columnName));
   }
 );
 
