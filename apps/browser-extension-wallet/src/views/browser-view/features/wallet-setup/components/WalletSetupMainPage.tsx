@@ -22,9 +22,8 @@ import { useHistory } from 'react-router-dom';
 
 export const WalletSetupMainPage = (): ReactElement => {
   const history = useHistory();
-  const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
-  const { t: translate, Trans } = useTranslate();
+  const { t: translate } = useTranslate();
 
   const analytics = useAnalyticsContext();
   const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
@@ -53,7 +52,7 @@ export const WalletSetupMainPage = (): ReactElement => {
   };
 
   const handleStartHardwareOnboarding = () => {
-    setIsDappConnectorWarningOpen(true);
+    history.push(walletRoutePaths.setup.hardware);
     analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
   };
 
@@ -99,23 +98,6 @@ export const WalletSetupMainPage = (): ReactElement => {
           onHardwareWalletRequest={handleStartHardwareOnboarding}
           onRestoreWalletRequest={handleRestoreWallet}
           translations={walletSetupOptionsStepTranslations}
-        />
-        <WarningModal
-          header={translate('browserView.walletSetup.confirmExperimentalHwDapp.header')}
-          content={
-            <div className={styles.confirmResetContent}>
-              <p>
-                <Trans i18nKey="browserView.walletSetup.confirmExperimentalHwDapp.content" />
-              </p>
-            </div>
-          }
-          visible={isDappConnectorWarningOpen}
-          confirmLabel={translate('browserView.walletSetup.confirmExperimentalHwDapp.confirm')}
-          onCancel={() => setIsDappConnectorWarningOpen(false)}
-          onConfirm={() => {
-            setIsDappConnectorWarningOpen(false);
-            history.push(walletRoutePaths.setup.hardware);
-          }}
         />
       </WalletSetupLayout>
       <AnalyticsConfirmationBanner

@@ -1,6 +1,6 @@
 {
   "name": "@lace/browser-extension-wallet",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "description": "A fully capable wallet packaged as browser extensions for Chrome, Firefox, and Edge",
   "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
   "bugs": {
@@ -45,8 +45,8 @@
     "@cardano-sdk/input-selection": "0.12.26",
     "@cardano-sdk/tx-construction": "0.18.2",
     "@cardano-sdk/util": "0.15.0",
-    "@cardano-sdk/wallet": "0.35.2",
-    "@cardano-sdk/web-extension": "0.26.1",
+    "@cardano-sdk/wallet": "0.36.0",
+    "@cardano-sdk/web-extension": "0.26.2",
     "@emurgo/cip14-js": "~3.0.1",
     "@koralabs/handles-public-api-interfaces": "^1.6.6",
     "@lace/cardano": "0.1.0",

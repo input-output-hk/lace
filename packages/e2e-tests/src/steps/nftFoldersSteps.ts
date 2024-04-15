@@ -5,8 +5,6 @@ import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
-import ToastMessageAssert from '../assert/toastMessageAssert';
-import { t } from '../utils/translationService';
 import NftSelectNftsAssert from '../assert/nftSelectNftsAssert';
 import IndexedDB from '../fixture/indexedDB';
 import { NFTFolder } from '../data/NFTFolder';
@@ -236,36 +234,6 @@ Then(
     await nftCreateFolderAssert.assertSeeNftItemOnFolderPage(nftName, shouldSee === 'see');
   }
 );
-
-Then(
-  /^I see a toast with text: "Folder (created|renamed|deleted) successfully"$/,
-  async (action: 'created' | 'deleted' | 'renamed') => {
-    let translationKey;
-    switch (action) {
-      case 'created':
-        translationKey = 'browserView.nfts.folderDrawer.toast.create';
-        break;
-      case 'deleted':
-        translationKey = 'browserView.nfts.deleteFolderSuccess';
-        break;
-      case 'renamed':
-        translationKey = 'browserView.nfts.renameFolderSuccess';
-        break;
-      default:
-        throw new Error(`Unsupported action name: ${action}`);
-    }
-
-    await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
-  }
-);
-
-Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
-  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
-});
-
-Then(/^I see a toast with text: "NFT removed"$/, async () => {
-  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);
-});
 
 Then(/^I select (\d+) NFTs$/, async (numberOfNFTs: number) => {
   await NftSelectNftsPage.selectNFTs(numberOfNFTs);
