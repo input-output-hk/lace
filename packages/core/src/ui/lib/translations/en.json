@@ -422,6 +422,8 @@
       "address": "Address",
       "origin": "Origin",
       "transactionSummary": "Transaction Summary",
+      "transactionSummaryTooltip": "This summary includes all assets entering or leaving your wallet as part of this transaction, including fees, deposits.",
+      "additionalInformation": "Additional information",
       "deposit": "Deposit",
       "returnedDeposit": "Returned deposit",
       "items": "item(s)",

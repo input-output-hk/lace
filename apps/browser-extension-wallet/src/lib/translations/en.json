@@ -181,6 +181,8 @@
   "core.dappTransaction.send": "Send",
   "core.dappTransaction.sending": "Sending",
   "core.dappTransaction.transactionSummary": "Transaction Summary",
+  "core.dappTransaction.transactionSummaryTooltip": "This summary includes all assets entering or leaving your wallet as part of this transaction, including fees, deposits.",
+  "core.dappTransaction.additionalInformation": "Additional information",
   "core.dappTransaction.origin": "Origin",
   "core.dappTransaction.fromAddress": "From address",
   "core.dappTransaction.toAddress": "To address",
