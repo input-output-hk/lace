@@ -167,7 +167,6 @@ export const colors = {
   $dapp_transaction_summary_positive_balance_label_color: '',
 
   $dapp_transaction_summary_type_label_color: '',
-  $dapp_transaction_summary_label: '',
 
   $toast_bar_container_bgColor: '',
   $toast_bar_label_color: '',

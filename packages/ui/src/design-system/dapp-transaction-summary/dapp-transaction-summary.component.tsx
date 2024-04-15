@@ -56,14 +56,13 @@ export const TransactionSummary = ({
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Small
+            <Typography.Body.Normal
               className={classNames(styles.label, {
                 [styles.positiveBalance]: !transactionAmount.includes('-'),
-                [styles.negativeBalance]: transactionAmount.includes('-'),
               })}
             >
               {transactionAmount} {cardanoSymbol}
-            </Typography.Body.Small>
+            </Typography.Body.Normal>
           </Flex>
         </Cell>
       </Grid>

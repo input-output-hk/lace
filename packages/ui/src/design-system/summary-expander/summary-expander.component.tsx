@@ -47,7 +47,7 @@ export const SummaryExpander = ({
       >
         <Typography.Body.Large
           className={cx.title}
-          weight="$bold"
+          weight="$semibold"
           data-testid="expander-title"
         >
           {title}

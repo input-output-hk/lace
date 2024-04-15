@@ -2,13 +2,13 @@ import { sx, style } from '../../design-tokens';
 
 export const label = sx({
   color: '$transaction_summary_label_color',
-  fontWeight: '$bold',
+  fontWeight: '$medium',
 });
 
 export const text = style([
   sx({
     color: '$transaction_summary_label_color',
-    fontWeight: '$semibold',
+    fontWeight: '$medium',
   }),
   {
     wordBreak: 'break-all',

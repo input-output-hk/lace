@@ -68,7 +68,7 @@ export const Amount = ({
         </Cell>
         <Cell>
           <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-            <Typography.Body.Small
+            <Typography.Body.Normal
               className={classNames(cx.text, {
                 [cx.normalAmount]: !shouldHighlightPositiveAmount,
                 [cx.highlightedAmount]: shouldHighlightPositiveAmount,
@@ -76,14 +76,14 @@ export const Amount = ({
               data-testid={makeTestId(testId, 'amount')}
             >
               {amount}
-            </Typography.Body.Small>
+            </Typography.Body.Normal>
             {displayFiat && (
-              <Typography.Body.Small
+              <Typography.Body.Normal
                 className={cx.secondaryText}
                 data-testid={makeTestId(testId, 'fiat')}
               >
                 {fiatPrice}
-              </Typography.Body.Small>
+              </Typography.Body.Normal>
             )}
           </Flex>
         </Cell>

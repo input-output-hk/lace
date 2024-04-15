@@ -3,12 +3,11 @@ import React from 'react';
 import { truncate, addEllipsis } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
-import { Typography } from 'antd';
 
 import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
-import { Flex, TransactionAssets, SummaryExpander, DappTransactionSummary, Tooltip } from '@lace/ui';
+import { Text, Flex, TransactionAssets, SummaryExpander, DappTransactionSummary, Tooltip } from '@lace/ui';
 import classNames from 'classnames';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils/render-address-tag';
 
@@ -83,8 +82,6 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[], testId?: string) =>
     );
   });
 
-const { Title, Text } = Typography;
-
 const charBeforeEllipsisName = 8;
 const charAfterEllipsisName = 8;
 
@@ -113,37 +110,37 @@ export const DappAddressSections = ({
   const itemsCountCopy = t('core.dappTransaction.items');
 
   return (
-    <>
+    <div className={styles.summaryContent}>
       <SummaryExpander
         title={t('core.dappTransaction.fromAddress')}
         disabled={!isFromAddressesEnabled}
         testId="dapp-transaction-from-section-expander"
       >
-        <div className={styles.summaryContent}>
+        <div className={styles.fromAddress}>
           {[...groupedFromAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address} data-testid="dapp-transaction-from-row">
-                <Text className={styles.label} data-testid="dapp-transaction-address-title">
+                <Text.Body.Normal data-testid="dapp-transaction-address-title" weight="$medium">
                   {t('core.dappTransaction.address')}
-                </Text>
+                </Text.Body.Normal>
                 <Flex flexDirection="column" alignItems="flex-end" gap="$8">
-                  <Text className={styles.value} data-testid="dapp-transaction-address">
+                  <Text.Body.Small data-testid="dapp-transaction-address" weight="$medium">
                     <Tooltip label={address}>
                       <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
                     </Tooltip>
-                  </Text>
+                  </Text.Body.Small>
                   {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
                 </Flex>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-from-row">
-                    <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
+                    <Text.Body.Normal data-testid="dapp-transaction-tokens-title" weight="$medium">
                       {t('core.dappTransaction.tokens')}
-                    </Title>
-                    <Title level={5} className={styles.value} data-testid="dapp-transaction-tokens-value">
+                    </Text.Body.Normal>
+                    <Text.Body.Normal data-testid="dapp-transaction-tokens-value" weight="$medium">
                       -{getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
-                    </Title>
+                    </Text.Body.Normal>
                   </div>
                   {addressData.coins.map((coin) => (
                     <DappTransactionSummary
@@ -160,12 +157,12 @@ export const DappAddressSections = ({
               {addressData.nfts.length > 0 && (
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-from-row">
-                    <Title level={5} data-testid="dapp-transaction-nfts-title">
+                    <Text.Body.Normal data-testid="dapp-transaction-nfts-title" weight="$medium">
                       {t('core.dappTransaction.nfts')}
-                    </Title>
-                    <Title level={5} data-testid="dapp-transaction-nfts-amount-value">
+                    </Text.Body.Normal>
+                    <Text.Body.Normal data-testid="dapp-transaction-nfts-amount-value" weight="$medium">
                       -{addressData.nfts.length} {itemsCountCopy}
-                    </Title>
+                    </Text.Body.Normal>
                   </div>
                   {displayGroupedNFTs(addressData.nfts, 'dapp-transaction-from-row')}
                 </>
@@ -184,31 +181,31 @@ export const DappAddressSections = ({
           {[...groupedToAddresses.entries()].map(([address, addressData]) => (
             <>
               <div key={address} className={styles.address} data-testid="dapp-transaction-to-row">
-                <Text className={styles.label} data-testid="dapp-transaction-address-title">
+                <Text.Body.Normal data-testid="dapp-transaction-address-title" weight="$medium">
                   {t('core.dappTransaction.address')}
-                </Text>
+                </Text.Body.Normal>
                 <Flex flexDirection="column" alignItems="flex-end" gap="$8">
-                  <Text className={styles.value} data-testid="dapp-transaction-address">
+                  <Text.Body.Small data-testid="dapp-transaction-address" weight="$medium">
                     <Tooltip label={address}>
                       <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
                     </Tooltip>
-                  </Text>
+                  </Text.Body.Small>
                   {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
                 </Flex>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-to-row">
-                    <Title level={5} className={styles.label} data-testid="dapp-transaction-tokens-title">
+                    <Text.Body.Normal data-testid="dapp-transaction-tokens-title" weight="$medium">
                       {t('core.dappTransaction.tokens')}
-                    </Title>
-                    <Title
-                      level={5}
-                      className={classNames(styles.value, styles.positiveAmount)}
+                    </Text.Body.Normal>
+                    <Text.Body.Normal
+                      className={styles.positiveAmount}
                       data-testid="dapp-transaction-tokens-value"
+                      weight="$medium"
                     >
                       {getTokenQuantity(addressData.tokens, addressData.coins)} {itemsCountCopy}
-                    </Title>
+                    </Text.Body.Normal>
                   </div>
                   {addressData.coins.map((coin) => (
                     <DappTransactionSummary
@@ -225,16 +222,16 @@ export const DappAddressSections = ({
               {addressData.nfts.length > 0 && (
                 <>
                   <div className={styles.tokenCount} data-testid="dapp-transaction-to-row">
-                    <Title level={5} className={styles.label} data-testid="dapp-transaction-nfts-title">
+                    <Text.Body.Normal data-testid="dapp-transaction-nfts-title" weight="$medium">
                       {t('core.dappTransaction.nfts')}
-                    </Title>
-                    <Title
-                      level={5}
-                      className={classNames(styles.value, styles.positiveAmount)}
+                    </Text.Body.Normal>
+                    <Text.Body.Normal
+                      className={styles.positiveAmount}
                       data-testid="dapp-transaction-nfts-amount-value"
+                      weight="$medium"
                     >
                       {addressData.nfts.length} {itemsCountCopy}
-                    </Title>
+                    </Text.Body.Normal>
                   </div>
                   {displayGroupedNFTs(addressData.nfts, 'dapp-transaction-to-row')}
                 </>
@@ -243,6 +240,6 @@ export const DappAddressSections = ({
           ))}
         </div>
       </SummaryExpander>
-    </>
+    </div>
   );
 };

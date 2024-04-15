@@ -23,13 +23,12 @@ export const Metadata = ({
   return (
     <Grid {...props} columns="$2">
       <Cell>
-        <Typography.Body.Large
+        <Typography.Body.Normal
           className={cx.label}
-          weight="$bold"
           {...(testID != undefined && { 'data-testid': `${testID}-label` })}
         >
           {label}
-        </Typography.Body.Large>
+        </Typography.Body.Normal>
       </Cell>
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">

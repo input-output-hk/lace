@@ -1,18 +1,6 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/_typography.scss';
 
-.label {
-  color: var(--text-color-primary, #ffffff) !important;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.value {
-  color: var(--text-color-primary, #ffffff) !important;
-  font-size: 14px;
-  font-weight: 500;
-}
-
 .address {
   display: flex;
   justify-content: space-between;
@@ -20,6 +8,10 @@
 }
 
 .summaryContent {
+  color: var(--light-mode-black, var(--dark-mode-light-grey));
+}
+
+.fromAddress {
   padding-bottom: size_unit(2.5);
 }
 
@@ -30,5 +22,5 @@
 }
 
 .positiveAmount {
-  color: var(--data-green, #2CB67D) !important;
+  color: var(--data-green, #2cb67d);
 }

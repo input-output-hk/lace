@@ -78,16 +78,15 @@ export const TransactionAssets = ({
             alignItems="center"
             className={styles.balanceDetailContainer}
           >
-            <Typography.Body.Small
+            <Typography.Body.Normal
               className={classNames(styles.label, {
                 [styles.positiveBalance]: !isNegativeBalance,
-                [styles.negativeBalance]: isNegativeBalance,
               })}
             >
               <span>
                 {balance} {tokenName}
               </span>
-            </Typography.Body.Small>
+            </Typography.Body.Normal>
           </Flex>
         </Cell>
       </Grid>
