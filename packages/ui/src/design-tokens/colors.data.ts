@@ -147,10 +147,7 @@ export const colors = {
   $summary_expander_trigger_label_color: '',
   $summary_expander_trigger_label_color_pressed: '',
 
-  $transaction_summary_amount_color: '',
-  $transaction_summary_highlighted_amount_color: '',
   $transaction_summary_secondary_label_color: '',
-  $dapp_transaction_summary_positive_balance_label_color: '',
 
   $dapp_transaction_summary_type_label_color: '',
   $dapp_transaction_summary_label: '',
@@ -176,6 +173,7 @@ export const colors = {
   $text_primary: '',
   $text_secondary: '',
   $text_on_gradient: '',
+  $text_accent: '',
 
   $metadata_secondary_label_color: '',
 

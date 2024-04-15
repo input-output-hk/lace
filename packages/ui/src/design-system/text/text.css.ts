@@ -40,6 +40,7 @@ export const typography = recipe({
     color: {
       primary: sx({ color: '$text_primary' }),
       secondary: sx({ color: '$text_secondary' }),
+      accent: sx({ color: '$text_accent' }),
       highlight: sx({ color: '$data_blue' }),
       success: sx({ color: '$data_green' }),
       error: sx({ color: '$data_pink' }),

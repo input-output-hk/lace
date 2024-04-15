@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './dapp-transaction-summary.css';
 
@@ -33,22 +33,20 @@ export const TransactionType = ({
   return (
     <div className={cx.transactionTypeContainer}>
       <Grid {...props} columns="$2">
-        <Cell>
-          <Typography.Body.Large
-            className={cx.txSummaryTitle}
-            data-testid="dapp-transaction-title"
-          >
+        <Cell mb="$18">
+          <Text.Body.Large weight="$bold" data-testid="dapp-transaction-title">
             {label}
-          </Typography.Body.Large>
+          </Text.Body.Large>
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Large
-              className={cx.coloredText}
+            <Text.Body.Large
+              color="accent"
+              weight="$bold"
               data-testid="dapp-transaction-type"
             >
               {transactionType}
-            </Typography.Body.Large>
+            </Text.Body.Large>
           </Flex>
         </Cell>
       </Grid>

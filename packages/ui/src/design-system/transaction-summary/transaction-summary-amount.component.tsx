@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
-import classNames from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import { Grid, Cell } from '../grid';
+import { Cell, Grid } from '../grid';
 import { Text } from '../text';
 import { Tooltip } from '../tooltip';
 
@@ -69,10 +68,8 @@ export const Amount = ({
         <Cell>
           <Flex flexDirection="column" alignItems="flex-end" h="$fill">
             <Text.Body.Small
-              className={classNames(cx.text, {
-                [cx.normalAmount]: !shouldHighlightPositiveAmount,
-                [cx.highlightedAmount]: shouldHighlightPositiveAmount,
-              })}
+              color={shouldHighlightPositiveAmount ? 'success' : 'primary'}
+              className={cx.text}
               data-testid={makeTestId(testId, 'amount')}
             >
               {amount}

@@ -236,13 +236,8 @@ const colors: Colors = {
   $summary_expander_trigger_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
 
-  $transaction_summary_amount_color: lightColorScheme.$primary_black,
-  $transaction_summary_highlighted_amount_color:
-    lightColorScheme.$secondary_data_green,
   $transaction_summary_secondary_label_color:
     lightColorScheme.$primary_dark_grey,
-  $dapp_transaction_summary_positive_balance_label_color:
-    lightColorScheme.$secondary_data_green,
 
   $dapp_transaction_summary_type_label_color:
     lightColorScheme.$primary_accent_purple,
@@ -271,6 +266,7 @@ const colors: Colors = {
   $text_primary: lightColorScheme.$primary_black,
   $text_secondary: lightColorScheme.$primary_dark_grey,
   $text_on_gradient: lightColorScheme.$primary_white,
+  $text_accent: lightColorScheme.$primary_accent_purple,
 
   $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
 

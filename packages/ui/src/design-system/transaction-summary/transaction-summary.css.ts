@@ -28,15 +28,3 @@ export const tooltipText = style([
     display: 'flex',
   }),
 ]);
-
-export const normalAmount = style([
-  sx({
-    color: '$transaction_summary_amount_color',
-  }),
-]);
-
-export const highlightedAmount = style([
-  sx({
-    color: '$transaction_summary_highlighted_amount_color',
-  }),
-]);
