@@ -18,7 +18,12 @@ export const PasswordInputButton = ({
   isPasswordVisible,
 }: Readonly<PasswordBoxButtonProps>): JSX.Element => {
   return (
-    <button className={cx.inputButton} onClick={onClick} disabled={disabled}>
+    <button
+      type="button"
+      className={cx.inputButton}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {isPasswordVisible ? (
         <CloseEye
           className={cn(cx.inputButtonIcon, {

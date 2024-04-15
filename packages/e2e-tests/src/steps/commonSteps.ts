@@ -26,6 +26,7 @@ import {
 } from '../utils/window';
 import { Given } from '@wdio/cucumber-framework';
 import tokensPageObject from '../pageobject/tokensPageObject';
+import ToastMessage from '../elements/toastMessage';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
@@ -39,8 +40,10 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import MainLoader from '../elements/MainLoader';
 
 Given(/^Lace is ready for test$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.multiAddressModalConfirm();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -48,6 +51,7 @@ Given(/^Lace is ready for test$/, async () => {
 });
 
 Then(/^Lace is loaded properly$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
 });
@@ -104,6 +108,10 @@ When(
   }
 );
 
+When(/^I close a toast message$/, async () => {
+  await ToastMessage.clickCloseButton();
+});
+
 // TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
   await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
@@ -122,10 +130,36 @@ Then(
   }
 );
 
-Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
+Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
   await settingsExtendedPageObject.closeWalletSyncedToast();
-  await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
-  if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+
+  const toastTextToTranslationKeyMap: { [key: string]: string } = {
+    'Handle copied': 'core.infoWallet.handleCopied',
+    'Address copied': 'core.infoWallet.addressCopied',
+    'NFTs added to folder': 'browserView.nfts.folderDrawer.toast.update',
+    'NFT removed': 'browserView.nfts.folderDrawer.toast.delete',
+    'Folder created successfully': 'browserView.nfts.folderDrawer.toast.create',
+    'Folder deleted successfully': 'browserView.nfts.deleteFolderSuccess',
+    'Folder renamed successfully': 'browserView.nfts.renameFolderSuccess',
+    'Edited successfully': 'browserView.addressBook.toast.editAddress',
+    'Address added': 'browserView.addressBook.toast.addAddress',
+    'Given address already exists': 'addressBook.errors.givenAddressAlreadyExist',
+    'Given name already exists': 'addressBook.errors.givenNameAlreadyExist',
+    'Switched network': 'browserView.settings.wallet.network.networkSwitched',
+    'Network Error': 'general.errors.networkError',
+    'Copied to clipboard': 'general.clipboard.copiedToClipboard'
+  };
+
+  const translationKey = toastTextToTranslationKeyMap[toastText];
+  if (!translationKey) {
+    throw new Error(`Unsupported toast text: ${toastText}`);
+  }
+
+  await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), shouldSee === 'see');
+
+  if (translationKey === 'general.clipboard.copiedToClipboard') {
+    Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+  }
 });
 
 Then(/^I don't see any toast message$/, async () => {

@@ -11,6 +11,6 @@ export interface Data {
 export interface Providers {
   createWallet: (params: Data) => Promise<void>;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
-  disconnectHardwareWallet$: Observable<HIDConnectionEvent>;
+  disconnectHardwareWallet$: Observable<USBConnectionEvent>;
   shouldShowDialog$: Subject<boolean>;
 }

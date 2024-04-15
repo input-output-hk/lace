@@ -367,25 +367,6 @@ When(
 );
 
 Then(
-  /^I see a toast with text: "(Edited successfully|Address added)"$/,
-  async (action: 'Edited successfully' | 'Address added') => {
-    let translationKey;
-    switch (action) {
-      case 'Edited successfully':
-        translationKey = 'browserView.addressBook.toast.editAddress';
-        break;
-      case 'Address added':
-        translationKey = addressAddedToastTranslationKey;
-        break;
-      default:
-        throw new Error(`Unsupported action name: ${action}`);
-    }
-
-    await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
-  }
-);
-
-Then(
   /^I add address with name: "([^"]*)" and address: "([^"]*)" to address book in (extended|popup) mode$/,
   async (name: string, address: string, mode: 'extended' | 'popup') => {
     await mainMenuPageObject.navigateToSection('Address Book', mode);

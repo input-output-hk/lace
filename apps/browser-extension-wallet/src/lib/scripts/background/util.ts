@@ -86,7 +86,6 @@ export const launchCip30Popup = async (url: string, windowType: Windows.CreateTy
 };
 
 const waitForTabLoad = (tab: Tabs.Tab) =>
-  // eslint-disable-next-line promise/avoid-new
   new Promise<void>((resolve) => {
     const listener = (tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType) => {
       // make sure the status is 'complete' and it's the right tab

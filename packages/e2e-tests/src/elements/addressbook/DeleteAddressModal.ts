@@ -1,5 +1,5 @@
 class DeleteAddressModal {
-  private CONTAINER = '.ant-modal-content';
+  private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="delete-address-modal-title"]';
   private DESCRIPTION = '[data-testid="delete-address-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-address-modal-cancel"]';
@@ -10,19 +10,19 @@ class DeleteAddressModal {
   }
 
   get title() {
-    return $(this.TITLE);
+    return this.container.$(this.TITLE);
   }
 
   get description() {
-    return $(this.DESCRIPTION);
+    return this.container.$(this.DESCRIPTION);
   }
 
   get cancelButton() {
-    return $(this.CANCEL_BUTTON);
+    return this.container.$(this.CANCEL_BUTTON);
   }
 
   get deleteAddressButton() {
-    return $(this.DELETE_ADDRESS_BUTTON);
+    return this.container.$(this.DELETE_ADDRESS_BUTTON);
   }
 }
 

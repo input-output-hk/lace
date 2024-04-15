@@ -37,12 +37,12 @@ Feature: Onboarding - Create wallet
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
-      | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
-      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
-      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
-      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback | 2               | empty                                        |
-      | N_8J@bne87  |               | empty                                                                           | 3               | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                                                                           | 4               | core.walletSetupRegisterStep.noMatchPassword |
+      | password    | password_conf | passw_err                                                               | complex_bar_lvl | passw_conf_err                               |
+      | a           |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
+      | P@ss        |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
+      | N_8J@bne    |               | core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback | 2               | empty                                        |
+      | N_8J@bne87  |               | empty                                                                   | 3               | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                                                                   | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-3013
   Scenario: Create Wallet - Mnemonic writedown page - appears correctly after wallet setup page
@@ -210,9 +210,9 @@ Feature: Onboarding - Create wallet
       | 21    | is           | disabled    |
 
   @LW-5844
-  Scenario Outline: "Get started" page - Legal links - click on <legal_link> link
+  Scenario Outline: "Get started" page - Legal links in footer - click on <legal_link> link
     When "Get started" page is displayed
-    And I click on "<legal_link>" legal link on "Main page"
+    And I click on "<legal_link>" legal link
     Then "<legal_link>" is displayed in new tab
     Examples:
       | legal_link       |
@@ -260,11 +260,12 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
     Then "Mnemonic writedown" page is displayed with 24 words
+    And I save mnemonic words
     And I click "Next" button during wallet setup
-    When I enter 24 incorrect mnemonic words on "Mnemonic verification" page
+    When I fill passphrase fields using saved 24 words mnemonic in incorrect order
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process
-    When I enter 24 correct mnemonic words on "Mnemonic verification" page
+    When I enter saved mnemonic words
     Then "Next" button is enabled during onboarding process
 
   @LW-10138

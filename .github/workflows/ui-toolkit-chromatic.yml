@@ -2,6 +2,7 @@ name: Lace UI Toolkit
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - packages/ui/**
   push:
@@ -12,6 +13,7 @@ on:
 
 jobs:
   chromatic-deployment:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
