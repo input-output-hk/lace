@@ -10,7 +10,7 @@ Feature: Empty states
     Then I see empty state banner for Tokens page in extended mode
     And I do not see CoinGecko credits
     When I click "Copy" button on empty state banner
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
 
   @LW-2516 @LW-7236
   Scenario: Extended View - NFTs empty state
@@ -18,21 +18,21 @@ Feature: Empty states
     Then I see empty state banner for NFTs page in extended mode
     And I do not see "Create folder" button on NFTs page in extended mode
     When I click "Copy" button on empty state banner
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
 
   @LW-4445 @Smoke
   Scenario: Extended View - Transactions empty state
     When I navigate to Transactions extended page
     Then I see empty state banner for Transactions page in extended mode
     When I click "Copy" button on empty state banner
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
 
   @LW-8447
   Scenario: Extended View - Staking empty state
     And I navigate to Staking extended page
     Then I see empty state banner for Staking page in extended mode
     When I click "Copy" button on empty state banner
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
 
   @LW-3746
   Scenario: Extended-view - verify that MAX button is hidden when user has no tokens available in the wallet

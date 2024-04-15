@@ -42,7 +42,7 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
   const { t } = useTranslation();
   const { connectHardwareWallet, createHardwareWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
-  const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
+  const disconnectHardwareWallet$ = useMemo(() => new Subject<USBConnectionEvent>(), []);
 
   const hardwareWalletProviders = useMemo(
     (): Providers => ({
@@ -83,14 +83,14 @@ export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): 
   );
 
   useEffect(() => {
-    const onHardwareWalletDisconnect = (event: HIDConnectionEvent) => {
+    const onHardwareWalletDisconnect = (event: USBConnectionEvent) => {
       disconnectHardwareWallet$.next(event);
     };
 
-    navigator.hid.addEventListener('disconnect', onHardwareWalletDisconnect);
+    navigator.usb.addEventListener('disconnect', onHardwareWalletDisconnect);
 
     return () => {
-      navigator.hid.removeEventListener('disconnect', onHardwareWalletDisconnect);
+      navigator.usb.removeEventListener('disconnect', onHardwareWalletDisconnect);
       disconnectHardwareWallet$.complete();
     };
   }, [disconnectHardwareWallet$]);
