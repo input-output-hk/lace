@@ -47,9 +47,11 @@ export const Message = ({
       )}
       <Box className={cx.description}>
         {type === MessageType.SIDE_DRAWER ? (
-          <Text.Body.Normal weight="$semibold">{description}</Text.Body.Normal>
+          <Text.Body.Normal color="secondary" weight="$semibold">
+            {description}
+          </Text.Body.Normal>
         ) : (
-          <Text.Body.Small>{description}</Text.Body.Small>
+          <Text.Body.Small color="secondary">{description}</Text.Body.Small>
         )}
       </Box>
     </Flex>

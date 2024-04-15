@@ -27,7 +27,7 @@ export const TransactionSummary = ({
 }: Readonly<Props>): JSX.Element => (
   <div className={styles.txSummaryContainer}>
     {title !== undefined && (
-      <Flex justifyContent="flex-start" mb="$18">
+      <Flex justifyContent="flex-start" pb="$18">
         <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
       </Flex>
     )}

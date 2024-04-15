@@ -98,7 +98,6 @@ export const colors = {
   $scrollbar_thumb_container_bgColor: '',
   $scrollbar_thumb_container_bgColor_hover: '',
 
-  $toggle_switch_label_color: '',
   $toggle_switch_container_bgColor_on: '',
   $toggle_switch_container_bgColor_off: '',
   $toggle_switch_container_bgColor_disabled: '',
@@ -158,9 +157,6 @@ export const colors = {
 
   $tooltip_container_bgColor: '',
   $tooltip_title_dot_bgColor: '',
-
-  $message_title_color: '',
-  $message_description_color: '',
 
   $input_container_bgColor: '',
   $input_container_hover_outline_color: '',

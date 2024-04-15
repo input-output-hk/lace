@@ -155,7 +155,6 @@ const colors: Colors = {
   $scrollbar_thumb_container_bgColor: darkColorScheme.$primary_mid_grey,
   $scrollbar_thumb_container_bgColor_hover: darkColorScheme.$primary_grey,
 
-  $toggle_switch_label_color: darkColorScheme.$primary_light_grey,
   $toggle_switch_container_bgColor_on: darkColorScheme.$primary_mid_grey,
   $toggle_switch_container_bgColor_off: darkColorScheme.$primary_accent_purple,
   $toggle_switch_container_bgColor_disabled:
@@ -229,9 +228,6 @@ const colors: Colors = {
 
   $tooltip_container_bgColor: darkColorScheme.$primary_mid_grey,
   $tooltip_title_dot_bgColor: darkColorScheme.$primary_accent_purple,
-
-  $message_title_color: darkColorScheme.$primary_white,
-  $message_description_color: darkColorScheme.$primary_light_grey,
 
   $input_container_bgColor: darkColorScheme.$primary_dark_grey,
   $input_container_hover_outline_color: darkColorScheme.$primary_grey,

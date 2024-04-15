@@ -1,10 +1,8 @@
-import { style, sx } from '../../design-tokens';
+import { style, vars } from '../../design-tokens';
 
 export const dialogDescription = style([
-  sx({
-    color: '$dialog_description_color',
-  }),
   {
+    color: vars.colors.$dialog_description_color,
     textAlign: 'center',
   },
 ]);

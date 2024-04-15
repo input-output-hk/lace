@@ -36,7 +36,7 @@ export const ToggleSwitch = ({
       className={disabled === true ? cx.disabled : undefined}
     >
       <label className={cx.label} htmlFor={id}>
-        <Text.Body.Normal>{label}</Text.Body.Normal>
+        <Text.Body.Normal color="secondary">{label}</Text.Body.Normal>
       </label>
       {icon !== undefined && <Box className={cx.iconContainer}>{icon}</Box>}
       <Switch.Root
