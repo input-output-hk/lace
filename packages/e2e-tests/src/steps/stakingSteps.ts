@@ -14,7 +14,6 @@ import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDrawer';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import StakingExitModal from '../elements/staking/StakingExitModal';
-import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetailsDrawer';
 
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
@@ -123,12 +122,6 @@ Then(/^the stakepool drawer is opened with "([^"]*)" stake pool information$/, a
   await drawerCommonExtendedAssert.assertSeeDrawerWithTitle(poolName);
 });
 
-// When(/^I click on the "(.*)" column header$/, async (listHeader: string) => {
-//   const stakePoolListItem = new StakePoolListItem();
-//   await webTester.waitUntilSeeElement(stakePoolListItem.container(), 60_000);
-//   await stakingExtendedPageObject.clickStakePoolListHeader(listHeader);
-// });
-
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (_ignored: 'with' | 'without') => {
   // no need to distinguish between pools with/without metadata
@@ -140,10 +133,6 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
   };
 
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
-});
-
-When(/^I save stake pool info$/, async () => {
-  await StakePoolDetailsDrawer.saveStakePoolDetails();
 });
 
 Then(/^Staking password screen is displayed$/, async () => {
