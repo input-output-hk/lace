@@ -100,3 +100,18 @@ export const assetsContainer = style({
 export const txSummaryContainer = style({
   paddingTop: '20px',
 });
+
+export const tooltip = style([
+  sx({
+    color: '$transaction_summary_secondary_label_color',
+    width: '$24',
+    height: '$24',
+    fontSize: '$25',
+  }),
+]);
+
+export const tooltipText = style([
+  sx({
+    display: 'flex',
+  }),
+]);
