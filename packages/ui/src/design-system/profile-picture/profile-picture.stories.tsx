@@ -3,7 +3,10 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
+import DarkFallBack from '../../assets/images/dark-mode-fallback.png';
+import LightFallBack from '../../assets/images/light-mode-fallback.png';
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
+import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-variant';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -25,25 +28,36 @@ export default {
   decorators: [page({ title: 'Profile picture', subtitle })],
 } as Meta;
 
-const Images = (): JSX.Element => (
-  <>
-    <Variants.Row>
-      <Variants.Cell>
-        <UserProfile imageSrc="" fallback="L" delayMs={0} />
-      </Variants.Cell>
-    </Variants.Row>
-    <Variants.Row>
-      <Variants.Cell>
-        <Initials letter="M" />
-      </Variants.Cell>
-    </Variants.Row>
-    <Variants.Row>
-      <Variants.Cell>
-        <Image imageSrc={cardanoImage} />
-      </Variants.Cell>
-    </Variants.Row>
-  </>
-);
+const Images = (): JSX.Element => {
+  const { theme } = useThemeVariant();
+  const fallbackLogo =
+    theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
+
+  return (
+    <>
+      <Variants.Row>
+        <Variants.Cell>
+          <UserProfile imageSrc="" fallback="L" delayMs={0} />
+        </Variants.Cell>
+      </Variants.Row>
+      <Variants.Row>
+        <Variants.Cell>
+          <UserProfile imageSrc="" delayMs={0} fallbackLogo={fallbackLogo} />
+        </Variants.Cell>
+      </Variants.Row>
+      <Variants.Row>
+        <Variants.Cell>
+          <Initials letter="M" />
+        </Variants.Cell>
+      </Variants.Row>
+      <Variants.Row>
+        <Variants.Cell>
+          <Image imageSrc={cardanoImage} />
+        </Variants.Cell>
+      </Variants.Row>
+    </>
+  );
+};
 
 export const Overview = (): JSX.Element => (
   <Grid columns="$1">

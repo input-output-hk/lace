@@ -65,7 +65,7 @@ export const TransactionAssets = ({
       <Grid {...props} columns="$fitContent">
         <Cell>
           <UserProfile
-            fallback={setThemeFallbackImagine}
+            fallbackLogo={setThemeFallbackImagine}
             imageSrc={getImageSource(imageSrc)}
             alt={tokenName}
             radius="rounded"
