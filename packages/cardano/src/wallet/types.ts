@@ -2,9 +2,20 @@ import { Cardano, Paginated } from '@cardano-sdk/core';
 import type { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
 import { WalletType } from '@cardano-sdk/web-extension';
 
-export type DeviceConnection = LedgerKeyAgent['deviceConnection'] | boolean;
+export type LedgerConnection = LedgerKeyAgent['deviceConnection'];
+
+export type DeviceConnection = LedgerConnection | boolean;
 
 export type HardwareWallets = WalletType.Trezor | WalletType.Ledger;
+
+export type HardwareWalletConnection =
+  | {
+      type: WalletType.Trezor;
+    }
+  | {
+      type: WalletType.Ledger;
+      value: LedgerConnection;
+    };
 
 export type StakePoolSearchResults = Paginated<Cardano.StakePool>;
 
@@ -69,10 +80,3 @@ export enum WalletManagerProviderTypes {
 }
 
 export type ChainName = keyof typeof Cardano.ChainIds;
-
-export interface CreateHardwareWalletArgs {
-  deviceConnection: DeviceConnection;
-  name: string;
-  accountIndex: number;
-  activeChainId: Cardano.ChainId;
-}

@@ -15,8 +15,6 @@ export interface WalletSetupSelectAccountsStepRevampProps {
   accounts: number;
   onBack: () => void;
   onSubmit: (accountIndex: number, name: string) => void;
-  isHardwareWallet?: boolean;
-  wallet?: string;
   isNextLoading?: boolean;
 }
 
