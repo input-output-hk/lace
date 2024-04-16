@@ -19,7 +19,7 @@ export const searchNfts = (
 ): NftItemProps[] =>
   data.filter(
     (item) =>
-      item.name.toLowerCase() === searchValue.toLowerCase() ||
+      item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
       item.assetId === searchValue ||
       assetsInfo.get(Cardano.AssetId(item.assetId)).policyId === searchValue
   );
