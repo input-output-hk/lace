@@ -33,7 +33,7 @@ export const TransactionType = ({
   return (
     <div className={cx.transactionTypeContainer}>
       <Grid {...props} columns="$2">
-        <Cell mb="$18">
+        <Cell>
           <Text.Body.Large weight="$bold" data-testid="dapp-transaction-title">
             {label}
           </Text.Body.Large>
