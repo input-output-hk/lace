@@ -1,5 +1,5 @@
-@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
-@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../../../../../../../../packages/common/src/ui/styles/theme';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
 
 .errorDialog {
   :global(.ant-modal-content) {

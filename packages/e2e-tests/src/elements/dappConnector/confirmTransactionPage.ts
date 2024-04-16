@@ -111,12 +111,12 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   }
 
   async getAssetsFromAddressSection() {
-    const textArray = await getTextFromElementArray(await this.transactionToAssetsRows);
+    const textArray = await getTextFromElementArray(await this.transactionFromAssetsRows);
     return textArray.map((str) => str.replace(/\n/g, ' '));
   }
 
   async getAssetsToAddressSection() {
-    const textArray = await getTextFromElementArray(await this.transactionFromAssetsRows);
+    const textArray = await getTextFromElementArray(await this.transactionToAssetsRows);
     return textArray.map((str) => str.replace(/\n/g, ' '));
   }
 

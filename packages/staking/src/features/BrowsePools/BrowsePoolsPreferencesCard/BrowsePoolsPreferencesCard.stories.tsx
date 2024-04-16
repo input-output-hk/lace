@@ -1,24 +1,24 @@
 import { Box, Cell, Flex, Grid, Section, ThemeColorScheme, Variants } from '@lace/ui';
 import { action } from '@storybook/addon-actions';
-import { StakePoolSortOptions } from 'features/BrowsePools';
+import { useArgs } from '@storybook/preview-api';
+import { expect, userEvent, waitFor, within } from '@storybook/test';
+import { DEFAULT_SORT_OPTIONS, StakePoolSortOptions } from 'features/BrowsePools';
 import { LocalThemeProvider } from 'features/theme';
 import { useCallback, useState } from 'react';
-import type { Meta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 import { SortAndFilterTab } from './types';
 
-export default {
+const meta: Meta<typeof BrowsePoolsPreferencesCard> = {
+  component: BrowsePoolsPreferencesCard,
   title: 'Cards/Stake Pool Sorting & Filter',
-} as Meta;
-
+};
+export default meta;
 const Wrapper = ({ defaultTab }: { defaultTab: SortAndFilterTab }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [sort, setSort] = useState<StakePoolSortOptions>({
-    field: 'saturation',
-    order: 'asc',
-  });
+  const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [filter, setFilter] = useState<QueryStakePoolsFilters>({
     [PoolsFilter.Saturation]: ['', ''],
     [PoolsFilter.ProfitMargin]: ['', ''],
@@ -110,3 +110,57 @@ export const Overview = (): JSX.Element => (
     </Section>
   </>
 );
+
+export const Interactions: StoryObj<typeof BrowsePoolsPreferencesCard> = {
+  args: {
+    activeTab: SortAndFilterTab.sort,
+    filter: {
+      [PoolsFilter.Saturation]: ['', ''],
+      [PoolsFilter.ProfitMargin]: ['', ''],
+      [PoolsFilter.Performance]: ['', ''],
+      [PoolsFilter.Ros]: ['lastepoch'],
+    },
+    sort: {
+      field: 'pledge',
+      order: 'desc',
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await waitFor(() => expect(canvas.getByTestId('radio-btn-test-id-ticker')));
+    const tickerBtn = canvas.getByTestId('radio-btn-test-id-ticker');
+
+    await userEvent.click(tickerBtn);
+    const saturationBtn = canvas.getByTestId('radio-btn-test-id-saturation');
+    await step('Change sort field', async () => {
+      await userEvent.click(saturationBtn);
+    });
+
+    const iconDesc = canvas.getByTestId('sort-desc');
+    await waitFor(() => expect(saturationBtn).toBeChecked());
+    await waitFor(() => expect(iconDesc).toBeInTheDocument());
+    await step('Click on iconDesc', async () => {
+      await userEvent.click(iconDesc);
+    });
+
+    await waitFor(() => expect(iconDesc).not.toBeInTheDocument());
+    const iconAsc = canvas.getByTestId('sort-asc');
+    await waitFor(() => expect(iconAsc).toBeInTheDocument());
+  },
+  render: function Render(args) {
+    const [{ sort }, setArgs] = useArgs();
+
+    return (
+      <BrowsePoolsPreferencesCard
+        {...args}
+        sort={sort}
+        onSortChange={(newSort) => {
+          setArgs({
+            ...args,
+            sort: newSort,
+          });
+        }}
+      />
+    );
+  },
+};

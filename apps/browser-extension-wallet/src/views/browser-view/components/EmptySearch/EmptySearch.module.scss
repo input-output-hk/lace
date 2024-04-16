@@ -1,0 +1,15 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: size_unit(5) 0;
+  width: 100%;
+  position: relative;
+}
+
+.text {
+  color: var(--text-color-secondary);
+}
