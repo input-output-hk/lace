@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import cn from 'classnames';
 
 import { Text } from '../text';
 
@@ -20,10 +21,16 @@ export const Item = forwardRef<HTMLButtonElement, ToggleButtonGroupItemProps>(
     { icon: IconComponent, children, ...props },
     forwardReference,
   ): JSX.Element => (
-    <ToggleGroup.Item className={cx.root} ref={forwardReference} {...props}>
+    <ToggleGroup.Item
+      className={cn(cx.root, cx.rootHandle)}
+      ref={forwardReference}
+      {...props}
+    >
       {IconComponent && <IconComponent className={cx.icon} />}
       {Boolean(children) && (
-        <Text.Button weight="$semibold">{children}</Text.Button>
+        <Text.Button weight="$semibold" className={cx.label}>
+          {children}
+        </Text.Button>
       )}
     </ToggleGroup.Item>
   ),

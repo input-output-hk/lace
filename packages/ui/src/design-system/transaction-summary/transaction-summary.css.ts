@@ -4,15 +4,9 @@ export const text = style({
   wordBreak: 'break-all',
 });
 
-export const secondaryText = style([
-  sx({
-    color: '$transaction_summary_secondary_label_color',
-    fontWeight: '$semibold',
-  }),
-  {
-    wordBreak: 'break-all',
-  },
-]);
+export const secondaryText = style({
+  wordBreak: 'break-all',
+});
 
 export const tooltip = style([
   sx({

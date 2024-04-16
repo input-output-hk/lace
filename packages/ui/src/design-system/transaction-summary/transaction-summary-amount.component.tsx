@@ -69,6 +69,7 @@ export const Amount = ({
           <Flex flexDirection="column" alignItems="flex-end" h="$fill">
             <Text.Body.Small
               color={shouldHighlightPositiveAmount ? 'success' : 'primary'}
+              weight="$semibold"
               className={cx.text}
               data-testid={makeTestId(testId, 'amount')}
             >
@@ -77,6 +78,8 @@ export const Amount = ({
             {displayFiat && (
               <Text.Body.Small
                 className={cx.secondaryText}
+                color="secondary"
+                weight="$medium"
                 data-testid={makeTestId(testId, 'fiat')}
               >
                 {fiatPrice}
