@@ -11,6 +11,8 @@ import { walletRoutePaths } from '@routes/wallet-paths';
 import { StepConnect } from './StepConnect';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { StepCreate, WalletData } from './StepCreate';
+import { useAnalyticsContext } from '@providers';
+import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface HardwareWalletFlowProps {
   onCancel: () => void;
@@ -58,6 +60,7 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
   const [connection, setConnection] = useState<Wallet.HardwareWalletConnection>();
   const [walletData, setWalletData] = useState<WalletData>();
   const { updateEnteredAtTime } = useTimeSpentOnPage();
+  const analytics = useAnalyticsContext();
 
   useEffect(() => {
     updateEnteredAtTime();
@@ -157,6 +160,9 @@ export const HardwareWalletFlow = ({ onCancel }: HardwareWalletFlowProps): React
                   accounts={TOTAL_ACCOUNTS}
                   onBack={() => setIsStartOverDialogVisible(true)}
                   onSubmit={onAccountAndNameSubmit}
+                  onSelectedAccountChange={() => {
+                    void analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_HW_ACCOUNT_NO_CLICK);
+                  }}
                 />
               </Route>
               <Route path={route(FlowStep.Create)}>
