@@ -30,19 +30,24 @@ export default {
 
 const Images = (): JSX.Element => {
   const { theme } = useThemeVariant();
-  const fallbackLogo =
+  const fallbackImage =
     theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
 
   return (
     <>
       <Variants.Row>
         <Variants.Cell>
-          <UserProfile imageSrc="" fallback="L" delayMs={0} />
+          <UserProfile imageSrc="" fallbackText="L" delayMs={0} />
         </Variants.Cell>
       </Variants.Row>
       <Variants.Row>
         <Variants.Cell>
-          <UserProfile imageSrc="" delayMs={0} fallbackLogo={fallbackLogo} />
+          <UserProfile
+            imageSrc=""
+            delayMs={0}
+            fallbackText="FallbackImage has priority over fallbackText"
+            fallbackImage={fallbackImage}
+          />
         </Variants.Cell>
       </Variants.Row>
       <Variants.Row>
@@ -66,7 +71,7 @@ export const Overview = (): JSX.Element => (
         <Variants.Table headers={['User profile', 'Initials', 'Image']}>
           <Variants.Row>
             <Variants.Cell>
-              <UserProfile imageSrc="" fallback="L" delayMs={0} />
+              <UserProfile imageSrc="" fallbackText="L" delayMs={0} />
             </Variants.Cell>
             <Variants.Cell>
               <Initials letter="M" />
@@ -88,18 +93,18 @@ export const Overview = (): JSX.Element => (
         >
           <Variants.Row>
             <Variants.Cell>
-              <UserProfile imageSrc="" fallback="L" />
+              <UserProfile imageSrc="" fallbackText="L" />
             </Variants.Cell>
             <Variants.Cell>
               <UserProfile
                 imageSrc="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-                fallback="L"
+                fallbackText="L"
               />
             </Variants.Cell>
             <Variants.Cell>
               <UserProfile
                 imageSrc="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-                fallback="L"
+                fallbackText="L"
                 radius="rounded"
               />
             </Variants.Cell>

@@ -68,7 +68,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
             profile={
               handleImage
                 ? {
-                    fallback: walletName,
+                    fallbackText: walletName,
                     imageSrc: getAssetImageUrl(handleImage)
                   }
                 : undefined

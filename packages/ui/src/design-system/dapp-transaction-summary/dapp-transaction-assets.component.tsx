@@ -45,12 +45,12 @@ export const TransactionAssets = ({
   const { theme } = useThemeVariant();
   const isNegativeBalance = balance.includes('-');
 
-  const setThemeFallbackImagine =
+  const themeFallbackImage =
     theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
 
   const getImageSource = (value: string | undefined): string => {
     if (value === '' || value === undefined) {
-      return setThemeFallbackImagine;
+      return themeFallbackImage;
     } else if (value.startsWith('ipfs')) {
       return value.replace('ipfs://', 'https://ipfs.io/ipfs/');
     } else if (isImageBase64Encoded(value)) {
@@ -65,7 +65,7 @@ export const TransactionAssets = ({
       <Grid {...props} columns="$fitContent">
         <Cell>
           <UserProfile
-            fallbackLogo={setThemeFallbackImagine}
+            fallbackImage={themeFallbackImage}
             imageSrc={getImageSource(imageSrc)}
             alt={tokenName}
             radius="rounded"

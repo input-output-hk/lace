@@ -76,7 +76,7 @@ export const AccountItem = ({
       <Flex alignItems="center" gap="$8">
         <ProfilePicture.UserProfile
           imageSrc=""
-          fallback={accountNumber.toString()}
+          fallbackText={accountNumber.toString()}
           delayMs={0}
           data-testid="wallet-account-item-icon"
         />

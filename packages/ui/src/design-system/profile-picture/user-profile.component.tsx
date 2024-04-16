@@ -15,12 +15,12 @@ interface Props {
   background?: 'none';
 }
 
-interface Fallback {
-  fallback: string;
+interface FallbackText {
+  fallbackText: string;
 }
 
-interface FallbackLogo {
-  fallbackLogo: string;
+interface FallbackImage {
+  fallbackImage: string;
 }
 
 export const UserProfile = ({
@@ -30,7 +30,7 @@ export const UserProfile = ({
   radius = 'circle',
   background,
   ...rest
-}: Readonly<Props & (Fallback | FallbackLogo)>): JSX.Element => (
+}: Readonly<Props & (FallbackImage | FallbackText)>): JSX.Element => (
   <RadixUIAvatar.Root
     className={classNames(cx.root, {
       [cx.rounded]: radius === 'rounded',
@@ -40,11 +40,11 @@ export const UserProfile = ({
   >
     <RadixUIAvatar.Image className={cx.image} src={imageSrc} alt={alt} />
     <RadixUIAvatar.Fallback asChild delayMs={delayMs}>
-      {'fallbackLogo' in rest ? (
-        <img className={cx.image} src={rest.fallbackLogo} alt={alt} />
+      {'fallbackImage' in rest ? (
+        <img className={cx.image} src={rest.fallbackImage} alt={alt} />
       ) : (
         <Text.Body.Normal weight="$bold" className={cx.fallbackText}>
-          {rest.fallback}
+          {rest.fallbackText}
         </Text.Body.Normal>
       )}
     </RadixUIAvatar.Fallback>
