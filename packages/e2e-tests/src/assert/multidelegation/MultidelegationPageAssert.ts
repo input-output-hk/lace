@@ -321,7 +321,7 @@ class MultidelegationPageAssert {
     await MultidelegationPage.waitForPoolsCounterToBeGreaterThanZero();
     poolLimit ??= await MultidelegationPage.getNumberOfPoolsFromCounter();
     if (stakePoolsDisplayType === 'cards') {
-      // TODO: add code to handle grid cards
+      // TODO: add code to handle grid cards - LW-10284
       throw new Error('Please add validation for grid cards sorting');
     } else {
       const columnContent = await MultidelegationPage.extractColumnContent(

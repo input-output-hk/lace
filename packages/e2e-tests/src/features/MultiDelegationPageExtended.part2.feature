@@ -10,7 +10,7 @@ Feature: Staking Page - Extended View
     And I open Browse pools tab
     Then "More options" component with stake pool sorting options is displayed
 
-  @LW-10139 @LW-1041 @LW-10142 @Testnet @Mainnet
+  @LW-10139 @LW-10141 @LW-10142 @Testnet @Mainnet
   Scenario: Extended View - Staking - List View - Stake pool list sorting by ticker (default)
     When I am on Staking extended page
     And I open Browse pools tab
@@ -49,4 +49,3 @@ Feature: Staking Page - Extended View
       | Blocks     | descending    | ascending      |
       | Pledge     | descending    | ascending      |
       | Live Stake | descending    | ascending      |
-#      | Ticker      | ascending   | descending     |# Tested in LW-10139

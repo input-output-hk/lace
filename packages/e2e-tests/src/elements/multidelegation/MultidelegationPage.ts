@@ -590,7 +590,7 @@ class MultidelegationPage {
 
   async getNumberOfPoolsFromCounter(): Promise<number> {
     const poolsCounterText = await this.poolsCounter.getText();
-    return Number(poolsCounterText.replace('Pools (', '').replace(',', '').replace(')', ''));
+    return Number(Number(poolsCounterText.replace(/.*\(/, '').replace(')', '').replace(',', '')));
   }
 
   async waitForPoolsCounterToBeGreaterThanZero(): Promise<void> {
