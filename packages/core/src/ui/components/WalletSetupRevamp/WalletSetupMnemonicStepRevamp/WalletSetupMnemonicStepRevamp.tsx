@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
@@ -7,7 +7,6 @@ import styles from '../../WalletSetup/WalletSetupOption.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { hasEmptyString } from './WalletSetupMnemonicVerificationStepRevamp';
-import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
@@ -109,9 +108,9 @@ export const WalletSetupMnemonicStepRevamp = ({
         >
           {translations.writePassphraseSubtitle2}
         </span>
-        <Dialog.Root open={videoModalOpen} setOpen={setVideoModalOpen}>
+        <Modal open={videoModalOpen} centered footer={undefined} closable={false} destroyOnClose maskClosable={false}>
           {renderVideoPopupContent({ onClose: () => setVideoModalOpen(false) })}
-        </Dialog.Root>
+        </Modal>
       </>
     ) : (
       translations.enterPassphraseDescription

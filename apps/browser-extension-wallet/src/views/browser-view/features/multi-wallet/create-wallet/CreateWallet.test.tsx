@@ -21,7 +21,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
-import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
+import {
+  DEFAULT_MNEMONIC_LENGTH,
+  createAssetsRoute,
+  fillMnemonic,
+  getNextButton,
+  mnemonicWords,
+  setupStep
+} from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
@@ -36,31 +43,12 @@ jest.mock('@providers/AnalyticsProvider', () => ({
   })
 }));
 
-const keepWalletSecureStep = async () => {
-  const nextButton = getNextButton();
-
-  fireEvent.click(nextButton);
-
-  await screen.findByText('Write down your secret passphrase');
-};
-
 const recoveryPhraseStep = async () => {
   const nextButton = getNextButton();
 
-  // 08/24
-  fireEvent.click(nextButton);
-  // 16/24
-  fireEvent.click(nextButton);
-  // 24/24
   fireEvent.click(nextButton);
 
-  const step1 = 8;
-  const step2 = 16;
-  const step3 = 24;
-
-  await fillMnemonic(0, step1);
-  await fillMnemonic(step1, step2);
-  await fillMnemonic(step2, step3);
+  await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
 
   await screen.findByText('Total wallet balance');
 };
@@ -102,7 +90,6 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     );
 
     await setupStep();
-    await keepWalletSecureStep();
     await recoveryPhraseStep();
   });
 

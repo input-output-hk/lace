@@ -1,5 +1,5 @@
-import { WalletSetupMnemonicVerificationStep } from '@lace/core';
-import React, { useCallback, useMemo } from 'react';
+import { WalletSetupMnemonicVerificationStepRevamp } from '@lace/core';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { Wallet } from '@lace/cardano';
@@ -11,15 +11,13 @@ import { PostHogAction, toast } from '@lace/common';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
+import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { filter, firstValueFrom } from 'rxjs';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const wordList = wordlists.english;
-
-const PASSPHRASE_STEP_1 = 0;
-const PASSPHRASE_STEP_2 = 1;
-const PASSPHRASE_STEP_3 = 2;
+const DEFAULT_MNEMONIC_LENGTH = 24;
 
 export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
@@ -32,6 +30,12 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     [data.mnemonic]
   );
 
+  const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
+
+  useEffect(() => {
+    setMnemonic(Array.from({ length: mnemonicLength }).map(() => ''));
+  }, [mnemonicLength]);
+
   const clearSecrets = useCallback(() => {
     for (let i = 0; i < data.mnemonic.length; i++) {
       data.mnemonic[i] = '';
@@ -40,68 +44,64 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   }, [data]);
 
   const walletSetupMnemonicStepTranslations = {
-    writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
-    body: t('core.walletSetupMnemonicStep.body'),
-    enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
-    enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
-    passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
-    passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
-    passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
-    passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
+    writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
+    enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
+    enterPassphraseDescription: t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription'),
+    writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
+    writePassphraseSubtitle2: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'),
+    passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
+    enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
+    copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
   };
 
-  const onSubmitForm = useCallback(
-    async (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
-      event.preventDefault();
-      try {
-        const { source, wallet } = await createWallet(data);
-        await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
-          // eslint-disable-next-line camelcase
-          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-        });
-        await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-        const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
-        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-        if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreHdWallet);
-        }
-      } catch (error) {
-        if (error instanceof WalletConflictError) {
-          toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
-        } else {
-          throw error;
-        }
+  const onSubmitForm = useCallback(async () => {
+    try {
+      const { source, wallet } = await createWallet(data);
+      await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
+        // eslint-disable-next-line camelcase
+        $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+      });
+      await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+      const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
+      const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+      if (hdWalletDiscovered) {
+        analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreHdWallet);
       }
-      clearSecrets();
-      history.push(walletRoutePaths.assets);
-    },
-    [data, clearSecrets, createWallet, history, t, analytics, walletRepository]
-  );
+    } catch (error) {
+      if (error instanceof WalletConflictError) {
+        toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+      } else {
+        throw error;
+      }
+    }
+    clearSecrets();
+    history.push(walletRoutePaths.assets);
+  }, [data, clearSecrets, createWallet, history, t, analytics, walletRepository]);
+
+  const handleMnemonicVerification = (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
+    event.preventDefault();
+    analytics.sendEventToPostHog(postHogOnboardingActions.restore?.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+    onSubmitForm();
+  };
 
   return (
-    <WalletSetupMnemonicVerificationStep
+    <WalletSetupMnemonicVerificationStepRevamp
       mnemonic={data.mnemonic}
       onChange={setMnemonic}
       onCancel={() => {
         clearSecrets();
         history.goBack();
       }}
-      onSubmit={onSubmitForm}
-      onStepNext={(currentStep) => {
-        switch (currentStep) {
-          case PASSPHRASE_STEP_1:
-            analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreEnterPassphrase01NextClick);
-            break;
-          case PASSPHRASE_STEP_2:
-            analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreEnterPassphrase09NextClick);
-            break;
-          case PASSPHRASE_STEP_3:
-            analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreEnterPassphrase17NextClick);
-        }
-      }}
+      onSubmit={handleMnemonicVerification}
       isSubmitEnabled={isValidMnemonic}
       translations={walletSetupMnemonicStepTranslations}
       suggestionList={wordList}
+      defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
+      onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
+      onPasteFromClipboard={() =>
+        analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+      }
     />
   );
 };

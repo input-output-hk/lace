@@ -26,7 +26,6 @@ export const walletRoutePaths = {
     create: {
       root: '/new-wallet/create',
       setup: '/new-wallet/create/setup',
-      keepSecure: '/new-wallet/create/keep-secure',
       recoveryPhrase: '/new-wallet/create/recovery-phrase',
       allDone: '/new-wallet/create/all-done'
     },
@@ -40,8 +39,6 @@ export const walletRoutePaths = {
     restore: {
       root: '/new-wallet/restore',
       setup: '/new-wallet/restore/setup',
-      keepSecure: '/new-wallet/restore/keep-secure',
-      selectRecoveryPhraseLength: '/new-wallet/restore/select-recovery-phrase-length',
       enterRecoveryPhrase: '/new-wallet/restore/enter-recovery-phrase',
       allDone: '/new-wallet/restore/all-done'
     }

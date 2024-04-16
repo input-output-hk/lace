@@ -17,7 +17,7 @@ const MNEMONIC_LENGTHS = [12, 15, 24];
 export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
   onChange: (words: string[]) => void;
-  onSubmit: () => void;
+  onSubmit: (event?: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
   translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard'>;

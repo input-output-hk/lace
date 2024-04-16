@@ -4,7 +4,6 @@ import { Setup } from './steps/Setup';
 import { NewRecoveryPhrase } from './steps/NewRecoveryPhrase';
 import { CreateWalletProvider } from './context';
 import { walletRoutePaths } from '@routes';
-import { KeepWalletSecure } from './steps/KeepWalletSecure';
 import { Providers } from './types';
 
 const {
@@ -19,7 +18,6 @@ export const CreateWallet = ({ providers }: Props): JSX.Element => (
   <CreateWalletProvider providers={providers}>
     <Switch>
       <Route path={create.setup} component={Setup} />
-      <Route path={create.keepSecure} component={KeepWalletSecure} />
       <Route path={create.recoveryPhrase} component={NewRecoveryPhrase} />
     </Switch>
   </CreateWalletProvider>

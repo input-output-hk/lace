@@ -36,7 +36,7 @@ export const Setup = (): JSX.Element => {
         analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreWalletNamePasswordNextClick);
         setName(walletName);
         setPassword(password);
-        history.push(walletRoutePaths.newWallet.restore.keepSecure);
+        history.push(walletRoutePaths.newWallet.restore.enterRecoveryPhrase);
       }}
       translations={translations}
     />

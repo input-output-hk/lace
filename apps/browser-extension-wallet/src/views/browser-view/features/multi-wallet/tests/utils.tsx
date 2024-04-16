@@ -5,7 +5,9 @@ import { Route, Switch } from 'react-router-dom';
 
 export const getNextButton = (): HTMLElement => screen.queryByTestId('wallet-setup-step-btn-next');
 
-export const setupStep = async (): Promise<void> => {
+export const DEFAULT_MNEMONIC_LENGTH = 24;
+
+export const setupStep = async (flow = 'create'): Promise<void> => {
   const nextButton = getNextButton();
   expect(nextButton).toBeDisabled();
 
@@ -21,7 +23,9 @@ export const setupStep = async (): Promise<void> => {
   await waitFor(() => expect(nextButton).toBeEnabled());
   fireEvent.click(nextButton);
 
-  await screen.findByText('Keeping your wallet secure');
+  await screen.findByText(
+    flow === 'create' ? 'Start by saving your recovery phrase' : 'Enter your recovery passphrase'
+  );
 };
 
 export const mnemonicWords =

@@ -1,4 +1,4 @@
-import { MnemonicStage, WalletSetupMnemonicStep } from '@lace/core';
+import { MnemonicStage, MnemonicVideoPopupContent, WalletSetupMnemonicStepRevamp } from '@lace/core';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router';
@@ -10,12 +10,9 @@ import { useWalletManager } from '@hooks/useWalletManager';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { PostHogAction } from '@lace/common';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
+import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
-
-const PASSPHRASE_STEP_1 = 0;
-const PASSPHRASE_STEP_2 = 1;
-const PASSPHRASE_STEP_3 = 2;
 
 interface State {
   isResetMnemonicModalOpen: boolean;
@@ -33,15 +30,25 @@ export const NewRecoveryPhrase = (): JSX.Element => {
     resetMnemonicStage: 'writedown'
   }));
 
+  const [isBackFromNextStep, setIsBackFromNextStep] = useState(false);
+
   const walletSetupMnemonicStepTranslations = {
-    writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
-    body: t('core.walletSetupMnemonicStep.body'),
-    enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
-    enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
-    passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
-    passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
-    passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
-    passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
+    writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
+    enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
+    enterPassphraseDescription: t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription'),
+    writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
+    writePassphraseSubtitle2: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'),
+    passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
+    enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
+    copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
+  };
+
+  const mnemonicVideoPopupContentTranslations = {
+    title: t('core.mnemonicVideoPopupContent.title'),
+    description: t('core.mnemonicVideoPopupContent.description'),
+    linkText: t('core.mnemonicVideoPopupContent.link'),
+    closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
   const clearSecrets = useCallback(() => {
@@ -64,33 +71,43 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   return (
     <>
-      <WalletSetupMnemonicStep
+      <WalletSetupMnemonicStepRevamp
         mnemonic={data.mnemonic}
-        onReset={(resetStage) =>
-          setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }))
-        }
+        onReset={(resetStage) => {
+          setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }));
+          resetStage === 'input' && setIsBackFromNextStep(false);
+        }}
+        renderVideoPopupContent={({ onClose }) => (
+          <MnemonicVideoPopupContent
+            translations={mnemonicVideoPopupContentTranslations}
+            videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
+            onClose={() => {
+              onClose();
+              void analytics.sendEventToPostHog(
+                postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
+              );
+            }}
+          />
+        )}
         onNext={saveWallet}
-        onStepNext={(stage: MnemonicStage, step: number) => {
-          switch (step) {
-            case PASSPHRASE_STEP_1:
-              stage === 'input'
-                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase01NextClick)
-                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase01NextClick);
-              break;
-            case PASSPHRASE_STEP_2:
-              stage === 'input'
-                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase09NextClick)
-                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase09NextClick);
-              break;
-            case PASSPHRASE_STEP_3:
-              stage === 'input'
-                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase17NextClick)
-                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase17NextClick);
-          }
+        onStepNext={(mnemonicStage: MnemonicStage) => {
+          mnemonicStage === 'writedown'
+            ? analytics.sendEventToPostHog(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
+            : analytics.sendEventToPostHog(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
+        onWatchVideoClick={() =>
+          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+        }
+        onCopyToClipboard={() =>
+          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
+        }
+        onPasteFromClipboard={() =>
+          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+        }
+        isBackFromNextStep={isBackFromNextStep}
       />
       {state.isResetMnemonicModalOpen && (
         <WarningModal
