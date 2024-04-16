@@ -1,18 +1,14 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/_typography.scss';
 
+.root {
+  color: var(--text-color-primary);
+}
+
 .address {
   display: flex;
   justify-content: space-between;
   padding: size_unit(2.5) 0;
-}
-
-.summaryContent {
-  color: var(--light-mode-black, var(--dark-mode-light-grey));
-}
-
-.fromAddress {
-  padding-bottom: size_unit(2.5);
 }
 
 .tokenCount {
