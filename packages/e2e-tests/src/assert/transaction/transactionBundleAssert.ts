@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import webTester from '../../actor/webTester';
 import { TransactionBundle } from '../../elements/newTransaction/transactionBundle';
 import coinConfigureAssert from '../coinConfigureAssert';
 import assetInputAssert from '../assetInputAssert';
@@ -7,19 +6,17 @@ import TransactionNewPage from '../../elements/newTransaction/transactionNewPage
 import { t } from '../../utils/translationService';
 import { CoinConfigure } from '../../elements/newTransaction/coinConfigure';
 import { AssetInput } from '../../elements/newTransaction/assetInput';
-import { AddressInput } from '../../elements/AddressInput';
 
 class TransactionBundleAssert {
   assertSeeBundles = async (expectedNumberOfBundles: number) => {
     for (let i = 1; i <= expectedNumberOfBundles; i++) {
       const bundle = new TransactionBundle(i);
       if (expectedNumberOfBundles > 1) {
-        expect(await webTester.getTextValueFromElement(bundle.bundleTitle())).to.equal(
-          `${await t('core.outputSummaryList.output')} ${i}`
-        );
-        await webTester.seeWebElement(bundle.bundleRemoveButton());
+        await bundle.bundleTitle.waitForDisplayed();
+        expect(await bundle.bundleTitle.getText()).to.equal(`${await t('core.outputSummaryList.output')} ${i}`);
+        await bundle.bundleRemoveButton.waitForDisplayed();
       }
-      await new AddressInput(i).input.waitForDisplayed();
+      await bundle.bundleAddressInput.input.waitForDisplayed();
       await coinConfigureAssert.assertSeeCoinConfigure();
       await assetInputAssert.assertSeeAssetInput(i);
     }
@@ -27,15 +24,14 @@ class TransactionBundleAssert {
 
   async assertSeeTokenNameInBundleAndCoinConfigure(expectedName: string, bundleIndex: number) {
     await TransactionNewPage.cancelTransactionButton.waitForStable();
-    const tokenName = await new TransactionBundle(bundleIndex)
-      .bundleAssetInput()
+    const tokenName = await new TransactionBundle(bundleIndex).bundleAssetInput
       .coinConfigure(bundleIndex, expectedName.replace('...', ''))
       .nameElement.getText();
     expect(tokenName).to.contain(expectedName);
   }
 
   async assertSeeAssetNameAndValueInBundle(expectedName: string, expectedValue: number, bundleIndex: number) {
-    const asset = new TransactionBundle(bundleIndex).bundleAssetInput().coinConfigure(bundleIndex, expectedName);
+    const asset = new TransactionBundle(bundleIndex).bundleAssetInput.coinConfigure(bundleIndex, expectedName);
 
     const tokenName = await asset.nameElement.getText();
     const tokenValue = await asset.getAmount();
