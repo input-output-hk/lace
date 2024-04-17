@@ -10,7 +10,7 @@ import { compactNumberWithUnit } from '@utils/format-number';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
-import { OutsideHandlesProvider } from '@lace/staking';
+import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
 import { useBalances, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import {
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -27,7 +27,7 @@ export const StakingContainer = (): React.ReactElement => {
 
   const analytics = useAnalyticsContext();
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true

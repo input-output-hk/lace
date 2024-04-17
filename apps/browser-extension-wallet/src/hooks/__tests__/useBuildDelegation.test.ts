@@ -49,7 +49,6 @@ jest.mock('../../stores', () => ({
   })
 }));
 
-// eslint-disable-next-line promise/avoid-new
 const flushPromises = () => new Promise(setImmediate);
 
 describe('Testing useBuildDelegation hook', () => {
