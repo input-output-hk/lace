@@ -147,7 +147,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         title={<SectionTitle title={t('staking.sectionTitle')} classname={styles.sectionTilte} />}
         isLoading={isLoadingNetworkInfo}
       >
-        <StakingPopup currentChain={currentChain} theme={theme.name} />
+        <StakingPopup theme={theme.name} />
       </ContentLayout>
     </OutsideHandlesProvider>
   );

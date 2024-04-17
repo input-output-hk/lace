@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { BrowsePoolsView, getPoolInfos } from 'features/BrowsePools';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { CARDANO_COIN_SYMBOL_BY_NETWORK, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
@@ -14,6 +15,7 @@ import {
   processPopupViewCases,
   sanitizePercentages,
 } from './stateMachine';
+import { atomicStateMutators } from './stateMachine/atomicStateMutators';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -22,6 +24,7 @@ const defaultState: DelegationPortfolioState = {
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,
+  hydrated: false,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   view: undefined,
@@ -84,6 +87,51 @@ export const useDelegationPortfolioStore = create(
           state.pendingSelectedPortfolio = undefined;
           state.viewedStakePool = undefined;
         }),
+      hydrate: ({
+        poolIds,
+        stakePoolProvider,
+        view,
+        poolsView,
+      }: {
+        poolIds: Wallet.Cardano.PoolId[];
+        stakePoolProvider: Wallet.StakePoolProvider;
+        view: 'popup' | 'expanded';
+        poolsView: BrowsePoolsView;
+      }) => {
+        if (poolIds.length === 0) {
+          set((state) => {
+            Object.assign(state, {
+              browsePoolsView: poolsView,
+              hydrated: true,
+              view,
+            });
+          });
+
+          return;
+        }
+
+        getPoolInfos({
+          poolIds,
+          preserveOrder: true,
+          stakePoolProvider,
+          status: [
+            Wallet.Cardano.StakePoolStatus.Activating,
+            Wallet.Cardano.StakePoolStatus.Active,
+            Wallet.Cardano.StakePoolStatus.Retiring,
+          ],
+        })
+          .then((selectedStakePools) => {
+            set((state) => {
+              Object.assign(state, {
+                ...atomicStateMutators.selectPools({ stakePools: selectedStakePools, state }),
+                browsePoolsView: poolsView,
+                hydrated: true,
+                view,
+              });
+            });
+          })
+          .catch(() => null);
+      },
       setCardanoCoinSymbol: (currentChain) =>
         set((state) => {
           state.cardanoCoinSymbol = CARDANO_COIN_SYMBOL_BY_NETWORK[currentChain.networkId];
