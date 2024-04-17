@@ -26,7 +26,8 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
     if (hydrated) return;
 
     portfolioMutators.hydrate({
-      poolIds: stakingBrowserPreferencesPersistence.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)),
+      poolIds:
+        stakingBrowserPreferencesPersistence?.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)) ?? [],
       poolsView,
       stakePoolProvider,
       view,
@@ -36,7 +37,7 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
     poolsView,
     portfolioMutators,
     stakePoolProvider,
-    stakingBrowserPreferencesPersistence.selectedPoolIds,
+    stakingBrowserPreferencesPersistence?.selectedPoolIds,
     view,
   ]);
 
