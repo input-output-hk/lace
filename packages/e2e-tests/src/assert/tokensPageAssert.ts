@@ -15,6 +15,8 @@ type ExpectedTokenDetails = {
 };
 
 class TokensPageAssert {
+  ADA_PRICE_CHECK_INTERVAL = 65_000;
+
   assertSeeTitle = async () => {
     await TokensPage.title.waitForDisplayed({ timeout: 10_000 });
   };
@@ -251,6 +253,28 @@ class TokensPageAssert {
     const tickerDisplayed = tickers[await TokensPage.getTokenRowIndex('Cardano')];
 
     expect(tickerDisplayed).to.equal(expectedTicker);
+  }
+
+  async seePriceFetchExpiredErrorMessage(shouldBeVisible: boolean) {
+    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({
+      reverse: !shouldBeVisible,
+      timeout: this.ADA_PRICE_CHECK_INTERVAL * 3
+    });
+    if (shouldBeVisible) {
+      const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split(':')[0];
+      expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
+    }
+  }
+
+  async seePriceFetchFailedErrorMessage(shouldBeVisible: boolean) {
+    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({
+      reverse: !shouldBeVisible,
+      timeout: this.ADA_PRICE_CHECK_INTERVAL * 3
+    });
+    if (shouldBeVisible)
+      expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.equal(
+        await t('general.warnings.cannotFetchPrice')
+      );
   }
 }
 

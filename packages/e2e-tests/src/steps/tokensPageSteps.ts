@@ -1,4 +1,4 @@
-import { When, Then } from '@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 import tokensPageAssert from '../assert/tokensPageAssert';
 import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
@@ -217,3 +217,17 @@ Then(/^I see total wallet balance in ADA is "([^"]*)"$/, async (balanceInAda: nu
 Then(/^I see tMin token with the ADA balance of "([^"]*)"$/, async (balanceInAda: number) => {
   await tokensPageAssert.assertTMinBalance(balanceInAda);
 });
+
+Then(
+  /^fiat prices expired fetch error is (displayed|not displayed)$/,
+  async (shouldBeDisplayed: 'displayed' | 'not displayed') => {
+    await tokensPageAssert.seePriceFetchExpiredErrorMessage(shouldBeDisplayed === 'displayed');
+  }
+);
+
+Then(
+  /^fiat prices unable to fetch error is (displayed|not displayed)$/,
+  async (shouldBeDisplayed: 'displayed' | 'not displayed') => {
+    await tokensPageAssert.seePriceFetchFailedErrorMessage(shouldBeDisplayed === 'displayed');
+  }
+);
