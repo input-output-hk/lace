@@ -8,7 +8,6 @@ import Modal from '../elements/modal';
 import ModalAssert from '../assert/modalAssert';
 import OnboardingAnalyticsPage from '../elements/onboarding/analyticsPage';
 import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert';
-import OnboardingConnectHWPageAssert from '../assert/onboarding/onboardingConnectHWPageAssert';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMainPageAssert from '../assert/onboarding/onboardingMainPageAssert';
 import OnboardingWalletSetupPage from '../elements/onboarding/walletSetupPage';
@@ -17,7 +16,6 @@ import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import CommonAssert from '../assert/commonAssert';
-import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
 import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
 import type { RecoveryPhrase } from '../types/onboarding';
@@ -31,6 +29,7 @@ import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer
 import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
 import { shuffle } from '../utils/arrayUtils';
+import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -160,12 +159,19 @@ Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhra
   await RecoveryPhrasePage.selectMnemonicLength(length);
 });
 
-Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
-  await OnboardingConnectHWPageAssert.assertSeeConnectHardwareWalletPage();
+Then(/^"Connect your device" page is displayed$/, async () => {
+  await ConnectYourDevicePageAssert.assertSeeConnectYourDevicePage();
 });
 
-Then(/^I click Trezor wallet icon$/, async () => {
-  await OnboardingConnectHardwareWalletPage.trezorButton.click();
+Then(/^"No hardware wallet device was chosen." error is displayed on "Connect your device" page$/, async () => {
+  await ConnectYourDevicePageAssert.assertSeeError(
+    await t('core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.devicePickerRejected')
+  );
+});
+
+When(/^"Try again" button is enabled on "Connect your device" page$/, async () => {
+  await ConnectYourDevicePageAssert.assertSeeTryAgainButton(true);
+  await ConnectYourDevicePageAssert.assertSeeTryAgainButtonEnabled(true);
 });
 
 Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
