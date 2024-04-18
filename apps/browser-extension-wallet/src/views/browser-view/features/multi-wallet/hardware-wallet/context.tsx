@@ -15,7 +15,7 @@ interface State {
   setAccount: (account: number) => void;
   resetConnection: () => void;
   createWallet: () => Promise<void>;
-  disconnectHardwareWallet$: Observable<HIDConnectionEvent>;
+  disconnectHardwareWallet$: Observable<USBConnectionEvent>;
 }
 
 // eslint-disable-next-line unicorn/no-null
