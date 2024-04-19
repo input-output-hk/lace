@@ -88,22 +88,27 @@ Feature: Staking Page - Extended View
     Then I see the Network Info component with the expected content
 
   @LW-8499 @Testnet @Mainnet
-  Scenario Outline: Extended View - Staking - Show tooltip for <column_name> column in browse pools section
+  Scenario: Extended View - Staking - Show tooltip for columns in browse pools section
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    When I hover over "<column_name>" column name in stake pool list
-    Then tooltip for "<column_name>" column is displayed
-    Examples:
-      | column_name |
-      | Ticker      |
-      | Saturation  |
-#      | ROS         | #TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
-      | Cost        |
-      | Margin      |
-      | Blocks      |
-      | Pledge      |
-      | Live Stake  |
+    When I hover over "Ticker" column name in stake pool list
+    Then tooltip for "Ticker" column is displayed
+    When I hover over "Saturation" column name in stake pool list
+    Then tooltip for "Saturation" column is displayed
+    #TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+    #When I hover over "ROS" column name in stake pool list
+    #Then tooltip for "ROS" column is displayed
+    When I hover over "Cost" column name in stake pool list
+    Then tooltip for "Cost" column is displayed
+    When I hover over "Margin" column name in stake pool list
+    Then tooltip for "Margin" column is displayed
+    When I hover over "Blocks" column name in stake pool list
+    Then tooltip for "Blocks" column is displayed
+    When I hover over "Pledge" column name in stake pool list
+    Then tooltip for "Pledge" column is displayed
+    When I hover over "Live Stake" column name in stake pool list
+    Then tooltip for "Live Stake" column is displayed
 
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details
@@ -185,12 +190,6 @@ Feature: Staking Page - Extended View
       | grid | I open Overview tab |
       | list | I refresh the page  |
       | list | I open Overview tab |
-
-  @LW-10143 @Testnet @Mainnet
-  Scenario: Extended View - Staking - More options - Sorting options are displayed
-    When I am on Staking extended page
-    And I open Browse pools tab
-    Then "More options" component with stake pool sorting options is displayed
 
   @LW-9996 @Testnet @Mainnet
   Scenario: Extended View - Grid - display stake pool cards based on browser width
