@@ -265,7 +265,8 @@ class TokensPageAssert {
       expect(await TokensPage.priceFetchErrorDescription.getText())
         .to.include(expiredErrorMessageToMatch)
         .to.include(new Date().getFullYear())
-        .to.include(new Date().getDate());
+        .to.include(new Date().getDate())
+        .to.include(new Date().getMinutes());
     }
   }
 
