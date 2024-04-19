@@ -205,7 +205,7 @@ export const useGetOwnPubDRepKeyHash = (): UseGetOwnPubDRepKeyHash => {
   useEffect(() => {
     if (!inMemoryWallet) return;
     const get = async () => {
-      const ownPubDRepKey = await inMemoryWallet.getPubDRepKey();
+      const ownPubDRepKey = await inMemoryWallet.governance.getPubDRepKey();
       const ownDRepKeyHash = await pubDRepKeyToHash(ownPubDRepKey);
 
       setOwnPubDRepKeyHash(ownDRepKeyHash);
