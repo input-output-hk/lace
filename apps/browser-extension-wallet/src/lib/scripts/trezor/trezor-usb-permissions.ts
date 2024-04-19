@@ -1,8 +1,5 @@
 import { runtime, tabs } from 'webextension-polyfill';
-
-// Handling messages from usb permissions iframe
-
-const url = 'https://connect.trezor.io/8/';
+import { AllowedOrigins } from './types';
 
 /* Handling messages from usb permissions iframe */
 const switchToPopupTab = async (event?: BeforeUnloadEvent) => {
@@ -21,13 +18,15 @@ const switchToPopupTab = async (event?: BeforeUnloadEvent) => {
 
   // find tab by popup pattern and switch to it
   const currentTabs = await tabs.query({
-    url: `${url}popup.html`
+    url: `${AllowedOrigins.TREZOR_CONNECT_POPUP_BASE_URL}/popup.html`
   });
   if (currentTabs.length < 0) return;
   tabs.update(currentTabs[0].id, { active: true });
 };
 
 window.addEventListener('message', async (event) => {
+  if (event.origin !== AllowedOrigins.TREZOR_CONNECT) throw new Error('Origin not allowed');
+
   if (event.data === 'usb-permissions-init') {
     const iframe = document.querySelector('#trezor-usb-permissions');
     if (!iframe || !(iframe instanceof HTMLIFrameElement)) {
@@ -55,7 +54,7 @@ window.addEventListener('load', () => {
   instance.style.border = '0px';
   instance.style.width = '100%';
   instance.style.height = '100%';
-  instance.setAttribute('src', `${url}extension-permissions.html`);
+  instance.setAttribute('src', `${AllowedOrigins.TREZOR_CONNECT_POPUP_BASE_URL}/extension-permissions.html`);
   instance.setAttribute('allow', 'usb');
 
   if (document.body) {
