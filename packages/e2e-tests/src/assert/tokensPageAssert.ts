@@ -262,7 +262,10 @@ class TokensPageAssert {
     });
     if (shouldBeVisible) {
       const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split(':')[0];
-      expect(await TokensPage.priceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
+      expect(await TokensPage.priceFetchErrorDescription.getText())
+        .to.include(expiredErrorMessageToMatch)
+        .to.include(new Date().getFullYear())
+        .to.include(new Date().getDate());
     }
   }
 
