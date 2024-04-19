@@ -35,6 +35,7 @@ describe('Testing ActivityDetailsBrowser component', () => {
     ],
     amountTransformer: (amount) => `${amount} $`,
     coinSymbol: 'ADA',
+    ownAddresses: [],
     addressToNameMap: new Map()
   };
 
@@ -82,5 +83,23 @@ describe('Testing ActivityDetailsBrowser component', () => {
   test('should not display transaction metadata if not available', async () => {
     const { queryByTestId: query } = render(<TransactionDetails {...addrListProps} />);
     expect(query('tx-metadata')).not.toBeInTheDocument();
+  });
+
+  test('should show address tag for inputs', async () => {
+    // use empty addrOutputs (so we get only one toggle button for inputs)
+    const { findByTestId } = render(<TransactionDetails {...addrListProps} addrOutputs={[]} />);
+    const inputsSectionToggle = await findByTestId('tx-addr-list_toggle');
+    fireEvent.click(inputsSectionToggle);
+
+    expect(await findByTestId('address-tag')).toBeVisible();
+  });
+
+  test('should show address tag for outputs', async () => {
+    // use empty addrOutputs (so we get only one toggle button for outputs)
+    const { findByTestId } = render(<TransactionDetails {...addrListProps} addrOutputs={[]} />);
+    const outputsSectionToggle = await findByTestId('tx-addr-list_toggle');
+    fireEvent.click(outputsSectionToggle);
+
+    expect(await findByTestId('address-tag')).toBeVisible();
   });
 });

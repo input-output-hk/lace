@@ -9,6 +9,7 @@ import { TxDirections } from '@src/types';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { config } from '@src/config';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useObservable } from '@lace/common';
 
 type TransactionDetailsProxyProps = {
   name: string;
@@ -21,13 +22,23 @@ export const TransactionDetailsProxy = withAddressBookContext(
   ({ name, activityInfo, direction, status, amountTransformer }: TransactionDetailsProxyProps): ReactElement => {
     const analytics = useAnalyticsContext();
     const {
+      inMemoryWallet,
       walletInfo,
       environmentName,
       walletUI: { cardanoCoin, appMode }
     } = useWalletStore();
     const isPopupView = appMode === APP_MODE_POPUP;
     const openExternalLink = useExternalLinkOpener();
+
+    // Prepare own addresses of active account
+    const walletAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
+
+    // Prepare address book data as Map<address, name>
     const { list: addressList } = useAddressBookContext();
+    const addressToNameMap = useMemo(
+      () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
+      [addressList]
+    );
 
     const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
     const explorerBaseUrl = useMemo(
@@ -72,11 +83,6 @@ export const TransactionDetailsProxy = withAddressBookContext(
       externalLink && status === ActivityStatus.SUCCESS && openExternalLink(externalLink);
     };
 
-    const addressToNameMap = useMemo(
-      () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
-      [addressList]
-    );
-
     return (
       // eslint-disable-next-line react/jsx-pascal-case
       <TransactionDetails
@@ -95,6 +101,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
         amountTransformer={amountTransformer}
         headerDescription={getHeaderDescription() || cardanoCoin.symbol}
         txSummary={txSummary}
+        ownAddresses={walletAddresses}
         addressToNameMap={addressToNameMap}
         coinSymbol={cardanoCoin.symbol}
         isPopupView={isPopupView}

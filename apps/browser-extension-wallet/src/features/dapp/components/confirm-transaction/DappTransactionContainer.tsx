@@ -5,7 +5,7 @@ import { Flex } from '@lace/ui';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 
 import { Wallet } from '@lace/cardano';
-import { withAddressBookContext } from '@src/features/address-book/context';
+import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
 import { useFetchCoinPrice, useChainHistoryProvider } from '@hooks';
 import {
@@ -23,6 +23,7 @@ import { useCurrencyStore, useAppSettingsContext } from '@providers';
 import { logger } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
+import { AddressBookSchema, useDbStateValue } from '@lib/storage';
 
 interface DappTransactionContainerProps {
   errorMessage?: string;
@@ -42,6 +43,10 @@ export const DappTransactionContainer = withAddressBookContext(
       walletUI: { cardanoCoin },
       walletState
     } = useWalletStore();
+
+    const ownAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
+    const { list: addressBook } = useAddressBookContext() as useDbStateValue<AddressBookSchema>;
+    const addressToNameMap = new Map(addressBook?.map((entry) => [entry.address as string, entry.name]));
 
     const { fiatCurrency } = useCurrencyStore();
     const { priceResult } = useFetchCoinPrice();
@@ -146,6 +151,8 @@ export const DappTransactionContainer = withAddressBookContext(
             errorMessage={errorMessage}
             toAddress={toAddressTokens}
             collateral={txCollateral}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         ) : (
           <Skeleton loading />
