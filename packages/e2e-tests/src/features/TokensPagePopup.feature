@@ -109,7 +109,7 @@ Feature: LW: Tokens tab - popup view
   Scenario: Popup view - Token pricing - Price fetch expired error is displayed when coingecko request fails
     Given ADA fiat price has been fetched
     When I enable network interception to fail request: "https://coingecko.*"
-    And I delay last fiat price fetch time in local storage by 500 seconds
+    And I shift back last fiat price fetch time in local storage by 500 seconds
     Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
@@ -120,7 +120,7 @@ Feature: LW: Tokens tab - popup view
   Scenario: Popup view - Token pricing - Price fetch expired error is displayed when coingecko request returns 500
     Given ADA fiat price has been fetched
     When I enable network interception to finish request: "https://coingecko.*" with error 500
-    And I delay last fiat price fetch time in local storage by 500 seconds
+    And I shift back last fiat price fetch time in local storage by 500 seconds
     Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched

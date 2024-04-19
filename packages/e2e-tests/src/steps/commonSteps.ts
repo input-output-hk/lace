@@ -13,7 +13,7 @@ import networkManager from '../utils/networkManager';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
 import {
-  delayFiatPriceFetchedTimeInBrowserStorage,
+  shiftBackFiatPriceFetchedTimeInBrowserStorage,
   cleanBrowserStorage,
   deleteFiatPriceTimestampFromBackgroundStorage
 } from '../utils/browserStorage';
@@ -373,8 +373,8 @@ When(
   }
 );
 
-Given(/^I delay last fiat price fetch time in local storage by (\d+) seconds$/, async (seconds: number) => {
-  await delayFiatPriceFetchedTimeInBrowserStorage(seconds);
+Given(/^I shift back last fiat price fetch time in local storage by (\d+) seconds$/, async (seconds: number) => {
+  await shiftBackFiatPriceFetchedTimeInBrowserStorage(seconds);
 });
 
 Then(/^I disable network interception$/, async () => {
