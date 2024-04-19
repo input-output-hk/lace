@@ -36,7 +36,12 @@ export const WalletSetupConnectHardwareWalletStepRevamp = ({
       )}
       {state === 'error' && (
         <>
-          <img src={ExclamationCircleIcon} className={styles.errorImage} alt="hardware wallet connection error image" />
+          <img
+            src={ExclamationCircleIcon}
+            className={styles.errorImage}
+            alt="hardware wallet connection error image"
+            data-testid="error-image"
+          />
           <Banner message={translations.errorMessage} />
         </>
       )}
