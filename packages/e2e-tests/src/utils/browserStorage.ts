@@ -72,15 +72,9 @@ export const clearBackgroundStorageKey: any = async (): Promise<void> => {
   }
 };
 
-export const changeFiatPriceFetchedTimeInBrowserStorage = async (
-  action: 'delay' | 'advance',
-  seconds: number
-): Promise<void> => {
+export const delayFiatPriceFetchedTimeInBrowserStorage = async (seconds: number): Promise<void> => {
   const backgroundStorage = await getBackgroundStorage();
-  let newTimestamp = backgroundStorage.fiatPrices.timestamp;
-  const changeBy = action === 'advance' ? seconds : -Math.abs(seconds);
-  newTimestamp += changeBy * 1000;
-  backgroundStorage.fiatPrices.timestamp = newTimestamp;
+  backgroundStorage.fiatPrices.timestamp += -seconds * 1000;
   try {
     await browser.execute(
       `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,

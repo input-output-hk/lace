@@ -13,7 +13,7 @@ import networkManager from '../utils/networkManager';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
 import {
-  changeFiatPriceFetchedTimeInBrowserStorage,
+  delayFiatPriceFetchedTimeInBrowserStorage,
   cleanBrowserStorage,
   deleteFiatPriceTimestampFromBackgroundStorage
 } from '../utils/browserStorage';
@@ -45,7 +45,6 @@ import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 import MainLoader from '../elements/MainLoader';
-import TokensPage from '../elements/tokensPage';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -363,10 +362,6 @@ Given(/^I confirm multi-address discovery modal$/, async () => {
   await settingsExtendedPageObject.multiAddressModalConfirm();
 });
 
-Given(/^ADA fiat price has been fetched$/, async () => {
-  await TokensPage.waitForPricesToBeFetched();
-});
-
 When(/^I enable network interception to fail request: "([^"]*)"$/, async (urlPattern: string) => {
   await networkManager.failRequest(urlPattern);
 });
@@ -378,12 +373,9 @@ When(
   }
 );
 
-Given(
-  /^I (delay|advance) last fiat price fetch time in local storage by (\d+) seconds$/,
-  async (action: 'delay' | 'advance', seconds: number) => {
-    await changeFiatPriceFetchedTimeInBrowserStorage(action, seconds);
-  }
-);
+Given(/^I delay last fiat price fetch time in local storage by (\d+) seconds$/, async (seconds: number) => {
+  await delayFiatPriceFetchedTimeInBrowserStorage(seconds);
+});
 
 Then(/^I disable network interception$/, async () => {
   await networkManager.closeOpenedCdpSessions();

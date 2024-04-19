@@ -140,10 +140,10 @@ Feature: LW: Tokens tab - extended view
     Given ADA fiat price has been fetched
     When I enable network interception to fail request: "https://coingecko.*"
     And I delay last fiat price fetch time in local storage by 500 seconds
-    Then fiat prices expired fetch error is displayed
+    Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    And fiat prices expired fetch error is not displayed
+    And "Price data expired" error is not displayed
 
   @LW-10283 @Testnet @Mainnet @Pending
   @issue=LW-10296
@@ -151,10 +151,10 @@ Feature: LW: Tokens tab - extended view
     Given ADA fiat price has been fetched
     When I enable network interception to finish request: "https://coingecko.*" with error 500
     And I delay last fiat price fetch time in local storage by 500 seconds
-    Then fiat prices expired fetch error is displayed
+    Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    And fiat prices expired fetch error is not displayed
+    And "Price data expired" error is not displayed
 
   @LW-6890 @Testnet @Mainnet @Pending
   @issue=LW-10296
@@ -162,10 +162,10 @@ Feature: LW: Tokens tab - extended view
     Given ADA fiat price has been fetched
     When I enable network interception to fail request: "https://coingecko.*"
     And I delete fiat price timestamp from background storage
-    Then fiat prices unable to fetch error is displayed
+    Then "Unable to fetch fiat values" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    Then fiat prices unable to fetch error is not displayed
+    Then "Unable to fetch fiat values" error is not displayed
 
   @LW-6681 @Testnet @Mainnet @Pending
   @issue=LW-10296
@@ -173,7 +173,7 @@ Feature: LW: Tokens tab - extended view
     Given ADA fiat price has been fetched
     When I enable network interception to finish request: "https://coingecko.*" with error 500
     And I delete fiat price timestamp from background storage
-    Then fiat prices unable to fetch error is displayed
+    Then "Unable to fetch fiat values" error is displayed
     And I disable network interception
     Then ADA fiat price has been fetched
-    Then fiat prices unable to fetch error is not displayed
+    Then "Unable to fetch fiat values" error is not displayed

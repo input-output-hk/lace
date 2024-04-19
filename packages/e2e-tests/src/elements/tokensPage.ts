@@ -105,6 +105,10 @@ class TokensPage {
     return $(this.TOKEN_ROW_SKELETON);
   }
 
+  get priceFetchErrorDescription(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PRICE_FETCH_ERROR_DESCRIPTION);
+  }
+
   async getRows(): Promise<WebdriverIO.ElementArray> {
     return $$(this.TOKENS_TABLE_ROW);
   }
@@ -148,10 +152,6 @@ class TokensPage {
 
   async waitForPricesToBeFetched() {
     await this.totalBalanceValue.waitForDisplayed({ timeout: TokensPageAssert.ADA_PRICE_CHECK_INTERVAL });
-  }
-
-  get getPriceFetchErrorDescription(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.PRICE_FETCH_ERROR_DESCRIPTION);
   }
 }
 

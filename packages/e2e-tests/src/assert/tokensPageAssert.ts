@@ -256,23 +256,23 @@ class TokensPageAssert {
   }
 
   async seePriceFetchExpiredErrorMessage(shouldBeVisible: boolean) {
-    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({
+    await TokensPage.priceFetchErrorDescription.waitForDisplayed({
       reverse: !shouldBeVisible,
       timeout: this.ADA_PRICE_CHECK_INTERVAL * 3
     });
     if (shouldBeVisible) {
       const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split(':')[0];
-      expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
+      expect(await TokensPage.priceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
     }
   }
 
   async seePriceFetchFailedErrorMessage(shouldBeVisible: boolean) {
-    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({
+    await TokensPage.priceFetchErrorDescription.waitForDisplayed({
       reverse: !shouldBeVisible,
       timeout: this.ADA_PRICE_CHECK_INTERVAL * 3
     });
     if (shouldBeVisible)
-      expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.equal(
+      expect(await TokensPage.priceFetchErrorDescription.getText()).to.equal(
         await t('general.warnings.cannotFetchPrice')
       );
   }
