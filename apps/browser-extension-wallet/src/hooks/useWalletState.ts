@@ -52,6 +52,7 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
     wallet.delegation.rewardsHistory$,
     wallet.eraSummaries$,
     wallet.genesisParameters$,
+    wallet.governance.isRegisteredAsDRep$,
     wallet.handles$,
     wallet.protocolParameters$,
     wallet.publicStakeKeys$,
@@ -82,6 +83,7 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         delegationRewardsHistory,
         eraSummaries,
         genesisParameters,
+        isRegisteredAsDRep,
         handles,
         protocolParameters,
         publicStakeKeys,
@@ -117,6 +119,9 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         },
         eraSummaries,
         genesisParameters,
+        governance: {
+          isRegisteredAsDRep
+        },
         handles,
         protocolParameters,
         publicStakeKeys,

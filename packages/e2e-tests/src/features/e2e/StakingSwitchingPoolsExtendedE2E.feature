@@ -13,7 +13,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I wait for single search result
     And I click stake pool with name "OtherStakePool"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    And I save stake pool info
+    And I save stake pool details
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Fine by me" button on "Switching pool?" modal
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
@@ -37,7 +37,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I wait for single search result
     And I click stake pool with name "-"
     Then I see drawer with stake pool details without metadata and a button available for staking
-    And I save stake pool info
+    And I save stake pool details
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Fine by me" button on "Switching pool?" modal
     And I click "Next" button on staking confirmation drawer

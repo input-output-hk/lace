@@ -6,7 +6,8 @@ Feature: Send NFT - Extended Browser View - E2E
     And I am on NFTs extended page
     And I use a single wallet with "Ibilecoin" NFT in extended mode
 
-  @LW-2502 @Smoke
+  @LW-2502 @Smoke @Pending
+  @issue=LW-10306
   Scenario: Extended-view - Send NFT E2E
     And I'm sending the NFT with name: "Ibilecoin" in extended mode
     When I enter correct password and confirm the transaction
