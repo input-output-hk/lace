@@ -7,7 +7,7 @@ export enum PostHogAction {
   OnboardingMainViewPinExtensionClick = 'wallet | onboarding | lace main view | pin the wallet extension | click',
   OnboardingMainViewMultiAddressModalGotItClick = 'wallet | onboarding | lace main view | multi-address modal | got it | click',
   // Hardware wallet connect
-  OnboardingHWClick = 'onboarding | revamp hardware wallet | connect | click',
+  OnboardingHWClick = 'onboarding | hardware wallet revamp | connect | click',
   OnboardingHWConnectView = 'onboarding | hardware wallet revamp | connect your device | view',
   OnboardingHWPopupConnectClick = 'onboarding | hardware wallet revamp | native browser pop-up with HWs | connect | click',
   OnboardingHWConnectTryAgainClick = 'onboarding | hardware wallet revamp | connect your device | try again | click',
