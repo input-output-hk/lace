@@ -8,6 +8,10 @@ import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListI
 import Tooltip from '../../elements/Tooltip';
 import testContext from '../../utils/testContext';
 import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridCard';
+import { StakePoolListColumnName } from '../../types/staking';
+import { SortingOrder } from '../../types/sortingOrder';
+import { mapColumnNameStringToEnum, sortColumnContent } from '../../utils/stakePoolListContent';
+import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -188,36 +192,37 @@ class MultidelegationPageAssert {
     expect(await firstStakePool.ticker.getText()).to.equal(expectedTicker);
   };
 
-  assertSeeTooltipForColumn = async (columnName: string) => {
+  assertSeeTooltipForColumn = async (column: StakePoolListColumn) => {
+    await MultidelegationPage.tooltip.waitForStable();
     await MultidelegationPage.tooltip.waitForDisplayed();
     let expectedTooltipText;
-    switch (columnName) {
-      case 'Ticker':
+    switch (column) {
+      case StakePoolListColumn.Ticker:
         expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
         break;
-      case 'Saturation':
+      case StakePoolListColumn.Saturation:
         expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
         break;
-      case 'ROS':
+      case StakePoolListColumn.ROS:
         expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
         break;
-      case 'Cost':
+      case StakePoolListColumn.Cost:
         expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
         break;
-      case 'Margin':
+      case StakePoolListColumn.Margin:
         expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
         break;
-      case 'Blocks':
+      case StakePoolListColumn.Blocks:
         expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
         break;
-      case 'Pledge':
+      case StakePoolListColumn.Pledge:
         expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
         break;
-      case 'Live Stake':
+      case StakePoolListColumn.LiveStake:
         expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
         break;
       default:
-        throw new Error(`Unsupported column name: ${columnName}`);
+        throw new Error(`Unsupported column name: ${column}`);
     }
     expect(await MultidelegationPage.tooltip.getText()).to.equal(expectedTooltipText);
   };
@@ -299,6 +304,39 @@ class MultidelegationPageAssert {
     const cardWidth = await new StakePoolGridCard(0).container.getSize('width');
     const cardsInARow = Math.floor(rowWidth / cardWidth);
     expect(cardsInARow).to.equal(expectedCardsCount);
+  };
+
+  assertSeeColumnSortingIndicator = async (column: StakePoolListColumnName, order: 'ascending' | 'descending') => {
+    await (
+      await MultidelegationPage.getColumnSortingIndicator(mapColumnNameStringToEnum(column), order)
+    ).waitForDisplayed();
+  };
+
+  assertSeeStakePoolsSorted = async (
+    stakePoolsDisplayType: 'list rows' | 'cards',
+    sortingOption: StakePoolListColumnName,
+    order: SortingOrder,
+    poolLimit?: number
+  ) => {
+    await MultidelegationPage.waitForPoolsCounterToBeGreaterThanZero();
+    poolLimit ??= await MultidelegationPage.getNumberOfPoolsFromCounter();
+    if (stakePoolsDisplayType === 'cards') {
+      // TODO: add code to handle grid cards - LW-10284
+      throw new Error('Please add validation for grid cards sorting');
+    } else {
+      const columnContent = await MultidelegationPage.extractColumnContent(
+        mapColumnNameStringToEnum(sortingOption),
+        poolLimit
+      );
+      const sortedColumnContent = await sortColumnContent(
+        columnContent,
+        mapColumnNameStringToEnum(sortingOption),
+        order
+      );
+
+      expect(columnContent).to.not.be.empty;
+      expect(columnContent).to.deep.equal(sortedColumnContent);
+    }
   };
 }
 
