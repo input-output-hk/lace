@@ -53,3 +53,4 @@ export { SummaryExpander } from './summary-expander';
 export * from './auto-suggest-box';
 export * from './table';
 export { InfoBar } from './info-bar';
+export * from './address-tags';
