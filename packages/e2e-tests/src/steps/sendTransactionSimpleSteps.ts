@@ -389,7 +389,11 @@ Then(
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
-        { ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: String(getTestWallet(walletName).address) }
+        {
+          ada: `${adaValue} ${Asset.CARDANO.ticker}`,
+          address: String(getTestWallet(walletName).address),
+          addressTag: 'foreign'
+        }
       ],
       status: 'Success'
     };
