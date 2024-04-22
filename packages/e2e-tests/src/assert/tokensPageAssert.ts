@@ -65,59 +65,47 @@ class TokensPageAssert {
       await TokensPage.tokenName(i).waitForDisplayed();
       await TokensPage.tokenTicker(i).waitForDisplayed();
       if (mode === 'extended') {
-        // TODO: verify price cells in extended mode
+        await TokensPage.tokenPriceAda(i).waitForDisplayed();
+        await TokensPage.tokenPriceChange(i).waitForDisplayed();
       }
       await TokensPage.tokenBalance(i).waitForDisplayed();
       await TokensPage.tokenFiatBalance(i).waitForDisplayed();
     }
   };
 
-  assertSeeCardanoItem = async (mode: 'extended' | 'popup') => {
-    expect(await TokensPage.tokenName(0).getText()).to.equal(Asset.CARDANO.name);
-    expect(await TokensPage.tokenTicker(0).getText()).to.equal(Asset.CARDANO.ticker);
-
-    if (mode === 'extended') {
-      // TODO: verify price cells in extended mode
-    }
-
-    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(0);
-    expect(tokenBalance).to.be.greaterThan(0);
-
-    const tokenFiatBalance = (await TokensPage.tokenFiatBalance(0).getText()).replace(',', '');
-    const tokenValueFiatFloat = Number.parseFloat(tokenFiatBalance.split(' ')[0]);
-    expect(tokenValueFiatFloat).to.be.greaterThan(0);
+  assertSeeNativeToken = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    await this.assertSeeTokenItemBasicData(tokenName);
+    await this.assertSeeTokenData(tokenName, true, mode);
   };
 
-  assertSeeLaceCoinItem = async (mode: 'extended' | 'popup') => {
-    expect(await TokensPage.getTokenNames()).to.contain(Asset.LACE_COIN.name);
-    expect(await TokensPage.getTokenTickers()).to.contain(Asset.LACE_COIN.ticker);
-
-    const tokensTableIndex = await TokensPage.getTokenRowIndex(Asset.LACE_COIN.name);
-
-    if (mode === 'extended') {
-      // TODO: verify price cells in extended mode
-    }
-
-    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-    expect(tokenBalance).to.be.greaterThan(0);
-
-    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
-    expect(tokenFiatBalance).to.equal('-');
+  assertSeeNotNativeToken = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    await this.assertSeeTokenItemBasicData(tokenName);
+    await this.assertSeeTokenData(tokenName, false, mode);
   };
 
-  assertSeeHoskyItem = async (mode: 'extended' | 'popup') => {
-    expect(await TokensPage.getTokenNames()).to.contain(Asset.HOSKY_TOKEN.name);
-    expect(await TokensPage.getTokenTickers()).to.contain(Asset.HOSKY_TOKEN.ticker);
+  assertSeeTokenItemBasicData = async (tokenName: Asset) => {
+    const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
+    expect(await TokensPage.tokenName(tokensTableIndex).getText()).to.contain(tokenName.name);
+    expect(await TokensPage.tokenTicker(tokensTableIndex).getText()).to.contain(tokenName.ticker);
+    expect(await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex)).to.be.greaterThan(0);
+  };
 
-    const tokensTableIndex = await TokensPage.getTokenRowIndex(Asset.HOSKY_TOKEN.name);
+  assertSeeTokenData = async (tokenName: Asset, nativeToken: boolean, mode: 'extended' | 'popup') => {
+    const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
+    const tokenValueFiat = (await TokensPage.getTokenFiatBalanceByIndex(tokensTableIndex)) as string;
+    nativeToken
+      ? expect(tokenValueFiat).to.match(TestnetPatterns.TOKEN_VALUE_FIAT_REGEX)
+      : expect(tokenValueFiat).to.equal('-');
     if (mode === 'extended') {
-      // TODO: verify price cells in extended mode
+      const tokenValuePriceAda = (await TokensPage.getTokenPriceAdaByIndex(tokensTableIndex)) as string;
+      nativeToken
+        ? expect(tokenValuePriceAda).to.match(TestnetPatterns.TOKEN_VALUE_ADA_REGEX)
+        : expect(tokenValuePriceAda).to.equal('-');
+      const tokenValuePriceChange = (await TokensPage.getTokenPriceChangeByIndex(tokensTableIndex)) as string;
+      nativeToken
+        ? expect(tokenValuePriceChange).to.match(TestnetPatterns.TOKEN_PRICE_CHANGE)
+        : expect(tokenValuePriceChange).to.equal('-');
     }
-    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-    expect(tokenBalance).to.be.greaterThan(0);
-
-    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
-    expect(tokenFiatBalance).to.equal('-');
   };
 
   async assertSeeToken(shouldSee: boolean, tokenDetails: ExpectedTokenDetails, mode: 'extended' | 'popup') {
@@ -129,7 +117,8 @@ class TokensPageAssert {
       const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
       expect(tokenBalance).to.equal(tokenDetails.value);
       if (mode === 'extended') {
-        // TODO: verify price cells in extended mode
+        await TokensPage.tokenPriceAda(tokensTableIndex).waitForDisplayed();
+        await TokensPage.tokenPriceChange(tokensTableIndex).waitForDisplayed();
       }
     } else {
       expect(await TokensPage.getTokenNames()).to.not.contain(tokenDetails.name);
