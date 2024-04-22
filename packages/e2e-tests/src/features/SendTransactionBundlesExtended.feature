@@ -265,7 +265,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
 
   @LW-3578
   Scenario: Extended-view - Transaction error screen displayed for multiple bundles on transaction submit error
-    Given I enable network interception to fail request: "*/tx-submit/submit" with error 400
+    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on page header
     And I set 2 bundles with the same assets
     And I click "Review transaction" button on "Send" page

@@ -62,14 +62,12 @@ export class NetworkManager {
     await browser.pause(2000);
   };
 
-  failResponse = async (urlPattern: string, responseCode: number): Promise<any> => {
+  finishWithResponseCode = async (urlPattern: string, responseCode: number): Promise<any> => {
     await browser.call(async () => {
       const puppeteer = await browser.getPuppeteer();
       const targets = puppeteer
         .targets()
-        .filter(
-          (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
-        );
+        .filter((target) => ['page', 'service_worker', 'other'].includes(target.type()));
       targets.map(async (target) => {
         const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
         NetworkManager.cdpSessions.push(client);
@@ -82,6 +80,29 @@ export class NetworkManager {
             requestId,
             responseCode: Number(responseCode),
             body: Buffer.from('{"__type": "Error"}').toString('base64')
+          });
+        });
+      });
+    });
+  };
+
+  failRequest = async (urlPattern: string): Promise<any> => {
+    await browser.call(async () => {
+      const puppeteer = await browser.getPuppeteer();
+      const targets = puppeteer
+        .targets()
+        .filter((target) => ['page', 'service_worker', 'other'].includes(target.type()));
+      targets.map(async (target) => {
+        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
+        NetworkManager.cdpSessions.push(client);
+        await client.send('Fetch.enable', {
+          patterns: [{ urlPattern }]
+        });
+        client.on('Fetch.requestPaused', async ({ requestId, request }) => {
+          Logger.log(`found request: ${request.url}, failing request`);
+          await client.send('Fetch.failRequest', {
+            requestId,
+            errorReason: 'Failed'
           });
         });
       });
