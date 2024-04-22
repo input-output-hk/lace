@@ -21,6 +21,7 @@ export type PoolData = {
 
 export type TransactionData = {
   address: string;
+  addressTag?: string;
   ada: string;
   assets?: string[];
 };
@@ -72,6 +73,11 @@ class TransactionsDetailsAssert {
         } else {
           expect(expectedAddress.startsWith(actualAddressSplit[0])).to.be.true;
           expect(expectedAddress.endsWith(actualAddressSplit[1])).to.be.true;
+        }
+
+        if (expectedActivityDetails.transactionData[i].addressTag) {
+          const actualAddressTag = await TransactionDetailsPage.transactionDetailsToAddressTag(i).getText();
+          expect(expectedActivityDetails.transactionData[i].addressTag).to(actualAddressTag);
         }
       }
     }
