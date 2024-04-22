@@ -49,8 +49,6 @@ export const StepCreate: VFC<StepCreateProps> = ({ connection, onError, walletDa
       if (status !== CreationState.Idle) return;
       setStatus(CreationState.Working);
 
-      void analytics.sendEventToPostHog(postHogOnboardingActions.hw.SETUP_HW_WALLET_NEXT_CLICK);
-
       let cardanoWallet: Wallet.CardanoWallet;
       try {
         cardanoWallet = await createHardwareWalletRevamped({
@@ -64,7 +62,7 @@ export const StepCreate: VFC<StepCreateProps> = ({ connection, onError, walletDa
       }
 
       const deviceSpec = await Wallet.getDeviceSpec(connection);
-      await analytics.sendEventToPostHog(postHogOnboardingActions.hw.DONE_GO_TO_WALLET, {
+      void analytics.sendEventToPostHog(postHogOnboardingActions.hw.ENTER_WALLET, {
         /* eslint-disable camelcase */
         $set_once: {
           initial_hardware_wallet_model: deviceSpec.model,

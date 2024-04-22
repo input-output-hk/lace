@@ -26,11 +26,12 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
       PostHogAction.OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick
   },
   hw: {
-    WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingHWNameNextClick,
-    CONNECT_HW_NEXT_CLICK: PostHogAction.OnboardingHWConnectNextClick,
-    SETUP_HW_WALLET_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
-    DONE_GO_TO_WALLET: PostHogAction.OnboardingHWDoneGoToWallet
+    CONNECT_HW_VIEW: PostHogAction.OnboardingHWConnectView,
+    HW_POPUP_CONNECT_CLICK: PostHogAction.OnboardingHWPopupConnectClick,
+    CONNECT_HW_TRY_AGAIN_CLICK: PostHogAction.OnboardingHWConnectTryAgainClick,
+    SETUP_HW_ACCOUNT_NO_CLICK: PostHogAction.OnboardingHWSetupWalletAccountNoClick,
+    ENTER_WALLET: PostHogAction.OnboardingHWEnterWalletClick
   },
   // eslint-disable-next-line camelcase
   forgot_password: {

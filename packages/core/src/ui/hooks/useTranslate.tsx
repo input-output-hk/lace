@@ -6,7 +6,7 @@ import fallbackInstance from '../lib/i18n';
 // If no i18n instance found in context then use the local one
 setI18n(fallbackInstance);
 
-interface UseTranslate {
+export interface UseTranslate {
   t: (key: string | string[], defaultValue?: string, options?: TOptions<StringMap>) => string;
   Trans: typeof Trans;
   i18n: typeof i18n;
