@@ -8,8 +8,9 @@ import { Typography } from 'antd';
 import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
-import { TransactionAssets, SummaryExpander, DappTransactionSummary, Tooltip } from '@lace/ui';
+import { Flex, TransactionAssets, SummaryExpander, DappTransactionSummary, Tooltip } from '@lace/ui';
 import classNames from 'classnames';
+import { getAddressTagTranslations, renderAddressTag } from '@ui/utils/render-address-tag';
 
 interface GroupedAddressAssets {
   nfts: Array<AssetInfoWithAmount>;
@@ -23,6 +24,8 @@ export interface DappAddressSectionProps {
   isToAddressesEnabled: boolean;
   isFromAddressesEnabled: boolean;
   coinSymbol: string;
+  ownAddresses: string[];
+  addressToNameMap?: Map<string, string>;
 }
 
 const tryDecodeAsUtf8 = (
@@ -101,7 +104,9 @@ export const DappAddressSections = ({
   groupedToAddresses,
   isToAddressesEnabled,
   isFromAddressesEnabled,
-  coinSymbol
+  coinSymbol,
+  ownAddresses,
+  addressToNameMap
 }: DappAddressSectionProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -121,11 +126,14 @@ export const DappAddressSections = ({
                 <Text className={styles.label} data-testid="dapp-transaction-address-title">
                   {t('core.dappTransaction.address')}
                 </Text>
-                <Text className={styles.value} data-testid="dapp-transaction-address">
-                  <Tooltip label={address}>
-                    <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
-                  </Tooltip>
-                </Text>
+                <Flex flexDirection="column" alignItems="flex-end" gap="$8">
+                  <Text className={styles.value} data-testid="dapp-transaction-address">
+                    <Tooltip label={address}>
+                      <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
+                    </Tooltip>
+                  </Text>
+                  {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+                </Flex>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
                 <>
@@ -179,11 +187,14 @@ export const DappAddressSections = ({
                 <Text className={styles.label} data-testid="dapp-transaction-address-title">
                   {t('core.dappTransaction.address')}
                 </Text>
-                <Text className={styles.value} data-testid="dapp-transaction-address">
-                  <Tooltip label={address}>
-                    <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
-                  </Tooltip>
-                </Text>
+                <Flex flexDirection="column" alignItems="flex-end" gap="$8">
+                  <Text className={styles.value} data-testid="dapp-transaction-address">
+                    <Tooltip label={address}>
+                      <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
+                    </Tooltip>
+                  </Text>
+                  {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+                </Flex>
               </div>
               {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
                 <>

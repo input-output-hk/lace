@@ -16,13 +16,15 @@ export interface WalletSetupSelectAccountsStepRevampProps {
   onBack: () => void;
   onSubmit: (accountIndex: number, name: string) => void;
   isNextLoading?: boolean;
+  onSelectedAccountChange?: () => void;
 }
 
 export const WalletSetupSelectAccountsStepRevamp = ({
   accounts,
   onBack,
   onSubmit,
-  isNextLoading
+  isNextLoading,
+  onSelectedAccountChange
 }: WalletSetupSelectAccountsStepRevampProps): React.ReactElement => {
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>('0');
   const [walletName, setWalletName] = useState(INITIAL_WALLET_NAME);
@@ -72,7 +74,10 @@ export const WalletSetupSelectAccountsStepRevamp = ({
           <SelectGroup
             placeholder="Accounts"
             options={options}
-            onValueChange={(value) => setSelectedAccount(value)}
+            onValueChange={(value) => {
+              setSelectedAccount(value);
+              onSelectedAccountChange?.();
+            }}
             showArrow
             withOutline
             selectedValue={selectedAccount}

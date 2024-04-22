@@ -7,42 +7,6 @@ import { Logger } from '../support/logger';
 export type LocatorStrategy = 'css selector' | 'xpath';
 
 export default new (class WebTester {
-  async seeElement(selector: string, reverseOrder = false, timeoutMs = 3000) {
-    Logger.log(`Assert see element ${selector}, reverse = ${reverseOrder}`);
-    const shouldBeFound = reverseOrder ? 'should not be found' : 'should be found';
-    await $(selector).waitForDisplayed({
-      timeout: timeoutMs,
-      interval: 500,
-      reverse: reverseOrder,
-      timeoutMsg: `element: ${selector} ${shouldBeFound} after: ${timeoutMs}ms`
-    });
-  }
-
-  async seeWebElement(element: WebElement) {
-    await this.seeElement(element.toJSLocator());
-  }
-
-  async clickOnElement(selector: string, locatorStrategy?: LocatorStrategy): Promise<void> {
-    Logger.log(`Click on ${selector} [strategy=${locatorStrategy ?? 'css selector'}]`);
-    const element = await $(selector);
-    await element.waitForDisplayed();
-    await element
-      .waitForClickable({ timeout: 5000 })
-      .then(async () => await $(element).click())
-      .catch(() => {
-        throw new Error(`Element ${selector} not clickable`);
-      });
-  }
-
-  async clickElement(element: WebElement, retries?: number): Promise<void> {
-    if (retries && retries > 0 && (await (await $(element.toJSLocator())).isDisplayed())) {
-      await browser.pause(500);
-      await this.clickElement(element, retries - 1);
-    } else {
-      await this.clickOnElement(element.toJSLocator(), element.locatorStrategy());
-    }
-  }
-
   async getTextValueFromElement(element: WebElement): Promise<string | number> {
     return await this.getTextValue(element.toJSLocator());
   }

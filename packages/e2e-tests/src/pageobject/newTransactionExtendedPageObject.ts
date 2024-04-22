@@ -1,6 +1,4 @@
-import webTester from '../actor/webTester';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import { Asset } from '../data/Asset';
 import extensionUtils from '../utils/utils';
@@ -9,10 +7,6 @@ import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
 
 export default new (class NewTransactionExtendedPageObject {
-  clickRemoveBundleButton = async (outputIndex: number) => {
-    await webTester.clickElement(new TransactionBundle(outputIndex).bundleRemoveButton());
-  };
-
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
     await new AddressInput(bundleIndex).fillAddress(byron.getAddress());
     await new AssetInput(bundleIndex).clickAddAssetButton();
