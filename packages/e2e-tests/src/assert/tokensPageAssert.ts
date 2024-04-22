@@ -90,21 +90,19 @@ class TokensPageAssert {
     expect(await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex)).to.be.greaterThan(0);
   };
 
+  private assertTokenValueMatchesPattern = async (tokenValue: string, pattern: RegExp, isNativeToken: boolean) => {
+    isNativeToken ? expect(tokenValue).to.match(pattern) : expect(tokenValue).to.equal('-');
+  };
+
   assertSeeTokenData = async (tokenName: Asset, nativeToken: boolean, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    const tokenValueFiat = (await TokensPage.getTokenFiatBalanceByIndex(tokensTableIndex)) as string;
-    nativeToken
-      ? expect(tokenValueFiat).to.match(TestnetPatterns.TOKEN_VALUE_FIAT_REGEX)
-      : expect(tokenValueFiat).to.equal('-');
+    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
+    await this.assertTokenValueMatchesPattern(tokenValueFiat, TestnetPatterns.TOKEN_VALUE_FIAT_REGEX, nativeToken);
     if (mode === 'extended') {
-      const tokenValuePriceAda = (await TokensPage.getTokenPriceAdaByIndex(tokensTableIndex)) as string;
-      nativeToken
-        ? expect(tokenValuePriceAda).to.match(TestnetPatterns.TOKEN_VALUE_ADA_REGEX)
-        : expect(tokenValuePriceAda).to.equal('-');
-      const tokenValuePriceChange = (await TokensPage.getTokenPriceChangeByIndex(tokensTableIndex)) as string;
-      nativeToken
-        ? expect(tokenValuePriceChange).to.match(TestnetPatterns.TOKEN_PRICE_CHANGE)
-        : expect(tokenValuePriceChange).to.equal('-');
+      const tokenValuePriceAda = await TokensPage.tokenPriceAda(tokensTableIndex).getText();
+      await this.assertTokenValueMatchesPattern(tokenValuePriceAda, TestnetPatterns.TOKEN_VALUE_ADA_REGEX, nativeToken);
+      const tokenValuePriceChange = await TokensPage.tokenPriceChange(tokensTableIndex).getText();
+      await this.assertTokenValueMatchesPattern(tokenValuePriceChange, TestnetPatterns.TOKEN_PRICE_CHANGE, nativeToken);
     }
   };
 

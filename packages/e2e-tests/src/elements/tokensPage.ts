@@ -127,18 +127,6 @@ class TokensPage {
     return await this.getTokenBalanceAsFloatByIndex(tokenIndex);
   }
 
-  async getTokenPriceAdaByIndex(index: number): Promise<string> {
-    return await this.tokenPriceAda(index).getText();
-  }
-
-  async getTokenFiatBalanceByIndex(index: number): Promise<string | number> {
-    return await this.tokenFiatBalance(index).getText();
-  }
-
-  async getTokenPriceChangeByIndex(index: number): Promise<string | number> {
-    return await this.tokenPriceChange(index).getText();
-  }
-
   async getTokenNames(): Promise<string[]> {
     const rowsNumber = await this.getRows();
     const names = [];
