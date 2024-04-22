@@ -389,7 +389,11 @@ Then(
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
-        { ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: String(getTestWallet(walletName).address) }
+        {
+          ada: `${adaValue} ${Asset.CARDANO.ticker}`,
+          address: String(getTestWallet(walletName).address),
+          addressTag: 'foreign'
+        }
       ],
       status: 'Success'
     };
@@ -534,7 +538,7 @@ Then(/^Metadata input is empty$/, async () => {
 });
 
 Then(/^"Incorrect address" error (is|is not) displayed under address input field$/, async (state: 'is' | 'is not') => {
-  await drawerSendExtendedAssert.assertSeeIncorrectAddressError(state === 'is');
+  await drawerSendExtendedAssert.assertSeeIncorrectAddressError(1, state === 'is');
 });
 
 Then(/^"Review transaction" button is (enabled|disabled) on "Send" page$/, async (state: 'enabled' | 'disabled') => {
