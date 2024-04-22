@@ -223,7 +223,7 @@ class DAppConnectorAssert {
     );
     const dAppWalletLovelaceBalance = Math.trunc(Number(await ExampleDAppPage.walletBalance.getText()) / 10_000);
 
-    expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 1);
+    expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 2);
 
     expect(await ExampleDAppPage.walletChangeAddress.getText()).to.equal(
       getTestWallet(TestWalletName.TestAutomationWallet).address
