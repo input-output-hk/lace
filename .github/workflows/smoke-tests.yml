@@ -1,7 +1,10 @@
 name: Smoke Tests
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["CI"]  # This must match the name of your CI workflow
+    types:
+      - completed
   workflow_dispatch:
 
 env:
@@ -22,10 +25,11 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Build dist version of Lace
-        uses: ./.github/shared/build
+      - name: Download artifact from CI workflow
+        uses: actions/download-artifact@v4
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          name: lace 
+          path: apps/browser-extension-wallet/dist
       - name: Start XVFB
         run: |
           Xvfb :99 &
