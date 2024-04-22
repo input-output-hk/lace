@@ -2,6 +2,7 @@
 import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
+import TokensPageAssert from '../assert/tokensPageAssert';
 
 class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
@@ -23,6 +24,7 @@ class TokensPage {
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
   private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
   private TOKEN_ROW_SKELETON = '.ant-skeleton';
+  private PRICE_FETCH_ERROR_DESCRIPTION = '[data-testid="banner-description"]';
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
@@ -113,6 +115,10 @@ class TokensPage {
     return $(this.TOKEN_ROW_SKELETON);
   }
 
+  get priceFetchErrorDescription(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PRICE_FETCH_ERROR_DESCRIPTION);
+  }
+
   async getRows(): Promise<WebdriverIO.ElementArray> {
     return $$(this.TOKENS_TABLE_ROW);
   }
@@ -164,6 +170,10 @@ class TokensPage {
 
   async getTokensCounterAsNumber(): Promise<number> {
     return SectionTitle.getCounterAsNumber();
+  }
+
+  async waitForPricesToBeFetched() {
+    await this.totalBalanceValue.waitForDisplayed({ timeout: TokensPageAssert.ADA_PRICE_CHECK_INTERVAL });
   }
 }
 

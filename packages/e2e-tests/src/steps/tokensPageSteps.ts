@@ -1,4 +1,4 @@
-import { When, Then } from '@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 import tokensPageAssert from '../assert/tokensPageAssert';
 import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
@@ -9,6 +9,7 @@ import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
 import type { NetworkType } from '../types/network';
+import { Given } from '@wdio/cucumber-framework';
 
 When(/^I see Tokens counter with total number of tokens displayed$/, async () => {
   await tokensPageAssert.assertSeeTitleWithCounter();
@@ -216,4 +217,17 @@ Then(/^I see total wallet balance in ADA is "([^"]*)"$/, async (balanceInAda: nu
 
 Then(/^I see tMin token with the ADA balance of "([^"]*)"$/, async (balanceInAda: number) => {
   await tokensPageAssert.assertTMinBalance(balanceInAda);
+});
+
+Then(
+  /^"(Price data expired|Unable to fetch fiat values)" error (is|is not) displayed$/,
+  async (errorType: 'Price data expired' | 'Unable to fetch fiat values', shouldBeDisplayed: 'is' | 'is not') => {
+    errorType === 'Price data expired'
+      ? await tokensPageAssert.seePriceFetchExpiredErrorMessage(shouldBeDisplayed === 'is')
+      : await tokensPageAssert.seePriceFetchFailedErrorMessage(shouldBeDisplayed === 'is');
+  }
+);
+
+Given(/^ADA fiat price has been fetched$/, async () => {
+  await TokensPage.waitForPricesToBeFetched();
 });
