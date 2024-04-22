@@ -307,7 +307,9 @@ describe('Testing hooks', () => {
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockReturnValue({
       inMemoryWallet: {
-        getPubDRepKey: jest.fn(async () => await ed25519PublicKeyHexMock)
+        governance: {
+          getPubDRepKey: jest.fn(async () => await ed25519PublicKeyHexMock)
+        }
       }
     });
 

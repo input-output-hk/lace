@@ -2,12 +2,13 @@ import { Box, Cell, Flex, Grid, Section, ThemeColorScheme, Variants } from '@lac
 import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 import { expect, userEvent, waitFor, within } from '@storybook/test';
-import { DEFAULT_SORT_OPTIONS, StakePoolSortOptions } from 'features/BrowsePools';
 import { LocalThemeProvider } from 'features/theme';
 import { useCallback, useState } from 'react';
+import type { StakePoolSortOptions } from '../types';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
+import { DEFAULT_SORT_OPTIONS } from '../constants';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 import { SortAndFilterTab } from './types';
 
