@@ -11,13 +11,14 @@ import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
+import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
 });
 
 When(/^I remove bundle (\d)$/, async (index: number) => {
-  await transactionExtendedPageObject.clickRemoveBundleButton(index);
+  await new TransactionBundle(index).clickRemoveBundleButton();
 });
 
 When(/^I set multiple outputs for advanced transaction$/, async () => {

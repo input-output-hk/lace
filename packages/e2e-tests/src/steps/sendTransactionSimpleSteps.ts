@@ -538,7 +538,7 @@ Then(/^Metadata input is empty$/, async () => {
 });
 
 Then(/^"Incorrect address" error (is|is not) displayed under address input field$/, async (state: 'is' | 'is not') => {
-  await drawerSendExtendedAssert.assertSeeIncorrectAddressError(state === 'is');
+  await drawerSendExtendedAssert.assertSeeIncorrectAddressError(1, state === 'is');
 });
 
 Then(/^"Review transaction" button is (enabled|disabled) on "Send" page$/, async (state: 'enabled' | 'disabled') => {
