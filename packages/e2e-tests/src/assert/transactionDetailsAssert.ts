@@ -21,6 +21,7 @@ export type PoolData = {
 
 export type TransactionData = {
   address: string;
+  addressTag?: string;
   ada: string;
   assets?: string[];
 };
@@ -73,6 +74,11 @@ class TransactionsDetailsAssert {
           expect(expectedAddress.startsWith(actualAddressSplit[0])).to.be.true;
           expect(expectedAddress.endsWith(actualAddressSplit[1])).to.be.true;
         }
+
+        if (expectedActivityDetails.transactionData[i].addressTag) {
+          const actualAddressTag = await TransactionDetailsPage.transactionDetailsToAddressTag(i).getText();
+          expect(expectedActivityDetails.transactionData[i].addressTag).to(actualAddressTag);
+        }
       }
     }
 
@@ -109,13 +115,8 @@ class TransactionsDetailsAssert {
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
-      await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsStatus.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
       const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
-      if (!txType.includes(stakeKeyRegistration)) {
+      if (!txType.includes(stakeKeyRegistration) && !txType.includes('Rewards')) {
         await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
       }
@@ -123,6 +124,13 @@ class TransactionsDetailsAssert {
         await TransactionDetailsPage.transactionDetailsStakepoolName.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsStakepoolTicker.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsStakePoolId.waitForDisplayed();
+      }
+      if (!txType.includes('Rewards')) {
+        await TransactionDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsStatus.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
       }
 
       await TransactionDetailsPage.closeActivityDetails(mode);
