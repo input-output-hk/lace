@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 import { CoinConfigure } from './coinConfigure';
 import { AddressInput } from '../AddressInput';
-import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';
 import Banner from '../banner';
@@ -38,10 +37,6 @@ class TransactionNewPage extends CommonDrawerElements {
 
   coinConfigure(bundleIndex = 1, assetName?: string): CoinConfigure {
     return new CoinConfigure(bundleIndex, assetName);
-  }
-
-  transactionBundle(index?: number): TransactionBundle {
-    return new TransactionBundle(index);
   }
 
   get title() {

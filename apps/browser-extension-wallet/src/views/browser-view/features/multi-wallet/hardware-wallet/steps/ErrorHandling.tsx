@@ -1,10 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useHardwareWallet } from '../context';
-import { ErrorDialog } from '../../../wallet-setup/components/ErrorDialog';
+import { makeErrorDialog } from '../../../wallet-setup/components/HardwareWalletFlow';
 import { walletRoutePaths } from '@routes';
 
 type Errors = 'notDetectedLedger' | 'notDetectedTrezor' | 'common';
+
+const ErrorDialog = makeErrorDialog<Errors>({
+  common: {
+    title: 'multiWallet.errorDialog.commonError.title',
+    description: 'multiWallet.errorDialog.commonError.description',
+    confirm: 'multiWallet.errorDialog.commonError.ok'
+  },
+  notDetectedLedger: {
+    title: 'multiWallet.errorDialog.notDetectedError.title',
+    description: 'multiWallet.errorDialog.notDetectedError.description',
+    confirm: 'multiWallet.errorDialog.notDetectedError.agree'
+  },
+  notDetectedTrezor: {
+    title: 'multiWallet.errorDialog.notDetectedError.title',
+    description: 'multiWallet.errorDialog.notDetectedError.trezorDescription',
+    confirm: 'multiWallet.errorDialog.notDetectedError.agree'
+  }
+});
 
 interface State {
   error?: Errors;
@@ -21,7 +39,7 @@ export const ErrorHandling = ({ error, onRetry }: Props): JSX.Element => {
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
-    const subscription = disconnectHardwareWallet$.subscribe((event: HIDConnectionEvent) => {
+    const subscription = disconnectHardwareWallet$.subscribe((event: USBConnectionEvent) => {
       if (event.device.opened) {
         setState({ error: 'common' });
       }

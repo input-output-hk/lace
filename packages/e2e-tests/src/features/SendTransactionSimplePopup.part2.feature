@@ -138,7 +138,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click "Send" button on Tokens page in popup mode
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     Then I enter a value of: <value>  to the "tADA" asset in bundle 1
-    And I click on transaction drawer background to lose focus
+    And I open cancel modal to trigger button validation
     Then "Insufficient balance" error <should_see> displayed on "Send" page
     And "Review transaction" button is <status> on "Send" page
     Examples:

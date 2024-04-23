@@ -3,7 +3,7 @@ import styles from './WalletSetupStepLayoutRevamp.module.scss';
 import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
-import { urls } from '../../utils/constants';
+import { urls } from '@ui/utils/constants';
 import { useTranslate } from '@ui/hooks';
 import i18n from '@ui/lib/i18n';
 import { WalletTimelineSteps } from '../WalletSetup';

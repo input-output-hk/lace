@@ -21,6 +21,7 @@
     "build:cleanup": "rm -rf ./tmp",
     "build:svgr": "svgr ./raw --out-dir ./tmp --typescript",
     "build:tsc": "tsc --project tsconfig.json",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "test": "echo \"@lace/icons: no test specified\""
   },
   "devDependencies": {
