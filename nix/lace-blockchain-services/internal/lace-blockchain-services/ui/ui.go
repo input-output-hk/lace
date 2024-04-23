@@ -98,6 +98,7 @@ func SetupTray(
 	chMithrilStatus := make(chan t.ServiceStatus)
 	fixme_CardanoNodeStatus := make(chan string)
 	fixme_OgmiosStatus := make(chan string)
+	fixme_PostgresStatus := make(chan string)
 	fixme_SetOgmiosDashboard := make(chan string)
 	fixme_ProviderServerStatus := make(chan string)
 
@@ -115,6 +116,8 @@ func SetupTray(
 			case "ogmios":
 				fixme_OgmiosStatus <- formatted
 				fixme_SetOgmiosDashboard <- upd.Url
+			case "postgres":
+				fixme_PostgresStatus <- formatted
 			case "provider-server":
 				fixme_ProviderServerStatus <- formatted
 			case "mithril-client":
@@ -143,6 +146,7 @@ func SetupTray(
 	statuses := []map[string](<-chan string) {
 		{ "cardano-node":    fixme_CardanoNodeStatus },
 		{ "ogmios":          fixme_OgmiosStatus },
+		{ "postgres":        fixme_PostgresStatus },
 		{ "provider-server": fixme_ProviderServerStatus },
 	}
 

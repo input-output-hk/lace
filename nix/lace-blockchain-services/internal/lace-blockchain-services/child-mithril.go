@@ -46,7 +46,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 	}
 
 	serviceName := "mithril-client"
-	exePath := ourpaths.LibexecDir + sep + "mithril-client" + ourpaths.ExeSuffix
+	exePath := ourpaths.LibexecDir + sep + "mithril-client" + sep + "mithril-client" + ourpaths.ExeSuffix
 	snapshotsDir := ourpaths.WorkDir + sep + "mithril-snapshots"
 	downloadDir := ""  // set later
 	unpackDir := ""  // set later
@@ -357,5 +357,10 @@ func runCommandWithTimeout(
 		rerr = fmt.Errorf("failed: %s", err)
 	}
 
-	return stdoutBuf.Bytes(), stderrBuf.Bytes(), rerr, cmd.Process.Pid
+	pid := -1
+	if cmd.Process != nil {
+		pid = cmd.Process.Pid
+	}
+
+	return stdoutBuf.Bytes(), stderrBuf.Bytes(), rerr, pid
 }

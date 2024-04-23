@@ -18,7 +18,7 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 
 	return ManagedChild{
 		ServiceName: "ogmios",
-		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
+		ExePath: ourpaths.LibexecDir + sep + "ogmios" + sep + "ogmios" + ourpaths.ExeSuffix,
 		Version: constants.OgmiosVersion,
 		Revision: constants.OgmiosRevision,
 		MkArgv: func() ([]string, error) {

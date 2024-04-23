@@ -58,6 +58,8 @@ type SharedState struct {
 	CardanoNodeConfigDir string
 	CardanoNodeSocket string
 	OgmiosPort *int
+	PostgresPort *int
+	PostgresPassword *string
 }
 
 func manageChildren(comm CommChannels_Manager) {
@@ -100,6 +102,8 @@ func manageChildren(comm CommChannels_Manager) {
 			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network,
 			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "cardano-node.socket",
 			OgmiosPort: new(int),
+			PostgresPort: new(int),
+			PostgresPassword: new(string),
 		}
 
 		if (runtime.GOOS == "windows") {
@@ -122,6 +126,7 @@ func manageChildren(comm CommChannels_Manager) {
 		if !runMithril {
 			usedChildren = append(usedChildren, childCardanoNode)
 			usedChildren = append(usedChildren, childOgmios(ogmiosSyncProgressCh))
+			usedChildren = append(usedChildren, childPostgres)
 			if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
 		} else {
 			usedChildren = append(usedChildren, childMithril)

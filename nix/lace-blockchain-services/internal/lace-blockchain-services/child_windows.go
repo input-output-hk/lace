@@ -47,7 +47,8 @@ func setManagedChildSysProcAttr(cmd *exec.Cmd) {
 // XXX: we can’t make these WinAPI calls from the current process, as they change to much regarding
 // consoles attached to processes. Let’s offload them to a small C program:
 func windowsSendCtrlBreak(pid int) {
-	path := ourpaths.LibexecDir + string(filepath.Separator) + "sigbreak.exe"
+	sep := string(filepath.Separator)
+	path := ourpaths.LibexecDir + sep + "sigbreak" + sep + "sigbreak.exe"
 	var cmd *exec.Cmd
 	cmd = exec.Command(path, "break", fmt.Sprintf("%d", pid))
 	cmd.SysProcAttr = &syscall.SysProcAttr{

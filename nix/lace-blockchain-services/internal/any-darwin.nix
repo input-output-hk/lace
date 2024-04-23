@@ -182,10 +182,14 @@ in rec {
     mkdir -p $out/bin/
     ln -s "$app"/MacOS/lace-blockchain-services $out/bin/
 
-    ln -s ${cardano-node}/bin/cardano-node "$app"/MacOS/
-    ln -s ${ogmios}/bin/ogmios "$app"/MacOS/
-    ln -s ${cardano-js-sdk.nodejs}/bin/node "$app"/MacOS/
-    ln -s ${mithril-client}/bin/mithril-client "$app"/MacOS/
+    # cardano-node is already bundled by Haskell.nix; otherwise we’re getting missing
+    # symbols in dyld (TODO: investigate why)
+    ln -s ${cardano-node}/bin "$app"/MacOS/cardano-node
+
+    ln -s ${mkBundle { "ogmios"         = lib.getExe ogmios;                }} "$app"/MacOS/ogmios
+    ln -s ${mkBundle { "mithril-client" = lib.getExe mithril-client;        }} "$app"/MacOS/mithril-client
+    ln -s ${mkBundle { "node"           = lib.getExe cardano-js-sdk.nodejs; }} "$app"/MacOS/nodejs
+    ln -s ${postgresBundle                                                   } "$app"/MacOS/postgres
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
@@ -195,43 +199,110 @@ in rec {
     ln -s ${icons} "$app"/Resources/iconset.icns
   '';
 
+  postgresPackage = common.postgresPackage.overrideAttrs (drv: {
+    # `--with-system-tzdata=` is non-relocatable, cf. <https://github.com/postgres/postgres/blob/REL_15_2/src/timezone/pgtz.c#L39-L43>
+    configureFlags = lib.filter (flg: !(lib.hasPrefix "--with-system-tzdata=" flg)) drv.configureFlags;
+  });
+
+  # Slightly more complicated, we have to bundle ‘postgresPackage.lib’, and also make smart
+  # use of ‘make_relative_path’ defined in <https://github.com/postgres/postgres/blob/REL_15_2/src/port/path.c#L635C1-L662C1>:
+  postgresBundle = let
+    pkglibdir = let
+      unbundled = postgresPackage.lib;
+      bin_dir = "bin";
+      exe_dir = "exe";
+      lib_dir = ".";
+    in (import nix-bundle-exe-same-dir {
+      inherit pkgs;
+      inherit bin_dir exe_dir lib_dir;
+    } unbundled).overrideAttrs (drv: {
+      inherit bin_dir exe_dir lib_dir;
+      buildCommand = ''
+        mkdir -p $out/${lib_dir}
+        eval "$(sed -r '/^(out|binary)=/d ; /^bundleBin "/d' \
+                  <${nix-bundle-exe-same-dir + "/bundle-macos.sh)"}"
+        find -L ${unbundled} -type f -name '*.so' | while IFS= read -r lib ; do
+          bundleBin "$lib" "lib"
+        done
+        rmdir $out/bin
+      '';
+    });
+    binBundle = (mkBundle {
+      "postgres" = "${postgresPackage}/bin/postgres";
+      "initdb"   = "${postgresPackage}/bin/initdb";
+      "psql"     = "${postgresPackage}/bin/psql";
+      "pg_dump"  = "${postgresPackage}/bin/pg_dump";
+    }).overrideAttrs (drv: {
+      buildCommand = drv.buildCommand + ''
+        chmod -R +w $out
+        find $out -mindepth 1 -maxdepth 1 -type f -executable | xargs file | grep -E ':.*executable' | cut -d: -f1 | while IFS= read -r exe ; do
+          echo "Wrapping $exe…"
+          wrapped=".$(basename "$exe")-wrapped"
+          mv -v "$exe" "$(dirname "$exe")"/"$wrapped"
+          (
+            echo '#!/bin/sh'
+            echo 'set -eu'
+            echo 'dir=$(cd "$(dirname "$0")"; pwd -P)'
+            echo 'export NIX_PGLIBDIR="$dir/../pkglibdir"'
+            echo 'exec "$dir/'"$wrapped"'" "$@"'
+          ) >"$exe"
+          chmod +x "$exe"
+        done
+      '';
+    });
+  in pkgs.runCommand "postgresBundle" {
+    passthru = { inherit pkglibdir binBundle; };
+  } ''
+    mkdir -p $out/bin
+    cp -r ${binBundle}/. $out/bin/
+
+    ln -sf ${pkglibdir} $out/pkglibdir
+    ln -sf ${postgresPackage}/share $out/share
+  '';
+
   nix-bundle-exe-same-dir = pkgs.runCommand "nix-bundle-exe-same-dir" {} ''
     cp -R ${inputs.nix-bundle-exe} $out
     chmod -R +w $out
     sed -r 's+@executable_path/\$relative_bin_to_lib/\$lib_dir+@executable_path+g' -i $out/bundle-macos.sh
   '';
 
-  # XXX: this has no dependency on /nix/store on the target machine
-  lace-blockchain-services-bundle = let
-    noSpaces = lib.replaceStrings [" "] [""] common.prettyName;
-    unbundled = lace-blockchain-services;
-    originalApp = lib.escapeShellArg "${unbundled}/Applications/${common.prettyName}.app/Contents";
-    bundled = (import nix-bundle-exe-same-dir {
-      inherit pkgs;
-      bin_dir = "MacOS";
-      exe_dir = "_unused_";
-      lib_dir = "MacOS";
-    } unbundled).overrideAttrs (drv: {
-      meta.mainProgram = lace-blockchain-services-exe.name;
+  mkBundle = exes: let
+    unbundled = pkgs.linkFarm "exes" (lib.mapAttrsToList (name: path: {
+      name = "bin/" + name;
+      inherit path;
+    }) exes);
+  in (import nix-bundle-exe-same-dir {
+    inherit pkgs;
+    bin_dir = "bundle";
+    exe_dir = "_unused_";
+    lib_dir = "bundle";
+  } unbundled).overrideAttrs (drv: {
       buildCommand = (
         builtins.replaceStrings
           ["'${unbundled}/bin'"]
-          ["${originalApp}/MacOS -follow '(' -not -name cardano-node ')'"]
+          ["'${unbundled}/bin' -follow"]
           drv.buildCommand
       ) + ''
-        # cardano-node is bundled by Haskell.nix; otherwise we’re getting missing symbols in dyld (TODO: investigate)
-        cp -f ${cardano-node}/bin/* $out/MacOS/
-
-        app="$out/Applications/"${lib.escapeShellArg common.prettyName}.app/Contents
-        mkdir -p "$app"
-        mv $out/MacOS "$app"/
-        echo 'Copying Resources…'
-        cp -r --dereference ${originalApp}/{Resources,Info.plist} "$app"/
-        mkdir -p $out/bin
-        ln -s "$app"/MacOS/lace-blockchain-services $out/bin/
+        mv $out/bundle/* $out/
+        rmdir $out/bundle
       '';
-    });
-  in bundled;
+  });
+
+  # XXX: this has no dependency on /nix/store on the target machine
+  lace-blockchain-services-bundle = let
+    unbundled = lace-blockchain-services;
+  in pkgs.runCommand "lace-blockchain-services-bundle" {
+    meta.mainProgram = lace-blockchain-services-exe.name;
+  } ''
+    mkdir -p $out/{Applications,bin}
+    cp -r --dereference ${unbundled}/Applications/${lib.escapeShellArg common.prettyName}.app $out/Applications/
+
+    chmod -R +w $out
+    rm $out/Applications/${lib.escapeShellArg common.prettyName}.app/Contents/MacOS/lace-blockchain-services
+    cp -r --dereference ${mkBundle { "lace-blockchain-services" = "${unbundled}/Applications/${common.prettyName}.app/Contents/MacOS/lace-blockchain-services"; }}/. $out/Applications/${lib.escapeShellArg common.prettyName}.app/Contents/MacOS/.
+
+    ln -s $out/Applications/${lib.escapeShellArg common.prettyName}.app/Contents/MacOS/lace-blockchain-services $out/bin/
+  '';
 
   hfsprogs = pkgs.hfsprogs.overrideAttrs (drv: {
     buildInputs = (with pkgs; [ openssl darwin.cctools gcc ]) ++ [(
@@ -543,5 +614,4 @@ in rec {
     chmod +x $out/bin/mithril-client
     $out/bin/mithril-client --version
   '';
-
 }
