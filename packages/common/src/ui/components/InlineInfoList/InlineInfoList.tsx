@@ -26,14 +26,13 @@ export const InlineInfoList = ({ items }: InlineInfoListProps): React.ReactEleme
         <div className={styles.valueContainer}>
           <h5
             data-testid="info-list-item-value"
-            id={`$copy-${value}`}
             className={classNames(styles.value, { [styles.link]: !!onClick })}
             onClick={onClick}
           >
             {renderValueAs || value}
           </h5>
-          {showCopyIcon && (
-            <CopyToClipboard text={document.querySelector(`#copy-${value}`).textContent}>
+          {showCopyIcon && value && (
+            <CopyToClipboard text={value}>
               <CopyIcon className={styles.copyButton} data-testid="info-list-item-copy-btn" />
             </CopyToClipboard>
           )}
