@@ -32,13 +32,10 @@ class StakingPageAssert {
       ? expect(await StakingInfoComponent.poolTicker.getText()).to.contain(expectedStakePool.poolId.slice(0, 6))
       : expect(await StakingInfoComponent.poolTicker.getText()).to.equal(expectedStakePool.ticker);
 
-    expect(await StakingInfoComponent.statsApy.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsROS.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.ros')
     );
-    // TODO BUG LW-5635
-    // expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().value())) as string).to.match(
-    //   TestnetPatterns.PERCENT_DOUBLE_REGEX
-    // );
+    expect(await StakingInfoComponent.statsROS.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     expect(await StakingInfoComponent.statsFee.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.Fee')
