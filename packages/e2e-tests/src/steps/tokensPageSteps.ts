@@ -35,8 +35,8 @@ Then(
   /^I see Cardano & LaceCoin tokens on the list with all the details in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
     await tokensPageAssert.assertSeeTableItems(mode);
-    await tokensPageAssert.assertSeeCardanoItem(mode);
-    await tokensPageAssert.assertSeeLaceCoinItem(mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
+    await tokensPageAssert.assertSeeNotNativeToken(Asset.LACE_COIN, mode);
   }
 );
 
@@ -44,8 +44,8 @@ Then(
   /^I see Cardano & Hosky tokens on the list with all the details in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
     await tokensPageAssert.assertSeeTableItems(mode);
-    await tokensPageAssert.assertSeeCardanoItem(mode);
-    await tokensPageAssert.assertSeeHoskyItem(mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.HOSKY_TOKEN, mode);
   }
 );
 
