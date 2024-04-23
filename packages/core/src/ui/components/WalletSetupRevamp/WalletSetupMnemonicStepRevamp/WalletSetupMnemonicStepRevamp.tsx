@@ -1,17 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import styles from '../../WalletSetup/WalletSetupOption.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
-import { TranslationsFor } from '@ui/utils/types';
+import { TranslationsForJSX } from '@ui/utils/types';
 import { hasEmptyString } from './WalletSetupMnemonicVerificationStepRevamp';
 import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 import isEqual from 'lodash/isEqual';
+import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.component.svg';
+import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
 
 export type MnemonicStage = 'writedown' | 'input';
 
@@ -21,7 +23,7 @@ export interface WalletSetupMnemonicStepProps {
   onNext: () => void;
   onStepNext?: (currentStage: MnemonicStage) => void;
   isBackFromNextStep?: boolean;
-  translations: TranslationsFor<
+  translations: TranslationsForJSX<
     | 'writePassphraseTitle'
     | 'enterPassphraseDescription'
     | 'enterPassphrase'
@@ -30,6 +32,7 @@ export interface WalletSetupMnemonicStepProps {
     | 'passphraseError'
     | 'copyToClipboard'
     | 'pasteFromClipboard'
+    | 'copyPasteTooltipText'
   >;
   suggestionList?: Array<string>;
   passphraseInfoLink?: string;
@@ -132,20 +135,30 @@ export const WalletSetupMnemonicStepRevamp = ({
         currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
         customAction={
           mnemonicStage === 'writedown' ? (
-            <Button
-              type="link"
-              onClick={async () => {
-                await writeMnemonicToClipboard(mnemonic);
-                onCopyToClipboard();
-              }}
-              data-testid="copy-to-clipboard-button"
-            >
-              {translations.copyToClipboard}
-            </Button>
+            <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+              <Button
+                type="link"
+                onClick={async () => {
+                  await writeMnemonicToClipboard(mnemonic);
+                  onCopyToClipboard();
+                }}
+                data-testid="copy-to-clipboard-button"
+              >
+                <span className={styles.btnContentWrapper}>
+                  <CopyIcon />
+                  {translations.copyToClipboard}
+                </span>
+              </Button>
+            </Tooltip>
           ) : (
-            <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
-              {translations.pasteFromClipboard}
-            </Button>
+            <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+              <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
+                <span className={styles.btnContentWrapper}>
+                  <PasteIcon />
+                  {translations.pasteFromClipboard}
+                </span>
+              </Button>
+            </Tooltip>
           )
         }
         isNextEnabled={isSubmitEnabled}

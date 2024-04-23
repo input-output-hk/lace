@@ -6,10 +6,11 @@ import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import styles from './WalletSetupMnemonicVerificationStepRevamp.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
-import { TranslationsFor } from '@ui/utils/types';
-import { Segmented, Button } from 'antd';
+import { TranslationsForJSX } from '@ui/utils/types';
+import { Segmented, Button, Tooltip } from 'antd';
 import { readMnemonicFromClipboard } from './wallet-utils';
 import { WalletTimelineSteps } from '@ui/components/WalletSetup';
+import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
 const MNEMONIC_LENGTHS = [12, 15, 24];
@@ -20,7 +21,9 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onSubmit: () => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
-  translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard'>;
+  translations: TranslationsForJSX<
+    'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard' | 'copyPasteTooltipText'
+  >;
   onCancel?: () => void;
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
@@ -72,9 +75,14 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       onBack={onCancel}
       onNext={onSubmit}
       customAction={
-        <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
-          {translations.pasteFromClipboard}
-        </Button>
+        <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+          <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
+            <span className={styles.btnContentWrapper}>
+              <PasteIcon />
+              {translations.pasteFromClipboard}
+            </span>
+          </Button>
+        </Tooltip>
       }
       currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
       isNextEnabled={isSubmitEnabled}

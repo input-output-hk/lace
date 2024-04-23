@@ -1,0 +1,10 @@
+@import '../../styles/theme.scss';
+
+.btnContentWrapper {
+  display: flex !important;
+  gap: size_unit(0.5) !important;
+
+  svg {
+    font-size: 24px;
+  }
+}
