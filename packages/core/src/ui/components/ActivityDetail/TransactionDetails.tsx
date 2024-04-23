@@ -359,16 +359,19 @@ export const TransactionDetails = ({
                   )}
                   {(summary.addr as string[]).map((addr) => {
                     const address = isPopupView ? (
-                      <Ellipsis className={cn(styles.addr, styles.fiat)} text={addr} ellipsisInTheMiddle />
+                      <Ellipsis
+                        className={cn(styles.addr, styles.fiat)}
+                        text={addr}
+                        ellipsisInTheMiddle
+                        dataTestId="tx-to-detail"
+                      />
                     ) : (
-                      <span className={cn(styles.addr, styles.fiat)}>{addr}</span>
+                      <span className={cn(styles.addr, styles.fiat)} data-testid="tx-to-detail">
+                        {addr}
+                      </span>
                     );
                     return (
-                      <div
-                        key={addr}
-                        data-testid="tx-to-detail"
-                        className={cn([styles.detail, styles.addr, styles.addressTag])}
-                      >
+                      <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
                         {address}
                         {renderAddressTag(addr, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
                       </div>
