@@ -55,7 +55,7 @@ export const NftDetail = ({
             ...tokenInformation,
             {
               name: translations.directory,
-              value: (
+              renderValueAs: (
                 <Breadcrumb separator={<RightOutlined className={styles.folderSeperator} />}>
                   <Breadcrumb.Item>
                     <FolderOutlined />

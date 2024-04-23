@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { NftItemProps } from '@lace/core';
 import { AssetOrHandleInfoMap } from './useAssetInfo';
 import { Cardano } from '@cardano-sdk/core';
@@ -27,16 +27,19 @@ export const searchNfts = (
 export const useNftSearch = (assetsInfo: AssetOrHandleInfoMap): NftSearchResultProps => {
   const [isSearching, setIsSearching] = useState(false);
   const [filteredResults, setFilteredResults] = useState<NftItemProps[]>([]);
+  const searchDebounced = useMemo(
+    () =>
+      debounce((items: NftItemProps[], searchValue: string) => {
+        const filteredNfts = searchNfts(items, searchValue, assetsInfo);
+        setFilteredResults(filteredNfts);
+        setIsSearching(false);
+      }, DEBOUNCE_TIME),
+    [assetsInfo]
+  );
 
   const handleSearch = (items: NftItemProps[], searchValue: string) => {
-    let filteredNfts: NftItemProps[] = [];
     setIsSearching(true);
-
-    debounce(() => {
-      filteredNfts = searchNfts(items, searchValue, assetsInfo);
-      setFilteredResults(filteredNfts);
-      setIsSearching(false);
-    }, DEBOUNCE_TIME)();
+    searchDebounced(items, searchValue);
   };
 
   return { isSearching, filteredResults, handleSearch };
