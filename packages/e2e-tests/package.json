@@ -8,7 +8,7 @@
     "test": "yarn exec echo 'User test:local'",
     "test:local:chrome": "../../node_modules/.bin/wdio run wdio.conf.chrome.ts",
     "test:local:edge": "../../node_modules/.bin/wdio run wdio.conf.edge.ts",
-    "cleanup": "rm -rf node_modules logs reports screenshots",
+    "cleanup": "rm -rf logs node_modules reports screenshots",
     "lint": "run -T eslint -c .eslintrc.js .",
     "lint:fix": "run -T eslint -c .eslintrc.js . --fix",
     "pack-chrome-extension": "node ./src/utils/packExtension.ts",
