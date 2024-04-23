@@ -76,7 +76,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     }
     const signedTx = await delegationTxBuilder.build().sign();
     await inMemoryWallet.submitTx(signedTx);
-  }, [delegationTxBuilder, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType]);
+  }, [delegationTxBuilder, draftPortfolio, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType]);
 
   const onSubmit = async () => {
     setIsLoading(true);
