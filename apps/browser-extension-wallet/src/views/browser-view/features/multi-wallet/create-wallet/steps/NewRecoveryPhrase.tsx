@@ -10,7 +10,7 @@ import { useWalletManager } from '@hooks/useWalletManager';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { PostHogAction } from '@lace/common';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
-import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
 
@@ -60,6 +60,8 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   const saveWallet = useCallback(async () => {
     const { source } = await createWallet(data);
+    // move this to name-password setup submit handle after order changes
+    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterWalletClick);
     await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
@@ -84,7 +86,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
             onClose={() => {
               onClose();
               void analytics.sendEventToPostHog(
-                postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
+                postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
               );
             }}
           />
@@ -92,20 +94,20 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         onNext={saveWallet}
         onStepNext={(mnemonicStage: MnemonicStage) => {
           mnemonicStage === 'writedown'
-            ? analytics.sendEventToPostHog(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
-            : analytics.sendEventToPostHog(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+            ? analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
+            : analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
         onWatchVideoClick={() =>
-          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
         }
         onCopyToClipboard={() =>
-          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
         }
         onPasteFromClipboard={() =>
-          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
         }
         isBackFromNextStep={isBackFromNextStep}
       />
