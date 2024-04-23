@@ -180,11 +180,25 @@ in rec {
   mkPackage = { withJS }: pkgs.runCommand "lace-blockchain-services" {} ''
     mkdir -p $out/libexec
     cp -Lr ${lace-blockchain-services-exe-with-icon}/* $out/
-    cp -L ${mithril-client}/*.{exe,dll} $out/libexec
-    cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
-    cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
-    cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
-    cp -Lf ${sigbreak}/*.exe $out/libexec/
+
+    mkdir -p $out/libexec/mithril-client
+    cp -L ${mithril-client}/*.{exe,dll} $out/libexec/mithril-client/
+
+    mkdir -p $out/libexec/ogmios
+    cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/ogmios/
+
+    mkdir -p $out/libexec/nodejs
+    cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/nodejs/
+
+    mkdir -p $out/libexec/cardano-node
+    cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/cardano-node/
+
+    mkdir -p $out/libexec/sigbreak
+    cp -Lf ${sigbreak}/*.exe $out/libexec/sigbreak/
+
+    mkdir -p $out/libexec/postgres
+    cp -Lr ${postgresUnpacked}/{bin,lib,share,*license*.txt} $out/libexec/postgres/
+
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
     cp -Lr ${common.swagger-ui} $out/swagger-ui
     cp -Lr ${common.dashboard} $out/dashboard
@@ -671,7 +685,33 @@ in rec {
   mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
     mkdir -p $out
     cp ${common.mithril-bin}/mithril-client.exe $out/
-    cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/arm/vcruntime140.dll $out/
+    cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/x64/vcruntime140.dll $out/
   '';
 
+  postgresUnpacked = pkgs.runCommand "postgres-unpacked" {
+    buildInputs = with cardano-js-sdk.fresherPkgs; [
+      wineWowPackages.stableFull
+      winetricks samba /*samba for bin/ntlm_auth*/
+    ];
+  } ''
+    export HOME=$(realpath $NIX_BUILD_TOP/home)
+    mkdir -p $HOME
+    ${pkgs.xvfb-run}/bin/xvfb-run \
+      --server-args="-screen 0 1920x1080x24 +extension GLX +extension RENDER -ac -noreset" \
+      ${pkgs.writeShellScript "wine-setup-inside-xvfb" ''
+        set -euo pipefail
+        #export WINEDEBUG=-all  # comment out to get normal output (err,fixme), or set to +all for a flood
+        set +e
+        wine ${common.postgresPackage} \
+          --extract-only 1 \
+          --unattendedmodeui minimal \
+          --mode unattended \
+          --enable-components server,commandlinetools \
+          --disable-components pgAdmin,stackbuilder \
+          --prefix 'C:\postgres' \
+          --datadir 'C:\postgres-data'
+      ''}
+    mv $HOME/.wine/drive_c/postgres $out
+    cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/x64/{vcruntime140,vcruntime140_1,msvcp140}.dll $out/bin/
+  '';
 }

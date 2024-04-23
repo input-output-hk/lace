@@ -21,7 +21,7 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 
 	return ManagedChild{
 		ServiceName: "provider-server",
-		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
+		ExePath: ourpaths.LibexecDir + sep + "nodejs" + sep + "node" + ourpaths.ExeSuffix,
 		Version: constants.ProviderServerVersion,
 		Revision: constants.ProviderServerRevision,
 		MkArgv: func() ([]string, error) {

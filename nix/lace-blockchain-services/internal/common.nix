@@ -110,6 +110,18 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
+  postgresPackage = {
+    x86_64-linux = pkgs.postgresql_15_jit;
+    x86_64-darwin = pkgs.postgresql_15_jit;
+    aarch64-darwin = pkgs.postgresql_15_jit;
+    x86_64-windows = let
+      version = "15.4-1";
+    in (pkgs.fetchurl {
+      url = "https://get.enterprisedb.com/postgresql/postgresql-${version}-windows-x64.exe";
+      hash = "sha256-Su4VKwJkeQ6HqCXTIZIK2c4AJHloqm72BZLs2JCnmN8=";
+    }) // { inherit version; };
+  }.${targetSystem};
+
   lace-blockchain-services-exe-vendorHash = "sha256-A1SGcW3+a5jTVMu2H2blEhnvlBD8S+zm61GriF47B0A=";
 
   constants = pkgs.writeText "constants.go" ''
@@ -122,6 +134,8 @@ in rec {
       CardanoNodeRevision = ${__toJSON inputs.cardano-node.sourceInfo.rev}
       OgmiosVersion = ${__toJSON ogmios.version}
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
+      PostgresVersion = ${__toJSON postgresPackage.version}
+      PostgresRevision = ${__toJSON postgresPackage.version}
       ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
       ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
       MithrilClientRevision = ${__toJSON inputs.mithril.sourceInfo.rev}
