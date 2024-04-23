@@ -1,6 +1,5 @@
 import { Then, When } from '@cucumber/cucumber';
 import tokensPageAssert from '../assert/tokensPageAssert';
-import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
@@ -9,6 +8,7 @@ import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
 import type { NetworkType } from '../types/network';
 import { Given } from '@wdio/cucumber-framework';
+import TokenDetailsPage from '../elements/tokenDetailsPage';
 
 When(/^I see Tokens counter with total number of tokens displayed$/, async () => {
   await tokensPageAssert.assertSeeTitleWithCounter();
@@ -97,7 +97,7 @@ Then(
 );
 
 When(/^I click token with name: "([^"]*)"$/, async (tokenName: string) => {
-  await tokensPageObject.clickTokenWithName(tokenName);
+  await TokensPage.clickTokenWithName(tokenName);
 });
 
 Then(
@@ -109,8 +109,8 @@ Then(
 );
 
 Then(/^I save token: "([^"]*)" balance$/, async (tokenName: string) => {
-  await tokensPageObject.waitUntilCardanoTokenLoaded();
-  await tokensPageObject.saveTokenBalance(tokenName);
+  await TokensPage.waitUntilCardanoTokenLoaded();
+  await TokensPage.saveTokenBalance(tokenName);
 });
 
 Then(
@@ -144,7 +144,7 @@ Then(/^I (see|do not see) CoinGecko credits$/, async (shouldSee) => {
 });
 
 When(/^I click on "CoinGecko" link$/, async () => {
-  await tokensPageObject.clickOnCoinGeckoCreditsLink();
+  await TokensPage.clickOnCoinGeckoCreditsLink();
 });
 
 Then(/^"www.coingecko.com" page is displayed in new tab$/, async () => {
@@ -186,7 +186,7 @@ When(/^I click (closed|opened) eye icon on Tokens page$/, async (iconType: 'clos
 });
 
 When(/^I click on "View all" button on token details drawer$/, async () => {
-  await tokensPageObject.clickOnViewAllButton();
+  await TokenDetailsPage.clickOnViewAllButton();
 });
 
 Then(/^total wallet balance is masked with asterisks$/, async () => {
