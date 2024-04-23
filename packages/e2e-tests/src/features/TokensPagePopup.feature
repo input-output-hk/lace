@@ -105,7 +105,8 @@ Feature: LW: Tokens tab - popup view
     And total wallet balance is masked with asterisks
     And balance and FIAT balance for each token are masked with asterisks
 
-  @LW-6684 @Testnet @Mainnet
+  @LW-6684 @Testnet @Mainnet @Pending
+  @issue=LW-10296
   Scenario: Popup view - Token pricing - Price fetch expired error is displayed when coingecko request fails
     Given ADA fiat price has been fetched
     When I enable network interception to fail request: "https://coingecko.*"
