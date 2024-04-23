@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Modal } from 'antd';
+import { Button } from 'antd';
 import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
@@ -11,6 +11,7 @@ import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputReva
 import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 import isEqual from 'lodash/isEqual';
+import { Dialog } from '@lace/ui';
 
 export type MnemonicStage = 'writedown' | 'input';
 
@@ -108,9 +109,12 @@ export const WalletSetupMnemonicStepRevamp = ({
         >
           {translations.writePassphraseSubtitle2}
         </span>
-        <Modal open={videoModalOpen} centered footer={undefined} closable={false} destroyOnClose maskClosable={false}>
+        <Dialog.Root open={videoModalOpen} setOpen={setVideoModalOpen} zIndex={1001}>
           {renderVideoPopupContent({ onClose: () => setVideoModalOpen(false) })}
-        </Modal>
+        </Dialog.Root>
+        {/* <Modal open={videoModalOpen} centered footer={undefined} closable={false} destroyOnClose maskClosable={false}>
+          {renderVideoPopupContent({ onClose: () => setVideoModalOpen(false) })}
+        </Modal> */}
       </>
     ) : (
       translations.enterPassphraseDescription
