@@ -18,14 +18,13 @@
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
-    "cleanup": "yarn exec rm -rf node_modules",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "format": "yarn prettier --write '**/*.tsx'",
     "lint": "eslint .",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
     "test": "echo \"@lace/ui: no test specified\"",
     "test-storybook": "test-storybook",
     "test-storybook:ci": "NODE_OPTIONS=--openssl-legacy-provider; export STORYBOOK_TEST=1; concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"yarn build-storybook && http-server storybook-static --port 6006\" \"wait-on http://127.0.0.1:6006/ && yarn test-storybook\"",
-    "test:coverage": "echo \"@lace/ui: no test specified\"",
     "typecheck": "tsc --noEmit",
     "watch": "yarn build --watch"
   },

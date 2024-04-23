@@ -8,8 +8,8 @@ import { browser } from '@wdio/globals';
 import ToastMessage from '../elements/toastMessage';
 import { t } from '../utils/translationService';
 import { Logger } from '../support/logger';
-import onboardingPageObject from './onboardingPageObject';
 import { expect } from 'chai';
+import MainLoader from '../elements/MainLoader';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -162,14 +162,14 @@ class SettingsExtendedPageObject {
   };
 
   async waitUntilHdWalletSynced() {
-    await onboardingPageObject.waitUntilLoaderDisappears();
+    await MainLoader.waitUntilLoaderDisappears();
     await this.waitUntilSyncingModalDisappears();
     await this.closeWalletSyncedToast();
     await this.multiAddressModalConfirm();
   }
 
   async multiAddressModalConfirm() {
-    if (await Modal.confirmButton.isDisplayed()) {
+    if (await Modal.container.isDisplayed()) {
       expect(await Modal.confirmButton.getText()).to.equal(await t('modals.beta.button', 'staking'));
       await Modal.confirmButton.click();
     }

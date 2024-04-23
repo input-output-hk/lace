@@ -8,14 +8,16 @@ import type { PasswordInputProps } from './password-box-input.component';
 
 export interface PasswordBoxProps extends PasswordInputProps {
   rootStyle?: React.CSSProperties;
+  onSubmit: (event: Readonly<React.FormEvent>) => void;
 }
 
 export const PasswordBox = ({
   rootStyle,
+  onSubmit,
   ...props
 }: Readonly<PasswordBoxProps>): JSX.Element => {
   return (
-    <Form.Root style={rootStyle}>
+    <Form.Root style={rootStyle} onSubmit={onSubmit}>
       <PasswordInput {...props} />
     </Form.Root>
   );

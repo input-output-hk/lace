@@ -22,19 +22,19 @@ Feature: Send Simple Transactions - Extended view - E2E
     When I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransactionE2E" address
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransactionE2E" address
     When I open wallet: "WalletReceiveSimpleTransactionE2E" in: extended mode
     And Wallet is synced
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
-    Then The Tx details are displayed as "package.core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransactionE2E" address
+    Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransactionE2E" address
 
   @LW-4677
   Scenario: Extended-view - Self Transaction E2E
     And I click "Receive" button on page header
     And I click "Copy" button on "Receive" page for default wallet address
-    Then I see a toast with message: "core.infoWallet.addressCopied"
+    Then I see a toast with text: "Address copied"
     And I close the drawer by clicking close button
     And I click "Send" button on page header
     And I fill bundle 1 with "CopiedAddress" address with following assets:
@@ -60,7 +60,7 @@ Feature: Send Simple Transactions - Extended view - E2E
     When I click "View transaction" button on submitted transaction page
     And I click on a transaction: 1
     And I click on a transaction hash
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
     And I see 1 opened tab(s)
     When I wait for the transaction history to be loaded and all transactions to be confirmed
     And I click on a transaction hash and save hash information

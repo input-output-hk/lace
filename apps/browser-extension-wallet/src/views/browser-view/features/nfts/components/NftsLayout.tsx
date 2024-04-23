@@ -252,10 +252,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                   <Skeleton loading={isSearching}>
                     {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={4} />}
                     {searchValue !== '' && filteredResults.length === 0 && (
-                      <ListEmptyState
-                        message={t('package.core.assetSelectorOverlay.noMatchingResult')}
-                        icon="sad-face"
-                      />
+                      <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
                     )}
                     {searchValue === '' && <NftList items={items} rows={4} />}
                   </Skeleton>

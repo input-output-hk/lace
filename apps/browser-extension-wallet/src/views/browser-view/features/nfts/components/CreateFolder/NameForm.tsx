@@ -2,6 +2,7 @@ import React, { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { Input } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './NameForm.module.scss';
+import { TranslationKey } from '@lib/translations/types';
 
 interface GeneralSettingsDrawerProps {
   usedFolderNames: Array<string>;
@@ -11,7 +12,7 @@ interface GeneralSettingsDrawerProps {
 }
 
 const MAX_CHARS = 20;
-const validateName = (name: string, usedFolderNames: Array<string> = []): string => {
+const validateName = (name: string, usedFolderNames: Array<string> = []): TranslationKey | '' => {
   if (usedFolderNames.includes(name)) return 'browserView.nfts.folderDrawer.nameForm.givenNameAlreadyExist';
   if (name.length > MAX_CHARS) return 'browserView.nfts.folderDrawer.nameForm.inputError';
   return '';

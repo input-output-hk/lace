@@ -27,29 +27,30 @@
   ],
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
-    "cleanup": "yarn exec rm -rf dist node_modules coverage .rollup.cache src/dist",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "lint": "cd ../.. && yarn cardano:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
     "prestart": "yarn build",
     "start": "node dist/index.js",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
-    "test:coverage": "yarn test --coverage --silent",
     "tsc:declarationOnly": "tsc --project ./src/tsconfig.declarationOnly.json",
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/cardano-services-client": "0.17.10",
-    "@cardano-sdk/core": "0.29.0",
-    "@cardano-sdk/crypto": "0.1.21",
-    "@cardano-sdk/hardware-ledger": "0.8.17",
-    "@cardano-sdk/hardware-trezor": "0.4.17",
-    "@cardano-sdk/key-management": "0.20.0",
+    "@cardano-sdk/cardano-services-client": "0.19.0",
+    "@cardano-sdk/core": "0.30.0",
+    "@cardano-sdk/crypto": "0.1.22",
+    "@cardano-sdk/hardware-ledger": "0.9.1",
+    "@cardano-sdk/hardware-trezor": "0.4.20",
+    "@cardano-sdk/key-management": "0.20.1",
     "@cardano-sdk/util": "0.15.0",
-    "@cardano-sdk/wallet": "0.35.0",
-    "@cardano-sdk/web-extension": "0.25.0",
+    "@cardano-sdk/wallet": "0.37.0",
+    "@cardano-sdk/web-extension": "0.27.0",
     "@lace/common": "0.1.0",
+    "@ledgerhq/devices": "^8.2.1",
     "@stablelib/chacha20poly1305": "1.0.1",
+    "@trezor/transport": "^1.1.18",
     "bignumber.js": "9.0.1",
     "buffer": "6.0.3",
     "classnames": "2.3.1",
@@ -67,10 +68,10 @@
     "webextension-polyfill": "0.8.0"
   },
   "devDependencies": {
-    "@cardano-sdk/util-dev": "0.19.17",
+    "@cardano-sdk/util-dev": "0.19.18",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.8.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.9.5"
   },
   "peerDependencies": {
     "react": "17.0.2",

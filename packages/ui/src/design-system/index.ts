@@ -46,6 +46,11 @@ export type {
 export { SelectGroup } from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
+export { TransactionType } from './dapp-transaction-summary';
+export { TransactionSummary as DappTransactionSummary } from './dapp-transaction-summary';
+export { TransactionAssets } from './dapp-transaction-summary';
+export { SummaryExpander } from './summary-expander';
 export * from './auto-suggest-box';
 export * from './table';
 export { InfoBar } from './info-bar';
+export * from './address-tags';

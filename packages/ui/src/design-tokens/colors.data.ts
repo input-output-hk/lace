@@ -161,7 +161,13 @@ export const colors = {
   $summary_expander_trigger_label_color_pressed: '',
 
   $transaction_summary_label_color: '',
+  $transaction_summary_amount_color: '',
+  $transaction_summary_highlighted_amount_color: '',
   $transaction_summary_secondary_label_color: '',
+  $dapp_transaction_summary_positive_balance_label_color: '',
+
+  $dapp_transaction_summary_type_label_color: '',
+  $dapp_transaction_summary_label: '',
 
   $toast_bar_container_bgColor: '',
   $toast_bar_label_color: '',
@@ -302,6 +308,13 @@ export const colors = {
   $info_bar_container_bgColor: '',
   $info_bar_message_color: '',
   $info_bar_icon_color: '',
+
+  $address_tag_own_color: '',
+  $address_tag_own_bgColor: '',
+  $address_tag_handle_color: '',
+  $address_tag_handle_bgColor: '',
+  $address_tag_foreign_color: '',
+  $address_tag_foreign_bgColor: '',
 };
 
 export type Colors = typeof colors;

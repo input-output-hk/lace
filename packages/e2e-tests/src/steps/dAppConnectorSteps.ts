@@ -15,6 +15,7 @@ import popupView from '../page/popupView';
 import { Logger } from '../support/logger';
 import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
+import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -66,24 +67,24 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
 
 Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeSignDataConfirmTransactionPage(
-    testDAppDetails,
-    String(getTestWallet('TestAutomationWallet').address)
-  );
 });
 
 Then(
-  /^I see DApp connector "Confirm transaction" page with: "([^"]*)", "([^"]*)" assets and receiving wallet "([^"]*)"$/,
-  async (adaValue: string, assetValue: string, walletName: string) => {
+  /^I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:$/,
+  async (dataTable) => {
     await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-
     const expectedTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: adaValue,
-      amountAsset: assetValue,
-      recipientAddress: String(getTestWallet(walletName).address)
+      assetsDetails: dataTableAsStringArray(dataTable)
     };
-    await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, expectedTransactionData);
+    await DAppConnectorAssert.assertSeeConfirmTransactionPage(expectedTransactionData);
+  }
+);
+
+Then(
+  /^I see DApp connector "Confirm transaction" page "(From address|To address)" section with following data:$/,
+  async (section: 'From address' | 'To address', entries) => {
+    await DAppConnectorAssert.assertSeeConfirmFromAddressTransactionPage(section, dataTableAsStringArray(entries));
   }
 );
 
@@ -94,14 +95,12 @@ Then(
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: '3.00 ADA',
-      amountAsset: '0',
-      recipientAddress: String(getTestWallet('WalletReceiveDappTransactionE2E').address)
+      assetsDetails: ['-3 tADA']
     };
 
     switch (expectedPage) {
       case 'Confirm transaction':
-        await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, defaultDAppTransactionData);
+        await DAppConnectorAssert.assertSeeConfirmTransactionPage(defaultDAppTransactionData);
         break;
       case 'Something went wrong':
         await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
@@ -151,6 +150,13 @@ Then(/^I see DApp removal confirmation window$/, async () => {
 Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async (button: 'Authorize' | 'Cancel') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow(button);
 });
+
+Then(
+  /^I expand "(Origin|From address|To address)" section in DApp transaction window$/,
+  async (section: 'Origin' | 'From address' | 'To address') => {
+    await ConfirmTransactionPage.expandSectionInDappTransactionWindow(section);
+  }
+);
 
 Then(/^I click "(Always|Only once)" button in DApp authorization window$/, async (button: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(button);

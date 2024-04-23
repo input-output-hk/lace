@@ -44,13 +44,13 @@ Feature: Forgot password
     And I click on "Proceed" button on "Forgot password?" modal
     And I switch to tab with restore wallet process
     And I go to "Wallet setup" page from "Restore" wallet flow and "not fill" values
-    When I enter password: "<password>" and password confirmation: "<password_conf>"
+    # When I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
       | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
-      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
+      | a           |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | P@ss        |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | N_8J@bne    |               | core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
       | N_8J@bne87  |               | empty                                                                           |               3 | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
 
@@ -63,7 +63,7 @@ Feature: Forgot password
     And I click on "Proceed" button on "Forgot password?" modal
     And I switch to tab with restore wallet process
     Then "Wallet setup" page is displayed
-    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    # When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     When I add characters "asd" in word 7
     Then "Next" button is disabled during onboarding process
@@ -77,7 +77,7 @@ Feature: Forgot password
     And I click on "Proceed" button on "Forgot password?" modal
     And I switch to tab with restore wallet process
     Then "Wallet setup" page is displayed
-    When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    # When I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Forgot password" flow with 24 words
     And I enter 24 correct mnemonic words on "Mnemonic verification" page
@@ -93,7 +93,7 @@ Feature: Forgot password
     And I click on "Proceed" button on "Forgot password?" modal
     And all wallet related data is removed
     And I switch to tab with restore wallet process
-    And I am on <expected_page> page of restoration flow
+    # And I am on <expected_page> page of restoration flow
     And I leave "Forgot password" flow
     And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed

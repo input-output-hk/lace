@@ -35,12 +35,12 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const removeWallet = async () => {
     setDeletingWallet(true);
-    const nextActiveWallet = await deleteWallet();
-    setDeletingWallet(false);
-    analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
+    await analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });
+    const nextActiveWallet = await deleteWallet();
+    setDeletingWallet(false);
     if (nextActiveWallet) return;
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
     // force reload to ensure all stores are cleaned up

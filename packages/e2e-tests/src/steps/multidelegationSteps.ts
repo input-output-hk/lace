@@ -27,9 +27,12 @@ import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
-import { StakePoolListColumnType } from '../types/staking';
+import { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/staking';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
-import OnboardingPageObject from '../pageobject/onboardingPageObject';
+import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
+import { mapColumnNameStringToEnum } from '../utils/stakePoolListContent';
+
+const validPassword = 'N_8J@bne87A';
 
 Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.openTab(tabToClick);
@@ -187,7 +190,7 @@ When(
     let password;
     switch (type) {
       case 'newly created':
-        password = OnboardingPageObject.validPassword;
+        password = validPassword;
         break;
       case 'incorrect':
         password = 'somePassword';
@@ -233,15 +236,15 @@ Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, 
 
 When(
   /^I hover over "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column name in stake pool list$/,
-  async (columnName: StakePoolListColumnType) => {
-    await MultidelegationPage.hoverOverColumnWithName(columnName);
+  async (columnName: StakePoolListColumnName) => {
+    await MultidelegationPage.hoverOverColumn(mapColumnNameStringToEnum(columnName));
   }
 );
 
 Then(
   /^tooltip for "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column is displayed$/,
-  async (columnName: StakePoolListColumnType) => {
-    await MultidelegationPageAssert.assertSeeTooltipForColumn(columnName);
+  async (columnName: StakePoolListColumnName) => {
+    await MultidelegationPageAssert.assertSeeTooltipForColumn(mapColumnNameStringToEnum(columnName));
   }
 );
 
@@ -458,10 +461,7 @@ Then(/^I see Expanded View banner$/, async () => {
 });
 
 When(/^I switch to (grid|list) view on "Browse pools" tab$/, async (viewType: 'grid' | 'list') => {
-  // TODO: remove `if` when USE_MULTI_DELEGATION_STAKING_GRID_VIEW is enabled by default
-  if (await MultidelegationPage.gridViewToggle.isExisting()) {
-    await MultidelegationPage.switchPoolsView(viewType);
-  }
+  await MultidelegationPage.switchPoolsView(viewType);
 });
 
 Then(/^stake pool list row skeleton (is|is not) displayed$/, async (status: 'is' | 'is not') => {
@@ -494,7 +494,40 @@ Then(/^I see (\d+) stake pool cards in a row$/, async (cardsCount: number) => {
 
 When(
   /^I click on stake pools table "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column header$/,
-  async (headerName: StakePoolListColumnType) => {
-    await MultidelegationPage.clickOnColumnWithName(headerName);
+  async (headerName: StakePoolListColumnName) => {
+    await MultidelegationPage.clickOnColumn(mapColumnNameStringToEnum(headerName));
+  }
+);
+
+When(
+  /^I select "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option from "More options" component$/,
+  async (sortingOption: StakePoolSortingOptionType) => {
+    await MultidelegationPage.moreOptionsComponent.selectSortingOption(sortingOption);
+  }
+);
+
+Then(
+  /^"More options" component with stake pool (sorting|filtering) options is displayed$/,
+  async (tab: 'sorting' | 'filtering') => {
+    await MoreOptionsComponentAssert.assertSeeMoreOptionsComponent(tab);
+  }
+);
+
+Then(
+  /^(ascending|descending) sorting indicator is displayed for "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" column$/,
+  async (order: 'ascending' | 'descending', sortingOption: StakePoolListColumnName) => {
+    await MultidelegationPageAssert.assertSeeColumnSortingIndicator(sortingOption, order);
+  }
+);
+
+Then(
+  /^stake pool (list rows|cards) are sorted by "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" in (ascending|descending) order$/,
+  async (
+    stakePoolsDisplayType: 'list rows' | 'cards',
+    sortingOption: StakePoolListColumnName,
+    order: 'ascending' | 'descending'
+  ) => {
+    const poolLimit = 100; // Limit verification to 100 stake pools due to time constraints
+    await MultidelegationPageAssert.assertSeeStakePoolsSorted(stakePoolsDisplayType, sortingOption, order, poolLimit);
   }
 );

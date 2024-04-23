@@ -13,6 +13,8 @@ import { TxCBOR } from '@cardano-sdk/core';
 import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 import { getFormattedFiatAmount } from '../common-tx-transformer';
+import { CurrencyInfo } from '@src/types';
+import { currencyCode } from '@providers/currency/constants';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -93,7 +95,7 @@ describe('Testing tx transformers utils', () => {
           }
         ] as Wallet.KeyManagement.GroupedAddress[],
         fiatCurrency: {
-          code: 'USD',
+          code: currencyCode.USD,
           symbol: '$'
         },
         fiatPrice: 1,
@@ -142,7 +144,7 @@ describe('Testing tx transformers utils', () => {
     test('shoud return properly formatted fiat amount', () => {
       const amount = new BigNumber('10');
       const fiatPrice = 2;
-      const fiatCurrency = { code: 'code', symbol: 'symbol' };
+      const fiatCurrency = { code: 'code', symbol: 'symbol' } as unknown as CurrencyInfo;
       mockLovelacesToAdaString.mockImplementationOnce((val) => val);
 
       expect(getFormattedFiatAmount({ amount, fiatPrice, fiatCurrency })).toEqual(
@@ -152,7 +154,7 @@ describe('Testing tx transformers utils', () => {
     test('shoud return properly formatted fiat amount in case there is no fiat price', () => {
       const amount = new BigNumber('10');
       const fiatPrice = 0;
-      const fiatCurrency = { code: 'code', symbol: 'symbol' };
+      const fiatCurrency = { code: 'code', symbol: 'symbol' } as unknown as CurrencyInfo;
       mockLovelacesToAdaString.mockImplementationOnce((val) => val);
 
       expect(getFormattedFiatAmount({ amount, fiatPrice, fiatCurrency })).toEqual('-');

@@ -1,4 +1,8 @@
+import { getTestWallet, TestWalletName } from '../../support/walletConfiguration';
 import CommonOnboardingElements from './commonOnboardingElements';
+import recoveryPhrasePage from './recoveryPhrasePage';
+import walletSetupPage from './walletSetupPage';
+import topNavigationAssert from '../../assert/topNavigationAssert';
 
 class OnboardingMainPage extends CommonOnboardingElements {
   private LOGO_IMAGE = '[data-testid="wallet-setup-logo"]';
@@ -90,6 +94,30 @@ class OnboardingMainPage extends CommonOnboardingElements {
 
   get agreementPrivacyPolicyLink() {
     return $(this.AGREEMENT_PRIVACY_POLICY_LINK);
+  }
+
+  async clickOnLegalLink(linkText: string): Promise<void> {
+    switch (linkText) {
+      case 'Privacy policy':
+        await this.agreementPrivacyPolicyLink.click();
+        break;
+      case 'Terms of service':
+        await this.agreementTermsOfServiceLink.click();
+        break;
+      default:
+        throw new Error(`Unsupported legal link text - ${linkText}`);
+    }
+  }
+
+  async restoreWallet(): Promise<void> {
+    await this.restoreWalletButton.click();
+    await recoveryPhrasePage.enterMnemonicWords(getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []);
+    await recoveryPhrasePage.nextButton.click();
+    await walletSetupPage.setWalletNameInput('ValidName');
+    await walletSetupPage.setWalletPasswordInput('N_8J@bne87A');
+    await walletSetupPage.setWalletPasswordConfirmInput('N_8J@bne87A');
+    await walletSetupPage.clickEnterWalletButton();
+    await topNavigationAssert.assertLogoPresent();
   }
 }
 

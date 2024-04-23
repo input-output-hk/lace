@@ -11,7 +11,7 @@ import {
 } from '../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { WalletNameInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
 import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
-import { WalletSetupStepLayoutRevamp } from '../WalletSetupRevamp';
+import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { TranslationsFor } from '@ui/utils/types';
 import { useTranslate } from '@ui/hooks';
 import { passwordComplexity } from '@ui/utils/password-complexity';

@@ -44,12 +44,6 @@ export interface CreateWallet {
   chainId?: Wallet.Cardano.ChainId;
 }
 
-export interface SetWallet {
-  walletInstance: Wallet.CardanoWallet;
-  chainName?: Wallet.ChainName;
-  mnemonicVerificationFrequency?: string;
-}
-
 export interface CreateHardwareWallet {
   accountIndex?: number;
   name: string;
@@ -66,6 +60,14 @@ type WalletManagerAddAccountProps = {
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
 
+type CreateHardwareWalletRevampedParams = {
+  accountIndex: number;
+  name: string;
+  connection: Wallet.HardwareWalletConnection;
+};
+
+type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
+
 export interface UseWalletManager {
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -78,7 +80,9 @@ export interface UseWalletManager {
   createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
+  createHardwareWalletRevamped: CreateHardwareWalletRevamped;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
+  connectHardwareWalletRevamped: typeof connectHardwareWalletRevamped;
   saveHardwareWallet: (wallet: Wallet.CardanoWallet, chainName?: Wallet.ChainName) => Promise<void>;
   /**
    * @returns active wallet id after deleting the wallet; undefined if deleted the last wallet
@@ -92,27 +96,6 @@ export interface UseWalletManager {
 const clearBytes = (bytes: Uint8Array) => {
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = 0;
-  }
-};
-
-const getHwExtendedAccountPublicKey = async (
-  walletType: Wallet.HardwareWallets,
-  accountIndex: number,
-  deviceConnection?: Wallet.DeviceConnection
-) => {
-  switch (walletType) {
-    case WalletType.Ledger:
-      await Wallet.Ledger.LedgerKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
-      return Wallet.Ledger.LedgerKeyAgent.getXpub({
-        communicationType: Wallet.KeyManagement.CommunicationType.Web,
-        deviceConnection: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined,
-        accountIndex
-      });
-    case WalletType.Trezor:
-      return Wallet.Trezor.TrezorKeyAgent.getXpub({
-        communicationType: Wallet.KeyManagement.CommunicationType.Web,
-        accountIndex
-      });
   }
 };
 
@@ -143,7 +126,7 @@ const getExtendedAccountPublicKey = async (
     }
     case WalletType.Ledger:
     case WalletType.Trezor:
-      return getHwExtendedAccountPublicKey(wallet.type, accountIndex);
+      return Wallet.getHwExtendedAccountPublicKey(wallet.type, accountIndex);
   }
 };
 
@@ -210,6 +193,9 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
 export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
   await Wallet.connectDevice(model);
 
+const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
+  Wallet.connectDeviceRevamped(usbDevice);
+
 export const useWalletManager = (): UseWalletManager => {
   const {
     walletLock,
@@ -241,25 +227,21 @@ export const useWalletManager = (): UseWalletManager => {
     return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
   }, [currentChain]);
 
-  /**
-   * Creates a Ledger or Trezor hardware wallet
-   * and saves it in browser storage with the data to lock/unlock it
-   */
-  const createHardwareWallet = useCallback(
-    async ({
-      accountIndex = 0,
-      deviceConnection,
-      name,
-      connectedDevice
-    }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> => {
-      const extendedAccountPublicKey = await getHwExtendedAccountPublicKey(
-        connectedDevice,
-        accountIndex,
-        deviceConnection
-      );
+  const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
+    async ({ accountIndex, connection, name }) => {
+      let extendedAccountPublicKey;
+      try {
+        extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey(
+          connection.type,
+          accountIndex,
+          connection.type === WalletType.Ledger ? connection.value : undefined
+        );
+      } catch (error: unknown) {
+        throw error;
+      }
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
         metadata: { name, lastActiveAccountIndex: accountIndex },
-        type: connectedDevice,
+        type: connection.type,
         accounts: [
           {
             extendedAccountPublicKey,
@@ -289,6 +271,28 @@ export const useWalletManager = (): UseWalletManager => {
       };
     },
     [getCurrentChainId]
+  );
+
+  /**
+   * Creates a Ledger or Trezor hardware wallet
+   * and saves it in browser storage with the data to lock/unlock it
+   */
+  const createHardwareWallet = useCallback(
+    async ({
+      accountIndex = 0,
+      deviceConnection,
+      name,
+      connectedDevice
+    }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> =>
+      createHardwareWalletRevamped({
+        accountIndex,
+        connection: {
+          type: connectedDevice,
+          value: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined
+        },
+        name
+      }),
+    [createHardwareWalletRevamped]
   );
 
   const tryMigrateToWalletRepository = useCallback(async (): Promise<
@@ -742,7 +746,9 @@ export const useWalletManager = (): UseWalletManager => {
     loadWallet,
     createWallet,
     createHardwareWallet,
+    createHardwareWalletRevamped,
     connectHardwareWallet,
+    connectHardwareWalletRevamped,
     saveHardwareWallet,
     deleteWallet,
     switchNetwork,

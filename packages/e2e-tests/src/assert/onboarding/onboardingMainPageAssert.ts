@@ -13,7 +13,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
   async assertSeeAgreementText() {
     await OnboardingMainPage.agreementText.waitForDisplayed();
     expect(await OnboardingMainPage.agreementText.getText()).to.equal(
-      'By proceeding you agree to Lace’s Terms of Service and Privacy Policy'
+      'By clicking the Create, Connect or Restore button above, you agree with Lace’s Terms of Service and Privacy Policy'
     );
   }
 

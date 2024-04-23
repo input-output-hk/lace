@@ -169,10 +169,11 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I enter a value of: 99999999 to the "tADA" asset in bundle 1
-    And I click on transaction drawer background to lose focus
+    And I open cancel modal to trigger button validation
     Then "Insufficient balance" error is displayed on "Send" page
     And "Review transaction" button is disabled on "Send" page
     When I enter a value of: 2 to the "tADA" asset in bundle 1
+    And I open cancel modal to trigger button validation
     Then "Insufficient balance" error is not displayed on "Send" page
     Then "Review transaction" button is enabled on "Send" page
 
@@ -182,7 +183,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then I verify transaction costs amount is around 0.00 ADA
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I enter a value of: 2 to the "tADA" asset in bundle 1
-    Then I verify transaction costs amount is around 0.18 ADA
+    Then I verify transaction costs amount is around 0.25 ADA
 
   @LW-2404 @Testnet @Mainnet
   Scenario: Popup-view - Tx summary page is displayed - single asset (ADA)
