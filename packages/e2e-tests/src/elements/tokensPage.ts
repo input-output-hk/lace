@@ -14,6 +14,8 @@ class TokensPage {
   private TOKEN_TICKER = '[data-testid="token-table-cell-ticker"]';
   private TOKEN_BALANCE = '[data-testid="token-table-cell-balance"]';
   private TOKEN_FIAT_BALANCE = '[data-testid="token-table-cell-fiat-balance"]';
+  private TOKEN_PRICE = '[data-testid="token-table-cell-price"]';
+  private TOKEN_VARIATION = '[data-testid="token-table-cell-price-variation"]';
   private COINGECKO_CREDITS = '[data-testid="coingecko-credits"]';
   private COINGECKO_LINK = '[data-testid="coingecko-link"]';
   private RECEIVE_BUTTON_POPUP_MODE = 'main [data-testid="receive-button"]';
@@ -78,6 +80,14 @@ class TokensPage {
 
   tokenFiatBalance(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_FIAT_BALANCE);
+  }
+
+  tokenPriceAda(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_PRICE);
+  }
+
+  tokenPriceChange(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_VARIATION);
   }
 
   tokensTableItemWithName(tokenName: string): ChainablePromiseElement<WebdriverIO.Element> {
