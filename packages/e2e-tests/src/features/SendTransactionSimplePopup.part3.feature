@@ -103,7 +103,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
   @LW-2408 @Testnet
   Scenario: Popup-view - Transaction error screen displayed on transaction submit error
-    Given I enable network interception to fail request: "*/tx-submit/submit" with error 400
+    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on Tokens page in popup mode
     And I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page

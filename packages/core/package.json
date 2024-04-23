@@ -28,7 +28,7 @@
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
-    "cleanup": "yarn exec rm -rf dist node_modules .rollup.cache src/dist",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "lint": "cd ../.. && yarn core:lint",
     "prepack": "yarn build",
     "prestart": "yarn build",
@@ -45,7 +45,7 @@
     "@lace/icons": "0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.24.10",
-    "axios": "0.21.4",
+    "axios": "0.28.0",
     "axios-cache-adapter": "2.7.3",
     "classnames": "^2.3.1",
     "debounce-promise": "^3.1.2",
