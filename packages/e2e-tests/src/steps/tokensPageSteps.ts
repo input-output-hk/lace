@@ -4,7 +4,6 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
-import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
@@ -46,17 +45,6 @@ Then(
     await tokensPageAssert.assertSeeTableItems(mode);
     await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
     await tokensPageAssert.assertSeeNativeToken(Asset.HOSKY_TOKEN, mode);
-  }
-);
-
-Then(/^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/, async (network: NetworkType) => {
-  await settingsPageExtendedAssert.assertSeeCurrentNetworkName(network);
-});
-
-Then(
-  /^I see current network: "(Mainnet|Preprod|Preview)" name in "About Lace" widget$/,
-  async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
-    await settingsPageExtendedAssert.assertSeeNetworkInAboutComponent(network);
   }
 );
 
