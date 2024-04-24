@@ -53,13 +53,10 @@ export const Amount = ({
               {label}
             </Typography.Body.Normal>
             {tooltip !== undefined && (
-              <Box ml="$8" className={cx.tooltip}>
+              <Box ml="$8">
                 <Tooltip label={tooltip}>
-                  <div
-                    className={cx.tooltipText}
-                    data-testid={makeTestId(testId, 'tooltip-icon')}
-                  >
-                    <InfoIcon />
+                  <div data-testid={makeTestId(testId, 'tooltip-icon')}>
+                    <InfoIcon className={cx.tooltipIcon} />
                   </div>
                 </Tooltip>
               </Box>

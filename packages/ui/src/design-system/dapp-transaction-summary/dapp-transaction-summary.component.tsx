@@ -35,14 +35,14 @@ export const TransactionSummary = ({
   <div className={styles.txSummaryContainer}>
     {title !== undefined && (
       <Flex justifyContent="flex-start">
-        <Typography.Body.Large className={styles.txSummaryTitle}>
+        <Typography.Body.Normal className={styles.txSummaryTitle}>
           {title}
-        </Typography.Body.Large>
+        </Typography.Body.Normal>
         {tooltip && (
-          <Box ml="$8" className={styles.tooltip}>
+          <Box ml="$8">
             <Tooltip label={tooltip}>
-              <div className={styles.tooltipText}>
-                <InfoIcon />
+              <div>
+                <InfoIcon className={styles.tooltipIcon} />
               </div>
             </Tooltip>
           </Box>

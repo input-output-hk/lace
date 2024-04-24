@@ -45,13 +45,13 @@ export const SummaryExpander = ({
           [cx.expanded]: open,
         })}
       >
-        <Typography.Body.Large
+        <Typography.Body.Normal
           className={cx.title}
           weight="$semibold"
           data-testid="expander-title"
         >
           {title}
-        </Typography.Body.Large>
+        </Typography.Body.Normal>
 
         <Collapsible.Trigger asChild data-testid="expander-button">
           <Trigger open={open} disabled={disabled} {...props} />

@@ -25,18 +25,11 @@ export const secondaryText = style([
   },
 ]);
 
-export const tooltip = style([
+export const tooltipIcon = style([
   sx({
-    color: '$transaction_summary_secondary_label_color',
-    width: '$24',
+    color: '$transaction_summary_label_color',
     height: '$24',
-    fontSize: '$25',
-  }),
-]);
-
-export const tooltipText = style([
-  sx({
-    display: 'flex',
+    width: '$24',
   }),
 ]);
 
