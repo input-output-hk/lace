@@ -38,6 +38,11 @@ export interface UnconfirmedTransaction {
   date: string;
 }
 
+export interface CustomSubmitApiConfig {
+  status: boolean;
+  url: string;
+}
+
 export type UnconfirmedTransactions = UnconfirmedTransaction[];
 
 export interface ILocalStorage {
@@ -59,4 +64,5 @@ export interface ILocalStorage {
   showPinExtension?: boolean;
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
+  isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
 }

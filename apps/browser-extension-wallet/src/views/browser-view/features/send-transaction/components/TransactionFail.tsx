@@ -5,8 +5,13 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction, TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './TransactionSuccessView.module.scss';
 import { useAnalyticsSendFlowTriggerPoint } from '../store';
+import { WarningBanner } from '@lace/common';
 
-export const TransactionFail = (): React.ReactElement => {
+interface TransactionFailProps {
+  showCustomApiBanner?: boolean;
+}
+
+export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFailProps): React.ReactElement => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
@@ -34,7 +39,12 @@ export const TransactionFail = (): React.ReactElement => {
             <div data-testid="send-error-description">
               {t('browserView.transaction.fail.problemSubmittingYourTransaction')}
             </div>
-            <div data-testid="send-error-description2">{t('browserView.transaction.fail.clickBackAndTryAgain')}</div>
+            <div data-testid="send-error-description2" className={styles.message}>
+              {t('browserView.transaction.fail.clickBackAndTryAgain')}
+            </div>
+            {showCustomApiBanner && (
+              <WarningBanner message={t('browserView.transaction.send.customSubmitApiBannerText')} />
+            )}
           </>
         }
       />
