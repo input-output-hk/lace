@@ -10,6 +10,8 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { config } from '@src/config';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useObservable } from '@lace/common';
+import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
+import { walletRepository } from '@lib/wallet-api-ui';
 
 type TransactionDetailsProxyProps = {
   name: string;
@@ -31,6 +33,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
     const openExternalLink = useExternalLinkOpener();
 
     // Prepare own addresses of active account
+    const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
     const walletAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
 
     // Prepare address book data as Map<address, name>
@@ -101,7 +104,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
         amountTransformer={amountTransformer}
         headerDescription={getHeaderDescription() || cardanoCoin.symbol}
         txSummary={txSummary}
-        ownAddresses={walletAddresses}
+        ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : walletAddresses}
         addressToNameMap={addressToNameMap}
         coinSymbol={cardanoCoin.symbol}
         isPopupView={isPopupView}

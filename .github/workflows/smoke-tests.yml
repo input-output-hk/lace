@@ -2,7 +2,8 @@ name: Smoke Tests
 
 on:
   workflow_run:
-    workflows: ["CI"]  # This must match the name of your CI workflow
+    workflows:
+      - CI
     types:
       - completed
   workflow_dispatch:
@@ -28,7 +29,7 @@ jobs:
       - name: Download artifact from CI workflow
         uses: actions/download-artifact@v4
         with:
-          name: lace 
+          name: lace
           path: apps/browser-extension-wallet/dist
       - name: Start XVFB
         run: |
