@@ -56,7 +56,7 @@ export const NftDetail = ({
             {
               name: translations.directory,
               renderValueAs: (
-                <Breadcrumb separator={<RightOutlined className={styles.folderSeperator} />}>
+                <Breadcrumb separator={<RightOutlined />}>
                   <Breadcrumb.Item>
                     <FolderOutlined />
                     <span>Root</span>
