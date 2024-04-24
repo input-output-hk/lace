@@ -20,10 +20,11 @@ import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
 
 import { useCurrencyStore, useAppSettingsContext } from '@providers';
-import { logger } from '@lib/wallet-api-ui';
+import { logger, walletRepository } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
 import { AddressBookSchema, useDbStateValue } from '@lib/storage';
+import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 
 interface DappTransactionContainerProps {
   errorMessage?: string;
@@ -82,6 +83,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
     const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
     const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+    const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
 
     useEffect(() => {
       if (!req || !protocolParameters) {
@@ -151,7 +153,7 @@ export const DappTransactionContainer = withAddressBookContext(
             errorMessage={errorMessage}
             toAddress={toAddressTokens}
             collateral={txCollateral}
-            ownAddresses={ownAddresses}
+            ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
             addressToNameMap={addressToNameMap}
           />
         ) : (

@@ -2,11 +2,10 @@
 import React from 'react';
 
 import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
-import classNames from 'classnames';
 
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as styles from './dapp-transaction-summary.css';
 
@@ -28,10 +27,8 @@ export const TransactionSummary = ({
 }: Readonly<Props>): JSX.Element => (
   <div className={styles.txSummaryContainer}>
     {title !== undefined && (
-      <Flex justifyContent="flex-start">
-        <Typography.Body.Large className={styles.txSummaryTitle}>
-          {title}
-        </Typography.Body.Large>
+      <Flex justifyContent="flex-start" mb="$18">
+        <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
       </Flex>
     )}
     <div className={styles.txAmountContainer} data-testid={testId}>
@@ -41,14 +38,12 @@ export const TransactionSummary = ({
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Small
-              className={classNames(styles.label, {
-                [styles.positiveBalance]: !transactionAmount.includes('-'),
-                [styles.negativeBalance]: transactionAmount.includes('-'),
-              })}
+            <Text.Body.Small
+              color={transactionAmount.includes('-') ? 'primary' : 'success'}
+              weight="$semibold"
             >
               {transactionAmount} {cardanoSymbol}
-            </Typography.Body.Small>
+            </Text.Body.Small>
           </Flex>
         </Cell>
       </Grid>

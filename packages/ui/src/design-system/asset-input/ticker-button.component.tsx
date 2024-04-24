@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ReactComponent as ChevronRight } from '@lace/icons/dist/ChevronRightComponent';
 
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './ticker-button.css';
 
@@ -22,7 +22,7 @@ export const TickerButton = ({
     onClick={onClick}
     data-testid={`asset-input-ticker-button-${id}`}
   >
-    <Text.SubHeading weight="$bold" className={cx.ticker}>
+    <Text.SubHeading weight="$bold">
       {name}
       <ChevronRight className={cx.chevronIcon} />
     </Text.SubHeading>

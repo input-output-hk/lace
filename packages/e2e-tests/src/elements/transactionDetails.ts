@@ -15,8 +15,8 @@ class ActivityDetailsPage extends CommonDrawerElements {
   private TRANSACTION_DETAILS_SENT_TOKEN = '[data-testid="tx-sent-detail-token"]';
   private TRANSACTION_DETAILS_SENT_ADA = '[data-testid="tx-sent-detail-ada"]';
   private TRANSACTION_DETAILS_SENT_FIAT = '[data-testid="tx-sent-detail-fiat"]';
-  private TRANSACTION_DETAILS_TO_ADDRESS = '[data-testid="tx-to-detail"] span';
-  private TRANSACTION_DETAILS_TO_ADDRESS_TAG = '[data-testid="tx-to-detail"] [data-testid="address-tag"]';
+  private TRANSACTION_DETAILS_TO_ADDRESS = '[data-testid="tx-to-address"]';
+  private TRANSACTION_DETAILS_TO_ADDRESS_TAG = '[data-testid="address-tag"]';
   private TRANSACTION_DETAILS_STATUS = '[data-testid="tx-status"]';
   private TRANSACTION_DETAILS_TIMESTAMP = '[data-testid="tx-timestamp"]';
   private TRANSACTION_DETAILS_FEE_ADA = '[data-testid="tx-amount-fee-amount"]';

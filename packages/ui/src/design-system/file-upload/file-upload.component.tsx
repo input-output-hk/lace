@@ -2,12 +2,11 @@ import React from 'react';
 
 import { ReactComponent as CheckFileUploadIcon } from '@lace/icons/dist/CheckFileUploadComponent';
 import { ReactComponent as UploadIcon } from '@lace/icons/dist/UploadGradientComponent';
-import cn from 'classnames';
 
 import { Box } from '../box';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './file-upload.css';
 
@@ -47,17 +46,14 @@ export const FileUpload = ({
           {labelText.map(({ text, highlight }) => (
             <Text.Body.Normal
               weight="$medium"
-              className={cn({
-                [cx.highlightLabel]: highlight,
-                [cx.label]: !highlight,
-              })}
+              color={highlight ? 'highlight' : 'primary'}
               key={text}
             >
               {text}{' '}
             </Text.Body.Normal>
           ))}
         </Box>
-        <Text.Body.Small weight="$medium" className={cx.supportedFormatText}>
+        <Text.Body.Small color="secondary" weight="$medium">
           {supportedFormats}
         </Text.Body.Small>
       </Box>
@@ -67,9 +63,7 @@ export const FileUpload = ({
           {files.map((file, index) => (
             <Box key={file}>
               <Flex mb="$8">
-                <Text.Body.Small weight="$medium" className={cx.fileName}>
-                  {file}
-                </Text.Body.Small>
+                <Text.Body.Small weight="$medium">{file}</Text.Body.Small>
                 <Box className={cx.checkIconBox} ml="$8">
                   <CheckFileUploadIcon />
                 </Box>
@@ -82,9 +76,7 @@ export const FileUpload = ({
                   }
                 }}
               >
-                <Text.Label className={cx.removeButtonLabel}>
-                  {removeButtonLabel}
-                </Text.Label>
+                <Text.Label color="error">{removeButtonLabel}</Text.Label>
               </button>
             </Box>
           ))}

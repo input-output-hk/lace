@@ -22,3 +22,4 @@ export * from './useUpdateAddressStatus';
 export * from './useOnAddressSave';
 export * from './useAppInit';
 export * from './useChainHistoryProvider';
+export * from './useWalletAvatar';
