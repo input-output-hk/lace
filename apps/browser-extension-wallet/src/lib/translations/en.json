@@ -1230,6 +1230,8 @@
   "core.nftDetail.tokenInformation": "Token Information",
   "core.nftDetail.attributes": "Attributes",
   "core.nftDetail.sendNFT": "Send NFT",
+  "core.nftDetail.setAsAvatar": "Set as your wallet avatar",
+  "core.nftDetail.avatarUpdated": "User avatar updated",
   "core.outputSummaryList.recipientAddress": "Recipient address",
   "core.outputSummaryList.sending": "Sending",
   "core.outputSummaryList.txFee": "Transaction fee",
