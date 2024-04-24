@@ -2,6 +2,8 @@ import { style, sx, vars } from '../../design-tokens';
 
 import * as toggleButtonGroupRootCn from './toggle-button-group-root.css';
 
+export const rootHandle = style({});
+
 export const root = style([
   sx({
     padding: '$8',
@@ -46,6 +48,24 @@ export const root = style([
     },
   },
 ]);
+
+export const label = style({
+  color: vars.colors.$toggle_button_group_item_label_color,
+  selectors: {
+    [`${rootHandle}:hover &`]: {
+      color: vars.colors.$toggle_button_group_item_label_color_hover,
+    },
+    [`${rootHandle}[data-state='on'] &`]: {
+      color: vars.colors.$toggle_button_group_item_label_color_active,
+    },
+    [`${rootHandle}:active &`]: {
+      color: vars.colors.$toggle_button_group_item_label_color_active,
+    },
+    [`${rootHandle}:disabled &`]: {
+      color: vars.colors.$toggle_button_group_item_label_color_disabled,
+    },
+  },
+});
 
 export const icon = sx({
   width: '$24',

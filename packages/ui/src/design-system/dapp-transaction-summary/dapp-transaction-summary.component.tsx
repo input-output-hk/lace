@@ -4,13 +4,12 @@ import React from 'react';
 
 import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
 import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
-import classNames from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
+import { Text } from '../text';
 import { Tooltip } from '../tooltip';
-import * as Typography from '../typography';
 
 import * as styles from './dapp-transaction-summary.css';
 
@@ -34,10 +33,8 @@ export const TransactionSummary = ({
 }: Readonly<Props>): JSX.Element => (
   <div className={styles.txSummaryContainer}>
     {title !== undefined && (
-      <Flex justifyContent="flex-start">
-        <Typography.Body.Normal className={styles.txSummaryTitle}>
-          {title}
-        </Typography.Body.Normal>
+      <Flex justifyContent="flex-start" mb="$18">
+        <Text.Body.Normal weight="$semibold">{title}</Text.Body.Normal>
         {tooltip && (
           <Box ml="$8">
             <Tooltip label={tooltip}>
@@ -56,13 +53,12 @@ export const TransactionSummary = ({
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Typography.Body.Normal
-              className={classNames(styles.label, {
-                [styles.positiveBalance]: !transactionAmount.includes('-'),
-              })}
+            <Text.Body.Normal
+              color={transactionAmount.includes('-') ? 'primary' : 'success'}
+              weight="$semibold"
             >
               {transactionAmount} {cardanoSymbol}
-            </Typography.Body.Normal>
+            </Text.Body.Normal>
           </Flex>
         </Cell>
       </Grid>

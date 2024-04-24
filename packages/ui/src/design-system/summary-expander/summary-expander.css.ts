@@ -20,7 +20,3 @@ export const header = style([
 export const expanded = style({
   borderBottom: 'none',
 });
-
-export const title = sx({
-  color: '$summary_expander_label_color',
-});

@@ -13,7 +13,3 @@ export const container = style([
     gridArea: 'header',
   },
 ]);
-
-export const text = sx({
-  color: '$side_drawer_head_title_color',
-});

@@ -1,7 +1,5 @@
 import React from 'react';
 
-import classNames from 'classnames';
-
 import DarkFallBack from '../../assets/images/dark-mode-fallback.png';
 import LightFallBack from '../../assets/images/light-mode-fallback.png';
 import { ThemeColorScheme } from '../../design-tokens';
@@ -9,7 +7,7 @@ import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-varia
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 import { UserProfile } from '../profile-picture';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as styles from './dapp-transaction-summary.css';
 
@@ -78,15 +76,14 @@ export const TransactionAssets = ({
             alignItems="center"
             className={styles.balanceDetailContainer}
           >
-            <Typography.Body.Normal
-              className={classNames(styles.label, {
-                [styles.positiveBalance]: !isNegativeBalance,
-              })}
+            <Text.Body.Normal
+              color={isNegativeBalance ? 'primary' : 'success'}
+              weight="$semibold"
             >
               <span>
                 {balance} {tokenName}
               </span>
-            </Typography.Body.Normal>
+            </Text.Body.Normal>
           </Flex>
         </Cell>
       </Grid>

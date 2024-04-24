@@ -3,6 +3,7 @@ import { EnhancedAnalyticsOptInStatus, TxCreationType } from '../providers/Analy
 import { StakingBrowserPreferences } from '@lace/staking';
 import { currencyCode } from '@providers/currency/constants';
 import { ADASymbols } from '@src/utils/constants';
+import { EnvironmentTypes } from '@stores';
 
 export interface WalletStorage {
   name: string;
@@ -57,4 +58,5 @@ export interface ILocalStorage {
   stakingBrowserPreferences: StakingBrowserPreferences;
   showPinExtension?: boolean;
   showMultiAddressModal?: boolean;
+  userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
 }

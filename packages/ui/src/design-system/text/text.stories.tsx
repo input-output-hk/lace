@@ -2,8 +2,9 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { page, Section, Variants } from '../decorators';
-import { Grid, Cell } from '../grid';
+import { ColorSchemaTable, page, Section, Variants } from '../decorators';
+import { Divider } from '../divider';
+import { Cell, Grid } from '../grid';
 
 import { Address } from './address.component';
 import * as Body from './body.component';
@@ -14,6 +15,7 @@ import { Label } from './label.component';
 import { PageHeading } from './page-heading.component';
 import { SubHeading } from './subheading.component';
 
+import type { TypographyVariants } from './text.css';
 import type { Theme } from '../../design-tokens';
 
 const subtitle = `As the visual representation of language, typography's main task is to communicate information. Lace defines a set of styles you can use to apply a consistent typographic style across your platform.`;
@@ -77,9 +79,34 @@ const typefaces = [
   [Display, 'Display', fill({ $bold: true })],
 ] as const;
 
+const colors: TypographyVariants['color'][] = [
+  'primary',
+  'secondary',
+  'highlight',
+  'error',
+  'success',
+  'accent',
+];
+
 export const Overview = (): JSX.Element => (
   <Grid columns="$1">
     <Cell>
+      <Section title="Colors">
+        <ColorSchemaTable
+          headers={colors.map(
+            color => color.charAt(0).toUpperCase() + color.slice(1),
+          )}
+        >
+          <Variants.Row>
+            {colors.map(color => (
+              <Variants.Cell key={color}>
+                <Body.Normal color={color}>Text</Body.Normal>
+              </Variants.Cell>
+            ))}
+          </Variants.Row>
+        </ColorSchemaTable>
+      </Section>
+      <Divider my="$64" />
       <Section title="Overview">
         <Variants.Table
           headers={['Text', 'Regular', 'Medium', 'Semibold', 'Bold']}
