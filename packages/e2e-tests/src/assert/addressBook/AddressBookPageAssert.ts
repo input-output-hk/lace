@@ -69,9 +69,7 @@ class AddressBookPageAssert {
 
   assertSeeHandleWarningTooltip = async () => {
     await AddressBookPage.warningTooltip.waitForDisplayed();
-    expect(await AddressBookPage.warningTooltip.getText()).to.equal(
-      await t('core.addressBook.addressHandleTooltip', 'core')
-    );
+    expect(await AddressBookPage.warningTooltip.getText()).to.equal(await t('core.addressBook.addressHandleTooltip'));
   };
 
   assertSeeEachAddressRow = async () => {
