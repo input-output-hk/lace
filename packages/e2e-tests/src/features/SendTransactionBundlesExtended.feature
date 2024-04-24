@@ -167,15 +167,15 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 1
+    And I open cancel modal to trigger button validation
     Then I do not see insufficient balance error in bundle 1 for "tADA" asset
     And "Review transaction" button is enabled on "Send" page
     When I click "Add bundle" button on "Send" page
     And I enter a valid "shelley" address in the bundle 2 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 2
+    And I open cancel modal to trigger button validation
     Then I see insufficient balance error in bundle 2 for "tADA" asset
     And I do not see insufficient balance error in bundle 1 for "tADA" asset
-    # step below is a workaround to set focus on something else than input
-    And I click "Review transaction" button on "Send" page
     And "Review transaction" button is disabled on "Send" page
 
   @LW-1762
