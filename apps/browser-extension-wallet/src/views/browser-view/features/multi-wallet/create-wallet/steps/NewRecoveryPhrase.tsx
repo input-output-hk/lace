@@ -1,33 +1,26 @@
 import { MnemonicStage, MnemonicVideoPopupContent, WalletSetupMnemonicStepRevamp } from '@lace/core';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useCreateWallet } from '../context';
-import { walletRoutePaths } from '@routes';
-import { useWalletManager } from '@hooks/useWalletManager';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { PostHogAction } from '@lace/common';
-import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
 
 interface State {
   isResetMnemonicModalOpen: boolean;
-  resetMnemonicStage: MnemonicStage;
+  mnemonicStage: MnemonicStage;
 }
 
 export const NewRecoveryPhrase = (): JSX.Element => {
-  const history = useHistory();
   const { t } = useTranslation();
-  const { generatedMnemonic, data } = useCreateWallet();
-  const { createWallet, walletRepository } = useWalletManager();
+  const { back, createWalletData, generateMnemonic, next, setFormDirty } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const [state, setState] = useState<State>(() => ({
     isResetMnemonicModalOpen: false,
-    resetMnemonicStage: 'writedown'
+    mnemonicStage: 'writedown'
   }));
 
   const [isBackFromNextStep, setIsBackFromNextStep] = useState(false);
@@ -51,32 +44,24 @@ export const NewRecoveryPhrase = (): JSX.Element => {
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
-  const clearSecrets = useCallback(() => {
-    for (let i = 0; i < data.mnemonic.length; i++) {
-      data.mnemonic[i] = '';
+  const onMnemonicReset = (mnemonicStage: MnemonicStage) => {
+    if (mnemonicStage === 'writedown') {
+      back();
     }
-    data.password = '';
-  }, [data]);
-
-  const saveWallet = useCallback(async () => {
-    const { source } = await createWallet(data);
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
-      // eslint-disable-next-line camelcase
-      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-    });
-    await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-    clearSecrets();
-    history.push(walletRoutePaths.assets);
-  }, [data, createWallet, history, clearSecrets, analytics, walletRepository]);
+    setFormDirty(false);
+    setState((prevState) => ({
+      ...prevState,
+      isResetMnemonicModalOpen: true,
+      mnemonicStage
+    }));
+    setIsBackFromNextStep(false);
+  };
 
   return (
     <>
       <WalletSetupMnemonicStepRevamp
-        mnemonic={data.mnemonic}
-        onReset={(resetStage) => {
-          setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }));
-          resetStage === 'input' && setIsBackFromNextStep(false);
-        }}
+        mnemonic={createWalletData.mnemonic}
+        onReset={onMnemonicReset}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
             translations={mnemonicVideoPopupContentTranslations}
@@ -89,11 +74,15 @@ export const NewRecoveryPhrase = (): JSX.Element => {
             }}
           />
         )}
-        onNext={saveWallet}
-        onStepNext={(mnemonicStage: MnemonicStage) => {
-          mnemonicStage === 'writedown'
-            ? analytics.sendEventToPostHog(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
-            : analytics.sendEventToPostHog(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+        onNext={next}
+        onStepNext={(currentMnemonicStage: MnemonicStage) => {
+          if (currentMnemonicStage === 'input') {
+            void analytics.sendEventToPostHog(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+            return;
+          }
+
+          setFormDirty(true);
+          void analytics.sendEventToPostHog(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
@@ -123,17 +112,17 @@ export const NewRecoveryPhrase = (): JSX.Element => {
             }));
           }}
           onConfirm={() => {
-            if (state.resetMnemonicStage === 'writedown') {
-              history.goBack();
+            if (state.mnemonicStage === 'writedown') {
+              back();
               return;
             }
 
             setState({
-              resetMnemonicStage: 'writedown',
+              mnemonicStage: 'writedown',
               isResetMnemonicModalOpen: false
             });
 
-            generatedMnemonic();
+            generateMnemonic();
           }}
         />
       )}

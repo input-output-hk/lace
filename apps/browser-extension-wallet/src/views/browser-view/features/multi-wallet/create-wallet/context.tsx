@@ -1,18 +1,32 @@
+import { CreateWalletParams, useWalletManager } from '@hooks';
+import { PostHogAction } from '@lace/common';
+import { useAnalyticsContext } from '@providers';
+import { walletRoutePaths } from '@routes';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import React, { createContext, useContext, useState } from 'react';
-import { Data, Providers } from './types';
+import { useHistory } from 'react-router';
+import { useSoftwareWalletCreation } from '../useSoftwareWalletCreation';
+import { Providers } from './types';
 
 interface Props {
   children: React.ReactNode;
   providers: Providers;
 }
 
+type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+
+enum Step {
+  RecoveryPhrase = 'RecoveryPhrase',
+  Setup = 'Setup'
+}
+
 interface State {
-  data: Data;
-  setMnemonic: (mnemonic: string[]) => void;
-  setName: (name: string) => void;
-  setPassword: (password: string) => void;
-  generatedMnemonic: () => void;
-  onChange: (state: { name: string; password: string }) => void;
+  back: () => void;
+  createWalletData: CreateWalletParams;
+  generateMnemonic: () => void;
+  next: () => Promise<void>;
+  onNameAndPasswordChange: OnNameAndPasswordChange;
+  setFormDirty: (dirty: boolean) => void;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -25,41 +39,75 @@ export const useCreateWallet = (): State => {
 };
 
 export const CreateWalletProvider = ({ children, providers }: Props): React.ReactElement => {
-  const [state, setState] = useState<Data>({
-    mnemonic: providers.generateMnemonicWords(),
-    name: '',
-    password: ''
+  const history = useHistory();
+  const analytics = useAnalyticsContext();
+  const { createWallet, walletRepository } = useWalletManager();
+  const { clearSecrets, createWalletData, setCreateWalletData } = useSoftwareWalletCreation({
+    initialMnemonic: providers.generateMnemonicWords()
   });
+  const [step, setStep] = useState<Step>(Step.RecoveryPhrase);
 
-  const setMnemonic = (mnemonic: string[]) => {
-    setState((prevState) => ({ ...prevState, mnemonic }));
+  const generateMnemonic = () => {
+    setCreateWalletData((prevState) => ({ ...prevState, mnemonic: providers.generateMnemonicWords() }));
   };
 
-  const setName = (name: string) => {
-    setState((prevState) => ({ ...prevState, name }));
+  const onNameAndPasswordChange: OnNameAndPasswordChange = ({ name, password }) => {
+    setCreateWalletData((prevState) => ({ ...prevState, name, password }));
   };
 
-  const setPassword = (password: string) => {
-    setState((prevState) => ({ ...prevState, password }));
+  const completeCreation = async () => {
+    const { source } = await createWallet(createWalletData);
+    void analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+    });
+    void analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+    clearSecrets();
   };
 
-  const generatedMnemonic = () => {
-    setState((prevState) => ({ ...prevState, mnemonic: providers.generateMnemonicWords() }));
+  const setFormDirty = (dirty: boolean) => {
+    providers.confirmationDialog.shouldShowDialog$.next(dirty);
   };
 
-  const onChange = ({ name, password }: { name: string; password: string }) => {
-    providers.confirmationDialog.shouldShowDialog$.next(Boolean(name || password));
+  const next = async () => {
+    switch (step) {
+      case Step.RecoveryPhrase: {
+        setStep(Step.Setup);
+        history.push(walletRoutePaths.newWallet.create.setup);
+        break;
+      }
+      case Step.Setup: {
+        await completeCreation();
+        history.push(walletRoutePaths.assets);
+        break;
+      }
+    }
+  };
+
+  const back = () => {
+    switch (step) {
+      case Step.RecoveryPhrase: {
+        setFormDirty(false);
+        history.push(walletRoutePaths.newWallet.root);
+        break;
+      }
+      case Step.Setup: {
+        setStep(Step.RecoveryPhrase);
+        history.push(walletRoutePaths.newWallet.create.recoveryPhrase);
+        break;
+      }
+    }
   };
 
   return (
     <CreateWalletContext.Provider
       value={{
-        data: state,
-        setMnemonic,
-        setName,
-        setPassword,
-        generatedMnemonic,
-        onChange
+        back,
+        createWalletData,
+        generateMnemonic,
+        next,
+        onNameAndPasswordChange,
+        setFormDirty
       }}
     >
       {children}

@@ -1,18 +1,34 @@
-import React, { createContext, useContext, useState } from 'react';
-import { Data, Providers } from './types';
+import React, { createContext, useCallback, useContext, useState } from 'react';
+import { Providers } from './types';
+import { CreateWalletParams, useWalletManager } from '@hooks';
+import { PostHogAction } from '@lace/common';
+import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
+import { useHistory } from 'react-router';
+import { useAnalyticsContext } from '@providers';
+import { filter, firstValueFrom } from 'rxjs';
+import { isScriptAddress } from '@cardano-sdk/wallet';
+import { walletRoutePaths } from '@routes';
+import { useSoftwareWalletCreation } from '../useSoftwareWalletCreation';
 
 interface Props {
   children: React.ReactNode;
   providers: Providers;
 }
 
+type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+
+enum Step {
+  RecoveryPhrase = 'RecoveryPhrase',
+  Setup = 'Setup'
+}
+
 interface State {
-  data: Data;
+  createWalletData: CreateWalletParams;
+  createWallet: () => Promise<void>;
   setMnemonic: (mnemonic: string[]) => void;
-  setLength: (length: number) => void;
-  setName: (name: string) => void;
-  setPassword: (password: string) => void;
-  onChange: (state: { name: string; password: string }) => void;
+  onNameAndPasswordChange: OnNameAndPasswordChange;
+  next: () => Promise<void>;
+  back: () => void;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -25,43 +41,74 @@ export const useRestoreWallet = (): State => {
 };
 
 export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
-  const [state, setState] = useState<Data>({
-    mnemonic: [],
-    length: 0,
-    name: '',
-    password: ''
-  });
+  const history = useHistory();
+  const analytics = useAnalyticsContext();
+  const walletManager = useWalletManager();
+  const [step, setStep] = useState<Step>(Step.RecoveryPhrase);
+  const { clearSecrets, createWalletData, setCreateWalletData } = useSoftwareWalletCreation({ initialMnemonic: [] });
 
-  const setMnemonic = (mnemonic: string[]) => {
-    providers.confirmationDialog.shouldShowDialog$.next(Boolean(mnemonic));
-    setState((prevState) => ({ ...prevState, mnemonic }));
+  const setMnemonic = useCallback(
+    (mnemonic: string[]) => {
+      const mnemonicNotEmpty = mnemonic.some((m) => m);
+      providers.confirmationDialog.shouldShowDialog$.next(mnemonicNotEmpty);
+      setCreateWalletData((prevState) => ({ ...prevState, mnemonic }));
+    },
+    [providers.confirmationDialog.shouldShowDialog$, setCreateWalletData]
+  );
+
+  const onNameAndPasswordChange: OnNameAndPasswordChange = ({ name, password }) => {
+    setCreateWalletData((prevState) => ({ ...prevState, name, password }));
   };
 
-  const setLength = (length: number) => {
-    setState((prevState) => ({ ...prevState, length, mnemonic: Array.from({ length }) }));
+  const createWallet = async () => {
+    const { source, wallet } = await walletManager.createWallet(createWalletData);
+    void analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
+    });
+    void analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+    const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
+    const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
+    if (hdWalletDiscovered) {
+      void analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreHdWallet);
+    }
   };
 
-  const setName = (name: string) => {
-    setState((prevState) => ({ ...prevState, name }));
+  const next = async () => {
+    switch (step) {
+      case Step.RecoveryPhrase:
+        setStep(Step.Setup);
+        history.push(walletRoutePaths.newWallet.restore.setup);
+        break;
+      case Step.Setup:
+        clearSecrets();
+        history.push(walletRoutePaths.assets);
+        break;
+    }
   };
 
-  const setPassword = (password: string) => {
-    setState((prevState) => ({ ...prevState, password }));
-  };
-
-  const onChange = (s: { name: string; password: string }) => {
-    providers.confirmationDialog.shouldShowDialog$.next(Boolean(s.name || s.password));
+  const back = () => {
+    switch (step) {
+      case Step.RecoveryPhrase:
+        providers.confirmationDialog.shouldShowDialog$.next(false);
+        history.push(walletRoutePaths.newWallet.root);
+        break;
+      case Step.Setup:
+        setStep(Step.RecoveryPhrase);
+        history.push(walletRoutePaths.newWallet.restore.enterRecoveryPhrase);
+        break;
+    }
   };
 
   return (
     <RestoreWalletContext.Provider
       value={{
-        data: state,
+        createWalletData,
+        createWallet,
         setMnemonic,
-        setLength,
-        setName,
-        setPassword,
-        onChange
+        onNameAndPasswordChange,
+        next,
+        back
       }}
     >
       {children}

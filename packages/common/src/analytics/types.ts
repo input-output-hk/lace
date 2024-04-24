@@ -39,6 +39,7 @@ export enum PostHogAction {
   MultiWalletCreatePassphraseIntroPlayVideoClick = 'multiwallet | new wallet | passphrase intro | play video | click',
   MultiwalletCreatePassphraseIntroNextClick = 'multiwallet | new wallet | passphrase intro | next | click',
   MultiWalletCreateAdded = 'multiwallet | new wallet | added',
+  MultiWalletCreateEnterWalletClick = "multiwallet | new wallet | let's set up your new wallet | enter wallet | click",
 
   // Multi wallet Hardware wallet connect
   MultiWalletHWClick = 'multiwallet | hardware wallet | connect | click',

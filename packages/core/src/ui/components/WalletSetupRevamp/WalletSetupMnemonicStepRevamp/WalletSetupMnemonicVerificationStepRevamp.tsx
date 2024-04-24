@@ -12,7 +12,6 @@ import { readMnemonicFromClipboard } from './wallet-utils';
 import { WalletTimelineSteps } from '@ui/components/WalletSetup';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
-const MNEMONIC_LENGTHS = [12, 15, 24];
 
 export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
@@ -43,7 +42,15 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   const description = (
     <>
       {translations.enterPassphraseLength}
-      <Segmented options={MNEMONIC_LENGTHS} defaultValue={defaultMnemonicLength} onChange={onSetMnemonicLength} />
+      <Segmented
+        options={[
+          { label: <span data-testid="recovery-phrase-12">12</span>, value: 12 },
+          { label: <span data-testid="recovery-phrase-15">15</span>, value: 15 },
+          { label: <span data-testid="recovery-phrase-24">24</span>, value: 24 }
+        ]}
+        defaultValue={defaultMnemonicLength}
+        onChange={onSetMnemonicLength}
+      />
     </>
   );
 
