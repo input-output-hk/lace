@@ -215,19 +215,24 @@ in rec {
     ver = (__fromJSON (__readFile (inputs.self + "/flake.lock"))).nodes.mithril.original.ref;
   in {
     x86_64-linux = pkgs.fetchzip {
+      name = "mithril-${ver}-linux-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-linux-x64.tar.gz";
-      hash = "sha256-oyBhhSG/kvZge3tpZfheGHtD1ivY56+jYgSAH09rswE=";
+      hash = "sha256-BvKBZWEd9b+hCfNyEKr0SVivUDK5lGxZhwLJuSlHCpY=";
       stripRoot = false;
     };
     x86_64-windows = pkgs.fetchzip {
+      name = "mithril-${ver}-windows-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-windows-x64.tar.gz";
-      hash = "sha256-SWPk9zTlmRElOe3l7Ic+jeqo3VNST6wuXfiFogkcrA4=";
+      hash = "sha256-3/KZSxK46Akeno5VUHC0ZX9EZa5vLuMbAdCq7gy1oRw=";
+      stripRoot = false;
     };
     x86_64-darwin = pkgs.fetchzip {
+      name = "mithril-${ver}-macos-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-macos-x64.tar.gz";
-      hash = "sha256-u0S9ClTE38Uv5uyFO4dlS0P/O1cAjeUwl3zarhwk9no=";
+      hash = "sha256-5rQEhBjAQHKS86N7uLzjAp9L/w0c0pGwEA2vbN4n8NI=";
+      stripRoot = false;
     };
-    aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client;
+    aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client-cli;
   }.${targetSystem} // { version = ver; };
 
 }
