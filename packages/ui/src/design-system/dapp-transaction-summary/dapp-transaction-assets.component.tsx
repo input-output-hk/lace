@@ -78,7 +78,7 @@ export const TransactionAssets = ({
           >
             <Text.Body.Normal
               color={isNegativeBalance ? 'primary' : 'success'}
-              weight="$semibold"
+              weight="$medium"
             >
               <span>
                 {balance} {tokenName}

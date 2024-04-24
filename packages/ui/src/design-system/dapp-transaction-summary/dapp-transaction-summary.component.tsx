@@ -55,7 +55,7 @@ export const TransactionSummary = ({
           <Flex justifyContent="flex-end">
             <Text.Body.Normal
               color={transactionAmount.includes('-') ? 'primary' : 'success'}
-              weight="$semibold"
+              weight="$medium"
             >
               {transactionAmount} {cardanoSymbol}
             </Text.Body.Normal>

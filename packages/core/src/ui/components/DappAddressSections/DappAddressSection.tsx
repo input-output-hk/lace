@@ -5,7 +5,6 @@ import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 
 import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
-import cn from 'classnames';
 
 import { Text, TransactionAssets, DappTransactionSummary, Tooltip, SummaryExpander, Box, Flex } from '@lace/ui';
 import { getAddressTagTranslations, renderAddressTag } from '@src/ui/utils';
@@ -133,7 +132,7 @@ export const DappAddressSection = ({
                   {t('core.dappTransaction.tokens')}
                 </Text.Body.Normal>
                 <Text.Body.Normal
-                  className={cn({ [styles.positiveAmount]: addressType === 'to' })}
+                  color={addressType === 'to' ? 'success' : 'primary'}
                   data-testid="dapp-transaction-tokens-value"
                   weight="$medium"
                 >
@@ -161,9 +160,9 @@ export const DappAddressSection = ({
                   {t('core.dappTransaction.nfts')}
                 </Text.Body.Normal>
                 <Text.Body.Normal
-                  className={cn({ [styles.positiveAmount]: addressType === 'to' })}
                   data-testid="dapp-transaction-nfts-amount-value"
                   weight="$medium"
+                  color={addressType === 'to' ? 'success' : 'primary'}
                 >
                   {addressType === 'to'
                     ? `${addressData.nfts.length} ${itemsCountCopy}`

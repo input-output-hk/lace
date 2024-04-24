@@ -2,7 +2,6 @@
 import React from 'react';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 
-import styles from './DappAddressSections.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 
 import { DappAddressSection } from './DappAddressSection';
@@ -35,7 +34,7 @@ export const DappAddressSections = ({
   const { t } = useTranslate();
 
   return (
-    <div className={styles.root}>
+    <>
       <DappAddressSection
         addressType="from"
         coinSymbol={coinSymbol}
@@ -55,6 +54,6 @@ export const DappAddressSections = ({
         ownAddresses={ownAddresses}
         addressToNameMap={addressToNameMap}
       />
-    </div>
+    </>
   );
 };

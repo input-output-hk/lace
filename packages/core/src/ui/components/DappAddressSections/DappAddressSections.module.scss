@@ -1,10 +1,6 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/_typography.scss';
 
-.root {
-  color: var(--text-color-primary);
-}
-
 .address {
   display: flex;
   justify-content: space-between;
@@ -15,8 +11,4 @@
   display: flex;
   justify-content: space-between;
   align-items: end;
-}
-
-.positiveAmount {
-  color: var(--data-green, #2cb67d);
 }

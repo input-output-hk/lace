@@ -161,9 +161,7 @@ export const DappTransaction = ({
         </Box>
 
         <Box mb="$16">
-          <Text.Body.Normal className={styles.additionalInformation} weight="$semibold">
-            {t('core.dappTransaction.additionalInformation')}
-          </Text.Body.Normal>
+          <Text.Body.Normal weight="$semibold">{t('core.dappTransaction.additionalInformation')}</Text.Body.Normal>
         </Box>
 
         {collateral !== undefined && collateral !== BigInt(0) && (
