@@ -117,13 +117,10 @@ const colors: Colors = {
   $divider_bgColor: lightColorScheme.$primary_light_grey_plus,
 
   $bundle_input_container_bgColor: lightColorScheme.$primary_light_grey,
-  $bundle_input_primary_label_color: lightColorScheme.$primary_black,
   $bundle_input_secondary_label_color: lightColorScheme.$primary_dark_grey,
-  $bundle_input_error_label_color: lightColorScheme.$secondary_data_pink,
 
   $bundle_input_max_button_container_bgColor:
     lightColorScheme.$primary_light_grey_plus,
-  $bundle_input_max_button_label_color: lightColorScheme.$primary_dark_grey,
   $bundle_input_max_button_label_color_hover: lightColorScheme.$primary_black,
 
   $bundle_input_remove_button_container_bgColor:
@@ -171,7 +168,6 @@ const colors: Colors = {
   $scrollbar_thumb_container_bgColor: lightColorScheme.$primary_light_grey_plus,
   $scrollbar_thumb_container_bgColor_hover: lightColorScheme.$primary_grey,
 
-  $toggle_switch_label_color: lightColorScheme.$primary_dark_grey,
   $toggle_switch_container_bgColor_on: laceGradient,
   $toggle_switch_container_bgColor_off: lightColorScheme.$primary_grey,
   $toggle_switch_container_bgColor_disabled:
@@ -180,22 +176,13 @@ const colors: Colors = {
   $toggle_switch_thumb_bgColor: lightColorScheme.$primary_grey,
 
   $assets_table_container_bgColor_hover: lightColorScheme.$primary_light_grey,
-  $assets_table_label_primary_color: lightColorScheme.$primary_black,
-  $assets_table_label_secondary_color: lightColorScheme.$primary_dark_grey,
-  $assets_table_market_price_trend_up_label_color:
-    lightColorScheme.$secondary_data_green,
-  $assets_table_market_price_trend_down_label_color:
-    lightColorScheme.$secondary_data_pink,
 
   $dialog_container_bgColor: lightColorScheme.$primary_white,
-  $dialog_title_color: lightColorScheme.$primary_black,
   $dialog_description_color: lightColorScheme.$primary_black,
 
   $side_drawer_container_bgColor: lightColorScheme.$primary_white,
   $side_drawer_separator_bgColor: lightColorScheme.$primary_light_grey_plus,
-  $side_drawer_head_title_color: lightColorScheme.$primary_black,
   $side_drawer_content_title_color: lightColorScheme.$primary_black,
-  $side_drawer_content_description_color: lightColorScheme.$primary_dark_grey,
 
   $search_box_container_bgColor: lightColorScheme.$primary_light_grey,
   $search_box_container_bgColor_pressed:
@@ -221,8 +208,6 @@ const colors: Colors = {
     lightColorScheme.$primary_dark_grey,
 
   $flow_card_container_bgColor: lightColorScheme.$primary_light_grey,
-  $flow_card_label_primary_color: lightColorScheme.$primary_black,
-  $flow_card_label_secondary_color: lightColorScheme.$primary_dark_grey,
 
   $icon_button_label_color: lightColorScheme.$primary_dark_grey,
   $icon_button_label_color_pressed: lightColorScheme.$primary_black,
@@ -235,7 +220,6 @@ const colors: Colors = {
 
   $summary_expander_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
-  $summary_expander_label_color: lightColorScheme.$primary_black,
   $summary_expander_trigger_label_color: lightColorScheme.$primary_black,
   $summary_expander_trigger_label_color_pressed:
     lightColorScheme.$primary_black,
@@ -251,31 +235,19 @@ const colors: Colors = {
   $summary_expander_trigger_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
 
-  $transaction_summary_label_color: lightColorScheme.$primary_black,
-  $transaction_summary_amount_color: lightColorScheme.$primary_black,
-  $transaction_summary_highlighted_amount_color:
-    lightColorScheme.$secondary_data_green,
   $transaction_summary_secondary_label_color:
     lightColorScheme.$primary_dark_grey,
-  $dapp_transaction_summary_positive_balance_label_color:
-    lightColorScheme.$secondary_data_green,
 
   $dapp_transaction_summary_type_label_color:
     lightColorScheme.$primary_accent_purple,
   $dapp_transaction_summary_label: lightColorScheme.$primary_dark_grey,
 
   $toast_bar_container_bgColor: lightColorScheme.$primary_white,
-  $toast_bar_label_color: lightColorScheme.$primary_black,
   $toast_bar_icon_container_bgColor: lightColorScheme.$primary_light_grey,
   $toast_bar_icon_label_color: lightColorScheme.$primary_dark_grey,
 
   $tooltip_container_bgColor: lightColorScheme.$primary_white,
   $tooltip_title_dot_bgColor: lightColorScheme.$primary_accent_purple,
-  $tooltip_label_color: lightColorScheme.$primary_dark_grey,
-  $tooltip_title_color: lightColorScheme.$primary_black,
-
-  $message_title_color: lightColorScheme.$primary_black,
-  $message_description_color: lightColorScheme.$primary_dark_grey,
 
   $input_container_bgColor: lightColorScheme.$primary_light_grey,
   $input_container_hover_outline_color:
@@ -286,16 +258,14 @@ const colors: Colors = {
   $input_button_bgColor: lightColorScheme.$primary_white,
   $input_button_icon_color: lightColorScheme.$primary_dark_grey,
   $input_label_color: lightColorScheme.$primary_dark_grey,
-  $input_error_message_color: lightColorScheme.$secondary_data_pink,
 
   $text_primary: lightColorScheme.$primary_black,
   $text_secondary: lightColorScheme.$primary_dark_grey,
   $text_on_gradient: lightColorScheme.$primary_white,
+  $text_accent: lightColorScheme.$primary_accent_purple,
 
-  $metadata_label_color: lightColorScheme.$primary_black,
   $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
 
-  $text_link_label_color: lightColorScheme.$secondary_data_blue,
   $text_link_label_color_visited: lightColorScheme.$primary_hover_purple,
   $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 
@@ -351,8 +321,6 @@ const colors: Colors = {
     lightColorScheme.$primary_light_grey_plus_0_56,
   $educational_card_item_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
-  $educational_card_item_label_color: lightColorScheme.$primary_dark_grey,
-  $educational_card_item_title_color: lightColorScheme.$primary_black,
   $educational_card_item_icon_container_bgColor:
     lightColorScheme.$primary_white,
   $educational_card_item_icon_container_borderColor:

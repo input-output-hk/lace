@@ -4,7 +4,7 @@ import React from 'react';
 import { Box } from '../box';
 import { CallToAction } from '../buttons';
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './info-bar.css';
 
@@ -26,9 +26,9 @@ export const InfoBar = ({
     <Flex className={cx.container}>
       <Box className={cx.icon}>{icon}</Box>
       <Box>
-        <Typography.Button weight="$semibold" className={cx.message}>
+        <Text.Button weight="$semibold" className={cx.message}>
           {message}
-        </Typography.Button>
+        </Text.Button>
       </Box>
 
       {callToAction && (

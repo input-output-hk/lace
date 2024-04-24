@@ -4,7 +4,7 @@ import { ReactComponent as HappyEmoji } from '@lace/icons/dist/HappyEmojiCompone
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './message.css';
 
@@ -39,21 +39,19 @@ export const Message = ({
       {title && (
         <Box className={cx.title}>
           {type === MessageType.SIDE_DRAWER ? (
-            <Typography.Heading weight="$bold">{title}</Typography.Heading>
+            <Text.Heading weight="$bold">{title}</Text.Heading>
           ) : (
-            <Typography.Body.Large weight="$bold">
-              {title}
-            </Typography.Body.Large>
+            <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
           )}
         </Box>
       )}
       <Box className={cx.description}>
         {type === MessageType.SIDE_DRAWER ? (
-          <Typography.Body.Normal weight="$semibold">
+          <Text.Body.Normal color="secondary" weight="$semibold">
             {description}
-          </Typography.Body.Normal>
+          </Text.Body.Normal>
         ) : (
-          <Typography.Body.Small>{description}</Typography.Body.Small>
+          <Text.Body.Small color="secondary">{description}</Text.Body.Small>
         )}
       </Box>
     </Flex>

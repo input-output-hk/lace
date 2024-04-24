@@ -7,7 +7,7 @@ import cn from 'classnames';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { ScrollArea } from '../scroll-area';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { CloseButton } from './auto-suggest-box-close-button.component';
 import { Icon } from './auto-suggest-box-icon.component';
@@ -149,7 +149,9 @@ export const AutoSuggestBox = <SuggestionType extends SuggestionBaseType>({
             </Select.Content>
           </Popover.Content>
           {Boolean(errorMessage) && (
-            <Text.Label className={cx.errorMessage}>{errorMessage}</Text.Label>
+            <Text.Label color="error" className={cx.errorMessage}>
+              {errorMessage}
+            </Text.Label>
           )}
         </Box>
       </Select.Root>
