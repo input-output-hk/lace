@@ -133,7 +133,12 @@ export const DappAddressSection = ({
               <Text.Body.Small data-testid="dapp-transaction-address" weight="$medium">
                 <Tooltip label={address}>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</Tooltip>
               </Text.Body.Small>
-              {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+              {renderAddressTag({
+                address,
+                translations: getAddressTagTranslations(t),
+                ownAddresses,
+                addressToNameMap
+              })}
             </Flex>
           </div>
           {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (

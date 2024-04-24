@@ -373,7 +373,12 @@ export const TransactionDetails = ({
                     return (
                       <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
                         {address}
-                        {renderAddressTag(addr, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+                        {renderAddressTag({
+                          address: addr,
+                          translations: getAddressTagTranslations(t),
+                          ownAddresses,
+                          addressToNameMap
+                        })}
                       </div>
                     );
                   })}

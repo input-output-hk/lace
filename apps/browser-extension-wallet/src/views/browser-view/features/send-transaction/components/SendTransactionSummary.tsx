@@ -17,6 +17,8 @@ import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers'
 import { useObservable, Banner } from '@lace/common';
 import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
+import { walletRepository } from '@lib/wallet-api-ui';
 
 const { Text } = Typography;
 
@@ -98,7 +100,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
+    const { builtTxData: { uiTx: { fee, outputs, handleResolutions } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
     const {
       inMemoryWallet,
@@ -128,24 +130,34 @@ export const SendTransactionSummary = withAddressBookContext(
       [addressList]
     );
 
-    const rows = [...(outputs?.values() ?? [])].map((item) => ({
-      list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
-      recipientAddress: item.address,
-      recipientName:
-        addressToNameMap?.get(item.handleResolution?.handle || item.address) || item.handleResolution?.handle
-    }));
+    const rows = [...(outputs?.values() ?? [])].map<OutputSummaryProps>((item) => {
+      const handle =
+        item.handleResolution?.handle ||
+        handleResolutions.find(({ cardanoAddress }) => cardanoAddress === item.address)?.handle;
+      return {
+        list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
+        recipientAddress: item.address,
+        recipientName: addressToNameMap?.get(handle || item.address),
+        recipientHandle: handle
+      };
+    });
+
+    const ownAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
+    const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
 
     // Where do we get the deposit field? LW-1363
     return (
       <>
         <OutputSummaryList
-          rows={rows as OutputSummaryProps[]}
+          rows={rows}
           txFee={{
             ...getFee(fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
             tootipText: t('send.theAmountYoullBeChargedToProcessYourTransaction')
           }}
           metadata={metadata}
           translations={outputSummaryListTranslation}
+          addressToNameMap={addressToNameMap}
+          ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
         />
         {isHardwareWallet && !isPopupView && (
           <Text className={styles.connectLedgerText}>

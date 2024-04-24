@@ -92,7 +92,12 @@ export const TransactionInputOutput = ({
                   <div data-testid="tx-address" className={cn(styles.addressDetail, styles.content)}>
                     <Tooltip title={inputAddress}>{addEllipsis(inputAddress, 8, 8)}</Tooltip>
                   </div>
-                  {renderAddressTag(inputAddress, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+                  {renderAddressTag({
+                    address: inputAddress,
+                    translations: getAddressTagTranslations(t),
+                    ownAddresses,
+                    addressToNameMap
+                  })}
                 </Flex>
               </div>
 
