@@ -12,7 +12,11 @@ import localStorageManager from '../utils/localStorageManager';
 import networkManager from '../utils/networkManager';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import { cleanBrowserStorage } from '../utils/browserStorage';
+import {
+  shiftBackFiatPriceFetchedTimeInBrowserStorage,
+  cleanBrowserStorage,
+  deleteFiatPriceTimestampFromBackgroundStorage
+} from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -201,13 +205,6 @@ When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' 
   await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true');
 });
 
-When(
-  /^I enable network interception to fail request: "([^"]*)" with error (\d*)$/,
-  async (urlPattern: string, errorCode: number) => {
-    await networkManager.failResponse(urlPattern, errorCode);
-  }
-);
-
 When(/^I click outside the drawer$/, async () => {
   await new CommonDrawerElements().areaOutsideDrawer.click();
 });
@@ -363,4 +360,27 @@ When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixel
 
 Given(/^I confirm multi-address discovery modal$/, async () => {
   await settingsExtendedPageObject.multiAddressModalConfirm();
+});
+
+When(/^I enable network interception to fail request: "([^"]*)"$/, async (urlPattern: string) => {
+  await networkManager.failRequest(urlPattern);
+});
+
+When(
+  /^I enable network interception to finish request: "([^"]*)" with error (\d*)$/,
+  async (urlPattern: string, errorCode: number) => {
+    await networkManager.finishWithResponseCode(urlPattern, errorCode);
+  }
+);
+
+Given(/^I shift back last fiat price fetch time in local storage by (\d+) seconds$/, async (seconds: number) => {
+  await shiftBackFiatPriceFetchedTimeInBrowserStorage(seconds);
+});
+
+Then(/^I disable network interception$/, async () => {
+  await networkManager.closeOpenedCdpSessions();
+});
+
+Given(/^I delete fiat price timestamp from background storage$/, async () => {
+  await deleteFiatPriceTimestampFromBackgroundStorage();
 });

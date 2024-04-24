@@ -405,6 +405,16 @@ const colors: Colors = {
   $info_bar_container_bgColor: lightColorScheme.$secondary_cream,
   $info_bar_icon_color: lightColorScheme.$secondary_data_pink,
   $info_bar_message_color: lightColorScheme.$primary_black,
+
+  $address_tag_own_color: lightColorScheme.$secondary_data_pink,
+  $address_tag_own_bgColor: rgba(lightColorScheme.$secondary_data_pink, 0.1),
+  $address_tag_handle_color: lightColorScheme.$primary_accent_purple,
+  $address_tag_handle_bgColor: rgba(
+    lightColorScheme.$primary_accent_purple,
+    0.1,
+  ),
+  $address_tag_foreign_color: lightColorScheme.$primary_dark_grey,
+  $address_tag_foreign_bgColor: lightColorScheme.$primary_light_grey,
 };
 
 export const elevation: Elevation = {

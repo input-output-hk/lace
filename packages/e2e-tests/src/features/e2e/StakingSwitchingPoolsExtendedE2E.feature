@@ -13,7 +13,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I wait for single search result
     And I click stake pool with name "OtherStakePool"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    And I save stake pool info
+    And I save stake pool details
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Fine by me" button on "Switching pool?" modal
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
@@ -37,7 +37,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I wait for single search result
     And I click stake pool with name "-"
     Then I see drawer with stake pool details without metadata and a button available for staking
-    And I save stake pool info
+    And I save stake pool details
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Fine by me" button on "Switching pool?" modal
     And I click "Next" button on staking confirmation drawer
@@ -53,7 +53,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   @LW-4558 @Testnet
   Scenario: Extended View - Staking - Staking error screen displayed on transaction submit error
-    Given I enable network interception to fail request: "*/tx-submit/submit" with error 400
+    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     When I navigate to Staking extended page
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
     When I input "OtherStakePool" to the search bar

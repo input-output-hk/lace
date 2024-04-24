@@ -1368,6 +1368,8 @@
   "core.receive.usedAddresses.copy": "Copy Address",
   "core.receive.usedAddresses.addressCopied": "Address copied",
   "core.receive.showUsedAddresses": "Show used addresses",
+  "core.addressTags.own": "own",
+  "core.addressTags.foreign": "foreign",
   "addressesDiscovery.overlay.title": "Your wallet is syncing, this might take a few minutes",
   "addressesDiscovery.toast.errorText": "Wallet failed to sync",
   "addressesDiscovery.toast.successText": "Wallet synced successfully",

@@ -280,6 +280,13 @@ export const colors = {
   $info_bar_container_bgColor: '',
   $info_bar_message_color: '',
   $info_bar_icon_color: '',
+
+  $address_tag_own_color: '',
+  $address_tag_own_bgColor: '',
+  $address_tag_handle_color: '',
+  $address_tag_handle_bgColor: '',
+  $address_tag_foreign_color: '',
+  $address_tag_foreign_bgColor: '',
 };
 
 export type Colors = typeof colors;
