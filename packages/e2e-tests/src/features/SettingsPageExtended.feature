@@ -363,7 +363,7 @@ Feature: General Settings - Extended Browser View
     And I click "Remove wallet" button on "Remove wallet" modal
     And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
-    When I click "Restore" button and confirm
+    When I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page with wallet TAWalletNoFunds from "Restore" wallet flow
     When I click "Enter wallet" button
     Then I see LW homepage

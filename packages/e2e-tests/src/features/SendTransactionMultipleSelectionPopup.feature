@@ -13,10 +13,10 @@ Feature: Send - Multiple selection for Popup View
     And click on the <assetsType> button in the coin selector dropdown
     And I click "Select multiple" button on asset picker drawer
     And I select amount: 30 of asset type: <assetsType>
-    Then the 3 selected <assetsType> are grayed out and display checkmark
+    Then the 30 selected <assetsType> are grayed out and display checkmark
     And I see counter with number: 30 of selected tokens
     When I deselect <assetsType> 30
-    Then the 2 selected <assetsType> are grayed out and display checkmark
+    Then the 29 selected <assetsType> are grayed out and display checkmark
     And I see counter with number: 29 of selected tokens
     When I save selected <assetsType> in bundle 1
     And I click "Add to transaction" button on asset picker drawer

@@ -119,7 +119,7 @@ class SettingsPageAssert {
   async assertSeeRemoveWalletButton() {
     await SettingsPage.removeWalletButton.waitForDisplayed();
     expect(await SettingsPage.removeWalletButton.getText()).to.equal(
-      await t('browserView.settings.wallet.general.removeWalletAction')
+      await t('browserView.settings.wallet.general.removeAction')
     );
   }
 
