@@ -38,3 +38,7 @@ export const tooltipIcon = style([
     width: '$24',
   }),
 ]);
+
+export const iconContainer = style({
+  lineHeight: 0,
+});

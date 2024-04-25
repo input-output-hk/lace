@@ -38,11 +38,9 @@ export const TransactionSummary = ({
       <Flex justifyContent="flex-start" mb="$18">
         <Text.Body.Normal weight="$semibold">{title}</Text.Body.Normal>
         {tooltip && (
-          <Box ml="$8">
+          <Box ml="$8" className={styles.iconContainer}>
             <Tooltip label={tooltip}>
-              <div>
-                <InfoIcon className={styles.tooltipIcon} />
-              </div>
+              <InfoIcon className={styles.tooltipIcon} />
             </Tooltip>
           </Box>
         )}
