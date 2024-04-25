@@ -215,6 +215,12 @@ export const WalletSetupWizard = ({
     moveForward();
   };
 
+  const handleCloseMnemonicResetModal = () => {
+    setIsResetMnemonicModalOpen(false);
+    setResetMnemonicStage('');
+    setIsBackFromNextStep(false);
+  };
+
   const renderedMnemonicStep = () => {
     if ([SetupType.RESTORE, SetupType.FORGOT_PASSWORD].includes(setupType)) {
       const isMnemonicSubmitEnabled = util.validateMnemonic(util.joinMnemonicWords(mnemonic));
@@ -242,7 +248,6 @@ export const WalletSetupWizard = ({
         onReset={(resetStage) => {
           setResetMnemonicStage(resetStage);
           resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : onCancel();
-          resetStage === 'input' && setIsBackFromNextStep(false);
         }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
@@ -301,17 +306,13 @@ export const WalletSetupWizard = ({
           visible={isResetMnemonicModalOpen}
           cancelLabel={t('browserView.walletSetup.mnemonicResetModal.cancel')}
           confirmLabel={t('browserView.walletSetup.mnemonicResetModal.confirm')}
-          onCancel={() => {
-            setIsResetMnemonicModalOpen(false);
-            setResetMnemonicStage('');
-          }}
+          onCancel={handleCloseMnemonicResetModal}
           onConfirm={() => {
+            handleCloseMnemonicResetModal();
             setMnemonic(util.generateMnemonicWords());
-            setIsResetMnemonicModalOpen(false);
             if (resetMnemonicStage === 'writedown') {
               moveBack();
             }
-            setResetMnemonicStage('');
           }}
         />
       )}
