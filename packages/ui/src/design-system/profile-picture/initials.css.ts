@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 
-import { sx } from '../../design-tokens';
+import { sx, vars } from '../../design-tokens';
 
 export const root = style([
   sx({
@@ -23,10 +23,8 @@ export const circle = sx({
 });
 
 export const text = style([
-  sx({
-    color: '$profile_picture_initials_label_color',
-  }),
   {
+    color: vars.colors.$profile_picture_initials_label_color,
     zIndex: 1,
   },
 ]);

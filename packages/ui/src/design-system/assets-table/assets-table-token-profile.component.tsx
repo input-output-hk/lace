@@ -3,7 +3,7 @@ import React from 'react';
 import { Box } from '../box';
 import { Grid, Cell } from '../grid';
 import { Image } from '../profile-picture';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './assets-table-token-profile.css';
 
@@ -27,16 +27,11 @@ export const TokenProfile = ({
           </Box>
         </Cell>
         <Cell>
-          <Typography.Body.Large weight="$semibold" className={cx.name}>
-            {name}
-          </Typography.Body.Large>
+          <Text.Body.Large weight="$semibold">{name}</Text.Body.Large>
           <Box>
-            <Typography.Body.Normal
-              weight="$semibold"
-              className={cx.description}
-            >
+            <Text.Body.Normal color="secondary" weight="$semibold">
               {description}
-            </Typography.Body.Normal>
+            </Text.Body.Normal>
           </Box>
         </Cell>
       </Grid>

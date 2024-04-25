@@ -42,22 +42,6 @@ export const iconBox = style([
   },
 ]);
 
-export const label = sx({
-  color: '$text_primary',
-});
-
-export const highlightLabel = sx({
-  color: '$data_blue',
-});
-
-export const supportedFormatText = sx({
-  color: '$text_secondary',
-});
-
-export const fileName = sx({
-  color: '$text_primary',
-});
-
 export const checkIconBox = style([
   sx({
     w: '$24',
@@ -72,8 +56,4 @@ export const removeButtonBox = style({
   border: 'none',
   cursor: 'pointer',
   padding: 0,
-});
-
-export const removeButtonLabel = sx({
-  color: '$data_pink',
 });

@@ -19,7 +19,6 @@ export const container = style([
 ]);
 
 export const label = style([
-  sx({ color: '$bundle_input_max_button_label_color' }),
   {
     selectors: {
       [`${button}:hover &`]: {

@@ -3,6 +3,8 @@ import React, { ReactNode } from 'react';
 import styles from './NftDetail.module.scss';
 import { NftImage } from './NftImage';
 import { TranslationsFor } from '@ui/utils/types';
+import { ControlButton } from '@lace/ui';
+import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 
 export interface NftDetailProps {
   title?: ReactNode;
@@ -10,7 +12,8 @@ export interface NftDetailProps {
   tokenInformation: LabeledInfo[];
   attributes?: string;
   amount?: number | string;
-  translations: TranslationsFor<'tokenInformation' | 'attributes'>;
+  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar'>;
+  onSetAsAvatar?: (image: string) => void;
 }
 
 const JSON_INDENTATION = 2;
@@ -29,7 +32,8 @@ export const NftDetail = ({
   tokenInformation,
   attributes,
   amount,
-  translations
+  translations,
+  onSetAsAvatar
 }: NftDetailProps): React.ReactElement => (
   <div className={styles.nftDetail}>
     {title}
@@ -43,6 +47,12 @@ export const NftDetail = ({
         <NftImage image={image} detailView popupView />
       </div>
     </div>
+    <ControlButton.Outlined
+      size="small"
+      label={translations.setAsAvatar}
+      icon={<ProfileIcon />}
+      onClick={() => onSetAsAvatar(image)}
+    />
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
         <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>

@@ -14,7 +14,7 @@ import testContext from '../utils/testContext';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import NoWalletModal from '../elements/dappConnector/noWalletModal';
 import extensionUtils from '../utils/utils';
-import TokensPageObject from '../pageobject/tokensPageObject';
+import TokensPage from '../elements/tokensPage';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
@@ -218,9 +218,7 @@ class DAppConnectorAssert {
     expect(await ExampleDAppPage.walletNetworkId.getText()).to.equal(extensionUtils.isMainnet() ? '1' : '0');
     expect(await ExampleDAppPage.walletUtxo.getText()).not.to.be.empty;
 
-    const actualWalletLovelaceBalance = Number(
-      (Number(await TokensPageObject.loadTokenBalance('Cardano')) * 100).toFixed(0)
-    );
+    const actualWalletLovelaceBalance = Number((Number(await TokensPage.loadTokenBalance('Cardano')) * 100).toFixed(0));
     const dAppWalletLovelaceBalance = Math.trunc(Number(await ExampleDAppPage.walletBalance.getText()) / 10_000);
 
     expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 2);

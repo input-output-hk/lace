@@ -133,6 +133,7 @@ export const DappTransaction = ({
         <DappTransactionSummary
           testId="dapp-transaction-summary-row"
           title={t('core.dappTransaction.transactionSummary')}
+          adaTooltip={t('core.dappTransaction.adaTooltip')}
           cardanoSymbol={coinSymbol}
           transactionAmount={Wallet.util.lovelacesToAdaString(coins.toString())}
         />
@@ -147,7 +148,13 @@ export const DappTransaction = ({
                 testId="dapp-transaction-summary-row"
                 key={key}
                 imageSrc={imageSrc}
+                translations={{
+                  assetId: t('core.dappTransaction.assetId'),
+                  policyId: t('core.dappTransaction.policyId')
+                }}
                 balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
+                assetId={assetWithAmount.assetInfo.assetId}
+                policyId={assetWithAmount.assetInfo.policyId}
                 tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
                 showImageBackground={imageSrc === undefined}
               />
