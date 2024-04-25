@@ -20,7 +20,7 @@ export const verifyHandle = async (
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
     const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1).toLowerCase()] });
-    if (resolvedHandles.length === 0 || resolvedHandles === null) {
+    if (!resolvedHandles[0]) {
       return { valid: false };
     }
     return { valid: true, handles: resolvedHandles };
@@ -95,12 +95,10 @@ export const validateWalletHandle = async ({ value, handleResolver }: validateWa
   }
 
   const response = await verifyHandle(value, handleResolver);
-  const handles = response.handles;
 
-  if (!handles) {
+  if (!response) {
     throw new Error(i18n.t('general.errors.incorrectHandle'));
   }
-
   return '';
 };
 
