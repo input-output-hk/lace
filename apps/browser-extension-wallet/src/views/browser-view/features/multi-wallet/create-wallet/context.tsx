@@ -1,8 +1,6 @@
-import { CreateWalletParams, useWalletManager } from '@hooks';
+import { CreateWalletParams } from '@hooks';
 import { PostHogAction } from '@lace/common';
-import { useAnalyticsContext } from '@providers';
 import { walletRoutePaths } from '@routes';
-import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import React, { createContext, useContext, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useSoftwareWalletCreation } from '../useSoftwareWalletCreation';
@@ -40,10 +38,9 @@ export const useCreateWallet = (): State => {
 
 export const CreateWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const history = useHistory();
-  const analytics = useAnalyticsContext();
-  const { createWallet, walletRepository } = useWalletManager();
-  const { clearSecrets, createWalletData, setCreateWalletData } = useSoftwareWalletCreation({
-    initialMnemonic: providers.generateMnemonicWords()
+  const { clearSecrets, createWallet, createWalletData, setCreateWalletData } = useSoftwareWalletCreation({
+    initialMnemonic: providers.generateMnemonicWords(),
+    postHogActionWalletAdded: PostHogAction.MultiWalletCreateAdded
   });
   const [step, setStep] = useState<Step>(Step.RecoveryPhrase);
 
@@ -53,16 +50,6 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
 
   const onNameAndPasswordChange: OnNameAndPasswordChange = ({ name, password }) => {
     setCreateWalletData((prevState) => ({ ...prevState, name, password }));
-  };
-
-  const completeCreation = async () => {
-    const { source } = await createWallet(createWalletData);
-    void analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
-      // eslint-disable-next-line camelcase
-      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-    });
-    void analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-    clearSecrets();
   };
 
   const setFormDirty = (dirty: boolean) => {
@@ -77,7 +64,8 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
         break;
       }
       case Step.Setup: {
-        await completeCreation();
+        await createWallet();
+        clearSecrets();
         history.push(walletRoutePaths.assets);
         break;
       }
