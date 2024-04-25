@@ -4,13 +4,13 @@ export const transactionTypeContainer = style({
   padding: '20px 0',
 });
 
-export const adaIcon = style([
+export const cardanoIcon = style([
   sx({
     display: 'flex',
   }),
   {
-    width: '34px',
-    height: '26px',
+    width: '32px',
+    height: '32px',
   },
 ]);
 

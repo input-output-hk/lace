@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 import React from 'react';
 
-import { ReactComponent as AdaComponent } from '@lace/icons/dist/AdaComponent';
+import { ReactComponent as CardanoLogoComponent } from '@lace/icons/dist/CardanoLogoComponent';
 import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
 
 import { Box } from '../box';
@@ -18,6 +18,7 @@ import type { OmitClassName } from '../../types';
 type Props = OmitClassName<'div'> & {
   testId?: string;
   transactionAmount: string;
+  adaTooltip: string;
   title?: string;
   cardanoSymbol?: string;
   tooltip?: string;
@@ -26,6 +27,7 @@ type Props = OmitClassName<'div'> & {
 export const TransactionSummary = ({
   testId,
   transactionAmount,
+  adaTooltip,
   title,
   cardanoSymbol,
   tooltip,
@@ -49,16 +51,20 @@ export const TransactionSummary = ({
     <div className={styles.txAmountContainer} data-testid={testId}>
       <Grid {...props} alignItems="$center" columns="$2">
         <Cell>
-          <AdaComponent className={styles.adaIcon} />
+          <Tooltip label={adaTooltip}>
+            <CardanoLogoComponent className={styles.cardanoIcon} />
+          </Tooltip>
         </Cell>
         <Cell>
           <Flex justifyContent="flex-end">
-            <Text.Body.Normal
-              color={transactionAmount.includes('-') ? 'primary' : 'success'}
-              weight="$medium"
-            >
-              {transactionAmount} {cardanoSymbol}
-            </Text.Body.Normal>
+            <Tooltip label={adaTooltip}>
+              <Text.Body.Normal
+                color={transactionAmount.includes('-') ? 'primary' : 'success'}
+                weight="$medium"
+              >
+                {transactionAmount} {cardanoSymbol}
+              </Text.Body.Normal>
+            </Tooltip>
           </Flex>
         </Cell>
       </Grid>
