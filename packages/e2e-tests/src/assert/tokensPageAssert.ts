@@ -29,7 +29,7 @@ class TokensPageAssert {
   };
 
   assertCounterNumberMatchesWalletTokens = async () => {
-    const tokensCounterValue = Number((await TokensPage.counter.getText()).slice(1, -1));
+    const tokensCounterValue = await TokensPage.getTokensCounterAsNumber();
     if (tokensCounterValue > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
     await TokensPage.tokenRowSkeleton.waitForDisplayed({ reverse: true, timeout: 60_000 });
     const rowsNumber = (await TokensPage.getRows()).length;
