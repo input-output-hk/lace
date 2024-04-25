@@ -3,7 +3,10 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
+import DarkFallBack from '../../assets/images/dark-mode-fallback.png';
+import LightFallBack from '../../assets/images/light-mode-fallback.png';
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
+import { useThemeVariant } from '../../design-tokens/theme/hooks/use-theme-variant';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -25,25 +28,41 @@ export default {
   decorators: [page({ title: 'Profile picture', subtitle })],
 } as Meta;
 
-const Images = (): JSX.Element => (
-  <>
-    <Variants.Row>
-      <Variants.Cell>
-        <UserProfile imageSrc="" fallback="L" delayMs={0} />
-      </Variants.Cell>
-    </Variants.Row>
-    <Variants.Row>
-      <Variants.Cell>
-        <Initials letter="M" />
-      </Variants.Cell>
-    </Variants.Row>
-    <Variants.Row>
-      <Variants.Cell>
-        <Image imageSrc={cardanoImage} />
-      </Variants.Cell>
-    </Variants.Row>
-  </>
-);
+const Images = (): JSX.Element => {
+  const { theme } = useThemeVariant();
+  const fallbackImage =
+    theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
+
+  return (
+    <>
+      <Variants.Row>
+        <Variants.Cell>
+          <UserProfile imageSrc="" fallbackText="L" delayMs={0} />
+        </Variants.Cell>
+      </Variants.Row>
+      <Variants.Row>
+        <Variants.Cell>
+          <UserProfile
+            imageSrc=""
+            delayMs={0}
+            fallbackText="FallbackImage has priority over fallbackText"
+            fallbackImage={fallbackImage}
+          />
+        </Variants.Cell>
+      </Variants.Row>
+      <Variants.Row>
+        <Variants.Cell>
+          <Initials letter="M" />
+        </Variants.Cell>
+      </Variants.Row>
+      <Variants.Row>
+        <Variants.Cell>
+          <Image imageSrc={cardanoImage} />
+        </Variants.Cell>
+      </Variants.Row>
+    </>
+  );
+};
 
 export const Overview = (): JSX.Element => (
   <Grid columns="$1">
@@ -52,7 +71,7 @@ export const Overview = (): JSX.Element => (
         <Variants.Table headers={['User profile', 'Initials', 'Image']}>
           <Variants.Row>
             <Variants.Cell>
-              <UserProfile imageSrc="" fallback="L" delayMs={0} />
+              <UserProfile imageSrc="" fallbackText="L" delayMs={0} />
             </Variants.Cell>
             <Variants.Cell>
               <Initials letter="M" />
@@ -74,18 +93,18 @@ export const Overview = (): JSX.Element => (
         >
           <Variants.Row>
             <Variants.Cell>
-              <UserProfile imageSrc="" fallback="L" />
+              <UserProfile imageSrc="" fallbackText="L" />
             </Variants.Cell>
             <Variants.Cell>
               <UserProfile
                 imageSrc="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-                fallback="L"
+                fallbackText="L"
               />
             </Variants.Cell>
             <Variants.Cell>
               <UserProfile
                 imageSrc="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-                fallback="L"
+                fallbackText="L"
                 radius="rounded"
               />
             </Variants.Cell>

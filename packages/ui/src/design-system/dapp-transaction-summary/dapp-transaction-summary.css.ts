@@ -30,3 +30,15 @@ export const assetsContainer = style({
 export const txSummaryContainer = style({
   paddingTop: '20px',
 });
+
+export const tooltipIcon = style([
+  sx({
+    color: '$text_primary',
+    height: '$24',
+    width: '$24',
+  }),
+]);
+
+export const iconContainer = style({
+  lineHeight: 0,
+});
