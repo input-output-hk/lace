@@ -10,9 +10,9 @@ class OnboardingAnalyticsBannerAssert {
   async assertBannerIsDisplayedCorrectly() {
     await AnalyticsBanner.container.waitForDisplayed();
     await AnalyticsBanner.agreeButton.waitForDisplayed();
-    expect(await AnalyticsBanner.agreeButton.getText()).to.equal(await t('core.confirmationBanner.agree', 'core'));
+    expect(await AnalyticsBanner.agreeButton.getText()).to.equal(await t('core.confirmationBanner.agree'));
     await AnalyticsBanner.rejectButton.waitForDisplayed();
-    expect(await AnalyticsBanner.rejectButton.getText()).to.equal(await t('core.confirmationBanner.reject', 'core'));
+    expect(await AnalyticsBanner.rejectButton.getText()).to.equal(await t('core.confirmationBanner.reject'));
     await AnalyticsBanner.message.waitForDisplayed();
     expect(await AnalyticsBanner.message.getText()).to.equal(await t('analyticsConfirmationBanner.message'));
     await AnalyticsBanner.learnMore.waitForDisplayed();
