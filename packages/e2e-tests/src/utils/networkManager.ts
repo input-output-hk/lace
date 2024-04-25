@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-import { ChainablePromiseElement } from 'webdriverio';
 import { Logger } from '../support/logger';
 import allure from '@wdio/allure-reporter';
 import { CDPSession } from 'puppeteer';
@@ -8,36 +7,6 @@ import { browser } from '@wdio/globals';
 export class NetworkManager {
   private readonly NETWORK_ENABLE = 'Network.enable';
   private static cdpSessions: CDPSession[] = [];
-
-  isNetworkActivityPresentByPartialUrl = async (
-    partialUrl: string,
-    elementToClick?: ChainablePromiseElement<WebdriverIO.Element>,
-    expectedQueryParams?: string[]
-  ): Promise<boolean> => {
-    let initialCondition = false;
-    await browser.call(async () => {
-      const puppeteer = await browser.getPuppeteer();
-      const targets = puppeteer.targets().filter((target) => target.type() === 'page');
-      targets.map(async (target) => {
-        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
-        NetworkManager.cdpSessions.push(client);
-        await client.send(this.NETWORK_ENABLE);
-        client.on('Network.requestWillBeSent', (params: any) => {
-          if (params.request.url.includes(partialUrl)) {
-            Logger.log(`Request match: ${partialUrl} => ${params.request.url}`);
-            Logger.log(`expected params: ${expectedQueryParams}`);
-            initialCondition = !expectedQueryParams
-              ? true
-              : expectedQueryParams.every((param: string) => params.request.url.includes(param));
-          }
-        });
-      });
-    });
-    elementToClick ? await elementToClick.click() : await browser.refresh();
-    await browser.pause(1000);
-
-    return initialCondition;
-  };
 
   changeNetworkCapabilitiesOfBrowser = async (offline: boolean): Promise<any> => {
     await browser.call(async () => {

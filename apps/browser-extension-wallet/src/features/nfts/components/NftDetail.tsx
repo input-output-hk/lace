@@ -35,7 +35,8 @@ export const NftDetail = (): React.ReactElement => {
 
   const nftDetailTranslation = {
     tokenInformation: t('core.nftDetail.tokenInformation'),
-    attributes: t('core.nftDetail.attributes')
+    attributes: t('core.nftDetail.attributes'),
+    setAsAvatar: t('core.nftDetail.setAsAvatar')
   };
 
   const handleOpenSend = () => {

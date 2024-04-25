@@ -142,6 +142,7 @@ export enum PostHogAction {
   NFTsCreateFolderClick = 'nft | nfts | create folder | click',
   NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
   NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
+  NFTDetailSetAsAvatarClick = 'nft | nft detail | set as your wallet avatar | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -200,6 +201,9 @@ export enum PostHogAction {
   SettingsFaqsClick = 'settings | faqs | click',
   SettingsWalletHdWalletSyncSyncClick = 'settings | wallet | hd wallet sync | sync | click',
   SettingsWalletHdWalletSyncSyncNewAddresses = 'settings | wallet | hd wallet sync | sync | new addresses',
+  SettingsCustomSubmitApiClick = 'settings | custom submit api | click',
+  SettingsCustomSubmitApiXClick = 'settings | custom submit api | x | click',
+  SettingsCustomSubmitApiEnableClick = 'settings | custom submit api | enable | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

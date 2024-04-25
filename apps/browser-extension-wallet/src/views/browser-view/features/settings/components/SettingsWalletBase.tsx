@@ -9,7 +9,7 @@ import { NetworkChoiceDrawer } from './NetworkChoiceDrawer';
 import { useWalletStore } from '@src/stores';
 import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
-import { COLLATERAL_AMOUNT_LOVELACES, useRedirection } from '@hooks';
+import { COLLATERAL_AMOUNT_LOVELACES, useCustomSubmitApi, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { useSearchParams, useObservable, Button } from '@lace/common';
@@ -18,6 +18,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import uniq from 'lodash/uniq';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
+import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
 
 const { Title } = Typography;
 
@@ -26,7 +27,8 @@ export enum SettingsDrawer {
   collateral = 'collateral',
   dappList = 'dappList',
   general = 'general',
-  networkChoice = 'networkChoice'
+  networkChoice = 'networkChoice',
+  customSubmitApi = 'customSubmitApi'
 }
 
 export type SettingsSearchParams<AdditionalDrawers extends string> = {
@@ -67,6 +69,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
   const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true';
@@ -108,9 +111,14 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const handleOpenGeneralSettingsDrawer = () =>
     handleOpenDrawer(SettingsDrawer.general, PostHogAction.SettingsYourKeysClick);
 
+  const handleOpenCustomSubmitApiDrawer = () =>
+    handleOpenDrawer(SettingsDrawer.customSubmitApi, PostHogAction.SettingsCustomSubmitApiClick);
+
   const handleCloseNetworkChoiceDrawer = () => handleCloseDrawer(PostHogAction.SettingsNetworkXClick);
 
   const handleCloseGeneralSettingsDrawer = () => handleCloseDrawer(PostHogAction.SettingsYourKeysShowPublicKeyXClick);
+
+  const handleCloseCustomSubmitApiDrawer = () => handleCloseDrawer(PostHogAction.SettingsCustomSubmitApiXClick);
 
   const handleSendAnalyticsEvent = (postHogEvent: PostHogAction) => analytics.sendEventToPostHog(postHogEvent);
 
@@ -153,6 +161,11 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         popupView={popupView}
         sendAnalyticsEvent={handleSendAnalyticsEvent}
       />
+      <CustomSubmitApiDrawer
+        visible={activeDrawer === SettingsDrawer.customSubmitApi}
+        onClose={handleCloseCustomSubmitApiDrawer}
+        popupView={popupView}
+      />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
@@ -186,6 +199,17 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
             </SettingsLink>
           </>
         )}
+        <SettingsLink
+          description={t('browserView.settings.wallet.customSubmitApi.settingsLinkDescription')}
+          onClick={handleOpenCustomSubmitApiDrawer}
+          addon={
+            getCustomSubmitApiForNetwork(environmentName).status
+              ? t('browserView.settings.wallet.customSubmitApi.enabled')
+              : t('browserView.settings.wallet.customSubmitApi.disabled')
+          }
+        >
+          {t('browserView.settings.wallet.customSubmitApi.settingsLinkTitle')}
+        </SettingsLink>
         {authorizedAppsEnabled && (
           <>
             <DappListDrawer

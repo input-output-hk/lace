@@ -52,7 +52,14 @@ const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
 const charBeforeEllName = 9;
 const charAfterEllName = 0;
 
-const displayGroupedNFTs = (nfts: AssetInfoWithAmount[], testId?: string) =>
+type UseTranslate = ReturnType<typeof useTranslate>['t'];
+
+const getTransactionAssetTranslations = (t: UseTranslate) => ({
+  assetId: t('core.dappTransaction.assetId'),
+  policyId: t('core.dappTransaction.policyId')
+});
+
+const displayGroupedNFTs = (nfts: AssetInfoWithAmount[], t: UseTranslate, testId?: string) =>
   nfts.map((nft: AssetInfoWithAmount) => {
     const imageSrc = nft.assetInfo.tokenMetadata?.icon ?? nft.assetInfo.nftMetadata?.image ?? undefined;
     return (
@@ -60,14 +67,17 @@ const displayGroupedNFTs = (nfts: AssetInfoWithAmount[], testId?: string) =>
         testId={testId}
         key={nft.assetInfo.fingerprint}
         imageSrc={imageSrc}
+        translations={getTransactionAssetTranslations(t)}
         balance={Wallet.util.calculateAssetBalance(nft.amount, nft.assetInfo)}
+        assetId={nft.assetInfo.assetId}
+        policyId={nft.assetInfo.policyId}
         tokenName={truncate(getAssetTokenName(nft), charBeforeEllName, charAfterEllName)}
         showImageBackground={imageSrc === undefined}
       />
     );
   });
 
-const displayGroupedTokens = (tokens: AssetInfoWithAmount[], testId?: string) =>
+const displayGroupedTokens = (tokens: AssetInfoWithAmount[], t: UseTranslate, testId?: string) =>
   tokens.map((token: AssetInfoWithAmount) => {
     const imageSrc = token.assetInfo.tokenMetadata?.icon ?? token.assetInfo.nftMetadata?.image ?? undefined;
 
@@ -76,7 +86,10 @@ const displayGroupedTokens = (tokens: AssetInfoWithAmount[], testId?: string) =>
         testId={testId}
         key={token.assetInfo.fingerprint}
         imageSrc={token.assetInfo.tokenMetadata?.icon ?? token.assetInfo.nftMetadata?.image ?? undefined}
+        translations={getTransactionAssetTranslations(t)}
         balance={Wallet.util.calculateAssetBalance(token.amount, token.assetInfo)}
+        assetId={token.assetInfo.assetId}
+        policyId={token.assetInfo.policyId}
         tokenName={truncate(getAssetTokenName(token), charBeforeEllName, charAfterEllName)}
         showImageBackground={imageSrc === undefined}
       />
@@ -129,7 +142,7 @@ export const DappAddressSections = ({
                 <Flex flexDirection="column" alignItems="flex-end" gap="$8">
                   <Text className={styles.value} data-testid="dapp-transaction-address">
                     <Tooltip label={address}>
-                      <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
+                      {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
                     </Tooltip>
                   </Text>
                   {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
@@ -149,11 +162,12 @@ export const DappAddressSections = ({
                     <DappTransactionSummary
                       testId="dapp-transaction-from-row"
                       key={`${address}${coin}`}
+                      adaTooltip={t('core.dappTransaction.adaTooltip')}
                       cardanoSymbol={coinSymbol}
                       transactionAmount={getStringFromLovelace(coin)}
                     />
                   ))}
-                  {displayGroupedTokens(addressData.tokens, 'dapp-transaction-from-row')}
+                  {displayGroupedTokens(addressData.tokens, t, 'dapp-transaction-from-row')}
                 </>
               )}
 
@@ -167,7 +181,7 @@ export const DappAddressSections = ({
                       -{addressData.nfts.length} {itemsCountCopy}
                     </Title>
                   </div>
-                  {displayGroupedNFTs(addressData.nfts, 'dapp-transaction-from-row')}
+                  {displayGroupedNFTs(addressData.nfts, t, 'dapp-transaction-from-row')}
                 </>
               )}
             </>
@@ -190,7 +204,7 @@ export const DappAddressSections = ({
                 <Flex flexDirection="column" alignItems="flex-end" gap="$8">
                   <Text className={styles.value} data-testid="dapp-transaction-address">
                     <Tooltip label={address}>
-                      <span>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</span>
+                      {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
                     </Tooltip>
                   </Text>
                   {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
@@ -214,11 +228,12 @@ export const DappAddressSections = ({
                     <DappTransactionSummary
                       key={`${address}${coin}`}
                       cardanoSymbol={coinSymbol}
+                      adaTooltip={t('core.dappTransaction.adaTooltip')}
                       transactionAmount={getStringFromLovelace(coin)}
                       testId="dapp-transaction-to-row"
                     />
                   ))}
-                  {displayGroupedTokens(addressData.tokens, 'dapp-transaction-to-row')}
+                  {displayGroupedTokens(addressData.tokens, t, 'dapp-transaction-to-row')}
                 </>
               )}
 
@@ -236,7 +251,7 @@ export const DappAddressSections = ({
                       {addressData.nfts.length} {itemsCountCopy}
                     </Title>
                   </div>
-                  {displayGroupedNFTs(addressData.nfts, 'dapp-transaction-to-row')}
+                  {displayGroupedNFTs(addressData.nfts, t, 'dapp-transaction-to-row')}
                 </>
               )}
             </>

@@ -2,7 +2,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import { Box } from '../box';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 type Props = PropsWithChildren<{
   title: string;

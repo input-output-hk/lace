@@ -5,7 +5,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import classNames from 'classnames';
 
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { Trigger } from './summary-expander-trigger.component';
 import * as cx from './summary-expander.css';
@@ -45,14 +45,9 @@ export const SummaryExpander = ({
           [cx.expanded]: open,
         })}
       >
-        <Typography.Body.Large
-          className={cx.title}
-          weight="$bold"
-          data-testid="expander-title"
-        >
+        <Text.Body.Large weight="$bold" data-testid="expander-title">
           {title}
-        </Typography.Body.Large>
-
+        </Text.Body.Large>
         <Collapsible.Trigger asChild data-testid="expander-button">
           <Trigger open={open} disabled={disabled} {...props} />
         </Collapsible.Trigger>

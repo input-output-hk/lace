@@ -1,13 +1,12 @@
 import React from 'react';
 
 import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
-import classNames from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import { Grid, Cell } from '../grid';
+import { Cell, Grid } from '../grid';
+import { Text } from '../text';
 import { Tooltip } from '../tooltip';
-import * as Typography from '../typography';
 
 import * as cx from './transaction-summary.css';
 
@@ -46,12 +45,12 @@ export const Amount = ({
       <Grid {...props} data-testid={makeTestId(testId, 'root')} columns="$2">
         <Cell>
           <Flex>
-            <Typography.Body.Normal
+            <Text.Body.Normal
+              weight="$semibold"
               data-testid={makeTestId(testId, 'label')}
-              className={cx.label}
             >
               {label}
-            </Typography.Body.Normal>
+            </Text.Body.Normal>
             {tooltip !== undefined && (
               <Box ml="$8" className={cx.tooltip}>
                 <Tooltip label={tooltip}>
@@ -68,22 +67,23 @@ export const Amount = ({
         </Cell>
         <Cell>
           <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-            <Typography.Body.Small
-              className={classNames(cx.text, {
-                [cx.normalAmount]: !shouldHighlightPositiveAmount,
-                [cx.highlightedAmount]: shouldHighlightPositiveAmount,
-              })}
+            <Text.Body.Small
+              color={shouldHighlightPositiveAmount ? 'success' : 'primary'}
+              weight="$medium"
+              className={cx.text}
               data-testid={makeTestId(testId, 'amount')}
             >
               {amount}
-            </Typography.Body.Small>
+            </Text.Body.Small>
             {displayFiat && (
-              <Typography.Body.Small
+              <Text.Body.Small
                 className={cx.secondaryText}
+                color="secondary"
+                weight="$medium"
                 data-testid={makeTestId(testId, 'fiat')}
               >
                 {fiatPrice}
-              </Typography.Body.Small>
+              </Text.Body.Small>
             )}
           </Flex>
         </Cell>

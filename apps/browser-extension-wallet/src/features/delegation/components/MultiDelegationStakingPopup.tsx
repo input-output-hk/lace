@@ -7,7 +7,7 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
+import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -37,6 +37,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
   const {
     walletType,
     inMemoryWallet,
@@ -48,7 +49,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     networkInfo,
     blockchainProvider,
     walletInfo,
-    currentChain
+    currentChain,
+    environmentName
   } = useWalletStore((state) => ({
     walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
@@ -60,7 +62,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchNetworkInfo: state.fetchNetworkInfo,
     blockchainProvider: state.blockchainProvider,
     walletInfo: state.walletInfo,
-    currentChain: state.currentChain
+    currentChain: state.currentChain,
+    environmentName: state.environmentName
   }));
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
@@ -140,7 +143,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         compactNumber: compactNumberWithUnit,
         walletAddress,
         currentChain,
-        isMultidelegationSupportedByDevice
+        isMultidelegationSupportedByDevice,
+        isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status
       }}
     >
       <ContentLayout

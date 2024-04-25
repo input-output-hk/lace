@@ -35,10 +35,7 @@ export const container = style([
   },
 ]);
 
-export const labelSelector = style({});
-
 export const label = style([
-  sx({ color: '$text_link_label_color' }),
   {
     selectors: {
       [`${button}:hover &`]: {
@@ -52,6 +49,6 @@ export const label = style([
   },
 ]);
 
-globalStyle(`a:visited ${labelSelector}`, {
+globalStyle(`a:visited ${label}`, {
   color: vars.colors.$text_link_label_color_visited,
 });

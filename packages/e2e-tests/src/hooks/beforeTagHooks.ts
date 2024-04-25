@@ -39,6 +39,7 @@ Before(
   async () => {
     await extendedViewWalletInitialization();
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
 
@@ -49,6 +50,7 @@ Before(
   async () => {
     await popupViewWalletInitialization();
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
 
