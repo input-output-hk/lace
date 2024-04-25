@@ -13,8 +13,6 @@ import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-ut
 import isEqual from 'lodash/isEqual';
 import { Dialog } from '@lace/ui';
 
-export type MnemonicStage = 'writedown' | 'input';
-
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
   onReset: (mnemonicStage?: MnemonicStage) => void;
@@ -112,9 +110,6 @@ export const WalletSetupMnemonicStepRevamp = ({
         <Dialog.Root open={videoModalOpen} setOpen={setVideoModalOpen} zIndex={1001}>
           {renderVideoPopupContent({ onClose: () => setVideoModalOpen(false) })}
         </Dialog.Root>
-        {/* <Modal open={videoModalOpen} centered footer={undefined} closable={false} destroyOnClose maskClosable={false}>
-          {renderVideoPopupContent({ onClose: () => setVideoModalOpen(false) })}
-        </Modal> */}
       </>
     ) : (
       translations.enterPassphraseDescription
