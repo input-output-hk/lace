@@ -19,7 +19,7 @@ export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   subtitle: string;
   profile?: {
     imageSrc: string;
-    fallback: string;
+    fallbackText: string;
     alt?: string;
     delayMs?: number;
   };

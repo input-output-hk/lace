@@ -56,7 +56,7 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = chainIdToChainName(chainId);
-    const providers = getProviders(chainName);
+    const providers = await getProviders(chainName);
     if (wallet.type === WalletType.Script || typeof accountIndex !== 'number') {
       throw new NotImplementedError('Script wallet support is not implemented');
     }

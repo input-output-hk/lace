@@ -1,11 +1,12 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './tooltip-content.css';
 
 export interface TooltipContentProps {
-  label: string;
+  label: ReactNode | string;
 }
 
 export const TooltipContent = ({
@@ -13,9 +14,9 @@ export const TooltipContent = ({
 }: Readonly<TooltipContentProps>): JSX.Element => {
   return (
     <div className={cx.tooltipContent}>
-      <Typography.Body.Small weight="$medium" className={cx.label}>
+      <Text.Body.Small color="secondary" weight="$medium">
         {label}
-      </Typography.Body.Small>
+      </Text.Body.Small>
     </div>
   );
 };

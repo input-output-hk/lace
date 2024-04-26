@@ -3,6 +3,8 @@ import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import TokensPageAssert from '../assert/tokensPageAssert';
+import testContext from '../utils/testContext';
+import { Asset } from '../data/Asset';
 
 class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
@@ -22,7 +24,6 @@ class TokensPage {
   private SEND_BUTTON_POPUP_MODE = 'main [data-testid="send-button"]';
   private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
-  private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
   private TOKEN_ROW_SKELETON = '.ant-skeleton';
   private PRICE_FETCH_ERROR_DESCRIPTION = '[data-testid="banner-description"]';
 
@@ -56,10 +57,6 @@ class TokensPage {
 
   get totalBalanceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BALANCE_CURRENCY);
-  }
-
-  get ViewAllButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.VIEW_ALL_BUTTON);
   }
 
   tokensAvatar(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -162,6 +159,35 @@ class TokensPage {
 
   async waitForPricesToBeFetched() {
     await this.totalBalanceValue.waitForDisplayed({ timeout: TokensPageAssert.ADA_PRICE_CHECK_INTERVAL });
+  }
+
+  async clickTokenWithName(tokenName: string) {
+    await this.tokensTableItemWithName(tokenName).click();
+  }
+
+  async waitUntilHeadersLoaded() {
+    await this.title.waitForDisplayed({ timeout: 30_000 });
+    await this.totalBalanceLabel.waitForDisplayed({ timeout: 30_000 });
+  }
+
+  async waitUntilCardanoTokenLoaded() {
+    const selector = 'p=Cardano';
+    await $(selector).waitForClickable({ timeout: 120_000 });
+  }
+
+  async saveTokenBalance(tokenName: string) {
+    const rowIndex = await this.getTokenRowIndex(tokenName);
+    const tokenBalance = await this.getTokenBalanceAsFloatByIndex(rowIndex);
+    testContext.save(`${Asset.getByName(tokenName)?.ticker}tokenBalance`, tokenBalance);
+  }
+
+  async loadTokenBalance(tokenName: string) {
+    return testContext.load(`${Asset.getByName(tokenName)?.ticker}tokenBalance`);
+  }
+
+  async clickOnCoinGeckoCreditsLink() {
+    await this.coinGeckoLink.waitForClickable();
+    await this.coinGeckoLink.click();
   }
 }
 

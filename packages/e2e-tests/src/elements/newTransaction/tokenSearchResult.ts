@@ -32,10 +32,10 @@ export class TokenSearchResult {
   }
 
   get grayedOutTokenIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(String(`(${this.CONTAINER}${this.TOKEN_ICON}//div[contains(@class, 'overlay')]`));
+    return $(String(`${this.CONTAINER}${this.TOKEN_ICON}//div[contains(@class, 'overlay')]`));
   }
 
   get checkmarkInSelectedToken(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(String(`(${this.CONTAINER}${this.TOKEN_ICON}//*[name()='svg']`));
+    return $(String(`${this.CONTAINER}${this.TOKEN_ICON}//*[name()='svg']`));
   }
 }

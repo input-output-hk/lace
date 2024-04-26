@@ -5,8 +5,6 @@ import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import Modal from '../elements/modal';
-import ModalAssert from '../assert/modalAssert';
-import OnboardingAnalyticsPage from '../elements/onboarding/analyticsPage';
 import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMainPageAssert from '../assert/onboarding/onboardingMainPageAssert';
@@ -16,7 +14,6 @@ import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import CommonAssert from '../assert/commonAssert';
-import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
 import type { RecoveryPhrase } from '../types/onboarding';
 import { generateRandomString } from '../utils/textUtils';
@@ -71,33 +68,8 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
   }
 });
 
-When(/^I select ([^"]*) account on Select Account page$/, async (accountNumber: number) => {
-  await SelectAccountPage.accountRadioButtons[accountNumber - 1].click();
-});
-
-When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'Back' | 'Skip' | 'Agree') => {
-  switch (button) {
-    case 'Back':
-      await OnboardingAnalyticsPage.backButton.click();
-      break;
-    case 'Skip':
-      await OnboardingAnalyticsPage.skipButton.click();
-      break;
-    case 'Agree':
-      await OnboardingAnalyticsPage.nextButton.click();
-      break;
-    default:
-      throw new Error(`Unsupported button name: ${button}`);
-  }
-});
-
-When(/^I click "Go to my wallet" button on "All done" page$/, async () => {
-  await RecoveryPhrasePage.nextButton.waitForClickable();
-  await RecoveryPhrasePage.nextButton.click();
-});
-
 When(
-  /^I click "(Cancel|OK)" button on "(Limited support for DApp|Restoring a multi-address wallet\?|Are you sure you want to start again\?)" modal$/,
+  /^I click "(Cancel|OK)" button on "(Restoring a multi-address wallet\?|Are you sure you want to start again\?)" modal$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (button: 'Cancel' | 'OK', _modalType: string) => {
     await browser.pause(500);
@@ -114,10 +86,6 @@ When(
   }
 );
 
-Given(/^I click "Restore" button and confirm$/, async () => {
-  await OnboardingMainPage.restoreWalletButton.click();
-});
-
 When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
   await OnboardingWalletSetupPage.setWalletNameInput(walletName === 'empty' ? '' : walletName);
 });
@@ -125,10 +93,6 @@ When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
 When(/^I enter wallet name with size of: ([^"]*) characters$/, async (numberOfCharacters: number) => {
   const walletName = await generateRandomString(numberOfCharacters);
   await OnboardingWalletSetupPage.setWalletNameInput(walletName);
-});
-
-Then(/^Name error "([^"]*)" is displayed/, async (nameError: string) => {
-  await OnboardingWalletSetupPageAssert.assertSeeWalletNameError(await t(nameError));
 });
 
 Then(
@@ -172,10 +136,6 @@ Then(/^"No hardware wallet device was chosen." error is displayed on "Connect yo
 When(/^"Try again" button is enabled on "Connect your device" page$/, async () => {
   await ConnectYourDevicePageAssert.assertSeeTryAgainButton(true);
   await ConnectYourDevicePageAssert.assertSeeTryAgainButtonEnabled(true);
-});
-
-Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
-  await ModalAssert.assertSeeRestoringMultiAddressWalletModal();
 });
 
 Then(/^I clear saved words$/, async () => {
@@ -226,7 +186,7 @@ Then(/^I see following autocomplete options:$/, async (options: DataTable) => {
   await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicAutocompleteOptions(dataTableAsStringArray(options));
 });
 
-Then(/^I click header to loose focus$/, async () => {
+Then(/^I click header to lose focus$/, async () => {
   await RecoveryPhrasePage.clickHeaderToLoseFocus();
 });
 
@@ -251,10 +211,6 @@ Then(/^the mnemonic input contains the word "([^"]*)"$/, async (expectedWord: st
 
 Then(/^the word in mnemonic input has only ([^"]*) characters$/, async (expectedLength: string) => {
   await onboardingRecoveryPhrasePageAssert.assertMnemonicInputLength(0, Number(expectedLength));
-});
-
-When(/^I click on Privacy Policy link$/, async () => {
-  await OnboardingAnalyticsPage.privacyPolicyLinkWithinDescription.click();
 });
 
 When(

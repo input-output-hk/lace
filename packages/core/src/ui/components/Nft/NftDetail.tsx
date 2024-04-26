@@ -5,6 +5,8 @@ import { NftImage } from './NftImage';
 import { TranslationsFor } from '@ui/utils/types';
 import { Breadcrumb } from 'antd';
 import { FolderOutlined, RightOutlined } from '@ant-design/icons';
+import { ControlButton } from '@lace/ui';
+import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 
 export interface NftDetailProps {
   title?: ReactNode;
@@ -13,7 +15,8 @@ export interface NftDetailProps {
   attributes?: string;
   folder?: string;
   amount?: number | string;
-  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'directory'>;
+  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar' | 'directory'>;
+  onSetAsAvatar?: (image: string) => void;
 }
 
 const JSON_INDENTATION = 2;
@@ -33,7 +36,8 @@ export const NftDetail = ({
   attributes,
   folder,
   amount,
-  translations
+  translations,
+  onSetAsAvatar
 }: NftDetailProps): React.ReactElement => (
   <div className={styles.nftDetail}>
     {title}
@@ -47,6 +51,12 @@ export const NftDetail = ({
         <NftImage image={image} detailView popupView />
       </div>
     </div>
+    <ControlButton.Outlined
+      size="small"
+      label={translations.setAsAvatar}
+      icon={<ProfileIcon />}
+      onClick={() => onSetAsAvatar(image)}
+    />
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
         <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>

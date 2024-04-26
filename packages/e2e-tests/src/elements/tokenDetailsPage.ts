@@ -74,6 +74,10 @@ class TokenDetailsPage extends CommonDrawerElements {
   get transactionsListItems(): Promise<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_ITEM);
   }
+
+  async clickOnViewAllButton() {
+    await this.viewAllButton.click();
+  }
 }
 
 export default new TokenDetailsPage();

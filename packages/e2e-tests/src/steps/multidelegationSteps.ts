@@ -20,7 +20,7 @@ import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingCo
 import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDrawerAssert';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
-import TokensPageObject from '../pageobject/tokensPageObject';
+import TokensPage from '../elements/tokensPage';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
@@ -312,17 +312,17 @@ Then(/^I see tooltip for element in currently staking component$/, async () => {
 });
 
 Then(/^I see Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  const cardanoBalance = String(await TokensPage.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });
 
 Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  await TokensPageObject.waitUntilCardanoTokenLoaded();
-  await TokensPageObject.saveTokenBalance('Cardano');
+  await TokensPage.waitUntilCardanoTokenLoaded();
+  await TokensPage.saveTokenBalance('Cardano');
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   await mainMenuPageObject.navigateToSection('Staking', mode);
-  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  const cardanoBalance = String(await TokensPage.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });
 

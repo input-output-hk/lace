@@ -28,6 +28,7 @@ export interface BackgroundStorage {
   userId?: string;
   usePersistentUserId?: boolean;
   experimentsConfiguration?: Record<string, string | boolean>;
+  customSubmitTxUrl?: string;
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;
