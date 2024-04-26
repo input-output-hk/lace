@@ -87,6 +87,7 @@ export const triggerIcon = style({
 });
 
 const contentBase = sx({
+  marginTop: '$4',
   padding: '$4',
   borderRadius: '$medium',
   width: '$fill',
