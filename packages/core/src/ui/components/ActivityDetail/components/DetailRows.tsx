@@ -4,6 +4,7 @@ import { DetailRow } from './DetailRow';
 import { TxDetails } from '../types';
 import { TranslationsFor } from '@src/ui/utils/types';
 import styles from '../TransactionInputOutput.module.scss';
+import { Text } from '@lace/ui';
 
 type DetailRowsProps<T extends string> = {
   list: TxDetails<T>;
@@ -33,7 +34,9 @@ export const DetailRows = function DetailRows<T extends string>({
               key={`${testId}-list-header`}
               className={cn(styles.listHeader, { [styles.topBorderContent]: index > 0 })}
             >
-              <div className={styles.listHeaderTitle}>{translations[item.header]}</div>
+              <Text.Body.Normal className={styles.listHeaderTitle} weight="$bold">
+                {translations[item.header]}
+              </Text.Body.Normal>
             </div>
             <DetailRows testId={testId} list={item.details} translations={translations} />
           </>

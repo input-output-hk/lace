@@ -10,30 +10,14 @@ export const getAddressTagTranslations = (t: UseTranslate['t']): AddressTagTrans
 });
 
 interface Props {
-  handle?: string;
   address: string;
   translations: AddressTagTranslations;
   ownAddresses?: string[];
-  addressToNameMap?: Map<string, string>; // address || handle, name
 }
 
-export const renderAddressTag = ({
-  address,
-  handle,
-  translations,
-  ownAddresses = [],
-  addressToNameMap = new Map()
-}: Props): JSX.Element => {
-  const matchingAddressName = addressToNameMap.get(handle) ?? addressToNameMap.get(address);
-  return ownAddresses.includes(address) ? (
-    <AddressTag variant={AddressTagVariants.Own}>
-      {translations.own}
-      {matchingAddressName ? ` / ${matchingAddressName}` : ''}
-    </AddressTag>
+export const renderAddressTag = ({ address, translations, ownAddresses = [] }: Props): JSX.Element =>
+  ownAddresses.includes(address) ? (
+    <AddressTag variant={AddressTagVariants.Own}>{translations.own}</AddressTag>
   ) : (
-    <AddressTag variant={AddressTagVariants.Foreign}>
-      {translations.foreign}
-      {matchingAddressName ? ` / ${matchingAddressName}` : ''}
-    </AddressTag>
+    <AddressTag variant={AddressTagVariants.Foreign}>{translations.foreign}</AddressTag>
   );
-};

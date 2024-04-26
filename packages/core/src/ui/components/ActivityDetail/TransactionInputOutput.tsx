@@ -11,7 +11,7 @@ import { TranslationsFor } from '../../utils/types';
 
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
 import styles from './TransactionInputOutput.module.scss';
-import { Flex } from '@lace/ui';
+import { Box, Flex, Text } from '@lace/ui';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 import { useTranslate } from '@ui/hooks';
 
@@ -61,8 +61,8 @@ export const TransactionInputOutput = ({
   return (
     <div data-testid={testId} className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine })}>
       <div className={styles.expanderHeader}>
-        <div className={styles.title}>
-          <span>{title}</span>
+        <div>
+          <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
           {tooltipContent && (
             <Tooltip title={tooltipContent}>
               <InfoCircleOutlined className={styles.infoIcon} />
@@ -84,46 +84,62 @@ export const TransactionInputOutput = ({
       </div>
       {isVisible && (
         <div className={styles.txInOutContent} data-testid="tx-addr-list">
-          {list.map(({ addr: inputAddress, amount: addressAmount, assetList }, idx) => (
-            <div className={styles.addressContainer} key={`${inputAddress}-${idx}`}>
-              <div className={styles.row}>
-                <div className={styles.label}>{translations.address}</div>
-                <Flex flexDirection="column" alignItems="flex-end" gap="$8">
-                  <div data-testid="tx-address" className={cn(styles.addressDetail, styles.content)}>
-                    <Tooltip title={inputAddress}>{addEllipsis(inputAddress, 8, 8)}</Tooltip>
-                  </div>
-                  {renderAddressTag({
-                    address: inputAddress,
-                    translations: getAddressTagTranslations(t),
-                    ownAddresses,
-                    addressToNameMap
-                  })}
-                </Flex>
-              </div>
-
-              <div className={styles.row}>
-                <div className={styles.label}>{translations.sent}</div>
-
-                <div className={styles.content}>
-                  <div data-testid="tx-amounts" className={styles.amount}>
-                    {/* asset amount */}
-                    <span data-testid="tx-ada-amount" className={styles.asset}>{`${addressAmount} ${coinSymbol}`}</span>
-                    {/* fiat value */}
-                    <span data-testid="tx-fiat-amount" className={styles.fiat}>
-                      {amountTransformer(addressAmount)}
-                    </span>
-                  </div>
-                  {assetList?.map(({ id: assetId, amount: assetAmount, name: assetName, fiatBalance }, indx) => (
-                    <div data-testid="tx-asset" key={assetId || indx} className={styles.amount}>
-                      <span className={styles.asset}> {`${assetAmount} ${assetName || assetId}`}</span>
-                      {/* fiat value */}
-                      <span className={styles.fiat}>{fiatBalance}</span>
+          {list.map(({ addr: inputAddress, amount: addressAmount, assetList }, idx) => {
+            const addressName = addressToNameMap?.get(inputAddress);
+            return (
+              <div className={styles.addressContainer} key={`${inputAddress}-${idx}`}>
+                <div className={styles.row}>
+                  <Text.Body.Normal weight="$semibold" className={styles.label}>
+                    {translations.address}
+                  </Text.Body.Normal>
+                  <Flex flexDirection="column" alignItems="flex-end" gap="$8">
+                    {addressName && (
+                      <Box className={styles.rightAlign}>
+                        <Text.Body.Normal weight="$semibold">{addressToNameMap?.get(inputAddress)}</Text.Body.Normal>
+                      </Box>
+                    )}
+                    <div data-testid="tx-address" className={styles.rightAlign}>
+                      <Tooltip title={inputAddress}>
+                        <Text.Body.Small weight="$medium">{addEllipsis(inputAddress, 8, 8)}</Text.Body.Small>
+                      </Tooltip>
                     </div>
-                  ))}
+                    {renderAddressTag({
+                      address: inputAddress,
+                      translations: getAddressTagTranslations(t),
+                      ownAddresses
+                    })}
+                  </Flex>
+                </div>
+
+                <div className={styles.row}>
+                  <Text.Body.Normal weight="$semibold" className={styles.label}>
+                    {translations.sent}
+                  </Text.Body.Normal>
+
+                  <div className={styles.content}>
+                    <div data-testid="tx-amounts" className={styles.amount}>
+                      {/* asset amount */}
+                      <Text.Body.Normal data-testid="tx-ada-amount" weight="$medium">
+                        {`${addressAmount} ${coinSymbol}`}
+                      </Text.Body.Normal>
+                      {/* fiat value */}
+                      <Text.Body.Normal data-testid="tx-fiat-amount" color="secondary" weight="$medium">
+                        {amountTransformer(addressAmount)}
+                      </Text.Body.Normal>
+                    </div>
+                    {assetList?.map(({ id: assetId, amount: assetAmount, name: assetName, fiatBalance }, indx) => (
+                      <div data-testid="tx-asset" key={assetId || indx} className={styles.amount}>
+                        <Text.Body.Normal weight="$medium">{`${assetAmount} ${assetName || assetId}`}</Text.Body.Normal>
+                        <Text.Body.Normal color="secondary" weight="$medium">
+                          {fiatBalance}
+                        </Text.Body.Normal>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -15,20 +15,16 @@ export interface OutputSummaryProps {
   list: SentAssetsList;
   recipientAddress: string;
   recipientName?: string;
-  recipientHandle?: string;
   translations?: TranslationsFor<'recipientAddress' | 'sending'>;
   ownAddresses?: string[];
-  addressToNameMap?: Map<string, string>;
 }
 
 export const OutputSummary = ({
   list,
   recipientAddress,
-  recipientHandle,
   translations,
   recipientName,
-  ownAddresses,
-  addressToNameMap
+  ownAddresses
 }: OutputSummaryProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -53,20 +49,17 @@ export const OutputSummary = ({
           )}
 
           <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$8">
-            <Text.Body.Small
-              weight="$semibold"
+            <Text.Address
               color={recipientName ? 'secondary' : 'primary'}
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {recipientHandle || recipientAddress}
-            </Text.Body.Small>
+              {recipientAddress}
+            </Text.Address>
             {renderAddressTag({
               address: recipientAddress,
-              handle: recipientHandle,
               translations: getAddressTagTranslations(t),
-              ownAddresses,
-              addressToNameMap
+              ownAddresses
             })}
           </Flex>
         </Flex>

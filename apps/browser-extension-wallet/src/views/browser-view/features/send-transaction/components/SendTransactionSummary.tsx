@@ -137,8 +137,7 @@ export const SendTransactionSummary = withAddressBookContext(
       return {
         list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
         recipientAddress: item.address,
-        recipientName: addressToNameMap?.get(handle || item.address),
-        recipientHandle: handle
+        recipientName: addressToNameMap?.get(handle || item.address) || handle
       };
     });
 
@@ -156,7 +155,6 @@ export const SendTransactionSummary = withAddressBookContext(
           }}
           metadata={metadata}
           translations={outputSummaryListTranslation}
-          addressToNameMap={addressToNameMap}
           ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
         />
         {isHardwareWallet && !isPopupView && (

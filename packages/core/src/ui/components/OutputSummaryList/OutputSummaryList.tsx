@@ -23,7 +23,6 @@ export interface OutputSummaryListProps {
   metadata?: string;
   translations: TranslationsFor<'recipientAddress' | 'sending' | 'txFee' | 'deposit' | 'metadata' | 'output'>;
   ownAddresses?: string[];
-  addressToNameMap?: Map<string, string>;
   onFeeTooltipHover?: () => unknown;
   onDepositTooltipHover?: () => unknown;
 }
@@ -35,7 +34,6 @@ export const OutputSummaryList = ({
   deposit,
   translations,
   ownAddresses,
-  addressToNameMap,
   onFeeTooltipHover,
   onDepositTooltipHover
 }: OutputSummaryListProps): React.ReactElement => {
@@ -53,12 +51,7 @@ export const OutputSummaryList = ({
               idx + 1
             }`}</Text>
           )}
-          <OutputSummary
-            {...row}
-            translations={outputSummaryTranslations}
-            ownAddresses={ownAddresses}
-            addressToNameMap={addressToNameMap}
-          />
+          <OutputSummary {...row} translations={outputSummaryTranslations} ownAddresses={ownAddresses} />
         </div>
       ))}
 
