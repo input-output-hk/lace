@@ -1,9 +1,11 @@
-import { CreateWalletParams } from '@hooks';
+import { CreateWalletParams, useWalletManager } from '@hooks';
 import { PostHogAction } from '@lace/common';
+import { useAnalyticsContext } from '@providers';
 import { walletRoutePaths } from '@routes';
+import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import React, { createContext, useContext, useState } from 'react';
 import { useHistory } from 'react-router';
-import { useSoftwareWalletCreation } from '../useSoftwareWalletCreation';
+import { useHotWalletCreation } from '../useHotWalletCreation';
 import { Providers } from './types';
 
 interface Props {
@@ -13,7 +15,7 @@ interface Props {
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
 
-enum Step {
+enum WalletSetupStep {
   RecoveryPhrase = 'RecoveryPhrase',
   Setup = 'Setup'
 }
@@ -38,11 +40,12 @@ export const useCreateWallet = (): State => {
 
 export const CreateWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const history = useHistory();
-  const { clearSecrets, createWallet, createWalletData, setCreateWalletData } = useSoftwareWalletCreation({
-    initialMnemonic: providers.generateMnemonicWords(),
-    postHogActionWalletAdded: PostHogAction.MultiWalletCreateAdded
+  const analytics = useAnalyticsContext();
+  const walletManager = useWalletManager();
+  const { clearSecrets, createWalletData, setCreateWalletData } = useHotWalletCreation({
+    initialMnemonic: providers.generateMnemonicWords()
   });
-  const [step, setStep] = useState<Step>(Step.RecoveryPhrase);
+  const [step, setStep] = useState<WalletSetupStep>(WalletSetupStep.RecoveryPhrase);
 
   const generateMnemonic = () => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: providers.generateMnemonicWords() }));
@@ -56,14 +59,23 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
     providers.confirmationDialog.shouldShowDialog$.next(dirty);
   };
 
+  const createWallet = async () => {
+    const { source } = await walletManager.createWallet(createWalletData);
+    void analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
+    });
+    void analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+  };
+
   const next = async () => {
     switch (step) {
-      case Step.RecoveryPhrase: {
-        setStep(Step.Setup);
+      case WalletSetupStep.RecoveryPhrase: {
+        setStep(WalletSetupStep.Setup);
         history.push(walletRoutePaths.newWallet.create.setup);
         break;
       }
-      case Step.Setup: {
+      case WalletSetupStep.Setup: {
         await createWallet();
         clearSecrets();
         history.push(walletRoutePaths.assets);
@@ -74,13 +86,13 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
 
   const back = () => {
     switch (step) {
-      case Step.RecoveryPhrase: {
+      case WalletSetupStep.RecoveryPhrase: {
         setFormDirty(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
       }
-      case Step.Setup: {
-        setStep(Step.RecoveryPhrase);
+      case WalletSetupStep.Setup: {
+        setStep(WalletSetupStep.RecoveryPhrase);
         history.push(walletRoutePaths.newWallet.create.recoveryPhrase);
         break;
       }
