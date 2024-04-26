@@ -4,7 +4,6 @@ import cn from 'classnames';
 import React, { useState } from 'react';
 import { DownOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button } from '@lace/common';
-import { TranslationsFor } from '@src/ui/utils/types';
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
 import { DetailRows } from './components';
 import styles from './TransactionInputOutput.module.scss';
@@ -15,7 +14,7 @@ interface TxDetailListProps<T extends string> {
   title: string;
   subTitle: string;
   lists: TxDetails<T>[];
-  translations: TranslationsFor<T>;
+  translations: Record<T, string>;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }

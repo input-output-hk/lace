@@ -6,7 +6,7 @@ import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import styles from './WalletSetupMnemonicVerificationStepRevamp.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
-import { TranslationsForJSX } from '@ui/utils/types';
+import { TranslationsFor } from '@ui/utils/types';
 import { Segmented, Button, Tooltip } from 'antd';
 import { readMnemonicFromClipboard } from './wallet-utils';
 import { WalletTimelineSteps } from '@ui/components/WalletSetup';
@@ -21,9 +21,10 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onSubmit: () => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
-  translations: TranslationsForJSX<
-    'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard' | 'copyPasteTooltipText'
-  >;
+  translations: TranslationsFor<{
+    jsxElementKey: 'copyPasteTooltipText';
+    stringKey: 'enterPassphrase' | 'passphraseError' | 'enterPassphraseLength' | 'pasteFromClipboard';
+  }>;
   onCancel?: () => void;
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
@@ -53,7 +54,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   const pasteRecoveryPhrase = async (offset = 0) => {
     const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    if (copiedWords.length === -1) return;
+    if (copiedWords.length === 0) return;
 
     const newMnemonic = [...mnemonic];
 

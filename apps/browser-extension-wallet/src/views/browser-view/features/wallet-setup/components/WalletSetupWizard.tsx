@@ -73,10 +73,8 @@ export const WalletSetupWizard = ({
   const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
-  const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
+  const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<MnemonicStage>('writedown');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const [isBackFromNextStep, setIsBackFromNextStep] = useState(false);
-  const [currentMnemonicStage, setCurrentMnemonicStage] = useState<MnemonicStage>('writedown');
   const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -106,7 +104,7 @@ export const WalletSetupWizard = ({
       return;
     }
 
-    currentMnemonicStage === 'writedown'
+    currentSetupMnemonicStage === 'writedown'
       ? sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
       : sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
@@ -276,16 +274,18 @@ export const WalletSetupWizard = ({
     return (
       <WalletSetupMnemonicStepRevamp
         mnemonic={mnemonic}
-        onReset={(resetStage) => {
-          setResetMnemonicStage(resetStage);
-          if (resetStage === 'input') {
-            setIsResetMnemonicModalOpen(true);
-            setIsBackFromNextStep(false);
-            setCurrentMnemonicStage('writedown');
+        mnemonicStage={currentSetupMnemonicStage}
+        onStageChange={(nextStage) => {
+          if (nextStage === 'input') {
+            setCurrentSetupMnemonicStage(nextStage);
+            void sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
           } else {
-            onCancel();
+            setIsResetMnemonicModalOpen(true);
+            void sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
           }
         }}
+        onBack={onCancel}
+        onNext={moveForward}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
             translations={mnemonicVideoPopupContentTranslations}
@@ -296,13 +296,6 @@ export const WalletSetupWizard = ({
             }}
           />
         )}
-        onNext={moveForward}
-        onStepNext={(mnemonicStage) => {
-          mnemonicStage === 'writedown' && setCurrentMnemonicStage('input');
-          mnemonicStage === 'writedown'
-            ? sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
-            : sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
-        }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
@@ -323,7 +316,6 @@ export const WalletSetupWizard = ({
             icon: Paste
           });
         }}
-        isBackFromNextStep={isBackFromNextStep}
       />
     );
   };
@@ -341,7 +333,6 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupNamePasswordStepRevamp
           onBack={() => {
-            setIsBackFromNextStep(true);
             moveBack();
           }}
           onNext={handleSubmit}
@@ -358,15 +349,11 @@ export const WalletSetupWizard = ({
           confirmLabel={t('browserView.walletSetup.mnemonicResetModal.confirm')}
           onCancel={() => {
             setIsResetMnemonicModalOpen(false);
-            setResetMnemonicStage('');
           }}
           onConfirm={() => {
             setMnemonic(util.generateMnemonicWords());
             setIsResetMnemonicModalOpen(false);
-            if (resetMnemonicStage === 'writedown') {
-              moveBack();
-            }
-            setResetMnemonicStage('');
+            setCurrentSetupMnemonicStage('writedown');
           }}
         />
       )}

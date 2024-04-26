@@ -1,6 +1,5 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/typography';
-@import "shared.scss";
 
 .walletSetupOption {
   flex: 1;
@@ -71,8 +70,4 @@
   top: 0;
   left: 0;
   opacity: 0;
-}
-
-.btnContentWrapper {
-  @extend .btnContentWrapper;
 }

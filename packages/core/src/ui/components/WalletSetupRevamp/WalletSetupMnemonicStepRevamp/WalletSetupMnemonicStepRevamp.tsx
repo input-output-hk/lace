@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Tooltip } from 'antd';
 import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
-import styles from '../../WalletSetup/WalletSetupOption.module.scss';
+import styles from './WalletSetupMnemonicStepRevamp.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
-import { TranslationsForJSX } from '@ui/utils/types';
+import { TranslationsFor } from '@ui/utils/types';
 import { hasEmptyString } from './WalletSetupMnemonicVerificationStepRevamp';
 import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
@@ -19,21 +19,22 @@ export type MnemonicStage = 'writedown' | 'input';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
-  onReset: (mnemonicStage?: MnemonicStage) => void;
+  mnemonicStage: MnemonicStage;
+  onBack: () => void;
   onNext: () => void;
-  onStepNext?: (currentStage: MnemonicStage) => void;
-  isBackFromNextStep?: boolean;
-  translations: TranslationsForJSX<
-    | 'writePassphraseTitle'
-    | 'enterPassphraseDescription'
-    | 'enterPassphrase'
-    | 'writePassphraseSubtitle1'
-    | 'writePassphraseSubtitle2'
-    | 'passphraseError'
-    | 'copyToClipboard'
-    | 'pasteFromClipboard'
-    | 'copyPasteTooltipText'
-  >;
+  onStageChange?: (currentStage: MnemonicStage) => void;
+  translations: TranslationsFor<{
+    jsxElementKey: 'copyPasteTooltipText';
+    stringKey:
+      | 'writePassphraseTitle'
+      | 'enterPassphraseDescription'
+      | 'enterPassphrase'
+      | 'writePassphraseSubtitle1'
+      | 'writePassphraseSubtitle2'
+      | 'passphraseError'
+      | 'copyToClipboard'
+      | 'pasteFromClipboard';
+  }>;
   suggestionList?: Array<string>;
   passphraseInfoLink?: string;
   onWatchVideoClick?: () => void;
@@ -44,32 +45,29 @@ export interface WalletSetupMnemonicStepProps {
 
 export const WalletSetupMnemonicStepRevamp = ({
   mnemonic,
-  onReset,
+  mnemonicStage,
+  onBack,
   onNext,
-  onStepNext,
+  onStageChange,
   translations,
   suggestionList,
   renderVideoPopupContent,
   onWatchVideoClick,
   onCopyToClipboard,
-  onPasteFromClipboard,
-  isBackFromNextStep = false
+  onPasteFromClipboard
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
-  const initialMnemonicWordsConfirm = useMemo(() => mnemonic.map(() => ''), [mnemonic]);
-  const [mnemonicStage, setMnemonicStage] = useState<MnemonicStage>('writedown');
-  const [mnemonicConfirm, setMnemonicWordsConfirm] = useState(initialMnemonicWordsConfirm);
+  const [mnemonicConfirm, setMnemonicWordsConfirm] = useState<string[]>([]);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  // reset the state on mnemonic change
   useEffect(() => {
-    setMnemonicStage(isBackFromNextStep ? 'input' : 'writedown');
-    setMnemonicWordsConfirm(isBackFromNextStep ? mnemonic : initialMnemonicWordsConfirm);
-  }, [initialMnemonicWordsConfirm, isBackFromNextStep, mnemonic]);
+    if (mnemonicConfirm.length > 0) return;
+    setMnemonicWordsConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
+  }, [mnemonic, mnemonicConfirm.length, mnemonicStage]);
 
   const pasteRecoveryPhrase = async (offset = 0) => {
     const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    if (copiedWords.length === -1) return;
+    if (copiedWords.length === 0) return;
 
     const newMnemonic = [...mnemonicConfirm];
 
@@ -85,16 +83,20 @@ export const WalletSetupMnemonicStepRevamp = ({
   };
 
   const handleBack = () => {
-    onReset(mnemonicStage);
+    if (mnemonicStage === 'writedown') {
+      onBack();
+    }
+    setMnemonicWordsConfirm(mnemonic.map(() => ''));
+    onStageChange('writedown');
   };
 
   const handleNext = () => {
-    onStepNext && onStepNext(mnemonicStage);
     if (mnemonicStage === 'input') {
       onNext();
       return;
     }
-    setMnemonicStage('input');
+    setMnemonicWordsConfirm(mnemonic.map(() => ''));
+    onStageChange('input');
   };
 
   const title = mnemonicStage === 'writedown' ? translations.writePassphraseTitle : translations.enterPassphrase;
@@ -166,7 +168,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         {mnemonicStage === 'writedown' ? (
           <MnemonicWordsWritedownRevamp words={mnemonic} />
         ) : (
-          <div className={styles.ContainerWordsConfirm}>
+          <div className={styles.containerWordsConfirm}>
             <MnemonicWordsConfirmInputRevamp
               handlePaste={pasteRecoveryPhrase}
               words={mnemonicConfirm}

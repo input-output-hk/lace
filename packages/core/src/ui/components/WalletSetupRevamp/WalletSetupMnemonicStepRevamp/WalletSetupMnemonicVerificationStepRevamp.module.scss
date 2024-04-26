@@ -1,6 +1,6 @@
 @import '../../../styles/theme.scss';
 @import '../../../../../../common/src/ui/styles/abstracts/typography';
-@import '../../WalletSetup/shared.scss';
+@import './WalletSetupMnemonicRevampCommon.module';
 
 .mnemonicContainer {
   margin-top: size_unit(2) !important;
@@ -52,8 +52,4 @@
   @include text-bodyXs-semi-bold;
   margin-top: size_unit(2) !important;
   color: var(--color-pink, #ff5470);
-}
-
-.btnContentWrapper {
-  @extend .btnContentWrapper;
 }
