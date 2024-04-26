@@ -8,7 +8,7 @@ import {
   Flex,
   RadioButtonGroup,
   RadioButtonGroupOption,
-  SelectGroup,
+  Select,
   Text,
   TextBox,
   ToggleButtonGroup,
@@ -123,15 +123,17 @@ export const BrowsePoolsPreferencesCard = ({
       (filterOption.opts as SelectOption[]).find((opt) => opt.value === localFilters[filterOption.key][0])?.value ?? '';
 
     return (
-      <SelectGroup
-        onValueChange={(value) => handleFilterChange(filterOption.key, 0, value)}
+      <Select.Root
+        variant="grey"
+        onChange={(value) => handleFilterChange(filterOption.key, 0, value)}
         showArrow
-        withOutline
-        className={styles.selectGroup}
         placeholder={t('browsePools.preferencesCard.filter.input.select')}
-        options={filterOption.opts as SelectOption[]}
-        selectedValue={selectedValue}
-      />
+        value={selectedValue}
+      >
+        {(filterOption.opts as SelectOption[]).map((opt) => (
+          <Select.Item key={opt.value} value={opt.value} title={opt.label} />
+        ))}
+      </Select.Root>
     );
   };
 
