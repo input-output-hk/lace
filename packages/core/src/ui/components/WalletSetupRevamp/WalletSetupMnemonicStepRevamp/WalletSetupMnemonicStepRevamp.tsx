@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from 'antd';
-import { WalletTimelineSteps } from '../../WalletSetup';
+import { MnemonicStage, WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import styles from '../../WalletSetup/WalletSetupOption.module.scss';
@@ -12,7 +12,6 @@ import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 import isEqual from 'lodash/isEqual';
 import { Dialog } from '@lace/ui';
-import { MnemonicStage } from '@lace/core';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
