@@ -122,11 +122,11 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
-    "@cardano-sdk/input-selection": "0.12.26",
-    "@cardano-sdk/tx-construction": "0.18.2",
+    "@cardano-sdk/input-selection": "0.12.29",
+    "@cardano-sdk/tx-construction": "0.18.5",
     "@cardano-sdk/util": "0.15.1",
-    "@cardano-sdk/wallet": "0.36.0",
-    "@cardano-sdk/web-extension": "0.26.2",
+    "@cardano-sdk/wallet": "0.37.3",
+    "@cardano-sdk/web-extension": "0.27.3",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",

@@ -1,6 +1,6 @@
 #!/usr/bin/env
 
-# Script to update @cardano-sdk/* dependencies and devDependencies in all package.json files
+# Script to update @cardano-sdk/* dependencies, peerDependencies and devDependencies in all package.json files
 # within a monorepo, excluding any located within node_modules directories,
 # and setting dependencies to exact versions (without the ^ prefix).
 
@@ -8,9 +8,9 @@
 find "." -type d -name 'node_modules' -prune -o -type f -name 'package.json' -print | while IFS= read -r package_file; do
     echo "Processing $package_file"
 
-    # Function to update a given section (dependencies or devDependencies)
+    # Function to update a given section (dependencies, peerDependencies or devDependencies)
     function update_dependencies {
-        dep_type="$1"  # either "dependencies" or "devDependencies"
+        dep_type="$1"  # either "dependencies", "peerDependencies" or "devDependencies"
         jq -r "if .$dep_type then .$dep_type | keys[] | select(startswith(\"@cardano-sdk/\")) else empty end" "$package_file" | while IFS= read -r package; do
             echo "Updating $package in $dep_type of $package_file"
             latest_version=$(curl -s "https://registry.npmjs.org/$package" | jq -r '.["dist-tags"].latest')
@@ -23,9 +23,10 @@ find "." -type d -name 'node_modules' -prune -o -type f -name 'package.json' -pr
         done
     }
 
-    # Update dependencies and devDependencies
+    # Update dependencies, peerDependencies and devDependencies
     update_dependencies "dependencies"
     update_dependencies "devDependencies"
+    update_dependencies "peerDependencies"
 done
 
 echo "Dependency updates complete."
