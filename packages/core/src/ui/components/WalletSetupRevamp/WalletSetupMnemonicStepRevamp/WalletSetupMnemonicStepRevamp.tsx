@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Tooltip } from 'antd';
 import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
@@ -64,23 +64,47 @@ export const WalletSetupMnemonicStepRevamp = ({
     setMnemonicWordsConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
   }, [mnemonic, mnemonicConfirm.length, mnemonicStage]);
 
-  const pasteRecoveryPhrase = async (offset = 0) => {
-    const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
+  const copyRecoveryPhrase = useCallback(async () => {
+    await writeMnemonicToClipboard(mnemonic);
+    onCopyToClipboard();
+  }, [mnemonic, onCopyToClipboard]);
 
-    if (copiedWords.length === 0) return;
+  const pasteRecoveryPhrase = useCallback(
+    async (offset = 0) => {
+      const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    const newMnemonic = [...mnemonicConfirm];
+      if (copiedWords.length === 0) return;
 
-    copiedWords.forEach((word, index) => {
-      const newIndex = offset + index;
-      if (newIndex < newMnemonic.length) {
-        newMnemonic[newIndex] = word;
+      const newMnemonic = [...mnemonicConfirm];
+
+      copiedWords.forEach((word, index) => {
+        const newIndex = offset + index;
+        if (newIndex < newMnemonic.length) {
+          newMnemonic[newIndex] = word;
+        }
+      });
+
+      setMnemonicWordsConfirm(newMnemonic);
+      onPasteFromClipboard();
+    },
+    [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
+  );
+
+  useEffect(() => {
+    const handleEnterKeyPress = (event: KeyboardEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      if (event.key === 'c' && mnemonicStage === 'writedown') {
+        void copyRecoveryPhrase();
       }
-    });
-
-    setMnemonicWordsConfirm(newMnemonic);
-    onPasteFromClipboard();
-  };
+      if (event.key === 'v' && mnemonicStage === 'input') {
+        void pasteRecoveryPhrase();
+      }
+    };
+    document.addEventListener('keydown', handleEnterKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleEnterKeyPress);
+    };
+  }, [copyRecoveryPhrase, mnemonic, mnemonicStage, pasteRecoveryPhrase]);
 
   const handleBack = () => {
     if (mnemonicStage === 'writedown') {
@@ -138,14 +162,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         customAction={
           mnemonicStage === 'writedown' ? (
             <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
-              <Button
-                type="link"
-                onClick={async () => {
-                  await writeMnemonicToClipboard(mnemonic);
-                  onCopyToClipboard();
-                }}
-                data-testid="copy-to-clipboard-button"
-              >
+              <Button type="link" onClick={copyRecoveryPhrase} data-testid="copy-to-clipboard-button">
                 <span className={styles.btnContentWrapper}>
                   <CopyIcon />
                   {translations.copyToClipboard}

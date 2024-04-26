@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-array-for-each */
 /* eslint-disable unicorn/no-new-array */
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import styles from './WalletSetupMnemonicVerificationStepRevamp.module.scss';
@@ -51,23 +51,37 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
     </>
   );
 
-  const pasteRecoveryPhrase = async (offset = 0) => {
-    const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
+  const pasteRecoveryPhrase = useCallback(
+    async (offset = 0) => {
+      const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    if (copiedWords.length === 0) return;
+      if (copiedWords.length === 0) return;
 
-    const newMnemonic = [...mnemonic];
+      const newMnemonic = [...mnemonic];
 
-    copiedWords.forEach((word, index) => {
-      const newIndex = offset + index;
-      if (newIndex < newMnemonic.length) {
-        newMnemonic[newIndex] = word;
-      }
-    });
+      copiedWords.forEach((word, index) => {
+        const newIndex = offset + index;
+        if (newIndex < newMnemonic.length) {
+          newMnemonic[newIndex] = word;
+        }
+      });
 
-    onChange(newMnemonic);
-    onPasteFromClipboard?.();
-  };
+      onChange(newMnemonic);
+      onPasteFromClipboard?.();
+    },
+    [mnemonic, onChange, onPasteFromClipboard]
+  );
+
+  useEffect(() => {
+    const handleEnterKeyPress = (event: KeyboardEvent) => {
+      if ((!event.ctrlKey && !event.metaKey) || event.key !== 'v') return;
+      void pasteRecoveryPhrase();
+    };
+    document.addEventListener('keydown', handleEnterKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleEnterKeyPress);
+    };
+  }, [mnemonic, pasteRecoveryPhrase]);
 
   return (
     <WalletSetupStepLayoutRevamp

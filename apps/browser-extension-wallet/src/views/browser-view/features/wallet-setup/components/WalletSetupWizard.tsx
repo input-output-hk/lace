@@ -29,7 +29,6 @@ import { isScriptAddress } from '@cardano-sdk/wallet';
 import { filter, firstValueFrom } from 'rxjs';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { toast } from '@lace/common';
-import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import Copy from '@src/assets/icons/copy.component.svg';
 import Paste from '@src/assets/icons/paste.component.svg';
 
@@ -62,6 +61,8 @@ export interface WalletSetupWizardProps {
 
 const DEFAULT_MNEMONIC_LENGTH = 24;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
+
+const twoSecondsToastDuration = 1.5;
 
 export const WalletSetupWizard = ({
   onCancel,
@@ -262,7 +263,7 @@ export const WalletSetupWizard = ({
           onPasteFromClipboard={() => {
             sendAnalytics(postHogOnboardingActions[setupType]?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK);
             toast.notify({
-              duration: TOAST_DEFAULT_DURATION,
+              duration: twoSecondsToastDuration,
               text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
               icon: Paste
             });
@@ -303,7 +304,7 @@ export const WalletSetupWizard = ({
         onCopyToClipboard={() => {
           sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
           toast.notify({
-            duration: TOAST_DEFAULT_DURATION,
+            duration: twoSecondsToastDuration,
             text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
             icon: Copy
           });
@@ -311,7 +312,7 @@ export const WalletSetupWizard = ({
         onPasteFromClipboard={() => {
           sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK);
           toast.notify({
-            duration: TOAST_DEFAULT_DURATION,
+            duration: twoSecondsToastDuration,
             text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
             icon: Paste
           });
