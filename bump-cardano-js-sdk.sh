@@ -1,8 +1,8 @@
 #!/usr/bin/env
 
-# Script to update @cardano-sdk/* dependencies, peerDependencies and devDependencies in all package.json files
-# within a monorepo, excluding any located within node_modules directories,
-# and setting dependencies to exact versions (without the ^ prefix).
+# Requirements: Linux/Mac, curl and jq
+
+# Script to update @cardano-sdk/* dependencies, peerDependencies and devDependencies in all package.json files within the lace monorepo
 
 # Using find to locate all package.json files in the monorepo.
 find "." -type d -name 'node_modules' -prune -o -type f -name 'package.json' -print | while IFS= read -r package_file; do
@@ -28,5 +28,8 @@ find "." -type d -name 'node_modules' -prune -o -type f -name 'package.json' -pr
     update_dependencies "devDependencies"
     update_dependencies "peerDependencies"
 done
+
+yarn install
+echo "Yarn install completed."
 
 echo "Dependency updates complete."
