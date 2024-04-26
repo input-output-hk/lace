@@ -12,6 +12,7 @@ import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 import isEqual from 'lodash/isEqual';
 import { Dialog } from '@lace/ui';
+import { MnemonicStage } from '@lace/core';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
