@@ -9,13 +9,11 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
-import * as cx from './select.stories.css';
-
-import { SelectGroup } from './';
+import * as Select from './index';
 
 export default {
   title: 'Input Fields / Select dropdown',
-  component: SelectGroup,
+  component: Select.Root,
   decorators: [
     page({
       title: 'Select dropdown',
@@ -24,80 +22,107 @@ export default {
   ],
 } as Meta;
 
-const placeholder = 'Select a value...';
+const placeholder = 'Select an option';
 const options = [
   { label: 'Apple', value: 'apple' },
   { label: 'Banana', value: 'banana' },
   { label: 'Blueberry', value: 'blueberry' },
 ];
 
-const MainComponentsIcon = (): JSX.Element => (
-  <Variants.Row>
-    <Variants.Cell>
-      <SelectGroup
-        onValueChange={(): undefined => undefined}
-        options={options}
-        placeholder={placeholder}
-        showArrow={true}
-        withOutline={true}
-      />
-    </Variants.Cell>
-    <Variants.Cell>
-      <SelectGroup
-        disabled={true}
-        onValueChange={(): undefined => undefined}
-        options={options}
-        placeholder={placeholder}
-        showArrow={true}
-        withOutline={true}
-      />
-    </Variants.Cell>
-    <Variants.Cell>
-      <SelectGroup
-        className={cx.focus}
-        disabled={true}
-        onValueChange={(): undefined => undefined}
-        options={options}
-        placeholder={placeholder}
-        showArrow={true}
-        withOutline={true}
-      />
-    </Variants.Cell>
-  </Variants.Row>
-);
-
 const MainComponents = (): JSX.Element => (
   <Variants.Row>
     <Variants.Cell>
-      <SelectGroup
-        onValueChange={(): undefined => undefined}
-        options={options}
+      <Select.Root
+        variant="grey"
+        value={options[1].value}
+        onChange={(): void => void 0}
         placeholder={placeholder}
-      />
+        showArrow
+      >
+        {options.map(option => (
+          <Select.Item
+            key={option.value}
+            value={option.value}
+            title={option.label}
+          />
+        ))}
+      </Select.Root>
     </Variants.Cell>
     <Variants.Cell>
-      <SelectGroup
-        disabled={true}
-        onValueChange={(): undefined => undefined}
-        options={options}
+      <Select.Root
+        id="hover"
+        variant="grey"
+        value={options[1].value}
+        onChange={(): void => void 0}
         placeholder={placeholder}
-      />
+        showArrow
+      >
+        {options.map(option => (
+          <Select.Item
+            key={option.value}
+            value={option.value}
+            title={option.label}
+          />
+        ))}
+      </Select.Root>
     </Variants.Cell>
     <Variants.Cell>
-      <SelectGroup
-        className={cx.focus}
-        disabled={true}
-        onValueChange={(): undefined => undefined}
-        options={options}
+      <Select.Root
+        variant="grey"
+        value={options[1].value}
+        onChange={(): void => void 0}
         placeholder={placeholder}
-      />
+        showArrow
+      >
+        <Select.Item
+          key={options[1].value}
+          value={options[1].value}
+          title={options[1].label}
+        />
+      </Select.Root>
+    </Variants.Cell>
+    <Variants.Cell>
+      <Select.Root
+        disabled
+        variant="grey"
+        value={options[1].value}
+        onChange={(): void => void 0}
+        placeholder={placeholder}
+        showArrow
+      >
+        {options.map(option => (
+          <Select.Item
+            key={option.value}
+            value={option.value}
+            title={option.label}
+          />
+        ))}
+      </Select.Root>
+    </Variants.Cell>
+    <Variants.Cell>
+      <Select.Root
+        id="focused"
+        variant="grey"
+        value={options[1].value}
+        onChange={(): void => void 0}
+        placeholder={placeholder}
+        showArrow
+      >
+        {options.map(option => (
+          <Select.Item
+            key={option.value}
+            value={option.value}
+            title={option.label}
+          />
+        ))}
+      </Select.Root>
     </Variants.Cell>
   </Variants.Row>
 );
 
 export const Overview = (): JSX.Element => {
   const [selectedValue, setSelectedValue] = React.useState<string>(
-    options[0].value,
+    options[1].value,
   );
 
   return (
@@ -112,37 +137,26 @@ export const Overview = (): JSX.Element => {
             my="$32"
           >
             <Flex mr="$8">
-              <SelectGroup
-                selectedValue={selectedValue}
-                options={options}
-                onValueChange={(value): void => {
-                  setSelectedValue(value);
-                }}
+              <Select.Root
+                value={selectedValue}
+                onChange={setSelectedValue}
                 placeholder={placeholder}
-                className={cx.testClassName}
-              />
+              >
+                {options.map(option => (
+                  <Select.Item
+                    key={option.value}
+                    value={option.value}
+                    title={option.label}
+                    disabled={option.value === 'apple'}
+                  />
+                ))}
+              </Select.Root>
             </Flex>
-          </Flex>
-
-          <Divider my="$64" />
-
-          <Flex
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            w="$fill"
-            my="$32"
-          >
-            <Flex mr="$8">
-              <SelectGroup
-                selectedValue={selectedValue}
-                options={options}
-                onValueChange={(value): void => {
-                  setSelectedValue(value);
-                }}
+            <Flex>
+              <Select.Root
+                value={undefined}
+                onChange={setSelectedValue}
                 placeholder={placeholder}
-                className={cx.testClassName}
-                showArrow={true}
               />
             </Flex>
           </Flex>
@@ -151,25 +165,14 @@ export const Overview = (): JSX.Element => {
         <Divider my="$64" />
 
         <Section title="Main components">
-          <Variants.Table headers={['Rest', 'Disabled', 'Focused']}>
+          <Variants.Table
+            headers={['Rest', 'Hover', 'Open', 'Disabled', 'Focused']}
+          >
             <MainComponents />
           </Variants.Table>
           <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
             <Variants.Table>
               <MainComponents />
-            </Variants.Table>
-          </LocalThemeProvider>
-        </Section>
-
-        <Divider my="$64" />
-
-        <Section title="Main components with Icon">
-          <Variants.Table headers={['Rest', 'Disabled', 'Focused']}>
-            <MainComponentsIcon />
-          </Variants.Table>
-          <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-            <Variants.Table>
-              <MainComponentsIcon />
             </Variants.Table>
           </LocalThemeProvider>
         </Section>
@@ -181,5 +184,7 @@ export const Overview = (): JSX.Element => {
 Overview.parameters = {
   pseudo: {
     hover: '#hover',
+    active: '#pressed',
+    focusVisible: '#focused',
   },
 };

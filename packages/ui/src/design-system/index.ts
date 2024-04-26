@@ -43,7 +43,13 @@ export type {
   RadioButtonGroupProps,
   RadioButtonGroupOption,
 } from './radio-button';
-export { SelectGroup } from './select';
+export * as Select from './select';
+export type {
+  SelectRootProps,
+  SelectItemProps,
+  SelectItemRootProps,
+  SelectItemTitleProps,
+} from './select';
 export { ActionCard } from './action-card';
 export { Loader } from './loader';
 export { TransactionType } from './dapp-transaction-summary';
