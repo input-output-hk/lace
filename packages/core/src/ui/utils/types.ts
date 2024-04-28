@@ -3,14 +3,36 @@ export type KeyConfig = {
   jsxElementKey: string;
 };
 
-export type TranslationsFor<Key extends string | KeyConfig> = Record<
-  Key extends string
-    ? Key
-    : Key extends KeyConfig
-    ? Key['stringKey'] extends string
-      ? Key['stringKey']
-      : never
-    : never,
+type NotEmptyKeyOfKeyConfig<Config extends string | KeyConfig, Key extends keyof KeyConfig> = Config extends KeyConfig
+  ? Config[Key] extends string
+    ? Config[Key]
+    : never
+  : never;
+
+/*
+ * Usage:
+ * 1. Union of string param
+ * translations: TranslationsFor<'title' | 'subtitle'>
+ * Creates:
+ * {
+ *   title: string;
+ *   subtitle: string;
+ * }
+ *
+ * 2. Object of sting unions param (both object keys are optional)
+ * translations: TranslationsFor<{
+ *   jsxElementKey: 'description';
+ *   stringKey: 'title' | 'subtitle';
+ * }>
+ * Creates:
+ * {
+ *   description: JSX.Element;
+ *   title: string;
+ *   subtitle: string;
+ * }
+ * */
+export type TranslationsFor<KeyOrConfig extends string | KeyConfig> = Record<
+  KeyOrConfig extends string ? KeyOrConfig : NotEmptyKeyOfKeyConfig<KeyOrConfig, 'stringKey'>,
   string
 > &
-  Record<Key extends KeyConfig ? Key['jsxElementKey'] : never, JSX.Element>;
+  Record<NotEmptyKeyOfKeyConfig<KeyOrConfig, 'jsxElementKey'>, JSX.Element>;

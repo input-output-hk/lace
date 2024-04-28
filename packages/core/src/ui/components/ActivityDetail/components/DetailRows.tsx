@@ -2,12 +2,13 @@ import React from 'react';
 import cn from 'classnames';
 import { DetailRow } from './DetailRow';
 import { TxDetails } from '../types';
+import { TranslationsFor } from '@src/ui/utils/types';
 import styles from '../TransactionInputOutput.module.scss';
 
 type DetailRowsProps<T extends string> = {
   list: TxDetails<T>;
   testId: string;
-  translations: Record<T, string>;
+  translations: T extends string ? TranslationsFor<T> : never;
 };
 
 export const DetailRows = function DetailRows<T extends string>({
