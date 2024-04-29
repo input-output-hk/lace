@@ -32,7 +32,7 @@ export const useKeyboardShortcut: UseKeyboardShortcut = (...params: Api1 | Api2)
   const { active = true, callback, keyCodes } = parseParams(params);
   const handler = useCallback(
     (event: KeyboardEvent) => {
-      const executeCallback = keyCodes.length === 0 || keyCodes.includes(event.code as string as KeyCode);
+      const executeCallback = keyCodes.length === 0 || keyCodes.includes(event.code as KeyCode);
       if (executeCallback) {
         callback(event);
       }

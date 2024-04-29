@@ -57,12 +57,12 @@ export const WalletSetupMnemonicStepRevamp = ({
   onCopyToClipboard,
   onPasteFromClipboard
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
-  const [mnemonicConfirm, setMnemonicWordsConfirm] = useState<string[]>([]);
+  const [mnemonicConfirm, setMnemonicConfirm] = useState<string[]>([]);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   useEffect(() => {
     if (mnemonicConfirm.length > 0) return;
-    setMnemonicWordsConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
+    setMnemonicConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
   }, [mnemonic, mnemonicConfirm.length, mnemonicStage]);
 
   const copyRecoveryPhrase = useCallback(async () => {
@@ -85,7 +85,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         }
       });
 
-      setMnemonicWordsConfirm(newMnemonic);
+      setMnemonicConfirm(newMnemonic);
       onPasteFromClipboard();
     },
     [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
@@ -105,7 +105,7 @@ export const WalletSetupMnemonicStepRevamp = ({
     if (mnemonicStage === 'writedown') {
       onBack();
     }
-    setMnemonicWordsConfirm(mnemonic.map(() => ''));
+    setMnemonicConfirm(mnemonic.map(() => ''));
     onStageChange('writedown');
   };
 
@@ -114,7 +114,7 @@ export const WalletSetupMnemonicStepRevamp = ({
       onNext();
       return;
     }
-    setMnemonicWordsConfirm(mnemonic.map(() => ''));
+    setMnemonicConfirm(mnemonic.map(() => ''));
     onStageChange('input');
   };
 
@@ -192,7 +192,7 @@ export const WalletSetupMnemonicStepRevamp = ({
                   newMnemonicWordsConfirm[index] = word;
                 });
 
-                setMnemonicWordsConfirm(newMnemonicWordsConfirm);
+                setMnemonicConfirm(newMnemonicWordsConfirm);
               }}
               suggestionList={suggestionList}
             />
