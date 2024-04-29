@@ -1,0 +1,14 @@
+name: unit
+description: Execute unit tests
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Unit tests
+      run: yarn test
+      shell: bash
+      env:
+        AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
+        DEFAULT_CHAIN: 'Preprod'
+        NODE_OPTIONS: '--max_old_space_size=8192'
