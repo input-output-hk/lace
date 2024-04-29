@@ -34,7 +34,16 @@ export enum PostHogAction {
   MultiWalletDisableAccount = 'multiwallet | disable account | click',
   MultiWalletEnableAccount = 'multiwallet | enable account | click',
   // Multi wallet Create new wallet
-  MultiWalletCreateClick = 'multiwallet | new wallet | create | click',
+  MultiWalletCreateClick = 'multiwallet | new wallet revamp | create | click',
+  MultiWalletCreateSaveRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | save your recovery phrase | next | click',
+  MultiWalletCreateEnterRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | enter your recovery phrase | next | click',
+  MultiWalletCreateSaveRecoveryPhraseIntroPlayVideoClick = 'multiwallet | new wallet revamp | save your recovery phrase | watch video | click',
+  MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick = 'multiwallet | new wallet revamp | save your recovery phrase | copy to clipboard | click',
+  MultiWalletCreateKeepWalletSecureGotItClick = 'multiwallet | new wallet revamp | keeping your wallet secure | got it | click',
+  MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | new wallet revamp | enter your recovery phrase | paste from clipboard | click',
+  MultiWalletCreateEnterWalletClick = "multiwallet | new wallet revamp | let's set up your new wallet | enter wallet | click",
+
+  // depr
   MultiWalletCreateWalletNamePasswordNextClick = 'multiwallet | new wallet | wallet name & password | next | click',
   MultiWalletCreatePassphraseIntroPlayVideoClick = 'multiwallet | new wallet | passphrase intro | play video | click',
   MultiwalletCreatePassphraseIntroNextClick = 'multiwallet | new wallet | passphrase intro | next | click',
