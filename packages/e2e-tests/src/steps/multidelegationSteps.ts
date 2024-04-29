@@ -28,11 +28,13 @@ import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/staking';
-import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
+import SwitchingStakePoolModal from '../elements/multidelegation/SwitchingStakePoolModal';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
 import { mapColumnNameStringToEnum } from '../utils/stakePoolListContent';
 import StakingExitModalAssert from '../assert/stakingExitModalAssert';
 import StakingExitModal from '../elements/multidelegation/StakingExitModal';
+import stakingPageAssert from '../assert/stakingPageAssert';
+import SwitchingPoolModalAssert from '../assert/multidelegation/SwitchingPoolModalAssert';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -458,6 +460,10 @@ When(/^\(if applicable\) I close "Switching pools\?" modal$/, async () => {
   }
 });
 
+Then(/^I (do not see|see) "Switching Pool\?" modal$/, async (shouldBeVisible: 'do not see' | 'see') => {
+  await SwitchingPoolModalAssert.assertSeeSwitchingPoolModal(shouldBeVisible === 'see');
+});
+
 Then(/^I see Expanded View banner$/, async () => {
   await StartStakingPageAssert.assertSeeExpandedViewBanner();
 });
@@ -557,3 +563,7 @@ Then(
     }
   }
 );
+
+Then(/^the staking error screen is displayed$/, async () => {
+  await stakingPageAssert.assertSeeStakingError();
+});

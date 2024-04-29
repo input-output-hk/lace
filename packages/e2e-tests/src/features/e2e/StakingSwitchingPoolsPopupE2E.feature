@@ -14,10 +14,10 @@ Feature: Staking Page - Switching pools - Popup View - E2E
     And I click stake pool with name "OtherStakePool"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
     And I save stake pool details
-    When I click "Stake on this pool" button on stake pool details drawer
-    And I click "Fine by me" button on "Switching pool?" modal
+    When I click on "Stake all on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in popup mode
-    And I click "Next" button on staking confirmation drawer
+    And I click on "Stake all on this pool" button on stake pool details drawer
     And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed in popup mode
     When I click "Close" button on staking success drawer
@@ -37,9 +37,9 @@ Feature: Staking Page - Switching pools - Popup View - E2E
     And I click stake pool with name "-"
     Then I see drawer with stake pool details without metadata and a button available for staking
     When I save stake pool details
-    And I click "Stake on this pool" button on stake pool details drawer
-    And I click "Fine by me" button on "Switching pool?" modal
-    And I click "Next" button on staking confirmation drawer
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Changing staking preferences?" modal
+    And I click on "Stake all on this pool" button on stake pool details drawer
     And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed in popup mode
     When I click "Close" button on staking success drawer

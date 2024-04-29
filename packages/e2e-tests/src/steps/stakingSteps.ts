@@ -9,9 +9,6 @@ import extensionUtils from '../utils/utils';
 import stakingConfirmationScreenAssert from '../assert/stakingConfirmationScreenAssert';
 import StakingPageObject from '../pageobject/stakingPageObject';
 import StakingPage from '../elements/staking/stakingPage';
-import StakePoolDetails from '../elements/staking/stakePoolDetails';
-import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDrawer';
-import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
@@ -62,10 +59,6 @@ Then(
     await stakingPageAssert.assertStakingSuccessDrawer(process, mode);
   }
 );
-
-Then(/^the staking error screen is displayed$/, async () => {
-  await stakingPageAssert.assertSeeStakingError();
-});
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 Then(/^I see drawer with "([^"]*)" stake pool details$/, async (_stakePool: string) => {
@@ -150,31 +143,6 @@ Then(
 
 When(/^I wait for single search result$/, async () => {
   await stakingPageAssert.assertSeeSingleSearchResult();
-});
-
-When(/^I click "Stake on this pool" button on stake pool details drawer$/, async () => {
-  await StakePoolDetails.stakeButton.waitForClickable();
-  await StakePoolDetails.stakeButton.click();
-});
-
-When(/^I click "Next" button on staking confirmation drawer$/, async () => {
-  await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 15_000 });
-  await StakingConfirmationDrawer.nextButton.click();
-});
-
-When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
-  switch (button) {
-    case 'Cancel':
-      await SwitchingStakePoolModal.cancelButton.waitForClickable();
-      await SwitchingStakePoolModal.cancelButton.click();
-      break;
-    case 'Fine by me':
-      await SwitchingStakePoolModal.fineByMeButton.waitForClickable();
-      await SwitchingStakePoolModal.fineByMeButton.click();
-      break;
-    default:
-      throw new Error(`Unsupported button name: ${button}`);
-  }
 });
 
 Then(

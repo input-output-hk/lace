@@ -16,12 +16,12 @@ Feature: Analytics - Posthog - Switching pools - Extended View
     And I click stake pool with name "OtherStakePool"
     Then I validate latest analytics single event "staking | staking | stake pool | click"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    When I click "Stake on this pool" button on stake pool details drawer
+    When I click on "Stake all on this pool" button on stake pool details drawer
     Then I validate latest analytics single event "staking | stake pool detail | stake on this pool | click"
-    And I click "Fine by me" button on "Switching pool?" modal
+    And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I validate latest analytics single event "staking | switching pool? | fine by me | click"
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
-    And I click "Next" button on staking confirmation drawer
+    And I click on "Stake all on this pool" button on stake pool details drawer
     Then I validate latest analytics single event "staking | manage delegation | stake pool confirmation | next | click"
     And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed in extended mode
@@ -44,12 +44,12 @@ Feature: Analytics - Posthog - Switching pools - Extended View
     And I click stake pool with name "OtherStakePool"
     Then I validate latest analytics single event "staking | staking | stake pool | click"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    When I click "Stake on this pool" button on stake pool details drawer
+    When I click on "Stake all on this pool" button on stake pool details drawer
     Then I validate latest analytics single event "staking | stake pool detail | stake on this pool | click"
-    And I click "Fine by me" button on "Switching pool?" modal
+    And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I validate latest analytics single event "staking | switching pool? | fine by me | click"
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
-    And I click "Next" button on staking confirmation drawer
+    And I click on "Stake all on this pool" button on stake pool details drawer
     Then I validate latest analytics single event "staking | manage delegation | stake pool confirmation | next | click"
     And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed in extended mode
