@@ -5,8 +5,7 @@ import { t } from '../utils/translationService';
 import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
 import { expect } from 'chai';
 import { StakePool } from '../data/expectedStakePoolsData';
-import StakingPasswordDrawer from '../elements/staking/StakingPasswordDrawer';
-import StakingErrorDrawer from '../elements/staking/StakingErrorDrawer';
+import StakingErrorDrawer from '../elements/multidelegation/StakingErrorDrawer';
 import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
@@ -106,20 +105,6 @@ class StakingPageAssert {
     });
   };
 
-  assertSeeStakingPasswordDrawer = async () => {
-    await StakingPasswordDrawer.title.waitForDisplayed();
-    expect(await StakingPasswordDrawer.title.getText()).to.equal(
-      await t('browserView.staking.details.confirmation.title')
-    );
-    await StakingPasswordDrawer.subtitle.waitForDisplayed();
-    expect(await StakingPasswordDrawer.subtitle.getText()).to.equal(
-      await t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')
-    );
-    await StakingPasswordDrawer.passwordInputContainer.waitForDisplayed();
-    await StakingPasswordDrawer.confirmButton.waitForDisplayed();
-    expect(await StakingPasswordDrawer.confirmButton.getText()).to.equal(await t('general.button.confirm'));
-  };
-
   assertSeeStakingError = async () => {
     await StakingErrorDrawer.icon.waitForDisplayed();
     await StakingErrorDrawer.title.waitForDisplayed();
@@ -137,15 +122,6 @@ class StakingPageAssert {
       await t('browserView.staking.details.fail.btn.close')
     );
   };
-
-  async assertSeeTickerInCostColumn(expectedTicker: 'ADA' | 'tADA') {
-    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
-
-    const tickerList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
-      String(((await stakePoolListCost.getText()) as string).match(regex))
-    );
-    this.assertTickerInList(expectedTicker, tickerList);
-  }
 
   async assertSeeTickerInCurrentStakedPool(expectedTicker: 'ADA' | 'tADA') {
     const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;

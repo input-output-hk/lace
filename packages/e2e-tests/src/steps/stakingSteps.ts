@@ -135,10 +135,6 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
 });
 
-Then(/^Staking password screen is displayed$/, async () => {
-  await stakingPageAssert.assertSeeStakingPasswordDrawer();
-});
-
 Then(/^Staking exit modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
   shouldBeDisplayed === 'is'
     ? await StakingExitModalAssert.assertSeeStakingExitModal()
@@ -213,10 +209,6 @@ Then(
     await stakingConfirmationScreenAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
   }
 );
-
-Then(/^I see (ADA|tADA) in the cost column$/, async (expectedTicker: 'ADA' | 'tADA') => {
-  await stakingPageAssert.assertSeeTickerInCostColumn(expectedTicker);
-});
 
 Then(/^I see (ADA|tADA) in current staked pool$/, async (expectedTicker: 'ADA' | 'tADA') => {
   await stakingPageAssert.assertSeeTickerInCurrentStakedPool(expectedTicker);
