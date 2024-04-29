@@ -1,11 +1,15 @@
 name: Continuous Integration
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
       - main
       - 'release/**'
+
+permissions:
+  pull-requests: write
 
 jobs:
   prepare:
@@ -22,6 +26,9 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Collect Workflow Telemetry Build packages
+        uses: catchpoint/workflow-telemetry-action@v2
 
       - name: Build icons
         uses: ./.github/actions/build/package
@@ -109,6 +116,9 @@ jobs:
           name: packages-staking
           path: packages/staking/dist
 
+      - name: Collect Workflow Telemetry Unit Tests
+        uses: catchpoint/workflow-telemetry-action@v2
+
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
@@ -162,6 +172,9 @@ jobs:
         name: packages-staking
         path: packages/staking/dist
 
+    - name: Collect Workflow Telemetry Smoke Tests
+      uses: catchpoint/workflow-telemetry-action@v2
+
     - name: Build Lace browser extension
       uses: ./.github/actions/build/app
       with:
@@ -185,156 +198,3 @@ jobs:
         E2E_REPORTS_PASSWORD: ${{ secrets.E2E_REPORTS_PASSWORD }}
         E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
         RUN: ${{ github.run_number }}
-
-  # chromaticUi:
-  #   if: github.event.pull_request.draft == false
-
-  #   name: Chromatic deploy packages/ui
-  #   runs-on: ubuntu-22.04
-  #   needs: prepare
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-
-  #     - name: Setup Node.js and install dependencies
-  #       uses: ./.github/actions/install
-  #       with:
-  #         WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-  #     - name: Download packages-icons
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-icons
-  #         path: packages/icons/dist
-
-  #     - name: Download packages-ui
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-ui
-  #         path: packages/ui/dist
-
-  #     - name: Chromatic packages-ui
-  #       uses: ./.github/actions/chromatic
-  #       with:
-  #         DIR: packages/ui
-  #         NAME: packages-ui
-  #         TOKEN: ${{ secrets.CHROMATIC_LACE_UI_TOOLKIT_TOKEN}}
-
-  # chromaticCore:
-  #   if: github.event.pull_request.draft == false
-
-  #   name: Chromatic deploy packages/core
-  #   runs-on: ubuntu-22.04
-  #   needs: prepare
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-
-  #     - name: Setup Node.js and install dependencies
-  #       uses: ./.github/actions/install
-  #       with:
-  #         WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-  #     - name: Download packages-icons
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-icons
-  #         path: packages/icons/dist
-
-  #     - name: Download packages-ui
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-ui
-  #         path: packages/ui/dist
-
-  #     - name: Download packages-common
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-common
-  #         path: packages/common/dist
-
-  #     - name: Download packages-cardano
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-cardano
-  #         path: packages/cardano/dist
-
-  #     - name: Download packages-core
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-core
-  #         path: packages/core/dist
-
-  #     - name: Chromatic packages-core
-  #       uses: ./.github/actions/chromatic
-  #       with:
-  #         DIR: packages/core
-  #         NAME: packages-core
-  #         TOKEN: ${{ secrets.CHROMATIC_LACE_CORE_TOKEN}}
-
-  # chromaticStaking:
-  #   if: github.event.pull_request.draft == false
-
-  #   name: Chromatic deploy packages/staking
-  #   runs-on: ubuntu-22.04
-  #   needs: prepare
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-
-  #     - name: Setup Node.js and install dependencies
-  #       uses: ./.github/actions/install
-  #       with:
-  #         WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-  #     - name: Download packages-icons
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-icons
-  #         path: packages/icons/dist
-
-  #     - name: Download packages-ui
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-ui
-  #         path: packages/ui/dist
-
-  #     - name: Download packages-common
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-common
-  #         path: packages/common/dist
-
-  #     - name: Download packages-cardano
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-cardano
-  #         path: packages/cardano/dist
-
-  #     - name: Download packages-core
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-core
-  #         path: packages/core/dist
-
-  #     - name: Download packages-staking
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: packages-staking
-  #         path: packages/staking/dist
-
-  #     - name: Chromatic packages-staking
-  #       uses: ./.github/actions/chromatic
-  #       with:
-  #         DIR: packages/staking
-  #         NAME: packages-staking
-  #         TOKEN: ${{ secrets.CHROMATIC_LACE_STAKING_TOKEN}}
