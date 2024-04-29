@@ -6,6 +6,10 @@ on:
     branches:
       - 'release/**'
 
+permissions:
+  pull-requests: write
+  actions: read
+
 jobs:
   buildAndTest:
     name: Build & Test
@@ -13,6 +17,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Collect Workflow Telemetry Build Packages
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
