@@ -19,7 +19,7 @@ type NotEmptyKeyOfKeyConfig<Config extends string | KeyConfig, Key extends keyof
  *   subtitle: string;
  * }
  *
- * 2. Object of sting unions param (both object keys are optional)
+ * 2. Object param with two string union properties
  * translations: TranslationsFor<{
  *   jsxElementKey: 'description';
  *   stringKey: 'title' | 'subtitle';

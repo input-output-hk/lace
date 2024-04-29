@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-array-for-each */
 /* eslint-disable unicorn/no-new-array */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import styles from './WalletSetupMnemonicVerificationStepRevamp.module.scss';
@@ -11,6 +11,7 @@ import { Segmented, Button, Tooltip } from 'antd';
 import { readMnemonicFromClipboard } from './wallet-utils';
 import { WalletTimelineSteps } from '@ui/components/WalletSetup';
 import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
+import { useKeyboardShortcut } from '@lace/common';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
 const MNEMONIC_LENGTHS = [12, 15, 24];
@@ -72,16 +73,10 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
     [mnemonic, onChange, onPasteFromClipboard]
   );
 
-  useEffect(() => {
-    const handleEnterKeyPress = (event: KeyboardEvent) => {
-      if ((!event.ctrlKey && !event.metaKey) || event.key !== 'v') return;
-      void pasteRecoveryPhrase();
-    };
-    document.addEventListener('keydown', handleEnterKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleEnterKeyPress);
-    };
-  }, [mnemonic, pasteRecoveryPhrase]);
+  useKeyboardShortcut((event) => {
+    if ((!event.ctrlKey && !event.metaKey) || event.key !== 'v') return;
+    void pasteRecoveryPhrase();
+  });
 
   return (
     <WalletSetupStepLayoutRevamp

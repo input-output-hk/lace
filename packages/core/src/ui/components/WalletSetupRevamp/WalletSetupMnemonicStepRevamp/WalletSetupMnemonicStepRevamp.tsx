@@ -14,6 +14,7 @@ import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-ut
 import isEqual from 'lodash/isEqual';
 import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.component.svg';
 import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
+import { useKeyboardShortcut } from '@lace/common';
 
 export type MnemonicStage = 'writedown' | 'input';
 
@@ -90,21 +91,15 @@ export const WalletSetupMnemonicStepRevamp = ({
     [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
   );
 
-  useEffect(() => {
-    const handleEnterKeyPress = (event: KeyboardEvent) => {
-      if (!event.ctrlKey && !event.metaKey) return;
-      if (event.key === 'c' && mnemonicStage === 'writedown') {
-        void copyRecoveryPhrase();
-      }
-      if (event.key === 'v' && mnemonicStage === 'input') {
-        void pasteRecoveryPhrase();
-      }
-    };
-    document.addEventListener('keydown', handleEnterKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleEnterKeyPress);
-    };
-  }, [copyRecoveryPhrase, mnemonic, mnemonicStage, pasteRecoveryPhrase]);
+  useKeyboardShortcut((event) => {
+    if (!event.ctrlKey && !event.metaKey) return;
+    if (event.key === 'c' && mnemonicStage === 'writedown') {
+      void copyRecoveryPhrase();
+    }
+    if (event.key === 'v' && mnemonicStage === 'input') {
+      void pasteRecoveryPhrase();
+    }
+  });
 
   const handleBack = () => {
     if (mnemonicStage === 'writedown') {
