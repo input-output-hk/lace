@@ -31,6 +31,8 @@ import { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/st
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
 import { mapColumnNameStringToEnum } from '../utils/stakePoolListContent';
+import StakingExitModalAssert from '../assert/stakingExitModalAssert';
+import StakingExitModal from '../elements/multidelegation/StakingExitModal';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -529,5 +531,29 @@ Then(
   ) => {
     const poolLimit = 100; // Limit verification to 100 stake pools due to time constraints
     await MultidelegationPageAssert.assertSeeStakePoolsSorted(stakePoolsDisplayType, sortingOption, order, poolLimit);
+  }
+);
+
+Then(/^Staking exit modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  shouldBeDisplayed === 'is'
+    ? await StakingExitModalAssert.assertSeeStakingExitModal()
+    : await StakingExitModalAssert.assertDontSeeStakingExitModal();
+});
+
+Then(
+  /^I click "(Cancel|Exit)" button for staking "You'll have to start again" modal$/,
+  async (button: 'Cancel' | 'Exit') => {
+    switch (button) {
+      case 'Cancel':
+        await StakingExitModal.cancelButton.waitForClickable();
+        await StakingExitModal.cancelButton.click();
+        break;
+      case 'Exit':
+        await StakingExitModal.exitButton.waitForClickable();
+        await StakingExitModal.exitButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 );

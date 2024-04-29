@@ -5,7 +5,6 @@ import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import { getStakePoolById, getStakePoolByName, StakePoolsData } from '../data/expectedStakePoolsData';
 import testContext from '../utils/testContext';
 import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
-import StakingExitModalAssert from '../assert/stakingExitModalAssert';
 import extensionUtils from '../utils/utils';
 import stakingConfirmationScreenAssert from '../assert/stakingConfirmationScreenAssert';
 import StakingPageObject from '../pageobject/stakingPageObject';
@@ -13,7 +12,6 @@ import StakingPage from '../elements/staking/stakingPage';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDrawer';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
-import StakingExitModal from '../elements/staking/StakingExitModal';
 
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
@@ -135,12 +133,6 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
 });
 
-Then(/^Staking exit modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
-  shouldBeDisplayed === 'is'
-    ? await StakingExitModalAssert.assertSeeStakingExitModal()
-    : await StakingExitModalAssert.assertDontSeeStakingExitModal();
-});
-
 Then(
   /^I see drawer with stakepool: "([^"]*)" confirmation screen in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
@@ -169,24 +161,6 @@ When(/^I click "Next" button on staking confirmation drawer$/, async () => {
   await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 15_000 });
   await StakingConfirmationDrawer.nextButton.click();
 });
-
-Then(
-  /^I click "(Cancel|Exit)" button for staking "You'll have to start again" modal$/,
-  async (button: 'Cancel' | 'Exit') => {
-    switch (button) {
-      case 'Cancel':
-        await StakingExitModal.cancelButton.waitForClickable();
-        await StakingExitModal.cancelButton.click();
-        break;
-      case 'Exit':
-        await StakingExitModal.exitButton.waitForClickable();
-        await StakingExitModal.exitButton.click();
-        break;
-      default:
-        throw new Error(`Unsupported button name: ${button}`);
-    }
-  }
-);
 
 When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
   switch (button) {
