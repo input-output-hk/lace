@@ -62,7 +62,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click "Stake on this pool" button on stake pool details drawer
     And I click "Fine by me" button on "Switching pool?" modal
     And I click "Next" button on staking confirmation drawer
-    And Staking password screen is displayed
+    And staking password drawer is displayed
     When I enter correct wallet password and confirm staking
     Then the staking error screen is displayed
     When I close the drawer by clicking close button
