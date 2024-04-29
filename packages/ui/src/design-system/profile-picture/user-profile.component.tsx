@@ -13,6 +13,7 @@ interface Props {
   delayMs?: number;
   radius?: 'circle' | 'rounded';
   background?: 'none';
+  testId?: string;
 }
 
 interface FallbackText {
@@ -29,6 +30,7 @@ export const UserProfile = ({
   delayMs = 600,
   radius = 'circle',
   background,
+  testId,
   ...rest
 }: Readonly<Props & (FallbackImage | FallbackText)>): JSX.Element => (
   <RadixUIAvatar.Root
@@ -38,7 +40,12 @@ export const UserProfile = ({
       [cx.noBackground]: background === 'none',
     })}
   >
-    <RadixUIAvatar.Image className={cx.image} src={imageSrc} alt={alt} />
+    <RadixUIAvatar.Image
+      className={cx.image}
+      src={imageSrc}
+      alt={alt}
+      data-testid={testId}
+    />
     <RadixUIAvatar.Fallback asChild delayMs={delayMs}>
       {'fallbackImage' in rest ? (
         <img className={cx.image} src={rest.fallbackImage} alt={alt} />

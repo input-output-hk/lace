@@ -15,6 +15,7 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import { browser } from '@wdio/globals';
 import { expect } from 'chai';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
+import nftDetails from '../elements/NFTs/nftDetails';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
@@ -148,4 +149,8 @@ When(/^I open NFT receiving HD wallet$/, async () => {
 
 When(/^I save all NFTs that I have$/, async () => {
   await nftsPageObject.saveNfts();
+});
+
+When(/^I save NFT details$/, async () => {
+  await nftDetails.saveNFTDetails();
 });

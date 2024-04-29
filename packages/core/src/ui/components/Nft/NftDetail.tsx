@@ -58,6 +58,7 @@ export const NftDetail = ({
       label={translations.setAsAvatar}
       icon={<ProfileIcon />}
       onClick={() => onSetAsAvatar(image)}
+      data-testid="nft-set-as-avatar-button"
     />
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
