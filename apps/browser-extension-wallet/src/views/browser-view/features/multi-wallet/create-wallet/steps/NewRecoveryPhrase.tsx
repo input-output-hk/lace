@@ -60,9 +60,10 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   const saveWallet = useCallback(async () => {
     const { source } = await createWallet(data);
+    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterRecoveryPhraseNextClick);
+
     // move this to name-password setup submit handle after order changes
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterWalletClick);
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
+    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterWalletClick, {
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });

@@ -33,6 +33,7 @@ export enum PostHogAction {
   MultiWalletSwitchAccount = 'multiwallet | switch account | click',
   MultiWalletDisableAccount = 'multiwallet | disable account | click',
   MultiWalletEnableAccount = 'multiwallet | enable account | click',
+
   // Multi wallet Create new wallet
   MultiWalletCreateClick = 'multiwallet | new wallet revamp | create | click',
   MultiWalletCreateSaveRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | save your recovery phrase | next | click',
@@ -43,11 +44,19 @@ export enum PostHogAction {
   MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | new wallet revamp | enter your recovery phrase | paste from clipboard | click',
   MultiWalletCreateEnterWalletClick = "multiwallet | new wallet revamp | let's set up your new wallet | enter wallet | click",
 
-  // depr
+  // deprecate
   MultiWalletCreateWalletNamePasswordNextClick = 'multiwallet | new wallet | wallet name & password | next | click',
-  MultiWalletCreatePassphraseIntroPlayVideoClick = 'multiwallet | new wallet | passphrase intro | play video | click',
-  MultiwalletCreatePassphraseIntroNextClick = 'multiwallet | new wallet | passphrase intro | next | click',
-  MultiWalletCreateAdded = 'multiwallet | new wallet | added',
+
+  // Multi wallet Restore wallet
+  MultiWalletRestoreClick = 'multiwallet | restore wallet revamp | restore | click',
+  MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | paste from clipboard | click',
+  MultiWalletRestoreEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
+  MultiWalletRestoreEnterRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | enter your recovery phrase | next | click',
+
+  // deprecate
+  MultiwalletRestoreWalletNamePasswordNextClick = 'multiwallet | restore wallet | wallet name & password | next | click',
+
+  MultiWalletRestoreHdWallet = 'multiwallet | restore wallet | hd wallet',
 
   // Multi wallet Hardware wallet connect
   MultiWalletHWClick = 'multiwallet | hardware wallet | connect | click',
@@ -56,17 +65,6 @@ export enum PostHogAction {
   MultiWalletHWNameNextClick = 'multiwallet | hardware wallet | name hw wallet | next | click',
   MultiWalletHWAdded = 'multiwallet | hardware wallet | added',
 
-  // Multi wallet Restore wallet
-  MultiWalletRestoreClick = 'multiwallet | restore wallet | restore | click',
-  MultiWalletRestorePassphraseIntroPlayVideoClick = 'multiwallet | restore wallet | passphrase intro | play video | click',
-  MultiwalletRestorePassphraseIntroNextClick = 'multiwallet | restore wallet | passphrase intro | next | click',
-  MultiwalletRestoreRecoveryPhraseLengthNextClick = 'multiwallet | restore wallet | recovery phrase length | next | click',
-  MultiwalletRestoreEnterPassphrase01NextClick = 'multiwallet | restore wallet | enter passphrase #01 | next | click',
-  MultiwalletRestoreEnterPassphrase09NextClick = 'multiwallet | restore wallet | enter passphrase #09 | next | click',
-  MultiwalletRestoreEnterPassphrase17NextClick = 'multiwallet | restore wallet | enter passphrase #17 | next | click',
-  MultiwalletRestoreWalletNamePasswordNextClick = 'multiwallet | restore wallet | wallet name & password | next | click',
-  MultiWalletRestoreAdded = 'multiwallet | restore wallet | added',
-  MultiWalletRestoreHdWallet = 'multiwallet | restore wallet | hd wallet',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',

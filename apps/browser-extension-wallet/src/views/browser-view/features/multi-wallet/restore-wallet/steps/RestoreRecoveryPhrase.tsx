@@ -11,7 +11,7 @@ import { PostHogAction, toast } from '@lace/common';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { filter, firstValueFrom } from 'rxjs';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
@@ -58,7 +58,10 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   const onSubmitForm = useCallback(async () => {
     try {
       const { source, wallet } = await createWallet(data);
-      await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreAdded, {
+      await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreEnterRecoveryPhraseNextClick);
+
+      // move this to name-password setup submit handle after order changes
+      await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreEnterWalletClick, {
         // eslint-disable-next-line camelcase
         $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
       });
@@ -81,7 +84,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
 
   const handleMnemonicVerification = (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
     event.preventDefault();
-    analytics.sendEventToPostHog(postHogOnboardingActions.restore?.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+    analytics.sendEventToPostHog(postHogMultiWalletActions.restore?.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
     onSubmitForm();
   };
 
@@ -100,7 +103,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
       onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
       onPasteFromClipboard={() =>
-        analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+        analytics.sendEventToPostHog(postHogMultiWalletActions.restore?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
       }
     />
   );

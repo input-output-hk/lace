@@ -53,5 +53,12 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
       PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick
+  },
+  restore: {
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletRestoreClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.MultiWalletRestoreEnterRecoveryPhraseNextClick,
+    ENTER_WALLET: PostHogAction.MultiWalletRestoreEnterWalletClick,
+    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
+      PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick
   }
 };
