@@ -5,7 +5,7 @@
   "author": "IOHK",
   "scripts": {
     "build": "yarn exec echo 'No build required'",
-    "test": "yarn exec echo 'User test:local'",
+    "test": "echo \"@lace/e2e-tests: no test command specified\"",
     "test:local:chrome": "../../node_modules/.bin/wdio run wdio.conf.chrome.ts",
     "test:local:edge": "../../node_modules/.bin/wdio run wdio.conf.edge.ts",
     "cleanup": "rm -rf logs node_modules reports screenshots",
@@ -51,7 +51,7 @@
     "flat": "5.0.2",
     "npm-run-all": "4.1.5",
     "ts-node": "10.9.1",
-    "typescript": "4.9.5",
+    "typescript": "^4.9.5",
     "wdio-intercept-service": "4.4.0",
     "webdriverio": "8.32.3"
   }

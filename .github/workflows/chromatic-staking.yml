@@ -1,0 +1,37 @@
+name: Chromatic deploy packages/staking
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - packages/staking/**
+  push:
+    paths:
+      - packages/staking/**
+    branches:
+      - main
+
+jobs:
+  chromatic-deployment:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Build
+        run: yarn workspaces foreach -Rpt -v --from '@lace/staking' run build
+
+      - name: Chromatic packages-staking
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/staking
+          NAME: packages-staking
+          TOKEN: ${{ secrets.CHROMATIC_LACE_STAKING_TOKEN }}

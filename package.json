@@ -30,6 +30,7 @@
     "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
     "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
     "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
+    "format-check": "yarn workspaces foreach -ptv run format-check",
     "postinstall": "husky install & ts-patch install -s",
     "lint": "yarn workspaces foreach -ptv run lint && yarn markdown:lint",
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
@@ -39,6 +40,7 @@
     "prestorybook:build": "yarn build",
     "storybook:build": "ENV=development build-storybook --log-level error",
     "test": "yarn workspaces foreach run test",
+    "type-check": "yarn workspaces foreach -ptv run type-check",
     "version": "standard-version",
     "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*CJS.*Build success)' -c watch",
     "watch-deps": "EXCLUDE_APP=true yarn watch"
