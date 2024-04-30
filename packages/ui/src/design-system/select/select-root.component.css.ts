@@ -16,6 +16,7 @@ const triggerBase = style({
   fontWeight: vars.fontWeights.$medium,
   userSelect: 'none',
   cursor: 'pointer',
+  color: vars.colors.$select_text_color,
 
   selectors: {
     '&:disabled': {
@@ -35,7 +36,6 @@ export const trigger = styleVariants({
   grey: [
     triggerBase,
     {
-      color: vars.colors.$select_text_color,
       backgroundColor: vars.colors.$select_grey_bgColor_rest,
       selectors: {
         '&:hover:not(:disabled)': {
