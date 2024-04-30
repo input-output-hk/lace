@@ -335,3 +335,14 @@ When(/^I reclaim collateral \(if active\) in (extended|popup) mode$/, async (mod
 When(/^I set theme switch in settings to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
   await settingsExtendedPageObject.setExtensionTheme(mode);
 });
+
+Then(/^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/, async (network: NetworkType) => {
+  await settingsPageExtendedAssert.assertSeeCurrentNetworkName(network);
+});
+
+Then(
+  /^I see current network: "(Mainnet|Preprod|Preview)" name in "About Lace" widget$/,
+  async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
+    await settingsPageExtendedAssert.assertSeeNetworkInAboutComponent(network);
+  }
+);

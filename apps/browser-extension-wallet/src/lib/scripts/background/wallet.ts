@@ -23,6 +23,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { ADA_HANDLE_POLICY_ID, HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, NotImplementedError } from '@cardano-sdk/core';
+import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 
 const logger = console;
 
@@ -55,7 +56,7 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = chainIdToChainName(chainId);
-    const providers = getProviders(chainName);
+    const providers = await getProviders(chainName);
     if (wallet.type === WalletType.Script || typeof accountIndex !== 'number') {
       throw new NotImplementedError('Script wallet support is not implemented');
     }
@@ -197,5 +198,7 @@ walletManager
   .catch((error) => {
     logger.error('Failed to initialize wallet manager', error);
   });
+
+cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
 
 export const wallet$ = walletManager.activeWallet$;

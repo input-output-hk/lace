@@ -3,6 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { getBaseUrlForChain } from '@src/utils/chain';
 import { BackgroundService, UserIdService as UserIdServiceInterface } from '../types';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
 
 export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,
@@ -20,16 +21,16 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   backendFailures$: RemoteApiPropertyType.HotObservable
 };
 
-export const getProviders = (chainName: Wallet.ChainName): Wallet.WalletProvidersDependencies => {
+export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.WalletProvidersDependencies> => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
+  const { customSubmitTxUrl } = await getBackgroundStorage();
+
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
-    baseUrl: baseCardanoServicesUrl
+    baseUrl: baseCardanoServicesUrl,
+    customSubmitTxUrl
   });
 };
-export const ownOrigin = globalThis.location.origin;
-
-export const BASE_EXTENSION_APP_URL = 'app.html';
 
 export const cip30WalletProperties = {
   // eslint-disable-next-line max-len

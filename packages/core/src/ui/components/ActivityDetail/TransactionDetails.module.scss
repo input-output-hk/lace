@@ -102,29 +102,14 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
         font-weight: 500;
         line-height: 17px;
       }
+
+      &.addressTag {
+        gap: size_unit(1);
+      }
     }
 
     .timestamp {
       flex: 0 0 35%;
-    }
-
-    .amount {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      align-items: flex-end;
-
-      .ada {
-        color: var(--text-color-primary, #ffffff);
-      }
-
-      .fiat {
-        color: var(--text-color-secondary, #878e9e);
-      }
-
-      .addrName {
-        margin-bottom: size_unit(1);
-      }
     }
 
     .addressDetail {

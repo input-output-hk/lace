@@ -134,7 +134,7 @@ class TokenSelectionPage extends CommonDrawerElements {
   };
 
   deselectToken = async (assetType: string, index: number) => {
-    assetType === 'Tokens' ? await this.tokenItem(index).container.click() : await this.nftNames[index].click();
+    assetType === 'Tokens' ? await this.tokenItem(Number(index)).container.click() : await this.nftNames[index].click();
   };
 
   saveSelectedTokens = async (assetType: string, bundle: number) => {

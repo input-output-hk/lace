@@ -20,11 +20,11 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
       | manage         | I close the drawer by clicking close button |
       | confirmation   | I close the drawer by clicking close button |
       | password       | I close the drawer by clicking close button |
-      | success        | I close the drawer by clicking close button |
+#      | success        | I close the drawer by clicking close button | TODO: unblock when LW-10336 is resolved
       | manage         | I click outside the drawer                  |
       | confirmation   | I click outside the drawer                  |
       | password       | I click outside the drawer                  |
-      | success        | I click outside the drawer                  |
+#      | success        | I click outside the drawer                  | TODO: unblock when LW-10336 is resolved
 
   @LW-8450
   Scenario Outline: Extended View - Staking - Hover over currently staking element: <element>

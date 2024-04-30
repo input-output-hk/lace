@@ -13,6 +13,7 @@ import SpyInstance = jest.SpyInstance;
 const mockEmip3decrypt = jest.fn();
 const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
+const mockGetHwExtendedAccountPublicKey = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
 const mockLedgerCheckDeviceConnection = jest.fn();
@@ -80,6 +81,7 @@ jest.mock('@lace/cardano', () => {
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
       switchKeyAgents: mockSwitchKeyAgents,
       connectDevice: mockConnectDevice,
+      getHwExtendedAccountPublicKey: mockGetHwExtendedAccountPublicKey,
       KeyManagement: {
         ...actual.Wallet.KeyManagement,
         emip3decrypt: mockEmip3decrypt,
@@ -382,7 +384,7 @@ describe('Testing useWalletManager hook', () => {
   describe('createHardwareWallet', () => {
     test('should use cardano manager to create wallet', async () => {
       const walletId = 'walletId';
-      mockLedgerGetXpub.mockResolvedValue('pubkey');
+      mockGetHwExtendedAccountPublicKey.mockResolvedValue('pubkey');
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletRepository as any).addAccount = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
@@ -556,7 +558,7 @@ describe('Testing useWalletManager hook', () => {
         ]
       });
       expect(clearBackgroundStorage).toBeCalledWith({
-        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
+        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration', 'customSubmitTxUrl']
       });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
@@ -696,11 +698,11 @@ describe('Testing useWalletManager hook', () => {
         },
         {
           type: WalletType.Trezor,
-          prepare: () => mockTrezorGetXpub.mockResolvedValueOnce(extendedAccountPublicKey)
+          prepare: () => mockGetHwExtendedAccountPublicKey.mockResolvedValueOnce(extendedAccountPublicKey)
         },
         {
           type: WalletType.Ledger,
-          prepare: () => mockLedgerGetXpub.mockResolvedValueOnce(extendedAccountPublicKey)
+          prepare: () => mockGetHwExtendedAccountPublicKey.mockResolvedValueOnce(extendedAccountPublicKey)
         }
       ];
 

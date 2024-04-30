@@ -124,10 +124,14 @@
   }
 }
 
-.negativeBalance {
+.pendingNegativeBalance {
   color: var(--data-orange);
 }
 
 .positiveBalance {
   color: var(--data-green);
+}
+
+.negativeBalance {
+  color: var(--text-color-primary);
 }

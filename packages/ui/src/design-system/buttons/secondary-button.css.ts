@@ -53,8 +53,8 @@ globalStyle(`${button}:active path`, {
 });
 
 export const label = style([
-  sx({ color: '$buttons_secondary_label_color' }),
   {
+    color: vars.colors.$buttons_secondary_label_color,
     selectors: {
       [`${button}:hover &`]: {
         color: vars.colors.$buttons_secondary_label_color_pressed,

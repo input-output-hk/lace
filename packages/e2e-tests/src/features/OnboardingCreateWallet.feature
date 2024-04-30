@@ -37,12 +37,12 @@ Feature: Onboarding - Create wallet
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
-      | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
+      | password    | password_conf | passw_err                                                               | complex_bar_lvl | passw_conf_err                               |
       | a           |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
       | P@ss        |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
       | N_8J@bne    |               | core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback | 2               | empty                                        |
-      | N_8J@bne87  |               | empty                                                                           | 3               | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                                                                           | 4               | core.walletSetupRegisterStep.noMatchPassword |
+      | N_8J@bne87  |               | empty                                                                   | 3               | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                                                                   | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-3013
   Scenario: Create Wallet - Mnemonic writedown page - appears correctly after wallet setup page
@@ -174,7 +174,7 @@ Feature: Onboarding - Create wallet
       | sad     |
       | saddle  |
       | sadness |
-    And I click header to loose focus
+    And I click header to lose focus
     Then I do not see autocomplete options list
     And I click on mnemonic input
     Then I see following autocomplete options:

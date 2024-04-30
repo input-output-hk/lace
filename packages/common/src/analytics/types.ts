@@ -7,14 +7,12 @@ export enum PostHogAction {
   OnboardingMainViewPinExtensionClick = 'wallet | onboarding | lace main view | pin the wallet extension | click',
   OnboardingMainViewMultiAddressModalGotItClick = 'wallet | onboarding | lace main view | multi-address modal | got it | click',
   // Hardware wallet connect
-  OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
-  OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
-  OnboardingHWClick = 'onboarding | hardware wallet | connect | click',
-  OnboardinHWLaceTermsOfUseNextClick = 'onboarding | hardware wallet | lace terms of use | next | click',
-  OnboardingHWConnectNextClick = 'onboarding | hardware wallet | connect hw | next | click',
-  OnboardingHWSelectAccountNextClick = 'onboarding | hardware wallet | select hw account | next | click',
-  OnboardingHWNameNextClick = 'onboarding | hardware wallet | name hw wallet | next | click',
-  OnboardingHWDoneGoToWallet = 'onboarding | hardware wallet | all done | go to my wallet | click',
+  OnboardingHWClick = 'onboarding | hardware wallet revamp | connect | click',
+  OnboardingHWConnectView = 'onboarding | hardware wallet revamp | connect your device | view',
+  OnboardingHWPopupConnectClick = 'onboarding | hardware wallet revamp | native browser pop-up with HWs | connect | click',
+  OnboardingHWConnectTryAgainClick = 'onboarding | hardware wallet revamp | connect your device | try again | click',
+  OnboardingHWSetupWalletAccountNoClick = "onboarding | hardware wallet revamp | let's set up your wallet | Account No | click",
+  OnboardingHWEnterWalletClick = "onboarding | hardware wallet revamp | let's set up your wallet | enter wallet | click",
   // Restore wallet
   OnboardingRestoreClick = 'onboarding | restore wallet revamp | restore | click',
   OnboardingRestoreEnterRecoveryPhraseNextClick = 'onboarding | restore wallet revamp |  enter your recovery phrase  | next | click',
@@ -150,6 +148,7 @@ export enum PostHogAction {
   NFTsCreateFolderClick = 'nft | nfts | create folder | click',
   NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
   NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
+  NFTDetailSetAsAvatarClick = 'nft | nft detail | set as your wallet avatar | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -208,6 +207,9 @@ export enum PostHogAction {
   SettingsFaqsClick = 'settings | faqs | click',
   SettingsWalletHdWalletSyncSyncClick = 'settings | wallet | hd wallet sync | sync | click',
   SettingsWalletHdWalletSyncSyncNewAddresses = 'settings | wallet | hd wallet sync | sync | new addresses',
+  SettingsCustomSubmitApiClick = 'settings | custom submit api | click',
+  SettingsCustomSubmitApiXClick = 'settings | custom submit api | x | click',
+  SettingsCustomSubmitApiEnableClick = 'settings | custom submit api | enable | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

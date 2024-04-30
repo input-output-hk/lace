@@ -80,10 +80,6 @@ export const box = sx({
   mr: '$16',
 });
 
-export const title = sx({
-  color: '$toast_bar_label_color',
-});
-
 export const progress = style([
   {
     position: 'absolute',

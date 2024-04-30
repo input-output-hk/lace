@@ -2,10 +2,13 @@
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import cn from 'classnames';
-import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
+
 import { Ellipsis, toast } from '@lace/common';
 import { Box } from '@lace/ui';
-import { useTranslate } from '@src/ui/hooks';
+import { useTranslate } from '@ui/hooks';
+import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
+
+import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { ActivityStatus } from '../Activity';
 import styles from './TransactionDetails.module.scss';
@@ -76,6 +79,7 @@ export interface TransactionDetailsProps {
   txSummary?: TxSummary[];
   coinSymbol: string;
   tooltipContent?: string;
+  ownAddresses: string[];
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: (url: string) => void;
@@ -122,6 +126,7 @@ export const TransactionDetails = ({
   txSummary = [],
   coinSymbol,
   pools,
+  ownAddresses,
   addressToNameMap,
   isPopupView,
   openExternalLink,
@@ -353,22 +358,22 @@ export const TransactionDetails = ({
                     </div>
                   )}
                   {(summary.addr as string[]).map((addr) => {
-                    const addrName = addressToNameMap?.get(addr);
                     const address = isPopupView ? (
-                      <Ellipsis className={cn(styles.addr, styles.fiat)} text={addr} ellipsisInTheMiddle />
+                      <Ellipsis
+                        className={cn(styles.addr, styles.fiat)}
+                        text={addr}
+                        dataTestId="tx-to-address"
+                        ellipsisInTheMiddle
+                      />
                     ) : (
-                      <span className={cn(styles.addr, styles.fiat)}>{addr}</span>
+                      <span className={cn(styles.addr, styles.fiat)} data-testid="tx-to-address">
+                        {addr}
+                      </span>
                     );
                     return (
-                      <div key={addr} data-testid="tx-to-detail" className={cn(styles.addr, styles.detail)}>
-                        {addrName ? (
-                          <div className={styles.amount}>
-                            <span className={cn(styles.ada, styles.addrName)}>{addrName}</span>
-                            {address}
-                          </div>
-                        ) : (
-                          address
-                        )}
+                      <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
+                        {address}
+                        {renderAddressTag(addr, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
                       </div>
                     );
                   })}
@@ -590,6 +595,8 @@ export const TransactionDetails = ({
             coinSymbol={coinSymbol}
             withSeparatorLine
             sendAnalytics={sendAnalyticsInputs}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         )}
         {addrOutputs?.length > 0 && (
@@ -604,6 +611,8 @@ export const TransactionDetails = ({
             }}
             coinSymbol={coinSymbol}
             sendAnalytics={sendAnalyticsOutputs}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         )}
         {metadata?.length > 0 && (

@@ -59,7 +59,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
   let providers = {} as {
     connectHardwareWallet: jest.Mock;
     createWallet: jest.Mock;
-    disconnectHardwareWallet$: Subject<HIDConnectionEvent>;
+    disconnectHardwareWallet$: Subject<USBConnectionEvent>;
     shouldShowDialog$: Subject<boolean>;
   };
 
@@ -67,7 +67,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     providers = {
       connectHardwareWallet: jest.fn(),
       createWallet: jest.fn(),
-      disconnectHardwareWallet$: new Subject<HIDConnectionEvent>(),
+      disconnectHardwareWallet$: new Subject<USBConnectionEvent>(),
       shouldShowDialog$: new Subject()
     };
   });
@@ -101,7 +101,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     await selectAccountStep();
 
     act(() => {
-      providers.disconnectHardwareWallet$.next({ device: { opened: true } } as HIDConnectionEvent);
+      providers.disconnectHardwareWallet$.next({ device: { opened: true } } as USBConnectionEvent);
     });
 
     await waitFor(() => expect(screen.queryByText('Oops! Something went wrong')).toBeInTheDocument());

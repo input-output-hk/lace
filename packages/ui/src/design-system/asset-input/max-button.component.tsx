@@ -2,7 +2,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './max-button.css';
 
@@ -17,6 +17,8 @@ export const MaxButton = ({
   ...props
 }: Readonly<Props>): JSX.Element => (
   <button {...props} className={classNames(cx.container, cx.button)}>
-    <Text.Label className={cx.label}>{label}</Text.Label>
+    <Text.Label color="secondary" className={cx.label}>
+      {label}
+    </Text.Label>
   </button>
 );
