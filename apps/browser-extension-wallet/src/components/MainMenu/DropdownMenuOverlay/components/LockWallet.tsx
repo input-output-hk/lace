@@ -17,7 +17,7 @@ export const LockWallet = (): React.ReactElement => {
   };
 
   return (
-    <Menu.Item data-testid="header-menu-lock" onClick={handleLockWallet} className={styles.menuItem}>
+    <Menu.Item data-testid="header-menu-lock" onClick={handleLockWallet} className={styles.menuItem} disabled>
       {t('browserView.topNavigationBar.links.lockWallet')}
     </Menu.Item>
   );
