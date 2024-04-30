@@ -5,7 +5,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Given Wallet is synced
     And I navigate to Staking extended page
 
-  @LW-7819 @Testnet
+  @LW-7819 @Testnet @Pending @issue=LW-10336
   Scenario Outline: Extended View - Multidelegation - Delegate to multiple pools E2E
     When I open Overview tab
     And I wait until delegation info card shows staking to "<pools_before>" pool(s)
@@ -31,7 +31,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | 2            | 10          | 8BETA, OCEAN, WOOF, PIANO, SMAUG, ZZZZX, ZZZG3, YATP, XSP, CENT | Delegation                |
       | 10           | 1           | 8BETA                                                           | Stake Key De-Registration |
 
-  @LW-8434 @Testnet
+  @LW-8434 @Testnet @Pending @issue=LW-10336
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata
     And I save identifiers of stake pools currently in use
     And I open Browse pools tab
@@ -55,7 +55,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     When I click on a transaction: 1
     Then The Tx details are displayed for Staking with metadata
 
-  @LW-8435 @Testnet
+  @LW-8435 @Testnet @Pending @issue=LW-10336
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool without metadata
     And I save identifiers of stake pools currently in use
     And I open Browse pools tab

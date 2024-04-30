@@ -1,31 +1,26 @@
 import { flatten } from 'flat';
 import { readFromFile } from './fileUtils';
-import { en } from '../../../staking/src/features/i18n/translations/en';
+import { en as staking } from '../../../staking/src/features/i18n/translations/en';
 
-const loadTranslations = async function (translationType = 'base') {
+type TranslationsOrigin = 'base' | 'staking';
+type Translations = { [index: string]: any };
+
+const loadTranslations = async function (translationOrigin: TranslationsOrigin) {
   const language = process.env.LACE_LOCALE ?? 'en';
 
   const extensionTranslationPath = `../../../../apps/browser-extension-wallet/src/lib/translations/${language}.json`;
   const coreTranslationPath = `../../../../packages/core/dist/translations/${language}.json`;
 
-  let stringStream;
-  switch (translationType) {
-    case 'base':
-      stringStream = await flatten(JSON.parse(readFromFile(__dirname, extensionTranslationPath).toString()));
-      break;
-    case 'core':
-      stringStream = await flatten(JSON.parse(readFromFile(__dirname, coreTranslationPath).toString()));
-      break;
-    case 'staking':
-      stringStream = en;
-      break;
-  }
-
-  return stringStream;
+  const extension: Translations = await flatten(
+    JSON.parse(readFromFile(__dirname, extensionTranslationPath).toString())
+  );
+  const core: Translations = await flatten(JSON.parse(readFromFile(__dirname, coreTranslationPath).toString()));
+  const baseTranslations = {
+    ...core,
+    ...extension
+  };
+  return translationOrigin === 'base' ? baseTranslations : staking;
 };
-let translations: { [index: string]: any };
 
-export const t = async (key: string, translationType = 'base'): Promise<string> => {
-  translations = await loadTranslations(translationType);
-  return translations[key];
-};
+export const t = async (key: string, translationOrigin: TranslationsOrigin = 'base'): Promise<string> =>
+  (await loadTranslations(translationOrigin))[key];

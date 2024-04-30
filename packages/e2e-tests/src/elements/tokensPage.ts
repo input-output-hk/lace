@@ -186,6 +186,7 @@ class TokensPage {
   }
 
   async clickOnCoinGeckoCreditsLink() {
+    await this.coinGeckoLink.waitForClickable();
     await this.coinGeckoLink.click();
   }
 }

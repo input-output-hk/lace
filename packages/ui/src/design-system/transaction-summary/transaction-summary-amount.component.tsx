@@ -46,19 +46,16 @@ export const Amount = ({
         <Cell>
           <Flex>
             <Text.Body.Normal
-              weight="$semibold"
+              weight="$medium"
               data-testid={makeTestId(testId, 'label')}
             >
               {label}
             </Text.Body.Normal>
             {tooltip !== undefined && (
-              <Box ml="$8" className={cx.tooltip}>
+              <Box ml="$8">
                 <Tooltip label={tooltip}>
-                  <div
-                    className={cx.tooltipText}
-                    data-testid={makeTestId(testId, 'tooltip-icon')}
-                  >
-                    <InfoIcon />
+                  <div data-testid={makeTestId(testId, 'tooltip-icon')}>
+                    <InfoIcon className={cx.tooltipIcon} />
                   </div>
                 </Tooltip>
               </Box>
@@ -67,23 +64,23 @@ export const Amount = ({
         </Cell>
         <Cell>
           <Flex flexDirection="column" alignItems="flex-end" h="$fill">
-            <Text.Body.Small
+            <Text.Body.Normal
               color={shouldHighlightPositiveAmount ? 'success' : 'primary'}
               weight="$medium"
               className={cx.text}
               data-testid={makeTestId(testId, 'amount')}
             >
               {amount}
-            </Text.Body.Small>
+            </Text.Body.Normal>
             {displayFiat && (
-              <Text.Body.Small
+              <Text.Body.Normal
                 className={cx.secondaryText}
                 color="secondary"
                 weight="$medium"
                 data-testid={makeTestId(testId, 'fiat')}
               >
                 {fiatPrice}
-              </Text.Body.Small>
+              </Text.Body.Normal>
             )}
           </Flex>
         </Cell>

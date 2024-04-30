@@ -174,7 +174,7 @@ Feature: Onboarding - Create wallet
       | sad     |
       | saddle  |
       | sadness |
-    And I click header to loose focus
+    And I click header to lose focus
     Then I do not see autocomplete options list
     And I click on mnemonic input
     Then I see following autocomplete options:

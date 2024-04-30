@@ -220,7 +220,6 @@ const colors: Colors = {
 
   $dapp_transaction_summary_type_label_color:
     darkColorScheme.$primary_accent_purple,
-  $dapp_transaction_summary_label: darkColorScheme.$primary_white,
 
   $toast_bar_container_bgColor: darkColorScheme.$primary_dark_grey,
   $toast_bar_icon_container_bgColor: darkColorScheme.$primary_grey,
