@@ -40,13 +40,15 @@ export const useRestoreWallet = (): State => {
   return state;
 };
 
+const mnemonicLength = 24;
+
 export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const history = useHistory();
   const analytics = useAnalyticsContext();
   const walletManager = useWalletManager();
   const [step, setStep] = useState<WalletSetupStep>(WalletSetupStep.RecoveryPhrase);
   const { clearSecrets, createWalletData, setCreateWalletData } = useHotWalletCreation({
-    initialMnemonic: []
+    initialMnemonic: Array.from({ length: mnemonicLength }, () => '')
   });
 
   const setMnemonic = useCallback(
