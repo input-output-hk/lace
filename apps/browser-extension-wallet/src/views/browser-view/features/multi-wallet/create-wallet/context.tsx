@@ -1,8 +1,6 @@
-import { CreateWalletParams, useWalletManager } from '@hooks';
+import { CreateWalletParams } from '@hooks';
 import { PostHogAction } from '@lace/common';
-import { useAnalyticsContext } from '@providers';
 import { walletRoutePaths } from '@routes';
-import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import React, { createContext, useContext, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useHotWalletCreation } from '../useHotWalletCreation';
@@ -40,9 +38,13 @@ export const useCreateWallet = (): State => {
 
 export const CreateWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const history = useHistory();
-  const analytics = useAnalyticsContext();
-  const walletManager = useWalletManager();
-  const { clearSecrets, createWalletData, setCreateWalletData } = useHotWalletCreation({
+  const {
+    clearSecrets,
+    createWallet: createHotWallet,
+    createWalletData,
+    sendPostWalletAddAnalytics,
+    setCreateWalletData
+  } = useHotWalletCreation({
     initialMnemonic: providers.generateMnemonicWords()
   });
   const [step, setStep] = useState<WalletSetupStep>(WalletSetupStep.RecoveryPhrase);
@@ -59,13 +61,13 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
     providers.confirmationDialog.shouldShowDialog$.next(dirty);
   };
 
-  const createWallet = async () => {
-    const { source } = await walletManager.createWallet(createWalletData);
-    void analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
-      // eslint-disable-next-line camelcase
-      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
+  const concludeWalletAdd = async () => {
+    const wallet = await createHotWallet();
+    await sendPostWalletAddAnalytics({
+      extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
+      walletAddedPostHogAction: PostHogAction.MultiWalletCreateAdded
     });
-    void analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
+    clearSecrets();
   };
 
   const next = async () => {
@@ -76,8 +78,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
         break;
       }
       case WalletSetupStep.Setup: {
-        await createWallet();
-        clearSecrets();
+        await concludeWalletAdd();
         history.push(walletRoutePaths.assets);
         break;
       }
