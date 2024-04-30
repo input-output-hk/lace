@@ -17,14 +17,14 @@ interface Props {
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
 
-enum Step {
+enum WalletRestoreStep {
   RecoveryPhrase = 'RecoveryPhrase',
   Setup = 'Setup'
 }
 
 interface State {
   back: () => void;
-  concludeWalletAdd: () => Promise<void>;
+  finalizeWalletRestoration: () => Promise<void>;
   createWalletData: CreateWalletParams;
   next: () => Promise<void>;
   onNameAndPasswordChange: OnNameAndPasswordChange;
@@ -45,7 +45,7 @@ const mnemonicLength = 24;
 export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const history = useHistory();
   const analytics = useAnalyticsContext();
-  const [step, setStep] = useState<Step>(Step.RecoveryPhrase);
+  const [step, setStep] = useState<WalletRestoreStep>(WalletRestoreStep.RecoveryPhrase);
   const { clearSecrets, createWallet, createWalletData, sendPostWalletAddAnalytics, setCreateWalletData } =
     useHotWalletCreation({
       initialMnemonic: Array.from({ length: mnemonicLength }, () => '')
@@ -72,7 +72,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
     }
   };
 
-  const concludeWalletAdd = async () => {
+  const finalizeWalletRestoration = async () => {
     const wallet = await createWallet();
     void sendPostWalletAddAnalytics({
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
@@ -84,11 +84,11 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
 
   const next = async () => {
     switch (step) {
-      case Step.RecoveryPhrase:
-        setStep(Step.Setup);
+      case WalletRestoreStep.RecoveryPhrase:
+        setStep(WalletRestoreStep.Setup);
         history.push(walletRoutePaths.newWallet.restore.setup);
         break;
-      case Step.Setup:
+      case WalletRestoreStep.Setup:
         history.push(walletRoutePaths.assets);
         break;
     }
@@ -96,12 +96,12 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
 
   const back = () => {
     switch (step) {
-      case Step.RecoveryPhrase:
+      case WalletRestoreStep.RecoveryPhrase:
         providers.confirmationDialog.shouldShowDialog$.next(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
-      case Step.Setup:
-        setStep(Step.RecoveryPhrase);
+      case WalletRestoreStep.Setup:
+        setStep(WalletRestoreStep.RecoveryPhrase);
         history.push(walletRoutePaths.newWallet.restore.enterRecoveryPhrase);
         break;
     }
@@ -111,7 +111,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
     <RestoreWalletContext.Provider
       value={{
         createWalletData,
-        concludeWalletAdd,
+        finalizeWalletRestoration,
         setMnemonic,
         onNameAndPasswordChange,
         next,

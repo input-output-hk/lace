@@ -13,7 +13,7 @@ interface Props {
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
 
-enum WalletSetupStep {
+enum WalletCreateStep {
   RecoveryPhrase = 'RecoveryPhrase',
   Setup = 'Setup'
 }
@@ -47,7 +47,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
   } = useHotWalletCreation({
     initialMnemonic: providers.generateMnemonicWords()
   });
-  const [step, setStep] = useState<WalletSetupStep>(WalletSetupStep.RecoveryPhrase);
+  const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.RecoveryPhrase);
 
   const generateMnemonic = () => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: providers.generateMnemonicWords() }));
@@ -61,7 +61,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
     providers.confirmationDialog.shouldShowDialog$.next(dirty);
   };
 
-  const concludeWalletAdd = async () => {
+  const finalizeWalletCreation = async () => {
     const wallet = await createHotWallet();
     await sendPostWalletAddAnalytics({
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
@@ -72,13 +72,13 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
 
   const next = async () => {
     switch (step) {
-      case WalletSetupStep.RecoveryPhrase: {
-        setStep(WalletSetupStep.Setup);
+      case WalletCreateStep.RecoveryPhrase: {
+        setStep(WalletCreateStep.Setup);
         history.push(walletRoutePaths.newWallet.create.setup);
         break;
       }
-      case WalletSetupStep.Setup: {
-        await concludeWalletAdd();
+      case WalletCreateStep.Setup: {
+        await finalizeWalletCreation();
         history.push(walletRoutePaths.assets);
         break;
       }
@@ -87,13 +87,13 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
 
   const back = () => {
     switch (step) {
-      case WalletSetupStep.RecoveryPhrase: {
+      case WalletCreateStep.RecoveryPhrase: {
         setFormDirty(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
       }
-      case WalletSetupStep.Setup: {
-        setStep(WalletSetupStep.RecoveryPhrase);
+      case WalletCreateStep.Setup: {
+        setStep(WalletCreateStep.RecoveryPhrase);
         history.push(walletRoutePaths.newWallet.create.recoveryPhrase);
         break;
       }

@@ -8,7 +8,7 @@ import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 
 export const Setup = (): JSX.Element => {
-  const { back, concludeWalletAdd, createWalletData, next, onNameAndPasswordChange } = useRestoreWallet();
+  const { back, createWalletData, finalizeWalletRestoration, next, onNameAndPasswordChange } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -30,7 +30,7 @@ export const Setup = (): JSX.Element => {
     void analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreWalletNamePasswordNextClick);
 
     try {
-      await concludeWalletAdd();
+      await finalizeWalletRestoration();
     } catch (error) {
       if (error instanceof WalletConflictError) {
         toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
