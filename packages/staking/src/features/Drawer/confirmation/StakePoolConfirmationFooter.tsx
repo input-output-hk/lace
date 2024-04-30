@@ -112,7 +112,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   }, [analytics, currentPortfolio, draftPortfolio, handleSubmission]);
 
   const confirmLabel = useMemo(() => {
-    if (!isHardwareWallet) {
+    if (isHardwareWallet) {
       const staleLabels = popupView
         ? t('drawer.confirmation.button.continueInAdvancedView')
         : t('drawer.confirmation.button.confirmWithDevice', { hardwareWallet: walletType });

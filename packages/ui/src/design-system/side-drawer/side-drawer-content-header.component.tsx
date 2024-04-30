@@ -3,7 +3,7 @@ import React from 'react';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import * as NavigationButtons from '../navigation-buttons';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { Close } from './side-drawer-close.component';
 import * as cx from './side-drawer-content-header.css';
@@ -32,9 +32,7 @@ export const Header = ({
         </Flex>
       )}
       <Flex justifyContent="center" w="$fill">
-        <Typography.Body.Large weight="$bold" className={cx.text}>
-          {text}
-        </Typography.Body.Large>
+        <Text.Body.Large weight="$bold">{text}</Text.Body.Large>
       </Flex>
       <Flex w="$40">
         <Close>

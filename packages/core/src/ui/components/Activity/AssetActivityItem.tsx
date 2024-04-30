@@ -202,8 +202,9 @@ export const AssetActivityItem = ({
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.negativeBalance]: isNegativeBalance,
-            [styles.positiveBalance]: !isNegativeBalance
+            [styles.pendingNegativeBalance]: isNegativeBalance && status === ActivityStatus.PENDING,
+            [styles.positiveBalance]: !isNegativeBalance,
+            [styles.negativeBalance]: isNegativeBalance && status !== ActivityStatus.PENDING
           })}
           ref={ref}
         >

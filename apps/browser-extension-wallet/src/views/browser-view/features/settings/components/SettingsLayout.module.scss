@@ -321,10 +321,20 @@
   @include text-bodyLarge-semi-bold;
   color: var(--text-color-secondary) !important;
   display: block !important;
+  margin-top: size_unit(1);
 
   @media (max-width: $breakpoint-popup) {
     font-size: var(--body) !important;
   }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+.drawerText {
+  @extend .drawerDescription;
+  margin-top: size_unit(3);
 }
 
 h5 {
@@ -519,4 +529,22 @@ h5 {
 .currencyWrapper {
   display: grid;
   grid-template-columns: size_unit(5) 1fr;
+}
+
+.customApiContainer {
+  margin-top: size_unit(4);
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  grid-gap: size_unit(2);
+  align-items: center;
+
+  svg {
+    font-size: 18px;
+  }
+}
+
+.validationError {
+  @include text-bodyXS-medium;
+  color: var(--data-pink) !important;
+  margin-left: size_unit(1);
 }

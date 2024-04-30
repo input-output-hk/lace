@@ -15,11 +15,11 @@ on:
 jobs:
   build_staking:
     name: Build Staking Center
-    runs-on: ubuntu-22.04
-    container: mcr.microsoft.com/playwright:v1.32.2-jammy
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
-      - name: Setup Build Essential
-        run: apt-get update && apt-get install build-essential -y
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -48,19 +48,3 @@ jobs:
         env:
           NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn workspace @lace/staking build
-#        TODO fix ladle build
-#      - name: Build Ladle
-#        run: yarn workspace @lace/staking story:build
-#      - name: Upload Ladle artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: staking-ladle
-#          path: packages/staking/build
-#      - name: Run visual regression
-#        continue-on-error: true
-#        run: yarn workspace @lace/staking test:vr
-#      - name: Upload visual regression
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: staking-visual-regression
-#          path: packages/staking/.lostpixel
