@@ -1,5 +1,5 @@
 import { SortingOption } from './SortingOption';
-import { StakePoolSortingOptionType } from '../../types/staking';
+import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
 
 class MoreOptionsComponent {
   private MORE_OPTIONS_LABEL = '[data-testid="stake-pools-more-options-label"]';
@@ -70,35 +70,104 @@ class MoreOptionsComponent {
     return $(this.ROS_FILTER_LABEL);
   }
 
-  async selectSortingOption(sortingOption: StakePoolSortingOptionType) {
+  async getSortingOptionOrderButton(sortingOption: StakePoolSortingOption, order: 'ascending' | 'descending') {
+    return $(this.getSortingOptionButtonSelector(sortingOption, order));
+  }
+
+  async hoverOverSortingOption(sortingOption: StakePoolSortingOption) {
     switch (sortingOption) {
-      case 'Ticker':
+      case StakePoolSortingOption.Ticker:
+        await this.tickerOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.Saturation:
+        await this.saturationOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.ROS:
+        await this.rosOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.Cost:
+        await this.costOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.Margin:
+        await this.marginOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.ProducedBlocks:
+        await this.blocksOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.Pledge:
+        await this.pledgeOption.label.moveTo();
+        break;
+      case StakePoolSortingOption.LiveStake:
+        await this.liveStakeOption.label.moveTo();
+        break;
+      default:
+        throw new Error(`Unsupported sorting option: ${sortingOption}`);
+    }
+  }
+
+  async selectSortingOption(sortingOption: StakePoolSortingOption) {
+    switch (sortingOption) {
+      case StakePoolSortingOption.Ticker:
         await this.tickerOption.radioButton.click();
         break;
-      case 'Saturation':
+      case StakePoolSortingOption.Saturation:
         await this.saturationOption.radioButton.click();
         break;
-      case 'ROS':
+      case StakePoolSortingOption.ROS:
         await this.rosOption.radioButton.click();
         break;
-      case 'Cost':
+      case StakePoolSortingOption.Cost:
         await this.costOption.radioButton.click();
         break;
-      case 'Margin':
+      case StakePoolSortingOption.Margin:
         await this.marginOption.radioButton.click();
         break;
-      case 'Produced blocks':
+      case StakePoolSortingOption.ProducedBlocks:
         await this.blocksOption.radioButton.click();
         break;
-      case 'Pledge':
+      case StakePoolSortingOption.Pledge:
         await this.pledgeOption.radioButton.click();
         break;
-      case 'Live Stake':
+      case StakePoolSortingOption.LiveStake:
         await this.liveStakeOption.radioButton.click();
         break;
       default:
-        throw new Error(`Unsupported column name: ${sortingOption}`);
+        throw new Error(`Unsupported sorting option: ${sortingOption}`);
     }
+  }
+
+  private getSortingOptionButtonSelector(
+    sortingOption: StakePoolSortingOption,
+    order: 'ascending' | 'descending'
+  ): string {
+    const orderSelector = order === 'ascending' ? '[data-testid="sort-asc"]' : '[data-testid="sort-desc"]';
+    const selectorTemplate = `#radio-btn-sorting-id-###option### ${orderSelector}`;
+    let option;
+    switch (sortingOption) {
+      case StakePoolSortingOption.Ticker:
+      case StakePoolSortingOption.Saturation:
+      case StakePoolSortingOption.ROS:
+      case StakePoolSortingOption.Cost:
+      case StakePoolSortingOption.Margin:
+      case StakePoolSortingOption.Pledge:
+        option = String(sortingOption).toLowerCase();
+        break;
+      case StakePoolSortingOption.ProducedBlocks:
+        option = 'blocks';
+        break;
+      case StakePoolSortingOption.LiveStake:
+        option = 'liveStake';
+        break;
+      default:
+        throw new Error(`Unsupported sorting option: ${sortingOption}`);
+    }
+    return selectorTemplate.replace('###option###', option);
+  }
+
+  async clickOnOrderButtonForSortingOption(order: 'ascending' | 'descending', sortingOption: StakePoolSortingOption) {
+    const selector = this.getSortingOptionButtonSelector(sortingOption, order);
+    await $(selector).moveTo();
+    await $(selector).click();
   }
 }
 
