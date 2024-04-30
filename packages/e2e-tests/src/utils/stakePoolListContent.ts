@@ -1,6 +1,7 @@
 import type { SortingOrder } from '../types/sortingOrder';
-import type { StakePoolListColumnName } from '../types/staking';
+import type { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/staking';
 import { StakePoolListColumn } from '../enums/StakePoolListColumn';
+import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
 
 interface AbbreviatedValue {
   value: number;
@@ -136,3 +137,15 @@ export const mapColumnNameStringToEnum = (columnName: StakePoolListColumnName): 
   columnName === 'Live Stake'
     ? StakePoolListColumn.LiveStake
     : StakePoolListColumn[columnName as keyof typeof StakePoolListColumn];
+
+export const mapSortingOptionToColumnNameEnum = (sortingOption: StakePoolSortingOption): StakePoolListColumn => {
+  if (sortingOption === StakePoolSortingOption.ProducedBlocks) return StakePoolListColumn.Blocks;
+  if (sortingOption === StakePoolSortingOption.LiveStake) return StakePoolListColumn.LiveStake;
+  return StakePoolListColumn[sortingOption as keyof typeof StakePoolListColumn];
+};
+
+export const mapSortingOptionNameStringToEnum = (sortingOption: StakePoolSortingOptionType): StakePoolSortingOption => {
+  if (sortingOption === 'Live Stake') return StakePoolSortingOption.LiveStake;
+  if (sortingOption === 'Produced blocks') return StakePoolSortingOption.ProducedBlocks;
+  return StakePoolSortingOption[sortingOption as keyof typeof StakePoolSortingOption];
+};
