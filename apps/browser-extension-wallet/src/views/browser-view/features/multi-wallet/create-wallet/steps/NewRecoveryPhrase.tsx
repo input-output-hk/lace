@@ -5,7 +5,7 @@ import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useCreateWallet } from '../context';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
 
@@ -69,7 +69,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
             onClose={() => {
               onClose();
               void analytics.sendEventToPostHog(
-                postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
+                postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
               );
             }}
           />
@@ -77,24 +77,24 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         onNext={next}
         onStepNext={(currentMnemonicStage: MnemonicStage) => {
           if (currentMnemonicStage === 'input') {
-            void analytics.sendEventToPostHog(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+            void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
             return;
           }
 
           setFormDirty(true);
-          void analytics.sendEventToPostHog(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
         onWatchVideoClick={() =>
-          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
         }
         onCopyToClipboard={() =>
-          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
         }
         onPasteFromClipboard={() =>
-          analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
         }
         isBackFromNextStep={isBackFromNextStep}
       />
