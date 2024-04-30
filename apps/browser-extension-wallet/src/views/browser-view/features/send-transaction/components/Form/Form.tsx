@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Tokens } from '@src/types';
-import { PriceResult, useCustomSubmitApi } from '@hooks';
+import { COIN_SELECTION_ERRORS, PriceResult, useCustomSubmitApi } from '@hooks';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
-import { Button, useObservable, WarningBanner } from '@lace/common';
+import { Banner, Button, useObservable, WarningBanner } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from '@hooks/useMaxAda';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
@@ -16,6 +16,8 @@ import { getReachedMaxAmountList } from '../../helpers';
 import { MetadataInput } from './MetadataInput';
 import { BundlesList } from './BundlesList';
 import { formatAdaAllocation, getNextBundleCoinId } from './util';
+import { Text } from '@lace/ui';
+import { ReactComponent as WarningIconCircle } from '@lace/icons/dist/WarningIconCircleComponent';
 import styles from './Form.module.scss';
 
 export interface Props {
@@ -42,7 +44,7 @@ export const Form = ({
     environmentName
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
-  const { builtTxData: { totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
+  const { builtTxData: { totalMinimumCoins, uiTx, error } = {} } = useBuiltTxState();
 
   const [isBundle, setIsBundle] = useState(false);
   const tokensUsed = useSpentBalances();
@@ -107,6 +109,17 @@ export const Form = ({
     <Skeleton loading={isLoading}>
       {getCustomSubmitApiForNetwork(environmentName).status && (
         <WarningBanner message={t('browserView.transaction.send.customSubmitApiBannerText')} />
+      )}
+      {error === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR && (
+        <Banner
+          withIcon
+          message={<Text.Button>{t('browserView.transaction.send.utxoDepletedBannerText')}</Text.Button>}
+          customIcon={
+            <Text.Label color="warning">
+              <WarningIconCircle />
+            </Text.Label>
+          }
+        />
       )}
       <BundlesList
         isPopupView={isPopupView}

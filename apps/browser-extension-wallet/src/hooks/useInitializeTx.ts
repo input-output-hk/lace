@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { useEffect, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { BuiltTxData, OutputsMap } from '../views/browser-view/features/send-transaction/types';
@@ -29,7 +30,11 @@ export const coinSelectionErrors = new Map<COIN_SELECTION_ERRORS, TranslationKey
 
 export const getErrorMessage =
   (t: UseTranslationResponse<'translation'>['t']) =>
-  (key: COIN_SELECTION_ERRORS): string => {
+  (key: COIN_SELECTION_ERRORS): string | undefined => {
+    if (key === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR) {
+      return;
+    }
+
     if (coinSelectionErrors.has(key)) {
       return t(coinSelectionErrors.get(key));
     }
