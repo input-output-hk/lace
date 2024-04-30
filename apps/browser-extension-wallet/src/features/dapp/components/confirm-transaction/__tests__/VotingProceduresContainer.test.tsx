@@ -9,7 +9,6 @@ const mockUseTranslation = jest.fn(() => ({ t }));
 const mockVotingProcedures = jest.fn();
 const mockNonRegisteredUserModal = jest.fn();
 const mockUseDisallowSignTx = jest.fn();
-const mockHasValidDrepRegistration = jest.fn();
 const mockPreprodCexplorerBaseUrl = 'PREPROD_CEXPLORER_BASE_URL';
 const mockCexplorerUrlPathsTx = 'CEXPLORER_URL_PATHS.TX';
 import * as React from 'react';
@@ -23,6 +22,7 @@ import { getWrapper } from '../testing.utils';
 import { getVoterType, getVote, VoterTypeEnum, VotesEnum } from '@src/utils/tx-inspection';
 import { drepIDasBech32FromHash } from '../utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { of } from 'rxjs';
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -67,11 +67,6 @@ jest.mock('react-i18next', () => {
     useTranslation: mockUseTranslation
   };
 });
-
-jest.mock('../utils', () => ({
-  ...jest.requireActual<any>('../utils'),
-  hasValidDrepRegistration: mockHasValidDrepRegistration
-}));
 
 jest.mock('../hooks', () => {
   const original = jest.requireActual('../hooks');
@@ -179,11 +174,12 @@ jest.mock('@providers', () => ({
 
 describe('Testing VotingProceduresContainer component', () => {
   beforeEach(() => {
-    mockHasValidDrepRegistration.mockReset();
-    mockHasValidDrepRegistration.mockReturnValue(true);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
-      environmentName: 'Preprod'
+      environmentName: 'Preprod',
+      inMemoryWallet: {
+        governance: {}
+      }
     }));
     mockVotingProcedures.mockReset();
     mockVotingProcedures.mockReturnValue(<span data-testid="VotingProcedures" />);
@@ -254,14 +250,12 @@ describe('Testing VotingProceduresContainer component', () => {
   });
 
   test('should handle NonRegisteredUserModal onConfirm', async () => {
-    mockHasValidDrepRegistration.mockReset();
-    mockHasValidDrepRegistration.mockReturnValue(false);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
       environmentName: 'Preprod',
-      walletState: {
-        transactions: {
-          history: []
+      inMemoryWallet: {
+        governance: {
+          isRegisteredAsDRep$: of(true)
         }
       }
     }));
@@ -291,14 +285,12 @@ describe('Testing VotingProceduresContainer component', () => {
     const disallowSignTxMock = jest.fn();
     mockUseDisallowSignTx.mockReset();
     mockUseDisallowSignTx.mockReturnValue(disallowSignTxMock);
-    mockHasValidDrepRegistration.mockReset();
-    mockHasValidDrepRegistration.mockReturnValue(false);
     mockUseWalletStore.mockReset();
     mockUseWalletStore.mockImplementation(() => ({
       environmentName: 'Preprod',
-      walletState: {
-        transactions: {
-          history: []
+      inMemoryWallet: {
+        governance: {
+          isRegisteredAsDRep$: of(false)
         }
       }
     }));
