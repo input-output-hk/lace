@@ -222,6 +222,9 @@ export enum PostHogAction {
   DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
   DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
   DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
+  DappConnectorCancelTransactionClick = 'dapp connector | confirm transaction | cancel | click',
+  DappConnectorSendTransactionClick = 'dapp connector | confirm transaction | confirm | click',
+
   // User
   UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
   UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',
