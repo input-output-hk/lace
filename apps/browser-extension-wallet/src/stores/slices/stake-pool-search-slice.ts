@@ -5,6 +5,41 @@ import { BlockchainProviderSlice, SliceCreator, StakePoolSearchSlice, StateStatu
 
 const defaultFetchLimit = 100;
 
+export const getQueryStakePoolsFilters = ({
+  searchString,
+  skip = 0,
+  limit = defaultFetchLimit,
+  sort
+}: Parameters<StakePoolSearchSlice['fetchStakePools']>[0]): Wallet.QueryStakePoolsArgs => {
+  let filtersValues: Wallet.QueryStakePoolsArgs['filters'] = {};
+  try {
+    const poolId: Wallet.Cardano.PoolId = Wallet.Cardano.PoolId(searchString);
+    filtersValues = {
+      identifier: {
+        values: [{ id: poolId }]
+      }
+    };
+  } catch {
+    filtersValues = { text: searchString };
+  }
+  return {
+    filters: {
+      ...filtersValues,
+      pledgeMet: true,
+      status: [
+        Wallet.Cardano.StakePoolStatus.Active,
+        Wallet.Cardano.StakePoolStatus.Activating,
+        Wallet.Cardano.StakePoolStatus.Retiring
+      ]
+    },
+    pagination: {
+      startAt: skip,
+      limit: limit - skip + 1
+    },
+    sort
+  };
+};
+
 const fetchStakePools =
   ({
     set,
@@ -18,34 +53,8 @@ const fetchStakePools =
     } = get().stakePoolSearchResults || {};
     set({ stakePoolSearchResultsStatus: StateStatus.LOADING });
 
-    let filtersValues = [];
-    try {
-      const poolId: Wallet.Cardano.PoolId = Wallet.Cardano.PoolId(searchString);
-      filtersValues = [{ id: poolId }];
-    } catch {
-      filtersValues = [{ name: searchString }, { ticker: searchString }];
-    }
-    const filters: Wallet.QueryStakePoolsArgs = {
-      filters: {
-        ...(searchString && {
-          identifier: {
-            _condition: 'or',
-            values: filtersValues
-          }
-        }),
-        pledgeMet: true,
-        status: [
-          Wallet.Cardano.StakePoolStatus.Active,
-          Wallet.Cardano.StakePoolStatus.Activating,
-          Wallet.Cardano.StakePoolStatus.Retiring
-        ]
-      },
-      pagination: {
-        startAt: skip,
-        limit: limit - skip + 1
-      },
-      sort
-    };
+    const filters = getQueryStakePoolsFilters({ searchString, skip, limit, sort });
+
     const { totalResultCount, pageResults } = await get().blockchainProvider.stakePoolProvider.queryStakePools(filters);
 
     const paginating = isEqual(prevSort, sort) && prevTotalCount === totalResultCount;
