@@ -1,8 +1,8 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity, max-statements, sonarjs/no-duplicate-string, unicorn/no-nested-ternary */
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
-import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
+import { useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   MnemonicVideoPopupContent,
@@ -13,21 +13,18 @@ import {
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal';
-import {
-  EnhancedAnalyticsOptInStatus,
-  PostHogAction,
-  postHogOnboardingActions
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { Fallback } from './Fallback';
 import { deleteFromLocalStorage } from '@src/utils/local-storage';
 import { useAnalyticsContext } from '@providers';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
-import { filter, firstValueFrom } from 'rxjs';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
+import { toast } from '@lace/common';
+import Copy from '@src/assets/icons/copy.component.svg';
+import Paste from '@src/assets/icons/paste.component.svg';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -57,6 +54,9 @@ export interface WalletSetupWizardProps {
 }
 
 const DEFAULT_MNEMONIC_LENGTH = 24;
+const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
+
+const twoSecondsToastDuration = 1.5;
 
 export const WalletSetupWizard = ({
   onCancel,
@@ -65,20 +65,14 @@ export const WalletSetupWizard = ({
   initialStep = WalletSetupSteps.Register
 }: WalletSetupWizardProps): React.ReactElement => {
   const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(initialStep);
-  const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
-  const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
+  const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<MnemonicStage>('writedown');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const [isBackFromNextStep, setIsBackFromNextStep] = useState(false);
   const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
-  const [enhancedAnalyticsStatus] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
 
   const { updateEnteredAtTime } = useTimeSpentOnPage();
 
@@ -94,6 +88,17 @@ export const WalletSetupWizard = ({
     );
   }, [mnemonicLength, setupType]);
 
+  const handleReadMoreOnClick = () => {
+    if (setupType === SetupType.RESTORE) {
+      sendAnalytics(postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+      return;
+    }
+
+    currentSetupMnemonicStage === 'writedown'
+      ? sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
+      : sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+  };
+
   const walletSetupMnemonicStepTranslations = {
     writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
     enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
@@ -103,7 +108,22 @@ export const WalletSetupWizard = ({
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
-    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
+    copyPasteTooltipText: (
+      <Trans
+        i18nKey="core.walletSetupMnemonicStepRevamp.copyPasteTooltipText"
+        components={{
+          a: (
+            <a
+              href={COPY_PASTE_TOOLTIP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleReadMoreOnClick}
+            />
+          )
+        }}
+      />
+    )
   };
 
   const walletSetupModeStepTranslations = {
@@ -153,19 +173,6 @@ export const WalletSetupWizard = ({
     }
   };
 
-  const goToMyWallet = useCallback(
-    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
-      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
-        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-        if (hdWalletDiscovered) {
-          void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        }
-      }
-    },
-    [analytics, enhancedAnalyticsStatus, walletInstance]
-  );
-
   const moveForward = useCallback(() => {
     const nextStep = walletSetupWizard[currentStep].next;
     setCurrentStep(nextStep);
@@ -180,7 +187,6 @@ export const WalletSetupWizard = ({
           password,
           chainId: DEFAULT_CHAIN_ID
         });
-        setWalletInstance(wallet);
 
         wallet.wallet.addresses$.subscribe((addresses) => {
           if (addresses.length === 0) return;
@@ -192,7 +198,6 @@ export const WalletSetupWizard = ({
 
         if (setupType === SetupType.FORGOT_PASSWORD) {
           deleteFromLocalStorage('isForgotPasswordFlow');
-          void goToMyWallet(wallet);
         } else {
           moveForward();
         }
@@ -201,7 +206,7 @@ export const WalletSetupWizard = ({
         throw new Error(error);
       }
     },
-    [createWallet, mnemonic, analytics, setupType, goToMyWallet, moveForward]
+    [createWallet, mnemonic, analytics, setupType, moveForward]
   );
 
   const handleSubmit = async (result: { password: string; walletName: string }) => {
@@ -229,9 +234,14 @@ export const WalletSetupWizard = ({
           suggestionList={wordList}
           defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
           onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
-          onPasteFromClipboard={() =>
-            sendAnalytics(postHogOnboardingActions[setupType]?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
-          }
+          onPasteFromClipboard={() => {
+            sendAnalytics(postHogOnboardingActions[setupType]?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK);
+            toast.notify({
+              duration: twoSecondsToastDuration,
+              text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
+              icon: Paste
+            });
+          }}
         />
       );
     }
@@ -239,11 +249,18 @@ export const WalletSetupWizard = ({
     return (
       <WalletSetupMnemonicStepRevamp
         mnemonic={mnemonic}
-        onReset={(resetStage) => {
-          setResetMnemonicStage(resetStage);
-          resetStage === 'input' ? setIsResetMnemonicModalOpen(true) : onCancel();
-          resetStage === 'input' && setIsBackFromNextStep(false);
+        mnemonicStage={currentSetupMnemonicStage}
+        onStageChange={(nextStage) => {
+          if (nextStage === 'input') {
+            setCurrentSetupMnemonicStage(nextStage);
+            void sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
+          } else {
+            setIsResetMnemonicModalOpen(true);
+            void sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+          }
         }}
+        onBack={onCancel}
+        onNext={moveForward}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
             translations={mnemonicVideoPopupContentTranslations}
@@ -254,21 +271,26 @@ export const WalletSetupWizard = ({
             }}
           />
         )}
-        onNext={moveForward}
-        onStepNext={(mnemonicStage) => {
-          mnemonicStage === 'writedown'
-            ? sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK)
-            : sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
-        }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
         onWatchVideoClick={() => sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)}
-        onCopyToClipboard={() => sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)}
-        onPasteFromClipboard={() =>
-          sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
-        }
-        isBackFromNextStep={isBackFromNextStep}
+        onCopyToClipboard={() => {
+          sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
+            icon: Copy
+          });
+        }}
+        onPasteFromClipboard={() => {
+          sendAnalytics(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK);
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
+            icon: Paste
+          });
+        }}
       />
     );
   };
@@ -286,7 +308,6 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupNamePasswordStepRevamp
           onBack={() => {
-            setIsBackFromNextStep(true);
             moveBack();
           }}
           onNext={handleSubmit}
@@ -303,15 +324,11 @@ export const WalletSetupWizard = ({
           confirmLabel={t('browserView.walletSetup.mnemonicResetModal.confirm')}
           onCancel={() => {
             setIsResetMnemonicModalOpen(false);
-            setResetMnemonicStage('');
           }}
           onConfirm={() => {
             setMnemonic(util.generateMnemonicWords());
             setIsResetMnemonicModalOpen(false);
-            if (resetMnemonicStage === 'writedown') {
-              moveBack();
-            }
-            setResetMnemonicStage('');
+            setCurrentSetupMnemonicStage('writedown');
           }}
         />
       )}

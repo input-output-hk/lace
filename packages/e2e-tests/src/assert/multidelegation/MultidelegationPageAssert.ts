@@ -10,8 +10,13 @@ import testContext from '../../utils/testContext';
 import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridCard';
 import { StakePoolListColumnName } from '../../types/staking';
 import { SortingOrder } from '../../types/sortingOrder';
-import { mapColumnNameStringToEnum, sortColumnContent } from '../../utils/stakePoolListContent';
+import {
+  mapColumnNameStringToEnum,
+  mapSortingOptionToColumnNameEnum,
+  sortColumnContent
+} from '../../utils/stakePoolListContent';
 import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
+import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -312,9 +317,18 @@ class MultidelegationPageAssert {
     ).waitForDisplayed();
   };
 
+  assertSeeSortingOptionOrderButton = async (
+    sortingOption: StakePoolSortingOption,
+    order: 'ascending' | 'descending'
+  ) => {
+    await (
+      await MultidelegationPage.moreOptionsComponent.getSortingOptionOrderButton(sortingOption, order)
+    ).waitForDisplayed();
+  };
+
   assertSeeStakePoolsSorted = async (
     stakePoolsDisplayType: 'list rows' | 'cards',
-    sortingOption: StakePoolListColumnName,
+    sortingOption: StakePoolSortingOption,
     order: SortingOrder,
     poolLimit?: number
   ) => {
@@ -325,18 +339,54 @@ class MultidelegationPageAssert {
       throw new Error('Please add validation for grid cards sorting');
     } else {
       const columnContent = await MultidelegationPage.extractColumnContent(
-        mapColumnNameStringToEnum(sortingOption),
+        mapSortingOptionToColumnNameEnum(sortingOption),
         poolLimit
       );
       const sortedColumnContent = await sortColumnContent(
         columnContent,
-        mapColumnNameStringToEnum(sortingOption),
+        mapSortingOptionToColumnNameEnum(sortingOption),
         order
       );
 
       expect(columnContent).to.not.be.empty;
       expect(columnContent).to.deep.equal(sortedColumnContent);
     }
+  };
+
+  assertSeeTooltipForSortingOption = async (sortingOption: StakePoolSortingOption) => {
+    await browser.pause(800); // Those tooltips are displayed after delay
+    await MultidelegationPage.sortingOptionTooltip.waitForStable();
+    await MultidelegationPage.sortingOptionTooltip.waitForDisplayed();
+    let expectedTooltipText;
+    switch (sortingOption) {
+      case StakePoolSortingOption.Ticker:
+        expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
+        break;
+      case StakePoolSortingOption.Saturation:
+        expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
+        break;
+      case StakePoolSortingOption.ROS:
+        expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
+        break;
+      case StakePoolSortingOption.Cost:
+        expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
+        break;
+      case StakePoolSortingOption.Margin:
+        expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
+        break;
+      case StakePoolSortingOption.ProducedBlocks:
+        expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
+        break;
+      case StakePoolSortingOption.Pledge:
+        expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
+        break;
+      case StakePoolSortingOption.LiveStake:
+        expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${sortingOption}`);
+    }
+    expect(await MultidelegationPage.sortingOptionTooltip.getText()).to.equal(expectedTooltipText);
   };
 }
 

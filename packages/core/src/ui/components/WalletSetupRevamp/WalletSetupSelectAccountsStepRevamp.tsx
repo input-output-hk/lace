@@ -59,10 +59,10 @@ export const WalletSetupSelectAccountsStepRevamp = ({
         <div>
           <Input
             dataTestId="wallet-setup-register-name-input"
-            className={styles.inputName}
             label={t('core.walletSetupSelectAccountsStep.walletName')}
             value={walletName}
             onChange={handleNameChange}
+            labelClassName={styles.label}
           />
           {isDirty && walletName && !isNameValid && (
             <p className={styles.formError} data-testid="wallet-setup-register-name-error">
