@@ -2,7 +2,7 @@
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
-import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
+import { useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   MnemonicVideoPopupContent,
@@ -13,20 +13,14 @@ import {
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal';
-import {
-  EnhancedAnalyticsOptInStatus,
-  PostHogAction,
-  postHogOnboardingActions
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { Fallback } from './Fallback';
 import { deleteFromLocalStorage } from '@src/utils/local-storage';
 import { useAnalyticsContext } from '@providers';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import { isScriptAddress } from '@cardano-sdk/wallet';
-import { filter, firstValueFrom } from 'rxjs';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { toast } from '@lace/common';
 import Copy from '@src/assets/icons/copy.component.svg';
@@ -71,7 +65,6 @@ export const WalletSetupWizard = ({
   initialStep = WalletSetupSteps.Register
 }: WalletSetupWizardProps): React.ReactElement => {
   const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(initialStep);
-  const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<MnemonicStage>('writedown');
@@ -80,10 +73,6 @@ export const WalletSetupWizard = ({
   const { createWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
-  const [enhancedAnalyticsStatus] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
 
   const { updateEnteredAtTime } = useTimeSpentOnPage();
 
@@ -184,19 +173,6 @@ export const WalletSetupWizard = ({
     }
   };
 
-  const goToMyWallet = useCallback(
-    async (cardanoWallet: Wallet.CardanoWallet = walletInstance) => {
-      if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn) {
-        const addresses = await firstValueFrom(cardanoWallet?.wallet?.addresses$.pipe(filter((a) => a.length > 0)));
-        const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-        if (hdWalletDiscovered) {
-          void analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        }
-      }
-    },
-    [analytics, enhancedAnalyticsStatus, walletInstance]
-  );
-
   const moveForward = useCallback(() => {
     const nextStep = walletSetupWizard[currentStep].next;
     setCurrentStep(nextStep);
@@ -211,7 +187,6 @@ export const WalletSetupWizard = ({
           password,
           chainId: DEFAULT_CHAIN_ID
         });
-        setWalletInstance(wallet);
 
         wallet.wallet.addresses$.subscribe((addresses) => {
           if (addresses.length === 0) return;
@@ -223,7 +198,6 @@ export const WalletSetupWizard = ({
 
         if (setupType === SetupType.FORGOT_PASSWORD) {
           deleteFromLocalStorage('isForgotPasswordFlow');
-          void goToMyWallet(wallet);
         } else {
           moveForward();
         }
@@ -232,7 +206,7 @@ export const WalletSetupWizard = ({
         throw new Error(error);
       }
     },
-    [createWallet, mnemonic, analytics, setupType, goToMyWallet, moveForward]
+    [createWallet, mnemonic, analytics, setupType, moveForward]
   );
 
   const handleSubmit = async (result: { password: string; walletName: string }) => {
