@@ -2,6 +2,7 @@ import { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { EnableAccountConfirmWithHW } from './EnableAccountConfirmWithHW';
+import { ThemeColorScheme } from '@lace/ui';
 
 const meta: Meta<typeof EnableAccountConfirmWithHW> = {
   title: 'Accounts/EnableAccountConfirmWithHW',
@@ -37,13 +38,23 @@ const data: ComponentProps<typeof EnableAccountConfirmWithHW> = {
 };
 
 export const Waiting: Story = {
-  args: data
+  args: data,
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
+  }
 };
 
 export const Signing: Story = {
   args: {
     ...data,
     state: 'signing'
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
   }
 };
 
@@ -51,5 +62,19 @@ export const ErrorCase: Story = {
   args: {
     ...data,
     state: 'error'
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
+  }
+};
+
+export const WithDarkMode: Story = {
+  args: data,
+  parameters: {
+    decorators: {
+      theme: ThemeColorScheme.Dark
+    }
   }
 };

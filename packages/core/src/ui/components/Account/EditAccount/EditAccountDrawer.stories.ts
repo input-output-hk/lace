@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { EditAccountDrawer } from './EditAccountDrawer';
 import { ComponentProps } from 'react';
+import { ThemeColorScheme } from '@lace/ui';
 
 const meta: Meta<typeof EditAccountDrawer> = {
   title: 'Accounts/EditAccountDrawer',
@@ -31,5 +32,21 @@ const data: ComponentProps<typeof EditAccountDrawer> = {
 export const Overview: Story = {
   args: {
     ...data
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
+  }
+};
+
+export const WithDarkMode: Story = {
+  args: {
+    ...data
+  },
+  parameters: {
+    decorators: {
+      theme: ThemeColorScheme.Dark
+    }
   }
 };

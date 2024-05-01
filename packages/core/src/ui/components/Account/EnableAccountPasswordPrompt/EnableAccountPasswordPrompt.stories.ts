@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { EnableAccountPasswordPrompt } from './EnableAccountPasswordPrompt';
 import { ComponentProps } from 'react';
+import { ThemeColorScheme } from '@lace/ui';
 
 const meta: Meta<typeof EnableAccountPasswordPrompt> = {
   title: 'Accounts/EnableAccountPasswordPrompt',
@@ -34,6 +35,11 @@ const data: ComponentProps<typeof EnableAccountPasswordPrompt> = {
 export const Overview: Story = {
   args: {
     ...data
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
   }
 };
 
@@ -41,6 +47,11 @@ export const PopUp: Story = {
   args: {
     ...data,
     isPopup: true
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
   }
 };
 
@@ -48,5 +59,21 @@ export const IncorrectPassword: Story = {
   args: {
     ...data,
     wasPasswordIncorrect: true
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
+  }
+};
+
+export const WithDarkMode: Story = {
+  args: {
+    ...data
+  },
+  parameters: {
+    decorators: {
+      theme: ThemeColorScheme.Dark
+    }
   }
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
+import { ThemeColorScheme, ThemeProvider, colorSchemaDecorator } from '@lace/ui';
 import 'antd/dist/antd.css';
 import 'normalize.css';
 import './theme.scss';
@@ -19,9 +19,16 @@ export const preview = {
 };
 
 export const decorators = [
-  (Story) => (
-    <ThemeProvider colorScheme={ThemeColorScheme.Light}>
-      <Story />
-    </ThemeProvider>
-  )
+  (Story, args) => {
+    const { decorators: { colorSchema = true } = {} } = args.parameters;
+    return colorSchema ? colorSchemaDecorator(Story, args) : <Story />;
+  },
+  (Story, args) => {
+    const { decorators: { theme } = {} } = args.parameters;
+    return (
+      <ThemeProvider colorScheme={theme ?? ThemeColorScheme.Light}>
+        <Story />
+      </ThemeProvider>
+    );
+  }
 ];
