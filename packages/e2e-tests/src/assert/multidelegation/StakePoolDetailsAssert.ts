@@ -120,8 +120,7 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.rosTitle.waitForDisplayed();
     expect(await StakePoolDetails.rosTitle.getText()).to.equal(await t('drawer.details.metrics.ros', 'staking'));
     await StakePoolDetails.rosValue.waitForDisplayed();
-    // TODO BUG LW-5635
-    // expect(await StakePoolDetails.rosValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    expect(await StakePoolDetails.rosValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
   }
 
   private async assertSeeDelegators() {

@@ -39,7 +39,6 @@ export const label = style({
 });
 
 export const errorMessage = style({
-  color: vars.colors.$input_error_message_color,
   marginLeft: vars.spacing.$20,
 });
 

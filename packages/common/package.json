@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
-    "cleanup": "yarn exec rm -rf dist node_modules .rollup.cache src/dist",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "lint": "cd ../.. && yarn common:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
@@ -37,7 +37,7 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/util": "0.15.0",
+    "@cardano-sdk/util": "0.15.1",
     "antd": "^4.24.10",
     "classnames": "^2.3.1",
     "jdenticon": "3.1.0",

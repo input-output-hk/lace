@@ -1,5 +1,6 @@
 /* eslint-disable react/no-multi-comp */
-import { Button } from '@lace/common';
+import { Button, WarningBanner } from '@lace/common';
+import { Box } from '@lace/ui';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,12 +15,26 @@ type TransactionFailProps = {
 
 export const TransactionFail = ({ popupView }: TransactionFailProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isCustomSubmitApiEnabled } = useOutsideHandles();
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     <div className={cn(styles.container, styles.fail, { [styles.popupView!]: popupView })}>
       <div className={styles.containerFail}>
-        <ResultMessage status="error" title={t('drawer.failure.title')} description={t('drawer.failure.subTitle')} />
+        <ResultMessage
+          status="error"
+          title={t('drawer.failure.title')}
+          description={
+            <>
+              <div>{t('drawer.failure.subTitle')}</div>
+              {isCustomSubmitApiEnabled && (
+                <Box mt="$32">
+                  <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />
+                </Box>
+              )}
+            </>
+          }
+        />
       </div>
     </div>
   );

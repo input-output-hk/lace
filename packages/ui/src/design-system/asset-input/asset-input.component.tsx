@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { AmountInput } from './amount-input.component';
 import * as cx from './asset-input.css';
@@ -55,7 +55,7 @@ export const AssetInput = ({
       </Flex>
     </Box>
     <Box className={cx.balance}>
-      <Text.Body.Normal className={cx.secondaryLabel}>
+      <Text.Body.Normal color="secondary">
         Balance: {state.asset.balance}
       </Text.Body.Normal>
     </Box>
@@ -65,12 +65,12 @@ export const AssetInput = ({
         alignItems="flex-end"
         justifyContent="flex-end"
       >
-        <Text.Body.Normal className={cx.secondaryLabel}>
+        <Text.Body.Normal color="secondary">
           ≈ {state.asset.fiat.value} {state.asset.fiat.ticker}
         </Text.Body.Normal>
         {state.type === 'invalid' && (
           <Text.Label
-            className={cx.error}
+            color="error"
             data-testid={`asset-input-error-${state.asset.id}`}
           >
             {state.error}

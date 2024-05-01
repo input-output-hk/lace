@@ -35,16 +35,6 @@ class ModalAssert {
     await this.assertSeeConfirmButton(confirmButtonLabel);
   }
 
-  async assertSeeRestoringMultiAddressWalletModal() {
-    const title = await t('browserView.walletSetup.confirmRestoreModal.header');
-    const description = await t('browserView.walletSetup.confirmRestoreModal.content');
-    const cancelButtonLabel = await t('general.button.cancel');
-    const confirmButtonLabel = await t('browserView.walletSetup.confirmRestoreModal.confirm');
-    const parsedDescription = description.replace('<b>', '').replace('</b>', '');
-
-    await this.assertSeeModal(title, parsedDescription, cancelButtonLabel, confirmButtonLabel);
-  }
-
   async assertSeeRemoveWalletModal(shouldBeDisplayed: boolean) {
     if (shouldBeDisplayed) {
       const title = await t('browserView.settings.wallet.general.removeWalletAlert.title');

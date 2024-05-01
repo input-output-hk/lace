@@ -5,7 +5,7 @@ import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { Box } from '../box';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { usePageContext } from './page.context';
 import { subtitleBox } from './page.css';

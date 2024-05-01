@@ -31,9 +31,6 @@ export const root = style([
 ]);
 
 export const accountLabel = style([
-  sx({
-    color: '$text_secondary',
-  }),
   {
     width: '118px',
     overflow: 'hidden',
@@ -46,18 +43,7 @@ export const derivationPath = style([
   {
     lineHeight: '1.3',
   },
-  sx({
-    color: '$text_primary',
-  }),
 ]);
-
-export const editIcon = sx({
-  color: '$profile_dropdown_account_item_edit_icon_color',
-});
-
-export const deleteIcon = sx({
-  color: '$profile_dropdown_account_item_delete_icon_color',
-});
 
 export const tooltipStyle = style({
   left: '70px !important',

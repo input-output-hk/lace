@@ -51,10 +51,8 @@ export const labelContainer = style([
 ]);
 
 export const label = style([
-  sx({
-    color: '$sub_navigation_item_label_color',
-  }),
   {
+    color: vars.colors.$sub_navigation_item_label_color,
     selectors: {
       [`${root}:hover &`]: {
         color: vars.colors.$sub_navigation_item_label_color_hover,

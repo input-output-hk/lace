@@ -53,7 +53,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   @LW-4558 @Testnet
   Scenario: Extended View - Staking - Staking error screen displayed on transaction submit error
-    Given I enable network interception to fail request: "*/tx-submit/submit" with error 400
+    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     When I navigate to Staking extended page
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
     When I input "OtherStakePool" to the search bar

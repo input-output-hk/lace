@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 
-import { sx } from '../../design-tokens';
+import { sx, vars } from '../../design-tokens';
 
 export const root = style([
   sx({
@@ -36,6 +36,6 @@ export const image = style({
   borderRadius: 'inherit',
 });
 
-export const fallbackText = sx({
-  color: '$profile_picture_avatar_label_color',
+export const fallbackText = style({
+  color: vars.colors.$profile_picture_avatar_label_color,
 });

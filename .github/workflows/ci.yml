@@ -6,13 +6,24 @@ on:
     branches:
       - 'release/**'
 
+permissions:
+  pull-requests: write
+  actions: read
+
 jobs:
   buildAndTest:
     name: Build & Test
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Collect Workflow Telemetry Build Packages
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -33,7 +44,7 @@ jobs:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
           NODE_OPTIONS: '--max_old_space_size=8192'
-        run: yarn test --maxWorkers=2 --silent
+        run: yarn test --silent
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
