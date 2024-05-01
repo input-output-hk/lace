@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import cn from 'classnames';
