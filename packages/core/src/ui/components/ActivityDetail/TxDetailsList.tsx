@@ -15,7 +15,7 @@ interface TxDetailListProps<T extends string> {
   title: string;
   subTitle: string;
   lists: TxDetails<T>[];
-  translations: TranslationsFor<T>;
+  translations: T extends string ? TranslationsFor<T> : never;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
