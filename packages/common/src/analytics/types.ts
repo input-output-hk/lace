@@ -133,6 +133,7 @@ export enum PostHogAction {
   SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
   SendTransactionSummaryConfirmClick = 'send | transaction summary | confirm | click',
   SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
+  SendTransactionConfirmationCancelClick = 'send | transaction summary | cancel | click',
   SendTransactionConfirmed = 'send | transaction confirmed',
   SendAllDoneView = 'send | all done | view',
   SendAllDoneViewTransactionClick = 'send | all done | view transaction | click',
@@ -222,9 +223,6 @@ export enum PostHogAction {
   DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
   DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
   DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
-  DappConnectorCancelTransactionClick = 'dapp connector | confirm transaction | cancel | click',
-  DappConnectorSendTransactionClick = 'dapp connector | confirm transaction | confirm | click',
-
   // User
   UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
   UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',

@@ -47,7 +47,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   }, [req]);
 
   const onConfirmTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.DappConnectorSendTransactionClick, {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
 
@@ -86,7 +86,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   }, [setSignTxRequest, setDappInfo]);
 
   const onCancelTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.DappConnectorCancelTransactionClick, {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationCancelClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
     disallowSignTx(true);
