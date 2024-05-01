@@ -251,7 +251,6 @@ const SelectRootVariants = (): JSX.Element => (
 export const Overview = (): JSX.Element => (
   <Grid>
     <Cell>
-      <Divider my="$64" />
       <SelectAlignment />
       <Divider my="$64" />
       <SelectVariants />
