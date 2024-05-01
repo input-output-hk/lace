@@ -77,7 +77,7 @@ class TransactionsDetailsAssert {
 
         if (expectedActivityDetails.transactionData[i].addressTag) {
           const actualAddressTag = await TransactionDetailsPage.transactionDetailsToAddressTag(i).getText();
-          expect(expectedActivityDetails.transactionData[i].addressTag).to(actualAddressTag);
+          expect(expectedActivityDetails.transactionData[i].addressTag).to.equal(actualAddressTag);
         }
       }
     }
@@ -143,19 +143,20 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsInputAddress.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsInputAdaAmount.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsInputFiatAmount.waitForDisplayed();
-      // TODO refactor steps below
-      //  some transactions (ADA only) don't have this field
-      // await TransactionDetailsPage.transactionDetailsInputTokens.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputAddress.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputAdaAmount.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputFiatAmount.waitForDisplayed();
-      // await TransactionDetailsPage.transactionDetailsOutputTokens.waitForDisplayed();
-
+      if ((await TransactionDetailsPage.transactionDetailsDescription.getText()) !== 'Rewards') {
+        await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
+        await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
+        await TransactionDetailsPage.transactionDetailsInputAddress.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsInputAdaAmount.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsInputFiatAmount.waitForDisplayed();
+        // TODO refactor steps below
+        //  some transactions (ADA only) don't have this field
+        // await TransactionDetailsPage.transactionDetailsInputTokens.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsOutputAddress.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsOutputAdaAmount.waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsOutputFiatAmount.waitForDisplayed();
+        // await TransactionDetailsPage.transactionDetailsOutputTokens.waitForDisplayed();
+      }
       await TransactionDetailsPage.closeActivityDetails(mode);
     }
   }
@@ -166,39 +167,41 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForStable();
+      if ((await TransactionDetailsPage.transactionDetailsDescription.getText()) !== 'Rewards') {
+        await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
+        await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
+        await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
+        await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForStable();
 
-      const txDetailsInputADAValueString = await TransactionDetailsPage.transactionDetailsInputAdaAmount.getText();
-      const txDetailsInputADAValue = Number(txDetailsInputADAValueString.split(' ', 1));
-      const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
+        const txDetailsInputADAValueString = await TransactionDetailsPage.transactionDetailsInputAdaAmount.getText();
+        const txDetailsInputADAValue = Number(txDetailsInputADAValueString.split(' ', 1));
+        const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
 
-      const txDetailsInputFiatValueString = await TransactionDetailsPage.transactionDetailsInputFiatAmount.getText();
-      const txDetailsInputFiatValue = Number(txDetailsInputFiatValueString.slice(1).split(' ', 1));
+        const txDetailsInputFiatValueString = await TransactionDetailsPage.transactionDetailsInputFiatAmount.getText();
+        const txDetailsInputFiatValue = Number(txDetailsInputFiatValueString.slice(1).split(' ', 1));
 
-      const txDetailsOutputADAValueString = await TransactionDetailsPage.transactionDetailsOutputAdaAmount.getText();
-      const txDetailsOutputADAValue = Number(txDetailsOutputADAValueString.split(' ', 1));
+        const txDetailsOutputADAValueString = await TransactionDetailsPage.transactionDetailsOutputAdaAmount.getText();
+        const txDetailsOutputADAValue = Number(txDetailsOutputADAValueString.split(' ', 1));
 
-      const txDetailsOutputFiatValueString = await TransactionDetailsPage.transactionDetailsOutputFiatAmount.getText();
-      const txDetailsOutputFiatValue = Number(txDetailsOutputFiatValueString.slice(1).split(' ', 1));
+        const txDetailsOutputFiatValueString =
+          await TransactionDetailsPage.transactionDetailsOutputFiatAmount.getText();
+        const txDetailsOutputFiatValue = Number(txDetailsOutputFiatValueString.slice(1).split(' ', 1));
 
-      if (!txType.includes(stakeKeyRegistration)) {
-        const txDetailsFeeADAValueString = await TransactionDetailsPage.transactionDetailsFeeADA.getText();
-        const txDetailsFeeADAValue = Number(txDetailsFeeADAValueString.split(' ', 1));
-        expect(txDetailsFeeADAValue).to.be.greaterThan(0);
+        if (!txType.includes(stakeKeyRegistration)) {
+          const txDetailsFeeADAValueString = await TransactionDetailsPage.transactionDetailsFeeADA.getText();
+          const txDetailsFeeADAValue = Number(txDetailsFeeADAValueString.split(' ', 1));
+          expect(txDetailsFeeADAValue).to.be.greaterThan(0);
 
-        const txDetailsFeeFiatValueString = await TransactionDetailsPage.transactionDetailsFeeFiat.getText();
-        const txDetailsFeeFiatValue = Number(txDetailsFeeFiatValueString.slice(1).split(' ', 1));
-        expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
+          const txDetailsFeeFiatValueString = await TransactionDetailsPage.transactionDetailsFeeFiat.getText();
+          const txDetailsFeeFiatValue = Number(txDetailsFeeFiatValueString.slice(1).split(' ', 1));
+          expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
+        }
+
+        expect(txDetailsInputADAValue).to.be.greaterThan(0);
+        expect(txDetailsInputFiatValue).to.be.greaterThan(0);
+        expect(txDetailsOutputADAValue).to.be.greaterThan(0);
+        expect(txDetailsOutputFiatValue).to.be.greaterThan(0);
       }
-
-      expect(txDetailsInputADAValue).to.be.greaterThan(0);
-      expect(txDetailsInputFiatValue).to.be.greaterThan(0);
-      expect(txDetailsOutputADAValue).to.be.greaterThan(0);
-      expect(txDetailsOutputFiatValue).to.be.greaterThan(0);
-
       await TransactionDetailsPage.closeActivityDetails(mode);
     }
   }
@@ -212,7 +215,7 @@ class TransactionsDetailsAssert {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       if (
-        !['Delegation', 'Stake Key De-Registration', 'Stake Key Registration', 'Self Transaction'].includes(
+        !['Delegation', 'Stake Key De-Registration', 'Stake Key Registration', 'Self Transaction', 'Rewards'].includes(
           transactionType
         )
       ) {
@@ -229,8 +232,8 @@ class TransactionsDetailsAssert {
     const rowsNumber = (await TransactionsPage.rows).length;
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
-      // TODO Cover self transaction details with automation
-      if ((await TransactionsPage.transactionsTableItemType(i).getText()) !== 'Self Transaction') {
+      const skippedTransaction = ['Self Transaction', 'Rewards']; // should be covered in separate tests
+      if (!skippedTransaction.includes(await TransactionsPage.transactionsTableItemType(i).getText())) {
         await TransactionsPage.clickOnTransactionRow(i);
         await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
         const txType = (await TransactionDetailsPage.transactionDetailsDescription.getText()).split('\n')[0];

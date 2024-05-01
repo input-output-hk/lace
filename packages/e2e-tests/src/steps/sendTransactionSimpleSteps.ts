@@ -38,6 +38,7 @@ import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
+import { Key } from 'webdriverio';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -269,11 +270,14 @@ Then(
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
     assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
     await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(Number.parseFloat(valueToEnter));
-    // workaround for test automation only to fire all events after finished typing
-    await TransactionNewPage.clickDrawerBackground();
-    await TransactionNewPage.coinConfigure(bundleIndex, assetName).balanceFiatValueElement.click();
   }
 );
+
+Then(/^I open cancel modal to trigger button validation$/, async () => {
+  // workaround for test automation only to fire all events after finished typing
+  await browser.keys(Key.Escape);
+  await Modal.cancelButton.click();
+});
 
 Then(/^I click on transaction drawer background to lose focus$/, async () => {
   await TransactionNewPage.clickDrawerBackground();

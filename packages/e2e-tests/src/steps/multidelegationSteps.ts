@@ -20,7 +20,7 @@ import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingCo
 import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDrawerAssert';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
-import TokensPageObject from '../pageobject/tokensPageObject';
+import TokensPage from '../elements/tokensPage';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
@@ -30,7 +30,9 @@ import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/Cha
 import { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/staking';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
-import { mapColumnNameStringToEnum } from '../utils/stakePoolListContent';
+import { mapColumnNameStringToEnum, mapSortingOptionNameStringToEnum } from '../utils/stakePoolListContent';
+import { browser } from '@wdio/globals';
+import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -312,17 +314,17 @@ Then(/^I see tooltip for element in currently staking component$/, async () => {
 });
 
 Then(/^I see Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  const cardanoBalance = String(await TokensPage.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });
 
 Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  await TokensPageObject.waitUntilCardanoTokenLoaded();
-  await TokensPageObject.saveTokenBalance('Cardano');
+  await TokensPage.waitUntilCardanoTokenLoaded();
+  await TokensPage.saveTokenBalance('Cardano');
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   await mainMenuPageObject.navigateToSection('Staking', mode);
-  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  const cardanoBalance = String(await TokensPage.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });
 
@@ -500,9 +502,25 @@ When(
 );
 
 When(
+  /^I hover over "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option from "More options" component$/,
+  async (sortingOption: StakePoolSortingOptionType) => {
+    await MultidelegationPage.moreOptionsComponent.hoverOverSortingOption(
+      mapSortingOptionNameStringToEnum(sortingOption)
+    );
+  }
+);
+
+Then(
+  /^tooltip for "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option is displayed$/,
+  async (sortingOption: StakePoolSortingOptionType) => {
+    await MultidelegationPageAssert.assertSeeTooltipForSortingOption(mapSortingOptionNameStringToEnum(sortingOption));
+  }
+);
+
+When(
   /^I select "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option from "More options" component$/,
   async (sortingOption: StakePoolSortingOptionType) => {
-    await MultidelegationPage.moreOptionsComponent.selectSortingOption(sortingOption);
+    await MultidelegationPage.moreOptionsComponent.selectSortingOption(mapSortingOptionNameStringToEnum(sortingOption));
   }
 );
 
@@ -521,13 +539,48 @@ Then(
 );
 
 Then(
-  /^stake pool (list rows|cards) are sorted by "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Pledge|Live Stake)" in (ascending|descending) order$/,
+  /^stake pool (list rows|cards) are sorted by "(Ticker|Saturation|ROS|Cost|Margin|Blocks|Produced blocks|Pledge|Live Stake)" in (ascending|descending) order$/,
   async (
     stakePoolsDisplayType: 'list rows' | 'cards',
-    sortingOption: StakePoolListColumnName,
+    sortingOption: StakePoolSortingOptionType | 'Blocks', // Different label used on column header and on "More options" component
     order: 'ascending' | 'descending'
   ) => {
     const poolLimit = 100; // Limit verification to 100 stake pools due to time constraints
-    await MultidelegationPageAssert.assertSeeStakePoolsSorted(stakePoolsDisplayType, sortingOption, order, poolLimit);
+    await MultidelegationPageAssert.assertSeeStakePoolsSorted(
+      stakePoolsDisplayType,
+      sortingOption === 'Blocks'
+        ? StakePoolSortingOption.ProducedBlocks
+        : mapSortingOptionNameStringToEnum(sortingOption),
+      order,
+      poolLimit
+    );
+  }
+);
+
+When(
+  /^I select (ascending|descending) order for "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option$/,
+  async (order: 'ascending' | 'descending', sortingOption: StakePoolSortingOptionType) => {
+    const isOptionAlreadySelected = await (
+      await MultidelegationPage.moreOptionsComponent.getSortingOptionOrderButton(
+        mapSortingOptionNameStringToEnum(sortingOption),
+        order
+      )
+    ).isDisplayed();
+    if (!isOptionAlreadySelected) {
+      await MultidelegationPage.moreOptionsComponent.clickOnOrderButtonForSortingOption(
+        order === 'ascending' ? 'descending' : 'ascending', // look for button with reversed state
+        mapSortingOptionNameStringToEnum(sortingOption)
+      );
+    }
+  }
+);
+
+Then(
+  /^order button is displayed for "(Ticker|Saturation|ROS|Cost|Margin|Produced blocks|Pledge|Live Stake)" sorting option in (ascending|descending) state$/,
+  async (sortingOption: StakePoolSortingOptionType, order: 'ascending' | 'descending') => {
+    await MultidelegationPageAssert.assertSeeSortingOptionOrderButton(
+      mapSortingOptionNameStringToEnum(sortingOption),
+      order
+    );
   }
 );

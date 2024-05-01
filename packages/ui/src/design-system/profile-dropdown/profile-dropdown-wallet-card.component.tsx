@@ -5,7 +5,7 @@ import cn from 'classnames';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { UserProfile } from '../profile-picture';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './profile-dropdown-wallet-card.css';
 import { WalletIcon } from './profile-dropdown-wallet-icon.component';
@@ -20,7 +20,7 @@ export interface Props {
   subtitle: string;
   profile?: {
     imageSrc: string;
-    fallback: string;
+    fallbackText: string;
     alt?: string;
     delayMs?: number;
   };
@@ -49,7 +49,7 @@ export const WalletCard = ({
         <UserProfile {...profile} radius="rounded" />
       )}
       <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
-        <Title className={cx.title} data-testid={makeTestId(testId, '-title')}>
+        <Title color="secondary" data-testid={makeTestId(testId, '-title')}>
           {title.text}
         </Title>
         <Box
@@ -60,7 +60,6 @@ export const WalletCard = ({
         >
           <Text.Body.Small
             weight="$semibold"
-            className={cx.subtitle}
             data-testid={makeTestId(testId, '-subtitle')}
           >
             {subtitle}

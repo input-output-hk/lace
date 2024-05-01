@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -10,7 +11,7 @@ export type Props = Pick<
   'align' | 'children' | 'side'
 > &
   typeof Tooltip.Root & {
-    label: string;
+    label: ReactNode | string;
     zIndex?: number;
   };
 

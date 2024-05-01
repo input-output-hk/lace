@@ -27,6 +27,7 @@ export const MultiAddressBalanceVisibleModal = (): ReactElement => {
       visible={showMultiAddressModal}
       confirmLabel={t('browserView.multiAddressWallet.modal.confirm')}
       onConfirm={handleCloseModal}
+      destroyOnClose
     />
   );
 };

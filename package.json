@@ -23,6 +23,7 @@
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
     "build": "yarn base-command-for-build-scripts -c build",
     "build-deps": "EXCLUDE_APP=true yarn build",
+    "bump-cardano-js-sdk": "sh bump-cardano-js-sdk.sh",
     "cardano:lint": "yarn eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
     "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/",
     "cleanup": "yarn workspaces foreach run cleanup && yarn exec rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",

@@ -29,7 +29,7 @@ import {
   switchToWindowWithRetry
 } from '../utils/window';
 import { Given } from '@wdio/cucumber-framework';
-import tokensPageObject from '../pageobject/tokensPageObject';
+import TokensPage from '../elements/tokensPage';
 import ToastMessage from '../elements/toastMessage';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
@@ -50,19 +50,20 @@ Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.multiAddressModalConfirm();
-  await tokensPageObject.waitUntilCardanoTokenLoaded();
+  await TokensPage.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
 });
 
 Then(/^Lace is loaded properly$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
-  await tokensPageObject.waitUntilCardanoTokenLoaded();
+  await TokensPage.waitUntilCardanoTokenLoaded();
 });
 
 Given(/^Lace with empty wallet is ready for test$/, async () => {
-  await tokensPageObject.waitUntilHeadersLoaded();
+  await TokensPage.waitUntilHeadersLoaded();
 });
+
 Then(/I navigate to home page on (popup|extended) view/, async (viewType: string) => {
   await browser.pause(1000);
   await (viewType === 'popup' ? popupView.visit() : extendedView.visit());

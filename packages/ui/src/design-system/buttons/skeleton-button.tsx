@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 import { sx } from '../../design-tokens';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import type { Sx } from '../../design-tokens';
 import type { OmitClassName } from '../../types';

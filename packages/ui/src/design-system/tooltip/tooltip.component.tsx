@@ -30,7 +30,9 @@ export const Tooltip = ({
       delayDuration={delayDuration}
     >
       <Root side={side} label={label} {...props}>
-        <Trigger asChild>{children}</Trigger>
+        <Trigger asChild>
+          <div>{children}</div>
+        </Trigger>
       </Root>
     </Provider>
   );

@@ -17,6 +17,7 @@ export enum PostHogAction {
   OnboardingRestoreClick = 'onboarding | restore wallet revamp | restore | click',
   OnboardingRestoreEnterRecoveryPhraseNextClick = 'onboarding | restore wallet revamp |  enter your recovery phrase  | next | click',
   OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick = 'onboarding | restore wallet revamp | enter your recovery phrase | paste from clipboard | click',
+  OnboardingRestoreEnterRecoveryPhrasePasteReadMoreClick = 'onboarding | restore wallet revamp | enter your recovery phrase | read more | click',
   OnboardingRestoreHdWallet = 'onboarding | restore wallet | hd wallet',
   OnboardingRestoreEnterWalletClick = "onboarding | restore wallet revamp | let's set up your new wallet | enter wallet | click",
   // Create new wallet
@@ -25,8 +26,10 @@ export enum PostHogAction {
   OnboardingCreateEnterRecoveryPhraseNextClick = 'onboarding | new wallet revamp | enter your recovery phrase | next | click',
   OnboardingCreateSaveRecoveryPhraseIntroPlayVideoClick = 'onboarding | new wallet revamp | save your recovery phrase | watch video | click',
   OnboardingCreateSaveRecoveryPhraseCopyToClipboardClick = 'onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click',
+  OnboardingCreateSaveRecoveryPhraseCopyReadMoreClick = 'onboarding | new wallet revamp | save your recovery phrase | read more | click',
   OnboardingCreateKeepWalletSecureGotItClick = 'onboarding | new wallet revamp | keeping your wallet secure | got it | click',
   OnboardingCreateEnterRecoveryPhrasePasteFromClipboardClick = 'onboarding | new wallet revamp | enter your recovery phrase | paste from clipboard | click',
+  OnboardingCreateEnterRecoveryPhrasePasteReadMoreClick = 'onboarding | new wallet revamp | enter your recovery phrase | read more | click',
   OnboardingCreateEnterWalletClick = "onboarding | new wallet revamp | let's set up your new wallet | enter wallet | click",
   // Multi wallet
   MultiWalletSwitchWallet = 'multiwallet | switch wallet | click',
@@ -148,6 +151,7 @@ export enum PostHogAction {
   NFTsCreateFolderClick = 'nft | nfts | create folder | click',
   NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
   NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
+  NFTDetailSetAsAvatarClick = 'nft | nft detail | set as your wallet avatar | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -206,6 +210,9 @@ export enum PostHogAction {
   SettingsFaqsClick = 'settings | faqs | click',
   SettingsWalletHdWalletSyncSyncClick = 'settings | wallet | hd wallet sync | sync | click',
   SettingsWalletHdWalletSyncSyncNewAddresses = 'settings | wallet | hd wallet sync | sync | new addresses',
+  SettingsCustomSubmitApiClick = 'settings | custom submit api | click',
+  SettingsCustomSubmitApiXClick = 'settings | custom submit api | x | click',
+  SettingsCustomSubmitApiEnableClick = 'settings | custom submit api | enable | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
