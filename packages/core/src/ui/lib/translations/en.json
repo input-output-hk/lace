@@ -522,7 +522,7 @@
   "core.walletSetupMnemonicStep.passphraseInfo3": "Find out more.",
   "core.walletSetupMnemonicStep.writePassphrase": "Write down your secret passphrase",
   "core.walletSetupMnemonicStepRevamp.copyToClipboard": "Copy to clipboard",
-  "core.walletSetupMnemonicStepRevamp.copyPasteTooltipText": "Best practices on copying and pasting. <a>Read more</a>",
+  "core.walletSetupMnemonicStepRevamp.copyPasteTooltipText": "Before using this feature, please read this <a>best practices FAQ</a>",
   "core.walletSetupMnemonicStepRevamp.enterPassphrase": "Enter your recovery passphrase",
   "core.walletSetupMnemonicStepRevamp.enterPassphraseDescription": "Let's check you've got the correct recovery phrase. Type each word in the right order or paste from clipboard to verify it.",
   "core.walletSetupMnemonicStepRevamp.enterPassphraseLength": "Choose recovery phrase length",
