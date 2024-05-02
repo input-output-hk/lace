@@ -74,7 +74,7 @@ jobs:
           eval "$runCommand";
       - name: Create allure properties
         if: always()
-        working-directory: ./packages/e2e-tests/reports/allure/results
+        working-directory: './packages/e2e-tests/reports/allure/results'
         run: |
           echo "
           env=${NETWORK}
