@@ -19,6 +19,9 @@ const triggerBase = style({
   color: vars.colors.$select_text_color,
 
   selectors: {
+    '&[data-state="open"]': {
+      backgroundColor: vars.colors.$select_grey_bgColor_pressed,
+    },
     '&:disabled': {
       cursor: 'not-allowed',
       opacity: vars.opacities.$0_5,
