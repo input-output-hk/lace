@@ -152,7 +152,8 @@ Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: strin
     'Given name already exists': 'addressBook.errors.givenNameAlreadyExist',
     'Switched network': 'browserView.settings.wallet.network.networkSwitched',
     'Network Error': 'general.errors.networkError',
-    'Copied to clipboard': 'general.clipboard.copiedToClipboard'
+    'Copied to clipboard': 'general.clipboard.copiedToClipboard',
+    'Collateral added': 'browserView.settings.wallet.collateral.toast.add'
   };
 
   const translationKey = toastTextToTranslationKeyMap[toastText];

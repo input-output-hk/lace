@@ -47,16 +47,16 @@ Feature: Send Transactions from Dapp - E2E
       | -2 LaceCoin2     |
     And I expand "From address" section in DApp transaction window
     And I see DApp connector "Confirm transaction" page "From address" section with following data:
-      | Address WalletSendDappTransactionE2E |
-      | Tokens -2 item(s)                    |
-      | -1.38 tADA - FEE                     |
-      | -2 LaceCoin2                         |
+      | Address WalletSendDappTransactionE2E own |
+      | Tokens -2 item(s)                        |
+      | -1.38 tADA - FEE                         |
+      | -2 LaceCoin2                             |
     And I expand "To address" section in DApp transaction window
     And I see DApp connector "Confirm transaction" page "To address" section with following data:
-      | Address WalletReceiveDappTransactionE2E |
-      | Tokens 2 item(s)                        |
-      | 1.38 tADA                               |
-      | 2 LaceCoin2                             |
+      | Address WalletReceiveDappTransactionE2E foreign |
+      | Tokens 2 item(s)                                |
+      | 1.38 tADA                                       |
+      | 2 LaceCoin2                                     |
     And I save fee value on DApp "Confirm transaction" page
     And I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page
