@@ -9,6 +9,7 @@ import { filter, firstValueFrom } from 'rxjs';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { walletRoutePaths } from '@routes';
 import { useHotWalletCreation } from '../useHotWalletCreation';
+import { RecoveryPhraseLength } from '@lace/core';
 
 interface Props {
   children: React.ReactNode;
@@ -16,6 +17,8 @@ interface Props {
 }
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+
+type OnRecoveryPhraseLengthChange = (length: RecoveryPhraseLength) => void;
 
 enum WalletRestoreStep {
   RecoveryPhrase = 'RecoveryPhrase',
@@ -29,6 +32,7 @@ interface State {
   next: () => Promise<void>;
   onNameAndPasswordChange: OnNameAndPasswordChange;
   setMnemonic: (mnemonic: string[]) => void;
+  onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -40,7 +44,7 @@ export const useRestoreWallet = (): State => {
   return state;
 };
 
-const mnemonicLength = 24;
+const initialMnemonicLength: RecoveryPhraseLength = 24;
 
 export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const history = useHistory();
@@ -48,7 +52,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
   const [step, setStep] = useState<WalletRestoreStep>(WalletRestoreStep.RecoveryPhrase);
   const { clearSecrets, createWallet, createWalletData, sendPostWalletAddAnalytics, setCreateWalletData } =
     useHotWalletCreation({
-      initialMnemonic: Array.from({ length: mnemonicLength }, () => '')
+      initialMnemonic: Array.from({ length: initialMnemonicLength }, () => '')
     });
 
   const setMnemonic = useCallback(
@@ -59,6 +63,10 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
     },
     [providers.confirmationDialog.shouldShowDialog$, setCreateWalletData]
   );
+
+  const onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange = (length) => {
+    setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Array.from({ length }, () => '') }));
+  };
 
   const onNameAndPasswordChange: OnNameAndPasswordChange = ({ name, password }) => {
     setCreateWalletData((prevState) => ({ ...prevState, name, password }));
@@ -110,12 +118,13 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
   return (
     <RestoreWalletContext.Provider
       value={{
+        back,
         createWalletData,
         finalizeWalletRestoration,
-        setMnemonic,
-        onNameAndPasswordChange,
         next,
-        back
+        onNameAndPasswordChange,
+        onRecoveryPhraseLengthChange,
+        setMnemonic
       }}
     >
       {children}

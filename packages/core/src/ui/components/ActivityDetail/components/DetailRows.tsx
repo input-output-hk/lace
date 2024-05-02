@@ -8,7 +8,7 @@ import styles from '../TransactionInputOutput.module.scss';
 type DetailRowsProps<T extends string> = {
   list: TxDetails<T>;
   testId: string;
-  translations: TranslationsFor<T>;
+  translations: T extends string ? TranslationsFor<T> : never;
 };
 
 export const DetailRows = function DetailRows<T extends string>({

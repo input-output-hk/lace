@@ -18,4 +18,3 @@ export * from './WalletSetupConfirmationDialogProvider';
 export * from './WalletAnalyticsInfo';
 export * from './LegalTranslations';
 export * from './AnalyticsConfirmationBanner';
-export * from './types';

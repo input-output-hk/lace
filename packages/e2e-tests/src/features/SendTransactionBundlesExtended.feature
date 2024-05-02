@@ -139,7 +139,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And click on the coin selector for "tADA" asset in bundle 2
     And click on an token with name: "LaceCoin"
     And I enter a value of: 1 to the "LaceCoin1" asset in bundle 2
-    Then transaction fee is around 0.25 ADA and Ada allocation cost is around 1.07 ADA
+    Then transaction fee is around 0.26 ADA and Ada allocation cost is around 1.07 ADA
 
   @LW-4505
   Scenario: Extended-view - Cancel transaction with multiple bundles on Summary page

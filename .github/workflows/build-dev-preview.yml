@@ -5,7 +5,10 @@ on:
 jobs:
   build:
     name: Build + test
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

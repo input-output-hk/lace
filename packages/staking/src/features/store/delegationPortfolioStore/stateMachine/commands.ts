@@ -181,7 +181,7 @@ export type PortfolioManagementConfirmationCommand =
 
 export type PortfolioManagementSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue;
+export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue | HwSkipToDeviceFailure;
 
 export type PortfolioManagementHwFailureCommand = CancelDrawer | DrawerBack;
 
@@ -206,7 +206,7 @@ export type NewPortfolioConfirmationCommand =
 
 export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue;
+export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | HwSkipToDeviceFailure;
 
 export type NewPortfolioHwFailureCommand = CancelDrawer | DrawerBack;
 
