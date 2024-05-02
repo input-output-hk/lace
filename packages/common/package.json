@@ -37,7 +37,7 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/util": "0.15.0",
+    "@cardano-sdk/util": "0.15.1",
     "antd": "^4.24.10",
     "classnames": "^2.3.1",
     "jdenticon": "3.1.0",

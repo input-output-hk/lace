@@ -110,6 +110,29 @@ Feature: Staking Page - Extended View
     When I hover over "Live Stake" column name in stake pool list
     Then tooltip for "Live Stake" column is displayed
 
+  @LW-10414 @Testnet @Mainnet
+  Scenario: Extended View - Staking - Show tooltips for sorting options in "More options" component
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    When I hover over "Ticker" sorting option from "More options" component
+    Then tooltip for "Ticker" sorting option is displayed
+    When I hover over "Saturation" sorting option from "More options" component
+    Then tooltip for "Saturation" sorting option is displayed
+    #TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+    #When I hover over "ROS" sorting option from "More options" component
+    #Then tooltip for "ROS" sorting option is displayed
+    When I hover over "Cost" sorting option from "More options" component
+    Then tooltip for "Cost" sorting option is displayed
+    When I hover over "Margin" sorting option from "More options" component
+    Then tooltip for "Margin" sorting option is displayed
+    When I hover over "Produced blocks" sorting option from "More options" component
+    Then tooltip for "Produced blocks" sorting option is displayed
+    When I hover over "Pledge" sorting option from "More options" component
+    Then tooltip for "Pledge" sorting option is displayed
+    When I hover over "Live Stake" sorting option from "More options" component
+    Then tooltip for "Live Stake" sorting option is displayed
+
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details
     When I navigate to Staking extended page

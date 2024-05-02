@@ -4,6 +4,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+  actions: read
+
 env:
   TAGS: '@Smoke and @Testnet'
   BROWSER: 'chrome'
@@ -13,10 +17,17 @@ env:
 jobs:
   smokeTests:
     name: Smoke Tests
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Collect Workflow Telemetry Build Packages
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh

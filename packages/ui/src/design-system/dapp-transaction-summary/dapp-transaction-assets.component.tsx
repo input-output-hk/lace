@@ -53,12 +53,12 @@ export const TransactionAssets = ({
   const { theme } = useThemeVariant();
   const isNegativeBalance = balance.includes('-');
 
-  const setThemeFallbackImagine =
+  const themeFallbackImage =
     theme === ThemeColorScheme.Dark ? DarkFallBack : LightFallBack;
 
   const getImageSource = (value: string | undefined): string => {
     if (value === '' || value === undefined) {
-      return setThemeFallbackImagine;
+      return themeFallbackImage;
     } else if (value.startsWith('ipfs')) {
       return value.replace('ipfs://', 'https://ipfs.io/ipfs/');
     } else if (isImageBase64Encoded(value)) {
@@ -82,7 +82,7 @@ export const TransactionAssets = ({
         <Cell>
           <Tooltip label={tooltipLabel}>
             <UserProfile
-              fallback={setThemeFallbackImagine}
+              fallbackImage={themeFallbackImage}
               imageSrc={getImageSource(imageSrc)}
               alt={tokenName}
               radius="rounded"
@@ -97,14 +97,14 @@ export const TransactionAssets = ({
             className={styles.balanceDetailContainer}
           >
             <Tooltip label={tooltipLabel}>
-              <Text.Body.Small
+              <Text.Body.Normal
                 color={isNegativeBalance ? 'primary' : 'success'}
-                weight="$semibold"
+                weight="$medium"
               >
                 <span>
                   {balance} {tokenName}
                 </span>
-              </Text.Body.Small>
+              </Text.Body.Normal>
             </Tooltip>
           </Flex>
         </Cell>

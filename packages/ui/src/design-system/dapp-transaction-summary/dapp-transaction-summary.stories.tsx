@@ -88,6 +88,7 @@ const Example = (): JSX.Element => (
     <TransactionSummary
       title="Transaction Summary"
       transactionAmount="-100.00"
+      tooltip="This is a test tooltip"
       adaTooltip="Special tooltip for ADA token"
     />
     {items.map(value => (

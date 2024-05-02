@@ -16,14 +16,18 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseIntroPlayVideoClick,
     RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.OnboardingCreateKeepWalletSecureGotItClick,
     RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseCopyToClipboardClick,
-    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK: PostHogAction.OnboardingCreateEnterRecoveryPhrasePasteFromClipboardClick
+    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
+      PostHogAction.OnboardingCreateEnterRecoveryPhrasePasteFromClipboardClick,
+    RECOVERY_PHRASE_COPY_READ_MORE_CLICK: PostHogAction.OnboardingCreateSaveRecoveryPhraseCopyReadMoreClick,
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.OnboardingCreateEnterRecoveryPhrasePasteReadMoreClick
   },
   restore: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingRestoreClick,
     ENTER_WALLET: PostHogAction.OnboardingRestoreEnterWalletClick,
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterRecoveryPhraseNextClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
-      PostHogAction.OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick
+      PostHogAction.OnboardingRestoreEnterRecoveryPhrasePasteFromClipboardClick,
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.OnboardingRestoreEnterRecoveryPhrasePasteReadMoreClick
   },
   hw: {
     SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
@@ -59,6 +63,8 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.MultiWalletRestoreEnterRecoveryPhraseNextClick,
     ENTER_WALLET: PostHogAction.MultiWalletRestoreEnterWalletClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
-      PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick
+      PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick,
+    RECOVERY_PHRASE_COPY_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick,
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
   }
 };

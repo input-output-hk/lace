@@ -6,9 +6,7 @@ import OnboardingCommonAssert from './onboardingCommonAssert';
 class ConnectYourDevicePageAssert extends OnboardingCommonAssert {
   async assertSeeConnectYourDevicePage() {
     await this.assertSeeStepTitle(await t('core.walletSetupConnectHardwareWalletStepRevamp.title'));
-    // TODO: replace subtitle assertions when USE_TREZOR_HW=true
-    // await this.assertSeeStepSubtitle(await t('core.walletSetupConnectHardwareWalletStepRevamp.subTitle'));
-    await this.assertSeeStepSubtitle(await t('core.walletSetupConnectHardwareWalletStepRevamp.subTitleLedgerOnly'));
+    await this.assertSeeStepSubtitle(await t('core.walletSetupConnectHardwareWalletStepRevamp.subTitle'));
 
     await ConnectYourDevicePage.loader.waitForDisplayed();
 

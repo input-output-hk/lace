@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React from 'react';
 import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
@@ -11,7 +10,7 @@ import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
-import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
+import { TransactionType, DappTransactionSummary, TransactionAssets, Text, Box, Divider } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
@@ -136,6 +135,7 @@ export const DappTransaction = ({
           adaTooltip={t('core.dappTransaction.adaTooltip')}
           cardanoSymbol={coinSymbol}
           transactionAmount={Wallet.util.lovelacesToAdaString(coins.toString())}
+          tooltip={t('core.dappTransaction.transactionSummaryTooltip')}
         />
         <div className={styles.transactionAssetsContainer}>
           {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => {
@@ -161,6 +161,14 @@ export const DappTransaction = ({
             );
           })}
         </div>
+
+        <Box mb="$20">
+          <Divider />
+        </Box>
+
+        <Box mb="$16">
+          <Text.Body.Normal weight="$semibold">{t('core.dappTransaction.additionalInformation')}</Text.Body.Normal>
+        </Box>
 
         {collateral !== undefined && collateral !== BigInt(0) && (
           <Collateral

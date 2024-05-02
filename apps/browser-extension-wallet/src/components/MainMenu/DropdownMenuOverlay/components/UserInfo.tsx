@@ -111,7 +111,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
           profile={
             walletAvatar
               ? {
-                  fallback: fullWalletName,
+                  fallbackText: fullWalletName,
                   imageSrc: walletAvatar
                 }
               : undefined

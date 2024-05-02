@@ -4,8 +4,7 @@ Feature: Send Transactions from Dapp - E2E
   Background:
     Given Wallet is synced
 
-  @LW-3761 @Testnet @Smoke @Pending
-  @issue=LW-10306
+  @LW-3761 @Testnet @Smoke
   Scenario: Send ADA from DApp E2E
     And I save token: "Cardano" balance
     And I open and authorize test DApp with "Only once" setting
