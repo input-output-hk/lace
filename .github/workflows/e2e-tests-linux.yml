@@ -96,6 +96,7 @@ jobs:
           prefix: 'all/linux/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         if: always()
