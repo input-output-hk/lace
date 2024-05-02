@@ -91,7 +91,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './packages/e2e-tests/reports/allure/results/*'
+          resultsGlob: './packages/e2e-tests/reports/allure/results'
           bucket: lace-e2e-test-results
           prefix: 'all/linux/${BROWSER}/${RUN}'
           copyLatest: true
