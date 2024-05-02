@@ -18,7 +18,7 @@ const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
 
 export const NewRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
-  const { back, createWalletData, next, setFormDirty, step } = useCreateWallet();
+  const { back, createWalletData, next, step } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
@@ -69,7 +69,6 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         mnemonicStage={getMnemonicStage(step)}
         onStageChange={(nextStage) => {
           if (nextStage === 'input') {
-            setFormDirty(true);
             void next();
             void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
           } else {
@@ -117,7 +116,6 @@ export const NewRecoveryPhrase = (): JSX.Element => {
             setIsResetMnemonicModalOpen(false);
           }}
           onConfirm={() => {
-            setFormDirty(false);
             setIsResetMnemonicModalOpen(false);
             back();
           }}

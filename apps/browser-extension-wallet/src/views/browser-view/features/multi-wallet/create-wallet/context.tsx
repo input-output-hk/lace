@@ -24,7 +24,6 @@ interface State {
   createWalletData: CreateWalletParams;
   next: () => Promise<void>;
   onNameAndPasswordChange: OnNameAndPasswordChange;
-  setFormDirty: (dirty: boolean) => void;
   step: WalletCreateStep;
 }
 
@@ -118,7 +117,6 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
         createWalletData,
         next,
         onNameAndPasswordChange,
-        setFormDirty,
         step
       }}
     >
