@@ -23,6 +23,7 @@ export type SelectRootProps = Pick<
   showArrow?: boolean;
   value: string | undefined;
   variant?: SelectVariant;
+  portalContainer?: HTMLElement;
 };
 
 const isValidSelectRootChild = (
@@ -45,6 +46,8 @@ const isValidSelectRootChild = (
  * @param onChange `onValueChange` See: https://www.radix-ui.com/primitives/docs/components/select#root
  * @param defaultOpen The default value for open state of the select.
  * @param placeholder See: https://www.radix-ui.com/primitives/docs/components/select#value
+ * @param portalContainer The HTMLElement which will be passed as `container` to the Radix `<Select.Portal />`.
+ * See: https://www.radix-ui.com/primitives/docs/components/select#portal
  * @param required See: https://www.radix-ui.com/primitives/docs/components/select#root
  * @param showArrow Render arrow icon next to the input value, when the Select is closed.
  * @param value See: https://www.radix-ui.com/primitives/docs/components/select#root
@@ -59,6 +62,7 @@ export const Root = ({
   onChange,
   defaultOpen = false,
   placeholder,
+  portalContainer,
   required,
   showArrow = false,
   value,
@@ -84,7 +88,7 @@ export const Root = ({
           </Select.Icon>
         )}
       </Select.Trigger>
-      <Select.Portal>
+      <Select.Portal container={portalContainer}>
         <Select.Content
           className={cx.content[variant]}
           position={align === 'selected' ? 'item-aligned' : 'popper'}

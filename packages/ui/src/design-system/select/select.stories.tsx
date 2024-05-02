@@ -5,7 +5,12 @@ import type { Meta } from '@storybook/react';
 import capitalize from 'lodash/capitalize';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
-import { page, Section, Variants } from '../decorators';
+import {
+  page,
+  Section,
+  useDarkThemePortalContainer,
+  Variants,
+} from '../decorators';
 import { Divider } from '../divider';
 import { Cell, Grid } from '../grid';
 
@@ -75,6 +80,7 @@ const SelectAlignment = (): JSX.Element => (
 );
 
 const SelectVariants = (): JSX.Element => {
+  const darkThemePortalContainer = useDarkThemePortalContainer();
   const renderedOptions = options.map(option => (
     <Select.Item
       key={option.value}
@@ -103,6 +109,11 @@ const SelectVariants = (): JSX.Element => {
                     value={undefined}
                     onChange={(): void => void 0}
                     placeholder={placeholder}
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
@@ -125,6 +136,11 @@ const SelectVariants = (): JSX.Element => {
                     onChange={(): void => void 0}
                     placeholder={placeholder}
                     showArrow
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
@@ -139,6 +155,7 @@ const SelectVariants = (): JSX.Element => {
 };
 
 const SelectRootVariants = (): JSX.Element => {
+  const darkThemePortalContainer = useDarkThemePortalContainer();
   const renderedOptions = options.map(option => (
     <Select.Item
       key={option.value}
@@ -174,6 +191,11 @@ const SelectRootVariants = (): JSX.Element => {
                     onChange={(): void => void 0}
                     placeholder={placeholder}
                     showArrow
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
@@ -186,6 +208,11 @@ const SelectRootVariants = (): JSX.Element => {
                     onChange={(): void => void 0}
                     placeholder={placeholder}
                     showArrow
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
@@ -197,6 +224,11 @@ const SelectRootVariants = (): JSX.Element => {
                     onChange={(): void => void 0}
                     placeholder={placeholder}
                     showArrow
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
@@ -209,6 +241,11 @@ const SelectRootVariants = (): JSX.Element => {
                     onChange={(): void => void 0}
                     placeholder={placeholder}
                     showArrow
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
@@ -221,6 +258,11 @@ const SelectRootVariants = (): JSX.Element => {
                     onChange={(): void => void 0}
                     placeholder={placeholder}
                     showArrow
+                    portalContainer={
+                      colorScheme === ThemeColorScheme.Dark
+                        ? darkThemePortalContainer
+                        : undefined
+                    }
                   >
                     {renderedOptions}
                   </Select.Root>
