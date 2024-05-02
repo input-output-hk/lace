@@ -1,24 +1,29 @@
-import { WalletSetupMnemonicStage, MnemonicVideoPopupContent, WalletSetupMnemonicStepRevamp } from '@lace/core';
+import { MnemonicVideoPopupContent, WalletSetupMnemonicStage, WalletSetupMnemonicStepRevamp } from '@lace/core';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
-import { useCreateWallet } from '../context';
+import { useCreateWallet, WalletCreateStep } from '../context';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
 
+const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
+  if (step === WalletCreateStep.RecoveryPhraseWriteDown) return 'writedown';
+  if (step === WalletCreateStep.RecoveryPhraseInput) return 'input';
+  throw new Error('Invalid wallet crate step');
+};
+
 export const NewRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
-  const { back, createWalletData, generateMnemonic, next, setFormDirty } = useCreateWallet();
+  const { back, createWalletData, next, setFormDirty, step } = useCreateWallet();
   const analytics = useAnalyticsContext();
-  const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<WalletSetupMnemonicStage>('writedown');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
   const handleReadMoreOnClick = () => {
-    currentSetupMnemonicStage === 'writedown'
+    step === WalletCreateStep.RecoveryPhraseWriteDown
       ? analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
       : analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
@@ -61,11 +66,11 @@ export const NewRecoveryPhrase = (): JSX.Element => {
     <>
       <WalletSetupMnemonicStepRevamp
         mnemonic={createWalletData.mnemonic}
-        mnemonicStage={currentSetupMnemonicStage}
+        mnemonicStage={getMnemonicStage(step)}
         onStageChange={(nextStage) => {
           if (nextStage === 'input') {
             setFormDirty(true);
-            setCurrentSetupMnemonicStage(nextStage);
+            void next();
             void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
           } else {
             setIsResetMnemonicModalOpen(true);
@@ -114,8 +119,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
           onConfirm={() => {
             setFormDirty(false);
             setIsResetMnemonicModalOpen(false);
-            setCurrentSetupMnemonicStage('writedown');
-            generateMnemonic();
+            back();
           }}
         />
       )}

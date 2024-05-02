@@ -13,18 +13,19 @@ interface Props {
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
 
-enum WalletCreateStep {
-  RecoveryPhrase = 'RecoveryPhrase',
+export enum WalletCreateStep {
+  RecoveryPhraseWriteDown = 'RecoveryPhraseWriteDown',
+  RecoveryPhraseInput = 'RecoveryPhraseInput',
   Setup = 'Setup'
 }
 
 interface State {
   back: () => void;
   createWalletData: CreateWalletParams;
-  generateMnemonic: () => void;
   next: () => Promise<void>;
   onNameAndPasswordChange: OnNameAndPasswordChange;
   setFormDirty: (dirty: boolean) => void;
+  step: WalletCreateStep;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -47,7 +48,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
   } = useHotWalletCreation({
     initialMnemonic: providers.generateMnemonicWords()
   });
-  const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.RecoveryPhrase);
+  const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.RecoveryPhraseWriteDown);
 
   const generateMnemonic = () => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: providers.generateMnemonicWords() }));
@@ -72,8 +73,13 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
 
   const next = async () => {
     switch (step) {
-      case WalletCreateStep.RecoveryPhrase: {
+      case WalletCreateStep.RecoveryPhraseWriteDown: {
+        setStep(WalletCreateStep.RecoveryPhraseInput);
+        break;
+      }
+      case WalletCreateStep.RecoveryPhraseInput: {
         setStep(WalletCreateStep.Setup);
+        setFormDirty(true);
         history.push(walletRoutePaths.newWallet.create.setup);
         break;
       }
@@ -87,13 +93,18 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
 
   const back = () => {
     switch (step) {
-      case WalletCreateStep.RecoveryPhrase: {
+      case WalletCreateStep.RecoveryPhraseWriteDown: {
         setFormDirty(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
       }
+      case WalletCreateStep.RecoveryPhraseInput: {
+        generateMnemonic();
+        setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+        break;
+      }
       case WalletCreateStep.Setup: {
-        setStep(WalletCreateStep.RecoveryPhrase);
+        setStep(WalletCreateStep.RecoveryPhraseInput);
         history.push(walletRoutePaths.newWallet.create.recoveryPhrase);
         break;
       }
@@ -105,10 +116,10 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
       value={{
         back,
         createWalletData,
-        generateMnemonic,
         next,
         onNameAndPasswordChange,
-        setFormDirty
+        setFormDirty,
+        step
       }}
     >
       {children}
