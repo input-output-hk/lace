@@ -1,34 +1,41 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Button } from 'antd';
-import { MnemonicStage, WalletTimelineSteps } from '../../WalletSetup';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Tooltip } from 'antd';
+import { WalletTimelineSteps } from '../../WalletSetup';
 import { MnemonicWordsWritedownRevamp } from './MnemonicWordsWritedownRevamp';
 import { WalletSetupStepLayoutRevamp } from '../WalletSetupStepLayoutRevamp';
-import styles from '../../WalletSetup/WalletSetupOption.module.scss';
+import styles from './WalletSetupMnemonicStepRevamp.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { hasEmptyString } from './WalletSetupMnemonicVerificationStepRevamp';
+import { Dialog } from '@lace/ui';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
 import isEqual from 'lodash/isEqual';
-import { Dialog } from '@lace/ui';
+import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.component.svg';
+import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
+import { useKeyboardShortcut } from '@lace/common';
+
+export type WalletSetupMnemonicStage = 'writedown' | 'input';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
-  onReset: (mnemonicStage?: MnemonicStage) => void;
+  mnemonicStage: WalletSetupMnemonicStage;
+  onBack: () => void;
   onNext: () => void;
-  onStepNext?: (currentStage: MnemonicStage) => void;
-  isBackFromNextStep?: boolean;
-  translations: TranslationsFor<
-    | 'writePassphraseTitle'
-    | 'enterPassphraseDescription'
-    | 'enterPassphrase'
-    | 'writePassphraseSubtitle1'
-    | 'writePassphraseSubtitle2'
-    | 'passphraseError'
-    | 'copyToClipboard'
-    | 'pasteFromClipboard'
-  >;
+  onStageChange?: (currentStage: WalletSetupMnemonicStage) => void;
+  translations: TranslationsFor<{
+    jsxElementKey: 'copyPasteTooltipText';
+    stringKey:
+      | 'writePassphraseTitle'
+      | 'enterPassphraseDescription'
+      | 'enterPassphrase'
+      | 'writePassphraseSubtitle1'
+      | 'writePassphraseSubtitle2'
+      | 'passphraseError'
+      | 'copyToClipboard'
+      | 'pasteFromClipboard';
+  }>;
   suggestionList?: Array<string>;
   passphraseInfoLink?: string;
   onWatchVideoClick?: () => void;
@@ -39,57 +46,76 @@ export interface WalletSetupMnemonicStepProps {
 
 export const WalletSetupMnemonicStepRevamp = ({
   mnemonic,
-  onReset,
+  mnemonicStage,
+  onBack,
   onNext,
-  onStepNext,
+  onStageChange,
   translations,
   suggestionList,
   renderVideoPopupContent,
   onWatchVideoClick,
   onCopyToClipboard,
-  onPasteFromClipboard,
-  isBackFromNextStep = false
+  onPasteFromClipboard
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
-  const initialMnemonicWordsConfirm = useMemo(() => mnemonic.map(() => ''), [mnemonic]);
-  const [mnemonicStage, setMnemonicStage] = useState<MnemonicStage>('writedown');
-  const [mnemonicConfirm, setMnemonicWordsConfirm] = useState(initialMnemonicWordsConfirm);
+  const [mnemonicConfirm, setMnemonicConfirm] = useState<string[]>([]);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  // reset the state on mnemonic change
   useEffect(() => {
-    setMnemonicStage(isBackFromNextStep ? 'input' : 'writedown');
-    setMnemonicWordsConfirm(isBackFromNextStep ? mnemonic : initialMnemonicWordsConfirm);
-  }, [initialMnemonicWordsConfirm, isBackFromNextStep, mnemonic]);
+    if (mnemonicConfirm.length > 0) return;
+    setMnemonicConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
+  }, [mnemonic, mnemonicConfirm.length, mnemonicStage]);
 
-  const pasteRecoveryPhrase = async (offset = 0) => {
-    const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
+  const copyRecoveryPhrase = useCallback(async () => {
+    await writeMnemonicToClipboard(mnemonic);
+    onCopyToClipboard();
+  }, [mnemonic, onCopyToClipboard]);
 
-    if (copiedWords.length === -1) return;
+  const pasteRecoveryPhrase = useCallback(
+    async (offset = 0) => {
+      const copiedWords = await readMnemonicFromClipboard(mnemonic.length);
 
-    const newMnemonic = [...mnemonicConfirm];
+      if (copiedWords.length === 0) return;
 
-    copiedWords.forEach((word, index) => {
-      const newIndex = offset + index;
-      if (newIndex < newMnemonic.length) {
-        newMnemonic[newIndex] = word;
-      }
-    });
+      const newMnemonic = [...mnemonicConfirm];
 
-    setMnemonicWordsConfirm(newMnemonic);
-    onPasteFromClipboard();
-  };
+      copiedWords.forEach((word, index) => {
+        const newIndex = offset + index;
+        if (newIndex < newMnemonic.length) {
+          newMnemonic[newIndex] = word;
+        }
+      });
+
+      setMnemonicConfirm(newMnemonic);
+      onPasteFromClipboard();
+    },
+    [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
+  );
+
+  useKeyboardShortcut((event) => {
+    if (!event.ctrlKey && !event.metaKey) return;
+    if (event.key === 'c' && mnemonicStage === 'writedown') {
+      void copyRecoveryPhrase();
+    }
+    if (event.key === 'v' && mnemonicStage === 'input') {
+      void pasteRecoveryPhrase();
+    }
+  });
 
   const handleBack = () => {
-    onReset(mnemonicStage);
+    if (mnemonicStage === 'writedown') {
+      onBack();
+    }
+    setMnemonicConfirm(mnemonic.map(() => ''));
+    onStageChange('writedown');
   };
 
   const handleNext = () => {
-    onStepNext && onStepNext(mnemonicStage);
     if (mnemonicStage === 'input') {
       onNext();
       return;
     }
-    setMnemonicStage('input');
+    setMnemonicConfirm(mnemonic.map(() => ''));
+    onStageChange('input');
   };
 
   const title = mnemonicStage === 'writedown' ? translations.writePassphraseTitle : translations.enterPassphrase;
@@ -130,20 +156,23 @@ export const WalletSetupMnemonicStepRevamp = ({
         currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
         customAction={
           mnemonicStage === 'writedown' ? (
-            <Button
-              type="link"
-              onClick={async () => {
-                await writeMnemonicToClipboard(mnemonic);
-                onCopyToClipboard();
-              }}
-              data-testid="copy-to-clipboard-button"
-            >
-              {translations.copyToClipboard}
-            </Button>
+            <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+              <Button type="link" onClick={copyRecoveryPhrase} data-testid="copy-to-clipboard-button">
+                <span className={styles.btnContentWrapper}>
+                  <CopyIcon />
+                  {translations.copyToClipboard}
+                </span>
+              </Button>
+            </Tooltip>
           ) : (
-            <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
-              {translations.pasteFromClipboard}
-            </Button>
+            <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+              <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
+                <span className={styles.btnContentWrapper}>
+                  <PasteIcon />
+                  {translations.pasteFromClipboard}
+                </span>
+              </Button>
+            </Tooltip>
           )
         }
         isNextEnabled={isSubmitEnabled}
@@ -151,7 +180,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         {mnemonicStage === 'writedown' ? (
           <MnemonicWordsWritedownRevamp words={mnemonic} />
         ) : (
-          <div className={styles.ContainerWordsConfirm}>
+          <div className={styles.containerWordsConfirm}>
             <MnemonicWordsConfirmInputRevamp
               handlePaste={pasteRecoveryPhrase}
               words={mnemonicConfirm}
@@ -163,7 +192,7 @@ export const WalletSetupMnemonicStepRevamp = ({
                   newMnemonicWordsConfirm[index] = word;
                 });
 
-                setMnemonicWordsConfirm(newMnemonicWordsConfirm);
+                setMnemonicConfirm(newMnemonicWordsConfirm);
               }}
               suggestionList={suggestionList}
             />

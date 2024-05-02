@@ -1,5 +1,6 @@
 @import '../../../styles/theme.scss';
 @import '../../../../../../common/src/ui/styles/abstracts/typography';
+@import './WalletSetupMnemonicRevampCommon.module';
 
 .mnemonicContainer {
   margin-top: size_unit(2) !important;

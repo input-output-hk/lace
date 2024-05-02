@@ -1,6 +1,6 @@
 import { WalletSetupMnemonicVerificationStepRevamp } from '@lace/core';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { Wallet } from '@lace/cardano';
 import { useHistory } from 'react-router-dom';
@@ -18,6 +18,7 @@ import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const wordList = wordlists.english;
 const DEFAULT_MNEMONIC_LENGTH = 24;
+const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
 
 export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
@@ -33,8 +34,8 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
 
   useEffect(() => {
-    setMnemonic(Array.from({ length: mnemonicLength }).map(() => ''));
-  }, [mnemonicLength]);
+    setMnemonic(Array.from({ length: mnemonicLength }, () => ''));
+  }, [mnemonicLength, setMnemonic]);
 
   const clearSecrets = useCallback(() => {
     for (let i = 0; i < data.mnemonic.length; i++) {
@@ -42,6 +43,11 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     }
     data.password = '';
   }, [data]);
+
+  const handleReadMoreOnClick = () => {
+    // TODO: LW-10251 Use multi wallet events
+    void analytics.sendEventToPostHog(postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+  };
 
   const walletSetupMnemonicStepTranslations = {
     writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
@@ -52,7 +58,22 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
     enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
     copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
-    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard')
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
+    copyPasteTooltipText: (
+      <Trans
+        i18nKey="core.walletSetupMnemonicStepRevamp.copyPasteTooltipText"
+        components={{
+          a: (
+            <a
+              href={COPY_PASTE_TOOLTIP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleReadMoreOnClick}
+            />
+          )
+        }}
+      />
+    )
   };
 
   const onSubmitForm = useCallback(async () => {
@@ -81,6 +102,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
 
   const handleMnemonicVerification = (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
     event.preventDefault();
+    // TODO: LW-10251 Use multi wallet events
     analytics.sendEventToPostHog(postHogOnboardingActions.restore?.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
     onSubmitForm();
   };
@@ -100,6 +122,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
       onSetMnemonicLength={(value: number) => setMnemonicLength(value)}
       onPasteFromClipboard={() =>
+        // TODO: LW-10251 Use multi wallet events
         analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
       }
     />
