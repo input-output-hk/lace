@@ -157,6 +157,7 @@ export const useSelectedCoins = ({
       compactValue: assetInputItem.compactValue || compactNumberWithUnit(assetInputItem.value),
       value: assetInputItem.value,
       hasMaxBtn: true,
+      displayMaxBtn: assetInputItem.id === cardanoCoin.id && error === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR,
       invalid: !!error,
       error,
       onBlurErrors: new Set([COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY]),

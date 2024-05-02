@@ -132,6 +132,10 @@
   }
 }
 
+button.maxBtn.show {
+  display: initial !important;
+}
+
 button.maxBtn {
   display: none !important;
   padding: 4px 11px !important;
