@@ -11,9 +11,13 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { PostHogAction } from '@lace/common';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { toast } from '@lace/common';
+import Copy from '@assets/icons/copy.component.svg';
+import Paste from '@assets/icons/paste.component.svg';
 
 const wordList = wordlists.english;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
+const twoSecondsToastDuration = 1.5;
 
 export const NewRecoveryPhrase = (): JSX.Element => {
   const history = useHistory();
@@ -118,12 +122,21 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         onWatchVideoClick={() =>
           analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
         }
-        onCopyToClipboard={() =>
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
-        }
-        onPasteFromClipboard={() =>
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
-        }
+        onCopyToClipboard={() => {
+          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
+            icon: Copy
+          });
+        }}
+        onPasteFromClipboard={() => {
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
+            icon: Paste
+          });
+        }}
       />
       {isResetMnemonicModalOpen && (
         <WarningModal
