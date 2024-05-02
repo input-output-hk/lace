@@ -56,6 +56,8 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.MultiWalletCreateKeepWalletSecureGotItClick,
     RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
-      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick
+      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick,
+    RECOVERY_PHRASE_COPY_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick,
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
   }
 };

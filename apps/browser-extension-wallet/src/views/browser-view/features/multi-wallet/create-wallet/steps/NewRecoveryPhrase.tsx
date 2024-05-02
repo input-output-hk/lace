@@ -10,7 +10,7 @@ import { useWalletManager } from '@hooks/useWalletManager';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { PostHogAction } from '@lace/common';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
-import { postHogMultiWalletActions, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
@@ -26,9 +26,8 @@ export const NewRecoveryPhrase = (): JSX.Element => {
 
   const handleReadMoreOnClick = () => {
     currentSetupMnemonicStage === 'writedown'
-      ? // TODO: LW-10251 Use multi wallet events
-        analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
-      : analytics.sendEventToPostHog(postHogOnboardingActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+      ? analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
+      : analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
 
   const walletSetupMnemonicStepTranslations = {

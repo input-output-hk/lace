@@ -44,7 +44,9 @@ export enum PostHogAction {
   MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick = 'multiwallet | new wallet revamp | save your recovery phrase | copy to clipboard | click',
   MultiWalletCreateKeepWalletSecureGotItClick = 'multiwallet | new wallet revamp | keeping your wallet secure | got it | click',
   MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | new wallet revamp | enter your recovery phrase | paste from clipboard | click',
-  MultiWalletCreateEnterWalletClick = "multiwallet | new wallet revamp | let's set up your new wallet | enter wallet | click",
+  MultiWalletCreateEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
+  MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick = 'multiwallet | new wallet revamp | save your recovery phrase | read more | click',
+  MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | read more | click',
 
   // depr
   MultiWalletCreateWalletNamePasswordNextClick = 'multiwallet | new wallet | wallet name & password | next | click',
