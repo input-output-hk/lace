@@ -178,7 +178,6 @@ const SelectRootVariants = (): JSX.Element => {
               headers={[
                 `${capitalize(variant)}: Rest`,
                 `${capitalize(variant)}: Hover`,
-                `${capitalize(variant)}: Open`,
                 `${capitalize(variant)}: Disabled`,
                 `${capitalize(variant)}: Focused`,
               ]}
