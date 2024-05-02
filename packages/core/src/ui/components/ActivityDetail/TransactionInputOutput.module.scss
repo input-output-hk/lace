@@ -29,7 +29,6 @@
   .addressContainer {
     display: flex;
     flex-direction: column;
-    gap: size_unit(3);
     border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
     padding: size_unit(5) 0;
 
@@ -41,6 +40,7 @@
       width: 100%;
       display: flex;
       justify-content: space-between;
+      margin-bottom: size_unit(1.5);
 
       .label {
         display: flex;
@@ -111,4 +111,8 @@
 .rightAlign {
   text-align: right;
   word-break: break-all;
+}
+
+.addressTextContainer {
+  line-height: size_unit(2);
 }

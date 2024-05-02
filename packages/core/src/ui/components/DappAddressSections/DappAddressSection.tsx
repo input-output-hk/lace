@@ -132,17 +132,22 @@ export const DappAddressSection = ({
                 {t('core.dappTransaction.address')}
               </Text.Body.Normal>
 
-              <Flex flexDirection="column" alignItems="flex-end" gap="$8">
+              <Flex flexDirection="column" alignItems="flex-end">
                 {addressName && (
-                  <Text.Body.Normal data-testid="dapp-transaction-address-book-name" weight="$medium">
-                    {addressToNameMap.get(address)}
-                  </Text.Body.Normal>
+                  <Box mb="$4" className={styles.addressText}>
+                    <Text.Address data-testid="dapp-transaction-address-book-name" color="primary">
+                      {addressToNameMap.get(address)}
+                    </Text.Address>
+                  </Box>
                 )}
-                <Text.Body.Small data-testid="dapp-transaction-address" weight="$medium">
-                  <Tooltip label={address}>
-                    {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
-                  </Tooltip>
-                </Text.Body.Small>
+                <Box mb={addressName ? '$4' : '$12'} className={styles.addressText}>
+                  <Text.Address color={addressName ? 'secondary' : 'primary'} data-testid="dapp-transaction-address">
+                    <Tooltip label={address}>
+                      {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                    </Tooltip>
+                  </Text.Address>
+                </Box>
+
                 {renderAddressTag({
                   address,
                   translations: getAddressTagTranslations(t),

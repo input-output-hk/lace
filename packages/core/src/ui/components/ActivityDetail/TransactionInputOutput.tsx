@@ -92,17 +92,23 @@ export const TransactionInputOutput = ({
                   <Text.Body.Normal weight="$semibold" className={styles.label}>
                     {translations.address}
                   </Text.Body.Normal>
-                  <Flex flexDirection="column" alignItems="flex-end" gap="$8">
+                  <Flex flexDirection="column" alignItems="flex-end">
                     {addressName && (
-                      <Box className={styles.rightAlign}>
-                        <Text.Body.Normal weight="$semibold">{addressToNameMap?.get(inputAddress)}</Text.Body.Normal>
+                      <Box mb="$4" className={cn([styles.rightAlign, styles.addressTextContainer])}>
+                        <Text.Address>{addressToNameMap?.get(inputAddress)}</Text.Address>
                       </Box>
                     )}
-                    <div data-testid="tx-address" className={styles.rightAlign}>
+                    <Box
+                      mb={addressName ? '$4' : '$12'}
+                      data-testid="tx-address"
+                      className={cn([styles.rightAlign, styles.addressTextContainer])}
+                    >
                       <Tooltip title={inputAddress}>
-                        <Text.Body.Small weight="$medium">{addEllipsis(inputAddress, 8, 8)}</Text.Body.Small>
+                        <Text.Address color={addressName ? 'secondary' : 'primary'} weight="$medium">
+                          {addEllipsis(inputAddress, 8, 8)}
+                        </Text.Address>
                       </Tooltip>
-                    </div>
+                    </Box>
                     {renderAddressTag({
                       address: inputAddress,
                       translations: getAddressTagTranslations(t),

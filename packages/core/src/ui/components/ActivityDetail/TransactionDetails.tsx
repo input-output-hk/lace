@@ -374,7 +374,7 @@ export const TransactionDetails = ({
                     return (
                       <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
                         {addressName && <Text.Body.Normal weight="$semibold">{addressName}</Text.Body.Normal>}
-                        {address}
+                        {<Text.Address color={addressName ? 'secondary' : 'primary'}>{address}</Text.Address>}
                         {renderAddressTag({
                           address: addr,
                           translations: getAddressTagTranslations(t),

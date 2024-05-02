@@ -41,7 +41,7 @@ export const OutputSummary = ({
         {renderLabel({ label: translations.recipientAddress, dataTestId: 'output-summary-recipient-title' })}
         <Flex className={styles.recipient} flexDirection="column">
           {recipientName && (
-            <Box mb="$16" w="$fill">
+            <Box mb="$4" w="$fill">
               <Text.Body.Normal weight="$semibold" data-testid="output-summary-recipient-name">
                 {recipientName}
               </Text.Body.Normal>
