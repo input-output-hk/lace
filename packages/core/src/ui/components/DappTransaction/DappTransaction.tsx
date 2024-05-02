@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React from 'react';
 import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';

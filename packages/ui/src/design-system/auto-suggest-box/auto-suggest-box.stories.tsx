@@ -190,20 +190,13 @@ Controls.argTypes = {
 
 type Interactions = ComponentStory<typeof AutoSuggestBox>;
 
-const createInteraction: () => Interactions = () => (): JSX.Element =>
-  (
-    <Flex
-      flexDirection="column"
-      alignItems="center"
-      w="$fill"
-      my="$32"
-      mb="$312"
-    >
-      <Box w="$312">
-        <AutoSuggestBox suggestions={SUGGESTIONS} label="Auto suggest box" />
-      </Box>
-    </Flex>
-  );
+const createInteraction: () => Interactions = () => (): JSX.Element => (
+  <Flex flexDirection="column" alignItems="center" w="$fill" my="$32" mb="$312">
+    <Box w="$312">
+      <AutoSuggestBox suggestions={SUGGESTIONS} label="Auto suggest box" />
+    </Box>
+  </Flex>
+);
 
 export const SuggestAndErase = createInteraction();
 export const SuggestAndPick = createInteraction();
