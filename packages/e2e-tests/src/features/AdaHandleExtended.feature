@@ -99,6 +99,7 @@ Feature: ADA handle - extended view
     And Clipboard contains text: "$test_handle_3"
 
   @LW-7427 @LW-7426
+  @Pending @issue=LW-10444
   Scenario: Extended View - Validate custom ADA handle image on the wallet address/NFTs/NFT details page
     When I click "Receive" button on page header
     Then I see ADA handle with custom image on the "Wallet Address" page
@@ -109,6 +110,7 @@ Feature: ADA handle - extended view
     Then I see ADA handle NFT details page with custom image in extended mode
 
   @LW-7430
+  @Pending @issue=LW-10444
   Scenario: Extended View - Validate custom ADA handle image on the send/coin selector page
     When I click "Send" button on page header
     And I click "Add token or NFT" button for bundle 1
@@ -119,6 +121,7 @@ Feature: ADA handle - extended view
     Then the "$test_handle_1" asset is displayed in bundle 1
 
   @LW-7429
+  @Pending @issue=LW-10444
   Scenario: Extended View - Validate custom ADA handle image on the NFT folder thumbnail/page
     Given I navigate to NFTs extended page
     And I click "Receive" button on page header
@@ -136,6 +139,7 @@ Feature: ADA handle - extended view
     Then I see ADA handle NFT with custom image on the NFT folder page
 
   @LW-7428
+  @Pending @issue=LW-10444
   Scenario: Extended View - Validate custom ADA handle image on the "Select NFT" (folder) screen
     Given I navigate to NFTs extended page
     And I click "Receive" button on page header

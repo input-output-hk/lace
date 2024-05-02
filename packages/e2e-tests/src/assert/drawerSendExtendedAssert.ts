@@ -20,6 +20,7 @@ class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
     await this.assertSeeDrawerTitle(mode === 'extended');
     const addressInput = new AddressInput();
+    await addressInput.input.waitForStable();
     await addressInput.input.waitForDisplayed();
     await addressInput.label.waitForDisplayed();
     expect(await addressInput.label.getText()).to.equal(await t('core.destinationAddressInput.recipientAddress'));
