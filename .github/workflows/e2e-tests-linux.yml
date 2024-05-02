@@ -34,6 +34,7 @@ env:
   NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
+  NODE_OPTIONS: --max-old-space-size=16384
 
 jobs:
   tests:
@@ -82,7 +83,7 @@ jobs:
           platform=Linux
           " > environment.properties
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v1.0.1
+        uses: andrcuns/allure-publish-action@v2.6.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
