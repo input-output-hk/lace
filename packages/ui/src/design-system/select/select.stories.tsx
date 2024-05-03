@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React from 'react';
 
+import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 import capitalize from 'lodash/capitalize';
@@ -382,17 +382,9 @@ export const Interactions: ComponentStory<any> = (): JSX.Element => {
   );
 };
 
-const pauseBetweenClicksInMs = 500;
-const numberOfPausesPerIteration = 3;
-// variants * alignments * themes
-const numberOfIterations = variants.length * 2 * 2;
-const timeoutMargin = 2000;
-const testTimeout =
-  pauseBetweenClicksInMs * numberOfPausesPerIteration * numberOfIterations +
-  timeoutMargin;
+const pauseBetweenClicksInMs = 300;
 
 Interactions.play = async ({ canvasElement }): Promise<void> => {
-  jest.setTimeout(testTimeout);
   const canvas = within(canvasElement);
 
   // eslint-disable-next-line functional/no-loop-statements
@@ -416,13 +408,19 @@ Interactions.play = async ({ canvasElement }): Promise<void> => {
           colorScheme,
         });
 
+        expect(canvas.getByTestId(triggerTestId)).toBeInTheDocument();
         userEvent.click(canvas.getByTestId(triggerTestId));
+
         await sleep(pauseBetweenClicksInMs);
+
+        expect(canvas.getByTestId(optionTestId)).toBeInTheDocument();
         userEvent.click(canvas.getByTestId(optionTestId));
+
         await sleep(pauseBetweenClicksInMs);
+
         // open select again to see the "selected" state
         userEvent.click(canvas.getByTestId(triggerTestId));
-        await sleep(pauseBetweenClicksInMs);
+        expect(canvas.getByTestId(optionTestId)).toBeInTheDocument();
         // select the same option again
         userEvent.click(canvas.getByTestId(optionTestId));
       }
