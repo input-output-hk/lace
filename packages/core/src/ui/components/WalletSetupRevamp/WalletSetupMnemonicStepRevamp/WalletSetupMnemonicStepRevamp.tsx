@@ -160,6 +160,7 @@ export const WalletSetupMnemonicStepRevamp = ({
             title={translations.copyPasteTooltipText}
             showArrow={false}
             overlayClassName={styles.copyPasteTooltip}
+            data-testid="mnemonic-copy-paste-tooltip"
           >
             {mnemonicStage === 'writedown' ? (
               <Button type="link" onClick={copyRecoveryPhrase} data-testid="copy-to-clipboard-button">
