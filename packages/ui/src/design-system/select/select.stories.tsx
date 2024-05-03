@@ -382,7 +382,17 @@ export const Interactions: ComponentStory<any> = (): JSX.Element => {
   );
 };
 
+const pauseBetweenClicksInMs = 500;
+const numberOfPausesPerIteration = 3;
+// variants * alignments * themes
+const numberOfIterations = variants.length * 2 * 2;
+const timeoutMargin = 2000;
+const testTimeout =
+  pauseBetweenClicksInMs * numberOfPausesPerIteration * numberOfIterations +
+  timeoutMargin;
+
 Interactions.play = async ({ canvasElement }): Promise<void> => {
+  jest.setTimeout(testTimeout);
   const canvas = within(canvasElement);
 
   // eslint-disable-next-line functional/no-loop-statements
@@ -406,14 +416,13 @@ Interactions.play = async ({ canvasElement }): Promise<void> => {
           colorScheme,
         });
 
-        await sleep(500);
         userEvent.click(canvas.getByTestId(triggerTestId));
-        await sleep(500);
+        await sleep(pauseBetweenClicksInMs);
         userEvent.click(canvas.getByTestId(optionTestId));
-        await sleep(500);
+        await sleep(pauseBetweenClicksInMs);
         // open select again to see the "selected" state
         userEvent.click(canvas.getByTestId(triggerTestId));
-        await sleep(500);
+        await sleep(pauseBetweenClicksInMs);
         // select the same option again
         userEvent.click(canvas.getByTestId(optionTestId));
       }
