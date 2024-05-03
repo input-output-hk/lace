@@ -10,14 +10,17 @@ import { NftDetail as NftDetailView } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { SendFlowTriggerPoints, useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
-import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
+import { APP_MODE_POPUP, DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { withNftsFoldersContext } from '../context';
 
 export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
-  const { inMemoryWallet } = useWalletStore();
+  const {
+    inMemoryWallet,
+    walletUI: { appMode }
+  } = useWalletStore();
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
 
@@ -59,6 +62,7 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
       {assetInfo && (
         <NftDetailView
           {...nftDetailSelector(assetInfo)}
+          isPopup={appMode === APP_MODE_POPUP}
           amount={amount}
           title={<h2 className={styles.secondaryTitle}>{assetInfo.nftMetadata?.name ?? assetInfo.fingerprint}</h2>}
         />

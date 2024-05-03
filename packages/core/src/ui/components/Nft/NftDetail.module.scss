@@ -65,9 +65,9 @@
         justify-content: center;
         gap: size_unit(0.75);
         align-items: center;
-        background-color: var(--light-mode-light-grey, #f9f9f9);
+        background-color: var(--dark-mode-grey, #f9f9f9);
         border-radius: 100px;
-        color: var(--dark-mode-mid-grey, --text-color-primary);
+        color: var(--text-color-primary);
         font-weight: 500;
       }
 

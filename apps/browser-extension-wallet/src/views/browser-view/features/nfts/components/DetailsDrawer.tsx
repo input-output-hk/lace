@@ -12,6 +12,7 @@ import styles from './DetailsDrawer.module.scss';
 import { useWalletStore } from '@stores';
 import { useWalletAvatar } from '@hooks';
 import { useAnalyticsContext } from '@providers';
+import { APP_MODE_POPUP } from '@src/utils/constants';
 
 interface GeneralSettingsDrawerProps {
   onClose: () => void;
@@ -27,7 +28,10 @@ export const DetailsDrawer = ({
   onSend
 }: GeneralSettingsDrawerProps): ReactElement => {
   const { t } = useTranslation();
-  const { environmentName } = useWalletStore();
+  const {
+    environmentName,
+    walletUI: { appMode }
+  } = useWalletStore();
   const assetInfo = useMemo(
     () => (isNil(assetsInfo) ? undefined : assetsInfo.get(selectedNft?.assetId)),
     [selectedNft, assetsInfo]
@@ -69,6 +73,7 @@ export const DetailsDrawer = ({
         <div className={styles.wrapper}>
           <NftDetail
             {...nftDetailSelector(assetInfo)}
+            isPopup={appMode === APP_MODE_POPUP}
             amount={selectedNft.amount}
             translations={nftDetailTranslation}
             onSetAsAvatar={handleSetAsAvatar}

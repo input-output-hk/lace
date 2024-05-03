@@ -5,7 +5,7 @@ import { NftImage } from './NftImage';
 import { TranslationsFor } from '@ui/utils/types';
 import { Breadcrumb } from 'antd';
 import { FolderOutlined, RightOutlined } from '@ant-design/icons';
-import { ControlButton } from '@lace/ui';
+import { Box, ControlButton, Flex } from '@lace/ui';
 import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 
 export interface NftDetailProps {
@@ -17,6 +17,7 @@ export interface NftDetailProps {
   amount?: number | string;
   translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar' | 'directory'>;
   onSetAsAvatar?: (image: string) => void;
+  isPopup?: boolean;
 }
 
 const JSON_INDENTATION = 2;
@@ -37,7 +38,8 @@ export const NftDetail = ({
   folder,
   amount,
   translations,
-  onSetAsAvatar
+  onSetAsAvatar,
+  isPopup
 }: NftDetailProps): React.ReactElement => (
   <div className={styles.nftDetail}>
     {title}
@@ -65,7 +67,8 @@ export const NftDetail = ({
             ...tokenInformation,
             {
               name: translations.directory,
-              renderValueAs: (
+              value: folder ? `Root > ${folder}` : 'Root',
+              renderValueAs: !isPopup ? (
                 <Breadcrumb separator={<RightOutlined />}>
                   <Breadcrumb.Item>
                     <FolderOutlined />
@@ -73,6 +76,12 @@ export const NftDetail = ({
                   </Breadcrumb.Item>
                   {folder && <Breadcrumb.Item>{folder}</Breadcrumb.Item>}
                 </Breadcrumb>
+              ) : (
+                <Flex justifyContent="space-between" gap="$1">
+                  <Box>Root</Box>
+                  {folder && <Box px="$8">{'>'}</Box>}
+                  {folder && <Box>{folder}</Box>}
+                </Flex>
               )
             }
           ]}
