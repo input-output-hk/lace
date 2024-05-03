@@ -1,6 +1,6 @@
-import { styleVariants } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 
-import { style, vars } from '../../../design-tokens';
+import { vars } from '../../../design-tokens';
 
 const rootBase = style({
   display: 'flex',

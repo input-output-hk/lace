@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 
 import { PageContext } from './page.context';
 
+import type { PageContextValue } from './page.context';
+
 interface Props {
   children: ReactNode;
 }
@@ -10,10 +12,12 @@ interface Props {
 export const PageProvider = ({
   children,
 }: Readonly<Props>): React.ReactElement => {
-  const [state, setState] = useState<{
-    lightThemePortalContainer?: HTMLElement;
-    darkThemePortalContainer?: HTMLElement;
-  }>({});
+  const [state, setState] = useState<
+    Pick<
+      PageContextValue,
+      'darkThemePortalContainer' | 'lightThemePortalContainer'
+    >
+  >({});
 
   return (
     <PageContext.Provider

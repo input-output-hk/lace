@@ -1,6 +1,6 @@
-import { styleVariants } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 
-import { style, sx, vars } from '../../design-tokens';
+import { sx, vars } from '../../design-tokens';
 
 const triggerBase = style({
   border: 0,

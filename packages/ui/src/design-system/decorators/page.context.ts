@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-interface PageContextValue {
+export interface PageContextValue {
   darkThemePortalContainer?: HTMLElement;
   lightThemePortalContainer?: HTMLElement;
   setPortalContainers: ({
