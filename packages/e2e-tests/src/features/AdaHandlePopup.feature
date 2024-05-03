@@ -98,6 +98,7 @@ Feature: ADA handle - popup view
     And Clipboard contains text: "$test_handle_3"
 
   @LW-7435 @LW-7436
+  @Pending @issue=LW-10444
   Scenario: Popup View - Validate custom ADA handle image on the wallet address/NFTs/NFT details page
     And I click "Receive" button on Tokens page in popup mode
     Then I see ADA handle with custom image on the "Wallet Address" page
@@ -108,6 +109,7 @@ Feature: ADA handle - popup view
     Then I see ADA handle NFT details page with custom image in popup mode
 
   @LW-7432
+  @Pending @issue=LW-10444
   Scenario: Popup View - Validate custom ADA handle image on the send/coin selector page
     When I click "Send" button on Tokens page in popup mode
     And I click "Add token or NFT" button for bundle 1
@@ -118,6 +120,7 @@ Feature: ADA handle - popup view
     Then the "$test_hand..." asset is displayed in bundle 1
 
   @LW-7434
+  @Pending @issue=LW-10444
   Scenario: Popup View - Validate custom ADA handle image on the NFT folder thumbnail/page
     Given I click "Receive" button on Tokens page in popup mode
     And I see handles listed on the "Receive" screen
@@ -134,6 +137,7 @@ Feature: ADA handle - popup view
     Then I see ADA handle NFT with custom image on the NFT folder page
 
   @LW-7433
+  @Pending @issue=LW-10444
   Scenario: Popup View - Validate custom image from a handle on the "Select NFT" (folder) screen
     Given I click "Receive" button on Tokens page in popup mode
     And I see handles listed on the "Receive" screen
