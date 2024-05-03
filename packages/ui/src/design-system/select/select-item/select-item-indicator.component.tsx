@@ -9,7 +9,7 @@ import * as cx from './select-item-indicator.css';
  * https://www.radix-ui.com/primitives/docs/components/select#itemindicator
  */
 export const ItemIndicator = forwardRef<HTMLSpanElement>(
-  ({}, forwardReference) => (
+  (_, forwardReference) => (
     <Select.ItemIndicator ref={forwardReference} className={cx.indicator}>
       <CheckIcon />
     </Select.ItemIndicator>
