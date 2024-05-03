@@ -10,13 +10,21 @@ interface Props {
 export const PageProvider = ({
   children,
 }: Readonly<Props>): React.ReactElement => {
-  const [state, setState] = useState<HTMLElement>();
+  const [state, setState] = useState<{
+    lightThemePortalContainer?: HTMLElement;
+    darkThemePortalContainer?: HTMLElement;
+  }>({});
 
   return (
     <PageContext.Provider
       value={{
-        portalContainer: state,
-        setPortalContainer: setState,
+        ...state,
+        setPortalContainers: ({ lightTheme, darkTheme }): void => {
+          setState({
+            lightThemePortalContainer: lightTheme,
+            darkThemePortalContainer: darkTheme,
+          });
+        },
       }}
     >
       {children}

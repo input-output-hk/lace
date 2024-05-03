@@ -24,14 +24,18 @@ export const Page = ({
   title,
   subtitle,
 }: Readonly<PageProps>): JSX.Element => {
-  const container = useRef<HTMLDivElement>(null);
-  const { setPortalContainer } = usePageContext();
+  const lightThemeContainer = useRef<HTMLDivElement>(null);
+  const darkThemeContainer = useRef<HTMLDivElement>(null);
+  const { setPortalContainers } = usePageContext();
 
   useEffect(() => {
-    if (container.current) {
-      setPortalContainer(container.current);
+    if (lightThemeContainer.current && darkThemeContainer.current) {
+      setPortalContainers({
+        lightTheme: lightThemeContainer.current,
+        darkTheme: darkThemeContainer.current,
+      });
     }
-  }, [container.current]);
+  }, [lightThemeContainer.current, darkThemeContainer.current]);
 
   return (
     <ThemeProvider colorScheme={ThemeColorScheme.Light}>
@@ -52,8 +56,9 @@ export const Page = ({
           {children}
         </Grid>
       </div>
+      <div id="light-theme-portal-container" ref={lightThemeContainer} />
       <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-        <div id="dark-theme-portal-container" ref={container} />
+        <div id="dark-theme-portal-container" ref={darkThemeContainer} />
       </LocalThemeProvider>
     </ThemeProvider>
   );

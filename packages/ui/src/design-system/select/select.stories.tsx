@@ -5,12 +5,7 @@ import type { Meta } from '@storybook/react';
 import capitalize from 'lodash/capitalize';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
-import {
-  page,
-  Section,
-  useDarkThemePortalContainer,
-  Variants,
-} from '../decorators';
+import { page, Section, usePortalContainer, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Cell, Grid } from '../grid';
 
@@ -80,7 +75,8 @@ const SelectAlignment = (): JSX.Element => (
 );
 
 const SelectVariants = (): JSX.Element => {
-  const darkThemePortalContainer = useDarkThemePortalContainer();
+  const { darkThemePortalContainer, lightThemePortalContainer } =
+    usePortalContainer();
   const renderedOptions = options.map(option => (
     <Select.Item
       key={option.value}
@@ -112,7 +108,7 @@ const SelectVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}
@@ -139,7 +135,7 @@ const SelectVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}
@@ -155,7 +151,8 @@ const SelectVariants = (): JSX.Element => {
 };
 
 const SelectRootVariants = (): JSX.Element => {
-  const darkThemePortalContainer = useDarkThemePortalContainer();
+  const { darkThemePortalContainer, lightThemePortalContainer } =
+    usePortalContainer();
   const renderedOptions = options.map(option => (
     <Select.Item
       key={option.value}
@@ -193,7 +190,7 @@ const SelectRootVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}
@@ -210,7 +207,7 @@ const SelectRootVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}
@@ -226,7 +223,7 @@ const SelectRootVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}
@@ -243,7 +240,7 @@ const SelectRootVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}
@@ -260,7 +257,7 @@ const SelectRootVariants = (): JSX.Element => {
                     portalContainer={
                       colorScheme === ThemeColorScheme.Dark
                         ? darkThemePortalContainer
-                        : undefined
+                        : lightThemePortalContainer
                     }
                   >
                     {renderedOptions}

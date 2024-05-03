@@ -1,16 +1,18 @@
 import { createContext, useContext } from 'react';
 
 interface PageContextValue {
-  portalContainer?: HTMLElement;
-  setPortalContainer: (container: Readonly<HTMLElement>) => void;
+  darkThemePortalContainer?: HTMLElement;
+  lightThemePortalContainer?: HTMLElement;
+  setPortalContainers: ({
+    lightTheme,
+    darkTheme,
+  }: Readonly<{ lightTheme: HTMLElement; darkTheme: HTMLElement }>) => void;
 }
 
 export const PageContext = createContext<PageContextValue>({
-  portalContainer: undefined,
-  setPortalContainer: () => false,
+  darkThemePortalContainer: undefined,
+  lightThemePortalContainer: undefined,
+  setPortalContainers: () => void 0,
 });
 
-export const usePageContext = (): PageContextValue => {
-  const context = useContext(PageContext);
-  return context;
-};
+export const usePageContext = (): PageContextValue => useContext(PageContext);
