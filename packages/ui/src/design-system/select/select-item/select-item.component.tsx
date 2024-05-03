@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 
+import { ItemIndicator } from './select-item-indicator.component';
 import { ItemRoot } from './select-item-root.component';
 import { ItemText } from './select-item-text.component';
 
@@ -36,6 +37,7 @@ export const Item = forwardRef<HTMLDivElement, SelectItemProps>(
       testId={testId}
     >
       <ItemText title={title} description={description} />
+      <ItemIndicator />
     </ItemRoot>
   ),
 );
