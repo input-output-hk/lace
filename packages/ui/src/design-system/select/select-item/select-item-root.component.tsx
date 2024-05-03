@@ -10,7 +10,9 @@ import type { SelectItemProps } from '@radix-ui/react-select';
 export type SelectItemRootProps = Pick<
   SelectItemProps,
   'children' | 'disabled' | 'value'
->;
+> & {
+  testId?: string;
+};
 
 /**
  * https://www.radix-ui.com/primitives/docs/components/select#item
@@ -18,16 +20,22 @@ export type SelectItemRootProps = Pick<
 export const ItemRoot = forwardRef<
   HTMLDivElement,
   SelectItemPrivateProps & SelectItemRootProps
->(({ children, disabled, value, variant = 'plain' }, forwardReference) => (
-  <Select.Item
-    ref={forwardReference}
-    disabled={disabled}
-    value={value}
-    className={cx.root[variant]}
-  >
-    {children}
-  </Select.Item>
-));
+>(
+  (
+    { children, disabled, value, variant = 'plain', testId },
+    forwardReference,
+  ) => (
+    <Select.Item
+      ref={forwardReference}
+      disabled={disabled}
+      value={value}
+      className={cx.root[variant]}
+      data-testid={testId}
+    >
+      {children}
+    </Select.Item>
+  ),
+);
 
 // eslint-disable-next-line functional/immutable-data
 ItemRoot.displayName = 'ItemRoot';

@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React from 'react';
 
-import type { Meta } from '@storybook/react';
+import type { ComponentStory, Meta } from '@storybook/react';
+import { userEvent, within } from '@storybook/testing-library';
 import capitalize from 'lodash/capitalize';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { sleep } from '../../test';
 import { page, Section, usePortalContainer, Variants } from '../decorators';
 import { Divider } from '../divider';
+import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
 import * as Select from './index';
@@ -29,11 +32,11 @@ export default {
 
 const placeholder = 'Select';
 const options = [
-  { label: 'Option 1', value: 'option-1' },
-  { label: 'Option 2', value: 'option-2' },
-  { label: 'Option 3', value: 'option-3' },
+  { label: 'Option 1', value: 'option-1', disabled: false },
+  { label: 'Option 2', value: 'option-2', disabled: false },
+  { label: 'Option 3', value: 'option-3', disabled: false },
   { label: 'Option 4', value: 'option-4', disabled: true },
-];
+] as const;
 const alignments: SelectAlign[] = ['bottom', 'selected'];
 const variants: SelectVariant[] = ['grey', 'plain', 'outline'];
 
@@ -290,4 +293,130 @@ Overview.parameters = {
     active: '#pressed',
     focusVisible: '#focused',
   },
+};
+
+const getTriggerTestId = ({
+  variant,
+  align,
+  colorScheme,
+}: Readonly<{
+  variant: SelectVariant;
+  align: SelectAlign;
+  colorScheme: ThemeColorScheme;
+}>): string => `theme_${colorScheme}-select-${variant}-align_${align}-trigger`;
+
+const getOptionTestId = ({
+  variant,
+  align,
+  optionValue,
+  colorScheme,
+}: Readonly<{
+  variant: SelectVariant;
+  align: SelectAlign;
+  optionValue: (typeof options)[number]['value'];
+  colorScheme: ThemeColorScheme;
+}>): string =>
+  `theme_${colorScheme}-select-${variant}-align_${align}-${optionValue}`;
+
+export const Interactions: ComponentStory<any> = (): JSX.Element => {
+  const { lightThemePortalContainer, darkThemePortalContainer } =
+    usePortalContainer();
+
+  return (
+    <Section title="Play">
+      <Grid columns="$2">
+        {variants.map(variant =>
+          (['selected', 'bottom'] as const).map(align => (
+            <Cell key={`${variant}-${align}`}>
+              <Section title={capitalize(variant)} subtitle={`align: ${align}`}>
+                <Flex justifyContent="space-between">
+                  {[ThemeColorScheme.Light, ThemeColorScheme.Dark].map(
+                    colorScheme => (
+                      <LocalThemeProvider
+                        colorScheme={colorScheme}
+                        key={colorScheme}
+                      >
+                        <Select.Root
+                          key={colorScheme}
+                          onChange={(): void => void 0}
+                          value={undefined}
+                          placeholder="Placeholder"
+                          variant={variant}
+                          align={align}
+                          portalContainer={
+                            colorScheme === ThemeColorScheme.Dark
+                              ? darkThemePortalContainer
+                              : lightThemePortalContainer
+                          }
+                          triggerTestId={getTriggerTestId({
+                            variant,
+                            align,
+                            colorScheme,
+                          })}
+                        >
+                          {options.map(option => (
+                            <Select.Item
+                              key={option.value}
+                              value={option.value}
+                              title={option.label}
+                              disabled={option.disabled}
+                              testId={getOptionTestId({
+                                variant,
+                                align,
+                                optionValue: option.value,
+                                colorScheme,
+                              })}
+                            />
+                          ))}
+                        </Select.Root>
+                      </LocalThemeProvider>
+                    ),
+                  )}
+                </Flex>
+              </Section>
+            </Cell>
+          )),
+        )}
+      </Grid>
+    </Section>
+  );
+};
+
+Interactions.play = async ({ canvasElement }): Promise<void> => {
+  const canvas = within(canvasElement);
+
+  // eslint-disable-next-line functional/no-loop-statements
+  for (const variant of variants) {
+    // eslint-disable-next-line functional/no-loop-statements
+    for (const align of ['selected', 'bottom'] as const) {
+      // eslint-disable-next-line functional/no-loop-statements
+      for (const colorScheme of [
+        ThemeColorScheme.Light,
+        ThemeColorScheme.Dark,
+      ]) {
+        const triggerTestId = getTriggerTestId({
+          variant,
+          align,
+          colorScheme,
+        });
+        const optionTestId = getOptionTestId({
+          variant,
+          align,
+          optionValue: 'option-2',
+          colorScheme,
+        });
+
+        await sleep(500);
+        userEvent.click(canvas.getByTestId(triggerTestId));
+        await sleep(500);
+        userEvent.click(canvas.getByTestId(optionTestId));
+        await sleep(500);
+        // open select again to see the "selected" state
+        userEvent.click(canvas.getByTestId(triggerTestId));
+        await sleep(500);
+        // select the same option again
+        userEvent.click(canvas.getByTestId(optionTestId));
+      }
+    }
+  }
 };

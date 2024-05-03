@@ -12,6 +12,7 @@ export interface SelectItemProps {
   title: string;
   description?: string;
   disabled?: boolean;
+  testId?: string;
 }
 
 export const Item = forwardRef<HTMLDivElement, SelectItemProps>(
@@ -24,6 +25,7 @@ export const Item = forwardRef<HTMLDivElement, SelectItemProps>(
       // This is a private prop, passed by the parent using `React.cloneElement()`
       // eslint-disable-next-line react/prop-types
       variant,
+      testId,
     }: Readonly<SelectItemPrivateProps & SelectItemProps>,
     forwardReference,
   ) => (
@@ -32,6 +34,7 @@ export const Item = forwardRef<HTMLDivElement, SelectItemProps>(
       value={value}
       disabled={disabled}
       variant={variant}
+      testId={testId}
     >
       <ItemText title={title} description={description} />
       <ItemIndicator />

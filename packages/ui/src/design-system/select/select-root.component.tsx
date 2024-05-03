@@ -24,6 +24,7 @@ export type SelectRootProps = Pick<
   value: string | undefined;
   variant?: SelectVariant;
   portalContainer?: HTMLElement;
+  triggerTestId?: string;
 };
 
 const isValidSelectRootChild = (
@@ -52,6 +53,7 @@ const isValidSelectRootChild = (
  * @param showArrow Render arrow icon next to the input value, when the Select is closed.
  * @param value See: https://www.radix-ui.com/primitives/docs/components/select#root
  * @param variant The style variant.
+ * @param triggerTestId The `data-testid` attribute, passed to the input trigger / root element.
  */
 export const Root = ({
   align = 'selected',
@@ -67,6 +69,7 @@ export const Root = ({
   showArrow = false,
   value,
   variant = 'plain',
+  triggerTestId,
 }: Readonly<SelectRootProps>): JSX.Element => {
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
@@ -80,7 +83,11 @@ export const Root = ({
       onOpenChange={setIsOpen}
       onValueChange={onChange}
     >
-      <Select.Trigger className={cx.trigger[variant]} id={id}>
+      <Select.Trigger
+        className={cx.trigger[variant]}
+        id={id}
+        data-testid={triggerTestId}
+      >
         <Select.Value placeholder={placeholder} />
         {showArrow && (
           <Select.Icon asChild>
