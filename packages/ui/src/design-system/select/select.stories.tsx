@@ -418,10 +418,14 @@ Interactions.play = async ({ canvasElement }): Promise<void> => {
 
         await sleep(pauseBetweenClicksInMs);
 
-        // open select again to see the "selected" state
         userEvent.click(canvas.getByTestId(triggerTestId));
-        expect(canvas.getByTestId(optionTestId)).toBeInTheDocument();
-        // select the same option again
+        expect(
+          within(canvas.getByTestId(optionTestId)).getByTestId(
+            `${optionTestId}-indicator`,
+          ),
+        ).toBeInTheDocument();
+
+        await sleep(pauseBetweenClicksInMs);
         userEvent.click(canvas.getByTestId(optionTestId));
       }
     }
