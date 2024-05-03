@@ -27,7 +27,8 @@ import {
   fillMnemonic,
   getNextButton,
   mnemonicWords,
-  setupStep
+  setupStep,
+  getBackButton
 } from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
@@ -37,20 +38,22 @@ import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker'
 import { CreateWallet } from './CreateWallet';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
-    sendMergeEvent: jest.fn().mockReturnValue(''),
-    sendEventToPostHog: jest.fn().mockReturnValue('')
-  })
+  useAnalyticsContext: jest
+    .fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog' | 'sendAliasEvent'>, []>()
+    .mockReturnValue({
+      sendMergeEvent: jest.fn().mockReturnValue(''),
+      sendEventToPostHog: jest.fn().mockReturnValue(''),
+      sendAliasEvent: jest.fn().mockReturnValue('')
+    })
 }));
 
 const recoveryPhraseStep = async () => {
-  const nextButton = getNextButton();
-
+  let nextButton = getNextButton();
   fireEvent.click(nextButton);
-
   await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
-
-  await screen.findByText('Total wallet balance');
+  nextButton = getNextButton();
+  fireEvent.click(nextButton);
+  await screen.findByText("Let's set up your new wallet");
 };
 
 describe('Multi Wallet Setup/Create Wallet', () => {
@@ -80,7 +83,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.root]}>
               <CreateWallet providers={providers as Providers} />
               {createAssetsRoute()}
             </MemoryRouter>
@@ -89,16 +92,18 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
-    await setupStep();
     await recoveryPhraseStep();
+    await setupStep();
   });
 
   test('should emit correct value for shouldShowDialog', async () => {
+    providers.generateMnemonicWords.mockReturnValue(mnemonicWords);
+
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.root]}>
               <CreateWallet providers={providers as Providers} />
               {createAssetsRoute()}
             </MemoryRouter>
@@ -107,14 +112,14 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
-    const nameInput = screen.getByTestId('wallet-name-input');
+    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
 
-    fireEvent.change(nameInput, { target: { value: 'My X Wallet' } });
-
+    const nextButton = getNextButton();
+    fireEvent.click(nextButton);
     expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(true);
 
-    fireEvent.change(nameInput, { target: { value: '' } });
-
+    const backButton = getBackButton();
+    fireEvent.click(backButton);
     expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
   });
 });

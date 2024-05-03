@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { Setup } from './steps/Setup';
 import { RestoreRecoveryPhrase } from './steps/RestoreRecoveryPhrase';
 import { RestoreWalletProvider } from './context';
@@ -17,8 +17,9 @@ interface Props {
 export const RestoreWallet = ({ providers }: Props): JSX.Element => (
   <RestoreWalletProvider providers={providers}>
     <Switch>
-      <Route path={restore.setup} component={Setup} />
       <Route path={restore.enterRecoveryPhrase} component={RestoreRecoveryPhrase} />
+      <Route path={restore.setup} component={Setup} />
+      <Redirect from={restore.root} to={restore.enterRecoveryPhrase} />
     </Switch>
   </RestoreWalletProvider>
 );

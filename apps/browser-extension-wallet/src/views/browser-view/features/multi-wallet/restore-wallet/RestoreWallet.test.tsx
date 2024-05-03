@@ -18,11 +18,11 @@ jest.doMock('@hooks/useWalletManager', () => ({
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
-import { DEFAULT_MNEMONIC_LENGTH, createAssetsRoute, fillMnemonic, setupStep } from '../tests/utils';
+import { DEFAULT_MNEMONIC_LENGTH, createAssetsRoute, fillMnemonic, setupStep, getNextButton } from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
@@ -39,7 +39,9 @@ jest.mock('@providers/AnalyticsProvider', () => ({
 
 const recoveryPhraseStep = async () => {
   await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
-  await screen.findByText('Total wallet balance');
+  const nextButton = getNextButton();
+  fireEvent.click(nextButton);
+  await screen.findByText("Let's set up your new wallet");
 };
 
 describe('Multi Wallet Setup/Restore Wallet', () => {
@@ -49,14 +51,6 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
       shouldShowDialog$: Subject<boolean>;
     };
   };
-
-  const originalWarn = console.error.bind(console.error);
-  beforeAll(() => {
-    console.error = (msg) => !msg.toString().includes('Warning: [antd:') && originalWarn(msg);
-  });
-  afterAll(() => {
-    console.error = originalWarn;
-  });
 
   beforeEach(() => {
     providers = {
@@ -74,7 +68,7 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.setup]}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.root]}>
               <RestoreWallet providers={providers as Providers} />
               {createAssetsRoute()}
             </MemoryRouter>
@@ -83,7 +77,7 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
       </AppSettingsProvider>
     );
 
-    await setupStep('restore');
     await recoveryPhraseStep();
+    await setupStep();
   });
 });

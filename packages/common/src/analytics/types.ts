@@ -47,20 +47,13 @@ export enum PostHogAction {
   MultiWalletCreateEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
   MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick = 'multiwallet | new wallet revamp | save your recovery phrase | read more | click',
   MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | read more | click',
-
-  // depr
-  MultiWalletCreateWalletNamePasswordNextClick = 'multiwallet | new wallet | wallet name & password | next | click',
-  MultiWalletCreatePassphraseIntroPlayVideoClick = 'multiwallet | new wallet | passphrase intro | play video | click',
-  MultiwalletCreatePassphraseIntroNextClick = 'multiwallet | new wallet | passphrase intro | next | click',
-  MultiWalletCreateAdded = 'multiwallet | new wallet | added',
-
+  MultiWalletCreateAdded = 'multiwallet | new wallet revamp | added',
   // Multi wallet Hardware wallet connect
   MultiWalletHWClick = 'multiwallet | hardware wallet | connect | click',
   MultiWalletHWConnectNextClick = 'multiwallet | hardware wallet | connect hw | next | click',
   MultiWalletHWSelectAccountNextClick = 'multiwallet | hardware wallet | select hw account | next | click',
   MultiWalletHWNameNextClick = 'multiwallet | hardware wallet | name hw wallet | next | click',
   MultiWalletHWAdded = 'multiwallet | hardware wallet | added',
-
   // Multi wallet Restore wallet
   MultiWalletRestoreClick = 'multiwallet | restore wallet | restore | click',
   MultiWalletRestorePassphraseIntroPlayVideoClick = 'multiwallet | restore wallet | passphrase intro | play video | click',

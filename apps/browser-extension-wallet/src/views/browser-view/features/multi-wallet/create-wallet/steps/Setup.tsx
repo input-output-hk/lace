@@ -1,15 +1,12 @@
-import { WalletSetupNamePasswordStep } from '@lace/core';
-import { walletRoutePaths } from '@routes';
-import React from 'react';
-import { useHistory } from 'react-router';
-import { useCreateWallet } from '../context';
-import { useTranslation } from 'react-i18next';
-import { useAnalyticsContext } from '@providers';
+import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
 import { PostHogAction } from '@lace/common';
+import { useAnalyticsContext } from '@providers';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useCreateWallet } from '../context';
 
 export const Setup = (): JSX.Element => {
-  const history = useHistory();
-  const { setName, setPassword, onChange, data } = useCreateWallet();
+  const { back, createWalletData, next, onNameAndPasswordChange } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -22,22 +19,23 @@ export const Setup = (): JSX.Element => {
     confirmPasswordInputLabel: t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
     nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
     noMatchPassword: t('core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    confirmButton: t('core.walletNameAndPasswordSetupStep.next'),
+    confirmButton: t('core.walletNameAndPasswordSetupStep.enterWallet'),
     secondLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'),
     firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
+  const onNext = async () => {
+    void analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterWalletClick);
+    await next();
+    void analytics.sendAliasEvent();
+  };
+
   return (
-    <WalletSetupNamePasswordStep
-      initialWalletName={data.name}
-      onChange={onChange}
-      onBack={() => history.push(walletRoutePaths.newWallet.root)}
-      onNext={({ password, walletName }) => {
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateWalletNamePasswordNextClick);
-        setName(walletName);
-        setPassword(password);
-        history.push(walletRoutePaths.newWallet.create.recoveryPhrase);
-      }}
+    <WalletSetupNamePasswordStepRevamp
+      initialWalletName={createWalletData.name}
+      onChange={onNameAndPasswordChange}
+      onBack={back}
+      onNext={onNext}
       translations={translations}
     />
   );

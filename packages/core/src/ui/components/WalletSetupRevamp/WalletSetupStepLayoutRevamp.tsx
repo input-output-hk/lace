@@ -95,12 +95,12 @@ export const WalletSetupStepLayoutRevamp = ({
             {title}
           </h1>
           {description && (
-            <p data-testid="wallet-setup-step-subtitle" className={styles.subtitle}>
+            <div data-testid="wallet-setup-step-subtitle" className={styles.subtitle}>
               {description}{' '}
               <a href={urls.faq.secretPassphrase} target="_blank" data-testid="faq-secret-passphrase-url">
                 {linkText}
               </a>
-            </p>
+            </div>
           )}
         </div>
         <div className={styles.content} data-testid="wallet-setup-step-content">
@@ -117,7 +117,7 @@ export const WalletSetupStepLayoutRevamp = ({
           {onNext && (
             <span ref={nextButtonContainerRef}>
               <Tooltip
-                visible={!isNextEnabled && !!toolTipText}
+                open={!isNextEnabled && !!toolTipText}
                 title={!isNextEnabled && toolTipText}
                 getPopupContainer={() => nextButtonContainerRef.current}
                 autoAdjustOverflow={false}

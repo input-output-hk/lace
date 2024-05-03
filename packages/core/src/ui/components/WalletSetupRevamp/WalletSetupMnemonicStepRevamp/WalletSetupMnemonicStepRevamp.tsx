@@ -61,7 +61,8 @@ export const WalletSetupMnemonicStepRevamp = ({
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   useEffect(() => {
-    if (mnemonicConfirm.length > 0) return;
+    const mnemonicConfirmWasAlreadyInitialized = mnemonicConfirm.length > 0;
+    if (mnemonicConfirmWasAlreadyInitialized) return;
     setMnemonicConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
   }, [mnemonic, mnemonicConfirm.length, mnemonicStage]);
 
@@ -104,8 +105,8 @@ export const WalletSetupMnemonicStepRevamp = ({
   const handleBack = () => {
     if (mnemonicStage === 'writedown') {
       onBack();
+      return;
     }
-    setMnemonicConfirm(mnemonic.map(() => ''));
     onStageChange('writedown');
   };
 
