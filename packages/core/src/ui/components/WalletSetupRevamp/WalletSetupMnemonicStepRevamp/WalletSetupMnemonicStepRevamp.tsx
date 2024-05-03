@@ -155,25 +155,29 @@ export const WalletSetupMnemonicStepRevamp = ({
         onNext={handleNext}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
         customAction={
-          mnemonicStage === 'writedown' ? (
-            <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+          <Tooltip
+            placement="top"
+            title={translations.copyPasteTooltipText}
+            showArrow={false}
+            overlayClassName={styles.copyPasteTooltip}
+            data-testid="mnemonic-copy-paste-tooltip"
+          >
+            {mnemonicStage === 'writedown' ? (
               <Button type="link" onClick={copyRecoveryPhrase} data-testid="copy-to-clipboard-button">
                 <span className={styles.btnContentWrapper}>
                   <CopyIcon />
                   {translations.copyToClipboard}
                 </span>
               </Button>
-            </Tooltip>
-          ) : (
-            <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+            ) : (
               <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
                 <span className={styles.btnContentWrapper}>
                   <PasteIcon />
                   {translations.pasteFromClipboard}
                 </span>
               </Button>
-            </Tooltip>
-          )
+            )}
+          </Tooltip>
         }
         isNextEnabled={isSubmitEnabled}
       >
