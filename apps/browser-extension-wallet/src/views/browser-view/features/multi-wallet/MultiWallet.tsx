@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-multi-comp */
-import React, { useEffect, useMemo } from 'react';
+import React from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { Modal } from 'antd';
 
@@ -18,101 +18,38 @@ import { CreateWallet } from './create-wallet';
 import { HardwareWallet } from './hardware-wallet';
 import { RestoreWallet } from './restore-wallet';
 import { walletRoutePaths } from '@routes';
-import { useWalletManager } from '@hooks';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
-import { NavigationButton, PostHogAction, toast } from '@lace/common';
+import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
-import { Providers } from './hardware-wallet/types';
-import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
-import { useTranslation } from 'react-i18next';
-import { WalletConflictError } from '@cardano-sdk/web-extension';
-import { useAnalyticsContext } from '@providers';
-import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const { newWallet } = walletRoutePaths;
 
-const createWallet = (): Promise<void> => Promise.resolve(void 0);
-
-interface ConfirmationDialog {
-  shouldShowDialog$: Subject<boolean>;
+interface Props {
+  shouldShowConfirmationDialog$: Subject<boolean>;
 }
 
-export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
-  const { t } = useTranslation();
-  const { connectHardwareWallet, createHardwareWallet, walletRepository } = useWalletManager();
-  const analytics = useAnalyticsContext();
-  const disconnectHardwareWallet$ = useMemo(() => new Subject<USBConnectionEvent>(), []);
-
-  const hardwareWalletProviders = useMemo(
-    (): Providers => ({
-      connectHardwareWallet,
-      disconnectHardwareWallet$,
-      shouldShowDialog$,
-      createWallet: async ({ account, connection, model, name }) => {
-        try {
-          const { source } = await createHardwareWallet({
-            connectedDevice: model,
-            deviceConnection: connection,
-            name,
-            accountIndex: account
-          });
-          await analytics.sendEventToPostHog(PostHogAction.MultiWalletHWAdded, {
-            // eslint-disable-next-line camelcase
-            $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-          });
-          await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-        } catch (error) {
-          if (error instanceof WalletConflictError) {
-            toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
-          } else {
-            throw error;
-          }
-        }
-      }
-    }),
-    [
-      connectHardwareWallet,
-      createHardwareWallet,
-      disconnectHardwareWallet$,
-      shouldShowDialog$,
-      t,
-      analytics,
-      walletRepository
-    ]
-  );
-
-  useEffect(() => {
-    const onHardwareWalletDisconnect = (event: USBConnectionEvent) => {
-      disconnectHardwareWallet$.next(event);
-    };
-
-    navigator.usb.addEventListener('disconnect', onHardwareWalletDisconnect);
-
-    return () => {
-      navigator.usb.removeEventListener('disconnect', onHardwareWalletDisconnect);
-      disconnectHardwareWallet$.complete();
-    };
-  }, [disconnectHardwareWallet$]);
-
-  return <HardwareWallet providers={hardwareWalletProviders} />;
-};
-
-export const SetupCreateWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
-  <CreateWallet
+export const SetupHardwareWallet = ({ shouldShowConfirmationDialog$ }: Props): JSX.Element => (
+  <HardwareWallet
     providers={{
-      createWallet,
-      generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords,
-      confirmationDialog
+      shouldShowConfirmationDialog$
     }}
   />
 );
 
-export const SetupRestoreWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
+export const SetupCreateWallet = ({ shouldShowConfirmationDialog$ }: Props): JSX.Element => (
+  <CreateWallet
+    providers={{
+      generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords,
+      shouldShowConfirmationDialog$
+    }}
+  />
+);
+
+export const SetupRestoreWallet = ({ shouldShowConfirmationDialog$ }: Props): JSX.Element => (
   <RestoreWallet
     providers={{
-      createWallet,
-      confirmationDialog
+      shouldShowConfirmationDialog$
     }}
   />
 );
@@ -136,15 +73,15 @@ const Component = (): JSX.Element => {
         <Switch>
           <Route
             path={newWallet.create.root}
-            render={() => <SetupCreateWallet shouldShowDialog$={shouldShowDialog$} />}
+            render={() => <SetupCreateWallet shouldShowConfirmationDialog$={shouldShowDialog$} />}
           />
           <Route
             path={newWallet.hardware.root}
-            render={() => <SetupHardwareWallet shouldShowDialog$={shouldShowDialog$} />}
+            render={() => <SetupHardwareWallet shouldShowConfirmationDialog$={shouldShowDialog$} />}
           />
           <Route
             path={newWallet.restore.root}
-            render={() => <SetupRestoreWallet shouldShowDialog$={shouldShowDialog$} />}
+            render={() => <SetupRestoreWallet shouldShowConfirmationDialog$={shouldShowDialog$} />}
           />
           <Route exact path={`${path}/`} component={Home} />
         </Switch>

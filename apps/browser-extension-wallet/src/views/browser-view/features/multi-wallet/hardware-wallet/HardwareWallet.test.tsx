@@ -60,7 +60,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     connectHardwareWallet: jest.Mock;
     createWallet: jest.Mock;
     disconnectHardwareWallet$: Subject<USBConnectionEvent>;
-    shouldShowDialog$: Subject<boolean>;
+    shouldShowConfirmationDialog$: Subject<boolean>;
   };
 
   beforeEach(() => {
@@ -68,7 +68,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
       connectHardwareWallet: jest.fn(),
       createWallet: jest.fn(),
       disconnectHardwareWallet$: new Subject<USBConnectionEvent>(),
-      shouldShowDialog$: new Subject()
+      shouldShowConfirmationDialog$: new Subject()
     };
   });
 
