@@ -73,12 +73,12 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
   const next = async () => {
     switch (step) {
       case WalletCreateStep.RecoveryPhraseWriteDown: {
+        setFormDirty(true);
         setStep(WalletCreateStep.RecoveryPhraseInput);
         break;
       }
       case WalletCreateStep.RecoveryPhraseInput: {
         setStep(WalletCreateStep.Setup);
-        setFormDirty(true);
         history.push(walletRoutePaths.newWallet.create.setup);
         break;
       }
@@ -93,11 +93,11 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
   const back = () => {
     switch (step) {
       case WalletCreateStep.RecoveryPhraseWriteDown: {
-        setFormDirty(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
       }
       case WalletCreateStep.RecoveryPhraseInput: {
+        setFormDirty(false);
         generateMnemonic();
         setStep(WalletCreateStep.RecoveryPhraseWriteDown);
         break;

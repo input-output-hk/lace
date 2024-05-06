@@ -120,6 +120,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
 
     const backButton = getBackButton();
     fireEvent.click(backButton);
+    fireEvent.click(screen.queryByTestId('delete-address-modal-confirm'));
     expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
   });
 });
