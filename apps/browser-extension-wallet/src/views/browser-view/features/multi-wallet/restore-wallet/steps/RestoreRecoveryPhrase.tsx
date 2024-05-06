@@ -5,7 +5,7 @@ import { wordlists } from 'bip39';
 import { Wallet } from '@lace/cardano';
 import { useRestoreWallet } from '../context';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const wordList = wordlists.english;
 const DEFAULT_MNEMONIC_LENGTH = 24;
@@ -24,8 +24,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   );
 
   const handleReadMoreOnClick = () => {
-    // TODO: LW-10251 Use multi wallet events
-    void analytics.sendEventToPostHog(postHogOnboardingActions.restore.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
 
   const walletSetupMnemonicStepTranslations = {
@@ -52,8 +51,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
 
   const handleMnemonicVerification = (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
     event.preventDefault();
-    // TODO: LW-10251 Use multi wallet events
-    void analytics.sendEventToPostHog(postHogOnboardingActions.restore?.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
     void next();
   };
 
@@ -69,8 +67,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
       onSetMnemonicLength={onRecoveryPhraseLengthChange}
       onPasteFromClipboard={() =>
-        // TODO: LW-10251 Use multi wallet events
-        analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+        analytics.sendEventToPostHog(postHogMultiWalletActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
       }
     />
   );

@@ -56,11 +56,14 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.MultiWalletCreateKeepWalletSecureGotItClick,
     RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
-      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick,
-    RECOVERY_PHRASE_COPY_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick,
-    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
+      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick
   },
   restore: {
-    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletRestoreSaveRecoveryPhrasePasteReadMoreClick
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletRestoreClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.MultiWalletRestoreEnterRecoveryPhraseNextClick,
+    ENTER_WALLET: PostHogAction.MultiWalletRestoreEnterWalletClick,
+    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
+      PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick,
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
   }
 };

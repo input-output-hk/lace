@@ -1,9 +1,9 @@
 import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
-import { PostHogAction } from '@lace/common';
 import { useAnalyticsContext } from '@providers';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateWallet } from '../context';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const Setup = (): JSX.Element => {
   const { back, createWalletData, next, onNameAndPasswordChange } = useCreateWallet();
@@ -25,7 +25,7 @@ export const Setup = (): JSX.Element => {
   };
 
   const onNext = async () => {
-    void analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterWalletClick);
+    void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_WALLET);
     await next();
     void analytics.sendAliasEvent();
   };

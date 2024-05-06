@@ -1,10 +1,10 @@
-import { PostHogAction } from '@lace/common';
 import { WalletSetupOptionsStep } from '@lace/core';
 import { useAnalyticsContext } from '@providers';
 import { walletRoutePaths } from '@routes';
 import React from 'react';
 import { useHistory } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const Home = (): JSX.Element => {
   const { t: translate } = useTranslation();
@@ -34,15 +34,15 @@ export const Home = (): JSX.Element => {
   return (
     <WalletSetupOptionsStep
       onNewWalletRequest={() => {
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateClick);
+        void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SETUP_OPTION_CLICK);
         history.push(walletRoutePaths.newWallet.create.root);
       }}
       onHardwareWalletRequest={() => {
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletHWClick);
+        void analytics.sendEventToPostHog(postHogMultiWalletActions.hw.SETUP_OPTION_CLICK);
         history.push(walletRoutePaths.newWallet.hardware.root);
       }}
       onRestoreWalletRequest={() => {
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreClick);
+        void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.SETUP_OPTION_CLICK);
         history.push(walletRoutePaths.newWallet.restore.root);
       }}
       translations={walletSetupOptionsStepTranslations}

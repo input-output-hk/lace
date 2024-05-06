@@ -100,10 +100,10 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
         onWatchVideoClick={() =>
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
         }
         onCopyToClipboard={() => {
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
           toast.notify({
             duration: twoSecondsToastDuration,
             text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
@@ -111,6 +111,9 @@ export const NewRecoveryPhrase = (): JSX.Element => {
           });
         }}
         onPasteFromClipboard={() => {
+          void analytics.sendEventToPostHog(
+            postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK
+          );
           toast.notify({
             duration: twoSecondsToastDuration,
             text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),

@@ -2,10 +2,11 @@ import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
 import React from 'react';
 import { useRestoreWallet } from '../context';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, toast } from '@lace/common';
+import { toast } from '@lace/common';
 import { useAnalyticsContext } from '@providers';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const Setup = (): JSX.Element => {
   const { back, createWalletData, finalizeWalletRestoration, next, onNameAndPasswordChange } = useRestoreWallet();
@@ -27,7 +28,7 @@ export const Setup = (): JSX.Element => {
   };
 
   const onNext = async () => {
-    void analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreWalletNamePasswordNextClick);
+    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.ENTER_WALLET);
 
     try {
       await finalizeWalletRestoration();
