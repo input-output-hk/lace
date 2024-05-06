@@ -20,7 +20,8 @@ import {
   TxDetailsProposalProceduresTitles,
   TxDetailsCertificateTitles,
   TxDetails,
-  TxDetail
+  TxDetail,
+  TransactionActivityType
 } from './types';
 import { Collateral, CollateralStatus } from './Collateral';
 
@@ -345,7 +346,7 @@ export const TransactionDetails = ({
               </div>
               <div className={styles.details}>
                 <div className={styles.title}>
-                  {t(`core.activityDetails.${name.toLowerCase() === 'sent' ? 'to' : 'from'}`)}
+                  {t(`core.activityDetails.${summary.type === TransactionActivityType.outgoing ? 'to' : 'from'}`)}
                 </div>
                 <div>
                   {summary.addr.length > 1 && (

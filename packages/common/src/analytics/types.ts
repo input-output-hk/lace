@@ -36,40 +36,34 @@ export enum PostHogAction {
   MultiWalletSwitchAccount = 'multiwallet | switch account | click',
   MultiWalletDisableAccount = 'multiwallet | disable account | click',
   MultiWalletEnableAccount = 'multiwallet | enable account | click',
-
   // Multi wallet Create new wallet
   MultiWalletCreateClick = 'multiwallet | new wallet revamp | create | click',
   MultiWalletCreateSaveRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | save your recovery phrase | next | click',
   MultiWalletCreateEnterRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | enter your recovery phrase | next | click',
   MultiWalletCreateSaveRecoveryPhraseIntroPlayVideoClick = 'multiwallet | new wallet revamp | save your recovery phrase | watch video | click',
   MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick = 'multiwallet | new wallet revamp | save your recovery phrase | copy to clipboard | click',
+  MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick = 'multiwallet | new wallet revamp | save your recovery phrase | read more | click',
   MultiWalletCreateKeepWalletSecureGotItClick = 'multiwallet | new wallet revamp | keeping your wallet secure | got it | click',
   MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | new wallet revamp | enter your recovery phrase | paste from clipboard | click',
+  MultiWalletCreateEnterRecoveryPhrasePasteReadMoreClick = 'multiwallet | new wallet revamp | enter your recovery phrase | read more | click',
   MultiWalletCreateEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
-  MultiWalletCreateSaveRecoveryPhraseCopyReadMoreClick = 'multiwallet | new wallet revamp | save your recovery phrase | read more | click',
-  MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | read more | click',
-
-  // deprecate
-  MultiWalletCreateWalletNamePasswordNextClick = 'multiwallet | new wallet | wallet name & password | next | click',
-
+  // TODO
+  MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick = 'multiwallet | new wallet revamp | enter your recovery phrase | read more | click',
+  MultiWalletCreateAdded = 'multiwallet | new wallet revamp | added',
   // Multi wallet Restore wallet
   MultiWalletRestoreClick = 'multiwallet | restore wallet revamp | restore | click',
-  MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | paste from clipboard | click',
-  MultiWalletRestoreEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
   MultiWalletRestoreEnterRecoveryPhraseNextClick = 'multiwallet | new wallet revamp | enter your recovery phrase | next | click',
-
-  // deprecate
-  MultiwalletRestoreWalletNamePasswordNextClick = 'multiwallet | restore wallet | wallet name & password | next | click',
-
+  MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | paste from clipboard | click',
+  MultiWalletRestoreEnterRecoveryPhrasePasteReadMoreClick = 'multiwallet | restore wallet revamp | enter your recovery phrase | read more | click',
   MultiWalletRestoreHdWallet = 'multiwallet | restore wallet | hd wallet',
-
+  MultiWalletRestoreEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
+  MultiWalletRestoreAdded = 'multiwallet | restore wallet | added',
   // Multi wallet Hardware wallet connect
   MultiWalletHWClick = 'multiwallet | hardware wallet | connect | click',
   MultiWalletHWConnectNextClick = 'multiwallet | hardware wallet | connect hw | next | click',
   MultiWalletHWSelectAccountNextClick = 'multiwallet | hardware wallet | select hw account | next | click',
   MultiWalletHWNameNextClick = 'multiwallet | hardware wallet | name hw wallet | next | click',
   MultiWalletHWAdded = 'multiwallet | hardware wallet | added',
-
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',

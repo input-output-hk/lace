@@ -14,7 +14,8 @@ import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.
 import { useKeyboardShortcut } from '@lace/common';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
-const MNEMONIC_LENGTHS = [12, 15, 24];
+const MNEMONIC_LENGTHS = [12, 15, 24] as const;
+export type RecoveryPhraseLength = typeof MNEMONIC_LENGTHS[number];
 
 export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
@@ -29,7 +30,7 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onCancel?: () => void;
   suggestionList?: Array<string>;
   defaultMnemonicLength?: number;
-  onSetMnemonicLength?: (length: number) => void;
+  onSetMnemonicLength?: (length: RecoveryPhraseLength) => void;
   onPasteFromClipboard?: () => void;
 }
 
@@ -48,7 +49,14 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   const description = (
     <>
       {translations.enterPassphraseLength}
-      <Segmented options={MNEMONIC_LENGTHS} defaultValue={defaultMnemonicLength} onChange={onSetMnemonicLength} />
+      <Segmented
+        options={MNEMONIC_LENGTHS.map((value) => ({
+          label: <span data-testid={`recovery-phrase-${value}`}>{value}</span>,
+          value
+        }))}
+        defaultValue={defaultMnemonicLength}
+        onChange={onSetMnemonicLength}
+      />
     </>
   );
 

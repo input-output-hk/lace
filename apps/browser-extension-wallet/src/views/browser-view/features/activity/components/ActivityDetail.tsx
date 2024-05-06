@@ -3,16 +3,16 @@ import uniq from 'lodash/uniq';
 import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
 import { Wallet } from '@lace/cardano';
+import type { ActivityType } from '@lace/core';
 import {
-  AssetActivityListProps,
   ActivityStatus,
-  TxOutputInput,
-  TxSummary,
+  AssetActivityListProps,
+  DelegationActivityType,
   RewardsDetails,
   TransactionActivityType,
-  DelegationActivityType
+  TxOutputInput,
+  TxSummary
 } from '@lace/core';
-import type { ActivityType } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
 import { ActivityDetail as ActivityDetailType } from '@src/types';
@@ -54,7 +54,8 @@ export const getTransactionData = ({
     return outputData.map((output) => ({
       ...output,
       // Show up to 5 addresses below multiple addresses (see LW-4040)
-      addr: addrs.slice(0, MAX_SUMMARY_ADDRESSES)
+      addr: addrs.slice(0, MAX_SUMMARY_ADDRESSES),
+      type: TransactionActivityType.incoming
     }));
   }
 
@@ -63,7 +64,8 @@ export const getTransactionData = ({
     .filter((output) => !walletAddresses.includes(output.addr))
     .map((output) => ({
       ...output,
-      ...(!Array.isArray(output.addr) && { addr: [output.addr] })
+      ...(!Array.isArray(output.addr) && { addr: [output.addr] }),
+      type: TransactionActivityType.outgoing
     }));
 };
 

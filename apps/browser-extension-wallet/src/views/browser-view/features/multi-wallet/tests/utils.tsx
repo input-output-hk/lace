@@ -5,9 +5,11 @@ import { Route, Switch } from 'react-router-dom';
 
 export const getNextButton = (): HTMLElement => screen.queryByTestId('wallet-setup-step-btn-next');
 
+export const getBackButton = (): HTMLElement => screen.queryByTestId('wallet-setup-step-btn-back');
+
 export const DEFAULT_MNEMONIC_LENGTH = 24;
 
-export const setupStep = async (flow = 'create'): Promise<void> => {
+export const setupStep = async (): Promise<void> => {
   const nextButton = getNextButton();
   expect(nextButton).toBeDisabled();
 
@@ -23,9 +25,7 @@ export const setupStep = async (flow = 'create'): Promise<void> => {
   await waitFor(() => expect(nextButton).toBeEnabled());
   fireEvent.click(nextButton);
 
-  await screen.findByText(
-    flow === 'create' ? 'Start by saving your recovery phrase' : 'Enter your recovery passphrase'
-  );
+  await screen.findByText('Total wallet balance');
 };
 
 export const mnemonicWords =
@@ -36,7 +36,6 @@ export const mnemonicWords =
 export const fillMnemonic = async (from: number, to: number): Promise<void> => {
   const nextButton = getNextButton();
   const inputs = screen.queryAllByTestId('mnemonic-word-input');
-
   const words = mnemonicWords.slice(from, to);
 
   words.forEach((word, index) => {

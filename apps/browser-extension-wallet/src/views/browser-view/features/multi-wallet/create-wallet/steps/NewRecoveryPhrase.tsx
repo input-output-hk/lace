@@ -1,31 +1,33 @@
-import { WalletSetupMnemonicStage, MnemonicVideoPopupContent, WalletSetupMnemonicStepRevamp } from '@lace/core';
-import React, { useCallback, useState } from 'react';
+import { MnemonicVideoPopupContent, WalletSetupMnemonicStage, WalletSetupMnemonicStepRevamp } from '@lace/core';
+import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
-import { useCreateWallet } from '../context';
-import { walletRoutePaths } from '@routes';
-import { useWalletManager } from '@hooks/useWalletManager';
+import { useCreateWallet, WalletCreateStep } from '../context';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { PostHogAction } from '@lace/common';
-import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { toast } from '@lace/common';
+import Copy from '@assets/icons/copy.component.svg';
+import Paste from '@assets/icons/paste.component.svg';
 
 const wordList = wordlists.english;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
+const twoSecondsToastDuration = 1.5;
+
+const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
+  if (step === WalletCreateStep.RecoveryPhraseWriteDown) return 'writedown';
+  if (step === WalletCreateStep.RecoveryPhraseInput) return 'input';
+  throw new Error('Invalid wallet crate step');
+};
 
 export const NewRecoveryPhrase = (): JSX.Element => {
-  const history = useHistory();
   const { t } = useTranslation();
-  const { generatedMnemonic, data } = useCreateWallet();
-  const { createWallet, walletRepository } = useWalletManager();
+  const { back, createWalletData, next, step } = useCreateWallet();
   const analytics = useAnalyticsContext();
-  const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<WalletSetupMnemonicStage>('writedown');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
   const handleReadMoreOnClick = () => {
-    currentSetupMnemonicStage === 'writedown'
+    step === WalletCreateStep.RecoveryPhraseWriteDown
       ? analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
       : analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
@@ -64,43 +66,24 @@ export const NewRecoveryPhrase = (): JSX.Element => {
     closeButton: t('core.mnemonicVideoPopupContent.closeButton')
   };
 
-  const clearSecrets = useCallback(() => {
-    for (let i = 0; i < data.mnemonic.length; i++) {
-      data.mnemonic[i] = '';
-    }
-    data.password = '';
-  }, [data]);
-
-  const saveWallet = useCallback(async () => {
-    void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
-    const { source } = await createWallet(data);
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterRecoveryPhraseNextClick);
-
-    // move this to name-password setup submit handle after order changes
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateEnterWalletClick, {
-      // eslint-disable-next-line camelcase
-      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-    });
-    await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-    clearSecrets();
-    history.push(walletRoutePaths.assets);
-  }, [data, createWallet, history, clearSecrets, analytics, walletRepository]);
-
   return (
     <>
       <WalletSetupMnemonicStepRevamp
-        mnemonic={data.mnemonic}
-        mnemonicStage={currentSetupMnemonicStage}
+        mnemonic={createWalletData.mnemonic}
+        mnemonicStage={getMnemonicStage(step)}
         onStageChange={(nextStage) => {
           if (nextStage === 'input') {
-            setCurrentSetupMnemonicStage(nextStage);
+            void next();
             void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
           } else {
             setIsResetMnemonicModalOpen(true);
           }
         }}
-        onBack={() => history.goBack()}
-        onNext={saveWallet}
+        onBack={back}
+        onNext={() => {
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+          void next();
+        }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
             translations={mnemonicVideoPopupContentTranslations}
@@ -117,14 +100,26 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
         onWatchVideoClick={() =>
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
         }
-        onCopyToClipboard={() =>
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK)
-        }
-        onPasteFromClipboard={() =>
-          analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
-        }
+        onCopyToClipboard={() => {
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
+            icon: Copy
+          });
+        }}
+        onPasteFromClipboard={() => {
+          void analytics.sendEventToPostHog(
+            postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK
+          );
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
+            icon: Paste
+          });
+        }}
       />
       {isResetMnemonicModalOpen && (
         <WarningModal
@@ -138,8 +133,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
           }}
           onConfirm={() => {
             setIsResetMnemonicModalOpen(false);
-            setCurrentSetupMnemonicStage('writedown');
-            generatedMnemonic();
+            back();
           }}
         />
       )}

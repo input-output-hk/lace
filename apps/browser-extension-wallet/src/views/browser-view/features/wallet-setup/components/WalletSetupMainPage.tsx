@@ -1,4 +1,5 @@
 import React, { ReactElement, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { WalletSetupLayout, WarningModal } from '@views/browser/components';
 import {
   AnalyticsConfirmationBanner,
@@ -19,6 +20,9 @@ import { useAnalyticsContext } from '@providers';
 import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { useHistory } from 'react-router-dom';
+
+const PRIVACY_POLICY_URL = process.env.PRIVACY_POLICY_URL;
+const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
 
 export const WalletSetupMainPage = (): ReactElement => {
   const history = useHistory();
@@ -48,7 +52,30 @@ export const WalletSetupMainPage = (): ReactElement => {
       title: translate('core.walletSetupOptionsStep.restoreWallet.title'),
       description: translate('core.walletSetupOptionsStep.restoreWallet.description'),
       button: translate('core.walletSetupOptionsStep.restoreWallet.button')
-    }
+    },
+    agreementText: (
+      <Trans
+        i18nKey="core.walletSetupOptionsStep.agreementText"
+        components={{
+          a1: (
+            <a
+              href={TERMS_OF_USE_URL}
+              target="_blank"
+              className={styles.link}
+              data-testid="agreement-terms-of-service-link"
+            />
+          ),
+          a2: (
+            <a
+              href={PRIVACY_POLICY_URL}
+              target="_blank"
+              className={styles.link}
+              data-testid="agreement-privacy-policy-link"
+            />
+          )
+        }}
+      />
+    )
   };
 
   const handleStartHardwareOnboarding = () => {

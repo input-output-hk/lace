@@ -9,9 +9,9 @@ const subtractFeeFromCucumberListElement = async (entry: string) => {
 };
 
 const shortenAddressFromCucumberListElement = (wallet: string) => {
-  const [addressLabel, walletValue] = wallet.split(' ');
+  const [addressLabel, walletValue, source] = wallet.split(' ');
   const fullAddress = String(getTestWallet(walletValue).address);
-  return `${addressLabel} ${fullAddress.slice(0, 8)}...${fullAddress.slice(-8)}`;
+  return `${addressLabel} ${fullAddress.slice(0, 8)}...${fullAddress.slice(-8)} ${source}`;
 };
 
 export const parseDappCucumberAssetList = async (assetsList: string[]): Promise<string[]> =>

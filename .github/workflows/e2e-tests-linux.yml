@@ -34,6 +34,7 @@ env:
   NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
+  NODE_OPTIONS: --max-old-space-size=16384
 
 jobs:
   tests:
@@ -73,7 +74,7 @@ jobs:
           eval "$runCommand";
       - name: Create allure properties
         if: always()
-        working-directory: ./packages/e2e-tests/reports/allure/results
+        working-directory: './packages/e2e-tests/reports/allure/results'
         run: |
           echo "
           env=${NETWORK}
@@ -82,7 +83,7 @@ jobs:
           platform=Linux
           " > environment.properties
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v1.0.1
+        uses: andrcuns/allure-publish-action@v2.6.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,11 +91,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './packages/e2e-tests/reports/allure/results/*'
+          resultsGlob: './packages/e2e-tests/reports/allure/results'
           bucket: lace-e2e-test-results
           prefix: 'all/linux/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         if: always()
