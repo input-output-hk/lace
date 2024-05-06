@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React from 'react';
 import cn from 'classnames';
 import Icon, { QuestionOutlined } from '@ant-design/icons';

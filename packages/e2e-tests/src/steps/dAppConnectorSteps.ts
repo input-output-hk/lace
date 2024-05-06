@@ -95,7 +95,7 @@ Then(
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      assetsDetails: ['-3 tADA']
+      assetsDetails: ['-3 tADA - FEE']
     };
 
     switch (expectedPage) {

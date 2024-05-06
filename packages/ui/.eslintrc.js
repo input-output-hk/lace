@@ -14,6 +14,7 @@ module.exports = {
     'plugin:functional/lite',
     'plugin:functional/stylistic',
     'prettier',
+    'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
