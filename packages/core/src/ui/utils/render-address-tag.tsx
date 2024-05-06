@@ -9,19 +9,15 @@ export const getAddressTagTranslations = (t: UseTranslate['t']): AddressTagTrans
   foreign: t('core.addressTags.foreign')
 });
 
-export const renderAddressTag = (
-  address: string,
-  translations: AddressTagTranslations,
-  ownAddresses: string[] = [],
-  addressToNameMap: Map<string, string> = new Map() // address, name
-): JSX.Element => {
-  const matchingAddressName = addressToNameMap.get(address);
-  return ownAddresses.includes(address) ? (
+interface Props {
+  address: string;
+  translations: AddressTagTranslations;
+  ownAddresses?: string[];
+}
+
+export const renderAddressTag = ({ address, translations, ownAddresses = [] }: Props): JSX.Element =>
+  ownAddresses.includes(address) ? (
     <AddressTag variant={AddressTagVariants.Own}>{translations.own}</AddressTag>
   ) : (
-    <AddressTag variant={AddressTagVariants.Foreign}>
-      {translations.foreign}
-      {matchingAddressName ? `/${matchingAddressName}` : ''}
-    </AddressTag>
+    <AddressTag variant={AddressTagVariants.Foreign}>{translations.foreign}</AddressTag>
   );
-};

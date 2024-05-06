@@ -15,19 +15,12 @@ const translations: AddressTagTranslations = {
 describe('rendering correct tags for addresses', () => {
   test('should tag own addresses', async () => {
     const ownAddresses = [address];
-    const { findByTestId } = render(renderAddressTag(address, translations, ownAddresses));
+    const { findByTestId } = render(renderAddressTag({ address, translations, ownAddresses }));
     expect(await findByTestId('address-tag')).toContainHTML(translations.own);
   });
 
   test('should tag foreign addresses', async () => {
-    const { findByTestId } = render(renderAddressTag(address, translations));
+    const { findByTestId } = render(renderAddressTag({ address, translations }));
     expect(await findByTestId('address-tag')).toContainHTML(translations.foreign);
-  });
-
-  test('should tag address book addresses', async () => {
-    const addressName = 'test';
-    const addressToNameMap = new Map<string, string>([[address, addressName]]);
-    const { findByTestId } = render(renderAddressTag(address, translations, [], addressToNameMap));
-    expect(await findByTestId('address-tag')).toContainHTML(`${translations.foreign}/${addressName}`);
   });
 });

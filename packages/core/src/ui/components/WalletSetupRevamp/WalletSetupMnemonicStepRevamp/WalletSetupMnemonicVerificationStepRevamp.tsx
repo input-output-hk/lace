@@ -93,7 +93,12 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       onBack={onCancel}
       onNext={onSubmit}
       customAction={
-        <Tooltip placement="top" title={translations.copyPasteTooltipText} showArrow={false}>
+        <Tooltip
+          placement="top"
+          title={translations.copyPasteTooltipText}
+          showArrow={false}
+          data-testid="verification-copy-paste-tooltip"
+        >
           <Button type="link" onClick={() => pasteRecoveryPhrase()} data-testid="paste-from-clipboard-button">
             <span className={styles.btnContentWrapper}>
               <PasteIcon />

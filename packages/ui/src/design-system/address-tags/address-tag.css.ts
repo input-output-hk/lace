@@ -20,10 +20,6 @@ export const addressTag = recipe({
         color: vars.colors.$address_tag_own_color,
         backgroundColor: vars.colors.$address_tag_own_bgColor,
       },
-      [AddressTagVariants.Handle]: {
-        color: vars.colors.$address_tag_handle_color,
-        backgroundColor: vars.colors.$address_tag_handle_bgColor,
-      },
       [AddressTagVariants.Foreign]: {
         color: vars.colors.$address_tag_foreign_color,
         backgroundColor: vars.colors.$address_tag_foreign_bgColor,
