@@ -60,7 +60,7 @@ export const TransactionAssets = ({
     if (value === '' || value === undefined) {
       return themeFallbackImage;
     } else if (value.startsWith('ipfs')) {
-      return value.replace('ipfs://', 'https://ipfs.io/ipfs/');
+      return value.replace('ipfs://', 'https://ipfs.blockfrost.dev/ipfs/');
     } else if (isImageBase64Encoded(value)) {
       return `data:image/png;base64,${value}`;
     } else {
