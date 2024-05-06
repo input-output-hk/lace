@@ -65,7 +65,7 @@ export type PostHogActionsKeys =
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogMultiWalletActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
-export type PostHogMultiWalletActionsType = Partial<Record<MultiWalletFlows, PostHogMultiWalletActionsValueType>>;
+export type PostHogMultiWalletActionsType = Record<MultiWalletFlows, PostHogMultiWalletActionsValueType>;
 export type PostHogPersonProperties = {
   $set: {
     user_tracking_type: UserTrackingType;

@@ -1,4 +1,4 @@
-import { PostHogAction, PostHogOnboardingActionsType, PostHogMultiWalletActionsType } from './types';
+import { PostHogAction, PostHogMultiWalletActionsType, PostHogOnboardingActionsType } from './types';
 
 export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   onboarding: {
@@ -65,5 +65,8 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
       PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick,
     RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
+  },
+  hw: {
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletHWClick
   }
 };
