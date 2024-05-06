@@ -3,7 +3,7 @@ import React from 'react';
 import cn from 'classnames';
 
 import { Ellipsis, toast } from '@lace/common';
-import { Box } from '@lace/ui';
+import { Box, Text } from '@lace/ui';
 import { useTranslate } from '@ui/hooks';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 
@@ -358,6 +358,7 @@ export const TransactionDetails = ({
                     </div>
                   )}
                   {(summary.addr as string[]).map((addr) => {
+                    const addressName = addressToNameMap?.get(addr);
                     const address = isPopupView ? (
                       <Ellipsis
                         className={cn(styles.addr, styles.fiat)}
@@ -372,8 +373,13 @@ export const TransactionDetails = ({
                     );
                     return (
                       <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
-                        {address}
-                        {renderAddressTag(addr, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+                        {addressName && <Text.Body.Normal weight="$semibold">{addressName}</Text.Body.Normal>}
+                        {<Text.Address color={addressName ? 'secondary' : 'primary'}>{address}</Text.Address>}
+                        {renderAddressTag({
+                          address: addr,
+                          translations: getAddressTagTranslations(t),
+                          ownAddresses
+                        })}
                       </div>
                     );
                   })}
