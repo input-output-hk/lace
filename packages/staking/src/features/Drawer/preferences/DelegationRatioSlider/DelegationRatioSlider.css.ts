@@ -54,7 +54,8 @@ export const SliderThumb = style([
     width: '$20',
   }),
   {
-    border: '2px solid',
+    borderStyle: 'solid',
+    borderWidth: 2,
     boxShadow: '0 2px 10px var(--black-a7)',
     display: 'block',
   },
