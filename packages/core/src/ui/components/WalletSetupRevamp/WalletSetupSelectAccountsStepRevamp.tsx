@@ -81,6 +81,7 @@ export const WalletSetupSelectAccountsStepRevamp = ({
             showArrow
             withOutline
             selectedValue={selectedAccount}
+            contentClassName={styles.selectOptions}
           />
         </Box>
       </Box>
