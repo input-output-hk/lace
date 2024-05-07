@@ -23,6 +23,7 @@ import { Wallet } from '@lace/cardano';
 import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, NotImplementedError } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
+import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 
 const logger = console;
 
@@ -76,6 +77,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         ...providers,
         stores,
         handleProvider: handleHttpProvider({
+          adapter: axiosFetchAdapter,
           baseUrl:
             HANDLE_SERVER_URLS[
               // TODO: remove exclude to support sanchonet
