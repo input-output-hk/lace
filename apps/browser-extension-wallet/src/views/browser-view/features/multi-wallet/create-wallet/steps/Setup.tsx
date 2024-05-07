@@ -27,7 +27,6 @@ export const Setup = (): JSX.Element => {
   const onNext = async () => {
     void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_WALLET);
     await next();
-    void analytics.sendAliasEvent();
   };
 
   return (
