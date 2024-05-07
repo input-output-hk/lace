@@ -168,21 +168,6 @@ export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): s
   }
 };
 
-export const hasValidDrepRegistration = (history: Wallet.Cardano.HydratedTx[]): boolean => {
-  for (const transaction of history) {
-    const drepRegistrationOrRetirementCerticicate = transaction.body.certificates?.find((cert) =>
-      [CertificateType.UnregisterDelegateRepresentative, CertificateType.RegisterDelegateRepresentative].includes(
-        cert.__typename
-      )
-    );
-
-    if (drepRegistrationOrRetirementCerticicate) {
-      return drepRegistrationOrRetirementCerticicate.__typename === CertificateType.RegisterDelegateRepresentative;
-    }
-  }
-  return false;
-};
-
 export const getDRepId = (voter: Wallet.Cardano.Voter): Wallet.Cardano.DRepID | string =>
   getVoterType(voter.__typename) === VoterTypeEnum.DREP
     ? drepIDasBech32FromHash(voter.credential.hash)

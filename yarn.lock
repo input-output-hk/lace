@@ -10578,13 +10578,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@koralabs/handles-public-api-interfaces@npm:^1.6.6":
-  version: 1.6.6
-  resolution: "@koralabs/handles-public-api-interfaces@npm:1.6.6"
-  checksum: 10687928187ac935089781fc616a3c10596120aed2f5be2c28852cf2d8c1b14acbb72b90243f3228ff0bc9034c99230162d48d08f5aeb657c7d4decd6c6364e2
-  languageName: node
-  linkType: hard
-
 "@lace/browser-extension-wallet@workspace:apps/browser-extension-wallet":
   version: 0.0.0-use.local
   resolution: "@lace/browser-extension-wallet@workspace:apps/browser-extension-wallet"
@@ -10600,7 +10593,6 @@ __metadata:
     "@cardano-sdk/web-extension": 0.27.3
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@koralabs/handles-public-api-interfaces": ^1.6.6
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
