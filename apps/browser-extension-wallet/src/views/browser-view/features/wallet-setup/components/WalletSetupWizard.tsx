@@ -251,17 +251,17 @@ export const WalletSetupWizard = ({
         mnemonic={mnemonic}
         mnemonicStage={currentSetupMnemonicStage}
         onStageChange={(nextStage) => {
-          if (nextStage === 'writedown') {
+          if (nextStage === 'input') {
+            setCurrentSetupMnemonicStage(nextStage);
+            void sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
+          } else {
             setIsResetMnemonicModalOpen(true);
-            return;
           }
-          setCurrentSetupMnemonicStage(nextStage);
-          void sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         onBack={onCancel}
         onNext={() => {
-          void sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
           moveForward();
+          void sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
