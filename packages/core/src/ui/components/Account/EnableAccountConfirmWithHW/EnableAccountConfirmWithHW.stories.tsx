@@ -74,6 +74,7 @@ export const WithDarkMode: Story = {
   args: data,
   parameters: {
     decorators: {
+      colorSchema: false,
       theme: ThemeColorScheme.Dark
     }
   }
