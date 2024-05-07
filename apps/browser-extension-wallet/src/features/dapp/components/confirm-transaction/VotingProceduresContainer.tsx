@@ -35,7 +35,7 @@ export const VotingProceduresContainer = (): React.ReactElement => {
     if (userAckNonRegisteredState) return () => void 0;
     const subscription = inMemoryWallet?.governance?.isRegisteredAsDRep$?.subscribe(
       (hasValidDrepRegistration): void => {
-        setIsNonRegisteredUserModalVisible(hasValidDrepRegistration);
+        setIsNonRegisteredUserModalVisible(!hasValidDrepRegistration);
       }
     );
 
