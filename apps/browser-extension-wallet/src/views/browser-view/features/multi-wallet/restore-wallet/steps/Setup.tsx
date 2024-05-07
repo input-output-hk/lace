@@ -1,15 +1,15 @@
-import { WalletSetupNamePasswordStep } from '@lace/core';
+import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
 import React from 'react';
-import { useHistory } from 'react-router';
 import { useRestoreWallet } from '../context';
-import { walletRoutePaths } from '@routes/wallet-paths';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction } from '@lace/common';
+import { toast } from '@lace/common';
 import { useAnalyticsContext } from '@providers';
+import { WalletConflictError } from '@cardano-sdk/web-extension';
+import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const Setup = (): JSX.Element => {
-  const history = useHistory();
-  const { setName, setPassword, onChange, data } = useRestoreWallet();
+  const { back, createWalletData, finalizeWalletRestoration, next, onNameAndPasswordChange } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -22,22 +22,33 @@ export const Setup = (): JSX.Element => {
     confirmPasswordInputLabel: t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
     nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
     noMatchPassword: t('core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    confirmButton: t('core.walletNameAndPasswordSetupStep.next'),
+    confirmButton: t('core.walletNameAndPasswordSetupStep.enterWallet'),
     secondLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'),
     firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
+  const onNext = async () => {
+    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.ENTER_WALLET);
+
+    try {
+      await finalizeWalletRestoration();
+    } catch (error) {
+      if (error instanceof WalletConflictError) {
+        toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+      } else {
+        throw error;
+      }
+    }
+
+    await next();
+  };
+
   return (
-    <WalletSetupNamePasswordStep
-      initialWalletName={data.name}
-      onChange={onChange}
-      onBack={() => history.push(walletRoutePaths.newWallet.root)}
-      onNext={({ password, walletName }) => {
-        analytics.sendEventToPostHog(PostHogAction.MultiwalletRestoreWalletNamePasswordNextClick);
-        setName(walletName);
-        setPassword(password);
-        history.push(walletRoutePaths.newWallet.restore.keepSecure);
-      }}
+    <WalletSetupNamePasswordStepRevamp
+      initialWalletName={createWalletData.name}
+      onChange={onNameAndPasswordChange}
+      onBack={back}
+      onNext={onNext}
       translations={translations}
     />
   );

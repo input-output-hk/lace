@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
-  MnemonicStage,
+  WalletSetupMnemonicStage,
   MnemonicVideoPopupContent,
   WalletSetupNamePasswordStepRevamp,
   WalletSetupSteps,
@@ -67,7 +67,7 @@ export const WalletSetupWizard = ({
   const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(initialStep);
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
-  const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<MnemonicStage>('writedown');
+  const [currentSetupMnemonicStage, setCurrentSetupMnemonicStage] = useState<WalletSetupMnemonicStage>('writedown');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
   const walletName = getWalletFromStorage()?.name;
   const { createWallet } = useWalletManager();
@@ -251,16 +251,18 @@ export const WalletSetupWizard = ({
         mnemonic={mnemonic}
         mnemonicStage={currentSetupMnemonicStage}
         onStageChange={(nextStage) => {
-          if (nextStage === 'input') {
-            setCurrentSetupMnemonicStage(nextStage);
-            void sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
-          } else {
+          if (nextStage === 'writedown') {
             setIsResetMnemonicModalOpen(true);
-            void sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+            return;
           }
+          setCurrentSetupMnemonicStage(nextStage);
+          void sendAnalytics(postHogOnboardingActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
         }}
         onBack={onCancel}
-        onNext={moveForward}
+        onNext={() => {
+          void sendAnalytics(postHogOnboardingActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+          moveForward();
+        }}
         renderVideoPopupContent={({ onClose }) => (
           <MnemonicVideoPopupContent
             translations={mnemonicVideoPopupContentTranslations}

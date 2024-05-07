@@ -10,13 +10,17 @@ import { NftDetail as NftDetailView } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { SendFlowTriggerPoints, useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
-import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
+import { APP_MODE_POPUP, DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
+import { withNftsFoldersContext } from '../context';
 
-export const NftDetail = (): React.ReactElement => {
-  const { inMemoryWallet } = useWalletStore();
+export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
+  const {
+    inMemoryWallet,
+    walletUI: { appMode }
+  } = useWalletStore();
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
 
@@ -32,12 +36,6 @@ export const NftDetail = (): React.ReactElement => {
   const bigintBalance = assetsBalance?.assets?.get(assetId) || BigInt(1);
 
   const amount = useMemo(() => Wallet.util.calculateAssetBalance(bigintBalance, assetInfo), [assetInfo, bigintBalance]);
-
-  const nftDetailTranslation = {
-    tokenInformation: t('core.nftDetail.tokenInformation'),
-    attributes: t('core.nftDetail.attributes'),
-    setAsAvatar: t('core.nftDetail.setAsAvatar')
-  };
 
   const handleOpenSend = () => {
     // eslint-disable-next-line camelcase
@@ -64,11 +62,11 @@ export const NftDetail = (): React.ReactElement => {
       {assetInfo && (
         <NftDetailView
           {...nftDetailSelector(assetInfo)}
+          isPopup={appMode === APP_MODE_POPUP}
           amount={amount}
-          translations={nftDetailTranslation}
           title={<h2 className={styles.secondaryTitle}>{assetInfo.nftMetadata?.name ?? assetInfo.fingerprint}</h2>}
         />
       )}
     </Drawer>
   );
-};
+});

@@ -16,14 +16,14 @@ import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.co
 import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
 import { useKeyboardShortcut } from '@lace/common';
 
-export type MnemonicStage = 'writedown' | 'input';
+export type WalletSetupMnemonicStage = 'writedown' | 'input';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
-  mnemonicStage: MnemonicStage;
+  mnemonicStage: WalletSetupMnemonicStage;
   onBack: () => void;
   onNext: () => void;
-  onStageChange?: (currentStage: MnemonicStage) => void;
+  onStageChange?: (currentStage: WalletSetupMnemonicStage) => void;
   translations: TranslationsFor<{
     jsxElementKey: 'copyPasteTooltipText';
     stringKey:
@@ -61,7 +61,8 @@ export const WalletSetupMnemonicStepRevamp = ({
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   useEffect(() => {
-    if (mnemonicConfirm.length > 0) return;
+    const mnemonicConfirmWasAlreadyInitialized = mnemonicConfirm.length > 0;
+    if (mnemonicConfirmWasAlreadyInitialized) return;
     setMnemonicConfirm(mnemonicStage === 'writedown' ? mnemonic.map(() => '') : mnemonic);
   }, [mnemonic, mnemonicConfirm.length, mnemonicStage]);
 
@@ -104,8 +105,8 @@ export const WalletSetupMnemonicStepRevamp = ({
   const handleBack = () => {
     if (mnemonicStage === 'writedown') {
       onBack();
+      return;
     }
-    setMnemonicConfirm(mnemonic.map(() => ''));
     onStageChange('writedown');
   };
 
@@ -133,7 +134,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         >
           {translations.writePassphraseSubtitle2}
         </span>
-        <Dialog.Root open={videoModalOpen} setOpen={setVideoModalOpen}>
+        <Dialog.Root open={videoModalOpen} setOpen={setVideoModalOpen} zIndex={1001}>
           {renderVideoPopupContent({ onClose: () => setVideoModalOpen(false) })}
         </Dialog.Root>
       </>

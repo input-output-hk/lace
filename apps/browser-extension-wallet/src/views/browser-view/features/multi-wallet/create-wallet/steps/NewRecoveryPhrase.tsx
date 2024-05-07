@@ -1,122 +1,139 @@
-import { MnemonicStage, WalletSetupMnemonicStep } from '@lace/core';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router';
+import { MnemonicVideoPopupContent, WalletSetupMnemonicStage, WalletSetupMnemonicStepRevamp } from '@lace/core';
+import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
-import { useCreateWallet } from '../context';
-import { walletRoutePaths } from '@routes';
-import { useWalletManager } from '@hooks/useWalletManager';
+import { useCreateWallet, WalletCreateStep } from '../context';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { PostHogAction } from '@lace/common';
-import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { toast } from '@lace/common';
+import Copy from '@assets/icons/copy.component.svg';
+import Paste from '@assets/icons/paste.component.svg';
 
 const wordList = wordlists.english;
+const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
+const twoSecondsToastDuration = 1.5;
 
-const PASSPHRASE_STEP_1 = 0;
-const PASSPHRASE_STEP_2 = 1;
-const PASSPHRASE_STEP_3 = 2;
-
-interface State {
-  isResetMnemonicModalOpen: boolean;
-  resetMnemonicStage: MnemonicStage;
-}
+const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
+  if (step === WalletCreateStep.RecoveryPhraseWriteDown) return 'writedown';
+  if (step === WalletCreateStep.RecoveryPhraseInput) return 'input';
+  throw new Error('Invalid wallet crate step');
+};
 
 export const NewRecoveryPhrase = (): JSX.Element => {
-  const history = useHistory();
   const { t } = useTranslation();
-  const { generatedMnemonic, data } = useCreateWallet();
-  const { createWallet, walletRepository } = useWalletManager();
+  const { back, createWalletData, next, step } = useCreateWallet();
   const analytics = useAnalyticsContext();
-  const [state, setState] = useState<State>(() => ({
-    isResetMnemonicModalOpen: false,
-    resetMnemonicStage: 'writedown'
-  }));
+  const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
-  const walletSetupMnemonicStepTranslations = {
-    writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
-    body: t('core.walletSetupMnemonicStep.body'),
-    enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
-    enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
-    passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
-    passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
-    passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
-    passphraseError: t('core.walletSetupMnemonicStep.passphraseError')
+  const handleReadMoreOnClick = () => {
+    step === WalletCreateStep.RecoveryPhraseWriteDown
+      ? analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
+      : analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
 
-  const clearSecrets = useCallback(() => {
-    for (let i = 0; i < data.mnemonic.length; i++) {
-      data.mnemonic[i] = '';
-    }
-    data.password = '';
-  }, [data]);
+  const walletSetupMnemonicStepTranslations = {
+    writePassphraseTitle: t('core.walletSetupMnemonicStepRevamp.writePassphraseTitle'),
+    enterPassphrase: t('core.walletSetupMnemonicStepRevamp.enterPassphrase'),
+    enterPassphraseDescription: t('core.walletSetupMnemonicStepRevamp.enterPassphraseDescription'),
+    writePassphraseSubtitle1: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle1'),
+    writePassphraseSubtitle2: t('core.walletSetupMnemonicStepRevamp.writePassphraseSubtitle2'),
+    passphraseError: t('core.walletSetupMnemonicStepRevamp.passphraseError'),
+    enterPassphraseLength: t('core.walletSetupMnemonicStepRevamp.enterPassphraseLength'),
+    copyToClipboard: t('core.walletSetupMnemonicStepRevamp.copyToClipboard'),
+    pasteFromClipboard: t('core.walletSetupMnemonicStepRevamp.pasteFromClipboard'),
+    copyPasteTooltipText: (
+      <Trans
+        i18nKey="core.walletSetupMnemonicStepRevamp.copyPasteTooltipText"
+        components={{
+          a: (
+            <a
+              href={COPY_PASTE_TOOLTIP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleReadMoreOnClick}
+            />
+          )
+        }}
+      />
+    )
+  };
 
-  const saveWallet = useCallback(async () => {
-    const { source } = await createWallet(data);
-    await analytics.sendEventToPostHog(PostHogAction.MultiWalletCreateAdded, {
-      // eslint-disable-next-line camelcase
-      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-    });
-    await analytics.sendMergeEvent(source.account.extendedAccountPublicKey);
-    clearSecrets();
-    history.push(walletRoutePaths.assets);
-  }, [data, createWallet, history, clearSecrets, analytics, walletRepository]);
+  const mnemonicVideoPopupContentTranslations = {
+    title: t('core.mnemonicVideoPopupContent.title'),
+    description: t('core.mnemonicVideoPopupContent.description'),
+    linkText: t('core.mnemonicVideoPopupContent.link'),
+    closeButton: t('core.mnemonicVideoPopupContent.closeButton')
+  };
 
   return (
     <>
-      <WalletSetupMnemonicStep
-        mnemonic={data.mnemonic}
-        onReset={(resetStage) =>
-          setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }))
-        }
-        onNext={saveWallet}
-        onStepNext={(stage: MnemonicStage, step: number) => {
-          switch (step) {
-            case PASSPHRASE_STEP_1:
-              stage === 'input'
-                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase01NextClick)
-                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase01NextClick);
-              break;
-            case PASSPHRASE_STEP_2:
-              stage === 'input'
-                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase09NextClick)
-                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase09NextClick);
-              break;
-            case PASSPHRASE_STEP_3:
-              stage === 'input'
-                ? analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateEnterPassphrase17NextClick)
-                : analytics.sendEventToPostHog(PostHogAction.MultiwalletCreateWritePassphrase17NextClick);
+      <WalletSetupMnemonicStepRevamp
+        mnemonic={createWalletData.mnemonic}
+        mnemonicStage={getMnemonicStage(step)}
+        onStageChange={(nextStage) => {
+          if (nextStage === 'input') {
+            void next();
+            void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
+          } else {
+            setIsResetMnemonicModalOpen(true);
           }
         }}
+        onBack={back}
+        onNext={() => {
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+          void next();
+        }}
+        renderVideoPopupContent={({ onClose }) => (
+          <MnemonicVideoPopupContent
+            translations={mnemonicVideoPopupContentTranslations}
+            videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
+            onClose={() => {
+              onClose();
+              void analytics.sendEventToPostHog(
+                postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
+              );
+            }}
+          />
+        )}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
+        onWatchVideoClick={() =>
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+        }
+        onCopyToClipboard={() => {
+          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
+            icon: Copy
+          });
+        }}
+        onPasteFromClipboard={() => {
+          void analytics.sendEventToPostHog(
+            postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK
+          );
+          toast.notify({
+            duration: twoSecondsToastDuration,
+            text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
+            icon: Paste
+          });
+        }}
       />
-      {state.isResetMnemonicModalOpen && (
+      {isResetMnemonicModalOpen && (
         <WarningModal
           header={t('browserView.walletSetup.mnemonicResetModal.header')}
           content={t('browserView.walletSetup.mnemonicResetModal.content')}
-          visible={state.isResetMnemonicModalOpen}
+          visible={isResetMnemonicModalOpen}
           cancelLabel={t('browserView.walletSetup.mnemonicResetModal.cancel')}
           confirmLabel={t('browserView.walletSetup.mnemonicResetModal.confirm')}
           onCancel={() => {
-            setState((s) => ({
-              ...s,
-              isResetMnemonicModalOpen: false
-            }));
+            setIsResetMnemonicModalOpen(false);
           }}
           onConfirm={() => {
-            if (state.resetMnemonicStage === 'writedown') {
-              history.goBack();
-              return;
-            }
-
-            setState({
-              resetMnemonicStage: 'writedown',
-              isResetMnemonicModalOpen: false
-            });
-
-            generatedMnemonic();
+            setIsResetMnemonicModalOpen(false);
+            back();
           }}
         />
       )}

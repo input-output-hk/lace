@@ -39,7 +39,7 @@ const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
 export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
 
-export interface CreateWallet {
+export interface CreateWalletParams {
   name: string;
   mnemonic: string[];
   password: string;
@@ -79,7 +79,7 @@ export interface UseWalletManager {
     wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
-  createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
+  createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   createHardwareWalletRevamped: CreateHardwareWalletRevamped;
@@ -459,7 +459,7 @@ export const useWalletManager = (): UseWalletManager => {
       name,
       password,
       chainId = getCurrentChainId()
-    }: CreateWallet): Promise<Wallet.CardanoWallet> => {
+    }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
       const accountIndex = 0;
       const passphrase = Buffer.from(password, 'utf8');
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(

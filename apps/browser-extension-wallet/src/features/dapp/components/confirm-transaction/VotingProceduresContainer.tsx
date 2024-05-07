@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VotingProcedures } from '@lace/core';
-import { getDRepId, hasValidDrepRegistration, votingProceduresInspector } from './utils';
+import { getDRepId, votingProceduresInspector } from './utils';
 import { useCexplorerBaseUrl, useDisallowSignTx } from './hooks';
 import { getVote, getVoterType } from '@src/utils/tx-inspection';
 import { Wallet } from '@lace/cardano';
+
 import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
 import { useViewsFlowContext } from '@providers';
 import { useWalletStore } from '@src/stores';
@@ -15,7 +16,7 @@ export const VotingProceduresContainer = (): React.ReactElement => {
     signTxRequest: { request },
     dappInfo
   } = useViewsFlowContext();
-  const { walletState } = useWalletStore();
+  const { inMemoryWallet } = useWalletStore();
   const [votingProcedures, setVotingProcedures] = useState<Wallet.Cardano.VotingProcedures>([]);
   const [isNonRegisteredUserModalVisible, setIsNonRegisteredUserModalVisible] = useState<boolean>(false);
   const [userAckNonRegisteredState, setUserAckNonRegisteredState] = useState<boolean>(false);
@@ -31,9 +32,15 @@ export const VotingProceduresContainer = (): React.ReactElement => {
   }, [request]);
 
   useEffect(() => {
-    if (!walletState?.transactions.history || userAckNonRegisteredState) return;
-    setIsNonRegisteredUserModalVisible(!hasValidDrepRegistration(walletState.transactions.history));
-  }, [walletState?.transactions.history, userAckNonRegisteredState]);
+    if (userAckNonRegisteredState) return () => void 0;
+    const subscription = inMemoryWallet?.governance?.isRegisteredAsDRep$?.subscribe(
+      (hasValidDrepRegistration): void => {
+        setIsNonRegisteredUserModalVisible(!hasValidDrepRegistration);
+      }
+    );
+
+    return () => subscription?.unsubscribe();
+  }, [inMemoryWallet?.governance?.isRegisteredAsDRep$, userAckNonRegisteredState]);
 
   const explorerBaseUrl = useCexplorerBaseUrl();
 

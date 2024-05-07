@@ -17,8 +17,7 @@ import {
   getTxType,
   drepIDasBech32FromHash,
   pubDRepKeyToHash,
-  depositPaidWithSymbol,
-  hasValidDrepRegistration
+  depositPaidWithSymbol
 } from '../utils';
 
 jest.mock('@cardano-sdk/core', () => ({
@@ -170,60 +169,5 @@ describe('Testing utils', () => {
     expect(() => depositPaidWithSymbol(BigInt(20_000), { name: 'Unknown', symbol: 'UNK' } as Wallet.CoinId)).toThrow(
       'coinId Unknown not supported'
     );
-  });
-
-  describe('hasValidDrepRegistration', () => {
-    test('should return false if there transactions', () => {
-      const transactions = [] as unknown as Wallet.Cardano.HydratedTx[];
-      expect(hasValidDrepRegistration(transactions)).toBe(false);
-    });
-
-    test('should return false if there is no certificates', () => {
-      const transactions = [{ body: {} }, { body: { certificates: [] } }] as unknown as Wallet.Cardano.HydratedTx[];
-      expect(hasValidDrepRegistration(transactions)).toBe(false);
-    });
-
-    test('should return true if first certificate has RegisterDelegateRepresentative __typename', () => {
-      const transactions = [
-        {
-          body: {
-            certificates: [
-              { __typename: Wallet.Cardano.CertificateType.RegisterDelegateRepresentative },
-              { __typename: Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative }
-            ]
-          }
-        },
-        {
-          body: {
-            certificates: [
-              { __typename: Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative },
-              { __typename: Wallet.Cardano.CertificateType.RegisterDelegateRepresentative }
-            ]
-          }
-        }
-      ] as unknown as Wallet.Cardano.HydratedTx[];
-      expect(hasValidDrepRegistration(transactions)).toBe(true);
-    });
-    test('should return false if first certificate has UnregisterDelegateRepresentative __typename', () => {
-      const transactions = [
-        {
-          body: {
-            certificates: [
-              { __typename: Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative },
-              { __typename: Wallet.Cardano.CertificateType.RegisterDelegateRepresentative }
-            ]
-          }
-        },
-        {
-          body: {
-            certificates: [
-              { __typename: Wallet.Cardano.CertificateType.RegisterDelegateRepresentative },
-              { __typename: Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative }
-            ]
-          }
-        }
-      ] as unknown as Wallet.Cardano.HydratedTx[];
-      expect(hasValidDrepRegistration(transactions)).toBe(false);
-    });
   });
 });
