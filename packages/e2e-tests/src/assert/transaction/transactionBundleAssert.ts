@@ -12,6 +12,7 @@ class TransactionBundleAssert {
     for (let i = 1; i <= expectedNumberOfBundles; i++) {
       const bundle = new TransactionBundle(i);
       if (expectedNumberOfBundles > 1) {
+        await bundle.bundleTitle.waitForStable();
         await bundle.bundleTitle.waitForDisplayed();
         expect(await bundle.bundleTitle.getText()).to.equal(`${await t('core.outputSummaryList.output')} ${i}`);
         await bundle.bundleRemoveButton.waitForDisplayed();

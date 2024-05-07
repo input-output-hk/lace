@@ -27,6 +27,8 @@ Feature: Collateral - popup view
     When I click on "Collateral" setting
     And I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
+    And I see a toast with text: "Collateral added"
+    And I close a toast message
     And I navigate to Transactions popup page
     And I can see transaction 1 with type "Self Transaction"
     When I switch network to: "Preview" in popup mode
