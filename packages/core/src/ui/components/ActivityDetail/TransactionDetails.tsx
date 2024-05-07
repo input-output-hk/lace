@@ -250,7 +250,7 @@ export const TransactionDetails = ({
       <div className={styles.title}>{label}</div>
       <div className={styles.detail}>
         <div className={styles.amount}>
-          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>
+          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>{' '}
           <span className={styles.fiat}>{amountTransformer(value)}</span>
         </div>
       </div>
@@ -337,7 +337,7 @@ export const TransactionDetails = ({
                     <span
                       className={styles.ada}
                       data-testid="tx-sent-detail-ada"
-                    >{`${summary.amount} ${coinSymbol}`}</span>
+                    >{`${summary.amount} ${coinSymbol}`}</span>{' '}
                     <span className={styles.fiat} data-testid="tx-sent-detail-fiat">{`${amountTransformer(
                       summary.amount
                     )}`}</span>
