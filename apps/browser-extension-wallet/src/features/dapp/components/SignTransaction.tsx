@@ -57,6 +57,13 @@ export const SignTransaction = (): React.ReactElement => {
     return !password;
   }, [request, password]);
 
+  const onCancel = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationCancelClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    setPreviousView;
+  };
+
   return (
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
@@ -82,12 +89,7 @@ export const SignTransaction = (): React.ReactElement => {
         >
           {t('dapp.confirm.btn.confirm')}
         </Button>
-        <Button
-          onClick={setPreviousView}
-          color="secondary"
-          className={styles.actionBtn}
-          data-testid="sign-transaction-cancel"
-        >
+        <Button onClick={onCancel} color="secondary" className={styles.actionBtn} data-testid="sign-transaction-cancel">
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>

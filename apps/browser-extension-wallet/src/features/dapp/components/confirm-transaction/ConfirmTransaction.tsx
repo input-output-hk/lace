@@ -86,7 +86,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   }, [setSignTxRequest, setDappInfo]);
 
   const onCancelTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationCancelClick, {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
     disallowSignTx(true);
