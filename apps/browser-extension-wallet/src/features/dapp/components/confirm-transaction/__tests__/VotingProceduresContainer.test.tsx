@@ -255,7 +255,7 @@ describe('Testing VotingProceduresContainer component', () => {
       environmentName: 'Preprod',
       inMemoryWallet: {
         governance: {
-          isRegisteredAsDRep$: of(true)
+          isRegisteredAsDRep$: of(false)
         }
       }
     }));
