@@ -28,7 +28,7 @@ import { FilterOption, SelectOption, SortAndFilterTab } from './types';
 
 export interface SortAndFilterProps {
   activeTab: SortAndFilterTab;
-  sort: StakePoolSortOptions;
+  sort?: StakePoolSortOptions;
   filter: QueryStakePoolsFilters;
   onSortChange: (value: StakePoolSortOptions) => void;
   onFilterChange: (filters: QueryStakePoolsFilters) => void;
@@ -60,7 +60,7 @@ export const BrowsePoolsPreferencesCard = ({
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
   const [localFilters, setLocalFilters] = useState<QueryStakePoolsFilters>(filter);
-  const { field: sortBy, order: direction } = sort;
+  const { field: sortBy, order: direction } = sort || {};
 
   const debouncedFilterChange = useMemo(() => debounce(onFilterChange, ON_CHANGE_DEBOUNCE), [onFilterChange]);
   const handleFilterChange = useCallback(
@@ -75,13 +75,16 @@ export const BrowsePoolsPreferencesCard = ({
     [debouncedFilterChange, localFilters]
   );
 
-  const handleIconClick = useCallback(() => {
-    const newSort: StakePoolSortOptions = {
-      field: sortBy,
-      order: direction === 'desc' ? 'asc' : 'desc',
-    };
-    onSortChange(newSort);
-  }, [direction, onSortChange, sortBy]);
+  const handleIconClick = useCallback(
+    (_sortBy) => {
+      const newSort: StakePoolSortOptions = {
+        field: _sortBy,
+        order: direction === 'desc' ? 'asc' : 'desc',
+      };
+      onSortChange(newSort);
+    },
+    [direction, onSortChange]
+  );
 
   const handleSortChange = useCallback(
     (field: string) => {
@@ -157,7 +160,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.ticker')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('ticker'),
         value: 'ticker',
       },
       {
@@ -168,7 +171,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.saturation')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('saturation'),
         value: 'saturation',
       },
       USE_ROS_STAKING_COLUMN && {
@@ -179,7 +182,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.ros')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('ros'),
         value: 'ros',
       },
       {
@@ -190,7 +193,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.cost')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('cost'),
         value: 'cost',
       },
       {
@@ -201,7 +204,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.margin')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('margin'),
         value: 'margin',
       },
       {
@@ -212,7 +215,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.blocks')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('blocks'),
         value: 'blocks',
       },
       {
@@ -223,7 +226,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.pledge')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('pledge'),
         value: 'pledge',
       },
       {
@@ -234,7 +237,7 @@ export const BrowsePoolsPreferencesCard = ({
             text={t('browsePools.preferencesCard.sort.liveStake')}
           />
         ),
-        onIconClick: handleIconClick,
+        onIconClick: () => handleIconClick('liveStake'),
         value: 'liveStake',
       },
     ].filter(Boolean) as RadioButtonGroupOption[];

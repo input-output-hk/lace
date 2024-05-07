@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { DEFAULT_SORT_OPTIONS } from 'features/BrowsePools/constants';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { CARDANO_COIN_SYMBOL_BY_NETWORK, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
@@ -24,6 +25,8 @@ const defaultState: DelegationPortfolioState = {
   draftPortfolio: undefined,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
+  sortField: DEFAULT_SORT_OPTIONS.field,
+  sortOrder: DEFAULT_SORT_OPTIONS.order,
   view: undefined,
   viewedStakePool: undefined,
 };

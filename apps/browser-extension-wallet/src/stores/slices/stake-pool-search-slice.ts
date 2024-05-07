@@ -36,7 +36,7 @@ export const getQueryStakePoolsFilters = ({
       startAt: skip,
       limit: limit - skip + 1
     },
-    sort
+    ...(sort && { sort })
   };
 };
 
