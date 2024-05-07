@@ -61,7 +61,7 @@ export const SignTransaction = (): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationCancelClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
-    setPreviousView;
+    setPreviousView();
   };
 
   return (
