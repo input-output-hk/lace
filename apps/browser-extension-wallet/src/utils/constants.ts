@@ -107,4 +107,5 @@ export const COINGECKO_URL = 'https://www.coingecko.com';
 export const MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY =
   'multidelegationFirstVisitSincePortfolioPersistence';
 export const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
+export const MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY = 'multidelegationDAppCompatibility';
 export const STAKING_BROWSER_PREFERENCES_LS_KEY = 'stakingBrowserPreferences';

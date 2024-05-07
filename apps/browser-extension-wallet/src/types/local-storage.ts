@@ -58,6 +58,7 @@ export interface ILocalStorage {
   analyticsStatus?: EnhancedAnalyticsOptInStatus;
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;
+  multidelegationDAppCompatibility?: boolean;
   multidelegationFirstVisitSincePortfolioPersistence?: boolean;
   unconfirmedTransactions: UnconfirmedTransaction[];
   stakingBrowserPreferences: StakingBrowserPreferences;

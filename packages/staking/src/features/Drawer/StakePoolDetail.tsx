@@ -6,8 +6,9 @@ import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { StakePoolCardProgressBar } from 'features/BrowsePools';
 import { isOversaturated } from 'features/BrowsePools/utils';
+import { MultidelegationDAppCompatibilityModal } from 'features/modals/MultidelegationDAppCompatibilityModal';
 import { TFunction } from 'i18next';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import {
@@ -254,6 +255,7 @@ const makeSelector =
       poolInCurrentPortfolio,
       poolSelected,
       selectionsEmpty: selectedPortfolio.length === 0,
+      userAlreadyMultidelegated: currentPortfolio.length > 1,
     };
   };
 
@@ -312,15 +314,22 @@ const makeActionButtons = (
 
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { analytics } = useOutsideHandles();
+  const { analytics, multidelegationDAppCompatibility, triggerMultidelegationDAppCompatibility } = useOutsideHandles();
   const { walletStoreWalletType } = useOutsideHandles();
+  const [showDAppCompatibilityModal, setShowDAppCompatibilityModal] = useState(false);
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
     portfolioMutators: store.mutators,
     viewedStakePool: store.viewedStakePool,
   }));
-  const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
-    useDelegationPortfolioStore(makeSelector(openPoolDetails));
+  const {
+    ableToSelect,
+    ableToStakeOnlyOnThisPool,
+    selectionsEmpty,
+    poolInCurrentPortfolio,
+    poolSelected,
+    userAlreadyMultidelegated,
+  } = useDelegationPortfolioStore(makeSelector(openPoolDetails));
 
   const isInMemory = walletStoreWalletType === WalletType.InMemory;
 
@@ -329,16 +338,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
     portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
   }, [analytics, portfolioMutators]);
 
-  useEffect(() => {
-    if (isInMemory) return;
-    if (popupView) return;
-    const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
-    if (!hasPersistedHwStakepool) return;
-    onStakeOnThisPool();
-    localStorage.removeItem('TEMP_POOLID');
-  }, [isInMemory, onStakeOnThisPool, popupView]);
-
-  const onSelectClick = useCallback(() => {
+  const selectPoolFromDetails = useCallback(() => {
     if (!viewedStakePool) return;
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailAddStakingPoolClick);
     portfolioMutators.executeCommand({
@@ -346,6 +346,27 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
       type: 'SelectPoolFromDetails',
     });
   }, [viewedStakePool, portfolioMutators, analytics]);
+
+  const onSelectClick = useCallback(() => {
+    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility) {
+      setShowDAppCompatibilityModal(true);
+    } else {
+      selectPoolFromDetails();
+    }
+  }, [multidelegationDAppCompatibility, selectPoolFromDetails, userAlreadyMultidelegated]);
+
+  const onDAppCompatibilityConfirm = useCallback(() => {
+    triggerMultidelegationDAppCompatibility();
+    selectPoolFromDetails();
+  }, [selectPoolFromDetails, triggerMultidelegationDAppCompatibility]);
+
+  useEffect(() => {
+    if (isInMemory || popupView) return;
+    const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
+    if (!hasPersistedHwStakepool) return;
+    onStakeOnThisPool();
+    localStorage.removeItem('TEMP_POOLID');
+  }, [isInMemory, onStakeOnThisPool, popupView]);
 
   const onUnselectClick = useCallback(() => {
     if (!viewedStakePool) return;
@@ -392,18 +413,27 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   const [callToActionButton, ...secondaryButtons] = actionButtons;
 
   return (
-    <Flex flexDirection="column" alignItems="stretch" gap="$16">
-      {callToActionButton && (
-        <Button.CallToAction
-          label={callToActionButton.label}
-          data-testid={callToActionButton.dataTestId}
-          onClick={callToActionButton.callback}
-          w="$fill"
+    <>
+      <Flex flexDirection="column" alignItems="stretch" gap="$16">
+        {callToActionButton && (
+          <Button.CallToAction
+            label={callToActionButton.label}
+            data-testid={callToActionButton.dataTestId}
+            onClick={callToActionButton.callback}
+            w="$fill"
+          />
+        )}
+        {secondaryButtons.map(({ callback, dataTestId, label }) => (
+          <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
+        ))}
+      </Flex>
+      {showDAppCompatibilityModal && (
+        <MultidelegationDAppCompatibilityModal
+          visible={multidelegationDAppCompatibility}
+          onConfirm={onDAppCompatibilityConfirm}
+          popupView={popupView}
         />
       )}
-      {secondaryButtons.map(({ callback, dataTestId, label }) => (
-        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
-      ))}
-    </Flex>
+    </>
   );
 };

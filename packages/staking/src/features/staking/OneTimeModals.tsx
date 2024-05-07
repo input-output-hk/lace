@@ -1,3 +1,4 @@
+import { MultidelegationDAppCompatibilityModal } from 'features/modals/MultidelegationDAppCompatibilityModal';
 import { useDelegationPortfolioStore } from 'features/store';
 import { isPortfolioSavedOnChain } from 'features/store/delegationPortfolioStore/isPortfolioSavedOnChain';
 import { useEffect } from 'react';
@@ -10,6 +11,8 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
   const {
     multidelegationFirstVisit,
     triggerMultidelegationFirstVisit,
+    multidelegationDAppCompatibility,
+    triggerMultidelegationDAppCompatibility,
     multidelegationFirstVisitSincePortfolioPersistence,
     triggerMultidelegationFirstVisitSincePortfolioPersistence,
   } = useOutsideHandles();
@@ -38,11 +41,18 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
 
   if (!userAlreadyMultidelegated) {
     return (
-      <MultidelegationBetaModal
-        visible={multidelegationFirstVisit}
-        onConfirm={triggerMultidelegationFirstVisit}
-        popupView={popupView}
-      />
+      <>
+        <MultidelegationBetaModal
+          visible={multidelegationFirstVisit}
+          onConfirm={triggerMultidelegationFirstVisit}
+          popupView={popupView}
+        />
+        <MultidelegationDAppCompatibilityModal
+          visible={!multidelegationFirstVisit && multidelegationDAppCompatibility}
+          onConfirm={triggerMultidelegationDAppCompatibility}
+          popupView={popupView}
+        />
+      </>
     );
   }
 
