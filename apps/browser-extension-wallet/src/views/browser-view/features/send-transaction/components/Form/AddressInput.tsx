@@ -297,7 +297,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         empty={!address}
         valid={isAddressInputValueValid}
         validationObject={validationObject}
-        exists={!!getExistingAddress(handle || address)}
+        exists={!!getExistingAddress(address)}
         className={styles.input}
         style={{ width: '100%' }}
         open
