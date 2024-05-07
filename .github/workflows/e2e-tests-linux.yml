@@ -35,6 +35,7 @@ env:
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
+  BRANCH: ${{ github.ref_name }}
 
 jobs:
   tests:
@@ -77,6 +78,7 @@ jobs:
         working-directory: './packages/e2e-tests/reports/allure/results'
         run: |
           echo "
+          branch=${BRANCH}
           env=${NETWORK}
           browser=${BROWSER}
           tags=${TAGS}
