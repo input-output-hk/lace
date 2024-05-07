@@ -5,12 +5,8 @@
     "rootDir": "./",
     "baseUrl": "../src",
     "paths": {
-      "@src/*": [
-        "*"
-      ],
-      "@ui/*": [
-        "ui/*"
-      ]
+      "@src/*": ["*"],
+      "@ui/*": ["ui/*"]
     },
     "declarationDir": "./",
     "declaration": true,
@@ -30,12 +26,6 @@
       "path": "../../common/src"
     }
   ],
-  "exclude": [
-    "dist/"
-  ],
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.json"
-  ]
+  "exclude": ["dist/"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.json"]
 }

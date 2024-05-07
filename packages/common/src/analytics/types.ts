@@ -148,6 +148,7 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  NFTsSearchType = 'nft | nfts | search | type',
   NFTsCreateFolderClick = 'nft | nfts | create folder | click',
   NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
   NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
