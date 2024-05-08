@@ -4,6 +4,7 @@ import { renderAmountInfo, renderLabel, RowContainer } from '../OutputSummary/Ou
 import { Typography } from 'antd';
 import styles from './OutputSummaryList.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
+import { Flex } from '@lace/ui';
 
 const { Text } = Typography;
 
@@ -19,9 +20,21 @@ export type Costs = {
 export interface OutputSummaryListProps {
   rows: OutputSummaryProps[];
   txFee: Costs & TootipText;
+  expiresBy: { utcDate: string; utcTime: string };
   deposit?: Costs & TootipText;
   metadata?: string;
-  translations: TranslationsFor<'recipientAddress' | 'sending' | 'txFee' | 'deposit' | 'metadata' | 'output'>;
+  translations: TranslationsFor<
+    | 'recipientAddress'
+    | 'sending'
+    | 'txFee'
+    | 'deposit'
+    | 'metadata'
+    | 'output'
+    | 'expiresBy'
+    | 'expiresByTooltip'
+    | 'noLimit'
+    | 'utc'
+  >;
   ownAddresses?: string[];
   onFeeTooltipHover?: () => unknown;
   onDepositTooltipHover?: () => unknown;
@@ -33,6 +46,7 @@ export const OutputSummaryList = ({
   metadata,
   deposit,
   translations,
+  expiresBy,
   ownAddresses,
   onFeeTooltipHover,
   onDepositTooltipHover
@@ -41,6 +55,17 @@ export const OutputSummaryList = ({
     recipientAddress: translations.recipientAddress,
     sending: translations.sending
   };
+
+  const expireByText = expiresBy ? (
+    <Flex flexDirection="column" alignItems="flex-end">
+      <span>{expiresBy.utcDate}</span>
+      <span>
+        {expiresBy.utcTime} {translations.utc}
+      </span>
+    </Flex>
+  ) : (
+    translations.noLimit
+  );
 
   return (
     <div className={styles.listContainer}>
@@ -54,7 +79,6 @@ export const OutputSummaryList = ({
           <OutputSummary {...row} translations={outputSummaryTranslations} ownAddresses={ownAddresses} />
         </div>
       ))}
-
       {metadata && (
         <div className={styles.metadataRow} data-testid="metadata-container">
           <Text className={styles.metadataLabel} data-testid="metadata-label">
@@ -67,6 +91,18 @@ export const OutputSummaryList = ({
       )}
 
       <div className={styles.feeContainer} data-testid="summary-fee-container">
+        <RowContainer>
+          {renderLabel({
+            label: translations.expiresBy,
+            tooltipContent: translations.expiresByTooltip,
+            dataTestId: 'validity-interval-expires-by-label'
+          })}
+
+          <Text className={styles.validityIntervalExpiresBy} data-testid="validity-interval-expires-by-value">
+            {expireByText}
+          </Text>
+        </RowContainer>
+
         {deposit && (
           <RowContainer>
             {renderLabel({
