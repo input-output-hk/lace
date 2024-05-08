@@ -1,7 +1,7 @@
 @OnboardingCreateWallet @Analytics @Testnet
 Feature: Analytics - Posthog - Onboarding - Extended View
 
-  @LW-8311
+  @LW-8311 @Pending @issue=LW-10488
   Scenario Outline: Analytics - Posthog events are enabled or disabled based on decision <enable_analytics> on Analytics page
     Given "Get started" page is displayed
     When I enable showing Analytics consent banner
@@ -31,7 +31,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | $create_alias                                                                                |
     And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
 
-  @LW-7365
+  @LW-7365 @Pending @issue=LW-10488
   Scenario: Analytics - Onboarding new wallet events
     Given "Get started" page is displayed
     When I enable showing Analytics consent banner

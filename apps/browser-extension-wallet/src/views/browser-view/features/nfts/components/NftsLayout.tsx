@@ -4,7 +4,7 @@ import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
 import { useTranslation } from 'react-i18next';
-import { NftItemProps, NftList, NftListProps, NftFolderItemProps, NftsItemsTypes } from '@lace/core';
+import { NftItemProps, NftList, NftListProps, NftFolderItemProps, NftsItemsTypes, ListEmptyState } from '@lace/core';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
 import { useOutputInitialState, useAnalyticsSendFlowTriggerPoint, SendFlowTriggerPoints } from '../../send-transaction';
@@ -29,15 +29,21 @@ import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext }
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
 import { useAssetInfo } from '@hooks';
+import { SearchBox } from '@lace/ui';
+import { useNftSearch } from '@hooks/useNftSearch';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
-// eslint-disable-next-line max-statements
+const MIN_ASSET_COUNT_FOR_SEARCH = 10;
+
+// eslint-disable-next-line max-statements, complexity
 export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const { walletInfo, inMemoryWallet, blockchainProvider, environmentName } = useWalletStore();
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { t } = useTranslation();
   const assetsInfo = useAssetInfo();
+  const { isSearching, handleSearch, filteredResults } = useNftSearch(assetsInfo);
+
   const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
   const analytics = useAnalyticsContext();
@@ -56,12 +62,26 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const [isRenameFolderDrawerOpen, setIsRenameFolderDrawerOpen] = useState(false);
   const [isDeleteFolderModalOpen, setIsDeleteFolderModalOpen] = useState(false);
 
+  const [searchValue, setSearchValue] = useState('');
+  const [hasRecordedAnalytics, setHasRecordedAnalytics] = useState(false);
+
   const onDeleteFolderConfirm = () => {
     setIsDeleteFolderModalOpen(false);
     deleteRecord(folderToDelete, {
       text: t('browserView.nfts.deleteFolderSuccess'),
       icon: RemoveFolderIcon
     });
+  };
+
+  const handleNftSearch = (items: NftItemProps[], value: string) => {
+    setSearchValue(value);
+
+    if (!hasRecordedAnalytics) {
+      analytics.sendEventToPostHog(PostHogAction.NFTsSearchType);
+      setHasRecordedAnalytics(true);
+    }
+
+    handleSearch(items, value);
   };
 
   const renderContextMenu = useCallback(
@@ -219,7 +239,24 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
             </div>
             <div className={styles.content} data-testid="nft-list-container">
               {items.length > 0 ? (
-                <NftList items={items} rows={4} />
+                <>
+                  {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
+                    <SearchBox
+                      placeholder={t('browserView.nfts.searchPlaceholder')}
+                      onChange={(value) => handleNftSearch(nfts, value)}
+                      data-testid="nft-search-input"
+                      value={searchValue}
+                      onClear={() => setSearchValue('')}
+                    />
+                  )}
+                  <Skeleton loading={isSearching}>
+                    {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={4} />}
+                    {searchValue !== '' && filteredResults.length === 0 && (
+                      <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+                    )}
+                    {searchValue === '' && <NftList items={items} rows={4} />}
+                  </Skeleton>
+                </>
               ) : (
                 <FundWalletBanner
                   title={t('browserView.nfts.fundWalletBanner.title')}

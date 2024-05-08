@@ -1,10 +1,9 @@
 import React from 'react';
-import { Typography, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import styles from './OutputSummary.module.scss';
 import { SentAssetsList } from './OutputSummary';
-
-const { Text } = Typography;
+import { Flex, Text } from '@lace/ui';
 
 export const RowContainer = (props: { children: React.ReactNode; key?: string }): React.ReactElement => (
   <div key={props.key} className={styles.rowContent}>
@@ -13,14 +12,14 @@ export const RowContainer = (props: { children: React.ReactNode; key?: string })
 );
 
 export const renderAmountInfo = (amount: string, fiat: string, key?: string): JSX.Element => (
-  <div key={key} className={styles.assetInfo} data-testid="asset-info">
-    <Text className={styles.asset} data-testid="asset-info-amount">
+  <Flex key={key} w="$fill" flexDirection="column" alignItems="flex-end">
+    <Text.Body.Normal weight="$medium" data-testid="asset-info-amount">
       {amount}
-    </Text>
-    <Text className={styles.fiat} data-testid="asset-info-amount-fiat">
+    </Text.Body.Normal>
+    <Text.Body.Normal weight="$medium" color="secondary" data-testid="asset-info-amount-fiat">
       {fiat}
-    </Text>
-  </div>
+    </Text.Body.Normal>
+  </Flex>
 );
 
 export const renderSentAssets = (list: SentAssetsList): JSX.Element[] =>
@@ -38,9 +37,9 @@ export const renderLabel = ({
   onTooltipHover?: () => unknown;
 }): JSX.Element => (
   <div className={styles.labelContainer}>
-    <p className={styles.label} data-testid={`${dataTestId}-label`}>
+    <Text.Body.Normal weight="$semibold" data-testid={`${dataTestId}-label`}>
       {label}
-    </p>
+    </Text.Body.Normal>
 
     {tooltipContent && (
       <Tooltip

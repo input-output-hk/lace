@@ -3,7 +3,7 @@ import React from 'react';
 import cn from 'classnames';
 
 import { Ellipsis, toast } from '@lace/common';
-import { Box } from '@lace/ui';
+import { Box, Text } from '@lace/ui';
 import { useTranslate } from '@ui/hooks';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 
@@ -20,7 +20,8 @@ import {
   TxDetailsProposalProceduresTitles,
   TxDetailsCertificateTitles,
   TxDetails,
-  TxDetail
+  TxDetail,
+  TransactionActivityType
 } from './types';
 import { Collateral, CollateralStatus } from './Collateral';
 
@@ -345,7 +346,7 @@ export const TransactionDetails = ({
               </div>
               <div className={styles.details}>
                 <div className={styles.title}>
-                  {t(`core.activityDetails.${name.toLowerCase() === 'sent' ? 'to' : 'from'}`)}
+                  {t(`core.activityDetails.${summary.type === TransactionActivityType.outgoing ? 'to' : 'from'}`)}
                 </div>
                 <div>
                   {summary.addr.length > 1 && (
@@ -357,6 +358,7 @@ export const TransactionDetails = ({
                     </div>
                   )}
                   {(summary.addr as string[]).map((addr) => {
+                    const addressName = addressToNameMap?.get(addr);
                     const address = isPopupView ? (
                       <Ellipsis
                         className={cn(styles.addr, styles.fiat)}
@@ -371,8 +373,13 @@ export const TransactionDetails = ({
                     );
                     return (
                       <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
-                        {address}
-                        {renderAddressTag(addr, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
+                        {addressName && <Text.Body.Normal weight="$semibold">{addressName}</Text.Body.Normal>}
+                        {<Text.Address color={addressName ? 'secondary' : 'primary'}>{address}</Text.Address>}
+                        {renderAddressTag({
+                          address: addr,
+                          translations: getAddressTagTranslations(t),
+                          ownAddresses
+                        })}
                       </div>
                     );
                   })}
