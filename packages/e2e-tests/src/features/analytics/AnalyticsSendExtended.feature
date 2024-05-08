@@ -68,6 +68,20 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate that 1 analytics event(s) have been sent
     And Local storage unconfirmedTransaction is empty
 
+  @LW-10505
+  Scenario: Analytics - Send - Dapp Success Screen - View transaction - Transaction Canceled
+    Given I de-authorize all DApps in extended mode
+    And I open and authorize test DApp with "Only once" setting
+    And I set send to wallet address to: "WalletAnalyticsReceiveSimpleTransactionE2E" in test DApp
+    And I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
+      | -3.00 tADA - FEE |
+    And I set up request interception for posthog analytics request(s)
+    When I click "Confirm" button on "Confirm transaction" page
+    When I click "Cancel" button on "Sign transaction" page
+    Then I validate latest analytics single event "send | transaction confirmation | cancel | click"
+    And I validate that the "send | transaction confirmation | cancel | click" event includes property "tx_creation_type" with value "external" in posthog
+
   @LW-9111
   Scenario: Analytics - Extended-view - Outdated unconfirmedTransaction is deleted
     Given I set up request interception for posthog analytics request(s)
