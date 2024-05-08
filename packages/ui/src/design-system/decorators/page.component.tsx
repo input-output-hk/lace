@@ -12,7 +12,7 @@ import { Cell, Grid } from '../grid';
 import { Text } from '../text';
 
 import { usePageContext } from './page.context';
-import { subtitleBox } from './page.css';
+import * as cx from './page.css';
 
 export type PageProps = PropsWithChildren<{
   title: string;
@@ -45,7 +45,7 @@ export const Page = ({
             <Text.Display>{title}</Text.Display>
             {Boolean(subtitle) && (
               <Box pt="$32">
-                <div className={subtitleBox}>
+                <div className={cx.subtitleBox}>
                   <Text.Body.Large>{subtitle}</Text.Body.Large>
                 </div>
               </Box>

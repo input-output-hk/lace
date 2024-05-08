@@ -4,7 +4,7 @@ import React from 'react';
 import { Box } from '../box';
 import { Text } from '../text';
 
-import { subtitleBox } from './page.css';
+import * as cx from './page.css';
 
 type Props = PropsWithChildren<{
   title: string;
@@ -22,7 +22,7 @@ export const Section = ({
         <Text.Heading>{title}</Text.Heading>
         {Boolean(subtitle) && (
           <Box pt="$16">
-            <div className={subtitleBox}>
+            <div className={cx.subtitleBox}>
               <Text.Body.Large>{subtitle}</Text.Body.Large>
             </div>
           </Box>
