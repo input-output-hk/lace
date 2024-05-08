@@ -13,6 +13,7 @@ env:
   BROWSER: 'chrome'
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
+  BRANCH: ${{ github.ref_name }}
 
 jobs:
   smokeTests:
@@ -52,6 +53,7 @@ jobs:
         working-directory: ./packages/e2e-tests/reports/allure/results
         run: |
           echo "
+          branch=${BRANCH}
           browser=${BROWSER}
           tags=${TAGS}
           platform=Linux

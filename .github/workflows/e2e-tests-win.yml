@@ -33,6 +33,7 @@ env:
   BROWSER: ${{ github.event.inputs.browser || 'edge' }}
   NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
+  BRANCH: ${{ github.ref_name }}
 
 jobs:
   build-extension-linux:
@@ -123,6 +124,7 @@ jobs:
         working-directory: ./packages/e2e-tests/reports/allure/results
         run: |
           echo "
+          branch=${BRANCH}
           env=${NETWORK}
           browser=${BROWSER}
           tags=${TAGS}
