@@ -1,5 +1,5 @@
-import { style, sx } from '@lace/ui';
 import { theme } from 'features/theme';
+import { style, sx } from '../../../design-tokens';
 
 // TODO use new @lace/ui Grid when available: https://input-output.atlassian.net/browse/LW-9791
 export const grid = style([

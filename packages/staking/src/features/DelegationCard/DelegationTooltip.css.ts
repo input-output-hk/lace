@@ -1,4 +1,4 @@
-import { style, sx } from '@lace/ui';
+import { style, sx } from '../../design-tokens';
 import { theme } from '../theme';
 
 export const tooltip = style([

@@ -1,5 +1,5 @@
-import { style } from '@lace/ui';
 import { theme } from 'features/theme';
+import { style } from '../../design-tokens';
 
 export const sadFaceIcon = style({
   height: theme.spacing.$112,

@@ -1,4 +1,4 @@
-import { sx } from '@lace/ui';
+import { sx } from '../../design-tokens';
 
 export const browsePools = sx({
   alignItems: 'stretch',

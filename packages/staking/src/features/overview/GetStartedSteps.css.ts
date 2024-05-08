@@ -1,5 +1,5 @@
-import { vars } from '@lace/ui';
 import { style } from '@vanilla-extract/css';
+import { vars } from '../../design-tokens';
 import { theme } from '../theme';
 
 export const stepCircle = style({

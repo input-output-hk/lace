@@ -1,5 +1,14 @@
-import { elevation, fontFamily, fontSizes, fontWeights, lineHeights, opacities, radius, spacing } from '@lace/ui';
 import { createGlobalTheme, createThemeContract } from '@vanilla-extract/css';
+import {
+  elevation,
+  fontFamily,
+  fontSizes,
+  fontWeights,
+  lineHeights,
+  opacities,
+  radius,
+  spacing,
+} from '../../design-tokens';
 import { colorsContract, darkThemeColors, lightThemeColors } from './colors';
 
 const themeCommon = {

@@ -1,7 +1,7 @@
-import { style, sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
 import { theme } from 'features/theme';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { style, sx } from '../../../../design-tokens';
 
 export const cellPlaceholder = recipe({
   base: [

@@ -10851,9 +10851,11 @@ __metadata:
     "@svgr/plugin-jsx": ^8.0.1
     "@testing-library/react-hooks": ^8.0.1
     "@tsconfig/create-react-app": ^1.0.3
-    "@vanilla-extract/css": ^1.11.1
+    "@vanilla-extract/css": ^1.10.0
+    "@vanilla-extract/css-utils": ^0.1.3
     "@vanilla-extract/esbuild-plugin": ^2.2.2
     "@vanilla-extract/recipes": ^0.5.1
+    "@vanilla-extract/sprinkles": ^1.5.1
     "@vanilla-extract/vite-plugin": ^3.9.3
     "@vitest/coverage-c8": ^0.31.0
     antd: ^4.24.10
@@ -20906,25 +20908,6 @@ __metadata:
     media-query-parser: ^2.0.2
     outdent: ^0.8.0
   checksum: 31bbe8ad7b17bda32b486344a7f9b014ae30144f88f7f9d79bfc8684f28ff534558481464a64272dbd4505abaf7931e6e8d4a4a523f35ee7c9f58f2c3eea20c6
-  languageName: node
-  linkType: hard
-
-"@vanilla-extract/css@npm:^1.11.1":
-  version: 1.11.1
-  resolution: "@vanilla-extract/css@npm:1.11.1"
-  dependencies:
-    "@emotion/hash": ^0.9.0
-    "@vanilla-extract/private": ^1.0.3
-    ahocorasick: 1.0.2
-    chalk: ^4.1.1
-    css-what: ^6.1.0
-    cssesc: ^3.0.0
-    csstype: ^3.0.7
-    deep-object-diff: ^1.1.9
-    deepmerge: ^4.2.2
-    media-query-parser: ^2.0.2
-    outdent: ^0.8.0
-  checksum: 1498ced4ba1fd78f3e42567a49daac9eea15e0fa1418d39e4ba5a3e84ded66a5567733f5fa364eaf5fe9c0354124bd62a32ffd603427b76e36004ed49b55c7d2
   languageName: node
   linkType: hard
 

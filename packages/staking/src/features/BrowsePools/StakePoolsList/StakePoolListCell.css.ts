@@ -1,6 +1,6 @@
-import { sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
 import { theme } from 'features/theme';
+import { sx } from '../../../design-tokens';
 
 export const dot = recipe({
   base: [

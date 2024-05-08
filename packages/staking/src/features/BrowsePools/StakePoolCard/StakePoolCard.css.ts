@@ -1,6 +1,6 @@
-import { style, sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { style, sx } from '../../../design-tokens';
 import { theme } from '../../theme';
 import { STAKE_POOL_CARD_HEIGHT } from './constants';
 

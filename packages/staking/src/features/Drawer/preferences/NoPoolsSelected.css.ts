@@ -1,4 +1,4 @@
-import { style } from '@lace/ui';
+import { style } from '../../../design-tokens';
 import { theme } from '../../theme';
 
 export const container = style({

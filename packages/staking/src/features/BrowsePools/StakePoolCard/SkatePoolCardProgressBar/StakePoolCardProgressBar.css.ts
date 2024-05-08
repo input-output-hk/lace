@@ -1,5 +1,5 @@
-import { style, sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
+import { style, sx } from '../../../../design-tokens';
 import { theme } from '../../../theme';
 
 export const wrapper = sx({

@@ -1,5 +1,5 @@
-import { style, sx } from '@lace/ui';
 import { theme } from 'features/theme';
+import { style, sx } from '../../../design-tokens';
 
 export const textBoxLeft = style({
   borderBottomRightRadius: 0,

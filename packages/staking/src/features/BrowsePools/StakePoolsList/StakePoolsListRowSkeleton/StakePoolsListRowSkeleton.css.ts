@@ -1,4 +1,4 @@
-import { style, sx, vars } from '@lace/ui';
+import { style, sx, vars } from '../../../../design-tokens';
 
 export const row = style([
   {
