@@ -6,13 +6,14 @@
   /*
     in case the theme provider is not being used, this media query allows us to use the theme set on the user system
     */
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: dark) and (data-theme: dark) {
     :root {
       @include theme-custom-properties($dark-theme);
     }
   }
 
-  html[data-theme='dark'] {
+  html[data-theme='dark'],
+  div[data-theme='dark'] {
     @include theme-custom-properties($dark-theme);
   }
 }
@@ -21,13 +22,14 @@
   /*
     in case the theme provider is not being used, this media query allows us to use the theme set on the user system
     */
-  @media (prefers-color-scheme: light) {
+  @media (prefers-color-scheme: light) and (data-theme: light) {
     :root {
       @include theme-custom-properties($light-theme);
     }
   }
 
-  html[data-theme='light'] {
+  html[data-theme='light'],
+  div[data-theme='light'] {
     @include theme-custom-properties($light-theme);
   }
 }

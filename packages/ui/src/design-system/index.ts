@@ -28,7 +28,7 @@ export { PasswordBox } from './password-box';
 export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
-export { Variants, Section } from './decorators';
+export { Variants, Section, colorSchemaDecorator } from './decorators';
 export * as EducationalCard from './educational-card';
 export { FileUpload } from './file-upload';
 export { Checkbox } from './checkbox';
