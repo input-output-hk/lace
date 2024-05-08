@@ -27,9 +27,7 @@ class CoinConfigureAssert {
     const coinConfigure = new CoinConfigure(index);
     await coinConfigure.assetMaxButton.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await coinConfigure.assetMaxButton.getText()).to.equal(
-        await t('package.core.assetInput.maxButton', 'core')
-      );
+      expect(await coinConfigure.assetMaxButton.getText()).to.equal(await t('core.assetInput.maxButton'));
     }
   }
 }

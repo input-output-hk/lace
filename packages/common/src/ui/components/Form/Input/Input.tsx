@@ -12,6 +12,7 @@ export type inputProps = {
   label?: string;
   invalid?: boolean;
   focus?: boolean;
+  labelClassName?: string;
 } & InputProps;
 
 export const Input = ({
@@ -21,6 +22,7 @@ export const Input = ({
   invalid,
   value,
   focus,
+  labelClassName = '',
   ...props
 }: inputProps): React.ReactElement => {
   const inputRef = useRef();
@@ -42,7 +44,7 @@ export const Input = ({
       onChange={onValChange}
       {...(label && {
         prefix: (
-          <div className={cn(styles.label, { [styles.filled]: localVal })} data-testid="input-label">
+          <div className={cn(styles.label, { [styles.filled]: localVal }, labelClassName)} data-testid="input-label">
             {label}
           </div>
         )

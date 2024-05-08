@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { MetadataBase } from './metadata.base';
 import * as cx from './metadata.css';
@@ -14,7 +14,9 @@ type Props = BaseProps & {
 export const Metadata = ({ text, ...props }: Readonly<Props>): JSX.Element => {
   return (
     <MetadataBase {...props}>
-      <Typography.Address className={cx.text}>{text}</Typography.Address>
+      <Text.Address weight="$medium" className={cx.text}>
+        {text}
+      </Text.Address>
     </MetadataBase>
   );
 };

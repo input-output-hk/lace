@@ -7,6 +7,7 @@ import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-t
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from './useMaxAda';
 import { UseTranslationResponse } from 'react-i18next';
+import { TranslationKey } from '@lib/translations/types';
 
 const { buildTransactionProps, setMissingCoins, getTotalMinimumCoins } = Wallet;
 
@@ -18,7 +19,7 @@ export enum COIN_SELECTION_ERRORS {
   BUNDLE_AMOUNT_IS_EMPTY = 'Bundle amount is empty'
 }
 
-export const coinSelectionErrors = new Map<COIN_SELECTION_ERRORS, string>([
+export const coinSelectionErrors = new Map<COIN_SELECTION_ERRORS, TranslationKey>([
   [COIN_SELECTION_ERRORS.BALANCE_INSUFFICIENT_ERROR, 'general.errors.insufficientBalance'],
   [COIN_SELECTION_ERRORS.NOT_FRAGMENTED_ENOUGH_ERROR, 'general.errors.utxoNotFragmentedEnough'],
   [COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR, 'general.errors.utxoFullyDepleted'],

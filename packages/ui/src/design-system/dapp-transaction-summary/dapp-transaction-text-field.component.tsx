@@ -6,8 +6,8 @@ import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
+import { Text } from '../text';
 import { Tooltip } from '../tooltip';
-import * as Typography from '../typography';
 
 import * as cx from './dapp-transaction-text-field.css';
 
@@ -29,15 +29,11 @@ export const TransactionTextField = ({
     <Grid {...props} columns="$2">
       <Cell>
         <Flex>
-          <Typography.Body.Normal className={cx.label}>
-            {label}
-          </Typography.Body.Normal>
+          <Text.Body.Normal weight="$medium">{label}</Text.Body.Normal>
           {tooltip !== undefined && (
-            <Box ml="$8" className={cx.tooltip}>
+            <Box ml="$8">
               <Tooltip label={tooltip}>
-                <div className={cx.tooltipText}>
-                  <InfoIcon />
-                </div>
+                <InfoIcon className={cx.tooltipIcon} />
               </Tooltip>
             </Box>
           )}
@@ -45,9 +41,9 @@ export const TransactionTextField = ({
       </Cell>
       <Cell>
         <Flex justifyContent="flex-end" h="$fill">
-          <Typography.Body.Small className={cx.text}>
+          <Text.Body.Small weight="$medium" className={cx.text}>
             {text}
-          </Typography.Body.Small>
+          </Text.Body.Small>
         </Flex>
       </Cell>
     </Grid>

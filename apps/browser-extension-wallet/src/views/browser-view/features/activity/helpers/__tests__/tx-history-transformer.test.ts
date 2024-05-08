@@ -13,6 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import { cardanoCoin } from '@src/utils/constants';
 import * as txInspection from '@src/utils/tx-inspection';
 import type { TxDirections } from '@src/types';
+import { currencyCode } from '@providers/currency/constants';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -103,7 +104,7 @@ describe('Testing txHistoryTransformer function', () => {
       ] as Wallet.KeyManagement.GroupedAddress[],
       date,
       fiatCurrency: {
-        code: 'USD',
+        code: currencyCode.USD,
         symbol: '$'
       },
       fiatPrice: 1,
@@ -132,7 +133,7 @@ describe('Testing txHistoryTransformer function', () => {
       ] as Wallet.KeyManagement.GroupedAddress[],
       date,
       fiatCurrency: {
-        code: 'USD',
+        code: currencyCode.USD,
         symbol: '$'
       },
       fiatPrice: 1,
@@ -171,7 +172,7 @@ describe('Testing txHistoryTransformer function', () => {
       ] as Wallet.KeyManagement.GroupedAddress[],
       date,
       fiatCurrency: {
-        code: 'USD',
+        code: currencyCode.USD,
         symbol: '$'
       },
       fiatPrice: 1,

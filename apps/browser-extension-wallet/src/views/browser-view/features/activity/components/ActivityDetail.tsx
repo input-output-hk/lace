@@ -3,22 +3,23 @@ import uniq from 'lodash/uniq';
 import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
 import { Wallet } from '@lace/cardano';
+import type { ActivityType } from '@lace/core';
 import {
-  AssetActivityListProps,
   ActivityStatus,
-  TxOutputInput,
-  TxSummary,
-  useTranslate,
+  AssetActivityListProps,
+  DelegationActivityType,
   RewardsDetails,
   TransactionActivityType,
-  DelegationActivityType
+  TxOutputInput,
+  TxSummary
 } from '@lace/core';
-import type { ActivityType } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
 import { ActivityDetail as ActivityDetailType } from '@src/types';
 import { useCurrencyStore } from '@providers';
 import { TransactionDetailsProxy } from './TransactionDetailsProxy';
+import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '@lib/translations/types';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -53,7 +54,8 @@ export const getTransactionData = ({
     return outputData.map((output) => ({
       ...output,
       // Show up to 5 addresses below multiple addresses (see LW-4040)
-      addr: addrs.slice(0, MAX_SUMMARY_ADDRESSES)
+      addr: addrs.slice(0, MAX_SUMMARY_ADDRESSES),
+      type: TransactionActivityType.incoming
     }));
   }
 
@@ -62,7 +64,8 @@ export const getTransactionData = ({
     .filter((output) => !walletAddresses.includes(output.addr))
     .map((output) => ({
       ...output,
-      ...(!Array.isArray(output.addr) && { addr: [output.addr] })
+      ...(!Array.isArray(output.addr) && { addr: [output.addr] }),
+      type: TransactionActivityType.outgoing
     }));
 };
 
@@ -79,19 +82,19 @@ interface ActivityDetailProps {
   price: PriceResult;
 }
 
-const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
-  if (type === DelegationActivityType.delegationRegistration) return t('package.core.activityDetails.registration');
-  if (type === DelegationActivityType.delegationDeregistration) return t('package.core.activityDetails.deregistration');
-  if (type === TransactionActivityType.incoming) return t('package.core.activityDetails.received');
-  if (type === TransactionActivityType.outgoing) return t('package.core.activityDetails.sent');
-  return t(`package.core.activityDetails.${type}`);
+const getTypeLabel = (type: ActivityType): TranslationKey => {
+  if (type === DelegationActivityType.delegationRegistration) return 'core.activityDetails.registration';
+  if (type === DelegationActivityType.delegationDeregistration) return 'core.activityDetails.deregistration';
+  if (type === TransactionActivityType.incoming) return 'core.activityDetails.received';
+  if (type === TransactionActivityType.outgoing) return 'core.activityDetails.sent';
+  return `core.activityDetails.${type}`;
 };
 
 export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => {
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const { getActivityDetail, activityDetail, fetchingActivityInfo, walletActivities } = useWalletStore();
   const [activityInfo, setActivityInfo] = useState<ActivityDetailType>();
   const { fiatCurrency } = useCurrencyStore();
@@ -118,8 +121,8 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
 
   const name =
     activityInfo.status === ActivityStatus.PENDING
-      ? t('package.core.activityDetails.sending')
-      : getTypeLabel(activityInfo.type, t);
+      ? t('core.activityDetails.sending')
+      : t(getTypeLabel(activityInfo.type));
 
   const amountTransformer = (ada: string) =>
     `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`;

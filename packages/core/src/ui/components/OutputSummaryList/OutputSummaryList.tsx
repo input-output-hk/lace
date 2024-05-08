@@ -35,6 +35,7 @@ export interface OutputSummaryListProps {
     | 'noLimit'
     | 'utc'
   >;
+  ownAddresses?: string[];
   onFeeTooltipHover?: () => unknown;
   onDepositTooltipHover?: () => unknown;
 }
@@ -46,6 +47,7 @@ export const OutputSummaryList = ({
   deposit,
   translations,
   expiresBy,
+  ownAddresses,
   onFeeTooltipHover,
   onDepositTooltipHover
 }: OutputSummaryListProps): React.ReactElement => {
@@ -74,7 +76,7 @@ export const OutputSummaryList = ({
               idx + 1
             }`}</Text>
           )}
-          <OutputSummary {...row} translations={outputSummaryTranslations} />
+          <OutputSummary {...row} translations={outputSummaryTranslations} ownAddresses={ownAddresses} />
         </div>
       ))}
       {metadata && (

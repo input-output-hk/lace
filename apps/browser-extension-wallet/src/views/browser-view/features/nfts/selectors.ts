@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { NftDetailProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
@@ -5,6 +6,8 @@ import i18n from 'i18next';
 import { EnvironmentTypes } from '@stores';
 import { AssetOrHandleInfo } from '@hooks';
 import { getAssetImage } from '@src/utils/get-asset-image';
+import { useNftsFoldersContext } from '@src/features/nfts/context';
+import { NftFoldersSchema } from '@lib/storage';
 
 export const nftImageSelector = (imageUri: Wallet.Asset.Uri | Wallet.Asset.Uri[]): string | undefined => {
   const uri = Array.isArray(imageUri) ? imageUri[0] : imageUri;
@@ -26,7 +29,11 @@ const nftAttributesSelector = (metadata: Map<string, Wallet.Cardano.Metadatum>):
 
 export const nftDetailSelector = (asset: AssetOrHandleInfo): NftDetailProps => {
   const image = nftImageSelector(getAssetImage(asset));
+  const { list } = useNftsFoldersContext();
 
+  const selectedFolder: Partial<NftFoldersSchema> | undefined = list?.find((folder: NftFoldersSchema) =>
+    folder.assets.includes(asset.assetId)
+  );
   const { otherProperties } = asset.nftMetadata || {};
 
   return {
@@ -45,10 +52,13 @@ export const nftDetailSelector = (asset: AssetOrHandleInfo): NftDetailProps => {
         value: image
       }
     ],
+    folder: selectedFolder?.name,
     attributes: otherProperties ? nftAttributesSelector(otherProperties) : undefined,
     translations: {
       tokenInformation: i18n.t('core.nftDetail.tokenInformation'),
-      attributes: i18n.t('core.nftDetail.attributes')
+      attributes: i18n.t('core.nftDetail.attributes'),
+      directory: i18n.t('core.nftDetail.directory'),
+      setAsAvatar: i18n.t('core.nftDetail.setAsAvatar')
     }
   };
 };

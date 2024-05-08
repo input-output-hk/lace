@@ -9,7 +9,9 @@ import {
   StakePoolsListRowSkeleton,
   StakePoolSortOptions,
   stakePoolTableConfig,
-  TranslationsFor
+  TranslationsFor,
+  getDefaultSortOrderByField,
+  DEFAULT_SORT_OPTIONS
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search } from '@lace/common';
@@ -30,11 +32,6 @@ type stakePoolsTableProps = {
 };
 
 type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
-
-const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'ticker',
-  order: 'desc'
-};
 
 const searchDebounce = 300;
 
@@ -109,14 +106,14 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   };
 
   const onSortChange = (sortField: SortField) => {
-    const order = sortField === sort?.field && sort?.order === 'asc' ? 'desc' : 'asc';
+    const inverseOrder = sort?.order === 'asc' ? 'desc' : 'asc';
+    const order = sortField !== sort?.field ? getDefaultSortOrderByField(sortField) : inverseOrder;
 
     setSort({ field: sortField, order });
   };
 
-  const headers = stakePoolTableConfig.columns.map((column) => {
-    const translationKey = `cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`;
-    const tooltipText = t(translationKey);
+  const headers = stakePoolTableConfig.columns.map((column: SortField) => {
+    const tooltipText = t(`cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`);
     return {
       label: tableHeaderTranslations[column as SortField],
       ...(tableHeaderTooltipsTranslations[column as SortField] && { tooltipText }),

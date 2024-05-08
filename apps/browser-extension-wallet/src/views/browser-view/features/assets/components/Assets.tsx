@@ -281,6 +281,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       totalAssets={fullAssetList?.length ?? 0}
     />
   );
+
   const drawers = (
     <>
       <AssetActivityDetails

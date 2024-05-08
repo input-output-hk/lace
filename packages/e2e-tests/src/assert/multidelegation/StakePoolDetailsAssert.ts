@@ -14,13 +14,15 @@ class StakePoolDetailsAssert {
     await this.assertSeeStakePoolDetailsCommonElements();
 
     expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
-    expect(await StakePoolDetails.poolTicker.getText()).to.equal(expectedStakedPool.ticker);
     expect(await StakePoolDetails.informationDescription.getText()).to.equal(expectedStakedPool.information);
 
     if (noMetaDataPool) {
+      const shortPoolId = `${expectedStakedPool.poolId.slice(0, 6)}...${expectedStakedPool.poolId.slice(-8)}`;
+      expect(await StakePoolDetails.poolTicker.getText()).to.equal(shortPoolId);
       await StakePoolDetails.socialLinksTitle.waitForDisplayed({ reverse: true });
       await StakePoolDetails.socialWebsiteIcon.waitForDisplayed({ reverse: true });
     } else {
+      expect(await StakePoolDetails.poolTicker.getText()).to.equal(expectedStakedPool.ticker);
       expect(await StakePoolDetails.socialLinksTitle.getText()).to.equal(await t('drawer.details.social', 'staking'));
       await StakePoolDetails.socialWebsiteIcon.waitForDisplayed();
     }
@@ -118,8 +120,7 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.rosTitle.waitForDisplayed();
     expect(await StakePoolDetails.rosTitle.getText()).to.equal(await t('drawer.details.metrics.ros', 'staking'));
     await StakePoolDetails.rosValue.waitForDisplayed();
-    // TODO BUG LW-5635
-    // expect(await StakePoolDetails.rosValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    expect(await StakePoolDetails.rosValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
   }
 
   private async assertSeeDelegators() {

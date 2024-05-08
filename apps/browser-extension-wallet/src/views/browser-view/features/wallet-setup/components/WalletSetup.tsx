@@ -107,11 +107,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Mnemonic }: WalletS
                 />
               </Route>
               <Route path={`${path}/hardware`}>
-                <HardwareWalletFlow
-                  onCancel={cancelWalletFlow}
-                  onAppReload={() => location.reload()}
-                  sendAnalytics={sendAnalyticsHandler}
-                />
+                <HardwareWalletFlow onCancel={cancelWalletFlow} />
               </Route>
             </>
           )}

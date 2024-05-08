@@ -11,7 +11,7 @@ import {
 } from '../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { WalletNameInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
 import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
-import { WalletSetupStepLayoutRevamp } from '../WalletSetupRevamp/WalletSetupStepLayoutRevamp';
+import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { TranslationsFor } from '@ui/utils/types';
 import { useTranslate } from '@ui/hooks';
 import { passwordComplexity } from '@ui/utils/password-complexity';
@@ -19,7 +19,7 @@ import styles from '../WalletSetup/WalletSetupNamePasswordStep/styles.module.scs
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
-  onNext: (params: WalletSetupNamePasswordSubmitParams) => void;
+  onNext: (params: WalletSetupNamePasswordSubmitParams) => void | Promise<void>;
   initialWalletName?: string;
   onChange?: (state: { name: string; password: string }) => void;
   translations: TranslationsFor<
@@ -47,7 +47,8 @@ export const WalletSetupNamePasswordStepRevamp = ({
   const { t } = useTranslate();
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
+  const [nextButtonLoading, setNextButtonLoading] = useState(false);
+  const [passHasBeenValidated, setPassHasBeenValidated] = useState(false);
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
 
@@ -90,8 +91,13 @@ export const WalletSetupNamePasswordStepRevamp = ({
     setPasswordConfirmation(target.value);
   };
 
-  const handleNextButtonClick = () => {
-    onNext({ walletName, password });
+  const handleNextButtonClick = async () => {
+    try {
+      setNextButtonLoading(true);
+      await onNext({ walletName, password });
+    } finally {
+      setNextButtonLoading(false);
+    }
   };
 
   return (
@@ -101,6 +107,7 @@ export const WalletSetupNamePasswordStepRevamp = ({
       onBack={onBack}
       onNext={handleNextButtonClick}
       isNextEnabled={isNextButtonEnabled()}
+      isNextLoading={nextButtonLoading}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
       nextLabel={translations.confirmButton}
     >

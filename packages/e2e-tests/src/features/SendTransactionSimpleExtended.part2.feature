@@ -128,7 +128,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     Then I enter a value of: <value>  to the "tADA" asset in bundle 1
-    And I click on transaction drawer background to lose focus
+    And I open cancel modal to trigger button validation
     Then "Insufficient balance" error <should_see> displayed on "Send" page
     Then "Review transaction" button is <status> on "Send" page
     Examples:
@@ -176,7 +176,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I hover over the value for "tADA" asset in bundle 1
     Then the "MAX" button is not displayed
 
-  @LW-4762 @Testnet @Mainnet
+  @LW-4762 @Testnet @Mainnet @Pending
+  @issue=LW-10242
   Scenario: Extended View - Send flow - Enter and Escape buttons support
     When I click "Send" button on page header
     And I press keyboard Enter button

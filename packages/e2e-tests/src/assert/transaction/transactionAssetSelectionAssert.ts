@@ -45,7 +45,7 @@ class TransactionAssetSelectionAssert {
     await TokenSelectionPage.neutralFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(
-        await t('package.core.assetSelectorOverlay.usedAllAssets')
+        await t('core.assetSelectorOverlay.usedAllAssets')
       );
     }
   }
@@ -55,7 +55,7 @@ class TransactionAssetSelectionAssert {
     await TokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(
-        await t('package.core.assetSelectorOverlay.noMatchingResult')
+        await t('core.assetSelectorOverlay.noMatchingResult')
       );
     }
   }
@@ -64,11 +64,11 @@ class TransactionAssetSelectionAssert {
     await TokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
     await TokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      const messageForTokens = `${await t('package.core.assetSelectorOverlay.youDonthaveAnyTokens')}\n${await t(
-        'package.core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted'
+      const messageForTokens = `${await t('core.assetSelectorOverlay.youDonthaveAnyTokens')}\n${await t(
+        'core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted'
       )}`;
-      const messageForNFTs = `${await t('package.core.assetSelectorOverlay.noNFTs')}\n${await t(
-        'package.core.assetSelectorOverlay.addFundsToStartYourWeb3Journey.'
+      const messageForNFTs = `${await t('core.assetSelectorOverlay.noNFTs')}\n${await t(
+        'core.assetSelectorOverlay.addFundsToStartYourWeb3Journey.'
       )}`;
       const expectedMessage = assetType === 'tokens' ? messageForTokens : messageForNFTs;
       expect(await TokenSelectionPage.emptyStateMessage.getText()).to.equal(expectedMessage);

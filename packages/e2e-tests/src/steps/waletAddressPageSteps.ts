@@ -2,9 +2,6 @@ import { Then, When } from '@wdio/cucumber-framework';
 import { getTestWallet } from '../support/walletConfiguration';
 import walletAddressPageAssert from '../assert/walletAddressPageAssert';
 import walletAddressPage from '../elements/walletAddressPage';
-import ToastMessageAssert from '../assert/toastMessageAssert';
-import { t } from '../utils/translationService';
-import ToastMessage from '../elements/toastMessage';
 import MenuHeader from '../elements/menuHeader';
 
 When(/^I see handles listed on the "Receive" screen$/, async () => {
@@ -46,24 +43,6 @@ When(
 
 Then(/^The first ADA handle displayed on the list is the shortest$/, async () => {
   await walletAddressPageAssert.assertSeeTheShortestHandleFirst();
-});
-
-Then(/^I see a toast with text: "(Handle|Address) copied"$/, async (action: string) => {
-  let translationKey;
-  switch (action) {
-    case 'Handle':
-      translationKey = 'core.infoWallet.handleCopied';
-      break;
-    case 'Address':
-      translationKey = 'core.infoWallet.addressCopied';
-      break;
-    default:
-      throw new Error(`Unsupported action name: ${action}`);
-  }
-
-  await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
-  await ToastMessage.clickCloseButton();
-  await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), false);
 });
 
 Then(/^I see ADA handle with custom image on the "Wallet Address" page$/, async () => {

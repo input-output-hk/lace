@@ -2,8 +2,7 @@ import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of, combineLatest, map, EMPTY } from 'rxjs';
 import { getProviders } from './config';
 import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery, createPersonalWallet, storage } from '@cardano-sdk/wallet';
-import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import {
   AnyWallet,
   StoresFactory,
@@ -21,8 +20,10 @@ import {
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { ADA_HANDLE_POLICY_ID, HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
+import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, NotImplementedError } from '@cardano-sdk/core';
+import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
+import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 
 const logger = console;
 
@@ -55,7 +56,7 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = chainIdToChainName(chainId);
-    const providers = getProviders(chainName);
+    const providers = await getProviders(chainName);
     if (wallet.type === WalletType.Script || typeof accountIndex !== 'number') {
       throw new NotImplementedError('Script wallet support is not implemented');
     }
@@ -75,8 +76,9 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         logger,
         ...providers,
         stores,
-        handleProvider: new KoraLabsHandleProvider({
-          serverUrl:
+        handleProvider: handleHttpProvider({
+          adapter: axiosFetchAdapter,
+          baseUrl:
             HANDLE_SERVER_URLS[
               // TODO: remove exclude to support sanchonet
               Cardano.ChainIds[chainName].networkMagic as Exclude<
@@ -84,8 +86,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
                 Cardano.NetworkMagics.Sanchonet
               >
             ],
-          adapter: axiosFetchAdapter,
-          policyId: ADA_HANDLE_POLICY_ID
+          logger
         }),
         addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
         witnesser,
@@ -197,5 +198,7 @@ walletManager
   .catch((error) => {
     logger.error('Failed to initialize wallet manager', error);
   });
+
+cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
 
 export const wallet$ = walletManager.activeWallet$;

@@ -20,6 +20,7 @@ class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
     await this.assertSeeDrawerTitle(mode === 'extended');
     const addressInput = new AddressInput();
+    await addressInput.input.waitForStable();
     await addressInput.input.waitForDisplayed();
     await addressInput.label.waitForDisplayed();
     expect(await addressInput.label.getText()).to.equal(await t('core.destinationAddressInput.recipientAddress'));
@@ -206,8 +207,7 @@ class DrawerSendExtendedAssert {
 
   async assertDefaultInputsDoNotContainValues() {
     const coinConfigure = new CoinConfigure();
-    const addressInput = new AddressInput();
-    expect(await addressInput.input.getValue()).to.be.empty;
+    expect(await new AddressInput().input.getValue()).to.be.empty;
     expect(await coinConfigure.input.getValue()).to.equal('0.00');
   }
 
@@ -304,10 +304,10 @@ class DrawerSendExtendedAssert {
     expect(await TransactionNewPage.metadataInputField.getValue()).to.be.empty;
   }
 
-  async assertSeeIncorrectAddressError(shouldSee: boolean) {
-    await new TransactionBundle().bundleAddressInputError.waitForDisplayed({ reverse: !shouldSee });
+  async assertSeeIncorrectAddressError(bundleIndex: number, shouldSee: boolean) {
+    await new TransactionBundle(bundleIndex).bundleAddressInputError.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await new TransactionBundle().bundleAddressInputError.getText()).to.equal(
+      expect(await new TransactionBundle(bundleIndex).bundleAddressInputError.getText()).to.equal(
         await t('general.errors.incorrectAddress')
       );
     }
@@ -368,8 +368,7 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
-    const addressInput = new AddressInput();
-    await addressInput.invalidAdaHandleIcon.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await new AddressInput().invalidAdaHandleIcon.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
   async assertSeeAdaHandleError(shouldBeDisplayed: boolean) {
@@ -381,13 +380,11 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
-    const addressInput = new AddressInput();
-    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed, interval: 50 });
+    await new AddressInput().searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed, interval: 50 });
   }
 
   async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {
-    const addressInput = new AddressInput(bundleIndex);
-    await addressInput.ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
+    await new AddressInput(bundleIndex).ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
 
   async assertSeeReviewAddressBanner(handle: string) {

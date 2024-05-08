@@ -2,7 +2,6 @@ import { WalletSetupConnectHardwareWalletStep } from '@lace/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router';
-import { isTrezorHWSupported } from '../../../wallet-setup/helpers';
 import { Wallet } from '@lace/cardano';
 import { useHardwareWallet } from '../context';
 import { walletRoutePaths } from '@routes';
@@ -10,6 +9,8 @@ import { ErrorHandling } from './ErrorHandling';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
+
+export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
 interface State {
   error?: 'notDetectedLedger' | 'notDetectedTrezor';

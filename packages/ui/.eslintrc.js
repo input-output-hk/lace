@@ -14,6 +14,7 @@ module.exports = {
     'plugin:functional/lite',
     'plugin:functional/stylistic',
     'prettier',
+    'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -125,6 +126,7 @@ module.exports = {
         allowMappedTypes: 'in-unions-and-intersections',
       },
     ],
+    '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/prefer-enum-initializers': 'error',
     '@typescript-eslint/prefer-readonly': 'error',
     '@typescript-eslint/promise-function-async': 'error',
