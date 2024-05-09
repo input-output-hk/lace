@@ -1,6 +1,9 @@
 import { Wallet } from '@lace/cardano';
 import { EnhancedAnalyticsOptInStatus, TxCreationType } from '../providers/AnalyticsProvider/analyticsTracker/types';
 import { StakingBrowserPreferences } from '@lace/staking';
+import { currencyCode } from '@providers/currency/constants';
+import { ADASymbols } from '@src/utils/constants';
+import { EnvironmentTypes } from '@stores';
 
 export interface WalletStorage {
   name: string;
@@ -15,7 +18,7 @@ export interface AppSettings {
 }
 
 export interface CurrencyInfo {
-  code: string;
+  code: currencyCode | ADASymbols;
   symbol: string;
 }
 
@@ -33,6 +36,11 @@ export interface UnconfirmedTransaction {
   id: string;
   creationType: TxCreationType;
   date: string;
+}
+
+export interface CustomSubmitApiConfig {
+  status: boolean;
+  url: string;
 }
 
 export type UnconfirmedTransactions = UnconfirmedTransaction[];
@@ -55,4 +63,6 @@ export interface ILocalStorage {
   stakingBrowserPreferences: StakingBrowserPreferences;
   showPinExtension?: boolean;
   showMultiAddressModal?: boolean;
+  userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
+  isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
 }

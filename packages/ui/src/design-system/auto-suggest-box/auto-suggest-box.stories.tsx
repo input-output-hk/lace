@@ -12,7 +12,7 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import { ValidationStatus } from './auto-suggest-box-types';
 import { AutoSuggestBox } from './auto-suggest-box.component';
@@ -190,20 +190,13 @@ Controls.argTypes = {
 
 type Interactions = ComponentStory<typeof AutoSuggestBox>;
 
-const createInteraction: () => Interactions = () => (): JSX.Element =>
-  (
-    <Flex
-      flexDirection="column"
-      alignItems="center"
-      w="$fill"
-      my="$32"
-      mb="$312"
-    >
-      <Box w="$312">
-        <AutoSuggestBox suggestions={SUGGESTIONS} label="Auto suggest box" />
-      </Box>
-    </Flex>
-  );
+const createInteraction: () => Interactions = () => (): JSX.Element => (
+  <Flex flexDirection="column" alignItems="center" w="$fill" my="$32" mb="$312">
+    <Box w="$312">
+      <AutoSuggestBox suggestions={SUGGESTIONS} label="Auto suggest box" />
+    </Box>
+  </Flex>
+);
 
 export const SuggestAndErase = createInteraction();
 export const SuggestAndPick = createInteraction();

@@ -6,6 +6,6 @@ describe('Testing nftImageSelector', () => {
     const imageUri = 'ipfs://nft-address' as unknown as Wallet.Asset.Uri;
     const image = nftImageSelector(imageUri);
 
-    expect(image).toBe('https://ipfs.io/ipfs/nft-address');
+    expect(image).toBe('https://ipfs.blockfrost.dev/ipfs/nft-address');
   });
 });

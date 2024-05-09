@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Text from '../typography';
+import { Text } from '../text';
 
 import * as cx from './initials.css';
 

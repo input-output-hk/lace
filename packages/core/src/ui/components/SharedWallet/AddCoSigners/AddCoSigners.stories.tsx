@@ -1,9 +1,7 @@
-/* eslint-disable no-magic-numbers, promise/avoid-new */
 import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { AddCoSigners } from './AddCoSigners';
-import { Flex } from '@lace/ui';
 import { ValidateAddress } from './type';
 import { Wallet } from '@lace/cardano';
 
@@ -40,7 +38,7 @@ const addressBook = [
 
 const handleResolution =
   'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g' as Wallet.Cardano.PaymentAddress;
-let timeout: NodeJS.Timeout;
+let timeout: number;
 
 const validateAddress: ValidateAddress = async (address) => {
   if (!address) {
@@ -51,10 +49,12 @@ const validateAddress: ValidateAddress = async (address) => {
       if (timeout) {
         clearTimeout(timeout);
       }
-      timeout = setTimeout(() => {
+      const twoSeconds = 2000;
+      timeout = window.setTimeout(() => {
         clearTimeout(timeout);
-        resolve(Math.random() < 0.5 ? { isValid: true, handleResolution } : { isValid: false });
-      }, 2000);
+        const factor = 0.5;
+        resolve(Math.random() < factor ? { isValid: true, handleResolution } : { isValid: false });
+      }, twoSeconds);
     });
   }
   return {
@@ -63,22 +63,20 @@ const validateAddress: ValidateAddress = async (address) => {
 };
 
 export const Overview = (): JSX.Element => (
-  <Flex alignItems="center" justifyContent="center" w="$480" h="$480">
-    <AddCoSigners
-      validateAddress={validateAddress}
-      translations={{
-        title: 'Add your Co-signers',
-        subtitle: 'Add up to 20 wallet addresses to your shared wallet',
-        inputLabel: "Recipient's address or $handle",
-        inputError: 'Invalid address',
-        addButton: 'Add Co-signer',
-        removeButton: 'Remove',
-        backButton: 'Back',
-        nextButton: 'Next'
-      }}
-      onBack={() => void 0}
-      onNext={() => void 0}
-      addressBook={addressBook}
-    />
-  </Flex>
+  <AddCoSigners
+    validateAddress={validateAddress}
+    translations={{
+      title: 'Add your Co-signers',
+      subtitle: 'Add up to 20 wallet addresses to your shared wallet',
+      inputLabel: "Recipient's address or $handle",
+      inputError: 'Invalid address',
+      addButton: 'Add Co-signer',
+      removeButton: 'Remove',
+      backButton: 'Back',
+      nextButton: 'Next'
+    }}
+    onBack={() => void 0}
+    onNext={() => void 0}
+    addressBook={addressBook}
+  />
 );

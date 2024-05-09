@@ -48,6 +48,7 @@ class MenuHeaderPageObject {
   }
 
   async clickSettingsOption() {
+    await MenuHeader.menuSettingsButton.waitForStable();
     await MenuHeader.menuSettingsButton.click();
   }
 

@@ -9,13 +9,14 @@ import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.c
 import { DetailRows } from './components';
 import styles from './TransactionInputOutput.module.scss';
 import { TxDetails } from './types';
+import { Text } from '@lace/ui';
 
 interface TxDetailListProps<T extends string> {
   testId: string;
   title: string;
   subTitle: string;
   lists: TxDetails<T>[];
-  translations: TranslationsFor<T>;
+  translations: T extends string ? TranslationsFor<T> : never;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
@@ -46,7 +47,7 @@ export const TxDetailList = <T extends string>({
     <div data-testid={testId} className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine })}>
       <div className={styles.expanderHeader}>
         <div className={styles.title}>
-          <span>{title}</span>
+          <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
           {tooltipContent && (
             <Tooltip title={tooltipContent}>
               <InfoCircleOutlined className={styles.infoIcon} />
@@ -70,7 +71,9 @@ export const TxDetailList = <T extends string>({
               <div className={cn({ [styles.topBorderContent]: idx > 0 })} />
               {lists.length > 1 && (
                 <div key={`${testId}-list-header`} className={styles.listHeader}>
-                  <div className={styles.listHeaderTitle}>{`${subTitle} ${idx + 1}`}</div>
+                  <Text.Body.Normal className={styles.listHeaderTitle} weight="$bold">{`${subTitle} ${
+                    idx + 1
+                  }`}</Text.Body.Normal>
                 </div>
               )}
               <DetailRows<T> translations={translations} testId={testId} list={list} />

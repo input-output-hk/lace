@@ -40,14 +40,14 @@ export const RewardsDetails = ({
 }: RewardsDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
   const poolRewards = rewards.rewards.filter((reward) => !!reward.pool);
-  const tooltipContent = t('package.core.activityDetails.rewardsDescription');
+  const tooltipContent = t('core.activityDetails.rewardsDescription');
 
   return (
     <div data-testid="rewards-detail" className={styles.content}>
       <ActivityDetailHeader tooltipContent={tooltipContent} name={name} description={headerDescription} />
       <div>
-        <div className={styles.header}>{t('package.core.activityDetails.header')}</div>
-        <h1 className={styles.summary}>{t('package.core.activityDetails.summary')}</h1>
+        <div className={styles.header}>{t('core.activityDetails.header')}</div>
+        <h1 className={styles.summary}>{t('core.activityDetails.summary')}</h1>
         <div className={styles.block}>
           <div data-testid="rewards-detail-bundle">
             <div className={styles.details}>
@@ -57,7 +57,7 @@ export const RewardsDetails = ({
                   <span
                     className={styles.ada}
                     data-testid="rewards-received-detail-ada"
-                  >{`${rewards.totalAmount} ${coinSymbol}`}</span>
+                  >{`${rewards.totalAmount} ${coinSymbol}`}</span>{' '}
                   <span className={styles.fiat} data-testid="rewars-received-detail-fiat">{`${amountTransformer(
                     rewards.totalAmount
                   )}`}</span>
@@ -68,7 +68,7 @@ export const RewardsDetails = ({
 
           {poolRewards.length > 0 && (
             <div className={styles.stakingInfo}>
-              <div className={cn(styles.title, styles.poolsTitle)}>{t('package.core.activityDetails.pools')}</div>
+              <div className={cn(styles.title, styles.poolsTitle)}>{t('core.activityDetails.pools')}</div>
               <div className={styles.poolsList}>
                 {poolRewards.map(({ pool, amount }) => (
                   <div key={pool.id} className={styles.poolEntry}>
@@ -107,17 +107,17 @@ export const RewardsDetails = ({
           )}
 
           <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.activityDetails.status')}</div>
+            <div className={styles.title}>{t('core.activityDetails.status')}</div>
             <div data-testid="rewards-status" className={styles.detail}>{`${status
               .charAt(0)
               .toUpperCase()}${status.slice(1)}`}</div>
           </div>
           <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.activityDetails.epoch')}</div>
+            <div className={styles.title}>{t('core.activityDetails.epoch')}</div>
             <div data-testid="rewards-epoch" className={styles.detail}>{`${rewards.spendableEpoch}`}</div>
           </div>
           <div data-testid="rewards-date" className={cn(styles.details, styles.timestampContainer)}>
-            <div className={cn(styles.title, styles.timestamp)}>{t('package.core.activityDetails.timestamp')}</div>
+            <div className={cn(styles.title, styles.timestamp)}>{t('core.activityDetails.timestamp')}</div>
             <div data-testid="rewards-timestamp" className={styles.detail}>
               <span>{includedDate}</span>
               <span>&nbsp;{includedTime}</span>

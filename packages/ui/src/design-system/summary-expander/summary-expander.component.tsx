@@ -5,7 +5,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import classNames from 'classnames';
 
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import { Trigger } from './summary-expander-trigger.component';
 import * as cx from './summary-expander.css';
@@ -18,6 +18,7 @@ export type Props = OmitClassName<'button'> &
     onOpenChange?: (open: boolean) => void;
     title: string;
     disabled?: boolean;
+    testId?: string;
   }>;
 
 export const SummaryExpander = ({
@@ -25,6 +26,7 @@ export const SummaryExpander = ({
   onOpenChange,
   title,
   disabled,
+  testId,
   children,
   ...props
 }: Readonly<Props>): JSX.Element => {
@@ -34,6 +36,7 @@ export const SummaryExpander = ({
       open={open}
       onOpenChange={onOpenChange}
       disabled={disabled}
+      data-testid={testId ?? 'expander'}
     >
       <Flex
         alignItems="center"
@@ -42,11 +45,11 @@ export const SummaryExpander = ({
           [cx.expanded]: open,
         })}
       >
-        <Typography.Body.Large className={cx.title} weight="$bold">
+        <Text.Body.Normal weight="$semibold" data-testid="expander-title">
           {title}
-        </Typography.Body.Large>
+        </Text.Body.Normal>
 
-        <Collapsible.Trigger asChild>
+        <Collapsible.Trigger asChild data-testid="expander-button">
           <Trigger open={open} disabled={disabled} {...props} />
         </Collapsible.Trigger>
       </Flex>

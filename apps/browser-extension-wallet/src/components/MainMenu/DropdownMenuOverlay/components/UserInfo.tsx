@@ -8,7 +8,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toast, addEllipsis, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
-import { useGetHandles, useWalletManager } from '@hooks';
+import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@lace/ui';
@@ -46,6 +46,8 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const fullWalletName = cardanoWallet.source.wallet.metadata.name;
   const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
+  const { activeWalletAvatar, getAvatar } = useWalletAvatar();
+
   const handleName = handle?.nftMetadata?.name;
   const activeWalletId = cardanoWallet.source.wallet.walletId;
 
@@ -80,6 +82,8 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const renderBip32Wallet = useCallback(
     (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
       const lastActiveAccount = getLastActiveAccount(wallet);
+      const walletAvatar = getAvatar(wallet.walletId);
+
       return (
         <ProfileDropdown.WalletOption
           key={wallet.walletId}
@@ -104,10 +108,28 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
             });
           }}
           type={getUiWalletType(wallet.type)}
+          profile={
+            walletAvatar
+              ? {
+                  fallbackText: fullWalletName,
+                  imageSrc: walletAvatar
+                }
+              : undefined
+          }
         />
       );
     },
-    [activateWallet, getLastActiveAccount, onOpenWalletAccounts, setIsDropdownMenuOpen, analytics, t, activeWalletId]
+    [
+      getLastActiveAccount,
+      getAvatar,
+      fullWalletName,
+      onOpenWalletAccounts,
+      activeWalletId,
+      analytics,
+      activateWallet,
+      setIsDropdownMenuOpen,
+      t
+    ]
   );
 
   const renderWallet = useCallback(
@@ -151,7 +173,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
               }
             >
               <div className={styles.userInfo} onClick={handleOnAddressCopy}>
-                {avatarVisible && <UserAvatar walletName={activeWalletName} />}
+                {avatarVisible && <UserAvatar walletName={activeWalletName} avatar={activeWalletAvatar} />}
                 <div className={styles.userMeta} data-testid="header-menu-user-details">
                   <p className={styles.walletName} data-testid="header-menu-wallet-name">
                     {activeWalletName}

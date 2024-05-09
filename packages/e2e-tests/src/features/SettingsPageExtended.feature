@@ -2,7 +2,7 @@
 Feature: General Settings - Extended Browser View
 
   Background:
-    Given Lace is ready for test
+    Given Wallet is synced
 
   @LW-2324 @Smoke @Mainnet @Testnet
   Scenario: Extended View - Visibility of Settings page and its content
@@ -65,7 +65,7 @@ Feature: General Settings - Extended Browser View
     And I click on "Your keys" setting
     And I click on Show public key button
     And I click "Copy" button on "Show public key" page
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
+    Then I see a toast with text: "Copied to clipboard"
     And I see that content of "TestAutomationWallet" public key is in clipboard
 
   @LW-2674 @Mainnet @Testnet
@@ -79,7 +79,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on "Network" setting
     When I click on "Preprod" radio button
-    Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I don't see a toast with text: "Switched network"
     And I close the drawer by clicking close button
     When I navigate to Tokens extended page
     Then I see network id: "Preprod"
@@ -90,7 +90,7 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on "Network" setting
     When I click on "Mainnet" radio button
-    Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I don't see a toast with text: "Switched network"
     And I close the drawer by clicking close button
     When I navigate to Tokens extended page
     Then I do not see network id: "Mainnet"
@@ -126,7 +126,7 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Toast displayed after switching network
     Given I am on Settings extended page
     When I switch network to: "Preview" without closing drawer
-    Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I see a toast with text: "Switched network"
 
   @LW-2718 @Testnet
   Scenario: Extended View - Settings - Token/NFTs updated after network switching
@@ -363,18 +363,19 @@ Feature: General Settings - Extended Browser View
     And I click "Remove wallet" button on "Remove wallet" modal
     And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
-    When I click "Restore" button and confirm
+    When I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page with wallet TAWalletNoFunds from "Restore" wallet flow
     When I click "Enter wallet" button
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 
-        # this test should be executed as the last one in this suite
+  # this test should be executed as the last one in this suite
   @LW-2521 @LW-9113 @Mainnet @Testnet
   Scenario: Extended View - Remove wallet and confirm
     And my local storage is fully initialized
     When I open settings from header menu
-    And I click on Remove wallet button
+    Then I see Remove wallet section
+    When I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
     Then I see Analytics banner
     And I expect wallet repository and local storage to be empty

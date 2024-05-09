@@ -13,3 +13,9 @@
     width: 1000px;
   }
 }
+
+.searchBoxContainer {
+  @media (max-width: $breakpoint-popup) {
+    margin-top: size_unit(3);
+  }
+}

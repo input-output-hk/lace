@@ -5,12 +5,11 @@ import { Radio, RadioChangeEvent } from 'antd';
 import { Search } from '@lace/common';
 import { NftList, NftItemProps } from '../Nft';
 import { TokenItem, TokenItemProps } from '../Token';
-import { ReactComponent as NeutralFaceIcon } from '../../assets/icons/neutral-face.component.svg';
-import { ReactComponent as SadFaceIcon } from '../../assets/icons/sad-face.component.svg';
 
 import styles from './AssetSelectorOverlay.module.scss';
 import { TranslationsFor } from '@src/ui/utils/types';
 import { useTranslate } from '@src/ui/hooks/useTranslate';
+import { ListEmptyState } from '../ListEmptyState';
 
 export const stringIncludesValue = (string: string, searchValue: string): boolean =>
   string.toLowerCase().includes(searchValue.toLowerCase());
@@ -21,22 +20,6 @@ export enum ASSET_COMPONENTS {
   NFTS = 'nfts',
   TOKENS = 'tokens'
 }
-
-const ListEmptyState = (props: { message: React.ReactNode; icon: 'sad-face' | 'neutral-face' }) => {
-  const Icon: Record<string, React.ReactElement> = {
-    'sad-face': <SadFaceIcon className={styles.img} data-testid="sad-face-icon" />,
-    'neutral-face': <NeutralFaceIcon className={styles.img} data-testid="neutral-face-icon" />
-  };
-
-  return (
-    <div className={styles.emptyMessage}>
-      {Icon[props.icon]}
-      <p className={styles.text} data-testid="asset-list-empty-state-message">
-        {props.message}
-      </p>
-    </div>
-  );
-};
 
 const getTokensContent = (
   params: {
@@ -54,8 +37,8 @@ const getTokensContent = (
       <ListEmptyState
         message={
           <>
-            {t('package.core.assetSelectorOverlay.youDonthaveAnyTokens')}
-            <br /> {t('package.core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted')}
+            {t('core.assetSelectorOverlay.youDonthaveAnyTokens')}
+            <br /> {t('core.assetSelectorOverlay.justAddSomeDigitalAssetsToGetStarted')}
           </>
         }
         icon="sad-face"
@@ -64,9 +47,9 @@ const getTokensContent = (
 
   switch (true) {
     case (!params.tokens || params.tokens?.length === 0) && !params.hasUsedAllTokens:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
     case params.hasUsedAllTokens:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
     default:
       return params.tokens.map(({ id, ...item }, idx) => (
         <TokenItem
@@ -96,8 +79,8 @@ const getNftsContent = (
       <ListEmptyState
         message={
           <>
-            {t('package.core.assetSelectorOverlay.noNFTs')}
-            <br /> {t('package.core.assetSelectorOverlay.addFundsToStartYourWeb3Journey')}
+            {t('core.assetSelectorOverlay.noNFTs')}
+            <br /> {t('core.assetSelectorOverlay.addFundsToStartYourWeb3Journey')}
           </>
         }
         icon="sad-face"
@@ -112,9 +95,9 @@ const getNftsContent = (
 
   switch (true) {
     case (!nftList || nftList.length === 0) && !params.hasUsedAllNFTs:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
     case params.hasUsedAllNFTs:
-      return <ListEmptyState message={t('package.core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
+      return <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
     default:
       return <NftList {...params.nftListConfig} items={nftList} />;
   }

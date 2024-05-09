@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 
-import { sx } from '../../design-tokens';
+import { sx, vars } from '../../design-tokens';
 
 export const container = sx({
   px: '$24',
@@ -20,10 +20,10 @@ export const icon = sx({
 
 export const message = style([
   sx({
-    color: '$info_bar_message_color',
     mt: '$8',
   }),
   {
+    color: vars.colors.$info_bar_message_color,
     textAlign: 'center',
     whiteSpace: 'pre-wrap',
   },

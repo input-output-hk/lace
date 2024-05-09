@@ -38,6 +38,7 @@ import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
+import { Key } from 'webdriverio';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -272,6 +273,12 @@ Then(
   }
 );
 
+Then(/^I open cancel modal to trigger button validation$/, async () => {
+  // workaround for test automation only to fire all events after finished typing
+  await browser.keys(Key.Escape);
+  await Modal.cancelButton.click();
+});
+
 Then(/^I click on transaction drawer background to lose focus$/, async () => {
   await TransactionNewPage.clickDrawerBackground();
 });
@@ -386,7 +393,11 @@ Then(
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
-        { ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: String(getTestWallet(walletName).address) }
+        {
+          ada: `${adaValue} ${Asset.CARDANO.ticker}`,
+          address: String(getTestWallet(walletName).address),
+          addressTag: 'foreign'
+        }
       ],
       status: 'Success'
     };
@@ -531,7 +542,7 @@ Then(/^Metadata input is empty$/, async () => {
 });
 
 Then(/^"Incorrect address" error (is|is not) displayed under address input field$/, async (state: 'is' | 'is not') => {
-  await drawerSendExtendedAssert.assertSeeIncorrectAddressError(state === 'is');
+  await drawerSendExtendedAssert.assertSeeIncorrectAddressError(1, state === 'is');
 });
 
 Then(/^"Review transaction" button is (enabled|disabled) on "Send" page$/, async (state: 'enabled' | 'disabled') => {

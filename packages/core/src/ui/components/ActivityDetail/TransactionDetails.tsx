@@ -1,11 +1,13 @@
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import cn from 'classnames';
-import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
+
 import { Ellipsis, toast } from '@lace/common';
-import { Box } from '@lace/ui';
-import { useTranslate } from '@src/ui/hooks';
+import { Box, Text } from '@lace/ui';
+import { useTranslate } from '@ui/hooks';
+import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
+
+import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { ActivityStatus } from '../Activity';
 import styles from './TransactionDetails.module.scss';
@@ -18,7 +20,8 @@ import {
   TxDetailsProposalProceduresTitles,
   TxDetailsCertificateTitles,
   TxDetails,
-  TxDetail
+  TxDetail,
+  TransactionActivityType
 } from './types';
 import { Collateral, CollateralStatus } from './Collateral';
 
@@ -76,6 +79,7 @@ export interface TransactionDetailsProps {
   txSummary?: TxSummary[];
   coinSymbol: string;
   tooltipContent?: string;
+  ownAddresses: string[];
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: (url: string) => void;
@@ -122,6 +126,7 @@ export const TransactionDetails = ({
   txSummary = [],
   coinSymbol,
   pools,
+  ownAddresses,
   addressToNameMap,
   isPopupView,
   openExternalLink,
@@ -153,7 +158,7 @@ export const TransactionDetails = ({
           ...detail,
           ...('title' in detail &&
             detail.title === 'certificateType' && {
-              details: [t(`package.core.assetActivityItem.entry.name.${detail.details[0]}`)]
+              details: [t(`core.assetActivityItem.entry.name.${detail.details[0]}`)]
             }),
           ...('title' in detail &&
             detail.title === 'anchorURL' && {
@@ -173,7 +178,7 @@ export const TransactionDetails = ({
           ...p,
           ...('title' in p &&
             p.title === 'type' && {
-              details: [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)]
+              details: [t(`core.activityDetails.governanceActions.${p.details[0]}`)]
             }),
           ...('title' in p &&
             p.title === 'anchorURL' && {
@@ -189,7 +194,7 @@ export const TransactionDetails = ({
                     ${Number(detail.details[0])}
                       ${t(
                         // eslint-disable-next-line sonarjs/no-nested-template-literals
-                        `package.core.activityDetails.${
+                        `core.activityDetails.${
                           Number(detail.details[0]) === 0 || Number(detail.details[0]) > 1 ? 'epochs' : 'epoch'
                         }`
                       )}
@@ -215,7 +220,7 @@ export const TransactionDetails = ({
           ...p,
           ...('title' in p &&
             ['voterType', 'voteTypes'].includes(p.title) && {
-              details: [t(`package.core.activityDetails.${p.title}.${p.details[0]}`)]
+              details: [t(`core.activityDetails.${p.title}.${p.details[0]}`)]
             }),
           ...('title' in p &&
             p.title === 'anchorURL' && {
@@ -245,7 +250,7 @@ export const TransactionDetails = ({
       <div className={styles.title}>{label}</div>
       <div className={styles.detail}>
         <div className={styles.amount}>
-          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>
+          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>{' '}
           <span className={styles.fiat}>{amountTransformer(value)}</span>
         </div>
       </div>
@@ -257,12 +262,12 @@ export const TransactionDetails = ({
       <ActivityDetailHeader name={name} description={headerDescription} />
       <div>
         <div className={styles.header} data-testid="tx-header">
-          {t('package.core.activityDetails.header')}
+          {t('core.activityDetails.header')}
         </div>
         <div className={styles.block}>
           <div data-testid="tx-hash" className={styles.hashContainer}>
             <div className={cn(styles.title, styles.labelWidth)}>
-              <div className={styles.hashLabel}>{t('package.core.activityDetails.transactionID')}</div>
+              <div className={styles.hashLabel}>{t('core.activityDetails.transactionID')}</div>
             </div>
             <div
               data-testid="tx-hash-detail"
@@ -274,7 +279,7 @@ export const TransactionDetails = ({
             >
               <div>
                 {isSending ? (
-                  <CopiableHash hash={hash} copiedText={t('package.core.activityDetails.copiedToClipboard')} />
+                  <CopiableHash hash={hash} copiedText={t('core.activityDetails.copiedToClipboard')} />
                 ) : (
                   hash
                 )}
@@ -282,10 +287,10 @@ export const TransactionDetails = ({
             </div>
           </div>
 
-          <h1 className={styles.summary}>{t('package.core.activityDetails.summary')}</h1>
+          <h1 className={styles.summary}>{t('core.activityDetails.summary')}</h1>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
-              <div className={cn(styles.title, styles.poolsTitle)}>{t('package.core.activityDetails.pools')}</div>
+              <div className={cn(styles.title, styles.poolsTitle)}>{t('core.activityDetails.pools')}</div>
               <div className={styles.poolsList}>
                 {pools?.map((pool) => (
                   <div key={pool.id} className={styles.poolEntry}>
@@ -332,7 +337,7 @@ export const TransactionDetails = ({
                     <span
                       className={styles.ada}
                       data-testid="tx-sent-detail-ada"
-                    >{`${summary.amount} ${coinSymbol}`}</span>
+                    >{`${summary.amount} ${coinSymbol}`}</span>{' '}
                     <span className={styles.fiat} data-testid="tx-sent-detail-fiat">{`${amountTransformer(
                       summary.amount
                     )}`}</span>
@@ -341,7 +346,7 @@ export const TransactionDetails = ({
               </div>
               <div className={styles.details}>
                 <div className={styles.title}>
-                  {t(`package.core.activityDetails.${name.toLowerCase() === 'sent' ? 'to' : 'from'}`)}
+                  {t(`core.activityDetails.${summary.type === TransactionActivityType.outgoing ? 'to' : 'from'}`)}
                 </div>
                 <div>
                   {summary.addr.length > 1 && (
@@ -349,26 +354,32 @@ export const TransactionDetails = ({
                       data-testid="tx-to-detail-multiple-addresses"
                       className={cn(styles.detail, styles.detailTitle)}
                     >
-                      {t('package.core.activityDetails.multipleAddresses')}
+                      {t('core.activityDetails.multipleAddresses')}
                     </div>
                   )}
                   {(summary.addr as string[]).map((addr) => {
-                    const addrName = addressToNameMap?.get(addr);
+                    const addressName = addressToNameMap?.get(addr);
                     const address = isPopupView ? (
-                      <Ellipsis className={cn(styles.addr, styles.fiat)} text={addr} ellipsisInTheMiddle />
+                      <Ellipsis
+                        className={cn(styles.addr, styles.fiat)}
+                        text={addr}
+                        dataTestId="tx-to-address"
+                        ellipsisInTheMiddle
+                      />
                     ) : (
-                      <span className={cn(styles.addr, styles.fiat)}>{addr}</span>
+                      <span className={cn(styles.addr, styles.fiat)} data-testid="tx-to-address">
+                        {addr}
+                      </span>
                     );
                     return (
-                      <div key={addr} data-testid="tx-to-detail" className={cn(styles.addr, styles.detail)}>
-                        {addrName ? (
-                          <div className={styles.amount}>
-                            <span className={cn(styles.ada, styles.addrName)}>{addrName}</span>
-                            {address}
-                          </div>
-                        ) : (
-                          address
-                        )}
+                      <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
+                        {addressName && <Text.Body.Normal weight="$semibold">{addressName}</Text.Body.Normal>}
+                        {<Text.Address color={addressName ? 'secondary' : 'primary'}>{address}</Text.Address>}
+                        {renderAddressTag({
+                          address: addr,
+                          translations: getAddressTagTranslations(t),
+                          ownAddresses
+                        })}
                       </div>
                     );
                   })}
@@ -377,7 +388,7 @@ export const TransactionDetails = ({
             </div>
           ))}
           <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.activityDetails.status')}</div>
+            <div className={styles.title}>{t('core.activityDetails.status')}</div>
             {status && (
               <div data-testid="tx-status" className={styles.detail}>{`${status.charAt(0).toUpperCase()}${status.slice(
                 1
@@ -385,7 +396,7 @@ export const TransactionDetails = ({
             )}
           </div>
           <div data-testid="tx-date" className={cn(styles.details, styles.timestampContainer)}>
-            <div className={cn(styles.title, styles.timestamp)}>{t('package.core.activityDetails.timestamp')}</div>
+            <div className={cn(styles.title, styles.timestamp)}>{t('core.activityDetails.timestamp')}</div>
             <div data-testid="tx-timestamp" className={styles.detail}>
               <span>{includedDate}</span>
               <span>&nbsp;{includedTime}</span>
@@ -404,34 +415,34 @@ export const TransactionDetails = ({
           {fee && fee !== '-' && (
             <Box mb="$32" data-testid="tx-fee">
               <TransactionFee
-                tooltipInfo={t('package.core.activityDetails.transactionFeeInfo')}
+                tooltipInfo={t('core.activityDetails.transactionFeeInfo')}
                 fee={fee}
                 amountTransformer={amountTransformer}
                 coinSymbol={coinSymbol}
               />
             </Box>
           )}
-          {deposit && renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}
+          {deposit && renderDepositValueSection({ value: deposit, label: t('core.activityDetails.deposit') })}
           {depositReclaim &&
             renderDepositValueSection({
               value: depositReclaim,
-              label: t('package.core.activityDetails.depositReclaim')
+              label: t('core.activityDetails.depositReclaim')
             })}
         </div>
 
         {votingProcedures?.length > 0 && (
           <TxDetailList<TxDetailsVotingProceduresTitles>
             testId="voting-procedures"
-            title={t('package.core.activityDetails.votingProcedures')}
-            subTitle={t('package.core.activityDetails.votingProcedure')}
+            title={t('core.activityDetails.votingProcedures')}
+            subTitle={t('core.activityDetails.votingProcedure')}
             lists={translatedVotingProcedures}
             translations={{
-              voterType: t('package.core.activityDetails.votingProcedureTitles.voterType'),
-              drepId: t('package.core.activityDetails.votingProcedureTitles.drepId'),
-              voterCredential: t('package.core.activityDetails.votingProcedureTitles.voterCredential'),
-              voteTypes: t('package.core.activityDetails.votingProcedureTitles.voteTypes'),
-              anchorHash: t('package.core.activityDetails.votingProcedureTitles.anchorHash'),
-              anchorURL: t('package.core.activityDetails.votingProcedureTitles.anchorURL')
+              voterType: t('core.activityDetails.votingProcedureTitles.voterType'),
+              drepId: t('core.activityDetails.votingProcedureTitles.drepId'),
+              voterCredential: t('core.activityDetails.votingProcedureTitles.voterCredential'),
+              voteTypes: t('core.activityDetails.votingProcedureTitles.voteTypes'),
+              anchorHash: t('core.activityDetails.votingProcedureTitles.anchorHash'),
+              anchorURL: t('core.activityDetails.votingProcedureTitles.anchorURL')
             }}
             withSeparatorLine
           />
@@ -439,210 +450,180 @@ export const TransactionDetails = ({
         {proposalProcedures?.length > 0 && (
           <TxDetailList<TxDetailsProposalProceduresTitles>
             testId="proposal-procedures"
-            title={t('package.core.activityDetails.proposalProcedures')}
-            subTitle={t('package.core.activityDetails.proposalProcedure')}
+            title={t('core.activityDetails.proposalProcedures')}
+            subTitle={t('core.activityDetails.proposalProcedure')}
             lists={translatedProposalProcedures}
             withSeparatorLine
             translations={{
-              type: t('package.core.activityDetails.proposalProcedureTitles.type'),
-              deposit: t('package.core.activityDetails.proposalProcedureTitles.deposit'),
-              rewardAccount: t('package.core.activityDetails.proposalProcedureTitles.rewardAccount'),
-              anchorHash: t('package.core.activityDetails.proposalProcedureTitles.anchorHash'),
-              anchorURL: t('package.core.activityDetails.proposalProcedureTitles.anchorURL'),
-              governanceActionID: t('package.core.activityDetails.proposalProcedureTitles.governanceActionID'),
-              actionIndex: t('package.core.activityDetails.proposalProcedureTitles.actionIndex'),
-              newQuorumThreshold: t('package.core.activityDetails.proposalProcedureTitles.newQuorumThreshold'),
-              withdrawal: t('package.core.activityDetails.proposalProcedureTitles.withdrawal'),
-              withdrawalRewardAccount: t(
-                'package.core.activityDetails.proposalProcedureTitles.withdrawalRewardAccount'
-              ),
-              withdrawalAmount: t('package.core.activityDetails.proposalProcedureTitles.withdrawalAmount'),
-              constitutionAnchorURL: t('package.core.activityDetails.proposalProcedureTitles.constitutionAnchorURL'),
-              constitutionScriptHash: t('package.core.activityDetails.proposalProcedureTitles.constitutionScriptHash'),
-              coldCredentialHash: t('package.core.activityDetails.proposalProcedureTitles.coldCredentialHash'),
-              epoch: t('package.core.activityDetails.proposalProcedureTitles.epoch'),
-              membersToBeAdded: t('package.core.activityDetails.proposalProcedureTitles.membersToBeAdded'),
-              hash: t('package.core.activityDetails.proposalProcedureTitles.hash'),
-              membersToBeRemoved: t('package.core.activityDetails.proposalProcedureTitles.membersToBeRemoved'),
-              protocolVersionMajor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMajor'),
-              protocolVersionMinor: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionMinor'),
-              protocolVersionPatch: t('package.core.activityDetails.proposalProcedureTitles.protocolVersionPatch'),
-              maxTxExUnits: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'
-              ),
+              type: t('core.activityDetails.proposalProcedureTitles.type'),
+              deposit: t('core.activityDetails.proposalProcedureTitles.deposit'),
+              rewardAccount: t('core.activityDetails.proposalProcedureTitles.rewardAccount'),
+              anchorHash: t('core.activityDetails.proposalProcedureTitles.anchorHash'),
+              anchorURL: t('core.activityDetails.proposalProcedureTitles.anchorURL'),
+              governanceActionID: t('core.activityDetails.proposalProcedureTitles.governanceActionID'),
+              actionIndex: t('core.activityDetails.proposalProcedureTitles.actionIndex'),
+              newQuorumThreshold: t('core.activityDetails.proposalProcedureTitles.newQuorumThreshold'),
+              withdrawal: t('core.activityDetails.proposalProcedureTitles.withdrawal'),
+              withdrawalRewardAccount: t('core.activityDetails.proposalProcedureTitles.withdrawalRewardAccount'),
+              withdrawalAmount: t('core.activityDetails.proposalProcedureTitles.withdrawalAmount'),
+              constitutionAnchorURL: t('core.activityDetails.proposalProcedureTitles.constitutionAnchorURL'),
+              constitutionScriptHash: t('core.activityDetails.proposalProcedureTitles.constitutionScriptHash'),
+              coldCredentialHash: t('core.activityDetails.proposalProcedureTitles.coldCredentialHash'),
+              epoch: t('core.activityDetails.proposalProcedureTitles.epoch'),
+              membersToBeAdded: t('core.activityDetails.proposalProcedureTitles.membersToBeAdded'),
+              hash: t('core.activityDetails.proposalProcedureTitles.hash'),
+              membersToBeRemoved: t('core.activityDetails.proposalProcedureTitles.membersToBeRemoved'),
+              protocolVersionMajor: t('core.activityDetails.proposalProcedureTitles.protocolVersionMajor'),
+              protocolVersionMinor: t('core.activityDetails.proposalProcedureTitles.protocolVersionMinor'),
+              protocolVersionPatch: t('core.activityDetails.proposalProcedureTitles.protocolVersionPatch'),
+              maxTxExUnits: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'),
               maxBlockExUnits: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
               ),
-              networkGroup: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
-              economicGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'
-              ),
-              technicalGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.title'
-              ),
-              costModels: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.costModels'
-              ),
-              PlutusV1: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV1'
-              ),
-              PlutusV2: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV2'
-              ),
-              governanceGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.title'
-              ),
+              networkGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
+              economicGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'),
+              technicalGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.title'),
+              costModels: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.costModels'),
+              PlutusV1: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV1'),
+              PlutusV2: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV2'),
+              governanceGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.title'),
               dRepVotingThresholds: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.title'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.title'
               ),
-              memory: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
-              step: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
-              maxBBSize: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'
-              ),
-              maxTxSize: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'
-              ),
-              maxBHSize: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'
-              ),
-              maxValSize: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'
-              ),
+              memory: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
+              step: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
+              maxBBSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'),
+              maxTxSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'),
+              maxBHSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'),
+              maxValSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'),
               maxCollateralInputs: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
               ),
-              minFeeA: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
-              minFeeB: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
-              keyDeposit: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'
-              ),
-              poolDeposit: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'
-              ),
-              rho: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
-              tau: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
-              minPoolCost: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'
-              ),
+              minFeeA: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
+              minFeeB: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
+              keyDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'),
+              poolDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'),
+              rho: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
+              tau: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
+              minPoolCost: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'),
               coinsPerUTxOByte: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
               ),
-              a0: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.a0'),
-              eMax: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.eMax'),
-              nOpt: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.nOpt'),
+              a0: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.a0'),
+              eMax: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.eMax'),
+              nOpt: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.nOpt'),
               collateralPercentage: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.collateralPercentage'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.collateralPercentage'
               ),
-              prices: t('package.core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.prices'),
+              prices: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.prices'),
               govActionLifetime: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionLifetime'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionLifetime'
               ),
               govActionDeposit: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionDeposit'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionDeposit'
               ),
-              drepDeposit: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepDeposit'
-              ),
+              drepDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepDeposit'),
               drepActivity: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepActivity'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepActivity'
               ),
-              ccMinSize: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMinSize'
-              ),
+              ccMinSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMinSize'),
               ccMaxTermLength: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMaxTermLength'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMaxTermLength'
               ),
               motionNoConfidence: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.motionNoConfidence'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.motionNoConfidence'
               ),
               committeeNormal: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNormal'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNormal'
               ),
               committeeNoConfidence: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
               ),
               updateConstitution: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.updateConstitution'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.updateConstitution'
               ),
               hardForkInitiation: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.hardForkInitiation'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.hardForkInitiation'
               ),
               ppNetworkGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
               ),
               ppEconomicGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
               ),
               ppTechnicalGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
               ),
               ppGovernanceGroup: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
               ),
               treasuryWithdrawal: t(
-                'package.core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
+                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
               )
             }}
           />
         )}
         {certificates?.length > 0 && (
           <TxDetailList<TxDetailsCertificateTitles>
-            title={t('package.core.activityDetails.certificates')}
-            subTitle={t('package.core.activityDetails.certificate')}
+            title={t('core.activityDetails.certificates')}
+            subTitle={t('core.activityDetails.certificate')}
             testId="certificates"
             lists={translatedCertificates}
             withSeparatorLine
             translations={{
-              certificate: t('package.core.activityDetails.certificateTitles.certificate'),
-              certificateType: t('package.core.activityDetails.certificateTitles.certificateType'),
-              coldCredential: t('package.core.activityDetails.certificateTitles.coldCredential'),
-              hotCredential: t('package.core.activityDetails.certificateTitles.hotCredential'),
-              stakeKey: t('package.core.activityDetails.certificateTitles.stakeKey'),
-              drepId: t('package.core.activityDetails.certificateTitles.drepId'),
-              anchorURL: t('package.core.activityDetails.certificateTitles.anchorURL'),
-              anchorHash: t('package.core.activityDetails.certificateTitles.anchorHash'),
-              poolId: t('package.core.activityDetails.certificateTitles.poolId'),
-              drep: t('package.core.activityDetails.certificateTitles.drep'),
-              depositPaid: t('package.core.activityDetails.certificateTitles.depositPaid'),
-              depositPaidInfo: t('package.core.activityDetails.certificateTitles.depositPaidInfo'),
-              depositReturned: t('package.core.activityDetails.certificateTitles.depositReturned'),
-              depositReturnedInfo: t('package.core.activityDetails.certificateTitles.depositReturnedInfo')
+              certificate: t('core.activityDetails.certificateTitles.certificate'),
+              certificateType: t('core.activityDetails.certificateTitles.certificateType'),
+              coldCredential: t('core.activityDetails.certificateTitles.coldCredential'),
+              hotCredential: t('core.activityDetails.certificateTitles.hotCredential'),
+              stakeKey: t('core.activityDetails.certificateTitles.stakeKey'),
+              drepId: t('core.activityDetails.certificateTitles.drepId'),
+              anchorURL: t('core.activityDetails.certificateTitles.anchorURL'),
+              anchorHash: t('core.activityDetails.certificateTitles.anchorHash'),
+              poolId: t('core.activityDetails.certificateTitles.poolId'),
+              drep: t('core.activityDetails.certificateTitles.drep'),
+              depositPaid: t('core.activityDetails.certificateTitles.depositPaid'),
+              depositPaidInfo: t('core.activityDetails.certificateTitles.depositPaidInfo'),
+              depositReturned: t('core.activityDetails.certificateTitles.depositReturned'),
+              depositReturnedInfo: t('core.activityDetails.certificateTitles.depositReturnedInfo')
             }}
           />
         )}
         {addrInputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
-            title={t('package.core.activityDetails.inputs')}
+            title={t('core.activityDetails.inputs')}
             testId="tx-inputs"
             list={addrInputs}
             translations={{
-              address: t('package.core.activityDetails.address'),
-              sent: t('package.core.activityDetails.sent')
+              address: t('core.activityDetails.address'),
+              sent: t('core.activityDetails.sent')
             }}
             coinSymbol={coinSymbol}
             withSeparatorLine
             sendAnalytics={sendAnalyticsInputs}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         )}
         {addrOutputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
-            title={t('package.core.activityDetails.outputs')}
+            title={t('core.activityDetails.outputs')}
             testId="tx-outputs"
             list={addrOutputs}
             translations={{
-              address: t('package.core.activityDetails.address'),
-              sent: t('package.core.activityDetails.sent')
+              address: t('core.activityDetails.address'),
+              sent: t('core.activityDetails.sent')
             }}
             coinSymbol={coinSymbol}
             sendAnalytics={sendAnalyticsOutputs}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         )}
         {metadata?.length > 0 && (
           <div className={styles.metadataContainer}>
-            <div className={styles.metadataLabel}>{t('package.core.activityDetails.metadata')}</div>
+            <div className={styles.metadataLabel}>{t('core.activityDetails.metadata')}</div>
             <div className={styles.detail} data-testid="tx-metadata">
               {metadata?.map((item) => (
                 <div key={item.key} className={styles.detail} data-testid={`tx-metadata-row-${item.key}`}>

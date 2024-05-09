@@ -5,7 +5,7 @@ import * as Switch from '@radix-ui/react-switch';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
-import * as Typography from '../typography';
+import { Text } from '../text';
 
 import * as cx from './toggle-switch.css';
 
@@ -36,7 +36,7 @@ export const ToggleSwitch = ({
       className={disabled === true ? cx.disabled : undefined}
     >
       <label className={cx.label} htmlFor={id}>
-        <Typography.Body.Normal>{label}</Typography.Body.Normal>
+        <Text.Body.Normal color="secondary">{label}</Text.Body.Normal>
       </label>
       {icon !== undefined && <Box className={cx.iconContainer}>{icon}</Box>}
       <Switch.Root

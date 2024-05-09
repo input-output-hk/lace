@@ -12,7 +12,6 @@ import {
   UIThemeProvider
 } from '@providers';
 import { StoreProvider } from '@stores';
-import '@lib/i18n';
 import 'antd/dist/antd.css';
 import '../../styles/index.scss';
 import 'normalize.css';

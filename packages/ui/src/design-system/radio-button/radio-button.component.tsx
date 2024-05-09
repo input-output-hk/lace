@@ -11,7 +11,7 @@ import * as cx from './radio-button.css';
 export interface RadioButtonGroupOption {
   value: string;
   label: React.ReactNode;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: JSX.Element;
   onIconClick?: () => void;
   tooltipText?: string;
 }
@@ -41,7 +41,7 @@ export const RadioButtonGroup = ({
         onValueChange={onValueChange}
         className={cx.radioGroupRoot}
       >
-        {options.map(({ value, label, icon: Icon, onIconClick }) => {
+        {options.map(({ value, label, icon, onIconClick }) => {
           const hasLabel = Boolean(label);
 
           return (
@@ -60,6 +60,7 @@ export const RadioButtonGroup = ({
                   id={`radio-btn-control-id-${value}`}
                   value={value}
                   className={cx.radioGroupIndicatorWrapper}
+                  data-testid={`radio-btn-test-id-${value}`}
                 >
                   <RadixRadioGroup.Indicator
                     className={cx.radioGroupIndicator}
@@ -79,7 +80,7 @@ export const RadioButtonGroup = ({
                     </Box>
                   </label>
                 )}
-                {Icon !== undefined && value === selectedValue && (
+                {icon !== undefined && value === selectedValue && (
                   <Flex justifyContent="flex-end" className={cx.iconWrapper}>
                     <button
                       className={cx.iconButton}
@@ -88,7 +89,7 @@ export const RadioButtonGroup = ({
                       tabIndex={-1}
                       id={`radio-btn-sorting-id-${value}`}
                     >
-                      <Icon />
+                      {icon}
                     </button>
                   </Flex>
                 )}

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React from 'react';
 import { ErrorPane, truncate } from '@lace/common';
 import { Wallet } from '@lace/cardano';
@@ -11,7 +10,16 @@ import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
-import { TransactionType, DappTransactionSummary, TransactionAssets } from '@lace/ui';
+import {
+  TransactionType,
+  DappTransactionSummary,
+  TransactionAssets,
+  DappTransactionTextField,
+  Flex,
+  Text,
+  Box,
+  Divider
+} from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
@@ -27,9 +35,12 @@ export interface DappTransactionProps {
   fiatCurrencyCode?: string;
   fiatCurrencyPrice?: number;
   coinSymbol?: string;
+  expiresBy?: { utcDate: string; utcTime: string };
   /** tokens send to being sent to or from the user */
   fromAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
   toAddress: Map<Cardano.PaymentAddress, TokenTransferValue>;
+  ownAddresses?: string[];
+  addressToNameMap?: Map<string, string>;
   collateral?: bigint;
 }
 
@@ -57,6 +68,7 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
 
     const addressAssets = value.assets;
     for (const [, asset] of addressAssets) {
+      // NFTs are unique, so there is only a supply of 1
       if (asset.assetInfo.supply === BigInt(1)) {
         group.nfts.push(asset);
       } else {
@@ -110,7 +122,10 @@ export const DappTransaction = ({
   fiatCurrencyCode,
   fiatCurrencyPrice,
   coinSymbol,
-  dappInfo
+  dappInfo,
+  expiresBy,
+  ownAddresses = [],
+  addressToNameMap = new Map()
 }: DappTransactionProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -120,15 +135,29 @@ export const DappTransaction = ({
   const isFromAddressesEnabled = groupedFromAddresses.size > 0;
   const isToAddressesEnabled = groupedToAddresses.size > 0;
 
+  const expireByText = expiresBy ? (
+    <Flex flexDirection="column" alignItems="flex-end">
+      <span>{expiresBy.utcDate}</span>
+      <span>
+        {expiresBy.utcTime} {t('core.outputSummaryList.utc')}
+      </span>
+    </Flex>
+  ) : (
+    t('core.outputSummaryList.noLimit')
+  );
+
   return (
     <div>
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
         <DappTransactionHeader transactionType={getTxType(coins)} name={dappInfo.name} />
         <DappTransactionSummary
-          title={t('package.core.dappTransaction.transactionSummary')}
+          testId="dapp-transaction-summary-row"
+          title={t('core.dappTransaction.transactionSummary')}
+          adaTooltip={t('core.dappTransaction.adaTooltip')}
           cardanoSymbol={coinSymbol}
           transactionAmount={Wallet.util.lovelacesToAdaString(coins.toString())}
+          tooltip={t('core.dappTransaction.transactionSummaryTooltip')}
         />
         <div className={styles.transactionAssetsContainer}>
           {[...assets].map(([key, assetWithAmount]: [string, AssetInfoWithAmount]) => {
@@ -138,10 +167,16 @@ export const DappTransaction = ({
               undefined;
             return (
               <TransactionAssets
-                testId="dapp-transaction-amount-value"
+                testId="dapp-transaction-summary-row"
                 key={key}
                 imageSrc={imageSrc}
+                translations={{
+                  assetId: t('core.dappTransaction.assetId'),
+                  policyId: t('core.dappTransaction.policyId')
+                }}
                 balance={Wallet.util.calculateAssetBalance(assetWithAmount.amount, assetWithAmount.assetInfo)}
+                assetId={assetWithAmount.assetInfo.assetId}
+                policyId={assetWithAmount.assetInfo.policyId}
                 tokenName={truncate(getAssetTokenName(assetWithAmount) ?? '', charBeforeEllName, charAfterEllName)}
                 showImageBackground={imageSrc === undefined}
               />
@@ -149,8 +184,17 @@ export const DappTransaction = ({
           })}
         </div>
 
+        <Box mb="$20">
+          <Divider />
+        </Box>
+
+        <Box mb="$16">
+          <Text.Body.Normal weight="$semibold">{t('core.dappTransaction.additionalInformation')}</Text.Body.Normal>
+        </Box>
+
         {collateral !== undefined && collateral !== BigInt(0) && (
           <Collateral
+            testId="collateral"
             collateral={Wallet.util.lovelacesToAdaString(collateral.toString())}
             amountTransformer={amountTransformer({
               price: fiatCurrencyPrice,
@@ -162,11 +206,19 @@ export const DappTransaction = ({
           />
         )}
 
+        <div className={styles.depositContainer}>
+          <DappTransactionTextField
+            text={expireByText}
+            label={t('core.outputSummaryList.expiresBy')}
+            tooltip={t('core.outputSummaryList.expiresByTooltip')}
+          />
+        </div>
+
         {returnedDeposit !== BigInt(0) && (
           <TransactionFee
             fee={Wallet.util.lovelacesToAdaString(returnedDeposit.toString())}
             testId="returned-deposit"
-            label={t('package.core.dappTransaction.returnedDeposit')}
+            label={t('core.dappTransaction.returnedDeposit')}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
             displayFiat={false}
@@ -180,7 +232,7 @@ export const DappTransaction = ({
           <TransactionFee
             testId="deposit"
             fee={Wallet.util.lovelacesToAdaString(deposit.toString())}
-            label={t('package.core.dappTransaction.deposit')}
+            label={t('core.dappTransaction.deposit')}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
             displayFiat={false}
@@ -203,6 +255,8 @@ export const DappTransaction = ({
           groupedFromAddresses={groupedFromAddresses}
           groupedToAddresses={groupedToAddresses}
           coinSymbol={coinSymbol}
+          ownAddresses={ownAddresses}
+          addressToNameMap={addressToNameMap}
         />
       </div>
     </div>

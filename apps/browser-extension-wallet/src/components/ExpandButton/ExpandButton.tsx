@@ -16,9 +16,8 @@ const RenderTooltipIfMultiWallet = ({ children, label }: { children: ReactNode; 
 
 export const ExpandButton = ({ label, onClick }: { label: string; onClick: () => void }): React.ReactElement => (
   <RenderTooltipIfMultiWallet label={label}>
-    <a
+    <span
       onClick={onClick}
-      href="#"
       className={classnames(styles.button, {
         [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true'
       })}
@@ -26,6 +25,6 @@ export const ExpandButton = ({ label, onClick }: { label: string; onClick: () =>
     >
       <ExpandIcon className={styles.icon} />
       {process.env.USE_MULTI_WALLET !== 'true' && <span className={styles.text}>{label}</span>}
-    </a>
+    </span>
   </RenderTooltipIfMultiWallet>
 );

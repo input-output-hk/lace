@@ -68,7 +68,7 @@ export const WalletAddressItem = ({
       </div>
       <div className={cn(styles.listItemBlock, styles.addressBox)}>
         {isAddressWarningVisible && (
-          <Tooltip title={t('package.core.addressBook.addressHandleTooltip')}>
+          <Tooltip title={t('core.addressBook.addressHandleTooltip')}>
             <MissingIcon data-testid="address-list-item-warning" className={cn(styles.listItemWarning)} />
           </Tooltip>
         )}

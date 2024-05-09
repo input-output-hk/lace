@@ -6,7 +6,7 @@ import { Tooltip } from 'antd';
 import * as ControlButtons from '../../control-buttons';
 import { Flex } from '../../flex';
 import * as ProfilePicture from '../../profile-picture';
-import * as Text from '../../typography';
+import { Text } from '../../text';
 
 import * as cx from './profile-dropdown-account-item.css';
 
@@ -76,12 +76,13 @@ export const AccountItem = ({
       <Flex alignItems="center" gap="$8">
         <ProfilePicture.UserProfile
           imageSrc=""
-          fallback={accountNumber.toString()}
+          fallbackText={accountNumber.toString()}
           delayMs={0}
           data-testid="wallet-account-item-icon"
         />
         <Flex flexDirection="column">
           <Text.Label
+            color="secondary"
             weight="$medium"
             className={cx.accountLabel}
             data-testid="wallet-account-item-label"

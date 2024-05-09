@@ -59,6 +59,7 @@ When(/^I click on a transaction hash and save hash information$/, async () => {
 });
 
 When(/^I click on a transaction hash$/, async () => {
+  await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
   await TransactionDetailsPage.transactionDetailsHash.click();
 });
 

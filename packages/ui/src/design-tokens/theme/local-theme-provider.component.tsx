@@ -32,6 +32,7 @@ export const LocalThemeProvider = ({
   return (
     <ThemeContext.Provider value={value}>
       <div
+        data-theme={colorScheme}
         className={cs(cx.root, className, {
           [darkTheme]: colorScheme === ThemeColorScheme.Dark,
           [lightTheme]: colorScheme === ThemeColorScheme.Light,
