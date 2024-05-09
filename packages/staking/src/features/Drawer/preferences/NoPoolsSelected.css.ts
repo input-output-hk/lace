@@ -1,5 +1,5 @@
-import { style } from '@lace/ui';
-import { theme } from '../../theme';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 
 export const container = style({
   alignItems: 'center',
@@ -8,9 +8,9 @@ export const container = style({
 });
 
 export const icon = style({
-  fontSize: theme.spacing.$112,
+  fontSize: 112,
 });
 
-export const text = style({
-  color: theme.colors.$preferencesDrawerNoPoolsTextColor,
+export const text = sx({
+  color: '$preferencesDrawerNoPoolsTextColor',
 });

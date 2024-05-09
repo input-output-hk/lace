@@ -45,6 +45,7 @@ runs:
     - name: Build dist version
       shell: bash
       env:
+        NODE_OPTIONS: '--max_old_space_size=8192'
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
