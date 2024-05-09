@@ -68,13 +68,12 @@ export const Form = ({
         getReachedMaxAmountList({
           assets,
           tokensUsed,
-          spendableCoin,
           balance,
           cardanoCoin,
           exceed: true
         }) || []
       ),
-    [assets, balance, cardanoCoin, spendableCoin, tokensUsed]
+    [assets, balance, cardanoCoin, tokensUsed]
   );
 
   useEffect(() => {

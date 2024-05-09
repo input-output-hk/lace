@@ -169,7 +169,7 @@ export const useSelectedCoins = ({
 
     // Asset is cardano coin
     if (assetInputItem.id === cardanoCoin.id) {
-      const { availableADA, ...adaCoinProps } = getADACoinProperties(
+      const { availableADA, hasReachedMaxAmount, ...adaCoinProps } = getADACoinProperties(
         coinBalance,
         spendableCoin?.toString(),
         tokensUsed[cardanoCoin.id] || '0',
@@ -182,6 +182,7 @@ export const useSelectedCoins = ({
       return {
         ...commonCoinProps,
         ...adaCoinProps,
+        hasReachedMaxAmount: hasReachedMaxAmount && error !== COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR,
         coin: {
           id: cardanoCoin.id,
           ticker: cardanoCoin.symbol,

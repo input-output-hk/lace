@@ -6,7 +6,6 @@ import { useSpentBalances } from '../views/browser-view/features/send-transactio
 import { useObservable } from '@lace/common';
 import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-transaction/helpers';
 import { useWalletStore } from '@src/stores';
-import { useMaxAda } from './useMaxAda';
 import { UseTranslationResponse } from 'react-i18next';
 import type { TranslationKey } from '@lace/translation';
 
@@ -54,13 +53,11 @@ export const useInitializeTx = (
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const tokensUsed = useSpentBalances();
-  const spendableCoin = useMaxAda();
 
   const buildTransaction = useCallback(async () => {
     const reachedMaxAmountList = getReachedMaxAmountList({
       assets: assetsInfo,
       tokensUsed,
-      spendableCoin,
       balance,
       exceed: true,
       cardanoCoin
@@ -112,7 +109,6 @@ export const useInitializeTx = (
   }, [
     assetsInfo,
     tokensUsed,
-    spendableCoin,
     balance,
     cardanoCoin,
     hasInvalidOutputs,
