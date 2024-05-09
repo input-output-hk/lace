@@ -1,6 +1,5 @@
-import { sx } from '@lace/ui';
 import { recipe } from '@vanilla-extract/recipes';
-import { theme } from 'features/theme';
+import { sx, theme } from 'features/theme';
 
 export const dot = recipe({
   base: [
@@ -12,9 +11,9 @@ export const dot = recipe({
   ],
   variants: {
     level: {
-      high: sx({ backgroundColor: '$data_orange' }),
-      medium: sx({ backgroundColor: '$data_green' }),
-      veryHigh: sx({ backgroundColor: '$data_pink' }),
+      high: sx({ backgroundColor: '$stakePoolListCellDotHighColor' }),
+      medium: sx({ backgroundColor: '$stakePoolListCellDotMediumColor' }),
+      veryHigh: sx({ backgroundColor: '$stakePoolListCellDotVeryHighColor' }),
     },
   },
 });
