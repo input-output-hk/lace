@@ -1,9 +1,9 @@
-import { useAssetInfo, useRedirection } from '@hooks';
+import { useAssetInfo, useRedirection, useWalletAvatar } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './Nfts.module.scss';
-import { Button, Drawer, DrawerNavigation, useObservable } from '@lace/common';
+import { Button, Drawer, DrawerNavigation, toast, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { nftDetailSelector } from '@src/views/browser-view/features/nfts/selectors';
 import { NftDetail as NftDetailView } from '@lace/core';
@@ -23,6 +23,7 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
   } = useWalletStore();
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
+  const { setAvatar } = useWalletAvatar();
 
   const redirectToNfts = useRedirection(walletRoutePaths.nfts);
   const redirectToSend = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
@@ -42,6 +43,12 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     setSendInitialState(id, SEND_NFT_DEFAULT_AMOUNT);
     redirectToSend({ params: { id } });
+  };
+
+  const handleSetAsAvatar = (image: string) => {
+    setAvatar(image);
+    toast.notify({ text: t('core.nftDetail.avatarUpdated') });
+    void analytics.sendEventToPostHog(PostHogAction.NFTDetailSetAsAvatarClick);
   };
 
   return (
@@ -65,6 +72,7 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
           isPopup={appMode === APP_MODE_POPUP}
           amount={amount}
           title={<h2 className={styles.secondaryTitle}>{assetInfo.nftMetadata?.name ?? assetInfo.fingerprint}</h2>}
+          onSetAsAvatar={handleSetAsAvatar}
         />
       )}
     </Drawer>
