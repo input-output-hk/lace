@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import { Button } from '@lace/ui';
 import { TopUpWalletDialog } from './TopUpWalletDialog';
 import { useTranslation } from 'react-i18next';
-import { BANXA_URL } from './config';
+import { BANXA_LACE_URL } from './config';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
 
@@ -35,7 +35,7 @@ export const TopUpWalletButton = (): React.ReactElement => {
         triggerRef={dialogTriggerReference}
         onConfirm={() => {
           analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerContinueClick);
-          tabs.create({ url: BANXA_URL });
+          tabs.create({ url: BANXA_LACE_URL });
         }}
       />
     </>

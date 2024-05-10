@@ -17,8 +17,8 @@ export const CallToAction = forwardRef<HTMLButtonElement, Props>(
         ref={forwardReference}
         className={{
           container: classNames(cx.container, cx.button),
-          icon: cx.labelAndIcon,
-          label: cx.labelAndIcon,
+          icon: cx.label,
+          label: cx.label,
         }}
       />
     );

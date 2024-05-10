@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Box, Checkbox, Dialog, Text } from '@lace/ui';
+import React, { useCallback } from 'react';
+import { Box, Dialog, Text, TextLink } from '@lace/ui';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
-import { useAnalyticsContext } from '@providers';
-import { PostHogAction } from '@lace/common';
+import { tabs } from 'webextension-polyfill';
+import { BANXA_HOMEPAGE_URL } from './config';
 
 interface TopUpWalletDialogProps {
   open: boolean;
@@ -17,48 +17,35 @@ export const TopUpWalletDialog = ({
   onConfirm,
   triggerRef
 }: TopUpWalletDialogProps): React.ReactElement => {
-  const [agreed, setAgreed] = useState(false);
   const { t } = useTranslation();
-  const analytics = useAnalyticsContext();
+  const handleOpenTabBanxaHomepage = useCallback(() => {
+    tabs.create({ url: BANXA_HOMEPAGE_URL });
+  }, []);
 
   return (
-    <Dialog.Root
-      open={open}
-      setOpen={() => {
-        setAgreed(false);
-        onCancel();
-      }}
-      zIndex={1000}
-      onCloseAutoFocusRef={triggerRef}
-    >
+    <Dialog.Root open={open} setOpen={onCancel} zIndex={1000} onCloseAutoFocusRef={triggerRef}>
       <Dialog.Title>{t('browserView.assets.topupWallet.modal.title')}</Dialog.Title>
       <Dialog.Description>
-        <Box className={styles.scroll}>
-          <Text.Body.Normal weight="$medium">{t('browserView.assets.topupWallet.modal.content')}</Text.Body.Normal>
+        <Box className={styles.disclaimerFullWrapper}>
+          <Text.Body.Normal weight="$medium" color="secondary">
+            {t('browserView.assets.topupWallet.disclaimer.full.part1')}
+          </Text.Body.Normal>
+          <TextLink
+            onClick={handleOpenTabBanxaHomepage}
+            label={t('browserView.assets.topupWallet.disclaimer.full.banxaLinkCaption')}
+          />
+          <Text.Body.Normal weight="$medium" color="secondary">
+            {t('browserView.assets.topupWallet.disclaimer.full.part2')}
+          </Text.Body.Normal>
+          <TextLink
+            onClick={handleOpenTabBanxaHomepage}
+            label={t('browserView.assets.topupWallet.disclaimer.full.banxaLinkCaption')}
+          />
         </Box>
       </Dialog.Description>
-      <Checkbox
-        label={t('browserView.assets.topupWallet.modal.checkbox')}
-        onClick={() => {
-          !agreed && analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerAgreeClick);
-          setAgreed((prev) => !prev);
-        }}
-        checked={agreed}
-      />
       <Dialog.Actions>
-        <Dialog.Action
-          cancel
-          label={t('browserView.assets.topupWallet.modal.cancel')}
-          onClick={() => {
-            setAgreed(false);
-            onCancel();
-          }}
-        />
-        <Dialog.Action
-          label={t('browserView.assets.topupWallet.modal.confirm')}
-          onClick={onConfirm}
-          disabled={!agreed}
-        />
+        <Dialog.Action cancel label={t('browserView.assets.topupWallet.modal.goBack')} onClick={onCancel} />
+        <Dialog.Action label={t('browserView.assets.topupWallet.modal.continue')} onClick={onConfirm} />
       </Dialog.Actions>
     </Dialog.Root>
   );

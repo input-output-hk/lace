@@ -20,3 +20,11 @@
   padding: 0 4px;
   color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
 }
+
+.disclaimerShort {
+  color: var(--light-mode-mid-grey, var(--dark-mode-mid-grey, #c0c0c0)) !important;
+}
+
+.disclaimerFullWrapper {
+  text-align: center;
+}

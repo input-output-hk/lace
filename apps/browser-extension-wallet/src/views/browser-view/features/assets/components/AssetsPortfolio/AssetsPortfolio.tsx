@@ -22,7 +22,7 @@ import { AssetPortfolioContent } from './AssetPortfolioContent';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
 import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
-import { Flex } from '@lace/ui';
+import { Flex, Text } from '@lace/ui';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -124,8 +124,16 @@ export const AssetsPortfolio = ({
         />
       )}
       {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && (
-        <Flex w={'$214'} flexDirection={'column'} alignItems={'stretch'}>
-          <TopUpWalletButton />
+        <Flex flexDirection="column" gap="$10">
+          <Text.Body.Normal weight="$medium" color="secondary">
+            {t('browserView.assets.topupWallet.buyButton.title')}
+          </Text.Body.Normal>
+          <Flex flexDirection="column" alignItems="stretch" w="$294">
+            <TopUpWalletButton />
+          </Flex>
+          <Text.Label weight="$medium" className={styles.topupWalletDisclaimerShort}>
+            {t('browserView.assets.topupWallet.disclaimer.short')}
+          </Text.Label>
         </Flex>
       )}
       <AssetPortfolioContent
