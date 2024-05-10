@@ -32,6 +32,10 @@ const data: ComponentProps<typeof OutputSummary> = {
     {
       assetAmount: '1234 FT',
       fiatAmount: '100 USD'
+    },
+    {
+      assetAmount: '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff198775348494241 FT',
+      fiatAmount: '1 USD'
     }
   ],
   recipientAddress: ownAddress,
