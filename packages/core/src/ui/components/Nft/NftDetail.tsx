@@ -1,11 +1,11 @@
-import { InlineInfoList, LabeledInfo, addEllipsis } from '@lace/common';
+import { Ellipsis, InlineInfoList, LabeledInfo } from '@lace/common';
 import React, { ReactNode } from 'react';
 import styles from './NftDetail.module.scss';
 import { NftImage } from './NftImage';
 import { TranslationsFor } from '@ui/utils/types';
 import { Breadcrumb } from 'antd';
 import { FolderOutlined, RightOutlined } from '@ant-design/icons';
-import { Box, ControlButton, Flex, Tooltip } from '@lace/ui';
+import { Box, ControlButton, Flex } from '@lace/ui';
 import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 
 export interface NftDetailProps {
@@ -21,7 +21,6 @@ export interface NftDetailProps {
 }
 
 const JSON_INDENTATION = 2;
-const ELLIPSIS_LENGTH = 5;
 
 const parseAttributes = (attributes: Record<string, string | unknown[] | Record<string, unknown>>) =>
   Object.entries(attributes).map(
@@ -30,8 +29,6 @@ const parseAttributes = (attributes: Record<string, string | unknown[] | Record<
       value: typeof value === 'string' ? value : JSON.stringify(value, undefined, JSON_INDENTATION)
     })
   );
-
-const parseFolderName = (folder: string) => addEllipsis(folder, ELLIPSIS_LENGTH, ELLIPSIS_LENGTH);
 
 export const NftDetail = ({
   title,
@@ -79,7 +76,7 @@ export const NftDetail = ({
                   </Breadcrumb.Item>
                   {folder && (
                     <Breadcrumb.Item>
-                      <Tooltip label={folder}>{parseFolderName(folder)}</Tooltip>
+                      <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} />
                     </Breadcrumb.Item>
                   )}
                 </Breadcrumb>
@@ -87,11 +84,7 @@ export const NftDetail = ({
                 <Flex justifyContent="space-between" gap="$1">
                   <Box>Root</Box>
                   {folder && <Box px="$8">{'>'}</Box>}
-                  {folder && (
-                    <Tooltip label={folder}>
-                      <Box>{parseFolderName(folder)}</Box>
-                    </Tooltip>
-                  )}
+                  {folder && <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} />}
                 </Flex>
               )
             }
