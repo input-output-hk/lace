@@ -6,7 +6,7 @@ Feature: ADA handle - popup view
     And I am on NFTs popup page
     And I use a wallet with ADA handle "$handletosend2" NFT in popup mode
 
-  @LW-8808 @Pending
+  @LW-8808 @E2E @Pending
   @issue=LW-8793
   @issue=LW-9885
   Scenario: Popup view - Ada handle transfer e2e, review flow
