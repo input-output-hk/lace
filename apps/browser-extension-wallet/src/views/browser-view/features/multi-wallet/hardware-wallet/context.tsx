@@ -4,7 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useHistory } from 'react-router-dom';
 import { useWalletManager } from '@hooks';
 import { Providers, ErrorDialogCode } from './types';
-import { WalletType } from '@cardano-sdk/web-extension';
+import { WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
 import { walletRoutePaths } from '@routes';
 import { useWrapWithTimeout } from './useWrapWithTimeout';
 import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -97,6 +97,7 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
         break;
       }
       case WalletConnectStep.Create: {
+        history.push(walletRoutePaths.assets);
         break;
       }
     }
@@ -179,15 +180,18 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });
 
-      let errorCode: ErrorDialogCode = ErrorDialogCode.Generic;
-      const ledgerPkRejection =
-        error.message.includes('Failed to export extended account public key') &&
-        error.message.includes('Action rejected by user');
-      const trezorPkRejection = error.message.includes('Trezor transport failed');
-      if (ledgerPkRejection || trezorPkRejection) {
-        errorCode = ErrorDialogCode.PublicKeyExportRejected;
+      const walletDuplicatedError = error instanceof WalletConflictError;
+      if (!walletDuplicatedError) {
+        let errorCode: ErrorDialogCode = ErrorDialogCode.Generic;
+        const ledgerPkRejection =
+          error.message.includes('Failed to export extended account public key') &&
+          error.message.includes('Action rejected by user');
+        const trezorPkRejection = error.message.includes('Trezor transport failed');
+        if (ledgerPkRejection || trezorPkRejection) {
+          errorCode = ErrorDialogCode.PublicKeyExportRejected;
+        }
+        setErrorDialogCode(errorCode);
       }
-      setErrorDialogCode(errorCode);
       closeConnection();
       throw error;
     }

@@ -20,7 +20,7 @@ enum CreationState {
 export const Create: VFC = () => {
   const { t } = useTranslation();
   const [status, setStatus] = useState<CreationState>(CreationState.Idle);
-  const { createWallet } = useHardwareWallet();
+  const { createWallet, next } = useHardwareWallet();
 
   const walletSetupCreateStepTranslations = useMemo(() => makeWalletSetupCreateStepTranslations(t), [t]);
 
@@ -36,8 +36,10 @@ export const Create: VFC = () => {
           toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
         }
       }
+
+      next();
     })();
-  }, [createWallet, status, t]);
+  }, [createWallet, next, status, t]);
 
   return <WalletSetupHWCreationStep translations={walletSetupCreateStepTranslations} />;
 };
