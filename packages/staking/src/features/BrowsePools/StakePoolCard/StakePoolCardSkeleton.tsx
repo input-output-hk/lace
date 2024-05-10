@@ -2,6 +2,7 @@
 import { Card } from '@lace/ui';
 import cn from 'classnames';
 import * as styles from './StakePoolCard.css';
+import { FadeVariant } from './StakePoolCard.css';
 
 interface Props {
   index?: number;
@@ -10,9 +11,14 @@ interface Props {
 
 const defaultFadeScale = 4;
 
-export const StakePoolCardSkeleton = ({ index = 0, fadeScale = defaultFadeScale }: Props) => (
-  <Card.Greyed
-    className={cn(styles.card, styles.skeleton({ [`fade${fadeScale}`]: index % (fadeScale + 1) }))}
-    data-testid="stake-pool-card-skeleton"
-  />
-);
+export const StakePoolCardSkeleton = ({ index = 0, fadeScale = defaultFadeScale }: Props) => {
+  // this is necessary because computed key in `styles.skeleton({ [`fade${fadeScale}`]: 0 })` isn't type-safe for some reason
+  const skeletonVariant: FadeVariant = `fade${fadeScale}`;
+
+  return (
+    <Card.Greyed
+      className={cn(styles.card, styles.skeleton({ [skeletonVariant]: index % fadeScale }))}
+      data-testid="stake-pool-card-skeleton"
+    />
+  );
+};

@@ -48,28 +48,22 @@ export const skeleton = recipe({
     },
   ],
   variants: {
+    fade2: {
+      0: style({ opacity: '1' }),
+      1: style({ opacity: '0.75' }),
+    },
     fade3: {
-      0: style({ opacity: '0.75' }),
-      1: style({ opacity: '0.5' }),
-      2: style({ opacity: '0.25' }),
-      3: style({ opacity: '0.5' }),
+      0: style({ opacity: '1' }),
+      1: style({ opacity: '0.75' }),
+      2: style({ opacity: '0.5' }),
     },
     fade4: {
       0: style({ opacity: '1' }),
       1: style({ opacity: '0.75' }),
       2: style({ opacity: '0.5' }),
       3: style({ opacity: '0.25' }),
-      4: style({ opacity: '0.5' }),
-    },
-    fade5: {
-      0: style({ opacity: '1' }),
-      1: style({ opacity: '0.75' }),
-      2: style({ opacity: '0.5' }),
-      3: style({ opacity: '0.25' }),
-      4: style({ opacity: '0.5' }),
-      5: style({ opacity: '0.75' }),
     },
   },
 });
 
-export type fadeVariants = Required<NonNullable<RecipeVariants<typeof skeleton>>>;
+export type FadeVariant = keyof NonNullable<RecipeVariants<typeof skeleton>>;

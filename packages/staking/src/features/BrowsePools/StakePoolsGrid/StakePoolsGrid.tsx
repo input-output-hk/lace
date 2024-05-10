@@ -43,8 +43,8 @@ export const StakePoolsGrid = ({
 
   const showEmptyPlaceholder = !showSkeleton && pools.length === 0;
   const matchTwoColumnsLayout = useMediaQuery({ maxWidth: 668 });
-  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1024, minWidth: 669 });
-  const matchFourColumnsLayout = useMediaQuery({ minWidth: 1025 });
+  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1660, minWidth: 668 });
+  const matchFourColumnsLayout = useMediaQuery({ minWidth: 1660 });
 
   const numberOfItemsPerMediaQueryMap: Partial<Record<StakePoolsGridColumnCount, boolean>> = useMemo(
     () => ({
