@@ -43,7 +43,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
 
   useEffect(() => () => setIsDropdownMenuOpen(false), [setIsDropdownMenuOpen]);
 
-  const walletName = cardanoWallet.source.wallet.metadata.name;
+  const walletName = cardanoWallet?.source?.wallet?.metadata?.name;
 
   const titleCharBeforeEll = 10;
   const titleCharAfterEll = 0;

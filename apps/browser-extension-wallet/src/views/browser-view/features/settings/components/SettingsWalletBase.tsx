@@ -64,7 +64,8 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const { t } = useTranslation();
   const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
-  const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
+
+  const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
 
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
   const backgroundServices = useBackgroundServiceAPIContext();
