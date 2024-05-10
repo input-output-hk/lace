@@ -12,9 +12,9 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_AUTOCOMPLETE_DROPDOWN = '.ant-select-dropdown';
   private MNEMONIC_WORD_AUTOCOMPLETE_OPTIONS = '.ant-select-item-option-content';
   private MNEMONIC_ERROR_MESSAGE = '[data-testid="passphrase-error"]';
-  private MNEMONIC_LENGTH_SELECTOR_12 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="12"]';
-  private MNEMONIC_LENGTH_SELECTOR_15 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="15"]';
-  private MNEMONIC_LENGTH_SELECTOR_24 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="24"]';
+  private MNEMONIC_LENGTH_SELECTOR_12 = '[data-testid="recovery-phrase-12"]';
+  private MNEMONIC_LENGTH_SELECTOR_15 = '[data-testid="recovery-phrase-15"]';
+  private MNEMONIC_LENGTH_SELECTOR_24 = '[data-testid="recovery-phrase-24"]';
   private WATCH_VIDEO_LINK = '[data-testid="watch-video-link"]';
   private COPY_TO_CLIPBOARD_BUTTON = '[data-testid="copy-to-clipboard-button"]';
   private PASTE_FROM_CLIPBOARD_BUTTON = '[data-testid="paste-from-clipboard-button"]';
