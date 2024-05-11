@@ -1,4 +1,4 @@
-import { initI18n } from 'features/i18n';
+import '@lace/translation';
 import { StakingPage } from 'features/staking';
 import { SetupBase } from 'features/staking/Setup/SetupBase';
 import { PoolsFilter, QueryStakePoolsFilters, activePageSelector, useDelegationPortfolioStore } from 'features/store';
@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useQueryStakePools } from '../hooks';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 import { SortAndFilterTab } from './types';
-initI18n();
 
 export const BrowsePoolsPreferencesCardContainer = ({ theme }: { theme: 'light' | 'dark' }) => {
   const activePage = useDelegationPortfolioStore(activePageSelector);
