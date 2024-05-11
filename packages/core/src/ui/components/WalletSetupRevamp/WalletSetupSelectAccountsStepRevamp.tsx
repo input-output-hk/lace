@@ -1,10 +1,10 @@
 import React, { ChangeEvent, useMemo, useState } from 'react';
 import styles from './WalletSetupSelectAccountsStepRevamp.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 import { Input } from '@lace/common';
 import { Box, SelectGroup } from '@lace/ui';
 import { WalletTimelineSteps } from '../WalletSetup';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
+import { useTranslation } from 'react-i18next';
 
 const INITIAL_WALLET_NAME = 'Wallet 1';
 const nameShouldHaveRightLengthRegex = /^.{1,20}$/;
@@ -29,7 +29,7 @@ export const WalletSetupSelectAccountsStepRevamp = ({
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>('0');
   const [walletName, setWalletName] = useState(INITIAL_WALLET_NAME);
   const [isDirty, setIsDirty] = useState(false);
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const isNameValid = useMemo(() => validateName(walletName), [walletName]);
 

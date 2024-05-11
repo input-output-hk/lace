@@ -2,9 +2,9 @@ import React from 'react';
 import { Typography } from 'antd';
 
 import styles from './DappTransactionHeader.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 
 import { TransactionType, SummaryExpander, Card } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -26,7 +26,7 @@ export interface DappTransactionHeaderProps {
 }
 
 export const DappTransactionHeader = ({ transactionType, name }: DappTransactionHeaderProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <div data-testid="transaction-type-container">

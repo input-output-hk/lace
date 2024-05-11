@@ -581,7 +581,7 @@
   "core.walletSetupSelectAccountsStep.walletName": "Wallet name",
   "core.walletSetupStep.allDone": "All done",
   "core.walletSetupStep.back": "Back",
-  "core.walletSetupStep.connectWallet": "Connect wallet",
+  "core.walletSetupStep.connectWallet": "Connect device",
   "core.walletSetupStep.enterWallet": "Enter wallet",
   "core.walletSetupStep.legalAndAnalytics": "Legal & analytics",
   "core.walletSetupStep.nameWallet": "Name wallet",

@@ -4,7 +4,7 @@ import DefaultActivityImage from '../../assets/images/token-default-logo.png';
 import { ReactComponent as SelectedIcon } from '../../assets/icons/check-token-icon.svg';
 
 import styles from './TokenItem.module.scss';
-import { useTranslate } from '@src/ui/hooks';
+import { useTranslation } from 'react-i18next';
 
 export interface TokenItemProps {
   amount: string;
@@ -25,7 +25,7 @@ export const TokenItem = ({
   selected,
   logo = DefaultActivityImage
 }: TokenItemProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const [isDeselectVisible, setDeselectVisibility] = useState(false);
 
   const handleMouseIn = () => setDeselectVisibility(true);

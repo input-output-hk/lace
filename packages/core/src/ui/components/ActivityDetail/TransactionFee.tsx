@@ -1,6 +1,6 @@
 import React from 'react';
-import { useTranslate } from '@src/ui/hooks';
 import { TransactionSummary } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 
 export interface TransactionFeeProps {
   fee: string;
@@ -24,7 +24,7 @@ export const TransactionFee = ({
   displayFiat,
   highlightPositiveAmount
 }: TransactionFeeProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <TransactionSummary.Amount

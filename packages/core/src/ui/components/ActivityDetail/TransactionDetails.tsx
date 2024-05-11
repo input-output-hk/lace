@@ -4,7 +4,6 @@ import cn from 'classnames';
 
 import { Ellipsis, toast } from '@lace/common';
 import { Box, Text } from '@lace/ui';
-import { useTranslate } from '@ui/hooks';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 
 import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
@@ -24,6 +23,7 @@ import {
   TransactionActivityType
 } from './types';
 import { Collateral, CollateralStatus } from './Collateral';
+import { useTranslation } from 'react-i18next';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -138,7 +138,7 @@ export const TransactionDetails = ({
   certificates,
   collateral
 }: TransactionDetailsProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const isSending = status === ActivityStatus.PENDING;
   const isSuccess = status === ActivityStatus.SUCCESS;

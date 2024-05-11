@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { Tooltip, Input } from 'antd';
 import { Button, getTextWidth } from '@lace/common';
-import { useTranslate } from '@src/ui/hooks/useTranslate';
 import { ReactComponent as Chevron } from '../../assets/icons/chevron-right.component.svg';
 import styles from './AssetInput.module.scss';
 import { validateNumericValue } from '@src/ui/utils/validate-numeric-value';
 import { sanitizeNumber } from '@ui/utils/sanitize-number';
+import { useTranslation } from 'react-i18next';
 
 const isSameNumberFormat = (num1: string, num2: string) => {
   if (!num1 || !num2) return false;
@@ -103,7 +103,7 @@ export const AssetInput = ({
     }
   }, [compactValue, value, focused]);
 
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsInvalid(invalid);
