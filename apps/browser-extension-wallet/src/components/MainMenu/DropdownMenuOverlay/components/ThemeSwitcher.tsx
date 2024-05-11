@@ -9,7 +9,7 @@ import MoonIcon from '../../../../assets/icons/moon.component.svg';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { themes, useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 type ThemeAnalyticsEvents<T> = Record<themes, T>;
 

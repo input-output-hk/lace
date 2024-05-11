@@ -2,7 +2,7 @@ import React, { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { Input } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './NameForm.module.scss';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 interface GeneralSettingsDrawerProps {
   usedFolderNames: Array<string>;

@@ -21,7 +21,7 @@ const mockUseSpentBalances = jest.fn().mockReturnValue({});
 /* eslint-disable import/imports-first */
 import { renderHook } from '@testing-library/react-hooks';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { UseSelectedCoinsProps, useSelectedCoins } from '../useSelectedCoins';
 import { COIN_SELECTION_ERRORS } from '@hooks/useInitializeTx';
 import { mockAsset } from '@src/utils/mocks/test-helpers';

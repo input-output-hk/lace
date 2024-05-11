@@ -15,7 +15,7 @@ import {
 import { useWalletStore } from '@src/stores';
 import { ActionableAlert, Button, MultiStepProgressLine, DrawerHeader, DrawerNavigation, Drawer } from '@lace/common';
 import classnames from 'classnames';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 const votingPhases = ['registration', 'snapshot', 'voting'] as const;
 type VotingPhase = typeof votingPhases[number];

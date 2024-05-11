@@ -52,6 +52,7 @@
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
     "@lace/staking": "0.1.0",
+    "@lace/translation": "0.1.0",
     "@lace/ui": "^0.1.0",
     "@react-rxjs/core": "^0.9.8",
     "@react-rxjs/utils": "^0.9.5",

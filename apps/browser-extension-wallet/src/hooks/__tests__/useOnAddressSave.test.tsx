@@ -15,7 +15,7 @@ const mockSendEventToPostHog = jest.fn();
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { useOnAddressSave } from '../useOnAddressSave';
 import React from 'react';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';

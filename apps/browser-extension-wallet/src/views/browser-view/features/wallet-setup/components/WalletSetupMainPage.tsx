@@ -1,12 +1,7 @@
 import React, { ReactElement, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { WalletSetupLayout, WarningModal } from '@views/browser/components';
-import {
-  AnalyticsConfirmationBanner,
-  useTranslate,
-  WalletAnalyticsInfo,
-  WalletSetupOptionsStepRevamp
-} from '@lace/core';
+import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, WalletSetupOptionsStepRevamp } from '@lace/core';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
 import { walletRoutePaths } from '@routes';
 import {
@@ -27,7 +22,7 @@ const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
 export const WalletSetupMainPage = (): ReactElement => {
   const history = useHistory();
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
-  const { t: translate } = useTranslate();
+  const { t: translate } = useTranslation();
 
   const analytics = useAnalyticsContext();
   const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
@@ -63,6 +58,7 @@ export const WalletSetupMainPage = (): ReactElement => {
               target="_blank"
               className={styles.link}
               data-testid="agreement-terms-of-service-link"
+              rel="noreferrer"
             />
           ),
           a2: (
@@ -71,6 +67,7 @@ export const WalletSetupMainPage = (): ReactElement => {
               target="_blank"
               className={styles.link}
               data-testid="agreement-privacy-policy-link"
+              rel="noreferrer"
             />
           )
         }}

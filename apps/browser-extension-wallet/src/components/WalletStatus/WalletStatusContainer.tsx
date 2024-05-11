@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSyncStatus } from '@src/stores';
 import { WalletStatus, Status } from './WalletStatus';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 const DEFAULT_WALLET_STATUS: { status: Status; text: TranslationKey } = {
   status: Status.SYNCING,

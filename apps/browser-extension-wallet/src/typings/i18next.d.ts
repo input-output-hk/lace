@@ -1,5 +1,5 @@
 import 'i18next';
-import { Translations } from '../lib/translations/types';
+import type { Translations } from '@lace/translation';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
