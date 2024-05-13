@@ -1,5 +1,6 @@
-import { style, sx } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
+import { sx } from 'features/theme';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { theme } from '../../theme';
 import { STAKE_POOL_CARD_HEIGHT } from './constants';
@@ -33,8 +34,8 @@ export const title = style([
   },
 ]);
 
-export const cardSelected = style({
-  borderColor: theme.colors.$poolCardSelectedBorderColor,
+export const cardSelected = sx({
+  borderColor: '$poolCardSelectedBorderColor',
 });
 
 export const skeleton = recipe({

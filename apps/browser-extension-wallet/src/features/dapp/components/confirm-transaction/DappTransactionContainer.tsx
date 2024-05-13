@@ -23,6 +23,7 @@ import { useCurrencyStore, useAppSettingsContext } from '@providers';
 import { logger, walletRepository } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 import { AddressBookSchema, useDbStateValue } from '@lib/storage';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 
@@ -83,6 +84,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
     const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
     const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+    const eraSummaries = useObservable(inMemoryWallet?.eraSummaries$);
     const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
 
     useEffect(() => {
@@ -153,6 +155,7 @@ export const DappTransactionContainer = withAddressBookContext(
             errorMessage={errorMessage}
             toAddress={toAddressTokens}
             collateral={txCollateral}
+            expiresBy={eraSlotDateTime(eraSummaries, tx.body.validityInterval?.invalidHereafter)}
             ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
             addressToNameMap={addressToNameMap}
           />

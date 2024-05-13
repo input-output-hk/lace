@@ -19,7 +19,7 @@ export const StakePoolsListRowSkeleton = <E extends string>({
   <div
     data-testid="stake-pool-list-row-skeleton"
     className={cn(styles.row, {
-      [styles.selectable]: withSelection,
+      [styles.selectableRow]: withSelection,
     })}
   >
     {withSelection && <Box />}
