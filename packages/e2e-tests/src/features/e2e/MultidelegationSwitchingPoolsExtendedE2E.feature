@@ -71,11 +71,13 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
+    And I navigate to Transactions extended page
+    Then I can see transaction 1 with type "Delegation"
+    And I navigate to Staking extended page
     And I open Overview tab
     And I wait until "-" pool is on "Your pools" list
     And I save identifiers of stake pools currently in use
     And I navigate to Transactions extended page
-    Then I can see transaction 1 with type "Delegation"
     When I click on a transaction: 1
     Then The Tx details are displayed for Staking without metadata
 
