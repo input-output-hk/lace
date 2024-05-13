@@ -6,7 +6,7 @@ class AssetInputAssert {
   async assertSeeAssetInput(index = 1) {
     const assetInput = new AssetInput(index);
     await assetInput.container.waitForDisplayed();
-    await assetInput.assetAddButton.waitForStable();
+    await assetInput.assetAddButton.waitForDisplayed();
     expect(await assetInput.assetAddButton.getText()).to.equal(await t('browserView.transaction.send.advanced.asset'));
   }
 }

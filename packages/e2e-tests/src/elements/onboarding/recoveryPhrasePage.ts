@@ -65,7 +65,6 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   }
 
   async selectMnemonicLength(length: RecoveryPhrase): Promise<void> {
-    await this.mnemonicLengthSelector12.waitForClickable();
     switch (length) {
       case '12':
         await this.mnemonicLengthSelector12.click();

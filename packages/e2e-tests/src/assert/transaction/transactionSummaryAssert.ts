@@ -81,7 +81,6 @@ class TransactionSummaryAssert {
     expect(await TransactionSummaryPage.sendingTitle(bundleIndex + 1).getText()).to.equal(
       await t('core.outputSummaryList.sending')
     );
-    await TransactionSummaryPage.recipientAddressLabel(bundleIndex + 1).scrollIntoView();
     await TransactionSummaryPage.recipientAddressLabel(bundleIndex + 1).waitForDisplayed();
     expect(await TransactionSummaryPage.recipientAddressLabel(bundleIndex + 1).getText()).to.equal(
       await t('core.outputSummaryList.recipientAddress')
