@@ -104,6 +104,15 @@ export const Form = ({
     !spendableCoin ||
     !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length;
 
+  const utxoDepletedMsg = (
+    <>
+      <Text.Button>{t('browserView.transaction.send.utxoDepletedBannerErrorText')}</Text.Button>
+      {spendableCoin > 0 && (
+        <Text.Button> {t('browserView.transaction.send.utxoDepletedBannerMaxButtonText')}</Text.Button>
+      )}
+    </>
+  );
+
   return (
     <Skeleton loading={isLoading}>
       {getCustomSubmitApiForNetwork(environmentName).status && (
@@ -112,7 +121,7 @@ export const Form = ({
       {error === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR && (
         <Banner
           withIcon
-          message={<Text.Button>{t('browserView.transaction.send.utxoDepletedBannerText')}</Text.Button>}
+          message={utxoDepletedMsg}
           customIcon={
             <Text.Label color="warning">
               <WarningIconCircle />
