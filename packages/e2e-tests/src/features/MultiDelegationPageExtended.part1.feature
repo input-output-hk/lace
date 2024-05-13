@@ -27,6 +27,7 @@ Feature: Staking Page - Extended View
     And I switch to list view on "Browse pools" tab
     Then I see the stake pool search control with appropriate content
 
+  #  TODO: update to match LW-10410 when ready
   @LW-8448 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
@@ -37,14 +38,14 @@ Feature: Staking Page - Extended View
     And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
     Examples:
       | stake_pool_search_term | number_of_results | stake_pool_ticker |
-      | a Ocean                | 1                 | OCEAN             |
-      | a ocean                | 1                 | OCEAN             |
-      | NED#                   | 0                 |                   |
-      | PAN                    | 1                 | PANL              |
+      | a Ocean                | 3                 | OCEAN             |
+      | a ocean                | 3                 | OCEAN             |
+      | ABC#                   | 0                 |                   |
+      | HUA                    | 1                 | HUADA             |
       | 123456                 | 0                 |                   |
-      | WO                     | 2                 | WOOF              |
+      | ZZZ                    | 2                 | ZZZZX             |
       | £££                    | 0                 |                   |
-      | Amso                   | 0                 |                   |
+      | Abcde                  | 0                 |                   |
 
   @LW-8448 @Mainnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content

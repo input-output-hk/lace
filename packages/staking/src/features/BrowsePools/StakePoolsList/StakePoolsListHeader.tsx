@@ -15,7 +15,7 @@ export interface TableHeaders {
 
 export type StakePoolsListHeaderProps = {
   setActiveSort: (props: StakePoolSortOptions) => void;
-  activeSort: StakePoolSortOptions;
+  activeSort?: StakePoolSortOptions;
 };
 
 export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsListHeaderProps) => {

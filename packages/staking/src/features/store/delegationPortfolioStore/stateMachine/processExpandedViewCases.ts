@@ -197,6 +197,8 @@ export const processExpandedViewCases: Handler = (params) =>
             ({ state, command: { data } }) => ({
               ...state,
               searchQuery: data,
+              sortField: undefined,
+              sortOrder: undefined,
             })
           ),
           SetSort: handler<SetSort, StateBrowsePools, StateBrowsePools>(({ state, command: { data } }) => ({

@@ -16,7 +16,7 @@ export type StakePoolsListProps = {
   selectedPools: StakePoolDetails[];
   loadMoreData: (range: ListRange) => void;
   setActiveSort: (props: StakePoolSortOptions) => void;
-  activeSort: StakePoolSortOptions;
+  activeSort?: StakePoolSortOptions;
   emptyPlaceholder: () => ReactElement;
   showSkeleton?: boolean;
 };
