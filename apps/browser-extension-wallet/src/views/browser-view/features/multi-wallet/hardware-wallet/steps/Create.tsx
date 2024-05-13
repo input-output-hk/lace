@@ -32,9 +32,9 @@ export const Create: VFC = () => {
       try {
         await createWallet();
       } catch (error) {
-        if (error instanceof WalletConflictError) {
-          toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
-        }
+        const walletExistsError = error instanceof WalletConflictError;
+        if (!walletExistsError) throw error;
+        toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
       }
 
       next();
