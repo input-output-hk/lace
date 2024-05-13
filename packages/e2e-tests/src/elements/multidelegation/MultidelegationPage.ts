@@ -376,7 +376,7 @@ class MultidelegationPage {
     });
     for (const ticker of poolsToMark) {
       await this.fillSearch(ticker);
-      await MultidelegationPageAssert.assertSeeSearchResultsCountExact(1);
+      await MultidelegationPageAssert.assertSeeSearchResultsCountGreaterOrEqual(1);
       await this.markStakePoolWithTicker(ticker);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);

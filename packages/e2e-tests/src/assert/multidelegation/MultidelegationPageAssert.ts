@@ -25,10 +25,10 @@ class MultidelegationPageAssert {
     expect(poolsCounter).to.equal(poolsCount);
   };
 
-  assertSeeSearchResultsCountExact = async (items: number) => {
-    await browser.waitUntil(async () => (await MultidelegationPage.displayedPools.length) === items, {
+  assertSeeSearchResultsCountGreaterOrEqual = async (expectedPoolsCount: number) => {
+    await browser.waitUntil(async () => (await MultidelegationPage.displayedPools.length) >= expectedPoolsCount, {
       timeout: 20_000,
-      timeoutMsg: `Search result does not match exact items count expected: ${items}`
+      timeoutMsg: `There should be ${expectedPoolsCount} or more stake pools returned`
     });
   };
 

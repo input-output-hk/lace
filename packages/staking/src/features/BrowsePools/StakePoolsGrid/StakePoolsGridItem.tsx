@@ -7,14 +7,14 @@ import { getFormattedStakePoolProp } from '../formatters';
 import { SortField } from '../types';
 
 type StakePoolsGridItemProps = StakePoolDetails & {
-  sortField: SortField;
+  sortField?: SortField;
 };
 
 export const StakePoolsGridItem = ({
   stakePool,
   hexId,
   id,
-  sortField,
+  sortField = 'ticker',
   ...data
 }: StakePoolsGridItemProps): React.ReactElement => {
   const { analytics } = useOutsideHandles();

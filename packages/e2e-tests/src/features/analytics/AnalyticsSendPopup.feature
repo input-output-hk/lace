@@ -4,7 +4,7 @@ Feature: Analytics - Posthog - Sending - Popup View
   Background:
     Given Wallet is synced
 
-  @LW-7828 @LW-9109
+  @LW-7828 @LW-9109 @E2E
   Scenario: Analytics - Popup-view - Send - Success Screen - View transaction
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance

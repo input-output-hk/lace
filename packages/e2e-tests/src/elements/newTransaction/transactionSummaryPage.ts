@@ -5,9 +5,9 @@ import testContext from '../../utils/testContext';
 class TransactionSummaryPage extends CommonDrawerElements {
   private BUNDLE_ROW = '//div[@data-testid="bundle-summary-row"]';
   private BUNDLE_ROW_TITLE = '//span[@data-testid="bundle-summary-title"]';
-  private RECIPIENT_ADDRESS_LABEL = '//p[@data-testid="output-summary-recipient-title-label"]';
+  private RECIPIENT_ADDRESS_LABEL = '//span[@data-testid="output-summary-recipient-title-label"]';
   private RECIPIENT_ADDRESS_VALUE = '//span[@data-testid="output-summary-recipient-address"]';
-  private SENDING_TITLE = '//p[@data-testid="output-summary-sending-title-label"]';
+  private SENDING_TITLE = '//span[@data-testid="output-summary-sending-title-label"]';
   private ASSET_INFO_CONTAINER = '//div[@data-testid="asset-info"]';
   private ASSET_INFO_VALUE = '//span[@data-testid="asset-info-amount"]';
   private ASSET_INFO_FIAT = '//span[@data-testid="asset-info-amount-fiat"]';

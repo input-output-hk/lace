@@ -1,8 +1,19 @@
-import { elevation, fontFamily, fontSizes, fontWeights, lineHeights, opacities, radius, spacing } from '@lace/ui';
-import { createGlobalTheme, createThemeContract } from '@vanilla-extract/css';
+import {
+  borders,
+  elevation,
+  fontFamily,
+  fontSizes,
+  fontWeights,
+  lineHeights,
+  opacities,
+  radius,
+  spacing,
+} from '@lace/ui';
+import { createGlobalTheme, createTheme, createThemeContract } from '@vanilla-extract/css';
 import { colorsContract, darkThemeColors, lightThemeColors } from './colors';
 
 const themeCommon = {
+  borders,
   elevation,
   fontFamily,
   fontSizes,
@@ -15,6 +26,18 @@ const themeCommon = {
 
 export const theme = createThemeContract({
   colors: colorsContract,
+  ...themeCommon,
+});
+
+// For use only with the LocalThemeProvider
+export const darkTheme = createTheme(theme, {
+  colors: darkThemeColors,
+  ...themeCommon,
+});
+
+// For use only with the LocalThemeProvider
+export const lightTheme = createTheme(theme, {
+  colors: lightThemeColors,
   ...themeCommon,
 });
 
