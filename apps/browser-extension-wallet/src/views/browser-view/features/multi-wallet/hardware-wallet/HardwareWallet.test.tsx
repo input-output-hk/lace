@@ -26,7 +26,6 @@ import { APP_MODE_BROWSER } from '@utils/constants';
 import { StoreProvider } from '@src/stores';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
 import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
-import { LedgerConnection } from '@lace/cardano/wallet';
 import { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
@@ -93,7 +92,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
         transport: {
           close: () => void 0
         }
-      } as LedgerConnection)
+      } as Wallet.LedgerConnection)
     );
     jest.spyOn(LedgerKeyAgent, 'getXpub').mockImplementation(() => Promise.resolve('' as Bip32PublicKeyHex));
 
