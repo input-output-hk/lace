@@ -41,18 +41,21 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
 
   if (!userAlreadyMultidelegated) {
     return (
-      <>
-        <MultidelegationBetaModal
-          visible={multidelegationFirstVisit}
-          onConfirm={triggerMultidelegationFirstVisit}
-          popupView={popupView}
-        />
-        <MultidelegationDAppCompatibilityModal
-          visible={!multidelegationFirstVisit && multidelegationDAppCompatibility}
-          onConfirm={triggerMultidelegationDAppCompatibility}
-          popupView={popupView}
-        />
-      </>
+      <MultidelegationBetaModal
+        visible={multidelegationFirstVisit}
+        onConfirm={triggerMultidelegationFirstVisit}
+        popupView={popupView}
+      />
+    );
+  }
+
+  if (userAlreadyMultidelegated) {
+    return (
+      <MultidelegationDAppCompatibilityModal
+        visible={!multidelegationFirstVisit && multidelegationDAppCompatibility}
+        onConfirm={triggerMultidelegationDAppCompatibility}
+        popupView={popupView}
+      />
     );
   }
 
