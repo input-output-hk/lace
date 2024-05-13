@@ -8,8 +8,8 @@ type Translations = { [index: string]: any };
 const loadTranslations = async function (translationOrigin: TranslationsOrigin) {
   const language = process.env.LACE_LOCALE ?? 'en';
 
-  const extensionTranslationPath = `../../../../apps/browser-extension-wallet/src/lib/translations/${language}.json`;
-  const coreTranslationPath = `../../../../packages/core/dist/translations/${language}.json`;
+  const extensionTranslationPath = `../../../../packages/translation/src/lib/translations/browser-extension-wallet/${language}.json`;
+  const coreTranslationPath = `../../../../packages/translation/src/lib/translations/core/${language}.json`;
 
   const extension: Translations = await flatten(
     JSON.parse(readFromFile(__dirname, extensionTranslationPath).toString())
