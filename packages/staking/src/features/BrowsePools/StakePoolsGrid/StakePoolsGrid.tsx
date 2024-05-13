@@ -24,7 +24,7 @@ export type StakePoolsGridProps = {
   loadMoreData: (range: ListRange) => void;
   emptyPlaceholder: () => ReactElement;
   showSkeleton?: boolean;
-  sortField: SortField;
+  sortField?: SortField;
 };
 
 export const StakePoolsGrid = ({

@@ -17,7 +17,7 @@ export interface HeaderProps<T> {
   isActiveSortItem: (value: string) => boolean;
   isSortingAvailable?: (value: string) => boolean;
   onSortChange: (field: T) => void;
-  order: 'asc' | 'desc';
+  order?: 'asc' | 'desc';
   withSelection?: boolean;
   dataTestId?: string;
   headers: Headers<T>[];
@@ -58,7 +58,7 @@ export const Header = <T extends string>({
               {label}
             </Tooltip>
           </span>
-          {isSortingAvailable(value) && isActiveSortItem(value) && (
+          {order && isSortingAvailable(value) && isActiveSortItem(value) && (
             <IconButton.Caret
               direction={order}
               data-testid={`${dataTestId}-sort-order-${order}`}
