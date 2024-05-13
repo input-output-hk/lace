@@ -25,13 +25,17 @@ import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker'
 import { APP_MODE_BROWSER } from '@utils/constants';
 import { StoreProvider } from '@src/stores';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
-import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
 import { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendEventToPostHog'>, []>().mockReturnValue({
-    sendEventToPostHog: jest.fn().mockReturnValue('')
-  })
+  useAnalyticsContext: jest
+    .fn<Pick<AnalyticsTracker, 'sendEventToPostHog' | 'sendMergeEvent' | 'sendAliasEvent'>, []>()
+    .mockReturnValue({
+      sendEventToPostHog: jest.fn().mockReturnValue(''),
+      sendMergeEvent: jest.fn(),
+      sendAliasEvent: jest.fn()
+    })
 }));
 
 const connectHardwareWalletStep = async () => {
@@ -87,14 +91,27 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     // @ts-expect-error
     globalThis.USBDevice = class USBDevice {};
 
-    jest.spyOn(LedgerKeyAgent, 'establishDeviceConnection').mockImplementation(() =>
+    jest.spyOn(Wallet, 'connectDeviceRevamped').mockImplementation(() =>
       Promise.resolve({
-        transport: {
-          close: () => void 0
-        }
-      } as Wallet.LedgerConnection)
+        type: WalletType.Ledger,
+        value: {
+          transport: {
+            close: () => void 0
+          }
+        } as Wallet.LedgerConnection
+      })
     );
-    jest.spyOn(LedgerKeyAgent, 'getXpub').mockImplementation(() => Promise.resolve('' as Bip32PublicKeyHex));
+
+    jest
+      .spyOn(Wallet, 'getHwExtendedAccountPublicKey')
+      .mockImplementation(() => Promise.resolve('' as Bip32PublicKeyHex));
+
+    jest.spyOn(Wallet, 'getDeviceSpec').mockImplementation(() =>
+      Promise.resolve({
+        model: 'Nano S',
+        cardanoAppVersion: '1.1.1'
+      })
+    );
 
     const nanoS = Wallet.ledgerDescriptors[0];
     deviceObject = Object.assign(new USBDevice(), nanoS);
