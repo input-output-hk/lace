@@ -12,7 +12,14 @@ export const RowContainer = (props: { children: React.ReactNode; key?: string })
 );
 
 export const renderAmountInfo = (amount: string, fiat: string, key?: string): JSX.Element => (
-  <Flex key={key} className={styles.assetInfo} w="$fill" flexDirection="column" alignItems="flex-end">
+  <Flex
+    key={key}
+    className={styles.assetInfo}
+    w="$fill"
+    flexDirection="column"
+    alignItems="flex-end"
+    data-testid="asset-info"
+  >
     <Text.Body.Normal weight="$medium" data-testid="asset-info-amount">
       {amount}
     </Text.Body.Normal>
