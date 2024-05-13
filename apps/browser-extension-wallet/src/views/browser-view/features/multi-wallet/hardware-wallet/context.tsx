@@ -83,6 +83,12 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
     };
   }, [connectedUsbDevice, connection]);
 
+  const closeConnection = useCallback(() => {
+    if (connection.type === WalletType.Ledger) {
+      void connection.value.transport.close();
+    }
+  }, [connection]);
+
   const next = useCallback(() => {
     switch (step) {
       case WalletConnectStep.Connect: {
@@ -97,11 +103,12 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
         break;
       }
       case WalletConnectStep.Create: {
+        closeConnection();
         history.push(walletRoutePaths.assets);
         break;
       }
     }
-  }, [history, providers.shouldShowConfirmationDialog$, step]);
+  }, [closeConnection, history, providers.shouldShowConfirmationDialog$, step]);
 
   const back = useCallback(() => {
     switch (step) {
@@ -112,6 +119,7 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
       case WalletConnectStep.Setup:
       case WalletConnectStep.Create: {
         if (isStartOverDialogVisible) {
+          closeConnection();
           setStep(WalletConnectStep.Connect);
           history.push(walletRoutePaths.newWallet.hardware.connect);
           providers.shouldShowConfirmationDialog$.next(false);
@@ -121,13 +129,7 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
         break;
       }
     }
-  }, [history, isStartOverDialogVisible, providers.shouldShowConfirmationDialog$, step]);
-
-  const closeConnection = useCallback(() => {
-    if (connection.type === WalletType.Ledger) {
-      void connection.value.transport.close();
-    }
-  }, [connection]);
+  }, [closeConnection, history, isStartOverDialogVisible, providers.shouldShowConfirmationDialog$, step]);
 
   const cleanupConnectionState = useCallback(() => {
     setConnection(undefined);

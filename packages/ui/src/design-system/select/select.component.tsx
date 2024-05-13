@@ -47,6 +47,7 @@ export const SelectGroup = ({
           cx.selectTriggerVariants[withOutline ? 'outlined' : 'notOutlined']
         }
         aria-label="Food"
+        data-testid="select-group-input"
       >
         <RadixSelectGroup.Value placeholder={placeholder} />
         {showArrow && (
@@ -63,7 +64,11 @@ export const SelectGroup = ({
             <RadixSelectGroup.Group>
               {options.map(({ label, value }) => {
                 return (
-                  <SelectItem key={label} value={value}>
+                  <SelectItem
+                    key={label}
+                    value={value}
+                    data-testid="select-group-option"
+                  >
                     {label}
                   </SelectItem>
                 );
