@@ -58,6 +58,8 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests
