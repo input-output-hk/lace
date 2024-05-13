@@ -4,14 +4,13 @@ import type { DecoratorFunction } from '@storybook/csf/dist/story';
 import type { ReactFramework } from '@storybook/react';
 
 import { ThemeColorScheme, LocalThemeProvider } from '../../../design-tokens';
-import { Flex } from '../../flex';
 
 import * as styles from './color-schema.css';
 
 export const colorSchemaDecorator: DecoratorFunction<
   ReactFramework
 > = Story => (
-  <Flex className={styles.root} flexDirection="row">
+  <div className={styles.root}>
     <LocalThemeProvider
       colorScheme={ThemeColorScheme.Light}
       className={styles.storyContainer}
@@ -24,5 +23,5 @@ export const colorSchemaDecorator: DecoratorFunction<
     >
       <Story />
     </LocalThemeProvider>
-  </Flex>
+  </div>
 );
