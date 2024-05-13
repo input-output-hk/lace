@@ -1,24 +1,29 @@
-import { useAssetInfo, useRedirection } from '@hooks';
+import { useAssetInfo, useRedirection, useWalletAvatar } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './Nfts.module.scss';
-import { Button, Drawer, DrawerNavigation, useObservable } from '@lace/common';
+import { Button, Drawer, DrawerNavigation, toast, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { nftDetailSelector } from '@src/views/browser-view/features/nfts/selectors';
 import { NftDetail as NftDetailView } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { SendFlowTriggerPoints, useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
-import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
+import { APP_MODE_POPUP, DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
+import { withNftsFoldersContext } from '../context';
 
-export const NftDetail = (): React.ReactElement => {
-  const { inMemoryWallet } = useWalletStore();
+export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
+  const {
+    inMemoryWallet,
+    walletUI: { appMode }
+  } = useWalletStore();
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
+  const { setAvatar } = useWalletAvatar();
 
   const redirectToNfts = useRedirection(walletRoutePaths.nfts);
   const redirectToSend = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
@@ -33,17 +38,17 @@ export const NftDetail = (): React.ReactElement => {
 
   const amount = useMemo(() => Wallet.util.calculateAssetBalance(bigintBalance, assetInfo), [assetInfo, bigintBalance]);
 
-  const nftDetailTranslation = {
-    tokenInformation: t('core.nftDetail.tokenInformation'),
-    attributes: t('core.nftDetail.attributes'),
-    setAsAvatar: t('core.nftDetail.setAsAvatar')
-  };
-
   const handleOpenSend = () => {
     // eslint-disable-next-line camelcase
     analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     setSendInitialState(id, SEND_NFT_DEFAULT_AMOUNT);
     redirectToSend({ params: { id } });
+  };
+
+  const handleSetAsAvatar = (image: string) => {
+    setAvatar(image);
+    toast.notify({ text: t('core.nftDetail.avatarUpdated') });
+    void analytics.sendEventToPostHog(PostHogAction.NFTDetailSetAsAvatarClick);
   };
 
   return (
@@ -64,11 +69,12 @@ export const NftDetail = (): React.ReactElement => {
       {assetInfo && (
         <NftDetailView
           {...nftDetailSelector(assetInfo)}
+          isPopup={appMode === APP_MODE_POPUP}
           amount={amount}
-          translations={nftDetailTranslation}
           title={<h2 className={styles.secondaryTitle}>{assetInfo.nftMetadata?.name ?? assetInfo.fingerprint}</h2>}
+          onSetAsAvatar={handleSetAsAvatar}
         />
       )}
     </Drawer>
   );
-};
+});

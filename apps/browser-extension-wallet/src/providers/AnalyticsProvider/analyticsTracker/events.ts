@@ -1,4 +1,4 @@
-import { PostHogAction, PostHogOnboardingActionsType } from './types';
+import { PostHogAction, PostHogMultiWalletActionsType, PostHogOnboardingActionsType } from './types';
 
 export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   onboarding: {
@@ -43,5 +43,30 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     ENTER_WALLET: PostHogAction.UnlockWalletForgotPasswordEnterWalletClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
       PostHogAction.UnlockWalletForgotPasswordRecoveryPhrasePasteFromClipboardClick
+  }
+};
+
+export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
+  create: {
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletCreateClick,
+    SAVE_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseNextClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.MultiWalletCreateEnterRecoveryPhraseNextClick,
+    ENTER_WALLET: PostHogAction.MultiWalletCreateEnterWalletClick,
+    RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseIntroPlayVideoClick,
+    RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.MultiWalletCreateKeepWalletSecureGotItClick,
+    RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick,
+    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
+      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick
+  },
+  restore: {
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletRestoreClick,
+    ENTER_RECOVERY_PHRASE_NEXT_CLICK: PostHogAction.MultiWalletRestoreEnterRecoveryPhraseNextClick,
+    ENTER_WALLET: PostHogAction.MultiWalletRestoreEnterWalletClick,
+    RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
+      PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick,
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
+  },
+  hw: {
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletHWClick
   }
 };

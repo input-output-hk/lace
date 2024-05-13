@@ -7,11 +7,9 @@ export const transactionTypeContainer = style({
 export const cardanoIcon = style([
   sx({
     display: 'flex',
+    w: '$32',
+    height: '$32',
   }),
-  {
-    width: '32px',
-    height: '32px',
-  },
 ]);
 
 export const txAmountContainer = style({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { Connect } from './steps/Connect';
 import { SelectAccount } from './steps/SelectAccount';
 import { NameWallet } from './steps/NameWallet';
@@ -21,6 +21,7 @@ export const HardwareWallet = ({ providers }: Props): JSX.Element => (
       <Route path={hardware.connect} component={Connect} />
       <Route path={hardware.select} component={SelectAccount} />
       <Route path={hardware.name} component={NameWallet} />
+      <Redirect from={hardware.root} to={hardware.connect} />
     </Switch>
   </HardwareWalletProvider>
 );

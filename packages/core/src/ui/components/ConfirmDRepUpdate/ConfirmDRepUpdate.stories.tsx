@@ -7,7 +7,7 @@ const customViewports = {
   popup: {
     name: 'Popup',
     styles: {
-      width: '360px',
+      width: '720px',
       height: '600'
     }
   }

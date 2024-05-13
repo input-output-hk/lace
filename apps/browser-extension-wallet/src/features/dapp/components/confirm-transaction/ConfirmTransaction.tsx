@@ -46,7 +46,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
     fetchTxType();
   }, [req]);
 
-  const onConfirm = () => {
+  const onConfirmTransaction = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
@@ -85,6 +85,13 @@ export const ConfirmTransaction = (): React.ReactElement => {
     };
   }, [setSignTxRequest, setDappInfo]);
 
+  const onCancelTransaction = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    disallowSignTx(true);
+  };
+
   useOnBeforeUnload(disallowSignTx);
 
   return (
@@ -97,7 +104,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button
-            onClick={onConfirm}
+            onClick={onConfirmTransaction}
             loading={isHardwareWallet && isConfirmingTx}
             data-testid="dapp-transaction-confirm"
             className={styles.actionBtn}
@@ -109,7 +116,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
           <Button
             color="secondary"
             data-testid="dapp-transaction-cancel"
-            onClick={() => disallowSignTx(true)}
+            onClick={onCancelTransaction}
             className={styles.actionBtn}
           >
             {t('dapp.confirm.btn.cancel')}

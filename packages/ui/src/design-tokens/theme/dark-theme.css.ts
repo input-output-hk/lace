@@ -379,13 +379,11 @@ const colors: Colors = {
 
   $address_tag_own_color: darkColorScheme.$secondary_data_pink,
   $address_tag_own_bgColor: rgba(darkColorScheme.$secondary_data_pink, 0.1),
-  $address_tag_handle_color: darkColorScheme.$primary_accent_purple,
-  $address_tag_handle_bgColor: rgba(
+  $address_tag_foreign_color: darkColorScheme.$primary_accent_purple,
+  $address_tag_foreign_bgColor: rgba(
     darkColorScheme.$primary_accent_purple,
     0.1,
   ),
-  $address_tag_foreign_color: darkColorScheme.$primary_dark_grey,
-  $address_tag_foreign_bgColor: darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
@@ -398,15 +396,15 @@ const elevation: Elevation = {
 
 export const theme = {
   borders,
-  spacing,
-  fontWeights,
-  fontSizes,
-  lineHeights,
-  fontFamily,
   colors,
-  radius,
   elevation,
+  fontFamily,
+  fontSizes,
+  fontWeights,
+  lineHeights,
   opacities,
+  radius,
+  spacing,
 };
 
 createGlobalTheme('[data-theme="dark"]:root', vars, theme);

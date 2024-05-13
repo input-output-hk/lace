@@ -122,70 +122,90 @@ export const DappAddressSection = ({
 
   return (
     <SummaryExpander title={title} disabled={!isEnabled} testId={`dapp-transaction-${addressType}-section-expander`}>
-      {[...groupedAddresses.entries()].map(([address, addressData]) => (
-        <Box mb="$20" key={address}>
-          <div key={address} className={styles.address} data-testid={`dapp-transaction-${addressType}-row`}>
-            <Text.Body.Normal data-testid="dapp-transaction-address-title" weight="$medium">
-              {t('core.dappTransaction.address')}
-            </Text.Body.Normal>
+      {[...groupedAddresses.entries()].map(([address, addressData]) => {
+        const addressName = addressToNameMap.get(address);
 
-            <Flex flexDirection="column" alignItems="flex-end" gap="$8">
-              <Text.Body.Small data-testid="dapp-transaction-address" weight="$medium">
-                <Tooltip label={address}>{addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}</Tooltip>
-              </Text.Body.Small>
-              {renderAddressTag(address, getAddressTagTranslations(t), ownAddresses, addressToNameMap)}
-            </Flex>
-          </div>
-          {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
-            <>
-              <div className={styles.tokenCount} data-testid={`dapp-transaction-${addressType}-row`}>
-                <Text.Body.Normal data-testid="dapp-transaction-tokens-title" weight="$medium">
-                  {t('core.dappTransaction.tokens')}
-                </Text.Body.Normal>
-                <Text.Body.Normal
-                  color={addressType === 'to' ? 'success' : 'primary'}
-                  data-testid="dapp-transaction-tokens-value"
-                  weight="$medium"
-                >
-                  {addressType === 'to'
-                    ? `${getTokenQuantity(addressData.tokens, addressData.coins)} ${itemsCountCopy}`
-                    : `-${getTokenQuantity(addressData.tokens, addressData.coins)} ${itemsCountCopy}`}
-                </Text.Body.Normal>
-              </div>
-              {addressData.coins.map((coin) => (
-                <DappTransactionSummary
-                  testId={`dapp-transaction-${addressType}-row`}
-                  key={`${address}${coin}`}
-                  adaTooltip={t('core.dappTransaction.adaTooltip')}
-                  cardanoSymbol={coinSymbol}
-                  transactionAmount={getStringFromLovelace(coin)}
-                />
-              ))}
-              {displayGroupedTokens(addressData.tokens, t, `dapp-transaction-${addressType}-row`)}
-            </>
-          )}
+        return (
+          <Box mb="$20" key={address}>
+            <div key={address} className={styles.address} data-testid={`dapp-transaction-${addressType}-row`}>
+              <Text.Body.Normal data-testid="dapp-transaction-address-title" weight="$medium">
+                {t('core.dappTransaction.address')}
+              </Text.Body.Normal>
 
-          {addressData.nfts.length > 0 && (
-            <>
-              <div className={styles.tokenCount} data-testid={`dapp-transaction-${addressType}-row`}>
-                <Text.Body.Normal data-testid="dapp-transaction-nfts-title" weight="$medium">
-                  {t('core.dappTransaction.nfts')}
-                </Text.Body.Normal>
-                <Text.Body.Normal
-                  data-testid="dapp-transaction-nfts-amount-value"
-                  weight="$medium"
-                  color={addressType === 'to' ? 'success' : 'primary'}
-                >
-                  {addressType === 'to'
-                    ? `${addressData.nfts.length} ${itemsCountCopy}`
-                    : `-${addressData.nfts.length} ${itemsCountCopy}`}
-                </Text.Body.Normal>
-              </div>
-              {displayGroupedNFTs(addressData.nfts, t, `dapp-transaction-${addressType}-row`)}
-            </>
-          )}
-        </Box>
-      ))}
+              <Flex flexDirection="column" alignItems="flex-end">
+                {addressName && (
+                  <Box mb="$4" className={styles.addressText}>
+                    <Text.Address data-testid="dapp-transaction-address-book-name" color="primary">
+                      {addressToNameMap.get(address)}
+                    </Text.Address>
+                  </Box>
+                )}
+                <Box mb={addressName ? '$4' : '$12'} className={styles.addressText}>
+                  <Text.Address color={addressName ? 'secondary' : 'primary'} data-testid="dapp-transaction-address">
+                    <Tooltip label={address}>
+                      {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
+                    </Tooltip>
+                  </Text.Address>
+                </Box>
+
+                {renderAddressTag({
+                  address,
+                  translations: getAddressTagTranslations(t),
+                  ownAddresses
+                })}
+              </Flex>
+            </div>
+            {(addressData.tokens.length > 0 || addressData.coins.length > 0) && (
+              <>
+                <div className={styles.tokenCount} data-testid={`dapp-transaction-${addressType}-row`}>
+                  <Text.Body.Normal data-testid="dapp-transaction-tokens-title" weight="$medium">
+                    {t('core.dappTransaction.tokens')}
+                  </Text.Body.Normal>
+                  <Text.Body.Normal
+                    color={addressType === 'to' ? 'success' : 'primary'}
+                    data-testid="dapp-transaction-tokens-value"
+                    weight="$medium"
+                  >
+                    {addressType === 'to'
+                      ? `${getTokenQuantity(addressData.tokens, addressData.coins)} ${itemsCountCopy}`
+                      : `-${getTokenQuantity(addressData.tokens, addressData.coins)} ${itemsCountCopy}`}
+                  </Text.Body.Normal>
+                </div>
+                {addressData.coins.map((coin) => (
+                  <DappTransactionSummary
+                    testId={`dapp-transaction-${addressType}-row`}
+                    key={`${address}${coin}`}
+                    adaTooltip={t('core.dappTransaction.adaTooltip')}
+                    cardanoSymbol={coinSymbol}
+                    transactionAmount={getStringFromLovelace(coin)}
+                  />
+                ))}
+                {displayGroupedTokens(addressData.tokens, t, `dapp-transaction-${addressType}-row`)}
+              </>
+            )}
+
+            {addressData.nfts.length > 0 && (
+              <>
+                <div className={styles.tokenCount} data-testid={`dapp-transaction-${addressType}-row`}>
+                  <Text.Body.Normal data-testid="dapp-transaction-nfts-title" weight="$medium">
+                    {t('core.dappTransaction.nfts')}
+                  </Text.Body.Normal>
+                  <Text.Body.Normal
+                    data-testid="dapp-transaction-nfts-amount-value"
+                    weight="$medium"
+                    color={addressType === 'to' ? 'success' : 'primary'}
+                  >
+                    {addressType === 'to'
+                      ? `${addressData.nfts.length} ${itemsCountCopy}`
+                      : `-${addressData.nfts.length} ${itemsCountCopy}`}
+                  </Text.Body.Normal>
+                </div>
+                {displayGroupedNFTs(addressData.nfts, t, `dapp-transaction-${addressType}-row`)}
+              </>
+            )}
+          </Box>
+        );
+      })}
     </SummaryExpander>
   );
 };

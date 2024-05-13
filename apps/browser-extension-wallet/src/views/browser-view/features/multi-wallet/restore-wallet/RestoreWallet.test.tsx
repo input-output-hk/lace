@@ -22,7 +22,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
-import { createAssetsRoute, fillMnemonic, getNextButton, setupStep } from '../tests/utils';
+import { DEFAULT_MNEMONIC_LENGTH, createAssetsRoute, fillMnemonic, setupStep, getNextButton } from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
@@ -37,35 +37,11 @@ jest.mock('@providers/AnalyticsProvider', () => ({
   })
 }));
 
-const keepWalletSecureStep = async () => {
-  const nextButton = getNextButton();
-
-  fireEvent.click(nextButton);
-
-  await screen.findByText('Recovery phrase length');
-};
-
-const selectRecoveryPhraseLengthStep = async () => {
-  const nextButton = getNextButton();
-
-  const defaultLength = screen.queryByTestId('24-word-passphrase-radio-button');
-  fireEvent.click(defaultLength);
-
-  fireEvent.click(nextButton);
-
-  await screen.findByText('Enter your secret passphrase');
-};
-
 const recoveryPhraseStep = async () => {
-  const step1 = 8;
-  const step2 = 16;
-  const step3 = 24;
-
-  await fillMnemonic(0, step1);
-  await fillMnemonic(step1, step2);
-  await fillMnemonic(step2, step3);
-
-  await screen.findByText('Total wallet balance');
+  await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
+  const nextButton = getNextButton();
+  fireEvent.click(nextButton);
+  await screen.findByText("Let's set up your new wallet");
 };
 
 describe('Multi Wallet Setup/Restore Wallet', () => {
@@ -75,14 +51,6 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
       shouldShowDialog$: Subject<boolean>;
     };
   };
-
-  const originalWarn = console.error.bind(console.error);
-  beforeAll(() => {
-    console.error = (msg) => !msg.toString().includes('Warning: [antd:') && originalWarn(msg);
-  });
-  afterAll(() => {
-    console.error = originalWarn;
-  });
 
   beforeEach(() => {
     providers = {
@@ -100,7 +68,7 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.setup]}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.root]}>
               <RestoreWallet providers={providers as Providers} />
               {createAssetsRoute()}
             </MemoryRouter>
@@ -109,9 +77,7 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
       </AppSettingsProvider>
     );
 
-    await setupStep();
-    await keepWalletSecureStep();
-    await selectRecoveryPhraseLengthStep();
     await recoveryPhraseStep();
+    await setupStep();
   });
 });

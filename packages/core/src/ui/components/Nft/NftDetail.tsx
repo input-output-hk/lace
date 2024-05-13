@@ -3,7 +3,9 @@ import React, { ReactNode } from 'react';
 import styles from './NftDetail.module.scss';
 import { NftImage } from './NftImage';
 import { TranslationsFor } from '@ui/utils/types';
-import { ControlButton } from '@lace/ui';
+import { Breadcrumb } from 'antd';
+import { FolderOutlined, RightOutlined } from '@ant-design/icons';
+import { Box, ControlButton, Flex } from '@lace/ui';
 import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 
 export interface NftDetailProps {
@@ -11,9 +13,11 @@ export interface NftDetailProps {
   image?: string;
   tokenInformation: LabeledInfo[];
   attributes?: string;
+  folder?: string;
   amount?: number | string;
-  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar'>;
+  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar' | 'directory'>;
   onSetAsAvatar?: (image: string) => void;
+  isPopup?: boolean;
 }
 
 const JSON_INDENTATION = 2;
@@ -31,9 +35,11 @@ export const NftDetail = ({
   image,
   tokenInformation,
   attributes,
+  folder,
   amount,
   translations,
-  onSetAsAvatar
+  onSetAsAvatar,
+  isPopup
 }: NftDetailProps): React.ReactElement => (
   <div className={styles.nftDetail}>
     {title}
@@ -56,7 +62,30 @@ export const NftDetail = ({
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
         <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>
-        <InlineInfoList items={tokenInformation} />
+        <InlineInfoList
+          items={[
+            ...tokenInformation,
+            {
+              name: translations.directory,
+              value: folder ? `Root > ${folder}` : 'Root',
+              renderValueAs: !isPopup ? (
+                <Breadcrumb separator={<RightOutlined />}>
+                  <Breadcrumb.Item>
+                    <FolderOutlined />
+                    <span>Root</span>
+                  </Breadcrumb.Item>
+                  {folder && <Breadcrumb.Item>{folder}</Breadcrumb.Item>}
+                </Breadcrumb>
+              ) : (
+                <Flex justifyContent="space-between" gap="$1">
+                  <Box>Root</Box>
+                  {folder && <Box px="$8">{'>'}</Box>}
+                  {folder && <Box>{folder}</Box>}
+                </Flex>
+              )
+            }
+          ]}
+        />
       </div>
       {attributes && (
         <>

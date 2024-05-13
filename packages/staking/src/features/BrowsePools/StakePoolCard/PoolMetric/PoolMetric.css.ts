@@ -1,8 +1,7 @@
-import { style, sx } from '@lace/ui';
-import { theme } from '../../../theme';
+import { sx } from 'features/theme';
 
-export const metric = style({
-  color: theme.colors.$poolCardMetricColor,
+export const metric = sx({
+  color: '$poolCardMetricColor',
 });
 
 export const icon = sx({

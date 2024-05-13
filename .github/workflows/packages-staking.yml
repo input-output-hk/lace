@@ -45,4 +45,6 @@ jobs:
       - name: Run tests
         run: yarn workspace @lace/staking test:unit
       - name: Build Staking dist
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn workspace @lace/staking build

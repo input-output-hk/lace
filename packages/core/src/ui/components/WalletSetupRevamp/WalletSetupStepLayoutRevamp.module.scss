@@ -18,10 +18,6 @@
     }
   }
 
-  .title, .subtitle {
-    margin: 0
-  }
-
   .container {
     flex: 1;
     height: 100%;
@@ -35,15 +31,17 @@
       flex-direction: column;
       gap: size_unit(3);
 
-      h1 {
+      .title {
         @include text-heading;
         color: var(--text-color-primary, #3d3b39);
+        margin: 0
       }
 
-      p {
+      .subtitle {
         font-size: var(--body) !important;
         line-height: size_unit(3) !important;
         color: var(--text-color-primary, #3d3b39);
+        margin: 0;
       }
     }
 

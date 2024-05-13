@@ -5,6 +5,7 @@ import { I18nextProvider } from 'react-i18next';
 import { initI18n } from '../../i18n';
 import { StakingProps } from '../types';
 import { useI18n } from './useI18n';
+import 'features/theme';
 
 initI18n();
 

@@ -14,7 +14,7 @@ export default {
   decorators: [
     page({
       title: 'Address Tag',
-      subtitle: 'Simple component to flag addresses as own, handle or foreign.',
+      subtitle: 'Simple component to flag addresses as own or foreign.',
     }),
   ],
 } as Meta;
@@ -24,10 +24,6 @@ export const Overview = (): JSX.Element => {
     {
       Component: AddressTag,
       variant: AddressTagVariants.Own,
-    },
-    {
-      Component: AddressTag,
-      variant: AddressTagVariants.Handle,
     },
     {
       Component: AddressTag,

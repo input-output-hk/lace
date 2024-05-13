@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
-import * as Variants from '../decorators/variants-table';
+import { ThemeColorScheme, LocalThemeProvider } from '../../../design-tokens';
+import * as Variants from '../variants-table';
 
 interface Props {
   children: React.ReactNode;
-  headers?: string[] | undefined;
+  headers?: string[];
 }
 
 export const ColorSchemaTable = ({
