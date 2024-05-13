@@ -286,6 +286,18 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     (isAddressInputValueHandle || isAddressInputInvalidHandle) &&
     handleVerificationState === HandleVerificationState.INVALID;
 
+  const exists = () => {
+    if (handleVerificationState === HandleVerificationState.VALID) {
+      return Boolean(getExistingAddress(handle));
+    }
+
+    if (address.startsWith('$')) {
+      return false;
+    }
+
+    return Boolean(getExistingAddress(address));
+  };
+
   return (
     <span className={styles.container}>
       <DestinationAddressInput
@@ -297,7 +309,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         empty={!address}
         valid={isAddressInputValueValid}
         validationObject={validationObject}
-        exists={!!getExistingAddress(address)}
+        exists={exists()}
         className={styles.input}
         style={{ width: '100%' }}
         open
