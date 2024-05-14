@@ -10,10 +10,7 @@ const meta: Meta<DestinationAddressInputProps> = {
   title: 'Components/DestinationAddressInput',
   component: DestinationAddressInput,
   parameters: {
-    layout: 'centered',
-    decorators: {
-      theme: null
-    }
+    layout: 'centered'
   },
   render: (props) => (
     <Flex flexDirection="column" alignItems="stretch">

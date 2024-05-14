@@ -26,9 +26,6 @@ export const decorators = [
   },
   (Story, args) => {
     const { decorators: { theme } = {} } = args.parameters;
-    if (theme === null) {
-      return <Story />;
-    }
     return (
       <ThemeProvider colorScheme={theme ?? ThemeColorScheme.Light}>
         <Story />
