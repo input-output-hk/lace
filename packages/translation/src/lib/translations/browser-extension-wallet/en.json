@@ -810,5 +810,14 @@
   "walletSetup.setupOptions.restoreDescription": "By typing your secret phrase",
   "walletSetup.setupOptions.restoreWallet": "Restore wallet",
   "walletSetup.walletName.pleaseNameYourWallet": "Please name your wallet",
-  "walletSetup.walletName.walletNameDescription": "Lorem ipsum dolor sit amet"
+  "walletSetup.walletName.walletNameDescription": "Lorem ipsum dolor sit amet",
+  "midnightEventBanner.popup.title": "Participate in the\nMidnight Pre-Launch Event",
+  "midnightEventBanner.desktop.title": "Participate in the Midnight Pre-Launch Event",
+  "midnightEventBanner.description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  "midnightEventBanner.moreDetails": "More details",
+  "midnightEventBanner.reminder": "Remind me later",
+  "midnightEventBanner.dialog.title": "Heads up",
+  "midnightEventBanner.dialog.description": "You can check the Midnight Pre-Launch Event details anytime from settings",
+  "midnightEventBanner.dialog.confirm": "I understand",
+  "midnightEventBanner.dialog.cancel": "Cancel"
 }
