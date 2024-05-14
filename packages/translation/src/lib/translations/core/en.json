@@ -6,6 +6,7 @@
   "core.activityDetails.certificateTitles.anchorHash": "Anchor Hash",
   "core.activityDetails.certificateTitles.anchorURL": "Anchor URL",
   "core.activityDetails.certificateTitles.certificateType": "Type",
+  "core.activityDetails.certificateTitles.certificate": "Certificate",
   "core.activityDetails.certificateTitles.coldCredential": "Cold credential",
   "core.activityDetails.certificateTitles.depositPaid": "Deposit paid",
   "core.activityDetails.certificateTitles.depositPaidInfo": "Deposit paid",
