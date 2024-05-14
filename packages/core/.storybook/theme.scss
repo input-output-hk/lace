@@ -12,7 +12,7 @@
     }
   }
 
-  html[data-theme='dark'],
+  html[data-theme='dark']:not(:has(div[data-theme='light'])),
   div[data-theme='dark'] {
     @include theme-custom-properties($dark-theme);
   }
@@ -28,7 +28,7 @@
     }
   }
 
-  html[data-theme='light'],
+  html[data-theme='light']:not(:has(div[data-theme='dark'])),
   div[data-theme='light'] {
     @include theme-custom-properties($light-theme);
   }
