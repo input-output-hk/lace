@@ -110,7 +110,18 @@ export const useDelegationPortfolioStore = create(
           return;
         }
 
-        const selectedStakePools = await getPoolInfos({
+        const setPools = (selectedStakePools: Wallet.Cardano.StakePool[]) => {
+          set((state) => {
+            Object.assign(state, {
+              ...atomicStateMutators.selectPools({ stakePools: selectedStakePools, state }),
+              browsePoolsView: poolsView,
+              hydrated: true,
+              view,
+            });
+          });
+        };
+
+        getPoolInfos({
           poolIds,
           preserveOrder: true,
           stakePoolProvider,
@@ -119,16 +130,9 @@ export const useDelegationPortfolioStore = create(
             Wallet.Cardano.StakePoolStatus.Active,
             Wallet.Cardano.StakePoolStatus.Retiring,
           ],
-        }).catch(() => []);
-        
-        set((state) => {
-              Object.assign(state, {
-                ...atomicStateMutators.selectPools({ stakePools: selectedStakePools, state }),
-                browsePoolsView: poolsView,
-                hydrated: true,
-                view,
-              });
-            });
+        })
+          .then(setPools)
+          .catch(() => setPools([]));
       },
       setCardanoCoinSymbol: (currentChain) =>
         set((state) => {

@@ -12,14 +12,17 @@ export const useSyncDelegationPortfolioStore = () => {
   const delegationPortfolio = useObservable(walletStoreInMemoryWallet.delegation.portfolio$);
 
   useEffect(() => {
-    if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
-    portfolioMutators.setCardanoCoinSymbol(currentChain);
-    portfolioMutators.setCurrentPortfolio({
-      currentEpoch,
-      delegationDistribution: [...delegationDistribution.values()],
-      delegationPortfolio,
-      delegationRewardsHistory,
-    });
+    if (
+      [delegationDistribution, delegationRewardsHistory, currentEpoch, currentChain, delegationPortfolio].every(Boolean)
+    ) {
+      portfolioMutators.setCardanoCoinSymbol(currentChain);
+      portfolioMutators.setCurrentPortfolio({
+        currentEpoch,
+        delegationDistribution: [...delegationDistribution.values()],
+        delegationPortfolio,
+        delegationRewardsHistory,
+      });
+    }
   }, [
     currentChain,
     currentEpoch,

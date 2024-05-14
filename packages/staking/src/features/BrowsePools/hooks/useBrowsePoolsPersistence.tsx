@@ -25,13 +25,17 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
   useEffect(() => {
     if (hydrated) return;
 
-    portfolioMutators.hydrate({
-      poolIds:
-        stakingBrowserPreferencesPersistence?.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)) ?? [],
-      poolsView,
-      stakePoolProvider,
-      view,
-    });
+    try {
+      portfolioMutators.hydrate({
+        poolIds:
+          stakingBrowserPreferencesPersistence?.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)) ?? [],
+        poolsView,
+        stakePoolProvider,
+        view,
+      });
+    } catch {
+      console.error('error during store hydration');
+    }
   }, [
     hydrated,
     poolsView,
