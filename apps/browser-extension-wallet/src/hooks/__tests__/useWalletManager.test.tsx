@@ -554,7 +554,7 @@ describe('Testing useWalletManager hook', () => {
           'hideBalance',
           'isForgotPasswordFlow',
           'multidelegationFirstVisit',
-          'multidelegationDAppCompatibility',
+          'isMultiDelegationDAppCompatibilityModalVisible',
           'multidelegationFirstVisitSincePortfolioPersistence'
         ]
       });
