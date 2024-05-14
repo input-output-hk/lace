@@ -1,5 +1,6 @@
 import React from 'react';
 import { ThemeColorScheme, ThemeProvider, colorSchemaDecorator } from '@lace/ui';
+import '@lace/translation';
 import 'antd/dist/antd.css';
 import 'normalize.css';
 import './index.scss';
