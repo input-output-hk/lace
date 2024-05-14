@@ -1,6 +1,6 @@
 import { CreateWalletParams } from '@hooks';
-import { PostHogAction } from '@lace/common';
 import { walletRoutePaths } from '@routes';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import React, { createContext, useContext, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useHotWalletCreation } from '../useHotWalletCreation';
@@ -58,14 +58,14 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
   };
 
   const setFormDirty = (dirty: boolean) => {
-    providers.confirmationDialog.shouldShowDialog$.next(dirty);
+    providers.shouldShowConfirmationDialog$.next(dirty);
   };
 
   const finalizeWalletCreation = async () => {
     const wallet = await createHotWallet();
     await sendPostWalletAddAnalytics({
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      walletAddedPostHogAction: PostHogAction.MultiWalletCreateAdded
+      walletAddedPostHogAction: postHogMultiWalletActions.create.WALLET_ADDED
     });
     clearSecrets();
   };

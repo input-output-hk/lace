@@ -88,6 +88,7 @@
     "zustand": "3.5.14"
   },
   "devDependencies": {
+    "@cardano-sdk/hardware-ledger": "0.9.3",
     "@emurgo/cardano-message-signing-asmjs": "1.0.1",
     "@types/dotenv-webpack": "7.0.3",
     "@types/pluralize": "^0.0.29",

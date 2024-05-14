@@ -60,18 +60,14 @@ describe('Multi Wallet Setup/Create Wallet', () => {
   let providers = {} as {
     createWallet: jest.Mock;
     generateMnemonicWords: jest.Mock;
-    confirmationDialog: {
-      shouldShowDialog$: BehaviorSubject<boolean>;
-    };
+    shouldShowConfirmationDialog$: BehaviorSubject<boolean>;
   };
 
   beforeEach(() => {
     providers = {
       createWallet: jest.fn(),
       generateMnemonicWords: jest.fn(),
-      confirmationDialog: {
-        shouldShowDialog$: new BehaviorSubject(false)
-      }
+      shouldShowConfirmationDialog$: new BehaviorSubject(false)
     };
   });
 
@@ -112,15 +108,15 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
+    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(false);
 
     const nextButton = getNextButton();
     fireEvent.click(nextButton);
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(true);
+    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(true);
 
     const backButton = getBackButton();
     fireEvent.click(backButton);
     fireEvent.click(screen.queryByTestId('delete-address-modal-confirm'));
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
+    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(false);
   });
 });

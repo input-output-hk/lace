@@ -61,10 +61,12 @@ export type PostHogActionsKeys =
   | 'RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK'
   | 'RECOVERY_PASSPHRASE_VERIFICATION_NEXT_CLICK'
   | 'RECOVERY_PHRASE_COPY_READ_MORE_CLICK'
-  | 'RECOVERY_PHRASE_PASTE_READ_MORE_CLICK';
+  | 'RECOVERY_PHRASE_PASTE_READ_MORE_CLICK'
+  | 'WALLET_ADDED'
+  | 'HD_WALLET';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
+export type PostHogOnboardingActionsType = Record<OnboardingFlows, PostHogOnboardingActionsValueType>;
 export type PostHogMultiWalletActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
-export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMultiWalletActionsType = Record<MultiWalletFlows, PostHogMultiWalletActionsValueType>;
 export type PostHogPersonProperties = {
   $set: {

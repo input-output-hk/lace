@@ -188,7 +188,7 @@
   "browserView.onboarding.errorDialog.messageDeviceDisconnected": "Please check your hardware device connection and for Ledger, if Cardano App is open",
   "browserView.onboarding.errorDialog.messageGeneric": "Try connecting you device again",
   "browserView.onboarding.errorDialog.messagePublicKeyExportRejected": "Public key export unsuccessful. User declined action on hardware wallet device.",
-  "browserView.onboarding.errorDialog.title": "Opps! Something went wrong",
+  "browserView.onboarding.errorDialog.title": "Oops! Something went wrong",
   "browserView.onboarding.hardwareWalletSendTransition.cancel": "Cancel",
   "browserView.onboarding.hardwareWalletSendTransition.description": "Ledger transactions require confirmation in advanced view.",
   "browserView.onboarding.hardwareWalletSendTransition.ok": "Ok",

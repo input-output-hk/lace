@@ -47,17 +47,13 @@ const recoveryPhraseStep = async () => {
 describe('Multi Wallet Setup/Restore Wallet', () => {
   let providers = {} as {
     createWallet: jest.Mock;
-    confirmationDialog: {
-      shouldShowDialog$: Subject<boolean>;
-    };
+    shouldShowConfirmationDialog$: Subject<boolean>;
   };
 
   beforeEach(() => {
     providers = {
       createWallet: jest.fn(),
-      confirmationDialog: {
-        shouldShowDialog$: new Subject()
-      }
+      shouldShowConfirmationDialog$: new Subject()
     };
   });
 
