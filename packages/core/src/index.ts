@@ -42,3 +42,4 @@ export * from '@ui/components/SharedWallet';
 export * from '@ui/components/Account';
 export * from '@ui/components/WalletSetupRevamp';
 export * from '@ui/components/ListEmptyState';
+export * from '@ui/components/MidnightEventBanner';
