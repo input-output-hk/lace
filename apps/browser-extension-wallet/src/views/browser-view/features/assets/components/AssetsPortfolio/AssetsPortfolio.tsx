@@ -23,6 +23,7 @@ import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan'
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
 import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
 import { Flex, Text } from '@lace/ui';
+import { useAppSettingsContext } from '@providers';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -60,8 +61,10 @@ export const AssetsPortfolio = ({
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
+  const [{ chainName }] = useAppSettingsContext();
 
   const isPopupView = appMode === APP_MODE_POPUP;
+  const isMainnet = chainName === 'Mainnet';
 
   const portfolioBalanceAsBigNumber = useMemo(() => new BigNumber(portfolioTotalBalance), [portfolioTotalBalance]);
   const isPortfolioBalanceLoading = useMemo(
@@ -123,7 +126,7 @@ export const AssetsPortfolio = ({
           }}
         />
       )}
-      {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && (
+      {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && isMainnet && (
         <Flex flexDirection="column" gap="$10" mb="$16">
           <Text.Body.Normal weight="$medium" color="secondary">
             {t('browserView.assets.topupWallet.buyButton.title')}

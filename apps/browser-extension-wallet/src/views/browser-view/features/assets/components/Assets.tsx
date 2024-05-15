@@ -13,7 +13,7 @@ import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { walletRoutePaths } from '@routes';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
 import {
@@ -62,6 +62,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
+  const [{ chainName }] = useAppSettingsContext();
+  const isMainnet = chainName === 'Mainnet';
 
   const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
@@ -316,7 +318,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         hasCredit={fullAssetList?.length > 0}
         sidePanelContent={
           <Flex flexDirection="column" gap="$28">
-            {USE_FOOR_TOPUP && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}
+            {USE_FOOR_TOPUP && isMainnet && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}
             <AssetEducationalList />
           </Flex>
         }
