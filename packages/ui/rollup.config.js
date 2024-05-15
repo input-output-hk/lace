@@ -33,11 +33,6 @@ export default () => ({
       format: 'cjs',
       sourcemap: true,
     },
-    {
-      file: packageJson.module,
-      format: 'esm',
-      sourcemap: true,
-    },
   ],
   external: [/node_modules/],
 });
