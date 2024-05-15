@@ -1,4 +1,5 @@
-import { BrowsePoolsView, StakePoolSortOptions, StakingBrowserPreferences } from './types';
+import type { StakePoolSortOptions, StakingBrowserPreferences } from './types';
+import { BrowsePoolsView } from './types';
 import { getDefaultSortOrderByField } from './utils';
 
 export const SEARCH_DEBOUNCE_IN_MS = 300;

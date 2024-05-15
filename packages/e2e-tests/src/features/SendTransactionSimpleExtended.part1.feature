@@ -176,10 +176,11 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I enter a value of: 99999999 to the "tADA" asset
-    And I click on transaction drawer background to lose focus
+    And I open cancel modal to trigger button validation
     Then "Insufficient balance" error is displayed on "Send" page
     And "Review transaction" button is disabled on "Send" page
     When I enter a value of: 2 to the "tADA" asset
+    And I open cancel modal to trigger button validation
     Then "Insufficient balance" error is not displayed on "Send" page
     And "Review transaction" button is enabled on "Send" page
 
@@ -189,7 +190,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then I verify transaction costs amount is around 0.00 ADA
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I enter a value of: 2 to the "tADA" asset
-    Then I verify transaction costs amount is around 0.25 ADA
+    Then I verify transaction costs amount is around 0.17 ADA
 
   @LW-2370 @Testnet @Mainnet
   Scenario: Extended-view - Tx summary page is displayed

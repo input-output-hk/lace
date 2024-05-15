@@ -57,7 +57,7 @@ export const RewardsDetails = ({
                   <span
                     className={styles.ada}
                     data-testid="rewards-received-detail-ada"
-                  >{`${rewards.totalAmount} ${coinSymbol}`}</span>
+                  >{`${rewards.totalAmount} ${coinSymbol}`}</span>{' '}
                   <span className={styles.fiat} data-testid="rewars-received-detail-fiat">{`${amountTransformer(
                     rewards.totalAmount
                   )}`}</span>

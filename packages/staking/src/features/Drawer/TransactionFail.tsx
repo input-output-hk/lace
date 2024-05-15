@@ -1,5 +1,7 @@
 /* eslint-disable react/no-multi-comp */
-import { Button } from '@lace/common';
+import { WalletType } from '@cardano-sdk/web-extension';
+import { Button, WarningBanner } from '@lace/common';
+import { Box } from '@lace/ui';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,12 +16,26 @@ type TransactionFailProps = {
 
 export const TransactionFail = ({ popupView }: TransactionFailProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isCustomSubmitApiEnabled } = useOutsideHandles();
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     <div className={cn(styles.container, styles.fail, { [styles.popupView!]: popupView })}>
       <div className={styles.containerFail}>
-        <ResultMessage status="error" title={t('drawer.failure.title')} description={t('drawer.failure.subTitle')} />
+        <ResultMessage
+          status="error"
+          title={t('drawer.failure.title')}
+          description={
+            <>
+              <div>{t('drawer.failure.subTitle')}</div>
+              {isCustomSubmitApiEnabled && (
+                <Box mt="$32">
+                  <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />
+                </Box>
+              )}
+            </>
+          }
+        />
       </div>
     </div>
   );
@@ -30,17 +46,20 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
+    walletStoreWalletType: walletType,
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     password: { password, removePassword },
     walletStoreInMemoryWallet: inMemoryWallet,
     walletManagerExecuteWithPassword: executeWithPassword,
+    isMultidelegationSupportedByDevice,
   } = useOutsideHandles();
   // TODO implement analytics for the new flow
   const analytics = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     sendEvent: () => {},
   };
-  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
+  const { portfolioMutators, draftPortfolio } = useDelegationPortfolioStore((store) => ({
+    draftPortfolio: store.draftPortfolio,
     portfolioMutators: store.mutators,
   }));
 
@@ -57,23 +76,38 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     portfolioMutators.executeCommand({ type: 'CancelDrawer' });
   };
 
+  const isInMemory = walletType === WalletType.InMemory;
+
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+
+    const isMultidelegation = draftPortfolio && draftPortfolio.length > 1;
+    if (!isInMemory && isMultidelegation) {
+      const isSupported = await isMultidelegationSupportedByDevice(walletType);
+      if (!isSupported) {
+        throw new Error('MULTIDELEGATION_NOT_SUPPORTED');
+      }
+    }
     const signedTx = await delegationTxBuilder.build().sign();
     await inMemoryWallet.submitTx(signedTx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+  }, [delegationTxBuilder, draftPortfolio, inMemoryWallet, isInMemory, isMultidelegationSupportedByDevice, walletType]);
 
   const onSubmit = async () => {
     setIsLoading(true);
+
     try {
       await signAndSubmitTransaction();
       setIsLoading(false);
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       removePassword();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('failed to sign or submit tx due to:', error);
       setIsLoading(false);
+
+      if (error instanceof Error && error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
+        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+      }
     }
   };
 

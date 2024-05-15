@@ -5,12 +5,11 @@ import { Radio, RadioChangeEvent } from 'antd';
 import { Search } from '@lace/common';
 import { NftList, NftItemProps } from '../Nft';
 import { TokenItem, TokenItemProps } from '../Token';
-import { ReactComponent as NeutralFaceIcon } from '../../assets/icons/neutral-face.component.svg';
-import { ReactComponent as SadFaceIcon } from '../../assets/icons/sad-face.component.svg';
 
 import styles from './AssetSelectorOverlay.module.scss';
 import { TranslationsFor } from '@src/ui/utils/types';
 import { useTranslate } from '@src/ui/hooks/useTranslate';
+import { ListEmptyState } from '../ListEmptyState';
 
 export const stringIncludesValue = (string: string, searchValue: string): boolean =>
   string.toLowerCase().includes(searchValue.toLowerCase());
@@ -21,22 +20,6 @@ export enum ASSET_COMPONENTS {
   NFTS = 'nfts',
   TOKENS = 'tokens'
 }
-
-const ListEmptyState = (props: { message: React.ReactNode; icon: 'sad-face' | 'neutral-face' }) => {
-  const Icon: Record<string, React.ReactElement> = {
-    'sad-face': <SadFaceIcon className={styles.img} data-testid="sad-face-icon" />,
-    'neutral-face': <NeutralFaceIcon className={styles.img} data-testid="neutral-face-icon" />
-  };
-
-  return (
-    <div className={styles.emptyMessage}>
-      {Icon[props.icon]}
-      <p className={styles.text} data-testid="asset-list-empty-state-message">
-        {props.message}
-      </p>
-    </div>
-  );
-};
 
 const getTokensContent = (
   params: {

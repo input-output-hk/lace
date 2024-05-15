@@ -15,8 +15,8 @@ import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import { Text } from '../text';
 import { TooltipContent } from '../tooltip';
-import * as Text from '../typography';
 
 import * as styles from './radio-button.stories.css';
 

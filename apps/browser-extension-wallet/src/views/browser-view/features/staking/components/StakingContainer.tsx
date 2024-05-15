@@ -11,7 +11,7 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
-import { useBalances, useFetchCoinPrice, useLocalStorage } from '@hooks';
+import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import {
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
@@ -58,6 +58,7 @@ export const StakingContainer = (): React.ReactElement => {
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const password = usePassword();
   const submittingState = useSubmitingState();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   const {
     walletInfo,
@@ -71,7 +72,8 @@ export const StakingContainer = (): React.ReactElement => {
     fetchNetworkInfo,
     networkInfo,
     blockchainProvider,
-    currentChain
+    currentChain,
+    environmentName
   } = useWalletStore((state) => ({
     walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
@@ -85,8 +87,7 @@ export const StakingContainer = (): React.ReactElement => {
     blockchainProvider: state.blockchainProvider,
     walletInfo: state.walletInfo,
     currentChain: state.currentChain,
-    activityDetail: state.activityDetail,
-    resetActivityState: state.resetActivityState
+    environmentName: state.environmentName
   }));
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
 
@@ -131,7 +132,8 @@ export const StakingContainer = (): React.ReactElement => {
           },
           walletAddress,
           currentChain,
-          isMultidelegationSupportedByDevice
+          isMultidelegationSupportedByDevice,
+          isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

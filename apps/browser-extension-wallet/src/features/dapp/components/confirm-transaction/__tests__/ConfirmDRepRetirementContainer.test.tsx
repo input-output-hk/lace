@@ -33,7 +33,9 @@ const hash = Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden')
 const getPubDRepKey = async () => await hash;
 
 const inMemoryWallet = {
-  getPubDRepKey,
+  governance: {
+    getPubDRepKey
+  },
   assetInfo$,
   balance: {
     utxo: {

@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { getQueryStakePoolsFilters } from '@src/stores/slices';
 
 export const fetchPoolsInfo = async ({
   searchString = '',
@@ -7,26 +8,8 @@ export const fetchPoolsInfo = async ({
   searchString: string;
   stakePoolProvider: Wallet.StakePoolProvider;
 }): Promise<Wallet.StakePoolSearchResults['pageResults']> => {
-  const filters: Wallet.QueryStakePoolsArgs = {
-    filters: {
-      ...(searchString && {
-        identifier: {
-          _condition: 'or',
-          values: [{ name: searchString }, { ticker: searchString }, { id: Wallet.Cardano.PoolId(searchString) }]
-        }
-      }),
-      pledgeMet: true,
-      status: [
-        Wallet.Cardano.StakePoolStatus.Active,
-        Wallet.Cardano.StakePoolStatus.Activating,
-        Wallet.Cardano.StakePoolStatus.Retiring
-      ]
-    },
-    pagination: {
-      startAt: 0,
-      limit: 100
-    }
-  };
+  const filters = getQueryStakePoolsFilters({ searchString });
+
   const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
 
   return pools;

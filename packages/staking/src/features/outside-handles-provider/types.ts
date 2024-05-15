@@ -99,4 +99,5 @@ export type OutsideHandlesContextValue = {
   walletAddress: string;
   currentChain: Wallet.Cardano.ChainId;
   isMultidelegationSupportedByDevice: (walletType: string) => Promise<boolean>;
+  isCustomSubmitApiEnabled: boolean;
 };

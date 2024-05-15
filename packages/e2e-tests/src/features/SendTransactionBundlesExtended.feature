@@ -139,7 +139,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And click on the coin selector for "tADA" asset in bundle 2
     And click on an token with name: "LaceCoin"
     And I enter a value of: 1 to the "LaceCoin1" asset in bundle 2
-    Then transaction fee is around 0.25 ADA and Ada allocation cost is around 1.07 ADA
+    Then transaction fee is around 0.20 ADA and Ada allocation cost is around 1.07 ADA
 
   @LW-4505
   Scenario: Extended-view - Cancel transaction with multiple bundles on Summary page
@@ -167,15 +167,15 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 1
+    And I open cancel modal to trigger button validation
     Then I do not see insufficient balance error in bundle 1 for "tADA" asset
     And "Review transaction" button is enabled on "Send" page
     When I click "Add bundle" button on "Send" page
     And I enter a valid "shelley" address in the bundle 2 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 2
+    And I open cancel modal to trigger button validation
     Then I see insufficient balance error in bundle 2 for "tADA" asset
     And I do not see insufficient balance error in bundle 1 for "tADA" asset
-    # step below is a workaround to set focus on something else than input
-    And I click "Review transaction" button on "Send" page
     And "Review transaction" button is disabled on "Send" page
 
   @LW-1762
@@ -265,7 +265,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
 
   @LW-3578
   Scenario: Extended-view - Transaction error screen displayed for multiple bundles on transaction submit error
-    Given I enable network interception to fail request: "*/tx-submit/submit" with error 400
+    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on page header
     And I set 2 bundles with the same assets
     And I click "Review transaction" button on "Send" page

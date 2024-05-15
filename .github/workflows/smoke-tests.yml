@@ -4,19 +4,31 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+  actions: read
+
 env:
   TAGS: '@Smoke and @Testnet'
   BROWSER: 'chrome'
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
+  BRANCH: ${{ github.ref_name }}
 
 jobs:
   smokeTests:
     name: Smoke Tests
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Collect Workflow Telemetry Build Packages
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -41,12 +53,13 @@ jobs:
         working-directory: ./packages/e2e-tests/reports/allure/results
         run: |
           echo "
+          branch=${BRANCH}
           browser=${BROWSER}
           tags=${TAGS}
           platform=Linux
           " > environment.properties
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.4.0
+        uses: andrcuns/allure-publish-action@v2.6.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

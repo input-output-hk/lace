@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styles from './WalletSetupOptionsStepRevamp.module.scss';
 import WalletLogo from '../../assets/icons/onboarding/logo/lace/isologo.png';
 import { ReactComponent as NewWalletIcon } from '../../assets/icons/onboarding/new-wallet.component.svg';
@@ -19,11 +19,9 @@ export interface WalletSetupOptionsStepRevampProps {
     newWallet: SetupOptionTranslations;
     hardwareWallet: SetupOptionTranslations;
     restoreWallet: SetupOptionTranslations;
+    agreementText: ReactNode;
   };
 }
-
-const PRIVACY_POLICY_URL = process.env.PRIVACY_POLICY_URL;
-const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
 
 export const WalletSetupOptionsStepRevamp = ({
   onNewWalletRequest,
@@ -66,14 +64,7 @@ export const WalletSetupOptionsStepRevamp = ({
       </div>
     </div>
     <div className={styles.legal} data-testid="agreement-text">
-      By clicking the Create, Connect or Restore button above, you agree with Lace’s{' '}
-      <a href={TERMS_OF_USE_URL} target="_blank" className={styles.link} data-testid="agreement-terms-of-service-link">
-        Terms of Service
-      </a>{' '}
-      and{' '}
-      <a href={PRIVACY_POLICY_URL} target="_blank" className={styles.link} data-testid="agreement-privacy-policy-link">
-        Privacy Policy
-      </a>
+      {translations.agreementText}
     </div>
   </div>
 );

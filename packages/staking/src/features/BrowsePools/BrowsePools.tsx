@@ -49,7 +49,7 @@ export const BrowsePools = () => {
               showSkeleton={fetching}
               loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
-              sortField={sort.field}
+              sortField={sort?.field}
             />
           ) : (
             <StakePoolsList

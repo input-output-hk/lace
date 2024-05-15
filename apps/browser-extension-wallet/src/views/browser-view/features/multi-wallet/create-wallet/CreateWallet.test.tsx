@@ -21,7 +21,15 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
-import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
+import {
+  DEFAULT_MNEMONIC_LENGTH,
+  createAssetsRoute,
+  fillMnemonic,
+  getNextButton,
+  mnemonicWords,
+  setupStep,
+  getBackButton
+} from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
@@ -30,57 +38,36 @@ import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker'
 import { CreateWallet } from './CreateWallet';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
-    sendMergeEvent: jest.fn().mockReturnValue(''),
-    sendEventToPostHog: jest.fn().mockReturnValue('')
-  })
+  useAnalyticsContext: jest
+    .fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog' | 'sendAliasEvent'>, []>()
+    .mockReturnValue({
+      sendMergeEvent: jest.fn().mockReturnValue(''),
+      sendEventToPostHog: jest.fn().mockReturnValue(''),
+      sendAliasEvent: jest.fn().mockReturnValue('')
+    })
 }));
 
-const keepWalletSecureStep = async () => {
-  const nextButton = getNextButton();
-
-  fireEvent.click(nextButton);
-
-  await screen.findByText('Write down your secret passphrase');
-};
-
 const recoveryPhraseStep = async () => {
-  const nextButton = getNextButton();
-
-  // 08/24
+  let nextButton = getNextButton();
   fireEvent.click(nextButton);
-  // 16/24
+  await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
+  nextButton = getNextButton();
   fireEvent.click(nextButton);
-  // 24/24
-  fireEvent.click(nextButton);
-
-  const step1 = 8;
-  const step2 = 16;
-  const step3 = 24;
-
-  await fillMnemonic(0, step1);
-  await fillMnemonic(step1, step2);
-  await fillMnemonic(step2, step3);
-
-  await screen.findByText('Total wallet balance');
+  await screen.findByText("Let's set up your new wallet");
 };
 
 describe('Multi Wallet Setup/Create Wallet', () => {
   let providers = {} as {
     createWallet: jest.Mock;
     generateMnemonicWords: jest.Mock;
-    confirmationDialog: {
-      shouldShowDialog$: BehaviorSubject<boolean>;
-    };
+    shouldShowConfirmationDialog$: BehaviorSubject<boolean>;
   };
 
   beforeEach(() => {
     providers = {
       createWallet: jest.fn(),
       generateMnemonicWords: jest.fn(),
-      confirmationDialog: {
-        shouldShowDialog$: new BehaviorSubject(false)
-      }
+      shouldShowConfirmationDialog$: new BehaviorSubject(false)
     };
   });
 
@@ -92,7 +79,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.root]}>
               <CreateWallet providers={providers as Providers} />
               {createAssetsRoute()}
             </MemoryRouter>
@@ -101,17 +88,18 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
-    await setupStep();
-    await keepWalletSecureStep();
     await recoveryPhraseStep();
+    await setupStep();
   });
 
   test('should emit correct value for shouldShowDialog', async () => {
+    providers.generateMnemonicWords.mockReturnValue(mnemonicWords);
+
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.root]}>
               <CreateWallet providers={providers as Providers} />
               {createAssetsRoute()}
             </MemoryRouter>
@@ -120,14 +108,15 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
-    const nameInput = screen.getByTestId('wallet-name-input');
+    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(false);
 
-    fireEvent.change(nameInput, { target: { value: 'My X Wallet' } });
+    const nextButton = getNextButton();
+    fireEvent.click(nextButton);
+    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(true);
 
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(true);
-
-    fireEvent.change(nameInput, { target: { value: '' } });
-
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
+    const backButton = getBackButton();
+    fireEvent.click(backButton);
+    fireEvent.click(screen.queryByTestId('delete-address-modal-confirm'));
+    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(false);
   });
 });

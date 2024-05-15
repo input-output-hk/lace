@@ -6,6 +6,8 @@ import { TranslationKey } from '@lib/translations/types';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState, VFC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAnalyticsContext } from '@providers';
+import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
@@ -92,6 +94,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
   const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(DiscoveryState.Requested);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
   const { connectHardwareWalletRevamped } = useWalletManager();
+  const analytics = useAnalyticsContext();
 
   const translations = makeTranslations({ connectionError, t });
   const connect = useConnectHardwareWalletWithTimeout(connectHardwareWalletRevamped);
@@ -99,7 +102,8 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
   const onRetry = useCallback(() => {
     setDiscoveryState(DiscoveryState.Requested);
     setConnectionError(null);
-  }, []);
+    void analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_TRY_AGAIN_CLICK);
+  }, [analytics]);
 
   useEffect(() => {
     (async () => {
@@ -108,10 +112,12 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
       setDiscoveryState(DiscoveryState.Running);
       let connectionResult: Wallet.HardwareWalletConnection;
       try {
+        void analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_VIEW);
         const usbDevice = await requestHardwareWalletConnection();
         onUsbDeviceChange(usbDevice);
         connectionResult = await connect(usbDevice);
         onConnected(connectionResult);
+        void analytics.sendEventToPostHog(postHogOnboardingActions.hw?.HW_POPUP_CONNECT_CLICK);
         setDiscoveryState(DiscoveryState.Idle);
       } catch (error) {
         setDiscoveryState(DiscoveryState.Idle);
@@ -125,7 +131,7 @@ export const StepConnect: VFC<StepConnectProps> = ({ onBack, onConnected, onUsbD
         setConnectionError(parseConnectionError(error));
       }
     })();
-  }, [connect, discoveryState, onUsbDeviceChange, onConnected]);
+  }, [connect, discoveryState, onUsbDeviceChange, onConnected, analytics]);
 
   return (
     <WalletSetupConnectHardwareWalletStepRevamp

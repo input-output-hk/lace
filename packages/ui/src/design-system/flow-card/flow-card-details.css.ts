@@ -8,11 +8,3 @@ export const container = style([
     gridArea: 'details',
   },
 ]);
-
-export const title = sx({
-  color: '$flow_card_label_primary_color',
-});
-
-export const subtitle = sx({
-  color: '$flow_card_label_secondary_color',
-});

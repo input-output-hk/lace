@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-
 import { Tokens } from '@src/types';
-import { PriceResult } from '@hooks';
+import { PriceResult, useCustomSubmitApi } from '@hooks';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
-import { Button, useObservable } from '@lace/common';
+import { Button, useObservable, WarningBanner } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from '@hooks/useMaxAda';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
@@ -39,7 +38,8 @@ export const Form = ({
   const { t } = useTranslation();
   const {
     inMemoryWallet,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    environmentName
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const { builtTxData: { totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
@@ -50,10 +50,11 @@ export const Form = ({
   const [insufficientBalanceInputs, setInsufficientBalanceInputs] = useState<string[]>([]); // we save all the element input ids with insufficient balance error
   const { lastFocusedInput } = useLastFocusedInput();
   const { fiatCurrency } = useCurrencyStore();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   const { setNewOutput } = useOutputs();
 
-  const isEmptyAssets = assetBalances?.size === 0;
+  const isEmptyAssets = !assetBalances?.size;
 
   const handleAddRow = () => {
     const nextBundleId = getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin);
@@ -99,12 +100,16 @@ export const Form = ({
   const totalCost = getFee(fee.toString(), prices?.cardano?.price, cardanoCoin, fiatCurrency);
 
   const hasMissingCoins = totalMinimumCoins?.coinMissing && totalMinimumCoins?.coinMissing !== '0';
-  const bundleDisabled = spendableCoin
-    ? !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length
-    : false;
+
+  const bundleDisabled =
+    !spendableCoin ||
+    !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length;
 
   return (
     <Skeleton loading={isLoading}>
+      {getCustomSubmitApiForNetwork(environmentName).status && (
+        <WarningBanner message={t('browserView.transaction.send.customSubmitApiBannerText')} />
+      )}
       <BundlesList
         isPopupView={isPopupView}
         coinBalance={coinBalance}

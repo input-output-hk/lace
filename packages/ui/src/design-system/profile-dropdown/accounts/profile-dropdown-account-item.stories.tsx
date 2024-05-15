@@ -13,7 +13,7 @@ export default {
   component: AccountItem,
   decorators: [
     page({
-      title: 'AccountItem',
+      title: 'Account Item',
       subtitle: 'Component for the profile dropdown to represent an account.',
     }),
   ],

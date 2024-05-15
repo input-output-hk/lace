@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { DisableAccountConfirmation } from './DisableAccountConfirmation';
 import { ComponentProps } from 'react';
+import { ThemeColorScheme } from '@lace/ui';
 
 const meta: Meta<typeof DisableAccountConfirmation> = {
   title: 'Accounts/DisableAccountConfirmation',
@@ -29,5 +30,22 @@ const data: ComponentProps<typeof DisableAccountConfirmation> = {
 export const Overview: Story = {
   args: {
     ...data
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false
+    }
+  }
+};
+
+export const WithDarkMode: Story = {
+  args: {
+    ...data
+  },
+  parameters: {
+    decorators: {
+      colorSchema: false,
+      theme: ThemeColorScheme.Dark
+    }
   }
 };

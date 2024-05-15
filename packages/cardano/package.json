@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
-    "cleanup": "yarn exec rm -rf dist node_modules .rollup.cache src/dist",
+    "cleanup": "yarn exec rm -rf dist node_modules",
     "lint": "cd ../.. && yarn cardano:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
@@ -38,15 +38,15 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/cardano-services-client": "0.18.0",
-    "@cardano-sdk/core": "0.30.0",
-    "@cardano-sdk/crypto": "0.1.22",
-    "@cardano-sdk/hardware-ledger": "0.9.0",
-    "@cardano-sdk/hardware-trezor": "0.4.19",
-    "@cardano-sdk/key-management": "0.20.1",
-    "@cardano-sdk/util": "0.15.0",
-    "@cardano-sdk/wallet": "0.36.0",
-    "@cardano-sdk/web-extension": "0.26.2",
+    "@cardano-sdk/cardano-services-client": "0.19.3",
+    "@cardano-sdk/core": "0.31.0",
+    "@cardano-sdk/crypto": "0.1.23",
+    "@cardano-sdk/hardware-ledger": "0.9.4",
+    "@cardano-sdk/hardware-trezor": "0.4.24",
+    "@cardano-sdk/key-management": "0.20.4",
+    "@cardano-sdk/util": "0.15.1",
+    "@cardano-sdk/wallet": "0.37.4",
+    "@cardano-sdk/web-extension": "0.27.4",
     "@lace/common": "0.1.0",
     "@ledgerhq/devices": "^8.2.1",
     "@stablelib/chacha20poly1305": "1.0.1",
@@ -68,7 +68,7 @@
     "webextension-polyfill": "0.8.0"
   },
   "devDependencies": {
-    "@cardano-sdk/util-dev": "0.19.18",
+    "@cardano-sdk/util-dev": "0.20.3",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.8.0",
     "typescript": "^4.9.5"

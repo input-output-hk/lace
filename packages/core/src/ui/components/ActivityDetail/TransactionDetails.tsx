@@ -1,11 +1,13 @@
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import cn from 'classnames';
-import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
+
 import { Ellipsis, toast } from '@lace/common';
-import { Box } from '@lace/ui';
-import { useTranslate } from '@src/ui/hooks';
+import { Box, Text } from '@lace/ui';
+import { useTranslate } from '@ui/hooks';
+import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
+
+import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { ActivityStatus } from '../Activity';
 import styles from './TransactionDetails.module.scss';
@@ -18,7 +20,8 @@ import {
   TxDetailsProposalProceduresTitles,
   TxDetailsCertificateTitles,
   TxDetails,
-  TxDetail
+  TxDetail,
+  TransactionActivityType
 } from './types';
 import { Collateral, CollateralStatus } from './Collateral';
 
@@ -76,6 +79,7 @@ export interface TransactionDetailsProps {
   txSummary?: TxSummary[];
   coinSymbol: string;
   tooltipContent?: string;
+  ownAddresses: string[];
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: (url: string) => void;
@@ -122,6 +126,7 @@ export const TransactionDetails = ({
   txSummary = [],
   coinSymbol,
   pools,
+  ownAddresses,
   addressToNameMap,
   isPopupView,
   openExternalLink,
@@ -245,7 +250,7 @@ export const TransactionDetails = ({
       <div className={styles.title}>{label}</div>
       <div className={styles.detail}>
         <div className={styles.amount}>
-          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>
+          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>{' '}
           <span className={styles.fiat}>{amountTransformer(value)}</span>
         </div>
       </div>
@@ -332,7 +337,7 @@ export const TransactionDetails = ({
                     <span
                       className={styles.ada}
                       data-testid="tx-sent-detail-ada"
-                    >{`${summary.amount} ${coinSymbol}`}</span>
+                    >{`${summary.amount} ${coinSymbol}`}</span>{' '}
                     <span className={styles.fiat} data-testid="tx-sent-detail-fiat">{`${amountTransformer(
                       summary.amount
                     )}`}</span>
@@ -341,7 +346,7 @@ export const TransactionDetails = ({
               </div>
               <div className={styles.details}>
                 <div className={styles.title}>
-                  {t(`core.activityDetails.${name.toLowerCase() === 'sent' ? 'to' : 'from'}`)}
+                  {t(`core.activityDetails.${summary.type === TransactionActivityType.outgoing ? 'to' : 'from'}`)}
                 </div>
                 <div>
                   {summary.addr.length > 1 && (
@@ -353,22 +358,28 @@ export const TransactionDetails = ({
                     </div>
                   )}
                   {(summary.addr as string[]).map((addr) => {
-                    const addrName = addressToNameMap?.get(addr);
+                    const addressName = addressToNameMap?.get(addr);
                     const address = isPopupView ? (
-                      <Ellipsis className={cn(styles.addr, styles.fiat)} text={addr} ellipsisInTheMiddle />
+                      <Ellipsis
+                        className={cn(styles.addr, styles.fiat)}
+                        text={addr}
+                        dataTestId="tx-to-address"
+                        ellipsisInTheMiddle
+                      />
                     ) : (
-                      <span className={cn(styles.addr, styles.fiat)}>{addr}</span>
+                      <span className={cn(styles.addr, styles.fiat)} data-testid="tx-to-address">
+                        {addr}
+                      </span>
                     );
                     return (
-                      <div key={addr} data-testid="tx-to-detail" className={cn(styles.addr, styles.detail)}>
-                        {addrName ? (
-                          <div className={styles.amount}>
-                            <span className={cn(styles.ada, styles.addrName)}>{addrName}</span>
-                            {address}
-                          </div>
-                        ) : (
-                          address
-                        )}
+                      <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
+                        {addressName && <Text.Body.Normal weight="$semibold">{addressName}</Text.Body.Normal>}
+                        {<Text.Address color={addressName ? 'secondary' : 'primary'}>{address}</Text.Address>}
+                        {renderAddressTag({
+                          address: addr,
+                          translations: getAddressTagTranslations(t),
+                          ownAddresses
+                        })}
                       </div>
                     );
                   })}
@@ -590,6 +601,8 @@ export const TransactionDetails = ({
             coinSymbol={coinSymbol}
             withSeparatorLine
             sendAnalytics={sendAnalyticsInputs}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         )}
         {addrOutputs?.length > 0 && (
@@ -604,6 +617,8 @@ export const TransactionDetails = ({
             }}
             coinSymbol={coinSymbol}
             sendAnalytics={sendAnalyticsOutputs}
+            ownAddresses={ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         )}
         {metadata?.length > 0 && (

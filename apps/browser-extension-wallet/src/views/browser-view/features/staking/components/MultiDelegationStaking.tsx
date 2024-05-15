@@ -10,19 +10,9 @@ import { useTranslation } from 'react-i18next';
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
   const { priceResult } = useFetchCoinPrice();
+
   const { blockchainProvider, activityDetail, resetActivityState } = useWalletStore((state) => ({
-    walletType: state.walletType,
-    inMemoryWallet: state.inMemoryWallet,
-    walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
-    stakePoolSearchResults: state.stakePoolSearchResults,
-    stakePoolSearchResultsStatus: state.stakePoolSearchResultsStatus,
-    fetchStakePools: state.fetchStakePools,
-    resetStakePools: state.resetStakePools,
-    networkInfo: state.networkInfo,
-    fetchNetworkInfo: state.fetchNetworkInfo,
     blockchainProvider: state.blockchainProvider,
-    walletInfo: state.walletInfo,
-    currentChain: state.currentChain,
     activityDetail: state.activityDetail,
     resetActivityState: state.resetActivityState
   }));

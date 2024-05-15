@@ -1,13 +1,8 @@
 import StakingPage from '../elements/staking/stakingPage';
 import { TestnetPatterns } from '../support/patterns';
-import webTester from '../actor/webTester';
 import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import { t } from '../utils/translationService';
-import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
-import { Logger } from '../support/logger';
-import StakingExtendedPageObject from '../pageobject/stakingExtendedPageObject';
-import { sortColumnContent } from '../utils/stakePoolListContent';
 import { expect } from 'chai';
 import { StakePool } from '../data/expectedStakePoolsData';
 import StakingPasswordDrawer from '../elements/staking/StakingPasswordDrawer';
@@ -37,13 +32,10 @@ class StakingPageAssert {
       ? expect(await StakingInfoComponent.poolTicker.getText()).to.contain(expectedStakePool.poolId.slice(0, 6))
       : expect(await StakingInfoComponent.poolTicker.getText()).to.equal(expectedStakePool.ticker);
 
-    expect(await StakingInfoComponent.statsApy.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsROS.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.ros')
     );
-    // TODO BUG LW-5635
-    // expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().value())) as string).to.match(
-    //   TestnetPatterns.PERCENT_DOUBLE_REGEX
-    // );
+    expect(await StakingInfoComponent.statsROS.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     expect(await StakingInfoComponent.statsFee.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.Fee')
@@ -112,18 +104,6 @@ class StakingPageAssert {
       timeout: 20_000,
       timeoutMsg: 'failed while waiting for single search result'
     });
-  };
-
-  assertStakePoolItemsOrder = async (columnName: string, order: string) => {
-    const stakePoolListItem = new StakePoolListItem();
-    await webTester.waitUntilSeeElement(stakePoolListItem.container(), 60_000);
-    const columnContent: string[] = await StakingExtendedPageObject.extractColumnContent(columnName);
-    Logger.log(`EXTRACTED DATA: ${columnContent}`);
-    const sortedColumnContent = await sortColumnContent(columnContent, columnName, order);
-    Logger.log(`SORTED DATA: ${sortedColumnContent}`);
-
-    expect(columnContent).to.not.be.empty;
-    expect(columnContent).to.deep.equal(sortedColumnContent);
   };
 
   assertSeeStakingPasswordDrawer = async () => {

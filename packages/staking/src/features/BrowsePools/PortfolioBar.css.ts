@@ -1,4 +1,5 @@
-import { style, sx } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 import { theme } from '../theme';
 const minimumScreenSize = '668px';
 

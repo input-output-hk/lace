@@ -69,7 +69,6 @@ export const thumb = style([
 ]);
 
 export const label = sx({
-  color: '$toggle_switch_label_color',
   mr: '$8',
 });
 
@@ -81,7 +80,7 @@ export const iconContainer = style([
     mr: '$8',
     width: '$24',
     height: '$24',
-    color: '$toggle_switch_label_color',
+    color: '$text_secondary',
     fontSize: '$25',
   }),
   {

@@ -21,8 +21,8 @@ export type Props = Readonly<{
   disabled?: boolean;
   showArrow?: boolean;
   withOutline?: boolean;
-
   onValueChange: (value: string) => void;
+  contentClassName?: string;
 }>;
 
 export const SelectGroup = ({
@@ -33,6 +33,7 @@ export const SelectGroup = ({
   selectedValue,
   showArrow = false,
   withOutline = false,
+  contentClassName,
   ...props
 }: Props): JSX.Element => (
   <Box className={cn(className, cx.root)}>
@@ -46,6 +47,7 @@ export const SelectGroup = ({
           cx.selectTriggerVariants[withOutline ? 'outlined' : 'notOutlined']
         }
         aria-label="Food"
+        data-testid="select-group-input"
       >
         <RadixSelectGroup.Value placeholder={placeholder} />
         {showArrow && (
@@ -55,12 +57,18 @@ export const SelectGroup = ({
         )}
       </RadixSelectGroup.Trigger>
       <RadixSelectGroup.Portal>
-        <RadixSelectGroup.Content className={cx.selectContent}>
+        <RadixSelectGroup.Content
+          className={cn(cx.selectContent, contentClassName)}
+        >
           <RadixSelectGroup.Viewport className="SelectViewport">
             <RadixSelectGroup.Group>
               {options.map(({ label, value }) => {
                 return (
-                  <SelectItem key={label} value={value}>
+                  <SelectItem
+                    key={label}
+                    value={value}
+                    data-testid="select-group-option"
+                  >
                     {label}
                   </SelectItem>
                 );
