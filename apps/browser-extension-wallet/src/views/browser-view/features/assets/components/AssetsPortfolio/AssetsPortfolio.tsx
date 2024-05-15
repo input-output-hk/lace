@@ -124,7 +124,7 @@ export const AssetsPortfolio = ({
         />
       )}
       {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && (
-        <Flex flexDirection="column" gap="$10">
+        <Flex flexDirection="column" gap="$10" mb="$16">
           <Text.Body.Normal weight="$medium" color="secondary">
             {t('browserView.assets.topupWallet.buyButton.title')}
           </Text.Body.Normal>

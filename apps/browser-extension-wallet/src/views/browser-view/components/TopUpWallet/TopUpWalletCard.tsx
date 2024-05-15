@@ -8,8 +8,8 @@ export const TopUpWalletCard = (): React.ReactElement => {
   const { t } = useTranslation();
 
   return (
-    <Card.Outlined>
-      <Flex flexDirection="column" mx="$20" my="$20" gap="$6">
+    <Card.Outlined className={styles.card}>
+      <Flex flexDirection="column" mx="$20" my="$20" gap="$6" alignItems="stretch">
         <div className={styles.titleBadge}>
           <Text.Label className={styles.badgeCaption} weight="$medium">
             {t('browserView.assets.topupWallet.card.badge')}

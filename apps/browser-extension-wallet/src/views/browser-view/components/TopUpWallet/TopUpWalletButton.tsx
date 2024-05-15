@@ -36,6 +36,7 @@ export const TopUpWalletButton = (): React.ReactElement => {
         onConfirm={() => {
           analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerContinueClick);
           tabs.create({ url: BANXA_LACE_URL });
+          setOpen(false);
         }}
       />
     </>

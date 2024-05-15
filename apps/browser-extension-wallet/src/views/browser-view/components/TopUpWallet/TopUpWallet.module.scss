@@ -1,9 +1,14 @@
 @import '../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
 
+.card {
+  align-self: stretch;
+}
+
 .titleBadge {
+  align-self: start;
   border-radius: 16px;
   background: var(--primary-gradient);
-  display: flex;
+  display: flex;  
   align-items: center; 
   justify-content: center;   
   padding: 0 8px;
