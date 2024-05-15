@@ -45,7 +45,7 @@ export const TopUpWalletDialog = ({
       </Dialog.Description>
       <Dialog.Actions>
         <Dialog.Action cancel label={t('browserView.assets.topupWallet.modal.goBack')} onClick={onCancel} />
-        <Dialog.Action label={t('browserView.assets.topupWallet.modal.continue')} onClick={onConfirm} />
+        <Dialog.Action autoFocus label={t('browserView.assets.topupWallet.modal.continue')} onClick={onConfirm} />
       </Dialog.Actions>
     </Dialog.Root>
   );

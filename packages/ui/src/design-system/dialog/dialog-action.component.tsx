@@ -9,6 +9,7 @@ export interface DialogActionProps {
   label: string;
   disabled?: boolean;
   cancel?: boolean;
+  autoFocus?: boolean;
 }
 
 export const Action = ({
@@ -16,13 +17,19 @@ export const Action = ({
   label,
   disabled,
   cancel = false,
+  autoFocus = false,
 }: Readonly<DialogActionProps>): JSX.Element => {
   const Wrapper = cancel ? AlertDialog.Cancel : AlertDialog.Action;
   const ActionButton = cancel ? Button.Secondary : Button.CallToAction;
 
   return (
     <Wrapper asChild onClick={onClick}>
-      <ActionButton w="$fill" label={label} disabled={disabled} />
+      <ActionButton
+        w="$fill"
+        label={label}
+        disabled={disabled}
+        autoFocus={autoFocus}
+      />
     </Wrapper>
   );
 };
