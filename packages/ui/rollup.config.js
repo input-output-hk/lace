@@ -20,7 +20,9 @@ export default () => ({
     commonjs(),
     image(),
     svgr({ icon: true }),
-    vanillaExtractPlugin(),
+    vanillaExtractPlugin({
+      identifiers: 'short',
+    }),
     copy({
       targets: [{ src: 'src/assets/icons/*', dest: 'dist/assets/icons' }],
     }),
