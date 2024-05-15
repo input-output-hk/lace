@@ -29,6 +29,8 @@ import { AssetActivityDetails } from './AssetActivityDetails/AssetActivityDetail
 import { AssetEducationalList } from './AssetEducationalList/AssetEducationalList';
 import { Flex } from '@lace/ui';
 import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
+import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
+import { BREAKPOINT_SMALL } from '@src/styles/constants';
 
 const LIST_CHUNK_SIZE = 12;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -59,6 +61,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
+  const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
 
   const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
@@ -313,7 +316,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         hasCredit={fullAssetList?.length > 0}
         sidePanelContent={
           <Flex flexDirection="column" gap="$28">
-            {USE_FOOR_TOPUP && <TopUpWalletCard />}
+            {USE_FOOR_TOPUP && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}
             <AssetEducationalList />
           </Flex>
         }
