@@ -220,13 +220,13 @@ Feature: Staking Page - Extended View
     And I open Browse pools tab
     And I switch to grid view on "Browse pools" tab
     Then stake pool grid view is displayed
-    Then I see 5 stake pool cards in a row
+    Then I see 4 stake pool cards in a row
     When I resize the window to a width of: 1660 and a height of: 1080
-    Then I see 5 stake pool cards in a row
+    Then I see 4 stake pool cards in a row
     When I resize the window to a width of: 1659 and a height of: 1080
-    Then I see 4 stake pool cards in a row
-    When I resize the window to a width of: 668 and a height of: 1080
-    Then I see 4 stake pool cards in a row
-    When I resize the window to a width of: 667 and a height of: 1080
     Then I see 3 stake pool cards in a row
+    When I resize the window to a width of: 669 and a height of: 1080
+    Then I see 3 stake pool cards in a row
+    When I resize the window to a width of: 668 and a height of: 1080
+    Then I see 2 stake pool cards in a row
 
