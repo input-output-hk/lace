@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   chromatic-deployment:
+    name: Chromatic Staking
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-22.04
     steps:
