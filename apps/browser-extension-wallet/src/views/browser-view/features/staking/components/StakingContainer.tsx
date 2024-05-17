@@ -13,6 +13,7 @@ import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@p
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
 import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import {
+  MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
@@ -32,6 +33,8 @@ export const StakingContainer = (): React.ReactElement => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
+    useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
   const [
     multidelegationFirstVisitSincePortfolioPersistence,
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
@@ -125,6 +128,8 @@ export const StakingContainer = (): React.ReactElement => {
           compactNumber: compactNumberWithUnit,
           multidelegationFirstVisit,
           triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+          multidelegationDAppCompatibility,
+          triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
           multidelegationFirstVisitSincePortfolioPersistence,
           triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
             setMultidelegationFirstVisit(false);

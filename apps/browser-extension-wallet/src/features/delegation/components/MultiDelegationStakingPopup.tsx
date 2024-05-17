@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
+  MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
@@ -86,6 +87,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
+    useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
   const [
     multidelegationFirstVisitSincePortfolioPersistence,
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
@@ -109,6 +112,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         setStakingBrowserPreferencesPersistence,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        multidelegationDAppCompatibility,
+        triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
         multidelegationFirstVisitSincePortfolioPersistence,
         triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
           setMultidelegationFirstVisit(false);

@@ -33,6 +33,7 @@ import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsCom
 import { mapColumnNameStringToEnum, mapSortingOptionNameStringToEnum } from '../utils/stakePoolListContent';
 import { browser } from '@wdio/globals';
 import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
+import MultidelegationDAppIssueModal from '../elements/staking/MultidelegationDAppIssueModal';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -584,3 +585,9 @@ Then(
     );
   }
 );
+
+When(/^I close the modal about issues with multidelegation and DApps$/, async () => {
+  if (await MultidelegationDAppIssueModal.gotItButton.isDisplayed()) {
+    await MultidelegationDAppIssueModal.gotItButton.click();
+  }
+});
