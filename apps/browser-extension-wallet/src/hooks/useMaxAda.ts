@@ -9,8 +9,8 @@ const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 export const useMaxAda = (): bigint => {
   const [maxADA, setMaxADA] = useState<bigint>();
   const { walletInfo, inMemoryWallet } = useWalletStore();
-  const balance = useObservable(inMemoryWallet.balance.utxo.available$);
-  const availableRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
+  const balance = useObservable(inMemoryWallet?.balance?.utxo.available$);
+  const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
 
   const calculateMaxAda = useCallback(async () => {
     if (!balance) {
