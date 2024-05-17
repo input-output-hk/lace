@@ -321,6 +321,10 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
+Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
 Given(/^I enable showing Analytics consent banner$/, async () => {
   await localStorageInitializer.enableShowingAnalyticsBanner();
   await browser.refresh();
