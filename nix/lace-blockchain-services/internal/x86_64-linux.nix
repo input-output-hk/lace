@@ -14,7 +14,16 @@ in rec {
 
   inherit (common) ogmios cardano-node;
 
-  cardano-js-sdk = inputs.cardano-js-sdk.packages.${pkgs.system}.default;
+  cardano-js-sdk = (common.flake-compat {
+    src = inputs.cardano-js-sdk;
+  }).defaultNix.${pkgs.system}.cardano-services.packages.cardano-services;
+
+  # In v18.16, after `patchelf`, we’re getting:
+  #   `Check failed: VerifyChecksum(blob)` in `v8::internal::Snapshot::VerifyChecksum`
+  # Let’s disable the default snapshot verification for now:
+  nodejs-no-snapshot = cardano-js-sdk.nodejs.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [ ./nodejs--no-verify-snapshot-checksum.patch ];
+  });
 
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
@@ -167,12 +176,12 @@ in rec {
     ln -s ${mkBundle { "cardano-node"   = lib.getExe cardano-node;          }} $out/libexec/cardano-node
     ln -s ${mkBundle { "ogmios"         = lib.getExe ogmios;                }} $out/libexec/ogmios
     ln -s ${mkBundle { "mithril-client" = lib.getExe mithril-client;        }} $out/libexec/mithril-client
-    ln -s ${mkBundle { "node"           = lib.getExe cardano-js-sdk.nodejs; }} $out/libexec/nodejs
+    ln -s ${mkBundle { "node"           = lib.getExe nodejs-no-snapshot;    }} $out/libexec/nodejs
     ln -s ${mkBundle { "clip"           = lib.getExe pkgs.xclip;            }} $out/libexec/xclip
     ln -s ${postgresBundle                                                   } $out/libexec/postgres
 
     mkdir -p $out/share
-    ln -s ${cardano-js-sdk}/libexec/source $out/share/cardano-js-sdk
+    ln -s ${cardano-js-sdk}/libexec/incl $out/share/cardano-js-sdk
     ln -s ${pkgs.xkeyboard_config}/share/X11/xkb $out/share/xkb
     ln -s ${common.networkConfigs} $out/share/cardano-node-config
     ln -s ${common.swagger-ui} $out/share/swagger-ui
@@ -186,6 +195,7 @@ in rec {
     mkdir -p $out
     cp -r --dereference ${unbundled}/libexec $out/
     chmod -R +w $out/libexec
+    rm -r $out/libexec/lace-blockchain-services
     cp -r --dereference ${mkBundle { "lace-blockchain-services" = (lib.getExe unbundled); }} $out/libexec/lace-blockchain-services
     mkdir -p $out/bin
     ln -s ../libexec/lace-blockchain-services/lace-blockchain-services $out/bin/

@@ -12,20 +12,17 @@ in rec {
 
   laceVersion = (builtins.fromJSON (builtins.readFile ../../../apps/browser-extension-wallet/package.json)).version;
 
-  cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
-
   # These are configs of ‘cardano-node’ for all networks we make available from the UI.
   # The patching of the official networks needs to happen to:
   #   • turn off ‘EnableP2P’ (and modify topology accordingly), because it doesn’t work on Windows,
   #   • and turn off ‘hadPrometheus’, because it makes cardano-node hang on Windows during graceful exit.
   networkConfigs = let
     selectedNetworks = [ "mainnet" "preprod" "preview" ];
-    website = cardanoWorldFlake.${buildSystem}.cardano.packages.cardano-config-html-internal;
   in pkgs.runCommand "network-configs" {
     nativeBuildInputs = [ pkgs.jq ];
   } ((lib.concatMapStringsSep "\n" (network: ''
     mkdir -p $out/${network}
-    cp -r ${website}/config/${network}/. $out/${network}
+    cp -r ${inputs.cardano-js-sdk}/packages/cardano-services/config/network/${network}/. $out/${network}
   '') selectedNetworks) + (lib.optionalString (targetSystem == "x86_64-windows") ''
     # Transform P2P topologies to non-P2P (or else, on Windows, we’d require C:\etc\resolv.conf)
     chmod -R +w $out
@@ -137,7 +134,16 @@ in rec {
       PostgresVersion = ${__toJSON postgresPackage.version}
       PostgresRevision = ${__toJSON postgresPackage.version}
       ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
-      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
+      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.rev}
+      CardanoJsSdkBuildInfo = ${__toJSON (let self = inputs.cardano-js-sdk; in builtins.toJSON {
+        inherit (self) lastModified lastModifiedDate rev;
+        shortRev = self.shortRev or "no rev";
+        extra = {
+          inherit (self) narHash;
+          sourceInfo = self;
+          path = self.outPath;
+        };
+      })}
       MithrilClientRevision = ${__toJSON inputs.mithril.sourceInfo.rev}
       MithrilClientVersion = ${__toJSON mithril-bin.version}
       MithrilGVKPreview = ${__toJSON mithrilGenesisVerificationKeys.preview}

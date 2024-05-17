@@ -241,7 +241,7 @@ func readAvailableNetworks() (map[t.NetworkMagic]string, error) {
 	names, err := readDirAsStrings(ourpaths.NetworkConfigDir)
 	if err != nil { return nil, err }
 	for _, name := range names {
-		configFile := ourpaths.NetworkConfigDir + sep + name + sep + "config.json"
+		configFile := ourpaths.NetworkConfigDir + sep + name + sep + "cardano-node" + sep + "config.json"
 
 		configBytes, err := ioutil.ReadFile(configFile)
 		var config map[string]interface{}

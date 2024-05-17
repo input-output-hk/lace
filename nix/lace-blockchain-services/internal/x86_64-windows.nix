@@ -196,6 +196,9 @@ in rec {
     mkdir -p $out/libexec/sigbreak
     cp -Lf ${sigbreak}/*.exe $out/libexec/sigbreak/
 
+    mkdir -p $out/libexec/mksymlink
+    cp -Lf ${mksymlink}/*.exe $out/libexec/mksymlink/
+
     mkdir -p $out/libexec/postgres
     cp -Lr ${postgresUnpacked}/{bin,lib,share,*license*.txt} $out/libexec/postgres/
 
@@ -231,14 +234,18 @@ in rec {
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
-  # XXX: we’re compiling it with MSVC so that it takes 122 kB, not 100× more…
-  sigbreak = pkgs.runCommandNoCC "sigbreak" {
+  # XXX: we’re compiling them with MSVC so that it takes 122 kB, not 100× more…
+  mkSimpleExecutable = {
+    name,
+    srcFile,
+    noConsole ? false   # Don’t open a terminal window
+  }: pkgs.runCommandNoCC name {
     buildInputs = with cardano-js-sdk.fresherPkgs; [ wineWowPackages.stableFull winetricks ];
   } ''
     export HOME=$(realpath $NIX_BUILD_TOP/home)
     mkdir -p $HOME
 
-    cp ${./sigbreak.cc} sigbreak.cc
+    cp ${srcFile} ${name}.cc
 
     export WINEDEBUG=-all  # comment out to get normal output (err,fixme), or set to +all for a flood
     export WINEPATH="$(winepath -w ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/x64)"
@@ -252,14 +259,27 @@ in rec {
     libPath_2="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Lib/*/ucrt/x64)"
     libPath_3="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Lib/*/um/x64)"
 
-    wine cl.exe /EHsc "/I$inclPath_1" "/I$inclPath_2" "/I$inclPath_3" "/I$inclPath_4" /c sigbreak.cc
+    wine cl.exe /EHsc "/I$inclPath_1" "/I$inclPath_2" "/I$inclPath_3" "/I$inclPath_4" /c ${name}.cc
 
-    wine cl.exe sigbreak.obj /link "/LIBPATH:$libPath_1" "/LIBPATH:$libPath_2" "/LIBPATH:$libPath_3" \
-      /out:sigbreak.exe
+    wine cl.exe ${name}.obj /link "/LIBPATH:$libPath_1" "/LIBPATH:$libPath_2" "/LIBPATH:$libPath_3" \
+      ${lib.optionalString noConsole "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"} \
+      /out:${name}.exe
 
     mkdir -p $out
-    mv sigbreak.exe $out/
+    mv ${name}.exe $out/
   '';
+
+  sigbreak = mkSimpleExecutable {
+    name = "sigbreak";
+    srcFile = ./sigbreak.cc;
+  };
+
+  # `mklink /D` is a `cmd.exe` built-in, not a real executable… let’s make it one:
+  mksymlink = mkSimpleExecutable {
+    name = "mksymlink";
+    srcFile = ./mksymlink.c;
+    noConsole = true;
+  };
 
   make-windows-installer = let
     project = common.haskell-nix.project {
@@ -291,7 +311,11 @@ in rec {
       --banner-bmp banner.bmp \
       --lock-file '$APPDATA\lace-blockchain-services\instance.lock' \
       --shortcut-exe "lace-blockchain-services.exe" \
-      --contents-dir 'contents\*'
+      --contents-dir 'contents\*' \
+      ${lib.escapeShellArgs (lib.concatMap (wspace: [
+        "--extra-exec"
+        ''"$INSTDIR\libexec\mksymlink\mksymlink.exe" "$INSTDIR\cardano-js-sdk\node_modules\@cardano-sdk\${wspace}" ..\..\packages\${wspace}''
+      ]) (__attrNames (__readDir (inputs.cardano-js-sdk + "/packages"))))}
 
     makensis uninstaller.nsi -V4
 
@@ -348,7 +372,9 @@ in rec {
   #
   # See also: similar approach in Daedalus: <https://github.com/input-output-hk/daedalus/blob/94ffe045dea35fd8d638bc466f9eb61e51d4e935/nix/internal/x86_64-windows.nix#L205>
   cardano-js-sdk = rec {
-    theirPackage = inputs.cardano-js-sdk.packages.x86_64-linux.default;
+    theirPackage = (common.flake-compat {
+      src = inputs.cardano-js-sdk;
+    }).defaultNix.${pkgs.system}.cardano-services.packages.cardano-services;
 
     # Let’s grab the build-time `node_modules` of the Linux build, and
     # we’ll call specific "install" scripts manually inside Wine.
@@ -372,18 +398,16 @@ in rec {
     });
 
     # Let’s build the TS/JS files as on Linux, but then copy native Windows DLLs (${nativeModules} below)
-    ourPackage = pkgs.stdenv.mkDerivation {
+    ourPackage = theirPackage.overrideAttrs (drv: {
       name = "cardano-js-sdk";
-      src = toString inputs.cardano-js-sdk;
-      nativeBuildInputs = with pkgs; [ python3 rsync ];
-      inherit (theirPackage) buildInputs npm_config_nodedir configurePhase CHROMEDRIVER_FILEPATH;
-      buildPhase = "yarn build";
+      nativeBuildInputs = (drv.nativeBuildInputs or []) ++ [ pkgs.rsync ];
+      patches = (drv.patches or []) ++ [ ./cardano-js-sdk--windows-http.patch ];
       installPhase = ''
         mkdir $out
         rsync -Rah $(find . '(' '(' -type d -name 'dist' ')' -o -name 'package.json' ')' \
           -not -path '*/node_modules/*') $out/
 
-        cp -r ${theirPackage.production-deps}/libexec/source/node_modules $out/
+        cp -r ${theirPackage.production-deps}/libexec/incl/node_modules $out/
         chmod -R +w $out
 
         # Clear the Linux binaries:
@@ -392,22 +416,42 @@ in rec {
 
         # Inject the Windows DLLs:
         rsync -ah ${nativeModules}/. $out/
+
+        # Another bug concerns workspace symlinks, NTFS symlinks made with `mklink /D` do work,
+        # and we create them in the installer.exe (which is run as Administrator).
+        rm $out/node_modules/@cardano-sdk/*
+
+        find $out/node_modules/ -type l -name 'python3'     -exec rm -vf  '{}' ';'
+        find $out/node_modules/ -type d -name '.bin' -prune -exec rm -vfr '{}' ';'
+
+        # Drop the cjs/ prefix, it’s problematic on Windows:
+        find $out/packages -mindepth 3 -maxdepth 3 -type d -path '*/dist/cjs' | while IFS= read -r cjs ; do
+          mv "$cjs" "$cjs.old-unused"
+          mv "$cjs.old-unused"/{.*,*} "$(dirname "$cjs")/"
+          rmdir "$cjs.old-unused"
+        done
+        find $out/packages -mindepth 2 -maxdepth 2 -type f -name 'package.json' | while IFS= read -r packageJson ; do
+          sed -r 's,dist/cjs,dist,g' -i "$packageJson"
+          sed -r 's,dist/esm,dist,g' -i "$packageJson"
+        done
       '';
+      postInstall = "";
       dontFixup = true;
-    };
+    });
 
     # XXX: `pkgs.nodejs` lacks `uv/win.h`, `node.lib` etc., so:
     nodejsHeaders = pkgs.runCommand "nodejs-headers-${theirPackage.nodejs.version}" rec {
       version = theirPackage.nodejs.version;
       src = pkgs.fetchurl {
         url = "https://nodejs.org/dist/v${version}/node-v${version}-headers.tar.gz";
-        hash = "sha256-4LCiKSF5q4VTV876cE95fXhTtWny1mu3wxPdXLNuBjs=";
+        hash = "sha256-jHLwhhI3cxo+KSpL4rals8D1EUr+OjoCtfrTXXs7LMI=";
       };
       # XXX: normally, node-gyp would download it only for Windows, see `resolveLibUrl()`
       # in `node-gyp/lib/process-release.js`
       node_lib = pkgs.fetchurl {
+        name = "node.lib-${version}";
         url = "https://nodejs.org/dist/v${version}/win-x64/node.lib";
-        hash = "sha256-Orh+nCfi1Jhp/RXHhBwWdK9Wyb468WcsFzYhozAPDg0=";
+        hash = "sha256-crf6uTga+PSVjIIS89TN//jHxbHjPqrQ59WIgpNWjNU=";
       };
     } ''
       mkdir unpack
@@ -553,11 +597,16 @@ in rec {
             # Make it use our node_modules:
             export NODE_PATH="$(winepath -w ./node_modules)"
 
-            export CHROMEDRIVER_FILEPATH="$(winepath -w ${lib.escapeShellArg target.chromedriverBin})";
+            export CHROMEDRIVER_FILEPATH="$(winepath -w ${lib.escapeShellArg (builtins.toFile "fake-chromedriver" "")})";
 
             find -type f -name package.json | xargs grep -RF '"install":' | cut -d: -f1 \
+              | grep -vF 'node_modules/playwright/' \
               | while IFS= read -r package
             do
+              if [ "$(jq .scripts.install "$package")" = "null" ] ; then
+                continue
+              fi
+
               ${mkSection "Running the install script of ‘$package’"}
 
               # XXX: we have to do that, so that Node.js sets environment properly:
@@ -594,27 +643,16 @@ in rec {
       '';
     };
 
-    chromedriverVersion = __unsafeDiscardStringContext (__readFile (pkgs.runCommandLocal "chromedriver-version" {} ''
-      cat ${theirNodeModules}/node_modules/chromedriver/lib/chromedriver.js \
-        | grep -F 'exports.version' | grep -Po '\d+\.\d+\.\d+\.\d+' | tr -d '\n' >$out
-    ''));
-
     target = rec {
       nodejs = pkgs.fetchzip {
         url = "https://nodejs.org/dist/v${theirPackage.nodejs.version}/node-v${theirPackage.nodejs.version}-win-x64.zip";
-        hash = "sha256-lLE7yiyN/qOjrA9As3it3HN1VSbQgQlTTYUtMcQ2Xsk=";
+        hash = "sha256-TDSBxDq2VtUCzVQC7wfdKd9l4eAuK30/dNCMN/L6JIQ=";
       };
 
       python = pkgs.fetchzip {
         url = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip";
         hash = "sha256-p83yidrRg5Rz1vQpyRuZCb5F+s3ddgHt+JakPjgFgUc=";
         stripRoot = false;
-      };
-
-      chromedriverBin = pkgs.fetchurl {
-        name = "chromedriver-${targetSystem}-${chromedriverVersion}.zip";
-        url = "https://chromedriver.storage.googleapis.com/${chromedriverVersion}/chromedriver_win32.zip";
-        hash = "sha256-kM4G4AEcgelYopfWG5xVS+IvnXPB9F4lTpWCXivD3n0=";
       };
     };
 
