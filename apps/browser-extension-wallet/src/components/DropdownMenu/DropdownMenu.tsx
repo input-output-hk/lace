@@ -57,11 +57,11 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       placement="bottomRight"
       trigger={['click']}
     >
-      {process.env.USE_MULTI_WALLET === 'true' ? (
+      {process.env.USE_MULTI_WALLET === 'true' && walletName ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
             title={addEllipsis(walletName, titleCharBeforeEll, titleCharAfterEll)}
-            subtitle={getActiveWalletSubtitle(cardanoWallet.source.account)}
+            subtitle={getActiveWalletSubtitle(cardanoWallet?.source.account)}
             active={isDropdownMenuOpen}
             profile={
               activeWalletAvatar
