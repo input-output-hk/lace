@@ -84,6 +84,12 @@ export const StakePoolsGrid = ({
 
   useResizeObserver<HTMLDivElement>({ onResize, ref });
 
+  const itemContent = useCallback(
+    (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
+      data ? <StakePoolsGridItem {...data} /> : <StakePoolCardSkeleton fadeScale={columnCount} index={index} />,
+    [columnCount]
+  );
+
   return (
     <div ref={ref} data-testid="stake-pools-grid-container">
       {selectedPools?.length > 0 && (
@@ -110,13 +116,7 @@ export const StakePoolsGrid = ({
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
           items={pools}
-          itemContent={(index, data) =>
-            data ? (
-              <StakePoolsGridItem sortField={sortField} {...data} />
-            ) : (
-              <StakePoolCardSkeleton fadeScale={columnCount} index={index} />
-            )
-          }
+          itemContent={itemContent}
         />
       )}
     </div>

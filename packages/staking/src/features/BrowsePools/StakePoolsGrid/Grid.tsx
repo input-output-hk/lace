@@ -69,18 +69,16 @@ export const Grid = <T extends Record<string, unknown> | undefined>({
 
   return (
     <Flex h="$fill" ref={tableReference} data-testid="stake-pool-list-scroll-wrapper">
-      {items.length > 0 && scrollableTargetReference.current && (
-        <VirtuosoGrid<T>
-          overscan={overscan}
-          listClassName={cx.grid}
-          data={items}
-          customScrollParent={scrollableTargetReference.current}
-          totalCount={items.length}
-          className={cx.body}
-          rangeChanged={loadMoreData}
-          itemContent={itemContent}
-        />
-      )}
+      <VirtuosoGrid<T>
+        overscan={overscan}
+        listClassName={cx.grid}
+        data={items}
+        customScrollParent={scrollableTargetReference.current}
+        totalCount={items.length}
+        className={cx.body}
+        rangeChanged={loadMoreData}
+        itemContent={itemContent}
+      />
     </Flex>
   );
 };
