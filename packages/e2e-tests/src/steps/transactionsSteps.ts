@@ -163,6 +163,42 @@ When(/^I scroll to the last row$/, async () => {
   await TransactionsPage.scrollToTheLastRow();
 });
 
+When(
+  /^I scroll to the row with transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
+  async (
+    txType:
+      | 'Sent'
+      | 'Received'
+      | 'Self Transaction'
+      | 'Rewards'
+      | 'Delegation'
+      | 'Stake Key Registration'
+      | 'Stake Key De-Registration '
+  ) => {
+    const index = await TransactionsPage.getIndexOfTxType(txType);
+    if (index > 0) {
+      await TransactionsPage.scrollToTheRow(index);
+    }
+  }
+);
+
+Then(
+  /^I see (default - negative|green - positive) styling for transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
+  async (
+    styling: 'default - negative' | 'green - positive',
+    txType:
+      | 'Sent'
+      | 'Received'
+      | 'Self Transaction'
+      | 'Rewards'
+      | 'Delegation'
+      | 'Stake Key Registration'
+      | 'Stake Key De-Registration '
+  ) => {
+    await transactionsPageAssert.assertSeeStylingForTxType(styling, txType);
+  }
+);
+
 Then(/^a skeleton (is|is not) displayed at the bottom of the page/, async (shouldBeDisplayed: 'is' | 'is not') => {
   await transactionsPageAssert.assertSeeSkeleton(shouldBeDisplayed === 'is');
 });

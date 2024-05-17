@@ -108,6 +108,27 @@ class TransactionsPage {
       await browser.pause(1000);
     }
   }
+  async getIndexOfTxTypeWithoutScroll(txType: string): Promise<number> {
+    const txTypes: string[] = [];
+    const selectors = await $$(this.TRANSACTIONS_TABLE_ITEM_TYPE);
+    for (const item of selectors) {
+      txTypes.push(await item.getText());
+    }
+    return txTypes.indexOf(txType);
+  }
+
+  async getIndexOfTxTypeWithScroll(txType: string): Promise<number> {
+    await this.scrollToTheLastRow();
+    return await this.getIndexOfTxTypeWithoutScroll(txType);
+  }
+
+  async getIndexOfTxType(txType: string): Promise<number> {
+    const index = await this.getIndexOfTxTypeWithoutScroll(txType);
+    if (index === -1) {
+      return await this.getIndexOfTxTypeWithScroll(txType);
+    }
+    return index;
+  }
 
   async saveNumberOfVisibleRows() {
     const numberOfRows = (await this.rows).length;
