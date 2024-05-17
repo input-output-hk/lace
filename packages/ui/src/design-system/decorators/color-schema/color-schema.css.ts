@@ -11,9 +11,9 @@ export const storyContainer = style([
   { flex: 1, overflowY: 'auto' },
 ]);
 
-export const root = style([
-  sx({
-    minHeight: '$fill',
-    h: '$fill',
-  }),
-]);
+export const root = style({
+  minHeight: '100%',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+});
