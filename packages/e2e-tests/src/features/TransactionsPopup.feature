@@ -92,7 +92,7 @@ Feature: Transactions - Popup view
     When I switch to last window
     Then I see cexplorer url with correct transaction hash
 
-  @LW-9914a @Testnet
+  @LW-10596 @Testnet
   Scenario Outline: Popup View - transaction list - styling: <styling> applied to tx type: <tx_type>
     Given I am on Transactions popup page
     When I scroll to the row with transaction type: <tx_type>
