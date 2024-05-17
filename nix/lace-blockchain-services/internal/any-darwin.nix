@@ -11,7 +11,7 @@ in rec {
   installer = dmgImage;
   inherit (common) cardano-node ogmios;
 
-  cardano-js-sdk = let
+  cardano-js-sdk = rec {
     patchedSrc = pkgs.runCommand "cardano-js-sdk-patched" {} ''
       cp -r ${inputs.cardano-js-sdk} $out
       chmod -R +w $out
@@ -19,81 +19,138 @@ in rec {
       patch -p1 -i ${./cardano-js-sdk--darwin.patch}
     '';
 
-    # # FIXME: investigate more laster, but for now ↓, or else in v18.16, after `install_name_tool`, we’re
-    # # getting: `Check failed: VerifyChecksum(blob)` in `v8::internal::Snapshot::VerifyChecksum`
-    # nodejs-no-snapshot = cardano-js-sdk.nodejs.overrideAttrs (oldAttrs: {
-    #   configureFlags = (oldAttrs.configureFlags or []) ++ ["--without-snapshot"];
-    # });
+    theFlake = (common.flake-compat {
+      src = patchedSrc;
+    }).defaultNix;
+
+    # In v18.16, after `install_name_tool`, we’re getting:
+    #   `Check failed: VerifyChecksum(blob)` in `v8::internal::Snapshot::VerifyChecksum`
+    # Let’s disable the default snapshot verification for now:
+    nodejs-no-snapshot = theFlake.inputs.nixpkgs.legacyPackages.${targetSystem}.nodejs.overrideAttrs (old: {
+      patches = (old.patches or []) ++ [ ./nodejs--no-verify-snapshot-checksum.patch ];
+    });
 
     # For resolving the node_modules:
     theirPackage = (pkgs.callPackage "${patchedSrc}/yarn-project.nix" {
-      nodejs = pkgs.nodejs-16_x; # FIXME: temporarily 16.x (doesn’t have snapshots breaking after install_name_tool)
+      nodejs = nodejs-no-snapshot;
     } {
       src = patchedSrc;
     });
 
-    runtime-deps = pkgs.stdenv.mkDerivation {
-      name = "cardano-js-sdk-runtime-node_modules";
-      inherit (self) src buildInputs npm_config_nodedir;
-      configurePhase = __replaceStrings
-        ["yarn install --immutable --immutable-cache"]
-        ["yarn workspaces focus --all --production"]
-        self.configurePhase;
-      buildPhase = ":";
-      # TODO: since we’re not releasing universal, maybe unpack universal dylibs, keeping only our arch?
-      installPhase = let ourArch = if lib.hasInfix "aarch64" targetSystem then "arm64" else "x86_64"; in ''
-        mkdir -p $out
-        echo 'Getting rid of alien architectures…'
-        find node_modules -iname '*.node' | xargs -d'\n' file | grep -Evi 'Mach-O.*(${ourArch}|universal)' \
-          | cut -d: -f1 | xargs -d'\n' rm -v
-        cp -r node_modules $out/
-      '';
-    };
+    ourPackageWithoutDeps = theirPackage.overrideAttrs (oldAttrs: {
+      # A bunch of deps build binaries using node-gyp that requires Python
+      PYTHON = "${pkgs.python3}/bin/python3";
+      NODE_OPTIONS = "--max_old_space_size=8192";
+      # playwright build fixes
+      PLAYWRIGHT_BROWSERS_PATH = builtins.toFile "fake-playwright" ""; # nixpkgs.playwright-driver.browsers;
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = 1;
+      CHROMEDRIVER_FILEPATH = builtins.toFile "fake-chromedriver" "";
+      # node-hid uses pkg-config to find sources
+      buildInputs = oldAttrs.buildInputs ++ [
+        buildTimeSDK.xcodebuild
+        buildTimeSDK.frameworks.AppKit
+        pkgs.perl
+        pkgs.pkgconfig
+        pkgs.darwin.cctools
+        buildTimeSDK.frameworks.CoreServices
+        buildTimeSDK.objc4
+        pkgs.jq
+        pkgs.rsync
+      ];
 
-    # XXX: this is nasty, but seemingly there’s no other way
-    # (consulted with @tgunnoe) to patch a library (there’s no
-    # preinstall in yarn v3), so let’s hook clang++…
-    #
-    # kFSEventStreamEventFlagItemCloned is not available in MacOSX-SDK 10.12 on x86_64
-    clangWrapperWrapper = pkgs.writeShellScriptBin "clang++" ''
-      #!${pkgs.runtimeShell}
-      set -euo pipefail
-      if grep -qE 'node_modules/@parcel/watcher/build$' <<<"$PWD" ; then
-        if [ ! -e .already-patched ] ; then
-          touch .already-patched
-          echo >&2 'info: patching @parcel/watcher'
-          sed -r 's+\s*ignoredFlags\s*\|=\s*kFSEventStreamEventFlagItemCloned;+// \0+g' \
-            -i ../src/macos/FSEventsBackend.cc
-        fi
-      fi
-      exec ${pkgs.stdenv.cc}/bin/"$(basename "$0")" "$@"
-    '';
+      # We have to run the install scripts ourselves, because we cannot cross-build for 2 CPU architectures:
+      configurePhase = lib.replaceStrings ["yarn install"] ["YARN_ENABLE_SCRIPTS=false yarn install"] oldAttrs.configurePhase;
 
-    self = pkgs.stdenv.mkDerivation {
-      name = "cardano-js-sdk";
-      src = toString inputs.cardano-js-sdk;
-      buildInputs =
-        theirPackage.buildInputs # nodejs, and yarn3 wrapper
-        ++ (with pkgs; [ python3 pkgconfig xcbuild darwin.cctools rsync ])
-        ++ (with pkgs.darwin.apple_sdk.frameworks; [ IOKit AppKit ]);
-      inherit (theirPackage) npm_config_nodedir;
-      preConfigure = if targetSystem != "x86_64-darwin" then "" else ''
-        export PATH="${clangWrapperWrapper}/bin:$PATH"
+      # Now run the install scripts:
+      postConfigure = let
+        changeFrom = if lib.hasInfix "aarch64" targetSystem then "x86_64" else "arm64";
+        changeTo = if lib.hasInfix "aarch64" targetSystem then "arm64" else "x86_64";
+      in ''
+        # Get rid of all the prebuilds (no binary blobs):
+        find node_modules -iname '*.node' | xargs -r -d'\n' rm -v || true
+
+        # Don’t try to download prebuilded packages (with prebuild-install):
+        export HOME=$(realpath $NIX_BUILD_TOP/home)
+        mkdir -p $HOME
+        ( echo 'buildFromSource=true' ; echo 'compile=true' ; ) >$HOME/.prebuild-installrc
+        export npm_config_build_from_source=true
+
+        # x86_64 cross-compilation won’t fly in this pure derivation:
+        find -type f '(' -name '*.gyp' -o -name '*.gypi' ')' \
+          | xargs grep -F '${changeFrom}' | cut -d: -f1 | sort --unique \
+          | while IFS= read -r file
+        do
+          sed -r 's/${changeFrom}/${changeTo}/g' -i "$file"
+        done
+
+        # Now we have to run the install scripts manually:
+        find -type f -name package.json | xargs grep -RF '"install":' | cut -d: -f1 \
+          | grep -vF 'node_modules/playwright/' \
+          | grep -vF 'node_modules/napi-macros/example/' \
+          | while IFS= read -r package
+        do
+          if [ "$(jq .scripts.install "$package")" = "null" ] ; then
+            continue
+          fi
+          echo ' '
+          echo "Running ‘install’ for ‘$package’…"
+          (
+            cd "$(dirname "$package")"
+            yarn run install
+          )
+        done
       '';
-      configurePhase = theirPackage.configurePhase;
-      buildPhase = "yarn build";
+
+      # run actual build
+      buildPhase = ''
+        yarn workspace @cardano-sdk/cardano-services run build
+      '';
+      # override installPhase to only install what's necessary
       installPhase = ''
         mkdir $out
         rsync -Rah $(find . '(' '(' -type d -name 'dist' ')' -o -name 'package.json' ')' \
           -not -path '*/node_modules/*') $out/
-        cp -r ${runtime-deps}/node_modules $out/
       '';
+    });
+
+    production-deps = ourPackageWithoutDeps.overrideAttrs (oldAttrs: {
+      name = "cardano-sdk-production-deps";
+      configurePhase =
+        builtins.replaceStrings
+        ["yarn install --immutable --immutable-cache"]
+        ["yarn workspaces focus --all --production"]
+        oldAttrs.configurePhase;
+      buildPhase = "";
+      installPhase = let ourArch = if lib.hasInfix "aarch64" targetSystem then "arm64" else "x86_64"; in ''
+        mkdir -p $out
+        echo 'Getting rid of alien architectures…'
+        find node_modules -iname '*.node' | xargs -d'\n' file | grep -Evi 'Mach-O.*(${ourArch}|universal)' \
+          | cut -d: -f1 | xargs -r -d'\n' rm -v || true
+        cp -r node_modules $out/
+      '';
+    });
+
+    ourPackage = pkgs.runCommandNoCC "cardano-js-sdk" {
       passthru = {
         inherit (theirPackage) nodejs;
-        inherit runtime-deps clangWrapperWrapper;
       };
-    };
-  in self;
+    } ''
+      mkdir -p $out
+      cp -r ${ourPackageWithoutDeps}/. ${production-deps}/. $out/
+      chmod -R +w $out
+
+      # Drop the cjs/ prefix, it’s problematic on Darwin:
+      find $out/packages -mindepth 3 -maxdepth 3 -type d -path '*/dist/cjs' | while IFS= read -r cjs ; do
+        mv "$cjs" "$cjs.old-unused"
+        mv "$cjs.old-unused"/{.*,*} "$(dirname "$cjs")/"
+        rmdir "$cjs.old-unused"
+      done
+      find $out/packages -mindepth 2 -maxdepth 2 -type f -name 'package.json' | while IFS= read -r packageJson ; do
+        sed -r 's,dist/cjs,dist,g' -i "$packageJson"
+        sed -r 's,dist/esm,dist,g' -i "$packageJson"
+      done
+    '';
+  };
 
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
@@ -188,10 +245,10 @@ in rec {
 
     ln -s ${mkBundle { "ogmios"         = lib.getExe ogmios;                }} "$app"/MacOS/ogmios
     ln -s ${mkBundle { "mithril-client" = lib.getExe mithril-client;        }} "$app"/MacOS/mithril-client
-    ln -s ${mkBundle { "node"           = lib.getExe cardano-js-sdk.nodejs; }} "$app"/MacOS/nodejs
+    ln -s ${mkBundle { "node"           = lib.getExe cardano-js-sdk.ourPackage.nodejs; }} "$app"/MacOS/nodejs
     ln -s ${postgresBundle                                                   } "$app"/MacOS/postgres
 
-    ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
+    ln -s ${cardano-js-sdk.ourPackage} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
     ln -s ${common.swagger-ui} "$app"/Resources/swagger-ui
     ln -s ${common.dashboard} "$app"/Resources/dashboard
@@ -404,8 +461,11 @@ in rec {
   # the modern one for building tools we only use in build time
   buildTimeSDK =
     if targetSystem == "aarch64-darwin"
-    then pkgs.darwin.apple_sdk
-    else pkgs.darwin.apple_sdk_11_0;
+    then pkgs.darwin.apple_sdk_11_0
+    else (pkgs.darwin.apple_sdk_10_12 // {
+      xcodebuild = pkgs.xcbuild;
+      objc4 = pkgs.darwin.objc4;
+    });
 
   pyobjc = rec {
     version = "9.2";

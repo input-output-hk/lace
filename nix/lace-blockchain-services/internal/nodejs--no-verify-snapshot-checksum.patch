@@ -1,0 +1,13 @@
+diff --git a/deps/v8/src/flags/flag-definitions.h b/deps/v8/src/flags/flag-definitions.h
+index f02ef309d6..45c351cd3e 100644
+--- a/deps/v8/src/flags/flag-definitions.h
++++ b/deps/v8/src/flags/flag-definitions.h
+@@ -1785,7 +1785,7 @@ DEFINE_BOOL(rcs_cpu_time, false,
+ DEFINE_IMPLICATION(rcs_cpu_time, rcs)
+ 
+ // snapshot-common.cc
+-DEFINE_BOOL(verify_snapshot_checksum, true,
++DEFINE_BOOL(verify_snapshot_checksum, false,
+             "Verify snapshot checksums when deserializing snapshots. Enable "
+             "checksum creation and verification for code caches.")
+ DEFINE_BOOL(profile_deserialization, false,

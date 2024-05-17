@@ -99,7 +99,7 @@ func manageChildren(comm CommChannels_Manager) {
 		shared := SharedState{
 			Network: network,
 			SyncProgress: &[]float64{ -1.0 }[0],  // wat
-			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network,
+			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-node",
 			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "cardano-node.socket",
 			OgmiosPort: new(int),
 			PostgresPort: new(int),

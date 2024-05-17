@@ -13,10 +13,8 @@
       };
     };
 
-    cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/693689d3f457799c674bed51878a7078b7ddbd0e";
-
-    cardano-world.url = "github:input-output-hk/cardano-world/666ed9a3041768d785bd52487a0ed85b4538c69e";
-    cardano-world.flake = false; # otherwise, +19k `divnix/std` dependencies in flake.lock
+    cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/@cardano-sdk/cardano-services@0.28.1";
+    cardano-js-sdk.flake = false; # we patch it & to prevent lockfile explosion
 
     # XXX: when updating Ogmios, make sure to update ogmios-CHaP below to the one they use:
     ogmios.url = "github:CardanoSolutions/ogmios/v5.6.0";
