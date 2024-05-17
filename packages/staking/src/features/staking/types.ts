@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { Language } from '@lace/common';
+import { Language } from '@lace/translation';
 
 export type StakingProps = {
   currentChain: Wallet.Cardano.ChainId;

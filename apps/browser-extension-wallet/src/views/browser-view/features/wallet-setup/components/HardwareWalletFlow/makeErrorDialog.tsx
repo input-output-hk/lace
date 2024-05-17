@@ -1,4 +1,4 @@
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 import React from 'react';
 import { Modal, Typography } from 'antd';
 import { Button } from '@lace/common';

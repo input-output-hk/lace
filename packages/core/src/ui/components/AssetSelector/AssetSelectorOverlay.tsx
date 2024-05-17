@@ -8,8 +8,9 @@ import { TokenItem, TokenItemProps } from '../Token';
 
 import styles from './AssetSelectorOverlay.module.scss';
 import { TranslationsFor } from '@src/ui/utils/types';
-import { useTranslate } from '@src/ui/hooks/useTranslate';
 import { ListEmptyState } from '../ListEmptyState';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 export const stringIncludesValue = (string: string, searchValue: string): boolean =>
   string.toLowerCase().includes(searchValue.toLowerCase());
@@ -28,7 +29,7 @@ const getTokensContent = (
     tokens: DropdownList[];
     selectedTokenList?: Array<string>;
   },
-  t: ReturnType<typeof useTranslate>['t'],
+  t: TFunction,
   removeTokenFromList: (id: string) => void,
   handleTokenClick: (id: string) => void
 ) => {
@@ -70,7 +71,7 @@ const getNftsContent = (
     selectedTokenList?: Array<string>;
     nftListConfig?: { rows?: number };
   },
-  t: ReturnType<typeof useTranslate>['t'],
+  t: TFunction,
   removeTokenFromList: (id: string) => void,
   handleTokenClick: (id: string) => void
 ) => {
@@ -142,7 +143,7 @@ export const AssetSelectorOverlay = ({
   className,
   groups = [ASSET_COMPONENTS.TOKENS, ASSET_COMPONENTS.NFTS]
 }: AssetSelectorOverlayProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const [value, setValue] = useState<string>();
   const [section, setSection] = useState(intialSection);
   const [focus, setFocus] = useState(false);

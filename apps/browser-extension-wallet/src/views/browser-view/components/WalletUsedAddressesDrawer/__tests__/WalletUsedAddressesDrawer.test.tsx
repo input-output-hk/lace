@@ -3,7 +3,7 @@ import { I18nextProvider } from 'react-i18next';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Wallet } from '@lace/cardano';
-import i18n from '../../../../../lib/i18n';
+import { i18n } from '../../../../../lib/i18n';
 import { buildMockProviders } from '../../../../../utils/mocks/context-providers';
 import { WalletUsedAddressesDrawer } from '../WalletUsedAddressesDrawer';
 import { from } from 'rxjs';

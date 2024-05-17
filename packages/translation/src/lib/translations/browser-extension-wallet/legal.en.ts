@@ -579,5 +579,5 @@ export const legal = {
     matter hereof and supersedes and merges all prior discussions between the parties with respect to such
     subject matter.
   </p>
-    `
+    `,
 };

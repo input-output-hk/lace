@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { WalletSetupStepLayout, WalletTimelineSteps } from './WalletSetupStepLayout';
 import styles from './WalletSetupSelectAccountsStep.module.scss';
 import { Radio } from 'antd';
-import { useTranslate } from '@src/ui//hooks';
+import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupSelectAccountsStepProps {
   accounts: number;
@@ -19,7 +19,7 @@ export const WalletSetupSelectAccountsStep = ({
   wallet
 }: WalletSetupSelectAccountsStepProps): React.ReactElement => {
   const [selectedAccount, setSelectedAccount] = useState<number | undefined>();
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <WalletSetupStepLayout

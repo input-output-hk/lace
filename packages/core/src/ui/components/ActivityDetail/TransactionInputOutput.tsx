@@ -13,7 +13,7 @@ import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.c
 import styles from './TransactionInputOutput.module.scss';
 import { Box, Flex, Text } from '@lace/ui';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
-import { useTranslate } from '@ui/hooks';
+import { useTranslation } from 'react-i18next';
 
 const rotateOpen: React.CSSProperties = {
   transform: 'rotate(180deg)',
@@ -53,7 +53,7 @@ export const TransactionInputOutput = ({
   sendAnalytics
 }: TransactionInputOutputProps): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const animation = isVisible ? rotateOpen : rotateClose;
   const Icon = BracketDown ? <BracketDown className={styles.bracket} style={{ ...animation }} /> : <DownOutlined />;

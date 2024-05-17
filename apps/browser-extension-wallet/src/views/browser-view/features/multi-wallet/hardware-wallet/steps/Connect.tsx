@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null */
 import { Wallet } from '@lace/cardano';
 import { WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
-import { TranslationKey } from '@lib/translations/types';
+import { TranslationKey } from '@lace/translation';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState, VFC } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -121,5 +121,5 @@ export const cookiePolicy = {
       Longmont, CO 80504
     </address>
   </div>
-`
+`,
 };

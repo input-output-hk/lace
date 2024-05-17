@@ -1,10 +1,10 @@
 import React from 'react';
 import cn from 'classnames';
 import styles from './TransactionDetails.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 import { ActivityStatus } from '../Activity/AssetActivityItem';
 import { Ellipsis } from '@lace/common';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
+import { useTranslation } from 'react-i18next';
 
 type RewardItem = {
   pool?: { name: string; ticker: string; id: string };
@@ -38,7 +38,7 @@ export const RewardsDetails = ({
   coinSymbol,
   rewards
 }: RewardsDetailsProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const poolRewards = rewards.rewards.filter((reward) => !!reward.pool);
   const tooltipContent = t('core.activityDetails.rewardsDescription');
 

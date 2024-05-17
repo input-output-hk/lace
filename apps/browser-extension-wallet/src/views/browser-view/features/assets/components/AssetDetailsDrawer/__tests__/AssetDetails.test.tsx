@@ -5,7 +5,7 @@ import { queryByTestId as queryByTestIdInContainer, render } from '@testing-libr
 import { I18nextProvider } from 'react-i18next';
 import { AssetDetails, AssetDetailsProps } from '../AssetDetails';
 import { StateStatus } from '@src/stores/types';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import * as Stores from '@src/stores';
 import { ExternalLinkOpenerProvider } from '@providers';
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Wallet } from '@lace/cardano';
 import { render, queryByText } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import i18n from '../../../../../lib/i18n';
+import { i18n } from '../../../../../lib/i18n';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { SideMenu } from '../SideMenu';

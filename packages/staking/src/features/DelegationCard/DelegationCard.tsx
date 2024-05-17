@@ -1,8 +1,8 @@
+import { TranslationKey } from '@lace/translation';
 import { Card, PIE_CHART_DEFAULT_COLOR_SET, PieChart, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
 import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '../i18n';
 import { PERCENTAGE_SCALE_MAX, sumPercentagesSanitized } from '../store';
 import * as styles from './DelegationCard.css';
 import { DelegationTooltip } from './DelegationTooltip';

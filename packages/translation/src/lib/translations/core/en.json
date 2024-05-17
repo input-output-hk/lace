@@ -6,6 +6,7 @@
   "core.activityDetails.certificateTitles.anchorHash": "Anchor Hash",
   "core.activityDetails.certificateTitles.anchorURL": "Anchor URL",
   "core.activityDetails.certificateTitles.certificateType": "Type",
+  "core.activityDetails.certificateTitles.certificate": "Certificate",
   "core.activityDetails.certificateTitles.coldCredential": "Cold credential",
   "core.activityDetails.certificateTitles.depositPaid": "Deposit paid",
   "core.activityDetails.certificateTitles.depositPaidInfo": "Deposit paid",
@@ -264,6 +265,10 @@
   "core.outputSummaryList.deposit": "Deposit",
   "core.outputSummaryList.metaData": "Metadata",
   "core.outputSummaryList.output": "Bundle",
+  "core.outputSummaryList.expiresBy": "Expires by",
+  "core.outputSummaryList.expiresByTooltip": "This transaction can be added to the blockchain until the specified time. After this, it will automatically expire and no longer be valid.",
+  "core.outputSummaryList.noLimit": "No limit",
+  "core.outputSummaryList.utc": "UTC",
   "core.outputSummaryList.recipientAddress": "Recipient address",
   "core.outputSummaryList.sending": "Sending",
   "core.outputSummaryList.txFee": "Transaction fee",
@@ -596,5 +601,6 @@
   "core.walletSetupWalletNameStep.create": "Create",
   "core.walletSetupWalletNameStep.maxCharacters": "Max. 20 characters",
   "core.walletSetupWalletNameStep.nameYourWallet": "Name your wallet",
-  "core.walletSetupWalletNameStep.walletName": "Wallet name"
+  "core.walletSetupWalletNameStep.walletName": "Wallet name",
+  "core.nftDetail.directory": "Folder"
 }

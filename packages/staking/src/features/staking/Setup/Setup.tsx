@@ -1,14 +1,12 @@
 import { useObservable } from '@lace/common';
 import { useBrowsePoolsPersistence } from 'features/BrowsePools';
-import { initI18n } from 'features/i18n';
+import '@lace/translation';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from 'features/store';
 import { useEffect } from 'react';
 import { StakingProps } from '../types';
 import { SetupBase, SetupBaseProps } from './SetupBase';
 import '../reset.css';
-
-initI18n();
 
 type SetupProps = Omit<SetupBaseProps, 'loading'> &
   Pick<StakingProps, 'currentChain'> & {

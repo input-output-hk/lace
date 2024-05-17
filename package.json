@@ -45,13 +45,17 @@
     "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {
-    "*(apps/**/*.{js,ts,tsx}|packages/!(ui)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
+    "*(apps/**/*.{js,ts,tsx}|packages/!(ui|translation)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
       "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore",
       "prettier --write"
     ],
     "*(packages/ui/**/*.{js,ts,tsx})": [
       "yarn workspace @lace/ui lint --fix",
       "yarn workspace @lace/ui format"
+    ],
+    "*(packages/translation/**/*.{js,ts,tsx})": [
+      "yarn workspace @lace/translation lint --fix",
+      "yarn workspace @lace/translation format"
     ],
     "*.json": "prettier --write",
     "{packages/!(ui),apps}/**/*.md": [
