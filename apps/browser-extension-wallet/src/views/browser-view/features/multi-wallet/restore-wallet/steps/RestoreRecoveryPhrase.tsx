@@ -5,7 +5,7 @@ import { wordlists } from 'bip39';
 import { Wallet } from '@lace/cardano';
 import { useRestoreWallet } from '../context';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 const wordList = wordlists.english;
 const DEFAULT_MNEMONIC_LENGTH = 24;
@@ -13,6 +13,7 @@ const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-f
 
 export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
+  const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { back, createWalletData, next, setMnemonic, onRecoveryPhraseLengthChange } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const isValidMnemonic = useMemo(
@@ -24,7 +25,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
   );
 
   const handleReadMoreOnClick = () => {
-    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+    void analytics.sendEventToPostHog(postHogActions.restore.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
 
   const walletSetupMnemonicStepTranslations = {
@@ -51,7 +52,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
 
   const handleMnemonicVerification = (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => {
     event.preventDefault();
-    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+    void analytics.sendEventToPostHog(postHogActions.restore.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
     void next();
   };
 
@@ -59,7 +60,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
     <WalletSetupMnemonicVerificationStepRevamp
       mnemonic={createWalletData.mnemonic}
       onChange={setMnemonic}
-      onCancel={back}
+      onCancel={!forgotPasswordFlowActive && back}
       onSubmit={handleMnemonicVerification}
       isSubmitEnabled={isValidMnemonic}
       translations={walletSetupMnemonicStepTranslations}
@@ -67,7 +68,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       defaultMnemonicLength={DEFAULT_MNEMONIC_LENGTH}
       onSetMnemonicLength={onRecoveryPhraseLengthChange}
       onPasteFromClipboard={() =>
-        analytics.sendEventToPostHog(postHogMultiWalletActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
+        analytics.sendEventToPostHog(postHogActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
       }
     />
   );

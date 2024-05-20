@@ -75,7 +75,6 @@ export const WalletSetupWizard = ({
   const { t } = useTranslation();
 
   const { updateEnteredAtTime } = useTimeSpentOnPage();
-
   useEffect(() => {
     updateEnteredAtTime();
   }, [currentStep, updateEnteredAtTime]);

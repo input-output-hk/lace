@@ -9,3 +9,9 @@ export enum ErrorDialogCode {
   PublicKeyExportRejected = 'PublicKeyExportRejected',
   Generic = 'Generic'
 }
+
+export enum WalletConnectStep {
+  Connect = 'Connect',
+  Setup = 'Setup',
+  Create = 'Create'
+}
