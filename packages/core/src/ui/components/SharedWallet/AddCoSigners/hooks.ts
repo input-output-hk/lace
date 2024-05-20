@@ -9,7 +9,10 @@ export const useCoSigners = (): {
   updateCoSigner: (index: number, coSigner: CoSigner) => void;
   addCoSigner: () => void;
 } => {
-  const [coSigners, setCoSigners] = useState<CoSigner[]>([{ address: '', isValid: true, id: uuid() }]);
+  const [coSigners, setCoSigners] = useState<CoSigner[]>([
+    { address: '', isValid: true, id: uuid() },
+    { address: '', isValid: true, id: uuid() }
+  ]);
 
   return {
     coSigners,
@@ -54,11 +57,11 @@ export const useCoSignerInput = ({
         setErrorMessage('');
         return;
       }
-      setValidationStatus(ValidationStatus.Validading);
+      setValidationStatus(ValidationStatus.Validating);
       const result = await validateAddress(value);
 
       if (result.isValid) {
-        onChange(result.handleResolution || value, true);
+        onChange(value, true);
         setValidationStatus(ValidationStatus.Validated);
         setErrorMessage('');
       } else {

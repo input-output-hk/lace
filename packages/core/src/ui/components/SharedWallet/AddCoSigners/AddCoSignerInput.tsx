@@ -1,6 +1,5 @@
 import React from 'react';
-import type { SuggestionThreeItemType } from '@lace/ui';
-import { AutoSuggestBox } from '@lace/ui';
+import { TextBox } from '@lace/ui';
 import { ValidateAddress } from './type';
 import { useCoSignerInput } from './hooks';
 
@@ -11,23 +10,18 @@ interface Props {
     label: string;
     error: string;
   };
-  suggestions: SuggestionThreeItemType[];
 }
 
-export const AddCoSignerInput = ({ translations, suggestions, validateAddress, onChange }: Props): JSX.Element => {
-  const { errorMessage, validationStatus, onInputChange } = useCoSignerInput({
+export const AddCoSignerInput = ({ translations, validateAddress, onChange }: Props): JSX.Element => {
+  const { errorMessage, onInputChange } = useCoSignerInput({
     validateAddress,
     onChange,
     errorString: translations.error
   });
 
-  return (
-    <AutoSuggestBox
-      label={translations.label}
-      errorMessage={errorMessage}
-      suggestions={suggestions}
-      validationStatus={validationStatus}
-      onChange={onInputChange}
-    />
-  );
+  const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    await onInputChange(event.target.value);
+  };
+
+  return <TextBox label={translations.label} errorMessage={errorMessage} onChange={handleInputChange} w="$fill" />;
 };
