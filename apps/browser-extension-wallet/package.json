@@ -61,7 +61,7 @@
     "@vespaiach/axios-fetch-adapter": "^0.3.0",
     "antd": "^4.24.10",
     "are-you-es5": "^2.1.2",
-    "axios": "0.28.0",
+    "axios": "0.28.1",
     "bignumber.js": "9.0.1",
     "bip39": "^3.0.4",
     "blake2b-no-wasm": "2.1.4",
