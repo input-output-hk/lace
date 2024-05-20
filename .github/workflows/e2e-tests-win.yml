@@ -176,7 +176,7 @@ jobs:
           echo "TEST RESULTS:"
           echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/windows/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: windows" >> $GITHUB_STEP_SUMMARY
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2.2.0
+        uses: rtCamp/action-slack-notify@v2.3.0
         if: always()
         env:
           SLACK_COLOR: ${{ needs.run-tests-windows.outputs.job-status  }}
