@@ -3,6 +3,7 @@ import { StakePoolCard } from 'features/BrowsePools/StakePoolCard';
 import React from 'react';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { MAX_POOLS_COUNT, StakePoolDetails, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../store';
+import { DEFAULT_SORT_OPTIONS } from '../constants';
 import { getFormattedStakePoolProp } from '../formatters';
 import { useQueryStakePools } from '../hooks';
 import { SortField } from '../types';
@@ -15,7 +16,7 @@ export const StakePoolsGridItem = ({ stakePool, hexId, id, ...data }: StakePools
   const { analytics } = useOutsideHandles();
   const { sort } = useQueryStakePools();
 
-  const sortField = sort?.field || 'ticker';
+  const sortField = sort?.field || DEFAULT_SORT_OPTIONS.field;
 
   const { portfolioMutators, poolAlreadySelected } = useDelegationPortfolioStore((store) => ({
     poolAlreadySelected: isPoolSelectedSelector(hexId)(store),
