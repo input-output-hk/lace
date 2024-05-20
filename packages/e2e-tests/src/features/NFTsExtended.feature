@@ -1,7 +1,7 @@
 @NFTs-Extended @Testnet
 Feature: LW-423: NFTs - Extended view
 
-  Background: 
+  Background:
     Given Wallet is synced
 
   @LW-2495 @Smoke @Mainnet
@@ -57,7 +57,6 @@ Feature: LW-423: NFTs - Extended view
     Given I am on NFTs extended page
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
-
     Examples: 
       | type     | subtitle                        |
       | Glossary | What are collections?           |
