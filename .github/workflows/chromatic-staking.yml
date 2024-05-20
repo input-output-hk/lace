@@ -3,11 +3,7 @@ name: Chromatic deploy packages/staking
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - packages/staking/**
   push:
-    paths:
-      - packages/staking/**
     branches:
       - main
 
@@ -16,9 +12,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-if-should-run:
+    runs-on: ubuntu-20.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet packages/staking/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
   chromatic-deployment:
     name: Chromatic Staking
-    if: github.event.pull_request.draft == false
+    needs: check-if-should-run
+    if: ${{ (github.event.pull_request.draft == false) && (needs.check-if-should-run.outputs.requireChromaticCheck == 1) }}
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
