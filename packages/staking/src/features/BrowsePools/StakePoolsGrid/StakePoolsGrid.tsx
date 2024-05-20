@@ -1,21 +1,21 @@
 /* eslint-disable no-magic-numbers */
-import { Box, Text } from '@lace/ui';
+import { Box, Text, useVisibleItemsCount } from '@lace/ui';
 import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import { ReactElement, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { ListRange } from 'react-virtuoso';
 import useResizeObserver, { ObservedSize } from 'use-resize-observer';
 import { StakePoolDetails } from '../../store';
-import { STAKE_POOL_CARD_HEIGHT, StakePoolCardSkeleton } from '../StakePoolCard';
+import { STAKE_POOL_CARD_HEIGHT, STAKE_POOL_GRID_ROW_GAP, StakePoolCardSkeleton } from '../StakePoolCard';
 import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
 import { StakePoolsGridItem } from './StakePoolsGridItem';
-import { StakePoolsGridSkeleton } from './StakePoolsGridSkeleton';
 import { StakePoolsGridColumnCount } from './types';
 
 const DEFAULT_DEBOUNCE = 200;
+const increaseViewportBy = { bottom: 100, top: 0 };
 
 export type StakePoolsGridProps = {
   scrollableTargetId: string;
@@ -38,8 +38,10 @@ export const StakePoolsGrid = ({
 }: StakePoolsGridProps) => {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
+  const tableReference = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
   const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<StakePoolsGridColumnCount>();
+  const [initialItemsCount, setInitialItemsCount] = useState(0);
 
   const showEmptyPlaceholder = !showSkeleton && pools.length === 0;
   const matchTwoColumnsLayout = useMediaQuery({ maxWidth: 668 });
@@ -84,11 +86,32 @@ export const StakePoolsGrid = ({
 
   useResizeObserver<HTMLDivElement>({ onResize, ref });
 
+  const initialRowsCount = useVisibleItemsCount({
+    containerRef: tableReference,
+    rowHeight: STAKE_POOL_CARD_HEIGHT + STAKE_POOL_GRID_ROW_GAP,
+  });
+
+  useLayoutEffect(() => {
+    if (initialRowsCount !== undefined && numberOfItemsPerRow !== undefined) {
+      const overscanRows = Math.ceil(increaseViewportBy.bottom / STAKE_POOL_CARD_HEIGHT);
+
+      setInitialItemsCount((overscanRows + Math.max(initialRowsCount, 0)) * numberOfItemsPerRow);
+    }
+  }, [initialRowsCount, numberOfItemsPerRow]);
+
+  useLayoutEffect(() => {
+    if (tableReference && initialItemsCount) {
+      loadMoreData({ endIndex: initialItemsCount, startIndex: 0 });
+    }
+  }, [initialItemsCount, loadMoreData]);
+
   const itemContent = useCallback(
     (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
       data ? <StakePoolsGridItem {...data} /> : <StakePoolCardSkeleton fadeScale={columnCount} index={index} />,
     [columnCount]
   );
+
+  const cardsPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
 
   return (
     <div ref={ref} data-testid="stake-pools-grid-container">
@@ -106,19 +129,14 @@ export const StakePoolsGrid = ({
         </>
       )}
       {showEmptyPlaceholder && <EmptyPlaceholder />}
-      {showSkeleton || !numberOfItemsPerRow ? (
-        <StakePoolsGridSkeleton columnCount={columnCount} rowCount={2} />
-      ) : (
-        <Grid<StakePoolDetails | undefined>
-          parentRef={ref}
-          rowHeight={STAKE_POOL_CARD_HEIGHT}
-          numberOfItemsPerRow={numberOfItemsPerRow}
-          scrollableTargetId={scrollableTargetId}
-          loadMoreData={loadMoreData}
-          items={pools}
-          itemContent={itemContent}
-        />
-      )}
+      <Grid<StakePoolDetails | undefined>
+        tableReference={tableReference}
+        scrollableTargetId={scrollableTargetId}
+        loadMoreData={loadMoreData}
+        items={showSkeleton ? cardsPlaceholders : pools}
+        totalCount={showSkeleton ? cardsPlaceholders.length : pools.length}
+        itemContent={itemContent}
+      />
     </div>
   );
 };
