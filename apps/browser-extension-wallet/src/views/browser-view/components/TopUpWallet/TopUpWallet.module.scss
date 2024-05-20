@@ -6,7 +6,7 @@
 
 .titleBadge {
   align-self: start;
-  border-radius: 16px;
+  border-radius: size_unit(2);
   background: var(--primary-gradient);
   display: flex;  
   align-items: center; 
