@@ -1,5 +1,5 @@
 /* eslint-disable import/imports-first */
-import { Subject, of } from 'rxjs';
+import { of } from 'rxjs';
 jest.doMock('@hooks/useWalletManager', () => ({
   useWalletManager: jest.fn().mockReturnValue({
     createWallet: jest.fn().mockResolvedValue({
@@ -19,16 +19,15 @@ jest.doMock('@hooks/useWalletManager', () => ({
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { Providers } from './types';
-import { walletRoutePaths } from '@routes';
 import { DEFAULT_MNEMONIC_LENGTH, createAssetsRoute, fillMnemonic, setupStep, getNextButton } from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
 import { UseWalletManager } from '@hooks/useWalletManager';
-import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
-import { RestoreWallet } from './RestoreWallet';
+import { AnalyticsTracker, postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { MemoryRouter } from 'react-router-dom';
+import { walletRoutePaths } from '@routes';
+import { WalletOnboardingFlows } from '@views/browser/features/multi-wallet/WalletOnboardingFlows';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
   useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
@@ -45,27 +44,17 @@ const recoveryPhraseStep = async () => {
 };
 
 describe('Multi Wallet Setup/Restore Wallet', () => {
-  let providers = {} as {
-    createWallet: jest.Mock;
-    shouldShowConfirmationDialog$: Subject<boolean>;
-  };
-
-  beforeEach(() => {
-    providers = {
-      createWallet: jest.fn(),
-      shouldShowConfirmationDialog$: new Subject()
-    };
-  });
-
   test('setting up a new hot wallet', async () => {
-    providers.createWallet.mockResolvedValue(void 0);
-
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore.root]}>
-              <RestoreWallet providers={providers as Providers} />
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.restore]}>
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+              />
               {createAssetsRoute()}
             </MemoryRouter>
           </StoreProvider>

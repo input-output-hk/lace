@@ -1,6 +1,6 @@
 import React, { ReactElement, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { WalletSetupLayout, WarningModal } from '@views/browser/components';
+import { WarningModal } from '@views/browser/components';
 import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, WalletSetupOptionsStepRevamp } from '@lace/core';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
 import { walletRoutePaths } from '@routes';
@@ -116,14 +116,12 @@ export const WalletSetupMainPage = (): ReactElement => {
 
   return (
     <>
-      <WalletSetupLayout>
-        <WalletSetupOptionsStepRevamp
-          onNewWalletRequest={handleCreateNewWallet}
-          onHardwareWalletRequest={handleStartHardwareOnboarding}
-          onRestoreWalletRequest={handleRestoreWallet}
-          translations={walletSetupOptionsStepTranslations}
-        />
-      </WalletSetupLayout>
+      <WalletSetupOptionsStepRevamp
+        onNewWalletRequest={handleCreateNewWallet}
+        onHardwareWalletRequest={handleStartHardwareOnboarding}
+        onRestoreWalletRequest={handleRestoreWallet}
+        translations={walletSetupOptionsStepTranslations}
+      />
       <AnalyticsConfirmationBanner
         message={
           <>
