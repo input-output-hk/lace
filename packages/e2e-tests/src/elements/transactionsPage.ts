@@ -110,9 +110,9 @@ class TransactionsPage {
   }
   async getIndexOfTxTypeWithoutScroll(txType: string): Promise<number> {
     const txTypes: string[] = [];
-    const selectors = await $$(this.TRANSACTIONS_TABLE_ITEM_TYPE);
-    for (const item of selectors) {
-      txTypes.push(await item.getText());
+    const tableItems = await $$(this.TRANSACTIONS_TABLE_ITEM_TYPE);
+    for (const tableItem of tableItems) {
+      txTypes.push(await tableItem.getText());
     }
     return txTypes.indexOf(txType);
   }

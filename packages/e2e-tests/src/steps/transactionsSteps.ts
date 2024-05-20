@@ -9,6 +9,8 @@ import TransactionDetailsPage from '../elements/transactionDetails';
 import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
+import { TransactionType } from '../types/transactionType';
+import { TransactionStyle } from '../types/transactionStyle';
 
 Given(/^I am on the Transactions section - Extended view$/, async () => {
   await mainMenuPageObject.navigateToSection('Transactions', 'extended');
@@ -165,16 +167,7 @@ When(/^I scroll to the last row$/, async () => {
 
 When(
   /^I scroll to the row with transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
-  async (
-    txType:
-      | 'Sent'
-      | 'Received'
-      | 'Self Transaction'
-      | 'Rewards'
-      | 'Delegation'
-      | 'Stake Key Registration'
-      | 'Stake Key De-Registration '
-  ) => {
+  async (txType: TransactionType) => {
     const index = await TransactionsPage.getIndexOfTxType(txType);
     if (index > 0) {
       await TransactionsPage.scrollToTheRow(index);
@@ -184,17 +177,7 @@ When(
 
 Then(
   /^I see (default - negative|green - positive) styling for transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
-  async (
-    styling: 'default - negative' | 'green - positive',
-    txType:
-      | 'Sent'
-      | 'Received'
-      | 'Self Transaction'
-      | 'Rewards'
-      | 'Delegation'
-      | 'Stake Key Registration'
-      | 'Stake Key De-Registration '
-  ) => {
+  async (styling: TransactionStyle, txType: TransactionType) => {
     await transactionsPageAssert.assertSeeStylingForTxType(styling, txType);
   }
 );

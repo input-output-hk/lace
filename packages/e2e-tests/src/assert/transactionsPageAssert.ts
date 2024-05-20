@@ -6,6 +6,8 @@ import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 import { isPopupMode } from '../utils/pageUtils';
 import { ParsedCSSValue } from 'webdriverio';
+import { TransactionStyle } from '../types/transactionStyle';
+import { TransactionType } from '../types/transactionType';
 
 export type ExpectedTransactionRowAssetDetails = {
   type: string;
@@ -167,21 +169,11 @@ class TransactionsPageAssert {
     expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
   }
 
-  async assertSeeStylingForTxType(
-    styling: 'default - negative' | 'green - positive',
-    txType:
-      | 'Sent'
-      | 'Received'
-      | 'Self Transaction'
-      | 'Rewards'
-      | 'Delegation'
-      | 'Stake Key Registration'
-      | 'Stake Key De-Registration '
-  ) {
+  async assertSeeStylingForTxType(styling: TransactionStyle, txType: TransactionType) {
     const index = await TransactionsPage.getIndexOfTxType(txType);
     expect(await TransactionsPage.transactionsTableItemType(index).getText()).to.equal(txType);
 
-    let expectedColors: string[] = [];
+    let expectedColors: string[];
     const amountElement = await TransactionsPage.transactionsTableItemTokensAmount(index);
     if (styling === 'default - negative') {
       expectedColors = ['#3d3b39', '#ffffff'];
