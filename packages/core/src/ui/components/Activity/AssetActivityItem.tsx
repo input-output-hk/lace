@@ -10,11 +10,12 @@ import { ReactComponent as PendingIcon } from '../../assets/icons/pending.compon
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
-import { useTranslate } from '@src/ui/hooks';
 import { DelegationActivityType, TransactionActivityType } from '../ActivityDetail/types';
 import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
+import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '@lace/translation';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
@@ -108,7 +109,7 @@ export const AssetActivityItem = ({
   assets,
   formattedTimestamp
 }: AssetActivityItemProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const ref = useRef<HTMLHeadingElement>(null);
   const [assetsToShow, setAssetsToShow] = React.useState<number>(0);
 
@@ -193,7 +194,7 @@ export const AssetActivityItem = ({
           <h6 data-testid="transaction-type" className={styles.title}>
             {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationActivityType)
               ? t('core.assetActivityItem.entry.name.sending')
-              : t(`core.assetActivityItem.entry.name.${type}`)}
+              : t(`core.assetActivityItem.entry.name.${type}` as unknown as TranslationKey)}
           </h6>
           {descriptionContent}
         </div>

@@ -19,7 +19,7 @@ import { ActivityDetail as ActivityDetailType } from '@src/types';
 import { useCurrencyStore } from '@providers';
 import { TransactionDetailsProxy } from './TransactionDetailsProxy';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 

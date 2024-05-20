@@ -4,9 +4,9 @@ import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
 import { urls } from '../../utils/constants';
-import { useTranslate } from '@ui/hooks/useTranslate';
-import i18n from '@ui/lib/i18n';
+import { i18n } from '@lace/translation';
 import { WalletSetupFlow, useWalletSetupFlow } from './WalletSetupFlowProvider';
+import { useTranslation } from 'react-i18next';
 
 export enum WalletTimelineSteps {
   LEGAL_AND_ANALYTICS,
@@ -95,7 +95,7 @@ export const WalletSetupStepLayout = ({
   currentTimelineStep,
   isHardwareWallet = false
 }: WalletSetupStepLayoutProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const nextButtonContainerRef = useRef(null);
   const flow = useWalletSetupFlow();
 

@@ -10,7 +10,7 @@ import {
   ViewFlowProvider
 } from '@src/providers';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import React from 'react';

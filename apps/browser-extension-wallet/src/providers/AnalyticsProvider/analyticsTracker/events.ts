@@ -56,7 +56,8 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK: PostHogAction.MultiWalletCreateKeepWalletSecureGotItClick,
     RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhraseCopyToClipboardClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
-      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick
+      PostHogAction.MultiWalletCreateEnterRecoveryPhrasePasteFromClipboardClick,
+    WALLET_ADDED: PostHogAction.MultiWalletCreateAdded
   },
   restore: {
     SETUP_OPTION_CLICK: PostHogAction.MultiWalletRestoreClick,
@@ -64,9 +65,17 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     ENTER_WALLET: PostHogAction.MultiWalletRestoreEnterWalletClick,
     RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK:
       PostHogAction.MultiWalletRestoreEnterRecoveryPhrasePasteFromClipboardClick,
-    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick
+    RECOVERY_PHRASE_PASTE_READ_MORE_CLICK: PostHogAction.MultiWalletCreateSaveRecoveryPhrasePasteReadMoreClick,
+    WALLET_ADDED: PostHogAction.MultiWalletRestoreAdded,
+    HD_WALLET: PostHogAction.MultiWalletRestoreHdWallet
   },
   hw: {
-    SETUP_OPTION_CLICK: PostHogAction.MultiWalletHWClick
+    SETUP_OPTION_CLICK: PostHogAction.MultiWalletHWClick,
+    CONNECT_HW_VIEW: PostHogAction.MultiWalletHWConnectView,
+    HW_POPUP_CONNECT_CLICK: PostHogAction.MultiWalletHWPopupConnectClick,
+    CONNECT_HW_TRY_AGAIN_CLICK: PostHogAction.MultiWalletHWConnectTryAgainClick,
+    SETUP_HW_ACCOUNT_NO_CLICK: PostHogAction.MultiWalletHWSetupWalletAccountNoClick,
+    ENTER_WALLET: PostHogAction.MultiWalletHWEnterWalletClick,
+    WALLET_ADDED: PostHogAction.MultiWalletHWAdded
   }
 };

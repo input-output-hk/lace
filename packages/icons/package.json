@@ -22,7 +22,10 @@
     "build:svgr": "svgr ./raw --out-dir ./tmp --typescript",
     "build:tsc": "tsc --project tsconfig.json",
     "cleanup": "yarn exec rm -rf dist node_modules",
-    "test": "echo \"@lace/icons: no test specified\""
+    "format-check": "echo \"@lace/icons: no format-check command specified\"",
+    "lint": "echo \"@lace/icons: no lint command specified\"",
+    "test": "echo \"@lace/icons: no test command specified\"",
+    "type-check": "echo \"@lace/icons: no type-check specified\""
   },
   "devDependencies": {
     "@babel/cli": "^7.22.10",

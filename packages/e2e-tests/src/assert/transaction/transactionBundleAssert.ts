@@ -9,6 +9,7 @@ import { AssetInput } from '../../elements/newTransaction/assetInput';
 
 class TransactionBundleAssert {
   assertSeeBundles = async (expectedNumberOfBundles: number) => {
+    await TransactionNewPage.drawerBody.waitForStable();
     for (let i = 1; i <= expectedNumberOfBundles; i++) {
       const bundle = new TransactionBundle(i);
       if (expectedNumberOfBundles > 1) {

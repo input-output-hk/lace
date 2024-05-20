@@ -46,6 +46,7 @@ export const selectTriggerBase = style([
     justifyContent: 'space-between',
     border: 0,
     cursor: 'pointer',
+    color: vars.colors.$select_input_value_color,
 
     ':hover': {
       backgroundColor: vars.colors.$select_hover_background_color,
@@ -112,10 +113,6 @@ export const selectContent = style([
   },
 ]);
 
-export const selectViewport = style({
-  padding: '5px',
-});
-
 export const selectItem = style([
   sx({
     display: 'flex',
@@ -144,25 +141,5 @@ export const selectItem = style([
         color: vars.colors.$select_input_value_color,
       },
     },
-  },
-]);
-
-export const selectLabel = style({
-  padding: '0 25px',
-  fontSize: vars.fontSizes.$12,
-  lineHeight: '25px',
-  color: vars.colors.$select_input_value_color,
-});
-
-export const selectItemIndicator = style([
-  sx({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }),
-  {
-    position: 'absolute',
-    left: 0,
-    width: '25px',
   },
 ]);

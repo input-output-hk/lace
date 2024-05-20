@@ -7,7 +7,7 @@ import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-t
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from './useMaxAda';
 import { UseTranslationResponse } from 'react-i18next';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 const { buildTransactionProps, setMissingCoins, getTotalMinimumCoins } = Wallet;
 

@@ -5,7 +5,7 @@ import { DappTransactionFail } from '../components/DappTransactionFail';
 import { IViewAction, IViewState } from '../../../providers';
 import { DappConfirmData as ConfirmData } from '../components/ConfirmData';
 import { SignData } from '../components/SignData';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 export enum DAPP_VIEWS {
   CONNECT = 'connect',
   CONFIRM_TX = 'confirm-tx',

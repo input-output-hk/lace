@@ -9,7 +9,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { SectionConfig } from '@src/views/browser-view/stores';
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.SUCCESS_TX]: 'browserView.transaction.send.footer.viewTransaction',

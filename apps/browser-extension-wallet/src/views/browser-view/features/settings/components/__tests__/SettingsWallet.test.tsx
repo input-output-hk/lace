@@ -14,7 +14,7 @@ import '@testing-library/jest-dom';
 import { I18nextProvider } from 'react-i18next';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import {
   AnalyticsProvider,
   AppSettingsProvider,
@@ -297,7 +297,7 @@ describe('Testing SettingsWalletBase component', () => {
           section: BrowserViewSections.COLLATERAL_SETTINGS
         }
       };
-      const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => await true);
+      const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => true);
       mockGetBackgroundStorage.mockReturnValue({ message });
 
       const redirectToSettingsMock = jest.fn();

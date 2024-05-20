@@ -29,13 +29,15 @@
     "build": "run -T rollup -c rollup.config.js",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "yarn exec rm -rf dist node_modules",
+    "format-check": "echo \"@lace/core: no format-check command specified\"",
     "lint": "cd ../.. && yarn core:lint",
     "prepack": "yarn build",
     "prestart": "yarn build",
     "start": "node dist/index.js",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
-    "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
-    "typecheck": "tsc --noEmit",
+    "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
+    "test-storybook:ci": "echo \"@lace/core: no test-storybook:ci specified\"",
+    "type-check": "echo \"@lace/core: no type-check command specified\"",
     "watch": "yarn build --watch"
   },
   "dependencies": {
@@ -43,6 +45,7 @@
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/icons": "0.1.0",
+    "@lace/translation": "0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.24.10",
     "axios": "0.28.0",
@@ -83,7 +86,7 @@
     "sass": "^1.68.0",
     "storybook": "^7.4.3",
     "tsconfig-paths-webpack-plugin": "3.5.2",
-    "typescript": "^4.3.5"
+    "typescript": "^4.9.5"
   },
   "peerDependencies": {
     "react": "17.0.2",

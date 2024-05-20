@@ -2,7 +2,6 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 import { Providers } from './types';
 import { CreateWalletParams } from '@hooks';
 import { Wallet } from '@lace/cardano';
-import { PostHogAction } from '@lace/common';
 import { useHistory } from 'react-router';
 import { useAnalyticsContext } from '@providers';
 import { filter, firstValueFrom } from 'rxjs';
@@ -10,6 +9,7 @@ import { isScriptAddress } from '@cardano-sdk/wallet';
 import { walletRoutePaths } from '@routes';
 import { useHotWalletCreation } from '../useHotWalletCreation';
 import { RecoveryPhraseLength } from '@lace/core';
+import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 
 interface Props {
   children: React.ReactNode;
@@ -58,10 +58,10 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
   const setMnemonic = useCallback(
     (mnemonic: string[]) => {
       const mnemonicNotEmpty = mnemonic.some((m) => m);
-      providers.confirmationDialog.shouldShowDialog$.next(mnemonicNotEmpty);
+      providers.shouldShowConfirmationDialog$.next(mnemonicNotEmpty);
       setCreateWalletData((prevState) => ({ ...prevState, mnemonic }));
     },
-    [providers.confirmationDialog.shouldShowDialog$, setCreateWalletData]
+    [providers.shouldShowConfirmationDialog$, setCreateWalletData]
   );
 
   const onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange = (length) => {
@@ -76,7 +76,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
     const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
     const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
     if (hdWalletDiscovered) {
-      await analytics.sendEventToPostHog(PostHogAction.MultiWalletRestoreHdWallet);
+      await analytics.sendEventToPostHog(postHogMultiWalletActions.restore.HD_WALLET);
     }
   };
 
@@ -84,7 +84,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
     const wallet = await createWallet();
     void sendPostWalletAddAnalytics({
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      walletAddedPostHogAction: PostHogAction.MultiWalletRestoreAdded
+      walletAddedPostHogAction: postHogMultiWalletActions.restore.WALLET_ADDED
     });
     void sendHdWalletAnalyticEvent(wallet);
     clearSecrets();
@@ -105,7 +105,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
   const back = () => {
     switch (step) {
       case WalletRestoreStep.RecoveryPhrase:
-        providers.confirmationDialog.shouldShowDialog$.next(false);
+        providers.shouldShowConfirmationDialog$.next(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
       case WalletRestoreStep.Setup:

@@ -4,10 +4,11 @@ import { Wallet } from '@lace/cardano';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 
 import styles from './DappAddressSections.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 
 import { Text, TransactionAssets, DappTransactionSummary, Tooltip, SummaryExpander, Box, Flex } from '@lace/ui';
 import { getAddressTagTranslations, renderAddressTag } from '@src/ui/utils';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 interface GroupedAddressAssets {
   nfts: Array<AssetInfoWithAmount>;
@@ -49,7 +50,7 @@ const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
 const charBeforeEllName = 9;
 const charAfterEllName = 0;
 
-type UseTranslate = ReturnType<typeof useTranslate>['t'];
+type UseTranslate = TFunction;
 
 const getTransactionAssetTranslations = (t: UseTranslate) => ({
   assetId: t('core.dappTransaction.assetId'),
@@ -116,7 +117,7 @@ export const DappAddressSection = ({
   ownAddresses,
   addressToNameMap
 }: DappAddressSectionProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const itemsCountCopy = t('core.dappTransaction.items');
 

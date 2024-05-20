@@ -1,10 +1,10 @@
 import React, { ReactElement } from 'react';
 import { WarningModal } from '@views/browser/components';
-import { useTranslate } from '@lace/core';
 import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
+import { useTranslation } from 'react-i18next';
 
 export const MultiAddressBalanceVisibleModal = (): ReactElement => {
   const { walletState } = useWalletStore();
@@ -13,7 +13,7 @@ export const MultiAddressBalanceVisibleModal = (): ReactElement => {
     'showMultiAddressModal',
     walletState.addresses.length > 1
   );
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const handleCloseModal = () => {
     setShowMultiAddressModal(false);

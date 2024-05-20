@@ -79,9 +79,10 @@ button.addressBookBtn {
     flex: 1;
     font-weight: 400;
     padding-right: size_unit(1.5);
+    white-space: nowrap;
     &:first-child {
       font-weight: 600;
-      flex:0;
+      flex: 0;
     }
 
     p {
@@ -93,7 +94,6 @@ button.addressBookBtn {
   }
 }
 
-
 .children {
   pointer-events: none;
   position: absolute;
@@ -102,7 +102,7 @@ button.addressBookBtn {
   z-index: 1;
   background: var(--light-mode-light-grey, var(--dark-mode-dark-grey, #2f2f2f)) !important;
   padding-left: size_unit(1.5);
-  
+
   @media (max-width: $breakpoint-popup) {
     top: 8px;
     left: 0px;

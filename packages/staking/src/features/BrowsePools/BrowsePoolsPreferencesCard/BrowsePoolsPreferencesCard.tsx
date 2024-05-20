@@ -28,7 +28,7 @@ import { FilterOption, SelectOption, SortAndFilterTab } from './types';
 
 export interface SortAndFilterProps {
   activeTab: SortAndFilterTab;
-  sort: StakePoolSortOptions;
+  sort?: StakePoolSortOptions;
   filter: QueryStakePoolsFilters;
   onSortChange: (value: StakePoolSortOptions) => void;
   onFilterChange: (filters: QueryStakePoolsFilters) => void;
@@ -60,7 +60,7 @@ export const BrowsePoolsPreferencesCard = ({
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
   const [localFilters, setLocalFilters] = useState<QueryStakePoolsFilters>(filter);
-  const { field: sortBy, order: direction } = sort;
+  const { field: sortBy, order: direction } = sort || {};
 
   const debouncedFilterChange = useMemo(() => debounce(onFilterChange, ON_CHANGE_DEBOUNCE), [onFilterChange]);
   const handleFilterChange = useCallback(
@@ -75,13 +75,16 @@ export const BrowsePoolsPreferencesCard = ({
     [debouncedFilterChange, localFilters]
   );
 
-  const handleIconClick = useCallback(() => {
-    const newSort: StakePoolSortOptions = {
-      field: sortBy,
-      order: direction === 'desc' ? 'asc' : 'desc',
-    };
-    onSortChange(newSort);
-  }, [direction, onSortChange, sortBy]);
+  const handleIconClick = useCallback(
+    (_sortBy) => {
+      const newSort: StakePoolSortOptions = {
+        field: _sortBy,
+        order: direction === 'desc' ? 'asc' : 'desc',
+      };
+      onSortChange(newSort);
+    },
+    [direction, onSortChange]
+  );
 
   const handleSortChange = useCallback(
     (field: string) => {
@@ -148,96 +151,29 @@ export const BrowsePoolsPreferencesCard = ({
       ) : (
         <SortNumericalDescIcon data-testid="sort-desc" />
       );
-    return [
-      {
-        icon: iconAlphabetical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.ticker')}
-            text={t('browsePools.preferencesCard.sort.ticker')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'ticker',
-      },
-      {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.saturation')}
-            text={t('browsePools.preferencesCard.sort.saturation')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'saturation',
-      },
-      USE_ROS_STAKING_COLUMN && {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.ros')}
-            text={t('browsePools.preferencesCard.sort.ros')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'ros',
-      },
-      {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.cost')}
-            text={t('browsePools.preferencesCard.sort.cost')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'cost',
-      },
-      {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.margin')}
-            text={t('browsePools.preferencesCard.sort.margin')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'margin',
-      },
-      {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.blocks')}
-            text={t('browsePools.preferencesCard.sort.blocks')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'blocks',
-      },
-      {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.pledge')}
-            text={t('browsePools.preferencesCard.sort.pledge')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'pledge',
-      },
-      {
-        icon: iconNumerical,
-        label: (
-          <BrowsePoolsPreferencesCardLabel
-            tooltip={t('browsePools.tooltips.liveStake')}
-            text={t('browsePools.preferencesCard.sort.liveStake')}
-          />
-        ),
-        onIconClick: handleIconClick,
-        value: 'liveStake',
-      },
-    ].filter(Boolean) as RadioButtonGroupOption[];
+
+    const values: SortField[] = [
+      'ticker',
+      'saturation',
+      USE_ROS_STAKING_COLUMN && 'ros',
+      'cost',
+      'margin',
+      'blocks',
+      'pledge',
+      'liveStake',
+    ].filter((v): v is SortField => !!v);
+
+    return values.map((value) => ({
+      icon: value === 'ticker' ? iconAlphabetical : iconNumerical,
+      label: (
+        <BrowsePoolsPreferencesCardLabel
+          tooltip={t(`browsePools.tooltips.${value}`)}
+          text={t(`browsePools.preferencesCard.sort.${value}`)}
+        />
+      ),
+      onIconClick: () => handleIconClick(value),
+      value,
+    })) as RadioButtonGroupOption[];
   }, [direction, handleIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(() => {

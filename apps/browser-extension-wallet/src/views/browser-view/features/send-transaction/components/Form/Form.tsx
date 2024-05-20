@@ -54,7 +54,7 @@ export const Form = ({
 
   const { setNewOutput } = useOutputs();
 
-  const isEmptyAssets = assetBalances?.size === 0;
+  const isEmptyAssets = !assetBalances?.size;
 
   const handleAddRow = () => {
     const nextBundleId = getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin);
@@ -100,9 +100,10 @@ export const Form = ({
   const totalCost = getFee(fee.toString(), prices?.cardano?.price, cardanoCoin, fiatCurrency);
 
   const hasMissingCoins = totalMinimumCoins?.coinMissing && totalMinimumCoins?.coinMissing !== '0';
-  const bundleDisabled = spendableCoin
-    ? !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length
-    : false;
+
+  const bundleDisabled =
+    !spendableCoin ||
+    !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length;
 
   return (
     <Skeleton loading={isLoading}>

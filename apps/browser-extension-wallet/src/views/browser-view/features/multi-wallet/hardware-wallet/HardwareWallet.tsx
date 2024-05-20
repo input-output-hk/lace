@@ -1,10 +1,12 @@
+import { walletRoutePaths } from '@routes';
+import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { Connect } from './steps/Connect';
-import { SelectAccount } from './steps/SelectAccount';
-import { NameWallet } from './steps/NameWallet';
-import { walletRoutePaths } from '@routes';
 import { HardwareWalletProvider } from './context';
+import { ErrorDialog } from './ErrorDialog';
+import { Connect } from './steps/Connect';
+import { Setup } from './steps/Setup';
+import { Create } from './steps/Create';
 import { Providers } from './types';
 
 const {
@@ -17,11 +19,21 @@ interface Props {
 
 export const HardwareWallet = ({ providers }: Props): JSX.Element => (
   <HardwareWalletProvider providers={providers}>
-    <Switch>
-      <Route path={hardware.connect} component={Connect} />
-      <Route path={hardware.select} component={SelectAccount} />
-      <Route path={hardware.name} component={NameWallet} />
-      <Redirect from={hardware.root} to={hardware.connect} />
-    </Switch>
+    {({ errorDialogCode, onErrorDialogRetry, isStartOverDialogVisible, onStartOverDialogAction }) => (
+      <>
+        {!!errorDialogCode && <ErrorDialog visible onRetry={onErrorDialogRetry} errorCode={errorDialogCode} />}
+        <StartOverDialog
+          visible={isStartOverDialogVisible}
+          onStartOver={() => onStartOverDialogAction(true)}
+          onClose={() => onStartOverDialogAction(false)}
+        />
+        <Switch>
+          <Route path={hardware.connect} component={Connect} />
+          <Route path={hardware.setup} component={Setup} />
+          <Route path={hardware.create} component={Create} />
+          <Redirect from={hardware.root} to={hardware.connect} />
+        </Switch>
+      </>
+    )}
   </HardwareWalletProvider>
 );

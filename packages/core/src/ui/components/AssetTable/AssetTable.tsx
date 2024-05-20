@@ -4,7 +4,7 @@ import { InfiniteScrollableTable, useHasScrollBar } from '@lace/common';
 import { ColumnsType } from 'antd/lib/table';
 import React, { useState } from 'react';
 import styles from './AssetTable.module.scss';
-import { useTranslate } from '@src/ui/hooks/useTranslate';
+import { useTranslation } from 'react-i18next';
 
 export interface IRow {
   id: string;
@@ -118,7 +118,7 @@ export const AssetTable = ({
   const handleRowClick = (record: IAssetColumn) => ({
     onClick: () => onRowClick(record?.key)
   });
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const columns: ColumnsType<IAssetColumn> = [
     {

@@ -31,9 +31,8 @@ export const walletRoutePaths = {
     hardware: {
       root: '/new-wallet/hardware',
       connect: '/new-wallet/hardware/connect',
-      select: '/new-wallet/hardware/select',
-      name: '/new-wallet/hardware/name',
-      allDone: '/new-wallet/hardware/all-done'
+      setup: '/new-wallet/hardware/setup',
+      create: '/new-wallet/hardware/create'
     },
     restore: {
       root: '/new-wallet/restore',

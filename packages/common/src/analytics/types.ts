@@ -59,11 +59,13 @@ export enum PostHogAction {
   MultiWalletRestoreEnterWalletClick = 'multiwallet | new wallet revamp | lets set up your new wallet | enter wallet | click',
   MultiWalletRestoreAdded = 'multiwallet | restore wallet | added',
   // Multi wallet Hardware wallet connect
-  MultiWalletHWClick = 'multiwallet | hardware wallet | connect | click',
-  MultiWalletHWConnectNextClick = 'multiwallet | hardware wallet | connect hw | next | click',
-  MultiWalletHWSelectAccountNextClick = 'multiwallet | hardware wallet | select hw account | next | click',
-  MultiWalletHWNameNextClick = 'multiwallet | hardware wallet | name hw wallet | next | click',
-  MultiWalletHWAdded = 'multiwallet | hardware wallet | added',
+  MultiWalletHWClick = 'multiwallet | hardware wallet revamp | connect | click',
+  MultiWalletHWConnectView = 'multiwallet | hardware wallet revamp | connect your device | view',
+  MultiWalletHWPopupConnectClick = 'multiwallet | hardware wallet revamp | native browser pop-up with HWs | connect | click',
+  MultiWalletHWConnectTryAgainClick = 'multiwallet | hardware wallet revamp | connect your device | try again | click',
+  MultiWalletHWSetupWalletAccountNoClick = "multiwallet | hardware wallet revamp | let's set up your wallet | Account No | click",
+  MultiWalletHWEnterWalletClick = "multiwallet | hardware wallet revamp | let's set up your wallet | enter wallet | click",
+  MultiWalletHWAdded = 'multiwallet | hardware wallet revamp | added',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',

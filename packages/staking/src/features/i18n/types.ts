@@ -237,6 +237,11 @@ type KeysStructure = {
         description: '';
       };
     };
+    dapp: {
+      title: '';
+      description: '';
+      button: '';
+    };
     poolsManagement: {
       title: '';
       buttons: {

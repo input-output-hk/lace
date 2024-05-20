@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { PortfolioBalanceLabel, PortfolioBalanceLabelProps } from '../PortfolioBalanceLabel';
 import * as Stores from '@src/stores';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 
 jest.mock('@src/stores', (): typeof Stores => ({
   ...jest.requireActual<typeof Stores>('@src/stores'),

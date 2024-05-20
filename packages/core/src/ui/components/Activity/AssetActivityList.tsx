@@ -3,7 +3,7 @@ import React from 'react';
 import { AssetActivityItem, AssetActivityItemProps } from './AssetActivityItem';
 
 import styles from './AssetActivityList.module.scss';
-import { useTranslate } from '@src/ui/hooks/useTranslate';
+import { useTranslation } from 'react-i18next';
 
 export interface AssetActivityListProps {
   /**
@@ -22,7 +22,7 @@ export const AssetActivityList = ({
   title,
   isDrawerView
 }: AssetActivityListProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   return (
     <List
       header={

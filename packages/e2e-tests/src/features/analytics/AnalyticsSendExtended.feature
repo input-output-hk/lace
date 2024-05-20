@@ -4,7 +4,7 @@ Feature: Analytics - Posthog - Sending - Extended View
   Background:
     Given Wallet is synced
 
-  @LW-7821 @LW-9109
+  @LW-7821 @LW-9109 @E2E
   Scenario: Analytics - Extended-view - Send - Success Screen - View transaction + internal transaction confirmed + Check custom properties
     Given I set up request interception for posthog analytics request(s)
     And I have 2 addresses with ADA handle in my address book in extended mode
@@ -36,7 +36,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate that 7 analytics event(s) have been sent
     And Local storage unconfirmedTransaction is empty
 
-  @LW-9109
+  @LW-9109 @E2E
   Scenario: Analytics - Extended-view - Send - Dapp Success Screen - View transaction - Transaction confirmed
     Given I de-authorize all DApps in extended mode
     And I open and authorize test DApp with "Only once" setting

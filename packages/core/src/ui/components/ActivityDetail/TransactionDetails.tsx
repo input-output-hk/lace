@@ -4,7 +4,6 @@ import cn from 'classnames';
 
 import { Ellipsis, toast } from '@lace/common';
 import { Box, Text } from '@lace/ui';
-import { useTranslate } from '@ui/hooks';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 
 import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
@@ -24,6 +23,8 @@ import {
   TransactionActivityType
 } from './types';
 import { Collateral, CollateralStatus } from './Collateral';
+import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '@lace/translation';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -138,7 +139,7 @@ export const TransactionDetails = ({
   certificates,
   collateral
 }: TransactionDetailsProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const isSending = status === ActivityStatus.PENDING;
   const isSuccess = status === ActivityStatus.SUCCESS;
@@ -158,7 +159,7 @@ export const TransactionDetails = ({
           ...detail,
           ...('title' in detail &&
             detail.title === 'certificateType' && {
-              details: [t(`core.assetActivityItem.entry.name.${detail.details[0]}`)]
+              details: [t(`core.assetActivityItem.entry.name.${detail.details[0]}` as unknown as TranslationKey)]
             }),
           ...('title' in detail &&
             detail.title === 'anchorURL' && {
@@ -178,7 +179,7 @@ export const TransactionDetails = ({
           ...p,
           ...('title' in p &&
             p.title === 'type' && {
-              details: [t(`core.activityDetails.governanceActions.${p.details[0]}`)]
+              details: [t(`core.activityDetails.governanceActions.${p.details[0]}` as unknown as TranslationKey)]
             }),
           ...('title' in p &&
             p.title === 'anchorURL' && {
@@ -220,7 +221,7 @@ export const TransactionDetails = ({
           ...p,
           ...('title' in p &&
             ['voterType', 'voteTypes'].includes(p.title) && {
-              details: [t(`core.activityDetails.${p.title}.${p.details[0]}`)]
+              details: [t(`core.activityDetails.${p.title}.${p.details[0]}` as unknown as TranslationKey)]
             }),
           ...('title' in p &&
             p.title === 'anchorURL' && {
