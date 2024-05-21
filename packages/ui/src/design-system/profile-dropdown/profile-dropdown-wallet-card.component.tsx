@@ -46,7 +46,11 @@ export const WalletCard = ({
       {profile === undefined ? (
         <WalletIcon type={type} testId={makeTestId(testId, '-icon')} />
       ) : (
-        <UserProfile {...profile} radius="rounded" />
+        <UserProfile
+          {...profile}
+          radius="rounded"
+          testId={makeTestId(testId, '-icon')}
+        />
       )}
       <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
         <Title color="secondary" data-testid={makeTestId(testId, '-title')}>
