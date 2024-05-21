@@ -1,37 +1,53 @@
-import React from 'react';
-import { Box, Grid, Flex, Divider, Cell } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../../DappInfo';
-import { ErrorPane } from '@lace/common';
+import React, { useMemo } from 'react';
+import { Grid, Divider, Cell } from '@lace/ui';
 import * as Types from './NoConfidenceActionTypes';
-import { TransactionDetails } from '../components/TransactionDetails';
+import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
 import { Procedure } from '../components/Procedure';
 import { ActionId } from '../components/ActionId';
+import { useTranslation } from 'react-i18next';
 
 export interface NoConfidenceActionProps {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
   data: Types.Data;
-  translations: Types.Translations;
 }
 
 export const NoConfidenceAction = ({
-  dappInfo,
-  errorMessage,
-  data: { procedure, txDetails, actionId },
-  translations
-}: NoConfidenceActionProps): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$16'}>
-      <DappInfo {...dappInfo} />
-    </Box>
-    {errorMessage && (
-      <Box my={'$16'}>
-        <ErrorPane error={errorMessage} />
-      </Box>
-    )}
+  data: { procedure, txDetails, actionId }
+}: NoConfidenceActionProps): JSX.Element => {
+  const { t } = useTranslation();
+
+  const translations = useMemo<Types.Translations>(
+    () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
+      procedure: {
+        title: t('core.ProposalProcedure.procedure.title'),
+        anchor: {
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
+        }
+      },
+      actionId: {
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
+      }
+    }),
+    [t]
+  );
+
+  return (
     <Grid columns="$1" gutters="$20">
       {/* tx details section */}
-      <TransactionDetails translations={translations.txDetails} data={txDetails} />
+      <ProposalProcedureTransactionDetails
+        translations={translations.txDetails}
+        txTitle={t('core.ProposalProcedure.governanceAction.noConfidenceAction.title')}
+        deposit={txDetails.deposit}
+        rewardAccount={txDetails.rewardAccount}
+      />
       <Cell>
         <Divider my={'$16'} />
       </Cell>
@@ -47,5 +63,5 @@ export const NoConfidenceAction = ({
         </>
       )}
     </Grid>
-  </Flex>
-);
+  );
+};

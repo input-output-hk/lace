@@ -145,19 +145,10 @@ describe('Testing ConfirmStakeRegistrationDelegationContainer component', () => 
     expect(queryByTestId('ConfirmStakeRegistrationDelegation')).toBeInTheDocument();
     expect(mockConfirmStakeRegistrationDelegation).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         metadata: {
           poolId: certificate.poolId,
           stakeKeyHash: 'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
           depositPaid: depositPaidWithSymbol(certificate.deposit, cardanoCoinMock as Wallet.CoinId)
-        },
-        translations: {
-          metadata: t('core.StakeRegistrationDelegation.metadata'),
-          labels: {
-            poolId: t('core.StakeRegistrationDelegation.poolId'),
-            stakeKeyHash: t('core.StakeRegistrationDelegation.stakeKeyHash'),
-            depositPaid: t('core.StakeRegistrationDelegation.depositPaid')
-          }
         }
       },
       {}
