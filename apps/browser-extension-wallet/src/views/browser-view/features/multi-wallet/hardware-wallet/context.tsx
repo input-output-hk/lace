@@ -103,7 +103,7 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
         break;
       }
     }
-  }, [closeConnection, history, step]);
+  }, [closeConnection, history, setFormDirty, step]);
 
   const back = useCallback(() => {
     switch (step) {

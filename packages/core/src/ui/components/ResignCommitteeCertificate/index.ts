@@ -1,0 +1,1 @@
+export { ResignCommitteeCertificate } from './ResignCommitteeCertificate';

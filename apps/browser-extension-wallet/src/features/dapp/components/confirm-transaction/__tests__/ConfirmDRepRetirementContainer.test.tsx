@@ -21,10 +21,10 @@ import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
-import { depositPaidWithSymbol, drepIDasBech32FromHash } from '../utils';
+import { depositPaidWithSymbol } from '../utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
-const { Cardano, Crypto } = Wallet;
+const { Cardano, Crypto, util } = Wallet;
 
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
@@ -173,17 +173,9 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
     expect(mockConfirmDRepRetirement).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         metadata: {
           depositReturned: depositPaidWithSymbol(certificate.deposit, cardanoCoinMock as Wallet.CoinId),
-          drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)
-        },
-        translations: {
-          metadata: t('core.DRepRetirement.metadata'),
-          labels: {
-            depositReturned: t('core.DRepRetirement.depositReturned'),
-            drepId: t('core.DRepRetirement.drepId')
-          }
+          drepId: util.drepIDasBech32FromHash(certificate.dRepCredential.hash)
         }
       },
       {}

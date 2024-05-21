@@ -1,11 +1,12 @@
 import React, { Fragment } from 'react';
-import { Box, Cell, Grid, Flex, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../DappInfo';
-import { ErrorPane } from '@lace/common';
+import { Box, Cell, Grid, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '@lace/translation';
+import { VoterTypeEnum, VotesEnum } from '@lace/cardano/dist/wallet/util';
 
 type VotingProcedure = {
   voter: {
-    type: string;
+    type: VoterTypeEnum;
     dRepId?: string;
   };
   votes: {
@@ -15,7 +16,7 @@ type VotingProcedure = {
       txHashUrl?: string; // Dependent on having an explorer to link
     };
     votingProcedure: {
-      vote: string;
+      vote: VotesEnum;
       anchor: {
         url: string;
         hash: string;
@@ -25,43 +26,35 @@ type VotingProcedure = {
 };
 
 interface Props {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
   data: VotingProcedure[];
-  translations: {
-    actionIdTitle: string;
-    actionId: {
-      index: string;
-      txHash: string;
-    };
-    anchor: {
-      url: string;
-      hash: string;
-    } | null;
-    dRepId: string;
-    procedureTitle: string;
-    vote: string;
-    voterType: string;
-  };
 }
 
 const indexCounter = (text: string, idx: number, length: number): string => (length > 1 ? `${text} ${idx + 1}` : text);
 
-export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => {
+export const VotingProcedures = ({ data }: Props): JSX.Element => {
+  const { t } = useTranslation();
   const textCss = sx({
     color: '$text_primary'
   });
 
+  const translations = {
+    voterType: t('core.VotingProcedures.voterType'),
+    procedureTitle: t('core.VotingProcedures.procedureTitle'),
+    actionIdTitle: t('core.VotingProcedures.actionIdTitle'),
+    vote: t('core.VotingProcedures.vote'),
+    actionId: {
+      index: t('core.VotingProcedures.actionId.index'),
+      txHash: t('core.VotingProcedures.actionId.txHash')
+    },
+    anchor: {
+      hash: t('core.VotingProcedures.anchor.hash'),
+      url: t('core.VotingProcedures.anchor.url')
+    },
+    dRepId: t('core.VotingProcedures.dRepId')
+  };
+
   return (
-    <Flex h="$fill" flexDirection="column">
-      <Box mb={'$28'} mt={'$32'}>
-        <DappInfo {...dappInfo} />
-      </Box>
-      {errorMessage && (
-        <Box my={'$16'}>
-          <ErrorPane error={errorMessage} />
-        </Box>
-      )}
+    <>
       {data.map(({ voter, votes }, idx) => (
         <Box key={voter.dRepId} mt={idx > 0 ? '$40' : '$0'}>
           <Grid columns="$1" gutters="$16">
@@ -71,7 +64,10 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
               </Text.Body.Large>
             </Cell>
             <Cell>
-              <Metadata label={translations.voterType} text={voter.type} />
+              <Metadata
+                label={translations.voterType}
+                text={t(`core.VotingProcedures.voterTypes.${voter.type}` as unknown as TranslationKey)}
+              />
             </Cell>
             {voter.dRepId && (
               <Cell>
@@ -89,7 +85,10 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
                   </Text.Body.Normal>
                 </Cell>
                 <Cell>
-                  <Metadata label={translations.vote} text={votingProcedure.vote} />
+                  <Metadata
+                    label={translations.vote}
+                    text={t(`core.VotingProcedures.votes.${votingProcedure.vote}` as unknown as TranslationKey)}
+                  />
                 </Cell>
                 {votingProcedure.anchor && (
                   <>
@@ -130,6 +129,6 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
           </Grid>
         </Box>
       ))}
-    </Flex>
+    </>
   );
 };

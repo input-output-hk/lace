@@ -13,6 +13,7 @@ import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
 import { InfoActionContainer } from '../InfoActionContainer';
 import { getWrapper } from '../../testing.utils';
+import { mockProposalProcedure } from '@lace/core';
 
 jest.mock('react-i18next', () => {
   const original = jest.requireActual('react-i18next');
@@ -41,22 +42,8 @@ jest.mock('../../hooks', () => {
   };
 });
 
-const dappInfo = {
-  name: 'dappName',
-  logo: 'dappLogo',
-  url: 'dappUrl'
-};
-const errorMessage = 'errorMessage';
-const deposit = BigInt('10000');
-const rewardAccount = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
-const anchor = {
-  url: 'anchorUrl',
-  dataHash: Wallet.Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
-};
-
-const infoAction = {
-  __typename: Wallet.Cardano.GovernanceActionType.info_action
-} as Wallet.Cardano.InfoAction;
+const infoActionMock = mockProposalProcedure[Wallet.Cardano.GovernanceActionType.info_action];
+const { deposit, rewardAccount, anchor, governanceAction: infoAction } = infoActionMock;
 
 describe('Testing ProposalProceduresContainer component', () => {
   afterEach(() => {
@@ -69,9 +56,7 @@ describe('Testing ProposalProceduresContainer component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <InfoActionContainer
-          {...{ errorMessage, dappInfo, deposit, rewardAccount, anchor, governanceAction: infoAction }}
-        />,
+        <InfoActionContainer {...{ deposit, rewardAccount, anchor, governanceAction: infoAction }} />,
         {
           wrapper: getWrapper()
         }
@@ -81,11 +66,8 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('InfoAction')).toBeInTheDocument();
     expect(mockInfoAction).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         data: {
-          txDetails: {
-            txType: t('core.ProposalProcedure.governanceAction.infoAction.title')
-          },
+          txDetails: {},
           procedure: {
             anchor: {
               url: anchor.url,
@@ -93,21 +75,7 @@ describe('Testing ProposalProceduresContainer component', () => {
               txHashUrl: `${mockedCExpolorerBaseUrl}/${anchor.dataHash}`
             }
           }
-        },
-        translations: {
-          txDetails: {
-            title: t('core.ProposalProcedure.txDetails.title'),
-            txType: t('core.ProposalProcedure.txDetails.txType')
-          },
-          procedure: {
-            title: t('core.ProposalProcedure.procedure.title'),
-            anchor: {
-              url: t('core.ProposalProcedure.procedure.anchor.url'),
-              hash: t('core.ProposalProcedure.procedure.anchor.hash')
-            }
-          }
-        },
-        errorMessage
+        }
       },
       {}
     );
