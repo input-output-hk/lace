@@ -8,6 +8,9 @@ jest.mock('@lib/wallet-api-ui', () => ({
   },
   walletManager: {
     activate: jest.fn().mockReturnValue(void 0)
+  },
+  observableWallet: {
+    addresses$: of([[]])
   }
 }));
 

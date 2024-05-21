@@ -1,7 +1,7 @@
 import { CreateWalletParams } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useHotWalletCreation } from '../useHotWalletCreation';
 import { useWalletOnboarding } from '../walletOnboardingContext';
@@ -44,24 +44,27 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   });
   const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.RecoveryPhraseWriteDown);
 
-  const generateMnemonic = () => {
+  const generateMnemonic = useCallback(() => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Wallet.KeyManagement.util.generateMnemonicWords() }));
-  };
+  }, [setCreateWalletData]);
 
-  const onNameAndPasswordChange: OnNameAndPasswordChange = ({ name, password }) => {
-    setCreateWalletData((prevState) => ({ ...prevState, name, password }));
-  };
+  const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
+    ({ name, password }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+    },
+    [setCreateWalletData]
+  );
 
-  const finalizeWalletCreation = async () => {
+  const finalizeWalletCreation = useCallback(async () => {
     const wallet = await createHotWallet();
     await sendPostWalletAddAnalytics({
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      walletAddedPostHogAction: postHogActions.create.WALLET_ADDED
+      postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
     });
     clearSecrets();
-  };
+  }, [clearSecrets, createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]);
 
-  const next = async () => {
+  const next = useCallback(async () => {
     switch (step) {
       case WalletCreateStep.RecoveryPhraseWriteDown: {
         setFormDirty(true);
@@ -78,9 +81,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
         break;
       }
     }
-  };
+  }, [finalizeWalletCreation, history, setFormDirty, step]);
 
-  const back = () => {
+  const back = useCallback(() => {
     switch (step) {
       case WalletCreateStep.RecoveryPhraseWriteDown: {
         history.push(walletRoutePaths.newWallet.root);
@@ -97,7 +100,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
         break;
       }
     }
-  };
+  }, [generateMnemonic, history, setFormDirty, step]);
 
   const state = useMemo(
     () => ({
