@@ -14,7 +14,7 @@ interface State {
 }
 
 // eslint-disable-next-line no-magic-numbers
-const REMINDER_TIME = 36 * 60 * 60 * 1000;
+const REMINDER_TIME = Number.parseInt(process.env.MIDNIGHT_EVENT_BANNER_REMINDER_TIME);
 
 export const MidnightEventBanner = (): JSX.Element => {
   const { t } = useTranslation();
