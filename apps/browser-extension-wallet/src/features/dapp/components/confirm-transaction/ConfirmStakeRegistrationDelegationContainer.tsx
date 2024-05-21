@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ConfirmStakeRegistrationDelegation } from '@lace/core';
+import { ConfirmStakeRegistrationDelegation, DappInfo } from '@lace/core';
 import { certificateInspectorFactory, depositPaidWithSymbol } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useViewsFlowContext } from '@providers';
 import { Skeleton } from 'antd';
+import { Box, Flex, TransactionSummary } from '@lace/ui';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
@@ -36,24 +37,22 @@ export const ConfirmStakeRegistrationDelegationContainer = (): React.ReactElemen
     return <Skeleton loading />;
   }
   const depositPaidWithCardanoSymbol = depositPaidWithSymbol(certificate.deposit, cardanoCoin);
+
   return (
-    <ConfirmStakeRegistrationDelegation
-      dappInfo={dappInfo}
-      metadata={{
-        poolId: certificate.poolId,
-        stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)
-          .toAddress()
-          .toBech32(),
-        depositPaid: depositPaidWithCardanoSymbol
-      }}
-      translations={{
-        metadata: t('core.StakeRegistrationDelegation.metadata'),
-        labels: {
-          poolId: t('core.StakeRegistrationDelegation.poolId'),
-          stakeKeyHash: t('core.StakeRegistrationDelegation.stakeKeyHash'),
-          depositPaid: t('core.StakeRegistrationDelegation.depositPaid')
-        }
-      }}
-    />
+    <Flex h="$fill" flexDirection="column">
+      <Box mb={'$28'} mt={'$32'}>
+        <DappInfo {...dappInfo} />
+      </Box>
+      <TransactionSummary.Metadata label={t('core.StakeRegistrationDelegation.metadata')} text="" />
+      <ConfirmStakeRegistrationDelegation
+        metadata={{
+          poolId: certificate.poolId,
+          stakeKeyHash: RewardAddress.fromCredentials(currentChain.networkId, certificate.stakeCredential)
+            .toAddress()
+            .toBech32(),
+          depositPaid: depositPaidWithCardanoSymbol
+        }}
+      />
+    </Flex>
   );
 };

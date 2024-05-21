@@ -44,5 +44,5 @@ export const container = style([
 
 export const label = style({
   // this was the only way to override the `recipe` used in `text.css.ts` https://github.com/vanilla-extract-css/vanilla-extract/discussions/466
-  color: vars.colors.$buttons_cta_label_color,
+  color: `${vars.colors.$buttons_cta_label_color} !important`,
 });

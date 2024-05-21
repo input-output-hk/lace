@@ -29,23 +29,6 @@ export default meta;
 type Story = StoryObj<typeof ConfirmStakeVoteRegistrationDelegation>;
 
 const data: ComponentProps<typeof ConfirmStakeVoteRegistrationDelegation> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
-  translations: {
-    labels: {
-      drepId: 'DRep ID',
-      alwaysAbstain: 'Abstain',
-      alwaysNoConfidence: 'No Confidence',
-      stakeKeyHash: 'Stake key hash',
-      poolId: 'Pool Id',
-      depositPaid: 'Deposit paid'
-    },
-    option: 'Yes',
-    metadata: 'Metadata'
-  },
   metadata: {
     drepId: 'drep1ruvgm0auzdplfn7g2jf3kcnpnw5mlhwxaxj8crag8h6t2ye9y9g',
     alwaysAbstain: false,
@@ -59,12 +42,6 @@ const data: ComponentProps<typeof ConfirmStakeVoteRegistrationDelegation> = {
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };
 

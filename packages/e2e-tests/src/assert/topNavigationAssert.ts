@@ -178,6 +178,11 @@ class TopNavigationAssert {
     expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
   }
 
+  async assertSeeCustomAvatar(expectedImageSrc: string) {
+    await MenuHeader.avatarOnButton.waitForDisplayed();
+    expect(await MenuHeader.avatarOnButton.getAttribute('src')).to.equal(expectedImageSrc);
+  }
+
   async assertSeeRightSidePanelButton(shouldBeVisible: boolean) {
     await MenuHeader.rightSidePanelButton.waitForDisplayed({ reverse: !shouldBeVisible });
   }

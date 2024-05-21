@@ -69,7 +69,7 @@ export const postHogMultiWalletActions: PostHogMultiWalletActionsType = {
     WALLET_ADDED: PostHogAction.MultiWalletRestoreAdded,
     HD_WALLET: PostHogAction.MultiWalletRestoreHdWallet
   },
-  hw: {
+  hardware: {
     SETUP_OPTION_CLICK: PostHogAction.MultiWalletHWClick,
     CONNECT_HW_VIEW: PostHogAction.MultiWalletHWConnectView,
     HW_POPUP_CONNECT_CLICK: PostHogAction.MultiWalletHWPopupConnectClick,

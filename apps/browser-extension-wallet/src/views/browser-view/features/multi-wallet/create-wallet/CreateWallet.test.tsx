@@ -1,5 +1,5 @@
 /* eslint-disable import/imports-first */
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 jest.doMock('@hooks/useWalletManager', () => ({
   useWalletManager: jest.fn().mockReturnValue({
     createWallet: jest.fn().mockResolvedValue({
@@ -18,24 +18,24 @@ jest.doMock('@hooks/useWalletManager', () => ({
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { Providers } from './types';
-import { walletRoutePaths } from '@routes';
 import {
   DEFAULT_MNEMONIC_LENGTH,
   createAssetsRoute,
   fillMnemonic,
   getNextButton,
-  mnemonicWords,
   setupStep,
-  getBackButton
+  getBackButton,
+  mnemonicWords
 } from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
 import { UseWalletManager } from '@hooks/useWalletManager';
-import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
-import { CreateWallet } from './CreateWallet';
+import { AnalyticsTracker, postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { MemoryRouter, Router } from 'react-router-dom';
+import { WalletOnboardingFlows } from '../WalletOnboardingFlows';
+import { walletRoutePaths } from '@routes';
+import { createMemoryHistory } from 'history';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
   useAnalyticsContext: jest
@@ -47,6 +47,23 @@ jest.mock('@providers/AnalyticsProvider', () => ({
     })
 }));
 
+jest.mock('@lace/cardano', () => {
+  const actual = jest.requireActual('@lace/cardano');
+  return {
+    ...actual,
+    Wallet: {
+      ...actual.Wallet,
+      KeyManagement: {
+        ...actual.Wallet.KeyManagement,
+        util: {
+          ...actual.Wallet.KeyManagement.util,
+          generateMnemonicWords: () => mnemonicWords
+        }
+      }
+    }
+  };
+});
+
 const recoveryPhraseStep = async () => {
   let nextButton = getNextButton();
   fireEvent.click(nextButton);
@@ -57,66 +74,60 @@ const recoveryPhraseStep = async () => {
 };
 
 describe('Multi Wallet Setup/Create Wallet', () => {
-  let providers = {} as {
-    createWallet: jest.Mock;
-    generateMnemonicWords: jest.Mock;
-    shouldShowConfirmationDialog$: BehaviorSubject<boolean>;
-  };
-
-  beforeEach(() => {
-    providers = {
-      createWallet: jest.fn(),
-      generateMnemonicWords: jest.fn(),
-      shouldShowConfirmationDialog$: new BehaviorSubject(false)
-    };
-  });
-
   test('setting up a new hot wallet', async () => {
-    providers.generateMnemonicWords.mockReturnValue(mnemonicWords);
-    providers.createWallet.mockResolvedValue(void 0);
-
+    const history = createMemoryHistory();
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.root]}>
-              <CreateWallet providers={providers as Providers} />
+            <Router history={history}>
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+              />
               {createAssetsRoute()}
-            </MemoryRouter>
+            </Router>
           </StoreProvider>
         </DatabaseProvider>
       </AppSettingsProvider>
     );
 
+    history.push(walletRoutePaths.newWallet.create);
     await recoveryPhraseStep();
     await setupStep();
   });
 
-  test('should emit correct value for shouldShowDialog', async () => {
-    providers.generateMnemonicWords.mockReturnValue(mnemonicWords);
-
+  test('should properly mark for dirty', async () => {
+    let formDirty = false;
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.root]}>
-              <CreateWallet providers={providers as Providers} />
-              {createAssetsRoute()}
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create]}>
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+                setFormDirty={(dirty) => {
+                  formDirty = dirty;
+                }}
+              />
             </MemoryRouter>
           </StoreProvider>
         </DatabaseProvider>
       </AppSettingsProvider>
     );
 
-    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(false);
+    expect(formDirty).toBe(false);
 
     const nextButton = getNextButton();
     fireEvent.click(nextButton);
-    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(true);
+    expect(formDirty).toBe(true);
 
     const backButton = getBackButton();
     fireEvent.click(backButton);
     fireEvent.click(screen.queryByTestId('delete-address-modal-confirm'));
-    expect(await firstValueFrom(providers.shouldShowConfirmationDialog$)).toBe(false);
+    expect(formDirty).toBe(false);
   });
 });

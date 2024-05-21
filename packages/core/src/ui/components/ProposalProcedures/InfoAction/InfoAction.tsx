@@ -1,40 +1,45 @@
-import React from 'react';
-import { Box, Grid, Flex, Divider, Cell } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../../DappInfo';
-import { ErrorPane } from '@lace/common';
+import React, { useMemo } from 'react';
+import { Grid, Divider, Cell } from '@lace/ui';
 import * as Types from './InfoActionTypes';
-import { TransactionDetails } from '../components/TransactionDetails';
+import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
 import { Procedure } from '../components/Procedure';
+import { useTranslation } from 'react-i18next';
 
 export interface InfoActionProps {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
   data: Types.Data;
-  translations: Types.Translations;
 }
 
-export const InfoAction = ({
-  dappInfo,
-  errorMessage,
-  data: { procedure, txDetails },
-  translations
-}: InfoActionProps): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$16'}>
-      <DappInfo {...dappInfo} />
-    </Box>
-    {errorMessage && (
-      <Box my={'$16'}>
-        <ErrorPane error={errorMessage} />
-      </Box>
-    )}
+export const InfoAction = ({ data: { procedure, txDetails } }: InfoActionProps): JSX.Element => {
+  const { t } = useTranslation();
+  const translations = useMemo<Types.Translations>(
+    () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType')
+      },
+      procedure: {
+        title: t('core.ProposalProcedure.procedure.title'),
+        anchor: {
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
+        }
+      }
+    }),
+    [t]
+  );
+  return (
     <Grid columns="$1" gutters="$20">
-      <TransactionDetails translations={translations.txDetails} data={txDetails} />
+      <ProposalProcedureTransactionDetails
+        translations={translations.txDetails}
+        txTitle={t('core.ProposalProcedure.governanceAction.infoAction.title')}
+        deposit={txDetails.deposit}
+        rewardAccount={txDetails.rewardAccount}
+      />
       <Cell>
         <Divider my={'$16'} />
       </Cell>
       {/* procedure section */}
       <Procedure translations={translations.procedure} data={procedure} />
     </Grid>
-  </Flex>
-);
+  );
+};

@@ -1,0 +1,1 @@
+export { AuthorizeCommitteeCertificate } from './AuthorizeCommitteeCertificate';

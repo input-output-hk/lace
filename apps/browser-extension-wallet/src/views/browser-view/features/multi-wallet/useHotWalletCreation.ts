@@ -5,6 +5,7 @@ import { useAnalyticsContext } from '@providers';
 import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
+import { useWalletOnboarding } from './walletOnboardingContext';
 
 type UseSoftwareWalletCreationParams = {
   initialMnemonic: string[];
@@ -19,6 +20,7 @@ type SendPostWalletAddAnalyticsParams = {
 export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreationParams) => {
   const analytics = useAnalyticsContext();
   const walletManager = useWalletManager();
+  const { aliasEventRequired } = useWalletOnboarding();
   const [createWalletData, setCreateWalletData] = useState<CreateWalletParams>({
     mnemonic: initialMnemonic,
     name: '',
@@ -45,6 +47,9 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
     });
     await analytics.sendMergeEvent(extendedAccountPublicKey);
+    if (aliasEventRequired) {
+      await analytics.sendAliasEvent();
+    }
   };
 
   const clearSecrets = () => {

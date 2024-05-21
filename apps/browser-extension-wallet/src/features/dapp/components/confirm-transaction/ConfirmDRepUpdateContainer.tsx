@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ConfirmDRepUpdate } from '@lace/core';
-import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
+import { ConfirmDRepUpdate, DappInfo } from '@lace/core';
+import { certificateInspectorFactory } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useViewsFlowContext } from '@providers';
 import { Skeleton } from 'antd';
+import { Box, Flex } from '@lace/ui';
 
 const { CertificateType } = Wallet.Cardano;
 
 export const ConfirmDRepUpdateContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
   const {
     signTxRequest: { request },
     dappInfo
@@ -32,21 +31,17 @@ export const ConfirmDRepUpdateContainer = (): React.ReactElement => {
   }
 
   return (
-    <ConfirmDRepUpdate
-      dappInfo={dappInfo}
-      metadata={{
-        drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),
-        hash: certificate.anchor?.dataHash,
-        url: certificate.anchor?.url
-      }}
-      translations={{
-        metadata: t('core.DRepUpdate.metadata'),
-        labels: {
-          drepId: t('core.DRepUpdate.drepId'),
-          hash: t('core.DRepUpdate.hash'),
-          url: t('core.DRepUpdate.url')
-        }
-      }}
-    />
+    <Flex h="$fill" flexDirection="column">
+      <Box mb={'$24'} mt={'$24'}>
+        <DappInfo {...dappInfo} />
+      </Box>
+      <ConfirmDRepUpdate
+        metadata={{
+          drepId: Wallet.util.drepIDasBech32FromHash(certificate.dRepCredential.hash),
+          hash: certificate.anchor?.dataHash,
+          url: certificate.anchor?.url
+        }}
+      />
+    </Flex>
   );
 };
