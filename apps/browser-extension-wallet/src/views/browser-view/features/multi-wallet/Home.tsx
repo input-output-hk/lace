@@ -35,15 +35,15 @@ export const Home = (): JSX.Element => {
     <WalletSetupOptionsStep
       onNewWalletRequest={() => {
         void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SETUP_OPTION_CLICK);
-        history.push(walletRoutePaths.newWallet.create.root);
+        history.push(walletRoutePaths.newWallet.create);
       }}
       onHardwareWalletRequest={() => {
-        void analytics.sendEventToPostHog(postHogMultiWalletActions.hw.SETUP_OPTION_CLICK);
-        history.push(walletRoutePaths.newWallet.hardware.root);
+        void analytics.sendEventToPostHog(postHogMultiWalletActions.hardware.SETUP_OPTION_CLICK);
+        history.push(walletRoutePaths.newWallet.hardware);
       }}
       onRestoreWalletRequest={() => {
         void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.SETUP_OPTION_CLICK);
-        history.push(walletRoutePaths.newWallet.restore.root);
+        history.push(walletRoutePaths.newWallet.restore);
       }}
       translations={walletSetupOptionsStepTranslations}
     />

@@ -39,7 +39,7 @@ export enum TxCreationType {
 }
 
 export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password' | 'onboarding';
-export type MultiWalletFlows = 'create' | 'restore' | 'hw';
+export type MultiWalletFlows = 'create' | 'restore' | 'hardware';
 export type PostHogActionsKeys =
   | 'SETUP_OPTION_CLICK'
   | 'ANALYTICS_AGREE_CLICK'
@@ -64,10 +64,9 @@ export type PostHogActionsKeys =
   | 'RECOVERY_PHRASE_PASTE_READ_MORE_CLICK'
   | 'WALLET_ADDED'
   | 'HD_WALLET';
-export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
-export type PostHogOnboardingActionsType = Record<OnboardingFlows, PostHogOnboardingActionsValueType>;
-export type PostHogMultiWalletActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
-export type PostHogMultiWalletActionsType = Record<MultiWalletFlows, PostHogMultiWalletActionsValueType>;
+export type PostHogActions = Partial<Record<PostHogActionsKeys, PostHogAction>>;
+export type PostHogOnboardingActionsType = Record<OnboardingFlows, PostHogActions>;
+export type PostHogMultiWalletActionsType = Record<MultiWalletFlows, PostHogActions>;
 export type PostHogPersonProperties = {
   $set: {
     user_tracking_type: UserTrackingType;

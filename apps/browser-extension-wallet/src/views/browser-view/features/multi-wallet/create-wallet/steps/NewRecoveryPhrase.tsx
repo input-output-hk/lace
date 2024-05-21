@@ -1,14 +1,15 @@
 import { MnemonicVideoPopupContent, WalletSetupMnemonicStage, WalletSetupMnemonicStepRevamp } from '@lace/core';
-import React, { useState } from 'react';
+import React, { useState, VFC } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
-import { useCreateWallet, WalletCreateStep } from '../context';
+import { useCreateWallet } from '../context';
+import { WalletCreateStep } from '../types';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { toast } from '@lace/common';
 import Copy from '@assets/icons/copy.component.svg';
 import Paste from '@assets/icons/paste.component.svg';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 const wordList = wordlists.english;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
@@ -20,16 +21,17 @@ const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
   throw new Error('Invalid wallet crate step');
 };
 
-export const NewRecoveryPhrase = (): JSX.Element => {
+export const NewRecoveryPhrase: VFC = () => {
   const { t } = useTranslation();
+  const { postHogActions } = useWalletOnboarding();
   const { back, createWalletData, next, step } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
   const handleReadMoreOnClick = () => {
     step === WalletCreateStep.RecoveryPhraseWriteDown
-      ? analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
-      : analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
+      ? analytics.sendEventToPostHog(postHogActions.create.RECOVERY_PHRASE_COPY_READ_MORE_CLICK)
+      : analytics.sendEventToPostHog(postHogActions.create.RECOVERY_PHRASE_PASTE_READ_MORE_CLICK);
   };
 
   const walletSetupMnemonicStepTranslations = {
@@ -74,14 +76,14 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         onStageChange={(nextStage) => {
           if (nextStage === 'input') {
             void next();
-            void analytics.sendEventToPostHog(postHogMultiWalletActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
+            void analytics.sendEventToPostHog(postHogActions.create.SAVE_RECOVERY_PHRASE_NEXT_CLICK);
           } else {
             setIsResetMnemonicModalOpen(true);
           }
         }}
         onBack={back}
         onNext={() => {
-          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+          void analytics.sendEventToPostHog(postHogActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
           void next();
         }}
         renderVideoPopupContent={({ onClose }) => (
@@ -90,9 +92,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
             videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
             onClose={() => {
               onClose();
-              void analytics.sendEventToPostHog(
-                postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK
-              );
+              void analytics.sendEventToPostHog(postHogActions.create.RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK);
             }}
           />
         )}
@@ -100,10 +100,10 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         suggestionList={wordList}
         passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
         onWatchVideoClick={() =>
-          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
+          void analytics.sendEventToPostHog(postHogActions.create.RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK)
         }
         onCopyToClipboard={() => {
-          void analytics.sendEventToPostHog(postHogMultiWalletActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
+          void analytics.sendEventToPostHog(postHogActions.create.RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK);
           toast.notify({
             duration: twoSecondsToastDuration,
             text: t('core.walletSetupMnemonicStepRevamp.recoveryPhraseCopied'),
@@ -111,9 +111,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
           });
         }}
         onPasteFromClipboard={() => {
-          void analytics.sendEventToPostHog(
-            postHogMultiWalletActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK
-          );
+          void analytics.sendEventToPostHog(postHogActions.create.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK);
           toast.notify({
             duration: twoSecondsToastDuration,
             text: t('core.walletSetupMnemonicStepRevamp.recoveryPhrasePasted'),
