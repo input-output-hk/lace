@@ -1,0 +1,35 @@
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
+
+.card {
+  align-self: stretch;
+}
+
+.titleBadge {
+  align-self: start;
+  border-radius: size_unit(2);
+  background: var(--primary-gradient);
+  display: flex;  
+  align-items: center; 
+  justify-content: center;   
+  padding: 0 size_unit(1);
+  height: 20px;
+}
+.badgeCaption {
+  color: var(--color-white, #fff) !important;
+}
+
+.scroll {
+  @include scroll-bar-style;
+  overflow: auto;
+  height: 127px;
+  padding: 0 4px;
+  color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
+}
+
+.disclaimerShort {
+  color: var(--light-mode-mid-grey, var(--dark-mode-light-grey, #c0c0c0)) !important;
+}
+
+.disclaimerFullWrapper {
+  text-align: center;
+}

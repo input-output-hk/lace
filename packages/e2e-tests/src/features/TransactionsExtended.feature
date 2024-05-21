@@ -124,3 +124,18 @@ Feature: Transactions - Extended view
     When the Sent transaction is displayed with value: "24.79 tADA" and tokens count 1
     When I click on a transaction: 1
     Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "WalletReceiveSimpleTransactionE2E" address
+
+  @LW-9914 @Testnet
+  Scenario Outline: Extended View - transaction list - styling: <styling> applied to tx type: <tx_type>
+    Given I am on Transactions extended page
+    When I scroll to the row with transaction type: <tx_type>
+    Then I see <styling> styling for transaction type: <tx_type>
+    Examples:
+      | tx_type                   | styling            |
+      | Sent                      | default - negative |
+      | Received                  | green - positive   |
+      | Self Transaction          | default - negative |
+      | Rewards                   | green - positive   |
+      | Delegation                | default - negative |
+      | Stake Key De-Registration | green - positive   |
+      | Stake Key Registration    | default - negative |
