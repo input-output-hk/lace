@@ -10,6 +10,7 @@ import { useWrapWithTimeout } from './useWrapWithTimeout';
 import { useAnalyticsContext } from '@providers';
 import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { firstValueFrom } from 'rxjs';
+import { isHdWallet } from '../isHdWallet';
 import { useWalletOnboarding } from '../walletOnboardingContext';
 
 type WalletData = {
@@ -204,6 +205,11 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     await analytics.sendMergeEvent(cardanoWallet.source.account.extendedAccountPublicKey);
 
     await saveHardwareWallet(cardanoWallet);
+
+    if (await isHdWallet(cardanoWallet.wallet)) {
+      await analytics.sendEventToPostHog(postHogActions.hardware.HD_WALLET);
+    }
+
     if (aliasEventRequired) {
       await analytics.sendAliasEvent();
     }
@@ -213,6 +219,7 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     closeConnection,
     connection,
     createHardwareWalletRevamped,
+    postHogActions.hardware.HD_WALLET,
     postHogActions.hardware.WALLET_ADDED,
     saveHardwareWallet,
     walletData,

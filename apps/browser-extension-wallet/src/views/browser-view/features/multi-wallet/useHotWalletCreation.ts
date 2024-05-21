@@ -1,10 +1,12 @@
-import { Bip32PublicKeyHex } from '@cardano-sdk/crypto/dist/esm';
+import { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import { CreateWalletParams, useWalletManager } from '@hooks';
-import { PostHogAction } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 import { useAnalyticsContext } from '@providers';
+import { PostHogMultiWalletAction, PostHogOnboardingAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
+import { isHdWallet } from './isHdWallet';
 import { useWalletOnboarding } from './walletOnboardingContext';
 
 type UseSoftwareWalletCreationParams = {
@@ -13,7 +15,9 @@ type UseSoftwareWalletCreationParams = {
 
 type SendPostWalletAddAnalyticsParams = {
   extendedAccountPublicKey: Bip32PublicKeyHex;
-  walletAddedPostHogAction: PostHogAction;
+  postHogActionHdWallet?: PostHogMultiWalletAction | PostHogOnboardingAction;
+  postHogActionWalletAdded: PostHogMultiWalletAction | PostHogOnboardingAction;
+  wallet?: Wallet.ObservableWallet;
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -40,13 +44,20 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
 
   const sendPostWalletAddAnalytics = async ({
     extendedAccountPublicKey,
-    walletAddedPostHogAction
+    postHogActionHdWallet,
+    postHogActionWalletAdded,
+    wallet
   }: SendPostWalletAddAnalyticsParams) => {
-    await analytics.sendEventToPostHog(walletAddedPostHogAction, {
+    await analytics.sendEventToPostHog(postHogActionWalletAdded, {
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
     });
     await analytics.sendMergeEvent(extendedAccountPublicKey);
+
+    if (postHogActionHdWallet && wallet && (await isHdWallet(wallet))) {
+      await analytics.sendEventToPostHog(postHogActionHdWallet);
+    }
+
     if (aliasEventRequired) {
       await analytics.sendAliasEvent();
     }
