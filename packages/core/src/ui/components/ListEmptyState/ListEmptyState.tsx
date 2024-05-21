@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { VFC } from 'react';
 import { ReactComponent as NeutralFaceIcon } from '../../assets/icons/neutral-face.component.svg';
 import { ReactComponent as SadFaceIcon } from '../../assets/icons/sad-face.component.svg';
 import styles from './ListEmptyState.module.scss';
 
-export const ListEmptyState = (props: { message: React.ReactNode; icon: 'sad-face' | 'neutral-face' }) => {
+export const ListEmptyState: VFC<{ message: React.ReactNode; icon: 'sad-face' | 'neutral-face' }> = (props) => {
   const Icon: Record<string, React.ReactElement> = {
     'sad-face': <SadFaceIcon className={styles.img} data-testid="sad-face-icon" />,
     'neutral-face': <NeutralFaceIcon className={styles.img} data-testid="neutral-face-icon" />
