@@ -1,11 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { WalletRestoreStep } from './types';
 import { CreateWalletParams } from '@hooks';
-import { Wallet } from '@lace/cardano';
 import { useHistory } from 'react-router';
-import { useAnalyticsContext } from '@providers';
-import { filter, firstValueFrom } from 'rxjs';
-import { isScriptAddress } from '@cardano-sdk/wallet';
 import { walletRoutePaths } from '@routes';
 import { useHotWalletCreation } from '../useHotWalletCreation';
 import { RecoveryPhraseLength } from '@lace/core';
@@ -44,7 +40,6 @@ const initialMnemonicLength: RecoveryPhraseLength = 24;
 
 export const RestoreWalletProvider = ({ children }: Props): React.ReactElement => {
   const history = useHistory();
-  const analytics = useAnalyticsContext();
   const { forgotPasswordFlowActive, postHogActions, setFormDirty } = useWalletOnboarding();
   const [step, setStep] = useState<WalletRestoreStep>(WalletRestoreStep.RecoveryPhrase);
   const { clearSecrets, createWallet, createWalletData, sendPostWalletAddAnalytics, setCreateWalletData } =
@@ -61,36 +56,42 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     [setCreateWalletData, setFormDirty]
   );
 
-  const onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange = (length) => {
-    setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Array.from({ length }, () => '') }));
-  };
+  const onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange = useCallback(
+    (length) => {
+      setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Array.from({ length }, () => '') }));
+    },
+    [setCreateWalletData]
+  );
 
-  const onNameAndPasswordChange: OnNameAndPasswordChange = ({ name, password }) => {
-    setCreateWalletData((prevState) => ({ ...prevState, name, password }));
-  };
+  const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
+    ({ name, password }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+    },
+    [setCreateWalletData]
+  );
 
-  const sendHdWalletAnalyticEvent = async ({ wallet }: Wallet.CardanoWallet) => {
-    const addresses = await firstValueFrom(wallet.addresses$.pipe(filter((a) => a.length > 0)));
-    const hdWalletDiscovered = addresses.some((addr) => !isScriptAddress(addr) && addr.index > 0);
-    if (hdWalletDiscovered) {
-      await analytics.sendEventToPostHog(postHogActions.restore.HD_WALLET);
-    }
-  };
-
-  const finalizeWalletRestoration = async () => {
-    const wallet = await createWallet();
+  const finalizeWalletRestoration = useCallback(async () => {
+    const { source, wallet } = await createWallet();
     void sendPostWalletAddAnalytics({
-      extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      walletAddedPostHogAction: postHogActions.restore.WALLET_ADDED
+      extendedAccountPublicKey: source.account.extendedAccountPublicKey,
+      postHogActionHdWallet: postHogActions.restore.HD_WALLET,
+      postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
+      wallet
     });
-    void sendHdWalletAnalyticEvent(wallet);
     if (forgotPasswordFlowActive) {
       deleteFromLocalStorage('isForgotPasswordFlow');
     }
     clearSecrets();
-  };
+  }, [
+    clearSecrets,
+    createWallet,
+    forgotPasswordFlowActive,
+    postHogActions.restore.HD_WALLET,
+    postHogActions.restore.WALLET_ADDED,
+    sendPostWalletAddAnalytics
+  ]);
 
-  const next = async () => {
+  const next = useCallback(async () => {
     switch (step) {
       case WalletRestoreStep.RecoveryPhrase:
         setStep(WalletRestoreStep.Setup);
@@ -99,9 +100,9 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
         history.push(walletRoutePaths.assets);
         break;
     }
-  };
+  }, [history, step]);
 
-  const back = () => {
+  const back = useCallback(() => {
     switch (step) {
       case WalletRestoreStep.RecoveryPhrase:
         setFormDirty(false);
@@ -111,7 +112,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
         setStep(WalletRestoreStep.RecoveryPhrase);
         break;
     }
-  };
+  }, [history, setFormDirty, step]);
 
   const state = useMemo(
     () => ({

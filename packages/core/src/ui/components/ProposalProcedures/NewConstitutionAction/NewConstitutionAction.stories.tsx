@@ -29,14 +29,8 @@ export default meta;
 type Story = StoryObj<typeof NewConstitutionAction>;
 
 const data: ComponentProps<typeof NewConstitutionAction> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
   data: {
     txDetails: {
-      txType: 'New Constitution',
       deposit: '2000',
       rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr'
     },
@@ -58,46 +52,11 @@ const data: ComponentProps<typeof NewConstitutionAction> = {
       },
       scriptHash: 'cb0ec2692497b458e46812c8a5bfa2931d1a2d965a99893828ec810f'
     }
-  },
-  translations: {
-    txDetails: {
-      title: 'Transaction Details',
-      txType: 'Transaction Type',
-      deposit: 'Deposit',
-      rewardAccount: 'Reward Account'
-    },
-    procedure: {
-      anchor: {
-        hash: 'Anchor Hash',
-        url: 'Anchor URL'
-      },
-      title: 'Procedure'
-    },
-    actionId: {
-      title: 'Action ID',
-      index: 'Index',
-      txId: 'TX ID'
-    },
-    constitution: {
-      title: 'Constitution Details',
-      anchor: {
-        dataHash: 'Anchor Data Hash',
-        url: 'Anchor URL'
-      },
-      scriptHash: 'Script Hash'
-    }
   }
 };
 
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };

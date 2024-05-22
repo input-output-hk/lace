@@ -337,6 +337,8 @@
   "browserView.settings.wallet.general.showPubKeyAction": "Show public key",
   "browserView.settings.wallet.general.showPubKeyDescription": "This lets you import your wallet to other browsers and devices, or to restore it at a later date",
   "browserView.settings.wallet.general.title": "Your keys",
+  "browserView.settings.wallet.midnight.prelaunch.description": "Check how to claim and FAQ",
+  "browserView.settings.wallet.midnight.prelaunch.title": "Midnight Pre-Launch Event",
   "browserView.settings.wallet.network.description": "Switch from mainnet to testnet",
   "browserView.settings.wallet.network.drawerDescription": "Select the network you would like your wallet to operate on.",
   "browserView.settings.wallet.network.networkSwitched": "Switched network",

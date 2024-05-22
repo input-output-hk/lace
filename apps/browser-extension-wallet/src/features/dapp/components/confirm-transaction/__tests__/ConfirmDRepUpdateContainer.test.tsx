@@ -14,10 +14,9 @@ import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
-import { drepIDasBech32FromHash } from '../utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
-const { Cardano, Crypto } = Wallet;
+const { Cardano, Crypto, util } = Wallet;
 
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
@@ -126,19 +125,10 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
     expect(queryByTestId('ConfirmDRepUpdate')).toBeInTheDocument();
     expect(mockConfirmDRepUpdate).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         metadata: {
-          drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),
+          drepId: util.drepIDasBech32FromHash(certificate.dRepCredential.hash),
           hash: certificate.anchor?.dataHash,
           url: certificate.anchor?.url
-        },
-        translations: {
-          metadata: t('core.DRepUpdate.metadata'),
-          labels: {
-            drepId: t('core.DRepUpdate.drepId'),
-            hash: t('core.DRepUpdate.hash'),
-            url: t('core.DRepUpdate.url')
-          }
         }
       },
       {}

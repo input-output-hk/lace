@@ -1,5 +1,5 @@
 import * as ProcedureTypes from '../components/ProcedureTypes';
-import * as TxDetailsTypes from '../components/TransactionDetailsTypes';
+import * as TxDetailsTypes from '../components/ProposalProcedureTransactionDetailsTypes';
 
 export interface Data {
   protocolParamUpdate: ProtocolParamUpdate;

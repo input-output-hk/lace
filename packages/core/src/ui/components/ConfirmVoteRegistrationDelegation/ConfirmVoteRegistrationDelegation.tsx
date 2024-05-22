@@ -1,22 +1,8 @@
 import React from 'react';
-import { Box, Cell, Grid, TransactionSummary, Flex } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../DappInfo';
-import { ErrorPane } from '@lace/common';
+import { Cell, Grid, TransactionSummary } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
-  translations: {
-    labels: {
-      drepId: string;
-      alwaysAbstain: string;
-      alwaysNoConfidence: string;
-      stakeKeyHash: string;
-      depositPaid: string;
-    };
-    option: string;
-    metadata: string;
-  };
   metadata: {
     drepId?: string;
     alwaysAbstain: boolean;
@@ -26,24 +12,27 @@ interface Props {
   };
 }
 
-export const ConfirmVoteRegistrationDelegation = ({
-  dappInfo,
-  errorMessage,
-  translations,
-  metadata
-}: Props): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
-      <DappInfo {...dappInfo} />
-    </Box>
-    {errorMessage && (
-      <Box my={'$16'}>
-        <ErrorPane error={errorMessage} />
-      </Box>
-    )}
+export const ConfirmVoteRegistrationDelegation = ({ metadata }: Props): JSX.Element => {
+  const { t } = useTranslation();
+  const translations = {
+    option: t('core.VoteRegistrationDelegation.option'),
+    labels: {
+      drepId: t('core.VoteRegistrationDelegation.drepId'),
+      alwaysAbstain: t('core.VoteRegistrationDelegation.alwaysAbstain'),
+      alwaysNoConfidence: t('core.VoteRegistrationDelegation.alwaysNoConfidence'),
+      depositPaid: t('core.VoteRegistrationDelegation.depositPaid'),
+      stakeKeyHash: t('core.VoteRegistrationDelegation.stakeKeyHash')
+    }
+  };
+
+  return (
     <Grid columns="$1" gutters="$20">
       <Cell>
-        <TransactionSummary.Metadata label={translations.metadata} text="" />
+        <TransactionSummary.Address
+          label={t('core.activityDetails.certificateTitles.certificateType')}
+          address={t('core.assetActivityItem.entry.name.VoteRegistrationDelegateCertificate')}
+          testID="metadata-cetificateType"
+        />
       </Cell>
       {metadata.drepId && (
         <Cell>
@@ -67,5 +56,5 @@ export const ConfirmVoteRegistrationDelegation = ({
         <TransactionSummary.Address label={translations.labels.depositPaid} address={metadata.depositPaid} />
       </Cell>
     </Grid>
-  </Flex>
-);
+  );
+};
