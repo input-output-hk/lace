@@ -10,3 +10,4 @@ export * from './SocialNetworks';
 export * from './WalletUsedAddressesDrawer';
 export * from './TopUpWallet';
 export * from './EmptySearch';
+export * from './WalletOnboardingFlows';

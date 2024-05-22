@@ -12,7 +12,7 @@ import { DrawerContent, DrawerUIContainer } from '../Drawer';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { LeftSidePanel } from '../LeftSidePanel';
 import styles from './Layout.module.scss';
-import { PinExtension } from '@views/browser/features/wallet-setup/components/PinExtension';
+import { PinExtension } from '@views/browser/features/wallet-setup/PinExtension';
 import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
 

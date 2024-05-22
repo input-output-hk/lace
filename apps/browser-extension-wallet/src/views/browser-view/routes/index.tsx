@@ -22,7 +22,7 @@ import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { config } from '@src/config';
-import { Portal } from '../features/wallet-setup/components/Portal';
+import { Portal } from '../features/wallet-setup/Portal';
 import { MultiWallet } from '../features/multi-wallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';

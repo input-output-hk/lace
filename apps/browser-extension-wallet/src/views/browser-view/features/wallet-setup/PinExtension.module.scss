@@ -1,0 +1,44 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.pinExtension {
+  display: flex;
+  align-items: center;
+  gap: size_unit(2);
+  width: 300px;
+  padding: size_unit(2);
+  background: var(--primary-default, #7E5BF0);
+  box-shadow: var(--shadows-lighter-assets);
+  border-radius: 11px;
+
+  * {
+    margin: 0;
+  }
+
+  .logo {
+    font-size: var(--pageHeading);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+
+    h5 {
+      @include text-bodySmall-bold;
+      color: var(--text-color-white, #ffffff) !important;
+    }
+
+    p {
+      @include text-bodySmall-semi-bold;
+      color: var(--text-color-white, #ffffff);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        font-size: var(--body);
+        transform: rotate(90deg);
+      }
+    }
+  }
+}

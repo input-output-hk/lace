@@ -1,19 +1,19 @@
 import React, { useMemo, useState } from 'react';
-import { WalletTimelineSteps, WalletSetupStepLayout } from '../WalletSetupStepLayout';
 import { PasswordVerification } from '@lace/common';
-import { passwordComplexity } from '@src/ui/utils/password-complexity';
-import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
-import styles from './styles.module.scss';
+import { WalletTimelineSteps, WalletSetupStepLayout } from './WalletSetupStepLayout';
+import { BarStates, WalletSetupNamePasswordSubmitParams } from './WalletSetupNamePasswordStep/types';
 import {
   getComplexityBarStateList,
   MINIMUM_PASSWORD_LEVEL_REQUIRED,
   passwordStrengthFeedbackMap,
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
-} from './utils';
-import { WalletNameInput } from './WalletNameInput';
-import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
+} from './WalletSetupNamePasswordStep/utils';
+import { WalletNameInput } from './WalletSetupNamePasswordStep/WalletNameInput';
+import { WalletPasswordConfirmationInput } from './WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
 import { TranslationsFor } from '@ui/utils/types';
+import { passwordComplexity } from '@ui/utils/password-complexity';
+import styles from './WalletSetupNamePasswordStep/styles.module.scss';
 import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupNamePasswordStepProps {
@@ -36,7 +36,7 @@ export interface WalletSetupNamePasswordStepProps {
 
 const INITIAL_WALLET_NAME = 'Wallet 1';
 
-export const WalletSetupNamePasswordStep = ({
+export const WalletSetupNamePasswordStepRevamp = ({
   onBack,
   onNext,
   initialWalletName = INITIAL_WALLET_NAME,

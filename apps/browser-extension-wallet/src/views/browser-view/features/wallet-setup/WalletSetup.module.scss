@@ -1,0 +1,29 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme';
+
+:global(.ant-input-password > input[type='password']) {
+  letter-spacing: size_unit(0.75) !important;
+  color: var(--text-color-primary, #3d3b39) !important;
+  transition: none !important;
+}
+:global {
+  .ant-input-password > input[type='password'],
+  .ant-input-password > input[type='text'] {
+    transition: none !important;
+  }
+
+  .ant-input-password > input[type='password'] {
+    font-size: size_unit(3) !important;
+    letter-spacing: 4px !important;
+    color: var(--text-color-primary, #3d3b39) !important;
+  }
+}
+
+.learnMore {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: size_unit(0.5);
+}
+
+.analyticsModalTitle {
+  text-align: start;
+}

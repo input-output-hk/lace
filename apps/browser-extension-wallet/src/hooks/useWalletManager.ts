@@ -46,13 +46,6 @@ export interface CreateWalletParams {
   chainId?: Wallet.Cardano.ChainId;
 }
 
-export interface CreateHardwareWallet {
-  accountIndex?: number;
-  name: string;
-  deviceConnection: Wallet.DeviceConnection;
-  connectedDevice: Wallet.HardwareWallets;
-}
-
 type WalletManagerAddAccountProps = {
   wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   metadata: Wallet.AccountMetadata;
@@ -62,13 +55,13 @@ type WalletManagerAddAccountProps = {
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
 
-type CreateHardwareWalletRevampedParams = {
+type ConnectHardwareWallet = (usbDevice: USBDevice) => Promise<Wallet.HardwareWalletConnection>;
+
+type CreateHardwareWallet = (params: {
   accountIndex: number;
   name: string;
   connection: Wallet.HardwareWalletConnection;
-};
-
-type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
+}) => Promise<Wallet.CardanoWallet>;
 
 export interface UseWalletManager {
   walletManager: WalletManagerApi;
@@ -81,10 +74,8 @@ export interface UseWalletManager {
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
-  createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
-  createHardwareWalletRevamped: CreateHardwareWalletRevamped;
-  connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
-  connectHardwareWalletRevamped: typeof connectHardwareWalletRevamped;
+  createHardwareWallet: CreateHardwareWallet;
+  connectHardwareWallet: ConnectHardwareWallet;
   saveHardwareWallet: (wallet: Wallet.CardanoWallet, chainName?: Wallet.ChainName) => Promise<void>;
   /**
    * @returns active wallet id after deleting the wallet; undefined if deleted the last wallet
@@ -198,12 +189,8 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
   return HexBlob.fromBytes(walletEncrypted);
 };
 
-/** Connects a hardware wallet device */
-export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
-  await Wallet.connectDevice(model);
-
-const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
-  Wallet.connectDeviceRevamped(usbDevice);
+const connectHardwareWallet = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
+  Wallet.connectDeviceByUsbDeviceObject(usbDevice);
 
 export const useWalletManager = (): UseWalletManager => {
   const {
@@ -237,7 +224,7 @@ export const useWalletManager = (): UseWalletManager => {
     return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
   }, [currentChain]);
 
-  const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
+  const createHardwareWallet = useCallback<CreateHardwareWallet>(
     async ({ accountIndex, connection, name }) => {
       let extendedAccountPublicKey;
       try {
@@ -281,28 +268,6 @@ export const useWalletManager = (): UseWalletManager => {
       };
     },
     [getCurrentChainId]
-  );
-
-  /**
-   * Creates a Ledger or Trezor hardware wallet
-   * and saves it in browser storage with the data to lock/unlock it
-   */
-  const createHardwareWallet = useCallback(
-    async ({
-      accountIndex = 0,
-      deviceConnection,
-      name,
-      connectedDevice
-    }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> =>
-      createHardwareWalletRevamped({
-        accountIndex,
-        connection: {
-          type: connectedDevice,
-          value: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined
-        },
-        name
-      }),
-    [createHardwareWalletRevamped]
   );
 
   const tryMigrateToWalletRepository = useCallback(async (): Promise<
@@ -787,9 +752,7 @@ export const useWalletManager = (): UseWalletManager => {
     loadWallet,
     createWallet,
     createHardwareWallet,
-    createHardwareWalletRevamped,
     connectHardwareWallet,
-    connectHardwareWalletRevamped,
     saveHardwareWallet,
     deleteWallet,
     reloadWallet,

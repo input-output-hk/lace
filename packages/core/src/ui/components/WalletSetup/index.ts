@@ -1,20 +1,18 @@
 export * from './WalletSetupOptionsStep';
-export * from './WalletSetupStepLayout';
-export * from './WalletSetupRegisterStep';
-export * from './WalletSetupMnemonicIntroStep';
-export * from './WalletSetupModeStep';
-export * from './WalletSetupFinalStep';
-export * from './WalletSetupConnectHardwareWalletStep';
-export * from './WalletSetupSelectAccountsStep';
-export * from './WalletSetupWalletNameStep';
-export * from './WalletSetupRecoveryPhraseLengthStep';
-export * from './wallet-steps.common';
-export * from './wallet-steps';
-export * from './WalletSetupPasswordStep';
 export * from './MnemonicWordsWritedown';
 export * from './WalletSetupNamePasswordStep';
-export * from './WalletSetupFlowProvider';
 export * from './WalletSetupConfirmationDialogProvider';
 export * from './WalletAnalyticsInfo';
 export * from './LegalTranslations';
 export * from './AnalyticsConfirmationBanner';
+export { WalletSetupSelectAccountsStep } from './WalletSetupSelectAccountsStep';
+export { WalletSetupOptionsStepRevamp } from './WalletSetupOptionsStepRevamp';
+export { MnemonicVideoPopupContent } from './MnemonicVideoPopupContent';
+export {
+  RecoveryPhraseLength,
+  WalletSetupMnemonicStepRevamp,
+  WalletSetupMnemonicStage
+} from './WalletSetupMnemonicStepRevamp';
+export { WalletSetupMnemonicVerificationStepRevamp } from './WalletSetupMnemonicStepRevamp';
+export { WalletSetupConnectHardwareWalletStepRevamp } from './WalletSetupConnectHardwareWalletStepRevamp';
+export { WalletSetupHWCreationStep } from './WalletSetupHWCreationStep';

@@ -58,7 +58,7 @@ const onboardingActions = {
     WALLET_ADDED: makeOnboardingRestoreEvent('added'),
     HD_WALLET: makeOnboardingRestoreEvent('hd wallet')
   },
-  hw: {
+  hardware: {
     SETUP_OPTION_CLICK: makeOnboardingHardwareEvent('connect | click'),
     CONNECT_HW_VIEW: makeOnboardingHardwareEvent('connect your device | view'),
     HW_POPUP_CONNECT_CLICK: makeOnboardingHardwareEvent('native browser pop-up with HWs | connect | click'),

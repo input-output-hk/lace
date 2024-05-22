@@ -1,7 +1,6 @@
 import React from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { Modal } from 'antd';
-import { WalletSetupFlow, WalletSetupFlowProvider } from '@lace/core';
 import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import styles from '@views/browser/features/multi-wallet/MultiWallet.module.scss';
@@ -13,29 +12,27 @@ export const SharedWallet = (): JSX.Element => {
   const { page, setBackgroundPage } = useBackgroundPage();
 
   return (
-    <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_SHARED_WALLET}>
-      <Modal
-        centered
-        closable={false}
-        // eslint-disable-next-line unicorn/no-null
-        footer={null}
-        open
-        width="100%"
-        className={styles.modal}
-      >
-        <div className={styles.closeButton}>
-          <NavigationButton
-            icon="cross"
-            onClick={() => {
-              setBackgroundPage();
-              history.push(page);
-            }}
-          />
-        </div>
-        <Switch>
-          <Route exact path={`${path}/`} component={SharedWalletGetStarted} />
-        </Switch>
-      </Modal>
-    </WalletSetupFlowProvider>
+    <Modal
+      centered
+      closable={false}
+      // eslint-disable-next-line unicorn/no-null
+      footer={null}
+      open
+      width="100%"
+      className={styles.modal}
+    >
+      <div className={styles.closeButton}>
+        <NavigationButton
+          icon="cross"
+          onClick={() => {
+            setBackgroundPage();
+            history.push(page);
+          }}
+        />
+      </div>
+      <Switch>
+        <Route exact path={`${path}/`} component={SharedWalletGetStarted} />
+      </Switch>
+    </Modal>
   );
 };
