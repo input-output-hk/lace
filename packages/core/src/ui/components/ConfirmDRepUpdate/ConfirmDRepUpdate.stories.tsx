@@ -29,19 +29,6 @@ export default meta;
 type Story = StoryObj<typeof ConfirmDRepUpdate>;
 
 const data: ComponentProps<typeof ConfirmDRepUpdate> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
-  translations: {
-    labels: {
-      drepId: 'DRep ID',
-      hash: 'Hash',
-      url: 'URL'
-    },
-    metadata: 'Metadata'
-  },
   metadata: {
     drepId: '65ge6g54g5dd5',
     hash: '9bba8233cdd086f0325daba465d568a88970d42536f9e71e92a80d5922ded885',
@@ -61,12 +48,5 @@ export const Empty: Story = {
     metadata: {
       drepId: '65ge6g54g5dd5'
     }
-  }
-};
-
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };

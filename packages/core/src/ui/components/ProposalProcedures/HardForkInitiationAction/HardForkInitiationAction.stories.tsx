@@ -29,14 +29,8 @@ export default meta;
 type Story = StoryObj<typeof HardForkInitiationAction>;
 
 const data: ComponentProps<typeof HardForkInitiationAction> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
   data: {
     txDetails: {
-      txType: 'Hard Fork Initiation',
       deposit: '2000',
       rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr'
     },
@@ -56,43 +50,11 @@ const data: ComponentProps<typeof HardForkInitiationAction> = {
       minor: '1',
       patch: '1'
     }
-  },
-  translations: {
-    txDetails: {
-      title: 'Transaction Details',
-      txType: 'Transaction Type',
-      deposit: 'Deposit',
-      rewardAccount: 'Reward Account'
-    },
-    procedure: {
-      anchor: {
-        hash: 'Anchor Hash',
-        url: 'Anchor URL'
-      },
-      title: 'Procedure'
-    },
-    actionId: {
-      title: 'Action ID',
-      index: 'Index',
-      txId: 'TX ID'
-    },
-    protocolVersion: {
-      major: 'Protocol Version Major',
-      minor: 'Protocol Version Minor',
-      patch: 'Protocol Version Patch'
-    }
   }
 };
 
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };

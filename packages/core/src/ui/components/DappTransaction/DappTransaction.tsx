@@ -86,17 +86,8 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
 
 type TransactionType = keyof typeof TransactionTypes;
 
-const tryDecodeAsUtf8 = (
-  value: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: 'string'): string }
-): string => {
-  const bytes = Uint8Array.from(Buffer.from(value, 'hex'));
-  const decoder = new TextDecoder('utf-8');
-  // Decode the Uint8Array to a UTF-8 string
-  return decoder.decode(bytes);
-};
-
 const getFallbackName = (asset: AssetInfoWithAmount) =>
-  tryDecodeAsUtf8(asset.assetInfo.name) ? tryDecodeAsUtf8(asset.assetInfo.name) : asset.assetInfo.assetId;
+  Wallet.Cardano.AssetName.toUTF8(asset.assetInfo.name) || asset.assetInfo.assetId;
 
 const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
   if (isNFT(assetWithAmount)) {

@@ -1,5 +1,4 @@
 export interface TxDetails {
-  txType: string;
   deposit?: string;
   rewardAccount?: string;
 }

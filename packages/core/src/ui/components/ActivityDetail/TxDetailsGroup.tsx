@@ -4,32 +4,25 @@ import cn from 'classnames';
 import React, { useState } from 'react';
 import { DownOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button } from '@lace/common';
-import { TranslationsFor } from '@src/ui/utils/types';
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
-import { DetailRows } from './components';
 import styles from './TransactionInputOutput.module.scss';
-import { TxDetails } from './types';
 import { Text } from '@lace/ui';
 
-interface TxDetailListProps<T extends string> {
+interface TxDetailsGroupProps {
   testId: string;
   title: string;
-  subTitle: string;
-  lists: TxDetails<T>[];
-  translations: T extends string ? TranslationsFor<T> : never;
+  children: React.ReactNode;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
 
-export const TxDetailList = <T extends string>({
+export const TxDetailsGroup = ({
   testId,
   title,
-  subTitle,
-  lists,
+  children,
   tooltipContent,
-  withSeparatorLine,
-  translations
-}: TxDetailListProps<T>): React.ReactElement => {
+  withSeparatorLine
+}: TxDetailsGroupProps): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
   const Icon = BracketDown ? (
@@ -64,23 +57,7 @@ export const TxDetailList = <T extends string>({
           className={styles.arrowBtn}
         />
       </div>
-      {isVisible && (
-        <div className={styles.txInOutContent} data-testid={`${testId}-lists`}>
-          {lists.map((list, idx) => (
-            <React.Fragment key={`${testId}-list-${idx}`}>
-              <div className={cn({ [styles.topBorderContent]: idx > 0 })} />
-              {lists.length > 1 && (
-                <div key={`${testId}-list-header`} className={styles.listHeader}>
-                  <Text.Body.Normal className={styles.listHeaderTitle} weight="$bold">{`${subTitle} ${
-                    idx + 1
-                  }`}</Text.Body.Normal>
-                </div>
-              )}
-              <DetailRows<T> translations={translations} testId={testId} list={list} />
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+      {isVisible && children}
     </div>
   );
 };

@@ -54,8 +54,6 @@ export const Form = ({
 
   const { setNewOutput } = useOutputs();
 
-  const isEmptyAssets = !assetBalances?.size;
-
   const handleAddRow = () => {
     const nextBundleId = getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin);
     setNewOutput(nextBundleId);
@@ -131,7 +129,7 @@ export const Form = ({
             className={styles.actionBtn}
             onClick={handleAddRow}
             data-testid="add-bundle-button"
-            disabled={bundleDisabled || isEmptyAssets}
+            disabled={bundleDisabled}
           >
             <BundleIcon className={styles.bundleIcon} />
             {t('browserView.transaction.send.advanced.output')}

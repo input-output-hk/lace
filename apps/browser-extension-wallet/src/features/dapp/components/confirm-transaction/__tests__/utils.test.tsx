@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable import/imports-first */
-const mockDRepID = jest.fn();
 const mockHexBlob = (val: string) => val;
 mockHexBlob.toTypedBech32 = (prefix: string, value: string) => `${prefix}${value}`;
 /* eslint-disable unicorn/no-useless-undefined */
@@ -15,7 +14,6 @@ import {
   certificateInspectorFactory,
   votingProceduresInspector,
   getTxType,
-  drepIDasBech32FromHash,
   pubDRepKeyToHash,
   depositPaidWithSymbol
 } from '../utils';
@@ -33,8 +31,7 @@ jest.mock('@lace/cardano', () => {
     Wallet: {
       ...actual.Wallet,
       Cardano: {
-        ...actual.Wallet.Cardano,
-        DRepID: mockDRepID
+        ...actual.Wallet.Cardano
       },
       HexBlob: mockHexBlob,
       Crypto: {
@@ -149,11 +146,11 @@ describe('Testing utils', () => {
   });
 
   test('testing drepIDasBech32FromHash', () => {
-    mockDRepID.mockReset();
-    mockDRepID.mockImplementation((val) => val);
-
-    const drepID = '_drepID';
-    expect(drepIDasBech32FromHash(drepID as Wallet.Crypto.Hash28ByteBase16)).toEqual(`drep${drepID}`);
+    expect(
+      Wallet.util.drepIDasBech32FromHash(
+        '8293d319ef5b3ac72366dd28006bd315b715f7e7cfcbd3004129b80d' as Wallet.Crypto.Hash28ByteBase16
+      )
+    ).toEqual('drep1s2faxx00tvavwgmxm55qq67nzkm3tal8el9axqzp9xuq6s8s0wp');
   });
 
   test('testing pubDRepKeyToHash', async () => {

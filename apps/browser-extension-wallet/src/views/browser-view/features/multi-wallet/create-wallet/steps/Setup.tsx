@@ -3,9 +3,10 @@ import { useAnalyticsContext } from '@providers';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateWallet } from '../context';
-import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
+  const { postHogActions } = useWalletOnboarding();
   const { back, createWalletData, next, onNameAndPasswordChange } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export const Setup = (): JSX.Element => {
   };
 
   const onNext = async () => {
-    void analytics.sendEventToPostHog(postHogMultiWalletActions.create.ENTER_WALLET);
+    void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
     await next();
   };
 

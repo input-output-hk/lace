@@ -1,37 +1,59 @@
-import React from 'react';
-import { Box, Grid, Flex, Divider, Metadata, MetadataLink, Cell } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../../DappInfo';
-import { ErrorPane } from '@lace/common';
+import React, { useMemo } from 'react';
+import { Grid, Divider, Metadata, MetadataLink, Cell } from '@lace/ui';
 import * as Types from './NewConstitutionActionTypes';
-import { TransactionDetails } from '../components/TransactionDetails';
+import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
 import { Procedure } from '../components/Procedure';
 import { ActionId } from '../components/ActionId';
-
+import { useTranslation } from 'react-i18next';
 export interface NewConstitutionActionProps {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
   data: Types.Data;
-  translations: Types.Translations;
 }
 
 export const NewConstitutionAction = ({
-  dappInfo,
-  errorMessage,
-  data: { txDetails, procedure, constitution, actionId },
-  translations
-}: NewConstitutionActionProps): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
-      <DappInfo {...dappInfo} />
-    </Box>
-    {errorMessage && (
-      <Box my={'$16'}>
-        <ErrorPane error={errorMessage} />
-      </Box>
-    )}
+  data: { txDetails, procedure, constitution, actionId }
+}: NewConstitutionActionProps): JSX.Element => {
+  const { t } = useTranslation();
+  const translations = useMemo<Types.Translations>(
+    () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
+      procedure: {
+        title: t('core.ProposalProcedure.procedure.title'),
+        anchor: {
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
+        }
+      },
+      constitution: {
+        title: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.title'),
+        anchor: {
+          dataHash: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.anchor.dataHash'),
+          url: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.anchor.url')
+        },
+        scriptHash: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.scriptHash')
+      },
+      actionId: {
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
+      }
+    }),
+    [t]
+  );
+
+  return (
     <Grid columns="$1" gutters="$20">
       {/* txDetails section */}
-      <TransactionDetails translations={translations.txDetails} data={txDetails} />
+      <ProposalProcedureTransactionDetails
+        translations={translations.txDetails}
+        txTitle={t('core.ProposalProcedure.governanceAction.newConstitutionAction.title')}
+        deposit={txDetails.deposit}
+        rewardAccount={txDetails.rewardAccount}
+      />
       <Cell>
         <Divider my={'$16'} />
       </Cell>
@@ -59,5 +81,5 @@ export const NewConstitutionAction = ({
         </>
       )}
     </Grid>
-  </Flex>
-);
+  );
+};
