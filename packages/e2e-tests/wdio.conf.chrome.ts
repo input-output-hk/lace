@@ -6,7 +6,7 @@ import { config as baseConfig } from './wdio.conf.base';
 const chromeConfig = {
   capabilities: [
     {
-      maxInstances: 10,
+      maxInstances: 5,
       browserName: 'chrome',
       browserVersion: 'stable',
       ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
