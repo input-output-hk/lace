@@ -71,12 +71,6 @@ jest.mock('@lace/cardano', () => {
   };
 });
 
-const dappInfo = {
-  name: 'dappName',
-  logo: 'dappLogo',
-  url: 'dappUrl'
-};
-const errorMessage = 'errorMessage';
 const deposit = BigInt('10000');
 const rewardAccount = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
 const anchor = {
@@ -129,9 +123,7 @@ describe('Testing ProposalProceduresContainer component', () => {
 
     await act(async () => {
       ({ queryByTestId } = render(
-        <UpdateCommitteeActionContainer
-          {...{ errorMessage, dappInfo, deposit, rewardAccount, anchor, governanceAction: updateCommittee }}
-        />,
+        <UpdateCommitteeActionContainer {...{ deposit, rewardAccount, anchor, governanceAction: updateCommittee }} />,
         {
           wrapper: getWrapper()
         }
@@ -141,10 +133,8 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('UpdateCommitteeAction')).toBeInTheDocument();
     expect(mockUpdateCommitteeAction).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         data: {
           txDetails: {
-            txType: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.title'),
             deposit: depositPaidWithSymbol(deposit, cardanoCoinMock as Wallet.CoinId),
             rewardAccount
           },
@@ -166,43 +156,7 @@ describe('Testing ProposalProceduresContainer component', () => {
             epoch: epoch.toString()
           })),
           membersToBeRemoved: [...updateCommittee.membersToBeRemoved].map(({ hash }) => ({ hash: hash.toString() }))
-        },
-        translations: {
-          txDetails: {
-            title: t('core.ProposalProcedure.txDetails.title'),
-            txType: t('core.ProposalProcedure.txDetails.txType'),
-            deposit: t('core.ProposalProcedure.txDetails.deposit'),
-            rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
-          },
-          procedure: {
-            title: t('core.ProposalProcedure.procedure.title'),
-            anchor: {
-              url: t('core.ProposalProcedure.procedure.anchor.url'),
-              hash: t('core.ProposalProcedure.procedure.anchor.hash')
-            }
-          },
-          actionId: {
-            title: t('core.ProposalProcedure.governanceAction.actionId.title'),
-            index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
-          },
-          membersToBeAdded: {
-            title: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.title'),
-            coldCredential: {
-              hash: t(
-                'core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.coldCredential.hash'
-              ),
-              epoch: t(
-                'core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.coldCredential.epoch'
-              )
-            }
-          },
-          membersToBeRemoved: {
-            title: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeRemoved.title'),
-            hash: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeRemoved.hash')
-          }
-        },
-        errorMessage
+        }
       },
       {}
     );

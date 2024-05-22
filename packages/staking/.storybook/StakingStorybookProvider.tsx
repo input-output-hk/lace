@@ -43,6 +43,8 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
   compactNumber: undefined,
   multidelegationFirstVisit: undefined,
   triggerMultidelegationFirstVisit: undefined,
+  multidelegationDAppCompatibility: undefined,
+  triggerMultidelegationDAppCompatibility: undefined,
   multidelegationFirstVisitSincePortfolioPersistence: undefined,
   triggerMultidelegationFirstVisitSincePortfolioPersistence: undefined,
   walletAddress: undefined,

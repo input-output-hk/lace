@@ -17,7 +17,7 @@ import { StoreProvider } from '@src/stores';
 import { COLLATERAL_ADA_AMOUNT, COLLATERAL_AMOUNT_LOVELACES, useCollateral } from '@hooks';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { Wallet } from '@lace/cardano';
 import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';

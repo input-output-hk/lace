@@ -3,14 +3,15 @@ import { Wallet } from '@lace/cardano';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useWalletManager } from '@hooks';
-import { Providers, ErrorDialogCode } from './types';
+import { ErrorDialogCode, WalletConnectStep } from './types';
 import { WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
 import { walletRoutePaths } from '@routes';
 import { useWrapWithTimeout } from './useWrapWithTimeout';
-import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { firstValueFrom } from 'rxjs';
+import { isHdWallet } from '../isHdWallet';
+import { useWalletOnboarding } from '../walletOnboardingContext';
 
 type WalletData = {
   accountIndex: number;
@@ -20,19 +21,19 @@ type OnNameAndAccountChange = ({ accountIndex, name }: WalletData) => void;
 
 interface State {
   back: () => void;
-  next: () => void;
   connect: (usbDevice: USBDevice) => Promise<void>;
-  onNameAndAccountChange: OnNameAndAccountChange;
   createWallet: () => Promise<void>;
   errorDialogCode: ErrorDialogCode;
-  onErrorDialogRetry: () => void;
   isStartOverDialogVisible: boolean;
+  next: () => void;
+  onErrorDialogRetry: () => void;
+  onNameAndAccountChange: OnNameAndAccountChange;
   onStartOverDialogAction: (confirmed: boolean) => void;
+  step: WalletConnectStep;
 }
 
 interface HardwareWalletProviderProps {
   children: (state: State) => React.ReactNode;
-  providers: Providers;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -44,15 +45,11 @@ export const useHardwareWallet = (): State => {
   return state;
 };
 
-enum WalletConnectStep {
-  Connect = 'Connect',
-  Setup = 'Setup',
-  Create = 'Create'
-}
-
-export const HardwareWalletProvider = ({ children, providers }: HardwareWalletProviderProps): React.ReactElement => {
+export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const history = useHistory();
+  const { aliasEventRequired } = useWalletOnboarding();
+  const { postHogActions, setFormDirty } = useWalletOnboarding();
   const { connectHardwareWalletRevamped, createHardwareWalletRevamped, saveHardwareWallet, walletRepository } =
     useWalletManager();
   const [step, setStep] = useState<WalletConnectStep>(WalletConnectStep.Connect);
@@ -93,13 +90,11 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
     switch (step) {
       case WalletConnectStep.Connect: {
         setStep(WalletConnectStep.Setup);
-        history.push(walletRoutePaths.newWallet.hardware.setup);
-        providers.shouldShowConfirmationDialog$.next(true);
+        setFormDirty(true);
         break;
       }
       case WalletConnectStep.Setup: {
         setStep(WalletConnectStep.Create);
-        history.push(walletRoutePaths.newWallet.hardware.create);
         break;
       }
       case WalletConnectStep.Create: {
@@ -108,7 +103,7 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
         break;
       }
     }
-  }, [closeConnection, history, providers.shouldShowConfirmationDialog$, step]);
+  }, [closeConnection, history, setFormDirty, step]);
 
   const back = useCallback(() => {
     switch (step) {
@@ -121,22 +116,20 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
         if (isStartOverDialogVisible) {
           closeConnection();
           setStep(WalletConnectStep.Connect);
-          history.push(walletRoutePaths.newWallet.hardware.connect);
-          providers.shouldShowConfirmationDialog$.next(false);
+          setFormDirty(false);
         } else {
           setIsStartOverDialogVisible(true);
         }
         break;
       }
     }
-  }, [closeConnection, history, isStartOverDialogVisible, providers.shouldShowConfirmationDialog$, step]);
+  }, [closeConnection, history, isStartOverDialogVisible, setFormDirty, step]);
 
   const cleanupConnectionState = useCallback(() => {
     setConnection(undefined);
     setStep(WalletConnectStep.Connect);
-    history.push(walletRoutePaths.newWallet.hardware.connect);
     closeConnection();
-  }, [closeConnection, history]);
+  }, [closeConnection]);
 
   const onErrorDialogRetry = useCallback(() => {
     setErrorDialogCode(undefined);
@@ -199,7 +192,7 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
     }
 
     const deviceSpec = await Wallet.getDeviceSpec(connection);
-    await analytics.sendEventToPostHog(postHogMultiWalletActions.hw.WALLET_ADDED, {
+    await analytics.sendEventToPostHog(postHogActions.hardware.WALLET_ADDED, {
       /* eslint-disable camelcase */
       $set_once: {
         initial_hardware_wallet_model: deviceSpec.model,
@@ -212,39 +205,51 @@ export const HardwareWalletProvider = ({ children, providers }: HardwareWalletPr
     await analytics.sendMergeEvent(cardanoWallet.source.account.extendedAccountPublicKey);
 
     await saveHardwareWallet(cardanoWallet);
-    await analytics.sendAliasEvent();
+
+    if (await isHdWallet(cardanoWallet.wallet)) {
+      await analytics.sendEventToPostHog(postHogActions.hardware.HD_WALLET);
+    }
+
+    if (aliasEventRequired) {
+      await analytics.sendAliasEvent();
+    }
   }, [
+    aliasEventRequired,
     analytics,
     closeConnection,
     connection,
     createHardwareWalletRevamped,
+    postHogActions.hardware.HD_WALLET,
+    postHogActions.hardware.WALLET_ADDED,
     saveHardwareWallet,
     walletData,
     walletRepository
   ]);
 
-  const value = useMemo<State>(
+  const value = useMemo(
     () => ({
       back,
-      next,
       connect,
       createWallet,
-      onNameAndAccountChange,
       errorDialogCode,
-      onErrorDialogRetry,
       isStartOverDialogVisible,
-      onStartOverDialogAction
+      next,
+      onErrorDialogRetry,
+      onNameAndAccountChange,
+      onStartOverDialogAction,
+      step
     }),
     [
       back,
-      next,
       connect,
       createWallet,
-      onNameAndAccountChange,
       errorDialogCode,
-      onErrorDialogRetry,
       isStartOverDialogVisible,
-      onStartOverDialogAction
+      next,
+      onErrorDialogRetry,
+      onNameAndAccountChange,
+      onStartOverDialogAction,
+      step
     ]
   );
 

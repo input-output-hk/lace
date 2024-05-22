@@ -27,7 +27,7 @@ import { PostHogAction, PostHogProperties } from '@lace/common';
  * PostHog API reference:
  * https://posthog.com/docs/libraries/js
  */
-export class PostHogClient {
+export class PostHogClient<Action extends string = string> {
   protected static postHogClientInstance: PostHogClient;
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
@@ -167,7 +167,7 @@ export class PostHogClient {
     });
   }
 
-  async sendEvent(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
+  async sendEvent(action: Action, properties: PostHogProperties = {}): Promise<void> {
     const payload = {
       ...(await this.getEventMetadata()),
       ...properties

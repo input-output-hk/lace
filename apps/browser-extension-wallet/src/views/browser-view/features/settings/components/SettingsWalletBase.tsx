@@ -64,7 +64,8 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const { t } = useTranslation();
   const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
-  const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
+
+  const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
 
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
   const backgroundServices = useBackgroundServiceAPIContext();
@@ -170,6 +171,14 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
         </Title>
+        {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' ? (
+          <SettingsLink
+            description={t('browserView.settings.wallet.midnight.prelaunch.description')}
+            data-testid="settings-wallet-midnight-prelaunch-link"
+          >
+            {t('browserView.settings.wallet.midnight.prelaunch.title')}
+          </SettingsLink>
+        ) : undefined}
         {popupView && (
           <>
             <AboutDrawer visible={activeDrawer === SettingsDrawer.about} onClose={closeDrawer} popupView={popupView} />

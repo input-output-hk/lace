@@ -14,7 +14,7 @@ import { useWalletStore } from '@src/stores';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isOversaturated, StakePoolCardProgressBar } from '@lace/staking';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 const listItem: TranslationKey[] = [
   'browserView.staking.details.clickOnAPoolFromTheListInTheMainPage',

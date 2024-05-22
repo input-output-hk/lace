@@ -1,14 +1,14 @@
 /* eslint-disable unicorn/no-null */
 import { Wallet } from '@lace/cardano';
 import { WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
-import { TranslationKey } from '@lib/translations/types';
+import { TranslationKey } from '@lace/translation';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState, VFC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
-import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useHardwareWallet } from '../context';
 import { isTimeoutError } from '../useWrapWithTimeout';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
@@ -64,6 +64,7 @@ enum DiscoveryState {
 
 export const Connect: VFC = () => {
   const { t } = useTranslation();
+  const { postHogActions } = useWalletOnboarding();
   const { back, connect, next } = useHardwareWallet();
   const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(DiscoveryState.Requested);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
@@ -74,8 +75,8 @@ export const Connect: VFC = () => {
   const onRetry = useCallback(() => {
     setDiscoveryState(DiscoveryState.Requested);
     setConnectionError(null);
-    void analytics.sendEventToPostHog(postHogOnboardingActions.hw.CONNECT_HW_TRY_AGAIN_CLICK);
-  }, [analytics]);
+    void analytics.sendEventToPostHog(postHogActions.hardware.CONNECT_HW_TRY_AGAIN_CLICK);
+  }, [analytics, postHogActions.hardware.CONNECT_HW_TRY_AGAIN_CLICK]);
 
   useEffect(() => {
     (async () => {
@@ -83,9 +84,9 @@ export const Connect: VFC = () => {
 
       setDiscoveryState(DiscoveryState.Running);
       try {
-        void analytics.sendEventToPostHog(postHogOnboardingActions.hw.CONNECT_HW_VIEW);
+        void analytics.sendEventToPostHog(postHogActions.hardware.CONNECT_HW_VIEW);
         const usbDevice = await requestHardwareWalletConnection();
-        void analytics.sendEventToPostHog(postHogOnboardingActions.hw.HW_POPUP_CONNECT_CLICK);
+        void analytics.sendEventToPostHog(postHogActions.hardware.HW_POPUP_CONNECT_CLICK);
         await connect(usbDevice);
         setDiscoveryState(DiscoveryState.Idle);
         next();
@@ -95,7 +96,7 @@ export const Connect: VFC = () => {
         setConnectionError(parseConnectionError(error));
       }
     })();
-  }, [connect, discoveryState, analytics, next]);
+  }, [connect, discoveryState, analytics, next, postHogActions.hardware]);
 
   return (
     <WalletSetupConnectHardwareWalletStepRevamp

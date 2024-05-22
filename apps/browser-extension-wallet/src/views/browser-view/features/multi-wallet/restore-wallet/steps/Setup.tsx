@@ -6,16 +6,21 @@ import { toast } from '@lace/common';
 import { useAnalyticsContext } from '@providers';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
-import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
   const { back, createWalletData, finalizeWalletRestoration, next, onNameAndPasswordChange } = useRestoreWallet();
   const analytics = useAnalyticsContext();
+  const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { t } = useTranslation();
 
   const translations = {
-    title: t('core.walletNameAndPasswordSetupStep.title'),
-    description: t('core.walletNameAndPasswordSetupStep.description'),
+    title: forgotPasswordFlowActive
+      ? t('core.walletNameAndPasswordSetupStep.forgotPasswordTitle')
+      : t('core.walletNameAndPasswordSetupStep.title'),
+    description: forgotPasswordFlowActive
+      ? t('core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle')
+      : t('core.walletNameAndPasswordSetupStep.description'),
     nameInputLabel: t('core.walletNameAndPasswordSetupStep.nameInputLabel'),
     nameMaxLength: t('core.walletNameAndPasswordSetupStep.nameMaxLength'),
     passwordInputLabel: t('core.walletNameAndPasswordSetupStep.passwordInputLabel'),
@@ -28,7 +33,7 @@ export const Setup = (): JSX.Element => {
   };
 
   const onNext = async () => {
-    void analytics.sendEventToPostHog(postHogMultiWalletActions.restore.ENTER_WALLET);
+    void analytics.sendEventToPostHog(postHogActions.restore.ENTER_WALLET);
 
     try {
       await finalizeWalletRestoration();

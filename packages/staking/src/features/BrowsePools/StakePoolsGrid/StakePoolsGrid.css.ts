@@ -10,14 +10,14 @@ export const grid = style([
   }),
   {
     '@media': {
-      'screen and (min-width: 668px)': {
-        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+      'screen and (min-width: 669px)': {
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
       },
       'screen and (min-width: 1660px)': {
-        gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
       },
     },
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   },
 ]);
 

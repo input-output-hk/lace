@@ -94,6 +94,8 @@ export type OutsideHandlesContextValue = {
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  multidelegationDAppCompatibility: boolean;
+  triggerMultidelegationDAppCompatibility: () => void;
   multidelegationFirstVisitSincePortfolioPersistence: boolean;
   triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;

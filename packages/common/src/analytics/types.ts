@@ -116,7 +116,6 @@ export enum PostHogAction {
   StakingBrowsePoolsMoreOptionsSortingLiveStakeClick = 'staking | browse pools | more options sorting | live-stake | click',
   StakingBrowsePoolsTickerClick = 'staking | browse pools | ticker | click',
   StakingBrowsePoolsSaturationClick = 'staking | browse pools | saturation | click',
-  StakingBrowsePoolsROSClick = 'staking | browse pools | ros | click',
   StakingBrowsePoolsCostClick = 'staking | browse pools | cost | click',
   StakingBrowsePoolsMarginClick = 'staking | browse pools | margin | click',
   StakingBrowsePoolsProducedBlocksClick = 'staking | browse pools | produced blocks | click',
@@ -248,6 +247,10 @@ export enum PostHogAction {
   TokenTokensTokenRowClick = 'token | tokens | token row | click',
   TokenTokenDetailViewAllClick = 'token | token detail | view all | click',
   TokenTokenDetailXClick = 'token | token detail | x | click',
+  TokenTokensTopYourWalletBuyAdaClick = 'token | tokens | top your wallet | buy ada | click',
+  TokenBuyAdaDisclaimerGoBackClick = 'token | buy ada | disclaimer | go back | click',
+  TokenBuyAdaDisclaimerAgreeClick = 'token | buy ada | disclaimer | agree | click',
+  TokenBuyAdaDisclaimerContinueClick = 'token | buy ada | disclaimer | continue | click',
   // Activities
   ActivityActivityClick = 'activity | activity | click',
   ActivityActivityActivityRowClick = 'activity | activity | activity row | click',

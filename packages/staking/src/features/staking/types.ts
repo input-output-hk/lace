@@ -1,4 +1,4 @@
-import { Language } from '@lace/common';
+import { Language } from '@lace/translation';
 
 export type StakingProps = {
   language?: Language;

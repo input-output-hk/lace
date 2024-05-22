@@ -7,7 +7,6 @@ import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWit
 import { DappTransactionHeader, DappTransactionHeaderProps, TransactionTypes } from '../DappTransactionHeader';
 
 import styles from './DappTransaction.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
 
 import {
@@ -21,6 +20,7 @@ import {
   Divider
 } from '@lace/ui';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
+import { useTranslation } from 'react-i18next';
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
   `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
@@ -86,17 +86,8 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
 
 type TransactionType = keyof typeof TransactionTypes;
 
-const tryDecodeAsUtf8 = (
-  value: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: 'string'): string }
-): string => {
-  const bytes = Uint8Array.from(Buffer.from(value, 'hex'));
-  const decoder = new TextDecoder('utf-8');
-  // Decode the Uint8Array to a UTF-8 string
-  return decoder.decode(bytes);
-};
-
 const getFallbackName = (asset: AssetInfoWithAmount) =>
-  tryDecodeAsUtf8(asset.assetInfo.name) ? tryDecodeAsUtf8(asset.assetInfo.name) : asset.assetInfo.assetId;
+  Wallet.Cardano.AssetName.toUTF8(asset.assetInfo.name) || asset.assetInfo.assetId;
 
 const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
   if (isNFT(assetWithAmount)) {
@@ -127,7 +118,7 @@ export const DappTransaction = ({
   ownAddresses = [],
   addressToNameMap = new Map()
 }: DappTransactionProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const groupedToAddresses = groupAddresses(toAddress);
   const groupedFromAddresses = groupAddresses(fromAddress);

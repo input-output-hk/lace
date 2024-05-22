@@ -1,4 +1,4 @@
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 export enum AddressDetailsSteps {
   DETAILS,

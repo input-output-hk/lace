@@ -1,0 +1,51 @@
+{
+  "name": "@lace/translation",
+  "version": "0.1.0",
+  "description": "Lace Transaction Package",
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/translation/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/lace.git"
+  },
+  "license": "Apache-2.0",
+  "author": "IOHK",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "run -T rollup -c rollup.config.js",
+    "cleanup": "yarn exec rm -rf dist node_modules",
+    "format": "yarn prettier --write .",
+    "format-check": "yarn prettier --check .",
+    "lint": "eslint .",
+    "test": "echo \"@lace/ui: no test specified\"",
+    "type-check": "tsc --noEmit",
+    "watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "i18next": "^22.5.1",
+    "react-i18next": "^12.3.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "20.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-typescript": "^11.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "eslint": "8.33.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-boundaries": "^3.1.0",
+    "eslint-plugin-functional": "^5.0.4",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-max-params-no-constructor": "^0.0.4",
+    "eslint-plugin-prefer-arrow-functions": "^3.1.4",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "7.31.8",
+    "eslint-plugin-storybook": "^0.6.11",
+    "eslint-plugin-unicorn": "^45.0.2",
+    "prettier": "3.2.5"
+  }
+}

@@ -38,7 +38,7 @@ import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -232,22 +232,28 @@ export const Footer = withAddressBookContext(
       }
 
       switch (true) {
-        case isReviewingAddress:
+        case isReviewingAddress: {
           return handleReviewAddress('UPDATE');
-        case isSummaryStep && !isInMemoryWallet:
+        }
+        case isSummaryStep && !isInMemoryWallet: {
           if (isPopupView) {
             return openContinueDialog();
           }
           return handleVerifyPass();
-        case isConfirmPass:
+        }
+        case isConfirmPass: {
           return handleVerifyPass();
-        case txHasSucceeded:
+        }
+        case txHasSucceeded: {
           return onCloseSubmitedTransaction();
-        case txHasFailed:
+        }
+        case txHasFailed: {
           setSubmitingTxState({ isPasswordValid: true });
           return setSection(sectionsConfig.form);
-        default:
+        }
+        default: {
           return setSection();
+        }
       }
     }, [
       currentSection.currentSection,

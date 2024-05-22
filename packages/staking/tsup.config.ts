@@ -26,7 +26,7 @@ const tsupConfig = defineConfig([
     },
     name: 'lace/staking',
     outDir: './dist',
-    sourcemap: true,
+    sourcemap: false,
   },
 ]);
 

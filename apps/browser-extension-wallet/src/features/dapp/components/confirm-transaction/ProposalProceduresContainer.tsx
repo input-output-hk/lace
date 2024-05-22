@@ -9,7 +9,8 @@ import { ParameterChangeActionContainer } from './proposal-procedures/ParameterC
 import { TreasuryWithdrawalsActionContainer } from './proposal-procedures/TreasuryWithdrawalsActionContainer';
 import { UpdateCommitteeActionContainer } from './proposal-procedures/UpdateCommitteeActionContainer';
 import { useViewsFlowContext } from '@providers';
-import { SignTxData } from './types';
+import { Box, Flex } from '@lace/ui';
+import { DappInfo } from '@lace/core';
 
 export const ProposalProceduresContainer = (): React.ReactElement => {
   const [proposalProcedures, setProposalProcedures] = useState<Wallet.Cardano.ProposalProcedure[]>([]);
@@ -30,12 +31,10 @@ export const ProposalProceduresContainer = (): React.ReactElement => {
   const containerPerTypeMap: Record<
     Wallet.Cardano.GovernanceActionType,
     (props: {
-      dappInfo: SignTxData['dappInfo'];
       governanceAction: Wallet.Cardano.GovernanceAction;
       deposit: Wallet.Cardano.ProposalProcedure['deposit'];
       rewardAccount: Wallet.Cardano.ProposalProcedure['rewardAccount'];
       anchor: Wallet.Cardano.ProposalProcedure['anchor'];
-      errorMessage?: string;
     }) => React.ReactElement
   > = useMemo(
     () => ({
@@ -55,10 +54,12 @@ export const ProposalProceduresContainer = (): React.ReactElement => {
       {proposalProcedures.map(({ deposit, rewardAccount, anchor, governanceAction }) => {
         const Container = containerPerTypeMap[governanceAction.__typename];
         return (
-          <Container
-            key={`${governanceAction.__typename}_${anchor.dataHash}`}
-            {...{ dappInfo, deposit, rewardAccount, anchor, governanceAction }}
-          />
+          <Flex h="$fill" flexDirection="column" key={`${governanceAction.__typename}_${anchor.dataHash}`}>
+            <Box mb={'$28'} mt={'$16'}>
+              <DappInfo {...dappInfo} />
+            </Box>
+            <Container {...{ deposit, rewardAccount, anchor, governanceAction }} />
+          </Flex>
         );
       })}
     </>

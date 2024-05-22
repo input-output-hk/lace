@@ -1,11 +1,12 @@
 import { complexityLevels } from '@lace/common';
 import { ValidationErrorKeys } from './types';
+import { TranslationKey } from '@lace/translation';
 
 // Depending on what is the result of the A/B test, we might want to use these functions/constants in WalletSetupRegisterStep.tsx and WalletSetupPasswordStep.tsx to clean thing up
 export const MINIMUM_PASSWORD_LEVEL_REQUIRED = 3;
 export const WALLET_NAME_INPUT_MAX_LENGTH = 30;
 
-export const passwordStrengthFeedbackMap: Record<number, string> = {
+export const passwordStrengthFeedbackMap: Record<number, TranslationKey> = {
   0: 'core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback',
   1: 'core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback',
   2: 'core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'

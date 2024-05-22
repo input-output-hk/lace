@@ -2,6 +2,8 @@
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import { MultidelegationDAppCompatibilityModal } from 'features/modals/MultidelegationDAppCompatibilityModal';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../DelegationCard';
 import { useOutsideHandles } from '../../outside-handles-provider';
@@ -34,22 +36,37 @@ const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore):
   throw new Error('Unexpected delegation status');
 };
 
-export const StepPreferencesContent = () => {
+export type StepPreferencesContentProps = {
+  popupView?: boolean;
+};
+
+export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProps) => {
   const { t } = useTranslation();
+  const [showDAppCompatibilityModal, setShowDAppCompatibilityModal] = useState(false);
   const { analytics } = useOutsideHandles();
   const {
     balancesBalance,
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
+    multidelegationDAppCompatibility,
+    triggerMultidelegationDAppCompatibility,
   } = useOutsideHandles();
-  const { draftPortfolio, activeDelegationFlow, portfolioMutators, delegationStatus, cardanoCoinSymbol } =
-    useDelegationPortfolioStore((state) => ({
-      activeDelegationFlow: state.activeDelegationFlow,
-      cardanoCoinSymbol: state.cardanoCoinSymbol,
-      delegationStatus: getDraftDelegationStatus(state),
-      draftPortfolio: state.draftPortfolio || [],
-      portfolioMutators: state.mutators,
-    }));
+
+  const {
+    draftPortfolio,
+    activeDelegationFlow,
+    portfolioMutators,
+    delegationStatus,
+    cardanoCoinSymbol,
+    userAlreadyMultidelegated,
+  } = useDelegationPortfolioStore((state) => ({
+    activeDelegationFlow: state.activeDelegationFlow,
+    cardanoCoinSymbol: state.cardanoCoinSymbol,
+    delegationStatus: getDraftDelegationStatus(state),
+    draftPortfolio: state.draftPortfolio || [],
+    portfolioMutators: state.mutators,
+    userAlreadyMultidelegated: state.currentPortfolio.length > 1,
+  }));
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
@@ -84,67 +101,90 @@ export const StepPreferencesContent = () => {
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailUnselectPoolClick);
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
-  const onAddPoolButtonClick = () => {
+
+  const onAddPool = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsManageDelegationAddStakePoolClick);
     portfolioMutators.executeCommand({
       type: 'AddStakePools',
     });
-  };
+  }, [analytics, portfolioMutators]);
+
+  const onAddPoolButtonClick = useCallback(() => {
+    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility) {
+      setShowDAppCompatibilityModal(true);
+    } else {
+      onAddPool();
+    }
+  }, [multidelegationDAppCompatibility, onAddPool, userAlreadyMultidelegated]);
+
+  const onDAppCompatibilityConfirm = useCallback(() => {
+    triggerMultidelegationDAppCompatibility();
+    onAddPool();
+  }, [onAddPool, triggerMultidelegationDAppCompatibility]);
 
   return (
-    <Flex flexDirection="column" gap="$32" alignItems="stretch">
-      <Box className={styles.delegationCardWrapper}>
-        <DelegationCard
-          balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
-          cardanoCoinSymbol={symbol}
-          distribution={displayData}
-          status={delegationStatus}
-          showDistribution
-        />
-      </Box>
-      <Flex justifyContent="space-between">
-        <Text.Body.Large weight="$semibold" data-testid="manage-delegation-selected-pools-label">
-          {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
-        </Text.Body.Large>
-        <ControlButton.Small
-          label={t('drawer.preferences.addPoolButton')}
-          onClick={onAddPoolButtonClick}
-          disabled={addPoolButtonDisabled}
-          data-testid="manage-delegation-add-pools-btn"
-        />
+    <>
+      <Flex flexDirection="column" gap="$32" alignItems="stretch">
+        <Box className={styles.delegationCardWrapper}>
+          <DelegationCard
+            balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
+            cardanoCoinSymbol={symbol}
+            distribution={displayData}
+            status={delegationStatus}
+            showDistribution
+          />
+        </Box>
+        <Flex justifyContent="space-between">
+          <Text.Body.Large weight="$semibold" data-testid="manage-delegation-selected-pools-label">
+            {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
+          </Text.Body.Large>
+          <ControlButton.Small
+            label={t('drawer.preferences.addPoolButton')}
+            onClick={onAddPoolButtonClick}
+            disabled={addPoolButtonDisabled}
+            data-testid="manage-delegation-add-pools-btn"
+          />
+        </Flex>
+        <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
+          {displayData.length === 0 && (
+            <Box pt="$20">
+              <NoPoolsSelected onBrowsePoolsButtonClick={onAddPoolButtonClick} />
+            </Box>
+          )}
+          {displayData.map(
+            (
+              { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },
+              idx
+            ) => (
+              <PoolDetailsCard
+                key={id}
+                color={color}
+                name={name || ''}
+                onRemove={createRemovePoolFromPortfolio(id)}
+                actualPercentage={onChainPercentage}
+                savedPercentage={savedIntegerPercentage}
+                targetPercentage={sliderIntegerPercentage}
+                stakeValue={stakeValue}
+                cardanoCoinSymbol={cardanoCoinSymbol}
+                defaultExpand={activeDelegationFlow === DelegationFlow.PortfolioManagement ? idx === 0 : true}
+                onPercentageChange={(value) => {
+                  portfolioMutators.executeCommand({
+                    data: { id, newSliderPercentage: value },
+                    type: 'UpdateStakePercentage',
+                  });
+                }}
+              />
+            )
+          )}
+        </Flex>
       </Flex>
-      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
-        {displayData.length === 0 && (
-          <Box pt="$20">
-            <NoPoolsSelected onBrowsePoolsButtonClick={onAddPoolButtonClick} />
-          </Box>
-        )}
-        {displayData.map(
-          (
-            { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },
-            idx
-          ) => (
-            <PoolDetailsCard
-              key={id}
-              color={color}
-              name={name || ''}
-              onRemove={createRemovePoolFromPortfolio(id)}
-              actualPercentage={onChainPercentage}
-              savedPercentage={savedIntegerPercentage}
-              targetPercentage={sliderIntegerPercentage}
-              stakeValue={stakeValue}
-              cardanoCoinSymbol={cardanoCoinSymbol}
-              defaultExpand={activeDelegationFlow === DelegationFlow.PortfolioManagement ? idx === 0 : true}
-              onPercentageChange={(value) => {
-                portfolioMutators.executeCommand({
-                  data: { id, newSliderPercentage: value },
-                  type: 'UpdateStakePercentage',
-                });
-              }}
-            />
-          )
-        )}
-      </Flex>
-    </Flex>
+      {showDAppCompatibilityModal && (
+        <MultidelegationDAppCompatibilityModal
+          visible={multidelegationDAppCompatibility}
+          onConfirm={onDAppCompatibilityConfirm}
+          popupView={popupView}
+        />
+      )}
+    </>
   );
 };

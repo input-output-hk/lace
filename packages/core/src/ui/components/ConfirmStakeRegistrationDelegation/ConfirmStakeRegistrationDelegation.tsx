@@ -1,19 +1,8 @@
 import React from 'react';
-import { Box, Cell, Grid, TransactionSummary, Flex } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../DappInfo';
-import { ErrorPane } from '@lace/common';
+import { Cell, Grid, TransactionSummary, Flex } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
-  translations: {
-    labels: {
-      poolId: string;
-      stakeKeyHash: string;
-      depositPaid: string;
-    };
-    metadata: string;
-  };
   metadata: {
     poolId: string;
     stakeKeyHash: string;
@@ -21,34 +10,36 @@ interface Props {
   };
 }
 
-export const ConfirmStakeRegistrationDelegation = ({
-  dappInfo,
-  errorMessage,
-  translations,
-  metadata
-}: Props): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
-      <DappInfo {...dappInfo} />
-    </Box>
-    {errorMessage && (
-      <Box my={'$16'}>
-        <ErrorPane error={errorMessage} />
-      </Box>
-    )}
-    <Grid columns="$1" gutters="$20">
-      <Cell>
-        <TransactionSummary.Metadata label={translations.metadata} text="" />
-      </Cell>
-      <Cell>
-        <TransactionSummary.Address label={translations.labels.poolId} address={metadata.poolId} />
-      </Cell>
-      <Cell>
-        <TransactionSummary.Address label={translations.labels.stakeKeyHash} address={metadata.stakeKeyHash} />
-      </Cell>
-      <Cell>
-        <TransactionSummary.Address label={translations.labels.depositPaid} address={metadata.depositPaid} />
-      </Cell>
-    </Grid>
-  </Flex>
-);
+export const ConfirmStakeRegistrationDelegation = ({ metadata }: Props): JSX.Element => {
+  const { t } = useTranslation();
+  const translations = {
+    labels: {
+      poolId: t('core.StakeRegistrationDelegation.poolId'),
+      stakeKeyHash: t('core.StakeRegistrationDelegation.stakeKeyHash'),
+      depositPaid: t('core.StakeRegistrationDelegation.depositPaid')
+    }
+  };
+
+  return (
+    <Flex h="$fill" flexDirection="column">
+      <Grid columns="$1" gutters="$20">
+        <Cell>
+          <TransactionSummary.Address
+            label={t('core.activityDetails.certificateTitles.certificateType')}
+            address={t('core.assetActivityItem.entry.name.StakeRegistrationDelegateCertificate')}
+            testID="metadata-cetificateType"
+          />
+        </Cell>
+        <Cell>
+          <TransactionSummary.Address label={translations.labels.poolId} address={metadata.poolId} />
+        </Cell>
+        <Cell>
+          <TransactionSummary.Address label={translations.labels.stakeKeyHash} address={metadata.stakeKeyHash} />
+        </Cell>
+        <Cell>
+          <TransactionSummary.Address label={translations.labels.depositPaid} address={metadata.depositPaid} />
+        </Cell>
+      </Grid>
+    </Flex>
+  );
+};

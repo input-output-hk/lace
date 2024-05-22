@@ -1,0 +1,30 @@
+name: build
+description: Build package
+
+inputs:
+  DIR:
+    description: 'package directory'
+    required: true
+  NAME:
+    description: 'package name'
+    required: true
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Code check
+      uses: ./.github/actions/check
+      with:
+        DIR: ${{ inputs.DIR }}
+
+    - name: Build ${{ inputs.NAME }}
+      run: yarn build
+      shell: bash
+      working-directory: ${{ inputs.DIR }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.NAME }}
+        path: ${{ inputs.DIR }}/dist
