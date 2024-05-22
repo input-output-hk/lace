@@ -194,6 +194,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
     await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
   } else {
     await localStorageInitializer.initializeWallet(walletName);
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
   }
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
