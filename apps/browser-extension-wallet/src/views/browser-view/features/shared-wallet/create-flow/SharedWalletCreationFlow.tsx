@@ -1,10 +1,22 @@
+import { SetupSharedWallet } from '@lace/core';
 import React, { VFC } from 'react';
-import { SharedWalletCreationStepSetup } from './SharedWalletCreationStepSetup';
 import { SharedWalletCreationStore } from './SharedWalletCreationStore';
 import { SharedWalletCreationStep } from './types';
 
 export const SharedWalletCreationFlow: VFC = () => (
   <SharedWalletCreationStore>
-    {({ state: { step } }) => <>{step === SharedWalletCreationStep.Setup && <SharedWalletCreationStepSetup />}</>}
+    {({ state, dispatch }) => (
+      <>
+        {state.step === SharedWalletCreationStep.Setup && (
+          <SetupSharedWallet
+            activeWalletName={state.activeWalletName}
+            activeWalletAddress={''}
+            onBack={() => dispatch({ type: 'back' })}
+            onNext={() => dispatch({ type: 'next' })}
+            onNameChange={(walletName) => dispatch({ type: 'walletNameChanged', walletName })}
+          />
+        )}
+      </>
+    )}
   </SharedWalletCreationStore>
 );
