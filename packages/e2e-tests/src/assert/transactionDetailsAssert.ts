@@ -4,6 +4,8 @@ import { expect } from 'chai';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import { t } from '../utils/translationService';
+import { TransactionType } from '../types/transactionType';
+import { TestnetPatterns } from '../support/patterns';
 
 export type ExpectedActivityDetails = {
   transactionDescription: string;
@@ -27,6 +29,7 @@ export type TransactionData = {
 };
 
 const stakeKeyRegistration = 'Stake Key Registration';
+const headerTranslationKey = 'core.activityDetails.header';
 
 class TransactionsDetailsAssert {
   waitForTransactionsLoaded = async () => {
@@ -38,9 +41,10 @@ class TransactionsDetailsAssert {
 
   async assertSeeActivityDetailsDrawer(shouldBeDisplayed: boolean) {
     await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await TransactionDetailsPage.transactionDetails.waitForStable();
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t('core.activityDetails.header'));
+      expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t(headerTranslationKey));
     }
   }
 
@@ -216,6 +220,7 @@ class TransactionsDetailsAssert {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       if (
+        // eslint-disable-next-line sonarjs/no-duplicate-string
         !['Delegation', 'Stake Key De-Registration', 'Stake Key Registration', 'Self Transaction', 'Rewards'].includes(
           transactionType
         )
@@ -254,6 +259,211 @@ class TransactionsDetailsAssert {
   async assertTxMetadata() {
     const currentMetadata = await TransactionDetailsPage.transactionDetailsMetadata.getText();
     expect(currentMetadata).to.equal(testContext.load('metadata'));
+  }
+
+  // eslint-disable-next-line max-statements
+  async assertSeeSelfTransactionDetails(txType: 'Sent' | 'Received' | 'Self') {
+    expect(await TransactionDetailsPage.transactionDetailsType.getText()).to.equal(txType);
+    let tokensDescriptionAmount = await TransactionDetailsPage.transactionDetailsAmountOfTokens.getText();
+    tokensDescriptionAmount = tokensDescriptionAmount.replace('(', '').replace(')', '');
+    expect(Number(tokensDescriptionAmount)).to.be.greaterThan(0);
+    await TransactionDetailsPage.transactionHeader.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t(headerTranslationKey));
+
+    await TransactionDetailsPage.transactionDetailsHashTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsHashTitle.getText()).to.equal(
+      await t('core.activityDetails.transactionID')
+    );
+    await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsHash.getText()).not.to.be.empty;
+
+    await TransactionDetailsPage.transactionDetailsSummaryTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsSummaryTitle.getText()).to.equal(
+      await t('core.activityDetails.summary')
+    );
+
+    if (txType !== 'Self') {
+      const bundlesCount = (await TransactionDetailsPage.transactionDetailsBundles()).length;
+      expect(bundlesCount).to.be.greaterThan(0);
+
+      await TransactionDetailsPage.transactionDetailsTitle.waitForDisplayed();
+      expect(await TransactionDetailsPage.transactionDetailsTitle.getText()).to.equal(
+        txType === 'Received' ? await t('core.activityDetails.received') : await t('core.activityDetails.sent')
+      );
+
+      for (let i = 0; i < bundlesCount; i++) {
+        await TransactionDetailsPage.transactionDetailsSentAda(i).waitForDisplayed();
+        expect(await TransactionDetailsPage.transactionDetailsSentAda(i).getText()).to.match(
+          TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+        );
+        await TransactionDetailsPage.transactionDetailsSentFiat(i).waitForDisplayed();
+        expect(await TransactionDetailsPage.transactionDetailsSentFiat(i).getText()).to.match(
+          TestnetPatterns.USD_VALUE_REGEX
+        );
+
+        await TransactionDetailsPage.transactionDetailsToAddressTitle(i).waitForDisplayed();
+        expect(await TransactionDetailsPage.transactionDetailsToAddressTitle(i).getText()).to.equal(
+          txType === 'Received' ? await t('core.activityDetails.from') : await t('core.activityDetails.to')
+        );
+
+        await TransactionDetailsPage.transactionDetailsToAddress(i).waitForDisplayed();
+        expect(await TransactionDetailsPage.transactionDetailsToAddress(i).getText()).not.to.be.empty;
+
+        await TransactionDetailsPage.transactionDetailsToAddressTag(i).waitForDisplayed();
+        expect(await TransactionDetailsPage.transactionDetailsToAddressTag(i).getText()).to.be.oneOf([
+          await t('core.addressTags.foreign'),
+          await t('core.addressTags.own')
+        ]);
+      }
+    }
+
+    await TransactionDetailsPage.transactionDetailsStatusTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsStatusTitle.getText()).to.equal(
+      await t('core.activityDetails.status')
+    );
+    await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsHash.getText()).not.to.be.empty;
+
+    await TransactionDetailsPage.transactionDetailsTimestampTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsTimestampTitle.getText()).to.equal(
+      await t('core.activityDetails.timestamp')
+    );
+    await TransactionDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsTimestamp.getText()).not.to.be.empty;
+
+    await TransactionDetailsPage.transactionDetailsFeeTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsFeeTitle.getText()).to.equal(
+      await t('core.activityDetails.transactionFee')
+    );
+    await TransactionDetailsPage.transactionDetailsFeeTitleTooltip.waitForDisplayed();
+
+    await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsFeeADA.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+    );
+    await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
+
+    expect(await TransactionDetailsPage.transactionDetailsFeeFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
+
+    await TransactionDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
+    await TransactionDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
+
+    if (await TransactionDetailsPage.transactionDetailsMetadataTitle.isDisplayed()) {
+      expect(await TransactionDetailsPage.transactionDetailsMetadataTitle.getText()).to.equal(
+        await t('core.activityDetails.metadata')
+      );
+      await TransactionDetailsPage.transactionDetailsMetadata.waitForDisplayed();
+    }
+  }
+
+  // eslint-disable-next-line max-statements
+  async assertSeeRewardsTransactionDetails() {
+    expect(await TransactionDetailsPage.transactionDetailsType.getText()).to.equal(
+      await t('core.activityDetails.rewards')
+    );
+    await TransactionDetailsPage.transactionDetailsTooltipIcon.waitForDisplayed();
+
+    await TransactionDetailsPage.transactionHeader.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t(headerTranslationKey));
+
+    await TransactionDetailsPage.transactionDetailsSummaryTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsSummaryTitle.getText()).to.equal(
+      await t('core.activityDetails.summary')
+    );
+
+    await TransactionDetailsPage.transactionDetailsRewardsTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsTitle.getText()).to.equal(
+      await t('core.activityDetails.rewards')
+    );
+    await TransactionDetailsPage.transactionDetailsRewardsTotalAda.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsTotalAda.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+    );
+    await TransactionDetailsPage.transactionDetailsRewardsTotalFiat.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsTotalFiat.getText()).to.match(
+      TestnetPatterns.USD_VALUE_REGEX
+    );
+
+    await TransactionDetailsPage.transactionDetailsRewardsPoolsTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsPoolsTitle.getText()).to.equal(
+      await t('core.activityDetails.pools')
+    );
+
+    expect((await TransactionDetailsPage.transactionDetailsRewardsPoolNames).length).is.greaterThan(0);
+    for (const name of await TransactionDetailsPage.transactionDetailsRewardsPoolNames) {
+      await name.waitForDisplayed();
+      expect(await name.getText()).not.to.be.empty;
+    }
+
+    expect((await TransactionDetailsPage.transactionDetailsRewardsPoolTickers).length).is.greaterThan(0);
+    for (const ticker of await TransactionDetailsPage.transactionDetailsRewardsPoolTickers) {
+      await ticker.waitForDisplayed();
+      expect(await ticker.getText()).not.to.be.empty;
+    }
+
+    expect((await TransactionDetailsPage.transactionDetailsRewardsPoolIds).length).is.greaterThan(0);
+    for (const poolId of await TransactionDetailsPage.transactionDetailsRewardsPoolIds) {
+      await poolId.waitForDisplayed();
+      expect(await poolId.getText()).not.to.be.empty;
+    }
+
+    expect((await TransactionDetailsPage.transactionDetailsRewardsSinglePoolAda).length).is.greaterThan(0);
+    for (const singlePoolAdaReward of await TransactionDetailsPage.transactionDetailsRewardsSinglePoolAda) {
+      await singlePoolAdaReward.waitForDisplayed();
+      expect(await singlePoolAdaReward.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    }
+
+    expect((await TransactionDetailsPage.transactionDetailsRewardsSinglePoolFiat).length).is.greaterThan(0);
+    for (const singlePoolFiatReward of await TransactionDetailsPage.transactionDetailsRewardsSinglePoolFiat) {
+      await singlePoolFiatReward.waitForDisplayed();
+      expect(await singlePoolFiatReward.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
+    }
+
+    await TransactionDetailsPage.transactionDetailsRewardsStatusTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsStatusTitle.getText()).to.equal(
+      await t('core.activityDetails.status')
+    );
+    await TransactionDetailsPage.transactionDetailsRewardsStatus.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsStatus.getText()).to.be.oneOf([
+      'Spendable',
+      'Success',
+      'Sending',
+      'Error'
+    ]);
+
+    await TransactionDetailsPage.transactionDetailsRewardsEpochTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsEpochTitle.getText()).to.equal(
+      await t('core.activityDetails.epoch')
+    );
+    await TransactionDetailsPage.transactionDetailsRewardsEpoch.waitForDisplayed();
+    expect(Number(await TransactionDetailsPage.transactionDetailsRewardsEpoch.getText())).to.be.greaterThan(0);
+
+    await TransactionDetailsPage.transactionDetailsRewardsTimestampTitle.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsTimestampTitle.getText()).to.equal(
+      await t('core.activityDetails.timestamp')
+    );
+    await TransactionDetailsPage.transactionDetailsRewardsTimestamp.waitForDisplayed();
+    expect(await TransactionDetailsPage.transactionDetailsRewardsTimestamp.getText()).not.to.be.empty;
+  }
+
+  async assertSeeTransactionDetailsDrawer(txType: TransactionType) {
+    await this.assertSeeActivityDetailsDrawer(true);
+    switch (txType) {
+      case 'Sent':
+        await this.assertSeeSelfTransactionDetails('Sent');
+        break;
+      case 'Received':
+        await this.assertSeeSelfTransactionDetails('Received');
+        break;
+      case 'Self Transaction':
+        await this.assertSeeSelfTransactionDetails('Self');
+        break;
+      case 'Rewards':
+        await this.assertSeeRewardsTransactionDetails();
+        break;
+      default:
+        throw new Error(`Unknown tx type ${txType}`);
+    }
   }
 }
 

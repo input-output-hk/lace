@@ -268,7 +268,9 @@ export const TransactionDetails = ({
         <div className={styles.block}>
           <div data-testid="tx-hash" className={styles.hashContainer}>
             <div className={cn(styles.title, styles.labelWidth)}>
-              <div className={styles.hashLabel}>{t('core.activityDetails.transactionID')}</div>
+              <div className={styles.hashLabel} data-testid="tx-hash-title">
+                {t('core.activityDetails.transactionID')}
+              </div>
             </div>
             <div
               data-testid="tx-hash-detail"
@@ -288,7 +290,9 @@ export const TransactionDetails = ({
             </div>
           </div>
 
-          <h1 className={styles.summary}>{t('core.activityDetails.summary')}</h1>
+          <h1 className={styles.summary} data-testid="summary-title">
+            {t('core.activityDetails.summary')}
+          </h1>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
               <div className={cn(styles.title, styles.poolsTitle)}>{t('core.activityDetails.pools')}</div>
@@ -320,7 +324,9 @@ export const TransactionDetails = ({
           {txSummary.map((summary, index) => (
             <div key={index.toString()} data-testid="tx-detail-bundle">
               <div className={styles.details}>
-                <div className={styles.title}>{name}</div>
+                <div className={styles.title} data-testid="tx-sent-title">
+                  {name}
+                </div>
                 <div data-testid="tx-sent-detail" className={styles.detail}>
                   {summary.assetList?.map((asset, i) => (
                     <div className={styles.amount} key={`asset${i}`}>
@@ -346,7 +352,7 @@ export const TransactionDetails = ({
                 </div>
               </div>
               <div className={styles.details}>
-                <div className={styles.title}>
+                <div className={styles.title} data-testid="tx-to-from-title">
                   {t(`core.activityDetails.${summary.type === TransactionActivityType.outgoing ? 'to' : 'from'}`)}
                 </div>
                 <div>
@@ -389,7 +395,9 @@ export const TransactionDetails = ({
             </div>
           ))}
           <div className={styles.details}>
-            <div className={styles.title}>{t('core.activityDetails.status')}</div>
+            <div className={styles.title} data-testid="tx-status-title">
+              {t('core.activityDetails.status')}
+            </div>
             {status && (
               <div data-testid="tx-status" className={styles.detail}>{`${status.charAt(0).toUpperCase()}${status.slice(
                 1
@@ -397,7 +405,9 @@ export const TransactionDetails = ({
             )}
           </div>
           <div data-testid="tx-date" className={cn(styles.details, styles.timestampContainer)}>
-            <div className={cn(styles.title, styles.timestamp)}>{t('core.activityDetails.timestamp')}</div>
+            <div className={cn(styles.title, styles.timestamp)} data-testid="tx-timestamp-title">
+              {t('core.activityDetails.timestamp')}
+            </div>
             <div data-testid="tx-timestamp" className={styles.detail}>
               <span>{includedDate}</span>
               <span>&nbsp;{includedTime}</span>
@@ -624,7 +634,9 @@ export const TransactionDetails = ({
         )}
         {metadata?.length > 0 && (
           <div className={styles.metadataContainer}>
-            <div className={styles.metadataLabel}>{t('core.activityDetails.metadata')}</div>
+            <div className={styles.metadataLabel} data-testid="tx-metadata-title">
+              {t('core.activityDetails.metadata')}
+            </div>
             <div className={styles.detail} data-testid="tx-metadata">
               {metadata?.map((item) => (
                 <div key={item.key} className={styles.detail} data-testid={`tx-metadata-row-${item.key}`}>
