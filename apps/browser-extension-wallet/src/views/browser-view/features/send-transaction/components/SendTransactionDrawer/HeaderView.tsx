@@ -36,7 +36,7 @@ import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokens
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 export const useHandleClose = (): {
   onClose: () => void;

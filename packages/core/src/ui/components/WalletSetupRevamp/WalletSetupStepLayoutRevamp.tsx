@@ -4,9 +4,9 @@ import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
 import { urls } from '@ui/utils/constants';
-import { useTranslate } from '@ui/hooks';
-import i18n from '@ui/lib/i18n';
+import { i18n } from '@lace/translation';
 import { WalletTimelineSteps } from '../WalletSetup';
+import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupStepLayoutRevampProps {
   title: React.ReactNode;
@@ -67,7 +67,7 @@ export const WalletSetupStepLayoutRevamp = ({
   currentTimelineStep,
   isHardwareWallet = false
 }: WalletSetupStepLayoutRevampProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const nextButtonContainerRef = useRef(null);
 
   const defaultLabel = {

@@ -1,14 +1,6 @@
 /* eslint-disable camelcase */
-import { PostHogAction } from '@lace/common';
-
 export { PostHogAction } from '@lace/common';
 export type { IAnalyticsTracker } from '@lace/common';
-
-export type Metadata = {
-  _id?: string;
-  cookie?: number;
-  url: string;
-};
 
 export enum EnhancedAnalyticsOptInStatus {
   OptedIn = 'ACCEPTED',
@@ -38,34 +30,6 @@ export enum TxCreationType {
   External = 'external'
 }
 
-export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password' | 'onboarding';
-export type MultiWalletFlows = 'create' | 'restore' | 'hw';
-export type PostHogActionsKeys =
-  | 'SETUP_OPTION_CLICK'
-  | 'ANALYTICS_AGREE_CLICK'
-  | 'LEARN_MORE_CLICK'
-  | 'ANALYTICS_REJECT_CLICK'
-  | 'SAVE_RECOVERY_PHRASE_NEXT_CLICK'
-  | 'ENTER_RECOVERY_PHRASE_NEXT_CLICK'
-  | 'ENTER_WALLET'
-  | 'GOT_IT_CLICK'
-  | 'PIN_EXTENSION_CLICK'
-  | 'CONNECT_HW_VIEW'
-  | 'HW_POPUP_CONNECT_CLICK'
-  | 'CONNECT_HW_TRY_AGAIN_CLICK'
-  | 'SETUP_HW_ACCOUNT_NO_CLICK'
-  | 'WALLET_NAME_PASSWORD_NEXT_CLICK'
-  | 'RECOVERY_PHRASE_INTRO_WATCH_VIDEO_CLICK'
-  | 'RECOVERY_PHRASE_INTRO_VIDEO_GOTIT_CLICK'
-  | 'RECOVERY_PHRASE_COPY_TO_CLIPBOARD_CLICK'
-  | 'RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK'
-  | 'RECOVERY_PASSPHRASE_VERIFICATION_NEXT_CLICK'
-  | 'RECOVERY_PHRASE_COPY_READ_MORE_CLICK'
-  | 'RECOVERY_PHRASE_PASTE_READ_MORE_CLICK';
-export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
-export type PostHogMultiWalletActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
-export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
-export type PostHogMultiWalletActionsType = Record<MultiWalletFlows, PostHogMultiWalletActionsValueType>;
 export type PostHogPersonProperties = {
   $set: {
     user_tracking_type: UserTrackingType;

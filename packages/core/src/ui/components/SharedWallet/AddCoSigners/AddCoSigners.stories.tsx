@@ -2,7 +2,6 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { AddCoSigners } from './AddCoSigners';
-import { Flex } from '@lace/ui';
 import { ValidateAddress } from './type';
 import { Wallet } from '@lace/cardano';
 
@@ -64,22 +63,20 @@ const validateAddress: ValidateAddress = async (address) => {
 };
 
 export const Overview = (): JSX.Element => (
-  <Flex alignItems="center" justifyContent="center" w="$480" h="$480">
-    <AddCoSigners
-      validateAddress={validateAddress}
-      translations={{
-        title: 'Add your Co-signers',
-        subtitle: 'Add up to 20 wallet addresses to your shared wallet',
-        inputLabel: "Recipient's address or $handle",
-        inputError: 'Invalid address',
-        addButton: 'Add Co-signer',
-        removeButton: 'Remove',
-        backButton: 'Back',
-        nextButton: 'Next'
-      }}
-      onBack={() => void 0}
-      onNext={() => void 0}
-      addressBook={addressBook}
-    />
-  </Flex>
+  <AddCoSigners
+    validateAddress={validateAddress}
+    translations={{
+      title: 'Add your Co-signers',
+      subtitle: 'Add up to 20 wallet addresses to your shared wallet',
+      inputLabel: "Recipient's address or $handle",
+      inputError: 'Invalid address',
+      addButton: 'Add Co-signer',
+      removeButton: 'Remove',
+      backButton: 'Back',
+      nextButton: 'Next'
+    }}
+    onBack={() => void 0}
+    onNext={() => void 0}
+    addressBook={addressBook}
+  />
 );

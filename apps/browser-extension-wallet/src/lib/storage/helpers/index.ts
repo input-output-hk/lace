@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 import Dexie from 'dexie';
 
 const isAddressError = /address/i;

@@ -28,6 +28,7 @@ Feature: Delegating funds to new pool E2E
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
     And I disable showing Multidelegation beta banner
+    And I disable showing Multidelegation DApps issue modal
     And I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab

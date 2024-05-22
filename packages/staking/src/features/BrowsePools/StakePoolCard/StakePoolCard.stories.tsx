@@ -1,6 +1,7 @@
-import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, Text, ThemeColorScheme, Variants } from '@lace/ui';
-
+import { Box, Cell, Flex, Grid, Section, Text, ThemeColorScheme, Variants } from '@lace/ui';
 import { SortField } from 'features/BrowsePools';
+import { LocalThemeProvider } from 'features/theme';
+
 import type { Meta } from '@storybook/react';
 import { StakePoolCard, StakePoolCardProps } from './StakePoolCard';
 

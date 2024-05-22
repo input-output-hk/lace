@@ -1,0 +1,42 @@
+name: Chromatic deploy packages/ui
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - packages/ui/**
+  push:
+    paths:
+      - packages/ui/**
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic-deployment:
+    name: Chromatic UI
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Build
+        run: yarn workspaces foreach -Rpt -v --from '@lace/ui' run build
+
+      - name: Chromatic packages-ui
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/ui
+          NAME: packages-ui
+          TOKEN: ${{ secrets.CHROMATIC_LACE_UI_TOOLKIT_TOKEN }}

@@ -4,6 +4,7 @@ import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import menuHeaderNetwork from '../elements/menuHeaderNetwork';
 import MenuHeader from '../elements/menuHeader';
 import { browser } from '@wdio/globals';
+import nftDetails from '../elements/NFTs/nftDetails';
 
 When(/I click the menu button/, async () => {
   await menuHeaderPageObject.clickMenuButton();
@@ -105,6 +106,11 @@ Then(/^I see network sub-menu$/, async () => {
 
 Then(/^header menu displays "([^"]*)" as a wallet name$/, async (walletName) => {
   await topNavigationAssert.assertSeeWalletName(walletName);
+});
+
+Then(/^the NFT is set as a wallet profile avatar$/, async () => {
+  const savedNftDetails = await nftDetails.loadNFTDetails();
+  await topNavigationAssert.assertSeeCustomAvatar(savedNftDetails.mediaUrl);
 });
 
 When(/^I close header menu$/, async () => {

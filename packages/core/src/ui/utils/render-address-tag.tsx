@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { AddressTag, AddressTagVariants } from '@lace/ui';
-import { UseTranslate } from '@ui/hooks';
+import type { TFunction } from 'i18next';
 
 export type AddressTagTranslations = { own: string; foreign: string };
 
-export const getAddressTagTranslations = (t: UseTranslate['t']): AddressTagTranslations => ({
+export const getAddressTagTranslations = (t: TFunction): AddressTagTranslations => ({
   own: t('core.addressTags.own'),
   foreign: t('core.addressTags.foreign')
 });

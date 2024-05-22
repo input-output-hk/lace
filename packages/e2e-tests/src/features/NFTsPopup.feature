@@ -60,3 +60,14 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   Scenario: Popup-view - NFT with image does not display fallback picture
     Given I am on NFTs popup page
     Then Verify that "Bison Coin" doesn't contain fallback image
+
+
+  @LW-10322
+  Scenario: Popup-view - Setting up NFT as a wallet profile avatar
+    Given I am on NFTs popup page
+    And I left click on the NFT with name "LaceNFT" on NFTs page
+    And I am on a NFT details on the popup view for NFT with name: "LaceNFT"
+    And I save NFT details
+    And I click "Set as your wallet avatar" button on NFT details drawer
+    When I close the drawer by clicking back button
+    Then the NFT is set as a wallet profile avatar

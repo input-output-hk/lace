@@ -7,7 +7,7 @@ import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-t
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from './useMaxAda';
 import { UseTranslationResponse } from 'react-i18next';
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 
 const { buildTransactionProps, setMissingCoins, getTotalMinimumCoins } = Wallet;
 
@@ -86,7 +86,8 @@ export const useInitializeTx = (
             fee: inspection.inputSelection.fee,
             hash: inspection.hash,
             outputs: inspection.inputSelection.outputs,
-            handleResolutions: inspection.handleResolutions
+            handleResolutions: inspection.handleResolutions,
+            validityInterval: inspection.body.validityInterval
           },
           tx,
           totalMinimumCoins,

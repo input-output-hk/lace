@@ -1,7 +1,7 @@
 import React from 'react';
-import { useTranslate } from '@src/ui/hooks';
 import { Box, TransactionSummary, InfoBar } from '@lace/ui';
 import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
+import { useTranslation } from 'react-i18next';
 
 export enum CollateralStatus {
   REVIEW = 'review',
@@ -29,7 +29,7 @@ export const Collateral = ({
   testId,
   status = CollateralStatus.REVIEW
 }: Props): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const getTooltipText = (): string => {
     switch (status) {

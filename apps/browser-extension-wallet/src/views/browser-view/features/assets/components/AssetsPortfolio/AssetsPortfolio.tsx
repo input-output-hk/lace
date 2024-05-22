@@ -6,7 +6,7 @@ import { IRow, SendReceive } from '@lace/core';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { APP_MODE_POPUP, AppMode } from '@src/utils/constants';
 import { compactNumberWithUnit } from '@src/utils/format-number';
-import { PortfolioBalance } from '@src/views/browser-view/components';
+import { PortfolioBalance, TopUpWalletButton } from '@src/views/browser-view/components';
 import { useCurrencyStore } from '@providers/currency';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
@@ -18,6 +18,12 @@ import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
 import { SendFlowTriggerPoints } from '../../../send-transaction';
 import { AssetPortfolioContent } from './AssetPortfolioContent';
+
+import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
+import { BREAKPOINT_SMALL } from '@src/styles/constants';
+import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
+import { Flex, Text } from '@lace/ui';
+import { Wallet } from '@lace/cardano';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -49,13 +55,16 @@ export const AssetsPortfolio = ({
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const {
-    walletUI: { canManageBalancesVisibility, areBalancesVisible }
+    walletUI: { canManageBalancesVisibility, areBalancesVisible },
+    currentChain
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
+  const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
 
   const isPopupView = appMode === APP_MODE_POPUP;
+  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
 
   const portfolioBalanceAsBigNumber = useMemo(() => new BigNumber(portfolioTotalBalance), [portfolioTotalBalance]);
   const isPortfolioBalanceLoading = useMemo(
@@ -116,6 +125,19 @@ export const AssetsPortfolio = ({
             receive: t('core.sendReceive.receive')
           }}
         />
+      )}
+      {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && isMainnet && (
+        <Flex flexDirection="column" gap="$10" mb="$16">
+          <Text.Body.Normal weight="$medium" color="secondary">
+            {t('browserView.assets.topupWallet.buyButton.title')}
+          </Text.Body.Normal>
+          <Flex flexDirection="column" alignItems="stretch" w="$294">
+            <TopUpWalletButton />
+          </Flex>
+          <Text.Label weight="$medium" className={styles.topupWalletDisclaimerShort}>
+            {t('browserView.assets.topupWallet.disclaimer.short')}
+          </Text.Label>
+        </Flex>
       )}
       <AssetPortfolioContent
         totalAssets={totalAssets}

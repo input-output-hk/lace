@@ -1,68 +1,109 @@
-import { WalletSetupConnectHardwareWalletStep } from '@lace/core';
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router';
+/* eslint-disable unicorn/no-null */
 import { Wallet } from '@lace/cardano';
-import { useHardwareWallet } from '../context';
-import { walletRoutePaths } from '@routes';
-import { ErrorHandling } from './ErrorHandling';
-import { WalletType } from '@cardano-sdk/web-extension';
+import { WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
+import { TranslationKey } from '@lace/translation';
+import { TFunction } from 'i18next';
+import React, { useCallback, useEffect, useState, VFC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
-import { PostHogAction } from '@lace/common';
+import { useHardwareWallet } from '../context';
+import { isTimeoutError } from '../useWrapWithTimeout';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
-interface State {
-  error?: 'notDetectedLedger' | 'notDetectedTrezor';
+const requestHardwareWalletConnection = (): Promise<USBDevice> =>
+  navigator.usb.requestDevice({
+    filters: isTrezorHWSupported() ? Wallet.supportedHwUsbDescriptors : Wallet.ledgerDescriptors
+  });
+
+type ConnectionError =
+  | 'userGestureRequired'
+  | 'devicePickerRejected'
+  | 'deviceLocked'
+  | 'deviceBusy'
+  | 'cardanoAppNotOpen'
+  | 'generic';
+
+const connectionSubtitleErrorTranslationsMap: Record<ConnectionError, TranslationKey> = {
+  cardanoAppNotOpen: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.cardanoAppNotOpen',
+  deviceLocked: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceLocked',
+  deviceBusy: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceBusy',
+  devicePickerRejected: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.devicePickerRejected',
+  userGestureRequired: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.userGestureRequired',
+  generic: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.generic'
+};
+
+const makeTranslations = ({ connectionError, t }: { connectionError: ConnectionError; t: TFunction }) => ({
+  title: t('core.walletSetupConnectHardwareWalletStepRevamp.title'),
+  subTitle: isTrezorHWSupported()
+    ? t('core.walletSetupConnectHardwareWalletStepRevamp.subTitle')
+    : t('core.walletSetupConnectHardwareWalletStepRevamp.subTitleLedgerOnly'),
+  errorMessage: connectionError ? t(connectionSubtitleErrorTranslationsMap[connectionError]) : '',
+  errorCta: t('core.walletSetupConnectHardwareWalletStepRevamp.errorCta')
+});
+
+const parseConnectionError = (error: Error): ConnectionError => {
+  if (error instanceof DOMException) {
+    if (error.message.includes('user gesture')) return 'userGestureRequired';
+    if (error.message.includes('No device selected')) return 'devicePickerRejected';
+  }
+  if (isTimeoutError(error)) return 'deviceBusy';
+  if (error.message.includes('Cannot communicate with Ledger Cardano App')) {
+    if (error.message.includes('General error 0x5515')) return 'deviceLocked';
+    if (error.message.includes('General error 0x6e01')) return 'cardanoAppNotOpen';
+  }
+  return 'generic';
+};
+
+enum DiscoveryState {
+  Idle = 'Idle',
+  Requested = 'Requested',
+  Running = 'Running'
 }
 
-export const Connect = (): JSX.Element => {
+export const Connect: VFC = () => {
   const { t } = useTranslation();
-  const history = useHistory();
-  const { connect, data } = useHardwareWallet();
-  const [state, setState] = useState<State>({});
+  const { postHogActions } = useWalletOnboarding();
+  const { back, connect, next } = useHardwareWallet();
+  const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(DiscoveryState.Requested);
+  const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
   const analytics = useAnalyticsContext();
 
-  const walletSetupConnectHardwareWalletStepTranslations = {
-    title: t('core.walletSetupConnectHardwareWalletStep.title'),
-    subTitle: t(`core.walletSetupConnectHardwareWalletStep.${isTrezorHWSupported() ? 'subTitleFull' : 'subTitle'}`),
-    supportedDevices: t(
-      `core.walletSetupConnectHardwareWalletStep.${isTrezorHWSupported() ? 'supportedDevicesFull' : 'supportedDevices'}`
-    ),
-    connectDevice: t(
-      `core.walletSetupConnectHardwareWalletStep.${isTrezorHWSupported() ? 'connectDeviceFull' : 'connectDevice'}`
-    )
-  };
+  const translations = makeTranslations({ connectionError, t });
 
-  const clearError = () => setState({ error: undefined });
+  const onRetry = useCallback(() => {
+    setDiscoveryState(DiscoveryState.Requested);
+    setConnectionError(null);
+    void analytics.sendEventToPostHog(postHogActions.hardware.CONNECT_HW_TRY_AGAIN_CLICK);
+  }, [analytics, postHogActions.hardware.CONNECT_HW_TRY_AGAIN_CLICK]);
 
-  const handleConnect = async (model: Wallet.HardwareWallets) => {
-    connect(model)
-      .then(() => {
-        clearError();
-      })
-      .catch(() => {
-        setState({
-          error: model === WalletType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger'
-        });
-      });
-  };
+  useEffect(() => {
+    (async () => {
+      if (discoveryState !== DiscoveryState.Requested) return;
+
+      setDiscoveryState(DiscoveryState.Running);
+      try {
+        void analytics.sendEventToPostHog(postHogActions.hardware.CONNECT_HW_VIEW);
+        const usbDevice = await requestHardwareWalletConnection();
+        void analytics.sendEventToPostHog(postHogActions.hardware.HW_POPUP_CONNECT_CLICK);
+        await connect(usbDevice);
+        setDiscoveryState(DiscoveryState.Idle);
+        next();
+      } catch (error) {
+        setDiscoveryState(DiscoveryState.Idle);
+        console.error('ERROR connecting hardware wallet', error);
+        setConnectionError(parseConnectionError(error));
+      }
+    })();
+  }, [connect, discoveryState, analytics, next, postHogActions.hardware]);
 
   return (
-    <>
-      <ErrorHandling error={state.error} onRetry={clearError} />
-      <WalletSetupConnectHardwareWalletStep
-        wallets={Wallet.AVAILABLE_WALLETS}
-        onBack={() => history.push(walletRoutePaths.newWallet.root)}
-        onConnect={handleConnect}
-        onNext={() => {
-          analytics.sendEventToPostHog(PostHogAction.MultiWalletHWConnectNextClick);
-          history.push(walletRoutePaths.newWallet.hardware.select);
-        }}
-        isNextEnable={Boolean(data.connection)}
-        translations={walletSetupConnectHardwareWalletStepTranslations}
-        isHardwareWallet
-      />
-    </>
+    <WalletSetupConnectHardwareWalletStepRevamp
+      onBack={back}
+      translations={translations}
+      state={discoveryState === DiscoveryState.Idle && !!connectionError ? 'error' : 'loading'}
+      onRetry={connectionError ? onRetry : undefined}
+    />
   );
 };

@@ -19,7 +19,7 @@ import {
 } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
-const { CertificateType, GovernanceActionType, Vote, VoterType, InputSource } = Wallet.Cardano;
+const { CertificateType, GovernanceActionType, InputSource } = Wallet.Cardano;
 
 const hasWalletStakeAddress = (
   withdrawals: Wallet.Cardano.HydratedTx['body']['withdrawals'],
@@ -218,27 +218,6 @@ export const inspectTxValues = async ({
   return inspectionProperties.totalOutputsValue;
 };
 
-export enum VoterTypeEnum {
-  CONSTITUTIONAL_COMMITTEE = 'constitutionalCommittee',
-  SPO = 'spo',
-  DREP = 'drep'
-}
-
-export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterTypeEnum => {
-  switch (voterType) {
-    case VoterType.ccHotKeyHash:
-    case VoterType.ccHotScriptHash:
-      return VoterTypeEnum.CONSTITUTIONAL_COMMITTEE;
-    case VoterType.stakePoolKeyHash:
-      return VoterTypeEnum.SPO;
-    case VoterType.dRepKeyHash:
-    case VoterType.dRepScriptHash:
-      return VoterTypeEnum.DREP;
-    default:
-      return VoterTypeEnum.DREP;
-  }
-};
-
 export enum CredentialType {
   KeyHash = 'KeyHash',
   ScriptHash = 'ScriptHash'
@@ -252,23 +231,5 @@ export const getCredentialType = (credentialType: Wallet.Cardano.CredentialType)
       return CredentialType.ScriptHash;
     default:
       return CredentialType.ScriptHash;
-  }
-};
-
-export enum VotesEnum {
-  YES = 'yes',
-  NO = 'no',
-  ABSTAIN = 'abstain'
-}
-
-export const getVote = (vote: Wallet.Cardano.Vote): VotesEnum => {
-  switch (vote) {
-    case Vote.yes:
-      return VotesEnum.YES;
-    case Vote.no:
-      return VotesEnum.NO;
-    case Vote.abstain:
-    default:
-      return VotesEnum.ABSTAIN;
   }
 };

@@ -73,12 +73,6 @@ jest.mock('@lace/cardano', () => {
   };
 });
 
-const dappInfo = {
-  name: 'dappName',
-  logo: 'dappLogo',
-  url: 'dappUrl'
-};
-const errorMessage = 'errorMessage';
 const deposit = BigInt('10000');
 const rewardAccount = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
 const anchor = {
@@ -189,7 +183,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     await act(async () => {
       ({ queryByTestId } = render(
         <ParameterChangeActionContainer
-          {...{ errorMessage, dappInfo, deposit, rewardAccount, anchor, governanceAction: parameterChangeAction }}
+          {...{ deposit, rewardAccount, anchor, governanceAction: parameterChangeAction }}
         />,
         {
           wrapper: getWrapper()
@@ -200,10 +194,8 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('ParameterChangeAction')).toBeInTheDocument();
     expect(mockParameterChangeAction).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         data: {
           txDetails: {
-            txType: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.title'),
             deposit: depositPaidWithSymbol(deposit, cardanoCoinMock as Wallet.CoinId),
             rewardAccount
           },
@@ -307,218 +299,7 @@ describe('Testing ProposalProceduresContainer component', () => {
               }
             }
           }
-        },
-        translations: {
-          txDetails: {
-            title: t('core.ProposalProcedure.txDetails.title'),
-            txType: t('core.ProposalProcedure.txDetails.txType'),
-            deposit: t('core.ProposalProcedure.txDetails.deposit'),
-            rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
-          },
-          anchor: {
-            url: t('core.ProposalProcedure.procedure.anchor.url'),
-            hash: t('core.ProposalProcedure.procedure.anchor.hash')
-          },
-          memory: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
-          step: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
-          networkGroup: {
-            title: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
-            maxBBSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'),
-            maxTxSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'),
-            maxBHSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'),
-            maxValSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'),
-            maxTxExUnits: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'),
-            maxBlockExUnits: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
-            ),
-            maxCollateralInputs: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
-            ),
-            tooltip: {
-              maxBBSize: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxBBSize'
-              ),
-              maxTxSize: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxTxSize'
-              ),
-              maxBHSize: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxBHSize'
-              ),
-              maxValSize: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxValSize'
-              ),
-              maxTxExUnits: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxTxExUnits'
-              ),
-              maxBlockExUnits: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxBlockExUnits'
-              ),
-              maxCollateralInputs: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.tooltip.maxCollateralInputs'
-              )
-            }
-          },
-          economicGroup: {
-            title: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'),
-            minFeeA: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
-            minFeeB: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
-            keyDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'),
-            poolDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'),
-            rho: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
-            tau: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
-            minPoolCost: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'),
-            coinsPerUTxOByte: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
-            ),
-            prices: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.prices'),
-            tooltip: {
-              minFeeA: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.minFeeA'),
-              minFeeB: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.minFeeB'),
-              keyDeposit: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.keyDeposit'
-              ),
-              poolDeposit: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.poolDeposit'
-              ),
-              rho: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.rho'),
-              tau: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.tau'),
-              minPoolCost: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.minPoolCost'
-              ),
-              coinsPerUTxOByte: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.coinsPerUTxOByte'
-              ),
-              prices: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tooltip.prices')
-            }
-          },
-          technicalGroup: {
-            title: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.title'),
-            a0: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.a0'),
-            eMax: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.eMax'),
-            nOpt: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.nOpt'),
-            costModels: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.costModels'),
-            collateralPercentage: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.collateralPercentage'
-            ),
-            tooltip: {
-              a0: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.tooltip.a0'),
-              eMax: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.tooltip.eMax'),
-              nOpt: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.tooltip.nOpt'),
-              costModels: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.tooltip.costModels'
-              ),
-              collateralPercentage: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.tooltip.collateralPercentage'
-              )
-            }
-          },
-          governanceGroup: {
-            title: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.title'),
-            govActionLifetime: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionLifetime'
-            ),
-            govActionDeposit: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionDeposit'
-            ),
-            drepDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepDeposit'),
-            drepActivity: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepActivity'),
-            ccMinSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMinSize'),
-            ccMaxTermLength: t(
-              'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMaxTermLength'
-            ),
-            dRepVotingThresholds: {
-              title: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.title'
-              ),
-              motionNoConfidence: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.motionNoConfidence'
-              ),
-              committeeNormal: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNormal'
-              ),
-              committeeNoConfidence: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
-              ),
-              updateConstitution: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.updateConstitution'
-              ),
-              hardForkInitiation: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.hardForkInitiation'
-              ),
-              ppNetworkGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
-              ),
-              ppEconomicGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
-              ),
-              ppTechnicalGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
-              ),
-              ppGovernanceGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
-              ),
-              treasuryWithdrawal: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
-              )
-            },
-            tooltip: {
-              govActionLifetime: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.govActionLifetime'
-              ),
-              govActionDeposit: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.govActionDeposit'
-              ),
-              drepDeposit: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.drepDeposit'
-              ),
-              drepActivity: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.drepActivity'
-              ),
-              ccMinSize: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.ccMinSize'
-              ),
-              ccMaxTermLength: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.ccMaxTermLength'
-              ),
-              dRepVotingThresholds: {
-                title: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.title'
-                ),
-                motionNoConfidence: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.motionNoConfidence'
-                ),
-                committeeNormal: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.committeeNormal'
-                ),
-                committeeNoConfidence: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.committeeNoConfidence'
-                ),
-                updateConstitution: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.updateConstitution'
-                ),
-                hardForkInitiation: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.hardForkInitiation'
-                ),
-                ppNetworkGroup: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.ppNetworkGroup'
-                ),
-                ppEconomicGroup: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.ppEconomicGroup'
-                ),
-                ppTechnicalGroup: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.ppTechnicalGroup'
-                ),
-                ppGovernanceGroup: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.ppGovernanceGroup'
-                ),
-                treasuryWithdrawal: t(
-                  'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.tooltip.dRepVotingThresholds.treasuryWithdrawal'
-                )
-              }
-            }
-          }
-        },
-        errorMessage
+        }
       },
       {}
     );

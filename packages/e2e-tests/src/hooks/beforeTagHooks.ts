@@ -152,11 +152,13 @@ Before(
 Before({ tags: '@Staking-NonDelegatedFunds-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
 Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
 Before(
@@ -174,6 +176,7 @@ Before({ tags: '@AdaHandle-popup' }, async () => await popupViewWalletInitializa
 Before({ tags: '@Multidelegation-SwitchingPools-Extended-E2E' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.WalletMultidelegationSwitchPoolsE2E);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
 Before(
@@ -189,23 +192,27 @@ Before(
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedMulti);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedMulti);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });

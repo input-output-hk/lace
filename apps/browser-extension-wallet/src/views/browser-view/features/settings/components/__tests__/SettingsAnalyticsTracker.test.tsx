@@ -11,7 +11,7 @@ import {
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps
 } from '@providers';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { BehaviorSubject } from 'rxjs';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 

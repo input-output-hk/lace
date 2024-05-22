@@ -12,6 +12,7 @@
     width: 204px;
     border-right: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
     margin: size_unit(5) 0;
+    min-width: 200px;
 
     .activeText {
       @include text-bodySmall-semi-bold;

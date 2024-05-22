@@ -85,6 +85,10 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('analyticsStatus', '');
   };
 
+  disableShowingMultidelegationDAppsIssueModal = async () => {
+    await localStorageManager.setItem('isMultiDelegationDAppCompatibilityModalVisible', 'false');
+  };
+
   initialiseBasicLocalStorageData = async (
     walletName: string,
     chainName: 'Preprod' | 'Preview' | 'Mainnet'

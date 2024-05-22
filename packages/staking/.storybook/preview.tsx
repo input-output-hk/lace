@@ -2,6 +2,7 @@ import React from 'react';
 import type { Preview, Decorator } from '@storybook/react';
 // @ts-ignore
 import { StakingStorybookProvider } from './StakingStorybookProvider';
+import '@lace/translation';
 
 const wrapWith =
   (Component: React.FunctionComponent): Decorator =>

@@ -1,16 +1,17 @@
-import { Wallet } from '@lace/cardano';
-import { Observable, Subject } from 'rxjs';
-
-export interface Data {
-  model: Wallet.HardwareWallets;
-  connection: Wallet.DeviceConnection;
-  account: number;
-  name: string;
-}
+import { Subject } from 'rxjs';
 
 export interface Providers {
-  createWallet: (params: Data) => Promise<void>;
-  connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
-  disconnectHardwareWallet$: Observable<USBConnectionEvent>;
-  shouldShowDialog$: Subject<boolean>;
+  shouldShowConfirmationDialog$: Subject<boolean>;
+}
+
+export enum ErrorDialogCode {
+  DeviceDisconnected = 'DeviceDisconnected',
+  PublicKeyExportRejected = 'PublicKeyExportRejected',
+  Generic = 'Generic'
+}
+
+export enum WalletConnectStep {
+  Connect = 'Connect',
+  Setup = 'Setup',
+  Create = 'Create'
 }

@@ -57,7 +57,7 @@ Feature: LW-423: NFTs - Extended view
     Given I am on NFTs extended page
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
-    Examples:
+    Examples: 
       | type     | subtitle                        |
       | Glossary | What are collections?           |
       | FAQ      | How to buy an NFT?              |
@@ -89,3 +89,13 @@ Feature: LW-423: NFTs - Extended view
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I press keyboard Escape button
     Then a popup asking if you're sure you'd like to close it is displayed
+
+  @LW-10321
+  Scenario: Extended-view - Setting up NFT as a wallet profile avatar
+    Given I am on NFTs extended page
+    And I left click on the NFT with name "LaceNFT" on NFTs page
+    And I am on a NFT details on the extended view for NFT with name: "LaceNFT"
+    And I save NFT details
+    And I click "Set as your wallet avatar" button on NFT details drawer
+    When I close the drawer by clicking close button
+    Then the NFT is set as a wallet profile avatar

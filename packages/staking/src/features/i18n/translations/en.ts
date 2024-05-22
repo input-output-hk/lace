@@ -160,6 +160,10 @@ export const en: Translations = {
   'modals.changingPreferences.description':
     "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
   'modals.changingPreferences.title': 'Changing staking preferences?',
+  'modals.dapp.button': 'Got it',
+  'modals.dapp.description':
+    "Multi-delegation allows you to delegate to multiple pools using a single payment key for an enhanced user experience. However, as not all dApps support this new mechanism, if you encounter issues with dApps after multi-delegating, refer to the 'Multi-staking' section of our <Link>FAQ</Link> to revert your wallet to its previous state before multi-delegating.",
+  'modals.dapp.title': 'Multi-delegation',
   'modals.poolsManagement.buttons.cancel': 'Cancel',
   'modals.poolsManagement.buttons.confirm': 'Fine by me',
   'modals.poolsManagement.description.adjustment':

@@ -1,4 +1,4 @@
-import { TranslationKey } from '@lib/translations/types';
+import type { TranslationKey } from '@lace/translation';
 import React from 'react';
 import { Modal, Typography } from 'antd';
 import { Button } from '@lace/common';
@@ -9,7 +9,7 @@ const { Title, Text } = Typography;
 
 type TranslationKeys = Record<'title' | 'description' | 'confirm', TranslationKey>;
 
-interface ErrorDialogProps<ErrorCode extends string> {
+export interface ErrorDialogProps<ErrorCode extends string> {
   visible: boolean;
   onRetry: () => void;
   errorCode?: ErrorCode;

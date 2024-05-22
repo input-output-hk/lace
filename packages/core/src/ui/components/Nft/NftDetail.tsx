@@ -1,4 +1,4 @@
-import { InlineInfoList, LabeledInfo } from '@lace/common';
+import { Ellipsis, InlineInfoList, LabeledInfo } from '@lace/common';
 import React, { ReactNode } from 'react';
 import styles from './NftDetail.module.scss';
 import { NftImage } from './NftImage';
@@ -58,6 +58,7 @@ export const NftDetail = ({
       label={translations.setAsAvatar}
       icon={<ProfileIcon />}
       onClick={() => onSetAsAvatar(image)}
+      data-testid="nft-set-as-avatar-button"
     />
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
@@ -74,13 +75,17 @@ export const NftDetail = ({
                     <FolderOutlined />
                     <span>Root</span>
                   </Breadcrumb.Item>
-                  {folder && <Breadcrumb.Item>{folder}</Breadcrumb.Item>}
+                  {folder && (
+                    <Breadcrumb.Item>
+                      <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} />
+                    </Breadcrumb.Item>
+                  )}
                 </Breadcrumb>
               ) : (
                 <Flex justifyContent="space-between" gap="$1">
                   <Box>Root</Box>
                   {folder && <Box px="$8">{'>'}</Box>}
-                  {folder && <Box>{folder}</Box>}
+                  {folder && <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} />}
                 </Flex>
               )
             }

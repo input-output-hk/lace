@@ -2,9 +2,8 @@
 import React from 'react';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 
-import { useTranslate } from '@src/ui/hooks';
-
 import { DappAddressSection } from './DappAddressSection';
+import { useTranslation } from 'react-i18next';
 
 interface GroupedAddressAssets {
   nfts: Array<AssetInfoWithAmount>;
@@ -31,7 +30,7 @@ export const DappAddressSections = ({
   ownAddresses,
   addressToNameMap
 }: DappAddressSectionProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <>

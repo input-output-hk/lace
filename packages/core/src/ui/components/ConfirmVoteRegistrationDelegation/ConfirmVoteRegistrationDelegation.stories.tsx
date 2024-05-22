@@ -7,7 +7,7 @@ const customViewports = {
   popup: {
     name: 'Popup',
     styles: {
-      width: '360px',
+      width: '720px',
       height: '600'
     }
   }
@@ -29,22 +29,6 @@ export default meta;
 type Story = StoryObj<typeof ConfirmVoteRegistrationDelegation>;
 
 const data: ComponentProps<typeof ConfirmVoteRegistrationDelegation> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
-  translations: {
-    labels: {
-      drepId: 'DRep ID',
-      alwaysAbstain: 'Abstain',
-      alwaysNoConfidence: 'No Confidence',
-      depositPaid: 'Deposit paid',
-      stakeKeyHash: 'Stake key hash'
-    },
-    option: 'Yes',
-    metadata: 'Metadata'
-  },
   metadata: {
     drepId: 'drep1ruvgm0auzdplfn7g2jf3kcnpnw5mlhwxaxj8crag8h6t2ye9y9g',
     alwaysAbstain: false,
@@ -57,12 +41,6 @@ const data: ComponentProps<typeof ConfirmVoteRegistrationDelegation> = {
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };
 

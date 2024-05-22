@@ -4,7 +4,7 @@ import styles from './OutputSummary.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { Text, Flex, Box } from '@lace/ui';
 import { getAddressTagTranslations, renderAddressTag } from '@src/ui/utils';
-import { useTranslate } from '@src/ui/hooks';
+import { useTranslation } from 'react-i18next';
 
 export type SentAssetsList = Array<{
   assetAmount: string;
@@ -26,7 +26,7 @@ export const OutputSummary = ({
   recipientName,
   ownAddresses
 }: OutputSummaryProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <div className={styles.container} data-testid="output-summary-container">

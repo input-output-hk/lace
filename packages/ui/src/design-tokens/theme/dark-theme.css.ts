@@ -402,15 +402,15 @@ const elevation: Elevation = {
 
 export const theme = {
   borders,
-  spacing,
-  fontWeights,
-  fontSizes,
-  lineHeights,
-  fontFamily,
   colors,
-  radius,
   elevation,
+  fontFamily,
+  fontSizes,
+  fontWeights,
+  lineHeights,
   opacities,
+  radius,
+  spacing,
 };
 
 createGlobalTheme('[data-theme="dark"]:root', vars, theme);

@@ -1,8 +1,9 @@
 import React from 'react';
 import cn from 'classnames';
 import { Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
-import { LegalTranslations, useTranslate } from '@lace/core';
+import { LegalTranslations } from '@lace/core';
 import styles from './SettingsLayout.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface GeneralSettingsDrawerProps {
   visible: boolean;
@@ -16,7 +17,7 @@ export const TermsDrawer = ({
   onClose,
   popupView = false
 }: GeneralSettingsDrawerProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <Drawer

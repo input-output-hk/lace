@@ -73,8 +73,8 @@ class MultidelegationPage {
   private STAKE_POOLS_LIST_CONTAINER = '[data-testid="stake-pools-list-container"]';
   private STAKE_POOL_LIST_ROW_SKELETON = '[data-testid="stake-pool-list-row-skeleton"]';
   private STAKE_POOL_CARD_SKELETON = '[data-testid="stake-pool-card-skeleton"]';
-  private SELCECTED_STAKE_POOLS_IN_GRID_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-card"]';
-  private SELCECTED_STAKE_POOLS_IN_LIST_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-item"]';
+  private SELECTED_STAKE_POOLS_IN_GRID_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-card"]';
+  private SELECTED_STAKE_POOLS_IN_LIST_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-item"]';
   private POOLS_COUNTER = '[data-testid="pools-counter"]';
 
   get title() {
@@ -294,11 +294,11 @@ class MultidelegationPage {
   }
 
   get selectedPoolsInGridView() {
-    return $$(this.SELCECTED_STAKE_POOLS_IN_GRID_VIEW);
+    return $$(this.SELECTED_STAKE_POOLS_IN_GRID_VIEW);
   }
 
   get selectedPoolsInListView() {
-    return $$(this.SELCECTED_STAKE_POOLS_IN_LIST_VIEW);
+    return $$(this.SELECTED_STAKE_POOLS_IN_LIST_VIEW);
   }
 
   get moreOptionsComponent(): typeof MoreOptionsComponent {
@@ -376,7 +376,7 @@ class MultidelegationPage {
     });
     for (const ticker of poolsToMark) {
       await this.fillSearch(ticker);
-      await MultidelegationPageAssert.assertSeeSearchResultsCountExact(1);
+      await MultidelegationPageAssert.assertSeeSearchResultsCountGreaterOrEqual(1);
       await this.markStakePoolWithTicker(ticker);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);

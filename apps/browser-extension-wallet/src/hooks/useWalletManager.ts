@@ -614,6 +614,7 @@ export const useWalletManager = (): UseWalletManager => {
         'hideBalance',
         'isForgotPasswordFlow',
         'multidelegationFirstVisit',
+        'isMultiDelegationDAppCompatibilityModalVisible',
         'multidelegationFirstVisitSincePortfolioPersistence'
       ];
 

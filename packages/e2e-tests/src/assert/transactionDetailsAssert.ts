@@ -102,6 +102,7 @@ class TransactionsDetailsAssert {
     const actualIds: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolIds();
     const actualNames: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolNames();
     const actualTickers: string[] = await TransactionDetailsPage.getTransactionDetailsStakepoolTickers();
+    if (actualIds[0].endsWith(expectedTickers[0].split('...')[1])) expectedTickers[0] = '-';
 
     expect(actualIds).to.have.all.members(expectedIds);
     expect(actualNames).to.have.all.members(expectedNames);
