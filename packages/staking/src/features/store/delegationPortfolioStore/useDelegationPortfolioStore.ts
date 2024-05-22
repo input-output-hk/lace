@@ -144,13 +144,6 @@ export const useDelegationPortfolioStore = create(
         delegationRewardsHistory,
         delegationPortfolio,
       }) => {
-        console.log('XXX setCurrentPortfolio: ', {
-          currentEpoch,
-          delegationDistribution,
-          delegationRewardsHistory,
-          delegationPortfolio,
-        });
-
         const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
         const confirmedRewardHistory = delegationRewardsHistory.all.filter(
           ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
