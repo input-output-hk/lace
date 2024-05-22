@@ -1,62 +1,64 @@
-import React from 'react';
-import { sx, Box, Cell, Grid, Flex, Text, TextBox, Button } from '@lace/ui';
+/* eslint-disable sonarjs/no-identical-functions */
+import React, { useState } from 'react';
+import { SharedWalletStepLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
+import { WalletNameInput } from '../../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
+import { WALLET_NAME_INPUT_MAX_LENGTH } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
+import { ProfileDropdown, Box, Text, FlowCard } from '@lace/ui';
+import { addEllipsis } from '@lace/common';
+import styles from './SetupSharedWallet.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-  translations: {
-    title: string;
-    subtitle: string;
-    textBoxLabel: string;
-    backButton: string;
-    nextButton: string;
-  };
-  data: {
-    isNextEnabled: boolean;
-    name: string;
-  };
-  events: {
-    onNameChange: (name: string) => void;
-    onBack: () => void;
-    onNext: () => void;
-  };
+  walletName: string;
+  address: string;
+  onBack?: () => void;
+  onNext?: () => void;
+  onNameChange?: (name: string) => void;
 }
 
-export const SetupSharedWallet = ({ translations, data, events }: Props): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$24'}>
-      <Text.Heading
-        className={sx({
-          color: '$text_primary'
-        })}
-      >
-        {translations.title}
-      </Text.Heading>
-    </Box>
-    <Box mb={'$40'}>
-      <Text.Body.Normal
-        className={sx({
-          color: '$text_secondary'
-        })}
-      >
-        {translations.subtitle}
-      </Text.Body.Normal>
-    </Box>
-    <Grid columns="$1" gutters="$20">
-      <Cell>
-        <TextBox
-          label={translations.textBoxLabel}
-          w="$fill"
-          value={data.name}
-          onChange={(e) => events.onNameChange(e.target.value)}
-        />
-      </Cell>
-    </Grid>
-    <Flex w="$fill" justifyContent="space-between" alignItems="center">
-      <Button.Secondary label={translations.backButton} onClick={() => events.onBack()} />
-      <Button.CallToAction
-        label={translations.nextButton}
-        onClick={() => events.onNext()}
-        disabled={!data.isNextEnabled}
+const ADDRESS_FIRST_PART_LENGTH = 35;
+const ADDRESS_LAST_PART_LENGTH = 0;
+
+export const SetupSharedWallet = ({ walletName, address, onBack, onNext, onNameChange }: Props): JSX.Element => {
+  const [sharedWalletName, setSharedWalletName] = useState('');
+  const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
+  const { t } = useTranslation();
+
+  const translations = {
+    title: t('core.sharedWallet.walletName.title'),
+    subtitle: t('core.sharedWallet.walletName.subtitle'),
+    body: t('core.sharedWallet.walletName.body')
+  };
+
+  const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+    setSharedWalletName(value);
+    setShouldShowNameErrorMessage(true);
+    onNameChange?.(value);
+  };
+
+  return (
+    <SharedWalletStepLayout
+      title={translations.title}
+      description={translations.subtitle}
+      onBack={onBack}
+      onNext={onNext}
+      isNextEnabled={!!walletName}
+      currentTimelineStep={SharedWalletTimelineSteps.WALLET_NAME}
+    >
+      <WalletNameInput
+        value={sharedWalletName}
+        label="Shared wallet name"
+        onChange={handleNameChange}
+        maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
+        shouldShowErrorMessage={shouldShowNameErrorMessage}
       />
-    </Flex>
-  </Flex>
-);
+      <Box mt="$40" mb="$20">
+        <Text.Body.Normal weight="$semibold">{translations.body}</Text.Body.Normal>
+      </Box>
+      <FlowCard.Card flowCardClassName={styles.walletCard}>
+        <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type="hot" />} name={walletName} />
+        <FlowCard.Details subtitle={addEllipsis(address, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)} />
+      </FlowCard.Card>
+    </SharedWalletStepLayout>
+  );
+};

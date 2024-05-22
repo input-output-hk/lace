@@ -1,9 +1,16 @@
 import React from 'react';
 import { SharedWalletGetStartedOptions } from '@lace/core';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router';
+import { walletRoutePaths } from '@routes';
+
+const {
+  sharedWallet: { create }
+} = walletRoutePaths;
 
 export const SharedWalletGetStarted = (): React.ReactElement => {
   const { t } = useTranslation();
+  const history = useHistory();
 
   return (
     <SharedWalletGetStartedOptions
@@ -21,6 +28,7 @@ export const SharedWalletGetStarted = (): React.ReactElement => {
           button: t('browserView.sharedWallet.setup.importSharedWalletOption.button')
         }
       }}
+      onCreateSharedWalletClick={() => history.push(create.root)}
     />
   );
 };

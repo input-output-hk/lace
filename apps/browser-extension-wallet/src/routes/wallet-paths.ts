@@ -28,7 +28,10 @@ export const walletRoutePaths = {
     restore: '/new-wallet/restore'
   },
   sharedWallet: {
-    root: '/add-shared-wallet'
+    root: '/shared-wallet',
+    create: {
+      root: '/shared-wallet/wallet-name'
+    }
   }
 };
 

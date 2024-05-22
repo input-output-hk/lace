@@ -1,0 +1,28 @@
+@import '../../../../../../common/src/ui/styles/abstracts/mixins';
+@import '../../../../../../common/src/ui/styles/theme.scss';
+
+.timeline {
+  width: 204px;
+  border-right: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  margin: 100px 0 0 40px !important;
+  min-width: 200px;
+
+  .activeText {
+    @include text-bodySmall-semi-bold;
+  }
+}
+
+.scrollArea {
+  overflow-y: visible;
+  flex: 1;
+}
+
+.scrollAreaViewport {
+  max-height: 250px;
+  overflow-y: visible;
+}
+
+.scrollBar {
+  padding: 0;
+  right: -25px !important;
+}
