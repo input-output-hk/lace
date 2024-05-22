@@ -3,8 +3,16 @@ import * as React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TransactionDetails, TransactionDetailsProps } from '../TransactionDetails';
+import { Wallet } from '@lace/cardano';
 
 const transactionDate = '2021/09/10';
+
+export const cardanoCoin: Wallet.CoinId = {
+  id: '1',
+  name: 'Cardano',
+  decimals: 6,
+  symbol: 'A'
+};
 
 describe('Testing ActivityDetailsBrowser component', () => {
   const addrListProps: TransactionDetailsProps = {
@@ -36,7 +44,10 @@ describe('Testing ActivityDetailsBrowser component', () => {
     amountTransformer: (amount) => `${amount} $`,
     coinSymbol: 'ADA',
     ownAddresses: [],
-    addressToNameMap: new Map()
+    addressToNameMap: new Map(),
+    chainNetworkId: Wallet.Cardano.NetworkId.Testnet,
+    cardanoCoin,
+    explorerBaseUrl: ''
   };
 
   test('should display transaction hash and copy button', async () => {

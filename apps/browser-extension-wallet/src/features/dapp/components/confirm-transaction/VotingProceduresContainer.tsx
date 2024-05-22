@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { VotingProcedures } from '@lace/core';
-import { getDRepId, votingProceduresInspector } from './utils';
+import { DappInfo, VotingProcedures } from '@lace/core';
+import { votingProceduresInspector } from './utils';
 import { useCexplorerBaseUrl, useDisallowSignTx } from './hooks';
-import { getVote, getVoterType } from '@src/utils/tx-inspection';
 import { Wallet } from '@lace/cardano';
 
 import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
 import { useViewsFlowContext } from '@providers';
 import { useWalletStore } from '@src/stores';
+import { Box, Flex } from '@lace/ui';
 
 export const VotingProceduresContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
   const {
     signTxRequest: { request },
     dappInfo
@@ -54,48 +52,16 @@ export const VotingProceduresContainer = (): React.ReactElement => {
         }}
         onClose={() => disallowSignTx(true)}
       />
-      <VotingProcedures
-        dappInfo={dappInfo}
-        data={votingProcedures.map((votingProcedure) => {
-          const voterType = getVoterType(votingProcedure.voter.__typename);
-
-          return {
-            voter: {
-              type: t(`core.VotingProcedures.voterTypes.${voterType}`),
-              dRepId: getDRepId(votingProcedure.voter)
-            },
-            votes: votingProcedure.votes.map((vote) => ({
-              actionId: {
-                index: vote.actionId.actionIndex,
-                txHash: vote.actionId.id.toString(),
-                txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}`
-              },
-              votingProcedure: {
-                vote: t(`core.VotingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
-                anchor: !!vote.votingProcedure.anchor && {
-                  url: vote.votingProcedure.anchor.url,
-                  hash: vote.votingProcedure.anchor.dataHash.toString()
-                }
-              }
-            }))
-          };
-        })}
-        translations={{
-          voterType: t('core.VotingProcedures.voterType'),
-          procedureTitle: t('core.VotingProcedures.procedureTitle'),
-          actionIdTitle: t('core.VotingProcedures.actionIdTitle'),
-          vote: t('core.VotingProcedures.vote'),
-          actionId: {
-            index: t('core.VotingProcedures.actionId.index'),
-            txHash: t('core.VotingProcedures.actionId.txHash')
-          },
-          anchor: {
-            hash: t('core.VotingProcedures.anchor.hash'),
-            url: t('core.VotingProcedures.anchor.url')
-          },
-          dRepId: t('core.VotingProcedures.dRepId')
-        }}
-      />
+      <Flex h="$fill" flexDirection="column">
+        <Box mb={'$28'} mt={'$32'}>
+          <DappInfo {...dappInfo} />
+        </Box>
+        <VotingProcedures
+          data={votingProcedures.map((votingProcedure) =>
+            Wallet.util.mapVotingProcedureToView(votingProcedure, explorerBaseUrl)
+          )}
+        />
+      </Flex>
     </>
   );
 };

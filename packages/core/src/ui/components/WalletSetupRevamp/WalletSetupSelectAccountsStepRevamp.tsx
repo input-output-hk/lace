@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useMemo, useState } from 'react';
 import styles from './WalletSetupSelectAccountsStepRevamp.module.scss';
 import { Input } from '@lace/common';
-import { Box, SelectGroup } from '@lace/ui';
+import { Box, Select } from '@lace/ui';
 import { WalletTimelineSteps } from '../WalletSetup';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { useTranslation } from 'react-i18next';
@@ -71,18 +71,21 @@ export const WalletSetupSelectAccountsStepRevamp = ({
           )}
         </div>
         <Box mt="$16">
-          <SelectGroup
+          <Select.Root
+            variant="outline"
             placeholder="Accounts"
-            options={options}
-            onValueChange={(value) => {
+            value={selectedAccount}
+            triggerTestId="wallet-setup-account-select-input"
+            onChange={(value) => {
               setSelectedAccount(value);
               onSelectedAccountChange?.();
             }}
             showArrow
-            withOutline
-            selectedValue={selectedAccount}
-            contentClassName={styles.selectOptions}
-          />
+          >
+            {options.map(({ value, label }) => (
+              <Select.Item key={value} value={value} title={label} />
+            ))}
+          </Select.Root>
         </Box>
       </Box>
     </WalletSetupStepLayoutRevamp>

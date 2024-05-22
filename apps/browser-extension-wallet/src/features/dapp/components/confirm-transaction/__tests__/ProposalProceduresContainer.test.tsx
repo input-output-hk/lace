@@ -160,7 +160,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('TreasuryWithdrawalsActionContainer')).toBeInTheDocument();
     expect(queryByTestId('UpdateCommitteeActionContainer')).toBeInTheDocument();
 
-    const expectedProps = { dappInfo, deposit, rewardAccount, anchor };
+    const expectedProps = { deposit, rewardAccount, anchor };
 
     expect(mockHardForkInitiationActionContainer).toHaveBeenLastCalledWith(
       { ...expectedProps, governanceAction: hardForkInitiationAction },

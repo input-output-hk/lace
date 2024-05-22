@@ -1,5 +1,5 @@
 /* eslint-disable import/imports-first */
-import { of, Subject } from 'rxjs';
+import { of } from 'rxjs';
 
 jest.mock('@lib/wallet-api-ui', () => ({
   walletRepository: {
@@ -8,6 +8,9 @@ jest.mock('@lib/wallet-api-ui', () => ({
   },
   walletManager: {
     activate: jest.fn().mockReturnValue(void 0)
+  },
+  observableWallet: {
+    addresses$: of([[]])
   }
 }));
 
@@ -15,13 +18,12 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { createMemoryHistory } from 'history';
 import { act, fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { HardwareWallet } from './HardwareWallet';
+import { WalletOnboardingFlows } from '../WalletOnboardingFlows';
 import { MemoryRouter, Router } from 'react-router-dom';
-import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { Wallet } from '@lace/cardano';
 import { createAssetsRoute, getNextButton } from '../tests/utils';
-import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
+import { AnalyticsTracker, postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { APP_MODE_BROWSER } from '@utils/constants';
 import { StoreProvider } from '@src/stores';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
@@ -32,7 +34,7 @@ jest.mock('@providers/AnalyticsProvider', () => ({
   useAnalyticsContext: jest
     .fn<Pick<AnalyticsTracker, 'sendEventToPostHog' | 'sendMergeEvent' | 'sendAliasEvent'>, []>()
     .mockReturnValue({
-      sendEventToPostHog: jest.fn().mockReturnValue(''),
+      sendEventToPostHog: jest.fn(),
       sendMergeEvent: jest.fn(),
       sendAliasEvent: jest.fn()
     })
@@ -55,8 +57,8 @@ const selectAccountNameStep = async () => {
   act(() => {
     fireEvent.change(nameInput, { target: { value: 'Ada Lovalace' } });
   });
-  const acountSelect = screen.queryByTestId('select-group-input');
-  expect(acountSelect).toHaveTextContent('Account #0');
+  const accountSelect = screen.queryByTestId('wallet-setup-account-select-input');
+  expect(accountSelect).toHaveTextContent('Account #0');
 
   act(() => {
     fireEvent.click(nextButton);
@@ -69,10 +71,6 @@ const createStep = async () => {
 };
 
 describe('Multi Wallet Setup/Hardware Wallet', () => {
-  let providers = {} as {
-    shouldShowConfirmationDialog$: Subject<boolean>;
-  };
-
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const originalUsbDeviceClass = globalThis.USBDevice;
@@ -83,10 +81,6 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
   let deviceObject: any;
 
   beforeEach(() => {
-    providers = {
-      shouldShowConfirmationDialog$: new Subject()
-    };
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     globalThis.USBDevice = class USBDevice {};
@@ -142,7 +136,11 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
             <Router history={history}>
-              <HardwareWallet providers={providers as Providers} />
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+              />
               {createAssetsRoute()}
             </Router>
           </StoreProvider>
@@ -151,7 +149,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     );
 
     act(() => {
-      history.push(walletRoutePaths.newWallet.hardware.connect);
+      history.push(walletRoutePaths.newWallet.hardware);
     });
 
     await connectHardwareWalletStep();
@@ -164,8 +162,12 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.hardware.connect]}>
-              <HardwareWallet providers={providers as Providers} />
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.hardware]}>
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+              />
             </MemoryRouter>
           </StoreProvider>
         </DatabaseProvider>

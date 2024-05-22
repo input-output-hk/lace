@@ -13,18 +13,13 @@ import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { TransactionFee } from './TransactionFee';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
-import { TxDetailList } from './TxDetailsList';
-import {
-  TxDetailsVotingProceduresTitles,
-  TxDetailsProposalProceduresTitles,
-  TxDetailsCertificateTitles,
-  TxDetails,
-  TxDetail,
-  TransactionActivityType
-} from './types';
 import { Collateral, CollateralStatus } from './Collateral';
+import { Wallet } from '@lace/cardano';
+import { TxDetailsCertificates } from './components/TxDetailsCertificates/TxDetailsCertificates';
+import { TxDetailsVotingProcedures } from './components/TxDetailsVotingProcedures';
+import { TxDetailsProposalProcedures } from './components/TxDetailsProposalProcedures';
+import { TransactionActivityType } from './types';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '@lace/translation';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -83,13 +78,15 @@ export interface TransactionDetailsProps {
   ownAddresses: string[];
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
-  openExternalLink?: (url: string) => void;
   handleOpenExternalHashLink?: () => void;
   sendAnalyticsInputs?: () => void;
   sendAnalyticsOutputs?: () => void;
-  votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
-  proposalProcedures?: TxDetails<TxDetailsProposalProceduresTitles>[];
-  certificates?: TxDetails<TxDetailsCertificateTitles>[];
+  votingProcedures?: Wallet.Cardano.VotingProcedures;
+  proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
+  certificates?: Wallet.Cardano.Certificate[];
+  chainNetworkId: Wallet.Cardano.NetworkId;
+  cardanoCoin: Wallet.CoinId;
+  explorerBaseUrl: string;
 }
 
 const TOAST_DEFAULT_DURATION = 3;
@@ -130,106 +127,21 @@ export const TransactionDetails = ({
   ownAddresses,
   addressToNameMap,
   isPopupView,
-  openExternalLink,
   handleOpenExternalHashLink,
   sendAnalyticsInputs,
   sendAnalyticsOutputs,
   proposalProcedures,
   votingProcedures,
+  collateral,
   certificates,
-  collateral
+  chainNetworkId,
+  cardanoCoin,
+  explorerBaseUrl
 }: TransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
 
   const isSending = status === ActivityStatus.PENDING;
   const isSuccess = status === ActivityStatus.SUCCESS;
-
-  const renderAnchorHashDetails = (url: string) => (
-    <div className={styles.txLink} onClick={() => openExternalLink(url)}>
-      {url}
-    </div>
-  );
-
-  // Translate certificate typenames
-  // TODO: refactor this one
-  const translatedCertificates = certificates?.map((certificate) =>
-    certificate?.map(
-      (detail) =>
-        ({
-          ...detail,
-          ...('title' in detail &&
-            detail.title === 'certificateType' && {
-              details: [t(`core.assetActivityItem.entry.name.${detail.details[0]}` as unknown as TranslationKey)]
-            }),
-          ...('title' in detail &&
-            detail.title === 'anchorURL' && {
-              details: [renderAnchorHashDetails(detail.details[0] as string)]
-            })
-        } as unknown as TxDetail<TxDetailsCertificateTitles>)
-    )
-  );
-
-  // Translate governance proposal typenames
-  // TODO: find a way to translate in the mappers
-  // TODO: refactor this one
-  const translatedProposalProcedures = proposalProcedures?.map((proposal) =>
-    proposal?.map(
-      (p) =>
-        ({
-          ...p,
-          ...('title' in p &&
-            p.title === 'type' && {
-              details: [t(`core.activityDetails.governanceActions.${p.details[0]}` as unknown as TranslationKey)]
-            }),
-          ...('title' in p &&
-            p.title === 'anchorURL' && {
-              details: [renderAnchorHashDetails(p.details[0] as string)]
-            }),
-          ...('header' in p && {
-            details: p.details.map((detail) => ({
-              ...detail,
-              ...('title' in detail &&
-                ['govActionLifetime', 'drepActivity', 'ccMaxTermLength'].includes(detail.title) && {
-                  details: [
-                    `
-                    ${Number(detail.details[0])}
-                      ${t(
-                        // eslint-disable-next-line sonarjs/no-nested-template-literals
-                        `core.activityDetails.${
-                          Number(detail.details[0]) === 0 || Number(detail.details[0]) > 1 ? 'epochs' : 'epoch'
-                        }`
-                      )}
-                    `
-                  ]
-                }),
-              ...('title' in detail &&
-                detail.title === 'anchorURL' && {
-                  details: [renderAnchorHashDetails(detail.details[0] as string)]
-                })
-            }))
-          })
-        } as unknown as TxDetail<TxDetailsProposalProceduresTitles>)
-    )
-  );
-
-  // Translate voting procedure typenames
-  // TODO: refactor this one
-  const translatedVotingProcedures = votingProcedures?.map((proposal) =>
-    proposal?.map(
-      (p) =>
-        ({
-          ...p,
-          ...('title' in p &&
-            ['voterType', 'voteTypes'].includes(p.title) && {
-              details: [t(`core.activityDetails.${p.title}.${p.details[0]}` as unknown as TranslationKey)]
-            }),
-          ...('title' in p &&
-            p.title === 'anchorURL' && {
-              details: [renderAnchorHashDetails(p.details[0] as string)]
-            })
-        } as unknown as TxDetail<TxDetailsVotingProceduresTitles>)
-    )
-  );
 
   const getCollateralStatus = (): CollateralStatus => {
     switch (status) {
@@ -440,163 +352,21 @@ export const TransactionDetails = ({
               label: t('core.activityDetails.depositReclaim')
             })}
         </div>
-
         {votingProcedures?.length > 0 && (
-          <TxDetailList<TxDetailsVotingProceduresTitles>
-            testId="voting-procedures"
-            title={t('core.activityDetails.votingProcedures')}
-            subTitle={t('core.activityDetails.votingProcedure')}
-            lists={translatedVotingProcedures}
-            translations={{
-              voterType: t('core.activityDetails.votingProcedureTitles.voterType'),
-              drepId: t('core.activityDetails.votingProcedureTitles.drepId'),
-              voterCredential: t('core.activityDetails.votingProcedureTitles.voterCredential'),
-              voteTypes: t('core.activityDetails.votingProcedureTitles.voteTypes'),
-              anchorHash: t('core.activityDetails.votingProcedureTitles.anchorHash'),
-              anchorURL: t('core.activityDetails.votingProcedureTitles.anchorURL')
-            }}
-            withSeparatorLine
-          />
+          <TxDetailsVotingProcedures votingProcedures={votingProcedures} explorerBaseUrl={explorerBaseUrl} />
         )}
         {proposalProcedures?.length > 0 && (
-          <TxDetailList<TxDetailsProposalProceduresTitles>
-            testId="proposal-procedures"
-            title={t('core.activityDetails.proposalProcedures')}
-            subTitle={t('core.activityDetails.proposalProcedure')}
-            lists={translatedProposalProcedures}
-            withSeparatorLine
-            translations={{
-              type: t('core.activityDetails.proposalProcedureTitles.type'),
-              deposit: t('core.activityDetails.proposalProcedureTitles.deposit'),
-              rewardAccount: t('core.activityDetails.proposalProcedureTitles.rewardAccount'),
-              anchorHash: t('core.activityDetails.proposalProcedureTitles.anchorHash'),
-              anchorURL: t('core.activityDetails.proposalProcedureTitles.anchorURL'),
-              governanceActionID: t('core.activityDetails.proposalProcedureTitles.governanceActionID'),
-              actionIndex: t('core.activityDetails.proposalProcedureTitles.actionIndex'),
-              newQuorumThreshold: t('core.activityDetails.proposalProcedureTitles.newQuorumThreshold'),
-              withdrawal: t('core.activityDetails.proposalProcedureTitles.withdrawal'),
-              withdrawalRewardAccount: t('core.activityDetails.proposalProcedureTitles.withdrawalRewardAccount'),
-              withdrawalAmount: t('core.activityDetails.proposalProcedureTitles.withdrawalAmount'),
-              constitutionAnchorURL: t('core.activityDetails.proposalProcedureTitles.constitutionAnchorURL'),
-              constitutionScriptHash: t('core.activityDetails.proposalProcedureTitles.constitutionScriptHash'),
-              coldCredentialHash: t('core.activityDetails.proposalProcedureTitles.coldCredentialHash'),
-              epoch: t('core.activityDetails.proposalProcedureTitles.epoch'),
-              membersToBeAdded: t('core.activityDetails.proposalProcedureTitles.membersToBeAdded'),
-              hash: t('core.activityDetails.proposalProcedureTitles.hash'),
-              membersToBeRemoved: t('core.activityDetails.proposalProcedureTitles.membersToBeRemoved'),
-              protocolVersionMajor: t('core.activityDetails.proposalProcedureTitles.protocolVersionMajor'),
-              protocolVersionMinor: t('core.activityDetails.proposalProcedureTitles.protocolVersionMinor'),
-              protocolVersionPatch: t('core.activityDetails.proposalProcedureTitles.protocolVersionPatch'),
-              maxTxExUnits: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxExUnits'),
-              maxBlockExUnits: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBlockExUnits'
-              ),
-              networkGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.title'),
-              economicGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.title'),
-              technicalGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.title'),
-              costModels: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.costModels'),
-              PlutusV1: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV1'),
-              PlutusV2: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.PlutusV2'),
-              governanceGroup: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.title'),
-              dRepVotingThresholds: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.title'
-              ),
-              memory: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.memory'),
-              step: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.step'),
-              maxBBSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBBSize'),
-              maxTxSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxTxSize'),
-              maxBHSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxBHSize'),
-              maxValSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxValSize'),
-              maxCollateralInputs: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.networkGroup.maxCollateralInputs'
-              ),
-              minFeeA: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeA'),
-              minFeeB: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minFeeB'),
-              keyDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.keyDeposit'),
-              poolDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.poolDeposit'),
-              rho: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.rho'),
-              tau: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.tau'),
-              minPoolCost: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.minPoolCost'),
-              coinsPerUTxOByte: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.coinsPerUTxOByte'
-              ),
-              a0: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.a0'),
-              eMax: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.eMax'),
-              nOpt: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.nOpt'),
-              collateralPercentage: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.technicalGroup.collateralPercentage'
-              ),
-              prices: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.economicGroup.prices'),
-              govActionLifetime: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionLifetime'
-              ),
-              govActionDeposit: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.govActionDeposit'
-              ),
-              drepDeposit: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepDeposit'),
-              drepActivity: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.drepActivity'
-              ),
-              ccMinSize: t('core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMinSize'),
-              ccMaxTermLength: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.ccMaxTermLength'
-              ),
-              motionNoConfidence: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.motionNoConfidence'
-              ),
-              committeeNormal: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNormal'
-              ),
-              committeeNoConfidence: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.committeeNoConfidence'
-              ),
-              updateConstitution: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.updateConstitution'
-              ),
-              hardForkInitiation: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.hardForkInitiation'
-              ),
-              ppNetworkGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppNetworkGroup'
-              ),
-              ppEconomicGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppEconomicGroup'
-              ),
-              ppTechnicalGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppTechnicalGroup'
-              ),
-              ppGovernanceGroup: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.ppGovernanceGroup'
-              ),
-              treasuryWithdrawal: t(
-                'core.ProposalProcedure.governanceAction.protocolParamUpdate.governanceGroup.dRepVotingThresholds.treasuryWithdrawal'
-              )
-            }}
+          <TxDetailsProposalProcedures
+            proposalProcedures={proposalProcedures}
+            cardanoCoin={cardanoCoin}
+            explorerBaseUrl={explorerBaseUrl}
           />
         )}
         {certificates?.length > 0 && (
-          <TxDetailList<TxDetailsCertificateTitles>
-            title={t('core.activityDetails.certificates')}
-            subTitle={t('core.activityDetails.certificate')}
-            testId="certificates"
-            lists={translatedCertificates}
-            withSeparatorLine
-            translations={{
-              certificate: t('core.activityDetails.certificateTitles.certificate'),
-              certificateType: t('core.activityDetails.certificateTitles.certificateType'),
-              coldCredential: t('core.activityDetails.certificateTitles.coldCredential'),
-              hotCredential: t('core.activityDetails.certificateTitles.hotCredential'),
-              stakeKey: t('core.activityDetails.certificateTitles.stakeKey'),
-              drepId: t('core.activityDetails.certificateTitles.drepId'),
-              anchorURL: t('core.activityDetails.certificateTitles.anchorURL'),
-              anchorHash: t('core.activityDetails.certificateTitles.anchorHash'),
-              poolId: t('core.activityDetails.certificateTitles.poolId'),
-              drep: t('core.activityDetails.certificateTitles.drep'),
-              depositPaid: t('core.activityDetails.certificateTitles.depositPaid'),
-              depositPaidInfo: t('core.activityDetails.certificateTitles.depositPaidInfo'),
-              depositReturned: t('core.activityDetails.certificateTitles.depositReturned'),
-              depositReturnedInfo: t('core.activityDetails.certificateTitles.depositReturnedInfo')
-            }}
+          <TxDetailsCertificates
+            certificates={certificates}
+            chainNetworkId={chainNetworkId}
+            cardanoCoin={cardanoCoin}
           />
         )}
         {addrInputs?.length > 0 && (

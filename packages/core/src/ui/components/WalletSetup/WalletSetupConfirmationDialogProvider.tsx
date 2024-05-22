@@ -4,14 +4,14 @@ import { BehaviorSubject } from 'rxjs';
 import { StartOverDialog } from '@ui/components/SharedWallet/StartOverDialog';
 import { useTranslation } from 'react-i18next';
 
-interface Props {
-  children: React.ReactNode;
-}
-
 interface ContextType {
   isDialogOpen: boolean;
   shouldShowDialog$: BehaviorSubject<boolean>;
   withConfirmationDialog: (confirmedCallback: () => void) => () => void;
+}
+
+interface Props {
+  children: (value: ContextType) => React.ReactNode;
 }
 
 const WalletSetupConfirmationDialogContext = createContext<ContextType>(null);
@@ -80,7 +80,7 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
           onOpenChanged: setIsDialogOpen
         }}
       />
-      {children}
+      {children(value)}
     </WalletSetupConfirmationDialogContext.Provider>
   );
 };

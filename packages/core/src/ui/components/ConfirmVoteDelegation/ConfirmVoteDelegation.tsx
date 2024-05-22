@@ -1,20 +1,8 @@
 import React from 'react';
-import { Box, Cell, Grid, TransactionSummary, Flex } from '@lace/ui';
-import { DappInfo, DappInfoProps } from '../DappInfo';
-import { ErrorPane } from '@lace/common';
+import { Cell, Grid, TransactionSummary } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-  dappInfo: Omit<DappInfoProps, 'className'>;
-  errorMessage?: string;
-  translations: {
-    labels: {
-      drepId: string;
-      alwaysAbstain: string;
-      alwaysNoConfidence: string;
-    };
-    option: string;
-    metadata: string;
-  };
   metadata: {
     drepId?: string;
     alwaysAbstain: boolean;
@@ -22,19 +10,26 @@ interface Props {
   };
 }
 
-export const ConfirmVoteDelegation = ({ dappInfo, errorMessage, translations, metadata }: Props): JSX.Element => (
-  <Flex h="$fill" flexDirection="column">
-    <Box mb={'$24'} mt={'$24'}>
-      <DappInfo {...dappInfo} />
-    </Box>
-    {errorMessage && (
-      <Box>
-        <ErrorPane error={errorMessage} />
-      </Box>
-    )}
+export const ConfirmVoteDelegation = ({ metadata }: Props): JSX.Element => {
+  const { t } = useTranslation();
+  const translations = {
+    metadata: t('core.VoteDelegation.metadata'),
+    option: t('core.VoteDelegation.option'),
+    labels: {
+      drepId: t('core.VoteDelegation.drepId'),
+      alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
+      alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
+    }
+  };
+
+  return (
     <Grid columns="$1" gutters="$20">
       <Cell>
-        <TransactionSummary.Metadata label={translations.metadata} text="" testID="metadata" />
+        <TransactionSummary.Address
+          label={t('core.activityDetails.certificateTitles.certificateType')}
+          address={t('core.assetActivityItem.entry.name.VoteDelegationCertificate')}
+          testID="metadata-cetificateType"
+        />
       </Cell>
       {metadata.drepId && (
         <Cell>
@@ -64,5 +59,5 @@ export const ConfirmVoteDelegation = ({ dappInfo, errorMessage, translations, me
         </Cell>
       )}
     </Grid>
-  </Flex>
-);
+  );
+};
