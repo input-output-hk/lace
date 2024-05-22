@@ -16,7 +16,7 @@ import { getReachedMaxAmountList } from '../../helpers';
 import { MetadataInput } from './MetadataInput';
 import { BundlesList } from './BundlesList';
 import { formatAdaAllocation, getNextBundleCoinId } from './util';
-import { Text } from '@lace/ui';
+import { Box, Text } from '@lace/ui';
 import { ReactComponent as WarningIconCircle } from '@lace/icons/dist/WarningIconCircleComponent';
 import styles from './Form.module.scss';
 
@@ -119,15 +119,17 @@ export const Form = ({
         <WarningBanner message={t('browserView.transaction.send.customSubmitApiBannerText')} />
       )}
       {error === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR && (
-        <Banner
-          withIcon
-          message={utxoDepletedMsg}
-          customIcon={
-            <Text.Label color="warning">
-              <WarningIconCircle />
-            </Text.Label>
-          }
-        />
+        <Box mb="$20">
+          <Banner
+            withIcon
+            message={utxoDepletedMsg}
+            customIcon={
+              <Text.Label color="warning">
+                <WarningIconCircle />
+              </Text.Label>
+            }
+          />
+        </Box>
       )}
       <BundlesList
         isPopupView={isPopupView}
