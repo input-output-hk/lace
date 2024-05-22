@@ -2,7 +2,6 @@ import { Wallet } from '@lace/cardano';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from 'features/store';
 import { useEffect, useMemo, useState } from 'react';
-import { DEFAULT_BROWSE_POOLS_VIEW } from '../constants';
 
 export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
   const [hydrated, setHydrated] = useState(false);
@@ -12,7 +11,7 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
     walletStoreBlockchainProvider: { stakePoolProvider },
   } = useOutsideHandles();
   const { portfolioMutators, poolsView, selectedPortfolio } = useDelegationPortfolioStore((store) => ({
-    poolsView: store.browsePoolsView || DEFAULT_BROWSE_POOLS_VIEW,
+    poolsView: store.browsePoolsView,
     portfolioMutators: store.mutators,
     selectedPortfolio: store.selectedPortfolio,
   }));
