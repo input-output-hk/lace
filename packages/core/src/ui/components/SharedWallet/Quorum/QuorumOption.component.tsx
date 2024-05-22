@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './QuorumOption.module.scss';
-import { Card, RadioButtonGroup, Flex, Button, SelectGroup, Text, Box } from '@lace/ui';
+import { Card, RadioButtonGroup, Flex, Button, Select, Text, Box } from '@lace/ui';
 
 export interface QuorumOptionProps {
   translations: {
@@ -67,14 +67,17 @@ export const QuorumOption = ({
           alignItems="center"
           data-testid="setup-quorum-cosigner-container"
         >
-          <SelectGroup
-            options={cosignerValue}
+          <Select.Root
+            variant="outline"
             placeholder="0"
-            selectedValue={cosignerSelection}
-            onValueChange={onSelectValueChange}
+            value={cosignerSelection}
+            onChange={onSelectValueChange}
             showArrow
-            withOutline
-          />
+          >
+            {cosignerValue.map(({ value, label }) => (
+              <Select.Item key={value} value={value} title={label} />
+            ))}
+          </Select.Root>
           <Text.Body.Small className={styles.dropdownCopy}>
             {cosignersSentence.start} {cosignerValue.length} {cosignersSentence.end}
           </Text.Body.Small>
