@@ -131,7 +131,9 @@ export const MidnightEventBanner = (): JSX.Element => {
         <View
           translations={{
             title: popupView ? t('midnightEventBanner.popup.title') : t('midnightEventBanner.desktop.title'),
-            description: t('midnightEventBanner.description'),
+            description: popupView
+              ? t('midnightEventBanner.popup.description')
+              : t('midnightEventBanner.desktop.description'),
             moreDetails: t('midnightEventBanner.moreDetails'),
             reminder: t('midnightEventBanner.reminder')
           }}
