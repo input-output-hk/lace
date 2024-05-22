@@ -1,33 +1,29 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 
 import { Virtuoso } from 'react-virtuoso';
 
 import { Flex } from '../flex';
 
-import { useVisibleItemsCount } from './hooks';
 import * as cx from './table.css';
 
 import type { ListRange, VirtuosoProps } from 'react-virtuoso';
 
-const DEFAULT_ROW_HIGHT = 44;
-
 export type BodyProps<T> = VirtuosoProps<T, null> & {
-  items: T[];
+  items: T[] | undefined;
   loadMoreData: (range: Readonly<ListRange>) => void;
   itemContent: (index: number, item: T) => React.ReactElement;
-  rowHeight?: number;
   scrollableTargetId?: string;
+  tableReference?: React.Ref<HTMLDivElement>;
 };
 
 export const Body = <T extends object | undefined>({
   itemContent,
   items,
   loadMoreData,
-  rowHeight = DEFAULT_ROW_HIGHT,
   scrollableTargetId = '',
+  tableReference,
   ...props
 }: Readonly<BodyProps<T>>): React.ReactElement => {
-  const tableReference = useRef<HTMLDivElement | null>(null);
   const scrollableTargetReference =
     useRef<VirtuosoProps<T, undefined>['customScrollParent']>();
 
@@ -40,17 +36,6 @@ export const Body = <T extends object | undefined>({
     }
   }, [scrollableTargetId]);
 
-  const initialItemsLimit = useVisibleItemsCount({
-    rowHeight,
-    containerRef: tableReference,
-  });
-
-  useEffect(() => {
-    if (initialItemsLimit !== undefined) {
-      loadMoreData({ endIndex: Math.max(initialItemsLimit, 1), startIndex: 0 });
-    }
-  }, [initialItemsLimit, loadMoreData]);
-
   return (
     <Flex
       h="$fill"
@@ -59,7 +44,6 @@ export const Body = <T extends object | undefined>({
     >
       <Virtuoso
         customScrollParent={scrollableTargetReference.current}
-        totalCount={items.length}
         data={items}
         rangeChanged={loadMoreData}
         className={cx.body}

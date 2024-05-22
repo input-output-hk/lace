@@ -34,6 +34,7 @@ type stakePoolsTableProps = {
 type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
 
 const searchDebounce = 300;
+const increaseViewportBy = { bottom: 100, top: 0 };
 
 export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): React.ReactElement => {
   const componentRef = useRef<HTMLDivElement | null>(null);
@@ -99,11 +100,14 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     [pageResults]
   );
 
-  const onPoolClick = (pool: Wallet.Cardano.StakePool) => {
-    analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
-    setSelectedStakePool(pool);
-    setIsDrawerVisible(true);
-  };
+  const onPoolClick = useCallback(
+    (pool: Wallet.Cardano.StakePool) => {
+      analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
+      setSelectedStakePool(pool);
+      setIsDrawerVisible(true);
+    },
+    [analytics, setIsDrawerVisible, setSelectedStakePool]
+  );
 
   const onSortChange = (sortField: SortField) => {
     const inverseOrder = sort?.order === 'asc' ? 'desc' : 'asc';
@@ -122,6 +126,25 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   });
 
   const isActiveSortItem = (value: string) => value === sort?.field;
+
+  const itemContent = useCallback(
+    (index, props) => {
+      if (!props) {
+        return <StakePoolsListRowSkeleton index={index} columns={stakePoolTableConfig.columns} />;
+      }
+      const { stakePool } = props;
+      return (
+        <Table.Row<StakePoolsListRowProps>
+          onClick={() => onPoolClick(stakePool)}
+          columns={stakePoolTableConfig.columns}
+          cellRenderers={stakePoolTableConfig.renderer}
+          dataTestId="stake-pool"
+          data={props}
+        />
+      );
+    },
+    [onPoolClick]
+  );
 
   return (
     <div ref={componentRef} data-testid="stake-pool-table" className={styles.table}>
@@ -154,22 +177,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
           items={list}
-          itemContent={(index, props) => {
-            if (!props) {
-              return <StakePoolsListRowSkeleton index={index} columns={stakePoolTableConfig.columns} />;
-            }
-            const { stakePool } = props;
-            return (
-              <Table.Row<StakePoolsListRowProps>
-                onClick={() => onPoolClick(stakePool)}
-                columns={stakePoolTableConfig.columns}
-                cellRenderers={stakePoolTableConfig.renderer}
-                dataTestId="stake-pool"
-                data={props}
-              />
-            );
-          }}
-          increaseViewportBy={{ bottom: 100, top: 0 }}
+          itemContent={itemContent}
+          increaseViewportBy={increaseViewportBy}
         />
       </Box>
     </div>

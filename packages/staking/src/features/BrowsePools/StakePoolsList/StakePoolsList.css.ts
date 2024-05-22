@@ -5,6 +5,10 @@ export const selectedTitle = sx({
   color: '$titleColor',
 });
 
+export const box = style({
+  position: 'relative',
+});
+
 export const selectedPools = style([
   sx({
     borderBottomColor: '$selectedPoolsSectionBorderColor',
