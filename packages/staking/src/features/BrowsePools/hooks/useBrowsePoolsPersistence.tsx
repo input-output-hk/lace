@@ -1,17 +1,17 @@
 import { Wallet } from '@lace/cardano';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from 'features/store';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_BROWSE_POOLS_VIEW } from '../constants';
 
 export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
+  const [hydrated, setHydrated] = useState(false);
   const {
     stakingBrowserPreferencesPersistence,
     setStakingBrowserPreferencesPersistence,
     walletStoreBlockchainProvider: { stakePoolProvider },
   } = useOutsideHandles();
-  const { portfolioMutators, poolsView, selectedPortfolio, hydrated } = useDelegationPortfolioStore((store) => ({
-    hydrated: store.hydrated,
+  const { portfolioMutators, poolsView, selectedPortfolio } = useDelegationPortfolioStore((store) => ({
     poolsView: store.browsePoolsView || DEFAULT_BROWSE_POOLS_VIEW,
     portfolioMutators: store.mutators,
     selectedPortfolio: store.selectedPortfolio,
@@ -29,10 +29,11 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
       portfolioMutators.hydrate({
         poolIds:
           stakingBrowserPreferencesPersistence?.selectedPoolIds.map((poolId) => Wallet.Cardano.PoolId(poolId)) ?? [],
-        poolsView,
+        poolsView: stakingBrowserPreferencesPersistence.poolsView,
         stakePoolProvider,
         view,
       });
+      setHydrated(true);
     } catch {
       console.error('error during store hydration');
     }

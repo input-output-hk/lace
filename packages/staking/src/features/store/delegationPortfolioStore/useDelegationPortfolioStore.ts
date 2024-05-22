@@ -25,7 +25,6 @@ const defaultState: DelegationPortfolioState = {
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,
-  hydrated: false,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   sortField: DEFAULT_SORT_OPTIONS.field,
@@ -105,7 +104,6 @@ export const useDelegationPortfolioStore = create(
           set((state) => {
             Object.assign(state, {
               browsePoolsView: poolsView,
-              hydrated: true,
               view,
             });
           });
@@ -118,7 +116,6 @@ export const useDelegationPortfolioStore = create(
             Object.assign(state, {
               ...atomicStateMutators.selectPools({ stakePools: selectedStakePools, state }),
               browsePoolsView: poolsView,
-              hydrated: true,
               view,
             });
           });
@@ -147,6 +144,13 @@ export const useDelegationPortfolioStore = create(
         delegationRewardsHistory,
         delegationPortfolio,
       }) => {
+        console.log('XXX setCurrentPortfolio: ', {
+          currentEpoch,
+          delegationDistribution,
+          delegationRewardsHistory,
+          delegationPortfolio,
+        });
+
         const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
         const confirmedRewardHistory = delegationRewardsHistory.all.filter(
           ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
