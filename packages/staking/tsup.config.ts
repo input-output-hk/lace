@@ -20,7 +20,7 @@ const tsupConfig = defineConfig([
       svgr({ icon: true, plugins: [svgrJsx] }),
     ],
     external: Object.keys(peerDependencies),
-    format: ['esm', 'cjs'],
+    format: ['esm'],
     loader: {
       '.png': 'dataurl',
     },

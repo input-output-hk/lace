@@ -17,11 +17,6 @@ export default () => ({
   output: [
     {
       file: packageJson.main,
-      format: 'cjs',
-      sourcemap: false,
-    },
-    {
-      file: packageJson.module,
       format: 'esm',
       sourcemap: false,
     },

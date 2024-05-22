@@ -12,7 +12,7 @@
   },
   "license": "Apache-2.0",
   "author": "IOHK",
-  "main": "dist/index.js",
+  "main": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "directories": {
     "lib": "src",
