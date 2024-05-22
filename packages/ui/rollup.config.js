@@ -14,14 +14,16 @@ export default () => ({
     typescript({
       tsconfig: './tsconfig.json',
       composite: false,
-      exclude: ['**/*.stories.tsx'],
+      exclude: ['node_modules', '**/*.stories.tsx'],
     }),
+    vanillaExtractPlugin(),
     peerDepsExternal(),
     commonjs(),
     image(),
     svgr({ icon: true }),
-    vanillaExtractPlugin(),
     copy({
+      copyOnce: true,
+      hook: 'closeBundle',
       targets: [{ src: 'src/assets/icons/*', dest: 'dist/assets/icons' }],
     }),
   ],
@@ -29,12 +31,12 @@ export default () => ({
     {
       file: packageJson.main,
       format: 'cjs',
-      sourcemap: true,
+      sourcemap: false,
     },
     {
       file: packageJson.module,
       format: 'esm',
-      sourcemap: true,
+      sourcemap: false,
     },
   ],
   external: [/node_modules/],

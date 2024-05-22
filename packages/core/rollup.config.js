@@ -12,12 +12,12 @@ export default (args) => {
       {
         file: packageJson.main,
         format: 'cjs',
-        sourcemap: true
+        sourcemap: false
       },
       {
         file: packageJson.module,
         format: 'esm',
-        sourcemap: true
+        sourcemap: false
       }
     ],
     plugins: [
