@@ -28,7 +28,7 @@ export const SharedWalletGetStarted = (): React.ReactElement => {
           button: t('browserView.sharedWallet.setup.importSharedWalletOption.button')
         }
       }}
-      onCreateSharedWalletClick={() => history.push(create.root)}
+      onCreateSharedWalletClick={() => history.push(create)}
     />
   );
 };

@@ -9,17 +9,23 @@ import styles from './SetupSharedWallet.module.scss';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
-  walletName: string;
-  address: string;
+  activeWalletName: string;
+  activeWalletAddress: string;
   onBack?: () => void;
   onNext?: () => void;
-  onNameChange?: (name: string) => void;
+  onNameChange: (name: string) => void;
 }
 
 const ADDRESS_FIRST_PART_LENGTH = 35;
 const ADDRESS_LAST_PART_LENGTH = 0;
 
-export const SetupSharedWallet = ({ walletName, address, onBack, onNext, onNameChange }: Props): JSX.Element => {
+export const SetupSharedWallet = ({
+  activeWalletName,
+  activeWalletAddress,
+  onBack,
+  onNext,
+  onNameChange
+}: Props): JSX.Element => {
   const [sharedWalletName, setSharedWalletName] = useState('');
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
   const { t } = useTranslation();
@@ -33,7 +39,7 @@ export const SetupSharedWallet = ({ walletName, address, onBack, onNext, onNameC
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
     setSharedWalletName(value);
     setShouldShowNameErrorMessage(true);
-    onNameChange?.(value);
+    onNameChange(value);
   };
 
   return (
@@ -42,7 +48,7 @@ export const SetupSharedWallet = ({ walletName, address, onBack, onNext, onNameC
       description={translations.subtitle}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={!!walletName}
+      isNextEnabled={!!sharedWalletName && !shouldShowNameErrorMessage}
       currentTimelineStep={SharedWalletTimelineSteps.WALLET_NAME}
     >
       <WalletNameInput
@@ -56,8 +62,10 @@ export const SetupSharedWallet = ({ walletName, address, onBack, onNext, onNameC
         <Text.Body.Normal weight="$semibold">{translations.body}</Text.Body.Normal>
       </Box>
       <FlowCard.Card flowCardClassName={styles.walletCard}>
-        <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type="hot" />} name={walletName} />
-        <FlowCard.Details subtitle={addEllipsis(address, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)} />
+        <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type="hot" />} name={activeWalletName} />
+        <FlowCard.Details
+          subtitle={addEllipsis(activeWalletAddress, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)}
+        />
       </FlowCard.Card>
     </SharedWalletStepLayout>
   );
