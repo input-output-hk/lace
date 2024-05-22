@@ -75,6 +75,7 @@ export const WalletSetupSelectAccountsStepRevamp = ({
             variant="outline"
             placeholder="Accounts"
             value={selectedAccount}
+            triggerTestId="wallet-setup-account-select-input"
             onChange={(value) => {
               setSelectedAccount(value);
               onSelectedAccountChange?.();
