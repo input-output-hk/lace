@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ConfirmDRepRetirement } from '@lace/core';
-import { certificateInspectorFactory, depositPaidWithSymbol, disallowSignTx, drepIDasBech32FromHash } from './utils';
+import { ConfirmDRepRetirement, DappInfo } from '@lace/core';
+import { certificateInspectorFactory, depositPaidWithSymbol, disallowSignTx } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useGetOwnPubDRepKeyHash } from './hooks';
 import { Skeleton } from 'antd';
 import { DappError } from '../DappError';
 import { useViewsFlowContext } from '@providers';
+import { Box, Flex } from '@lace/ui';
 
 const { CertificateType } = Wallet.Cardano;
 
@@ -75,19 +76,16 @@ export const ConfirmDRepRetirementContainer = ({ onError }: Props): React.ReactE
   }
 
   return (
-    <ConfirmDRepRetirement
-      dappInfo={dappInfo}
-      metadata={{
-        depositReturned: depositPaidWithCardanoSymbol,
-        drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)
-      }}
-      translations={{
-        metadata: t('core.DRepRetirement.metadata'),
-        labels: {
-          depositReturned: t('core.DRepRetirement.depositReturned'),
-          drepId: t('core.DRepRetirement.drepId')
-        }
-      }}
-    />
+    <Flex h="$fill" flexDirection="column">
+      <Box mb={'$24'} mt={'$24'}>
+        <DappInfo {...dappInfo} />
+      </Box>
+      <ConfirmDRepRetirement
+        metadata={{
+          depositReturned: depositPaidWithCardanoSymbol,
+          drepId: Wallet.util.drepIDasBech32FromHash(certificate.dRepCredential.hash)
+        }}
+      />
+    </Flex>
   );
 };

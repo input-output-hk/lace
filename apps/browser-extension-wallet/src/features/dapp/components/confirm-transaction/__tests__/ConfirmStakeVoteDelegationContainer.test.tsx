@@ -17,7 +17,6 @@ import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
-import { drepIDasBech32FromHash } from '../utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 const REWARD_ACCOUNT = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
@@ -160,24 +159,12 @@ describe('Testing ConfirmStakeVoteDelegationContainer component', () => {
     expect(queryByTestId('ConfirmStakeVoteDelegation')).toBeInTheDocument();
     expect(mockConfirmStakeVoteDelegation).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         metadata: {
           poolId: certificate.poolId,
           stakeKeyHash: 'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
           alwaysAbstain: isDRepAlwaysAbstainMocked,
           alwaysNoConfidence: isDRepAlwaysNoConfidenceMocked,
-          drepId: drepIDasBech32FromHash((certificate.dRep as Wallet.Cardano.Credential).hash)
-        },
-        translations: {
-          metadata: t('core.StakeVoteDelegation.metadata'),
-          option: t('core.StakeVoteDelegation.option'),
-          labels: {
-            poolId: t('core.StakeVoteDelegation.poolId'),
-            stakeKeyHash: t('core.StakeVoteDelegation.stakeKeyHash'),
-            drepId: t('core.StakeVoteDelegation.drepId'),
-            alwaysAbstain: t('core.StakeVoteDelegation.alwaysAbstain'),
-            alwaysNoConfidence: t('core.StakeVoteDelegation.alwaysNoConfidence')
-          }
+          drepId: Wallet.util.drepIDasBech32FromHash((certificate.dRep as Wallet.Cardano.Credential).hash)
         }
       },
       {}

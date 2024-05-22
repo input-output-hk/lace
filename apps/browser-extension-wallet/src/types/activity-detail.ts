@@ -1,14 +1,11 @@
+import { Wallet } from '@lace/cardano';
 import type {
   TransactionMetadataProps,
   TxOutputInput,
   ActivityStatus,
   RewardsInfo,
   TransactionActivityType,
-  ActivityType,
-  TxDetailsVotingProceduresTitles,
-  TxDetailsProposalProceduresTitles,
-  TxDetailsCertificateTitles,
-  TxDetails
+  ActivityType
 } from '@lace/core';
 
 export enum TxDirections {
@@ -38,9 +35,9 @@ type TransactionActivity = {
   addrOutputs?: TxOutputInput[];
   metadata?: TransactionMetadataProps['metadata'];
   pools?: TransactionPool[];
-  votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
-  proposalProcedures?: TxDetails<TxDetailsProposalProceduresTitles>[];
-  certificates?: TxDetails<TxDetailsCertificateTitles>[];
+  votingProcedures?: Wallet.Cardano.VotingProcedures;
+  proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
+  certificates?: Wallet.Cardano.Certificate[];
 };
 
 type RewardsActivity = {

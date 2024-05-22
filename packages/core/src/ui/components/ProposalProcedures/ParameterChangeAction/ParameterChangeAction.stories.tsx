@@ -29,14 +29,8 @@ export default meta;
 type Story = StoryObj<typeof ParameterChangeAction>;
 
 const data: ComponentProps<typeof ParameterChangeAction> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
   data: {
     txDetails: {
-      txType: 'Protocol Parameter Update',
       deposit: '2000',
       rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr'
     },
@@ -112,132 +106,11 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
         }
       }
     }
-  },
-  translations: {
-    txDetails: {
-      title: 'Transaction Details',
-      txType: 'Transaction Type',
-      deposit: 'Deposit',
-      rewardAccount: 'Reward Account'
-    },
-    memory: 'Memory',
-    step: 'Step',
-    anchor: {
-      hash: 'Anchor Hash',
-      url: 'Anchor URL'
-    },
-    networkGroup: {
-      title: 'Network Group',
-      maxBBSize: 'Max BB Size',
-      maxTxSize: 'Max Tx Size',
-      maxBHSize: 'Max BH Size',
-      maxValSize: 'Max Val Size',
-      maxTxExUnits: 'Max TX Ex Units',
-      maxBlockExUnits: 'Max BLK Ex Units',
-      maxCollateralInputs: 'Max Coll Inputs',
-      tooltip: {
-        maxBBSize: 'Max block body size',
-        maxTxSize: 'Max transaction size',
-        maxBHSize: 'Max block header size',
-        maxValSize: 'Max size of a serialized asset value',
-        maxTxExUnits: 'Max script execution units in a single transaction',
-        maxBlockExUnits: 'Max script execution units in a single block',
-        maxCollateralInputs: 'Max number of collateral inputs'
-      }
-    },
-    economicGroup: {
-      title: 'Economic Group',
-      minFeeA: 'Min Fee A',
-      minFeeB: 'Min Fee B',
-      keyDeposit: 'Key Deposit',
-      poolDeposit: 'Pool Deposit',
-      rho: 'Rho',
-      tau: 'Tau',
-      minPoolCost: 'Min Pool Cost',
-      coinsPerUTxOByte: 'Coins/UTxO Byte',
-      prices: 'Price',
-      tooltip: {
-        minFeeA: 'Min fee coefficient',
-        minFeeB: 'Min fee constant',
-        keyDeposit: 'Delegation key Lovelace deposit',
-        poolDeposit: 'Pool registration Lovelace deposit',
-        rho: 'Monetary expansion',
-        tau: 'Treasury expansion',
-        minPoolCost: 'Min fixed rewards cut for pools',
-        coinsPerUTxOByte: 'Min Lovelace deposit per byte of serialized UTxO',
-        prices: 'Prices of Plutus execution units'
-      }
-    },
-    technicalGroup: {
-      title: 'Technical Group',
-      a0: 'A0',
-      eMax: 'EMax',
-      nOpt: 'NOpt',
-      costModels: 'Cost Models',
-      collateralPercentage: 'Coll Percentage',
-      tooltip: {
-        a0: 'Pool pledge influence',
-        eMax: 'Pool retirement maximum epoch',
-        nOpt: 'Desired number of pools',
-        costModels: 'Plutus execution cost models',
-        collateralPercentage: 'Proportion of collateral needed for scripts'
-      }
-    },
-    governanceGroup: {
-      title: 'Governance Group',
-      govActionLifetime: 'Gov Act Lifetime',
-      govActionDeposit: 'Gov Act Deposit',
-      drepDeposit: 'DRep Deposit',
-      drepActivity: 'DRep Activity',
-      ccMinSize: 'CC Min Size',
-      ccMaxTermLength: 'CC Max Term Length',
-      dRepVotingThresholds: {
-        title: 'Governance voting thresholds',
-        motionNoConfidence: 'Motion No Conf',
-        committeeNormal: 'Comm Normal',
-        committeeNoConfidence: 'Comm No Conf',
-        updateConstitution: 'Update Const',
-        hardForkInitiation: 'Hard Fork Init',
-        ppNetworkGroup: 'PP Network Grp',
-        ppEconomicGroup: 'PP Economic Grp',
-        ppTechnicalGroup: 'PP Technical Grp',
-        ppGovernanceGroup: 'PP Governance Grp',
-        treasuryWithdrawal: 'Treasury Withdraw'
-      },
-      tooltip: {
-        govActionLifetime: 'governance action maximum lifetime in epochs',
-        govActionDeposit: 'governance action deposit',
-        drepDeposit: 'DRep deposit amount',
-        drepActivity: 'DRep activity period in epochs',
-        ccMinSize: 'Min constitutional committee size',
-        ccMaxTermLength: 'Max term length (in epochs) for the constitutional committee members',
-        dRepVotingThresholds: {
-          title: 'DRep voting thresholds',
-          motionNoConfidence: '1. Motion of no-confidence',
-          committeeNormal: '2a. New committee/threshold (normal state)',
-          committeeNoConfidence: '2b. New committee/threshold (state of no-confidence)',
-          updateConstitution: '3. Update to the Constitution or proposal policy',
-          hardForkInitiation: '4. Hard-fork initiation',
-          ppNetworkGroup: '5a. Protocol parameter changes, network group',
-          ppEconomicGroup: '5b. Protocol parameter changes, economic group',
-          ppTechnicalGroup: '5c. Protocol parameter changes, technical group',
-          ppGovernanceGroup: '5d. Protocol parameter changes, governance group',
-          treasuryWithdrawal: '6. Treasury withdrawal'
-        }
-      }
-    }
   }
 };
 
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };
