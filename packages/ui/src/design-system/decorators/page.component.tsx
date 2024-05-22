@@ -1,14 +1,18 @@
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useRef } from 'react';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import {
+  LocalThemeProvider,
+  ThemeColorScheme,
+  ThemeProvider,
+} from '../../design-tokens';
 import { Box } from '../box';
 import { Divider } from '../divider';
-import { Grid, Cell } from '../grid';
+import { Cell, Grid } from '../grid';
 import { Text } from '../text';
 
 import { usePageContext } from './page.context';
-import { subtitleBox } from './page.css';
+import * as cx from './page.css';
 
 export type PageProps = PropsWithChildren<{
   title: string;
@@ -20,14 +24,18 @@ export const Page = ({
   title,
   subtitle,
 }: Readonly<PageProps>): JSX.Element => {
-  const container = useRef<HTMLDivElement>(null);
-  const { setPortalContainer } = usePageContext();
+  const lightThemeContainer = useRef<HTMLDivElement>(null);
+  const darkThemeContainer = useRef<HTMLDivElement>(null);
+  const { setPortalContainers } = usePageContext();
 
   useEffect(() => {
-    if (container.current) {
-      setPortalContainer(container.current);
+    if (lightThemeContainer.current && darkThemeContainer.current) {
+      setPortalContainers({
+        lightTheme: lightThemeContainer.current,
+        darkTheme: darkThemeContainer.current,
+      });
     }
-  }, [container.current]);
+  }, [lightThemeContainer.current, darkThemeContainer.current]);
 
   return (
     <ThemeProvider colorScheme={ThemeColorScheme.Light}>
@@ -37,7 +45,7 @@ export const Page = ({
             <Text.Display>{title}</Text.Display>
             {Boolean(subtitle) && (
               <Box pt="$32">
-                <div className={subtitleBox}>
+                <div className={cx.subtitleBox}>
                   <Text.Body.Large>{subtitle}</Text.Body.Large>
                 </div>
               </Box>
@@ -48,7 +56,10 @@ export const Page = ({
           {children}
         </Grid>
       </div>
-      <div id="portal-container" ref={container} />
+      <div id="light-theme-portal-container" ref={lightThemeContainer} />
+      <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <div id="dark-theme-portal-container" ref={darkThemeContainer} />
+      </LocalThemeProvider>
     </ThemeProvider>
   );
 };

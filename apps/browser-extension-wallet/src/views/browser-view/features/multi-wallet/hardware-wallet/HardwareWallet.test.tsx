@@ -8,6 +8,9 @@ jest.mock('@lib/wallet-api-ui', () => ({
   },
   walletManager: {
     activate: jest.fn().mockReturnValue(void 0)
+  },
+  observableWallet: {
+    addresses$: of([[]])
   }
 }));
 
@@ -54,8 +57,8 @@ const selectAccountNameStep = async () => {
   act(() => {
     fireEvent.change(nameInput, { target: { value: 'Ada Lovalace' } });
   });
-  const acountSelect = screen.queryByTestId('select-group-input');
-  expect(acountSelect).toHaveTextContent('Account #0');
+  const accountSelect = screen.queryByTestId('wallet-setup-account-select-input');
+  expect(accountSelect).toHaveTextContent('Account #0');
 
   act(() => {
     fireEvent.click(nextButton);

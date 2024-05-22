@@ -14,15 +14,18 @@ import {
 } from '../../PostHogClientProvider/client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
+import { PostHogMultiWalletAction, PostHogOnboardingAction } from './events';
+
+type Action = PostHogAction | PostHogMultiWalletAction | PostHogOnboardingAction;
 
 interface AnalyticsTrackerArgs {
-  postHogClient?: PostHogClient;
+  postHogClient?: PostHogClient<Action>;
   view?: ExtensionViews;
   analyticsDisabled?: boolean;
   isPostHogEnabled?: boolean;
   excludedEvents?: string;
 }
-export class AnalyticsTracker implements IAnalyticsTracker {
+export class AnalyticsTracker implements IAnalyticsTracker<Action> {
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
@@ -89,7 +92,7 @@ export class AnalyticsTracker implements IAnalyticsTracker {
     await this.postHogClient?.sendMergeEvent(extendedAccountPublicKey);
   }
 
-  async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
+  async sendEventToPostHog(action: Action, properties: PostHogProperties = {}): Promise<void> {
     const isEventExcluded = this.isEventExcluded(action);
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent || isEventExcluded) return;
@@ -107,7 +110,7 @@ export class AnalyticsTracker implements IAnalyticsTracker {
     return POSTHOG_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser;
   }
 
-  private isEventExcluded(action: PostHogAction) {
+  private isEventExcluded(action: Action) {
     return this.excludedEvents && this.excludedEvents.split(',').some((exclude: string) => action.startsWith(exclude));
   }
 }

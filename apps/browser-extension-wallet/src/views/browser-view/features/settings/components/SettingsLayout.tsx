@@ -4,6 +4,9 @@ import { PageTitle } from '@components/Layout';
 import { useTranslation } from 'react-i18next';
 import { Layout, SectionLayout } from '@src/views/browser-view/components/Layout';
 import { SettingsRemoveWallet } from './SettingsRemoveWallet';
+import { MidnightPreLaunchSettingsBanner } from '@lace/core';
+import { Box } from '@lace/ui';
+import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
 
 export interface SettingsLayoutProps {
   defaultPassphraseVisible?: boolean;
@@ -16,9 +19,20 @@ export const SettingsLayout = ({
 }: SettingsLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
 
+  const sidePanelContent = (
+    <div>
+      {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' ? (
+        <Box mb="$32">
+          <MidnightPreLaunchSettingsBanner bannerImageUrl={MidnightPreLaunchBannerImage} />
+        </Box>
+      ) : undefined}
+      <SettingsAbout data-testid="about-container" />
+    </div>
+  );
+
   return (
     <Layout>
-      <SectionLayout sidePanelContent={<SettingsAbout data-testid="about-container" />}>
+      <SectionLayout sidePanelContent={sidePanelContent}>
         <PageTitle data-testid="settings-page-title">{t('browserView.settings.heading')}</PageTitle>
         <SettingsWallet />
         {process.env.USE_MULTI_CURRENCY === 'true' && <SettingsPreferences />}

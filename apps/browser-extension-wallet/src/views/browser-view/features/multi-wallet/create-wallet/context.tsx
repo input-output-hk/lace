@@ -59,7 +59,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     const wallet = await createHotWallet();
     await sendPostWalletAddAnalytics({
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      walletAddedPostHogAction: postHogActions.create.WALLET_ADDED
+      postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
     });
     clearSecrets();
   }, [clearSecrets, createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]);

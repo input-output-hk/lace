@@ -1,7 +1,7 @@
-import { PostHogAction, PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export type SendOnboardingAnalyticsEvent = (
-  postHogAction: PostHogAction,
+  postHogAction: string,
   postHogProperties?: PostHogProperties
 ) => Promise<void>;
 
