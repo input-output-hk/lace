@@ -210,3 +210,12 @@ Feature: Onboarding - Restore wallet
       | mode  |
       | dark  |
       | light |
+
+  @LW-10453
+  Scenario: Restore Wallet - Paste from clipboard has a tooltip
+    Given I click "Restore" button on wallet setup page
+    And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
+    When I hover over "Paste from clipboard" button
+    Then I see clipboard tooltip with information about copying and pasting words
+    And I click on "clipboard tooltip link"
+    Then I see a "FAQ" article with title "Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features"
