@@ -9,6 +9,7 @@ import styles from './SetupSharedWallet.module.scss';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
+  walletName: string;
   activeWalletName: string;
   activeWalletAddress: string;
   onBack?: () => void;
@@ -20,13 +21,13 @@ const ADDRESS_FIRST_PART_LENGTH = 35;
 const ADDRESS_LAST_PART_LENGTH = 0;
 
 export const SetupSharedWallet = ({
+  walletName,
   activeWalletName,
   activeWalletAddress,
   onBack,
   onNext,
   onNameChange
 }: Props): JSX.Element => {
-  const [sharedWalletName, setSharedWalletName] = useState('');
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
   const { t } = useTranslation();
 
@@ -37,7 +38,6 @@ export const SetupSharedWallet = ({
   };
 
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-    setSharedWalletName(value);
     setShouldShowNameErrorMessage(true);
     onNameChange(value);
   };
@@ -48,11 +48,11 @@ export const SetupSharedWallet = ({
       description={translations.subtitle}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={!!sharedWalletName && !shouldShowNameErrorMessage}
+      isNextEnabled={!!walletName && !shouldShowNameErrorMessage}
       currentTimelineStep={SharedWalletTimelineSteps.WALLET_NAME}
     >
       <WalletNameInput
-        value={sharedWalletName}
+        value={walletName}
         label="Shared wallet name"
         onChange={handleNameChange}
         maxLength={WALLET_NAME_INPUT_MAX_LENGTH}

@@ -17,14 +17,14 @@ export type SupportingData = {
 // This type util forces to describe complete state - all props from the BaseState and SupportingData has to be specified, otherwise we have a TS error
 type MakeState<S extends BaseState & SupportingData> = BaseState & SupportingData & S;
 
-type StateSetup = MakeState<{
+export type StateSetup = MakeState<{
   activeWalletName: string;
   coSignersKeys: undefined;
   step: SharedWalletCreationStep.Setup;
   walletName: string;
 }>;
 
-type StateCoSigners = MakeState<{
+export type StateCoSigners = MakeState<{
   activeWalletName: string;
   coSignersKeys: string[];
   step: SharedWalletCreationStep.CoSigners;
@@ -57,16 +57,17 @@ const makeInitialState = (activeWalletName: string): State => ({
 });
 
 type SharedWalletCreationStoreProps = {
-  children: (value: ContextValue) => ReactNode;
+  children: ReactNode;
+  initialState?: State;
 };
 
-export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStoreProps): ReactElement => {
+export const SharedWalletCreationStore = ({ children, initialState }: SharedWalletCreationStoreProps): ReactElement => {
   const history = useHistory();
   const {
     walletInfo: { name: activeWalletName }
   } = useWalletStore();
 
-  const initialState = makeInitialState(activeWalletName);
+  const initialStateValue = initialState || makeInitialState(activeWalletName);
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
     switch (prevState.step) {
       case SharedWalletCreationStep.Setup: {
@@ -110,7 +111,7 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
     }
 
     return prevState;
-  }, initialState);
+  }, initialStateValue);
 
   const contextValue: ContextValue = useMemo(
     () => ({
@@ -120,9 +121,5 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
     [state]
   );
 
-  return (
-    <sharedWalletCreationContext.Provider value={contextValue}>
-      {children(contextValue)}
-    </sharedWalletCreationContext.Provider>
-  );
+  return <sharedWalletCreationContext.Provider value={contextValue}>{children}</sharedWalletCreationContext.Provider>;
 };
