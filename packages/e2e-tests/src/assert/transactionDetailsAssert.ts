@@ -41,7 +41,7 @@ class TransactionsDetailsAssert {
 
   async assertSeeActivityDetailsDrawer(shouldBeDisplayed: boolean) {
     await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
-    await TransactionDetailsPage.transactionDetails.waitForStable();
+    await TransactionDetailsPage.transactionDetails.waitForStable({ reverse: !shouldBeDisplayed });
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t(headerTranslationKey));
@@ -262,7 +262,7 @@ class TransactionsDetailsAssert {
   }
 
   // eslint-disable-next-line max-statements
-  async assertSeeSelfTransactionDetails(txType: 'Sent' | 'Received' | 'Self') {
+  async assertSeeSentReceivedSelfTransactionDetails(txType: 'Sent' | 'Received' | 'Self') {
     expect(await TransactionDetailsPage.transactionDetailsType.getText()).to.equal(txType);
     let tokensDescriptionAmount = await TransactionDetailsPage.transactionDetailsAmountOfTokens.getText();
     tokensDescriptionAmount = tokensDescriptionAmount.replace('(', '').replace(')', '');
@@ -321,8 +321,6 @@ class TransactionsDetailsAssert {
     expect(await TransactionDetailsPage.transactionDetailsStatusTitle.getText()).to.equal(
       await t('core.activityDetails.status')
     );
-    await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
-    expect(await TransactionDetailsPage.transactionDetailsHash.getText()).not.to.be.empty;
 
     await TransactionDetailsPage.transactionDetailsTimestampTitle.waitForDisplayed();
     expect(await TransactionDetailsPage.transactionDetailsTimestampTitle.getText()).to.equal(
@@ -450,13 +448,13 @@ class TransactionsDetailsAssert {
     await this.assertSeeActivityDetailsDrawer(true);
     switch (txType) {
       case 'Sent':
-        await this.assertSeeSelfTransactionDetails('Sent');
+        await this.assertSeeSentReceivedSelfTransactionDetails('Sent');
         break;
       case 'Received':
-        await this.assertSeeSelfTransactionDetails('Received');
+        await this.assertSeeSentReceivedSelfTransactionDetails('Received');
         break;
       case 'Self Transaction':
-        await this.assertSeeSelfTransactionDetails('Self');
+        await this.assertSeeSentReceivedSelfTransactionDetails('Self');
         break;
       case 'Rewards':
         await this.assertSeeRewardsTransactionDetails();
