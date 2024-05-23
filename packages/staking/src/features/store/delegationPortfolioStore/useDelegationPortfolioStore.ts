@@ -32,6 +32,7 @@ const defaultState: DelegationPortfolioState = {
   view: undefined,
   viewedStakePool: undefined,
   browsePoolsView: DEFAULT_BROWSE_POOLS_VIEW,
+  hydrated: false,
 };
 
 export const useDelegationPortfolioStore = create(
@@ -89,6 +90,7 @@ export const useDelegationPortfolioStore = create(
           state.selectedPortfolio = [];
           state.pendingSelectedPortfolio = undefined;
           state.viewedStakePool = undefined;
+          state.hydrated = false;
         }),
       hydrate: ({
         poolIds,
@@ -106,7 +108,8 @@ export const useDelegationPortfolioStore = create(
             Object.assign(state, {
               browsePoolsView: poolsView,
               view,
-            });
+              hydrated: true,
+            } as DelegationPortfolioStore);
           });
 
           return;
@@ -118,7 +121,8 @@ export const useDelegationPortfolioStore = create(
               ...atomicStateMutators.selectPools({ stakePools: selectedStakePools, state }),
               browsePoolsView: poolsView,
               view,
-            });
+              hydrated: true,
+            } as DelegationPortfolioStore);
           });
         };
 

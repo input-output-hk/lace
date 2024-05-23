@@ -7,6 +7,7 @@ export type AdaSymbol = 'ADA' | 'tADA';
 
 export type DelegationPortfolioState = State & {
   view?: 'popup' | 'expanded';
+  hydrated: boolean;
 };
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
