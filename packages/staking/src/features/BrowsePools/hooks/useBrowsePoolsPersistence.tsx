@@ -10,10 +10,10 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
     walletStoreBlockchainProvider: { stakePoolProvider },
   } = useOutsideHandles();
   const { portfolioMutators, poolsView, selectedPortfolio, hydrated } = useDelegationPortfolioStore((store) => ({
+    hydrated: store.hydrated,
     poolsView: store.browsePoolsView,
     portfolioMutators: store.mutators,
     selectedPortfolio: store.selectedPortfolio,
-    hydrated: store.hydrated,
   }));
   const selectedPoolIds = useMemo(
     () => selectedPortfolio.map(({ stakePool }) => stakePool.id.toString()),
@@ -40,6 +40,7 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
     poolsView,
     portfolioMutators,
     stakePoolProvider,
+    stakingBrowserPreferencesPersistence.poolsView,
     stakingBrowserPreferencesPersistence?.selectedPoolIds,
     view,
   ]);

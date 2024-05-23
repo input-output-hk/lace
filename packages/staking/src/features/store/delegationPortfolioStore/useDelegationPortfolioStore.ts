@@ -22,17 +22,17 @@ import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 const defaultState: DelegationPortfolioState = {
   activeDelegationFlow: DelegationFlow.Overview,
   activeDrawerStep: undefined,
+  browsePoolsView: DEFAULT_BROWSE_POOLS_VIEW,
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,
+  hydrated: false,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   sortField: DEFAULT_SORT_OPTIONS.field,
   sortOrder: DEFAULT_SORT_OPTIONS.order,
   view: undefined,
   viewedStakePool: undefined,
-  browsePoolsView: DEFAULT_BROWSE_POOLS_VIEW,
-  hydrated: false,
 };
 
 export const useDelegationPortfolioStore = create(
@@ -107,8 +107,8 @@ export const useDelegationPortfolioStore = create(
           set((state) => {
             Object.assign(state, {
               browsePoolsView: poolsView,
-              view,
               hydrated: true,
+              view,
             } as DelegationPortfolioStore);
           });
 
@@ -120,8 +120,8 @@ export const useDelegationPortfolioStore = create(
             Object.assign(state, {
               ...atomicStateMutators.selectPools({ stakePools: selectedStakePools, state }),
               browsePoolsView: poolsView,
-              view,
               hydrated: true,
+              view,
             } as DelegationPortfolioStore);
           });
         };
