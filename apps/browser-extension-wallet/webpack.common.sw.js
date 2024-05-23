@@ -16,6 +16,9 @@ module.exports = () =>
       content: path.join(__dirname, 'src/lib/scripts/background/content.ts'),
       inject: path.join(__dirname, 'src/lib/scripts/background/inject.ts')
     },
+    experiments: {
+      topLevelAwait: true
+    },
     module: {
       // configuration regarding modules
       rules: [

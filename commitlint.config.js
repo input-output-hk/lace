@@ -34,7 +34,8 @@ module.exports = {
         'ui',
         // SRE
         'monitoring',
-        'security'
+        'security',
+        'midnight'
       ]
     ],
     'scope-empty': [0, 'never']

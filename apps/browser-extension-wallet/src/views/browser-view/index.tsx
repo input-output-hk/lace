@@ -29,42 +29,45 @@ import '../../lib/scripts/keep-alive-ui';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
+import { WalletServiceAPIProvider } from '@lace/midnight';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <StoreProvider appMode={APP_MODE_BROWSER}>
-          <AxiosClientProvider>
-            <CurrencyStoreProvider>
-              <HashRouter>
-                <BackgroundPageProvider>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <UIThemeProvider>
-                            <ExternalLinkOpenerProvider>
-                              <MigrationContainer appMode={APP_MODE_BROWSER}>
-                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                  <AddressesDiscoveryOverlay>
-                                    <BrowserViewRoutes />
-                                  </AddressesDiscoveryOverlay>
-                                </DataCheckContainer>
-                              </MigrationContainer>
-                            </ExternalLinkOpenerProvider>
-                          </UIThemeProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </BackgroundPageProvider>
-              </HashRouter>
-            </CurrencyStoreProvider>
-          </AxiosClientProvider>
-        </StoreProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
+    <WalletServiceAPIProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <AxiosClientProvider>
+              <CurrencyStoreProvider>
+                <HashRouter>
+                  <BackgroundPageProvider>
+                    <PostHogClientProvider>
+                      <ExperimentsProvider>
+                        <AnalyticsProvider>
+                          <ThemeProvider>
+                            <UIThemeProvider>
+                              <ExternalLinkOpenerProvider>
+                                <MigrationContainer appMode={APP_MODE_BROWSER}>
+                                  <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                    <AddressesDiscoveryOverlay>
+                                      <BrowserViewRoutes />
+                                    </AddressesDiscoveryOverlay>
+                                  </DataCheckContainer>
+                                </MigrationContainer>
+                              </ExternalLinkOpenerProvider>
+                            </UIThemeProvider>
+                          </ThemeProvider>
+                        </AnalyticsProvider>
+                      </ExperimentsProvider>
+                    </PostHogClientProvider>
+                  </BackgroundPageProvider>
+                </HashRouter>
+              </CurrencyStoreProvider>
+            </AxiosClientProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
+    </WalletServiceAPIProvider>
   </BackgroundServiceAPIProvider>
 );
 

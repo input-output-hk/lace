@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "outDir": "dist/",
+    "rootDir": "./",
+    "baseUrl": "../src",
+    "paths": {
+      "@src/*": ["*"],
+      "@ui/*": ["ui/*"]
+    },
+    "declarationDir": "./",
+    "declaration": true,
+    "plugins": [
+      { "transform": "typescript-transform-paths" },
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ]
+  },
+  "exclude": ["dist"]
+}

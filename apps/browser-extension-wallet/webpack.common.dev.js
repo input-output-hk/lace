@@ -43,6 +43,9 @@ module.exports =
         mode: 'development',
         devtool: 'inline-source-map',
         cache: { type: 'filesystem' },
+        experiments: {
+          topLevelAwait: true
+        },
         plugins: [
           new Dotenv({
             path: '.env',

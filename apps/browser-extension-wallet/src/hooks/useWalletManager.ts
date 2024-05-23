@@ -34,6 +34,7 @@ import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import { createMidnightWallet } from '@lace/midnight';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -43,6 +44,7 @@ export interface CreateWalletParams {
   name: string;
   mnemonic: string[];
   password: string;
+  midnightWalletAddress?: string;
   chainId?: Wallet.Cardano.ChainId;
 }
 
@@ -460,6 +462,11 @@ export const useWalletManager = (): UseWalletManager => {
       password,
       chainId = getCurrentChainId()
     }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
+      const midnightWallet = await createMidnightWallet(mnemonic);
+      // @ts-expect-error different versions of rxjs are causing errors with firstValueFrom
+      const midnightWalletState = await firstValueFrom<MidnightWallet>(midnightWallet.state());
+      const midnightWalletAddress = midnightWalletState.address;
+
       const accountIndex = 0;
       const passphrase = Buffer.from(password, 'utf8');
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
@@ -477,7 +484,7 @@ export const useWalletManager = (): UseWalletManager => {
 
       const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lockValue, lastActiveAccountIndex: accountIndex },
+        metadata: { name, lockValue, lastActiveAccountIndex: accountIndex, midnightWalletAddress },
         encryptedSecrets: {
           keyMaterial: await encryptMnemonic(mnemonic, passphrase),
           rootPrivateKeyBytes: HexBlob.fromBytes(

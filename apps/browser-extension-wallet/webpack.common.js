@@ -20,7 +20,7 @@ module.exports = () => {
       rules: [
         {
           test: /\.(js|jsx|ts|tsx)$/,
-          exclude: /node_modules\/(?!(@cardano-sdk)\/).*/,
+          exclude: /node_modules\/(?!(@cardano-sdk|@midnight-ntwrk\/dapp-connector-api)\/).*/,
           loader: 'swc-loader',
           options: {
             jsc: {
@@ -32,6 +32,18 @@ module.exports = () => {
               loose: false
             }
           },
+          resolve: {
+            fullySpecified: false
+          }
+        },
+        {
+          test: /node_modules\/@midnight-ntwrk\/wallet\/.*.(js|ts)/,
+          resolve: {
+            fullySpecified: false
+          }
+        },
+        {
+          test: /node_modules\/@midnight-ntwrk\/wallet-api\/.*.(js|ts)/,
           resolve: {
             fullySpecified: false
           }
