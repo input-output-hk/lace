@@ -69,7 +69,7 @@ export const SharedWalletStepLayout = ({
   const timelineSteps = getTimelineSteps(currentTimelineStep);
 
   return (
-    <Flex h="$fill" w="$fill">
+    <Flex h="$fill" w="$fill" className={styles.root}>
       <Timeline className={styles.timeline}>
         {timelineSteps.map(({ name, key, active }) => (
           <Timeline.Item key={key} active={active}>

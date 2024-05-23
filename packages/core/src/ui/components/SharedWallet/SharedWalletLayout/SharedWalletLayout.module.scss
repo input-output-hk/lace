@@ -1,6 +1,10 @@
 @import '../../../../../../common/src/ui/styles/abstracts/mixins';
 @import '../../../../../../common/src/ui/styles/theme.scss';
 
+.root {
+  overflow: hidden;
+}
+
 .timeline {
   width: 204px;
   border-right: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));

@@ -31,13 +31,11 @@ export const WalletNameInput = ({
       className={styles.paddingLeft}
       autoFocus
     />
-    {shouldShowErrorMessage && (
-      <p
-        className={cn(styles.paragraph, { [styles.error]: shouldShowErrorMessage })}
-        data-testid="wallet-name-input-error"
-      >
-        {errorMessage}
-      </p>
-    )}
+    <p
+      className={cn(styles.paragraph, { [styles.error]: shouldShowErrorMessage })}
+      data-testid="wallet-name-input-error"
+    >
+      {shouldShowErrorMessage && errorMessage}
+    </p>
   </div>
 );

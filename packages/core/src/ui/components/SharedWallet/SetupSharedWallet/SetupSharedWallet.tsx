@@ -1,8 +1,8 @@
 /* eslint-disable sonarjs/no-identical-functions */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SharedWalletStepLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
 import { WalletNameInput } from '../../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
-import { WALLET_NAME_INPUT_MAX_LENGTH } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
+import { WALLET_NAME_INPUT_MAX_LENGTH, validateNameLength } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { ProfileDropdown, Box, Text, FlowCard } from '@lace/ui';
 import { addEllipsis } from '@lace/common';
 import styles from './SetupSharedWallet.module.scss';
@@ -33,7 +33,9 @@ export const SetupSharedWallet = ({
   const translations = {
     title: t('core.sharedWallet.walletName.title'),
     subtitle: t('core.sharedWallet.walletName.subtitle'),
-    body: t('core.sharedWallet.walletName.body')
+    body: t('core.sharedWallet.walletName.body'),
+    nameMaxLength: t('core.walletNameAndPasswordSetupStep.nameMaxLength'),
+    nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage')
   };
 
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,13 +44,18 @@ export const SetupSharedWallet = ({
     onNameChange(value);
   };
 
+  const walletNameErrorMessage = useMemo(() => {
+    const validationError = validateNameLength(sharedWalletName) ? translations.nameMaxLength : '';
+    return sharedWalletName ? validationError : translations.nameRequiredMessage;
+  }, [sharedWalletName, translations.nameMaxLength, translations.nameRequiredMessage]);
+
   return (
     <SharedWalletStepLayout
       title={translations.title}
       description={translations.subtitle}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={!!sharedWalletName && !shouldShowNameErrorMessage}
+      isNextEnabled={Boolean(!walletNameErrorMessage)}
       currentTimelineStep={SharedWalletTimelineSteps.WALLET_NAME}
     >
       <WalletNameInput
@@ -57,8 +64,9 @@ export const SetupSharedWallet = ({
         onChange={handleNameChange}
         maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
         shouldShowErrorMessage={shouldShowNameErrorMessage}
+        errorMessage={walletNameErrorMessage}
       />
-      <Box mt="$40" mb="$20">
+      <Box mt="$12" mb="$20">
         <Text.Body.Normal weight="$semibold">{translations.body}</Text.Body.Normal>
       </Box>
       <FlowCard.Card flowCardClassName={styles.walletCard}>
