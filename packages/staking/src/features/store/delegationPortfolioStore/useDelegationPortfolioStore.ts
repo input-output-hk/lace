@@ -105,11 +105,9 @@ export const useDelegationPortfolioStore = create(
       }) => {
         if (poolIds.length === 0) {
           set((state) => {
-            Object.assign(state, {
-              browsePoolsView: poolsView,
-              hydrated: true,
-              view,
-            } as DelegationPortfolioStore);
+            state.browsePoolsView = poolsView;
+            state.hydrated = true;
+            state.view = view;
           });
 
           return;
