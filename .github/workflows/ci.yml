@@ -2,6 +2,7 @@ name: Continuous Integration
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
@@ -227,3 +228,270 @@ jobs:
           E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
           RUN: ${{ github.run_number }}
           BRANCH: ${{ github.ref_name }}
+
+  if-core-changed:
+    name: When core changed
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-20.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/core/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+          set -e
+
+  chromaticCore:
+    name: >
+      Run Chromatic check: Core
+    runs-on: ubuntu-20.04
+    needs:
+      - prepare
+      - if-core-changed
+
+    steps:
+      - name: Checkout repository
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Download packages-icons
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-icons
+          path: packages/icons/dist
+
+      - name: Download packages-ui
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-ui
+          path: packages/ui/dist
+
+      - name: Download packages-common
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Chromatic packages-core
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/core
+          NAME: packages-core
+          TOKEN: ${{ secrets.CHROMATIC_LACE_CORE_TOKEN }}
+
+      - name: Skip
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 0 }}
+        run: echo "Chromatic check for packages/core not needed"
+          exit 0
+
+  if-staking-changed:
+    name: When staking change
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-20.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/staking/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+          set -e
+
+  chromaticStaking:
+    name: >
+      Run Chromatic check: Staking
+    runs-on: ubuntu-20.04
+    needs:
+      - prepare
+      - if-staking-changed
+
+    steps:
+      - name: Checkout repository
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Download packages-icons
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-icons
+          path: packages/icons/dist
+
+      - name: Download packages-ui
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-ui
+          path: packages/ui/dist
+
+      - name: Download packages-common
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-staking
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-staking
+          path: packages/staking/dist
+
+      - name: Chromatic packages-staking
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/staking
+          NAME: packages-staking
+          TOKEN: ${{ secrets.CHROMATIC_LACE_STAKING_TOKEN }}
+
+      - name: Skip
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 0 }}
+        run: echo "Chromatic check for packages/staking not needed"
+          exit 0
+
+  if-ui-changed:
+    name: When ui changed
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-20.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/ui/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+          set -e
+
+  chromaticUi:
+    name: >
+      Run Chromatic check: UI
+    runs-on: ubuntu-20.04
+    needs:
+      - prepare
+      - if-ui-changed
+
+    steps:
+      - name: Checkout repository
+        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Download packages-icons
+        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-icons
+          path: packages/icons/dist
+
+      - name: Download packages-ui
+        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-ui
+          path: packages/ui/dist
+
+      - name: Chromatic packages-ui
+        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/ui
+          NAME: packages-ui
+          TOKEN: ${{ secrets.CHROMATIC_LACE_UI_TOKEN }}
+
+      - name: Skip
+        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 0 }}
+        run: echo "Chromatic check for packages/ui not needed"
+          exit 0
