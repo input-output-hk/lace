@@ -213,6 +213,7 @@ jobs:
           POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
           POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
+          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
 
       - name: Execute smoke tests
         uses: ./.github/actions/test/smoke
