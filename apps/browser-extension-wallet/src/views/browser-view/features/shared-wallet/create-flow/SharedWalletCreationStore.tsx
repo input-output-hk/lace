@@ -4,12 +4,34 @@ import React, { Dispatch, ReactElement, ReactNode, createContext, useContext, us
 import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
 
-type State = {
+type BaseState = {
+  step: SharedWalletCreationStep;
+};
+
+export type SupportingData = {
   activeWalletName: string;
   coSignersKeys: string[];
-  step: SharedWalletCreationStep;
   walletName: string;
 };
+
+// This type util forces to describe complete state - all props from the BaseState and SupportingData has to be specified, otherwise we have a TS error
+type MakeState<S extends BaseState & SupportingData> = BaseState & SupportingData & S;
+
+export type StateSetup = MakeState<{
+  activeWalletName: string;
+  coSignersKeys: undefined;
+  step: SharedWalletCreationStep.Setup;
+  walletName: string;
+}>;
+
+export type StateCoSigners = MakeState<{
+  activeWalletName: string;
+  coSignersKeys: string[];
+  step: SharedWalletCreationStep.CoSigners;
+  walletName: string;
+}>;
+
+type State = StateSetup | StateCoSigners;
 
 type Action = { type: 'next' } | { type: 'back' } | { type: 'walletNameChanged'; walletName: string };
 
@@ -29,7 +51,7 @@ export const useSharedWalletCreationStore = (): ContextValue => {
 
 const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
-  coSignersKeys: ['', ''],
+  coSignersKeys: undefined,
   step: SharedWalletCreationStep.Setup,
   walletName: ''
 });
@@ -69,13 +91,15 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
       if (action.type === 'back') {
         return {
           ...prevState,
+          coSignersKeys: undefined,
           step: SharedWalletCreationStep.Setup
         };
       }
       if (action.type === 'next') {
         return {
           ...prevState,
-          step: SharedWalletCreationStep.Quorum
+          coSignersKeys: undefined,
+          step: SharedWalletCreationStep.Setup
         };
       }
     }
