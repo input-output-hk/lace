@@ -10,6 +10,7 @@ export interface DialogActionProps {
   disabled?: boolean;
   cancel?: boolean;
   autoFocus?: boolean;
+  testId?: string;
 }
 
 export const Action = ({
@@ -18,6 +19,7 @@ export const Action = ({
   disabled,
   cancel = false,
   autoFocus = false,
+  testId,
 }: Readonly<DialogActionProps>): JSX.Element => {
   const Wrapper = cancel ? AlertDialog.Cancel : AlertDialog.Action;
   const ActionButton = cancel ? Button.Secondary : Button.CallToAction;
@@ -29,6 +31,7 @@ export const Action = ({
         label={label}
         disabled={disabled}
         autoFocus={autoFocus}
+        data-testid={testId ?? 'action-button'}
       />
     </Wrapper>
   );
