@@ -27,7 +27,6 @@ export const SetupSharedWallet = ({
   onNameChange
 }: Props): JSX.Element => {
   const [sharedWalletName, setSharedWalletName] = useState('');
-  const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
   const { t } = useTranslation();
 
   const translations = {
@@ -40,7 +39,6 @@ export const SetupSharedWallet = ({
 
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
     setSharedWalletName(value);
-    setShouldShowNameErrorMessage(true);
     onNameChange(value);
   };
 
@@ -63,7 +61,7 @@ export const SetupSharedWallet = ({
         label="Shared wallet name"
         onChange={handleNameChange}
         maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
-        shouldShowErrorMessage={shouldShowNameErrorMessage}
+        shouldShowErrorMessage={Boolean(walletNameErrorMessage)}
         errorMessage={walletNameErrorMessage}
       />
       <Box mt="$12" mb="$20">
