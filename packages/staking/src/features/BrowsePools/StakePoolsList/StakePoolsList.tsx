@@ -1,5 +1,5 @@
-import { Box, Flex, Table, Text } from '@lace/ui';
-import React, { ReactElement } from 'react';
+import { Box, Flex, Table, Text, useVisibleItemsCount } from '@lace/ui';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
 import { StakePoolDetails } from '../../store';
@@ -9,6 +9,13 @@ import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';
 import { StakePoolsListRow } from './StakePoolsListRow';
 import { StakePoolsListRowSkeleton } from './StakePoolsListRowSkeleton';
+
+const itemContent = (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
+  data ? (
+    <StakePoolsListRow {...data} />
+  ) : (
+    <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection />
+  );
 
 export type StakePoolsListProps = {
   scrollableTargetId: string;
@@ -21,6 +28,9 @@ export type StakePoolsListProps = {
   showSkeleton?: boolean;
 };
 
+const increaseViewportBy = { bottom: 100, top: 0 };
+const DEFAULT_ROW_HIGHT = 44;
+
 export const StakePoolsList = ({
   emptyPlaceholder: EmptyPlaceholder,
   loadMoreData,
@@ -32,10 +42,36 @@ export const StakePoolsList = ({
   scrollableTargetId,
 }: StakePoolsListProps): React.ReactElement => {
   const { t } = useTranslation();
+  const tableReference = useRef<HTMLDivElement | null>(null);
+  const [initialItemsCount, setInitialItemsCount] = useState(0);
   const showEmptyPlaceholder = !showSkeleton && pools.length === 0;
 
+  const initialItemsLimit = useVisibleItemsCount({
+    containerRef: tableReference,
+    rowHeight: DEFAULT_ROW_HIGHT,
+  });
+
+  useEffect(() => {
+    if (initialItemsLimit !== undefined) {
+      const overscanRows = Math.ceil(increaseViewportBy.bottom / DEFAULT_ROW_HIGHT);
+
+      setInitialItemsCount(overscanRows + Math.max(initialItemsLimit, 0));
+    }
+  }, [initialItemsLimit]);
+
+  useEffect(() => {
+    if (initialItemsCount !== undefined) {
+      loadMoreData({
+        endIndex: initialItemsCount,
+        startIndex: 0,
+      });
+    }
+  }, [initialItemsCount, loadMoreData]);
+
+  const rowPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
+
   return (
-    <Box w="$fill" data-testid="stake-pools-list-container">
+    <Box className={styles.box} w="$fill" data-testid="stake-pools-list-container">
       {selectedPools?.length > 0 && (
         <Box w="$fill" pb="$6">
           <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
@@ -43,7 +79,7 @@ export const StakePoolsList = ({
           </Text.Body.Normal>
         </Box>
       )}
-      {!showEmptyPlaceholder && <StakePoolsListHeader {...{ activeSort, setActiveSort }} />}
+      <StakePoolsListHeader {...{ activeSort, setActiveSort }} />
       {selectedPools?.length > 0 && (
         <Flex
           flexDirection="column"
@@ -59,25 +95,15 @@ export const StakePoolsList = ({
         </Flex>
       )}
       {showEmptyPlaceholder && <EmptyPlaceholder />}
-      {showSkeleton ? (
-        Array.from({ length: 4 }).map((_, index) => (
-          <StakePoolsListRowSkeleton key={index} index={index} columns={config.columns} withSelection />
-        ))
-      ) : (
-        <Table.Body<StakePoolDetails | undefined>
-          scrollableTargetId={scrollableTargetId}
-          loadMoreData={loadMoreData}
-          items={pools}
-          itemContent={(index, data) =>
-            data ? (
-              <StakePoolsListRow {...data} />
-            ) : (
-              <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection />
-            )
-          }
-          increaseViewportBy={{ bottom: 100, top: 0 }}
-        />
-      )}
+      <Table.Body<StakePoolDetails | undefined>
+        tableReference={tableReference}
+        scrollableTargetId={scrollableTargetId}
+        loadMoreData={loadMoreData}
+        totalCount={showSkeleton ? rowPlaceholders.length : pools.length}
+        items={showSkeleton ? rowPlaceholders : pools}
+        itemContent={itemContent}
+        increaseViewportBy={increaseViewportBy}
+      />
     </Box>
   );
 };
