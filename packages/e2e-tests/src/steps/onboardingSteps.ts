@@ -335,6 +335,30 @@ When(/^I enter saved mnemonic words$/, async () => {
   await RecoveryPhrasePage.enterMnemonicWords(mnemonicWordsForReference);
 });
 
+When(
+  /^I hover over "(Copy to clipboard|Paste from clipboard)" button$/,
+  async (clipboardType: 'Copy to clipboard' | 'Paste from clipboard') => {
+    switch (clipboardType) {
+      case 'Copy to clipboard':
+        await RecoveryPhrasePage.copyToClipboardButton.moveTo();
+        break;
+      case 'Paste from clipboard':
+        await RecoveryPhrasePage.pasteFromClipboardButton.moveTo();
+        break;
+      default:
+        throw new Error(`Unsupported clipboard type: ${clipboardType}`);
+    }
+  }
+);
+
+When(/^I click on "clipboard tooltip link"$/, async () => {
+  await RecoveryPhrasePage.clipboardTooltipLink.click();
+});
+
+Then(/^I see clipboard tooltip with information about copying and pasting words$/, async () => {
+  await onboardingRecoveryPhrasePageAssert.assertSeeClipboardTooltip();
+});
+
 Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mnemonicWordsLength: RecoveryPhrase) => {
   await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage(mnemonicWordsLength);
 });
