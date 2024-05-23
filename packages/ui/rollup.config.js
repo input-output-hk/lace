@@ -16,7 +16,7 @@ export default () => ({
       composite: false,
       exclude: ['node_modules', '**/*.stories.tsx'],
     }),
-    vanillaExtractPlugin(),
+    vanillaExtractPlugin({ identifiers: 'short' }),
     peerDepsExternal(),
     commonjs(),
     image(),
