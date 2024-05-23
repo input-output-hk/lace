@@ -24,6 +24,10 @@ inputs:
     description: 'Enable analytics tracking in production'
     required: false
     default: 'false'
+  BANXA_LACE_URL:
+    description: 'Banxa`s integration URL'
+    required: false
+    default: 'https://lacewallet.banxa-sandbox.com/'
 runs:
   using: 'composite'
   steps:
@@ -52,4 +56,5 @@ runs:
         POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
+        BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
       run: yarn browser build
