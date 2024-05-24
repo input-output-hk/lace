@@ -24,6 +24,7 @@ export const TopUpWalletButton = (): React.ReactElement => {
           setOpen(true);
         }}
         ref={dialogTriggerReference}
+        data-testid="top-up-wallet-card-button"
       />
 
       <TopUpWalletDialog
