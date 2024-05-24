@@ -23,6 +23,7 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   initialHdDiscoveryCompleted: false,
   isInMemoryWallet: undefined,
   isHardwareWallet: undefined,
+  hasKeyMaterial: undefined,
   walletType: undefined,
   stayOnAllDonePage: false,
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) =>
@@ -36,7 +37,10 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
       cardanoWallet: wallet,
       walletType: wallet?.source.wallet.type,
       isInMemoryWallet: wallet?.source.wallet.type === WalletType.InMemory,
-      isHardwareWallet: [WalletType.Ledger, WalletType.Trezor].includes(wallet?.source.wallet.type)
+      isHardwareWallet: [WalletType.Ledger, WalletType.Trezor].includes(wallet?.source.wallet.type),
+      hasKeyMaterial:
+        wallet?.source.wallet.type === WalletType.InMemory &&
+        wallet?.source.wallet.encryptedSecrets.keyMaterial.length > 0
     }),
   setCurrentChain: (chain: Wallet.ChainName) => {
     set({ currentChain: Wallet.Cardano.ChainIds[chain], environmentName: chain });

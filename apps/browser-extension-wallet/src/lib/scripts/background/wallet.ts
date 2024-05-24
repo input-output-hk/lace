@@ -96,9 +96,11 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   }
 };
 
+export const getBaseDbName = (name: string): string => name.replace(/[^\da-z]/gi, '');
+
 const storesFactory: StoresFactory = {
   create: ({ name }) => {
-    const baseDbName = name.replace(/[^\da-z]/gi, '');
+    const baseDbName = getBaseDbName(name);
     const docsDbName = `${baseDbName}Docs`;
     return {
       addresses: new storage.PouchDbAddressesStore(docsDbName, 'addresses', logger),
