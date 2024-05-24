@@ -43,7 +43,6 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   const createWallet = () => walletManager.createWallet(createWalletData);
 
   const sendPostWalletAddAnalytics = async ({
-    extendedAccountPublicKey,
     postHogActionHdWallet,
     postHogActionWalletAdded,
     wallet
@@ -52,14 +51,13 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
     });
-    await analytics.sendMergeEvent(extendedAccountPublicKey);
-
-    if (postHogActionHdWallet && wallet && (await isHdWallet(wallet))) {
-      await analytics.sendEventToPostHog(postHogActionHdWallet);
-    }
 
     if (aliasEventRequired) {
       await analytics.sendAliasEvent();
+    }
+
+    if (postHogActionHdWallet && wallet && (await isHdWallet(wallet))) {
+      await analytics.sendEventToPostHog(postHogActionHdWallet);
     }
   };
 
