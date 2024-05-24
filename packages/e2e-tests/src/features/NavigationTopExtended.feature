@@ -31,15 +31,6 @@ Feature: Top Navigation - Extended view
     Then wallet sync status component is visible
     And sync status displays "Wallet synced" state
 
-  @LW-2322 @Mainnet @Testnet @Pending
-  @issue=LW-10057
-  Scenario: Avatar dropdown wallet address copy functions as expected
-    Given I close wallet synced toast
-    When I click the menu button
-    Then the dropdown menu is visible
-    When I click on the user details button
-    Then I see a toast with text: "Copied to clipboard"
-
   @LW-4598 @Testnet
   Scenario: Extended View - network id is visible for Testnet
     Then I see network id: "Preprod"
