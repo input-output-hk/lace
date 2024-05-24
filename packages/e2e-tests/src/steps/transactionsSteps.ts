@@ -176,6 +176,21 @@ When(
 );
 
 Then(
+  /^I see (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration) transaction details$/,
+  async (txType: TransactionType) => {
+    await transactionDetailsAssert.assertSeeTransactionDetailsDrawer(txType);
+  }
+);
+
+When(
+  /^I click transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
+  async (txType: TransactionType) => {
+    const index = await TransactionsPage.getIndexOfTxType(txType);
+    await TransactionsPage.clickOnTransactionRow(index);
+  }
+);
+
+Then(
   /^I see (default - negative|green - positive) styling for transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
   async (styling: TransactionStyle, txType: TransactionType) => {
     await transactionsPageAssert.assertSeeStylingForTxType(styling, txType);
