@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "composite": true,
-    "module": "es2020",
-    "target": "es2016",
+    "module": "esnext",
+    "target": "ES2018",
     "jsx": "react",
     "allowJs": false,
     "moduleResolution": "node",
@@ -15,7 +15,7 @@
     "noUnusedLocals": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   }

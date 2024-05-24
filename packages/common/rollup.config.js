@@ -9,13 +9,8 @@ export default (args) => {
     output: [
       {
         file: packageJson.main,
-        format: 'cjs',
-        sourcemap: true
-      },
-      {
-        file: packageJson.module,
         format: 'esm',
-        sourcemap: true
+        sourcemap: false
       }
     ]
   };

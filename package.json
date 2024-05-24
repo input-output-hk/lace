@@ -19,7 +19,7 @@
     "apps/*"
   ],
   "scripts": {
-    "base-command-for-build-scripts": "wsrun --prefix -trame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
+    "base-command-for-build-scripts": "wsrun --prefix -srame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
     "build": "yarn base-command-for-build-scripts -c build",
     "build-deps": "EXCLUDE_APP=true yarn build",

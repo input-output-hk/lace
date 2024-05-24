@@ -4,16 +4,20 @@
     "allowJs": false,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
+    "baseUrl": "./src",
+    "incremental": true,
+    "module": "esnext",
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "dist",
-    "module": "es2020",
-    "target": "es2016",
     "preserveConstEnums": true,
-    "baseUrl": "./src"
+    "skipLibCheck": true,
+    "target": "ES2018",
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
+  "exclude": ["node_modules", "dist"],
   "references": [{ "path": "../../packages/core/src" }, { "path": "../../packages/cardano/src" }]
 }

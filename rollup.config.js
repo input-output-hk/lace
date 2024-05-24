@@ -11,13 +11,13 @@ export default ({
   tsPluginOptions = {
     tsconfig: 'src/tsconfig.json',
     composite: false,
-    exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx']
+    exclude: ['node_modules', '**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx']
   }
 } = {}) => ({
   input: 'src/index.ts',
   plugins: [
     resolve({
-      preferBuiltins: false,
+      preferBuiltins: false
     }),
     typescript(tsPluginOptions),
     peerDepsExternal(),
@@ -26,7 +26,7 @@ export default ({
       // no matter what build type it is. It makes cjs build requiring esm version
       // https://github.com/egoist/rollup-plugin-postcss/issues/381
       // https://github.com/egoist/rollup-plugin-postcss/issues/367
-      inject: cssVariableName => `
+      inject: (cssVariableName) => `
 import styleInject from 'style-inject';
 styleInject(${cssVariableName});`
     }),

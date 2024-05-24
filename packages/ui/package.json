@@ -13,10 +13,9 @@
   "license": "Apache-2.0",
   "author": "IOHK",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "run -T rollup -c rollup.config.js",
+    "build": "run -T rollup -c rollup.config.js --verbose",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "format": "yarn prettier --write .",
