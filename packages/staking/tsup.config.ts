@@ -14,9 +14,9 @@ const tsupConfig = defineConfig([
     },
     entry: ['./src/index.ts'],
     esbuildPlugins: [
+      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
       // eslint-disable-next-line new-cap
       ScssModulesPlugin() as never,
-      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
       svgr({ icon: true, plugins: [svgrJsx] }),
     ],
     external: Object.keys(peerDependencies),

@@ -169,7 +169,7 @@ Feature: NFT - Folders - Popup view
     When I click NFT with name "Ibilecoin"
     Then I am on a NFT details on the popup view for NFT with name: "Ibilecoin"
 
-  @LW-10456
+  @LW-10456 @Pending
   @issue=LW-10634
   Scenario: Popup-view - NFT Folders - Search bar for NFTs
     Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
