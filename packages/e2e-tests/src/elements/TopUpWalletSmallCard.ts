@@ -23,7 +23,7 @@ class TopUpWalletSmallCard {
     return $(this.DISCLAIMER);
   }
 
-  async clickByAdaButton(): Promise<void> {
+  async clickBuyAdaButton(): Promise<void> {
     await this.buyAdaButton.waitForClickable();
     await this.buyAdaButton.click();
   }

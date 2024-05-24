@@ -4,16 +4,16 @@ import TopUpWalletCard from '../elements/TopUpWalletCard';
 import TopUpWalletDialog from '../elements/TopUpWalletDialog';
 import TopUpWalletSmallCard from '../elements/TopUpWalletSmallCard';
 
-Then(/^Banxa widget (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+Then(/^Banxa's widget (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
   await TopUpWalletAssert.assertSeeBanxaWidget(shouldBeDisplayed === 'is');
 });
 
-When(/^I click on "Buy ADA" button on Banxa widget$/, async () => {
-  await TopUpWalletCard.clickByAdaButton();
+When(/^I click on "Buy ADA" button on Banxa's widget$/, async () => {
+  await TopUpWalletCard.clickBuyAdaButton();
 });
 
-When(/^I click on "Buy ADA" button on small Banxa widget$/, async () => {
-  await TopUpWalletSmallCard.clickByAdaButton();
+When(/^I click on "Buy ADA" button on small Banxa's widget$/, async () => {
+  await TopUpWalletSmallCard.clickBuyAdaButton();
 });
 
 Then(/^"You're leaving Lace for Banxa" dialog (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
@@ -44,7 +44,7 @@ Then(/^Banxa's small component (is|is not) displayed over tokens$/, async (shoul
   await TopUpWalletAssert.assertSeeSmallBanxaComponent(shouldBeDisplayed === 'is');
 });
 
-When(/^I click on "Banxa's website" link on Banxa widget$/, async () => {
+When(/^I click on "Banxa's website" link on Banxa's widget$/, async () => {
   await TopUpWalletDialog.disclaimerLinkCaption1.click();
 });
 
