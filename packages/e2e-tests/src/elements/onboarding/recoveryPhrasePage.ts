@@ -18,6 +18,8 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   private WATCH_VIDEO_LINK = '[data-testid="watch-video-link"]';
   private COPY_TO_CLIPBOARD_BUTTON = '[data-testid="copy-to-clipboard-button"]';
   private PASTE_FROM_CLIPBOARD_BUTTON = '[data-testid="paste-from-clipboard-button"]';
+  private CLIPBOARD_TOOLTIP = '[data-testid="mnemonic-copy-paste-tooltip"]';
+  private CLIPBOARD_TOOLTIP_LINK = '[data-testid="mnemonic-copy-paste-tooltip"] a';
   private mnemonicWordsList: string[] = [];
 
   get mnemonicWords(): ChainablePromiseArray<WebdriverIO.ElementArray> {
@@ -62,6 +64,14 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
 
   get mnemonicLengthSelector24(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MNEMONIC_LENGTH_SELECTOR_24);
+  }
+
+  get clipboardTooltip(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLIPBOARD_TOOLTIP);
+  }
+
+  get clipboardTooltipLink(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLIPBOARD_TOOLTIP_LINK);
   }
 
   async selectMnemonicLength(length: RecoveryPhrase): Promise<void> {
