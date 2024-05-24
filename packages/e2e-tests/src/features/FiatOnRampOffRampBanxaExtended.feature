@@ -1,5 +1,5 @@
 # Unblock when USE_FOOR_TOPUP=true
-@Banxa-Extended @Testnet
+@Banxa-Extended @Testnet @Pending
 Feature: Fiat On Ramp & Off Ramp - Banxa
 
   Background:
