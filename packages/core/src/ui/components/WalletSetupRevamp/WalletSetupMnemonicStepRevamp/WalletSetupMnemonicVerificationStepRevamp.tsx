@@ -95,7 +95,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       customAction={
         <Tooltip
           placement="top"
-          title={translations.copyPasteTooltipText}
+          title={<span data-testid="mnemonic-copy-paste-tooltip">{translations.copyPasteTooltipText}</span>}
           showArrow={false}
           data-testid="verification-copy-paste-tooltip"
         >
