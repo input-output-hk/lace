@@ -19,6 +19,7 @@ import NftAssert from '../assert/nftAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
 import ToastMessage from '../elements/toastMessage';
+import NftDetails from '../elements/NFTs/nftDetails';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -429,3 +430,8 @@ Then(
     await NftAssert.assertSeeCustomAdaHandleThumbnail(folderName);
   }
 );
+
+Then(/^I see NFTs Folder value: "([^"]*)"$/, async (folderPath: string) => {
+  const actualFolderPath = await NftDetails.getFolderValue();
+  expect(actualFolderPath).toEqual(folderPath);
+});

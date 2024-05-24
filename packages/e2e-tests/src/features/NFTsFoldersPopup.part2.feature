@@ -168,3 +168,21 @@ Feature: NFT - Folders - Popup view
     And I see "Sample NFT folder" NFT folder page in popup mode
     When I click NFT with name "Ibilecoin"
     Then I am on a NFT details on the popup view for NFT with name: "Ibilecoin"
+
+  @LW-10456
+  @issue=LW-10634
+  Scenario: Popup-view - NFT Folders - Search bar for NFTs
+    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
+    And I navigate to NFTs popup page
+    And I search for NFT with name: "LaceNFT"
+    Then I see NFT with name "LaceNFT" on the NFT folder page
+    And I do not see NFT with name: "Ibilecoin" on the NFTs page
+
+  @LW-10457
+  Scenario: Popup-view - NFT Folders - NFTs details show NFTs path
+    Given the NFT folder with name "SampleFolder" and 2 NFT was created
+    And I navigate to NFTs popup page
+    And I left click on the NFT folder with name "SampleFolder"
+    And I see "SampleFolder" NFT folder page in popup mode
+    When I click NFT with name "Ibilecoin"
+    Then I see NFTs Folder value: "Root/SampleFolder"
