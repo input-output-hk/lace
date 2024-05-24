@@ -8,7 +8,7 @@ Feature: Send Simple Transactions - Popup view - E2E
   Scenario: Popup-view - Send ADA (single asset) E2E
     And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
-    And I fill bundle 1 with "WalletReceiveSimpleTransaction2E2E" address with following assets:
+    And I fill bundle 1 with "WalletReceiveSimpleTransaction2E2E" main address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page
@@ -37,7 +37,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     Then I see a toast with text: "Address copied"
     And I close the drawer by clicking close button
     And I click "Send" button on Tokens page in popup mode
-    And I fill bundle 1 with "CopiedAddress" address with following assets:
+    And I fill bundle 1 with "CopiedAddress" copied address with following assets:
       | type | assetName | amount |
       | ADA  | tADA      | 5      |
     And I click "Review transaction" button on "Send" page
@@ -51,7 +51,7 @@ Feature: Send Simple Transactions - Popup view - E2E
   @LW-5895
   Scenario: Popup View - transaction details - Hash does not contain cexplorer link until transaction is confirmed
     When I click "Send" button on Tokens page in popup mode
-    And I fill bundle 1 with "WalletReceiveSimpleTransaction2E2E" address with following assets:
+    And I fill bundle 1 with "WalletReceiveSimpleTransaction2E2E" main address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page

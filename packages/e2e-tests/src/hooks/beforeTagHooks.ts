@@ -5,6 +5,7 @@ import popupView from '../page/popupView';
 import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
 import analyticsBanner from '../elements/analyticsBanner';
+import { openWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 
 const extendedViewWalletInitialization = async (walletName = TestWalletName.TestAutomationWallet): Promise<void> => {
   await extendedView.visit();
@@ -19,6 +20,21 @@ const popupViewWalletInitialization = async (walletName = TestWalletName.TestAut
   await popupView.visit();
   await networkManager.logFailedRequests();
 };
+
+const extendedViewRepositoryWalletInitialization = async (
+  walletNames = [TestWalletName.MultiWallet1]
+): Promise<void> => {
+  await extendedView.visit();
+  await openWalletsInRepository(walletNames);
+  await networkManager.logFailedRequests();
+};
+
+// const popupViewRepositoryWalletInitialization = async (walletNames = [TestWalletName.MultiWallet1]): Promise<void> => {
+//   await extendedView.visit();
+//   await openWalletsInRepository(walletNames);
+//   await popupView.visit();
+//   await networkManager.logFailedRequests();
+// };
 
 Before({ tags: '@pending or @Pending' }, async () => 'skipped');
 
@@ -157,6 +173,12 @@ Before({ tags: '@Staking-NonDelegatedFunds-Extended' }, async () => {
 
 Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Before({ tags: '@MultiWallet-Extended' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });

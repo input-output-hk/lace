@@ -213,14 +213,29 @@ Then(
 );
 
 When(
-  /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
-  async (bundleIndex, receivingAddress, options) => {
+  /^I fill bundle (\d+) with "([^"]*)" (main|copied|other multiaddress|second account) address with following assets:$/,
+  async (bundleIndex, receivingAddress, addressType, options) => {
     const addressInput = new AddressInput(bundleIndex);
-    await addressInput.fillAddress(
-      receivingAddress === 'CopiedAddress'
-        ? String(await clipboard.read())
-        : String(getTestWallet(receivingAddress).address)
-    );
+    let resolvedReceivingAddress = '';
+    switch (addressType) {
+      case 'main':
+        resolvedReceivingAddress = String(getTestWallet(receivingAddress).address as string);
+        break;
+      case 'copied':
+        resolvedReceivingAddress = String(await clipboard.read());
+        break;
+      case 'other multiaddress':
+        resolvedReceivingAddress = String(
+          getTestWallet(receivingAddress).accounts?.[0].additionalMultiAddress as string
+        );
+        break;
+      case 'second account':
+        resolvedReceivingAddress = String(getTestWallet(receivingAddress).accounts?.[1].address as string);
+        break;
+      default:
+        throw new Error(`Unsupported address type: ${addressType}`);
+    }
+    await addressInput.fillAddress(resolvedReceivingAddress);
     await addressInput.searchLoader.waitForDisplayed({ reverse: true });
     // Close address dropdown menu if exists
     if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {

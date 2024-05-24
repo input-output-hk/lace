@@ -1,6 +1,7 @@
 import { browser } from '@wdio/globals';
 import { Logger } from '../support/logger';
 import { switchToWindowWithLace } from '../utils/window';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 
 export const getNumWalletsInRepository = async (): Promise<number> =>
   await browser.execute(`
@@ -44,3 +45,24 @@ export const addAndActivateWalletInRepository = async (wallets: string): Promise
       })
   `
   );
+
+export const openWalletsInRepository = async (wallets: TestWalletName[]): Promise<void> => {
+  const walletsRepositoryArray = JSON.stringify(
+    wallets.map((wallet) => JSON.parse(getTestWallet(wallet).repository as string))
+  );
+
+  await browser.execute(
+    `
+      let walletsObject = JSON.parse('${walletsRepositoryArray}');
+
+      for (const wallet of walletsObject.reverse()) {
+         await walletRepository.addWallet(wallet);
+         await walletManager.activate({
+          walletId: wallet.walletId,
+          accountIndex: wallet.accounts[0].accountIndex,
+          chainId: { networkId: 0, networkMagic: 1 }
+         })
+      }
+     `
+  );
+};
