@@ -489,7 +489,7 @@ jobs:
         with:
           DIR: packages/ui
           NAME: packages-ui
-          TOKEN: ${{ secrets.CHROMATIC_LACE_UI_TOKEN }}
+          TOKEN: ${{ secrets.CHROMATIC_LACE_UI_TOOLKIT_TOKEN }}
 
       - name: Skip
         if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 0 }}
