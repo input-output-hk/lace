@@ -218,6 +218,7 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     }
   }, [
     aliasEventRequired,
+    mergeEventRequired,
     analytics,
     closeConnection,
     connection,

@@ -24,7 +24,7 @@ type SendPostWalletAddAnalyticsParams = {
 export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreationParams) => {
   const analytics = useAnalyticsContext();
   const walletManager = useWalletManager();
-  const { aliasEventRequired } = useWalletOnboarding();
+  const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
   const [createWalletData, setCreateWalletData] = useState<CreateWalletParams>({
     mnemonic: initialMnemonic,
     name: '',
@@ -43,6 +43,7 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   const createWallet = () => walletManager.createWallet(createWalletData);
 
   const sendPostWalletAddAnalytics = async ({
+    extendedAccountPublicKey,
     postHogActionHdWallet,
     postHogActionWalletAdded,
     wallet
@@ -54,6 +55,10 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
 
     if (aliasEventRequired) {
       await analytics.sendAliasEvent();
+    }
+
+    if (mergeEventRequired) {
+      await analytics.sendMergeEvent(extendedAccountPublicKey);
     }
 
     if (postHogActionHdWallet && wallet && (await isHdWallet(wallet))) {
