@@ -26,8 +26,7 @@ Feature: Analytics - Posthog - Event properties
     Then I validate that the event includes "trigger_point" property
     And I validate that the "send | send | click" event includes property "trigger_point" with value "nfts page" in posthog
 
-  @LW-8351 @Pending
-  @issue=LW-10242
+  @LW-8351
   Scenario: Analytics -Extended View - Verify event properties - Send - Send token
     Given I set up request interception for posthog analytics request(s)
     And I click token with name: "Cardano"

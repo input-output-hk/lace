@@ -88,12 +88,11 @@ class StakingPageAssert {
         : await t('browserView.staking.details.switchedPools.title')
     );
     await StakingSuccessDrawer.resultSubtitle.waitForDisplayed();
-    // TODO: uncomment when LW-4864 is resolved
-    // expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
-    //   process === 'Initial'
-    //     ? await t('browserView.staking.details.success.subTitle')
-    //     : await t('browserView.staking.details.switchedPools.subTitle')
-    // );
+    expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
+      process === 'Initial'
+        ? await t('browserView.staking.details.success.subTitle')
+        : await t('browserView.staking.details.switchedPools.subTitle')
+    );
 
     await StakingSuccessDrawer.closeButton.waitForDisplayed();
     expect(await StakingSuccessDrawer.closeButton.getText()).to.equal(await t('general.button.close'));

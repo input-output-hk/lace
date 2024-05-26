@@ -185,4 +185,4 @@ Feature: NFT - Folders - Popup view
     And I left click on the NFT folder with name "SampleFolder"
     And I see "SampleFolder" NFT folder page in popup mode
     When I click NFT with name "Ibilecoin"
-    Then I see NFTs Folder value: "Root/SampleFolder"
+    Then I see NFTs Folder path: "Root/SampleFolder"

@@ -83,10 +83,6 @@ class NftDetails {
     return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[2].$(this.INFO_LIST_ITEM_VALUE);
   }
 
-  get folderLabel() {
-    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[3].$(this.INFO_LIST_ITEM_KEY);
-  }
-
   get folderPathPart1() {
     return this.tokenInfoSection.$(this.FOLDER_PATH_PART_1);
   }
@@ -118,15 +114,14 @@ class NftDetails {
     return testContext.load('nftDetails');
   }
 
-  async getFolderValue(): Promise<string> {
+  async getFolderPath(): Promise<string> {
     await this.folderPathPart1.waitUntil(async () => (await this.folderPathPart1.getText()) !== '');
     const folderPathText1 = await this.folderPathPart1.getText();
-    try {
+    if (await this.folderPathPart2.isDisplayed()) {
       const folderPathText2 = await this.folderPathPart2.getText();
       return `${folderPathText1}/${folderPathText2}`;
-    } catch {
-      return folderPathText1;
     }
+    return folderPathText1;
   }
 }
 
