@@ -13,7 +13,8 @@ export const SharedWalletCreationFlow: VFC = () => (
             activeWalletAddress={''}
             onBack={() => dispatch({ type: 'back' })}
             onNext={() => dispatch({ type: 'next' })}
-            onNameChange={(walletName) => dispatch({ type: 'walletNameChanged', walletName })}
+            onWalletNameChange={(walletName) => dispatch({ type: 'walletNameChanged', walletName })}
+            walletName={state.walletName}
           />
         )}
       </>

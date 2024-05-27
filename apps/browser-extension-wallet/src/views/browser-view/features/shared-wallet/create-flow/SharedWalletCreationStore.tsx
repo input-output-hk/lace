@@ -1,8 +1,19 @@
 import { walletRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
-import React, { Dispatch, ReactElement, ReactNode, createContext, useContext, useMemo, useReducer } from 'react';
+import React, {
+  Dispatch,
+  ReactElement,
+  ReactNode,
+  createContext,
+  useContext,
+  useMemo,
+  useReducer,
+  useEffect
+} from 'react';
 import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
+import { firstValueFrom } from 'rxjs';
+import { useWalletManager } from '@hooks';
 
 type BaseState = {
   step: SharedWalletCreationStep;
@@ -12,6 +23,7 @@ export type SupportingData = {
   activeWalletName: string;
   coSignersKeys: string[];
   walletName: string;
+  walletNameInitiallySet: boolean;
 };
 
 // This type util forces to describe complete state - all props from the BaseState and SupportingData has to be specified, otherwise we have a TS error
@@ -22,6 +34,7 @@ export type StateSetup = MakeState<{
   coSignersKeys: undefined;
   step: SharedWalletCreationStep.Setup;
   walletName: string;
+  walletNameInitiallySet: boolean;
 }>;
 
 export type StateCoSigners = MakeState<{
@@ -29,11 +42,16 @@ export type StateCoSigners = MakeState<{
   coSignersKeys: string[];
   step: SharedWalletCreationStep.CoSigners;
   walletName: string;
+  walletNameInitiallySet: boolean;
 }>;
 
 type State = StateSetup | StateCoSigners;
 
-type Action = { type: 'next' } | { type: 'back' } | { type: 'walletNameChanged'; walletName: string };
+type Action =
+  | { type: 'next' }
+  | { type: 'back' }
+  | { type: 'walletNameChanged'; walletName: string }
+  | { type: 'initialWalletNameDetermined'; walletName: string };
 
 type ContextValue = {
   state: State;
@@ -53,7 +71,8 @@ const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
   coSignersKeys: undefined,
   step: SharedWalletCreationStep.Setup,
-  walletName: ''
+  walletName: '',
+  walletNameInitiallySet: false
 });
 
 type SharedWalletCreationStoreProps = {
@@ -62,6 +81,7 @@ type SharedWalletCreationStoreProps = {
 
 export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStoreProps): ReactElement => {
   const history = useHistory();
+  const { walletRepository } = useWalletManager();
   const {
     walletInfo: { name: activeWalletName }
   } = useWalletStore();
@@ -69,6 +89,13 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
   const initialState = makeInitialState(activeWalletName);
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
     if (prevState.step === SharedWalletCreationStep.Setup) {
+      if (action.type === 'initialWalletNameDetermined' && !prevState.walletNameInitiallySet) {
+        return {
+          ...prevState,
+          walletName: action.walletName,
+          walletNameInitiallySet: true
+        };
+      }
       if (action.type === 'walletNameChanged') {
         return {
           ...prevState,
@@ -106,6 +133,15 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
 
     return prevState;
   }, initialState);
+
+  useEffect(() => {
+    (async () => {
+      if (state.walletName) return;
+      const wallets = await firstValueFrom(walletRepository.wallets$);
+      const walletName = `Wallet ${wallets.length + 1}`;
+      dispatch({ type: 'initialWalletNameDetermined', walletName });
+    })();
+  }, [state.walletName, walletRepository]);
 
   const contextValue: ContextValue = useMemo(
     () => ({
