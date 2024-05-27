@@ -5,6 +5,7 @@ import { ChainablePromiseArray } from 'webdriverio/build/types';
 class NftsPage {
   protected LIST_CONTAINER = '[data-testid="nft-list-container"]';
   private CREATE_FOLDER_BUTTON = '[data-testid="create-folder-button"]';
+  private NFT_SEARCH_INPUT = '[data-testid="nft-search-input"]';
   protected NFT_CONTAINER = '[data-testid="nft-item"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
   public NFT_NAME = '[data-testid="nft-item-name"]';
@@ -30,6 +31,10 @@ class NftsPage {
 
   get createFolderButton() {
     return $(this.CREATE_FOLDER_BUTTON);
+  }
+
+  get nftSearchInput() {
+    return $(this.NFT_SEARCH_INPUT);
   }
 
   get nftContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {

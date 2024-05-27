@@ -429,3 +429,7 @@ Then(
     await NftAssert.assertSeeCustomAdaHandleThumbnail(folderName);
   }
 );
+
+Then(/^I see NFTs Folder path: "([^"]*)"$/, async (folderPath: string) => {
+  await NftAssert.assertSeeNFTDetailsFolderPath(folderPath);
+});

@@ -11,7 +11,7 @@ import { ThemeColorScheme, LocalThemeProvider, sx } from '../../design-tokens';
 import { sleep } from '../../test';
 import { Box } from '../box';
 import * as Buttons from '../buttons';
-import { page, Section, Variants, usePortalContainer } from '../decorators';
+import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
@@ -403,46 +403,38 @@ type Interactions = ComponentStory<ElementType<Props>>;
 export const Interactions: Interactions = ({
   onCloseClick,
   onBackClick,
-}: Props): JSX.Element => {
-  const container = usePortalContainer();
-
-  return (
-    <Grid columns="$1">
-      <Cell>
-        <Section title="Play">
-          <Root>
-            <Content
-              data-testid="side-drawer-content"
-              zIndex={100}
-              container={container}
-            >
-              <Header
-                text="Label"
-                onBackClick={onBackClick}
-                onCloseClick={onCloseClick}
+}: Props): JSX.Element => (
+  <Grid columns="$1">
+    <Cell>
+      <Section title="Play">
+        <Root>
+          <Content data-testid="side-drawer-content" zIndex={100}>
+            <Header
+              text="Label"
+              onBackClick={onBackClick}
+              onCloseClick={onCloseClick}
+            />
+            <Body>
+              <Headline
+                title="Section title"
+                description="Lorem ipsum dolor sit amet quare id faciam."
               />
-              <Body>
-                <Headline
-                  title="Section title"
-                  description="Lorem ipsum dolor sit amet quare id faciam."
-                />
-              </Body>
-              <Footer>
-                <Buttons.CallToAction label="Label" />
-                <Close>
-                  <Buttons.Secondary label="Close" />
-                </Close>
-              </Footer>
-            </Content>
-            <Trigger>
-              <Buttons.Primary label="Open side drawer" />
-            </Trigger>
-          </Root>
-        </Section>
-      </Cell>
-    </Grid>
-  );
-};
+            </Body>
+            <Footer>
+              <Buttons.CallToAction label="Label" />
+              <Close>
+                <Buttons.Secondary label="Close" />
+              </Close>
+            </Footer>
+          </Content>
+          <Trigger>
+            <Buttons.Primary label="Open side drawer" />
+          </Trigger>
+        </Root>
+      </Section>
+    </Cell>
+  </Grid>
+);
 
 Interactions.play = async ({ canvasElement }): Promise<void> => {
   const canvas = within(canvasElement);
