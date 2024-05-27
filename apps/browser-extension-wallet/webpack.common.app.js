@@ -20,7 +20,8 @@ module.exports = () =>
       ['trezor-usb-permissions']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
     },
     experiments: {
-      syncWebAssembly: true
+      syncWebAssembly: true,
+      topLevelAwait: true
     },
     module: {
       rules: [

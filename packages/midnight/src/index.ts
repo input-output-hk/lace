@@ -1,10 +1,7 @@
 import { util } from '@cardano-sdk/key-management';
 import { Resource, WalletBuilder } from '@midnight-ntwrk/wallet';
 import { Wallet } from '@midnight-ntwrk/wallet-api';
-import { setNetworkId } from '@midnight-ntwrk/zswap';
 import { DEFAULT_NETWORK_ADDRESSES, MIDNIGHT_NETWORK_ID } from '@src/config';
-
-setNetworkId(MIDNIGHT_NETWORK_ID);
 
 const convertHttpToWebSocket = (address: string) => `${address.replace(/(http)(s)?:\/\//, 'ws$2://')}/ws`;
 

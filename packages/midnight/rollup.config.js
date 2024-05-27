@@ -48,17 +48,5 @@ export default () => [
         sourcemap: true
       }
     ]
-  },
-  {
-    ...baseConfig('src/tsconfig.background.json'),
-    input: ['./src/background/index.ts'],
-    output: [
-      {
-        dir: 'dist',
-        format: 'esm',
-        sourcemap: true,
-        preserveModules: true
-      }
-    ]
   }
 ];
