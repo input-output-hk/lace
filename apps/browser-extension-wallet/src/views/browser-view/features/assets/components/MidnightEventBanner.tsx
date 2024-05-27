@@ -43,6 +43,10 @@ export const MidnightEventBanner = (): JSX.Element => {
   }, []);
 
   const shouldHide = () => {
+    if (process.env.USE_MIDNIGHT_PRELAUNCH_EVENT !== 'true') {
+      return true;
+    }
+
     if (state.isLoading) {
       return true;
     }

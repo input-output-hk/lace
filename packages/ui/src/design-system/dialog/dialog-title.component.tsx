@@ -14,7 +14,7 @@ export interface DialogTitleProps {
 export const Title = ({
   children,
 }: Readonly<DialogTitleProps>): JSX.Element => (
-  <AlertDialog.Title asChild>
+  <AlertDialog.Title asChild data-testid="dialog-title">
     {typeof children === 'string' ? (
       <Text.SubHeading weight="$bold" className={cx.dialogTitle}>
         {children}

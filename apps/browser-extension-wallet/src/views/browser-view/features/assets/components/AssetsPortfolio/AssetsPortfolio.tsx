@@ -127,14 +127,18 @@ export const AssetsPortfolio = ({
         />
       )}
       {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && isMainnet && (
-        <Flex flexDirection="column" gap="$10" mb="$16">
-          <Text.Body.Normal weight="$medium" color="secondary">
+        <Flex flexDirection="column" gap="$10" mb="$16" data-testid="top-up-wallet-small-card">
+          <Text.Body.Normal weight="$medium" color="secondary" data-testid="top-up-wallet-small-card-title">
             {t('browserView.assets.topupWallet.buyButton.title')}
           </Text.Body.Normal>
           <Flex flexDirection="column" alignItems="stretch" w="$294">
             <TopUpWalletButton />
           </Flex>
-          <Text.Label weight="$medium" className={styles.topupWalletDisclaimerShort}>
+          <Text.Label
+            weight="$medium"
+            className={styles.topupWalletDisclaimerShort}
+            data-testid="top-up-wallet-small-card-disclaimer"
+          >
             {t('browserView.assets.topupWallet.disclaimer.short')}
           </Text.Label>
         </Flex>
