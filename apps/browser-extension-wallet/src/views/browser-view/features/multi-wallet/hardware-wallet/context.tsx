@@ -211,11 +211,11 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       await analytics.sendMergeEvent(cardanoWallet.source.account.extendedAccountPublicKey);
     }
 
+    await saveHardwareWallet(cardanoWallet);
+
     if (await isHdWallet(cardanoWallet.wallet)) {
       await analytics.sendEventToPostHog(postHogActions.hardware.HD_WALLET);
     }
-
-    await saveHardwareWallet(cardanoWallet);
   }, [
     aliasEventRequired,
     mergeEventRequired,
