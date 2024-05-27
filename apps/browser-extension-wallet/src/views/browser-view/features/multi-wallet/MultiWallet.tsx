@@ -30,6 +30,7 @@ export const MultiWallet = (): JSX.Element => {
               />
             </div>
             <WalletOnboardingFlows
+              mergeEventRequired
               postHogActions={postHogMultiWalletActions}
               renderHome={() => <Home />}
               setFormDirty={(dirty) => shouldShowDialog$.next(dirty)}

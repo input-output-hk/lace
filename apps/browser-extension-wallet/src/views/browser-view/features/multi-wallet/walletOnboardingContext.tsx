@@ -3,6 +3,7 @@ import { SetFormDirty, WalletOnboardingPostHogActions } from './types';
 
 type ContextValue = {
   aliasEventRequired: boolean;
+  mergeEventRequired: boolean;
   forgotPasswordFlowActive: boolean;
   postHogActions: WalletOnboardingPostHogActions;
   setFormDirty: SetFormDirty;
