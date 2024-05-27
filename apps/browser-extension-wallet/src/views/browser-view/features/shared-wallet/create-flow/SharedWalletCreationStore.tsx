@@ -17,9 +17,6 @@ import { useWalletManager } from '@hooks';
 
 type BaseState = {
   step: SharedWalletCreationStep;
-};
-
-export type SupportingData = {
   activeWalletName: string;
   coSignersKeys: string[];
   walletName: string;
@@ -27,7 +24,7 @@ export type SupportingData = {
 };
 
 // This type util forces to describe complete state - all props from the BaseState and SupportingData has to be specified, otherwise we have a TS error
-type MakeState<S extends BaseState & SupportingData> = BaseState & SupportingData & S;
+type MakeState<S extends BaseState> = S;
 
 export type StateSetup = MakeState<{
   activeWalletName: string;
