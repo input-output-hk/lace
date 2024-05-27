@@ -80,7 +80,9 @@ export const useInitializeTx = (
         const txBuilder = inMemoryWallet.createTxBuilder();
 
         outputsWithMissingCoins.outputs.forEach((output) => txBuilder.addOutput(output));
-        txBuilder.metadata(partialTxProps?.auxiliaryData?.blob || new Map());
+        if (partialTxProps?.auxiliaryData?.blob) {
+          txBuilder.metadata(partialTxProps.auxiliaryData.blob);
+        }
         const tx = txBuilder.build();
         const inspection = await tx.inspect();
         setBuiltTxData({
