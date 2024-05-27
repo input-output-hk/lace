@@ -73,19 +73,19 @@ export const NftDetail = ({
                 <Breadcrumb separator={<RightOutlined />}>
                   <Breadcrumb.Item>
                     <FolderOutlined />
-                    <span>Root</span>
+                    <span data-testid="folder-path-1">Root</span>
                   </Breadcrumb.Item>
                   {folder && (
                     <Breadcrumb.Item>
-                      <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} />
+                      <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />
                     </Breadcrumb.Item>
                   )}
                 </Breadcrumb>
               ) : (
                 <Flex justifyContent="space-between" gap="$1">
-                  <Box>Root</Box>
+                  <Box data-testid="folder-path-1">Root</Box>
                   {folder && <Box px="$8">{'>'}</Box>}
-                  {folder && <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} />}
+                  {folder && <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />}
                 </Flex>
               )
             }
