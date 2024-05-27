@@ -203,19 +203,19 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       /* eslint-enable camelcase */
     });
 
+    if (aliasEventRequired) {
+      await analytics.sendAliasEvent();
+    }
+
     if (mergeEventRequired) {
       await analytics.sendMergeEvent(cardanoWallet.source.account.extendedAccountPublicKey);
     }
-
-    await saveHardwareWallet(cardanoWallet);
 
     if (await isHdWallet(cardanoWallet.wallet)) {
       await analytics.sendEventToPostHog(postHogActions.hardware.HD_WALLET);
     }
 
-    if (aliasEventRequired) {
-      await analytics.sendAliasEvent();
-    }
+    await saveHardwareWallet(cardanoWallet);
   }, [
     aliasEventRequired,
     mergeEventRequired,
