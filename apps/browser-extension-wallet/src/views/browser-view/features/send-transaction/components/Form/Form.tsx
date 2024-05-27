@@ -140,6 +140,7 @@ export const Form = ({
         reachedMaxAmountList={reachedMaxAmountList}
         assets={assets}
         assetBalances={assetBalances}
+        spendableCoin={spendableCoin}
       />
 
       {!isPopupView && (

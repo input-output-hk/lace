@@ -12,7 +12,6 @@ import {
 } from '../../../store';
 import { COIN_SELECTION_ERRORS, getErrorMessage } from '@hooks/useInitializeTx';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
-import { useMaxAda } from '@hooks/useMaxAda';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
 import { useCurrencyStore } from '@providers/currency';
@@ -40,6 +39,7 @@ export interface UseSelectedCoinsProps {
   coinBalance: string;
   insufficientBalanceInputs?: Array<string>;
   openAssetPicker?: (id: string) => void;
+  spendableCoin: bigint;
 }
 
 export interface SelectedCoins {
@@ -55,7 +55,8 @@ export const useSelectedCoins = ({
   coinBalance,
   insufficientBalanceInputs,
   openAssetPicker,
-  bundleId
+  bundleId,
+  spendableCoin
 }: UseSelectedCoinsProps): SelectedCoins => {
   const { t } = useTranslation();
   const { priceResult: prices } = useFetchCoinPrice();
@@ -67,8 +68,6 @@ export const useSelectedCoins = ({
   const { address } = useAddressState(bundleId);
   const { builtTxData: { error: builtTxError } = {} } = useBuiltTxState();
   const tokensUsed = useSpentBalances();
-  // Max spendable ADA in lovelaces
-  const spendableCoin = useMaxAda();
   const currentCoinToChange = useCurrentCoinIdToChange();
   const { setLastFocusedInput } = useLastFocusedInput();
   // TODO: change "rows" for "bundleIds" in the send transaction store [LW-7353]
