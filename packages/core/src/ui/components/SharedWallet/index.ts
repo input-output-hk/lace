@@ -5,4 +5,4 @@ export { FindYourSharedWallet } from './FindYourSharedWallet';
 export { ImportantInfo } from './ImportantInfo';
 export { WalletSyncing } from './WalletSyncing';
 export { NoSharedWalletFoundDialog } from './NoSharedWalletFoundDialog';
-export { AddCoSigners } from './AddCoSigners';
+export * from './AddCoSigners';

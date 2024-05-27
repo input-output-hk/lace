@@ -25,20 +25,5 @@ const validateAddress: ValidateAddress = async (address) => {
 };
 
 export const Overview = (): JSX.Element => (
-  <AddCoSigners
-    validateAddress={validateAddress}
-    translations={{
-      title: 'Add wallet co-signers',
-      subtitle: 'Add up to 2 shared wallet co-signers wallet by entering their individual wallet addresses or handles.',
-      inputLabel: "Co-signer's address or $handle",
-      inputError: 'Invalid address',
-      addButton: 'Add Co-signer',
-      removeButton: 'Remove',
-      backButton: 'Back',
-      nextButton: 'Next',
-      warningMessage: 'Ensure entered addresses are correct. Incorrect addresses may prevent shared wallet operation.'
-    }}
-    onBack={() => void 0}
-    onNext={() => void 0}
-  />
+  <AddCoSigners validateAddress={validateAddress} onBack={() => void 0} onNext={() => void 0} />
 );

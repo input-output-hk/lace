@@ -1,26 +1,18 @@
 import React from 'react';
-import { Box, Flex, Text, Button, ControlButton, ScrollArea, sx } from '@lace/ui';
+import { Box, Flex, Text, ControlButton, sx } from '@lace/ui';
 import styles from './AddCoSigners.module.scss';
 import { AddCoSignerInput } from './AddCoSignerInput';
 import { CoSigner, ValidateAddress } from './type';
 import { useCoSigners } from './hooks';
 import { WarningBanner } from '@lace/common';
+import { SharedWalletStepLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   onBack: () => void;
-  onNext: (coSigner: CoSigner[]) => void;
+  onNext: () => void;
   validateAddress: ValidateAddress;
-  translations: {
-    title: string;
-    subtitle: string;
-    inputLabel: string;
-    inputError: string;
-    addButton: string;
-    backButton: string;
-    nextButton: string;
-    removeButton: string;
-    warningMessage: string;
-  };
+  onValueChange?: (data: CoSigner[]) => void;
 }
 
 const MAX_COSIGNERS = 2;
@@ -28,57 +20,61 @@ const MAX_COSIGNERS = 2;
 // this should be removed when extending this implementation beyond 2 cosigners
 const SHOW_ADD_COSIGNER_BUTTON = false;
 
-export const AddCoSigners = ({ translations, validateAddress, onBack, onNext }: Props): JSX.Element => {
+export const AddCoSigners = ({ validateAddress, onBack, onNext, onValueChange }: Props): JSX.Element => {
   const { coSigners, updateCoSigner, removeCoSigner, addCoSigner } = useCoSigners();
+  const { t } = useTranslation();
+
+  const translations = {
+    title: t('core.sharedWallet.addCosigners.title'),
+    subtitle: t('core.sharedWallet.addCosigners.subtitle'),
+    inputLabel: t('core.sharedWallet.addCosigners.inputLabel'),
+    inputError: t('core.sharedWallet.addCosigners.inputError'),
+    addButton: t('core.sharedWallet.addCosigners.addButton'),
+    removeButton: t('core.sharedWallet.addCosigners.removeButton'),
+    warningMessage: t('core.sharedWallet.addCosigners.warningMessage')
+  };
 
   return (
-    <Flex h="$fill" w="$fill" flexDirection="column">
-      <Box mb="$24">
-        <Text.Heading>{translations.title}</Text.Heading>
-      </Box>
-      <Box mb="$24">
-        <Text.Body.Normal weight="$medium">{translations.subtitle}</Text.Body.Normal>
-      </Box>
-
+    <SharedWalletStepLayout
+      title={translations.title}
+      description={translations.subtitle}
+      currentTimelineStep={SharedWalletTimelineSteps.ADD_COSIGNERS}
+      onBack={onBack}
+      onNext={onNext}
+      isNextEnabled={coSigners.some((coSigner) => !!coSigner.isValid)}
+    >
       <Box mb="$24">
         <WarningBanner message={translations.warningMessage} />
       </Box>
 
-      <ScrollArea
-        classNames={{
-          root: styles.scrollArea,
-          viewport: styles.scrollAreaViewport,
-          bar: styles.scrollBar
-        }}
-      >
-        {coSigners.map(({ id }, index) => (
-          <Box key={id} className={styles.coSigners}>
-            <AddCoSignerInput
-              validateAddress={validateAddress}
-              translations={{
-                label: translations.inputLabel,
-                error: translations.inputError
+      {coSigners.map(({ id }, index) => (
+        <Box key={id} className={styles.coSigners}>
+          <AddCoSignerInput
+            validateAddress={validateAddress}
+            translations={{
+              label: translations.inputLabel,
+              error: translations.inputError
+            }}
+            onChange={(address, isValid) => {
+              updateCoSigner(index, { address, isValid, id });
+              onValueChange(coSigners);
+            }}
+          />
+          {index !== 0 && SHOW_ADD_COSIGNER_BUTTON && (
+            <button
+              tabIndex={0}
+              className={styles.remove}
+              onClick={() => {
+                removeCoSigner(index);
               }}
-              onChange={(address, isValid) => {
-                updateCoSigner(index, { address, isValid, id });
-              }}
-            />
-            {index !== 0 && SHOW_ADD_COSIGNER_BUTTON && (
-              <button
-                tabIndex={0}
-                className={styles.remove}
-                onClick={() => {
-                  removeCoSigner(index);
-                }}
-              >
-                <Text.Body.Small weight="$semibold" className={styles.removeLabel}>
-                  {translations.removeButton}
-                </Text.Body.Small>
-              </button>
-            )}
-          </Box>
-        ))}
-      </ScrollArea>
+            >
+              <Text.Body.Small weight="$semibold" className={styles.removeLabel}>
+                {translations.removeButton}
+              </Text.Body.Small>
+            </button>
+          )}
+        </Box>
+      ))}
 
       {coSigners.length > 1 && SHOW_ADD_COSIGNER_BUTTON && (
         <Flex w="$fill" mb="$8" justifyContent="flex-end">
@@ -102,15 +98,6 @@ export const AddCoSigners = ({ translations, validateAddress, onBack, onNext }: 
           />
         </Box>
       )}
-
-      <Flex w="$fill" justifyContent="space-between" alignItems="center">
-        <Button.Secondary label={translations.backButton} onClick={onBack} />
-        <Button.CallToAction
-          disabled={coSigners.some(({ isValid }) => !isValid)}
-          label={translations.nextButton}
-          onClick={() => onNext(coSigners)}
-        />
-      </Flex>
-    </Flex>
+    </SharedWalletStepLayout>
   );
 };

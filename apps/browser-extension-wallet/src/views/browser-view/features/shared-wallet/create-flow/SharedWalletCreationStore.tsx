@@ -3,6 +3,7 @@ import { useWalletStore } from '@stores';
 import React, { Dispatch, ReactElement, ReactNode, createContext, useContext, useMemo, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
+import { CoSigner } from '@lace/core';
 
 type BaseState = {
   step: SharedWalletCreationStep;
@@ -10,7 +11,7 @@ type BaseState = {
 
 export type SupportingData = {
   activeWalletName: string;
-  coSignersKeys: string[];
+  coSigners: CoSigner[];
   walletName: string;
 };
 
@@ -19,21 +20,25 @@ type MakeState<S extends BaseState & SupportingData> = BaseState & SupportingDat
 
 export type StateSetup = MakeState<{
   activeWalletName: string;
-  coSignersKeys: undefined;
+  coSigners: CoSigner[];
   step: SharedWalletCreationStep.Setup;
   walletName: string;
 }>;
 
 export type StateCoSigners = MakeState<{
   activeWalletName: string;
-  coSignersKeys: string[];
+  coSigners: CoSigner[];
   step: SharedWalletCreationStep.CoSigners;
   walletName: string;
 }>;
 
 type State = StateSetup | StateCoSigners;
 
-type Action = { type: 'next' } | { type: 'back' } | { type: 'walletNameChanged'; walletName: string };
+type Action =
+  | { type: 'next' }
+  | { type: 'back' }
+  | { type: 'walletNameChanged'; walletName: string }
+  | { type: 'coSignersChanged'; cosigners: CoSigner[] };
 
 type ContextValue = {
   state: State;
@@ -51,7 +56,7 @@ export const useSharedWalletCreationStore = (): ContextValue => {
 
 const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
-  coSignersKeys: undefined,
+  coSigners: undefined,
   step: SharedWalletCreationStep.Setup,
   walletName: ''
 });
@@ -91,15 +96,19 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
       if (action.type === 'back') {
         return {
           ...prevState,
-          coSignersKeys: undefined,
           step: SharedWalletCreationStep.Setup
         };
       }
       if (action.type === 'next') {
         return {
           ...prevState,
-          coSignersKeys: undefined,
           step: SharedWalletCreationStep.Setup
+        };
+      }
+      if (action.type === 'coSignersChanged') {
+        return {
+          ...prevState,
+          coSigners: action.cosigners
         };
       }
     }

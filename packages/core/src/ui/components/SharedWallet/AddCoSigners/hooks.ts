@@ -10,8 +10,8 @@ export const useCoSigners = (): {
   addCoSigner: () => void;
 } => {
   const [coSigners, setCoSigners] = useState<CoSigner[]>([
-    { address: '', isValid: true, id: uuid() },
-    { address: '', isValid: true, id: uuid() }
+    { address: '', isValid: false, id: uuid() },
+    { address: '', isValid: false, id: uuid() }
   ]);
 
   return {
