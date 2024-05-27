@@ -14,13 +14,13 @@ const tsupConfig = defineConfig([
     },
     entry: ['./src/index.ts'],
     esbuildPlugins: [
-      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
+      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } }, identifiers: 'short' }),
       // eslint-disable-next-line new-cap
       ScssModulesPlugin() as never,
       svgr({ icon: true, plugins: [svgrJsx] }),
     ],
     external: Object.keys(peerDependencies),
-    format: ['esm', 'cjs'],
+    format: ['cjs'],
     loader: {
       '.png': 'dataurl',
     },
