@@ -259,6 +259,7 @@
   "core.mnemonicVideoPopupContent.description": "Learn about what is a recovery phrase, and how to keep it safe from the video below.",
   "core.mnemonicVideoPopupContent.link": "Read More.",
   "core.mnemonicVideoPopupContent.title": "Keeping your wallet secure",
+  "core.nami.migration.updating.heading": "Updating your wallet",
   "core.nftDetail.attributes": "Attributes",
   "core.nftDetail.avatarUpdated": "User avatar updated",
   "core.nftDetail.sendNFT": "Send NFT",
