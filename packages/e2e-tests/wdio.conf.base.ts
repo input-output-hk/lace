@@ -4,7 +4,7 @@ import extensionUtils from './src/utils/utils';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
-  specs: ['./src/features/**/*.feature'],
+  specs: [['./src/features/**/*.feature']],
   automationProtocol: 'webdriver',
   exclude: [],
   maxInstances: 1,
@@ -57,6 +57,6 @@ export const config: WebdriverIO.Config = {
     tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
     timeout: 200_000,
-    retry: 1
+    retry: 0
   } as WebdriverIO.CucumberOpts
 };

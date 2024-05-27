@@ -21,20 +21,18 @@ const popupViewWalletInitialization = async (walletName = TestWalletName.TestAut
   await networkManager.logFailedRequests();
 };
 
-const extendedViewRepositoryWalletInitialization = async (
-  walletNames = [TestWalletName.MultiWallet1]
-): Promise<void> => {
+const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
   await openWalletsInRepository(walletNames);
   await networkManager.logFailedRequests();
 };
 
-// const popupViewRepositoryWalletInitialization = async (walletNames = [TestWalletName.MultiWallet1]): Promise<void> => {
-//   await extendedView.visit();
-//   await openWalletsInRepository(walletNames);
-//   await popupView.visit();
-//   await networkManager.logFailedRequests();
-// };
+const popupViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
+  await extendedView.visit();
+  await openWalletsInRepository(walletNames);
+  await popupView.visit();
+  await networkManager.logFailedRequests();
+};
 
 Before({ tags: '@pending or @Pending' }, async () => 'skipped');
 
@@ -178,7 +176,13 @@ Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
 });
 
 Before({ tags: '@MultiWallet-Extended' }, async () => {
-  await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1]);
+  await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Before({ tags: '@MultiWallet-Popup' }, async () => {
+  await popupViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
