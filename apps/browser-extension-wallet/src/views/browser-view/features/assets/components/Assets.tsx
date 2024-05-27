@@ -31,6 +31,7 @@ import { Flex } from '@lace/ui';
 import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
+import { MidnightEventBanner } from './MidnightEventBanner';
 
 const LIST_CHUNK_SIZE = 12;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -309,7 +310,10 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
 
   return popupView ? (
     <>
-      <ContentLayout hasCredit={fullAssetList?.length > 0}>{assetsPortfolio}</ContentLayout>
+      <ContentLayout hasCredit={fullAssetList?.length > 0}>
+        <MidnightEventBanner />
+        {assetsPortfolio}
+      </ContentLayout>
       {drawers}
     </>
   ) : (
@@ -323,6 +327,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
           </Flex>
         }
       >
+        <MidnightEventBanner />
         {topSection}
         {assetsPortfolio}
         {drawers}

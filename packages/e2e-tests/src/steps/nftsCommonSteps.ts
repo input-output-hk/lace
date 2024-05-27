@@ -56,6 +56,10 @@ Then(/^NFTs counter matches the number of wallet NFTs$/, async () => {
   await nftAssert.assertCounterNumberMatchesWalletNFTs();
 });
 
+When(/^I search for NFT with name: "([^"]*)"$/, async (nftName: string) => {
+  await NftsPage.nftSearchInput.setValue(nftName);
+});
+
 When(
   /^I (see|do not see) NFT with name: "([^"]*)" on the NFTs page$/,
   async (shouldBeDisplayed: 'see' | 'do not see', nftName: string) => {

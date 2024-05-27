@@ -8,7 +8,6 @@ Feature: ADA handle - popup view
 
   @LW-8808 @E2E @Pending
   @issue=LW-8793
-  @issue=LW-9885
   Scenario: Popup view - Ada handle transfer e2e, review flow
     Given I validate that handle: "$handletosend2" is listed on the Receive screen
     And I add address with name: "$handletosend2" and address: "$handletosend2" to address book in popup mode

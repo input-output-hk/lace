@@ -17,12 +17,11 @@ class StakingSuccessDrawerAssert {
         : await t('drawer.success.switchedPools.title', 'staking')
     );
     await StakingSuccessDrawer.resultSubtitle.waitForDisplayed();
-    // TODO: uncomment when LW-4864 is resolved
-    // expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
-    //   process === 'Initial'
-    //     ? await t('drawer.success.subTitle', 'staking')
-    //     : await t('drawer.success.switchedPools.subTitle', 'staking')
-    // );
+    expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
+      process === 'Initial'
+        ? await t('drawer.success.subTitle', 'staking')
+        : await t('drawer.success.switchedPools.subTitle', 'staking')
+    );
 
     await StakingSuccessDrawer.closeButton.waitForDisplayed();
     expect(await StakingSuccessDrawer.closeButton.getText()).to.equal(await t('general.button.close'));
