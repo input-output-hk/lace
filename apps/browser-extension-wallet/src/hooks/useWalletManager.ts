@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
 import { useCallback } from 'react';
