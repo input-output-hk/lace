@@ -34,6 +34,7 @@
     "prepare": "ts-patch install -s",
     "prestart": "yarn build",
     "test:coverage": "yarn test --coverage",
+    "type-check": "echo \"@lace/midnight: no type-check command specified\"",
     "watch": "yarn build --watch"
   },
   "dependencies": {
