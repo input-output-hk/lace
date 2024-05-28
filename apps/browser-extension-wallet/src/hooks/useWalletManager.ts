@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
 import { useCallback } from 'react';
@@ -206,6 +207,11 @@ export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Prom
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
   Wallet.connectDeviceRevamped(usbDevice);
+
+const encryptSerialisedMidnightWallet = async (serializedMidnightWallet: string, passphrase: Uint8Array) => {
+  const encryptedState = await Wallet.KeyManagement.emip3encrypt(Buffer.from(serializedMidnightWallet), passphrase);
+  return HexBlob.fromBytes(encryptedState);
+};
 
 export const useWalletManager = (): UseWalletManager => {
   const {
@@ -463,12 +469,18 @@ export const useWalletManager = (): UseWalletManager => {
       chainId = getCurrentChainId()
     }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
       const midnightWallet = await createMidnightWallet(mnemonic);
+      const passphrase = Buffer.from(password, 'utf8');
+
       // @ts-expect-error different versions of rxjs are causing errors with firstValueFrom
       const midnightWalletState = await firstValueFrom<MidnightWallet>(midnightWallet.state());
+      const serializedMidnightWallet = await midnightWallet.serializeState();
+      const encryptedSerializedMidnightWallet = await encryptSerialisedMidnightWallet(
+        serializedMidnightWallet,
+        passphrase
+      );
       const midnightWalletAddress = midnightWalletState.address;
 
       const accountIndex = 0;
-      const passphrase = Buffer.from(password, 'utf8');
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
         {
           chainId,
@@ -484,7 +496,13 @@ export const useWalletManager = (): UseWalletManager => {
 
       const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lockValue, lastActiveAccountIndex: accountIndex, midnightWalletAddress },
+        metadata: {
+          name,
+          lockValue,
+          lastActiveAccountIndex: accountIndex,
+          midnightWalletAddress,
+          encryptedSerializedMidnightWallet
+        },
         encryptedSecrets: {
           keyMaterial: await encryptMnemonic(mnemonic, passphrase),
           rootPrivateKeyBytes: HexBlob.fromBytes(

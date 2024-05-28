@@ -28,6 +28,7 @@ export interface WalletMetadata {
   lockValue?: HexBlob;
   lastActiveAccountIndex?: number;
   midnightWalletAddress?: string;
+  encryptedSerializedMidnightWallet?: Wallet.HexBlob;
   walletAddresses?: Cardano.PaymentAddress[];
 }
 
