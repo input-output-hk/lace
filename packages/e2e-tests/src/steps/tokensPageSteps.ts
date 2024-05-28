@@ -219,3 +219,11 @@ Then(
 Given(/^ADA fiat price has been fetched$/, async () => {
   await TokensPage.waitForPricesToBeFetched();
 });
+
+When(/^I search for token: "([^"]*)"$/, async (tokenName: string) => {
+  await TokensPage.tokensSearchInput.setValue(tokenName);
+});
+
+Then(/^I see only token with name: "([^"]*)"$/, async (tokenName: string) => {
+  await tokensPageAssert.assertSeeOnlyFilteredToken(tokenName);
+});
