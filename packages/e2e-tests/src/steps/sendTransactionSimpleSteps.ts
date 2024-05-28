@@ -249,7 +249,7 @@ When(
   }
 );
 
-When(/^I fill bundle with copied address and "([^"]*)" ADA$/, async (adaValue: string) => {
+When(/^I fill bundle with copied address and ([^"]*) ADA$/, async (adaValue: string) => {
   const addressInput = new AddressInput(1);
   await addressInput.fillAddress(await clipboard.read());
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
@@ -356,8 +356,8 @@ Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async
 });
 
 Then(
-  /^The Tx summary screen is displayed for "([^"]*)" (main|other multiaddress|second account) address with "([^"]*)" tag$/,
-  async (walletName, addressType: AddressType, tag) => {
+  /^The Tx summary screen is displayed for "([^"]*)" (main|other multiaddress|second account) address with "(own|foreign)" tag$/,
+  async (walletName, addressType: AddressType, tag: AddressTag) => {
     const expectedTransactionSummaryData = {
       recipientAddress: parseWalletAddress(walletName, addressType),
       recipientAddressTag: tag,
