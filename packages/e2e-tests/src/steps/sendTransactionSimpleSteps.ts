@@ -44,6 +44,7 @@ import TransactionPasswordPage from '../elements/newTransaction/transactionPassw
 import { Key } from 'webdriverio';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
 import { AddressType } from '../enums/AddressTypeEnum';
+import clipboard from 'clipboardy';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -218,10 +219,10 @@ Then(
 );
 
 When(
-  /^I fill bundle (\d+) with "([^"]*)" (main|copied|other multiaddress|second account) address with following assets:$/,
+  /^I fill bundle (\d+) with "([^"]*)" (main|other multiaddress|second account) address with following assets:$/,
   async (bundleIndex, walletName, addressType: AddressType, options) => {
     const addressInput = new AddressInput(bundleIndex);
-    await addressInput.fillAddress(await parseWalletAddress(walletName, addressType));
+    await addressInput.fillAddress(parseWalletAddress(walletName, addressType));
     await addressInput.searchLoader.waitForDisplayed({ reverse: true });
     // Close address dropdown menu if exists
     if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
@@ -247,6 +248,12 @@ When(
     }
   }
 );
+
+When(/^I fill bundle with copied address and "([^"]*)" ADA$/, async (adaValue: string) => {
+  const addressInput = new AddressInput(1);
+  await addressInput.fillAddress(await clipboard.read());
+  await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
+});
 
 When(
   /^I save ticker for the (Token|NFT) with name: ([^"]*)$/,
@@ -352,7 +359,7 @@ Then(
   /^The Tx summary screen is displayed for "([^"]*)" (main|other multiaddress|second account) address with "([^"]*)" tag$/,
   async (walletName, addressType: AddressType, tag) => {
     const expectedTransactionSummaryData = {
-      recipientAddress: await parseWalletAddress(walletName, addressType),
+      recipientAddress: parseWalletAddress(walletName, addressType),
       recipientAddressTag: tag,
       valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker }]
     };
@@ -445,7 +452,7 @@ Then(
     for (const entry of txData) {
       const parsedEntry = {
         ada: entry.ada,
-        address: await parseWalletAddress(entry.address, entry.addressType as AddressType),
+        address: parseWalletAddress(entry.address, entry.addressType as AddressType),
         addressTag: entry?.addressTag as AddressTag,
         assets: entry?.assets?.split(',')
       };

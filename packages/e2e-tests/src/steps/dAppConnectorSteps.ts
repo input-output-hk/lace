@@ -327,8 +327,8 @@ Then(/^I set send to wallet address to: "([^"]*)" in test DApp$/, async (walletN
 });
 
 Then(
-  /^I set send to wallet address to: "([^"]*)" (main|copied|other multiaddress|second account) in test DApp$/,
+  /^I set send to wallet address to: "([^"]*)" (main|other multiaddress|second account) in test DApp$/,
   async (walletName: string, addressType) => {
-    await TestDAppPage.sendAdaAddressInput.setValue(await parseWalletAddress(walletName, addressType));
+    await TestDAppPage.sendAdaAddressInput.setValue(parseWalletAddress(walletName, addressType));
   }
 );
