@@ -37,7 +37,7 @@ Feature: Send Simple Transactions - Extended view - E2E
     Then I see a toast with text: "Address copied"
     And I close the drawer by clicking close button
     And I click "Send" button on page header
-    And I fill bundle 1 with "CopiedAddress" copied address with following assets:
+    And I fill bundle 1 with "" copied address with following assets:
       | type | assetName | amount |
       | ADA  | tADA      | 5      |
     And I click "Review transaction" button on "Send" page

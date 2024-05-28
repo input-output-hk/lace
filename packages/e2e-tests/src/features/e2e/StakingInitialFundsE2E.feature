@@ -13,7 +13,7 @@ Feature: Delegating funds to new pool E2E
     When I open wallet: "WalletSendingAdaToStakingE2E" in: extended mode
     And Wallet is synced
     And I click "Send" button on page header
-    And I fill bundle 1 with "CopiedAddress" copied address with following assets:
+    And I fill bundle 1 with "" copied address with following assets:
       | type | assetName | amount |
       | ADA  | tADA      | 15     |
     And I click "Review transaction" button on "Send" page

@@ -21,9 +21,11 @@ export type PoolData = {
   poolId: string;
 };
 
+export type AddressTag = 'own' | 'foreign';
+
 export type TransactionData = {
   address: string;
-  addressTag?: string;
+  addressTag?: AddressTag;
   ada: string;
   assets?: string[];
 };

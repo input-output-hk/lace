@@ -17,6 +17,7 @@ import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressTag } from '../assert/transactionDetailsAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -91,7 +92,7 @@ Then(
 
 Then(
   /^I see (own|foreign) tag on under address in "(From address|To address)" section$/,
-  async (addressTag, section: 'From address' | 'To address') => {
+  async (addressTag: AddressTag, section: 'From address' | 'To address') => {
     await DAppConnectorAssert.assertSeeAddressTag(addressTag, section);
   }
 );

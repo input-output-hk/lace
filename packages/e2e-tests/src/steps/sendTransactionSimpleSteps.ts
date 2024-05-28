@@ -22,7 +22,11 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedActivityDetails, TransactionData } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, {
+  AddressTag,
+  ExpectedActivityDetails,
+  TransactionData
+} from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import { Asset } from '../data/Asset';
 import extensionUtils from '../utils/utils';
@@ -39,6 +43,7 @@ import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
 import { Key } from 'webdriverio';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressType } from '../enums/AddressTypeEnum';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -214,9 +219,9 @@ Then(
 
 When(
   /^I fill bundle (\d+) with "([^"]*)" (main|copied|other multiaddress|second account) address with following assets:$/,
-  async (bundleIndex, receivingAddress, addressType, options) => {
+  async (bundleIndex, walletName, addressType: AddressType, options) => {
     const addressInput = new AddressInput(bundleIndex);
-    await addressInput.fillAddress(await parseWalletAddress(receivingAddress, addressType));
+    await addressInput.fillAddress(await parseWalletAddress(walletName, addressType));
     await addressInput.searchLoader.waitForDisplayed({ reverse: true });
     // Close address dropdown menu if exists
     if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
@@ -345,9 +350,9 @@ Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async
 
 Then(
   /^The Tx summary screen is displayed for "([^"]*)" (main|other multiaddress|second account) address with "([^"]*)" tag$/,
-  async (address, addressType, tag) => {
+  async (walletName, addressType: AddressType, tag) => {
     const expectedTransactionSummaryData = {
-      recipientAddress: await parseWalletAddress(address, addressType),
+      recipientAddress: await parseWalletAddress(walletName, addressType),
       recipientAddressTag: tag,
       valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker }]
     };
@@ -440,8 +445,8 @@ Then(
     for (const entry of txData) {
       const parsedEntry = {
         ada: entry.ada,
-        address: await parseWalletAddress(entry.address, entry.addressType),
-        addressTag: entry?.addressTag,
+        address: await parseWalletAddress(entry.address, entry.addressType as AddressType),
+        addressTag: entry?.addressTag as AddressTag,
         assets: entry?.assets?.split(',')
       };
       parsedTxData.push(parsedEntry);
