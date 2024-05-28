@@ -10,7 +10,6 @@ const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: '
 const mockUseWalletStore = jest.fn().mockReturnValue({
   walletUI: { cardanoCoin: { id: '1', name: 'Cardano', decimals: 6, symbol: 'ADA' }, appMode: 'popup' }
 });
-const mockUseMaxAda = jest.fn().mockReturnValue(BigInt(100));
 const mockUseCoinStateSelector = jest.fn().mockReturnValue(mockCoinStateSelector);
 const mockUseBuiltTxState = jest.fn().mockReturnValue({ builtTxData: { error: undefined } });
 const mockUseAddressState = jest.fn().mockReturnValue({ address: undefined });
@@ -220,14 +219,13 @@ describe('useSelectedCoin', () => {
           ...mockCoinStateSelector,
           uiOutputs: [{ id: '1', value: '0' }]
         });
-        mockUseMaxAda.mockReturnValueOnce(BigInt(10_000_000));
         mockUseSpentBalances.mockReturnValueOnce({});
         const props: UseSelectedCoinsProps = {
           assetBalances: new Map(),
           assets: new Map(),
           bundleId: 'bundleId',
           coinBalance: '12000000',
-          spendableCoin: BigInt(100)
+          spendableCoin: BigInt(10_000_000)
         };
         const { result } = renderUseSelectedCoins(props);
 
@@ -242,14 +240,13 @@ describe('useSelectedCoin', () => {
           ...mockCoinStateSelector,
           uiOutputs: [{ id: '1', value: '2' }]
         });
-        mockUseMaxAda.mockReturnValueOnce(BigInt(10_000_000));
         mockUseSpentBalances.mockReturnValueOnce({ '1': '5' });
         const props: UseSelectedCoinsProps = {
           assetBalances: new Map(),
           assets: new Map(),
           bundleId: 'bundleId',
           coinBalance: '12000000',
-          spendableCoin: BigInt(100)
+          spendableCoin: BigInt(10_000_000)
         };
         const { result } = renderUseSelectedCoins(props);
 
@@ -264,14 +261,13 @@ describe('useSelectedCoin', () => {
           ...mockCoinStateSelector,
           uiOutputs: [{ id: '1', value: '3' }]
         });
-        mockUseMaxAda.mockReturnValueOnce(BigInt(10_000_000));
         mockUseSpentBalances.mockReturnValueOnce({ '1': '13' });
         const props: UseSelectedCoinsProps = {
           assetBalances: new Map(),
           assets: new Map(),
           bundleId: 'bundleId',
           coinBalance: '12000000',
-          spendableCoin: BigInt(100)
+          spendableCoin: BigInt(10_000_000)
         };
         const { result } = renderUseSelectedCoins(props);
 

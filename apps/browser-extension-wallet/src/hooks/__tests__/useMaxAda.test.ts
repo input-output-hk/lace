@@ -7,14 +7,17 @@ import { Subject, of } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-const mockInitializeTx = jest.fn();
-const inspect = jest.fn().mockReturnThis();
+
+const MIN_COINS_FOR_TOKENS = 1_155_080;
+const TX_FEE = 155_381;
+
+const inspect = jest.fn();
 const mockCreateTxBuilder = jest.fn().mockReturnValue({
   inspect,
   build: jest.fn().mockReturnThis(),
-  addOutput: jest.fn().mockReturnThis()
+  addOutput: jest.fn().mockReturnThis(),
+  removeOutput: jest.fn().mockReturnThis()
 });
-const TX_FEE = 155_381;
 const inMemoryWallet = {
   balance: {
     utxo: {
@@ -25,7 +28,6 @@ const inMemoryWallet = {
     }
   },
   protocolParameters$: of({ coinsPerUtxoByte: 4310, maxValueSize: 5000 }),
-  initializeTx: mockInitializeTx,
   createTxBuilder: mockCreateTxBuilder
 };
 
@@ -38,14 +40,23 @@ jest.mock('../../stores', () => ({
   })
 }));
 
+const outputMap = new Map();
+
+jest.mock('../../views/browser-view/features/send-transaction', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('../../views/browser-view/features/send-transaction'),
+  useTransactionProps: () => ({
+    outputMap
+  })
+}));
+
 describe('Testing useMaxAda hook', () => {
   beforeEach(() => {
-    mockInitializeTx.mockImplementationOnce(() => ({
+    inspect.mockResolvedValue({
       inputSelection: {
-        // eslint-disable-next-line no-magic-numbers
         fee: BigInt(TX_FEE)
       }
-    }));
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -68,8 +79,8 @@ describe('Testing useMaxAda hook', () => {
   });
 
   test('should return 0 in case there is an error', async () => {
-    mockInitializeTx.mockReset();
-    mockInitializeTx.mockImplementation(async () => {
+    inspect.mockReset();
+    inspect.mockImplementation(async () => {
       throw new Error('init tx error');
     });
     const { result } = renderHook(() => useMaxAda());
@@ -84,10 +95,9 @@ describe('Testing useMaxAda hook', () => {
 
   test('should return 0 if balance is minimum for coins', async () => {
     const { result } = renderHook(() => useMaxAda());
-
     act(() => {
       inMemoryWallet.balance.utxo.available$.next({
-        coins: BigInt('1155080') + BigInt(TX_FEE),
+        coins: BigInt(MIN_COINS_FOR_TOKENS) + BigInt(TX_FEE),
         assets: new Map([
           [
             Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
@@ -102,25 +112,30 @@ describe('Testing useMaxAda hook', () => {
     });
   });
 
-  test('should return 8874869', async () => {
+  test('should return balance minus fee', async () => {
     const { result } = renderHook(() => useMaxAda());
 
     act(() => {
       inMemoryWallet.balance.utxo.available$.next({ coins: BigInt('10000000') });
     });
     await waitFor(() => {
-      expect(result.current.toString()).toBe('8874869');
+      expect(result.current).toBe(BigInt('10000000') - BigInt(TX_FEE));
     });
   });
 
-  test.each([[1], [3], [7]])('should return 8689539 minus adaErrorBuffer*%i', async (errorCount) => {
-    const { result } = renderHook(() => useMaxAda());
-
+  test.each([[1]])('should return balance minus fee and adaErrorBuffer times %i', async (errorCount) => {
+    inspect.mockResolvedValueOnce({
+      inputSelection: {
+        fee: BigInt(TX_FEE)
+      }
+    });
     Array.from({ length: errorCount }).forEach(() => {
       inspect.mockImplementationOnce(() => {
         throw new Error('Error');
       });
     });
+
+    const { result } = renderHook(() => useMaxAda());
 
     act(() => {
       inMemoryWallet.balance.utxo.available$.next({
@@ -135,7 +150,12 @@ describe('Testing useMaxAda hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current).toBe(BigInt('8689539') - BigInt(UTXO_DEPLETED_ADA_BUFFER * errorCount));
+      expect(result.current).toBe(
+        BigInt('10000000') -
+          BigInt(MIN_COINS_FOR_TOKENS) -
+          BigInt(TX_FEE) -
+          BigInt(UTXO_DEPLETED_ADA_BUFFER * errorCount)
+      );
     });
   });
 });

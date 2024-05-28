@@ -61,7 +61,7 @@ const getMinimunCoinsAndFee = async ({ address, balance, txBuilder, validateOutp
   const tx = await txBuilder.build().inspect();
   props.outputs.forEach((output) => txBuilder.removeOutput(output));
 
-  return { fee: tx.inputSelection.fee, minimumCoins: totalMinimumCoins.coinMissing };
+  return { fee: tx.inputSelection.fee, minimumCoins: balance.assets ? totalMinimumCoins.coinMissing : BigInt(0) };
 };
 
 interface CreateTestOutputs {
@@ -170,7 +170,7 @@ const calculateMaxAda = async ({
 export const dCalculateMaxAda = pDebounce.promise(calculateMaxAda);
 
 export const useMaxAda = (): bigint => {
-  const [maxADA, setMaxADA] = useState<bigint>();
+  const [maxADA, setMaxADA] = useState<bigint>(BigInt(0));
   const { walletInfo, inMemoryWallet } = useWalletStore();
   const balance = useObservable(inMemoryWallet?.balance?.utxo.available$);
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
@@ -207,7 +207,6 @@ export const useMaxAda = (): bigint => {
           signal: abortController.signal,
           outputMap
         });
-
         if (!abortController.signal.aborted) {
           setMaxADA(result);
         }
