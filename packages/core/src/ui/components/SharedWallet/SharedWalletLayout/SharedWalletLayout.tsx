@@ -1,11 +1,10 @@
-/* eslint-disable sonarjs/no-identical-functions */
-import React, { useRef } from 'react';
-import cn from 'classnames';
 import { Timeline } from '@lace/common';
 import { Box, Button, Flex, ScrollArea, Text } from '@lace/ui';
-import styles from './SharedWalletLayout.module.scss';
-import { i18n } from '@lace/translation';
+import cn from 'classnames';
+import { TFunction } from 'i18next';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styles from './SharedWalletLayout.module.scss';
 
 export enum SharedWalletTimelineSteps {
   WALLET_NAME,
@@ -14,59 +13,57 @@ export enum SharedWalletTimelineSteps {
   WALLET_DETAILS
 }
 
-export interface SharedWalletStepLayoutRevampProps {
+export interface SharedWalletLayoutProps {
   title: React.ReactNode;
-  children?: React.ReactNode;
-  description?: React.ReactNode;
+  children: React.ReactNode;
+  description: React.ReactNode;
   onNext?: () => void;
   onBack?: () => void;
-  customAction?: React.ReactNode;
-  nextLabel?: string;
-  backLabel?: string;
-  skipLabel?: string;
+  customNextLabel?: string;
+  customBackLabel?: string;
   isNextEnabled?: boolean;
-  toolTipText?: string;
-  currentTimelineStep?: SharedWalletTimelineSteps;
+  currentTimelineStep: SharedWalletTimelineSteps;
 }
 
-const getTimelineSteps = (currentStep: SharedWalletTimelineSteps) => {
+const getTimelineSteps = (currentStep: SharedWalletTimelineSteps, t: TFunction) => {
   const walletSteps = [
-    { key: SharedWalletTimelineSteps.WALLET_NAME, name: i18n.t('core.sharedWalletStep.walletName') },
-    { key: SharedWalletTimelineSteps.ADD_COSIGNERS, name: i18n.t('core.sharedWalletStep.addCosigners') },
-    { key: SharedWalletTimelineSteps.DEFINE_QUORUM, name: i18n.t('core.sharedWalletStep.defineQuorum') },
-    { key: SharedWalletTimelineSteps.WALLET_DETAILS, name: i18n.t('core.sharedWalletStep.walletDetails') }
-  ];
+    { key: SharedWalletTimelineSteps.WALLET_NAME, name: t('core.sharedWalletLayout.timelineStep.walletName') },
+    { key: SharedWalletTimelineSteps.ADD_COSIGNERS, name: t('core.sharedWalletLayout.timelineStep.addCosigners') },
+    { key: SharedWalletTimelineSteps.DEFINE_QUORUM, name: t('core.sharedWalletLayout.timelineStep.defineQuorum') },
+    { key: SharedWalletTimelineSteps.WALLET_DETAILS, name: t('core.sharedWalletLayout.timelineStep.walletDetails') }
+  ].map((step) => ({
+    ...step,
+    active: false
+  }));
 
-  if (typeof currentStep !== 'undefined') {
-    const currentStepIndex = walletSteps.findIndex((step) => step.key === currentStep);
-    return walletSteps.map((step, index) => ({ ...step, active: index <= currentStepIndex }));
-  }
-
-  return walletSteps.map((step) => ({ ...step, active: false }));
+  return walletSteps.map((step, index, self) => {
+    const previousStepActive = self[index - 1]?.active || false;
+    return {
+      ...step,
+      active: step.key === currentStep || previousStepActive
+    };
+  });
 };
 
-export const SharedWalletStepLayout = ({
+export const SharedWalletLayout = ({
   children,
   title,
   description,
   onNext,
   onBack,
-  customAction,
-  nextLabel,
-  backLabel,
+  customNextLabel,
+  customBackLabel,
   isNextEnabled = true,
   currentTimelineStep
-}: SharedWalletStepLayoutRevampProps): React.ReactElement => {
-  const nextButtonContainerRef = useRef(null);
+}: SharedWalletLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
 
   const defaultLabel = {
-    next: t('core.walletSetupStep.next'),
-    back: t('core.walletSetupStep.back'),
-    skip: t('core.walletSetupStep.skip')
+    next: t('core.sharedWalletLayout.defaultNextButtonLabel'),
+    back: t('core.sharedWalletLayout.defaultBackButtonLabel')
   };
 
-  const timelineSteps = getTimelineSteps(currentTimelineStep);
+  const timelineSteps = getTimelineSteps(currentTimelineStep, t);
 
   return (
     <Flex h="$fill" w="$fill" className={styles.root}>
@@ -101,21 +98,18 @@ export const SharedWalletStepLayout = ({
         <Flex data-testid="shared-wallet-step-footer" justifyContent="space-between" w="$fill" alignItems="center">
           {onBack && (
             <Button.Secondary
-              label={backLabel || defaultLabel.back}
+              label={customBackLabel || defaultLabel.back}
               onClick={onBack}
               data-testid="shared-wallet-step-btn-back"
             />
           )}
-          {customAction}
           {onNext && (
-            <span ref={nextButtonContainerRef}>
-              <Button.CallToAction
-                label={nextLabel || defaultLabel.next}
-                onClick={onNext}
-                disabled={!isNextEnabled}
-                data-testid="shared-wallet-step-btn-next"
-              />
-            </span>
+            <Button.CallToAction
+              label={customNextLabel || defaultLabel.next}
+              onClick={onNext}
+              disabled={!isNextEnabled}
+              data-testid="shared-wallet-step-btn-next"
+            />
           )}
         </Flex>
       </Flex>

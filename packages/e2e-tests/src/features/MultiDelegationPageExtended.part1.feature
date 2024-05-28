@@ -27,7 +27,6 @@ Feature: Staking Page - Extended View
     And I switch to list view on "Browse pools" tab
     Then I see the stake pool search control with appropriate content
 
-  #  TODO: update to match LW-10410 when ready
   @LW-8448 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page

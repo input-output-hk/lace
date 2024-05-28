@@ -1,19 +1,19 @@
-/* eslint-disable sonarjs/no-identical-functions */
+import { addEllipsis } from '@lace/common';
+import { ProfileDropdown, Box, Text, FlowCard } from '@lace/ui';
 import React, { useMemo, useState } from 'react';
-import { SharedWalletStepLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
+import { useTranslation } from 'react-i18next';
 import { WalletNameInput } from '../../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
 import { WALLET_NAME_INPUT_MAX_LENGTH, validateNameLength } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
-import { ProfileDropdown, Box, Text, FlowCard } from '@lace/ui';
-import { addEllipsis } from '@lace/common';
+import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
 import styles from './SetupSharedWallet.module.scss';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   activeWalletName: string;
   activeWalletAddress: string;
   onBack?: () => void;
   onNext?: () => void;
-  onNameChange: (name: string) => void;
+  onWalletNameChange: (name: string) => void;
+  walletName: string;
 }
 
 const ADDRESS_FIRST_PART_LENGTH = 35;
@@ -24,40 +24,50 @@ export const SetupSharedWallet = ({
   activeWalletAddress,
   onBack,
   onNext,
-  onNameChange
+  onWalletNameChange,
+  walletName
 }: Props): JSX.Element => {
-  const [sharedWalletName, setSharedWalletName] = useState('');
+  const [walletNameDirty, setWalletNameDirty] = useState(false);
   const { t } = useTranslation();
 
   const translations = {
     title: t('core.sharedWallet.walletName.title'),
     subtitle: t('core.sharedWallet.walletName.subtitle'),
     body: t('core.sharedWallet.walletName.body'),
-    nameMaxLength: t('core.walletNameAndPasswordSetupStep.nameMaxLength'),
-    nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage')
+    nameMaxLengthErrorMessage: t('core.sharedWallet.walletName.errorMessage.maxLength'),
+    nameRequiredMessageErrorMessage: t('core.sharedWallet.walletName.errorMessage.nameRequired')
   };
 
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-    setSharedWalletName(value);
-    onNameChange(value);
+    setWalletNameDirty(true);
+    onWalletNameChange(value);
   };
 
   const walletNameErrorMessage = useMemo(() => {
-    const validationError = validateNameLength(sharedWalletName) ? translations.nameMaxLength : '';
-    return sharedWalletName ? validationError : translations.nameRequiredMessage;
-  }, [sharedWalletName, translations.nameMaxLength, translations.nameRequiredMessage]);
+    if (!walletName && walletNameDirty) return translations.nameRequiredMessageErrorMessage;
+
+    const valid = !validateNameLength(walletName);
+    if (walletName && !valid) return translations.nameMaxLengthErrorMessage;
+
+    return '';
+  }, [
+    translations.nameMaxLengthErrorMessage,
+    translations.nameRequiredMessageErrorMessage,
+    walletName,
+    walletNameDirty
+  ]);
 
   return (
-    <SharedWalletStepLayout
+    <SharedWalletLayout
       title={translations.title}
       description={translations.subtitle}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={Boolean(!walletNameErrorMessage)}
+      isNextEnabled={!walletNameErrorMessage}
       currentTimelineStep={SharedWalletTimelineSteps.WALLET_NAME}
     >
       <WalletNameInput
-        value={sharedWalletName}
+        value={walletName}
         label="Shared wallet name"
         onChange={handleNameChange}
         maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
@@ -73,6 +83,6 @@ export const SetupSharedWallet = ({
           subtitle={addEllipsis(activeWalletAddress, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)}
         />
       </FlowCard.Card>
-    </SharedWalletStepLayout>
+    </SharedWalletLayout>
   );
 };

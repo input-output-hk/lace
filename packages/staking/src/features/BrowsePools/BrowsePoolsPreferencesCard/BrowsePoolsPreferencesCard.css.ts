@@ -21,7 +21,3 @@ export const textBoxRight = style({
 export const radioGroup = sx({
   width: '$fill',
 });
-
-export const selectGroup = sx({
-  width: '$fill',
-});

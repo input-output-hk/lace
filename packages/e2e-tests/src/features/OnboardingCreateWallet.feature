@@ -272,3 +272,18 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Analytics banner is displayed correctly
     Given I enable showing Analytics consent banner
     Then I see Analytics banner displayed correctly
+
+  @LW-10452
+  Scenario: Create wallet - Copy and Paste from clipboard has a tooltip
+    Given I click "Create" button on wallet setup page
+    And "Mnemonic writedown" page is displayed with 24 words
+    And I hover over "Copy to clipboard" button
+    Then I see clipboard tooltip with information about copying and pasting words
+    And I click on "clipboard tooltip link"
+    Then I see a "FAQ" article with title "Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features"
+    And I click "Next" button during wallet setup
+    Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
+    And I hover over "Paste from clipboard" button
+    Then I see clipboard tooltip with information about copying and pasting words
+    And I click on "clipboard tooltip link"
+    Then I see a "FAQ" article with title "Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features"

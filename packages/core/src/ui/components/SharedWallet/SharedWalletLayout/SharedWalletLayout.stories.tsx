@@ -1,11 +1,10 @@
 import React from 'react';
-// import { QuorumOption } from "../Quorum";
-import { SharedWalletStepLayout } from './SharedWalletLayout';
+import { SharedWalletLayout } from './SharedWalletLayout';
 import { Meta, StoryObj } from '@storybook/react';
 
-const meta: Meta<typeof SharedWalletStepLayout> = {
+const meta: Meta<typeof SharedWalletLayout> = {
   title: 'Shared Wallets / Shared Wallet Step Layout',
-  component: SharedWalletStepLayout,
+  component: SharedWalletLayout,
   parameters: {
     layout: 'centered'
   }
@@ -13,9 +12,9 @@ const meta: Meta<typeof SharedWalletStepLayout> = {
 
 export default meta;
 
-type Story = StoryObj<typeof SharedWalletStepLayout>;
+type Story = StoryObj<typeof SharedWalletLayout>;
 
-export const SharedWalletLayout: Story = {
+export const SharedWalletLayoutComponent: Story = {
   args: {
     title: 'Shared Wallet Step Layout',
     children: <div>Hello</div>
