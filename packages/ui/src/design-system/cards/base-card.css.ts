@@ -27,6 +27,11 @@ export const card = recipe({
         borderStyle: 'solid',
         borderWidth: vars.spacing.$2,
       },
+      [Scheme.Img]: {
+        borderColor: vars.colors.$card_img_borderColor,
+        backgroundColor: vars.colors.$card_img_bgColor,
+        borderRadius: vars.radius.$large,
+      },
     },
   },
 });

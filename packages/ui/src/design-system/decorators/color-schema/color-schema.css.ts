@@ -14,6 +14,4 @@ export const storyContainer = style([
 export const root = style({
   minHeight: '100%',
   height: '100%',
-  display: 'flex',
-  flexDirection: 'row',
 });

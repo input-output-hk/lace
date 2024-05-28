@@ -9,6 +9,9 @@ import type { BoxProps } from '../box';
 
 export type Props = PropsWithChildren<Readonly<Omit<BoxProps, 'className'>>>;
 
-export const Divider = (props: Readonly<BoxProps>): JSX.Element => (
-  <Box {...props} h="$1" className={cx.divider} />
+export const Divider = ({
+  h = '$1',
+  ...props
+}: Readonly<BoxProps>): JSX.Element => (
+  <Box {...props} h={h} className={cx.divider} />
 );

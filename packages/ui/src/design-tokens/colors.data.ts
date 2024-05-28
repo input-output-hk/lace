@@ -38,6 +38,8 @@ export const colors = {
   $card_greyed_backgroundColor: '',
   $card_outlined_backgroundColor: '',
   $card_outlined_borderColor: '',
+  $card_img_bgColor: '',
+  $card_img_borderColor: '',
 
   $control_buttons_label_color: '',
   $control_buttons_label_color_danger: '',
@@ -202,6 +204,7 @@ export const colors = {
   $data_green: '',
   $data_yellow: '',
   $data_orange: '',
+  $white: '',
 
   $educational_card_root_container_bgColor: '',
   $educational_card_root_container_borderColor: '',

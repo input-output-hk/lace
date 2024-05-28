@@ -41,6 +41,10 @@ export const Overview = (): JSX.Element => {
       Component: Card.Outlined,
       variant: Scheme.Outlined,
     },
+    {
+      Component: Card.Img,
+      variant: Scheme.Img,
+    },
   ];
 
   const renderTable = (showHeader = false): JSX.Element => (

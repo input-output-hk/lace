@@ -606,5 +606,12 @@
   "core.walletSetupWalletNameStep.maxCharacters": "Max. 20 characters",
   "core.walletSetupWalletNameStep.nameYourWallet": "Name your wallet",
   "core.walletSetupWalletNameStep.walletName": "Wallet name",
-  "core.nftDetail.directory": "Folder"
+  "core.nftDetail.directory": "Folder",
+  "core.namiMigration.timeline.1": "Welcome",
+  "core.namiMigration.timeline.2": "Customise your wallet",
+  "core.namiMigration.welcome": "Nami has joined the IOG product family",
+  "core.namiMigration.description": "Lace brings together a wealth of Web3 features, from managing digital assets, to accessing NFTs, DApps, and DeFi services, so you can discover and enjoy a new world of digital experiences.",
+  "core.namiMigration.faq": "But if change isn't your preference, fear not; you can continue using Nami as you always have. Check our <a1>FAQ here</a1>.",
+  "core.namiMigration.tos": "By proceeding you agree to Lace’s <a1>Terms of Service</a1> and <a2>Privacy Policy</a2>",
+  "core.namiMigration.cta": "Next"
 }

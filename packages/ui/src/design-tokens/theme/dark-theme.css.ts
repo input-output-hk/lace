@@ -73,6 +73,8 @@ const colors: Colors = {
   $card_greyed_backgroundColor: darkColorScheme.$primary_dark_grey_plus,
   $card_outlined_backgroundColor: darkColorScheme.$primary_mid_black,
   $card_outlined_borderColor: colorTransparent,
+  $card_img_bgColor: darkColorScheme.$primary_mid_grey,
+  $card_img_borderColor: darkColorScheme.$primary_light_black,
 
   $control_buttons_label_color: darkColorScheme.$primary_white,
   $control_buttons_label_color_hover: darkColorScheme.$primary_light_grey,
@@ -289,6 +291,7 @@ const colors: Colors = {
   $data_pink: darkColorScheme.$secondary_data_pink,
   $data_yellow: darkColorScheme.$secondary_lace_yellow,
   $data_orange: darkColorScheme.$secondary_data_orange,
+  $white: darkColorScheme.$primary_white,
 
   $educational_card_root_container_bgColor: darkColorScheme.$primary_mid_black,
   $educational_card_root_container_borderColor: colorTransparent,

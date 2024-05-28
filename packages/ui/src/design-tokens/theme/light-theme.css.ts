@@ -76,6 +76,8 @@ const colors: Colors = {
   $card_greyed_backgroundColor: lightColorScheme.$primary_light_grey,
   $card_outlined_backgroundColor: lightColorScheme.$primary_white,
   $card_outlined_borderColor: lightColorScheme.$primary_light_grey_plus,
+  $card_img_bgColor: lightColorScheme.$primary_light_grey_plus_0_56,
+  $card_img_borderColor: lightColorScheme.$primary_light_grey_0_56,
 
   $control_buttons_label_color: lightColorScheme.$primary_black,
   $control_buttons_label_color_hover: lightColorScheme.$primary_black,
@@ -309,6 +311,7 @@ const colors: Colors = {
   $data_pink: lightColorScheme.$secondary_data_pink,
   $data_yellow: lightColorScheme.$secondary_lace_yellow,
   $data_orange: lightColorScheme.$secondary_data_orange,
+  $white: lightColorScheme.$primary_white,
 
   $educational_card_root_container_bgColor: lightColorScheme.$primary_white,
   $educational_card_root_container_borderColor:
