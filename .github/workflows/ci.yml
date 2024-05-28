@@ -61,6 +61,12 @@ jobs:
           DIR: packages/cardano
           NAME: packages-cardano
 
+      - name: Build cardano
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/midnight
+          NAME: packages-midnight
+
       - name: Build translation
         uses: ./.github/actions/build/package
         with:
@@ -187,6 +193,12 @@ jobs:
           name: packages-cardano
           path: packages/cardano/dist
 
+      - name: Download packages-midnight
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-midnight
+          path: packages/midnight/dist
+
       - name: Download packages-translation
         uses: actions/download-artifact@v4
         with:
@@ -305,6 +317,13 @@ jobs:
           name: packages-cardano
           path: packages/cardano/dist
 
+      - name: Download packages-midnight
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-midnight
+          path: packages/midnight/dist
+
       - name: Download packages-translation
         if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
         uses: actions/download-artifact@v4
@@ -400,6 +419,13 @@ jobs:
         with:
           name: packages-cardano
           path: packages/cardano/dist
+
+      - name: Download packages-midnight
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-midnight
+          path: packages/midnight/dist
 
       - name: Download packages-translation
         if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
