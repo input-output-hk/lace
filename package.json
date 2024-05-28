@@ -36,6 +36,7 @@
     "lint": "yarn workspaces foreach -ptv run lint && yarn markdown:lint",
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
     "markdown:lint:fix": "yarn markdown:lint --fix",
+    "midnight:lint": "yarn eslint-cmd \"packages/midnight/**/*.{js,ts,tsx}\"",
     "staking": "APP_NAME=staking yarn $0",
     "storybook": "ENV=development start-storybook -p 6006",
     "prestorybook:build": "yarn build",
