@@ -28,6 +28,7 @@
   "scripts": {
     "build": "npx rollup -c rollup.config.js",
     "cleanup": "shx rm -rf dist node_modules coverage reports .rollup.cache src/dist",
+    "format-check": "echo \"@lace/common: no format-check command specified\"",
     "lint": "cd ../.. && yarn midnight:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
