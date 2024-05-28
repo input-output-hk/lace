@@ -61,7 +61,7 @@ jobs:
           DIR: packages/cardano
           NAME: packages-cardano
 
-      - name: Build cardano
+      - name: Build midnight
         uses: ./.github/actions/build/package
         with:
           DIR: packages/midnight
