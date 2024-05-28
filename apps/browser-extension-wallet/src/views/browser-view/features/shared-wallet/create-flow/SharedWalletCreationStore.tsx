@@ -6,9 +6,9 @@ import React, {
   ReactNode,
   createContext,
   useContext,
+  useEffect,
   useMemo,
-  useReducer,
-  useEffect
+  useReducer
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
@@ -19,8 +19,7 @@ type BaseState = {
   step: SharedWalletCreationStep;
   activeWalletName: string;
   coSignersKeys: string[];
-  walletName: string;
-  walletNameInitiallySet: boolean;
+  walletName: string | undefined;
 };
 
 // This type util forces to describe complete state - all props from the BaseState and SupportingData has to be specified, otherwise we have a TS error
@@ -30,25 +29,29 @@ export type StateSetup = MakeState<{
   activeWalletName: string;
   coSignersKeys: undefined;
   step: SharedWalletCreationStep.Setup;
-  walletName: string;
-  walletNameInitiallySet: boolean;
+  walletName: string | undefined;
 }>;
 
 export type StateCoSigners = MakeState<{
   activeWalletName: string;
   coSignersKeys: string[];
   step: SharedWalletCreationStep.CoSigners;
-  walletName: string;
-  walletNameInitiallySet: boolean;
+  walletName: string | undefined;
 }>;
 
 type State = StateSetup | StateCoSigners;
 
+export enum SharedWalletActionType {
+  NEXT,
+  BACK,
+  CHANGE_WALLET_NAME,
+  IS_WALLET_PREFILLED
+}
+
 type Action =
-  | { type: 'next' }
-  | { type: 'back' }
-  | { type: 'walletNameChanged'; walletName: string }
-  | { type: 'initialWalletNameDetermined'; walletName: string };
+  | { type: SharedWalletActionType.NEXT }
+  | { type: SharedWalletActionType.BACK }
+  | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string };
 
 type ContextValue = {
   state: State;
@@ -68,8 +71,7 @@ const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
   coSignersKeys: undefined,
   step: SharedWalletCreationStep.Setup,
-  walletName: '',
-  walletNameInitiallySet: false
+  walletName: undefined
 });
 
 type SharedWalletCreationStoreProps = {
@@ -84,26 +86,20 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
   } = useWalletStore();
 
   const initialState = makeInitialState(activeWalletName);
+
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
     if (prevState.step === SharedWalletCreationStep.Setup) {
-      if (action.type === 'initialWalletNameDetermined' && !prevState.walletNameInitiallySet) {
-        return {
-          ...prevState,
-          walletName: action.walletName,
-          walletNameInitiallySet: true
-        };
-      }
-      if (action.type === 'walletNameChanged') {
+      if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
         return {
           ...prevState,
           walletName: action.walletName
         };
       }
-      if (action.type === 'back') {
+      if (action.type === SharedWalletActionType.BACK) {
         history.push(walletRoutePaths.sharedWallet.root);
         return prevState;
       }
-      if (action.type === 'next') {
+      if (action.type === SharedWalletActionType.NEXT) {
         return {
           ...prevState,
           step: SharedWalletCreationStep.CoSigners
@@ -112,14 +108,14 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
     }
 
     if (prevState.step === SharedWalletCreationStep.CoSigners) {
-      if (action.type === 'back') {
+      if (action.type === SharedWalletActionType.BACK) {
         return {
           ...prevState,
           coSignersKeys: undefined,
           step: SharedWalletCreationStep.Setup
         };
       }
-      if (action.type === 'next') {
+      if (action.type === SharedWalletActionType.NEXT) {
         return {
           ...prevState,
           coSignersKeys: undefined,
@@ -133,10 +129,10 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
 
   useEffect(() => {
     (async () => {
-      if (state.walletName) return;
+      if (state.walletName !== undefined) return;
       const wallets = await firstValueFrom(walletRepository.wallets$);
       const walletName = `Wallet ${wallets.length + 1}`;
-      dispatch({ type: 'initialWalletNameDetermined', walletName });
+      dispatch({ type: SharedWalletActionType.CHANGE_WALLET_NAME, walletName });
     })();
   }, [state.walletName, walletRepository]);
 

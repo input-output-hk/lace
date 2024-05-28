@@ -1,7 +1,8 @@
 import { addEllipsis } from '@lace/common';
 import { ProfileDropdown, Box, Text, FlowCard } from '@lace/ui';
-import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+/* eslint-disable sonarjs/no-identical-functions */
+import React, { useMemo, useState } from 'react';
 import { WalletNameInput } from '../../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
 import { WALLET_NAME_INPUT_MAX_LENGTH, validateNameLength } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
