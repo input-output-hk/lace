@@ -12,7 +12,9 @@ import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
-import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
+import { TestWalletName } from '../support/walletConfiguration';
+import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressType } from '../enums/AddressTypeEnum';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -75,22 +77,22 @@ Then(/^The Tx summary screen is displayed for 2 bundles with multiple assets$/, 
 
 Then(/^The Tx summary screen is displayed for bundles with correct own \/ foreign tags$/, async () => {
   const bundle1 = {
-    recipientAddress: getTestWallet(TestWalletName.MultiWallet1)?.accounts?.[0].additionalMultiAddress as string,
+    recipientAddress: parseWalletAddress(TestWalletName.MultiWallet1, AddressType.OtherMultiaddress),
     recipientAddressTag: 'own',
     valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
   };
   const bundle2 = {
-    recipientAddress: getTestWallet(TestWalletName.MultiWallet1)?.accounts?.[1].address as string,
+    recipientAddress: parseWalletAddress(TestWalletName.MultiWallet1, AddressType.SecondAccount),
     recipientAddressTag: 'own',
     valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
   };
   const bundle3 = {
-    recipientAddress: getTestWallet(TestWalletName.MultiWallet2).address as string,
+    recipientAddress: parseWalletAddress(TestWalletName.MultiWallet2, AddressType.Main),
     recipientAddressTag: 'own',
     valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
   };
   const bundle4 = {
-    recipientAddress: getTestWallet(TestWalletName.WalletReceiveSimpleTransactionE2E).address as string,
+    recipientAddress: parseWalletAddress(TestWalletName.WalletReceiveSimpleTransactionE2E, AddressType.Main),
     recipientAddressTag: 'foreign',
     valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
   };
