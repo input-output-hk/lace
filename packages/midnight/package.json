@@ -32,7 +32,6 @@
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
     "prestart": "yarn build",
-    "test": "NODE_ENV=test jest -c ./test/jest.config.js",
     "test:coverage": "yarn test --coverage",
     "watch": "yarn build --watch"
   },
