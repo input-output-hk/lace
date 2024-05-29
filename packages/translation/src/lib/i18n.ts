@@ -6,11 +6,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import * as translations from './translations';
+import { Language } from '../types';
 
-export enum Language {
-  en = 'en',
-}
+import { allTranslations } from './translations';
 
 type I18NextResources = Partial<Record<Language, { translation: string }>>;
 
@@ -21,7 +19,7 @@ for (const lang of Object.values(Language)) {
   Object.assign(resources, {
     [lang]: {
       translation: {
-        ...translations[lang],
+        ...allTranslations[lang],
       },
     },
   });
