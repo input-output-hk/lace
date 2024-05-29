@@ -108,6 +108,10 @@ class TokensPageAssert {
     }
   };
 
+  async assertSeeOnlyFilteredToken(tokenName: string) {
+    expect(await TokensPage.getTokenNames()).to.deep.equal([tokenName]);
+  }
+
   async assertSeeToken(shouldSee: boolean, tokenDetails: ExpectedTokenDetails, mode: 'extended' | 'popup') {
     if (shouldSee) {
       await TokensPage.tokensTableItemWithName(tokenDetails.name).waitForDisplayed({ timeout: 10_000 });

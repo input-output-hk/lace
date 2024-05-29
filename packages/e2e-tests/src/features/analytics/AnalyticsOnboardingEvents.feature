@@ -1,7 +1,7 @@
 @OnboardingCreateWallet @Analytics @Testnet
 Feature: Analytics - Posthog - Onboarding - Extended View
 
-  @LW-8311 @Pending @issue=LW-10488
+  @LW-8311
   Scenario Outline: Analytics - Posthog events are enabled or disabled based on decision <enable_analytics> on Analytics page
     Given "Get started" page is displayed
     When I enable showing Analytics consent banner
@@ -28,16 +28,17 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I click "Enter wallet" button
     Then I validate latest analytics multiple events:
       | onboarding \| restore wallet revamp \| let's set up your new wallet \| enter wallet \| click |
+      | onboarding \| restore wallet revamp \| added                                                 |
       | $create_alias                                                                                |
     And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
 
-  @LW-7365 @Pending @issue=LW-10488
+  @LW-7365
   Scenario: Analytics - Onboarding new wallet events
     Given "Get started" page is displayed
     When I enable showing Analytics consent banner
     And I set up request interception for posthog analytics request(s)
     And I accept analytics banner on "Get started" page
-    Then I validate latest analytics single event "wallet | onboarding | analytics banner | agree | click"
+    Then I validate latest analytics single event "onboarding | analytics banner | agree | click"
     When I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
     When I go to "Mnemonic verification" page from "Create" wallet flow
@@ -49,8 +50,9 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I click "Enter wallet" button
     Then I validate latest analytics multiple events:
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
-      | $create_alias                                                                            |
-    And I validate that 6 analytics event(s) have been sent
+      | onboarding \| new wallet revamp \| added                                                 |
+      | $create_alias                                                                                |
+    And I validate that 7 analytics event(s) have been sent
 
   @LW-7364 @Pending
     # Disabled as user is opted out until he decision about tracking.

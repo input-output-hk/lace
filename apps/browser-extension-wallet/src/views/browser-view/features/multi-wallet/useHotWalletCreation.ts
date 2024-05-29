@@ -24,7 +24,7 @@ type SendPostWalletAddAnalyticsParams = {
 export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreationParams) => {
   const analytics = useAnalyticsContext();
   const walletManager = useWalletManager();
-  const { aliasEventRequired } = useWalletOnboarding();
+  const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
   const [createWalletData, setCreateWalletData] = useState<CreateWalletParams>({
     mnemonic: initialMnemonic,
     name: '',
@@ -52,14 +52,17 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletManager.walletRepository) }
     });
-    await analytics.sendMergeEvent(extendedAccountPublicKey);
-
-    if (postHogActionHdWallet && wallet && (await isHdWallet(wallet))) {
-      await analytics.sendEventToPostHog(postHogActionHdWallet);
-    }
 
     if (aliasEventRequired) {
       await analytics.sendAliasEvent();
+    }
+
+    if (mergeEventRequired) {
+      await analytics.sendMergeEvent(extendedAccountPublicKey);
+    }
+
+    if (postHogActionHdWallet && wallet && (await isHdWallet(wallet))) {
+      await analytics.sendEventToPostHog(postHogActionHdWallet);
     }
   };
 
