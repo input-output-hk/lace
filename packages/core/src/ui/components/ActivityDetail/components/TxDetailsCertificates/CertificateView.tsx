@@ -1,4 +1,5 @@
 /* eslint-disable complexity */
+/* eslint-disable sonarjs/no-duplicate-string */
 import React from 'react';
 import { Wallet } from '@lace/cardano';
 import { ConfirmStakeRegistrationDelegation } from '@src/ui/components/ConfirmStakeRegistrationDelegation';
@@ -11,6 +12,8 @@ import { ConfirmDRepUpdate } from '@src/ui/components/ConfirmDRepUpdate';
 import { ConfirmVoteDelegation } from '@src/ui/components/ConfirmVoteDelegation';
 import { AuthorizeCommitteeCertificate } from '@src/ui/components/AuthorizeCommitteeCertificate';
 import { ResignCommitteeCertificate } from '@src/ui/components/ResignCommitteeCertificate';
+import { Cell, Grid, TransactionSummary } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 
 interface CertificateViewProps {
   chainNetworkId: Wallet.Cardano.NetworkId;
@@ -20,11 +23,20 @@ interface CertificateViewProps {
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 
+const isNewStakeAddressCertificate = (
+  cert: Wallet.Cardano.Certificate
+): cert is Wallet.Cardano.NewStakeAddressCertificate => {
+  const { __typename } = cert;
+  return __typename === CertificateType.Registration || __typename === CertificateType.Unregistration;
+};
+
 export const CertificateView = ({
   certificate,
   chainNetworkId,
   cardanoCoin
 }: CertificateViewProps): React.ReactElement => {
+  const { t } = useTranslation();
+
   switch (certificate.__typename) {
     case CertificateType.StakeVoteDelegation:
       return (
@@ -147,6 +159,96 @@ export const CertificateView = ({
             url: certificate.anchor?.url
           }}
         />
+      );
+    case CertificateType.StakeRegistration:
+    case CertificateType.Registration:
+      return (
+        <Grid columns="$1" gutters="$20">
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.activityDetails.certificateTitles.certificateType')}
+              address={t('core.assetActivityItem.entry.name.StakeRegistrationCertificate')}
+              testID="metadata-cetificateType"
+            />
+          </Cell>
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.ProposalProcedure.txDetails.rewardAccount')}
+              address={RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential)
+                .toAddress()
+                .toBech32()}
+            />
+          </Cell>
+          <Cell>
+            {!!isNewStakeAddressCertificate(certificate) && (
+              <TransactionSummary.Address
+                label={t('core.activityDetails.certificateTitles.depositPaid')}
+                address={Wallet.util.getFormattedAmount({
+                  amount: certificate.deposit.toString(),
+                  cardanoCoin
+                })}
+              />
+            )}
+          </Cell>
+        </Grid>
+      );
+    case CertificateType.StakeDeregistration:
+    case CertificateType.Unregistration:
+      return (
+        <Grid columns="$1" gutters="$20">
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.activityDetails.certificateTitles.certificateType')}
+              address={t('core.assetActivityItem.entry.name.StakeDeRegistrationCertificate')}
+              testID="metadata-cetificateType"
+            />
+          </Cell>
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.ProposalProcedure.txDetails.rewardAccount')}
+              address={RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential)
+                .toAddress()
+                .toBech32()}
+            />
+          </Cell>
+          <Cell>
+            {!!isNewStakeAddressCertificate(certificate) && (
+              <TransactionSummary.Address
+                label={t('core.activityDetails.certificateTitles.depositReturned')}
+                address={Wallet.util.getFormattedAmount({
+                  amount: certificate.deposit.toString(),
+                  cardanoCoin
+                })}
+              />
+            )}
+          </Cell>
+        </Grid>
+      );
+    case CertificateType.StakeDelegation:
+      return (
+        <Grid columns="$1" gutters="$20">
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.activityDetails.certificateTitles.certificateType')}
+              address={t('core.assetActivityItem.entry.name.StakeDelegationCertificate')}
+              testID="metadata-cetificateType"
+            />
+          </Cell>
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.ProposalProcedure.txDetails.rewardAccount')}
+              address={RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential)
+                .toAddress()
+                .toBech32()}
+            />
+          </Cell>
+          <Cell>
+            <TransactionSummary.Address
+              label={t('core.activityDetails.certificateTitles.poolId')}
+              address={certificate.poolId}
+            />
+          </Cell>
+        </Grid>
       );
     default:
       throw new Error(`Not supported certificate: ${certificate.__typename}`);
