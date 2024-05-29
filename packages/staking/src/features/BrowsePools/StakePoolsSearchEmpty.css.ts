@@ -15,8 +15,3 @@ export const text = style([
     textAlign: 'center',
   },
 ]);
-
-export const wrapper = style({
-  minHeight: '144px',
-  position: 'absolute',
-});
