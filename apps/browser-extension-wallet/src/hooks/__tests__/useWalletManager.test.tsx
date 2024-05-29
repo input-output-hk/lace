@@ -334,7 +334,7 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('createWallet', () => {
-    test.only('should store wallet in repository', async () => {
+    test('should store wallet in repository', async () => {
       const walletId = 'walletId';
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
