@@ -38,7 +38,7 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/key-management": "0.15.1",
+    "@cardano-sdk/key-management": "0.20.5",
     "@midnight-ntwrk/wallet": "^3.5.9",
     "@midnight-ntwrk/wallet-api": "^3.3.1",
     "@midnight-ntwrk/zswap": "^0.3.11"

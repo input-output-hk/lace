@@ -30,12 +30,13 @@ module.exports = {
         'common',
         'core',
         'extension',
+        'midnight',
         'staking',
         'ui',
         // SRE
         'monitoring',
-        'security',
-        'midnight'
+        // Security
+        'security'
       ]
     ],
     'scope-empty': [0, 'never']
