@@ -79,6 +79,12 @@ jobs:
           DIR: packages/staking
           NAME: packages-staking
 
+      - name: Build nami
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/nami
+          NAME: packages-nami
+
   unitTests:
     name: Unit tests
     runs-on: ubuntu-20.04
@@ -134,6 +140,12 @@ jobs:
         with:
           name: packages-staking
           path: packages/staking/dist
+
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
 
       - name: Collect Workflow Telemetry Unit Tests
         uses: catchpoint/workflow-telemetry-action@v2
