@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useObservable } from '@lace/common';
-import { OutputsMap, useTransactionProps } from '@src/views/browser-view/features/send-transaction';
+import { OutputsMap, useMaxAdaStatus, useTransactionProps } from '@src/views/browser-view/features/send-transaction';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Assets, WalletUtil } from '@cardano-sdk/wallet';
 import pDebounce from 'p-debounce';
@@ -172,6 +172,7 @@ export const useMaxAda = (): bigint => {
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
   const assetInfo = useObservable(inMemoryWallet?.assetInfo$);
   const { outputMap } = useTransactionProps();
+  const { setMaxAdaLoading } = useMaxAdaStatus();
   const address = walletInfo.addresses[0].address;
 
   useEffect(() => {
@@ -179,6 +180,7 @@ export const useMaxAda = (): bigint => {
 
     const calculate = async () => {
       try {
+        setMaxAdaLoading(true);
         const { validateOutputs } = Wallet.createWalletUtil(inMemoryWallet);
         const txBuilder = inMemoryWallet.createTxBuilder();
         const { fee, minimumCoins } = await getMinimunCoinsAndFee({
@@ -210,6 +212,8 @@ export const useMaxAda = (): bigint => {
         if (!abortController.signal.aborted) {
           setMaxADA(BigInt(0));
         }
+      } finally {
+        setMaxAdaLoading(false);
       }
     };
 
@@ -219,7 +223,7 @@ export const useMaxAda = (): bigint => {
     return () => {
       abortController.abort();
     };
-  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputMap]);
+  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputMap, setMaxAdaLoading]);
 
   return maxADA;
 };
