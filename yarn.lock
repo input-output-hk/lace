@@ -11433,27 +11433,12 @@ __metadata:
   resolution: "@lace/midnight@workspace:packages/midnight"
   dependencies:
     "@cardano-sdk/key-management": 0.15.1
-    "@midnight-ntwrk/dapp-connector-api": ^1.1.0
     "@midnight-ntwrk/wallet": ^3.5.9
     "@midnight-ntwrk/wallet-api": ^3.3.1
     "@midnight-ntwrk/zswap": ^0.3.11
     shx: ^0.3.2
     typescript: ^4.3.5
   peerDependencies:
-    "@cardano-sdk/core": 0.22.2
-    "@cardano-sdk/dapp-connector": 0.11.1
-    "@cardano-sdk/util": 0.14.3
-    "@cardano-sdk/web-extension": 0.16.4
-    "@lace/common": 0.1.0
-    "@lace/core": 0.1.0
-    antd: ^4.24.10
-    bignumber.js: 9.0.1
-    classnames: ^2.3.1
-    lodash: 4.17.21
-    p-debounce: ^4.0.0
-    react: 17.0.2
-    react-dom: 17.0.2
-    react-i18next: 11.11.4
     rxjs: 7.4.0
     zustand: 3.5.14
   languageName: unknown
@@ -11842,18 +11827,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midnight-ntwrk/dapp-connector-api@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@midnight-ntwrk/dapp-connector-api@npm:1.1.0"
-  dependencies:
-    "@midnight-ntwrk/wallet-api": ^3.2.3
-    "@midnight-ntwrk/zswap": ^0.3.8
-    ts-custom-error: ^3.3.1
-  checksum: 8ef9936fa64c4e6b3fc4b9b4b4b5ee0ecbebace68c5160adaae85eb50fda16d51aa925e3ce9ae856a6934acc79591efe2edd806dcd54ad0bec093313cbcf87d9
-  languageName: node
-  linkType: hard
-
-"@midnight-ntwrk/wallet-api@npm:^3.2.3, @midnight-ntwrk/wallet-api@npm:^3.3.1":
+"@midnight-ntwrk/wallet-api@npm:^3.3.1":
   version: 3.3.1
   resolution: "@midnight-ntwrk/wallet-api@npm:3.3.1"
   dependencies:
@@ -11880,7 +11854,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midnight-ntwrk/zswap@npm:^0.3.11, @midnight-ntwrk/zswap@npm:^0.3.8":
+"@midnight-ntwrk/zswap@npm:^0.3.11":
   version: 0.3.11
   resolution: "@midnight-ntwrk/zswap@npm:0.3.11"
   checksum: c90e580c105b96ca564f2564433b1a9b722d62a77a6066c0427cb608742056b61d1c3e08fa5da9fdaf93046ce1bd0014c19e99725fa8e60ce49959db587f1e4c
@@ -52730,13 +52704,6 @@ __metadata:
   version: 3.2.0
   resolution: "ts-custom-error@npm:3.2.0"
   checksum: b1d2016de891cecea46a70c4adbaf1e6f7c6178994f72070ee3c218cc1a9e2b12c3011defb8385f15dc03ddfafd8d88ef2c9217e23700fb6e537755f33b9c801
-  languageName: node
-  linkType: hard
-
-"ts-custom-error@npm:^3.3.1":
-  version: 3.3.1
-  resolution: "ts-custom-error@npm:3.3.1"
-  checksum: 50a1e825fced68d70049bd8d282379a635e43aa023a370fa8e736b12a6edba7f18a2d731fa194ac35303a8b625be56e121bdb31d8a0318250d1a8b277059fce3
   languageName: node
   linkType: hard
 
