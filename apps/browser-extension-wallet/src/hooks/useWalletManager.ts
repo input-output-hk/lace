@@ -472,12 +472,13 @@ export const useWalletManager = (): UseWalletManager => {
 
       // @ts-expect-error different versions of rxjs are causing errors with firstValueFrom
       const midnightWalletState = await firstValueFrom<MidnightWallet>(midnightWallet.state());
+
       const serializedMidnightWallet = await midnightWallet.serializeState();
+      const midnightWalletAddress = midnightWalletState.address;
       const encryptedSerializedMidnightWallet = await encryptSerialisedMidnightWallet(
         serializedMidnightWallet,
         passphrase
       );
-      const midnightWalletAddress = midnightWalletState.address;
 
       const accountIndex = 0;
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
