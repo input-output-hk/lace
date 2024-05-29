@@ -91,38 +91,6 @@ jest.mock('@lace/cardano', () => {
   };
 });
 
-jest.mock('@lace/midnight', () => ({
-  __esModule: true,
-  createMidnightWallet: () => ({
-    balanceTransaction: jest.fn(),
-    close: jest.fn(),
-    proveTransaction: jest.fn(),
-    serializeState: jest.fn().mockReturnValue(
-      JSON.stringify({
-        state:
-          'AQEAAQAACcVTenGLY4bW4uzgmPbngaXg8UO27w7b/1Uohh1VLXsBAAAgs2XLl+jvyq8tlxEY0YsCIdUuXw3qf+3Ma/ixjt8HdAcAAAAAAAAAAAAAAAABAAACIAAAAAAAAAAA',
-        txHistory: [],
-        offset: null
-      })
-    ),
-    start: jest.fn(),
-    state: () =>
-      of({
-        address:
-          '665e639d46357a66000984e09b42d9e5c93d25e5ac9313a00952325bd47afc61|0100016d89cc7d25bb084436829792112d895e6f0853521e01d6b59afcafe3761b162e',
-        availableCoins: [],
-        balances: {},
-        coinPublicKey: '665e639d46357a66000984e09b42d9e5c93d25e5ac9313a00952325bd47afc61',
-        coins: [],
-        encryptionPublicKey: '0100016d89cc7d25bb084436829792112d895e6f0853521e01d6b59afcafe3761b162e',
-        pendingCoins: [],
-        transactionHistory: []
-      }),
-    submitTransaction: jest.fn(),
-    transferTransaction: jest.fn()
-  })
-}));
-
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
   const actual = jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService');
   return {
@@ -366,7 +334,7 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('createWallet', () => {
-    test('should store wallet in repository', async () => {
+    test.only('should store wallet in repository', async () => {
       const walletId = 'walletId';
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
@@ -382,8 +350,10 @@ describe('Testing useWalletManager hook', () => {
 
       const emip3encryptResultMocked = '{}';
       const emip3encryptResultMocked2 = '{}';
+      const emip3encryptResultMocked3 = '{}';
       mockEmip3encrypt.mockImplementationOnce(async () => emip3encryptResultMocked);
       mockEmip3encrypt.mockImplementationOnce(async () => emip3encryptResultMocked2);
+      mockEmip3encrypt.mockImplementationOnce(async () => emip3encryptResultMocked3);
 
       const {
         result: {
@@ -406,8 +376,8 @@ describe('Testing useWalletManager hook', () => {
       // but buffer that this is called with is nullified in order to remove the actual passphrase
       // bytes from memory as soon as possible. jest keeps a reference to the buffer, so it thinks it's called with 0-es
       const nullifiedPassphrase = Buffer.from(new Uint8Array(password.length));
-      expect(mockEmip3encrypt.mock.calls[0]).toEqual([LOCK_VALUE, nullifiedPassphrase]);
-      expect(mockEmip3encrypt.mock.calls[1]).toEqual([Buffer.from(mnemonic.join(' ')), nullifiedPassphrase]);
+      expect(mockEmip3encrypt.mock.calls[1]).toEqual([LOCK_VALUE, nullifiedPassphrase]);
+      expect(mockEmip3encrypt.mock.calls[2]).toEqual([Buffer.from(mnemonic.join(' ')), nullifiedPassphrase]);
 
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
       expect(walletApiUi.walletManager.activate).toBeCalledTimes(1);

@@ -25,6 +25,7 @@ module.exports = createJestConfig({
     '<rootDir>/test/__mocks__/set-env-vars.js',
     '<rootDir>/test/__mocks__/stores.js',
     '<rootDir>/test/__mocks__/hooks.js',
+    '<rootDir>/test/__mocks__/midnightWallet.js',
     '<rootDir>/test/__mocks__/react-router.js',
     '<rootDir>/test/__mocks__/cardano-wallet.js',
     '<rootDir>/test/__mocks__/axios-fetch-adapter.js',
