@@ -57,18 +57,20 @@ export const getReachedMaxAmountList = ({
   tokensUsed,
   balance,
   exceed = false,
-  cardanoCoin
+  cardanoCoin,
+  availableRewards = BigInt(0)
 }: {
   assets: Wallet.Assets;
   tokensUsed: SpentBalances;
   balance: Wallet.Cardano.Value;
   exceed?: boolean;
   cardanoCoin: Wallet.CoinId;
+  availableRewards?: bigint;
 }): (string | Wallet.Cardano.AssetId)[] => {
   const reachedMaxAmountAda =
     tokensUsed[cardanoCoin.id] && balance?.coins
       ? new BigNumber(tokensUsed[cardanoCoin.id])[exceed ? 'gt' : 'gte'](
-          Wallet.util.lovelacesToAdaString(balance.coins.toString())
+          Wallet.util.lovelacesToAdaString((balance.coins + availableRewards).toString())
         )
       : false;
 

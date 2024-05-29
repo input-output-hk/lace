@@ -53,6 +53,7 @@ export const Form = ({
   const { lastFocusedInput } = useLastFocusedInput();
   const { fiatCurrency } = useCurrencyStore();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
+  const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
 
   const { setNewOutput } = useOutputs();
 
@@ -70,10 +71,11 @@ export const Form = ({
           tokensUsed,
           balance,
           cardanoCoin,
+          availableRewards,
           exceed: true
         }) || []
       ),
-    [assets, balance, cardanoCoin, tokensUsed]
+    [assets, availableRewards, balance, cardanoCoin, tokensUsed]
   );
 
   useEffect(() => {

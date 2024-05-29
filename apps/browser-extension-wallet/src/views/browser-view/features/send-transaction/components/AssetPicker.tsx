@@ -159,7 +159,8 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
     assets,
     tokensUsed,
     balance,
-    cardanoCoin
+    cardanoCoin,
+    availableRewards
   });
 
   const usedAssetsIds = new Set([...list.map(({ id }) => id), ...reachedMaxAmountList]);

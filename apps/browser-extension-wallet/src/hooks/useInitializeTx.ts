@@ -53,6 +53,7 @@ export const useInitializeTx = (
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const tokensUsed = useSpentBalances();
+  const availableRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
 
   const buildTransaction = useCallback(async () => {
     const reachedMaxAmountList = getReachedMaxAmountList({
@@ -60,7 +61,8 @@ export const useInitializeTx = (
       tokensUsed,
       balance,
       exceed: true,
-      cardanoCoin
+      cardanoCoin,
+      availableRewards
     });
     if (hasInvalidOutputs || reachedMaxAmountList.length > 0) {
       setBuiltTxData({
@@ -113,6 +115,7 @@ export const useInitializeTx = (
     tokensUsed,
     balance,
     cardanoCoin,
+    availableRewards,
     hasInvalidOutputs,
     setBuiltTxData,
     metadata,
