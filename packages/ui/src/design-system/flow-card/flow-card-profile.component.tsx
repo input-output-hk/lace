@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { Box } from '../box';
 import { Flex } from '../flex';
@@ -9,22 +9,32 @@ import { Text } from '../text';
 import * as cx from './flow-card-profile.css';
 
 interface Props {
-  imageSrc: string;
+  imageSrc?: string;
+  icon?: ReactNode;
   name: string;
   description?: string;
 }
 
 export const Profile = ({
   imageSrc,
+  icon,
   name,
   description,
 }: Readonly<Props>): JSX.Element => {
+  const renderProfileImage = () => {
+    if (icon) {
+      return icon;
+    } else if (imageSrc) {
+      return <Image imageSrc={imageSrc} alt={name} />;
+    }
+  };
+
   return (
     <div className={cx.container}>
       <Grid columns="$fitContent" gutters="$0">
         <Cell>
           <Flex className={cx.image} alignItems="center" h="$fill">
-            <Image imageSrc={imageSrc} alt={name} />
+            {renderProfileImage()}
           </Flex>
         </Cell>
         <Cell>
