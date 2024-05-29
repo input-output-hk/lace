@@ -16,7 +16,6 @@ export const StakePoolsSearchEmpty = (): React.ReactElement => {
       h="$fill"
       w="$fill"
       data-testid="stake-pool-table-empty"
-      className={styles.wrapper}
     >
       <Empty data-testid="stake-pool-table-empty-image" className={styles.icon} />
       <Text.Body.Small className={styles.text} weight="$medium" data-testid="stake-pool-table-empty-message">
