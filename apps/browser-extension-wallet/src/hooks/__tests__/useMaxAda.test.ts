@@ -123,6 +123,25 @@ describe('Testing useMaxAda hook', () => {
     });
   });
 
+  test('should return balance minus fee and minimun ada for tokens', async () => {
+    const { result } = renderHook(() => useMaxAda());
+
+    act(() => {
+      inMemoryWallet.balance.utxo.available$.next({
+        coins: BigInt('10000000'),
+        assets: new Map([
+          [
+            Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
+            BigInt('100000000')
+          ]
+        ])
+      });
+    });
+    await waitFor(() => {
+      expect(result.current).toBe(BigInt('10000000') - BigInt(TX_FEE) - BigInt(MIN_COINS_FOR_TOKENS));
+    });
+  });
+
   test.each([[1]])('should return balance minus fee and adaErrorBuffer times %i', async (errorCount) => {
     inspect.mockResolvedValueOnce({
       inputSelection: {
@@ -139,23 +158,12 @@ describe('Testing useMaxAda hook', () => {
 
     act(() => {
       inMemoryWallet.balance.utxo.available$.next({
-        coins: BigInt('10000000'),
-        assets: new Map([
-          [
-            Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
-            BigInt('100000000')
-          ]
-        ])
+        coins: BigInt('10000000')
       });
     });
 
     await waitFor(() => {
-      expect(result.current).toBe(
-        BigInt('10000000') -
-          BigInt(MIN_COINS_FOR_TOKENS) -
-          BigInt(TX_FEE) -
-          BigInt(UTXO_DEPLETED_ADA_BUFFER * errorCount)
-      );
+      expect(result.current).toBe(BigInt('10000000') - BigInt(TX_FEE) - BigInt(UTXO_DEPLETED_ADA_BUFFER * errorCount));
     });
   });
 });

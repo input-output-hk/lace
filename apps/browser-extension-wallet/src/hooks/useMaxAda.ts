@@ -14,28 +14,6 @@ const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 export const UTXO_DEPLETED_ADA_BUFFER = 1_000_000;
 export const ADA_BUFFER_LIMIT = UTXO_DEPLETED_ADA_BUFFER * 10;
 
-const outputMapToSet = (outputMap: OutputsMap, assetInfo: Assets) =>
-  [...outputMap].reduce((acc, [, output]) => {
-    if (output.value.assets) {
-      const assets = Wallet.convertAssetsToBigInt(output.value.assets, assetInfo);
-      acc.add({
-        address: output.address,
-        value: {
-          coins: BigInt(output.value.coins),
-          assets
-        }
-      });
-    } else {
-      acc.add({
-        address: output.address,
-        value: {
-          coins: BigInt(output.value.coins)
-        }
-      });
-    }
-    return acc;
-  }, new Set<Wallet.Cardano.TxOut>());
-
 interface GetCoinsForTokens {
   address: Wallet.Cardano.PaymentAddress;
   balance: Wallet.Cardano.Value;
@@ -72,7 +50,7 @@ interface CreateTestOutputs {
   validateOutputs: WalletUtil['validateOutputs'];
 }
 
-const createMaxAmountOutputs = async ({
+const createOutputsWithMaxAmount = async ({
   address,
   adaAmount,
   assetInfo,
@@ -90,12 +68,30 @@ const createMaxAmountOutputs = async ({
     ]);
   }
 
-  const outputSet = outputMapToSet(outputMap, assetInfo);
-  const { outputs: outputsWithMissingCoins } = setMissingCoins(await validateOutputs(outputSet), outputSet);
-  const [firstOutput, ...rest] = outputsWithMissingCoins;
-  const totalAdaInOutputs = rest.reduce((acc, output) => acc + output.value.coins, BigInt(0));
-  firstOutput.value.coins = adaAmount - totalAdaInOutputs;
+  const outputSet = [...outputMap].reduce((acc, [, output]) => {
+    if (output.value.assets) {
+      const assets = Wallet.convertAssetsToBigInt(output.value.assets, assetInfo);
+      acc.add({
+        address: output.address,
+        value: {
+          coins: BigInt(0),
+          assets
+        }
+      });
+    } else {
+      acc.add({
+        address: output.address,
+        value: {
+          coins: BigInt(0)
+        }
+      });
+    }
+    return acc;
+  }, new Set<Wallet.Cardano.TxOut>());
 
+  const { outputs: outputsWithMissingCoins } = setMissingCoins(await validateOutputs(outputSet), outputSet);
+  const [firstOutput] = outputsWithMissingCoins;
+  firstOutput.value.coins = adaAmount;
   return outputsWithMissingCoins;
 };
 
@@ -141,7 +137,7 @@ const calculateMaxAda = async ({
     throw new Error('Aborted');
   }
   const adaAmount = maxAdaAmount - adaErrorBuffer;
-  const outputs = await createMaxAmountOutputs({
+  const outputs = await createOutputsWithMaxAmount({
     address,
     adaAmount,
     assetInfo,
