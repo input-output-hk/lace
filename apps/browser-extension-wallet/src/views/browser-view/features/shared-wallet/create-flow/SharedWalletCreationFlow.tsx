@@ -1,18 +1,12 @@
-import { AddCoSigners, SetupSharedWallet, ValidateAddress } from '@lace/core';
+import { AddCoSigners, CoSigner, SetupSharedWallet, ValidateAddress } from '@lace/core';
 import React, { VFC } from 'react';
 import { SharedWalletCreationStore } from './SharedWalletCreationStore';
 import { SharedWalletCreationStep } from './types';
 import { isValidAddress } from '@utils/validators';
 
-const validateAddress: ValidateAddress = async (address: string) => {
-  if (!address) {
-    return { isValid: false };
-  }
-
-  return {
-    isValid: isValidAddress(address)
-  };
-};
+const validateAddress: ValidateAddress = (address: string) => ({
+  isValid: !address ? false : isValidAddress(address)
+});
 
 export const SharedWalletCreationFlow: VFC = () => (
   <SharedWalletCreationStore>
@@ -33,7 +27,7 @@ export const SharedWalletCreationFlow: VFC = () => (
             onBack={() => dispatch({ type: 'back' })}
             onNext={() => dispatch({ type: 'next' })}
             validateAddress={validateAddress}
-            onValueChange={(data) => dispatch({ type: 'coSignersChanged', cosigners: data })}
+            onValueChange={(data: CoSigner[]) => dispatch({ type: 'coSignersChanged', cosigners: data })}
           />
         )}
       </>

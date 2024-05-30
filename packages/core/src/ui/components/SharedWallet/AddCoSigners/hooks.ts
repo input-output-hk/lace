@@ -5,9 +5,7 @@ import { v1 as uuid } from 'uuid';
 
 export const useCoSigners = (): {
   coSigners: CoSigner[];
-  removeCoSigner: (index: number) => void;
   updateCoSigner: (index: number, coSigner: CoSigner) => void;
-  addCoSigner: () => void;
 } => {
   const [coSigners, setCoSigners] = useState<CoSigner[]>([
     { address: '', isValid: false, id: uuid() },
@@ -16,15 +14,9 @@ export const useCoSigners = (): {
 
   return {
     coSigners,
-    removeCoSigner: (index) => {
-      setCoSigners([...coSigners.filter((_, i) => i !== index)]);
-    },
     updateCoSigner: (index: number, coSigner: CoSigner) => {
       coSigners[index] = coSigner;
       setCoSigners([...coSigners]);
-    },
-    addCoSigner: () => {
-      setCoSigners([...coSigners, { address: '', isValid: false, id: uuid() }]);
     }
   };
 };
@@ -58,7 +50,7 @@ export const useCoSignerInput = ({
         return;
       }
       setValidationStatus(ValidationStatus.Validating);
-      const result = await validateAddress(value);
+      const result = validateAddress(value);
 
       if (result.isValid) {
         onChange(value, true);

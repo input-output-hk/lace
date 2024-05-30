@@ -86,6 +86,7 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
   } = useWalletStore();
 
   const initialState = makeInitialState(activeWalletName);
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
     if (prevState.step === SharedWalletCreationStep.Setup) {
       if (action.type === 'initialWalletNameDetermined' && !prevState.walletNameInitiallySet) {
@@ -117,6 +118,7 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
       if (action.type === 'back') {
         return {
           ...prevState,
+          coSigners: undefined,
           step: SharedWalletCreationStep.Setup
         };
       }
