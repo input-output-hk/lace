@@ -25,6 +25,7 @@ export type SelectRootProps = Pick<
   variant?: SelectVariant;
   portalContainer?: HTMLElement;
   triggerTestId?: string;
+  zIndex?: number;
 };
 
 const isValidSelectRootChild = (
@@ -54,6 +55,7 @@ const isValidSelectRootChild = (
  * @param value See: https://www.radix-ui.com/primitives/docs/components/select#root
  * @param variant The style variant.
  * @param triggerTestId The `data-testid` attribute, passed to the input trigger / root element.
+ * @param zIndex The `z-index` applied to the `<Select.Content />`.
  */
 export const Root = ({
   align = 'selected',
@@ -70,6 +72,7 @@ export const Root = ({
   value,
   variant = 'plain',
   triggerTestId,
+  zIndex,
 }: Readonly<SelectRootProps>): JSX.Element => {
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
@@ -97,6 +100,7 @@ export const Root = ({
       </Select.Trigger>
       <Select.Portal container={portalContainer}>
         <Select.Content
+          style={{ zIndex }}
           className={cx.content[variant]}
           position={align === 'selected' ? 'item-aligned' : 'popper'}
         >
