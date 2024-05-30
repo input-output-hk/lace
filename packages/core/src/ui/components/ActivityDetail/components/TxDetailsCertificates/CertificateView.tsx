@@ -12,7 +12,6 @@ import { ConfirmDRepUpdate } from '@src/ui/components/ConfirmDRepUpdate';
 import { ConfirmVoteDelegation } from '@src/ui/components/ConfirmVoteDelegation';
 import { AuthorizeCommitteeCertificate } from '@src/ui/components/AuthorizeCommitteeCertificate';
 import { ResignCommitteeCertificate } from '@src/ui/components/ResignCommitteeCertificate';
-import { useTranslation } from 'react-i18next';
 import { RegistrationCertificate } from '@ui/components/RegistrationCertificate';
 import { UnregistrationCertificate } from '@ui/components/UnregistrationCertificate';
 import { StakeDelegationCertificate } from '@ui/components/StakeDelegationCertificate';
@@ -37,8 +36,6 @@ export const CertificateView = ({
   chainNetworkId,
   cardanoCoin
 }: CertificateViewProps): React.ReactElement => {
-  const { t } = useTranslation();
-
   switch (certificate.__typename) {
     case CertificateType.StakeVoteDelegation:
       return (
