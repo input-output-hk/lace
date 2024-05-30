@@ -1,6 +1,6 @@
 import { AddCoSigners, CoSigner, SetupSharedWallet, ValidateAddress } from '@lace/core';
 import React, { VFC } from 'react';
-import { SharedWalletCreationStore } from './SharedWalletCreationStore';
+import { SharedWalletCreationStore, SharedWalletActionType } from './SharedWalletCreationStore';
 import { SharedWalletCreationStep } from './types';
 import { isValidAddress } from '@utils/validators';
 
@@ -15,19 +15,23 @@ export const SharedWalletCreationFlow: VFC = () => (
         {state.step === SharedWalletCreationStep.Setup && (
           <SetupSharedWallet
             activeWalletName={state.activeWalletName}
-            activeWalletAddress={''}
-            onBack={() => dispatch({ type: 'back' })}
-            onNext={() => dispatch({ type: 'next' })}
-            onWalletNameChange={(walletName) => dispatch({ type: 'walletNameChanged', walletName })}
             walletName={state.walletName}
+            activeWalletAddress={''}
+            onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
+            onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
+            onWalletNameChange={(walletName) =>
+              dispatch({ type: SharedWalletActionType.CHANGE_WALLET_NAME, walletName })
+            }
           />
         )}
         {state.step === SharedWalletCreationStep.CoSigners && (
           <AddCoSigners
-            onBack={() => dispatch({ type: 'back' })}
-            onNext={() => dispatch({ type: 'next' })}
+            onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
+            onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
             validateAddress={validateAddress}
-            onValueChange={(data: CoSigner[]) => dispatch({ type: 'coSignersChanged', cosigners: data })}
+            onValueChange={(data: CoSigner[]) =>
+              dispatch({ type: SharedWalletActionType.COSIGNERS_CHANGED, cosigners: data })
+            }
           />
         )}
       </>
