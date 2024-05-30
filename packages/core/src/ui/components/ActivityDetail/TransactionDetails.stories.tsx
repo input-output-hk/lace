@@ -251,7 +251,7 @@ export const StakeDeRegistration: Story = {
   name: 'Stake De-Registration',
   args: {
     ...data,
-    name: 'Stake Key Registration',
+    name: 'Stake Key De-Registration',
     certificates: [stakeDeRegistrationCertificate]
   }
 };
