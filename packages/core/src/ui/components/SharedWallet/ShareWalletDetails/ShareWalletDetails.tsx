@@ -8,7 +8,7 @@ import { Button } from '@lace/common';
 import { ReactComponent as DownloadFileIcon } from '../../../assets/icons/download-file.svg';
 import { downloadWalletData } from '../utils';
 
-const FILENAME = 'shared-wallet-123.json';
+const FILENAME = 'shared-wallet-config.json';
 const FILE_CONTENTS = { hello: 'world' };
 
 export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Element => {
