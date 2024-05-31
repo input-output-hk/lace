@@ -1,8 +1,7 @@
 @SendTransactionBundles-E2E @E2E @Testnet
 Feature: Send Transaction bundles - E2E
 
-  @LW-4121 @LW-4122 @LW-3556 @Smoke @Pending
-  @issue=LW-8958
+  @LW-4121 @LW-4122 @LW-3556 @Smoke
   Scenario: Extended view - Sending multiple assets and bundles E2E
     Given Wallet is synced
     And I save token: "Cardano" balance
