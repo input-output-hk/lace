@@ -3,7 +3,6 @@ import { Box } from '@lace/ui';
 import styles from './AddCoSigners.module.scss';
 import { AddCoSignerInput } from './AddCoSignerInput';
 import { CoSigner, ValidateAddress } from './type';
-import { useCoSigners } from './hooks';
 import { WarningBanner } from '@lace/common';
 import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
 import { useTranslation } from 'react-i18next';
@@ -12,11 +11,11 @@ interface Props {
   onBack: () => void;
   onNext: () => void;
   validateAddress: ValidateAddress;
-  onValueChange?: (data: CoSigner[]) => void;
+  onValueChange?: (index: number, data: CoSigner) => void;
+  coSigners: CoSigner[];
 }
 
-export const AddCoSigners = ({ validateAddress, onBack, onNext, onValueChange }: Props): JSX.Element => {
-  const { coSigners, updateCoSigner } = useCoSigners();
+export const AddCoSigners = ({ onBack, onNext, onValueChange, coSigners, validateAddress }: Props): JSX.Element => {
   const { t } = useTranslation();
 
   const translations = {
@@ -27,6 +26,10 @@ export const AddCoSigners = ({ validateAddress, onBack, onNext, onValueChange }:
     addButton: t('core.sharedWallet.addCosigners.addButton'),
     removeButton: t('core.sharedWallet.addCosigners.removeButton'),
     warningMessage: t('core.sharedWallet.addCosigners.warningMessage')
+  };
+
+  const handleValueChange = (index: number, coSigner: CoSigner) => {
+    onValueChange(index, coSigner);
   };
 
   return (
@@ -51,8 +54,7 @@ export const AddCoSigners = ({ validateAddress, onBack, onNext, onValueChange }:
               error: translations.inputError
             }}
             onChange={(address, isValid) => {
-              updateCoSigner(index, { address, isValid, id });
-              onValueChange(coSigners);
+              handleValueChange(index, { id, address, isValid });
             }}
           />
         </Box>

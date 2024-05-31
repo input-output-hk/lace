@@ -15,6 +15,7 @@ import { SharedWalletCreationStep } from './types';
 import { CoSigner } from '@lace/core';
 import { firstValueFrom } from 'rxjs';
 import { useWalletManager } from '@hooks';
+import { v1 as uuid } from 'uuid';
 
 type BaseState = {
   step: SharedWalletCreationStep;
@@ -54,7 +55,7 @@ type Action =
   | { type: SharedWalletActionType.NEXT }
   | { type: SharedWalletActionType.BACK }
   | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string }
-  | { type: SharedWalletActionType.COSIGNERS_CHANGED; cosigners: CoSigner[] };
+  | { type: SharedWalletActionType.COSIGNERS_CHANGED; cosigners: { index: number; data: CoSigner } };
 
 type ContextValue = {
   state: State;
@@ -72,7 +73,10 @@ export const useSharedWalletCreationStore = (): ContextValue => {
 
 const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
-  coSigners: undefined,
+  coSigners: [
+    { address: '', isValid: false, id: uuid() },
+    { address: '', isValid: false, id: uuid() }
+  ],
   step: SharedWalletCreationStep.Setup,
   walletName: undefined
 });
@@ -125,9 +129,11 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
         };
       }
       if (action.type === SharedWalletActionType.COSIGNERS_CHANGED) {
+        const { index, data } = action.cosigners;
+        prevState.coSigners[index] = data;
         return {
           ...prevState,
-          coSigners: action.cosigners
+          coSigners: [...prevState.coSigners]
         };
       }
     }

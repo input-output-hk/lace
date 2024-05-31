@@ -1,25 +1,6 @@
 import { useState } from 'react';
 import { ValidationStatus } from '@lace/ui';
-import { CoSigner, ValidateAddress } from './type';
-import { v1 as uuid } from 'uuid';
-
-export const useCoSigners = (): {
-  coSigners: CoSigner[];
-  updateCoSigner: (index: number, coSigner: CoSigner) => void;
-} => {
-  const [coSigners, setCoSigners] = useState<CoSigner[]>([
-    { address: '', isValid: false, id: uuid() },
-    { address: '', isValid: false, id: uuid() }
-  ]);
-
-  return {
-    coSigners,
-    updateCoSigner: (index: number, coSigner: CoSigner) => {
-      coSigners[index] = coSigner;
-      setCoSigners([...coSigners]);
-    }
-  };
-};
+import { ValidateAddress } from './type';
 
 interface UseCoSignerInput {
   errorString: string;

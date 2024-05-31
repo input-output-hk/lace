@@ -29,9 +29,10 @@ export const SharedWalletCreationFlow: VFC = () => (
             onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
             onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
             validateAddress={validateAddress}
-            onValueChange={(data: CoSigner[]) =>
-              dispatch({ type: SharedWalletActionType.COSIGNERS_CHANGED, cosigners: data })
+            onValueChange={(index, data: CoSigner) =>
+              dispatch({ type: SharedWalletActionType.COSIGNERS_CHANGED, cosigners: { index, data } })
             }
+            coSigners={state.coSigners}
           />
         )}
       </>
