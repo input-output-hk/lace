@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
 import { firstValueFrom } from 'rxjs';
 import { useWalletManager } from '@hooks';
+import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 
 type BaseState = {
   step: SharedWalletCreationStep;
@@ -39,13 +40,19 @@ export type StateCoSigners = MakeState<{
   walletName: string | undefined;
 }>;
 
-type State = StateSetup | StateCoSigners;
+export type StateShareDetails = MakeState<{
+  activeWalletName: string;
+  coSignersKeys: string[];
+  step: SharedWalletCreationStep.ShareDetails;
+  walletName: string | undefined;
+}>;
+
+type State = StateSetup | StateCoSigners | StateShareDetails;
 
 export enum SharedWalletActionType {
   NEXT,
   BACK,
-  CHANGE_WALLET_NAME,
-  IS_WALLET_PREFILLED
+  CHANGE_WALLET_NAME
 }
 
 type Action =
@@ -84,6 +91,7 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
   const {
     walletInfo: { name: activeWalletName }
   } = useWalletStore();
+  const { page, setBackgroundPage } = useBackgroundPage();
 
   const initialState = makeInitialState(activeWalletName);
 
@@ -102,7 +110,7 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
       if (action.type === SharedWalletActionType.NEXT) {
         return {
           ...prevState,
-          step: SharedWalletCreationStep.CoSigners
+          step: SharedWalletCreationStep.ShareDetails
         };
       }
     }
@@ -119,9 +127,15 @@ export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStor
         return {
           ...prevState,
           coSignersKeys: undefined,
-          step: SharedWalletCreationStep.Setup
+          step: SharedWalletCreationStep.ShareDetails
         };
       }
+    }
+
+    if (prevState.step === SharedWalletCreationStep.ShareDetails && action.type === SharedWalletActionType.NEXT) {
+      setBackgroundPage();
+      history.push(page);
+      return initialState;
     }
 
     return prevState;

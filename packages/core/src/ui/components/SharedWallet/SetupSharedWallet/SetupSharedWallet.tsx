@@ -7,12 +7,11 @@ import { WalletNameInput } from '../../WalletSetup/WalletSetupNamePasswordStep/W
 import { WALLET_NAME_INPUT_MAX_LENGTH, validateNameLength } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
 import styles from './SetupSharedWallet.module.scss';
+import { LayoutNavigationProps } from '../SharedWalletLayout/type';
 
 interface Props {
   activeWalletName: string;
   activeWalletAddress: string;
-  onBack?: () => void;
-  onNext?: () => void;
   onWalletNameChange: (name: string) => void;
   walletName: string;
 }
@@ -27,7 +26,7 @@ export const SetupSharedWallet = ({
   onNext,
   onWalletNameChange,
   walletName
-}: Props): JSX.Element => {
+}: Props & LayoutNavigationProps): JSX.Element => {
   const [walletNameDirty, setWalletNameDirty] = useState(false);
   const { t } = useTranslation();
 

@@ -5,6 +5,7 @@ import { TFunction } from 'i18next';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './SharedWalletLayout.module.scss';
+import { LayoutNavigationProps } from './type';
 
 export enum SharedWalletTimelineSteps {
   WALLET_NAME,
@@ -17,8 +18,6 @@ export interface SharedWalletLayoutProps {
   title: React.ReactNode;
   children: React.ReactNode;
   description: React.ReactNode;
-  onNext?: () => void;
-  onBack?: () => void;
   customNextLabel?: string;
   customBackLabel?: string;
   isNextEnabled?: boolean;
@@ -55,7 +54,7 @@ export const SharedWalletLayout = ({
   customBackLabel,
   isNextEnabled = true,
   currentTimelineStep
-}: SharedWalletLayoutProps): React.ReactElement => {
+}: SharedWalletLayoutProps & LayoutNavigationProps): React.ReactElement => {
   const { t } = useTranslation();
 
   const defaultLabel = {
@@ -95,7 +94,12 @@ export const SharedWalletLayout = ({
           {children}
         </ScrollArea>
 
-        <Flex data-testid="shared-wallet-step-footer" justifyContent="space-between" w="$fill" alignItems="center">
+        <Flex
+          data-testid="shared-wallet-step-footer"
+          justifyContent={onBack ? 'space-between' : 'flex-end'}
+          w="$fill"
+          alignItems="center"
+        >
           {onBack && (
             <Button.Secondary
               label={customBackLabel || defaultLabel.back}

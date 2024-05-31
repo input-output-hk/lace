@@ -6,13 +6,15 @@ import { Flex } from '../flex';
 import { Text } from '../text';
 
 import * as cx from './action-card.css';
-
+import classNames from 'classnames';
 import type { OmitClassName } from '../../types';
 
 type Props = Omit<OmitClassName<'div'>, 'title'> & {
-  title: { text: string; highlight: boolean }[];
+  title: { text: string; highlight?: boolean; bold?: boolean }[];
   description?: string;
   icon: ReactNode;
+  rootClassName?: string;
+  iconClassName?: string;
 };
 
 export const ActionCard = ({
@@ -21,9 +23,9 @@ export const ActionCard = ({
   icon,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <Box {...props} className={cx.root}>
+  <Box {...props} className={classNames([cx.root, props.rootClassName])}>
     <Flex
-      className={cx.iconBox}
+      className={classNames([cx.iconBox, props.iconClassName])}
       mr="$24"
       alignItems="center"
       justifyContent="center"
@@ -33,9 +35,9 @@ export const ActionCard = ({
     <Box w="$fill">
       <Flex justifyContent="center" h="$fill" flexDirection="column">
         <Box>
-          {title.map(({ text, highlight }) => (
+          {title.map(({ text, highlight, bold }) => (
             <Text.Body.Normal
-              weight="$medium"
+              weight={bold ? '$semibold' : '$medium'}
               color={highlight ? 'highlight' : 'primary'}
               key={text}
             >
