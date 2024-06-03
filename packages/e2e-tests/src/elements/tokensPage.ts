@@ -10,6 +10,7 @@ class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
   private BALANCE_VALUE = '[data-testid="portfolio-balance-value"]';
   private BALANCE_CURRENCY = '[data-testid="portfolio-balance-currency"]';
+  private TOKENS_SEARCH_INPUT = '[data-testid="assets-search-input"]';
   private TOKENS_TABLE_ROW = '//tr[@data-testid="infinite-scrollable-table-row"]';
   private TOKEN_AVATAR = '[data-testid="asset-table-cell-logo"]';
   private TOKEN_NAME = '[data-testid="token-table-cell-name"]';
@@ -57,6 +58,10 @@ class TokensPage {
 
   get totalBalanceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BALANCE_CURRENCY);
+  }
+
+  get tokensSearchInput(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TOKENS_SEARCH_INPUT);
   }
 
   tokensAvatar(index: number): ChainablePromiseElement<WebdriverIO.Element> {

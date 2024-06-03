@@ -1,4 +1,5 @@
 /* eslint-disable complexity */
+/* eslint-disable sonarjs/no-duplicate-string */
 import React from 'react';
 import { Wallet } from '@lace/cardano';
 import { ConfirmStakeRegistrationDelegation } from '@src/ui/components/ConfirmStakeRegistrationDelegation';
@@ -11,6 +12,9 @@ import { ConfirmDRepUpdate } from '@src/ui/components/ConfirmDRepUpdate';
 import { ConfirmVoteDelegation } from '@src/ui/components/ConfirmVoteDelegation';
 import { AuthorizeCommitteeCertificate } from '@src/ui/components/AuthorizeCommitteeCertificate';
 import { ResignCommitteeCertificate } from '@src/ui/components/ResignCommitteeCertificate';
+import { RegistrationCertificate } from '@ui/components/RegistrationCertificate';
+import { UnregistrationCertificate } from '@ui/components/UnregistrationCertificate';
+import { StakeDelegationCertificate } from '@ui/components/StakeDelegationCertificate';
 
 interface CertificateViewProps {
   chainNetworkId: Wallet.Cardano.NetworkId;
@@ -19,6 +23,13 @@ interface CertificateViewProps {
 }
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
+
+const isNewStakeAddressCertificate = (
+  cert: Wallet.Cardano.Certificate
+): cert is Wallet.Cardano.NewStakeAddressCertificate => {
+  const { __typename } = cert;
+  return __typename === CertificateType.Registration || __typename === CertificateType.Unregistration;
+};
 
 export const CertificateView = ({
   certificate,
@@ -146,6 +157,43 @@ export const CertificateView = ({
             hash: certificate.anchor?.dataHash,
             url: certificate.anchor?.url
           }}
+        />
+      );
+    case CertificateType.StakeRegistration:
+    case CertificateType.Registration:
+      return (
+        <RegistrationCertificate
+          address={RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential).toAddress().toBech32()}
+          depositPaid={
+            isNewStakeAddressCertificate(certificate)
+              ? Wallet.util.getFormattedAmount({
+                  amount: certificate.deposit.toString(),
+                  cardanoCoin
+                })
+              : undefined
+          }
+        />
+      );
+    case CertificateType.StakeDeregistration:
+    case CertificateType.Unregistration:
+      return (
+        <UnregistrationCertificate
+          address={RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential).toAddress().toBech32()}
+          depositReturned={
+            isNewStakeAddressCertificate(certificate)
+              ? Wallet.util.getFormattedAmount({
+                  amount: certificate.deposit.toString(),
+                  cardanoCoin
+                })
+              : undefined
+          }
+        />
+      );
+    case CertificateType.StakeDelegation:
+      return (
+        <StakeDelegationCertificate
+          address={RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential).toAddress().toBech32()}
+          poolId={certificate.poolId}
         />
       );
     default:
