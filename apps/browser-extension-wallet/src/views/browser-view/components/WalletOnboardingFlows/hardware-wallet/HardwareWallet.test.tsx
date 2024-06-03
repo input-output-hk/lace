@@ -71,9 +71,6 @@ const createStep = async () => {
 };
 
 describe('Multi Wallet Setup/Hardware Wallet', () => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const originalUsbDeviceClass = globalThis.USBDevice;
   const originalNavigatorUsbObject = navigator.usb;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let addEventListenerCallback: (event: { device: any }) => void;
@@ -81,10 +78,6 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
   let deviceObject: any;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    globalThis.USBDevice = class USBDevice {};
-
     jest.spyOn(Wallet, 'connectDeviceByUsbDeviceObject').mockImplementation(() =>
       Promise.resolve({
         type: WalletType.Ledger,
@@ -107,8 +100,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
       })
     );
 
-    const nanoS = Wallet.ledgerDescriptors[0];
-    deviceObject = Object.assign(new USBDevice(), nanoS);
+    deviceObject = Wallet.ledgerDescriptors[0];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore usb api is not available in the jest env
     navigator.usb = {
@@ -121,9 +113,6 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
   });
 
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    globalThis.USBDevice = originalUsbDeviceClass;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore usb api is not available in the jest env
     navigator.usb = originalNavigatorUsbObject;

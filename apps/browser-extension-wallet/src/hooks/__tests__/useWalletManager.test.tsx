@@ -13,6 +13,7 @@ import SpyInstance = jest.SpyInstance;
 const mockEmip3decrypt = jest.fn();
 const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
+const mockConnectDeviceByUsbDeviceObject = jest.fn();
 const mockGetHwExtendedAccountPublicKey = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
@@ -81,6 +82,7 @@ jest.mock('@lace/cardano', () => {
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
       switchKeyAgents: mockSwitchKeyAgents,
       connectDevice: mockConnectDevice,
+      connectDeviceByUsbDeviceObject: mockConnectDeviceByUsbDeviceObject,
       getHwExtendedAccountPublicKey: mockGetHwExtendedAccountPublicKey,
       KeyManagement: {
         ...actual.Wallet.KeyManagement,
@@ -423,7 +425,7 @@ describe('Testing useWalletManager hook', () => {
     test('should call proper connect method', async () => {
       const mockConnectDeviceMockedResult = 'mockConnectDeviceMocked';
       const mockConnectDeviceMocked = jest.fn().mockReturnValue(mockConnectDeviceMockedResult);
-      mockConnectDevice.mockImplementation(mockConnectDeviceMocked);
+      mockConnectDeviceByUsbDeviceObject.mockImplementation(mockConnectDeviceMocked);
 
       const usbDevice = Wallet.ledgerDescriptors[0] as USBDevice;
 
