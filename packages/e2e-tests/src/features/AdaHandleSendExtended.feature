@@ -8,7 +8,6 @@ Feature: ADA handle - extended view
     And I use a wallet with ADA handle "$handletosend" NFT in extended mode
 
   @LW-7073 @E2E
-  @Pending @issue=LW-10445
   Scenario: Extended view - Ada handle transfer e2e, review flow
     Given I validate that handle: "$handletosend" is listed on the Receive screen
     And I add address with name: "$handletosend" and address: "$handletosend" to address book in extended mode

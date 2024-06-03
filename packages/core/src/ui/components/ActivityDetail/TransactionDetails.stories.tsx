@@ -228,6 +228,79 @@ export const DRepDeRegistration: Story = {
   }
 };
 
+const stakeRegistrationCertificate: Wallet.Cardano.StakeAddressCertificate = {
+  __typename: Cardano.CertificateType.StakeRegistration,
+  stakeCredential: KEY_HASH_CREDENTIAL
+};
+
+export const StakeRegistration: Story = {
+  name: 'Stake Registration',
+  args: {
+    ...data,
+    name: 'Stake Key Registration',
+    certificates: [stakeRegistrationCertificate]
+  }
+};
+
+const stakeDeRegistrationCertificate: Wallet.Cardano.StakeAddressCertificate = {
+  __typename: Cardano.CertificateType.StakeDeregistration,
+  stakeCredential: KEY_HASH_CREDENTIAL
+};
+
+export const StakeDeRegistration: Story = {
+  name: 'Stake De-Registration',
+  args: {
+    ...data,
+    name: 'Stake Key De-Registration',
+    certificates: [stakeDeRegistrationCertificate]
+  }
+};
+
+const stakeRegistrationCertificateWithDeposit: Wallet.Cardano.NewStakeAddressCertificate = {
+  __typename: Cardano.CertificateType.Registration,
+  stakeCredential: KEY_HASH_CREDENTIAL,
+  deposit: DUMMY_DEPOSIT
+};
+
+export const StakeRegistrationWithDeposit: Story = {
+  name: 'Stake Registration (New)',
+  args: {
+    ...data,
+    name: 'Stake Key Registration',
+    certificates: [stakeRegistrationCertificateWithDeposit]
+  }
+};
+
+const stakeDeRegistrationCertificateWithDeposit: Wallet.Cardano.NewStakeAddressCertificate = {
+  __typename: Cardano.CertificateType.Unregistration,
+  stakeCredential: KEY_HASH_CREDENTIAL,
+  deposit: DUMMY_DEPOSIT
+};
+
+export const StakeDeRegistrationWithDeposit: Story = {
+  name: 'Stake De-Registration (New)',
+  args: {
+    ...data,
+    name: 'Stake Key De-Registration',
+    certificates: [stakeDeRegistrationCertificateWithDeposit]
+  }
+};
+
+const stakeDelegationCertificate: Wallet.Cardano.StakeDelegationCertificate = {
+  __typename: Cardano.CertificateType.StakeDelegation,
+  stakeCredential: KEY_HASH_CREDENTIAL,
+  poolId: Cardano.PoolId('pool126zlx7728y7xs08s8epg9qp393kyafy9rzr89g4qkvv4cv93zem')
+};
+
+export const StakeDelegation: Story = {
+  name: 'Stake Delegation',
+  args: {
+    ...data,
+    name: 'Stake Delegation',
+    certificates: [stakeDelegationCertificate]
+  }
+};
+
 const voteDelegation: Wallet.Cardano.VoteDelegationCertificate = {
   __typename: Cardano.CertificateType.VoteDelegation,
   dRep: { __typename: 'AlwaysAbstain' },

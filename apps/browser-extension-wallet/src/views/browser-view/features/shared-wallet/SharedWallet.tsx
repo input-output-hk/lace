@@ -1,13 +1,14 @@
 import React from 'react';
-import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { Modal } from 'antd';
 import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import styles from '@views/browser/features/multi-wallet/MultiWallet.module.scss';
-import { SharedWalletGetStarted } from '@views/browser/features/shared-wallet/ui-flow/get-started/SharedWalletGetStarted';
+import { SharedWalletGetStarted } from './SharedWalletGetStarted';
+import { walletRoutePaths } from '@routes';
+import { SharedWalletCreationFlow } from './create-flow';
 
 export const SharedWallet = (): JSX.Element => {
-  const { path } = useRouteMatch();
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
 
@@ -31,7 +32,9 @@ export const SharedWallet = (): JSX.Element => {
         />
       </div>
       <Switch>
-        <Route exact path={`${path}/`} component={SharedWalletGetStarted} />
+        <Route exact path={walletRoutePaths.sharedWallet.create} component={SharedWalletCreationFlow} />
+        <Route exact path={walletRoutePaths.sharedWallet.root} component={SharedWalletGetStarted} />
+        <Redirect from="/" to={walletRoutePaths.sharedWallet.root} />
       </Switch>
     </Modal>
   );

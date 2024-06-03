@@ -2,7 +2,7 @@ import { When, Then } from '@cucumber/cucumber';
 import EducationalList from '../elements/educationalList';
 import educationalListAssert from '../assert/educationalListAssert';
 import faqPageAssert from '../assert/faqPageAssert';
-import { switchToLastWindow } from '../utils/window';
+import { closeAllTabsExceptOriginalOne, switchToLastWindow } from '../utils/window';
 
 Then(/^I see Address Book "About your wallet" widget with all relevant items$/, async () => {
   await educationalListAssert.assertSeeAddressBookWidget();
@@ -36,6 +36,7 @@ When(/^I see a "(FAQ|Glossary|Video)" article with title "([^"]*)"$/, async (typ
     await switchToLastWindow();
     await educationalListAssert.assertSeeVideoArticle(subTitle);
   }
+  await closeAllTabsExceptOriginalOne();
 });
 
 Then(/^I see Transactions "Learn about" widget with all relevant items$/, async () => {

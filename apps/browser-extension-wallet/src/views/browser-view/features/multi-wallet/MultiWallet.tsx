@@ -29,7 +29,7 @@ export const MultiWallet = (): JSX.Element => {
             />
           </div>
           <WalletOnboardingFlows
-            postHogActions={postHogMultiWalletActions}
+            mergeEventRequiredpostHogActions={postHogMultiWalletActions}
             renderHome={() => <Home />}
             setFormDirty={(dirty) => shouldShowDialog$.next(dirty)}
             urlPath={walletRoutePaths.newWallet}

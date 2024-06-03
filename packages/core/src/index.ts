@@ -41,4 +41,5 @@ export * from '@ui/components/ProposalProcedures';
 export * from '@ui/components/SharedWallet';
 export * from '@ui/components/Account';
 export * from '@ui/components/ListEmptyState';
+export * from '@ui/components/MidnightEventBanner';
 export * from '@ui/components/MidnightPreLaunchSettingsBanner';
