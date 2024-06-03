@@ -22,10 +22,13 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedActivityDetails, TransactionData } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, {
+  AddressTag,
+  ExpectedActivityDetails,
+  TransactionData
+} from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import { Asset } from '../data/Asset';
-import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
 import Modal from '../elements/modal';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
@@ -39,6 +42,9 @@ import { AssetInput } from '../elements/newTransaction/assetInput';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
 import { Key } from 'webdriverio';
+import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressType } from '../enums/AddressTypeEnum';
+import clipboard from 'clipboardy';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -213,14 +219,10 @@ Then(
 );
 
 When(
-  /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
-  async (bundleIndex, receivingAddress, options) => {
+  /^I fill bundle (\d+) with "([^"]*)" (main|other multiaddress|second account) address with following assets:$/,
+  async (bundleIndex, walletName, addressType: AddressType, options) => {
     const addressInput = new AddressInput(bundleIndex);
-    await addressInput.fillAddress(
-      receivingAddress === 'CopiedAddress'
-        ? String(await clipboard.read())
-        : String(getTestWallet(receivingAddress).address)
-    );
+    await addressInput.fillAddress(parseWalletAddress(walletName, addressType));
     await addressInput.searchLoader.waitForDisplayed({ reverse: true });
     // Close address dropdown menu if exists
     if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
@@ -246,6 +248,12 @@ When(
     }
   }
 );
+
+When(/^I fill bundle with copied address and ([^"]*) ADA$/, async (adaValue: string) => {
+  const addressInput = new AddressInput(1);
+  await addressInput.fillAddress(await clipboard.read());
+  await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
+});
 
 When(
   /^I save ticker for the (Token|NFT) with name: ([^"]*)$/,
@@ -347,6 +355,18 @@ Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async
   await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
 
+Then(
+  /^The Tx summary screen is displayed for "([^"]*)" (main|other multiaddress|second account) address with "(own|foreign)" tag$/,
+  async (walletName, addressType: AddressType, tag: AddressTag) => {
+    const expectedTransactionSummaryData = {
+      recipientAddress: parseWalletAddress(walletName, addressType),
+      recipientAddressTag: tag,
+      valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker }]
+    };
+    await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
+  }
+);
+
 Then(/^The password screen is displayed:$/, async (_ignored: string) => {
   await transactionPasswordExtendedAssert.assertSeePasswordPage();
 });
@@ -432,8 +452,9 @@ Then(
     for (const entry of txData) {
       const parsedEntry = {
         ada: entry.ada,
-        address: String(getTestWallet(entry.address).address),
-        assets: entry.assets.split(',')
+        address: parseWalletAddress(entry.address, entry.addressType as AddressType),
+        addressTag: entry?.addressTag as AddressTag,
+        assets: entry?.assets?.split(',')
       };
       parsedTxData.push(parsedEntry);
     }

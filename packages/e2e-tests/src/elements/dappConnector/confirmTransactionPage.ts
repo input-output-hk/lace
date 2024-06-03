@@ -29,6 +29,9 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     '[data-testid="dapp-transaction-from-section-expander"] [data-testid="expander-title"]';
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
+  private ADDRESS_TAG_FROM_SECTION =
+    '[data-testid="dapp-transaction-from-section-expander"] [data-testid="address-tag"]';
+  private ADDRESS_TAG_TO_SECTION = '[data-testid="dapp-transaction-to-section-expander"] [data-testid="address-tag"]';
 
   get transactionOrigin() {
     return $(this.TRANSACTION_ORIGIN);
@@ -108,6 +111,14 @@ class ConfirmTransactionPage extends CommonDappPageElements {
 
   get transactionToAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_TO_ROW);
+  }
+
+  get addressTagToSection() {
+    return $(this.ADDRESS_TAG_TO_SECTION);
+  }
+
+  get addressTagFromSection() {
+    return $(this.ADDRESS_TAG_FROM_SECTION);
   }
 
   async getAssetsFromAddressSection() {

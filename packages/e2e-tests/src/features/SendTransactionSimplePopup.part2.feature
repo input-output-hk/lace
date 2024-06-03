@@ -46,7 +46,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
   @LW-3395 @LW-5061 @Testnet
   Scenario: Popup-view - Click "Add bundle" button and open extended view - tokens saved
     And I click "Send" button on Tokens page in popup mode
-    When I fill bundle 1 with "TestAutomationWallet" address with following assets:
+    When I fill bundle 1 with "TestAutomationWallet" main address with following assets:
       | type  | assetName | amount | ticker    |
       | ADA   | Cardano   | 3      | tADA      |
       | Token | LaceCoin3 | 0.45   | LaceCoin3 |
@@ -63,7 +63,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
   @LW-3395 @LW-5061 @Mainnet
   Scenario: Popup-view - Click "Add bundle" button and open extended view - tokens saved
     And I click "Send" button on Tokens page in popup mode
-    When I fill bundle 1 with "TestAutomationWallet" address with following assets:
+    When I fill bundle 1 with "TestAutomationWallet" main address with following assets:
       | type  | assetName | amount | ticker |
       | ADA   | Cardano   | 2      | ADA    |
       | Token | SUNDAE    | 0.45   | SUNDAE |
