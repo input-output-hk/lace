@@ -17,22 +17,13 @@ type Story = StoryObj<typeof SetupSharedWallet>;
 const noop = (): void => void 0;
 
 const data: ComponentProps<typeof SetupSharedWallet> = {
-  translations: {
-    backButton: 'Back',
-    nextButton: 'Next',
-    subtitle: 'Choose a name to identify your new shared wallet and the select the wallet you want it linked to.',
-    textBoxLabel: 'Shared wallet name',
-    title: "Let's set up your shared wallet"
-  },
-  data: {
-    name: 'My Shared Wallet',
-    isNextEnabled: true
-  },
-  events: {
-    onBack: noop,
-    onNext: noop,
-    onNameChange: noop
-  }
+  activeWalletName: 'Wallet 1',
+  activeWalletAddress:
+    'addr_test1qz9kum802qxqf72ztg77a83j9lx2xle37v0wy2qprauqdw7d2yfye8mcz8jh6k86d5t7zx2f4z5n4twk0acn956zulusujyj9k',
+  onBack: noop,
+  onNext: noop,
+  onWalletNameChange: noop,
+  walletName: 'Wallet 3'
 };
 
 export const Overview: Story = {

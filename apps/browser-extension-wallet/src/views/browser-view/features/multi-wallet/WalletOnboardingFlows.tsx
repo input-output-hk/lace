@@ -9,6 +9,7 @@ import { WalletOnboardingProvider } from './walletOnboardingContext';
 
 type WalletOnboardingProps = {
   aliasEventRequired?: boolean;
+  mergeEventRequired?: boolean;
   flowsEnabled?: boolean;
   forgotPasswordFlowActive?: boolean;
   postHogActions: WalletOnboardingPostHogActions;
@@ -19,6 +20,7 @@ type WalletOnboardingProps = {
 
 export const WalletOnboardingFlows: VFC<WalletOnboardingProps> = ({
   aliasEventRequired = false,
+  mergeEventRequired = false,
   flowsEnabled = true,
   forgotPasswordFlowActive = false,
   postHogActions,
@@ -39,7 +41,9 @@ export const WalletOnboardingFlows: VFC<WalletOnboardingProps> = ({
 
   const { path } = useRouteMatch();
   return (
-    <WalletOnboardingProvider value={{ aliasEventRequired, forgotPasswordFlowActive, postHogActions, setFormDirty }}>
+    <WalletOnboardingProvider
+      value={{ aliasEventRequired, mergeEventRequired, forgotPasswordFlowActive, postHogActions, setFormDirty }}
+    >
       <Switch>
         <Route exact path={`${path}/`} render={renderHome} />
         {flowsEnabled && (

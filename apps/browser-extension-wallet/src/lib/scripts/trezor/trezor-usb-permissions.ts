@@ -37,7 +37,7 @@ window.addEventListener('message', async (event) => {
         type: 'usb-permissions-init',
         extension: runtime.id
       },
-      '*'
+      event.origin
     );
   } else if (event.data === 'usb-permissions-close') {
     await switchToPopupTab();

@@ -81,6 +81,7 @@ export const WalletSetupSelectAccountsStepRevamp = ({
               onSelectedAccountChange?.();
             }}
             showArrow
+            zIndex={1000}
           >
             {options.map(({ value, label }) => (
               <Select.Item key={value} value={value} title={label} />

@@ -48,7 +48,7 @@ export const useHardwareWallet = (): State => {
 export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const history = useHistory();
-  const { aliasEventRequired } = useWalletOnboarding();
+  const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
   const { postHogActions, setFormDirty } = useWalletOnboarding();
   const { connectHardwareWalletRevamped, createHardwareWalletRevamped, saveHardwareWallet, walletRepository } =
     useWalletManager();
@@ -202,19 +202,23 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
       /* eslint-enable camelcase */
     });
-    await analytics.sendMergeEvent(cardanoWallet.source.account.extendedAccountPublicKey);
+
+    if (aliasEventRequired) {
+      await analytics.sendAliasEvent();
+    }
+
+    if (mergeEventRequired) {
+      await analytics.sendMergeEvent(cardanoWallet.source.account.extendedAccountPublicKey);
+    }
 
     await saveHardwareWallet(cardanoWallet);
 
     if (await isHdWallet(cardanoWallet.wallet)) {
       await analytics.sendEventToPostHog(postHogActions.hardware.HD_WALLET);
     }
-
-    if (aliasEventRequired) {
-      await analytics.sendAliasEvent();
-    }
   }, [
     aliasEventRequired,
+    mergeEventRequired,
     analytics,
     closeConnection,
     connection,
