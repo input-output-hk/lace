@@ -1,1 +1,1 @@
-export { QuorumOption } from './QuorumOption.component';
+export { QuorumOption, QuorumOptionValue, QuorumRadioOption } from './QuorumOption.component';

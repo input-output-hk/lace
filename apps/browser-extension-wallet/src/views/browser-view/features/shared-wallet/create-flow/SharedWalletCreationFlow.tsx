@@ -1,6 +1,6 @@
-import { AddCoSigners, CoSigner, SetupSharedWallet, ValidateAddress } from '@lace/core';
+import { AddCoSigners, CoSigner, QuorumOption, SetupSharedWallet, ValidateAddress } from '@lace/core';
 import React, { VFC } from 'react';
-import { SharedWalletCreationStore, SharedWalletActionType } from './SharedWalletCreationStore';
+import { SharedWalletActionType, SharedWalletCreationStore } from './SharedWalletCreationStore';
 import { SharedWalletCreationStep } from './types';
 import { isValidAddress } from '@utils/validators';
 
@@ -15,7 +15,7 @@ export const SharedWalletCreationFlow: VFC = () => (
         {state.step === SharedWalletCreationStep.Setup && (
           <SetupSharedWallet
             activeWalletName={state.activeWalletName}
-            walletName={state.walletName}
+            walletName={state.walletName || ''}
             activeWalletAddress={''}
             onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
             onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
@@ -33,6 +33,15 @@ export const SharedWalletCreationFlow: VFC = () => (
               dispatch({ type: SharedWalletActionType.COSIGNERS_CHANGED, cosigners: { index, data } })
             }
             coSigners={state.coSigners}
+          />
+        )}
+        {state.step === SharedWalletCreationStep.Quorum && (
+          <QuorumOption
+            onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
+            onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
+            onChange={(quorumRules) => dispatch({ type: SharedWalletActionType.QUORUM_RULES_CHANGED, quorumRules })}
+            totalCosignersNumber={state.coSigners.length}
+            value={state.quorumRules}
           />
         )}
       </>
