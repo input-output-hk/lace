@@ -4,7 +4,7 @@ Feature: Own Tags - Extended View
   Background:
     Given Wallet is synced
 
-  @LW-10486 @Testnet @wip
+  @LW-10486 @Testnet
   Scenario: Extended View - Own Tags / Sent - recipient within the (active account|different account|different wallet) are flagged as: own or foreign
     And I click "Send" button on page header
     And I fill bundle 1 with "MultiWallet1" other multiaddress address with following assets:
