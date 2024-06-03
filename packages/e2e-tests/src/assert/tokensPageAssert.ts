@@ -136,13 +136,15 @@ class TokensPageAssert {
       Number.parseFloat(subtractedAmount) -
       Number.parseFloat(fee);
     const expectedValueRounded = Number.parseFloat(expectedValue.toFixed(2));
+    const expectedValueRoundedPlus = Number.parseFloat((expectedValue + 0.01).toFixed(2));
+    const expectedValueRoundedMinus = Number.parseFloat((expectedValue - 0.01).toFixed(2));
     Logger.log(`waiting for token: ${tokenName} with value: ${expectedValueRounded}`);
     await browser.waitUntil(
       async () => {
         const tokenValueAsFloat = await TokensPage.getTokenBalanceAsFloatByName(tokenName);
         return (
-          tokenValueAsFloat === expectedValueRounded + 0.01 ||
-          tokenValueAsFloat === expectedValueRounded - 0.01 ||
+          tokenValueAsFloat === expectedValueRoundedPlus ||
+          tokenValueAsFloat === expectedValueRoundedMinus ||
           tokenValueAsFloat === expectedValueRounded
         );
       },
