@@ -5,7 +5,7 @@ import popupView from '../page/popupView';
 import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
 import analyticsBanner from '../elements/analyticsBanner';
-import { openWalletsInRepository } from '../fixture/walletRepositoryInitializer';
+import { addAndActivateWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 
 const extendedViewWalletInitialization = async (walletName = TestWalletName.TestAutomationWallet): Promise<void> => {
   await extendedView.visit();
@@ -23,13 +23,13 @@ const popupViewWalletInitialization = async (walletName = TestWalletName.TestAut
 
 const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
-  await openWalletsInRepository(walletNames);
+  await addAndActivateWalletsInRepository(walletNames);
   await networkManager.logFailedRequests();
 };
 
 const popupViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
-  await openWalletsInRepository(walletNames);
+  await addAndActivateWalletsInRepository(walletNames);
   await popupView.visit();
   await networkManager.logFailedRequests();
 };
@@ -175,13 +175,13 @@ Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
-Before({ tags: '@MultiWallet-Extended' }, async () => {
+Before({ tags: '@OwnTags-Extended' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
-Before({ tags: '@MultiWallet-Popup' }, async () => {
+Before({ tags: '@OwnTags-Popup' }, async () => {
   await popupViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();

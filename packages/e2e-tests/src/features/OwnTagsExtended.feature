@@ -1,11 +1,11 @@
-@MultiWallet-Extended
-Feature: Multi wallet - Extended View
+@OwnTags-Extended
+Feature: Own Tags - Extended View
 
   Background:
     Given Wallet is synced
 
-  @LW-10486 @Testnet
-  Scenario: Extended View - Sent - recipient within the (active account|different account|different wallet) are flagged as: own or foreign
+  @LW-10486 @Testnet @wip
+  Scenario: Extended View - Own Tags / Sent - recipient within the (active account|different account|different wallet) are flagged as: own or foreign
     And I click "Send" button on page header
     And I fill bundle 1 with "MultiWallet1" other multiaddress address with following assets:
       | type | assetName | amount | ticker |
@@ -26,7 +26,7 @@ Feature: Multi wallet - Extended View
     And The Tx summary screen is displayed for bundles with correct own / foreign tags
 
   @LW-10262 @Testnet
-  Scenario: Extended View - Transaction details - all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign
+  Scenario: Extended View - Own Tags / Transaction details - all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign
     When I navigate to Transactions extended page
     And I save tx hash value "dfd99f134fdc076464edf36ef64a053706ac76c2879aacc989e8b9001dc522dd"
     And I click and open recent transactions details until find transaction with correct hash
@@ -37,7 +37,7 @@ Feature: Multi wallet - Extended View
       | WalletReceiveSimpleTransactionE2E | main           | 1.00 tADA | foreign    |
 
   @LW-10264 @Testnet
-  Scenario Outline: Dapp transaction confirmation - in to section all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign <wallet> <addressType>
+  Scenario Outline: Own Tags / Dapp transaction confirmation - in to section all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign <wallet> <addressType>
     And I save token: "Cardano" balance
     And I open and authorize test DApp with "Only once" setting
     And I set send to wallet address to: "<wallet>" <addressType> in test DApp

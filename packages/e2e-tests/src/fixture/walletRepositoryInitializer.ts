@@ -32,11 +32,10 @@ export const getWalletsFromRepository = async (): Promise<any[]> =>
       return wallets;
   `);
 
-export const addAndActivateWalletInRepository = async (wallets: string): Promise<number> =>
+export const addAndActivateWalletInRepository = async (wallet: string): Promise<number> =>
   await browser.execute(
     `
-      let walletsStr = '${wallets}';
-      let walletsObj = JSON.parse(walletsStr);
+      let walletsObj = JSON.parse('${wallet}');
       await walletRepository.addWallet(walletsObj[0]);
        await walletManager.activate({
         walletId: walletsObj[0].walletId,
@@ -46,23 +45,10 @@ export const addAndActivateWalletInRepository = async (wallets: string): Promise
   `
   );
 
-export const openWalletsInRepository = async (wallets: TestWalletName[]): Promise<void> => {
-  const walletsRepositoryArray = JSON.stringify(
-    wallets.map((wallet) => JSON.parse(getTestWallet(wallet).repository as string))
-  );
+export const addAndActivateWalletsInRepository = async (wallets: TestWalletName[]): Promise<void> => {
+  const walletsRepositoryArray = wallets.map((wallet) => getTestWallet(wallet).repository as string);
 
-  await browser.execute(
-    `
-      let walletsObject = JSON.parse('${walletsRepositoryArray}');
-
-      for (const wallet of walletsObject.reverse()) {
-         await walletRepository.addWallet(wallet);
-         await walletManager.activate({
-          walletId: wallet.walletId,
-          accountIndex: wallet.accounts[0].accountIndex,
-          chainId: { networkId: 0, networkMagic: 1 }
-         })
-      }
-     `
-  );
+  for (const wallet of walletsRepositoryArray.reverse()) {
+    await addAndActivateWalletInRepository(wallet);
+  }
 };

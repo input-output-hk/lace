@@ -1,11 +1,11 @@
-@MultiWallet-Popup
-Feature: Multi wallet - Popup View
+@OwnTags-Popup
+Feature: Own Tags - Popup View
 
   Background:
     Given Wallet is synced
 
   @LW-10487 @Testnet
-  Scenario Outline: Popup View - Sent - recipient within the (active account|different account|different wallet) are flagged as: own or foreign / <address> <addressType> address
+  Scenario Outline: Popup View - Own Tags / Sent - recipient within the (active account|different account|different wallet) are flagged as: own or foreign / <address> <addressType> address
     And I click "Send" button on Tokens page in popup mode
     And I fill bundle 1 with "<address>" <addressType> address with following assets:
       | type | assetName | amount | ticker |
@@ -20,7 +20,7 @@ Feature: Multi wallet - Popup View
       | WalletReceiveSimpleTransactionE2E | main               | foreign |
 
   @LW-10263 @Testnet
-  Scenario: Popup View - Transaction details - all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign
+  Scenario: Popup View - Own Tags / Transaction details - all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign
     When I navigate to Transactions popup page
     And I save tx hash value "dfd99f134fdc076464edf36ef64a053706ac76c2879aacc989e8b9001dc522dd"
     And I click and open recent transactions details until find transaction with correct hash
