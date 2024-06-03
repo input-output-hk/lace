@@ -4,6 +4,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
 
+const minimumTotalCosignersForEnablingDropdown = 3;
+
 export enum QuorumRadioOption {
   AllAddresses = 'AllAddresses',
   SomeAddress = 'SomeAddress'
@@ -113,7 +115,10 @@ export const QuorumOption = ({
             gap="$8"
           >
             <Select.Root
-              disabled={value.option === QuorumRadioOption.AllAddresses}
+              disabled={
+                value.option === QuorumRadioOption.AllAddresses ||
+                totalCosignersNumber < minimumTotalCosignersForEnablingDropdown
+              }
               variant="outline"
               placeholder="0"
               value={value.option === QuorumRadioOption.SomeAddress ? String(value.numberOfCosigner) : '1'}
