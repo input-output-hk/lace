@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, createContext } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import classNames from 'classnames';
@@ -6,6 +6,10 @@ import classNames from 'classnames';
 import * as cx from './toggle-button-group-root.css';
 
 import type { ToggleGroupSingleProps } from '@radix-ui/react-toggle-group';
+
+type Variant = 'compact' | 'wide' | 'small';
+
+const ToggleButtonGroupContext = createContext<Variant>('wide');
 
 type ToggleGroupSingleOptionalProps = Pick<
   ToggleGroupSingleProps,
@@ -18,9 +22,15 @@ type ToggleGroupSingleRequiredProps = Required<
 
 export type ToggleButtonGroupRootProps = ToggleGroupSingleOptionalProps &
   ToggleGroupSingleRequiredProps & {
-    variant?: 'compact' | 'wide';
+    variant?: Variant;
     disabled?: boolean;
   };
+
+export const useToggleButtonGroupContext = (): Variant => {
+  const context = React.useContext(ToggleButtonGroupContext);
+
+  return context;
+};
 
 export const Root = ({
   children,
@@ -37,17 +47,21 @@ export const Root = ({
   );
 
   return (
-    <ToggleGroup.Root
-      className={classNames(cx.root, {
-        [cx.rootCompact]: variant === 'compact',
-        [cx.rootDisabled]: disabled,
-      })}
-      type="single"
-      onValueChange={handleValueChange}
-      disabled={disabled}
-      {...props}
-    >
-      {children}
-    </ToggleGroup.Root>
+    <ToggleButtonGroupContext.Provider value={variant}>
+      <ToggleGroup.Root
+        className={classNames(cx.root, {
+          [cx.rootCompact]: variant === 'compact',
+          [cx.rootSmall]: variant === 'small',
+          [cx.rootDisabled]: disabled,
+          [cx.defaultRadius]: variant !== 'small',
+        })}
+        type="single"
+        onValueChange={handleValueChange}
+        disabled={disabled}
+        {...props}
+      >
+        {children}
+      </ToggleGroup.Root>
+    </ToggleButtonGroupContext.Provider>
   );
 };

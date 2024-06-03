@@ -239,6 +239,24 @@ export const Overview = (): JSX.Element => {
               </Variants.Cell>
             </Variants.Row>
           </Variants.Table>
+          <Variants.Table headers={['(Small) Label']}>
+            <Variants.Row>
+              <Variants.Cell>
+                <ToggleButtonGroup.Root
+                  variant="small"
+                  value={activeVariants}
+                  onValueChange={handleVariantsValueChange}
+                >
+                  <ToggleButtonGroup.Item value={ToggleGroupItemType.grid}>
+                    Label
+                  </ToggleButtonGroup.Item>
+                  <ToggleButtonGroup.Item value={ToggleGroupItemType.list}>
+                    Label
+                  </ToggleButtonGroup.Item>
+                </ToggleButtonGroup.Root>
+              </Variants.Cell>
+            </Variants.Row>
+          </Variants.Table>
         </Section>
         <Divider my="$64" />
         <Section title="Main components">

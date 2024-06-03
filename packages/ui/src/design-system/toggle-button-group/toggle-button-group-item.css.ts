@@ -9,7 +9,6 @@ export const root = style([
     padding: '$8',
     color: '$toggle_button_group_item_label_color',
     backgroundColor: '$toggle_button_group_item_bgColor',
-    borderRadius: '$small',
     gap: '$6',
   }),
   {
@@ -70,4 +69,12 @@ export const label = style({
 export const icon = sx({
   width: '$24',
   height: '$24',
+});
+
+export const commonVariant = sx({
+  borderRadius: '$small',
+});
+
+export const smallVariant = sx({
+  borderRadius: '$tiny',
 });

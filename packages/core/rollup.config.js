@@ -2,6 +2,7 @@ import rollupBase from '../../rollup.config';
 import packageJson from './package.json';
 import copy from 'rollup-plugin-copy';
 import json from '@rollup/plugin-json';
+import url from '@rollup/plugin-url';
 
 export default (args) => {
   const baseConfig = rollupBase(args);
@@ -25,7 +26,11 @@ export default (args) => {
       copy({
         targets: [{ src: 'src/ui/lib/translations/en.json', dest: 'dist/translations/' }]
       }),
-      json()
+      json(),
+      url({
+        limit: 0,
+        include: ['**/*.mp4']
+      })
     ]
   };
 };

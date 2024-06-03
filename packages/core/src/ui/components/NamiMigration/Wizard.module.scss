@@ -1,6 +1,13 @@
+[data-theme='dark'] {
+  .container {
+    background-color: #2e2e2e;
+  }
+}
+
 .container {
   width: 840px;
   height: 584px;
+  opacity: 0.9;
 }
 
 .timeline {

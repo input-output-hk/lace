@@ -3,7 +3,6 @@ import { style, sx } from '../../design-tokens';
 export const root = style([
   sx({
     backgroundColor: '$toggle_button_group_bgColor',
-    borderRadius: '$medium',
     padding: '$8',
     gap: '$8',
   }),
@@ -19,3 +18,18 @@ export const rootCompact = style({
 });
 
 export const rootDisabled = style({});
+
+export const defaultRadius = sx({
+  borderRadius: '$medium',
+});
+
+export const rootSmall = style([
+  sx({
+    height: '$40',
+    borderRadius: '$extraSmall',
+    boxSizing: 'border-box',
+  }),
+  {
+    padding: '5px',
+  },
+]);
