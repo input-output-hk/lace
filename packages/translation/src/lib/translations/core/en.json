@@ -619,5 +619,8 @@
   "core.namiMigration.customize.lace": "Lace brings together a wealth of Web3 features, from managing digital assets, to accessing NFTs, DApps, and DeFi services, so you can discover and enjoy a new world of digital experiences.",
   "core.namiMigration.customize.nami": "Nami wallet's familiar features for your daily use. But you may miss out on exciting new features and releases, exclusive to the Lace version.",
   "core.namiMigration.customize.cta": "Done",
-  "core.namiMigration.customize.back": "Back"
+  "core.namiMigration.customize.back": "Back",
+  "core.namiMigration.allDone.title": "All done!",
+  "core.namiMigration.allDone.message": "You can now close this tab and re-load the extension",
+  "core.namiMigration.allDone.close": "Close"
 }
