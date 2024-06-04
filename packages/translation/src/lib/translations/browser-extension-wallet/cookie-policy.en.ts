@@ -103,7 +103,7 @@ export const cookiePolicy = {
   <subtitle>How we notify you of changes to this Cookie Policy</subtitle>
   <p>
     We may update this Cookie Policy to reflect changes in our personal data practices or relevant laws. We will
-    notify you if we make any material changes by revising the “Last Updated” at the top of this Cookie Policy.
+    notify you if we make any material changes by revising the "Last Updated" at the top of this Cookie Policy.
   </p>
   <subtitle>Contact us</subtitle>
   <div>
