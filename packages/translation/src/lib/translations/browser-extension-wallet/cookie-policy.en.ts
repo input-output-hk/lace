@@ -1,7 +1,7 @@
 export const cookiePolicy = {
   cookiePolicy: `
   <div>
-    <heading>Last Updated: April 12, 2023</heading>
+    <heading>Last Updated: January 12, 2024</heading>
   </div>
   <p>
     Input Output Global, Inc. (together with our affiliates and subsidiaries, <strong>"IOG,"</strong>
