@@ -1,0 +1,48 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
+
+class WalletOption {
+  protected CONTAINER_SELECTOR;
+  private ITEM = '//button[@data-testid="wallet-option-item"]';
+  private ICON = '//div[@data-testid="wallet-option-icon"]';
+  private TITLE = '//span[@data-testid="wallet-option-title"]';
+  private SUBTITLE = '//span[@data-testid="wallet-option-subtitle"]';
+  private ACCOUNTS_MENU_BUTTON = '//div[@data-testid="wallet-option-accounts-menu-button"]';
+
+  constructor(index = 1) {
+    this.CONTAINER_SELECTOR = `(${this.ITEM})[${index}]`;
+  }
+
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER_SELECTOR);
+  }
+
+  get icon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER_SELECTOR}${this.ICON}`);
+  }
+
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER_SELECTOR}${this.TITLE}`);
+  }
+
+  get subtitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER_SELECTOR}${this.SUBTITLE}`);
+  }
+
+  get accountsMenuButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER_SELECTOR}${this.ACCOUNTS_MENU_BUTTON}`);
+  }
+
+  async clickOnWalletOptionContainer(): Promise<void> {
+    await this.container.scrollIntoView();
+    await this.container.click();
+  }
+
+  async clickOnAccountsMenuButton(): Promise<void> {
+    await this.accountsMenuButton.waitForClickable();
+    await this.accountsMenuButton.scrollIntoView();
+    await this.accountsMenuButton.click();
+  }
+}
+
+export default WalletOption;
