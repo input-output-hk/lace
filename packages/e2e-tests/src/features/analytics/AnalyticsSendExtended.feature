@@ -10,7 +10,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I have 2 addresses with ADA handle in my address book in extended mode
     And I click "Send" button on page header
     Then I validate latest analytics single event "send | send | click"
-    When I fill bundle 1 with "WalletAnalyticsReceiveSimpleTransactionE2E" address with following assets:
+    When I fill bundle 1 with "WalletAnalyticsReceiveSimpleTransactionE2E" main address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     When I click "Add bundle" button on "Send" page

@@ -33,7 +33,7 @@ class AddNewAddressDrawerAssert {
     // TODO: update translation when LW-5866 is resolved
     const expectedSaveButtonLabel = isSendFlow
       ? await t('core.editAddressForm.doneButton')
-      : await t('browserView.addressBook.addressForm.saveAddress');
+      : await t('core.addressForm.doneButton');
     expect(await AddNewAddressDrawer.saveAddressButton.getText()).to.equal(expectedSaveButtonLabel);
 
     await AddNewAddressDrawer.cancelButton.waitForDisplayed();

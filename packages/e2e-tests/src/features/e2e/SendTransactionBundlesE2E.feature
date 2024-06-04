@@ -6,18 +6,18 @@ Feature: Send Transaction bundles - E2E
     Given Wallet is synced
     And I save token: "Cardano" balance
     And I click "Send" button on page header
-    And I fill bundle 1 with "WalletFirstReceiveBundlesTransactionE2E" address with following assets:
+    And I fill bundle 1 with "WalletFirstReceiveBundlesTransactionE2E" main address with following assets:
       | type  | assetName | amount | ticker    |
       | ADA   | Cardano   | 1      | tADA      |
       | Token | LaceCoin  | 1      | LaceCoin1 |
       | Token | LaceCoin3 | 0.2333 | LaceCoin3 |
     When I click "Add bundle" button on "Send" page
-    And I fill bundle 2 with "WalletSecondReceiveBundlesTransactionE2E" address with following assets:
+    And I fill bundle 2 with "WalletSecondReceiveBundlesTransactionE2E" main address with following assets:
       | type  | assetName | amount | ticker    |
       | ADA   | Cardano   | 2      | tADA      |
       | Token | LaceCoin  | 2      | LaceCoin1 |
     When I click "Add bundle" button on "Send" page
-    And I fill bundle 3 with "WalletSecondReceiveBundlesTransactionE2E" address with following assets:
+    And I fill bundle 3 with "WalletSecondReceiveBundlesTransactionE2E" main address with following assets:
       | type  | assetName | amount | ticker    |
       | ADA   | Cardano   | 1      | tADA      |
       | Token | LaceCoin2 | 1      | LaceCoin2 |

@@ -6,3 +6,4 @@ export { ImportantInfo } from './ImportantInfo';
 export { WalletSyncing } from './WalletSyncing';
 export { NoSharedWalletFoundDialog } from './NoSharedWalletFoundDialog';
 export { ShareWalletDetails } from './ShareWalletDetails';
+export { QuorumOption, QuorumOptionValue, QuorumRadioOption } from './Quorum';

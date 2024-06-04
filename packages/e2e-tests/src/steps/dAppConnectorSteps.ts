@@ -16,6 +16,8 @@ import { Logger } from '../support/logger';
 import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
+import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressTag } from '../assert/transactionDetailsAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -85,6 +87,13 @@ Then(
   /^I see DApp connector "Confirm transaction" page "(From address|To address)" section with following data:$/,
   async (section: 'From address' | 'To address', entries) => {
     await DAppConnectorAssert.assertSeeConfirmFromAddressTransactionPage(section, dataTableAsStringArray(entries));
+  }
+);
+
+Then(
+  /^I see (own|foreign) tag on under address in "(From address|To address)" section$/,
+  async (addressTag: AddressTag, section: 'From address' | 'To address') => {
+    await DAppConnectorAssert.assertSeeAddressTag(addressTag, section);
   }
 );
 
@@ -316,3 +325,10 @@ Then(/^I save fee value on DApp "Confirm transaction" page$/, async () => {
 Then(/^I set send to wallet address to: "([^"]*)" in test DApp$/, async (walletName: string) => {
   await TestDAppPage.sendAdaAddressInput.setValue(String(getTestWallet(walletName).address));
 });
+
+Then(
+  /^I set send to wallet address to: "([^"]*)" (main|other multiaddress|second account) in test DApp$/,
+  async (walletName: string, addressType) => {
+    await TestDAppPage.sendAdaAddressInput.setValue(parseWalletAddress(walletName, addressType));
+  }
+);

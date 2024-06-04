@@ -1,41 +1,49 @@
-import { walletRoutePaths } from '@routes';
+import { QuorumOptionValue, QuorumRadioOption } from '@lace/core';
 import { useWalletStore } from '@stores';
 import React, {
+  createContext,
   Dispatch,
   ReactElement,
   ReactNode,
-  createContext,
   useContext,
   useEffect,
   useMemo,
   useReducer
 } from 'react';
-import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
 import { firstValueFrom } from 'rxjs';
 import { useWalletManager } from '@hooks';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 
-type BaseState = {
+type StateMainPart = {
   step: SharedWalletCreationStep;
-  activeWalletName: string;
-  coSignersKeys: string[];
-  walletName: string | undefined;
 };
 
-// This type util forces to describe complete state - all props from the BaseState and SupportingData has to be specified, otherwise we have a TS error
-type MakeState<S extends BaseState> = S;
+type StateVariableDataPart = {
+  coSignersKeys?: string[];
+  quorumRules?: QuorumOptionValue;
+  walletName?: string;
+};
+
+type StateConstantDataPart = {
+  activeWalletName: string;
+};
+
+type MakeState<S extends StateMainPart & StateVariableDataPart> = S &
+  StateMainPart &
+  StateVariableDataPart &
+  StateConstantDataPart;
 
 export type StateSetup = MakeState<{
-  activeWalletName: string;
   coSignersKeys: undefined;
+  quorumRules: undefined;
   step: SharedWalletCreationStep.Setup;
   walletName: string | undefined;
 }>;
 
 export type StateCoSigners = MakeState<{
-  activeWalletName: string;
   coSignersKeys: string[];
+  quorumRules: undefined;
   step: SharedWalletCreationStep.CoSigners;
   walletName: string | undefined;
 }>;
@@ -47,18 +55,36 @@ export type StateShareDetails = MakeState<{
   walletName: string | undefined;
 }>;
 
-type State = StateSetup | StateCoSigners | StateShareDetails;
+type State = StateSetup | StateCoSigners | StateQuorum | StateShareDetails;
+
+export type StateQuorum = MakeState<{
+  coSignersKeys: string[];
+  quorumRules: QuorumOptionValue;
+  step: SharedWalletCreationStep.Quorum;
+  walletName: string;
+}>;
 
 export enum SharedWalletActionType {
   NEXT,
   BACK,
-  CHANGE_WALLET_NAME
+  CHANGE_WALLET_NAME,
+  QUORUM_RULES_CHANGED
 }
 
 type Action =
   | { type: SharedWalletActionType.NEXT }
   | { type: SharedWalletActionType.BACK }
-  | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string };
+  | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string }
+  | { type: SharedWalletActionType.QUORUM_RULES_CHANGED; quorumRules: QuorumOptionValue };
+
+type Handler<S extends State> = (prevState: S, action: Action) => State;
+
+type StateMachine = {
+  [SharedWalletCreationStep.Setup]: Handler<StateSetup>;
+  [SharedWalletCreationStep.CoSigners]: Handler<StateCoSigners>;
+  [SharedWalletCreationStep.Quorum]: Handler<StateQuorum>;
+  [SharedWalletCreationStep.ShareDetails]: Handler<StateShareDetails>;
+};
 
 type ContextValue = {
   state: State;
@@ -66,7 +92,7 @@ type ContextValue = {
 };
 
 // eslint-disable-next-line unicorn/no-null
-const sharedWalletCreationContext = createContext<ContextValue>(null);
+const sharedWalletCreationContext = createContext<ContextValue | null>(null);
 
 export const useSharedWalletCreationStore = (): ContextValue => {
   const value = useContext(sharedWalletCreationContext);
@@ -77,8 +103,91 @@ export const useSharedWalletCreationStore = (): ContextValue => {
 const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
   coSignersKeys: undefined,
+  quorumRules: undefined,
   step: SharedWalletCreationStep.Setup,
   walletName: undefined
+});
+
+const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): StateMachine => ({
+  [SharedWalletCreationStep.Setup]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
+      return {
+        ...prevState,
+        walletName: action.walletName
+      };
+    }
+    if (action.type === SharedWalletActionType.BACK) {
+      navigateHome();
+      return prevState;
+    }
+    if (action.type === SharedWalletActionType.NEXT) {
+      return {
+        ...prevState,
+        coSignersKeys: ['', ''],
+        step: SharedWalletCreationStep.CoSigners,
+        walletName: prevState.walletName
+      };
+    }
+    return prevState;
+  },
+  [SharedWalletCreationStep.CoSigners]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.BACK) {
+      return {
+        ...prevState,
+        coSignersKeys: undefined,
+        step: SharedWalletCreationStep.Setup
+      };
+    }
+    if (action.type === SharedWalletActionType.NEXT) {
+      return {
+        ...prevState,
+        quorumRules: {
+          option: QuorumRadioOption.AllAddresses
+        },
+        step: SharedWalletCreationStep.Quorum
+      };
+    }
+    return prevState;
+  },
+  [SharedWalletCreationStep.Quorum]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.BACK) {
+      return {
+        ...prevState,
+        quorumRules: undefined,
+        step: SharedWalletCreationStep.CoSigners
+      };
+    }
+    if (action.type === SharedWalletActionType.NEXT) {
+      return {
+        ...prevState,
+        coSignersKeys: undefined,
+        quorumRules: undefined,
+        step: SharedWalletCreationStep.ShareDetails
+      };
+    }
+    if (action.type === SharedWalletActionType.QUORUM_RULES_CHANGED) {
+      return {
+        ...prevState,
+        quorumRules: action.quorumRules
+      };
+    }
+    return prevState;
+  },
+  [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.BACK) {
+      return {
+        ...prevState,
+        quorumRules: undefined,
+        step: SharedWalletCreationStep.Quorum
+      };
+    }
+    if (action.type === SharedWalletActionType.NEXT) {
+      navigateHome();
+      return prevState;
+    }
+
+    return prevState;
+  }
 });
 
 type SharedWalletCreationStoreProps = {
@@ -86,59 +195,20 @@ type SharedWalletCreationStoreProps = {
 };
 
 export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStoreProps): ReactElement => {
-  const history = useHistory();
   const { walletRepository } = useWalletManager();
+
   const {
     walletInfo: { name: activeWalletName }
   } = useWalletStore();
-  const { page, setBackgroundPage } = useBackgroundPage();
 
-  const initialState = makeInitialState(activeWalletName);
+  const { setBackgroundPage } = useBackgroundPage();
+
+  const initialState = makeInitialState(activeWalletName || '');
 
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
-    if (prevState.step === SharedWalletCreationStep.Setup) {
-      if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
-        return {
-          ...prevState,
-          walletName: action.walletName
-        };
-      }
-      if (action.type === SharedWalletActionType.BACK) {
-        history.push(walletRoutePaths.sharedWallet.root);
-        return prevState;
-      }
-      if (action.type === SharedWalletActionType.NEXT) {
-        return {
-          ...prevState,
-          step: SharedWalletCreationStep.ShareDetails
-        };
-      }
-    }
-
-    if (prevState.step === SharedWalletCreationStep.CoSigners) {
-      if (action.type === SharedWalletActionType.BACK) {
-        return {
-          ...prevState,
-          coSignersKeys: undefined,
-          step: SharedWalletCreationStep.Setup
-        };
-      }
-      if (action.type === SharedWalletActionType.NEXT) {
-        return {
-          ...prevState,
-          coSignersKeys: undefined,
-          step: SharedWalletCreationStep.ShareDetails
-        };
-      }
-    }
-
-    if (prevState.step === SharedWalletCreationStep.ShareDetails && action.type === SharedWalletActionType.NEXT) {
-      setBackgroundPage();
-      history.push(page);
-      return initialState;
-    }
-
-    return prevState;
+    const stateMachine = makeStateMachine({ navigateHome: setBackgroundPage });
+    const handler = stateMachine[prevState.step] as Handler<State>;
+    return handler(prevState, action);
   }, initialState);
 
   useEffect(() => {
