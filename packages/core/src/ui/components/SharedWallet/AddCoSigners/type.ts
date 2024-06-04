@@ -1,3 +1,11 @@
-export type ValidateAddress = (address: string) => { isValid: boolean };
+export type CoSigner = {
+  id: string;
+  name: string;
+  keys: string;
+};
 
-export type CoSigner = { address: string; isValid: boolean; id: string };
+export type CoSignerError = {
+  id: string;
+  name?: 'duplicated' | 'required' | 'tooLong';
+  keys?: 'invalid' | 'required';
+};

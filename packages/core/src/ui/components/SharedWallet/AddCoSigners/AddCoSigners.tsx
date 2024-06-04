@@ -1,61 +1,39 @@
 import React from 'react';
-import { Box } from '@lace/ui';
+import { Box, Divider } from '@lace/ui';
 import styles from './AddCoSigners.module.scss';
 import { AddCoSignerInput } from './AddCoSignerInput';
-import { CoSigner, ValidateAddress } from './type';
-import { WarningBanner } from '@lace/common';
+import { CoSigner, CoSignerError } from './type';
 import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout/SharedWalletLayout';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
   onBack: () => void;
   onNext: () => void;
-  validateAddress: ValidateAddress;
-  onValueChange?: (index: number, data: CoSigner) => void;
+  onValueChange: (coSigners: CoSigner) => void;
   coSigners: CoSigner[];
+  errors: CoSignerError[];
 }
 
-export const AddCoSigners = ({ onBack, onNext, onValueChange, coSigners, validateAddress }: Props): JSX.Element => {
+export const AddCoSigners = ({ onBack, onNext, onValueChange, coSigners, errors }: Props): JSX.Element => {
   const { t } = useTranslation();
-
-  const translations = {
-    title: t('core.sharedWallet.addCosigners.title'),
-    subtitle: t('core.sharedWallet.addCosigners.subtitle'),
-    inputLabel: t('core.sharedWallet.addCosigners.inputLabel'),
-    inputError: t('core.sharedWallet.addCosigners.inputError'),
-    addButton: t('core.sharedWallet.addCosigners.addButton'),
-    removeButton: t('core.sharedWallet.addCosigners.removeButton'),
-    warningMessage: t('core.sharedWallet.addCosigners.warningMessage')
-  };
-
-  const handleValueChange = (index: number, coSigner: CoSigner) => {
-    onValueChange(index, coSigner);
-  };
+  const atLeastOneValidCoSigner = coSigners.some((c) => c.keys && c.name) && errors.length === 0;
 
   return (
     <SharedWalletLayout
-      title={translations.title}
-      description={translations.subtitle}
+      title={t('core.sharedWallet.addCosigners.title')}
+      description={t('core.sharedWallet.addCosigners.subtitle')}
       currentTimelineStep={SharedWalletTimelineSteps.ADD_COSIGNERS}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={coSigners.some((coSigner) => !!coSigner.isValid)}
+      isNextEnabled={atLeastOneValidCoSigner}
     >
-      <Box mb="$24">
-        <WarningBanner message={translations.warningMessage} />
-      </Box>
-
-      {coSigners.map(({ id }, index) => (
-        <Box key={id} className={styles.coSigners}>
+      {coSigners.map((value, index) => (
+        <Box key={value.id} className={styles.coSigners}>
+          {index > 0 && <Divider my="$16" />}
           <AddCoSignerInput
-            validateAddress={validateAddress}
-            translations={{
-              label: translations.inputLabel,
-              error: translations.inputError
-            }}
-            onChange={(address, isValid) => {
-              handleValueChange(index, { id, address, isValid });
-            }}
+            value={value}
+            onChange={onValueChange}
+            error={errors.find((error) => error.id === value.id)}
           />
         </Box>
       ))}

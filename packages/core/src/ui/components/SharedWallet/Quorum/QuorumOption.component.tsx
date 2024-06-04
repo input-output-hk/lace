@@ -124,6 +124,7 @@ export const QuorumOption = ({
               value={value.option === QuorumRadioOption.SomeAddress ? String(value.numberOfCosigner) : '1'}
               onChange={onNumberOfCosignerChange}
               showArrow
+              zIndex={1001}
             >
               {cosignersNumberPickerOptions.map((num) => (
                 <Select.Item key={num} value={num} title={num} />

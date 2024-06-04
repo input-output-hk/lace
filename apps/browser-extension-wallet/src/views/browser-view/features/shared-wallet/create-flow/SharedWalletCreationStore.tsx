@@ -1,5 +1,5 @@
 import { useWalletManager } from '@hooks';
-import { CoSigner, QuorumOptionValue, QuorumRadioOption } from '@lace/core';
+import { CoSigner, CoSignerError, maxCoSignerNameLength, QuorumOptionValue, QuorumRadioOption } from '@lace/core';
 import { walletRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
 import React, {
@@ -22,9 +22,10 @@ type StateMainPart = {
 };
 
 type StateVariableDataPart = {
-  coSigners?: CoSigner[];
-  quorumRules?: QuorumOptionValue;
-  walletName?: string;
+  coSigners: CoSigner[] | undefined;
+  coSignersErrors: CoSignerError[] | undefined;
+  quorumRules: QuorumOptionValue | undefined;
+  walletName: string | undefined;
 };
 
 type StateConstantDataPart = {
@@ -38,6 +39,7 @@ type MakeState<S extends StateMainPart & StateVariableDataPart> = S &
 
 export type StateSetup = MakeState<{
   coSigners: undefined;
+  coSignersErrors: undefined;
   quorumRules: undefined;
   step: SharedWalletCreationStep.Setup;
   walletName: string | undefined;
@@ -45,6 +47,7 @@ export type StateSetup = MakeState<{
 
 export type StateCoSigners = MakeState<{
   coSigners: CoSigner[];
+  coSignersErrors: CoSignerError[];
   quorumRules: undefined;
   step: SharedWalletCreationStep.CoSigners;
   walletName: string;
@@ -52,6 +55,7 @@ export type StateCoSigners = MakeState<{
 
 export type StateQuorum = MakeState<{
   coSigners: CoSigner[];
+  coSignersErrors: CoSignerError[];
   quorumRules: QuorumOptionValue;
   step: SharedWalletCreationStep.Quorum;
   walletName: string;
@@ -71,7 +75,7 @@ type Action =
   | { type: SharedWalletActionType.NEXT }
   | { type: SharedWalletActionType.BACK }
   | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string }
-  | { type: SharedWalletActionType.COSIGNERS_CHANGED; cosigners: { index: number; data: CoSigner } }
+  | { type: SharedWalletActionType.COSIGNERS_CHANGED; coSigner: CoSigner }
   | { type: SharedWalletActionType.QUORUM_RULES_CHANGED; quorumRules: QuorumOptionValue };
 
 type Handler<S extends State> = (prevState: S, action: Action) => State;
@@ -99,10 +103,37 @@ export const useSharedWalletCreationStore = (): ContextValue => {
 const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
   coSigners: undefined,
+  coSignersErrors: undefined,
   quorumRules: undefined,
   step: SharedWalletCreationStep.Setup,
   walletName: undefined
 });
+
+const keysRegex = /(?<payment>addr_shared_vk[\da-z]*),(?<stake>stake_shared_vk[\da-z]*)?/;
+const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
+  let coSignersErrors: CoSignerError[] = [];
+
+  coSigners.forEach(({ id, keys, name }) => {
+    let keysError: CoSignerError['keys'];
+    let nameError: CoSignerError['name'];
+
+    const keysValidationResult = keysRegex.exec(keys);
+    if (!keys) keysError = 'required';
+    else if (!keysValidationResult) keysError = 'invalid';
+
+    if (!name) nameError = 'required';
+    else if (name.length > maxCoSignerNameLength) nameError = 'tooLong';
+    else if (coSigners.some((coSigner) => coSigner.id !== id && coSigner.name === name)) nameError = 'duplicated';
+
+    if (keysError || nameError) {
+      coSignersErrors = [...coSignersErrors, { id, keys: keysError, name: nameError }];
+    }
+  });
+
+  return coSignersErrors;
+};
+
+const getInitialCoSignerValue = (): CoSigner => ({ id: uuid(), keys: '', name: '' });
 
 const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): StateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
@@ -121,8 +152,8 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       return {
         ...prevState,
         coSigners: [
-          { address: '', isValid: false, id: uuid() },
-          { address: '', isValid: false, id: uuid() }
+          getInitialCoSignerValue(),
+          getInitialCoSignerValue()
         ],
         coSignersErrors: [],
         step: SharedWalletCreationStep.CoSigners,
@@ -132,36 +163,55 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
     return prevState;
   },
   [SharedWalletCreationStep.CoSigners]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.COSIGNERS_CHANGED) {
+      const matchingPrevCoSigner = prevState.coSigners.find((prevCosigner) => prevCosigner.id === action.coSigner.id);
+      if (!matchingPrevCoSigner) return prevState;
+
+      const nextCoSigners = prevState.coSigners.map((coSigner) =>
+        coSigner.id === action.coSigner.id ? action.coSigner : coSigner
+      );
+      const coSignersErrors = validateCoSigners(nextCoSigners).filter(
+        ({ id }) => !nextCoSigners.some((c) => c.id === id && !c.keys && !c.name)
+      );
+
+      return {
+        ...prevState,
+        coSigners: nextCoSigners,
+        coSignersErrors
+      };
+    }
     if (action.type === SharedWalletActionType.BACK) {
       return {
         ...prevState,
         coSigners: undefined,
+        coSignersErrors: undefined,
         step: SharedWalletCreationStep.Setup
       };
     }
     if (action.type === SharedWalletActionType.NEXT) {
+      const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
+      if (coSigners.length === 0) return prevState;
+
       return {
         ...prevState,
+        coSigners,
         quorumRules: {
           option: QuorumRadioOption.AllAddresses
         },
         step: SharedWalletCreationStep.Quorum
       };
     }
-    if (action.type === SharedWalletActionType.COSIGNERS_CHANGED) {
-      const { index, data } = action.cosigners;
-      prevState.coSigners[index] = data;
-      return {
-        ...prevState,
-        coSigners: [...prevState.coSigners]
-      };
-    }
     return prevState;
   },
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
     if (action.type === SharedWalletActionType.BACK) {
+      const coSigners = [
+        prevState.coSigners[0] || getInitialCoSignerValue(),
+        prevState.coSigners[1] || getInitialCoSignerValue()
+      ];
       return {
         ...prevState,
+        coSigners,
         quorumRules: undefined,
         step: SharedWalletCreationStep.CoSigners
       };
@@ -170,6 +220,7 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       return {
         ...prevState,
         coSigners: undefined,
+        coSignersErrors: undefined,
         quorumRules: undefined,
         step: SharedWalletCreationStep.Setup
       };

@@ -1,10 +1,22 @@
 import { useState } from 'react';
 import { ValidationStatus } from '@lace/ui';
-import { ValidateAddress } from './type';
+
+type ValidateAddress = (address: string) => { isValid: boolean };
+type CoSigner = {
+  id: string;
+  name: {
+    value: string;
+    isValid: boolean;
+  };
+  address: {
+    value: string;
+    isValid: boolean;
+  };
+};
 
 interface UseCoSignerInput {
-  errorString: string;
-  onChange: (address: string, isValid: boolean) => void;
+  errorString: { name: string; address: string };
+  onChange: ({ name, address }: Omit<CoSigner, 'id'>) => void;
   validateAddress: ValidateAddress;
 }
 
@@ -13,34 +25,44 @@ export const useCoSignerInput = ({
   validateAddress,
   onChange
 }: UseCoSignerInput): {
-  errorMessage: string;
+  errorMessage: { name: string; address: string };
   validationStatus: ValidationStatus;
-  onInputChange: (address: string) => Promise<void>;
+  onInputChange: (name: string, address: string) => void;
 } => {
   const [validationStatus, setValidationStatus] = useState(ValidationStatus.Idle);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState({
+    name: '',
+    address: ''
+  });
 
   return {
     errorMessage,
     validationStatus,
-    onInputChange: async (value: string) => {
-      if (!value) {
-        onChange(value, false);
+    onInputChange: (name: string, address: string) => {
+      if (!name && !address) {
+        onChange({ name: { value: '', isValid: false }, address: { value: '', isValid: false } });
         setValidationStatus(ValidationStatus.Idle);
-        setErrorMessage('');
+        setErrorMessage({ name: '', address: '' });
         return;
       }
       setValidationStatus(ValidationStatus.Validating);
-      const result = validateAddress(value);
+      const isAddressValid = validateAddress(address);
+      const isNameValid = name.length > 0;
 
-      if (result.isValid) {
-        onChange(value, true);
+      if (isAddressValid && isNameValid) {
         setValidationStatus(ValidationStatus.Validated);
-        setErrorMessage('');
+        setErrorMessage({ name: '', address: '' });
+        onChange({ name: { value: name, isValid: true }, address: { value: address, isValid: true } });
       } else {
-        onChange(value, false);
         setValidationStatus(ValidationStatus.Idle);
-        setErrorMessage(errorString);
+        setErrorMessage({
+          name: isNameValid ? '' : errorString.name,
+          address: isAddressValid ? '' : errorString.address
+        });
+        onChange({
+          name: { value: name, isValid: isNameValid },
+          address: { value: address, isValid: isAddressValid.isValid }
+        });
       }
     }
   };
