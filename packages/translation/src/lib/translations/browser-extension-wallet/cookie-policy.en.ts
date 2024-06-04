@@ -9,7 +9,7 @@ export const cookiePolicy = {
     important to you and we are committed to being transparent about the technologies used. This Cookie Policy
     explains how and why cookies may be stored on and accessed through our websites, mobile applications,
     and downloadable software, including our plug-ins and browser extensions (collectively, the
-    <strong>"Products"</strong>). This Cookie Notice should be read together with our
+    <strong>"Products"</strong>). This Cookie Policy should be read together with our
     <a href="https://www.lace.io/iog-privacy-policy.pdf">Privacy Policy</a> and
     <a href="https://www.lace.io/lace-terms-of-use.pdf">Terms of Use</a>.
   </p>
