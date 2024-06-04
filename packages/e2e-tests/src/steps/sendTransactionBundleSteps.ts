@@ -1,4 +1,4 @@
-import { When, Then } from '@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import transactionBundlesAssert from '../assert/transaction/transactionBundleAssert';
 import transactionSummaryAssert from '../assert/transaction/transactionSummaryAssert';
@@ -6,12 +6,15 @@ import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import { Asset } from '../data/Asset';
 import transactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import extensionUtils from '../utils/utils';
-import { shelley, byron } from '../data/AddressData';
+import { byron, shelley } from '../data/AddressData';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
+import { TestWalletName } from '../support/walletConfiguration';
+import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressType } from '../enums/AddressTypeEnum';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -70,6 +73,30 @@ Then(/^The Tx summary screen is displayed for 2 bundles with multiple assets$/, 
     ]
   };
   await transactionSummaryAssert.assertSeeSummaryPage([bundle1, bundle2]);
+});
+
+Then(/^The Tx summary screen is displayed for bundles with correct own \/ foreign tags$/, async () => {
+  const bundle1 = {
+    recipientAddress: parseWalletAddress(TestWalletName.MultiWallet1, AddressType.OtherMultiaddress),
+    recipientAddressTag: 'own',
+    valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
+  };
+  const bundle2 = {
+    recipientAddress: parseWalletAddress(TestWalletName.MultiWallet1, AddressType.SecondAccount),
+    recipientAddressTag: 'own',
+    valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
+  };
+  const bundle3 = {
+    recipientAddress: parseWalletAddress(TestWalletName.MultiWallet2, AddressType.Main),
+    recipientAddressTag: 'own',
+    valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
+  };
+  const bundle4 = {
+    recipientAddress: parseWalletAddress(TestWalletName.WalletReceiveSimpleTransactionE2E, AddressType.Main),
+    recipientAddressTag: 'foreign',
+    valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker, shouldVerifyFiat: true }]
+  };
+  await transactionSummaryAssert.assertSeeSummaryPage([bundle1, bundle2, bundle3, bundle4]);
 });
 
 Then(/^The Tx summary screen is displayed for 1 bundle with multiple assets$/, async () => {

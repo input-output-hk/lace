@@ -15,7 +15,7 @@ import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '@lace/translation';
+import { CoreTranslationKey } from '@lace/translation';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
@@ -194,7 +194,7 @@ export const AssetActivityItem = ({
           <h6 data-testid="transaction-type" className={styles.title}>
             {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationActivityType)
               ? t('core.assetActivityItem.entry.name.sending')
-              : t(`core.assetActivityItem.entry.name.${type}` as unknown as TranslationKey)}
+              : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
           </h6>
           {descriptionContent}
         </div>

@@ -241,8 +241,7 @@ class MultidelegationPageAssert {
     expect(await stakePoolListItem.saturation.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     if (process.env.USE_ROS_STAKING_COLUMN) {
       await stakePoolListItem.ros.waitForDisplayed();
-      expect(await stakePoolListItem.ros.getText()).to.equal('-');
-      // expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX); // TODO: update when issue with ROS not returned is resolved
+      expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     }
     await stakePoolListItem.cost.waitForDisplayed();
     expect(await stakePoolListItem.cost.getText()).to.match(TestnetPatterns.NUMBER_REGEX);

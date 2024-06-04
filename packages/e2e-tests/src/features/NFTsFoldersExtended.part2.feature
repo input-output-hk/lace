@@ -198,3 +198,21 @@ Feature: NFT - Folders - Extended view
     And I see "Sample NFT folder" NFT folder page in extended mode
     When I click NFT with name "Ibilecoin"
     Then I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
+
+  @LW-10454 @Pending
+  @issue=LW-10634
+  Scenario: Extended-view - NFT Folders - Search bar for NFTs
+    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
+    And I navigate to NFTs extended page
+    And I search for NFT with name: "LaceNFT"
+    Then I see NFT with name "LaceNFT" on the NFT folder page
+    And I do not see NFT with name: "Ibilecoin" on the NFTs page
+
+  @LW-10455
+  Scenario: Extended-view - NFT Folders - NFTs details show NFTs path
+    Given the NFT folder with name "SampleFolder" and 2 NFT was created
+    And I navigate to NFTs extended page
+    And I left click on the NFT folder with name "SampleFolder"
+    And I see "SampleFolder" NFT folder page in extended mode
+    When I click NFT with name "Ibilecoin"
+    Then I see NFTs Folder path: "Root/SampleFolder"

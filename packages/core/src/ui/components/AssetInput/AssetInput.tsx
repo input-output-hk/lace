@@ -8,8 +8,8 @@ import styles from './AssetInput.module.scss';
 import { validateNumericValue } from '@src/ui/utils/validate-numeric-value';
 import { sanitizeNumber } from '@ui/utils/sanitize-number';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '@lace/translation';
 import cn from 'classnames';
+import { CoreTranslationKey } from '@lace/translation';
 
 const isSameNumberFormat = (num1: string, num2: string) => {
   if (!num1 || !num2) return false;
@@ -41,7 +41,7 @@ export interface AssetInputProps {
   hasReachedMaxAmount?: boolean;
   focused?: boolean;
   onBlurErrors?: Set<string>;
-  getErrorMessage: (message: string) => TranslationKey;
+  getErrorMessage: (message: string) => CoreTranslationKey;
   setFocusInput?: (input?: string) => void;
   setFocus?: (focus: boolean) => void;
 }

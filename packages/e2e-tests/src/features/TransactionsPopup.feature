@@ -9,8 +9,7 @@ Feature: Transactions - Popup view
     When I navigate to Transactions popup page
     Then Transactions section is displayed
 
-  @LW-2541 @LW-2543 @LW-2544 @Testnet @Pending
-  @issue=LW-101212
+  @LW-2541 @LW-2543 @LW-2544 @Testnet
   Scenario: Popup View - Transactions tab - Counter matches the number of rows, transactions are loaded and skeleton disappears
     When I navigate to Transactions popup page
     And Transactions section is displayed
@@ -106,3 +105,19 @@ Feature: Transactions - Popup view
       | Delegation                | default - negative |
       | Stake Key De-Registration | green - positive   |
       | Stake Key Registration    | default - negative |
+
+  @LW-10617 @Testnet
+  Scenario Outline: Popup View - transaction list - details of <tx_type> type of transaction
+    Given I am on Transactions popup page
+    When I scroll to the row with transaction type: <tx_type>
+    And I click transaction type: <tx_type>
+    Then I see <tx_type> transaction details
+    Examples:
+      | tx_type                   |
+      | Sent                      |
+      | Received                  |
+      | Self Transaction          |
+      | Rewards                   |
+# TODO     | Delegation                |
+# TODO     | Stake Key De-Registration |
+# TODO     | Stake Key Registration    |

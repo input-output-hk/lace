@@ -47,7 +47,7 @@
     "test-storybook:ci": "echo \"@lace/staking: no test-storybook:ci specified\"",
     "test:all": "yarn test:unit && yarn test:vr",
     "test:unit": "vitest run",
-    "type-check": "echo \"@lace/staking: no type-checkc command specified\"",
+    "type-check": "echo \"@lace/staking: no type-check command specified\"",
     "watch": "tsup --watch"
   },
   "dependencies": {

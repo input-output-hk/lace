@@ -4,8 +4,7 @@ Feature: LW: Tokens tab - popup view
   Background:
     Given Wallet is synced
 
-  @LW-2343 @Testnet @Mainnet @Pending
-  @issue=LW-10211
+  @LW-2343 @Testnet @Mainnet
   Scenario: Tokens title and counter
     When I see Tokens counter with total number of tokens displayed
     Then Tokens counter matches the number of wallet tokens
@@ -148,3 +147,15 @@ Feature: LW: Tokens tab - popup view
     And I disable network interception
     Then ADA fiat price has been fetched
     Then "Unable to fetch fiat values" error is not displayed
+
+  @LW-10653 @Testnet
+  Scenario: Popup View - Search tokens by name, policy id, fingerprint and ticker
+    When I search for token: "<token>"
+    Then I see only token with name: "<token_result>"
+    Examples:
+      | token                                | token_result |
+      | Cardano                              | Cardano      |
+      | tADA                                 | Cardano      |
+      | tHOSKY                               | tHOSKY       |
+      | asset15qks69wv4vk7clnhp4lq7x0rpk6vs0 | tHOSKY       |
+      | 25561d09e55d60b64525b9cdb3cfbec      | LaceCoin3    |
