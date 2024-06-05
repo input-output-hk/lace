@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 export const downloadWalletData = (data: Record<string, unknown>, filename: string): void => {
   try {
@@ -12,7 +11,7 @@ export const downloadWalletData = (data: Record<string, unknown>, filename: stri
     link.click();
     link.remove();
 
-    console.log(`JSON file downloaded and saved as ${filename}`);
+    console.info(`JSON file downloaded and saved as ${filename}`);
   } catch (error) {
     console.error(`Failed to download JSON file: ${error.message}`);
   }
