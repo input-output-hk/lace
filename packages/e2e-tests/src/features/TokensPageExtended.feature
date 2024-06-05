@@ -179,7 +179,7 @@ Feature: LW: Tokens tab - extended view
     Then "Unable to fetch fiat values" error is not displayed
 
   @LW-10328 @Testnet
-  Scenario: Extended View - Search tokens by name, policy id, fingerprint and ticker
+  Scenario Outline: Extended View - Search tokens by name, policy id, fingerprint and ticker
     When I search for token: "<token>"
     Then I see only token with name: "<token_result>"
     Examples:

@@ -8,7 +8,7 @@ Feature: Send Simple Transactions - Extended view - E2E
   Scenario: Extended-view - Send ADA (single asset) E2E
     And I save token: "Cardano" balance
     And I click "Send" button on page header
-    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
+    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" main address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page
@@ -37,9 +37,7 @@ Feature: Send Simple Transactions - Extended view - E2E
     Then I see a toast with text: "Address copied"
     And I close the drawer by clicking close button
     And I click "Send" button on page header
-    And I fill bundle 1 with "CopiedAddress" address with following assets:
-      | type | assetName | amount |
-      | ADA  | tADA      | 5      |
+    And I fill bundle with copied address and 5 ADA
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
@@ -51,7 +49,7 @@ Feature: Send Simple Transactions - Extended view - E2E
   @LW-5894
   Scenario: Extended View - transaction details - Hash does not contain cexplorer link until transaction is confirmed
     When I click "Send" button on page header
-    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
+    And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" main address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page

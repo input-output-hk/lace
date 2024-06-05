@@ -79,6 +79,7 @@ export const AccountItem = ({
           fallbackText={accountNumber.toString()}
           delayMs={0}
           data-testid="wallet-account-item-icon"
+          testId="wallet-account-item-icon"
         />
         <Flex flexDirection="column">
           <Text.Label
