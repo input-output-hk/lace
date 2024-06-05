@@ -169,6 +169,14 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
 
+  @LW-9098
+  Scenario: Analytics - Extended View - Settings - Sync
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Sync" button
+    Then I validate latest analytics single event "settings | wallet | hd wallet sync | sync | click"
+    And I validate that 1 analytics event(s) have been sent
+
   # this test should be executed as the last one in this suite
   @LW-8559
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
