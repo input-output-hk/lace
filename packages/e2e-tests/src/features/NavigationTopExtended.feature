@@ -22,7 +22,7 @@ Feature: Top Navigation - Extended view
   @LW-2320 @Mainnet @Testnet
   Scenario: Avatar dropdown displayed on click with content
     When I click the menu button
-    Then the dropdown menu is visible
+    Then the user menu is displayed
     And chevron icon is changed to up
 
   @LW-2321 @Mainnet @Testnet
@@ -82,7 +82,7 @@ Feature: Top Navigation - Extended view
     And I click on the network option
     And I see network sub-menu
     When I click on then network sub-menu back button
-    Then the dropdown menu is visible
+    Then the user menu is displayed
 
   @LW-6073 @Testnet @Mainnet
   Scenario: Extended View - Toast displayed after switching network to Preview
