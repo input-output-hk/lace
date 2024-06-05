@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Meta } from '@storybook/react';
 
 import { AddCoSigners } from './AddCoSigners';
-import { ValidateAddress } from './type';
 import { v1 as uuid } from 'uuid';
+import { CoSigner } from './type';
 
 const meta: Meta<typeof AddCoSigners> = {
   title: 'Shared Wallets/AddCoSigners',
@@ -15,13 +15,19 @@ const meta: Meta<typeof AddCoSigners> = {
 
 export default meta;
 
-const cosigners = [
-  { address: '', isValid: false, id: uuid() },
-  { address: '', isValid: false, id: uuid() }
-];
+export const Overview = (): JSX.Element => {
+  const [coSigners, setCoSigners] = useState<CoSigner[]>([
+    { id: uuid(), keys: '', name: '' },
+    { id: uuid(), keys: '', name: '' }
+  ]);
 
-const validateAddress: ValidateAddress = (address) => ({ isValid: address ? address.startsWith('addr_test1') : false });
-
-export const Overview = (): JSX.Element => (
-  <AddCoSigners validateAddress={validateAddress} onBack={() => void 0} onNext={() => void 0} coSigners={cosigners} />
-);
+  return (
+    <AddCoSigners
+      onBack={() => void 0}
+      onNext={() => void 0}
+      coSigners={coSigners}
+      onValueChange={(coSigner) => setCoSigners(coSigners.map((c) => (c.id === coSigner.id ? coSigner : c)))}
+      errors={[]}
+    />
+  );
+};

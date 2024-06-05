@@ -1,4 +1,4 @@
-import { AddCoSigners, QuorumOption, SetupSharedWallet } from '@lace/core';
+import { AddCoSigners, ImportantInfoDialog, QuorumOption, SetupSharedWallet } from '@lace/core';
 import React, { VFC } from 'react';
 import { SharedWalletActionType, SharedWalletCreationStore } from './SharedWalletCreationStore';
 import { SharedWalletCreationStep } from './types';
@@ -19,7 +19,8 @@ export const SharedWalletCreationFlow: VFC = () => (
             }
           />
         )}
-        {state.step === SharedWalletCreationStep.CoSigners && (
+        {(state.step === SharedWalletCreationStep.CoSigners ||
+          state.step === SharedWalletCreationStep.CoSignersImportantInfo) && (
           <AddCoSigners
             onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
             onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
@@ -35,6 +36,14 @@ export const SharedWalletCreationFlow: VFC = () => (
             onChange={(quorumRules) => dispatch({ type: SharedWalletActionType.QUORUM_RULES_CHANGED, quorumRules })}
             totalCosignersNumber={state.coSigners.length + 1}
             value={state.quorumRules}
+          />
+        )}
+        {state.step === SharedWalletCreationStep.CoSignersImportantInfo && (
+          <ImportantInfoDialog
+            open
+            onBack={() => dispatch({ type: SharedWalletActionType.BACK })}
+            onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
+            zIndex={1001}
           />
         )}
       </>
