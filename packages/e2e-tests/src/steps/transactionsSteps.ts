@@ -8,7 +8,6 @@ import testContext from '../utils/testContext';
 import TransactionDetailsPage from '../elements/transactionDetails';
 import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
-import { browser } from '@wdio/globals';
 import { TransactionType } from '../types/transactionType';
 import { TransactionStyle } from '../types/transactionStyle';
 
@@ -212,7 +211,6 @@ Then(/^more transactions are loaded$/, async () => {
 Then(
   /^the (Received|Sent) transaction is displayed with value: "([^"]*)" and tokens count (\d)$/,
   async (transactionType: 'Received' | 'Sent', tokenValue: string, tokenCount: number) => {
-    await browser.pause(3000);
     const expectedTransactionRowAssetDetailsSent: ExpectedTransactionRowAssetDetails = {
       type: transactionType,
       tokensAmount: `${tokenValue}`,

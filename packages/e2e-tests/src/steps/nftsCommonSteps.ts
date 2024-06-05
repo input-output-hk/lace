@@ -12,7 +12,6 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
-import { browser } from '@wdio/globals';
 import { expect } from 'chai';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import nftDetails from '../elements/NFTs/nftDetails';
@@ -36,7 +35,6 @@ Then(
     name: string,
     mode: 'extended' | 'popup'
   ) => {
-    await browser.pause(2000);
     const fee = typeOfAsset === 'NFT' ? '1.17' : '1.19';
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
