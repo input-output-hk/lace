@@ -1,7 +1,7 @@
 import { Box } from '@lace/ui';
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { PERCENTAGE_SCALE_MAX } from '../../../store';
 import * as styles from './RatioInput.css';
+import { PERCENTAGE_SCALE_MAX } from 'features/store/delegationPortfolioStore/constants';
 
 type RatioInputProps = {
   onUpdate: (value: number) => void;

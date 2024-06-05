@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
   const { priceResult } = useFetchCoinPrice();
-  const { blockchainProvider, currentChain, activityDetail, resetActivityState } = useWalletStore((state) => ({
+  const { blockchainProvider, activityDetail, resetActivityState } = useWalletStore((state) => ({
     blockchainProvider: state.blockchainProvider,
     currentChain: state.currentChain,
     activityDetail: state.activityDetail,
@@ -25,7 +25,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
 
   return (
     <>
-      <Staking currentChain={currentChain} theme={theme.name} />
+      <Staking theme={theme.name} />
       {/*
         Note: Mounting the browser-extension activity details drawer here is just a workaround.
         Ideally, the Drawer/Activity detail should be fully managed within the "Staking" component,
@@ -34,7 +34,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         to a separate package (core perhaps?).
       */}
       <Drawer
-        visible={!!activityDetail}
+        open={!!activityDetail}
         onClose={resetActivityState}
         navigation={
           <DrawerNavigation

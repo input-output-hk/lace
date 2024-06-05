@@ -6,12 +6,15 @@ import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
-import { PERCENTAGE_SCALE_MAX } from '../../../store';
+// import { PERCENTAGE_SCALE_MAX } from '../../../store';
 import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
 import { PoolDetailsCardData } from './PoolDetailsCardData';
 import { RatioInput } from './RatioInput';
 import TrashIcon from './trash.svg';
+import { PERCENTAGE_SCALE_MAX } from 'features/store/delegationPortfolioStore/constants';
+
+// const PERCENTAGE_SCALE_MAX = 100;
 
 type PercentagesChangeHandler = (value: number) => void;
 

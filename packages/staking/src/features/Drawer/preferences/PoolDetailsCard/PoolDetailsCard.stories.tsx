@@ -21,6 +21,7 @@ export const Overview = () => (
       onPercentageChange={(nextValue) => console.info('changed 1:', nextValue)}
       defaultExpand
     />
+
     <PoolDetailsCard
       color="#475"
       name="Pool Name"
