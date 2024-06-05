@@ -64,7 +64,7 @@ class MultidelegationPage {
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
   private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
   private TOOLTIP = 'div.ant-tooltip-inner';
-  private SORTING_OPTION_TOOLTIP = '[class^="tooltip-root"]';
+  private SORTING_OPTION_TOOLTIP = '[data-testid="tooltip-content"]';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private MANAGE_BTN = '[data-testid="manage-btn"]';
   private GRID_VIEW_TOGGLE = '[data-testid="grid-view-toggle"]';

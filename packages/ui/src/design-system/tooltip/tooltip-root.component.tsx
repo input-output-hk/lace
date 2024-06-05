@@ -31,6 +31,7 @@ export const Root = ({
           side={side}
           align={align}
           className={cx.root}
+          data-testid={'tooltip-content'}
         >
           <TooltipContent label={label} />
         </Tooltip.Content>
