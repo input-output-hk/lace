@@ -96,6 +96,10 @@ Then(/I click on Remove wallet button/, async () => {
   await settingsExtendedPageObject.clickOnRemoveWallet();
 });
 
+Then(/^I click on "Sync" button$/, async () => {
+  await SettingsPage.clickSyncButton();
+});
+
 Then(/^I click on Show public key button$/, async () => {
   await settingsExtendedPageObject.clickOnShowPublicKey();
 });
