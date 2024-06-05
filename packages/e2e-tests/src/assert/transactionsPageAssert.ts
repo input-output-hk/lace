@@ -134,8 +134,16 @@ class TransactionsPageAssert {
       }
     );
 
-    expect(await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()).contains(
-      expectedTransactionRowAssetDetails.tokensAmount
+    await browser.waitUntil(
+      async () =>
+        (
+          await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()
+        ).includes(expectedTransactionRowAssetDetails.tokensAmount),
+      {
+        timeout: 8000,
+        interval: 1000,
+        timeoutMsg: 'failed while waiting for tx token details'
+      }
     );
 
     expect(await TransactionsPage.transactionsTableItemTimestamp(rowIndex).getText()).to.match(

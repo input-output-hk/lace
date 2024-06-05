@@ -321,6 +321,14 @@ class DAppConnectorAssert {
     expect(expectedAssets).to.deep.equal(adjustedAssetsList);
   }
 
+  async assertSeeAddressTag(addressTag: string, section: 'To address' | 'From address') {
+    const expectedTag =
+      section === 'To address'
+        ? await ConfirmTransactionPage.addressTagToSection.getText()
+        : await ConfirmTransactionPage.addressTagFromSection.getText();
+    expect(addressTag).to.equal(expectedTag);
+  }
+
   async assertSeeSignTransactionPage() {
     await this.assertSeeHeader();
     await SignTransactionPage.passwordInput.container.waitForDisplayed();

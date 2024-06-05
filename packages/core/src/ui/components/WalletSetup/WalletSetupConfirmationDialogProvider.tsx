@@ -69,10 +69,10 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
         open={isDialogOpen}
         zIndex={300}
         translations={{
-          title: t('multiWallet.confirmationDialog.title'),
-          description: t('multiWallet.confirmationDialog.description'),
-          cancel: t('multiWallet.confirmationDialog.cancel'),
-          confirm: t('multiWallet.confirmationDialog.confirm')
+          title: t('core.multiWallet.confirmationDialog.title'),
+          description: t('core.multiWallet.confirmationDialog.description'),
+          cancel: t('core.multiWallet.confirmationDialog.cancel'),
+          confirm: t('core.multiWallet.confirmationDialog.confirm')
         }}
         events={{
           onConfirm: handleOnConfirmRef.current,
