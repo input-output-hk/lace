@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 
-class WalletAccountItem {
+class WalletAccountsMenuItem {
   protected CONTAINER_SELECTOR;
   private ITEM = '//div[@data-testid="wallet-account-item"]';
   private ICON = '//span[@data-testid="wallet-account-item-icon"]';
@@ -39,4 +39,4 @@ class WalletAccountItem {
   }
 }
 
-export default WalletAccountItem;
+export default WalletAccountsMenuItem;

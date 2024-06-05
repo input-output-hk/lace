@@ -2,7 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 
-class WalletAccounts {
+class WalletAccountsMenu {
   private CONTAINER = '[data-testid="user-dropdown-wallet-accounts-section"]';
   private ARROW_BUTTON = '[data-testid="navigation-button-arrow"]';
   private TITLE = '[data-testid="user-dropdown-wallet-accounts-title"]';
@@ -40,4 +40,4 @@ class WalletAccounts {
   }
 }
 
-export default new WalletAccounts();
+export default new WalletAccountsMenu();

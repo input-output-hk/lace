@@ -1,9 +1,9 @@
-import WalletAccounts from '../elements/accounts/WalletAccounts';
+import WalletAccounts from '../elements/accounts/WalletAccountsMenu';
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
-import WalletAccountItem from '../elements/accounts/WalletAccountItem';
+import WalletAccountsMenuItem from '../elements/accounts/WalletAccountsMenuItem';
 
-class WalletAccountsAssert {
+class WalletAccountsMenuAssert {
   async assertSeeAccountsMenu(shouldBeDisplayed: boolean): Promise<void> {
     await WalletAccounts.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
@@ -24,7 +24,7 @@ class WalletAccountsAssert {
 
   async assertSeeEachAccountItem(): Promise<void> {
     for (let accountIndex = 0; accountIndex < 24; accountIndex++) {
-      const accountItem = new WalletAccountItem(accountIndex + 1);
+      const accountItem = new WalletAccountsMenuItem(accountIndex + 1);
       await accountItem.container.scrollIntoView();
       await accountItem.container.waitForDisplayed();
       await accountItem.icon.waitForDisplayed();
@@ -37,4 +37,4 @@ class WalletAccountsAssert {
   }
 }
 
-export default new WalletAccountsAssert();
+export default new WalletAccountsMenuAssert();

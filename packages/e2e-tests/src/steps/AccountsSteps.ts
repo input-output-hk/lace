@@ -1,7 +1,7 @@
 import { Then, When } from '@cucumber/cucumber';
-import WalletAccountsAssert from '../assert/WalletAccountsAssert';
+import WalletAccountsAssert from '../assert/WalletAccountsMenuAssert';
 import WalletOption from '../elements/WalletOption';
-import WalletAccounts from '../elements/accounts/WalletAccounts';
+import WalletAccounts from '../elements/accounts/WalletAccountsMenu';
 
 When(/^I click on chevron for wallet number (\d)$/, async (walletIndex: number) => {
   await new WalletOption(walletIndex).clickOnAccountsMenuButton();
