@@ -93,6 +93,7 @@ export const WalletSetupMnemonicStepRevamp = ({
   );
 
   useKeyboardShortcut((event) => {
+    event.preventDefault();
     if (!event.ctrlKey && !event.metaKey) return;
     if (event.key === 'c' && mnemonicStage === 'writedown') {
       void copyRecoveryPhrase();
