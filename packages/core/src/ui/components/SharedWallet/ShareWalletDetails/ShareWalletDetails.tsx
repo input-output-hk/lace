@@ -40,7 +40,7 @@ export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Eleme
       </Box>
       <Divider my="$20" />
       <ActionCard
-        title={[{ text: translations.label, bold: true }]}
+        title={[{ text: translations.label, weight: '$semibold' }]}
         description={FILENAME}
         rootClassName={styles.root}
         iconClassName={styles.icon}

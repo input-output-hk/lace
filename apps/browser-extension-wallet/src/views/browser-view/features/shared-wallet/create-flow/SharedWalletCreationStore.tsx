@@ -50,8 +50,6 @@ export type StateCoSigners = MakeState<{
   walletName: string;
 }>;
 
-type State = StateSetup | StateCoSigners | StateQuorum | StateShareDetails;
-
 export type StateQuorum = MakeState<{
   coSignersKeys: string[];
   quorumRules: QuorumOptionValue;
@@ -64,6 +62,8 @@ export type StateShareDetails = MakeState<{
   step: SharedWalletCreationStep.ShareDetails;
   walletName: string;
 }>;
+
+type State = StateSetup | StateCoSigners | StateQuorum | StateShareDetails;
 
 export enum SharedWalletActionType {
   NEXT,
