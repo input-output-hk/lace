@@ -6,7 +6,7 @@ import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
-import { PERCENTAGE_SCALE_MAX } from '../../../store';
+import { PERCENTAGE_SCALE_MAX } from 'features/store/delegationPortfolioStore/constants';
 import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
 import { PoolDetailsCardData } from './PoolDetailsCardData';
