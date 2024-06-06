@@ -140,7 +140,7 @@ export const BrowsePoolsPreferencesCard = ({
     );
   };
 
-  const sortingOptions: RadioButtonGroupOption[] = useMemo(() => {
+  const sortingOptions: RadioButtonGroupOption<SortField>[] = useMemo(() => {
     const iconAlphabetical =
       direction === 'asc' ? (
         <SortAlphabeticalAscIcon data-testid="sort-asc" />
@@ -175,7 +175,7 @@ export const BrowsePoolsPreferencesCard = ({
       ),
       onIconClick: () => handleIconClick(value),
       value,
-    })) as RadioButtonGroupOption[];
+    })) as RadioButtonGroupOption<SortField>[];
   }, [direction, handleIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(() => {

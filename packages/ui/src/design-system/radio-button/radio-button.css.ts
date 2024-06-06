@@ -57,33 +57,44 @@ export const radioGroupIndicatorWrapper = style([
   },
 ]);
 
-const defaultStyle = style({
-  borderRadius: vars.radius.$circle,
-  selectors: {
-    [`&:has(${radioGroupIndicatorWrapper}:focus-visible)`]: {
-      outlineColor: vars.colors.$radiobutton_focus_color,
-      outlineWidth: 3,
-      outlineStyle: 'solid',
-    },
+const radioGroupItemDefaultStyle = style([
+  {
+    borderRadius: vars.radius.$circle,
   },
-});
+]);
 
 export const radioGroupItem = styleVariants({
-  default: [defaultStyle],
+  default: [radioGroupItemDefaultStyle],
   withLabel: [
-    defaultStyle,
+    radioGroupItemDefaultStyle,
     {
       minHeight: 24,
       display: 'flex',
       alignItems: 'center',
       borderRadius: 1,
       padding: '0 4px',
+    },
+  ],
+});
+
+export const outline = style({
+  selectors: {
+    [`&:has(${radioGroupIndicatorWrapper}:focus-visible)`]: {
+      outlineColor: vars.colors.$radiobutton_focus_color,
+      outlineWidth: radioItemOutlineWidth,
+      outlineStyle: 'solid',
+    },
+  },
+});
+
+export const radioGroupItemOutline = styleVariants({
+  default: [outline],
+  withLabel: [
+    outline,
+    {
       selectors: {
         [`&:has(${radioGroupIndicatorWrapper}:focus-visible)`]: {
           outlineOffset: radioItemOutlineOffset,
-          outlineColor: vars.colors.$radiobutton_focus_color,
-          outlineWidth: radioItemOutlineWidth,
-          outlineStyle: 'solid',
         },
       },
     },

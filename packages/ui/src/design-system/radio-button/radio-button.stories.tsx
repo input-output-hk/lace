@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import type { SVGProps } from 'react';
-import React, { useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDownload';
 import type { Meta } from '@storybook/react';
@@ -11,10 +11,12 @@ import { v4 as uuid } from 'uuid';
 
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
 import { Box } from '../box';
+import * as Cards from '../cards';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
+import * as Select from '../select';
 import { Text } from '../text';
 import { TooltipContent } from '../tooltip';
 
@@ -38,9 +40,9 @@ export default {
 const getOptions = (
   count: number,
   label: string,
-  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
+  icon?: Readonly<ReactElement>,
   // eslint-disable-next-line max-params
-): RadioButtonGroupOption[] =>
+): RadioButtonGroupOption<string>[] =>
   Array.from({ length: count }).map(_ => ({
     value: `option-${uuid()}`,
     label,
@@ -49,10 +51,7 @@ const getOptions = (
   }));
 
 const MainComponents = (): JSX.Element => {
-  const getRow = (
-    label = 'Label',
-    icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element,
-  ) => [
+  const getRow = (label = 'Label', icon?: Readonly<ReactElement>) => [
     {
       options: getOptions(1, label, icon),
       onValueChange: (): undefined => undefined,
@@ -123,7 +122,7 @@ const MainComponents = (): JSX.Element => {
         ))}
       </Variants.Row>
       <Variants.Row>
-        {getRow('Label', DocumentDownload).map(item => (
+        {getRow('Label', <DocumentDownload />).map(item => (
           <Variants.Cell key={item.options[0].value}>
             <Box className={styles.withIconWrapper}>
               <RadioButtonGroup
@@ -143,7 +142,7 @@ const List = ({
   icon,
   radioButtonClassName,
 }: Readonly<{
-  icon?: (props: Readonly<SVGProps<SVGSVGElement>>) => JSX.Element;
+  icon?: ReactElement;
   radioButtonClassName?: string;
 }>) => {
   const options = useMemo(() => getOptions(4, 'Label', icon), []);
@@ -161,7 +160,7 @@ const List = ({
 };
 
 const VariantsSection = () => {
-  const withIconOptions = getOptions(1, 'Label', DocumentDownload);
+  const withIconOptions = getOptions(1, 'Label', <DocumentDownload />);
   return (
     <Section title="Variants">
       <Variants.Table
@@ -266,7 +265,7 @@ export const Overview = (): JSX.Element => {
                   <List />
                   <Box className={styles.withIconWrapper}>
                     <List
-                      icon={DocumentDownload}
+                      icon={<DocumentDownload />}
                       radioButtonClassName={styles.radioGroupWithIcon}
                     />
                   </Box>
@@ -280,7 +279,7 @@ export const Overview = (): JSX.Element => {
                     <List />
                     <Box className={styles.withIconWrapper}>
                       <List
-                        icon={DocumentDownload}
+                        icon={<DocumentDownload />}
                         radioButtonClassName={styles.radioGroupWithIcon}
                       />
                     </Box>
@@ -319,3 +318,143 @@ Overview.parameters = {
     focusVisible: '#focus',
   },
 };
+
+const SharedWalletQuorum = () => {
+  const [option, setOption] = useState<'all' | 'some'>('all');
+  const [count, setCount] = useState('1');
+
+  return (
+    <RadioButtonGroup
+      options={[
+        {
+          value: 'all',
+          label: 'All addresses must sign',
+          render: ({ optionElement }) => (
+            <Cards.Outlined style={{ marginBottom: 16 }}>
+              <Flex p={'$16'}>{optionElement}</Flex>
+            </Cards.Outlined>
+          ),
+        },
+        {
+          value: 'some',
+          label: 'Some addresses must sign',
+          render: ({ optionElement }) => (
+            <Cards.Outlined>
+              <Flex p={'$16'} flexDirection={'column'}>
+                <Box mb={'$10'}>{optionElement}</Box>
+                <Flex
+                  pl="$40"
+                  w="$fill"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  data-testid="setup-quorum-cosigner-container"
+                  gap="$8"
+                >
+                  <Select.Root
+                    disabled={option !== 'some'}
+                    variant="outline"
+                    placeholder="0"
+                    value={count}
+                    onChange={setCount}
+                    showArrow
+                  >
+                    {[1, 2].map(String).map(n => (
+                      <Select.Item key={n} value={n} title={n} />
+                    ))}
+                  </Select.Root>
+                  <Text.Body.Small>{'of 3 total signatures'}</Text.Body.Small>
+                </Flex>
+              </Flex>
+            </Cards.Outlined>
+          ),
+        },
+      ]}
+      onValueChange={setOption}
+      selectedValue={option}
+    />
+  );
+};
+
+const RecoveryMethod = ({
+  option,
+  description,
+}: Readonly<{ option: ReactElement; description: string }>) => (
+  <Flex
+    p={'$16'}
+    gap={'$24'}
+    justifyContent={'space-between'}
+    style={{ cursor: 'pointer' }}
+  >
+    <Flex flexDirection={'column'}>
+      <Box mb={'$8'}>{option}</Box>
+      <Box pl={'$40'}>
+        <Text.Body.Normal>{description}</Text.Body.Normal>
+      </Box>
+    </Flex>
+    <Box style={{ width: 100, height: 76, background: '#bbb' }} />
+  </Flex>
+);
+
+const OnboardingRecoveryMethod = () => {
+  const [option, setOption] = useState<'paper-wallet' | 'recovery-phrase'>();
+  return (
+    <RadioButtonGroup
+      options={[
+        {
+          value: 'recovery-phrase',
+          label: 'Recovery Phrase',
+          defaultOutlineDisabled: true,
+          render: ({ onOptionClick, optionElement, outlineClassName }) => (
+            <Cards.Outlined
+              onClick={onOptionClick}
+              className={outlineClassName}
+              style={{ marginBottom: 16 }}
+            >
+              <RecoveryMethod
+                option={optionElement}
+                description={
+                  'A 24-word recovery phrase for your wallet which you must record securely.'
+                }
+              />
+            </Cards.Outlined>
+          ),
+        },
+        {
+          value: 'paper-wallet',
+          label: 'Paper wallet',
+          defaultOutlineDisabled: true,
+          render: ({ onOptionClick, optionElement, outlineClassName }) => (
+            <Cards.Outlined
+              onClick={onOptionClick}
+              className={outlineClassName}
+            >
+              <RecoveryMethod
+                option={optionElement}
+                description={
+                  'A scannable QR code containing recovery information, encrypted with your PGP keys.'
+                }
+              />
+            </Cards.Outlined>
+          ),
+        },
+      ]}
+      onValueChange={setOption}
+      selectedValue={option}
+    />
+  );
+};
+
+export const WithRenderFunction = (): ReactElement => (
+  <Grid>
+    <Cell>
+      <Section title="Shared wallets Quorum">
+        <SharedWalletQuorum />
+      </Section>
+    </Cell>
+    <Cell>
+      <Section title="Onboarding recovery method">
+        <OnboardingRecoveryMethod />
+      </Section>
+    </Cell>
+  </Grid>
+);
