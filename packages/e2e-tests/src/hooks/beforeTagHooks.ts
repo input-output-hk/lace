@@ -242,3 +242,25 @@ Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Extended' }, async
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
+
+Before(
+  {
+    tags: '@Accounts-Extended'
+  },
+  async () => {
+    await extendedViewRepositoryWalletInitialization([TestWalletName.MultiAccActive1]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  }
+);
+
+Before(
+  {
+    tags: '@Accounts-Popup'
+  },
+  async () => {
+    await popupViewRepositoryWalletInitialization([TestWalletName.MultiAccActive1]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  }
+);
