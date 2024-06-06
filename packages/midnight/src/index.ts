@@ -11,15 +11,11 @@ export const createMidnightWallet = async (mnemonic: string[]): Promise<Midnight
   const { nodeAddress, pubSubAddress, proverAddress } = DEFAULT_NETWORK_ADDRESSES[MIDNIGHT_NETWORK_ID];
   const entropy = util.mnemonicWordsToEntropy(mnemonic);
 
-  const wallet = await WalletBuilder.buildFromSeed(
+  return await WalletBuilder.buildFromSeed(
     pubSubAddress,
     convertHttpToWebSocket(pubSubAddress),
     proverAddress,
     nodeAddress,
     entropy
   );
-
-  wallet.start();
-
-  return wallet;
 };
