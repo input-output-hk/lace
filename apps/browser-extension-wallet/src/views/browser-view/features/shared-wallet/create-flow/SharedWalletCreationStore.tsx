@@ -203,6 +203,7 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
 
       return {
         ...prevState,
+        coSigners,
         quorumRules: {
           option: QuorumRadioOption.AllAddresses
         },
