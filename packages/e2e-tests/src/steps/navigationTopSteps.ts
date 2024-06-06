@@ -18,7 +18,7 @@ When(/I click on the logo icon/, async () => {
   await menuHeaderPageObject.clickLogo();
 });
 
-Then(/the dropdown menu is visible/, async () => {
+Then(/^the user menu is displayed$/, async () => {
   await topNavigationAssert.assertDropdownVisible();
 });
 
