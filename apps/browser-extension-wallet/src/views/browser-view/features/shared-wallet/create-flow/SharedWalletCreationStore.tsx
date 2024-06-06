@@ -156,14 +156,19 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       const nextCoSigners = prevState.coSigners.map((coSigner) =>
         coSigner.id === action.coSigner.id ? action.coSigner : coSigner
       );
-      const coSignersErrors = validateCoSigners(nextCoSigners).filter(
+      const coSignersErrors = validateCoSigners(nextCoSigners);
+      // Validation function raises errors for every cosigner entry. Our current implementation
+      // have fixed 2 fields for cosigners so if user decided to specify only 1 then the second
+      // fields should stay empty and should not show errors.
+      // This filter should be removed once we enable the "add cosigner" button
+      const filteredCosignerErrors = coSignersErrors.filter(
         ({ id }) => !nextCoSigners.some((c) => c.id === id && !c.keys && !c.name)
       );
 
       return {
         ...prevState,
         coSigners: nextCoSigners,
-        coSignersErrors
+        coSignersErrors: filteredCosignerErrors
       };
     }
     if (action.type === SharedWalletActionType.BACK) {
@@ -192,6 +197,7 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       };
     }
     if (action.type === SharedWalletActionType.NEXT) {
+      // Having two cosigner fields fixed we need to filter out the empty cosigner
       const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
       if (coSigners.length === 0) return prevState;
 
@@ -207,6 +213,8 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
   },
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
     if (action.type === SharedWalletActionType.BACK) {
+      // Having two cosigner fields fixed we need to fall back to two entries if user specified
+      // just one because the empty one was filtere out in brevious step.
       const coSigners = [
         prevState.coSigners[0] || getInitialCoSignerValue(),
         prevState.coSigners[1] || getInitialCoSignerValue()
