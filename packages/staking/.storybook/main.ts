@@ -56,7 +56,7 @@ const config: StorybookConfig = {
         alias: [
           {
             find: '@lace/cardano',
-            replacement: require.resolve('./__mocks__/cardano.tsx'),
+            replacement: require.resolve('./__mocks__/cardano.ts'),
           },
         ],
       },
