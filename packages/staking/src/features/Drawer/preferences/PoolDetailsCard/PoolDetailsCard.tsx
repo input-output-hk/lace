@@ -3,10 +3,10 @@ import { ReactComponent as ChevronDownIcon } from '@lace/icons/dist/ChevronDownC
 import { ReactComponent as ChevronUpIcon } from '@lace/icons/dist/ChevronUpComponent';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useOutsideHandles } from 'features/outside-handles-provider';
+import { PERCENTAGE_SCALE_MAX } from 'features/store/delegationPortfolioStore/constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
-import { PERCENTAGE_SCALE_MAX } from '../../../store';
 import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
 import { PoolDetailsCardData } from './PoolDetailsCardData';
