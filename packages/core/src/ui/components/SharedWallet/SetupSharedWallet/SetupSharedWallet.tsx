@@ -5,12 +5,14 @@ import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState } from 'react';
 import { WalletNameInput } from '../../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
 import { WALLET_NAME_INPUT_MAX_LENGTH, validateNameLength } from '../../WalletSetup/WalletSetupNamePasswordStep/utils';
-import { LayoutNavigationProps, SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
+import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
 import styles from './SetupSharedWallet.module.scss';
 
 interface Props {
   activeWalletName: string;
   activeWalletAddress: string;
+  onBack?: () => void;
+  onNext?: () => void;
   onWalletNameChange: (name: string) => void;
   walletName: string;
 }
@@ -25,7 +27,7 @@ export const SetupSharedWallet = ({
   onNext,
   onWalletNameChange,
   walletName
-}: Props & LayoutNavigationProps): JSX.Element => {
+}: Props): JSX.Element => {
   const [walletNameDirty, setWalletNameDirty] = useState(false);
   const { t } = useTranslation();
 

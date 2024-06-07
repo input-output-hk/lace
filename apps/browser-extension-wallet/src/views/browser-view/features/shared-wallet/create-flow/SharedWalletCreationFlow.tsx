@@ -1,4 +1,4 @@
-import { QuorumOption, SetupSharedWallet, ShareWalletDetails } from '@lace/core';
+import { QuorumOption, SetupSharedWallet } from '@lace/core';
 import React, { VFC } from 'react';
 import { SharedWalletActionType, SharedWalletCreationStore } from './SharedWalletCreationStore';
 import { SharedWalletCreationStep } from './types';
@@ -34,9 +34,6 @@ export const SharedWalletCreationFlow: VFC = () => (
             totalCosignersNumber={state.coSignersKeys.length}
             value={state.quorumRules}
           />
-        )}
-        {state.step === SharedWalletCreationStep.ShareDetails && (
-          <ShareWalletDetails onNext={() => dispatch({ type: SharedWalletActionType.NEXT })} />
         )}
       </>
     )}

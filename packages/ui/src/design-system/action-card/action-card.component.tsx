@@ -4,17 +4,15 @@ import React from 'react';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import { Text } from '../text';
-import { FontWeights } from '../text/create-text.util';
+
 import * as cx from './action-card.css';
-import classNames from 'classnames';
+
 import type { OmitClassName } from '../../types';
 
 type Props = Omit<OmitClassName<'div'>, 'title'> & {
-  title: { text: string; highlight?: boolean; weight?: FontWeights }[];
+  title: { text: string; highlight: boolean }[];
   description?: string;
   icon: ReactNode;
-  rootClassName?: string;
-  iconClassName?: string;
 };
 
 export const ActionCard = ({
@@ -23,9 +21,9 @@ export const ActionCard = ({
   icon,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <Box {...props} className={classNames([cx.root, props.rootClassName])}>
+  <Box {...props} className={cx.root}>
     <Flex
-      className={classNames([cx.iconBox, props.iconClassName])}
+      className={cx.iconBox}
       mr="$24"
       alignItems="center"
       justifyContent="center"
@@ -35,9 +33,9 @@ export const ActionCard = ({
     <Box w="$fill">
       <Flex justifyContent="center" h="$fill" flexDirection="column">
         <Box>
-          {title.map(({ text, highlight, weight }) => (
+          {title.map(({ text, highlight }) => (
             <Text.Body.Normal
-              weight={weight || '$medium'}
+              weight="$medium"
               color={highlight ? 'highlight' : 'primary'}
               key={text}
             >

@@ -32,7 +32,7 @@ const responsiveProperties = defineProperties({
       'grid',
       'inline-flex',
     ],
-    flexDirection: ['row', 'column', 'column-reverse', 'row-reverse'],
+    flexDirection: ['row', 'column', 'column-reverse'],
     justifyContent: [
       'stretch',
       'flex-start',
