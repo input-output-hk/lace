@@ -43,9 +43,9 @@ class TransactionsDetailsAssert {
 
   async assertSeeActivityDetailsDrawer(shouldBeDisplayed: boolean) {
     await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
-    await TransactionDetailsPage.transactionDetails.waitForStable({ reverse: !shouldBeDisplayed });
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
+      await TransactionDetailsPage.transactionDetails.waitForStable();
       expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t(headerTranslationKey));
     }
   }

@@ -16,7 +16,13 @@ type Story = StoryObj<typeof SharedWalletLayout>;
 
 export const SharedWalletLayoutComponent: Story = {
   args: {
-    title: 'Shared Wallet Step Layout',
-    children: <div>Hello</div>
+    title: 'This is the title',
+    description: 'You can also specify description',
+    children: (
+      <>
+        <div>as well as</div>
+        <h1>children</h1>
+      </>
+    )
   }
 };

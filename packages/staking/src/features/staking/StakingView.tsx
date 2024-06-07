@@ -1,13 +1,11 @@
 import { Box, Text } from '@lace/ui';
 import { Activity } from 'features/activity';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../BrowsePools';
 import { Drawer } from '../Drawer';
 import { ChangingPreferencesModal } from '../modals';
-import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { DrawerManagementStep, DrawerStep, useDelegationPortfolioStore } from '../store';
+import { DrawerManagementStep, DrawerStep } from '../store';
 import { Navigation } from './Navigation';
 import { OneTimeModals } from './OneTimeModals';
 import { StakingPage } from './types';
@@ -16,23 +14,6 @@ const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation,
 
 export const StakingView = () => {
   const { t } = useTranslation();
-  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
-    portfolioMutators: store.mutators,
-  }));
-  const {
-    walletStoreFetchNetworkInfo: fetchNetworkInfo,
-    walletStoreBlockchainProvider: blockchainProvider,
-    currentChain,
-  } = useOutsideHandles();
-
-  useEffect(() => {
-    fetchNetworkInfo();
-  }, [fetchNetworkInfo, blockchainProvider]);
-
-  useEffect(() => {
-    if (!currentChain) return;
-    portfolioMutators.forceAbortFlows();
-  }, [currentChain, portfolioMutators]);
 
   return (
     <>
