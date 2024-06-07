@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { HTMLAttributes, forwardRef } from 'react';
 import type { CSSProperties, PropsWithChildren } from 'react';
 
 import classNames from 'classnames';
@@ -27,7 +27,8 @@ export type BoxProps = Pick<
   | 'w'
 > & { className?: string; style?: CSSProperties };
 
-export type Props = PropsWithChildren<BoxProps>;
+export type Props = PropsWithChildren<BoxProps> &
+  HTMLAttributes<HTMLDivElement>;
 
 export const Box = forwardRef<HTMLDivElement | null, Readonly<Props>>(
   (

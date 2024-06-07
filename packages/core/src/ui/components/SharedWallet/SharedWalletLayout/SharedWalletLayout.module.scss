@@ -11,7 +11,6 @@
   margin: 0 0 0 40px !important;
   min-width: 200px;
   padding-top: 100px !important;
-
   .activeText {
     @include text-bodySmall-semi-bold;
   }
@@ -23,7 +22,7 @@
 }
 
 .scrollAreaViewport {
-  max-height: 250px;
+  max-height: 310px;
   overflow-y: visible;
 }
 

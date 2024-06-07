@@ -31,18 +31,13 @@ const getTimelineSteps = (currentStep: SharedWalletTimelineSteps, t: TFunction) 
     { key: SharedWalletTimelineSteps.ADD_COSIGNERS, name: t('core.sharedWalletLayout.timelineStep.addCosigners') },
     { key: SharedWalletTimelineSteps.DEFINE_QUORUM, name: t('core.sharedWalletLayout.timelineStep.defineQuorum') },
     { key: SharedWalletTimelineSteps.WALLET_DETAILS, name: t('core.sharedWalletLayout.timelineStep.walletDetails') }
-  ].map((step) => ({
-    ...step,
-    active: false
-  }));
+  ];
 
-  return walletSteps.map((step, index, self) => {
-    const previousStepActive = self[index - 1]?.active || false;
-    return {
-      ...step,
-      active: step.key === currentStep || previousStepActive
-    };
-  });
+  const indexOfCurrentStep = walletSteps.findIndex(({ key }) => key === currentStep);
+  return walletSteps.map((step, index) => ({
+    ...step,
+    active: index <= indexOfCurrentStep
+  }));
 };
 
 export const SharedWalletLayout = ({
