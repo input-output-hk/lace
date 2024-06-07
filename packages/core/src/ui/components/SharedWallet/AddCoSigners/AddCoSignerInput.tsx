@@ -2,7 +2,7 @@ import { Box, TextBox } from '@lace/ui';
 import { TFunction } from 'i18next';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CoSigner, CoSignerError } from './type';
+import { CoSigner, CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './type';
 
 export const maxCoSignerNameLength = 20;
 
@@ -18,23 +18,23 @@ const parseError = (error: CoSignerError | undefined, t: TFunction): Partial<Rec
   if (!error) return {};
 
   let nameErrorMessage;
-  if (error.name === 'required') {
+  if (error.name === CoSignerErrorName.Required) {
     nameErrorMessage = t('core.sharedWallet.addCosigners.nameInputError.required');
   }
-  if (error.name === 'duplicated') {
+  if (error.name === CoSignerErrorName.Duplicated) {
     nameErrorMessage = t('core.sharedWallet.addCosigners.nameInputError.duplicated');
   }
-  if (error.name === 'tooLong') {
+  if (error.name === CoSignerErrorName.TooLong) {
     nameErrorMessage = t('core.sharedWallet.addCosigners.nameInputError.tooLong', {
       amount: maxCoSignerNameLength
     });
   }
 
   let keysErrorMessage;
-  if (error.keys === 'required') {
+  if (error.keys === CoSignerErrorKeys.Required) {
     keysErrorMessage = t('core.sharedWallet.addCosigners.keysInputError.required');
   }
-  if (error.keys === 'invalid') {
+  if (error.keys === CoSignerErrorKeys.Invalid) {
     keysErrorMessage = t('core.sharedWallet.addCosigners.keysInputError.invalid');
   }
 

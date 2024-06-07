@@ -33,8 +33,8 @@ export const ImportantInfoDialog = ({ onBack, onNext, open, zIndex }: Props): JS
         </>
       </Dialog.Description>
       <Dialog.Actions>
-        <Dialog.Action cancel label={t('core.sharedWallet.importantInfo.backButton')} onClick={onBack} />
-        <Dialog.Action disabled={!checked} label={t('core.sharedWallet.importantInfo.nextButton')} onClick={onNext} />
+        <Dialog.Action cancel label={t('core.sharedWallet.importantInfo.button.back')} onClick={onBack} />
+        <Dialog.Action disabled={!checked} label={t('core.sharedWallet.importantInfo.button.next')} onClick={onNext} />
       </Dialog.Actions>
     </Dialog.Root>
   );

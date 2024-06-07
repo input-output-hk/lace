@@ -4,8 +4,19 @@ export type CoSigner = {
   keys: string;
 };
 
+export enum CoSignerErrorName {
+  Duplicated = 'Duplicated',
+  Required = 'Required',
+  TooLong = 'TooLong'
+}
+
+export enum CoSignerErrorKeys {
+  Invalid = 'Invalid',
+  Required = 'Required'
+}
+
 export type CoSignerError = {
   id: string;
-  name?: 'duplicated' | 'required' | 'tooLong';
-  keys?: 'invalid' | 'required';
+  name?: CoSignerErrorName;
+  keys?: CoSignerErrorKeys;
 };

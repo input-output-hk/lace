@@ -1,3 +1,3 @@
 export { AddCoSigners } from './AddCoSigners';
 export { maxCoSignerNameLength } from './AddCoSignerInput';
-export type { CoSigner, CoSignerError } from './type';
+export { CoSigner, CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './type';

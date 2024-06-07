@@ -1,4 +1,4 @@
-import { CoSignerError } from '@lace/core';
+import { CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from '@lace/core';
 import { validateCoSigners } from './validateCoSigners';
 
 const fakeKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
@@ -11,32 +11,32 @@ describe('validateCoSigners', () => {
         { id: '2', name: 'John Doe', keys: fakeKeys }
       ])
     ).toEqual([
-      { id: '1', name: 'duplicated' },
-      { id: '2', name: 'duplicated' }
+      { id: '1', name: CoSignerErrorName.Duplicated },
+      { id: '2', name: CoSignerErrorName.Duplicated }
     ] as CoSignerError[]);
   });
 
   test('name empty', () => {
     expect(validateCoSigners([{ id: '1', name: '', keys: fakeKeys }])).toEqual([
-      { id: '1', name: 'required' }
+      { id: '1', name: CoSignerErrorName.Required }
     ] as CoSignerError[]);
   });
 
   test('name to long', () => {
     expect(validateCoSigners([{ id: '1', name: '123456789012345678901', keys: fakeKeys }])).toEqual([
-      { id: '1', name: 'tooLong' }
+      { id: '1', name: CoSignerErrorName.TooLong }
     ] as CoSignerError[]);
   });
 
   test('keys empty', () => {
     expect(validateCoSigners([{ id: '1', name: 'John Doe', keys: '' }])).toEqual([
-      { id: '1', keys: 'required' }
+      { id: '1', keys: CoSignerErrorKeys.Required }
     ] as CoSignerError[]);
   });
 
   test('keys incorrect', () => {
     expect(validateCoSigners([{ id: '1', name: 'John Doe', keys: 'incorrect' }])).toEqual([
-      { id: '1', keys: 'invalid' }
+      { id: '1', keys: CoSignerErrorKeys.Invalid }
     ] as CoSignerError[]);
   });
 
@@ -51,8 +51,8 @@ describe('validateCoSigners', () => {
         { id: '2', name: 'John Doe', keys: 'incorrect' }
       ])
     ).toEqual([
-      { id: '1', name: 'tooLong' },
-      { id: '2', keys: 'invalid' }
+      { id: '1', name: CoSignerErrorName.TooLong },
+      { id: '2', keys: CoSignerErrorKeys.Invalid }
     ] as CoSignerError[]);
   });
 });

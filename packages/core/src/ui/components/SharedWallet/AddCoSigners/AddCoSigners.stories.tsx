@@ -26,7 +26,9 @@ export const Overview = (): JSX.Element => {
       onBack={() => void 0}
       onNext={() => void 0}
       coSigners={coSigners}
-      onValueChange={(coSigner) => setCoSigners(coSigners.map((c) => (c.id === coSigner.id ? coSigner : c)))}
+      onValueChange={(coSigner) =>
+        setCoSigners(coSigners.map((signer) => (signer.id === coSigner.id ? coSigner : signer)))
+      }
       errors={[]}
     />
   );
