@@ -1,4 +1,6 @@
-import { QuorumOptionValue, QuorumRadioOption } from '@lace/core';
+import { useWalletManager } from '@hooks';
+import { CoSigner, CoSignerError, QuorumOptionValue, QuorumRadioOption } from '@lace/core';
+import { walletRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
 import React, {
   createContext,
@@ -12,19 +14,20 @@ import React, {
 } from 'react';
 import { SharedWalletCreationStep } from './types';
 import { firstValueFrom } from 'rxjs';
-import { useWalletManager } from '@hooks';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { useHistory } from 'react-router';
-import { walletRoutePaths } from '@routes';
+import { v1 as uuid } from 'uuid';
+import { validateCoSigners } from './validateCoSigners';
 
 type StateMainPart = {
   step: SharedWalletCreationStep;
 };
 
 type StateVariableDataPart = {
-  coSignersKeys?: string[];
-  quorumRules?: QuorumOptionValue;
-  walletName?: string;
+  coSigners: CoSigner[] | undefined;
+  coSignersErrors: CoSignerError[] | undefined;
+  quorumRules: QuorumOptionValue | undefined;
+  walletName: string | undefined;
 };
 
 type StateConstantDataPart = {
@@ -37,45 +40,63 @@ type MakeState<S extends StateMainPart & StateVariableDataPart> = S &
   StateConstantDataPart;
 
 export type StateSetup = MakeState<{
-  coSignersKeys: undefined;
+  coSigners: undefined;
+  coSignersErrors: undefined;
   quorumRules: undefined;
   step: SharedWalletCreationStep.Setup;
   walletName: string | undefined;
 }>;
 
-export type StateCoSigners = MakeState<{
-  coSignersKeys: string[];
+type StateCoSignersCommon = {
+  coSigners: CoSigner[];
+  coSignersErrors: CoSignerError[];
   quorumRules: undefined;
-  step: SharedWalletCreationStep.CoSigners;
   walletName: string;
-}>;
+};
+
+export type StateCoSigners = MakeState<
+  StateCoSignersCommon & {
+    step: SharedWalletCreationStep.CoSigners;
+  }
+>;
+
+export type StateCoSignersImportantInfo = MakeState<
+  StateCoSignersCommon & {
+    step: SharedWalletCreationStep.CoSignersImportantInfo;
+  }
+>;
 
 export type StateQuorum = MakeState<{
-  coSignersKeys: string[];
+  coSigners: CoSigner[];
+  coSignersErrors: CoSignerError[];
   quorumRules: QuorumOptionValue;
   step: SharedWalletCreationStep.Quorum;
   walletName: string;
 }>;
 
-export type StateShareDetails = MakeState<{
-  coSignersKeys: string[];
-  step: SharedWalletCreationStep.ShareDetails;
-  walletName: string;
-}>;
+export type StateShareDetails = MakeState<
+  StateCoSignersCommon & {
+    coSignersKeys: string[];
+    step: SharedWalletCreationStep.ShareDetails;
+    walletName: string;
+  }
+>;
 
-type State = StateSetup | StateCoSigners | StateQuorum | StateShareDetails;
+type State = StateSetup | StateCoSigners | StateCoSignersImportantInfo | StateQuorum | StateShareDetails;
 
 export enum SharedWalletActionType {
-  NEXT,
-  BACK,
-  CHANGE_WALLET_NAME,
-  QUORUM_RULES_CHANGED
+  NEXT = 'NEXT',
+  BACK = 'BACK',
+  CHANGE_WALLET_NAME = 'CHANGE_WALLET_NAME',
+  COSIGNERS_CHANGED = 'COSIGNERS_CHANGED',
+  QUORUM_RULES_CHANGED = 'QUORUM_RULES_CHANGED'
 }
 
 type Action =
   | { type: SharedWalletActionType.NEXT }
   | { type: SharedWalletActionType.BACK }
   | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string }
+  | { type: SharedWalletActionType.COSIGNERS_CHANGED; coSigner: CoSigner }
   | { type: SharedWalletActionType.QUORUM_RULES_CHANGED; quorumRules: QuorumOptionValue };
 
 type Handler<S extends State> = (prevState: S, action: Action) => State;
@@ -83,6 +104,7 @@ type Handler<S extends State> = (prevState: S, action: Action) => State;
 type StateMachine = {
   [SharedWalletCreationStep.Setup]: Handler<StateSetup>;
   [SharedWalletCreationStep.CoSigners]: Handler<StateCoSigners>;
+  [SharedWalletCreationStep.CoSignersImportantInfo]: Handler<StateCoSignersImportantInfo>;
   [SharedWalletCreationStep.Quorum]: Handler<StateQuorum>;
   [SharedWalletCreationStep.ShareDetails]: Handler<StateShareDetails>;
 };
@@ -103,11 +125,14 @@ export const useSharedWalletCreationStore = (): ContextValue => {
 
 const makeInitialState = (activeWalletName: string): State => ({
   activeWalletName,
-  coSignersKeys: undefined,
+  coSigners: undefined,
+  coSignersErrors: undefined,
   quorumRules: undefined,
   step: SharedWalletCreationStep.Setup,
   walletName: undefined
 });
+
+const getInitialCoSignerValue = (): CoSigner => ({ id: uuid(), keys: '', name: '' });
 
 const makeStateMachine = ({
   navigateHome,
@@ -130,7 +155,8 @@ const makeStateMachine = ({
     if (action.type === SharedWalletActionType.NEXT) {
       return {
         ...prevState,
-        coSignersKeys: ['', ''],
+        coSigners: [getInitialCoSignerValue(), getInitialCoSignerValue()],
+        coSignersErrors: [],
         step: SharedWalletCreationStep.CoSigners,
         walletName: prevState.walletName
       };
@@ -138,16 +164,61 @@ const makeStateMachine = ({
     return prevState;
   },
   [SharedWalletCreationStep.CoSigners]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.COSIGNERS_CHANGED) {
+      const matchingPrevCoSigner = prevState.coSigners.find((prevCosigner) => prevCosigner.id === action.coSigner.id);
+      if (!matchingPrevCoSigner) return prevState;
+
+      const nextCoSigners = prevState.coSigners.map((coSigner) =>
+        coSigner.id === action.coSigner.id ? action.coSigner : coSigner
+      );
+      const coSignersErrors = validateCoSigners(nextCoSigners);
+      // Validation function raises errors for every cosigner entry. Our current implementation
+      // have fixed 2 fields for cosigners so if user decided to specify only 1 then the second
+      // fields should stay empty and should not show errors.
+      // This filter should be removed once we enable the "add cosigner" button
+      const filteredCosignerErrors = coSignersErrors.filter(
+        ({ id }) => !nextCoSigners.some((c) => c.id === id && !c.keys && !c.name)
+      );
+
+      return {
+        ...prevState,
+        coSigners: nextCoSigners,
+        coSignersErrors: filteredCosignerErrors
+      };
+    }
     if (action.type === SharedWalletActionType.BACK) {
       return {
         ...prevState,
-        coSignersKeys: undefined,
+        coSigners: undefined,
+        coSignersErrors: undefined,
         step: SharedWalletCreationStep.Setup
       };
     }
     if (action.type === SharedWalletActionType.NEXT) {
+      if (prevState.coSigners.length === 0) return prevState;
+
       return {
         ...prevState,
+        step: SharedWalletCreationStep.CoSignersImportantInfo
+      };
+    }
+    return prevState;
+  },
+  [SharedWalletCreationStep.CoSignersImportantInfo]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.BACK) {
+      return {
+        ...prevState,
+        step: SharedWalletCreationStep.CoSigners
+      };
+    }
+    if (action.type === SharedWalletActionType.NEXT) {
+      // Having two cosigner fields fixed we need to filter out the empty cosigner
+      const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
+      if (coSigners.length === 0) return prevState;
+
+      return {
+        ...prevState,
+        coSigners,
         quorumRules: {
           option: QuorumRadioOption.AllAddresses
         },
@@ -158,8 +229,15 @@ const makeStateMachine = ({
   },
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
     if (action.type === SharedWalletActionType.BACK) {
+      // Having two cosigner fields fixed we need to fall back to two entries if user specified
+      // just one because the empty one was filtere out in brevious step.
+      const coSigners = [
+        prevState.coSigners[0] || getInitialCoSignerValue(),
+        prevState.coSigners[1] || getInitialCoSignerValue()
+      ];
       return {
         ...prevState,
+        coSigners,
         quorumRules: undefined,
         step: SharedWalletCreationStep.CoSigners
       };
@@ -167,6 +245,10 @@ const makeStateMachine = ({
     if (action.type === SharedWalletActionType.NEXT) {
       return {
         ...prevState,
+        coSigners: undefined,
+        coSignersKeys: undefined,
+        coSignersErrors: undefined,
+        quorumRules: undefined,
         step: SharedWalletCreationStep.ShareDetails
       };
     }
