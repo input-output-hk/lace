@@ -1,5 +1,4 @@
 import { QuorumOptionValue, QuorumRadioOption } from '@lace/core';
-import { walletRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
 import React, {
   createContext,
@@ -11,10 +10,12 @@ import React, {
   useMemo,
   useReducer
 } from 'react';
-import { useHistory } from 'react-router-dom';
 import { SharedWalletCreationStep } from './types';
 import { firstValueFrom } from 'rxjs';
 import { useWalletManager } from '@hooks';
+import { useBackgroundPage } from '@providers/BackgroundPageProvider';
+import { useHistory } from 'react-router';
+import { walletRoutePaths } from '@routes';
 
 type StateMainPart = {
   step: SharedWalletCreationStep;
@@ -56,7 +57,13 @@ export type StateQuorum = MakeState<{
   walletName: string;
 }>;
 
-type State = StateSetup | StateCoSigners | StateQuorum;
+export type StateShareDetails = MakeState<{
+  coSignersKeys: string[];
+  step: SharedWalletCreationStep.ShareDetails;
+  walletName: string;
+}>;
+
+type State = StateSetup | StateCoSigners | StateQuorum | StateShareDetails;
 
 export enum SharedWalletActionType {
   NEXT,
@@ -77,6 +84,7 @@ type StateMachine = {
   [SharedWalletCreationStep.Setup]: Handler<StateSetup>;
   [SharedWalletCreationStep.CoSigners]: Handler<StateCoSigners>;
   [SharedWalletCreationStep.Quorum]: Handler<StateQuorum>;
+  [SharedWalletCreationStep.ShareDetails]: Handler<StateShareDetails>;
 };
 
 type ContextValue = {
@@ -101,7 +109,13 @@ const makeInitialState = (activeWalletName: string): State => ({
   walletName: undefined
 });
 
-const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): StateMachine => ({
+const makeStateMachine = ({
+  navigateHome,
+  navigateToStart
+}: {
+  navigateHome: () => void;
+  navigateToStart: () => void;
+}): StateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
       return {
@@ -110,11 +124,10 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       };
     }
     if (action.type === SharedWalletActionType.BACK) {
-      navigateHome();
+      navigateToStart();
       return prevState;
     }
     if (action.type === SharedWalletActionType.NEXT) {
-      if (!prevState.walletName) return prevState;
       return {
         ...prevState,
         coSignersKeys: ['', ''],
@@ -154,9 +167,7 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
     if (action.type === SharedWalletActionType.NEXT) {
       return {
         ...prevState,
-        coSignersKeys: undefined,
-        quorumRules: undefined,
-        step: SharedWalletCreationStep.Setup
+        step: SharedWalletCreationStep.ShareDetails
       };
     }
     if (action.type === SharedWalletActionType.QUORUM_RULES_CHANGED) {
@@ -166,6 +177,14 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       };
     }
     return prevState;
+  },
+  [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.NEXT) {
+      navigateHome();
+      return prevState;
+    }
+
+    return prevState;
   }
 });
 
@@ -174,16 +193,18 @@ type SharedWalletCreationStoreProps = {
 };
 
 export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStoreProps): ReactElement => {
-  const history = useHistory();
   const { walletRepository } = useWalletManager();
+  const history = useHistory();
   const { walletInfo } = useWalletStore();
 
+  const { setBackgroundPage } = useBackgroundPage();
+
   const initialState = makeInitialState(walletInfo?.name || '');
+
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
     const stateMachine = makeStateMachine({
-      navigateHome: () => {
-        history.push(walletRoutePaths.sharedWallet.root);
-      }
+      navigateHome: setBackgroundPage,
+      navigateToStart: () => history.push(walletRoutePaths.sharedWallet.root)
     });
     const handler = stateMachine[prevState.step] as Handler<State>;
     return handler(prevState, action);
