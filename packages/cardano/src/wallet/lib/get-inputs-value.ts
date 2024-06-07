@@ -28,7 +28,8 @@ export const getTxInputsValueAndAddress = async (
 ): Promise<TxInput[]> => {
   const inputsOutputsMapping = new Map<Cardano.TransactionId, Cardano.TxOut>();
   const txIdsToResolveInputs = new Set<Cardano.TransactionId>();
-  const util = createWalletUtil(wallet);
+
+  const util = createWalletUtil({ ...wallet, chainHistoryProvider: chainProviderInstance });
 
   for (const input of inputs) {
     const resolvedInput = await util.resolveInput(input);

@@ -3,7 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { AssetSelectorOverlay, AssetSelectorOverlayProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
-import { useFetchCoinPrice, PriceResult, useMaxAda, AssetOrHandleInfoMap, useAssetInfo } from '@hooks';
+import {
+  useFetchCoinPrice,
+  PriceResult,
+  useMaxAda,
+  AssetOrHandleInfoMap,
+  useAssetInfo,
+  useChainHistoryProvider
+} from '@hooks';
 import { EnvironmentTypes, useWalletStore } from '@src/stores';
 import {
   useCoinStateSelector,
@@ -25,7 +32,7 @@ import { firstValueFrom } from 'rxjs';
 import { WarningModal } from '@src/views/browser-view/components';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import styles from './AssetPicker.module.scss';
-import { useCurrencyStore } from '@providers';
+import { useAppSettingsContext, useCurrencyStore } from '@providers';
 import { isNFT } from '@src/utils/is-nft';
 import { useObservable } from '@lace/common';
 
@@ -94,8 +101,10 @@ const isTokenBundleSizeExceedingLimit = async (
   selectedTokenIds: Array<string>,
   inMemoryWallet: Wallet.ObservableWallet
 ) => {
+  const [{ chainName }] = useAppSettingsContext();
+  const chainHistoryProvider = useChainHistoryProvider({ chainName });
   // should we validate the other added assets to the bundle transaction? (existing outputs)
-  const { validateOutput } = Wallet.createWalletUtil(inMemoryWallet);
+  const { validateOutput } = Wallet.createWalletUtil({ ...inMemoryWallet, chainHistoryProvider });
   // how much tokens should we use to validate this, the entire amount for each selected asset or just 1?
   const { coins, assets } = await firstValueFrom(inMemoryWallet.balance.utxo.available$);
   // we need a valid address for the outputs

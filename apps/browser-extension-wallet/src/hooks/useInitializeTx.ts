@@ -8,6 +8,8 @@ import { useWalletStore } from '@src/stores';
 import { useMaxAda } from './useMaxAda';
 import { UseTranslationResponse } from 'react-i18next';
 import type { TranslationKey } from '@lace/translation';
+import { useChainHistoryProvider } from './useChainHistoryProvider';
+import { useAppSettingsContext } from '@providers';
 
 const { buildTransactionProps, setMissingCoins, getTotalMinimumCoins } = Wallet;
 
@@ -50,6 +52,8 @@ export const useInitializeTx = (
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const tokensUsed = useSpentBalances();
   const spendableCoin = useMaxAda();
+  const [{ chainName }] = useAppSettingsContext();
+  const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
   const buildTransaction = useCallback(async () => {
     const reachedMaxAmountList = getReachedMaxAmountList({
@@ -71,7 +75,8 @@ export const useInitializeTx = (
     } else {
       try {
         const partialTxProps = buildTransactionProps({ metadata, outputsMap: outputs, assetsInfo });
-        const util = Wallet.createWalletUtil(inMemoryWallet);
+
+        const util = Wallet.createWalletUtil({ ...inMemoryWallet, chainHistoryProvider });
         const minimumCoinQuantities = await util.validateOutputs(partialTxProps.outputs);
         const totalMinimumCoins = getTotalMinimumCoins(minimumCoinQuantities);
         const outputsWithMissingCoins = setMissingCoins(minimumCoinQuantities, partialTxProps.outputs);

@@ -3,6 +3,8 @@ import { subtractValueQuantities } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useObservable } from '@lace/common';
+import { useAppSettingsContext } from '@providers';
+import { useChainHistoryProvider } from './useChainHistoryProvider';
 
 const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 
@@ -11,6 +13,8 @@ export const useMaxAda = (): bigint => {
   const { walletInfo, inMemoryWallet } = useWalletStore();
   const balance = useObservable(inMemoryWallet?.balance?.utxo.available$);
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
+  const [{ chainName }] = useAppSettingsContext();
+  const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
   const calculateMaxAda = useCallback(async () => {
     if (!balance) {
@@ -19,7 +23,7 @@ export const useMaxAda = (): bigint => {
     }
 
     if (balance.coins) {
-      const util = Wallet.createWalletUtil(inMemoryWallet);
+      const util = Wallet.createWalletUtil({ ...inMemoryWallet, chainHistoryProvider });
       // create and output with only the wallet tokens and nfts so we can calculate the mising coins for feature txs
       const outputs = new Set([
         {
