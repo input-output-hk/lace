@@ -1,4 +1,7 @@
 {
   "extends": "@lace/configs/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./src"
+  },
   "references": [{ "path": "../../packages/core/src" }, { "path": "../../packages/cardano/src" }]
 }

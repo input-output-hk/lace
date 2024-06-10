@@ -1,3 +1,6 @@
 {
-  "extends": "@lace/configs/tsconfig.json"
+  "extends": "@lace/configs/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./src"
+  }
 }
