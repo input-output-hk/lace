@@ -1,0 +1,3 @@
+{
+  "extends": "@lace/configs/tsconfig.json"
+}

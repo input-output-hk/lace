@@ -1,19 +1,4 @@
 {
-  "extends": "@tsconfig/create-react-app/tsconfig.json",
-  "compilerOptions": {
-    "allowJs": false,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "outDir": "dist",
-    "module": "es2020",
-    "target": "es2016",
-    "preserveConstEnums": true,
-    "baseUrl": "./src"
-  },
+  "extends": "@lace/configs/tsconfig.json",
   "references": [{ "path": "../../packages/core/src" }, { "path": "../../packages/cardano/src" }]
 }

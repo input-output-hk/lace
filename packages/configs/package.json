@@ -1,0 +1,11 @@
+{
+  "name": "@lace/configs",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/lace.git"
+  },
+  "license": "Apache-2.0",
+  "author": "IOHK"
+}

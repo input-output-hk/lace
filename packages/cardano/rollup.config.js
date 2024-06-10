@@ -1,4 +1,4 @@
-import rollupBase from '../../rollup.config';
+import rollupBase from '../configs/rollup.config';
 import packageJson from './package.json';
 
 export default (args) => {

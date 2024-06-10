@@ -1,19 +1,20 @@
-import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
 import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import postcss from 'rollup-plugin-postcss';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
 import svgr from '@svgr/rollup';
+import nodePolyfills from 'rollup-plugin-node-polyfills';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import postcss from 'rollup-plugin-postcss';
 
 export default ({
   tsPluginOptions = {
-    tsconfig: 'src/tsconfig.json',
     composite: false,
-    exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx']
-  }
+    exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx'],
+    tsconfig: 'src/tsconfig.json',
+  },
 } = {}) => ({
+  external: [/node_modules/],
   input: 'src/index.ts',
   plugins: [
     resolve({
@@ -26,14 +27,13 @@ export default ({
       // no matter what build type it is. It makes cjs build requiring esm version
       // https://github.com/egoist/rollup-plugin-postcss/issues/381
       // https://github.com/egoist/rollup-plugin-postcss/issues/367
-      inject: cssVariableName => `
+      inject: (cssVariableName) => `
 import styleInject from 'style-inject';
-styleInject(${cssVariableName});`
+styleInject(${cssVariableName});`,
     }),
     commonjs(),
     nodePolyfills(),
     image(),
-    svgr({ icon: true })
+    svgr({ icon: true }),
   ],
-  external: [/node_modules/]
 });
