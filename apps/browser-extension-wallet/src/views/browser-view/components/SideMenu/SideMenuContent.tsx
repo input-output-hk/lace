@@ -1,5 +1,5 @@
-import React from 'react';
-import { Menu, MenuProps } from 'antd';
+import React, { useState, useRef } from 'react';
+import { Menu, MenuProps, Tour, TourProps } from 'antd';
 import classnames from 'classnames';
 import { MenuItemList } from '@utils/constants';
 import { SideMenuItemConfig } from '@types';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { SideMenuLabel } from './SideMenuLabel';
 import { SideMenuItem } from '@views/browser/components/SideMenu/SideMenuItem';
 import styles from './SideMenuContent.module.scss';
+import { noop } from 'lodash/noop';
 
 export interface SideMenuContentProps {
   menuItems: SideMenuItemConfig[];
@@ -42,28 +43,71 @@ export const SideMenuContent = ({
 }: SideMenuContentProps): React.ReactElement => {
   const { t } = useTranslation();
 
+  const ref1 = useRef(null);
+  const ref2 = useRef(null);
+  const ref3 = useRef(null);
+  const ref4 = useRef(null);
+  const [open, setOpen] = useState<boolean>(true);
+
+  const refs = [ref1, ref2, ref3, ref4];
+
+  const steps: TourProps['steps'] = [
+    {
+      title: 'Tokens',
+      description: 'This is where you can see a list of all your tokens.',
+      target: () => ref1.current
+    },
+    {
+      title: 'NFTs',
+      description: 'You can see your NFTs in this section.',
+      target: () => ref2.current
+    },
+    {
+      title: 'Activity',
+      description: 'All your transaction history can be found here.',
+      target: () => ref3.current
+    },
+    {
+      title: 'Staking',
+      description: 'Contribute to the network by staking your ADA.',
+      target: () => ref4.current
+    }
+  ];
+
   return (
-    <Menu
-      className={styles.menuContainer}
-      data-testid="side-menu"
-      selectedKeys={[activeItemId]}
-      onClick={onClick}
-      mode="inline"
-    >
-      {menuItems.map((menuItem) => (
-        <SideMenuItem
-          onMouseEnter={() => onMouseEnter(menuItem.id)}
-          onMouseLeave={onMouseLeave}
-          data-testid={menuItem.testId}
-          key={menuItem.path}
-          className={classnames(styles.menuItem, menuItemClassName)}
-        >
-          {React.createElement(getIcon(menuItem, activeItemId, hoveredItemId), {
-            className: classnames(styles.icon, menuItem.iconClassName)
-          })}
-          <SideMenuLabel className={styles.concealableMenuLabel}>{t(menuItem.label)}</SideMenuLabel>
-        </SideMenuItem>
-      ))}
-    </Menu>
+    <>
+      <Menu
+        className={styles.menuContainer}
+        data-testid="side-menu"
+        selectedKeys={[activeItemId]}
+        onClick={onClick}
+        mode="inline"
+      >
+        {menuItems.map((menuItem, i) => (
+          <SideMenuItem
+            onMouseEnter={() => onMouseEnter(menuItem.id)}
+            onMouseLeave={onMouseLeave}
+            data-testid={menuItem.testId}
+            key={menuItem.path}
+            className={classnames(styles.menuItem, menuItemClassName)}
+          >
+            {React.createElement(getIcon(menuItem, activeItemId, hoveredItemId), {
+              className: classnames(styles.icon, menuItem.iconClassName)
+            })}
+            <SideMenuLabel ref={refs[i]} className={styles.concealableMenuLabel}>
+              {t(menuItem.label)}
+            </SideMenuLabel>
+          </SideMenuItem>
+        ))}
+      </Menu>
+      <Tour
+        open={open}
+        onClose={() => setOpen(false)}
+        steps={steps}
+        onPopupAlign={noop}
+        placement="right"
+        rootClassName={styles.tour}
+      />
+    </>
   );
 };

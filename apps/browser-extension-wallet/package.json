@@ -59,7 +59,7 @@
     "@react-rxjs/core": "^0.9.8",
     "@react-rxjs/utils": "^0.9.5",
     "@vespaiach/axios-fetch-adapter": "^0.3.0",
-    "antd": "^4.24.10",
+    "antd": "^5.15.1",
     "are-you-es5": "^2.1.2",
     "axios": "0.28.0",
     "bignumber.js": "9.0.1",
