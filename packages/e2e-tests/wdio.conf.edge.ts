@@ -18,7 +18,7 @@ const edgeConfig = {
           '--enable-automation',
           '--no-first-run',
           '--no-default-browser-check',
-          `--load-extension=${__dirname}/../../apps/browser-extension-wallet/dist`,
+          `--load-extension=${import.meta.dirname}/../../apps/browser-extension-wallet/dist`,
           '--allow-insecure-localhost',
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
