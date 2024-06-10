@@ -75,10 +75,8 @@ export type StateQuorum = MakeState<{
 }>;
 
 export type StateShareDetails = MakeState<
-  StateCoSignersCommon & {
-    coSignersKeys: string[];
+  Omit<StateQuorum, 'step'> & {
     step: SharedWalletCreationStep.ShareDetails;
-    walletName: string;
   }
 >;
 
@@ -245,12 +243,8 @@ const makeStateMachine = ({
     if (action.type === SharedWalletActionType.NEXT) {
       return {
         ...prevState,
-        coSigners: undefined,
-        coSignersKeys: undefined,
-        coSignersErrors: undefined,
-        quorumRules: undefined,
         step: SharedWalletCreationStep.ShareDetails
-      };
+      } as StateShareDetails;
     }
     if (action.type === SharedWalletActionType.QUORUM_RULES_CHANGED) {
       return {
