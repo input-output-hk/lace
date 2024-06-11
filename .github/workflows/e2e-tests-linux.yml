@@ -60,7 +60,7 @@ jobs:
           Xvfb :99 &
       - name: Install Playwright dependencies
         run: |
-          runCommand="npx playwright install chrome --with-deps"
+          runCommand="npx playwright install --with-deps chrome
           eval "$runCommand";
       - name: Execute E2E tests
         id: e2e-tests
