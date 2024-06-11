@@ -24,3 +24,13 @@ Feature: Staking Page - Delegated funds - Multiple pools - Popup View
     When I click "Expand view" on Start Staking page
     And I switch to last window
     Then I see Lace extension main page in extended mode
+
+  @LW-2652
+  Scenario: Popup View - Staking  - Currently staking components
+    When I navigate to Staking popup page
+    Then I see currently staking component for stake pool:
+      | position | poolName                        | poolTickerOrId | hasMetadata |
+      | 1        | AzureADA                        | AZUR           | true        |
+      | 2        | AVA - Testnet Pool              | AVA            | true        |
+      | 3        | ATADA Austria - PreProd Pool #1 | ATADA          | true        |
+      | 4        | Artemis Preprod Stakepool       | ARTMS          | true        |

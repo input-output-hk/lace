@@ -1,4 +1,4 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import MultiDelegationBetaModal from '../elements/multidelegation/MultiDelegationBetaModal';
 import MultidelegationPageAssert from '../assert/multidelegation/MultidelegationPageAssert';
 import MultidelegationPage from '../elements/multidelegation/MultidelegationPage';
@@ -589,5 +589,16 @@ Then(
 When(/^I close the modal about issues with multidelegation and DApps$/, async () => {
   if (await MultidelegationDAppIssueModal.gotItButton.isDisplayed()) {
     await MultidelegationDAppIssueModal.gotItButton.click();
+  }
+});
+
+Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {
+  for (const row of stakePools.hashes()) {
+    await MultidelegationPageAssert.assertSeeCurrentlyStakingComponent(
+      Number(row.position),
+      row.poolName,
+      row.poolTickerOrId,
+      Boolean(row.hasMetadata)
+    );
   }
 });
