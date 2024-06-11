@@ -1,10 +1,12 @@
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import { BasePage } from './basePage';
-import { BaseModal } from './onboarding/modals/baseModal';
 
 export class LaceBasePage extends BasePage {
+  readonly totalBalance: Locator;
+
   constructor(page: Page) {
     super(page);
+    this.totalBalance = page.getByTestId('portfolio-balance-value');
   }
 
   getBaseUrlFromCurrentUrl(): string {
@@ -14,7 +16,6 @@ export class LaceBasePage extends BasePage {
   }
 
   async waitForPageLoad(): Promise<void> {
-    await new BaseModal(this.page).clickAgree();
-    await new BaseModal(this.page).totalBalance.waitFor({ state: 'visible' });
+    await this.totalBalance.waitFor({ state: 'visible' });
   }
 }
