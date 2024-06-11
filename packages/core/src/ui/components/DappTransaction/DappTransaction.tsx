@@ -86,8 +86,13 @@ const groupAddresses = (addresses: Map<Cardano.PaymentAddress, TokenTransferValu
 
 type TransactionType = keyof typeof TransactionTypes;
 
-const getFallbackName = (asset: AssetInfoWithAmount) =>
-  Wallet.Cardano.AssetName.toUTF8(asset.assetInfo.name) || asset.assetInfo.assetId;
+const getFallbackName = (asset: AssetInfoWithAmount) => {
+  try {
+    return Wallet.Cardano.AssetName.toUTF8(asset.assetInfo.name);
+  } catch {
+    return asset.assetInfo.assetId;
+  }
+};
 
 const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
   if (isNFT(assetWithAmount)) {

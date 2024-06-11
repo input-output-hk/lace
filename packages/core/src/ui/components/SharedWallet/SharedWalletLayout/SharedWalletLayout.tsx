@@ -5,6 +5,7 @@ import { TFunction } from 'i18next';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './SharedWalletLayout.module.scss';
+import { LayoutNavigationProps } from './type';
 
 export enum SharedWalletTimelineSteps {
   WALLET_NAME,
@@ -17,8 +18,6 @@ export interface SharedWalletLayoutProps {
   title: React.ReactNode;
   children: React.ReactNode;
   description: React.ReactNode;
-  onNext?: () => void;
-  onBack?: () => void;
   customNextLabel?: string;
   customBackLabel?: string;
   isNextEnabled?: boolean;
@@ -31,18 +30,13 @@ const getTimelineSteps = (currentStep: SharedWalletTimelineSteps, t: TFunction) 
     { key: SharedWalletTimelineSteps.ADD_COSIGNERS, name: t('core.sharedWalletLayout.timelineStep.addCosigners') },
     { key: SharedWalletTimelineSteps.DEFINE_QUORUM, name: t('core.sharedWalletLayout.timelineStep.defineQuorum') },
     { key: SharedWalletTimelineSteps.WALLET_DETAILS, name: t('core.sharedWalletLayout.timelineStep.walletDetails') }
-  ].map((step) => ({
-    ...step,
-    active: false
-  }));
+  ];
 
-  return walletSteps.map((step, index, self) => {
-    const previousStepActive = self[index - 1]?.active || false;
-    return {
-      ...step,
-      active: step.key === currentStep || previousStepActive
-    };
-  });
+  const indexOfCurrentStep = walletSteps.findIndex(({ key }) => key === currentStep);
+  return walletSteps.map((step, index) => ({
+    ...step,
+    active: index <= indexOfCurrentStep
+  }));
 };
 
 export const SharedWalletLayout = ({
@@ -55,7 +49,7 @@ export const SharedWalletLayout = ({
   customBackLabel,
   isNextEnabled = true,
   currentTimelineStep
-}: SharedWalletLayoutProps): React.ReactElement => {
+}: SharedWalletLayoutProps & LayoutNavigationProps): React.ReactElement => {
   const { t } = useTranslation();
 
   const defaultLabel = {
@@ -95,7 +89,12 @@ export const SharedWalletLayout = ({
           {children}
         </ScrollArea>
 
-        <Flex data-testid="shared-wallet-step-footer" justifyContent="space-between" w="$fill" alignItems="center">
+        <Flex
+          data-testid="shared-wallet-step-footer"
+          justifyContent={onBack ? 'space-between' : 'flex-end'}
+          w="$fill"
+          alignItems="center"
+        >
           {onBack && (
             <Button.Secondary
               label={customBackLabel || defaultLabel.back}

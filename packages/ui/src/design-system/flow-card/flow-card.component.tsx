@@ -7,7 +7,7 @@ import { Box } from '../box';
 
 type Props = OmitClassName<'div'> & {
   children: React.ReactNode;
-  flowCardClassName: string;
+  flowCardClassName?: string;
 };
 
 export const Card = ({ children, ...props }: Readonly<Props>): JSX.Element => (
