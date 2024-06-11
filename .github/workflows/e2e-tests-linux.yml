@@ -59,10 +59,8 @@ jobs:
         run: |
           Xvfb :99 &
       - name: Install Playwright dependencies
-        id: playwright-dependencies
-        working-directory: ./packages/playwright-tests
-        run:
-          runCommand="yarn playwright install"
+        run: |
+          runCommand="npx playwright install --with-deps"
           eval "$runCommand";
       - name: Execute E2E tests
         id: e2e-tests
