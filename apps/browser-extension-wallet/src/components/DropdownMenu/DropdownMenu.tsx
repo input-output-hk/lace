@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { forwardRef, useEffect } from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
 import { Button, addEllipsis } from '@lace/common';
@@ -17,9 +17,10 @@ import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
+  ref?: any;
 }
 
-export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
+export const DropdownMenu = forwardRef(({ isPopup, ref }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const {
     cardanoWallet,
@@ -73,6 +74,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
             }
             type={getUiWalletType(cardanoWallet.source.wallet.type)}
             id="menu"
+            ref={ref}
           />
         </div>
       ) : (
@@ -81,6 +83,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
           color="secondary"
           className={cn(styles.avatarBtn, { [styles.open]: isDropdownMenuOpen })}
           data-testid="header-menu-button"
+          ref={ref}
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
             <UserAvatar walletName={walletName} isPopup={isPopup} avatar={activeWalletAvatar} />
@@ -93,4 +96,4 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       )}
     </Dropdown>
   );
-};
+});

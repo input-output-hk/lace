@@ -15,6 +15,7 @@ export interface SendReceiveProps {
   popupView?: boolean;
   sharedClass?: string;
   translations: TranslationsFor<'send' | 'receive'>;
+  refs?: any[];
 }
 
 export const SendReceive = ({
@@ -25,17 +26,18 @@ export const SendReceive = ({
   rightButtonOnClick,
   isReversed = false,
   popupView = false,
-  sharedClass
+  sharedClass,
+  refs
 }: SendReceiveProps): React.ReactElement => (
   <div
     className={classnames(styles.buttonsContainer, isReversed && styles.reversed, popupView && styles.popupContainer)}
     data-testid="send-receive-container"
   >
-    <Button className={sharedClass} block onClick={leftButtonOnClick} color="gradient" data-testid="send-button">
+    <Button ref={refs?.[0]} className={sharedClass} block onClick={leftButtonOnClick} color="gradient" data-testid="send-button">
       <ArrowDiagonalUp className={popupView ? styles.popupIconArrowUp : styles.iconArrowUp} />
       {leftButtonLabel}
     </Button>
-    <Button className={sharedClass} block onClick={rightButtonOnClick} color="gradient" data-testid="receive-button">
+    <Button ref={refs?.[1]} className={sharedClass} block onClick={rightButtonOnClick} color="gradient" data-testid="receive-button">
       <ArrowDiagonalDown className={popupView ? styles.popupIconArrowDown : styles.iconArrowDown} />
       {rightButtonLabel}
     </Button>

@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import IntersectionObserver from 'intersection-observer-polyfill';
 import classnames from 'classnames';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
@@ -9,6 +9,7 @@ import styles from './SectionLayout.modules.scss';
 import { SidePanelButton } from '../SidePanelButton/SidePanelButton';
 import { CollapsiblePanelContainer } from '../CollapsiblePanelContainer/CollapsiblePanelContainer';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
+import { TutorialContext } from '../../features/tutorial';
 
 export const CONTENT_ID = 'content';
 
@@ -57,6 +58,8 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
     setIsPanelVisible((prev) => !prev);
   };
 
+  const { refs } = useContext(TutorialContext);
+
   const topNavigation = (
     <div
       className={classnames(styles.navigationBox, {
@@ -65,7 +68,7 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
       })}
     >
       <SendReceiveBox />
-      <DropdownMenu />
+      <DropdownMenu ref={refs?.[6]} />
       {isScreenTooSmallForSidePanel && <SidePanelButton active={isPanelVisible} onClick={toggleSidePanelVisibility} />}
     </div>
   );

@@ -1,5 +1,5 @@
-import type { ComponentPropsWithoutRef } from 'react';
-import React from 'react';
+import type { ComponentPropsWithRef } from 'react';
+import React, { forwardRef } from 'react';
 
 import { ReactComponent as ChevronDown } from '@lace/icons/dist/ChevronDownComponent';
 import { ReactComponent as ChevronUp } from '@lace/icons/dist/ChevronUpComponent';
@@ -13,7 +13,7 @@ import { WalletCard } from './profile-dropdown-wallet-card.component';
 
 import type { WalletType } from './profile-dropdown.data';
 
-export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
+export type Props = Omit<ComponentPropsWithRef<'button'>, 'type'> & {
   disabled?: boolean;
   active?: boolean;
   title: string;
@@ -33,7 +33,7 @@ const makeTestId = (namespace = '', path = ''): string => {
     : `profile-dropdown-trigger-${namespace}${path}`;
 };
 
-export const Trigger = ({
+export const Trigger = forwardRef(({
   id,
   disabled,
   active = false,
@@ -42,10 +42,12 @@ export const Trigger = ({
   subtitle,
   profile,
   type,
+  ref,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
     <button
+      ref={ref}
       {...props}
       id={id}
       disabled={disabled}
@@ -73,4 +75,4 @@ export const Trigger = ({
       </Flex>
     </button>
   );
-};
+});

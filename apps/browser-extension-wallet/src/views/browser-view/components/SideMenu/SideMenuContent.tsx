@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Menu, MenuProps, Tour, TourProps } from 'antd';
+import React, { useContext } from 'react';
+import { Menu, MenuProps } from 'antd';
 import classnames from 'classnames';
 import { MenuItemList } from '@utils/constants';
 import { SideMenuItemConfig } from '@types';
@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { SideMenuLabel } from './SideMenuLabel';
 import { SideMenuItem } from '@views/browser/components/SideMenu/SideMenuItem';
 import styles from './SideMenuContent.module.scss';
-import { noop } from 'lodash/noop';
+import { TutorialContext } from '../../features/tutorial';
 
 export interface SideMenuContentProps {
   menuItems: SideMenuItemConfig[];
@@ -43,36 +43,37 @@ export const SideMenuContent = ({
 }: SideMenuContentProps): React.ReactElement => {
   const { t } = useTranslation();
 
-  const ref1 = useRef(null);
-  const ref2 = useRef(null);
-  const ref3 = useRef(null);
-  const ref4 = useRef(null);
-  const [open, setOpen] = useState<boolean>(true);
+  const { refs } = useContext(TutorialContext);
+  // const ref1 = useRef(null);
+  // const ref2 = useRef(null);
+  // const ref3 = useRef(null);
+  // const ref4 = useRef(null);
+  // const [open, setOpen] = useState<boolean>(true);
 
-  const refs = [ref1, ref2, ref3, ref4];
+  // const refs = [ref1, ref2, ref3, ref4];
 
-  const steps: TourProps['steps'] = [
-    {
-      title: 'Tokens',
-      description: 'This is where you can see a list of all your tokens.',
-      target: () => ref1.current
-    },
-    {
-      title: 'NFTs',
-      description: 'You can see your NFTs in this section.',
-      target: () => ref2.current
-    },
-    {
-      title: 'Activity',
-      description: 'All your transaction history can be found here.',
-      target: () => ref3.current
-    },
-    {
-      title: 'Staking',
-      description: 'Contribute to the network by staking your ADA.',
-      target: () => ref4.current
-    }
-  ];
+  // const steps: TourProps['steps'] = [
+  //   {
+  //     title: 'Tokens',
+  //     description: 'This is where you can see a list of all your tokens.',
+  //     target: () => ref1.current
+  //   },
+  //   {
+  //     title: 'NFTs',
+  //     description: 'You can see your NFTs in this section.',
+  //     target: () => ref2.current
+  //   },
+  //   {
+  //     title: 'Activity',
+  //     description: 'All your transaction history can be found here.',
+  //     target: () => ref3.current
+  //   },
+  //   {
+  //     title: 'Staking',
+  //     description: 'Contribute to the network by staking your ADA.',
+  //     target: () => ref4.current
+  //   }
+  // ];
 
   return (
     <>
@@ -100,14 +101,14 @@ export const SideMenuContent = ({
           </SideMenuItem>
         ))}
       </Menu>
-      <Tour
+      {/* <Tour
         open={open}
         onClose={() => setOpen(false)}
         steps={steps}
         onPopupAlign={noop}
         placement="right"
         rootClassName={styles.tour}
-      />
+      /> */}
     </>
   );
 };

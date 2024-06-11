@@ -32,6 +32,7 @@ import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/c
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
 import { MidnightEventBanner } from './MidnightEventBanner';
+import { TutorialProvider } from '../../tutorial';
 
 const LIST_CHUNK_SIZE = 12;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -317,21 +318,23 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       {drawers}
     </>
   ) : (
-    <Layout>
-      <SectionLayout
-        hasCredit={fullAssetList?.length > 0}
-        sidePanelContent={
-          <Flex flexDirection="column" gap="$28">
-            {USE_FOOR_TOPUP && isMainnet && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}
-            <AssetEducationalList />
-          </Flex>
-        }
-      >
-        <MidnightEventBanner />
-        {topSection}
-        {assetsPortfolio}
-        {drawers}
-      </SectionLayout>
-    </Layout>
+    <TutorialProvider>
+      <Layout>
+        <SectionLayout
+          hasCredit={fullAssetList?.length > 0}
+          sidePanelContent={
+            <Flex flexDirection="column" gap="$28">
+              {USE_FOOR_TOPUP && isMainnet && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}
+              <AssetEducationalList />
+            </Flex>
+          }
+        >
+          <MidnightEventBanner />
+          {topSection}
+          {assetsPortfolio}
+          {drawers}
+        </SectionLayout>
+      </Layout>
+    </TutorialProvider>
   );
 };
