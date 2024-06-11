@@ -62,7 +62,7 @@ jobs:
         id: playwright-dependencies
         working-directory: ./packages/playwright-tests
         run:
-          runCommand="npx playwright install"
+          runCommand="yarn playwright install"
           eval "$runCommand";
       - name: Execute E2E tests
         id: e2e-tests
