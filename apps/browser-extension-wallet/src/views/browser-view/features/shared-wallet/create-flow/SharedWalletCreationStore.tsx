@@ -12,10 +12,11 @@ import React, {
   useMemo,
   useReducer
 } from 'react';
-import { useHistory } from 'react-router-dom';
-import { firstValueFrom } from 'rxjs';
-import { v1 as uuid } from 'uuid';
 import { SharedWalletCreationStep } from './types';
+import { firstValueFrom } from 'rxjs';
+import { useBackgroundPage } from '@providers/BackgroundPageProvider';
+import { useHistory } from 'react-router';
+import { v1 as uuid } from 'uuid';
 import { validateCoSigners } from './validateCoSigners';
 
 type StateMainPart = {
@@ -73,7 +74,13 @@ export type StateQuorum = MakeState<{
   walletName: string;
 }>;
 
-type State = StateSetup | StateCoSigners | StateCoSignersImportantInfo | StateQuorum;
+export type StateShareDetails = MakeState<
+  Omit<StateQuorum, 'step'> & {
+    step: SharedWalletCreationStep.ShareDetails;
+  }
+>;
+
+type State = StateSetup | StateCoSigners | StateCoSignersImportantInfo | StateQuorum | StateShareDetails;
 
 export enum SharedWalletActionType {
   NEXT = 'NEXT',
@@ -97,6 +104,7 @@ type StateMachine = {
   [SharedWalletCreationStep.CoSigners]: Handler<StateCoSigners>;
   [SharedWalletCreationStep.CoSignersImportantInfo]: Handler<StateCoSignersImportantInfo>;
   [SharedWalletCreationStep.Quorum]: Handler<StateQuorum>;
+  [SharedWalletCreationStep.ShareDetails]: Handler<StateShareDetails>;
 };
 
 type ContextValue = {
@@ -124,7 +132,13 @@ const makeInitialState = (activeWalletName: string): State => ({
 
 const getInitialCoSignerValue = (): CoSigner => ({ id: uuid(), keys: '', name: '' });
 
-const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): StateMachine => ({
+const makeStateMachine = ({
+  navigateHome,
+  navigateToStart
+}: {
+  navigateHome: () => void;
+  navigateToStart: () => void;
+}): StateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
       return {
@@ -133,11 +147,10 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
       };
     }
     if (action.type === SharedWalletActionType.BACK) {
-      navigateHome();
+      navigateToStart();
       return prevState;
     }
     if (action.type === SharedWalletActionType.NEXT) {
-      if (!prevState.walletName) return prevState;
       return {
         ...prevState,
         coSigners: [getInitialCoSignerValue(), getInitialCoSignerValue()],
@@ -230,11 +243,8 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
     if (action.type === SharedWalletActionType.NEXT) {
       return {
         ...prevState,
-        coSigners: undefined,
-        coSignersErrors: undefined,
-        quorumRules: undefined,
-        step: SharedWalletCreationStep.Setup
-      };
+        step: SharedWalletCreationStep.ShareDetails
+      } as StateShareDetails;
     }
     if (action.type === SharedWalletActionType.QUORUM_RULES_CHANGED) {
       return {
@@ -242,6 +252,14 @@ const makeStateMachine = ({ navigateHome }: { navigateHome: () => void }): State
         quorumRules: action.quorumRules
       };
     }
+    return prevState;
+  },
+  [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
+    if (action.type === SharedWalletActionType.NEXT) {
+      navigateHome();
+      return prevState;
+    }
+
     return prevState;
   }
 });
@@ -251,16 +269,18 @@ type SharedWalletCreationStoreProps = {
 };
 
 export const SharedWalletCreationStore = ({ children }: SharedWalletCreationStoreProps): ReactElement => {
-  const history = useHistory();
   const { walletRepository } = useWalletManager();
+  const history = useHistory();
   const { walletInfo } = useWalletStore();
 
+  const { setBackgroundPage } = useBackgroundPage();
+
   const initialState = makeInitialState(walletInfo?.name || '');
+
   const [state, dispatch] = useReducer((prevState: State, action: Action): State => {
     const stateMachine = makeStateMachine({
-      navigateHome: () => {
-        history.push(walletRoutePaths.sharedWallet.root);
-      }
+      navigateHome: setBackgroundPage,
+      navigateToStart: () => history.push(walletRoutePaths.sharedWallet.root)
     });
     const handler = stateMachine[prevState.step] as Handler<State>;
     return handler(prevState, action);

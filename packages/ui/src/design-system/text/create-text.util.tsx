@@ -8,7 +8,7 @@ import { bold, medium, regular, semibold, typography } from './text.css';
 import type { TypographyVariants } from './text.css';
 import type { Theme } from '../../design-tokens';
 
-type FontWeights = keyof Theme['fontWeights'];
+export type FontWeights = keyof Theme['fontWeights'];
 
 type TextTypes = TypographyVariants['type'];
 type TextColor = TypographyVariants['color'];
