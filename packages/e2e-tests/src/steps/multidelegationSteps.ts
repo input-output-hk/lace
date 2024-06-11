@@ -34,6 +34,7 @@ import { mapColumnNameStringToEnum, mapSortingOptionNameStringToEnum } from '../
 import { browser } from '@wdio/globals';
 import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
 import MultidelegationDAppIssueModal from '../elements/staking/MultidelegationDAppIssueModal';
+import StakingInfoCard from '../elements/multidelegation/StakingInfoCard';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -131,6 +132,15 @@ Then(/^I see stake pool details drawer for "([^"]*)" stake pool$/, async (stakeP
   }
   await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
 });
+
+Then(
+  /^I see stake pool details drawer for "([^"]*)" stake pool opened from currently staked component$/,
+  async (stakePoolName: string) => {
+    const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
+    const stakePool = getStakePoolByName(stakePoolName, network);
+    await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, true, false, true);
+  }
+);
 
 Then(/^I see stake pool details drawer for stake pool without metadata$/, async () => {
   const stakePool = getStakePoolById(testContext.load('currentStakePoolId'));
@@ -601,4 +611,8 @@ Then(/^I see currently staking component for stake pool:$/, async (stakePools: D
       Boolean(row.hasMetadata)
     );
   }
+});
+
+When(/^I click on pool name in the first currently staking component$/, async () => {
+  await new StakingInfoCard(1).clickOnPoolName();
 });

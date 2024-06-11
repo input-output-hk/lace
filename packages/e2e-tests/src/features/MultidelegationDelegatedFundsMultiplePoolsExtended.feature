@@ -145,3 +145,9 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
       | 2        | AVA - Testnet Pool              | AVA            | true        |
       | 3        | ATADA Austria - PreProd Pool #1 | ATADA          | true        |
       | 4        | Artemis Preprod Stakepool       | ARTMS          | true        |
+
+  @LW-2643 @Smoke
+  Scenario: Extended View - Staking - Details of currently staked pool
+    And I navigate to Staking extended page
+    When I click on pool name in the first currently staking component
+    Then I see stake pool details drawer for "AzureADA" stake pool opened from currently staked component

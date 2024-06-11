@@ -60,6 +60,11 @@ class StakingInfoCard {
   get statsLastReward(): StatsComponent {
     return new StatsComponent(`(${this.STATS_LAST_REWARD_CONTAINER})[${this.index}]`);
   }
+
+  async clickOnPoolName(): Promise<void> {
+    await this.name.waitForClickable();
+    await this.name.click();
+  }
 }
 
 export default StakingInfoCard;
