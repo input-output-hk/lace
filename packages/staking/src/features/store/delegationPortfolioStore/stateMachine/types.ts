@@ -68,7 +68,6 @@ export type SupportingData = {
   pendingSelectedPortfolio?: DraftPortfolioStakePool[];
   draftPortfolio?: DraftPortfolioStakePool[];
   viewedStakePool?: StakePoolWithLogo;
-  browsePoolsView?: BrowsePoolsView;
   sortField?: SortField;
   sortOrder?: SortOrder;
   searchQuery?: string;
@@ -78,6 +77,7 @@ export type CrossStateData = {
   cardanoCoinSymbol: AdaSymbol;
   currentPortfolio: CurrentPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
+  browsePoolsView: BrowsePoolsView;
 };
 
 type StateMachineSpecificState = BaseState & SupportingData;

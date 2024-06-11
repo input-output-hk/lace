@@ -29,7 +29,9 @@ class CookiePolicyDrawerAssert {
   assertSeeCookiePolicyContent = async () => {
     await CookiePolicyDrawer.cookiePolicyContent.waitForDisplayed();
 
-    const expectedCookiePolicyText = await removeWhitespacesFromText(readFromFile(__dirname, './cookiePolicy.txt'));
+    const expectedCookiePolicyText = await removeWhitespacesFromText(
+      readFromFile(import.meta.dirname, './cookiePolicy.txt')
+    );
 
     await browser.waitUntil(
       async () =>

@@ -1,7 +1,22 @@
-import { Wallet } from '@lace/cardano';
+export type CoSigner = {
+  id: string;
+  name: string;
+  keys: string;
+};
 
-export type ValidateAddress = (
-  address: string
-) => Promise<{ isValid: boolean; handleResolution?: Wallet.Cardano.PaymentAddress }>;
+export enum CoSignerErrorName {
+  Duplicated = 'Duplicated',
+  Required = 'Required',
+  TooLong = 'TooLong'
+}
 
-export type CoSigner = { address: string; isValid: boolean; id: string };
+export enum CoSignerErrorKeys {
+  Invalid = 'Invalid',
+  Required = 'Required'
+}
+
+export type CoSignerError = {
+  id: string;
+  name?: CoSignerErrorName;
+  keys?: CoSignerErrorKeys;
+};
