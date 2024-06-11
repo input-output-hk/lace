@@ -2,7 +2,7 @@
   "name": "playwright-tests",
   "type": "module",
   "scripts": {
-    "test:local:chrome": "../../node_modules/.bin/playwright test"
+    "test:local:chrome": "../../node_modules/.bin/playwright test onboarding1.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.44.1",

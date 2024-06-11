@@ -11,19 +11,3 @@ import { ReadOnlyWallet } from '../utils/wallets';
 test('Restore Wallet - All done page - happy path 1', async ({ useRestoreWallet }) => {
   await useRestoreWallet(ReadOnlyWallet);
 });
-
-test('Restore Wallet - All done page - happy path 2', async ({ useRestoreWallet }) => {
-  await useRestoreWallet(ReadOnlyWallet);
-});
-
-test('Restore Wallet - All done page - happy path 3', async ({ useRestoreWallet }) => {
-  await useRestoreWallet(ReadOnlyWallet);
-});
-
-test('Restore Wallet - All done page - happy path 4', async ({ useRestoreWallet }) => {
-  await useRestoreWallet(ReadOnlyWallet);
-});
-
-test('Restore Wallet - All done page - happy path 5', async ({ useRestoreWallet }) => {
-  await useRestoreWallet(ReadOnlyWallet);
-});
