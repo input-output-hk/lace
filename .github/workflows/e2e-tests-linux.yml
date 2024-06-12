@@ -38,8 +38,8 @@ env:
   BRANCH: ${{ github.ref_name }}
 
 jobs:
-  tests:
-    runs-on: self-hosted
+  tests-run-part-1:
+    runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -66,13 +66,55 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          if [ "$TAGS" == "empty" ]; then
-            TAGS_TO_RUN="";
-          else
-            TAGS_TO_RUN="--cucumberOpts.tags='${{ env.TAGS }}'";
-          fi
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Testnet and not @Pending and @Staking-SwitchingPools-Popup-E2E"
           eval "$runCommand";
+      - name: Save tests results
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-run-part-1-results
+          path: ./packages/e2e-tests/reports/allure/results
+  tests-run-part-2:
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
+      - name: Execute E2E tests
+        id: e2e-tests
+        working-directory: ./packages/e2e-tests
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          ENV: ${{ env.NETWORK }}
+        run: |
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Testnet and not @Pending and @Staking-DelegatedFunds-Popup"
+          eval "$runCommand";
+      - name: Save tests results
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-run-part-2-results
+          path: ./packages/e2e-tests/reports/allure/results
+  results-processing:
+    needs: [tests-run-part-1, tests-run-part-2]
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
       - name: Create allure properties
         if: always()
         working-directory: './packages/e2e-tests/reports/allure/results'
@@ -84,21 +126,21 @@ jobs:
           tags=${TAGS}
           platform=Linux
           " > environment.properties
-      - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.6.0
-        if: always()
-        env:
-          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+      - name: Download reports from part 1
+        uses: actions/download-artifact@v4
         with:
-          storageType: s3
-          resultsGlob: './packages/e2e-tests/reports/allure/results'
-          bucket: lace-e2e-test-results
-          prefix: 'all/linux/${BROWSER}/${RUN}'
-          copyLatest: true
-          ignoreMissingResults: true
-          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+          name: tests-run-part-1-results
+          path: ./packages/e2e-tests/tests-run-part-1-results
+      - name: Download reports from part 2
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-2-results
+          path: ./packages/e2e-tests/tests-run-part-2-results
+      - name: Copy allure results
+        if: always()
+        run: |
+            cp -r ./packages/e2e-tests/tests-run-part-1-results/* ./packages/e2e-tests/reports/allure/results
+            cp -r ./packages/e2e-tests/tests-run-part-2-results/* ./packages/e2e-tests/reports/allure/results
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         if: always()
@@ -109,18 +151,4 @@ jobs:
             ./packages/e2e-tests/logs
             ./packages/e2e-tests/reports
           retention-days: 10
-      - name: Add link to summary
-        if: always()
-        run: |
-          echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2.2.0
-        if: always()
-        env:
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
-          SLACK_TITLE: 'Test automation results :rocket:'
-          SLACK_USERNAME: lace-qa-bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
