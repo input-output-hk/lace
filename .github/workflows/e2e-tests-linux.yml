@@ -66,7 +66,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Staking-SwitchingPools-Popup-E2E and @Testnet and not @Pending"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@LW-7430 and @Testnet and not @Pending"
           eval "$runCommand";
       - name: Save tests results
         uses: actions/upload-artifact@v4
@@ -101,7 +101,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Staking-DelegatedFunds-Popup and @Testnet and not @Pending"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@LW-7435 and @Testnet and not @Pending"
           eval "$runCommand";
       - name: Save tests results
         uses: actions/upload-artifact@v4
@@ -115,9 +115,25 @@ jobs:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
+      - name: Download reports from part 1
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-1-results
+          path: ./tests-run-part-1-results
+      - name: Download reports from part 2
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-2-results
+          path: ./tests-run-part-2-results
+      - name: Copy allure results
+        if: always()
+#        working-directory: ./packages/e2e-tests/reports/allure/results
+        run: |
+            cp -r ./tests-run-part-1-results/* ./allure/results
+            cp -r ./tests-run-part-2-results/* ./allure/results
       - name: Create allure properties
         if: always()
-        working-directory: './packages/e2e-tests/reports/allure/results'
+        #        working-directory: '/e2e-tests/reports/allure/results'
         run: |
           echo "
           branch=${BRANCH}
@@ -126,29 +142,12 @@ jobs:
           tags=${TAGS}
           platform=Linux
           " > environment.properties
-      - name: Download reports from part 1
-        uses: actions/download-artifact@v4
-        with:
-          name: tests-run-part-1-results
-          path: ./packages/e2e-tests/tests-run-part-1-results
-      - name: Download reports from part 2
-        uses: actions/download-artifact@v4
-        with:
-          name: tests-run-part-2-results
-          path: ./packages/e2e-tests/tests-run-part-2-results
-      - name: Copy allure results
-        if: always()
-        run: |
-            cp -r ./packages/e2e-tests/tests-run-part-1-results/* ./packages/e2e-tests/reports/allure/results
-            cp -r ./packages/e2e-tests/tests-run-part-2-results/* ./packages/e2e-tests/reports/allure/results
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-artifacts
           path: |
-            ./packages/e2e-tests/screenshots
-            ./packages/e2e-tests/logs
-            ./packages/e2e-tests/reports
+            ./allure
           retention-days: 10
 
