@@ -27,3 +27,23 @@ test('Restore Wallet - All done page - happy path 4', async ({ useRestoreWallet 
 test('Restore Wallet - All done page - happy path 5', async ({ useRestoreWallet }) => {
   await useRestoreWallet(ReadOnlyWallet);
 });
+
+test('Restore Wallet - All done page - happy path 6', async ({ useRestoreWallet }) => {
+  await useRestoreWallet(ReadOnlyWallet);
+});
+
+test('Restore Wallet - All done page - happy path 7', async ({ useRestoreWallet }) => {
+  await useRestoreWallet(ReadOnlyWallet);
+});
+
+test('Restore Wallet - All done page - happy path 8', async ({ useRestoreWallet }) => {
+  await useRestoreWallet(ReadOnlyWallet);
+});
+
+test('Restore Wallet - All done page - happy path 9', async ({ useRestoreWallet }) => {
+  await useRestoreWallet(ReadOnlyWallet);
+});
+
+test('Restore Wallet - All done page - happy path 10', async ({ useRestoreWallet }) => {
+  await useRestoreWallet(ReadOnlyWallet);
+});
