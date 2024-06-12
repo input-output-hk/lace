@@ -1,0 +1,23 @@
+@import '../../../styles/theme';
+
+:global {
+  .ant-btn-link {
+    color: var(--primary-default, #7f5af0) !important;
+    font-weight: 600 !important;
+
+    &:hover,
+    &:active,
+    &:focus {
+        color: var(--primary-default, #7f5af0) !important;
+    }
+  }
+}
+
+.btnContentWrapper {
+  display: flex !important;
+  gap: size_unit(0.5) !important;
+
+  svg {
+    font-size: 24px;
+  }
+}

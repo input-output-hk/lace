@@ -1,0 +1,16 @@
+@import '../../styles/theme';
+
+.subtitle {
+  font-size: var(--body, 16px) !important;
+  line-height: size_unit(3) !important;
+  color: var(--text-color-primary) !important;
+  margin-bottom: size_unit(3);
+}
+
+.formError {
+  color: var(--data-pink);
+}
+
+.label {
+  z-index: 0 !important;
+}

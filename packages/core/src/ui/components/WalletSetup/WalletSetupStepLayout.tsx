@@ -3,9 +3,8 @@ import styles from './WalletSetupStepLayout.module.scss';
 import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
-import { urls } from '../../utils/constants';
+import { urls } from '@ui/utils/constants';
 import { i18n } from '@lace/translation';
-import { WalletSetupFlow, useWalletSetupFlow } from './WalletSetupFlowProvider';
 import { useTranslation } from 'react-i18next';
 
 export enum WalletTimelineSteps {
@@ -17,16 +16,15 @@ export enum WalletTimelineSteps {
   NAME_WALLET
 }
 
-export interface WalletSetupStepLayoutProps {
+export interface WalletSetupStepLayoutRevampProps {
   title: React.ReactNode;
   children?: React.ReactNode;
   belowContentText?: React.ReactNode;
   description?: React.ReactNode;
   linkText?: React.ReactNode;
-  stepInfoText?: string;
-  onNext?: (event: Readonly<React.MouseEvent<HTMLButtonElement>>) => void;
+  onNext?: () => void;
   onBack?: () => void;
-  onSkip?: () => void;
+  customAction?: React.ReactNode;
   nextLabel?: string;
   backLabel?: string;
   skipLabel?: string;
@@ -37,36 +35,20 @@ export interface WalletSetupStepLayoutProps {
   isHardwareWallet?: boolean;
 }
 
-const removeLegalAndAnalyticsStep = (
-  steps: {
-    key: WalletTimelineSteps;
-    name: string;
-  }[]
-) => {
-  steps.shift();
-};
-
-const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, flow: WalletSetupFlow) => {
+const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean) => {
   const inMemoryWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('core.walletSetupStep.legalAndAnalytics') },
-    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') },
     { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('core.walletSetupStep.recoveryPhrase') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') },
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.enterWallet') }
   ];
 
   const hardwareWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('core.walletSetupStep.legalAndAnalytics') },
     { key: WalletTimelineSteps.CONNECT_WALLET, name: i18n.t('core.walletSetupStep.connectWallet') },
-    { key: WalletTimelineSteps.NAME_WALLET, name: i18n.t('core.walletSetupStep.nameWallet') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') },
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.enterWallet') }
   ];
 
   const walletSteps = isHardwareWallet ? hardwareWalletSteps : inMemoryWalletSteps;
-
-  if (flow === WalletSetupFlow.ADD_WALLET) {
-    // remove legal and analytics step
-    removeLegalAndAnalyticsStep(walletSteps);
-  }
 
   if (typeof currentStep !== 'undefined') {
     const currentStepIndex = walletSteps.findIndex((step) => step.key === currentStep);
@@ -81,23 +63,20 @@ export const WalletSetupStepLayout = ({
   title,
   description,
   linkText,
-  stepInfoText,
   belowContentText,
   onNext,
   onBack,
-  onSkip,
+  customAction,
   nextLabel,
   backLabel,
-  skipLabel,
   isNextEnabled = true,
   isNextLoading = false,
   toolTipText,
   currentTimelineStep,
   isHardwareWallet = false
-}: WalletSetupStepLayoutProps): React.ReactElement => {
+}: WalletSetupStepLayoutRevampProps): React.ReactElement => {
   const { t } = useTranslation();
   const nextButtonContainerRef = useRef(null);
-  const flow = useWalletSetupFlow();
 
   const defaultLabel = {
     next: t('core.walletSetupStep.next'),
@@ -105,7 +84,7 @@ export const WalletSetupStepLayout = ({
     skip: t('core.walletSetupStep.skip')
   };
 
-  const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet, flow);
+  const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet);
 
   return (
     <div className={styles.walletSetupStepLayout} data-testid="wallet-setup-step-layout">
@@ -120,14 +99,16 @@ export const WalletSetupStepLayout = ({
       </div>
       <div className={styles.container}>
         <div className={styles.header} data-testid="wallet-setup-step-header">
-          <h1 data-testid="wallet-setup-step-title">{title}</h1>
+          <h1 data-testid="wallet-setup-step-title" className={styles.title}>
+            {title}
+          </h1>
           {description && (
-            <p data-testid="wallet-setup-step-subtitle">
+            <div data-testid="wallet-setup-step-subtitle" className={styles.subtitle}>
               {description}{' '}
               <a href={urls.faq.secretPassphrase} target="_blank" data-testid="faq-secret-passphrase-url">
                 {linkText}
               </a>
-            </p>
+            </div>
           )}
         </div>
         <div className={styles.content} data-testid="wallet-setup-step-content">
@@ -135,23 +116,16 @@ export const WalletSetupStepLayout = ({
         </div>
         {belowContentText}
         <div className={styles.footer} data-testid="wallet-setup-step-footer">
-          {onBack ? (
+          {onBack && (
             <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
               {backLabel || defaultLabel.back}
             </Button>
-          ) : (
-            <div />
           )}
-          {stepInfoText && <p data-testid="step-info-text">{stepInfoText}</p>}
-          {onSkip && (
-            <Button variant="text" onClick={onSkip} data-testid="wallet-setup-step-btn-skip">
-              {skipLabel || defaultLabel.skip}
-            </Button>
-          )}
+          {customAction}
           {onNext && (
-            <div ref={nextButtonContainerRef}>
+            <span ref={nextButtonContainerRef}>
               <Tooltip
-                visible={!isNextEnabled && !!toolTipText}
+                open={!isNextEnabled && !!toolTipText}
                 title={!isNextEnabled && toolTipText}
                 getPopupContainer={() => nextButtonContainerRef.current}
                 autoAdjustOverflow={false}
@@ -165,7 +139,7 @@ export const WalletSetupStepLayout = ({
                   {nextLabel || defaultLabel.next}
                 </Button>
               </Tooltip>
-            </div>
+            </span>
           )}
         </div>
       </div>

@@ -38,7 +38,7 @@ export type ValidateOnboardingActionsStructure<
   T extends {
     create: CreateFlowActions;
     restore: RestoreFlowActions;
-    hw: HardwareFlowActions;
+    hardware: HardwareFlowActions;
     // eslint-disable-next-line camelcase
     forgot_password: Record<
       'ENTER_RECOVERY_PHRASE_NEXT_CLICK' | 'ENTER_WALLET' | 'RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK',

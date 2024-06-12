@@ -1,0 +1,58 @@
+@import '../../styles/theme';
+@import '../../../../../common/src/ui/styles/abstracts/typography';
+
+.walletSetupOptionsStep {
+  padding: size_unit(8) size_unit(9);
+  height: 100%;
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: space-between;
+    .image {
+      width: size_unit(10);
+    }
+  }
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: size_unit(6);
+    align-items: center;
+    .title {
+      @include text-heading;
+      letter-spacing: -0.015em;
+      color: var(--text-color-primary);
+      margin: size_unit(3) 0 0;
+      text-align: center;
+    }
+    .subtitle {
+      @include text-body-medium;
+      color: var(--text-color-secondary);
+      margin: 0;
+    }
+  }
+
+  .options {
+    display: flex;
+    gap: size_unit(2);
+  }
+  .separator {
+    width: 1px;
+    height: 100%;
+    background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  }
+}
+
+.link {
+  color: var(--data-blue);
+  cursor: pointer;
+}
+
+.legal {
+  margin-top: size_unit(2);
+  text-align: center;
+  margin-left: -5px;
+  margin-right: -5px;
+}

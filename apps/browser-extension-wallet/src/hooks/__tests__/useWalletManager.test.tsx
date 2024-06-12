@@ -13,6 +13,7 @@ import SpyInstance = jest.SpyInstance;
 const mockEmip3decrypt = jest.fn();
 const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
+const mockConnectDeviceByUsbDeviceObject = jest.fn();
 const mockGetHwExtendedAccountPublicKey = jest.fn();
 const mockRestoreWalletFromKeyAgent = jest.fn();
 const mockSwitchKeyAgents = jest.fn();
@@ -81,6 +82,7 @@ jest.mock('@lace/cardano', () => {
       restoreWalletFromKeyAgent: mockRestoreWalletFromKeyAgent,
       switchKeyAgents: mockSwitchKeyAgents,
       connectDevice: mockConnectDevice,
+      connectDeviceByUsbDeviceObject: mockConnectDeviceByUsbDeviceObject,
       getHwExtendedAccountPublicKey: mockGetHwExtendedAccountPublicKey,
       KeyManagement: {
         ...actual.Wallet.KeyManagement,
@@ -397,7 +399,6 @@ describe('Testing useWalletManager hook', () => {
           networkMagic: 0
         }
       }));
-      const connectedDevice = 'Ledger' as any;
       const deviceConnection = 'deviceConnection' as any;
 
       const {
@@ -408,10 +409,12 @@ describe('Testing useWalletManager hook', () => {
         wrapper: getWrapper({})
       });
       await createHardwareWallet({
-        deviceConnection,
         accountIndex,
         name,
-        connectedDevice
+        connection: {
+          type: WalletType.Ledger,
+          value: deviceConnection
+        }
       });
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
       expect(walletApiUi.walletManager.activate).toBeCalledTimes(1);
@@ -420,10 +423,11 @@ describe('Testing useWalletManager hook', () => {
 
   describe('connectHardwareWallet', () => {
     test('should call proper connect method', async () => {
-      const model = 'Trezor' as any;
       const mockConnectDeviceMockedResult = 'mockConnectDeviceMocked';
       const mockConnectDeviceMocked = jest.fn().mockReturnValue(mockConnectDeviceMockedResult);
-      mockConnectDevice.mockImplementation(mockConnectDeviceMocked);
+      mockConnectDeviceByUsbDeviceObject.mockImplementation(mockConnectDeviceMocked);
+
+      const usbDevice = Wallet.ledgerDescriptors[0] as USBDevice;
 
       const {
         result: {
@@ -433,8 +437,8 @@ describe('Testing useWalletManager hook', () => {
         wrapper: getWrapper({})
       });
       expect(connectHardwareWallet).toBeDefined();
-      expect(await connectHardwareWallet(model)).toEqual(mockConnectDeviceMockedResult);
-      expect(mockConnectDeviceMocked).toBeCalledWith(model);
+      expect(await connectHardwareWallet(usbDevice)).toEqual(mockConnectDeviceMockedResult);
+      expect(mockConnectDeviceMocked).toBeCalledWith(usbDevice);
     });
   });
 

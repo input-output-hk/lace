@@ -68,7 +68,7 @@ const trezorModelTProductId = 0x53_c1;
 const trezorDescriptors = TREZOR_USB_DESCRIPTORS.filter(({ productId }) => productId === trezorModelTProductId);
 export const supportedHwUsbDescriptors = [...ledgerDescriptors, ...trezorDescriptors];
 
-export const connectDeviceRevamped = async (usbDevice: USBDevice): Promise<HardwareWalletConnection> => {
+export const connectDeviceByUsbDeviceObject = async (usbDevice: USBDevice): Promise<HardwareWalletConnection> => {
   if (isDeviceDescribedBy(usbDevice, ledgerDescriptors)) {
     return {
       type: WalletType.Ledger,
