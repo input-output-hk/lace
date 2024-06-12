@@ -93,10 +93,6 @@ export const WalletSetupMnemonicStepRevamp = ({
   );
 
   useKeyboardShortcut((event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-    }
-
     if (!event.ctrlKey && !event.metaKey) return;
 
     if (event.key === 'c' && mnemonicStage === 'writedown') {
