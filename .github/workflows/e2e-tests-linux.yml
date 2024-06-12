@@ -125,8 +125,8 @@ jobs:
         with:
           name: tests-run-part-2-results
           path: ./tests-run-part-2-results
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
       - name: Copy allure results
         if: always()
 #        working-directory: ./packages/e2e-tests/reports/allure/results
@@ -145,6 +145,26 @@ jobs:
           tags=${TAGS}
           platform=Linux
           " > environment.properties
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.6.0
+        if: always()
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'all/linux/${BROWSER}/${RUN}'
+          copyLatest: true
+          ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+      - name: Add link to summary
+        if: always()
+        run: |
+          echo "TEST RESULTS:"
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         if: always()
