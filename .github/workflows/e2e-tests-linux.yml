@@ -66,7 +66,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Testnet and not @Pending and @Staking-SwitchingPools-Popup-E2E"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Staking-SwitchingPools-Popup-E2E and @Testnet and not @Pending"
           eval "$runCommand";
       - name: Save tests results
         uses: actions/upload-artifact@v4
@@ -101,7 +101,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Testnet and not @Pending and @Staking-DelegatedFunds-Popup"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Staking-DelegatedFunds-Popup and @Testnet and not @Pending"
           eval "$runCommand";
       - name: Save tests results
         uses: actions/upload-artifact@v4
