@@ -125,6 +125,8 @@ jobs:
         with:
           name: tests-run-part-2-results
           path: ./tests-run-part-2-results
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Copy allure results
         if: always()
 #        working-directory: ./packages/e2e-tests/reports/allure/results
