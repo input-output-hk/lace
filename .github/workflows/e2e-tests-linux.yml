@@ -40,9 +40,9 @@ env:
 jobs:
   tests-run-part-1:
     runs-on: ubuntu-22.04
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
+#    concurrency:
+#      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,9 +75,9 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
   tests-run-part-2:
     runs-on: ubuntu-22.04
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
+#    concurrency:
+#      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
