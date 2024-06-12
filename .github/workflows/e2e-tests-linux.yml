@@ -131,6 +131,7 @@ jobs:
         if: always()
 #        working-directory: ./packages/e2e-tests/reports/allure/results
         run: |
+            mkdir -p ./allure/results
             cp -r ./tests-run-part-1-results/* ./allure/results
             cp -r ./tests-run-part-2-results/* ./allure/results
       - name: Create allure properties
