@@ -66,13 +66,14 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@LW-7430 and @Testnet and not @Pending"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Onboarding or @Analytics or @E2E or @SendTx-Simple-Extended or @SendTx-Simple-Popup or @Staking-NonDelegatedFunds-Extended or @Settings-Extended and @Testnet and not @Pending"
           eval "$runCommand";
       - name: Save tests results
         uses: actions/upload-artifact@v4
         with:
           name: tests-run-part-1-results
           path: ./packages/e2e-tests/reports/allure/results
+
   tests-run-part-2:
     runs-on: ubuntu-22.04
 #    concurrency:
@@ -101,13 +102,14 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@LW-7435 and @Testnet and not @Pending"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags=@Testnet and not @Pending and not @Onboarding and not @Analytics and not @E2E and not @SendTx-Simple-Extended and not @SendTx-Simple-Popup and not @Staking-NonDelegatedFunds-Extended and not @Settings-Extended"
           eval "$runCommand";
       - name: Save tests results
         uses: actions/upload-artifact@v4
         with:
           name: tests-run-part-2-results
           path: ./packages/e2e-tests/reports/allure/results
+
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2]
     runs-on: ubuntu-22.04
@@ -173,4 +175,13 @@ jobs:
           path: |
             ./allure
           retention-days: 10
-
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2.2.0
+        if: always()
+        env:
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON_EMOJI: ':lace:'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+          SLACK_TITLE: 'Test automation results :rocket:'
+          SLACK_USERNAME: lace-qa-bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
