@@ -8,6 +8,10 @@ on:
       - 'release/**'
   workflow_dispatch:
     inputs:
+      workers:
+        description: 'Number of workers to use'
+        required: false
+        default: 1
       tags:
         description: 'Test scenario tags (will run all tests if empty)'
         required: false
@@ -36,6 +40,7 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
+  WORKERS: ${{ github.event.inputs.workers || 1 }}
 
 jobs:
   tests:

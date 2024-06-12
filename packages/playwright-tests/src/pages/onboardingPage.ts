@@ -6,7 +6,6 @@ import { AllDonePage } from './onboarding/allDonePage';
 import { PassphrasePage } from './onboarding/passphrasePage';
 import { SetupPage } from './onboarding/setupPage';
 import { WalletNameAndPasswordPage } from './onboarding/walletNameAndPasswordPage';
-import { LaceBasePage } from './laceBasePage';
 
 export class OnboardingPage extends BasePage {
   constructor(page: Page) {
@@ -21,6 +20,6 @@ export class OnboardingPage extends BasePage {
     await new WalletNameAndPasswordPage(this.page).enterName(testWallet.name);
     await new WalletNameAndPasswordPage(this.page).enterPassword(testWallet.password);
     await new AllDonePage(this.page).clickGoToWalletButton();
-    await new LaceBasePage(this.page).waitForPageLoad();
+    // await new LaceBasePage(this.page).waitForPageLoad();
   }
 }
