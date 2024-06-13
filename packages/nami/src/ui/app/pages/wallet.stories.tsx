@@ -538,3 +538,77 @@ export const StakePoolStakingInfoDark: Story = {
     colorMode: 'dark',
   },
 };
+
+export const AddAccountLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open new account modal', async () => {
+      const button = await canvas.findByText('New Account');
+      await userEvent.click(button.parentElement!);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([account]);
+    });
+    getNativeAccounts.mockImplementation(() => {
+      return [account];
+    });
+
+    return () => {
+      getAccounts.mockReset();
+      getNativeAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const AddAccountDark: Story = {
+  ...AddAccountLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const DeleteAccountLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open delete account modal', async () => {
+      const button = await canvas.findByText('Delete Account');
+      await userEvent.click(button.parentElement!);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([account1, account]);
+    });
+    getNativeAccounts.mockImplementation(() => {
+      return [account1, account];
+    });
+
+    return () => {
+      getAccounts.mockReset();
+      getNativeAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const DeleteAccountDark: Story = {
+  ...DeleteAccountLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
