@@ -12376,15 +12376,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lace/configs@workspace:packages/configs"
   dependencies:
-    "@lace/ui": "workspace:^"
-    "@storybook/react": ^8.1.6
     "@tsconfig/create-react-app": ^1.0.3
     antd: ^4.24.10
     eslint-plugin-typescript-sort-keys: ^3.2.0
     normalize.css: ^8.0.1
   peerDependencies:
-    "@lace/ui": "workspace:^"
-    "@storybook/react": ^8.1.6
     antd: ^4.24.10
     normalize.css: ^8.0.1
   languageName: unknown
