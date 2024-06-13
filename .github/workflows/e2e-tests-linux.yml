@@ -115,6 +115,7 @@ jobs:
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2]
     runs-on: ubuntu-22.04
+    if: always()
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
