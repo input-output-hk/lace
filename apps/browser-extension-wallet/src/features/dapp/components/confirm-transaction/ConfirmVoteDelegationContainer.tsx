@@ -4,7 +4,7 @@ import { certificateInspectorFactory } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useViewsFlowContext } from '@providers';
 import { Skeleton } from 'antd';
-import { Box, Flex } from '@lace/ui';
+import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 
 const { CertificateType } = Wallet.Cardano;
 

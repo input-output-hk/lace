@@ -1,4 +1,4 @@
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useLayoutEffect, useRef } from 'react';
 import { ListRange, VirtuosoGrid, VirtuosoGridProps } from 'react-virtuoso';
 import * as cx from './StakePoolsGrid.css';

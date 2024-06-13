@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { NoSharedWalletFoundDialog } from './NoSharedWalletFoundDialog';
-import { ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof NoSharedWalletFoundDialog> = {

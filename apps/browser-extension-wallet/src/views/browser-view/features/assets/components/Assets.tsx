@@ -27,7 +27,7 @@ import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
 import { AssetActivityDetails } from './AssetActivityDetails/AssetActivityDetails';
 import { AssetEducationalList } from './AssetEducationalList/AssetEducationalList';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';

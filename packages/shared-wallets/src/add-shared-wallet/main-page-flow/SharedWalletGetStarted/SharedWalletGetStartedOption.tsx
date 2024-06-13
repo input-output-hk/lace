@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, sx } from '@lace/ui';
+import { Box, Button, Flex, Text, sx } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import React from 'react';
 import styles from './SharedWalletGetStartedOption.module.scss';

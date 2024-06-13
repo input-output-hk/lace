@@ -1,4 +1,4 @@
-import { Box, Text } from '@lace/ui';
+import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Activity } from 'features/activity';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../BrowsePools';

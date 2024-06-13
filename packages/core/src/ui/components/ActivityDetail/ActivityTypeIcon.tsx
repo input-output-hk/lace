@@ -35,7 +35,7 @@ import {
 } from './types';
 
 import styles from './ActivityTypeIcon.module.scss';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 export interface ActivityTypeIconProps {
   type: ActivityType;

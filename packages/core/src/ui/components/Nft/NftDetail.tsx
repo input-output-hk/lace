@@ -5,7 +5,7 @@ import { NftImage } from './NftImage';
 import { TranslationsFor } from '@ui/utils/types';
 import { Breadcrumb } from 'antd';
 import { FolderOutlined, RightOutlined } from '@ant-design/icons';
-import { Box, ControlButton, Flex } from '@lace/ui';
+import { Box, ControlButton, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 
 export interface NftDetailProps {

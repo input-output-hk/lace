@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card } from '@lace/ui';
+import { Button, Card } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import styles from './MidnightPreLaunchSettingsBanner.module.scss';
 

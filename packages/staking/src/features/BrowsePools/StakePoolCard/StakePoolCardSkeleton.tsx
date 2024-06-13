@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { Card } from '@lace/ui';
+import { Card } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import * as styles from './StakePoolCard.css';
 import { FadeVariant } from './StakePoolCard.css';

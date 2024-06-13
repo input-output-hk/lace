@@ -1,8 +1,8 @@
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
+import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { Ellipsis, PostHogAction } from '@lace/common';
-import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { StakePoolCardProgressBar } from 'features/BrowsePools';
 import { isOversaturated } from 'features/BrowsePools/utils';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useObservable } from '@lace/common';
 import { DappTransaction } from '@lace/core';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 
 import { Wallet } from '@lace/cardano';

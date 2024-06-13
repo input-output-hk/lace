@@ -1,5 +1,12 @@
+import {
+  Card,
+  PIE_CHART_DEFAULT_COLOR_SET,
+  PieChart,
+  PieChartColor,
+  PieChartGradientColor,
+  Text,
+} from '@input-output-hk/lace-ui-toolkit';
 import { TranslationKey } from '@lace/translation';
-import { Card, PIE_CHART_DEFAULT_COLOR_SET, PieChart, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
 import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

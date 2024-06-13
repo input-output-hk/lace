@@ -11,7 +11,7 @@ import { TranslationsFor } from '../../utils/types';
 
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
 import styles from './TransactionInputOutput.module.scss';
-import { Box, Flex, Text } from '@lace/ui';
+import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 import { useTranslation } from 'react-i18next';
 

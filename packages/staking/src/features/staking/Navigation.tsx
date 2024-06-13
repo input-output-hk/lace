@@ -1,5 +1,5 @@
+import { SubNavigation } from '@input-output-hk/lace-ui-toolkit';
 import { PostHogAction } from '@lace/common';
-import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { USE_MULTI_DELEGATION_STAKING_ACTIVITY } from '../../featureFlags';

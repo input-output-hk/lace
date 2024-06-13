@@ -1,8 +1,8 @@
 import Icon from '@ant-design/icons';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { getRandomIcon } from '@lace/common';
 import { TranslationKey } from '@lace/translation';
-import { Flex } from '@lace/ui';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
 import React, { ReactNode } from 'react';

@@ -1,7 +1,14 @@
 import React from 'react';
-import { sx, Box, Flex, Text, Button, EducationalCard } from '@lace/ui';
-import { ReactComponent as BookGradient } from '@lace/icons/dist/BookGradientComponent';
-import { ReactComponent as LightBulbGradient } from '@lace/icons/dist/LightBulbGradientComponent';
+import {
+  sx,
+  Box,
+  Flex,
+  Text,
+  Button,
+  EducationalCard,
+  BookGradientComponent,
+  LightBulbGradientComponent
+} from '@input-output-hk/lace-ui-toolkit';
 
 type Educational = {
   title: string;
@@ -45,17 +52,17 @@ export const AllSet = ({ translations }: Props): JSX.Element => (
       <EducationalCard.Item
         label={translations.educational.multiSig.subtitle}
         title={translations.educational.multiSig.title}
-        icon={<BookGradient />}
+        icon={<BookGradientComponent />}
       />
       <EducationalCard.Item
         label={translations.educational.advancedFeatures.subtitle}
         title={translations.educational.advancedFeatures.title}
-        icon={<BookGradient />}
+        icon={<BookGradientComponent />}
       />
       <EducationalCard.Item
         label={translations.educational.tips.subtitle}
         title={translations.educational.tips.title}
-        icon={<LightBulbGradient />}
+        icon={<LightBulbGradientComponent />}
       />
     </Box>
     <Flex w="$fill" justifyContent="flex-end" alignItems="center">

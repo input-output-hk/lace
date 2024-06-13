@@ -1,18 +1,18 @@
-import { PostHogAction } from '@lace/common';
-import { ReactComponent as SortAlphabeticalAscIcon } from '@lace/icons/dist/SortAlphabeticalAscComponent';
-import { ReactComponent as SortAlphabeticalDescIcon } from '@lace/icons/dist/SortAlphabeticalDescComponent';
-import { ReactComponent as SortNumericalAscIcon } from '@lace/icons/dist/SortNumericalAscComponent';
-import { ReactComponent as SortNumericalDescIcon } from '@lace/icons/dist/SortNumericalDescComponent';
 import {
   Card,
   Flex,
   RadioButtonGroup,
   RadioButtonGroupOption,
   Select,
+  SortAlphabeticalAscComponent,
+  SortAlphabeticalDescComponent,
+  SortNumericalAscComponent,
+  SortNumericalDescComponent,
   Text,
   TextBox,
   ToggleButtonGroup,
-} from '@lace/ui';
+} from '@input-output-hk/lace-ui-toolkit';
+import { PostHogAction } from '@lace/common';
 import cn from 'classnames';
 import { SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
 import { useOutsideHandles } from 'features/outside-handles-provider';
@@ -143,15 +143,15 @@ export const BrowsePoolsPreferencesCard = ({
   const sortingOptions: RadioButtonGroupOption<SortField>[] = useMemo(() => {
     const iconAlphabetical =
       direction === 'asc' ? (
-        <SortAlphabeticalAscIcon data-testid="sort-asc" />
+        <SortAlphabeticalAscComponent data-testid="sort-asc" />
       ) : (
-        <SortAlphabeticalDescIcon data-testid="sort-desc" />
+        <SortAlphabeticalDescComponent data-testid="sort-desc" />
       );
     const iconNumerical =
       direction === 'asc' ? (
-        <SortNumericalAscIcon data-testid="sort-asc" />
+        <SortNumericalAscComponent data-testid="sort-asc" />
       ) : (
-        <SortNumericalDescIcon data-testid="sort-desc" />
+        <SortNumericalDescComponent data-testid="sort-desc" />
       );
 
     const values: SortField[] = [

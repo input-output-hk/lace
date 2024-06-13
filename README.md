@@ -16,7 +16,6 @@ The Lace monorepo.
 - [core]
 - [cardano]
 - [staking]
-- [ui]
 
 ## Dev commands
 
@@ -48,7 +47,6 @@ You can mix them together.
 [core]: ./packages/core
 [cardano]: ./packages/cardano
 [staking]: ./packages/staking
-[ui]: ./packages/ui
 
 ## Audit
 

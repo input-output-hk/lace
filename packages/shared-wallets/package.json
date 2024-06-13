@@ -38,9 +38,8 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
+    "@input-output-hk/lace-ui-toolkit": "1.2.0",
     "@lace/common": "workspace:^",
-    "@lace/icons": "workspace:^",
-    "@lace/ui": "workspace:^",
     "classnames": "^2.5.1",
     "uuid": "^10.0.0"
   },

@@ -1,6 +1,5 @@
+import { Box, Button, Flex, LoadingComponent, ScrollArea, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Timeline } from '@lace/common';
-import { ReactComponent as LoadingIcon } from '@lace/icons/dist/LoadingComponent';
-import { Box, Button, Flex, ScrollArea, Text } from '@lace/ui';
 import cn from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -99,7 +98,7 @@ export const SharedWalletLayout = <Key extends string>({
           )}
           {onNext && (
             <Button.CallToAction
-              icon={loading ? <LoadingIcon className={styles.loadingIcon} /> : undefined}
+              icon={loading ? <LoadingComponent className={styles.loadingIcon} /> : undefined}
               label={customNextLabel || defaultLabel.next}
               onClick={onNext}
               disabled={!isNextEnabled || loading}

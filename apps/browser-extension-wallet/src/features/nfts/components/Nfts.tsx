@@ -23,7 +23,7 @@ import { RenameFolderType } from '@views/browser/features/nfts';
 import { NftFolderConfirmationModal } from '@views/browser/features/nfts/components/NftFolderConfirmationModal';
 import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
-import { SearchBox } from '@lace/ui';
+import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import { Skeleton } from 'antd';
 import { useNftSearch } from '@hooks/useNftSearch';
 

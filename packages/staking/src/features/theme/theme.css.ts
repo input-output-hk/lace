@@ -8,7 +8,7 @@ import {
   opacities,
   radius,
   spacing,
-} from '@lace/ui';
+} from '@input-output-hk/lace-ui-toolkit';
 import { createGlobalTheme, createTheme, createThemeContract } from '@vanilla-extract/css';
 import { colorsContract, darkThemeColors, lightThemeColors } from './colors';
 

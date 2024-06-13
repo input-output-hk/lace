@@ -1,7 +1,14 @@
 /* eslint-disable unicorn/consistent-destructuring */
+import {
+  Box,
+  ControlButton,
+  Flex,
+  PIE_CHART_DEFAULT_COLOR_SET,
+  PieChartColor,
+  Text,
+} from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
-import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { MultidelegationDAppCompatibilityModal } from 'features/modals/MultidelegationDAppCompatibilityModal';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';

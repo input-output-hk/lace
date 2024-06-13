@@ -1,5 +1,5 @@
+import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
-import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@lace/ui';
 import type { CurrentPortfolioStakePool } from '../../store';
 import { isOverSaturated } from './hasSaturatedOrRetiredPools';
 

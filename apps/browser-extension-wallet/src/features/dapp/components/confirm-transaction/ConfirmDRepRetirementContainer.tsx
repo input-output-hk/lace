@@ -8,7 +8,7 @@ import { useGetOwnPubDRepKeyHash } from './hooks';
 import { Skeleton } from 'antd';
 import { DappError } from '../DappError';
 import { useViewsFlowContext } from '@providers';
-import { Box, Flex } from '@lace/ui';
+import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 
 const { CertificateType } = Wallet.Cardano;
 

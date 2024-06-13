@@ -1,4 +1,4 @@
-import { Box, Cell, Flex, Grid, Section, Text, ThemeColorScheme, Variants } from '@lace/ui';
+import { Box, Cell, Flex, Grid, Section, Text, ThemeColorScheme, Variants } from '@input-output-hk/lace-ui-toolkit';
 import { SortField } from 'features/BrowsePools';
 import { LocalThemeProvider } from 'features/theme';
 

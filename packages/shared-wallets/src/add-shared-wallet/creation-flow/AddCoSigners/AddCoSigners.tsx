@@ -1,4 +1,4 @@
-import { Box, Divider } from '@lace/ui';
+import { Box, Divider } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
 import { creationTimelineSteps } from '../timelineSteps';

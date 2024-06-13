@@ -1,4 +1,4 @@
-import { colorSchemaDecorator, ThemeColorScheme, ThemeProvider } from '@lace/ui';
+import { colorSchemaDecorator, ThemeColorScheme, ThemeProvider } from '@input-output-hk/lace-ui-toolkit';
 import type { Preview } from '@storybook/react';
 import '@lace/configs/storybook/base-styles';
 import '@lace/translation';

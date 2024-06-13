@@ -1,4 +1,4 @@
-import { Box, TextBox } from '@lace/ui';
+import { Box, TextBox } from '@input-output-hk/lace-ui-toolkit';
 import { TFunction } from 'i18next';
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';

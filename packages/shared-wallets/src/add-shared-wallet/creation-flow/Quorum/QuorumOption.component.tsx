@@ -1,4 +1,4 @@
-import { Box, Card, Flex, RadioButtonGroup, Select, Text } from '@lace/ui';
+import { Box, Card, Flex, RadioButtonGroup, Select, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
 import { creationTimelineSteps } from '../timelineSteps';

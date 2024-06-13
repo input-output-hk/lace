@@ -6,7 +6,7 @@ import { DownOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button } from '@lace/common';
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
 import styles from './TransactionInputOutput.module.scss';
-import { Text } from '@lace/ui';
+import { Text } from '@input-output-hk/lace-ui-toolkit';
 
 interface TxDetailsGroupProps {
   testId: string;

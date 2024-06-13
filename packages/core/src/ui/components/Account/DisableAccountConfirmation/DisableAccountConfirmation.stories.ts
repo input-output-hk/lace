@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { DisableAccountConfirmation } from './DisableAccountConfirmation';
 import { ComponentProps } from 'react';
-import { ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 const meta: Meta<typeof DisableAccountConfirmation> = {
   title: 'Accounts/DisableAccountConfirmation',
