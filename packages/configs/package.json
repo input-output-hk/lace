@@ -9,19 +9,15 @@
   "license": "Apache-2.0",
   "author": "IOHK",
   "dependencies": {
-    "@tsconfig/create-react-app": "^1.0.3"
+    "@tsconfig/create-react-app": "^1.0.3",
+    "eslint-plugin-typescript-sort-keys": "^3.2.0"
   },
-  "peerDependencies": {
-    "@lace/ui": "workspace:^",
-    "@storybook/react": "^8.1.6",
+  "devDependencies": {
     "antd": "^4.24.10",
     "normalize.css": "^8.0.1"
   },
-  "devDependencies": {
-    "@lace/ui": "workspace:^",
-    "@storybook/react": "^8.1.6",
+  "peerDependencies": {
     "antd": "^4.24.10",
-    "eslint-plugin-typescript-sort-keys": "^3.2.0",
     "normalize.css": "^8.0.1"
   }
 }

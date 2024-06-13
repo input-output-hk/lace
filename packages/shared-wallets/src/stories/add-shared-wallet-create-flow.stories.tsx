@@ -7,21 +7,21 @@ import {
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/types';
 import { validateCoSigners } from '../add-shared-wallet/creation-flow/validateCoSigners';
-import { AddSharedWalletFlow, AddSharedWalletFlowType } from './AddSharedWalletFlow';
+import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper } from './AddSharedWalletStorybookHelper';
 
-const meta: Meta<typeof AddSharedWalletFlow> = {
-  component: AddSharedWalletFlow,
+const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
+  component: AddSharedWalletStorybookHelper,
   title: 'Main / Add shared wallet - Creation',
 };
 
 export default meta;
 
-type Story = StoryObj<typeof AddSharedWalletFlow>;
+type Story = StoryObj<typeof AddSharedWalletStorybookHelper>;
 
 export const Setup: Story = {
   name: 'Setup',
   render: () => (
-    <AddSharedWalletFlow
+    <AddSharedWalletStorybookHelper
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -58,7 +58,7 @@ export const CoSigners: Story = {
   render: () => {
     const coSigners: CreationFlowState['coSigners'] = [getInitialCoSignerValue(), getInitialCoSignerValue()];
     return (
-      <AddSharedWalletFlow
+      <AddSharedWalletStorybookHelper
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
@@ -83,7 +83,7 @@ export const CoSignersSingleEntry: Story = {
       getInitialCoSignerValue(),
     ];
     return (
-      <AddSharedWalletFlow
+      <AddSharedWalletStorybookHelper
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
@@ -112,7 +112,7 @@ export const CoSignersWithErrors: Story = {
       },
     ];
     return (
-      <AddSharedWalletFlow
+      <AddSharedWalletStorybookHelper
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
@@ -129,7 +129,7 @@ export const CoSignersWithErrors: Story = {
 export const CoSignersConfirmation: Story = {
   name: 'CoSigners - confirmation',
   render: () => (
-    <AddSharedWalletFlow
+    <AddSharedWalletStorybookHelper
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -143,7 +143,7 @@ export const CoSignersConfirmation: Story = {
 export const Quorum: Story = {
   name: 'Quorum',
   render: () => (
-    <AddSharedWalletFlow
+    <AddSharedWalletStorybookHelper
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -160,7 +160,7 @@ export const Quorum: Story = {
 export const ShareDetails: Story = {
   name: 'ShareDetails',
   render: () => (
-    <AddSharedWalletFlow
+    <AddSharedWalletStorybookHelper
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{

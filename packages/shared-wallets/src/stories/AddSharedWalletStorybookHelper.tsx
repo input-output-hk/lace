@@ -14,7 +14,7 @@ type AddSharedWalletFlowProps = {
 };
 
 const activeWalletName = 'My wallet';
-export const AddSharedWalletFlow: VFC<AddSharedWalletFlowProps> = ({
+export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
   modalOpen = false,
   initialFlow = AddSharedWalletFlowType.GetStarted,
   creationInitialState = makeInitialState(activeWalletName),

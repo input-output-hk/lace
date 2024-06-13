@@ -1,19 +1,19 @@
 import { Meta, StoryObj } from '@storybook/react';
-import { AddSharedWalletFlow } from './AddSharedWalletFlow';
+import { AddSharedWalletStorybookHelper } from './AddSharedWalletStorybookHelper';
 
-const meta: Meta<typeof AddSharedWalletFlow> = {
-  component: AddSharedWalletFlow,
+const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
+  component: AddSharedWalletStorybookHelper,
   title: 'Main / Add shared wallet',
 };
 
 export default meta;
 
-type Story = StoryObj<typeof AddSharedWalletFlow>;
+type Story = StoryObj<typeof AddSharedWalletStorybookHelper>;
 
 export const Closed: Story = {
-  render: () => <AddSharedWalletFlow />,
+  render: () => <AddSharedWalletStorybookHelper />,
 };
 
 export const Open: Story = {
-  render: () => <AddSharedWalletFlow modalOpen />,
+  render: () => <AddSharedWalletStorybookHelper modalOpen />,
 };
