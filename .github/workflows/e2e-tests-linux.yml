@@ -69,6 +69,7 @@ jobs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Onboarding or @Analytics or @E2E or @SendTx-Simple-Extended or @SendTx-Simple-Popup or @Staking-NonDelegatedFunds-Extended or @Settings-Extended and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tests-run-part-1-results
@@ -105,6 +106,7 @@ jobs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Testnet and not @Pending and not @Onboarding and not @Analytics and not @E2E and not @SendTx-Simple-Extended and not @SendTx-Simple-Popup and not @Staking-NonDelegatedFunds-Extended and not @Settings-Extended'"
           eval "$runCommand";
       - name: Save tests results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tests-run-part-2-results
