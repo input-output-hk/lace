@@ -1,6 +1,9 @@
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-
+import css from 'rollup-plugin-import-css';
+import svg from 'rollup-plugin-svg';
+import image from '@rollup/plugin-image';
+import json from '@rollup/plugin-json';
 import packageJson from './package.json';
 
 export default () => ({
@@ -10,7 +13,11 @@ export default () => ({
       tsconfig: './src/tsconfig.json',
       composite: false,
     }),
+    json(),
     commonjs(),
+    css(),
+    svg(),
+    image(),
   ],
   output: [
     {

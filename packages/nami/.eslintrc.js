@@ -15,6 +15,7 @@ module.exports = {
     'plugin:functional/stylistic',
     'prettier',
     'plugin:prettier/recommended',
+    'plugin:storybook/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {

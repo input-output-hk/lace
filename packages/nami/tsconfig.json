@@ -20,11 +20,14 @@
     "strict": true,
     "target": "ES2018",
     "baseUrl": "./src",
-    "rootDir": "./",
-    "paths": {
-      "@src/*": ["./src/*"]
-    }
+    "rootDir": "./"
   },
-  "exclude": ["dist", "**/storybook-static/*"],
-  "include": ["**/*.ts", "**/*.tsx", "**/*.json"]
+  "exclude": [
+    "dist",
+    "**/storybook-static/*",
+    "**/.storybook/**/*.**",
+    "**/src/ui/app/components/*",
+    "**/src/ui/app/pages/*"
+  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json"]
 }

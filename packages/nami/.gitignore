@@ -2,3 +2,5 @@
 !src/ui/typings/*
 storybook-static
 dist
+
+*storybook.log
