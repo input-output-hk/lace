@@ -1,4 +1,9 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import { mergeConfig } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import svgrPlugin from 'vite-plugin-svgr';
+// TODO to be removed when @lace/icons properly supports ESM
+import commonjs from 'vite-plugin-commonjs';
 
 import { join, dirname } from 'path';
 
@@ -22,5 +27,15 @@ const config: StorybookConfig = {
     name: getAbsolutePath('@storybook/react-vite'),
     options: {},
   },
+  viteFinal: (baseConfig) => mergeConfig(baseConfig, {
+    plugins: [
+      commonjs(),
+      nodePolyfills(),
+      svgrPlugin({
+        include: '**/*.svg',
+        svgrOptions: { icon: true, exportType: 'default' },
+      }),
+    ]
+  })
 };
 export default config;

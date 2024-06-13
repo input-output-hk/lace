@@ -1,0 +1,1 @@
+export { SharedWalletGetStarted } from './SharedWalletGetStarted';

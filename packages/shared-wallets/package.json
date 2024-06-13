@@ -10,7 +10,7 @@
   "author": "IOHK",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/dts/index.d.ts",
   "files": [
     "dist",
     "LICENSE",
@@ -18,7 +18,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "run -T rollup -c rollup.config.js",
+    "build": "run -T rollup -c rollup.config.mjs",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; storybook build",
     "cleanup": "yarn exec rm -rf dist node_modules && yarn exec rm -rf ../../.cache/eslintcache",
     "dev": "NODE_OPTIONS=--openssl-legacy-provider; storybook dev -p 6006",
@@ -32,13 +32,14 @@
     "prettier:fix": "yarn run -T prettier --write --loglevel warn '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
-    "test-storybook:ci": "echo \"@lace/core: no test-storybook:ci specified\"",
+    "test-storybook:ci": "echo \"@lace/shared-wallets: no test-storybook:ci specified\"",
     "type-check": "echo \"@lace/shared-wallets: no type-check command specified\"",
     "watch": "yarn build --watch"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.5.0",
     "@lace/configs": "workspace:^",
+    "@lace/translation": "workspace:^",
     "@storybook/addon-essentials": "^8.1.6",
     "@storybook/addon-interactions": "^8.1.6",
     "@storybook/addon-links": "^8.1.6",
@@ -49,14 +50,28 @@
     "@storybook/test": "^8.1.6",
     "@tsconfig/create-react-app": "^1.0.3",
     "@types/react": "17.0.2",
+    "antd": "^4.24.10",
     "eslint-plugin-storybook": "^0.8.0",
+    "i18next": "^22.5.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-i18next": "^12.3.1",
     "storybook": "^8.1.6",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vite-plugin-node-polyfills": "^0.22.0"
   },
   "peerDependencies": {
+    "antd": "^4.24.10",
+    "i18next": "^22.5.1",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-i18next": "^12.3.1"
+  },
+  "dependencies": {
+    "@lace/common": "workspace:^",
+    "@lace/icons": "workspace:^",
+    "@lace/ui": "workspace:^",
+    "classnames": "^2.5.1",
+    "uuid": "^10.0.0"
   }
 }

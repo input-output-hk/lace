@@ -26,7 +26,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "run -T rollup -c rollup.config.js",
+    "build": "run -T rollup -c rollup.config.mjs",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "format-check": "echo \"@lace/core: no format-check command specified\"",
@@ -67,6 +67,7 @@
     "@babel/preset-env": "^7.22.20",
     "@babel/preset-react": "^7.22.15",
     "@babel/preset-typescript": "^7.22.15",
+    "@lace/configs": "workspace:^",
     "@storybook/addon-actions": "^6.5.16",
     "@storybook/addon-essentials": "^6.5.16",
     "@storybook/addon-interactions": "^6.5.16",

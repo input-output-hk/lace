@@ -12254,6 +12254,7 @@ __metadata:
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
+    "@lace/shared-wallets": "workspace:^"
     "@lace/staking": 0.1.0
     "@lace/translation": 0.1.0
     "@lace/ui": ^0.1.0
@@ -12349,7 +12350,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/common@0.1.0, @lace/common@^0.1.0, @lace/common@workspace:packages/common":
+"@lace/common@0.1.0, @lace/common@^0.1.0, @lace/common@workspace:^, @lace/common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@lace/common@workspace:packages/common"
   dependencies:
@@ -12375,7 +12376,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lace/configs@workspace:packages/configs"
   dependencies:
+    "@lace/ui": "workspace:^"
+    "@storybook/react": ^8.1.6
     "@tsconfig/create-react-app": ^1.0.3
+    antd: ^4.24.10
+    eslint-plugin-typescript-sort-keys: ^3.2.0
+    normalize.css: ^8.0.1
+  peerDependencies:
+    "@lace/ui": "workspace:^"
+    "@storybook/react": ^8.1.6
+    antd: ^4.24.10
+    normalize.css: ^8.0.1
   languageName: unknown
   linkType: soft
 
@@ -12389,6 +12400,7 @@ __metadata:
     "@babel/preset-typescript": ^7.22.15
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
+    "@lace/configs": "workspace:^"
     "@lace/icons": 0.1.0
     "@lace/translation": 0.1.0
     "@lace/ui": ^0.1.0
@@ -12472,7 +12484,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/icons@0.1.0, @lace/icons@^0.1.0, @lace/icons@workspace:packages/icons":
+"@lace/icons@0.1.0, @lace/icons@^0.1.0, @lace/icons@workspace:^, @lace/icons@workspace:packages/icons":
   version: 0.0.0-use.local
   resolution: "@lace/icons@workspace:packages/icons"
   dependencies:
@@ -12487,12 +12499,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/shared-wallets@workspace:packages/shared-wallets":
+"@lace/shared-wallets@workspace:^, @lace/shared-wallets@workspace:packages/shared-wallets":
   version: 0.0.0-use.local
   resolution: "@lace/shared-wallets@workspace:packages/shared-wallets"
   dependencies:
     "@chromatic-com/storybook": ^1.5.0
+    "@lace/common": "workspace:^"
     "@lace/configs": "workspace:^"
+    "@lace/icons": "workspace:^"
+    "@lace/translation": "workspace:^"
+    "@lace/ui": "workspace:^"
     "@storybook/addon-essentials": ^8.1.6
     "@storybook/addon-interactions": ^8.1.6
     "@storybook/addon-links": ^8.1.6
@@ -12503,14 +12519,23 @@ __metadata:
     "@storybook/test": ^8.1.6
     "@tsconfig/create-react-app": ^1.0.3
     "@types/react": 17.0.2
+    antd: ^4.24.10
+    classnames: ^2.5.1
     eslint-plugin-storybook: ^0.8.0
+    i18next: ^22.5.1
     react: 17.0.2
     react-dom: 17.0.2
+    react-i18next: ^12.3.1
     storybook: ^8.1.6
     typescript: ^5.4.5
+    uuid: ^10.0.0
+    vite-plugin-node-polyfills: ^0.22.0
   peerDependencies:
+    antd: ^4.24.10
+    i18next: ^22.5.1
     react: 17.0.2
     react-dom: 17.0.2
+    react-i18next: ^12.3.1
   languageName: unknown
   linkType: soft
 
@@ -12528,6 +12553,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.28.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
+    "@lace/configs": "workspace:^"
     "@lace/core": 0.1.0
     "@lace/icons": 0.1.0
     "@lace/translation": ^0.1.0
@@ -12609,7 +12635,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/translation@0.1.0, @lace/translation@^0.1.0, @lace/translation@workspace:packages/translation":
+"@lace/translation@0.1.0, @lace/translation@^0.1.0, @lace/translation@workspace:^, @lace/translation@workspace:packages/translation":
   version: 0.0.0-use.local
   resolution: "@lace/translation@workspace:packages/translation"
   dependencies:
@@ -12635,7 +12661,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/ui@^0.1.0, @lace/ui@workspace:packages/ui":
+"@lace/ui@^0.1.0, @lace/ui@workspace:^, @lace/ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "@lace/ui@workspace:packages/ui"
   dependencies:
@@ -23325,6 +23351,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/experimental-utils@npm:^5.0.0":
+  version: 5.62.0
+  resolution: "@typescript-eslint/experimental-utils@npm:5.62.0"
+  dependencies:
+    "@typescript-eslint/utils": 5.62.0
+  peerDependencies:
+    eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+  checksum: ce55d9f74eac5cb94d66d5db9ead9a5d734f4301519fb5956a57f4b405a5318a115b0316195a3c039e0111489138680411709cb769085d71e1e1db1376ea0949
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/experimental-utils@npm:^5.3.0":
   version: 5.31.0
   resolution: "@typescript-eslint/experimental-utils@npm:5.31.0"
@@ -28908,6 +28945,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"classnames@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: da424a8a6f3a96a2e87d01a432ba19315503294ac7e025f9fece656db6b6a0f7b5003bb1fbb51cbb0d9624d964f1b9bb35a51c73af9b2434c7b292c42231c1e5
+  languageName: node
+  linkType: hard
+
 "clean-css@npm:^4.2.3":
   version: 4.2.3
   resolution: "clean-css@npm:4.2.3"
@@ -34067,6 +34111,21 @@ __metadata:
   peerDependencies:
     eslint: ">=6"
   checksum: 71e4b064259e09a6353360ca4a3ec929df0ea3aabe1dc83a40b9264fe5c16bcecb94d097e7403f6916622b8fdb739e91f1268bbad220d838fcbc2b9a901345ec
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-typescript-sort-keys@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "eslint-plugin-typescript-sort-keys@npm:3.2.0"
+  dependencies:
+    "@typescript-eslint/experimental-utils": ^5.0.0
+    json-schema: ^0.4.0
+    natural-compare-lite: ^1.4.0
+  peerDependencies:
+    "@typescript-eslint/parser": ^6 || ^7
+    eslint: ^7 || ^8
+    typescript: ^3 || ^4 || ^5
+  checksum: 5c397446532ff0efd30195c8106bad21d8ccd4c94bb54bab47aa90f45cafc0602b881796f10be472a7925d7081af63545bd8f17ab03bd59636dc647b4971f08b
   languageName: node
   linkType: hard
 
@@ -56387,6 +56446,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "uuid@npm:10.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 4b81611ade2885d2313ddd8dc865d93d8dccc13ddf901745edca8f86d99bc46d7a330d678e7532e7ebf93ce616679fb19b2e3568873ac0c14c999032acb25869
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^3.3.2":
   version: 3.4.0
   resolution: "uuid@npm:3.4.0"
@@ -56670,6 +56738,18 @@ __metadata:
   peerDependencies:
     vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
   checksum: f01962d9c0bdb97c22c8d8994396ae950350c2bbeebcc837303e520216390fb194423cde92a47df5c835375efb86f5b33cc8ab224b0a7bf8e3e2800a66630f60
+  languageName: node
+  linkType: hard
+
+"vite-plugin-node-polyfills@npm:^0.22.0":
+  version: 0.22.0
+  resolution: "vite-plugin-node-polyfills@npm:0.22.0"
+  dependencies:
+    "@rollup/plugin-inject": ^5.0.5
+    node-stdlib-browser: ^1.2.0
+  peerDependencies:
+    vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+  checksum: c08d3df0d5cc3102280483d3f7b216f92a18e0708fcb9f67f78f01ab865474254756bacee17caa90b3f46afe5834cb9d8de0dd0e58c1bbbdae1b949edc1e6b57
   languageName: node
   linkType: hard
 

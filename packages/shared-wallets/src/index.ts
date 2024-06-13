@@ -1,1 +1,1 @@
-export const hello = 'world';
+export * from './add-shared-wallet';

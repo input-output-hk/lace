@@ -2,7 +2,7 @@ module.exports = {
   env: {
     node: true,
   },
-  extends: ['prettier'],
+  extends: ['prettier', 'plugin:typescript-sort-keys/recommended'],
   overrides: [
     {
       files: ['rollup.config.js'],
@@ -17,7 +17,7 @@ module.exports = {
     project: 'tsconfig.json',
     tsconfigRootDir: __dirname,
   },
-  plugins: ['sort-keys'],
+  plugins: ['sort-keys', 'typescript-sort-keys'],
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',

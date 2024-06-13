@@ -1,7 +1,10 @@
 {
   "extends": "@lace/configs/tsconfig.json",
   "compilerOptions": {
+    "allowJs": false,
+    "preserveConstEnums": true,
     "baseUrl": "./src"
   },
+  "include": ["src"],
   "references": [{ "path": "../../packages/core/src" }, { "path": "../../packages/cardano/src" }]
 }

@@ -1,6 +1,8 @@
 {
   "extends": "@lace/configs/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./src"
+    "baseUrl": "src",
+    "declaration": true,
+    "declarationDir": "dts"
   }
 }

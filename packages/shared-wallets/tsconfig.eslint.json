@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src", ".eslintrc.js", ".prettierrc.js", "rollup.config.js"]
+  "include": ["src", ".eslintrc.js", ".prettierrc.js", "rollup.config.mjs"]
 }
