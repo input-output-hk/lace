@@ -28,13 +28,14 @@ export const WalletOnboardingFlows: VFC<WalletOnboardingProps> = ({
   setFormDirty = () => void 0,
   urlPath
 }) => {
-  useKeyboardShortcut(['Enter'], () => {
+  useKeyboardShortcut(['Enter'], (event) => {
     const nextBnt: HTMLButtonElement = document.querySelector('[data-testid="wallet-setup-step-btn-next"]');
     const confirmGoBack: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
 
     if (confirmGoBack) {
       confirmGoBack.click();
     } else if (nextBnt && !nextBnt.getAttribute('disabled')) {
+      event.preventDefault();
       nextBnt.click();
     }
   });
