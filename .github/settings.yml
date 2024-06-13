@@ -13,7 +13,7 @@ repository:
   name: lace-with-nami-mode
   description: The Lace Wallet.
   homepage: https://lace.io
-  private: false
+  private: true
   topics: lace, cardano, wallet, crypto
   enable_automated_security_fixes: true
   enable_vulnerability_alerts: true
