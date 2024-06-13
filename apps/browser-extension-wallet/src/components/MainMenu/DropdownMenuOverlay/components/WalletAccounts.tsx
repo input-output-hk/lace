@@ -134,12 +134,12 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [disableAccountConfirmation, accountsData]
   );
 
-  const showHWErrorState = (accountIndex: number) => {
+  const showHWErrorState = useCallback((accountIndex: number) => {
     enableAccountHWSigningDialog.setData({
       accountIndex,
       state: 'error'
     });
-  };
+  }, []);
 
   const unlockHWAccount = useCallback(
     async (accountIndex: number) => {
