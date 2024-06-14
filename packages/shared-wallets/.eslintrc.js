@@ -2,7 +2,7 @@ module.exports = {
   extends: [require('@lace/configs').laceEslintConfigPath],
   overrides: [
     {
-      files: ['./rollup.config.mjs'],
+      files: ['./rollup.config.mjs', './vitest.config.ts'],
       rules: {
         'import/no-default-export': 'off',
       },

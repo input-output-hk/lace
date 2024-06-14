@@ -31,8 +31,9 @@
     "prettier:check": "yarn run -T prettier --check '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "prettier:fix": "yarn run -T prettier --write --loglevel warn '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "storybook": "NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
-    "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
+    "test": "yarn test:unit --silent",
     "test-storybook:ci": "echo \"@lace/shared-wallets: no test-storybook:ci specified\"",
+    "test:unit": "vitest run",
     "type-check": "echo \"@lace/shared-wallets: no type-check command specified\"",
     "watch": "yarn build --watch"
   },

@@ -43,7 +43,7 @@
     "lint:fix": "yarn eslint:fix && yarn prettier:fix",
     "prettier:check": "yarn run -T prettier --check '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "prettier:fix": "yarn run -T prettier --write --loglevel warn '**/*.{js,ts,jsx,tsx,html,json,md}'",
-    "test": "vitest run --silent",
+    "test": "yarn test:unit --silent",
     "test-storybook:ci": "echo \"@lace/staking: no test-storybook:ci specified\"",
     "test:all": "yarn test:unit && yarn test:vr",
     "test:unit": "vitest run",

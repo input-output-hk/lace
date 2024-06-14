@@ -5,10 +5,16 @@ module.exports = {
   extends: ['prettier', 'plugin:typescript-sort-keys/recommended'],
   overrides: [
     {
-      files: ['rollup.config.js'],
+      files: ['rollup.config.mjs'],
       rules: {
         'import/no-default-export': 'off',
         'import/no-extraneous-dependencies': 'off',
+      },
+    },
+    {
+      files: ['vitest.config.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
       },
     },
   ],
