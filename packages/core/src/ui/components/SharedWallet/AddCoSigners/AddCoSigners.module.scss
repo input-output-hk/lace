@@ -1,34 +1,10 @@
 .coSigners {
   & + & {
-    margin-top: 16px;
     width: 100%;
     justify-content: center;
   }
 }
 
-.scrollArea {
-  overflow: visible;
-}
-
-.scrollAreaViewport {
-  max-height: 250px;
-  overflow: visible;
-}
-
-.scrollBar {
-  padding: 0;
-  right: -25px !important;
-}
-
-.remove {
-  margin-left: 24px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.removeLabel {
-  color: var(--primary-default, #7f5af0);
-  font-size: 12px;
+.coSignersInput {
+  margin-bottom: 8px;
 }

@@ -89,15 +89,6 @@ export type OutsideHandlesContextValue = {
     sort?: StakePoolSortOptions;
   }) => Promise<void>;
   walletStoreResetStakePools?: () => void;
-  walletStoreNetworkInfo?: {
-    nextEpochIn: Date;
-    currentEpochIn: Date;
-    currentEpoch: string;
-    stakePoolsAmount: string;
-    totalStakedPercentage: string | number;
-    totalStaked: { number: string; unit?: string };
-  };
-  walletStoreFetchNetworkInfo: () => Promise<void>;
   walletStoreBlockchainProvider: IBlockchainProvider;
   currencyStoreFiatCurrency: CurrencyInfo;
   compactNumber: (value: number | string, decimal?: number) => string;

@@ -1,15 +1,15 @@
 export const cookiePolicy = {
   cookiePolicy: `
   <div>
-    <heading>Last Updated: April 12, 2023</heading>
+    <heading>Last Updated: January 12, 2024</heading>
   </div>
   <p>
     Input Output Global, Inc. (together with our affiliates and subsidiaries, <strong>"IOG,"</strong>
     <strong>"we,"</strong> <strong>"us,"</strong> or <strong>"our"</strong>) understands that your privacy is
-    important to you and we are committed to being transparent about the technologies used. This Cookie Notice
+    important to you and we are committed to being transparent about the technologies used. This Cookie Policy
     explains how and why cookies may be stored on and accessed through our websites, mobile applications,
-    downloadable software, including our plug-ins and browser extensions (collectively, the
-    <strong>"Products"</strong>). This Cookie Notice should be read together with our
+    and downloadable software, including our plug-ins and browser extensions (collectively, the
+    <strong>"Products"</strong>). This Cookie Policy should be read together with our
     <a href="https://www.lace.io/iog-privacy-policy.pdf">Privacy Policy</a> and
     <a href="https://www.lace.io/lace-terms-of-use.pdf">Terms of Use</a>.
   </p>
@@ -34,9 +34,11 @@ export const cookiePolicy = {
     Products and thus how we can improve them. Our third-party partners, such as analytics providers, may use
     these technologies to collect information about your online activities while using our Products.
   </p>
-  <subtitle>The types of cookies used</subtitle>
+  <subtitle>
+    The types of cookies that may be used by IOG (see the specific Product cookie banner for more details)
+  </subtitle>
   <p>
-    <em>Necessary Cookies</em>
+    <em>Necessary/Essential Cookies</em>
     <br />
     These cookies are necessary for the Products to function and cannot be switched off in our systems. They help
     to authenticate users and prevent fraudulent use. They are usually only set in response to actions made by you
@@ -47,11 +49,7 @@ export const cookiePolicy = {
     <em>Analytics Cookies</em>
     <br />
     These cookies help us to understand how users engage with the Products. We may use a set of cookies to collect
-    information and report site usage statistics. This helps us improve our Products. To learn more about Matomo
-    Analytics privacy practices, please visit Matomo's privacy policy page
-    <a href="https://matomo.org/privacy-policy">here</a>. To learn more about
-    Posthog’s privacy practices, please visit Posthog’s privacy policy page
-    <a href="https://posthog.com/privacy">here</a>.
+    information and report site usage statistics. This helps us improve our Products.
   </p>
   <p>
     <em>Functionality Cookies</em>
@@ -100,16 +98,16 @@ export const cookiePolicy = {
     You can still use our Products if you block or delete our cookies, but your ability to access certain Product
     features may be limited.
   </div>
-  <subtitle>Do-Not-Track Signals</subtitle>
+  <subtitle>Do-Not-Track signals</subtitle>
   <p>We do not respond to web browser "Do-Not-Track" signals.</p>
-  <subtitle>How We Notify You of Changes to this Cookie Notice</subtitle>
+  <subtitle>How we notify you of changes to this Cookie Policy</subtitle>
   <p>
-    We may update this Cookie Notice to reflect changes in our personal data practices or relevant laws. We will
-    notify you if we make any material changes by revising the "Last Updated" at the top of this Cookie Notice.
+    We may update this Cookie Policy to reflect changes in our personal data practices or relevant laws. We will
+    notify you if we make any material changes by revising the "Last Updated" at the top of this Cookie Policy.
   </p>
   <subtitle>Contact us</subtitle>
   <div>
-    If you have any questions or concerns about this Cookie Notice or our privacy practices, please contact us at
+    If you have any questions or concerns about this Cookie Policy or our privacy practices, please contact us at
     dataprotection@iohk.io or mail us at:
     <address>
       Attn: IO Privacy

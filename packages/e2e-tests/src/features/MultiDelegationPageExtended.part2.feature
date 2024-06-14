@@ -50,7 +50,7 @@ Feature: Staking Page - Extended View
       | Pledge     | descending    | ascending      |
       | Live Stake | descending    | ascending      |
 
-  @LW-10145 @Testnet @Mainnet
+  @LW-10145 @LW-10239 @Testnet @Mainnet
   Scenario Outline: Extended View - Staking - List View - More options - Sorting - sort stake pools by <option> <order>
     When I am on Staking extended page
     And I open Browse pools tab

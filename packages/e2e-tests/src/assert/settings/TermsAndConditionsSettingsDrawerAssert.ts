@@ -11,7 +11,9 @@ class TermsAndConditionsSettingsDrawerAssert {
       : await TermsAndConditionsDrawer.drawerHeaderCloseButton.waitForClickable();
     await TermsAndConditionsDrawer.termsAndConditionsContent.waitForDisplayed();
 
-    const expectedPolicy = await removeWhitespacesFromText(readFromFile(__dirname, './termsAndConditions.txt'));
+    const expectedPolicy = await removeWhitespacesFromText(
+      readFromFile(import.meta.dirname, './termsAndConditions.txt')
+    );
 
     await browser.waitUntil(
       async () =>

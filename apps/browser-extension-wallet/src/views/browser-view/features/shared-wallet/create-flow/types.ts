@@ -1,5 +1,7 @@
 export enum SharedWalletCreationStep {
   Setup = 'Setup',
   CoSigners = 'CoSigners',
-  Quorum = 'Quorum'
+  CoSignersImportantInfo = 'CoSignersImportantInfo',
+  Quorum = 'Quorum',
+  ShareDetails = 'ShareDetails'
 }

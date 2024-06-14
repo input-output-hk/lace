@@ -14,13 +14,13 @@ import {
   ToggleButtonGroup,
 } from '@lace/ui';
 import cn from 'classnames';
-import { SortField, StakePoolSortOptions } from 'features/BrowsePools';
+import { SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import debounce from 'lodash/debounce';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { USE_MULTI_DELEGATION_STAKING_FILTERS, USE_ROS_STAKING_COLUMN } from '../../../featureFlags';
-import { PoolsFilter, QueryStakePoolsFilters } from '../../store';
+import { PoolsFilter, QueryStakePoolsFilters } from '../../store/delegationPortfolioStore/types';
 import { getDefaultSortOrderByField } from '../utils';
 import * as styles from './BrowsePoolsPreferencesCard.css';
 import { BrowsePoolsPreferencesCardLabel } from './BrowsePoolsPreferencesCardLabel';
@@ -140,7 +140,7 @@ export const BrowsePoolsPreferencesCard = ({
     );
   };
 
-  const sortingOptions: RadioButtonGroupOption[] = useMemo(() => {
+  const sortingOptions: RadioButtonGroupOption<SortField>[] = useMemo(() => {
     const iconAlphabetical =
       direction === 'asc' ? (
         <SortAlphabeticalAscIcon data-testid="sort-asc" />
@@ -175,7 +175,7 @@ export const BrowsePoolsPreferencesCard = ({
       ),
       onIconClick: () => handleIconClick(value),
       value,
-    })) as RadioButtonGroupOption[];
+    })) as RadioButtonGroupOption<SortField>[];
   }, [direction, handleIconClick, t]);
 
   const filterOptions: FilterOption[] = useMemo(() => {

@@ -1,6 +1,6 @@
 export enum ValidationStatus {
   Idle = 'Idle',
-  Validading = 'Validading',
+  Validating = 'Validating',
   Validated = 'Validated',
 }
 

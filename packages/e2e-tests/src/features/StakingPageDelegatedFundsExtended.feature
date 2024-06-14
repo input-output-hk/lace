@@ -4,17 +4,6 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
   Background:
     Given Wallet is synced
 
-  @LW-2642 @Smoke
-  Scenario: Extended View - Staking  - Currently staking component
-    When I navigate to Staking extended page
-    Then I see currently staking component for stake pool: "ADA Ocean" in extended mode
-
-  @LW-2643 @Smoke
-  Scenario: Extended View - Staking - Details of currently staked pool
-    And I navigate to Staking extended page
-    When I click pool name in currently staking component
-    Then I see drawer with "ADA Ocean" stake pool details
-
   @LW-4877
   Scenario: Extended View - Stake pool details - Enter and Escape buttons support
     Given I am on Staking extended page

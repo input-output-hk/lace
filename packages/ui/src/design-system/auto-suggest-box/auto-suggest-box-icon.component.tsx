@@ -15,7 +15,7 @@ export interface Props {
 }
 
 export const Icon = ({ status }: Readonly<Props>): JSX.Element => {
-  const isValidating = status === ValidationStatus.Validading;
+  const isValidating = status === ValidationStatus.Validating;
   const isValidated = status === ValidationStatus.Validated;
 
   if (status === undefined) {
