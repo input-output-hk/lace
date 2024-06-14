@@ -7,7 +7,7 @@ export const config: WebdriverIO.Config = {
   specs: ['./src/features/**/*.feature'],
   automationProtocol: 'webdriver',
   exclude: [],
-  maxInstances: 2,
+  maxInstances: 1,
   maxInstancesPerCapability: 1,
   path: '/',
   logLevel: 'error',
