@@ -1,4 +1,4 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import MultiDelegationBetaModal from '../elements/multidelegation/MultiDelegationBetaModal';
 import MultidelegationPageAssert from '../assert/multidelegation/MultidelegationPageAssert';
 import MultidelegationPage from '../elements/multidelegation/MultidelegationPage';
@@ -34,6 +34,7 @@ import { mapColumnNameStringToEnum, mapSortingOptionNameStringToEnum } from '../
 import { browser } from '@wdio/globals';
 import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
 import MultidelegationDAppIssueModal from '../elements/staking/MultidelegationDAppIssueModal';
+import StakingInfoCard from '../elements/multidelegation/StakingInfoCard';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -131,6 +132,15 @@ Then(/^I see stake pool details drawer for "([^"]*)" stake pool$/, async (stakeP
   }
   await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
 });
+
+Then(
+  /^I see stake pool details drawer for "([^"]*)" stake pool opened from currently staked component$/,
+  async (stakePoolName: string) => {
+    const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
+    const stakePool = getStakePoolByName(stakePoolName, network);
+    await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, true, false, true);
+  }
+);
 
 Then(/^I see stake pool details drawer for stake pool without metadata$/, async () => {
   const stakePool = getStakePoolById(testContext.load('currentStakePoolId'));
@@ -590,4 +600,19 @@ When(/^I close the modal about issues with multidelegation and DApps$/, async ()
   if (await MultidelegationDAppIssueModal.gotItButton.isDisplayed()) {
     await MultidelegationDAppIssueModal.gotItButton.click();
   }
+});
+
+Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {
+  for (const row of stakePools.hashes()) {
+    await MultidelegationPageAssert.assertSeeCurrentlyStakingComponent(
+      Number(row.position),
+      row.poolName,
+      row.poolTickerOrId,
+      Boolean(row.hasMetadata)
+    );
+  }
+});
+
+When(/^I click on pool name in the first currently staking component$/, async () => {
+  await new StakingInfoCard(1).clickOnPoolName();
 });
