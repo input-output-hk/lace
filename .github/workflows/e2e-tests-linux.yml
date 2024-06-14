@@ -22,15 +22,15 @@ on:
         options:
           - preprod
           - mainnet
-      target:
-        description: 'Run job on'
-        required: true
-        default: self-hosted
-        type: choice
-        options:
-          - ubuntu-22.04
-          - ubuntu-20.04
-          - self-hosted
+#      target:
+#        description: 'Run job on'
+#        required: true
+#        default: self-hosted
+#        type: choice
+#        options:
+#          - ubuntu-22.04
+#          - ubuntu-20.04
+#          - self-hosted
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | tags: ${{ github.event.inputs.tags || 'empty' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
@@ -42,6 +42,7 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
+#  RUNS_ON: ${{ github.event.inputs.target || 'self-hosted' }}
 
 jobs:
   tests-run-part-1:
