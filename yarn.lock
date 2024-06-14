@@ -12527,6 +12527,7 @@ __metadata:
     "@storybook/test": ^8.1.6
     "@tsconfig/create-react-app": ^1.0.3
     "@types/react": 17.0.2
+    "@vitest/coverage-c8": ^0.33.0
     antd: ^4.24.10
     classnames: ^2.5.1
     eslint-plugin-storybook: ^0.8.0
@@ -12538,6 +12539,7 @@ __metadata:
     typescript: ^5.4.5
     uuid: ^10.0.0
     vite-plugin-node-polyfills: ^0.22.0
+    vitest: ^1.6.0
   peerDependencies:
     antd: ^4.24.10
     i18next: ^22.5.1
