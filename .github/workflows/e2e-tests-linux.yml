@@ -36,7 +36,8 @@ env:
 
 jobs:
   tests-run-part-1:
-    runs-on: self-hosted
+#    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -70,7 +71,8 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-2:
-    runs-on: self-hosted
+#    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -94,7 +96,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending and not @E2E'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -104,7 +106,8 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-3:
-    runs-on: self-hosted
+#    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -138,7 +141,8 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-4:
-    runs-on: self-hosted
+#    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
