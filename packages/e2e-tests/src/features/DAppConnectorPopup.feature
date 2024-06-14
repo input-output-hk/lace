@@ -1,4 +1,4 @@
-@DAppConnector-Popup
+@Runner4 @DAppConnector-Popup
 Feature: DAppConnector - Popup view
 
   Background:

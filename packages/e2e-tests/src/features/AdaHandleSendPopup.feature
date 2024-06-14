@@ -1,4 +1,4 @@
-@AdaHandleSend-popup @Testnet
+@Runner4 @AdaHandleSend-popup @Testnet
 Feature: ADA handle - popup view
 
   Background:

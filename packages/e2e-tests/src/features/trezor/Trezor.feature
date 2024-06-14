@@ -1,4 +1,4 @@
-@TrezorOnboarding @Trezor @Pending
+@Runner4 @TrezorOnboarding @Trezor @Pending
 Feature: Trezor Onboarding
 
   Scenario: Onboarding Trezor wallet

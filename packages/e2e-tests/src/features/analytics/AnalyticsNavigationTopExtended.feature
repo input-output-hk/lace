@@ -1,4 +1,4 @@
-@Top-Navigation-Extended @Analytics @Mainnet @Testnet
+@Runner2 @Top-Navigation-Extended @Analytics @Mainnet @Testnet
 Feature: Analytics - Top Navigation - Extended view
 
   Background:

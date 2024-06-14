@@ -1,4 +1,4 @@
-@Collateral-popup @Testnet
+@Runner3 @Collateral-popup @Testnet
 Feature: Collateral - popup view
 
   Background:

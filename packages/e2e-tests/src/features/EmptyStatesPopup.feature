@@ -1,4 +1,4 @@
-@EmptyStates-Popup @Mainnet @Testnet
+@Runner4 @EmptyStates-Popup @Mainnet @Testnet
 Feature: Empty states
 
   Background:

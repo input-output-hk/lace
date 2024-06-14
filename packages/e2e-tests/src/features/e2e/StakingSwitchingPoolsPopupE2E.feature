@@ -1,4 +1,4 @@
-@Staking-SwitchingPools-Popup-E2E @E2E @Testnet @Pending
+@Runner2 @Staking-SwitchingPools-Popup-E2E @E2E @Testnet @Pending
 Feature: Staking Page - Switching pools - Popup View - E2E
 
   Background:

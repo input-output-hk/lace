@@ -1,4 +1,4 @@
-@AdaHandleSend-extended @Testnet
+@Runner4 @AdaHandleSend-extended @Testnet
 Feature: ADA handle - extended view
 
   Background:

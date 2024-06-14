@@ -22,15 +22,6 @@ on:
         options:
           - preprod
           - mainnet
-      target:
-        description: 'Run job on'
-        required: true
-        default: self-hosted
-        type: choice
-        options:
-          - ubuntu-22.04
-          - ubuntu-20.04
-          - self-hosted
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | tags: ${{ github.event.inputs.tags || 'empty' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
@@ -42,11 +33,10 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  RUNS_ON: ${{ github.event.inputs.target || 'self-hosted' }}
 
 jobs:
   tests-run-part-1:
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -70,7 +60,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Onboarding or @SendTx-Simple-Extended or @SendTx-Simple-Popup or @Staking-NonDelegatedFunds-Extended or @Settings-Extended and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner1 and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -80,7 +70,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-2:
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -104,7 +94,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Analytics or @E2E and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -114,7 +104,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-3:
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -138,7 +128,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@AddressBook-extended or @AddressBook-popup or @NFT-Folders-Extended or @NFT-Folders-Popup or @Transactions-Extended or @Transactions-Popup or @Collateral-extended or @Collateral-popup or @SendTx-Bundles-Extended and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner3 and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -148,7 +138,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-4:
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -172,7 +162,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Testnet and not @Pending and not @Onboarding and not @Analytics and not @E2E and not @SendTx-Simple-Extended and not @SendTx-Simple-Popup and not @Staking-NonDelegatedFunds-Extended and not @Settings-Extended and not @AddressBook-extended and not @AddressBook-popup and not @NFT-Folders-Extended and not @NFT-Folders-Popup and not @Transactions-Extended and not @Transactions-Popup and not @Collateral-extended and not @Collateral-popup and not @SendTx-Bundles-Extended'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner4 and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -265,4 +255,3 @@ jobs:
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-

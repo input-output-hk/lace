@@ -1,4 +1,4 @@
-@DAppConnector
+@Runner4 @DAppConnector
 Feature: DAppConnector - Common
 
   Background:

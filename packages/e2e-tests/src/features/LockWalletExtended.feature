@@ -1,4 +1,4 @@
-@LockWallet-extended @Mainnet @Testnet @Pending
+@Runner4 @LockWallet-extended @Mainnet @Testnet @Pending
 Feature: Wallet locking / unlocking - Extended view
 
   Background:

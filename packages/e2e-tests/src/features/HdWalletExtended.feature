@@ -1,4 +1,4 @@
-@HdWallet-extended @Testnet
+@Runner4 @HdWallet-extended @Testnet
 Feature: HD wallet - extended view
 
   Background:

@@ -1,4 +1,4 @@
-@NFTs-Extended @Testnet
+@Runner4 @NFTs-Extended @Testnet
 Feature: LW-423: NFTs - Extended view
 
   Background:
@@ -57,7 +57,7 @@ Feature: LW-423: NFTs - Extended view
     Given I am on NFTs extended page
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
-    Examples: 
+    Examples:
       | type     | subtitle                        |
       | Glossary | What are collections?           |
       | FAQ      | How to buy an NFT?              |

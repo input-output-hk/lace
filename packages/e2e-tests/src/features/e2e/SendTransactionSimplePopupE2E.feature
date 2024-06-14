@@ -1,4 +1,4 @@
-@SendSimpleTransaction-Popup-E2E @E2E @Testnet
+@Runner2 @SendSimpleTransaction-Popup-E2E @E2E @Testnet
 Feature: Send Simple Transactions - Popup view - E2E
 
   Background:

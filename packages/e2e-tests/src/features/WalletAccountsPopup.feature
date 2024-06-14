@@ -1,4 +1,4 @@
-@Accounts-Popup @Testnet
+@Runner4 @Accounts-Popup @Testnet
 Feature: Wallet accounts
 
   Background:

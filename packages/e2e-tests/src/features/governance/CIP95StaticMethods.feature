@@ -1,4 +1,4 @@
-@Staking-NonDelegatedFunds-Extended @Testnet
+@Runner1 @Staking-NonDelegatedFunds-Extended @Testnet
 Feature: CIP-95 Static methods
 
   @LW-10611

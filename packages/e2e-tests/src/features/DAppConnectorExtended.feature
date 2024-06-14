@@ -1,4 +1,4 @@
-@DAppConnector-Extended
+@Runner4 @DAppConnector-Extended
 Feature: DAppConnector - Extended view
 
   Background:

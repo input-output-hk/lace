@@ -1,4 +1,4 @@
-@SendSimpleTransaction-Extended-E2E @E2E @Testnet
+@Runner2 @SendSimpleTransaction-Extended-E2E @E2E @Testnet
 Feature: Send Simple Transactions - Extended view - E2E
 
   Background:

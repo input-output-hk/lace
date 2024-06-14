@@ -1,4 +1,4 @@
-@OnboardingCreateWallet @Analytics @Testnet
+@Runner2 @OnboardingCreateWallet @Analytics @Testnet
 Feature: Analytics - Posthog - Onboarding - Extended View
 
   @LW-8311

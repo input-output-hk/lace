@@ -1,4 +1,4 @@
-@SendTx-Simple-Popup
+@Runner1 @SendTx-Simple-Popup
 Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
   Background:

@@ -1,4 +1,4 @@
-@Transactions-Popup @Analytics @Testnet @Mainnet
+@Runner2 @Transactions-Popup @Analytics @Testnet @Mainnet
 Feature: Transactions - Extended view
 
   Background:

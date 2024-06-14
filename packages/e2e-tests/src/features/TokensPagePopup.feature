@@ -1,4 +1,4 @@
-@Tokens-popup
+@Runner4 @Tokens-popup
 Feature: LW: Tokens tab - popup view
 
   Background:

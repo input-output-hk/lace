@@ -1,4 +1,4 @@
-@NFT-Folders-Extended @Testnet
+@Runner3 @NFT-Folders-Extended @Testnet
 Feature: NFT - Folders - Extended view
 
   Background:

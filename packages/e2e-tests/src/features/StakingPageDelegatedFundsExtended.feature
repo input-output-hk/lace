@@ -1,4 +1,4 @@
-@Staking-DelegatedFunds-Extended @Testnet @Mainnet @Pending
+@Runner4 @Staking-DelegatedFunds-Extended @Testnet @Mainnet @Pending
 Feature: Staking Page - Funds already delegated - Extended Browser View
 
   Background:

@@ -1,4 +1,4 @@
-@EmptyStates-Extended @Mainnet @Testnet
+@Runner4 @EmptyStates-Extended @Mainnet @Testnet
 Feature: Empty states
 
   Background:

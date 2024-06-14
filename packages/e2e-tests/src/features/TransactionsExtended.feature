@@ -1,4 +1,4 @@
-@Transactions-Extended
+@Runner3 @Transactions-Extended
 Feature: Transactions - Extended view
 
   Background:

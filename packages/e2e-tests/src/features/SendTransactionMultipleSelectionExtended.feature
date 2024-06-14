@@ -1,4 +1,4 @@
-@SendTx-MultipleSelection-Extended @Testnet
+@Runner4 @SendTx-MultipleSelection-Extended @Testnet
 Feature: Send - Multiple selection for Extended Browser View
 
   Background:

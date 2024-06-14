@@ -1,4 +1,4 @@
-@AddressBook-popup @Mainnet @Testnet
+@Runner3 @AddressBook-popup @Mainnet @Testnet
 Feature: Address book - popup view
 
   Background:

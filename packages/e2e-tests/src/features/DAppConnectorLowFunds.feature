@@ -1,4 +1,4 @@
-@DAppConnectorLowFunds
+@Runner4 @DAppConnectorLowFunds
 Feature: DAppConnector - Low Funds
 
   Background:

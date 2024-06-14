@@ -1,4 +1,4 @@
-@MainNavigation-Popup @Mainnet @Testnet
+@Runner4 @MainNavigation-Popup @Mainnet @Testnet
 Feature: Main Navigation - Popup View
 
   Background:

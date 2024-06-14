@@ -1,4 +1,4 @@
-@Collateral-extended @Testnet
+@Runner3 @Collateral-extended @Testnet
 Feature: Collateral - extended view
 
   Background:

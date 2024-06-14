@@ -1,4 +1,4 @@
-@NetworkSwitching-extended
+@Runner4 @NetworkSwitching-extended
 Feature: LW: Network Switching - extended view
 
   Background:

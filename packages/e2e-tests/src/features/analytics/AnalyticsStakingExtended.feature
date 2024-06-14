@@ -1,4 +1,4 @@
-@Staking-NonDelegatedFunds-Extended @Analytics @Testnet
+@Runner2 @Staking-NonDelegatedFunds-Extended @Analytics @Testnet
 Feature: Analytics - PostHog - Staking - Extended View
 
   Background:

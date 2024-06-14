@@ -1,4 +1,4 @@
-@OwnTags-Popup
+@Runner4 @OwnTags-Popup
 Feature: Own Tags - Popup View
 
   Background:

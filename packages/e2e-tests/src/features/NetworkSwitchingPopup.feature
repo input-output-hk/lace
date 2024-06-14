@@ -1,4 +1,4 @@
-@NetworkSwitching-popup
+@Runner4 @NetworkSwitching-popup
 Feature: LW: Network Switching - popup view
 
   Background:

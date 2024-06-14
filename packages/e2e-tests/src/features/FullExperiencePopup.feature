@@ -1,4 +1,4 @@
-@Common-Popup @Mainnet @Testnet
+@Runner4 @Common-Popup @Mainnet @Testnet
 Feature: Full experience - popup view
 
   Background:

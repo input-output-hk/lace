@@ -1,4 +1,4 @@
-@ForgotPassword @Mainnet @Testnet @Pending
+@Runner4 @ForgotPassword @Mainnet @Testnet @Pending
 Feature: Forgot password
 
   Background:

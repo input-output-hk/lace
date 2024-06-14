@@ -1,4 +1,4 @@
-@AddressBook-extended @Analytics @Testnet @Mainnet
+@Runner2 @AddressBook-extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - Address book - Extended view
 
   Background:
@@ -14,7 +14,7 @@ Feature: Analytics - Posthog - Address book - Extended view
     And I click "Save address" button on "Add new address" drawer
     Then I validate latest analytics single event "address book | add new address | save address | click"
     And I validate that 2 analytics event(s) have been sent
-    
+
 
   @LW-8675
   Scenario: Analytics - Extended-view - Address Book - Add new address and Cancel

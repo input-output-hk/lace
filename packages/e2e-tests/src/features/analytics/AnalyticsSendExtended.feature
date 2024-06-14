@@ -1,4 +1,4 @@
-@Analytics-SendSimpleTransaction-Extended-E2E @Analytics @Testnet
+@Runner2 @Analytics-SendSimpleTransaction-Extended-E2E @Analytics @Testnet
 Feature: Analytics - Posthog - Sending - Extended View
 
   Background:

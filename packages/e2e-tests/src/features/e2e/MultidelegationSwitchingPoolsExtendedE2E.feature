@@ -1,4 +1,4 @@
-@Multidelegation-SwitchingPools-Extended-E2E @E2E @Testnet
+@Runner2 @Multidelegation-SwitchingPools-Extended-E2E @E2E @Testnet
 Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   Background:
