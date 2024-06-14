@@ -5,7 +5,7 @@ Feature: Wallet accounts
     Given Wallet is synced
 
   @LW-9318 @LW-9320 @LW-9321
-  Scenario: Extended View - Accounts menu displayed
+  Scenario: Popup View - Accounts menu displayed
     When I click the menu button
     And I click on chevron for wallet number 1
     Then "Accounts" menu is displayed

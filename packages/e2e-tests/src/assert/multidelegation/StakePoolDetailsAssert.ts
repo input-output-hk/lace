@@ -6,7 +6,12 @@ import { TestnetPatterns } from '../../support/patterns';
 import { isPopupMode } from '../../utils/pageUtils';
 
 class StakePoolDetailsAssert {
-  async assertSeeStakePoolDetailsPage(expectedStakedPool: StakePool, staked: boolean, noMetaDataPool = false) {
+  async assertSeeStakePoolDetailsPage(
+    expectedStakedPool: StakePool,
+    staked: boolean,
+    noMetaDataPool = false,
+    isOpenedFromCurrentlyStakedComponent = false
+  ) {
     (await isPopupMode())
       ? await StakePoolDetails.drawerHeaderBackButton.waitForClickable()
       : await StakePoolDetails.drawerHeaderCloseButton.waitForClickable();
@@ -34,12 +39,14 @@ class StakePoolDetailsAssert {
       expect(await StakePoolDetails.tooltip.getText()).to.equal(await t('drawer.details.status.delegating', 'staking'));
     }
 
-    await this.assertSeeDrawerButtons(staked);
+    if (!isOpenedFromCurrentlyStakedComponent) {
+      await this.assertSeeDrawerButtons(staked);
 
-    await StakePoolDetails.selectPoolForMultiStakingButton.waitForDisplayed();
-    expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
-      await t('drawer.details.selectForMultiStaking', 'staking')
-    );
+      await StakePoolDetails.selectPoolForMultiStakingButton.waitForDisplayed();
+      expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
+        await t('drawer.details.selectForMultiStaking', 'staking')
+      );
+    }
 
     expect(await StakePoolDetails.informationTitle.getText()).to.equal(
       await t('drawer.details.information', 'staking')
@@ -50,7 +57,7 @@ class StakePoolDetailsAssert {
     expect(await StakePoolDetails.ownersTitle.getText()).to.equal(`${await t('drawer.details.owners', 'staking')} (1)`);
 
     for (const displayedOwner of await StakePoolDetails.owners) {
-      const slicedString = (await displayedOwner.getText()).slice(0, 21);
+      const slicedString = (await displayedOwner.getText()).slice(0, 20);
       expect(expectedStakedPool.owners.some((owner) => owner.includes(slicedString))).to.be.true;
     }
   }
@@ -177,6 +184,7 @@ class StakePoolDetailsAssert {
       await t('drawer.details.selectForMultiStaking', 'staking')
     );
   };
+
   assertSeeDrawerButtons = async (delegated: boolean, numberOfButtons = 2) => {
     if (delegated) {
       await this.assertSeeManageDelegationButton();
