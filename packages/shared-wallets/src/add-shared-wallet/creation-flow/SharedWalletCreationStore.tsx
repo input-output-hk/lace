@@ -1,5 +1,6 @@
 import { Dispatch, ReactElement, ReactNode, createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import { v1 as uuid } from 'uuid';
+import { makeInitialStateProvider } from '../../initial-state-provider';
 import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
 import { SharedWalletCreationStep } from './types';
@@ -109,6 +110,10 @@ type ContextValue = {
   dispatch: Dispatch<Action>;
   state: CreationFlowState;
 };
+
+const { InitialStateProvider, useInitialState } = makeInitialStateProvider<CreationFlowState>();
+
+export const SharedWalletCreationFlowInitialStateProvider = InitialStateProvider;
 
 // eslint-disable-next-line unicorn/no-null
 const sharedWalletCreationContext = createContext<ContextValue | null>(null);
@@ -293,30 +298,24 @@ const makeStateMachine = ({
 });
 
 export type SharedWalletCreationStoreSharedProps = {
+  activeWalletName: string;
+  initialWalletName: string;
   navigateToAppHome: () => void;
   navigateToParentFlow: () => void;
-} & (
-  | {
-      activeWalletName: string;
-      initialWalletName: string;
-    }
-  | {
-      initialState: CreationFlowState;
-    }
-);
+};
 
 export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
   children: (value: ContextValue) => ReactNode;
 };
 
 export const SharedWalletCreationStore = ({
+  activeWalletName,
   children,
+  initialWalletName,
   navigateToAppHome,
   navigateToParentFlow,
-  ...restProps
 }: SharedWalletCreationStoreProps): ReactElement => {
-  const initialState =
-    'initialState' in restProps ? restProps.initialState : makeInitialState(restProps.activeWalletName);
+  const initialState = useInitialState(makeInitialState(activeWalletName));
   const [state, dispatch] = useReducer((prevState: CreationFlowState, action: Action): CreationFlowState => {
     const stateMachine = makeStateMachine({
       navigateToAppHome,
@@ -327,10 +326,9 @@ export const SharedWalletCreationStore = ({
   }, initialState);
 
   useEffect(() => {
-    const initialWalletNameProvided = 'initialWalletName' in restProps && restProps.initialWalletName !== undefined;
-    if (state.walletName !== undefined || !initialWalletNameProvided) return;
-    dispatch({ type: SharedWalletActionType.CHANGE_WALLET_NAME, walletName: restProps.initialWalletName });
-  }, [state.walletName, restProps]);
+    if (state.walletName !== undefined || initialWalletName === undefined) return;
+    dispatch({ type: SharedWalletActionType.CHANGE_WALLET_NAME, walletName: initialWalletName });
+  }, [state.walletName, initialWalletName]);
 
   const contextValue: ContextValue = useMemo(
     () => ({
