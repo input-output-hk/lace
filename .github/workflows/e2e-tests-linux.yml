@@ -24,7 +24,7 @@ on:
           - mainnet
       target:
         description: 'Run job on'
-        required: false
+        required: true
         default: self-hosted
         type: choice
         options:
