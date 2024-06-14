@@ -1,11 +1,10 @@
+import { join, dirname } from 'path';
 import type { StorybookConfig } from '@storybook/react-vite';
 import { mergeConfig } from 'vite';
+import commonjs from 'vite-plugin-commonjs';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import svgrPlugin from 'vite-plugin-svgr';
 // TODO to be removed when @lace/icons properly supports ESM
-import commonjs from 'vite-plugin-commonjs';
-
-import { join, dirname } from 'path';
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -27,15 +26,16 @@ const config: StorybookConfig = {
     name: getAbsolutePath('@storybook/react-vite'),
     options: {},
   },
-  viteFinal: (baseConfig) => mergeConfig(baseConfig, {
-    plugins: [
-      commonjs(),
-      nodePolyfills(),
-      svgrPlugin({
-        include: '**/*.svg',
-        svgrOptions: { icon: true, exportType: 'default' },
-      }),
-    ]
-  })
+  viteFinal: (baseConfig) =>
+    mergeConfig(baseConfig, {
+      plugins: [
+        commonjs(),
+        nodePolyfills(),
+        svgrPlugin({
+          include: '**/*.svg',
+          svgrOptions: { icon: true, exportType: 'default' },
+        }),
+      ],
+    }),
 };
 export default config;

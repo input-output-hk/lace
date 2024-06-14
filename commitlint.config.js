@@ -28,8 +28,10 @@ module.exports = {
         'all',
         'cardano',
         'common',
+        'configs',
         'core',
         'extension',
+        'shared-wallets',
         'staking',
         'ui',
         // SRE

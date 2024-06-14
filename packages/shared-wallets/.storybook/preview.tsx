@@ -1,8 +1,8 @@
 import { colorSchemaDecorator, ThemeColorScheme, ThemeProvider } from '@lace/ui';
 import type { Preview } from '@storybook/react';
-import React from 'react';
-import '@lace/translation';
 import '@lace/configs/storybook/base-styles';
+import '@lace/translation';
+import React from 'react';
 
 const preview: Preview = {
   decorators: [
@@ -14,10 +14,10 @@ const preview: Preview = {
       const { decorators } = args.parameters;
       return (
         <ThemeProvider colorScheme={decorators?.theme ?? ThemeColorScheme.Light}>
-      <Story />
-      </ThemeProvider>
-    );
-    }
+          <Story />
+        </ThemeProvider>
+      );
+    },
   ],
   parameters: {
     controls: {
