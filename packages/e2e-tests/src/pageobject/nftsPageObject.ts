@@ -48,6 +48,10 @@ class NftsPageObject {
     await TransactionNewPage.reviewTransactionButton.click();
     await TransactionSummaryPage.confirmButton.waitForClickable();
     await TransactionSummaryPage.confirmButton.click();
+    await browser.pause(500);
+    if (await TransactionSummaryPage.confirmButton.isDisplayed()) {
+      await TransactionSummaryPage.confirmButton.click(); // workaround because single click for some reason may not be enough
+    }
   }
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
