@@ -42,11 +42,10 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  RUNS_ON: ${{ github.event.inputs.target || 'self-hosted' }}
 
 jobs:
   tests-run-part-1:
-    runs-on: echo $RUNS_ON
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -80,7 +79,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-2:
-    runs-on: echo $RUNS_ON
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -114,7 +113,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-3:
-    runs-on: echo $RUNS_ON
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -148,7 +147,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-4:
-    runs-on: echo $RUNS_ON
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
