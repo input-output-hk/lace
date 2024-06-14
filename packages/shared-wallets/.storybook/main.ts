@@ -33,7 +33,7 @@ const config: StorybookConfig = {
         nodePolyfills(),
         svgrPlugin({
           include: '**/*.svg',
-          svgrOptions: { icon: true, exportType: 'default' },
+          svgrOptions: { icon: true, exportType: 'named' },
         }),
       ],
     }),

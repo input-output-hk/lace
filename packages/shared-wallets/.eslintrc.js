@@ -8,6 +8,13 @@ module.exports = {
       },
     },
     {
+      files: ['./src/typings/*'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        'import/no-default-export': 'off',
+      },
+    },
+    {
       files: ['./.eslintrc.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
