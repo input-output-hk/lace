@@ -26,6 +26,7 @@ on:
         description: 'Run job on'
         required: false
         default: self-hosted
+        type: choice
         options:
           - ubuntu-22.04
           - ubuntu-20.04
