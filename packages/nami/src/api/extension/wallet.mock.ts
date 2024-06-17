@@ -9,3 +9,5 @@ export const initTx = fn(actualApi.initTx).mockName('initTx');
 export const undelegateTx = fn(actualApi.undelegateTx).mockName('undelegateTx');
 
 export const withdrawalTx = fn(actualApi.withdrawalTx).mockName('withdrawalTx');
+
+export const buildTx = fn(actualApi.buildTx).mockName('buildTx');

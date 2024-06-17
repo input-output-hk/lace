@@ -491,6 +491,7 @@ const Wallet = () => {
                 </MenuItem>
                 <MenuDivider />
                 <MenuItem
+                  isDisabled={!state.account}
                   icon={<Icon as={FaRegFileCode} w={3} h={3} />}
                   onClick={() => {
                     capture(Events.SettingsCollateralClick);

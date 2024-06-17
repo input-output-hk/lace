@@ -20,6 +20,11 @@ export const account = {
   paymentKeyHash: 'e8fc28480c73486d288074c5ac7660ad0611ae5ce505de1943534669',
   paymentKeyHashBech32:
     'addr_vkh1ar7zsjqvwdyx62yqwnz6canq45rprtjuu5zaux2r2drxjlwvm2w',
+  collateral: {
+    lovelace: '5000000',
+    txHash: 'a399e301967b7b69d4d422300db14310ebe4db2355d350949be37bda5ec3e311',
+    txId: 0,
+  },
   preprod: {
     assets: [
       {

@@ -1,3 +1,31 @@
-import { fn } from '@storybook/test';
+export const Loader = {
+  load() {},
 
-export const Loader = fn().mockName('Loader');
+  get Cardano() {
+    return {
+      BigNum: {
+        from_str: () => {},
+      },
+      Address: {
+        from_bech32: () => {},
+      },
+      Value: {
+        new: () => {},
+      },
+      TransactionOutputs: {
+        new: () => ({
+          add: () => {},
+        }),
+      },
+      TransactionOutput: {
+        new: () => ({
+          add: () => {},
+        }),
+      },
+    };
+  },
+
+  get Message() {
+    return {};
+  },
+};

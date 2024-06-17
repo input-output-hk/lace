@@ -8,7 +8,7 @@ import React from 'react';
 
 import { Box, useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn, userEvent, within } from '@storybook/test';
+import { expect, fn, userEvent, waitFor, within } from '@storybook/test';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -26,6 +26,7 @@ import {
   getAsset,
 } from '../../../api/extension/api.mock';
 import {
+  buildTx,
   initTx,
   undelegateTx,
   withdrawalTx,
@@ -558,7 +559,6 @@ export const AddAccountLight: Story = {
     getNativeAccounts.mockImplementation(() => {
       return [account];
     });
-
     return () => {
       getAccounts.mockReset();
       getNativeAccounts.mockReset();
@@ -608,6 +608,88 @@ export const DeleteAccountLight: Story = {
 
 export const DeleteAccountDark: Story = {
   ...DeleteAccountLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const RemoveCollateralLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open collateral modal', async () => {
+      const button = (await canvas.findByText('Collateral')).parentElement!;
+      await waitFor(async () => expect(button).toBeEnabled());
+      await userEvent.click(button);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([account]);
+    });
+    getNativeAccounts.mockImplementation(() => {
+      return [account];
+    });
+    return () => {
+      getAccounts.mockReset();
+      getNativeAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const RemoveCollateralDark: Story = {
+  ...RemoveCollateralLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const AddCollateralLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open collateral modal', async () => {
+      const button = (await canvas.findByText('Collateral')).parentElement!;
+      await waitFor(async () => expect(button).toBeEnabled());
+      await userEvent.click(button);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([{ ...account, collateral: undefined }]);
+    });
+    getNativeAccounts.mockImplementation(() => {
+      return [{ ...account, collateral: undefined }];
+    });
+    buildTx.mockResolvedValue({
+      body: () => ({
+        fee: () => ({
+          to_str: () => '176281',
+        }),
+      }),
+    });
+    return () => {
+      getAccounts.mockReset();
+      getNativeAccounts.mockReset();
+      buildTx.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const AddCollateralDark: Story = {
+  ...AddCollateralLight,
   parameters: {
     colorMode: 'dark',
   },

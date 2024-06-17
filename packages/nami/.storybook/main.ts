@@ -58,6 +58,10 @@ const config: StorybookConfig = {
           /^react-router-dom$/,
           join(__dirname, './mocks/react-router-dom.mock.ts'),
         ),
+        new NormalModuleReplacementPlugin(
+          /loader$/,
+          join(__dirname, './mocks/loader.ts'),
+        ),
       );
     }
 
