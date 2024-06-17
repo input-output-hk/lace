@@ -1,11 +1,6 @@
 name: E2E Tests Linux
 
 on:
-#  schedule:
-#    - cron: '0 0 * * *'
-#  push:
-#    branches:
-#      - 'release/**'
   workflow_dispatch:
     inputs:
       browser:
@@ -54,14 +49,13 @@ jobs:
   prereq:
     runs-on: ubuntu-latest
     steps:
-      - name: Provision step # at least one step is required in a job
+      - name: Provision step
         run: |
           echo "Provisioning ${{ github.event.inputs.runner }}"
     outputs:
       runner: ${{ github.event.inputs.runner }}
   tests-run-part-1:
     needs: prereq
-#    runs-on: self-hosted
     runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
@@ -97,7 +91,6 @@ jobs:
 
   tests-run-part-2:
     needs: prereq
-    #    runs-on: self-hosted
     runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
@@ -121,9 +114,14 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
-          INCLUDE_E2E: if (${{ env.E2E_INCLUDED }}) { '' } else { ' and not @E2E' }
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending${{ env.INCLUDE_E2E }}'"
+          |
+          if [ ${{ env.E2E_INCLUDED }} ]; then
+            RUN_E2E="";
+          else
+            RUN_E2E=" and not @E2E";
+          fi
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending${RUN_E2E}"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -134,7 +132,6 @@ jobs:
 
   tests-run-part-3:
     needs: prereq
-    #    runs-on: self-hosted
     runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
@@ -170,7 +167,6 @@ jobs:
 
   tests-run-part-4:
     needs: prereq
-    #    runs-on: self-hosted
     runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
@@ -208,9 +204,6 @@ jobs:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
     runs-on: ubuntu-22.04
     if: always()
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
     steps:
       - name: Download reports from part 1
         uses: actions/download-artifact@v4
