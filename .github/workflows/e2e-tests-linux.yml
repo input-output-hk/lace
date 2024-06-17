@@ -120,9 +120,9 @@ jobs:
           ENV: ${{ env.NETWORK }}
         run: |
           if [ ${{ env.E2E_INCLUDED }} ]; then
-            TAGS_TO_RUN="--cucumberOpts.tags='@Runner2 and @Testnet and not @Pending'";
+            TAGS_TO_RUN="--cucumberOpts.tags='@Analytics and @E2E and @Testnet and not @Pending'";
           else
-            TAGS_TO_RUN="--cucumberOpts.tags='@Runner2 and @Testnet and not @Pending and not @E2E'";
+            TAGS_TO_RUN="--cucumberOpts.tags='@Analytics and @Testnet and not @Pending'";
           fi
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
           eval "$runCommand";
