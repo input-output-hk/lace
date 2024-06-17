@@ -1,6 +1,11 @@
 name: E2E Tests Linux
 
 on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches:
+      - 'release/**'
   workflow_dispatch:
     inputs:
       browser:
@@ -32,7 +37,7 @@ on:
         default: true
         description: include e2e tests
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | e2e flows included: ${{ github.event.inputs.e2e-included }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | e2e flows: ${{ github.event.inputs.e2e-included }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -115,11 +120,11 @@ jobs:
           ENV: ${{ env.NETWORK }}
         run: |
           if [ ${{ env.E2E_INCLUDED }} ]; then
-            RUN_E2E="";
+            TAGS_TO_RUN="--cucumberOpts.tags='@Runner2 and @Testnet and not @Pending'";
           else
-            RUN_E2E=" and not @E2E";
+            TAGS_TO_RUN="--cucumberOpts.tags='@Runner2 and @Testnet and not @Pending and not @E2E'";
           fi
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending${RUN_E2E}'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -272,7 +277,7 @@ jobs:
         env:
           SLACK_COLOR: ${{ job.status }}
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | e2e flows included: ${{ env.E2E_INCLUDED }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | e2e flows: ${{ env.E2E_INCLUDED }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
