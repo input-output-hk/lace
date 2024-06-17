@@ -120,7 +120,7 @@ jobs:
           else
             RUN_E2E=" and not @E2E";
           fi
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending${RUN_E2E}"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending${RUN_E2E}'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
