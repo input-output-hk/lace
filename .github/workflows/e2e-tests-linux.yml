@@ -22,6 +22,14 @@ on:
         options:
           - preprod
           - mainnet
+      runner:
+        type: choice
+        default: 'self-hosted'
+        description: runner to use
+        options:
+          - self-hosted
+          - ubuntu-22.04
+          - ubuntu-20.04
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | tags: ${{ github.event.inputs.tags || 'empty' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
@@ -33,11 +41,21 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
+  RUNNER: ${{ github.event.inputs.runner }}
 
 jobs:
+  prereq:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Provision step # at least one step is required in a job
+        run: |
+          echo "Provisioning ${{ github.event.inputs.runner }}"
+    outputs:
+      runner: ${{ github.event.inputs.runner }}
   tests-run-part-1:
+    needs: prereq
 #    runs-on: self-hosted
-    runs-on: ubuntu-22.04
+    runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -71,8 +89,9 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-2:
-#    runs-on: self-hosted
-    runs-on: ubuntu-22.04
+    needs: prereq
+    #    runs-on: self-hosted
+    runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -106,8 +125,9 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-3:
-#    runs-on: self-hosted
-    runs-on: ubuntu-22.04
+    needs: prereq
+    #    runs-on: self-hosted
+    runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -141,8 +161,9 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-4:
-#    runs-on: self-hosted
-    runs-on: ubuntu-22.04
+    needs: prereq
+    #    runs-on: self-hosted
+    runs-on: ${{ needs.prereq.outputs.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
