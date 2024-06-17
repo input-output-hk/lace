@@ -115,7 +115,6 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          |
           if [ ${{ env.E2E_INCLUDED }} ]; then
             RUN_E2E="";
           else
