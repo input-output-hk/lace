@@ -233,7 +233,7 @@ jobs:
           cp -r ./tests-run-part-3-results/* ./allure/results
           cp -r ./tests-run-part-4-results/* ./allure/results
       - name: Create allure properties
-        if: always()
+        if: success()
         run: |
           echo "
           branch=${BRANCH}
@@ -244,7 +244,6 @@ jobs:
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
-        if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
@@ -258,13 +257,11 @@ jobs:
           ignoreMissingResults: true
           baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
       - name: Add link to summary
-        if: always()
         run: |
           echo "TEST RESULTS:"
           echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: test-artifacts
           path: |
@@ -272,7 +269,7 @@ jobs:
           retention-days: 10
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.2.0
-        if: always()
+        if: success()
         env:
           SLACK_COLOR: ${{ job.status }}
           SLACK_ICON_EMOJI: ':lace:'
