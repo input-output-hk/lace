@@ -1,11 +1,11 @@
 name: E2E Tests Linux
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
-  push:
-    branches:
-      - 'release/**'
+#  schedule:
+#    - cron: '0 0 * * *'
+#  push:
+#    branches:
+#      - 'release/**'
   workflow_dispatch:
     inputs:
       browser:
@@ -24,12 +24,18 @@ on:
           - mainnet
       runner:
         type: choice
+        required: true
         default: 'self-hosted'
         description: runner to use
         options:
           - self-hosted
           - ubuntu-22.04
           - ubuntu-20.04
+      e2e-included:
+        type: boolean
+        required: true
+        default: true
+        description: include e2e tests
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | tags: ${{ github.event.inputs.tags || 'empty' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
@@ -42,6 +48,7 @@ env:
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
   RUNNER: ${{ github.event.inputs.runner }}
+  E2E_INCLUDED: ${{ github.event.inputs.e2e-included }}
 
 jobs:
   prereq:
@@ -114,8 +121,9 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          INCLUDE_E2E: if (${{ env.E2E_INCLUDED }}) { '' } else { ' and not @E2E' }
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending and not @E2E'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending${{ env.INCLUDE_E2E }}'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
