@@ -9,15 +9,12 @@ import localStorageInitializer from '../fixture/localStorageInitializer';
 import publicKeyDrawerAssert from '../assert/settings/PublicKeyDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import drawerNetworkSettingsAssert from '../assert/settings/NetworkSettingsDrawerAssert';
-import drawerTermsAndConditionsSettingsAssert from '../assert/settings/TermsAndConditionsSettingsDrawerAssert';
-import PrivacyPolicyDrawerAssert from '../assert/settings/PrivacyPolicyDrawerAssert';
 import drawerHelpSettingsAssert from '../assert/settings/HelpSettingsDrawerAssert';
 import { t } from '../utils/translationService';
 import passphraseDrawerAssert from '../assert/settings/PassphraseDrawerAssert';
 import PassphraseDrawer from '../elements/settings/PassphraseDrawer';
 import localStorageAssert from '../assert/localStorageAssert';
 import collateralDrawerAssert from '../assert/settings/CollateralDrawerAssert';
-import CookiePolicyDrawerAssert from '../assert/settings/CookiePolicyDrawerAssert';
 import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
@@ -164,32 +161,6 @@ Then(
     await localStorageInitializer.initializeUnconfirmedTransactions(JSON.stringify(entry));
   }
 );
-
-Then(/the Terms and Conditions copy is displayed/, async () => {
-  await drawerTermsAndConditionsSettingsAssert.assertTermsAndConditionsContent();
-});
-
-Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  if (mode === 'extended') {
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerCloseButton();
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
-  } else {
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerBackButton();
-  }
-  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyTitle();
-  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyContent();
-});
-
-Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  if (mode === 'extended') {
-    await CookiePolicyDrawerAssert.assertSeeDrawerCloseButton();
-    await CookiePolicyDrawerAssert.assertSeeDrawerNavigationTitle();
-  } else {
-    await CookiePolicyDrawerAssert.assertSeeDrawerBackButton();
-  }
-  await CookiePolicyDrawerAssert.assertSeeCookiePolicyTitle();
-  await CookiePolicyDrawerAssert.assertSeeCookiePolicyContent();
-});
 
 Then(/^I see help details drawer in (extended|popup) mode/, async (mode: 'extended' | 'popup') => {
   await drawerHelpSettingsAssert.assertSeeHelpDrawer(mode);
