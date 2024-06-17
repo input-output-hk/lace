@@ -36,9 +36,6 @@ Feature: General Settings - Extended Browser View
       | browserView.settings.wallet.collateral.title       |
       | browserView.settings.security.showPassphrase.title |
       | browserView.settings.help.support.help             |
-      | browserView.settings.legal.tnc.title               |
-      | browserView.settings.legal.privacyPolicy.title     |
-      | browserView.settings.legal.cookiePolicy.title      |
 
   @LW-2522 @Mainnet @Testnet
   Scenario: Extended View - Try to remove wallet and cancel

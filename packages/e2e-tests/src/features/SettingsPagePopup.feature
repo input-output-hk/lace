@@ -42,9 +42,6 @@ Feature: General Settings - Popup View
 #     | browserView.settings.security.passphrasePeriodicVerification.title  |
       | browserView.settings.security.showPassphrase.title |
       | browserView.settings.help.support.help             |
-      | browserView.settings.legal.tnc.title               |
-      | browserView.settings.legal.privacyPolicy.title     |
-      | browserView.settings.legal.cookiePolicy.title      |
 
   @LW-2707 @Mainnet @Testnet
   Scenario: Popup view - Try to remove wallet and cancel
