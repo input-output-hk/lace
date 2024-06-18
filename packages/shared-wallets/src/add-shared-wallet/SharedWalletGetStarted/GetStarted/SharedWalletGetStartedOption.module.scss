@@ -1,0 +1,15 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/typography.scss';
+
+.description {
+  color: var(--text-color-secondary);
+  white-space: pre-line;
+  max-width: 170px;
+  text-align: center;
+}
+
+.icon {
+  margin-bottom: size_unit(2);
+  width: 40px;
+  height: 40px;
+}

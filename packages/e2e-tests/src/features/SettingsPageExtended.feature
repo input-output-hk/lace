@@ -36,9 +36,6 @@ Feature: General Settings - Extended Browser View
       | browserView.settings.wallet.collateral.title       |
       | browserView.settings.security.showPassphrase.title |
       | browserView.settings.help.support.help             |
-      | browserView.settings.legal.tnc.title               |
-      | browserView.settings.legal.privacyPolicy.title     |
-      | browserView.settings.legal.cookiePolicy.title      |
 
   @LW-2522 @Mainnet @Testnet
   Scenario: Extended View - Try to remove wallet and cancel
@@ -186,19 +183,19 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Terms and Conditions copy
     When I open settings from header menu
     When I click on "Terms and conditions" setting
-    Then the Terms and Conditions copy is displayed
+    Then "Terms and conditions" are displayed in new tab
 
   @LW-2781 @Mainnet @Testnet
   Scenario: Extended View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
-    Then the Privacy policy copy is displayed in extended mode
+    Then "Privacy policy" is displayed in new tab
 
   @LW-5830 @Mainnet @Testnet
   Scenario: Extended View - Settings - Cookie policy copy
     When I open settings from header menu
     And I click on "Cookie policy" setting
-    Then the Cookie policy drawer is displayed in extended mode
+    Then "Cookie policy" is displayed in new tab
 
   @LW-2788 @Mainnet @Testnet
   Scenario: Extended View - Settings - Visibility of Help drawer

@@ -1,0 +1,9 @@
+{
+  "extends": "@lace/configs/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "declaration": true,
+    "declarationDir": "dts"
+  },
+  "include": ["src"]
+}

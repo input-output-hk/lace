@@ -42,9 +42,6 @@ Feature: General Settings - Popup View
 #     | browserView.settings.security.passphrasePeriodicVerification.title  |
       | browserView.settings.security.showPassphrase.title |
       | browserView.settings.help.support.help             |
-      | browserView.settings.legal.tnc.title               |
-      | browserView.settings.legal.privacyPolicy.title     |
-      | browserView.settings.legal.cookiePolicy.title      |
 
   @LW-2707 @Mainnet @Testnet
   Scenario: Popup view - Try to remove wallet and cancel
@@ -213,19 +210,19 @@ Feature: General Settings - Popup View
   Scenario: Popup View - Settings - Terms and Conditions copy
     When I open settings from header menu
     When I click on "Terms and conditions" setting
-    Then the Terms and Conditions copy is displayed
+    Then "Terms and conditions" are displayed in new tab
 
   @LW-2782 @Mainnet @Testnet
   Scenario: Popup View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
-    Then the Privacy policy copy is displayed in popup mode
+    Then "Privacy policy" is displayed in new tab
 
   @LW-5831 @Mainnet @Testnet
   Scenario: Popup View - Settings - Cookie policy copy
     When I open settings from header menu
     And I click on "Cookie policy" setting
-    Then the Cookie policy drawer is displayed in popup mode
+    Then "Cookie policy" is displayed in new tab
 
   @LW-2790 @Mainnet @Testnet
   Scenario: Popup View - Settings - Visibility of Help drawer
