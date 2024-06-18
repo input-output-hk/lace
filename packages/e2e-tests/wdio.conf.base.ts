@@ -99,6 +99,6 @@ export const config: WebdriverIO.Config = {
     tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
     timeout: 200_000,
-    retry: 0
+    retry: 1
   } as WebdriverIO.CucumberOpts
 };
