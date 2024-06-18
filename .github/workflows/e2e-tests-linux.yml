@@ -93,6 +93,9 @@ jobs:
         with:
           name: tests-run-part-1-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   tests-run-part-2:
     needs: prereq
@@ -133,6 +136,9 @@ jobs:
         with:
           name: tests-run-part-2-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   tests-run-part-3:
     needs: prereq
@@ -168,6 +174,9 @@ jobs:
         with:
           name: tests-run-part-3-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   tests-run-part-4:
     needs: prereq
@@ -203,6 +212,9 @@ jobs:
         with:
           name: tests-run-part-4-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
