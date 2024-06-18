@@ -134,18 +134,18 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [disableAccountConfirmation, accountsData]
   );
 
-  const showHWErrorState = useCallback(() => {
+  const showHWErrorState = useCallback((accountIndex: number) => {
     enableAccountHWSigningDialog.setData({
-      ...enableAccountHWSigningDialog.data,
+      accountIndex,
       state: 'error'
     });
-  }, [enableAccountHWSigningDialog]);
+  }, []);
 
   const unlockHWAccount = useCallback(
     async (accountIndex: number) => {
       const name = defaultAccountName(accountIndex);
       try {
-        const timeout = setTimeout(showHWErrorState, HW_CONNECT_TIMEOUT_MS);
+        const timeout = setTimeout(() => showHWErrorState(accountIndex), HW_CONNECT_TIMEOUT_MS);
         if (wallet.type === WalletType.InMemory) return;
         await Wallet.connectDevice(wallet.type);
         await addAccount({
@@ -161,7 +161,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         enableAccountHWSigningDialog.hide();
         closeDropdownAndShowAccountActivated(name);
       } catch {
-        showHWErrorState();
+        showHWErrorState(accountIndex);
       }
     },
     [
