@@ -1,4 +1,4 @@
-@Runner2 @Settings-Extended @Analytics
+@Runner2 @Settings-Extended @Analytics @Testnet
 Feature: Analytics - Settings Toggle - Extended View
 
   Background:

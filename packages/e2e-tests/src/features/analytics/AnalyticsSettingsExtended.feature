@@ -1,4 +1,4 @@
-@Runner2 @Analytics-Settings-Extended @Analytics
+@Runner2 @Analytics-Settings-Extended @Analytics @Testnet
 Feature: Analytics - Settings - Extended View
 
   Background:
