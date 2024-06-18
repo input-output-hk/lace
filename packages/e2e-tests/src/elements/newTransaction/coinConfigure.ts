@@ -66,6 +66,8 @@ export class CoinConfigure {
   fillTokenValue = async (valueToEnter: number): Promise<void> => {
     await this.input.waitForClickable();
     await setInputFieldValue(await this.input, String(valueToEnter));
+    // Clicking on the container to unfocus the input
+    await $(`${this.CONTAINER}`).click();
   };
 
   fillTokenValueUsingKeys = async (valueToEnter: number): Promise<void> => {

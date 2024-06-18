@@ -601,12 +601,8 @@ When(
 );
 
 When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
-  await TransactionSummaryPage.confirmButton.waitForClickable();
+  await TransactionSummaryPage.confirmButton.waitForEnabled();
   await TransactionSummaryPage.confirmButton.click();
-  await browser.pause(500);
-  if (await TransactionSummaryPage.confirmButton.isDisplayed()) {
-    await TransactionSummaryPage.confirmButton.click(); // workaround because single click for some reason may not be enough
-  }
 });
 
 When(/^I click "(Save|Cancel)" button on "Add address" drawer in send flow$/, async (button: 'Save' | 'Cancel') => {
