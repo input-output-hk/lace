@@ -458,7 +458,6 @@
   "browserView.transaction.send.advancedFlowText": "Click 'Add bundle' to send assets to another recipient in this transaction.",
   "browserView.transaction.send.advancedTransaction": "Advanced transaction",
   "browserView.transaction.send.confirmationTitle": "Transaction confirmation",
-  "browserView.transaction.send.customSubmitApiBannerText": "Custom submit API enabled to send transactions. To disable, go to Settings >> Custom submit API",
   "browserView.transaction.send.utxoDepletedBannerErrorText": "Due to the minUTXO requirement for native assets, some ADA cannot be spent.",
   "browserView.transaction.send.utxoDepletedBannerMaxButtonText": "Use the 'Max' button to select the maximum spendable amount.",
   "browserView.transaction.send.drawer.addBundle": "Add bundle",
