@@ -80,6 +80,8 @@ export const theme = extendTheme({
     global: {
       body: {
         overflow: 'hidden',
+        lineHeight: '18px',
+        fontSize: '75%',
       },
     },
   },

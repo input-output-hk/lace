@@ -8,7 +8,14 @@ import React from 'react';
 
 import { Box, useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, waitFor, within } from '@storybook/test';
+import {
+  expect,
+  fn,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+} from '@storybook/test';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -690,6 +697,92 @@ export const AddCollateralLight: Story = {
 
 export const AddCollateralDark: Story = {
   ...AddCollateralLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const AboutModalLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open about modal', async () => {
+      const button = await canvas.findByText('About');
+      await userEvent.click(button);
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const AboutModalDark: Story = {
+  ...AboutModalLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const PrivacyPolicyModalLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open about modal', async () => {
+      const button = await canvas.findByText('About');
+      await userEvent.click(button);
+    });
+    await step('Open privacy policy modal', async () => {
+      await waitFor(() => {
+        expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
+      });
+      const link = await screen.findByText('Privacy Policy');
+      await userEvent.click(link);
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const PrivacyPolicyModalDark: Story = {
+  ...PrivacyPolicyModalLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const TermsOfUseModalLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Menu dropdown', async () => {
+      const menu = await canvas.findByTestId('menu');
+      await userEvent.click(menu.children[0]);
+    });
+    await step('Open about modal', async () => {
+      const button = await canvas.findByText('About');
+      await userEvent.click(button);
+    });
+    await step('Open terms of use modal', async () => {
+      await waitFor(() => {
+        expect(screen.getByText('Terms of use')).toBeInTheDocument();
+      });
+      const link = await screen.findByText('Terms of use');
+      await userEvent.click(link);
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const TermsOfUseModalDark: Story = {
+  ...TermsOfUseModalLight,
   parameters: {
     colorMode: 'dark',
   },

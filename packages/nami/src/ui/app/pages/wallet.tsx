@@ -83,7 +83,7 @@ import { onAccountChange } from '../../../api/extension';
 import AssetsViewer from '../components/assetsViewer';
 // import HistoryViewer from '../components/historyViewer';
 import Copy from '../components/copy';
-// import About from '../components/about';
+import About from '../components/about';
 import { useStoreState } from '../../store';
 import AvatarLoader from '../components/avatarLoader';
 import { currencyToSymbol, fromAssetUnit } from '../../../api/util';
@@ -800,7 +800,7 @@ const Wallet = () => {
         ref={builderRef}
         onConfirm={forceUpdate => getData(forceUpdate)}
       />
-      {/* <About ref={aboutRef} /> */}
+      <About ref={aboutRef} />
     </>
   );
 };
