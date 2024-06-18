@@ -1,4 +1,4 @@
-@Runner3 @AddressBook-extended @Mainnet @Testnet
+@AddressBook-extended @Mainnet @Testnet
 Feature: Address book - extended view
 
   Background:

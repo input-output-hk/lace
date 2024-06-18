@@ -1,4 +1,4 @@
-@Runner2 @AddressBook-popup @Analytics @Testnet @Mainnet
+@AddressBook-popup @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - Address book - Popup view
 
   Background:

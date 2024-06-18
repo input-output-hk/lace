@@ -1,4 +1,4 @@
-@Runner4 @NetworkSwitching-popup @Testnet @Mainnet
+@NetworkSwitching-popup @Testnet @Mainnet
 Feature: LW: Network Switching - popup view
 
   Background:

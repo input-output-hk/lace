@@ -1,4 +1,4 @@
-@Runner1 @Staking-NonDelegatedFunds-Extended
+@Staking-NonDelegatedFunds-Extended
 Feature: Staking Page - Extended View
 
   Background:

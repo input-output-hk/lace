@@ -1,4 +1,4 @@
-@Runner4 @Send-Transaction-Metadata-Extended @Testnet @Mainnet
+@Send-Transaction-Metadata-Extended @Testnet @Mainnet
 Feature: LW-2923: [Send Flow] Show visual clue for metadata characters limit
 
   Background:

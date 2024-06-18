@@ -1,4 +1,4 @@
-@Runner2 @MainNavigation-Popup @Analytics @Mainnet @Testnet
+@MainNavigation-Popup @Analytics @Mainnet @Testnet
 Feature: Analytics - Main Navigation - Popup view
 
   Background:

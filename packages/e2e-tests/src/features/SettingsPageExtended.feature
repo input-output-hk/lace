@@ -1,4 +1,4 @@
-@Runner1 @Settings-Extended
+@Settings-Extended
 Feature: General Settings - Extended Browser View
 
   Background:

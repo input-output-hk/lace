@@ -1,4 +1,4 @@
-@Runner1 @SendTx-Simple-Extended
+@SendTx-Simple-Extended
 Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
 
   Background:

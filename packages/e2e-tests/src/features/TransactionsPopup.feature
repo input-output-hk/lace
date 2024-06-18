@@ -1,4 +1,4 @@
-@Runner3 @Transactions-Popup
+@Transactions-Popup
 Feature: Transactions - Popup view
 
   Background:

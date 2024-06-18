@@ -1,4 +1,4 @@
-@Runner4 @Multidelegation-DelegatedFunds-SinglePool-Extended @Testnet
+@Multidelegation-DelegatedFunds-SinglePool-Extended @Testnet
 Feature: Staking Page - Delegated funds - Single pool - Extended View
 
   Background:

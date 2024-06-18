@@ -1,4 +1,4 @@
-@Runner1 @CIP-95-Extended @Testnet
+@CIP-95-Extended @Testnet
 Feature: CIP-95 Static methods
 
   @LW-10611

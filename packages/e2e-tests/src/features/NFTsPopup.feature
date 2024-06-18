@@ -1,4 +1,4 @@
-@Runner4 @NFTs-Popup @Testnet
+@NFTs-Popup @Testnet
 Feature: LW-411 Ext.PopUp - Collectibles/NFTs
 
   Background:

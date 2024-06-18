@@ -1,4 +1,4 @@
-@Runner4 @Settings-Popup
+@Settings-Popup
 Feature: General Settings - Popup View
 
   Background:

@@ -1,4 +1,4 @@
-@Runner2 @Tokens-popup @Analytics @Testnet @Mainnet
+@Tokens-popup @Analytics @Testnet @Mainnet
 Feature: Analytics - Tokens tab - Popup view
 
   Background:

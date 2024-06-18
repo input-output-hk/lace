@@ -1,4 +1,4 @@
-@Runner2 @NFTs-Extended @Analytics @Testnet @Mainnet
+@NFTs-Extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - Event properties
 
   Background:

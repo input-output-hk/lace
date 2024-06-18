@@ -1,4 +1,4 @@
-@Runner4 @NetworkSwitching-extended @Testnet @Mainnet
+@NetworkSwitching-extended @Testnet @Mainnet
 Feature: LW: Network Switching - extended view
 
   Background:

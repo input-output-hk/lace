@@ -1,4 +1,4 @@
-@Runner2 @SendTransactionDapp-E2E @E2E @Testnet
+@SendTransactionDapp-E2E @E2E @Testnet
 Feature: Send Transactions from Dapp - E2E
 
   Background:

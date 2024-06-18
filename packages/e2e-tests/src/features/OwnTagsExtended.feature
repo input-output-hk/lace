@@ -1,4 +1,4 @@
-@Runner4 @OwnTags-Extended
+@OwnTags-Extended
 Feature: Own Tags - Extended View
 
   Background:

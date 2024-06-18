@@ -1,4 +1,4 @@
-@Runner4 @Accounts-Extended @Testnet
+@Accounts-Extended @Testnet
 Feature: Wallet accounts
 
   Background:

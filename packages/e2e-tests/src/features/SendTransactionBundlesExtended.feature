@@ -1,4 +1,4 @@
-@Runner3 @SendTx-Bundles-Extended @Testnet
+@SendTx-Bundles-Extended @Testnet
 Feature: Send - Extended Browser View (Advanced Tx)
 
   Background:

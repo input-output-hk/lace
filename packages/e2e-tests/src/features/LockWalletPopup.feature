@@ -1,4 +1,4 @@
-@Runner4 @LockWallet-popup @Mainnet @Testnet @Pending
+@LockWallet-popup @Mainnet @Testnet @Pending
 Feature: Wallet locking / unlocking - Popup view
 
   Background:

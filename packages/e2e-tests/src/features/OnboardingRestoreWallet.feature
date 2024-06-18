@@ -1,4 +1,4 @@
-@Runner1 @OnboardingRestoreWallet @Onboarding @Testnet @Mainnet
+@OnboardingRestoreWallet @Onboarding @Testnet @Mainnet
 Feature: Onboarding - Restore wallet
 
   @LW-2457

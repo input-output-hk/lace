@@ -1,4 +1,4 @@
-@Runner2 @NFTs-Popup @Analytics @Testnet @Mainnet
+@NFTs-Popup @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - NFTs - Popup view
 
   Background:
