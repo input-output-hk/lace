@@ -64,6 +64,26 @@ class CommonAssert {
     const expectedWalletAddress = getTestWallet(walletName).address as string;
     await this.assertClipboardContains(expectedWalletAddress);
   }
+
+  async assertLegalContentIsDisplayed(linkName: string): Promise<void> {
+    let expectedUrl;
+    switch (linkName) {
+      case 'Cookie policy':
+        expectedUrl = 'https://www.lace.io/lace-cookie-policy.pdf';
+        break;
+      case 'Privacy policy':
+        expectedUrl = 'https://www.lace.io/iog-privacy-policy.pdf';
+        break;
+      case 'Terms of service':
+      case 'Terms and conditions':
+        expectedUrl = 'https://www.lace.io/lace-terms-of-use.pdf';
+        break;
+      default:
+        throw new Error(`Unsupported legal link - ${linkName}`);
+    }
+    const currentUrl = await browser.getUrl();
+    expect(currentUrl).to.contain(expectedUrl);
+  }
 }
 
 export default new CommonAssert();

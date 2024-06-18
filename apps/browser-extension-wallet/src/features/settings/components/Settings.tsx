@@ -23,7 +23,7 @@ export const Settings = ({ defaultPassphraseVisible, defaultMnemonic }: Settings
           defaultMnemonic={defaultMnemonic}
         />
         <SettingsHelp popupView />
-        <SettingsLegal popupView />
+        <SettingsLegal />
         <SettingsRemoveWallet popupView />
       </div>
     </ContentLayout>
