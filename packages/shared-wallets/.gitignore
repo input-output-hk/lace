@@ -1,0 +1,6 @@
+dist
+
+# Do not ignore the following
+!*.d.ts
+
+*storybook.log

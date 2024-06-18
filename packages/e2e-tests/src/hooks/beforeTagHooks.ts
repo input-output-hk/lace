@@ -163,7 +163,7 @@ Before(
   async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 
-Before({ tags: '@Staking-NonDelegatedFunds-Extended' }, async () => {
+Before({ tags: '@Staking-NonDelegatedFunds-Extended or @CIP-95-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();

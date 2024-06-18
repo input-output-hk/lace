@@ -54,6 +54,7 @@
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
     "@lace/icons": "workspace:^",
+    "@lace/shared-wallets": "workspace:^",
     "@lace/staking": "0.1.0",
     "@lace/translation": "0.1.0",
     "@lace/ui": "^0.1.0",

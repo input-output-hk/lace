@@ -1,0 +1,40 @@
+@import '../../../common/src/ui/styles/theme.scss';
+
+$container-width: 840px;
+
+.modal {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  :global(.ant-modal-content) {
+    background-color: var(--bg-color-container);
+    box-shadow: var(--shadow-setup-box, none);
+    border-radius: size_unit(2);
+    max-width: $container-width;
+    max-height: 584px;
+    width: 100%;
+    height: 100%;
+    min-width: 650px;
+    overflow: auto;
+  }
+  :global(.ant-modal-body) {
+    padding: 0;
+    height: 584px;
+  }
+  :global(.ant-modal-close-x) {
+    display: none;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+
+  :global(.ant-btn-icon-only) {
+    height: size_unit(5);
+    width: size_unit(5);
+    z-index: 1;
+  }
+}
