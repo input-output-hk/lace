@@ -16,5 +16,4 @@ export * from './WalletSetupNamePasswordStep';
 export * from './WalletSetupFlowProvider';
 export * from './WalletSetupConfirmationDialogProvider';
 export * from './WalletAnalyticsInfo';
-export * from './LegalTranslations';
 export * from './AnalyticsConfirmationBanner';

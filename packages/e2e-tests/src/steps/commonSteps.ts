@@ -391,3 +391,12 @@ Then(/^I disable network interception$/, async () => {
 Given(/^I delete fiat price timestamp from background storage$/, async () => {
   await deleteFiatPriceTimestampFromBackgroundStorage();
 });
+
+Then(
+  /^"(Cookie policy|Privacy policy|Terms of service|Terms and conditions)" (is|are) displayed in new tab$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service' | 'Terms and conditions', _ignored) => {
+    await switchToLastWindow();
+    await commonAssert.assertLegalContentIsDisplayed(link);
+  }
+);
