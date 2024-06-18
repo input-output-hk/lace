@@ -60,7 +60,7 @@
     "@react-rxjs/core": "^0.9.8",
     "@react-rxjs/utils": "^0.9.5",
     "@vespaiach/axios-fetch-adapter": "^0.3.0",
-    "@xsy/nami-migration-tool": "file:./xsy-nami-migration-tool-0.0.5.tgz",
+    "@xsy/nami-migration-tool": "file:./xsy-nami-migration-tool-0.0.15.tgz",
     "antd": "^4.24.10",
     "are-you-es5": "^2.1.2",
     "axios": "0.28.0",

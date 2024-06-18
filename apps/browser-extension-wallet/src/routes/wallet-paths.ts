@@ -29,6 +29,13 @@ export const walletRoutePaths = {
   },
   sharedWallet: {
     root: '/add-shared-wallet'
+  },
+  namiMigration: {
+    root: '/nami/migration',
+    activating: '/nami/migration/activating',
+    welcome: '/nami/migration/welcome',
+    customize: '/nami/migration/customize',
+    allDone: '/nami/migration/all-done'
   }
 };
 

@@ -79,6 +79,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.ADD_SHARED_WALLET:
       path = walletRoutePaths.sharedWallet.root;
       break;
+    case BrowserViewSections.NAMI_MIGRATION:
+      path = walletRoutePaths.namiMigration.root;
+      break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
   await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));

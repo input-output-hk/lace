@@ -1,0 +1,26 @@
+import React from 'react';
+import { walletRoutePaths } from '@routes';
+import { Route, Switch } from 'react-router-dom';
+import { Activating } from './Activating';
+import { Welcome } from './Welcome';
+import { Customize } from './Customize';
+import { AllDone } from './AllDone';
+import { WalletSetupLayout } from '@views/browser/components';
+import { Portal } from '@views/browser/features/wallet-setup/components/Portal';
+
+const urlPath = walletRoutePaths.namiMigration;
+
+export const NamiMigration = (): JSX.Element => (
+  <Portal>
+    <WalletSetupLayout>
+      <Switch>
+        <>
+          <Route path={urlPath.activating} component={Activating} />
+          <Route path={urlPath.welcome} component={Welcome} />
+          <Route path={urlPath.customize} component={Customize} />
+          <Route path={urlPath.allDone} component={AllDone} />
+        </>
+      </Switch>
+    </WalletSetupLayout>
+  </Portal>
+);

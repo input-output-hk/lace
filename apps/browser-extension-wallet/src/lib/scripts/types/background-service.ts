@@ -34,7 +34,8 @@ export enum BrowserViewSections {
   COLLATERAL_SETTINGS = 'collateral-settings',
   FORGOT_PASSWORD = 'forgot_password',
   NEW_WALLET = 'new_wallet',
-  ADD_SHARED_WALLET = 'add_shared_wallet'
+  ADD_SHARED_WALLET = 'add_shared_wallet',
+  NAMI_MIGRATION = 'nami_migration'
 }
 
 export interface OpenBrowserData {

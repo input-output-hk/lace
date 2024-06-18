@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flex, Text, Box, Button, ToggleButtonGroup } from '@lace/ui';
-import nami from './nami.mp4';
-import lace from './lace.mp4';
 
 import { Wizard } from '../Wizard';
 
 interface Props {
-  onDone: () => void;
+  onDone: (mode: Mode) => void;
   onBack: () => void;
+  videosURL: {
+    lace: string;
+    nami: string;
+  };
+  onChange?: (mode: Mode) => void;
 }
 
 type Mode = 'lace' | 'nami';
 
-export const Customize = ({ onDone, onBack }: Props): JSX.Element => {
+const noop = (): void => void 0;
+
+export const Customize = ({ onDone, onBack, videosURL, onChange = noop }: Props): JSX.Element => {
   const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('lace');
+
+  const handleModeChange = (value: Mode) => {
+    setMode(value);
+    onChange(value);
+  };
 
   return (
     <Wizard step="customize">
@@ -29,7 +39,7 @@ export const Customize = ({ onDone, onBack }: Props): JSX.Element => {
           <Text.Body.Normal>{t('core.namiMigration.customize.description')}</Text.Body.Normal>
         </Box>
         <Box mt="$20" w="$fill">
-          <ToggleButtonGroup.Root variant="small" value={mode} onValueChange={(value) => setMode(value as Mode)}>
+          <ToggleButtonGroup.Root variant="small" value={mode} onValueChange={handleModeChange}>
             <ToggleButtonGroup.Item value={'lace'}>Lace</ToggleButtonGroup.Item>
             <ToggleButtonGroup.Item value={'nami'}>Nami</ToggleButtonGroup.Item>
           </ToggleButtonGroup.Root>
@@ -37,14 +47,14 @@ export const Customize = ({ onDone, onBack }: Props): JSX.Element => {
         <Flex mt="$24" flexDirection="column" alignItems="center">
           {mode === 'lace' ? (
             <>
-              <video autoPlay loop src={lace} width="295" height="166" />
+              <video autoPlay loop src={videosURL.lace} width="295" height="166" />
               <Box w="$fill" mt="$24">
                 <Text.Body.Normal>{t('core.namiMigration.customize.lace')}</Text.Body.Normal>
               </Box>
             </>
           ) : (
             <>
-              <video autoPlay loop src={nami} width="297" height="175" />
+              <video autoPlay loop src={videosURL.nami} width="297" height="175" />
               <Box w="$fill" mt="$24">
                 <Text.Body.Normal>{t('core.namiMigration.customize.nami')}</Text.Body.Normal>
               </Box>
@@ -54,7 +64,7 @@ export const Customize = ({ onDone, onBack }: Props): JSX.Element => {
       </Box>
       <Flex w="$fill" justifyContent="space-between">
         <Button.Secondary label={t('core.namiMigration.customize.back')} onClick={onBack} />
-        <Button.CallToAction label={t('core.namiMigration.customize.cta')} onClick={onDone} />
+        <Button.CallToAction label={t('core.namiMigration.customize.cta')} onClick={() => onDone(mode)} />
       </Flex>
     </Wizard>
   );

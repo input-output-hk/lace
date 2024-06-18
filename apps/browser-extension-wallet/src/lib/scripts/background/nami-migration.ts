@@ -42,18 +42,21 @@ export interface NamiMigrationAPI {
       userId: string;
     };
   }>;
+  abortMigration: () => Promise<void>;
 }
 
 exposeApi<NamiMigrationAPI>(
   {
     api$: of({
       startMigration,
-      checkMigrationStatus: laceMigrationClient.checkMigrationStatus
+      checkMigrationStatus: laceMigrationClient.checkMigrationStatus,
+      abortMigration: laceMigrationClient.abortMigration
     }),
     baseChannel: NamiMigrationChannels.MIGRATION,
     properties: {
       startMigration: RemoteApiPropertyType.MethodReturningPromise,
-      checkMigrationStatus: RemoteApiPropertyType.MethodReturningPromise
+      checkMigrationStatus: RemoteApiPropertyType.MethodReturningPromise,
+      abortMigration: RemoteApiPropertyType.MethodReturningPromise
     }
   },
   { logger: console, runtime }

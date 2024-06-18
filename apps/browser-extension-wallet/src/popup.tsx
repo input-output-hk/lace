@@ -28,6 +28,7 @@ import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
+import { NamiMigrationGuard } from '@src/features/nami-migration/NamiMigrationGuard';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -46,7 +47,9 @@ const App = (): React.ReactElement => (
                             <DataCheckContainer appMode={APP_MODE_POPUP}>
                               <AddressesDiscoveryOverlay>
                                 <BackgroundPageProvider>
-                                  <PopupView />
+                                  <NamiMigrationGuard>
+                                    <PopupView />
+                                  </NamiMigrationGuard>
                                 </BackgroundPageProvider>
                               </AddressesDiscoveryOverlay>
                             </DataCheckContainer>

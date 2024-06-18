@@ -1,10 +1,11 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Flex, Text, Box, Button } from '@lace/ui';
+import { Flex, Text, Box, Button, ThemeColorScheme, useTheme } from '@lace/ui';
 import { ReactComponent as CloseComponent } from '@lace/icons/dist/CloseComponent';
 import { ReactComponent as CheckComponent } from '@lace/icons/dist/CheckComponent';
 import NamiImg from './nami.png';
 import LaceImg from './lace.png';
+import LaceDarkImg from './lace-dark.png';
 import ArrowImg from './arrow-right.png';
 import { WalletImg } from './WalletImg';
 import { Wizard } from '../Wizard';
@@ -13,10 +14,15 @@ interface Props {
   termsOfServiceUrl: string;
   privacyPolicyUrl: string;
   faqUrl: string;
+  colorScheme?: ThemeColorScheme;
+  onNext: () => void;
 }
 
-export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl }: Props): JSX.Element => {
+export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl, colorScheme, onNext }: Props): JSX.Element => {
   const { t } = useTranslation();
+
+  const theme = useTheme();
+  const isLight = colorScheme ? colorScheme === 'light' : theme.colorScheme === 'light';
 
   return (
     <Wizard step="welcome">
@@ -34,7 +40,7 @@ export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl }: Props):
             <img src={ArrowImg} alt="Arrow" />
           </Box>
           <Box w="$96" h="$96">
-            <WalletImg img={LaceImg} icon={<CheckComponent />} color="success" />
+            <WalletImg img={isLight ? LaceImg : LaceDarkImg} icon={<CheckComponent />} color="success" />
           </Box>
         </Flex>
         <Box mt="$32">
@@ -70,7 +76,7 @@ export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl }: Props):
         </Box>
       </Box>
       <Flex w="$fill" justifyContent="flex-end" mt="$64">
-        <Button.CallToAction label={t('core.namiMigration.cta')} />
+        <Button.CallToAction label={t('core.namiMigration.cta')} onClick={onNext} />
       </Flex>
     </Wizard>
   );
