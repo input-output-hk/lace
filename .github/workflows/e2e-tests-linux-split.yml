@@ -31,13 +31,8 @@ on:
           - self-hosted
           - ubuntu-22.04
           - ubuntu-20.04
-      e2e-included:
-        type: boolean
-        required: true
-        default: true
-        description: include e2e tests
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | e2e flows: ${{ github.event.inputs.e2e-included }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -47,7 +42,6 @@ env:
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
   RUNNER: ${{ github.event.inputs.runner }}
-  E2E_INCLUDED: ${{ github.event.inputs.e2e-included }}
 
 jobs:
   prereq:
@@ -93,6 +87,9 @@ jobs:
         with:
           name: tests-run-part-1-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   tests-run-part-2:
     needs: prereq
@@ -120,12 +117,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          if [ ${{ env.E2E_INCLUDED }} ]; then
-            TAGS_TO_RUN="--cucumberOpts.tags='@Analytics or @E2E and @Testnet and not @Pending'";
-          else
-            TAGS_TO_RUN="--cucumberOpts.tags='@Analytics and @Testnet and not @Pending'";
-          fi
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -133,6 +125,9 @@ jobs:
         with:
           name: tests-run-part-2-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   tests-run-part-3:
     needs: prereq
@@ -168,6 +163,9 @@ jobs:
         with:
           name: tests-run-part-3-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   tests-run-part-4:
     needs: prereq
@@ -203,6 +201,9 @@ jobs:
         with:
           name: tests-run-part-4-results
           path: ./packages/e2e-tests/reports/allure/results
+      - name: Clean chrome tmp files
+        id: clean-tmp-files
+        run: rm -rf /tmp/.org.chromium.*
 
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
@@ -264,7 +265,7 @@ jobs:
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         with:
@@ -278,7 +279,7 @@ jobs:
         env:
           SLACK_COLOR: ${{ job.status }}
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | e2e flows: ${{ env.E2E_INCLUDED }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
