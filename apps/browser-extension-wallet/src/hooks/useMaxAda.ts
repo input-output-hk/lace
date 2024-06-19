@@ -72,7 +72,7 @@ const createOutputsWithMaxAmount = async ({
     if (output.value.assets) {
       const assets = Wallet.convertAssetsToBigInt(output.value.assets, assetInfo);
       acc.add({
-        address: output.address,
+        address: output.address || address,
         value: {
           coins: BigInt(0),
           assets
@@ -80,7 +80,7 @@ const createOutputsWithMaxAmount = async ({
       });
     } else {
       acc.add({
-        address: output.address,
+        address: output.address || address,
         value: {
           coins: BigInt(0)
         }
