@@ -7,25 +7,24 @@ export const config: WebdriverIO.Config = {
   specs: ['./src/features/**/*.feature'],
   suites: {
     batch1: [
+      './src/features/governance/CIP95StaticMethods.feature',
+      './src/features/MultiDelegationPageExtended*.feature',
       './src/features/Onboarding*.feature',
       './src/features/SendTransactionSimpleExtended*.feature',
       './src/features/SendTransactionSimplePopup*.feature',
-      './src/features/MultiDelegationPageExtended*.feature',
-      './src/features/governance/CIP95StaticMethods.feature',
       './src/features/SettingsPageExtended.feature'
     ],
     batch2: ['./src/features/analytics/Analytics*.feature', './src/features/e2e/*.feature'],
     batch3: [
       './src/features/AddressBookExtended.feature',
       './src/features/AddressBookPopup.feature',
-      './src/features/NFTsFolders*.feature',
-      './src/features/Transactions*.feature',
       './src/features/Collateral*.feature',
-      './src/features/SendTransactionBundlesExtended.feature'
+      './src/features/NFTsFolders*.feature',
+      './src/features/SendTransactionBundlesExtended.feature',
+      './src/features/Transactions*.feature'
     ],
     batch4: [
       './src/features/AdaHandle*.feature',
-      './src/features/Trezor/Trezor.feature',
       './src/features/DAppConnector*.feature',
       './src/features/EmptyStates*.feature',
       './src/features/FiatOnRampOffRampBanxa*.feature',
@@ -44,6 +43,7 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionMultipleSelection*.feature',
       './src/features/SettingsPagePopup.feature',
       './src/features/TokensPage*.feature',
+      './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ]
   },

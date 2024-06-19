@@ -76,12 +76,6 @@ jobs:
         with:
           name: tests-run-part-1-results
           path: ./packages/e2e-tests/reports/allure/results
-      - name: Clean chrome tmp files
-        if: always()
-        id: clean-tmp-files
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
 
   tests-run-part-2:
     runs-on: "${{ inputs.runner }}"
@@ -116,12 +110,6 @@ jobs:
         with:
           name: tests-run-part-2-results
           path: ./packages/e2e-tests/reports/allure/results
-      - name: Clean chrome tmp files
-        if: always()
-        id: clean-tmp-files
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
 
   tests-run-part-3:
     runs-on: "${{ inputs.runner }}"
@@ -156,12 +144,6 @@ jobs:
         with:
           name: tests-run-part-3-results
           path: ./packages/e2e-tests/reports/allure/results
-      - name: Clean chrome tmp files
-        if: always()
-        id: clean-tmp-files
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
 
   tests-run-part-4:
     runs-on: "${{ inputs.runner }}"
@@ -196,16 +178,10 @@ jobs:
         with:
           name: tests-run-part-4-results
           path: ./packages/e2e-tests/reports/allure/results
-      - name: Clean chrome tmp files
-        if: always()
-        id: clean-tmp-files
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
 
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
-    runs-on: ubuntu-22.04
+    runs-on: "${{ inputs.runner }}"
     if: always()
     steps:
       - name: Download reports from part 1
@@ -238,12 +214,12 @@ jobs:
           cp -r ./tests-run-part-4-results/* ./allure/results
       - name: Create allure properties
         if: success()
+        working-directory: './allure/results'
         run: |
           echo "
           branch=${BRANCH}
           env=${NETWORK}
           browser=${BROWSER}
-          tags=${TAGS}
           platform=Linux
           " > environment.properties
       - name: Publish allure report to S3
@@ -281,3 +257,9 @@ jobs:
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Clean chrome tmp files
+        if: ${{ inputs.runner == 'self-hosted' }}
+        id: clean-tmp-files
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
