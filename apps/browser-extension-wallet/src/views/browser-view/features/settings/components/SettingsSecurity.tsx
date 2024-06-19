@@ -10,6 +10,7 @@ import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { useIsSharedWallet } from './utils/isSharedWallet';
 
 const { Title } = Typography;
 interface SettingsSecurityProps {
@@ -27,7 +28,7 @@ export const SettingsSecurity = ({
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const { t } = useTranslation();
-  const { isWalletLocked, isInMemoryWallet } = useWalletStore();
+  const { isWalletLocked, isInMemoryWallet, inMemoryWallet } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -37,6 +38,7 @@ export const SettingsSecurity = ({
   );
   const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
+  const isSharedWallet = useIsSharedWallet(inMemoryWallet);
 
   const handleAnalyticsChoice = async (isOptedIn: boolean) => {
     const status = isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
@@ -90,7 +92,7 @@ export const SettingsSecurity = ({
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
           {t('browserView.settings.security.title')}
         </Title>
-        {!hideShowPassphraseSetting && (
+        {!hideShowPassphraseSetting && !isSharedWallet && (
           <>
             <SettingsLink
               onClick={handleOpenShowPassphraseDrawer}

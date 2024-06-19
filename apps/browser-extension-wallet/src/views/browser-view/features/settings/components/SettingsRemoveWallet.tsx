@@ -13,6 +13,7 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import cn from 'classnames';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
+import { useIsSharedWallet } from './utils/isSharedWallet';
 
 const { Title, Text } = Typography;
 
@@ -21,11 +22,13 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
   const { deleteWallet, walletRepository } = useWalletManager();
-  const { walletInfo, setDeletingWallet } = useWalletStore();
+  const { walletInfo, setDeletingWallet, inMemoryWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
+  const isSharedWallet = useIsSharedWallet(inMemoryWallet);
 
   const toggleRemoveWalletAlert = () => {
+    if (isSharedWallet) return;
     setIsRemoveWalletAlertVisible(!isRemoveWalletAlertVisible);
 
     analytics.sendEventToPostHog(
@@ -82,8 +85,11 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
             onClick={toggleRemoveWalletAlert}
             block={popupView}
             data-testid="remove-wallet-button"
+            disabled={isSharedWallet}
           >
-            {t('browserView.settings.wallet.general.removeAction', { walletName: walletInfo.name })}
+            {isSharedWallet
+              ? t('browserView.settings.wallet.general.removeSharedWalletDescription')
+              : t('browserView.settings.wallet.general.removeAction', { walletName: walletInfo.name })}
           </Button>
         </div>
       </SettingsCard>

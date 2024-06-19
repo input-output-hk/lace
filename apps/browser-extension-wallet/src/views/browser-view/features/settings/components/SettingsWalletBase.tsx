@@ -19,6 +19,7 @@ import uniq from 'lodash/uniq';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
+import { useIsSharedWallet } from './utils/isSharedWallet';
 
 const { Title } = Typography;
 
@@ -72,8 +73,9 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const analytics = useAnalyticsContext();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
+  const isSharedWallet = useIsSharedWallet(inMemoryWallet);
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
-  const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true';
+  const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true' && !isSharedWallet;
 
   useEffect(() => {
     const openCollateralDrawer = async () => {
@@ -245,33 +247,38 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           {t('browserView.settings.wallet.general.title')}
         </SettingsLink>
         {renderLocalNodeSlot && renderLocalNodeSlot({ activeDrawer, closeDrawer, openDrawer })}
-        <SettingsLink
-          onClick={handleOpenCollateralDrawer}
-          description={t('browserView.settings.wallet.collateral.description')}
-          data-testid="settings-wallet-collateral-link"
-          addon={
-            hasCollateral
-              ? t('browserView.settings.wallet.collateral.active')
-              : t('browserView.settings.wallet.collateral.inactive')
-          }
-        >
-          {t('browserView.settings.wallet.collateral.title')}
-        </SettingsLink>
-        <Collateral.CollateralDrawer
-          visible={activeDrawer === SettingsDrawer.collateral}
-          onClose={closeDrawer}
-          hasCollateral={hasCollateral}
-          unspendableLoaded={unspendable?.coins !== undefined}
-          sendAnalyticsEvent={handleSendAnalyticsEvent}
-        />
-        <SettingsLink
-          description={t('browserView.settings.wallet.walletSync.description')}
-          data-testid="settings-wallet-wallet-sync"
-          addon={!popupView && syncButton}
-        >
-          {t('browserView.settings.wallet.walletSync.title')}
-        </SettingsLink>
-        {popupView && syncButton}
+        {!isSharedWallet && (
+          <>
+            <SettingsLink
+              onClick={handleOpenCollateralDrawer}
+              description={t('browserView.settings.wallet.collateral.description')}
+              data-testid="settings-wallet-collateral-link"
+              addon={
+                hasCollateral
+                  ? t('browserView.settings.wallet.collateral.active')
+                  : t('browserView.settings.wallet.collateral.inactive')
+              }
+            >
+              {t('browserView.settings.wallet.collateral.title')}
+            </SettingsLink>
+            <Collateral.CollateralDrawer
+              visible={activeDrawer === SettingsDrawer.collateral}
+              onClose={closeDrawer}
+              hasCollateral={hasCollateral}
+              unspendableLoaded={unspendable?.coins !== undefined}
+              sendAnalyticsEvent={handleSendAnalyticsEvent}
+            />
+
+            <SettingsLink
+              description={t('browserView.settings.wallet.walletSync.description')}
+              data-testid="settings-wallet-wallet-sync"
+              addon={!popupView && syncButton}
+            >
+              {t('browserView.settings.wallet.walletSync.title')}
+            </SettingsLink>
+            {popupView && syncButton}
+          </>
+        )}
       </SettingsCard>
     </>
   );

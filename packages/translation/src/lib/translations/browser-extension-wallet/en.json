@@ -332,6 +332,7 @@
   "browserView.settings.wallet.general.removeWalletAlert.content": "Are you sure you want to remove your wallet? You'll have to restore it with your secret passphrase to access it again.",
   "browserView.settings.wallet.general.removeWalletAlert.title": "Hold up!",
   "browserView.settings.wallet.general.removeWalletDescription": "Removing it does not affect the wallet balance, and it can be restored at any time.",
+  "browserView.settings.wallet.general.removeSharedWalletDescription": "This wallet cannot be removed because it is linked to a shared wallet. To remove it, first remove all linked shared wallets.",
   "browserView.settings.wallet.general.showPubKey": "Show public key",
   "browserView.settings.wallet.general.showPubKeyAction": "Show public key",
   "browserView.settings.wallet.general.showPubKeyDescription": "This lets you import your wallet to other browsers and devices, or to restore it at a later date",
