@@ -448,7 +448,7 @@ in rec {
     name = "apple-libffi";
     dontUnpack = true;
     installPhase = let
-      sdk = buildTimeSDK.MacOSX-SDK;
+      sdk = newestSDK.MacOSX-SDK;
     in ''
       mkdir -p $out/include $out/lib
       cp -r ${sdk}/usr/include/ffi $out/include/
@@ -467,6 +467,9 @@ in rec {
       objc4 = pkgs.darwin.objc4;
     });
 
+  # For the DMG tooling:
+  newestSDK = pkgs.darwin.apple_sdk_11_0;
+
   pyobjc = rec {
     version = "9.2";
 
@@ -475,7 +478,7 @@ in rec {
       grep -RF -- '-DPyObjC_BUILD_RELEASE=%02d%02d' | cut -d: -f1 | while IFS= read -r file ; do
         sed -r '/-DPyObjC_BUILD_RELEASE=%02d%02d/{s/%02d%02d/${
           lib.concatMapStrings (lib.fixedWidthString 2 "0") (
-            lib.splitString "." buildTimeSDK.stdenv.targetPlatform.darwinMinVersion
+            lib.splitString "." newestSDK.stdenv.targetPlatform.darwinMinVersion
           )
         }/;n;d;}' -i "$file"
       done
@@ -496,15 +499,15 @@ in rec {
         inherit pname version;
         hash = "sha256-1zS5KR/skf9OOuOLnGg53r8Ct5wHMUR26H2o6QssaMM=";
       };
-      nativeBuildInputs = [ buildTimeSDK.xcodebuild pkgs.darwin.cctools ];
+      nativeBuildInputs = [ newestSDK.xcodebuild pkgs.darwin.cctools ];
       buildInputs =
         (with pkgs; [ ])
-        ++ [ buildTimeSDK.objc4 apple_libffi buildTimeSDK.libs.simd ]
-        ++ (with buildTimeSDK.frameworks; [ Foundation GameplayKit MetalPerformanceShaders ]);
+        ++ [ newestSDK.objc4 apple_libffi newestSDK.libs.simd ]
+        ++ (with newestSDK.frameworks; [ Foundation GameplayKit MetalPerformanceShaders ]);
       hardeningDisable = ["strictoverflow"]; # -fno-strict-overflow is not supported in clang on darwin
       NIX_CFLAGS_COMPILE = [ "-Wno-error=deprecated-declarations" ];
       preBuild = commonPreBuild + ''
-        sed -r 's+\(.*usr/include/objc/runtime\.h.*\)+("${buildTimeSDK.objc4}/include/objc/runtime.h")+g' -i setup.py
+        sed -r 's+\(.*usr/include/objc/runtime\.h.*\)+("${newestSDK.objc4}/include/objc/runtime.h")+g' -i setup.py
         sed -r 's+/usr/include/ffi+${apple_libffi}/include+g' -i setup.py
 
         # Turn off clang’s Link Time Optimization, or else we can’t recognize (and link) Objective C .o’s:
@@ -532,8 +535,8 @@ in rec {
         inherit pname version;
         hash = "sha256-79eAgIctjI3mwrl+Dk6smdYgOl0WN6oTXQcdRk6y21M=";
       };
-      nativeBuildInputs = [ buildTimeSDK.xcodebuild pkgs.darwin.cctools ];
-      buildInputs = (with buildTimeSDK.frameworks; [ Foundation AppKit ]);
+      nativeBuildInputs = [ newestSDK.xcodebuild pkgs.darwin.cctools ];
+      buildInputs = (with newestSDK.frameworks; [ Foundation AppKit ]);
       propagatedBuildInputs = [ core ];
       hardeningDisable = ["strictoverflow"]; # -fno-strict-overflow is not supported in clang on darwin
       preBuild = commonPreBuild;
@@ -547,8 +550,8 @@ in rec {
         inherit pname version;
         hash = "sha256-9YYYO5ue9/Fl8ERKe3FO2WXXn26SYXyq+GkVDc/Vpys=";
       };
-      nativeBuildInputs = [ buildTimeSDK.xcodebuild pkgs.darwin.cctools ];
-      buildInputs = (with buildTimeSDK.frameworks; [ Foundation CoreVideo Quartz ]);
+      nativeBuildInputs = [ newestSDK.xcodebuild pkgs.darwin.cctools ];
+      buildInputs = (with newestSDK.frameworks; [ Foundation CoreVideo Quartz ]);
       propagatedBuildInputs = [ framework-Cocoa ];
       hardeningDisable = ["strictoverflow"]; # -fno-strict-overflow is not supported in clang on darwin
       preBuild = commonPreBuild;
@@ -559,7 +562,7 @@ in rec {
   # How to get it in a saner way?
   apple_SetFile = pkgs.runCommand "SetFile" {} ''
     mkdir -p $out/bin
-    cp ${buildTimeSDK.CLTools_Executables}/usr/bin/SetFile $out/bin/
+    cp ${newestSDK.CLTools_Executables}/usr/bin/SetFile $out/bin/
   '';
 
   # dmgbuild doesn’t rely on Finder to customize appearance of the mounted DMT directory
