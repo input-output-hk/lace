@@ -96,13 +96,15 @@ export const getHwExtendedAccountPublicKey = async (
     return HardwareLedger.LedgerKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       deviceConnection: ledgerConnection,
-      accountIndex
+      accountIndex,
+      purpose: KeyManagement.KeyPurpose.STANDARD
     });
   }
   if (isTrezorHWSupported() && walletType === WalletType.Trezor) {
     return HardwareTrezor.TrezorKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
-      accountIndex
+      accountIndex,
+      purpose: KeyManagement.KeyPurpose.STANDARD
     });
   }
   throw invalidDeviceError;
