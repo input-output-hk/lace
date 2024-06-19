@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMaxAda, UTXO_DEPLETED_ADA_BUFFER } from '../useMaxAda';
@@ -142,7 +143,7 @@ describe('Testing useMaxAda hook', () => {
     });
   });
 
-  test.each([[1]])('should return balance minus fee and adaErrorBuffer times %i', async (errorCount) => {
+  test.each([1, 2, 3, 10])('should return balance minus fee and adaErrorBuffer times %i', async (errorCount) => {
     inspect.mockResolvedValueOnce({
       inputSelection: {
         fee: BigInt(TX_FEE)
@@ -158,12 +159,37 @@ describe('Testing useMaxAda hook', () => {
 
     act(() => {
       inMemoryWallet.balance.utxo.available$.next({
-        coins: BigInt('10000000')
+        coins: BigInt('20000000')
       });
     });
 
     await waitFor(() => {
-      expect(result.current).toBe(BigInt('10000000') - BigInt(TX_FEE) - BigInt(UTXO_DEPLETED_ADA_BUFFER * errorCount));
+      expect(result.current).toBe(BigInt('20000000') - BigInt(TX_FEE) - BigInt(UTXO_DEPLETED_ADA_BUFFER * errorCount));
+    });
+  });
+
+  test('should return balance minus fee and adaErrorBuffer times %i', async () => {
+    inspect.mockResolvedValueOnce({
+      inputSelection: {
+        fee: BigInt(TX_FEE)
+      }
+    });
+    Array.from({ length: 11 }).forEach(() => {
+      inspect.mockImplementationOnce(() => {
+        throw new Error('Error');
+      });
+    });
+
+    const { result } = renderHook(() => useMaxAda());
+
+    act(() => {
+      inMemoryWallet.balance.utxo.available$.next({
+        coins: BigInt('20000000')
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current).toBe(BigInt(0));
     });
   });
 });
