@@ -15,7 +15,14 @@ export const useChainHistoryProvider = ({ chainName }: UseChainHistoryProviderAr
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
 
   return useMemo(
-    () => chainHistoryHttpProvider({ adapter: axiosFetchAdapter, baseUrl: baseCardanoServicesUrl, logger }),
+    () =>
+      chainHistoryHttpProvider({
+        adapter: axiosFetchAdapter,
+        baseUrl: baseCardanoServicesUrl,
+        logger,
+        // TODO: remove apiVersion override once the back-ends are all updated to P2P (Node 8.9.2)
+        apiVersion: '3.0.1'
+      }),
     [baseCardanoServicesUrl]
   );
 };
