@@ -1,4 +1,4 @@
-@Runner2 @Staking-initial-E2E @E2E @Testnet
+@Staking-initial-E2E @E2E @Testnet
 Feature: Delegating funds to new pool E2E
 
   @LW-2685 @Smoke

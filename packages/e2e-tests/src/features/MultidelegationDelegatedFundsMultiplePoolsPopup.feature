@@ -1,4 +1,4 @@
-@Runner4 @Multidelegation-DelegatedFunds-MultiplePools-Popup @Testnet
+@Multidelegation-DelegatedFunds-MultiplePools-Popup @Testnet
 Feature: Staking Page - Delegated funds - Multiple pools - Popup View
 
   Background:

@@ -1,4 +1,4 @@
-@Runner4 @NFTs-Extended @Testnet
+@NFTs-Extended @Testnet
 Feature: LW-423: NFTs - Extended view
 
   Background:

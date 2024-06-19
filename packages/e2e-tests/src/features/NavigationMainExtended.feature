@@ -1,4 +1,4 @@
-@Runner4 @MainNavigation-Extended @Mainnet @Testnet
+@MainNavigation-Extended @Mainnet @Testnet
 Feature: Main Navigation - Extended view
 
   Background:

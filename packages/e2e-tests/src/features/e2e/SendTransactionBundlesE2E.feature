@@ -1,4 +1,4 @@
-@Runner2 @SendTransactionBundles-E2E @E2E @Testnet
+@SendTransactionBundles-E2E @E2E @Testnet
 Feature: Send Transaction bundles - E2E
 
   @LW-4121 @LW-4122 @LW-3556 @Smoke

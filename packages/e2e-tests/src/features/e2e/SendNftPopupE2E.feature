@@ -1,4 +1,4 @@
-@Runner2 @SendNft-Popup-E2E @E2E @Testnet
+@SendNft-Popup-E2E @E2E @Testnet
 Feature: Send NFT - Popup View - E2E
 
   Background:

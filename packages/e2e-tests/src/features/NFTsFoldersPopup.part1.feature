@@ -1,4 +1,4 @@
-@Runner3 @NFT-Folders-Popup @Testnet
+@NFT-Folders-Popup @Testnet
 Feature: NFT - Folders - Popup view
 
   Background:

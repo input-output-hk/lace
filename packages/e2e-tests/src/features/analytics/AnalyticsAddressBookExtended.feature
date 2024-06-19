@@ -1,4 +1,4 @@
-@Runner2 @AddressBook-extended @Analytics @Testnet @Mainnet
+@AddressBook-extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - Address book - Extended view
 
   Background:

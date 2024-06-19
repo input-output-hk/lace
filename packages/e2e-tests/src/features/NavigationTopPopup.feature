@@ -1,4 +1,4 @@
-@Runner4 @Top-Navigation-Popup
+@Top-Navigation-Popup
 Feature: Top Navigation - Popup view
 
   Background:

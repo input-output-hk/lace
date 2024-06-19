@@ -1,4 +1,4 @@
-@Runner4 @Banxa-Popup @Testnet @Mainnet
+@Banxa-Popup @Testnet @Mainnet
 Feature: Fiat On Ramp & Off Ramp - Banxa
 
   Background:

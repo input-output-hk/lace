@@ -1,4 +1,4 @@
-@Runner2 @Analytics @Banxa-Extended @Testnet
+@Analytics @Banxa-Extended @Testnet
 Feature: Analytics - Fiat On Ramp & Off Ramp - Banxa
 
   Background:

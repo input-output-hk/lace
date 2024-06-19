@@ -1,4 +1,4 @@
-@Runner4 @Multidelegation-DelegatedFunds-MultiplePools-Extended @Testnet
+@Multidelegation-DelegatedFunds-MultiplePools-Extended @Testnet
 Feature: Staking Page - Delegated funds - Multiple pools - Extended View
 
   Background:
@@ -151,3 +151,32 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     And I navigate to Staking extended page
     When I click on pool name in the first currently staking component
     Then I see stake pool details drawer for "AzureADA" stake pool opened from currently staked component
+
+  @LW-4877
+  Scenario: Extended View - Stake pool details - Enter and Escape buttons support
+    Given I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I input "APEX" to the search bar
+    And I click on the stake pool with ticker "APEX"
+    Then Drawer is displayed
+    When I press keyboard Enter button
+    Then I see Changing Staking Preferences modal
+    When I press keyboard Enter button
+    Then I see Manage delegation drawer
+    # When I press keyboard Enter button # TODO: update when LW-8625 is resolved
+    # Then I see Manage delegation drawer Confirmation page
+    # When I press keyboard Escape button # TODO: update when LW-8623 is resolved
+    # Then Staking exit modal is displayed
+    # When I press keyboard Escape button
+    # Then I see Manage delegation drawer Confirmation page
+    # When I press keyboard Enter button
+    # And I press keyboard Enter button
+    # Then staking password drawer is displayed
+    # When I press keyboard Escape button # TODO: update when LW-8623 is resolved
+    # Then Staking exit modal is displayed
+    # When I press keyboard Escape button
+    # Then staking password drawer is displayed
+    When I press keyboard Escape button
+    # When I press keyboard Enter button
+    Then Drawer is not displayed

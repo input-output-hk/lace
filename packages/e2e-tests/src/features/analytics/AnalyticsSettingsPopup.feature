@@ -1,4 +1,4 @@
-@Runner2 @Analytics-Settings-Popup @Analytics @Mainnet @Testnet
+@Analytics-Settings-Popup @Analytics @Mainnet @Testnet
 Feature: Analytics - Settings - Popup View
 
   Background:

@@ -39,7 +39,7 @@ export const UserProfile = ({
       [cx.circle]: radius === 'circle',
       [cx.noBackground]: background === 'none',
     })}
-    data-testid={testId ?? 'avatar-root'}
+    data-testid={'avatar-root'}
   >
     <RadixUIAvatar.Image
       className={cx.image}

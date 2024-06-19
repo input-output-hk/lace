@@ -1,4 +1,4 @@
-name: E2E Tests Linux
+name: E2E Tests Linux split
 
 on:
   schedule:
@@ -41,21 +41,10 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  RUNNER: ${{ github.event.inputs.runner }}
 
 jobs:
-  prereq:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Provision step
-        run: |
-          echo "Provisioning ${{ github.event.inputs.runner }}"
-    outputs:
-      runner: ${{ github.event.inputs.runner }}
-
   tests-run-part-1:
-    needs: prereq
-    runs-on: ${{ needs.prereq.outputs.runner }}
+    runs-on: "${{ inputs.runner }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -79,7 +68,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner1 and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch1 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -88,12 +77,14 @@ jobs:
           name: tests-run-part-1-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Clean chrome tmp files
+        if: always()
         id: clean-tmp-files
-        run: rm -rf /tmp/.org.chromium.*
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
 
   tests-run-part-2:
-    needs: prereq
-    runs-on: ${{ needs.prereq.outputs.runner }}
+    runs-on: "${{ inputs.runner }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -117,7 +108,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner2 and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch2 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -126,12 +117,14 @@ jobs:
           name: tests-run-part-2-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Clean chrome tmp files
+        if: always()
         id: clean-tmp-files
-        run: rm -rf /tmp/.org.chromium.*
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
 
   tests-run-part-3:
-    needs: prereq
-    runs-on: ${{ needs.prereq.outputs.runner }}
+    runs-on: "${{ inputs.runner }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -155,7 +148,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner3 and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch3 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -164,12 +157,14 @@ jobs:
           name: tests-run-part-3-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Clean chrome tmp files
+        if: always()
         id: clean-tmp-files
-        run: rm -rf /tmp/.org.chromium.*
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
 
   tests-run-part-4:
-    needs: prereq
-    runs-on: ${{ needs.prereq.outputs.runner }}
+    runs-on: "${{ inputs.runner }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -193,7 +188,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Runner4 and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -202,8 +197,11 @@ jobs:
           name: tests-run-part-4-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Clean chrome tmp files
+        if: always()
         id: clean-tmp-files
-        run: rm -rf /tmp/.org.chromium.*
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
 
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
@@ -274,10 +272,10 @@ jobs:
             ./allure
           retention-days: 10
       - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2.2.0
+        uses: rtCamp/action-slack-notify@v2.3.0
         if: success()
         env:
-          SLACK_COLOR: ${{ job.status }}
+          SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
           SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
           SLACK_TITLE: 'Test automation results :rocket:'

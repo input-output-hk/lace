@@ -1,4 +1,4 @@
-@Runner2 @NFT-Folders-Extended @Analytics @Testnet @Mainnet
+@NFT-Folders-Extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - NFTs - Extended view
 
   Background:

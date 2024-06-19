@@ -1,4 +1,4 @@
-@Runner4 @Staking-NonDelegatedFunds-Popup
+@Staking-NonDelegatedFunds-Popup
 Feature: Staking Page - Popup View
 
   Background:

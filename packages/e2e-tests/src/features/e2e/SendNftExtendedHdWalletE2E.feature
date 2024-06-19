@@ -1,4 +1,4 @@
-@Runner2 @SendNftHdWallet-Extended-E2E @E2E @Testnet
+@SendNftHdWallet-Extended-E2E @E2E @Testnet
 Feature: Send NFT HD wallets - Extended Browser View - E2E
 
   Background:

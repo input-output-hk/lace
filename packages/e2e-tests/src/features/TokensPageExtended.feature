@@ -1,4 +1,4 @@
-@Runner4 @Tokens-extended
+@Tokens-extended
 Feature: LW: Tokens tab - extended view
 
   Background:

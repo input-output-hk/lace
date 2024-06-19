@@ -1,8 +1,8 @@
-@Runner1 @Staking-NonDelegatedFunds-Extended @Testnet
+@CIP-95-Extended @Testnet
 Feature: CIP-95 Static methods
 
   @LW-10611
-  Scenario: [CIP-95] Static methods - user hasn't staked yet
+  Scenario: CIP-95 - Static methods - user hasn't staked yet
     Given I open wallet: "TAWalletNonDelegated" in: extended mode
     When I open CIP-95 test DApp
     And I see CIP-95 test DApp authorization window

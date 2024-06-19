@@ -1,4 +1,4 @@
-@Runner4 @SendTx-MultipleSelection-Popup @Testnet
+@SendTx-MultipleSelection-Popup @Testnet
 Feature: Send - Multiple selection for Popup View
 
   Background:

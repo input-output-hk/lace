@@ -1,4 +1,4 @@
-@Runner4 @Top-Navigation-Extended
+@Top-Navigation-Extended
 Feature: Top Navigation - Extended view
 
   Background:

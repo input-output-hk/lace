@@ -117,14 +117,6 @@ When(/^I close a toast message$/, async () => {
   await ToastMessage.clickCloseButton();
 });
 
-// TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
-Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
-    timeout: 5000,
-    reverse: expectedResult === 'No'
-  });
-});
-
 Then(
   /I see that content of "([^"]*)" (public key|address) is in clipboard/,
   async (walletName: string, walletProperty: string) => {
