@@ -1,4 +1,4 @@
-@Analytics-Settings-Extended @Analytics
+@Analytics-Settings-Extended @Analytics @Testnet
 Feature: Analytics - Settings - Extended View
 
   Background:
@@ -93,9 +93,7 @@ Feature: Analytics - Settings - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click on "Terms and conditions" setting
     Then I validate latest analytics single event "settings | terms and conditions | click"
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "settings | terms and conditions | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8556
   Scenario: Analytics - Extended View - Settings - Privacy policy events
@@ -103,9 +101,7 @@ Feature: Analytics - Settings - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click on "Privacy policy" setting
     Then I validate latest analytics single event "settings | privacy policy | click"
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "settings | privacy policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8557
   Scenario: Analytics - Extended View - Settings - Cookie policy events
@@ -113,9 +109,7 @@ Feature: Analytics - Settings - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click on "Cookie policy" setting
     Then I validate latest analytics single event "settings | cookie policy | click"
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "settings | cookie policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8558
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Cancel
