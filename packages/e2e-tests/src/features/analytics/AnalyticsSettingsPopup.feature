@@ -102,9 +102,7 @@ Feature: Analytics - Settings - Popup View
     And I set up request interception for posthog analytics request(s)
     And I click on "Terms and conditions" setting
     Then I validate latest analytics single event "settings | terms and conditions | click"
-    When I close the drawer by clicking back button
-    Then I validate latest analytics single event "settings | terms and conditions | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8568
   Scenario: Analytics - Popup View - Settings - Privacy policy events
@@ -113,9 +111,7 @@ Feature: Analytics - Settings - Popup View
     And I set up request interception for posthog analytics request(s)
     And I click on "Privacy policy" setting
     Then I validate latest analytics single event "settings | privacy policy | click"
-    When I close the drawer by clicking back button
-    Then I validate latest analytics single event "settings | privacy policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8569
   Scenario: Analytics - Popup View - Settings - Cookie policy events
@@ -124,10 +120,7 @@ Feature: Analytics - Settings - Popup View
     And I set up request interception for posthog analytics request(s)
     And I click on "Cookie policy" setting
     Then I validate latest analytics single event "settings | cookie policy | click"
-    And I wait 1000 milliseconds
-    When I close the drawer by clicking back button
-    Then I validate latest analytics single event "settings | cookie policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8570
   Scenario: Analytics - Popup View - Settings - Wallet removal events - Cancel

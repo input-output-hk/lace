@@ -4,7 +4,7 @@ import { ChainablePromiseElement } from 'webdriverio';
 class WalletAccountsMenuItem {
   protected CONTAINER_SELECTOR;
   private ITEM = '//div[@data-testid="wallet-account-item"]';
-  private ICON = '//span[@data-testid="wallet-account-item-icon"]';
+  private ICON = '//span[@data-testid="avatar-root"]';
   private LABEL = '//span[@data-testid="wallet-account-item-label"]';
   private PATH = '//span[@data-testid="wallet-account-item-path"]';
   private DISABLE_BUTTON = '//button[@data-testid="wallet-account-item-lock-btn"]';

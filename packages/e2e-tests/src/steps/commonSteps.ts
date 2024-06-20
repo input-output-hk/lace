@@ -117,14 +117,6 @@ When(/^I close a toast message$/, async () => {
   await ToastMessage.clickCloseButton();
 });
 
-// TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
-Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
-    timeout: 5000,
-    reverse: expectedResult === 'No'
-  });
-});
-
 Then(
   /I see that content of "([^"]*)" (public key|address) is in clipboard/,
   async (walletName: string, walletProperty: string) => {
@@ -391,3 +383,12 @@ Then(/^I disable network interception$/, async () => {
 Given(/^I delete fiat price timestamp from background storage$/, async () => {
   await deleteFiatPriceTimestampFromBackgroundStorage();
 });
+
+Then(
+  /^"(Cookie policy|Privacy policy|Terms of service|Terms and conditions)" (is|are) displayed in new tab$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service' | 'Terms and conditions', _ignored) => {
+    await switchToLastWindow();
+    await commonAssert.assertLegalContentIsDisplayed(link);
+  }
+);

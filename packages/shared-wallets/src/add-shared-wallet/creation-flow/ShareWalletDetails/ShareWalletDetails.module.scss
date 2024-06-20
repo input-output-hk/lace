@@ -1,0 +1,19 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+
+.root {
+  flex-direction: row-reverse;
+  cursor: default !important;
+  border: none !important;
+  padding: 0 !important;
+
+  &:hover {
+    background: none !important;
+  }
+}
+
+.icon {
+  border: none !important;
+  border-radius: 0 !important;
+  background: none !important;
+  margin-right: 40px !important;
+}
