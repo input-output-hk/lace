@@ -41,8 +41,19 @@ env:
   BRANCH: ${{ github.ref_name }}
 
 jobs:
+  prereq:
+    runs-on: "${{ inputs.runner }}"
+    if: ${{ inputs.runner == 'self-hosted' }}
+    steps:
+      - name: Deleting chrome tmp files
+        id: clean-chrome-tmp-files
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
+
   tests-run-part-1:
     runs-on: "${{ inputs.runner }}"
+    needs: prereq
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -77,6 +88,7 @@ jobs:
 
   tests-run-part-2:
     runs-on: "${{ inputs.runner }}"
+    needs: prereq
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -111,6 +123,7 @@ jobs:
 
   tests-run-part-3:
     runs-on: "${{ inputs.runner }}"
+    needs: prereq
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -145,6 +158,7 @@ jobs:
 
   tests-run-part-4:
     runs-on: "${{ inputs.runner }}"
+    needs: prereq
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -255,9 +269,3 @@ jobs:
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      - name: Clean chrome tmp files
-        if: ${{ inputs.runner == 'self-hosted' }}
-        id: clean-tmp-files
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
