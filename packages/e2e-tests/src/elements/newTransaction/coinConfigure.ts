@@ -6,6 +6,7 @@ import { browser } from '@wdio/globals';
 export class CoinConfigure {
   protected CONTAINER_BUNDLE = '//div[@data-testid="asset-bundle-container"]';
   protected CONTAINER = '//div[@data-testid="coin-configure"]';
+  protected DRAWER_NAVIGATION_HEADER = '//div[@data-testid="drawer-navigation"]';
   private TOKEN_NAME = '//div[@data-testid="coin-configure-text"]';
   private TOKEN_VALUE = '//p[@data-testid="coin-configure-balance"]';
   private TOKEN_INPUT = '//input[@data-testid="coin-configure-input"]';
@@ -58,6 +59,10 @@ export class CoinConfigure {
     return $(this.TOOLTIP);
   }
 
+  get drawerNavigationHeader(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.DRAWER_NAVIGATION_HEADER);
+  }
+
   getAmount = async (): Promise<number> => {
     const value = await $(`${this.CONTAINER}${this.TOKEN_INPUT}`).getValue();
     return Number(value);
@@ -66,8 +71,7 @@ export class CoinConfigure {
   fillTokenValue = async (valueToEnter: number): Promise<void> => {
     await this.input.waitForClickable();
     await setInputFieldValue(await this.input, String(valueToEnter));
-    // Clicking on the container to unfocus the input
-    await $(`${this.CONTAINER}`).click();
+    await this.clickToLoseFocus();
   };
 
   fillTokenValueUsingKeys = async (valueToEnter: number): Promise<void> => {
@@ -108,7 +112,7 @@ export class CoinConfigure {
   };
 
   clickToLoseFocus = async (): Promise<void> => {
-    await this.container.click();
+    await this.drawerNavigationHeader.click();
   };
 
   clickCoinSelectorName = async (): Promise<void> => {
