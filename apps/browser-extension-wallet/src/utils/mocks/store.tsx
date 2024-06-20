@@ -46,6 +46,7 @@ export const walletStoreMock = async (
     walletType: WalletType.InMemory,
     isInMemoryWallet: true,
     isHardwareWallet: false,
+    isSharedWallet: false,
     // TODO: mock [LW-5454]
     cardanoWallet: undefined,
     isWalletLocked: jest.fn(() => false),
