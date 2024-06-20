@@ -86,7 +86,7 @@ export const theme = extendTheme({
     },
   },
   fonts: {
-    body: 'Ubuntu, sans-serif !important',
+    body: 'sans-serif !important',
   },
 });
 

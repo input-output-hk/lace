@@ -64,39 +64,42 @@ export const setStorage = (item) =>
 //     })
 //   );
 
-// export const encryptWithPassword = async (password, rootKeyBytes) => {
-//   await Loader.load();
-//   const rootKeyHex = Buffer.from(rootKeyBytes, 'hex').toString('hex');
-//   const passwordHex = Buffer.from(password).toString('hex');
-//   const salt = cryptoRandomString({ length: 2 * 32 });
-//   const nonce = cryptoRandomString({ length: 2 * 12 });
-//   return Loader.Cardano.encrypt_with_password(
-//     passwordHex,
-//     salt,
-//     nonce,
-//     rootKeyHex
-//   );
-// };
+export const encryptWithPassword = async (password, rootKeyBytes) => {
+  return '';
+  // await Loader.load();
+  // const rootKeyHex = Buffer.from(rootKeyBytes, 'hex').toString('hex');
+  // const passwordHex = Buffer.from(password).toString('hex');
+  // const salt = cryptoRandomString({ length: 2 * 32 });
+  // const nonce = cryptoRandomString({ length: 2 * 12 });
+  // return Loader.Cardano.encrypt_with_password(
+  //   passwordHex,
+  //   salt,
+  //   nonce,
+  //   rootKeyHex
+  // );
+};
 
-// export const decryptWithPassword = async (password, encryptedKeyHex) => {
-//   await Loader.load();
-//   const passwordHex = Buffer.from(password).toString('hex');
-//   let decryptedHex;
-//   try {
-//     decryptedHex = Loader.Cardano.decrypt_with_password(
-//       passwordHex,
-//       encryptedKeyHex
-//     );
-//   } catch (err) {
-//     throw new Error(ERROR.wrongPassword);
-//   }
-//   return decryptedHex;
-// };
+export const decryptWithPassword = async (password, encryptedKeyHex) => {
+  return '';
+  // await Loader.load();
+  // const passwordHex = Buffer.from(password).toString('hex');
+  // let decryptedHex;
+  // try {
+  //   decryptedHex = Loader.Cardano.decrypt_with_password(
+  //     passwordHex,
+  //     encryptedKeyHex
+  //   );
+  // } catch (err) {
+  //   throw new Error(ERROR.wrongPassword);
+  // }
+  // return decryptedHex;
+};
 
-// export const getWhitelisted = async () => {
-//   const result = await getStorage(STORAGE.whitelisted);
-//   return result ? result : [];
-// };
+export const getWhitelisted = async () => {
+  return [];
+  // const result = await getStorage(STORAGE.whitelisted);
+  // return result ? result : [];
+};
 
 // export const isWhitelisted = async (_origin) => {
 //   const whitelisted = await getWhitelisted();
@@ -111,12 +114,12 @@ export const setStorage = (item) =>
 //   return await setStorage({ [STORAGE.whitelisted]: whitelisted });
 // };
 
-// export const removeWhitelisted = async (origin) => {
-//   const whitelisted = await getWhitelisted();
-//   const index = whitelisted.indexOf(origin);
-//   whitelisted.splice(index, 1);
-//   return await setStorage({ [STORAGE.whitelisted]: whitelisted });
-// };
+export const removeWhitelisted = async (origin) => {
+  // const whitelisted = await getWhitelisted();
+  // const index = whitelisted.indexOf(origin);
+  // whitelisted.splice(index, 1);
+  // return await setStorage({ [STORAGE.whitelisted]: whitelisted });
+};
 
 // export const getCurrency = () => getStorage(STORAGE.currency);
 
@@ -535,19 +538,19 @@ export const getAccounts = async () => {
   return accounts;
 };
 
-// export const setAccountName = async (name) => {
-//   const currentAccountIndex = await getCurrentAccountIndex();
-//   const accounts = await getStorage(STORAGE.accounts);
-//   accounts[currentAccountIndex].name = name;
-//   return await setStorage({ [STORAGE.accounts]: accounts });
-// };
+export const setAccountName = async (name) => {
+  // const currentAccountIndex = await getCurrentAccountIndex();
+  // const accounts = await getStorage(STORAGE.accounts);
+  // accounts[currentAccountIndex].name = name;
+  // return await setStorage({ [STORAGE.accounts]: accounts });
+};
 
-// export const setAccountAvatar = async (avatar) => {
-//   const currentAccountIndex = await getCurrentAccountIndex();
-//   const accounts = await getStorage(STORAGE.accounts);
-//   accounts[currentAccountIndex].avatar = avatar;
-//   return await setStorage({ [STORAGE.accounts]: accounts });
-// };
+export const setAccountAvatar = async (avatar) => {
+  // const currentAccountIndex = await getCurrentAccountIndex();
+  // const accounts = await getStorage(STORAGE.accounts);
+  // accounts[currentAccountIndex].avatar = avatar;
+  // return await setStorage({ [STORAGE.accounts]: accounts });
+};
 
 // export const createPopup = async (popup) => {
 //   let left = 0;
@@ -1257,11 +1260,11 @@ export const switchAccount = async (accountIndex) => {
 //   };
 // };
 
-// export const resetStorage = async (password) => {
-//   await requestAccountKey(password, 0);
-//   await new Promise((res, rej) => chrome.storage.local.clear(() => res()));
-//   return true;
-// };
+export const resetStorage = async (password) => {
+  // await requestAccountKey(password, 0);
+  // await new Promise((res, rej) => chrome.storage.local.clear(() => res()));
+  return true;
+};
 
 export const createAccount = async (name, password, accountIndex = null) => {
   return {}
