@@ -1,67 +1,51 @@
 import { Timeline } from '@lace/common';
+import { ReactComponent as LoadingIcon } from '@lace/icons/dist/LoadingComponent';
 import { Box, Button, Flex, ScrollArea, Text } from '@lace/ui';
 import cn from 'classnames';
-import { TFunction } from 'i18next';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './SharedWalletLayout.module.scss';
 import { LayoutNavigationProps } from './type';
 
-export enum SharedWalletTimelineSteps {
-  WALLET_NAME,
-  ADD_COSIGNERS,
-  DEFINE_QUORUM,
-  WALLET_DETAILS,
-}
+export type TimelineStep<Key extends string> = {
+  key: Key;
+  name: string;
+};
 
-export interface SharedWalletLayoutProps {
+const parseTimelineSteps = <Key extends string>(timelineSteps: TimelineStep<Key>[], timelineCurrentStep: Key) => {
+  const indexOfCurrentStep = timelineSteps.findIndex(({ key }) => key === timelineCurrentStep);
+  return timelineSteps.map(({ name }, index) => ({
+    current: index === indexOfCurrentStep,
+    marked: index <= indexOfCurrentStep,
+    name,
+  }));
+};
+
+export interface SharedWalletLayoutProps<Key extends string> extends LayoutNavigationProps {
   children: React.ReactNode;
-  currentTimelineStep: SharedWalletTimelineSteps;
   customBackLabel?: string;
   customNextLabel?: string;
   description: React.ReactNode;
   isNextEnabled?: boolean;
+  loading?: boolean;
+  timelineCurrentStep: Key;
+  timelineSteps: TimelineStep<Key>[];
   title: React.ReactNode;
 }
 
-const getTimelineSteps = (currentStep: SharedWalletTimelineSteps, t: TFunction) => {
-  const walletSteps = [
-    {
-      key: SharedWalletTimelineSteps.WALLET_NAME,
-      name: t('sharedWallets.addSharedWallet.layout.timelineStep.walletName'),
-    },
-    {
-      key: SharedWalletTimelineSteps.ADD_COSIGNERS,
-      name: t('sharedWallets.addSharedWallet.layout.timelineStep.addCosigners'),
-    },
-    {
-      key: SharedWalletTimelineSteps.DEFINE_QUORUM,
-      name: t('sharedWallets.addSharedWallet.layout.timelineStep.defineQuorum'),
-    },
-    {
-      key: SharedWalletTimelineSteps.WALLET_DETAILS,
-      name: t('sharedWallets.addSharedWallet.layout.timelineStep.walletDetails'),
-    },
-  ];
-
-  const indexOfCurrentStep = walletSteps.findIndex(({ key }) => key === currentStep);
-  return walletSteps.map((step, index) => ({
-    ...step,
-    active: index <= indexOfCurrentStep,
-  }));
-};
-
-export const SharedWalletLayout = ({
+export const SharedWalletLayout = <Key extends string>({
   children,
-  title,
-  description,
-  onNext,
-  onBack,
-  customNextLabel,
   customBackLabel,
-  isNextEnabled = true,
-  currentTimelineStep,
-}: SharedWalletLayoutProps & LayoutNavigationProps): React.ReactElement => {
+  customNextLabel,
+  description,
+  isNextEnabled,
+  loading = false,
+  onBack,
+  onNext,
+  timelineCurrentStep,
+  timelineSteps,
+  title,
+}: SharedWalletLayoutProps<Key>): React.ReactElement => {
   const { t } = useTranslation();
 
   const defaultLabel = {
@@ -69,24 +53,22 @@ export const SharedWalletLayout = ({
     next: t('sharedWallets.addSharedWallet.layout.defaultNextButtonLabel'),
   };
 
-  const timelineSteps = getTimelineSteps(currentTimelineStep, t);
-
   return (
     <Flex h="$fill" w="$fill" className={styles.root}>
       <Timeline className={styles.timeline}>
-        {timelineSteps.map(({ name, key, active }) => (
-          <Timeline.Item key={key} active={active}>
-            <Box className={cn({ [`${styles.activeText}`]: currentTimelineStep === key })}>{name}</Box>
+        {parseTimelineSteps(timelineSteps, timelineCurrentStep).map(({ current, marked, name }) => (
+          <Timeline.Item key={name} active={marked}>
+            <Box className={cn({ [`${styles.activeText}`]: current })}>{name}</Box>
           </Timeline.Item>
         ))}
       </Timeline>
       <Flex h="$fill" w="$fill" flexDirection="column" p="$40">
-        <Flex data-testid="shared-wallet-step-header" flexDirection="column" justifyContent="center">
+        <Flex data-testid="shared-wallet-step-header" flexDirection="column" justifyContent="center" gap="$32" mb="$32">
           <Text.Heading data-testid="shared-wallet-step-title">{title}</Text.Heading>
           {description && (
-            <Box data-testid="shared-wallet-step-subtitle" mt="$40" mb="$20">
-              <Text.Body.Normal weight="$semibold">{description}</Text.Body.Normal>
-            </Box>
+            <Text.Body.Normal weight="$semibold" data-testid="shared-wallet-step-subtitle">
+              {description}
+            </Text.Body.Normal>
           )}
         </Flex>
 
@@ -106,6 +88,7 @@ export const SharedWalletLayout = ({
           justifyContent={onBack ? 'space-between' : 'flex-end'}
           w="$fill"
           alignItems="center"
+          mt="$16"
         >
           {onBack && (
             <Button.Secondary
@@ -116,9 +99,10 @@ export const SharedWalletLayout = ({
           )}
           {onNext && (
             <Button.CallToAction
+              icon={loading ? <LoadingIcon className={styles.loadingIcon} /> : undefined}
               label={customNextLabel || defaultLabel.next}
               onClick={onNext}
-              disabled={!isNextEnabled}
+              disabled={!isNextEnabled || loading}
               data-testid="shared-wallet-step-btn-next"
             />
           )}

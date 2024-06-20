@@ -1,6 +1,8 @@
 import { Box, Card, Flex, RadioButtonGroup, Select, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
-import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
+import { SharedWalletLayout } from '../../SharedWalletLayout';
+import { creationTimelineSteps } from '../timelineSteps';
+import { SharedWalletCreationStep } from '../types';
 
 const minimumTotalCosignersForEnablingDropdown = 3;
 
@@ -77,7 +79,8 @@ export const QuorumOption = ({
       description={translations.description}
       onNext={onNext}
       onBack={onBack}
-      currentTimelineStep={SharedWalletTimelineSteps.DEFINE_QUORUM}
+      timelineSteps={creationTimelineSteps}
+      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
     >
       <Flex gap="$16" flexDirection="column" alignItems="stretch">
         <RadioButtonGroup

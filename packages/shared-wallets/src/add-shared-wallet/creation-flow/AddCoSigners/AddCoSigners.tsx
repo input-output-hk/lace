@@ -1,6 +1,8 @@
 import { Box, Divider } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
-import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
+import { SharedWalletLayout } from '../../SharedWalletLayout';
+import { creationTimelineSteps } from '../timelineSteps';
+import { SharedWalletCreationStep } from '../types';
 import { AddCoSignerInput } from './AddCoSignerInput';
 import styles from './AddCoSigners.module.scss';
 import { CoSigner, CoSignerDirty, CoSignerError } from './type';
@@ -29,7 +31,8 @@ export const AddCoSigners = ({
     <SharedWalletLayout
       title={t('sharedWallets.addSharedWallet.addCosigners.title')}
       description={t('sharedWallets.addSharedWallet.addCosigners.subtitle')}
-      currentTimelineStep={SharedWalletTimelineSteps.ADD_COSIGNERS}
+      timelineSteps={creationTimelineSteps}
+      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
       onBack={onBack}
       onNext={onNext}
       isNextEnabled={atLeastOneValidCoSigner}
