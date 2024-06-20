@@ -60,6 +60,8 @@ const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEleme
   [ConwayEraCertificatesTypes.RegisterDelegateRepresentative]: RegisterDelegateRepresentativeIcon,
   [ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]: UnregisterDelegateRepresentativeIcon,
   [ConwayEraCertificatesTypes.VoteDelegation]: VoteDelegationIcon,
+  [ConwayEraCertificatesTypes.Registration]: ClipboardCheckOutlineIcon,
+  [ConwayEraCertificatesTypes.Unregistration]: ClipboardXOutlineComponentIcon,
   [TransactionActivityType.rewards]: RewardsIcon,
   [TransactionActivityType.incoming]: IncomingIcon,
   [TransactionActivityType.outgoing]: OutgoingIcon,
