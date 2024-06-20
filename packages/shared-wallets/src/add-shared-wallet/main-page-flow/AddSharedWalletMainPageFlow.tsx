@@ -1,19 +1,20 @@
 import { VFC } from 'react';
 import { SharedWalletGetStarted, SharedWalletGetStartedSharedProps } from './SharedWalletGetStarted';
 
-type AddSharedWalletMainPageFlowPrps = SharedWalletGetStartedSharedProps & {
+type AddSharedWalletMainPageFlowProps = SharedWalletGetStartedSharedProps & {
   sharedKeys?: string;
 };
 
-const makeCopyKeysToClipboard = (sharedKeys: string) => async () => {
-  await navigator.clipboard.writeText(sharedKeys);
-};
-
-export const AddSharedWalletMainPageFlow: VFC<AddSharedWalletMainPageFlowPrps> = ({ sharedKeys, ...restProps }) => (
-  <SharedWalletGetStarted
-    keysMode={!sharedKeys ? 'generate' : 'copy'}
-    createAndImportOptionsDisabled={!sharedKeys}
-    copyKeysToClipboard={sharedKeys ? makeCopyKeysToClipboard(sharedKeys) : undefined}
-    {...restProps}
-  />
-);
+export const AddSharedWalletMainPageFlow: VFC<AddSharedWalletMainPageFlowProps> = ({ sharedKeys, ...restProps }) =>
+  sharedKeys ? (
+    <SharedWalletGetStarted
+      keysMode="copy"
+      createAndImportOptionsDisabled={false}
+      copyKeysToClipboard={async () => {
+        await navigator.clipboard.writeText(sharedKeys);
+      }}
+      {...restProps}
+    />
+  ) : (
+    <SharedWalletGetStarted keysMode="generate" createAndImportOptionsDisabled {...restProps} />
+  );
