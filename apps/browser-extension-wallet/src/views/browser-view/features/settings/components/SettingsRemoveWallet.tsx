@@ -13,7 +13,6 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import cn from 'classnames';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
-import { useIsSharedWallet } from './utils/isSharedWallet';
 
 const { Title, Text } = Typography;
 
@@ -22,10 +21,9 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
   const { deleteWallet, walletRepository } = useWalletManager();
-  const { walletInfo, setDeletingWallet, inMemoryWallet } = useWalletStore();
+  const { walletInfo, setDeletingWallet, isSharedWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
-  const isSharedWallet = useIsSharedWallet(inMemoryWallet);
 
   const toggleRemoveWalletAlert = () => {
     if (isSharedWallet) return;

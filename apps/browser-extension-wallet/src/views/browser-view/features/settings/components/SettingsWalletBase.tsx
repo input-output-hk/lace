@@ -19,7 +19,6 @@ import uniq from 'lodash/uniq';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
-import { useIsSharedWallet } from './utils/isSharedWallet';
 
 const { Title } = Typography;
 
@@ -63,7 +62,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const closeDrawer = useRedirection(walletRoutePaths.settings);
 
   const { t } = useTranslation();
-  const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus } = useWalletStore();
+  const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus, isSharedWallet } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
 
   const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
@@ -73,7 +72,6 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const analytics = useAnalyticsContext();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
-  const isSharedWallet = useIsSharedWallet(inMemoryWallet);
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
   const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true' && !isSharedWallet;
 
