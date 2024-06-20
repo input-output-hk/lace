@@ -17,3 +17,8 @@ export const Closed: Story = {
 export const Open: Story = {
   render: () => <AddSharedWalletStorybookHelper modalOpen />,
 };
+
+const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
+export const KeysAvailable: Story = {
+  render: () => <AddSharedWalletStorybookHelper activeWalletSharedKeys={sharedKeys} modalOpen />,
+};

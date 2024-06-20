@@ -1,5 +1,5 @@
 import { VFC, useEffect, useState } from 'react';
-import { AddSharedWalletModal, SharedWalletCreationFlow, SharedWalletGetStarted } from '../add-shared-wallet';
+import { AddSharedWalletMainPageFlow, AddSharedWalletModal, SharedWalletCreationFlow } from '../add-shared-wallet';
 import {
   CreationFlowState,
   SharedWalletCreationFlowInitialStateProvider,
@@ -12,6 +12,7 @@ export enum AddSharedWalletFlowType {
 }
 
 type AddSharedWalletFlowProps = {
+  activeWalletSharedKeys?: string;
   creationInitialState?: CreationFlowState;
   initialFlow?: AddSharedWalletFlowType;
   modalOpen?: boolean;
@@ -19,6 +20,7 @@ type AddSharedWalletFlowProps = {
 
 const activeWalletName = 'My wallet';
 export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
+  activeWalletSharedKeys,
   modalOpen = false,
   initialFlow = AddSharedWalletFlowType.GetStarted,
   creationInitialState = makeInitialState(activeWalletName),
@@ -36,7 +38,12 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
       {open && (
         <AddSharedWalletModal onClose={() => setOpen(false)}>
           {flow === AddSharedWalletFlowType.GetStarted && (
-            <SharedWalletGetStarted onCreateSharedWalletClick={() => setFlow(AddSharedWalletFlowType.Creation)} />
+            <AddSharedWalletMainPageFlow
+              onCreateSharedWalletClick={() => setFlow(AddSharedWalletFlowType.Creation)}
+              onImportSharedWalletClick={() => void 0}
+              onKeysGenerateClick={() => void 0}
+              sharedKeys={activeWalletSharedKeys}
+            />
           )}
           {flow === AddSharedWalletFlowType.Creation && (
             <SharedWalletCreationFlowInitialStateProvider value={initialState}>

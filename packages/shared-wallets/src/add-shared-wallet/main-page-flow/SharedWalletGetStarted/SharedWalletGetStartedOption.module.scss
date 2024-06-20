@@ -1,15 +1,22 @@
 @import '../../../../../common/src/ui/styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/typography.scss';
 
+.option {
+  padding: size_unit(1.5) size_unit(4.25);
+}
+
+.disabled {
+  opacity: 0.4;
+}
+
 .description {
   color: var(--text-color-secondary);
   white-space: pre-line;
-  max-width: 170px;
   text-align: center;
 }
 
 .icon {
   margin-bottom: size_unit(2);
-  width: 40px;
-  height: 40px;
+  width: size_unit(5);
+  height: size_unit(5);
 }

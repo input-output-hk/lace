@@ -1,40 +1,37 @@
 import { Dispatch, ReactElement, ReactNode, createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import { v1 as uuid } from 'uuid';
 import { makeInitialStateProvider } from '../../initial-state-provider';
+import { StateType, defineStateShape } from '../../state-utils';
 import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
 import { SharedWalletCreationStep } from './types';
 import { validateCoSigners } from './validateCoSigners';
 
-type StateMainPart = {
-  step: SharedWalletCreationStep;
-};
+const makeState = defineStateShape<{
+  constantDataPart: {
+    activeWalletName: string;
+  };
+  mainPart: {
+    step: SharedWalletCreationStep;
+  };
+  variableDataPart: {
+    coSignerInputsDirty: CoSignerDirty[];
+    coSignerInputsErrors: CoSignerError[];
+    coSigners: CoSigner[];
+    quorumRules: QuorumOptionValue;
+    walletName: string;
+  };
+}>();
 
-type StateVariableDataPart = {
-  coSignerInputsDirty: CoSignerDirty[] | undefined;
-  coSignerInputsErrors: CoSignerError[] | undefined;
-  coSigners: CoSigner[] | undefined;
-  quorumRules: QuorumOptionValue | undefined;
-  walletName: string | undefined;
-};
-
-type StateConstantDataPart = {
-  activeWalletName: string;
-};
-
-type MakeState<S extends StateMainPart & StateVariableDataPart> = S &
-  StateMainPart &
-  StateVariableDataPart &
-  StateConstantDataPart;
-
-export type StateSetup = MakeState<{
+const stateSetup = makeState<{
   coSignerInputsDirty: undefined;
   coSignerInputsErrors: undefined;
   coSigners: undefined;
   quorumRules: undefined;
   step: SharedWalletCreationStep.Setup;
   walletName: string | undefined;
-}>;
+}>();
+type StateSetup = StateType<typeof stateSetup>;
 
 type StateCoSignersCommon = {
   coSignerInputsDirty: CoSignerDirty[];
@@ -44,35 +41,39 @@ type StateCoSignersCommon = {
   walletName: string;
 };
 
-export type StateCoSigners = MakeState<
+const stateCoSigners = makeState<
   StateCoSignersCommon & {
     step: SharedWalletCreationStep.CoSigners;
   }
->;
+>();
+type StateCoSigners = StateType<typeof stateCoSigners>;
 
-export type StateCoSignersImportantInfo = MakeState<
+const stateCoSignersImportantInfo = makeState<
   StateCoSignersCommon & {
     step: SharedWalletCreationStep.CoSignersImportantInfo;
   }
->;
+>();
+type StateCoSignersImportantInfo = StateType<typeof stateCoSignersImportantInfo>;
 
-export type StateQuorum = MakeState<{
+const stateQuorum = makeState<{
   coSignerInputsDirty: CoSignerDirty[];
   coSignerInputsErrors: CoSignerError[];
   coSigners: CoSigner[];
   quorumRules: QuorumOptionValue;
   step: SharedWalletCreationStep.Quorum;
   walletName: string;
-}>;
+}>();
+type StateQuorum = StateType<typeof stateQuorum>;
 
-export type StateShareDetails = MakeState<{
+const stateShareDetails = makeState<{
   coSignerInputsDirty: CoSignerDirty[];
   coSignerInputsErrors: CoSignerError[];
   coSigners: CoSigner[];
   quorumRules: QuorumOptionValue;
   step: SharedWalletCreationStep.ShareDetails;
   walletName: string;
-}>;
+}>();
+type StateShareDetails = StateType<typeof stateShareDetails>;
 
 export type CreationFlowState =
   | StateSetup
@@ -124,17 +125,18 @@ export const useSharedWalletCreationStore = (): ContextValue => {
   return value;
 };
 
-export const makeInitialState = (activeWalletName: string): CreationFlowState => ({
-  activeWalletName,
-  coSignerInputsDirty: undefined,
-  coSignerInputsErrors: undefined,
-  coSigners: undefined,
-  quorumRules: undefined,
-  step: SharedWalletCreationStep.Setup,
-  walletName: undefined,
-});
+export const makeInitialState = (activeWalletName: string) =>
+  stateSetup({
+    activeWalletName,
+    coSignerInputsDirty: undefined,
+    coSignerInputsErrors: undefined,
+    coSigners: undefined,
+    quorumRules: undefined,
+    step: SharedWalletCreationStep.Setup,
+    walletName: undefined,
+  });
 
-export const getInitialCoSignerValue = (): CoSigner => ({ id: uuid(), keys: '', name: '' });
+export const createEmptyCosignerObject = (): CoSigner => ({ id: uuid(), keys: '', name: '' });
 
 const getNextCoSignersDirtyValue = ({
   action,
@@ -164,10 +166,10 @@ const makeStateMachine = ({
 }): StateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
-      return {
+      return stateSetup({
         ...prevState,
         walletName: action.walletName,
-      };
+      });
     }
     if (action.type === SharedWalletActionType.BACK) {
       navigateToParentFlow();
@@ -175,15 +177,15 @@ const makeStateMachine = ({
     }
     if (action.type === SharedWalletActionType.NEXT) {
       if (!prevState.walletName) return prevState;
-      const coSigners = [getInitialCoSignerValue(), getInitialCoSignerValue()];
-      return {
+      const coSigners = [createEmptyCosignerObject(), createEmptyCosignerObject()];
+      return stateCoSigners({
         ...prevState,
         coSignerInputsDirty: coSigners.map(({ id }) => ({ id, keys: false, name: false })),
         coSignerInputsErrors: [],
         coSigners,
         step: SharedWalletCreationStep.CoSigners,
         walletName: prevState.walletName,
-      };
+      });
     }
     return prevState;
   },
@@ -209,52 +211,52 @@ const makeStateMachine = ({
         ({ id }) => !nextCoSigners.some((c) => c.id === id && !c.keys && !c.name),
       );
 
-      return {
+      return stateCoSigners({
         ...prevState,
         coSignerInputsDirty: coSignersDirty,
         coSignerInputsErrors: filteredCosignerErrors,
         coSigners: nextCoSigners,
-      };
+      });
     }
     if (action.type === SharedWalletActionType.BACK) {
-      return {
+      return stateSetup({
         ...prevState,
         coSignerInputsDirty: undefined,
         coSignerInputsErrors: undefined,
         coSigners: undefined,
         step: SharedWalletCreationStep.Setup,
-      };
+      });
     }
     if (action.type === SharedWalletActionType.NEXT) {
       if (prevState.coSigners.length === 0) return prevState;
 
-      return {
+      return stateCoSignersImportantInfo({
         ...prevState,
         step: SharedWalletCreationStep.CoSignersImportantInfo,
-      };
+      });
     }
     return prevState;
   },
   [SharedWalletCreationStep.CoSignersImportantInfo]: (prevState, action) => {
     if (action.type === SharedWalletActionType.BACK) {
-      return {
+      return stateCoSigners({
         ...prevState,
         step: SharedWalletCreationStep.CoSigners,
-      };
+      });
     }
     if (action.type === SharedWalletActionType.NEXT) {
       // Having two cosigner fields fixed we need to filter out the empty cosigner
       const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
       if (coSigners.length === 0) return prevState;
 
-      return {
+      return stateQuorum({
         ...prevState,
         coSigners,
         quorumRules: {
           option: QuorumRadioOption.AllAddresses,
         },
         step: SharedWalletCreationStep.Quorum,
-      };
+      });
     }
     return prevState;
   },
@@ -263,27 +265,27 @@ const makeStateMachine = ({
       // Having two cosigner fields fixed we need to fall back to two entries if user specified
       // just one because the empty one was filtere out in brevious step.
       const coSigners = [
-        prevState.coSigners[0] || getInitialCoSignerValue(),
-        prevState.coSigners[1] || getInitialCoSignerValue(),
+        prevState.coSigners[0] || createEmptyCosignerObject(),
+        prevState.coSigners[1] || createEmptyCosignerObject(),
       ];
-      return {
+      return stateCoSigners({
         ...prevState,
         coSigners,
         quorumRules: undefined,
         step: SharedWalletCreationStep.CoSigners,
-      };
+      });
     }
     if (action.type === SharedWalletActionType.NEXT) {
-      return {
+      return stateShareDetails({
         ...prevState,
         step: SharedWalletCreationStep.ShareDetails,
-      };
+      });
     }
     if (action.type === SharedWalletActionType.QUORUM_RULES_CHANGED) {
-      return {
+      return stateQuorum({
         ...prevState,
         quorumRules: action.quorumRules,
-      };
+      });
     }
     return prevState;
   },
