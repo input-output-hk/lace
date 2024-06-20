@@ -9,6 +9,7 @@
   "sharedWallets.addSharedWallet.getStarted.keysOption.title": "Shared wallet keys",
   "sharedWallets.addSharedWallet.getStarted.keysOption.button.generate": "Generate",
   "sharedWallets.addSharedWallet.getStarted.keysOption.button.copy": "Copy to clipboard",
+  "sharedWallets.addSharedWallet.getStarted.keysOption.copyToast": "Shared keys copied to clipboard",
   "sharedWallets.addSharedWallet.getStarted.subTitle": "Choose an option to get started",
   "sharedWallets.addSharedWallet.getStarted.title": "Shared Wallets",
   "sharedWallets.addSharedWallet.layout.timelineStep.walletName": "Wallet name",

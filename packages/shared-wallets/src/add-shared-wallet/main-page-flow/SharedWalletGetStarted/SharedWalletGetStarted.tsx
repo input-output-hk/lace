@@ -10,7 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styles from './SharedWalletGetStarted.module.scss';
 import { SharedWalletGetStartedOption } from './SharedWalletGetStartedOption';
 
-const toastDuration = 3;
+const TOAST_DURATION = 3;
 
 export type SharedWalletGetStartedSharedProps = {
   onCreateSharedWalletClick: () => void;
@@ -18,19 +18,25 @@ export type SharedWalletGetStartedSharedProps = {
   onKeysGenerateClick: () => void;
 };
 
-type SharedWalletGetStartedProps = SharedWalletGetStartedSharedProps & {
-  copyKeysToClipboard?: () => Promise<void>;
-  createAndImportOptionsDisabled: boolean;
-  keysMode: 'generate' | 'copy';
-};
+type SharedWalletGetStartedProps = SharedWalletGetStartedSharedProps &
+  (
+    | {
+        createAndImportOptionsDisabled: true;
+        keysMode: 'generate';
+      }
+    | {
+        copyKeysToClipboard: () => Promise<void>;
+        createAndImportOptionsDisabled: false;
+        keysMode: 'copy';
+      }
+  );
 
 export const SharedWalletGetStarted = ({
-  copyKeysToClipboard,
   createAndImportOptionsDisabled,
-  keysMode,
   onCreateSharedWalletClick,
   onImportSharedWalletClick,
   onKeysGenerateClick,
+  ...restProps
 }: SharedWalletGetStartedProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -66,7 +72,7 @@ export const SharedWalletGetStarted = ({
       ...commonKeysOptionCopies,
       button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.copy'),
     },
-    keysCopyToastText: 'Shared keys copied to clipboard',
+    keysCopyToastText: t('sharedWallets.addSharedWallet.getStarted.keysOption.copyToast'),
     keysGenerateOption: {
       ...commonKeysOptionCopies,
       button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.generate'),
@@ -76,10 +82,10 @@ export const SharedWalletGetStarted = ({
   };
 
   const onKeysCopyClick = async () => {
-    if (!copyKeysToClipboard) return;
-    await copyKeysToClipboard();
+    if (restProps.keysMode !== 'copy') return;
+    await restProps.copyKeysToClipboard();
     toast.notify({
-      duration: toastDuration,
+      duration: TOAST_DURATION,
       icon: CopyIcon,
       text: translations.keysCopyToastText,
     });
@@ -122,7 +128,7 @@ export const SharedWalletGetStarted = ({
           </Box>
         </Flex>
         <div className={styles.options}>
-          {keysMode === 'generate' && (
+          {restProps.keysMode === 'generate' && (
             <SharedWalletGetStartedOption
               copies={translations.keysGenerateOption}
               Icon={KeyIcon}
@@ -130,7 +136,7 @@ export const SharedWalletGetStarted = ({
               testId="shared-wallet-generate"
             />
           )}
-          {keysMode === 'copy' && (
+          {restProps.keysMode === 'copy' && (
             <SharedWalletGetStartedOption
               copies={translations.keysCopyOption}
               Icon={KeyIcon}
