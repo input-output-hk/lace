@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable consistent-return */
 import {
   createTxInspector,
@@ -53,8 +54,11 @@ const governanceCertificateInspection = (
   // Assumes single certificate only, should update
 
   switch (true) {
+    case signedCertificateTypenames.includes(CertificateType.Registration):
+      return ConwayEraCertificatesTypes.Registration;
+    case signedCertificateTypenames.includes(CertificateType.Unregistration):
+      return ConwayEraCertificatesTypes.Unregistration;
     case signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative):
-      // TODO: can we map to Cip30TxType instead?
       return ConwayEraCertificatesTypes.RegisterDelegateRepresentative;
     case signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative):
       return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;

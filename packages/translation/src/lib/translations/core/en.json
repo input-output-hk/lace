@@ -139,6 +139,8 @@
   "core.assetActivityItem.entry.name.delegation": "Delegation",
   "core.assetActivityItem.entry.name.delegationDeregistration": "Stake Key De-Registration",
   "core.assetActivityItem.entry.name.delegationRegistration": "Stake Key Registration",
+  "core.assetActivityItem.entry.name.UnRegistrationCertificate": "Stake Key De-Registration",
+  "core.assetActivityItem.entry.name.RegistrationCertificate": "Stake Key Registration",
   "core.assetActivityItem.entry.name.HardForkInitiationAction": "Hard Fork Initiation Action",
   "core.assetActivityItem.entry.name.incoming": "Received",
   "core.assetActivityItem.entry.name.InfoAction": "Info Action",
