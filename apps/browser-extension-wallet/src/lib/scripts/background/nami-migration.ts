@@ -25,7 +25,8 @@ const startMigration = async () => {
 
   return {
     currency: state.currency === 'usd' ? currencyCode.USD : currencyCode.EUR,
-    analytics: state.analytics
+    analytics: state.analytics,
+    themeColor: state.themeColor
   };
 };
 
@@ -41,6 +42,7 @@ export interface NamiMigrationAPI {
       enabled: boolean;
       userId: string;
     };
+    themeColor: string;
   }>;
   abortMigration: () => Promise<void>;
 }

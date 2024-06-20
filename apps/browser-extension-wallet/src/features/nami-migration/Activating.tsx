@@ -8,6 +8,7 @@ import { useHistory } from 'react-router-dom';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useCurrencyStore } from '@providers/currency';
 import { MigrationState } from '@xsy/nami-migration-tool/dist/migrator/migration-state.data';
+import { useTheme } from '@providers/ThemeProvider/context';
 
 const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'startMigration' | 'checkMigrationStatus'>>(
   {
@@ -26,6 +27,7 @@ const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'startMig
 export const Activating = (): JSX.Element => {
   const history = useHistory();
   const { setFiatCurrency } = useCurrencyStore();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     const startMigration = async () => {
@@ -37,12 +39,15 @@ export const Activating = (): JSX.Element => {
       }
 
       const result = await namiMigrationRemoteApi.startMigration();
+      const namiTheme = result.themeColor === 'light' ? 'light' : 'dark';
+
+      setTheme(namiTheme);
       setFiatCurrency(result.currency);
       history.push(routes.namiMigration.welcome);
     };
 
     startMigration();
-  }, [setFiatCurrency, history]);
+  }, [setFiatCurrency, history, setTheme]);
 
   return <NamiMigrationUpdatingYourWallet />;
 };

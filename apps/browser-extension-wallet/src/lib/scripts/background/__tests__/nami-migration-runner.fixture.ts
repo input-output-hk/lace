@@ -102,5 +102,6 @@ export const state: Nami.State = {
   analytics: {
     enabled: true,
     userId: 'b60f45ed66f596ebfd2ca19ff704cfee33e316795da50f295fc1f85d6ddf539c'
-  }
+  },
+  themeColor: 'white'
 };

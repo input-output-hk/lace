@@ -13320,7 +13320,7 @@ __metadata:
     "@types/w3c-web-hid": ^1.0.3
     "@types/webextension-polyfill": 0.8.0
     "@vespaiach/axios-fetch-adapter": ^0.3.0
-    "@xsy/nami-migration-tool": "file:./xsy-nami-migration-tool-0.0.15.tgz"
+    "@xsy/nami-migration-tool": "file:./xsy-nami-migration-tool-0.0.39.tgz"
     antd: ^4.24.10
     are-you-es5: ^2.1.2
     axios: 0.28.0
@@ -26482,13 +26482,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xsy/nami-migration-tool@file:./xsy-nami-migration-tool-0.0.15.tgz::locator=%40lace%2Fbrowser-extension-wallet%40workspace%3Aapps%2Fbrowser-extension-wallet":
-  version: 0.0.1
-  resolution: "@xsy/nami-migration-tool@file:./xsy-nami-migration-tool-0.0.15.tgz::locator=%40lace%2Fbrowser-extension-wallet%40workspace%3Aapps%2Fbrowser-extension-wallet"
+"@xsy/nami-migration-tool@file:./xsy-nami-migration-tool-0.0.39.tgz::locator=%40lace%2Fbrowser-extension-wallet%40workspace%3Aapps%2Fbrowser-extension-wallet":
+  version: 0.0.39
+  resolution: "@xsy/nami-migration-tool@file:./xsy-nami-migration-tool-0.0.39.tgz::locator=%40lace%2Fbrowser-extension-wallet%40workspace%3Aapps%2Fbrowser-extension-wallet"
   dependencies:
     dotenv: ^16.4.5
     webextension-polyfill: ^0.10.0
-  checksum: 4da831100c0cfb997e68dc3f0ea0efe8ee6600c12ff0f011bb700145f09e5b9d175d345d8035f8200b5539b08fc07ca8a76f4575e9b6a3305fdab81fc9b3d76c
+  checksum: 3cae7b880683b94c6ffb761024a14068d9c0182fe31a2fba6379318af738ea5c0c1ab303416604ae0c0d22f2d827f1057f0b64925f46f8248def796bada50a8c
   languageName: node
   linkType: hard
 
