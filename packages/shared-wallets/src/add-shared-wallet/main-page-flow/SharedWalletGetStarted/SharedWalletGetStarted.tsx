@@ -21,12 +21,12 @@ export type SharedWalletGetStartedSharedProps = {
 type SharedWalletGetStartedProps = SharedWalletGetStartedSharedProps &
   (
     | {
-        createAndImportOptionsDisabled: true;
+        createAndImportOptionsDisabled: boolean;
         keysMode: 'generate';
       }
     | {
-        copyKeysToClipboard: () => Promise<void>;
-        createAndImportOptionsDisabled: false;
+        copyKeysToClipboard?: () => Promise<void>;
+        createAndImportOptionsDisabled: boolean;
         keysMode: 'copy';
       }
   );
@@ -83,7 +83,7 @@ export const SharedWalletGetStarted = ({
 
   const onKeysCopyClick = async () => {
     if (restProps.keysMode !== 'copy') return;
-    await restProps.copyKeysToClipboard();
+    await restProps.copyKeysToClipboard?.();
     toast.notify({
       duration: TOAST_DURATION,
       icon: CopyIcon,

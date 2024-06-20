@@ -130,7 +130,7 @@ const parameterChangeAction = {
         numerator: 36,
         denominator: 37
       },
-      commiteeNoConfidence: {
+      committeeNoConfidence: {
         numerator: 38,
         denominator: 39
       },
@@ -265,8 +265,8 @@ describe('Testing ProposalProceduresContainer component', () => {
                     parameterChangeAction.protocolParamUpdate.dRepVotingThresholds.committeeNormal.denominator
                 ),
                 committeeNoConfidence: formatPercentages(
-                  parameterChangeAction.protocolParamUpdate.dRepVotingThresholds.commiteeNoConfidence.numerator /
-                    parameterChangeAction.protocolParamUpdate.dRepVotingThresholds.commiteeNoConfidence.denominator
+                  parameterChangeAction.protocolParamUpdate.dRepVotingThresholds.committeeNoConfidence.numerator /
+                    parameterChangeAction.protocolParamUpdate.dRepVotingThresholds.committeeNoConfidence.denominator
                 ),
                 updateToConstitution: formatPercentages(
                   parameterChangeAction.protocolParamUpdate.dRepVotingThresholds.updateConstitution.numerator /
