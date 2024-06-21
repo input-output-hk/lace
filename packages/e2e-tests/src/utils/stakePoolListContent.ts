@@ -17,7 +17,7 @@ const suffixOrderPriority = {
 const emojiRegex =
   /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
 
-const sortTickerColumnContent = (columnContent: string[], order: SortingOrder): string[] => {
+export const sortContentByTicker = (columnContent: string[], order: SortingOrder): string[] => {
   const itemsWithNoTicker = columnContent.filter((item) => item === '-');
   const itemsWithTicker = columnContent.filter((item) => item !== '-');
 
@@ -36,7 +36,7 @@ const sortTickerColumnContent = (columnContent: string[], order: SortingOrder): 
   return sortedItems;
 };
 
-const sortBlocksColumnContent = (columnContent: string[], order: SortingOrder): string[] => {
+export const sortContentByBlocks = (columnContent: string[], order: SortingOrder): string[] => {
   const parsedColumnContent = columnContent.map((item) => Number(item.replace(',', '')));
   const sortedColumnContent = [...parsedColumnContent].sort((a, b) => a - b);
 
@@ -47,7 +47,7 @@ const sortBlocksColumnContent = (columnContent: string[], order: SortingOrder): 
   return sortedColumnContent.map((item) => item.toLocaleString());
 };
 
-const parseValueFromColumnIntoAbbreviatedValueObject = (valueFromColumn: string): AbbreviatedValue => {
+export const parseValueFromColumnIntoAbbreviatedValueObject = (valueFromColumn: string): AbbreviatedValue => {
   if (valueFromColumn.endsWith('K')) {
     return {
       value: Number(valueFromColumn.slice(0, -1)),
@@ -78,7 +78,7 @@ const compareAbbreviatedValues = (abbreviatedValue1: AbbreviatedValue, abbreviat
   return suffixOrderPriority[abbreviatedValue1.suffix] - suffixOrderPriority[abbreviatedValue2.suffix];
 };
 
-const sortColumnWithPercentageValues = (columnContent: string[], order: string): string[] => {
+export const sortContentWithPercentageValues = (columnContent: string[], order: string): string[] => {
   const parsedColumnContent = columnContent.map((item) => Number(item.replace(/%/, '')).toFixed(2));
   const sortedColumnContent = [...parsedColumnContent].sort((a, b) => Number(a) - Number(b));
 
@@ -89,7 +89,7 @@ const sortColumnWithPercentageValues = (columnContent: string[], order: string):
   return sortedColumnContent.map((item) => String(`${item}%`));
 };
 
-const sortColumnWithAbbreviatedNumbers = (columnContent: string[], order: string): string[] => {
+export const sortContentWithAbbreviatedNumbers = (columnContent: string[], order: string): string[] => {
   const parsedColumnContent: AbbreviatedValue[] = columnContent.map((item) =>
     parseValueFromColumnIntoAbbreviatedValueObject(item)
   );
@@ -111,20 +111,20 @@ export const sortColumnContent = async (
 
   switch (sortingOption) {
     case StakePoolListColumn.Ticker:
-      sortedColumnContent = sortTickerColumnContent(columnContent, order);
+      sortedColumnContent = sortContentByTicker(columnContent, order);
       break;
     case StakePoolListColumn.Saturation:
     case StakePoolListColumn.ROS:
     case StakePoolListColumn.Margin:
-      sortedColumnContent = sortColumnWithPercentageValues(columnContent, order);
+      sortedColumnContent = sortContentWithPercentageValues(columnContent, order);
       break;
     case StakePoolListColumn.Blocks:
-      sortedColumnContent = sortBlocksColumnContent(columnContent, order);
+      sortedColumnContent = sortContentByBlocks(columnContent, order);
       break;
     case StakePoolListColumn.Cost:
     case StakePoolListColumn.Pledge:
     case StakePoolListColumn.LiveStake:
-      sortedColumnContent = sortColumnWithAbbreviatedNumbers(columnContent, order);
+      sortedColumnContent = sortContentWithAbbreviatedNumbers(columnContent, order);
       break;
     default:
       throw new Error(`Unsupported sorting option: ${sortingOption}`);

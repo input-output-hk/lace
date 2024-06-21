@@ -19,6 +19,7 @@ import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
 import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
 import StakingInfoCard from '../../elements/multidelegation/StakingInfoCard';
 import { isPopupMode } from '../../utils/pageUtils';
+import { sortGridContent } from '../../utils/stakePoolGridContent';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -336,8 +337,10 @@ class MultidelegationPageAssert {
     await MultidelegationPage.waitForPoolsCounterToBeGreaterThanZero();
     poolLimit ??= await MultidelegationPage.getNumberOfPoolsFromCounter();
     if (stakePoolsDisplayType === 'cards') {
-      // TODO: add code to handle grid cards - LW-10284
-      throw new Error('Please add validation for grid cards sorting');
+      const gridContent = await MultidelegationPage.extractGridContent(sortingOption, poolLimit);
+      const sortedGridContent = await sortGridContent(gridContent, sortingOption, order);
+      expect(gridContent).to.not.be.empty;
+      expect(gridContent).to.deep.equal(sortedGridContent);
     } else {
       const columnContent = await MultidelegationPage.extractColumnContent(
         mapSortingOptionToColumnNameEnum(sortingOption),

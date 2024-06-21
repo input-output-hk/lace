@@ -2,7 +2,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { QuorumRadioOption } from '../add-shared-wallet/creation-flow/Quorum';
 import {
   CreationFlowState,
-  getInitialCoSignerValue,
+  createEmptyCosignerObject,
   makeInitialState,
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/types';
@@ -18,10 +18,13 @@ export default meta;
 
 type Story = StoryObj<typeof AddSharedWalletStorybookHelper>;
 
+const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
+
 export const Setup: Story = {
   name: 'Setup',
   render: () => (
     <AddSharedWalletStorybookHelper
+      activeWalletSharedKeys={sharedKeys}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -34,12 +37,12 @@ export const Setup: Story = {
 const coSignersData: CreationFlowState['coSigners'] = [
   {
     id: 'cosigner1',
-    keys: 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7',
+    keys: sharedKeys,
     name: 'Sophia',
   },
   {
     id: 'cosigner2',
-    keys: 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7',
+    keys: sharedKeys,
     name: 'Martha',
   },
 ];
@@ -56,9 +59,10 @@ const coSignersStateData: CreationFlowState = {
 export const CoSigners: Story = {
   name: 'CoSigners',
   render: () => {
-    const coSigners: CreationFlowState['coSigners'] = [getInitialCoSignerValue(), getInitialCoSignerValue()];
+    const coSigners: CreationFlowState['coSigners'] = [createEmptyCosignerObject(), createEmptyCosignerObject()];
     return (
       <AddSharedWalletStorybookHelper
+        activeWalletSharedKeys={sharedKeys}
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
@@ -77,13 +81,14 @@ export const CoSignersSingleEntry: Story = {
     const coSigners: CreationFlowState['coSigners'] = [
       {
         id: 'cosigner',
-        keys: 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7',
+        keys: sharedKeys,
         name: 'Bob',
       },
-      getInitialCoSignerValue(),
+      createEmptyCosignerObject(),
     ];
     return (
       <AddSharedWalletStorybookHelper
+        activeWalletSharedKeys={sharedKeys}
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
@@ -113,6 +118,7 @@ export const CoSignersWithErrors: Story = {
     ];
     return (
       <AddSharedWalletStorybookHelper
+        activeWalletSharedKeys={sharedKeys}
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
@@ -130,6 +136,7 @@ export const CoSignersConfirmation: Story = {
   name: 'CoSigners - confirmation',
   render: () => (
     <AddSharedWalletStorybookHelper
+      activeWalletSharedKeys={sharedKeys}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -144,6 +151,7 @@ export const Quorum: Story = {
   name: 'Quorum',
   render: () => (
     <AddSharedWalletStorybookHelper
+      activeWalletSharedKeys={sharedKeys}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -161,6 +169,7 @@ export const ShareDetails: Story = {
   name: 'ShareDetails',
   render: () => (
     <AddSharedWalletStorybookHelper
+      activeWalletSharedKeys={sharedKeys}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
