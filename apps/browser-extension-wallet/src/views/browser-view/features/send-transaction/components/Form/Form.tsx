@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Tokens } from '@src/types';
-import { PriceResult } from '@hooks';
+import { COIN_SELECTION_ERRORS, PriceResult } from '@hooks';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
-import { Button, useObservable } from '@lace/common';
+import { Banner, Button, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from '@hooks/useMaxAda';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
@@ -16,6 +16,8 @@ import { getReachedMaxAmountList } from '../../helpers';
 import { MetadataInput } from './MetadataInput';
 import { BundlesList } from './BundlesList';
 import { formatAdaAllocation, getNextBundleCoinId } from './util';
+import { Box, Text } from '@lace/ui';
+import { ReactComponent as WarningIconCircle } from '@lace/icons/dist/WarningIconCircleComponent';
 import styles from './Form.module.scss';
 
 export interface Props {
@@ -41,7 +43,7 @@ export const Form = ({
     walletUI: { cardanoCoin }
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
-  const { builtTxData: { totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
+  const { builtTxData: { totalMinimumCoins, uiTx, error } = {} } = useBuiltTxState();
 
   const [isBundle, setIsBundle] = useState(false);
   const tokensUsed = useSpentBalances();
@@ -49,6 +51,7 @@ export const Form = ({
   const [insufficientBalanceInputs, setInsufficientBalanceInputs] = useState<string[]>([]); // we save all the element input ids with insufficient balance error
   const { lastFocusedInput } = useLastFocusedInput();
   const { fiatCurrency } = useCurrencyStore();
+  const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
 
   const { setNewOutput } = useOutputs();
 
@@ -64,13 +67,13 @@ export const Form = ({
         getReachedMaxAmountList({
           assets,
           tokensUsed,
-          spendableCoin,
           balance,
           cardanoCoin,
+          availableRewards,
           exceed: true
         }) || []
       ),
-    [assets, balance, cardanoCoin, spendableCoin, tokensUsed]
+    [assets, availableRewards, balance, cardanoCoin, tokensUsed]
   );
 
   useEffect(() => {
@@ -101,8 +104,30 @@ export const Form = ({
     !spendableCoin ||
     !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length;
 
+  const utxoDepletedMsg = (
+    <>
+      <Text.Button>{t('browserView.transaction.send.utxoDepletedBannerErrorText')}</Text.Button>
+      {spendableCoin > 0 && (
+        <Text.Button> {t('browserView.transaction.send.utxoDepletedBannerMaxButtonText')}</Text.Button>
+      )}
+    </>
+  );
+
   return (
     <Skeleton loading={isLoading}>
+      {error === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR && (
+        <Box mb="$20">
+          <Banner
+            withIcon
+            message={utxoDepletedMsg}
+            customIcon={
+              <Text.Label color="warning">
+                <WarningIconCircle />
+              </Text.Label>
+            }
+          />
+        </Box>
+      )}
       <BundlesList
         isPopupView={isPopupView}
         coinBalance={coinBalance}
@@ -112,6 +137,7 @@ export const Form = ({
         reachedMaxAmountList={reachedMaxAmountList}
         assets={assets}
         assetBalances={assetBalances}
+        spendableCoin={spendableCoin}
       />
 
       {!isPopupView && (

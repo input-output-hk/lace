@@ -11,6 +11,7 @@ export type CoinInputProps = {
   assetBalances: Wallet.Cardano.Value['assets'];
   canAddMoreAssets?: boolean;
   onAddAsset?: () => void;
+  spendableCoin: bigint;
 } & Omit<UseSelectedCoinsProps, 'bundleId' | 'assetBalances'>;
 
 export const CoinInput = ({
@@ -18,11 +19,12 @@ export const CoinInput = ({
   assetBalances,
   onAddAsset,
   canAddMoreAssets,
+  spendableCoin,
   ...selectedCoinsProps
 }: CoinInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setCoinValues } = useCoinStateSelector(bundleId);
-  const { selectedCoins } = useSelectedCoins({ bundleId, assetBalances, ...selectedCoinsProps });
+  const { selectedCoins } = useSelectedCoins({ bundleId, assetBalances, spendableCoin, ...selectedCoinsProps });
 
   useEffect(() => {
     const { tempOutputs } = getTemporaryTxDataFromStorage();
