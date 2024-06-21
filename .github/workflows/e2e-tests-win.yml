@@ -156,7 +156,7 @@ jobs:
           name: test-artifacts
           path: ./packages/e2e-tests
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.6.0
+        uses: andrcuns/allure-publish-action@v2.7.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
