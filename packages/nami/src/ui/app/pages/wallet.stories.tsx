@@ -787,3 +787,36 @@ export const TermsOfUseModalDark: Story = {
     colorMode: 'dark',
   },
 };
+
+export const EmptyAssetListLight: Story = {
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([
+        {
+          ...account,
+          collateral: undefined,
+          assets: [],
+          lovelace: '0',
+          minAda: 0,
+        },
+      ]);
+    });
+    getNativeAccounts.mockImplementation(() => {
+      return [account];
+    });
+    return () => {
+      getAccounts.mockReset();
+      getNativeAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const EmptyAssetListDark: Story = {
+  ...EmptyAssetListLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
