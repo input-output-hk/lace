@@ -78,14 +78,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         stores,
         handleProvider: handleHttpProvider({
           adapter: axiosFetchAdapter,
-          baseUrl:
-            HANDLE_SERVER_URLS[
-              // TODO: remove exclude to support sanchonet
-              Cardano.ChainIds[chainName].networkMagic as Exclude<
-                Cardano.NetworkMagics,
-                Cardano.NetworkMagics.Sanchonet
-              >
-            ],
+          baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
           logger
         }),
         addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
