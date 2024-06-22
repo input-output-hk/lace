@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { BrowserViewRoutes } from '@views/browser/routes';
 import {
-  CurrencyStoreProvider,
   DatabaseProvider,
+  CurrencyStoreProvider,
   AxiosClientProvider,
   AppSettingsProvider,
   ThemeProvider,
