@@ -22,8 +22,9 @@ import {
 //   setNetwork,
 // } from './api/extension';
 
-// import { sendStore } from './app/pages/send';
 import { NETWORK_ID, NODE } from '../config/config';
+
+import { sendStore } from './app/pages/send';
 
 import type { Action, Actions } from 'easy-peasy';
 
@@ -72,7 +73,7 @@ const routeStore: RouteModel = {
 const globalModel = persist(
   {
     routeStore,
-    // sendStore,
+    sendStore,
   },
   { storage: 'localStorage' },
 );
@@ -96,6 +97,7 @@ const initSettings = async (
 interface GlobalModel {
   globalModel: {
     routeStore: RouteModel;
+    sendStore: any;
   };
   settings: SettingsModel;
 }

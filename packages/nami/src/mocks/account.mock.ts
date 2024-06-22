@@ -184,6 +184,9 @@ export const account = {
       'addr_test1qr50c2zgp3e5smfgsp6vttrkvzksvydwtnjsthsegdf5v6tpafc27808z72a75hx95wq7tygzlcnkhx5ks8qfj44444q377vht',
     rewardAddr:
       'stake_test1ups75u90rhn309wl2tnz68q09jyp0ufmtn2tgrsye26666sh7lj7r',
+    recentSendToAddresses: [
+      'addr_test1qznkfw45dhtkr6f60hgw6rktmza7ll7achyv2w7vsx2khhcvec23vqjpq7wzwfq78j44xkyy6rg6435skpst6ju0j4tqfcx0ze',
+    ],
   },
   preview: {
     assets: [],

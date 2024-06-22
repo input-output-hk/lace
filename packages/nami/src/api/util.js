@@ -227,12 +227,13 @@ export const currencyToSymbol = (currency) => {
 //  * @param {TransactionUnspentOutput[]} utxos
 //  * @returns
 //  */
-// export const sumUtxos = async (utxos) => {
+export const sumUtxos = async (utxos) => {
+  return {}
 //   await Loader.load();
 //   let value = Loader.Cardano.Value.new(Loader.Cardano.BigNum.from_str('0'));
 //   utxos.forEach((utxo) => (value = value.checked_add(utxo.output().amount())));
 //   return value;
-// };
+};
 
 // /**
 //  *
@@ -254,7 +255,7 @@ export const currencyToSymbol = (currency) => {
 //   };
 // };
 
-// export const assetsToValue = async (assets) => {
+export const assetsToValue = async (assets) => {
 //   await Loader.load();
 //   const multiAsset = Loader.Cardano.MultiAsset.new();
 //   const lovelace = assets.find((asset) => asset.unit === 'lovelace');
@@ -286,13 +287,14 @@ export const currencyToSymbol = (currency) => {
 //   );
 //   if (assets.length > 1 || !lovelace) value.set_multiasset(multiAsset);
 //   return value;
-// };
+};
 
 // /**
 //  *
 //  * @param {Value} value
 //  */
-// export const valueToAssets = async (value) => {
+export const valueToAssets = async (value) => {
+  return  []
 //   await Loader.load();
 //   const assets = [];
 //   assets.push({ unit: 'lovelace', quantity: value.coin().to_str() });
@@ -326,12 +328,13 @@ export const currencyToSymbol = (currency) => {
 //   }
 //   // if (value.coin().to_str() == '0') return [];
 //   return assets;
-// };
+};
 
-// export const minAdaRequired = async (output, coinsPerUtxoWord) => {
+export const minAdaRequired = async (output, coinsPerUtxoWord) => {
+  return ''
 //   await Loader.load();
 //   return Loader.Cardano.min_ada_required(output, coinsPerUtxoWord).to_str();
-// };
+};
 
 // const outputsToTrezor = (outputs, address, index) => {
 //   const trezorOutputs = [];

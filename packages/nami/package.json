@@ -54,13 +54,19 @@
     "@emotion/styled": "^11.3.0",
     "@fontsource/ubuntu": "^5.0.8",
     "crc": "^4.1.1",
+    "debounce-promise": "^3.1.2",
     "easy-peasy": "^6.0.4",
     "focus-visible": "^5.2.0",
     "framer-motion": "^4.1.16",
+    "promise-latest": "^1.0.4",
     "react-custom-scrollbars-2": "^4.5.0",
     "react-icons": "4.2.0",
     "react-kawaii": "^0.18.0",
-    "react-lazy-load-image-component": "^1.5.1"
+    "react-lazy-load-image-component": "^1.5.1",
+    "react-middle-ellipsis": "^1.2.1",
+    "react-number-format": "^5.3.1",
+    "react-window": "^1.8.10",
+    "use-constant": "^1.1.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.5.0",

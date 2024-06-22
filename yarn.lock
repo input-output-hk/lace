@@ -13560,6 +13560,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
     crc: ^4.1.1
+    debounce-promise: ^3.1.2
     easy-peasy: ^6.0.4
     eslint: 8.33.0
     eslint-config-prettier: ^9.1.0
@@ -13575,18 +13576,23 @@ __metadata:
     msw: ^2.3.1
     msw-storybook-addon: ^2.0.2
     prettier: 3.2.5
+    promise-latest: ^1.0.4
     react: 17.0.2
     react-custom-scrollbars-2: ^4.5.0
     react-dom: 17.0.2
     react-icons: 4.2.0
     react-kawaii: ^0.18.0
     react-lazy-load-image-component: ^1.5.1
+    react-middle-ellipsis: ^1.2.1
+    react-number-format: ^5.3.1
+    react-window: ^1.8.10
     rollup-plugin-import-css: ^3.5.0
     rollup-plugin-svg: ^2.0.0
     sass: ^1.68.0
     storybook: ^8.1.6
     tsconfig-paths-webpack-plugin: 3.5.2
     typescript: ^4.9.5
+    use-constant: ^1.1.0
   peerDependencies:
     react: 17.0.2
     react-dom: 17.0.2
@@ -45221,6 +45227,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"memoize-one@npm:>=3.1.1 <6":
+  version: 5.2.1
+  resolution: "memoize-one@npm:5.2.1"
+  checksum: a3cba7b824ebcf24cdfcd234aa7f86f3ad6394b8d9be4c96ff756dafb8b51c7f71320785fbc2304f1af48a0467cbbd2a409efc9333025700ed523f254cb52e3d
+  languageName: node
+  linkType: hard
+
 "memoizerific@npm:^1.11.3":
   version: 1.11.3
   resolution: "memoizerific@npm:1.11.3"
@@ -49622,6 +49635,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"promise-latest@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "promise-latest@npm:1.0.4"
+  checksum: 766a14501261282682f295a0070e50d83ab7eaa25b020b52f8362c889371d9172ff5b818549070d5e62d9eb2ed091e3dc60d12ecba8f71c9b97d2720a1a28d91
+  languageName: node
+  linkType: hard
+
 "promise-retry@npm:^2.0.1":
   version: 2.0.1
   resolution: "promise-retry@npm:2.0.1"
@@ -51286,6 +51306,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-middle-ellipsis@npm:^1.2.1":
+  version: 1.2.2
+  resolution: "react-middle-ellipsis@npm:1.2.2"
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18
+    react-dom: ^16.8 || ^17 || ^18
+  checksum: d3ccc8036ec284119bea02e20ebaf4fdb652f805b5850fa56a262fbd7b889a2882de5591eabe515c4f70432fd1d6942c97ac1008caefac9712a7dce3d014bce0
+  languageName: node
+  linkType: hard
+
+"react-number-format@npm:^5.3.1":
+  version: 5.4.0
+  resolution: "react-number-format@npm:5.4.0"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 7ddfc7a3a01336234c6417ee2ee0660aef342ed0505abc5dd5b378c2c10182ed8afc74ce9be5aa60c4793f95039448ac1feac34dca0bbf5bd2c1a8235aa07b61
+  languageName: node
+  linkType: hard
+
 "react-popper-tooltip@npm:^3.1.1":
   version: 3.1.1
   resolution: "react-popper-tooltip@npm:3.1.1"
@@ -51569,6 +51611,19 @@ __metadata:
     react: ">=16 || >=17 || >= 18"
     react-dom: ">=16 || >=17 || >= 18"
   checksum: 7279f41005339dfa597ef154f971b518e88eb8a32a2850df369864de02482426e47e6b9aa881cf4f907bcb847252ed755e7d0fc8451088d164716af469fa2ad0
+  languageName: node
+  linkType: hard
+
+"react-window@npm:^1.8.10":
+  version: 1.8.10
+  resolution: "react-window@npm:1.8.10"
+  dependencies:
+    "@babel/runtime": ^7.0.0
+    memoize-one: ">=3.1.1 <6"
+  peerDependencies:
+    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: e8830f32e3ad4bf91af9cdc5cead84148c7694ce6abd9fdb447fb609da6cd4bbd0bbc75ff985f78828f4bbbd3ba4cbc98235cc9c056b5e5787578518f7fafbb9
   languageName: node
   linkType: hard
 
@@ -58387,6 +58442,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: f771cbadfdc91e03b7ab9eb32d0fc0cc647755711801bf507e891ad38c4bbc5f02b2509acadf9c965ec9c5f2f642fd33bdfdfb17b0873c4ad0a9b1f5e5e724bf
+  languageName: node
+  linkType: hard
+
+"use-constant@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "use-constant@npm:1.1.1"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: cbff28ec85e10a17adc889482752006cf49e7d2f8c38cce7bcab82b42b5c31b0e42a07310995d140265956aa5f7c641edc1111a8647d01980a822760df2648dc
   languageName: node
   linkType: hard
 

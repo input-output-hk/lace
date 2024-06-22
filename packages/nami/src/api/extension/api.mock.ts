@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { fn } from '@storybook/test';
 
 import * as actualApi from './';
@@ -41,5 +42,21 @@ export const updateAccount = fn(actualApi.updateAccount).mockName(
 export const onAccountChange = fn(actualApi.onAccountChange).mockName(
   'onAccountChange',
 );
+
+export const isValidAddress = fn(actualApi.isValidAddress).mockName(
+  'isValidAddress',
+);
+
+export const isValidEthAddress = fn(actualApi.isValidEthAddress).mockName(
+  'isValidEthAddress',
+);
+
+export const getUtxos = fn(actualApi.getUtxos).mockName('getUtxos');
+
+export const updateRecentSentToAddress = fn(
+  actualApi.updateRecentSentToAddress,
+).mockName('updateRecentSentToAddress');
+
+export const getAdaHandle = fn(actualApi.getAdaHandle).mockName('getAdaHandle');
 
 export const getAsset = fn(actualApi.getAsset).mockName('getAsset');

@@ -655,35 +655,36 @@ export const createTab = (tab, query = '') =>
 // export const bytesAddressToBinary = (bytes) =>
 //   bytes.reduce((str, byte) => str + byte.toString(2).padStart(8, '0'), '');
 
-// export const isValidAddress = async (address) => {
-//   await Loader.load();
-//   const network = await getNetwork();
-//   try {
-//     const addr = Loader.Cardano.Address.from_bech32(address);
-//     if (
-//       (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
-//       (addr.network_id() === 0 &&
-//         (network.id === NETWORK_ID.testnet ||
-//           network.id === NETWORK_ID.preview ||
-//           network.id === NETWORK_ID.preprod))
-//     )
-//       return addr.to_bytes();
-//     return false;
-//   } catch (e) {}
-//   try {
-//     const addr = Loader.Cardano.ByronAddress.from_base58(address);
-//     if (
-//       (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
-//       (addr.network_id() === 0 &&
-//         (network.id === NETWORK_ID.testnet ||
-//           network.id === NETWORK_ID.preview ||
-//           network.id === NETWORK_ID.preprod))
-//     )
-//       return addr.to_address().to_bytes();
-//     return false;
-//   } catch (e) {}
-//   return false;
-// };
+export const isValidAddress = async (address) => {
+  return true;
+  await Loader.load();
+  const network = await getNetwork();
+  try {
+    const addr = Loader.Cardano.Address.from_bech32(address);
+    if (
+      (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
+      (addr.network_id() === 0 &&
+        (network.id === NETWORK_ID.testnet ||
+          network.id === NETWORK_ID.preview ||
+          network.id === NETWORK_ID.preprod))
+    )
+      return addr.to_bytes();
+    return false;
+  } catch (e) {}
+  try {
+    const addr = Loader.Cardano.ByronAddress.from_base58(address);
+    if (
+      (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
+      (addr.network_id() === 0 &&
+        (network.id === NETWORK_ID.testnet ||
+          network.id === NETWORK_ID.preview ||
+          network.id === NETWORK_ID.preprod))
+    )
+      return addr.to_address().to_bytes();
+    return false;
+  } catch (e) {}
+  return false;
+};
 
 // const isValidAddressBytes = async (address) => {
 //   await Loader.load();
@@ -715,9 +716,9 @@ export const createTab = (tab, query = '') =>
 //   return false;
 // };
 
-// // export const isValidEthAddress = function (address) {
-// //   return isAddress(address);
-// // };
+export const isValidEthAddress = function (address) {
+  return isAddress(address);
+};
 
 // export const extractKeyHash = async (address) => {
 //   await Loader.load();
@@ -1234,7 +1235,6 @@ export const switchAccount = async (accountIndex) => {
   // await setStorage({ [STORAGE.currentAccount]: accountIndex });
   // const address = await getAddress();
   // emitAccountChange([address]);
-  console.log(accountIndex);
   return true;
 };
 
@@ -1562,88 +1562,88 @@ export const initHW = async ({ device, id }) => {
 //  *
 //  * @param {string} assetName utf8 encoded
 //  */
-// export const getAdaHandle = async (assetName) => {
-//   try {
-//     const network = await getNetwork();
-//     if (!network) return null;
-//     let handleUrl;
-//     switch (network.id){
-//       case 'mainnet':
-//         handleUrl = 'https://api.handle.me'
-//         break;
-//       case 'preprod':
-//         handleUrl = 'https://preprod.api.handle.me'
-//         break;
-//       default:
-//         return null;
-//     }
-//     const response = await fetch(`${handleUrl}/handles/${assetName}`);
-//     const data = response && response.ok ? await response.json() : null;
-//     return data && data.resolved_addresses && data.resolved_addresses.ada
-//       ? data.resolved_addresses.ada
-//       : null;
-//   } catch (e) {
-//     return null;
-//   }
-// };
+export const getAdaHandle = async (assetName) => {
+  try {
+    const network = await getNetwork();
+    if (!network) return null;
+    let handleUrl;
+    switch (network.id){
+      case 'mainnet':
+        handleUrl = 'https://api.handle.me'
+        break;
+      case 'preprod':
+        handleUrl = 'https://preprod.api.handle.me'
+        break;
+      default:
+        return null;
+    }
+    const response = await fetch(`${handleUrl}/handles/${assetName}`);
+    const data = response && response.ok ? await response.json() : null;
+    return data && data.resolved_addresses && data.resolved_addresses.ada
+      ? data.resolved_addresses.ada
+      : null;
+  } catch (e) {
+    return null;
+  }
+};
 
 /**
  *
  * @param {string} ethAddress
  */
-// export const getMilkomedaData = async (ethAddress) => {
-//   return {
-//     isAllowed: true,
-//     assets: [],
-//     // ada,
-//     current_address: '123213',
-//     // protocolMagic,
-//     // ttl: ttl_expiry,
-//   };
+export const getMilkomedaData = async (ethAddress) => {
+  return {
+    isAllowed: true,
+    assets: [],
+    // ada,
+    current_address: '123213',
+    // protocolMagic,
+    // ttl: ttl_expiry,
+  };
 
-//   const network = await getNetwork();
-//   if (network.id === NETWORK_ID.mainnet) {
-//     const { isAllowed } = await fetch(
-//       'https://' +
-//         milkomedaNetworks['c1-mainnet'].backendEndpoint +
-//         `/v1/isAddressAllowed?address=${ethAddress}`
-//     ).then((res) => res.json());
-//     const { ada, ttl_expiry, assets, current_address } = await fetch(
-//       'https://' +
-//         milkomedaNetworks['c1-mainnet'].backendEndpoint +
-//         '/v1/stargate'
-//     ).then((res) => res.json());
-//     const protocolMagic = milkomedaNetworks['c1-mainnet'].protocolMagic;
-//     return {
-//       isAllowed,
-//       assets: [],
-//       ada,
-//       current_address,
-//       protocolMagic,
-//       ttl: ttl_expiry,
-//     };
-//   } else {
-//     const { isAllowed } = await fetch(
-//       'https://' +
-//         milkomedaNetworks['c1-devnet'].backendEndpoint +
-//         `/v1/isAddressAllowed?address=${ethAddress}`
-//     ).then((res) => res.json());
-//     const { ada, ttl_expiry, assets, current_address } = await fetch(
-//       'https://' +
-//         milkomedaNetworks['c1-devnet'].backendEndpoint +
-//         '/v1/stargate'
-//     ).then((res) => res.json());
-//     const protocolMagic = milkomedaNetworks['c1-devnet'].protocolMagic;
-//     return {
-//       isAllowed,
-//       assets: [],
-//       ada,
-//       current_address,
-//       protocolMagic,
-//       ttl: ttl_expiry,
-//     };
-//   }
-// };
+  const network = await getNetwork();
+  if (network.id === NETWORK_ID.mainnet) {
+    const { isAllowed } = await fetch(
+      'https://' +
+        milkomedaNetworks['c1-mainnet'].backendEndpoint +
+        `/v1/isAddressAllowed?address=${ethAddress}`
+    ).then((res) => res.json());
+    const { ada, ttl_expiry, assets, current_address } = await fetch(
+      'https://' +
+        milkomedaNetworks['c1-mainnet'].backendEndpoint +
+        '/v1/stargate'
+    ).then((res) => res.json());
+    const protocolMagic = milkomedaNetworks['c1-mainnet'].protocolMagic;
+    return {
+      isAllowed,
+      assets: [],
+      ada,
+      current_address,
+      protocolMagic,
+      ttl: ttl_expiry,
+    };
+  } else {
+    const { isAllowed } = await fetch(
+      'https://' +
+        milkomedaNetworks['c1-devnet'].backendEndpoint +
+        `/v1/isAddressAllowed?address=${ethAddress}`
+    ).then((res) => res.json());
+    const { ada, ttl_expiry, assets, current_address } = await fetch(
+      'https://' +
+        milkomedaNetworks['c1-devnet'].backendEndpoint +
+        '/v1/stargate'
+    ).then((res) => res.json());
+    const protocolMagic = milkomedaNetworks['c1-devnet'].protocolMagic;
+    return {
+      isAllowed,
+      assets: [],
+      ada,
+      current_address,
+      protocolMagic,
+      ttl: ttl_expiry,
+    };
+  }
+};
 
 // export const createWallet = async (name, seedPhrase, password) => {
 //   await Loader.load();
@@ -1990,17 +1990,17 @@ export const updateAccount = async (forceUpdate = false) => {
 //   });
 };
 
-// export const updateRecentSentToAddress = async (address) => {
-//   const currentIndex = await getCurrentAccountIndex();
-//   const accounts = await getStorage(STORAGE.accounts);
-//   const network = await getNetwork();
-//   accounts[currentIndex][network.id].recentSendToAddresses = [address]; // Update in the future to add mulitple addresses
-//   return await setStorage({
-//     [STORAGE.accounts]: {
-//       ...accounts,
-//     },
-//   });
-// };
+export const updateRecentSentToAddress = async (address) => {
+  const currentIndex = await getCurrentAccountIndex();
+  const accounts = await getStorage(STORAGE.accounts);
+  const network = await getNetwork();
+  accounts[currentIndex][network.id].recentSendToAddresses = [address]; // Update in the future to add mulitple addresses
+  return await setStorage({
+    [STORAGE.accounts]: {
+      ...accounts,
+    },
+  });
+};
 
 export const displayUnit = (quantity, decimals = 6) => {
   return parseInt(quantity) / 10 ** decimals;

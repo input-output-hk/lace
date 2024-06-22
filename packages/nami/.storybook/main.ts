@@ -47,6 +47,10 @@ const config: StorybookConfig = {
           join(__dirname, '../src/api/extension/wallet.mock.ts'),
         ),
         new NormalModuleReplacementPlugin(
+          /api\/util$/,
+          join(__dirname, '../src/api/util.mock.ts'),
+        ),
+        new NormalModuleReplacementPlugin(
           /api\/extension$/,
           join(__dirname, '../src/api/extension/api.mock.ts'),
         ),
@@ -60,7 +64,7 @@ const config: StorybookConfig = {
         ),
         new NormalModuleReplacementPlugin(
           /loader$/,
-          join(__dirname, './mocks/loader.ts'),
+          join(__dirname, '../src/api/loader.mock.ts'),
         ),
       );
     }

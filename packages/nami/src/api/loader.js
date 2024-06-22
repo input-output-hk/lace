@@ -36,4 +36,5 @@ class LoaderClass {
   }
 }
 
-export const Loader = new LoaderClass();
+// export const Loader = new LoaderClass();
+export const Loader = () => void 0;

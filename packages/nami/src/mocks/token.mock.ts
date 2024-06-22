@@ -97,4 +97,16 @@ export const tokens = {
     time: 1_718_016_433_971,
     unit: 'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e3744d494e',
   },
+  '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743235':
+    {
+      decimals: 0,
+      displayName: 'NonSquareNft25',
+      fingerprint: 'asset15tfh93yjsffr7v9fepepuq2w4scl58eeaszmx7',
+      image:
+        'https://ipfs.blockfrost.dev/ipfs/QmPmYGX7Vob7X9BkfHQeHskTJQJzgd9oZupugVSLXBJYLV',
+      name: 'NonSquareNft25',
+      policy: '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d3',
+      time: 1_718_430_739_151,
+      unit: '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743235',
+    },
 };
