@@ -75,10 +75,14 @@ export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactEl
   const icon = (type && activityTypeIcon[type]) || RefreshOutlinedIcon;
   const iconStyle = { fontSize: txIconSize() };
 
+  const isDelegationActivity =
+    type === ConwayEraCertificatesTypes.Unregistration || type === ConwayEraCertificatesTypes.Registration;
+
   const isGovernanceTx =
-    Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
-    type in ConwayEraGovernanceActions ||
-    type in Cip1694GovernanceActivityType;
+    !isDelegationActivity &&
+    (Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
+      type in ConwayEraGovernanceActions ||
+      type in Cip1694GovernanceActivityType);
 
   return (
     <Flex
