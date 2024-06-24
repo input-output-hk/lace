@@ -191,7 +191,7 @@ func main() {
 	go func() {
 		defer systray.Quit()
 		defer wgManager.Done()
-		manageChildren(commManager)
+		manageChildren(commManager, appConfig)
 	}()
 
 	systray.Run(ui.SetupTray(commUI, logFile, networks, appConfig), func(){

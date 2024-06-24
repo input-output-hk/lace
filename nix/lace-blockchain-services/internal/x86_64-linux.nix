@@ -12,7 +12,7 @@ in rec {
 
   installer = selfExtractingArchive;
 
-  inherit (common) ogmios cardano-node;
+  inherit (common) cardano-node ogmios cardano-submit-api;
 
   cardano-js-sdk = (common.flake-compat {
     src = inputs.cardano-js-sdk;
@@ -173,7 +173,8 @@ in rec {
     ln -s $out/libexec/lace-blockchain-services/* $out/bin/
 
     mkdir -p $out/libexec
-    ln -s ${mkBundle { "cardano-node"   = lib.getExe cardano-node;          }} $out/libexec/cardano-node
+    ln -s ${mkBundle { "cardano-node" = lib.getExe cardano-node;            }} $out/libexec/cardano-node
+    ln -s ${mkBundle { "cardano-submit-api" = lib.getExe cardano-submit-api;}} $out/libexec/cardano-submit-api
     ln -s ${mkBundle { "ogmios"         = lib.getExe ogmios;                }} $out/libexec/ogmios
     ln -s ${mkBundle { "mithril-client" = lib.getExe mithril-client;        }} $out/libexec/mithril-client
     ln -s ${mkBundle { "node"           = lib.getExe nodejs-no-snapshot;    }} $out/libexec/nodejs

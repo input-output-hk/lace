@@ -9,7 +9,7 @@ in rec {
   common = import ./common.nix { inherit inputs targetSystem; };
   package = lace-blockchain-services;
   installer = dmgImage;
-  inherit (common) cardano-node ogmios;
+  inherit (common) cardano-node ogmios cardano-submit-api;
 
   cardano-js-sdk = rec {
     patchedSrc = pkgs.runCommand "cardano-js-sdk-patched" {} ''
@@ -242,6 +242,7 @@ in rec {
     # cardano-node is already bundled by Haskell.nix; otherwise we’re getting missing
     # symbols in dyld (TODO: investigate why)
     ln -s ${cardano-node}/bin "$app"/MacOS/cardano-node
+    ln -s ${cardano-submit-api}/bin "$app"/MacOS/cardano-submit-api
 
     ln -s ${mkBundle { "ogmios"         = lib.getExe ogmios;                }} "$app"/MacOS/ogmios
     ln -s ${mkBundle { "mithril-client" = lib.getExe mithril-client;        }} "$app"/MacOS/mithril-client

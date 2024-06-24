@@ -73,7 +73,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 					libexecDir + sep + "initdb" + ourpaths.ExeSuffix,
 					[]string{"--username", "postgres", "--pwfile", pwFileClear.Name()},
 					extraEnv,
-					30 * time.Second,
+					60 * time.Second,
 				)
 
 				if err != nil {
