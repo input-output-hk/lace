@@ -34,11 +34,11 @@
     nixpkgs-nsis.flake = false; # too old
   };
 
-  outputs = inputs: let
-    supportedSystem = ["x86_64-linux" "x86_64-darwin" "aarch64-darwin"];
-    inherit (inputs.nixpkgs) lib;
+  outputs = { self, nixpkgs, ... } @ inputs: let
+    supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    inherit (nixpkgs) lib;
   in {
-    packages = lib.genAttrs supportedSystem (buildSystem:
+    packages = lib.genAttrs supportedSystems (buildSystem:
       import ./nix/lace-blockchain-services/packages.nix { inherit inputs buildSystem; }
     );
 
@@ -48,18 +48,34 @@
 
     hydraJobs = {
       lace-blockchain-services-installer = {
-        x86_64-linux   = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer;
-        x86_64-darwin  = inputs.self.packages.x86_64-darwin.lace-blockchain-services-installer;
-        aarch64-darwin  = inputs.self.packages.aarch64-darwin.lace-blockchain-services-installer;
-        x86_64-windows = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer-x86_64-windows;
+        x86_64-linux   = self.packages.x86_64-linux.lace-blockchain-services-installer;
+        x86_64-darwin  = self.packages.x86_64-darwin.lace-blockchain-services-installer;
+        aarch64-darwin = self.packages.aarch64-darwin.lace-blockchain-services-installer;
+        x86_64-windows = self.packages.x86_64-linux.lace-blockchain-services-installer-x86_64-windows;
       };
 
-      required = inputs.nixpkgs.legacyPackages.x86_64-linux.releaseTools.aggregate {
+      required = nixpkgs.legacyPackages.x86_64-linux.releaseTools.aggregate {
         name = "github-required";
         meta.description = "All jobs required to pass CI";
-        constituents = __attrValues inputs.self.hydraJobs.lace-blockchain-services-installer;
+        constituents = lib.attrValues self.hydraJobs.lace-blockchain-services-installer;
       };
     };
-  };
 
+    devShells = lib.genAttrs supportedSystems (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in pkgs.mkShell {
+        buildInputs = [
+          pkgs.nodejs-18_x
+          pkgs.yarn
+        ];
+
+        shellHook = ''
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          export YARN_VERSION=3
+          echo "Development shell with Node.js 18 and Yarn 3 is ready"
+        '';
+      }
+    );
+  };
 }
