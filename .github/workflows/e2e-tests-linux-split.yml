@@ -51,6 +51,10 @@ jobs:
 #        run: |
 #          runCommand="rm -rf /tmp/.org.chromium.*"
 #          eval "$runCommand";
+    steps:
+      - name: Provision step # at least one step is required in a job
+        run: |
+          echo "Provisioning ${{ github.event.inputs.runner }}"
     outputs:
       runner: ${{ github.event.inputs.runner || 'self-hosted' }}
 
