@@ -39,21 +39,23 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  RUNNER: ${{ github.event.inputs.runner || 'self-hosted' }}
+#  RUNNER: ${{ github.event.inputs.runner || 'self-hosted' }}
 
 jobs:
   prereq:
-    runs-on: ${{ env.RUNNER }}
-    if: ${{ env.RUNNER == 'self-hosted' }}
-    steps:
-      - name: Deleting chrome tmp files
-        id: clean-chrome-tmp-files
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
+    runs-on: ubuntu-latest
+#    if: ${{ env.RUNNER == 'self-hosted' }}
+#    steps:
+#      - name: Deleting chrome tmp files
+#        id: clean-chrome-tmp-files
+#        run: |
+#          runCommand="rm -rf /tmp/.org.chromium.*"
+#          eval "$runCommand";
+    outputs:
+      runner: ${{ github.event.inputs.runner || 'self-hosted' }}
 
   tests-run-part-1:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     needs: prereq
     steps:
@@ -89,7 +91,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-2:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     needs: prereq
     steps:
@@ -125,7 +127,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-3:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     needs: prereq
     steps:
@@ -161,7 +163,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   tests-run-part-4:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     needs: prereq
     steps:
@@ -198,7 +200,7 @@ jobs:
 
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     steps:
       - name: Download reports from part 1
@@ -274,3 +276,9 @@ jobs:
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Deleting chrome tmp files
+        id: clean-chrome-tmp-files
+        if: ${{ needs.prereq.outputs.runner == 'self-hosted' }}
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";
