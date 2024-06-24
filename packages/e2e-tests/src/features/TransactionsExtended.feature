@@ -41,7 +41,7 @@ Feature: Transactions - Extended view
     When I navigate to Transactions extended page
     Then all transactions have icon, type of transaction, amount of tokens, value, and value in FIAT
 
-  @LW-2559 @Smoke @Testnet @Mainnet
+  @LW-2559 @Smoke @Testnet @Mainnet @Pending @issue=@LW-10788
   Scenario: Extended View - Transactions details - Folded
     Given I am on the Transactions section - Extended view
     When click on a transaction
