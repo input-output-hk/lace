@@ -44,6 +44,7 @@ export const typography = recipe({
       highlight: sx({ color: '$data_blue' }),
       success: sx({ color: '$data_green' }),
       error: sx({ color: '$data_pink' }),
+      warning: sx({ color: '$data_orange' }),
     },
   },
 });
