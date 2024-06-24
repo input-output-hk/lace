@@ -236,6 +236,7 @@ jobs:
           env=${NETWORK}
           browser=${BROWSER}
           platform=Linux
+          runner=${{ needs.prereq.outputs.runner }}
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
