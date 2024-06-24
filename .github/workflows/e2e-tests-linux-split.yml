@@ -77,7 +77,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch1 --cucumberOpts.tags='@Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -113,7 +113,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch2 --cucumberOpts.tags='@Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -149,7 +149,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch3 --cucumberOpts.tags='@Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -185,7 +185,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
