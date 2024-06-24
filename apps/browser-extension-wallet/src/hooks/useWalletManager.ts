@@ -34,6 +34,8 @@ import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import { KeyPurpose } from '@cardano-sdk/key-management/dist/cjs/types';
+import * as KeyManagement from '@cardano-sdk/key-management';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -44,6 +46,7 @@ export interface CreateWalletParams {
   mnemonic: string[];
   password: string;
   chainId?: Wallet.Cardano.ChainId;
+  isSharedWallet: boolean;
 }
 
 export interface CreateHardwareWallet {
@@ -450,6 +453,43 @@ export const useWalletManager = (): UseWalletManager => {
     [updateAppSettings, setCardanoWallet, setCurrentChain]
   );
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const generateSharedKeys = async ({
+    mnemonic,
+    password,
+    chainId = getCurrentChainId(),
+    isSharedWallet = false
+  }: CreateWalletParams): Promise<string> => {
+    const accountIndex = 0;
+    const passphrase = Buffer.from(password, 'utf8');
+    const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+      {
+        chainId,
+        getPassphrase: async () => passphrase,
+        mnemonicWords: mnemonic,
+        accountIndex,
+        purpose: isSharedWallet ? KeyPurpose.MULTI_SIG : KeyPurpose.STANDARD
+      },
+      {
+        bip32Ed25519: Wallet.bip32Ed25519,
+        logger
+      }
+    );
+
+    const pubKey1 = await keyAgent.derivePublicKey({
+      index: 0,
+      role: KeyManagement.KeyRole.Stake
+    });
+
+    const pubKey2 = (await keyAgent.derivePublicKey({
+      index: 0,
+      role: KeyManagement.KeyRole.External
+    })) as string;
+
+    return `${pubKey1},${pubKey2}`;
+  };
+
   /**
    * Creates or restores a new in-memory wallet with the cardano-js-sdk and saves it in wallet repository
    */
@@ -458,7 +498,8 @@ export const useWalletManager = (): UseWalletManager => {
       mnemonic,
       name,
       password,
-      chainId = getCurrentChainId()
+      chainId = getCurrentChainId(),
+      isSharedWallet = false
     }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
       const accountIndex = 0;
       const passphrase = Buffer.from(password, 'utf8');
@@ -467,7 +508,8 @@ export const useWalletManager = (): UseWalletManager => {
           chainId,
           getPassphrase: async () => passphrase,
           mnemonicWords: mnemonic,
-          accountIndex
+          accountIndex,
+          purpose: isSharedWallet ? KeyPurpose.MULTI_SIG : KeyPurpose.STANDARD
         },
         {
           bip32Ed25519: Wallet.bip32Ed25519,
@@ -491,7 +533,8 @@ export const useWalletManager = (): UseWalletManager => {
           {
             accountIndex,
             metadata: { name: defaultAccountName(accountIndex) },
-            extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+            extendedAccountPublicKey: keyAgent.extendedAccountPublicKey,
+            purpose: keyAgent.purpose
           }
         ],
         type: WalletType.InMemory
