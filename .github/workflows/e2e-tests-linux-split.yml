@@ -77,7 +77,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -113,7 +113,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -149,7 +149,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -185,7 +185,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
         run: |
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Accounts-Popup and @Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save tests results
         if: always()
@@ -195,7 +195,7 @@ jobs:
           path: ./packages/e2e-tests/reports/allure/results
 
   results-processing:
-    runs-on: ${{ needs.prereq.outputs.runner }}
+    runs-on: "${{ needs.prereq.outputs.runner }}"
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
     if: always()
     steps:
