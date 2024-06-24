@@ -97,6 +97,7 @@ func SetupTray(
 	// FIXME: this has to be done smarter
 	chMithrilStatus := make(chan t.ServiceStatus)
 	fixme_CardanoNodeStatus := make(chan string)
+	fixme_CardanoSubmitApiStatus := make(chan string)
 	fixme_OgmiosStatus := make(chan string)
 	fixme_PostgresStatus := make(chan string)
 	fixme_SetOgmiosDashboard := make(chan string)
@@ -113,6 +114,8 @@ func SetupTray(
 			switch upd.ServiceName {
 			case "cardano-node":
 				fixme_CardanoNodeStatus <- formatted
+			case "cardano-submit-api":
+				fixme_CardanoSubmitApiStatus <- formatted
 			case "ogmios":
 				fixme_OgmiosStatus <- formatted
 				fixme_SetOgmiosDashboard <- upd.Url
@@ -144,10 +147,11 @@ func SetupTray(
 
 	// XXX: this weird type because we want order, and there are no tuples:
 	statuses := []map[string](<-chan string) {
-		{ "cardano-node":    fixme_CardanoNodeStatus },
-		{ "ogmios":          fixme_OgmiosStatus },
-		{ "postgres":        fixme_PostgresStatus },
-		{ "provider-server": fixme_ProviderServerStatus },
+		{ "cardano-node":       fixme_CardanoNodeStatus },
+		{ "ogmios":             fixme_OgmiosStatus },
+		{ "cardano-submit-api": fixme_CardanoSubmitApiStatus },
+		{ "postgres":           fixme_PostgresStatus },
+		{ "provider-server":    fixme_ProviderServerStatus },
 	}
 
 	for _, statusItem := range statuses {

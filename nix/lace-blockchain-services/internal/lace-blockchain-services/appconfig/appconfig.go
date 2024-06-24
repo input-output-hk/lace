@@ -15,8 +15,9 @@ const (
 )
 
 type AppConfig struct {
-	ApiPort     int     `json:"apiPort"`
-	LastNetwork string  `json:"lastNetwork"`
+	ApiPort              int     `json:"apiPort"`
+	CardanoSubmitApiPort int     `json:"cardanoSubmitApiPort"`
+	LastNetwork          string  `json:"lastNetwork"`
 }
 
 func Load() AppConfig {
@@ -24,6 +25,7 @@ func Load() AppConfig {
 
 	defaults := AppConfig {
 		ApiPort: 52910,
+		CardanoSubmitApiPort: 52911,
 		LastNetwork: "mainnet",
 	}
 

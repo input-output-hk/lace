@@ -87,6 +87,13 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
+  cardano-submit-api = {
+    x86_64-linux = cardanoNodeFlake.hydraJobs.linux.musl.cardano-submit-api;
+    x86_64-windows = cardanoNodeFlake.hydraJobs.linux.windows.cardano-submit-api;
+    x86_64-darwin = cardanoNodeFlake.packages.x86_64-darwin.cardano-submit-api;
+    aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-submit-api;
+  }.${targetSystem};
+
   postgresPackage = {
     x86_64-linux = pkgs.postgresql_15_jit;
     x86_64-darwin = pkgs.postgresql_15_jit;

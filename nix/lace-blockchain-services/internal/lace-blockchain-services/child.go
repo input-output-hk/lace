@@ -14,6 +14,7 @@ import (
 
 	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
+	"lace.io/lace-blockchain-services/appconfig"
 
 	"github.com/creack/pty"
 	"github.com/acarl005/stripansi"
@@ -56,13 +57,15 @@ type SharedState struct {
 	Network string
 	SyncProgress *float64  // XXX: we take that from Ogmios, we should probably calculate ourselves?
 	CardanoNodeConfigDir string
+	CardanoSubmitApiConfigDir string
 	CardanoNodeSocket string
+	CardanoSubmitApiPort *int
 	OgmiosPort *int
 	PostgresPort *int
 	PostgresPassword *string
 }
 
-func manageChildren(comm CommChannels_Manager) {
+func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 	sep := string(filepath.Separator)
 
 	network := <-comm.NetworkSwitch
@@ -100,7 +103,9 @@ func manageChildren(comm CommChannels_Manager) {
 			Network: network,
 			SyncProgress: &[]float64{ -1.0 }[0],  // wat
 			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-node",
+			CardanoSubmitApiConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-submit-api",
 			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "cardano-node.socket",
+			CardanoSubmitApiPort: new(int),
 			OgmiosPort: new(int),
 			PostgresPort: new(int),
 			PostgresPassword: new(string),
@@ -126,6 +131,7 @@ func manageChildren(comm CommChannels_Manager) {
 		if !runMithril {
 			usedChildren = append(usedChildren, childCardanoNode)
 			usedChildren = append(usedChildren, childOgmios(ogmiosSyncProgressCh))
+			usedChildren = append(usedChildren, childCardanoSubmitApi(appConfig))
 			usedChildren = append(usedChildren, childPostgres)
 			if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
 		} else {

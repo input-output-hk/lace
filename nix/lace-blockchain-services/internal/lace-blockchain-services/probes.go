@@ -36,14 +36,18 @@ func probeUnixSocket(path string, timeout time.Duration) error {
 }
 
 func probeHttp200(url string, timeout time.Duration) error {
+	return probeHttpFor(http.StatusOK, url, timeout)
+}
+
+func probeHttpFor(expectedStatus int, url string, timeout time.Duration) error {
 	httpClient := http.Client{Timeout: timeout}
 	resp, err := httpClient.Get(url)
 	if err == nil {
 		defer resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
+		if resp.StatusCode == expectedStatus {
 			return nil
 		} else {
-			return fmt.Errorf("got a non-200 response: %s for %s", resp.StatusCode, url)
+			return fmt.Errorf("got a non-%d response: %s for %s", expectedStatus, resp.StatusCode, url)
 		}
 	}
 	return err
