@@ -1,7 +1,9 @@
 import { Button } from '@lace/common';
 import { ActionCard, Box, Divider, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
-import { LayoutNavigationProps, SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
+import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
+import { creationTimelineSteps } from '../timelineSteps';
+import { SharedWalletCreationStep } from '../types';
 import { ReactComponent as DownloadFileIcon } from './download-file.svg';
 import styles from './ShareWalletDetails.module.scss';
 import { downloadWalletData } from './utils';
@@ -30,7 +32,8 @@ export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Eleme
       title={translations.title}
       description={translations.subtitle}
       onNext={onNext}
-      currentTimelineStep={SharedWalletTimelineSteps.WALLET_DETAILS}
+      timelineSteps={creationTimelineSteps}
+      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
       customNextLabel={translations.next}
     >
       <Box mt="$12">

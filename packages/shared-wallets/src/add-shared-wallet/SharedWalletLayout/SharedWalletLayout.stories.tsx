@@ -22,6 +22,11 @@ export const SharedWalletLayoutComponent: Story = {
       </>
     ),
     description: 'You can also specify description',
+    timelineCurrentStep: 'step1',
+    timelineSteps: [
+      { key: 'step1', name: 'First step' },
+      { key: 'step2', name: 'Second step' },
+    ],
     title: 'This is the title',
   },
 };

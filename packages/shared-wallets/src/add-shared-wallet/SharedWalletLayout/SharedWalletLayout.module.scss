@@ -1,5 +1,5 @@
-@import '../../../../../common/src/ui/styles/abstracts/mixins';
-@import '../../../../../common/src/ui/styles/theme.scss';
+@import '../../../../common/src/ui/styles/abstracts/mixins';
+@import '../../../../common/src/ui/styles/theme.scss';
 
 .root {
   overflow: hidden;
@@ -7,6 +7,7 @@
 
 .timeline {
   width: 204px;
+  height: 100%;
   border-right: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
   margin: 0 0 0 40px !important;
   min-width: 200px;
@@ -28,4 +29,8 @@
 .scrollBar {
   padding: 0;
   right: -25px !important;
+}
+
+.loadingIcon {
+  @include spin-animation();
 }
