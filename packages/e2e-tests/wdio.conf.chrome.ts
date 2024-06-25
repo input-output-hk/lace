@@ -23,7 +23,7 @@ const chromeConfig = {
           '--allow-insecure-localhost',
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
-          '--disable-dev-shm-usage',
+          // '--disable-dev-shm-usage',
           '--remote-allow-origins=*'
         ]
       },
