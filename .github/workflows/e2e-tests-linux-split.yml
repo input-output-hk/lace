@@ -70,7 +70,7 @@ jobs:
         run: |
           Xvfb :99 &
       - name: Start Chrome driver
-        working-directory: /usr/local/share/chrome_driver
+        working-directory: /usr/local/share/chromedriver-linux64
         run: |
           if [ ${BROWSER} == "chrome" ]; then
             ./chromedriver -port=4444 &
@@ -122,6 +122,22 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
+      - name: Start Chrome driver
+        working-directory: /usr/local/share/chromedriver-linux64
+        run: |
+          if [ ${BROWSER} == "chrome" ]; then
+            ./chromedriver -port=4444 &
+          else
+            echo "Skipping start of ChromeDriver"
+          fi
+      - name: Start Edge driver
+        working-directory: /usr/local/share/edge_driver
+        run: |
+          if [ ${BROWSER} == "edge" ]; then
+            ./msedgedriver -port=4444 &
+          else
+            echo "Skipping start of EdgeDriver"
+          fi
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests
@@ -158,6 +174,22 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
+      - name: Start Chrome driver
+        working-directory: /usr/local/share/chromedriver-linux64
+        run: |
+          if [ ${BROWSER} == "chrome" ]; then
+            ./chromedriver -port=4444 &
+          else
+            echo "Skipping start of ChromeDriver"
+          fi
+      - name: Start Edge driver
+        working-directory: /usr/local/share/edge_driver
+        run: |
+          if [ ${BROWSER} == "edge" ]; then
+            ./msedgedriver -port=4444 &
+          else
+            echo "Skipping start of EdgeDriver"
+          fi
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests
@@ -194,6 +226,22 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
+      - name: Start Chrome driver
+        working-directory: /usr/local/share/chromedriver-linux64
+        run: |
+          if [ ${BROWSER} == "chrome" ]; then
+            ./chromedriver -port=4444 &
+          else
+            echo "Skipping start of ChromeDriver"
+          fi
+      - name: Start Edge driver
+        working-directory: /usr/local/share/edge_driver
+        run: |
+          if [ ${BROWSER} == "edge" ]; then
+            ./msedgedriver -port=4444 &
+          else
+            echo "Skipping start of EdgeDriver"
+          fi
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests
