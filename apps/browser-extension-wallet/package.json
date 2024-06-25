@@ -1,6 +1,6 @@
 {
   "name": "@lace/browser-extension-wallet",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "description": "A fully capable wallet packaged as browser extensions for Chrome, Firefox, and Edge",
   "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
   "bugs": {
@@ -53,6 +53,7 @@
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
+    "@lace/icons": "workspace:^",
     "@lace/shared-wallets": "workspace:^",
     "@lace/staking": "0.1.0",
     "@lace/translation": "0.1.0",

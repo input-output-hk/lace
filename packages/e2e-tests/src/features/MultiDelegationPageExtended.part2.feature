@@ -77,3 +77,36 @@ Feature: Staking Page - Extended View
       | Pledge          | Pledge     | descending    | ascending      |
       | Live Stake      | Live Stake | descending    | ascending      |
       | Ticker          | Ticker     | ascending     | descending     |
+
+  @LW-10140 @Testnet @Mainnet
+  Scenario: Extended View - Staking - Grid View - Stake pool cards sorting by ticker (default)
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to grid view on "Browse pools" tab
+    Then stake pool grid view is displayed
+    And stake pool cards are sorted by "Ticker" in ascending order
+
+  @LW-10146 @LW-10240 @Testnet @Mainnet
+  Scenario Outline: Extended View - Staking - Grid View - More options - Sorting - sort stake pools by <option> <order>
+    When I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to grid view on "Browse pools" tab
+    And I select "<option>" sorting option from "More options" component
+    Then order button is displayed for "<option>" sorting option in <default_order> state
+    And stake pool cards are sorted by "<option>" in <default_order> order
+    When I select <modified_order> order for "<option>" sorting option
+    Then order button is displayed for "<option>" sorting option in <modified_order> state
+    And stake pool cards are sorted by "<option>" in <modified_order> order
+    When I select <default_order> order for "<option>" sorting option
+    Then order button is displayed for "<option>" sorting option in <default_order> state
+    And stake pool cards are sorted by "<option>" in <default_order> order
+    Examples:
+      | option          | default_order | modified_order |
+      | Saturation      | descending    | ascending      |
+#      | ROS             | descending    | ascending      | # TODO: Uncomment when USE_ROS_STAKING_COLUMN=true
+      | Cost            | ascending     | descending     |
+      | Margin          | ascending     | descending     |
+      | Produced blocks | descending    | ascending      |
+      | Pledge          | descending    | ascending      |
+      | Live Stake      | descending    | ascending      |
+      | Ticker          | ascending     | descending     |

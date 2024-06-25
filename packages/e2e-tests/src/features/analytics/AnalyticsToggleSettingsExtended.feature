@@ -1,4 +1,4 @@
-@Settings-Extended @Analytics
+@Settings-Extended @Analytics @Testnet
 Feature: Analytics - Settings Toggle - Extended View
 
   Background:

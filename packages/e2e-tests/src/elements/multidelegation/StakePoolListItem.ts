@@ -14,7 +14,7 @@ export class StakePoolListItem {
   private PLEDGE = '[data-testid="stake-pool-list-pledge"]';
   private LIVE_STAKE = '[data-testid="stake-pool-list-liveStake"]';
 
-  protected listItem;
+  protected listItem: ChainablePromiseElement<WebdriverIO.Element | undefined>;
 
   constructor(index = 0, isOnSelectedPoolsList = false) {
     this.listItem = $(

@@ -1,0 +1,280 @@
+name: E2E Tests Linux split
+
+on:
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to use'
+        required: true
+        default: 'chrome'
+        type: choice
+        options:
+          - chrome
+          - edge
+      network:
+        type: choice
+        description: network to use
+        options:
+          - preprod
+          - mainnet
+      runner:
+        type: choice
+        required: true
+        default: 'self-hosted'
+        description: runner to use
+        options:
+          - self-hosted
+          - ubuntu-22.04
+          - ubuntu-20.04
+
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
+
+env:
+  BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
+  NETWORK: ${{ github.event.inputs.network || 'preprod' }}
+  RUN: ${{ github.run_number }}
+  DISPLAY: ':99.0'
+  NODE_OPTIONS: --max-old-space-size=16384
+  BRANCH: ${{ github.ref_name }}
+
+jobs:
+  prereq:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Provision step
+        run: |
+          echo "Provisioning ${{ github.event.inputs.runner }}"
+    outputs:
+      runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
+
+  tests-run-part-1:
+    runs-on: ${{ needs.prereq.outputs.runner }}
+    if: always()
+    needs: prereq
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
+      - name: Execute E2E tests
+        id: e2e-tests
+        working-directory: ./packages/e2e-tests
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          ENV: ${{ env.NETWORK }}
+        run: |
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch1 --cucumberOpts.tags='@Testnet and not @Pending'"
+          eval "$runCommand";
+      - name: Save tests results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-run-part-1-results
+          path: ./packages/e2e-tests/reports/allure/results
+
+  tests-run-part-2:
+    runs-on: ${{ needs.prereq.outputs.runner }}
+    if: always()
+    needs: prereq
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
+      - name: Execute E2E tests
+        id: e2e-tests
+        working-directory: ./packages/e2e-tests
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          ENV: ${{ env.NETWORK }}
+        run: |
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch2 --cucumberOpts.tags='@Testnet and not @Pending'"
+          eval "$runCommand";
+      - name: Save tests results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-run-part-2-results
+          path: ./packages/e2e-tests/reports/allure/results
+
+  tests-run-part-3:
+    runs-on: ${{ needs.prereq.outputs.runner }}
+    if: always()
+    needs: prereq
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
+      - name: Execute E2E tests
+        id: e2e-tests
+        working-directory: ./packages/e2e-tests
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          ENV: ${{ env.NETWORK }}
+        run: |
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch3 --cucumberOpts.tags='@Testnet and not @Pending'"
+          eval "$runCommand";
+      - name: Save tests results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-run-part-3-results
+          path: ./packages/e2e-tests/reports/allure/results
+
+  tests-run-part-4:
+    runs-on: ${{ needs.prereq.outputs.runner }}
+    if: always()
+    needs: prereq
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
+      - name: Execute E2E tests
+        id: e2e-tests
+        working-directory: ./packages/e2e-tests
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          ENV: ${{ env.NETWORK }}
+        run: |
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Testnet and not @Pending'"
+          eval "$runCommand";
+      - name: Save tests results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-run-part-4-results
+          path: ./packages/e2e-tests/reports/allure/results
+
+  results-processing:
+    needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
+    runs-on: 'self-hosted'
+    if: always()
+    steps:
+      - name: Download reports from part 1
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-1-results
+          path: ./tests-run-part-1-results
+      - name: Download reports from part 2
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-2-results
+          path: ./tests-run-part-2-results
+      - name: Download reports from part 3
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-3-results
+          path: ./tests-run-part-3-results
+      - name: Download reports from part 4
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-run-part-4-results
+          path: ./tests-run-part-4-results
+      - name: Copy allure results
+        if: always()
+        run: |
+          mkdir -p ./allure/results
+          cp -r ./tests-run-part-1-results/* ./allure/results
+          cp -r ./tests-run-part-2-results/* ./allure/results
+          cp -r ./tests-run-part-3-results/* ./allure/results
+          cp -r ./tests-run-part-4-results/* ./allure/results
+      - name: Create allure properties
+        if: success()
+        working-directory: './allure/results'
+        run: |
+          echo "
+          branch=${BRANCH}
+          env=${NETWORK}
+          browser=${BROWSER}
+          platform=Linux
+          " > environment.properties
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.6.0
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'all/linux/${BROWSER}/${RUN}'
+          copyLatest: true
+          ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+      - name: Add link to summary
+        run: |
+          echo "TEST RESULTS:"
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
+      - name: Publish artifacts (logs, reports, screenshots)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            ./allure
+          retention-days: 10
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2.3.0
+        if: success()
+        env:
+          SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
+          SLACK_ICON_EMOJI: ':lace:'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+          SLACK_TITLE: 'Test automation results :rocket:'
+          SLACK_USERNAME: lace-qa-bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Deleting chrome tmp files
+        id: clean-chrome-tmp-files
+        if: ${{ needs.prereq.outputs.runner == 'self-hosted' }}
+        run: |
+          runCommand="rm -rf /tmp/.org.chromium.*"
+          eval "$runCommand";

@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
 import { AssetInputListProps, AssetInputProps } from '@lace/core';
 import {
@@ -11,7 +12,6 @@ import {
 } from '../../../store';
 import { COIN_SELECTION_ERRORS, getErrorMessage } from '@hooks/useInitializeTx';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
-import { useMaxAda } from '@hooks/useMaxAda';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
 import { useCurrencyStore } from '@providers/currency';
@@ -39,6 +39,7 @@ export interface UseSelectedCoinsProps {
   coinBalance: string;
   insufficientBalanceInputs?: Array<string>;
   openAssetPicker?: (id: string) => void;
+  spendableCoin: bigint;
 }
 
 export interface SelectedCoins {
@@ -54,7 +55,8 @@ export const useSelectedCoins = ({
   coinBalance,
   insufficientBalanceInputs,
   openAssetPicker,
-  bundleId
+  bundleId,
+  spendableCoin
 }: UseSelectedCoinsProps): SelectedCoins => {
   const { t } = useTranslation();
   const { priceResult: prices } = useFetchCoinPrice();
@@ -66,8 +68,6 @@ export const useSelectedCoins = ({
   const { address } = useAddressState(bundleId);
   const { builtTxData: { error: builtTxError } = {} } = useBuiltTxState();
   const tokensUsed = useSpentBalances();
-  // Max spendable ADA in lovelaces
-  const spendableCoin = useMaxAda();
   const currentCoinToChange = useCurrentCoinIdToChange();
   const { setLastFocusedInput } = useLastFocusedInput();
   // TODO: change "rows" for "bundleIds" in the send transaction store [LW-7353]
@@ -157,6 +157,10 @@ export const useSelectedCoins = ({
       compactValue: assetInputItem.compactValue || compactNumberWithUnit(assetInputItem.value),
       value: assetInputItem.value,
       hasMaxBtn: true,
+      displayMaxBtn:
+        assetInputItem.id === cardanoCoin.id &&
+        error === COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR &&
+        spendableCoin > 0,
       invalid: !!error,
       error,
       onBlurErrors: new Set([COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY]),
@@ -168,7 +172,7 @@ export const useSelectedCoins = ({
 
     // Asset is cardano coin
     if (assetInputItem.id === cardanoCoin.id) {
-      const { availableADA, ...adaCoinProps } = getADACoinProperties(
+      const { availableADA, hasReachedMaxAmount, ...adaCoinProps } = getADACoinProperties(
         coinBalance,
         spendableCoin?.toString(),
         tokensUsed[cardanoCoin.id] || '0',
@@ -181,6 +185,7 @@ export const useSelectedCoins = ({
       return {
         ...commonCoinProps,
         ...adaCoinProps,
+        hasReachedMaxAmount: hasReachedMaxAmount && error !== COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR,
         coin: {
           id: cardanoCoin.id,
           ticker: cardanoCoin.symbol,

@@ -13,6 +13,7 @@ import { StakePoolGridCard } from './StakePoolGridCard';
 import StakePoolDetailsDrawer from './StakePoolDetailsDrawer';
 import MoreOptionsComponent from './MoreOptionsComponent';
 import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
+import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
 
 class MultidelegationPage {
   private ACTIVITY_TAB = '[data-testid="activity-tab"]';
@@ -76,6 +77,7 @@ class MultidelegationPage {
   private SELECTED_STAKE_POOLS_IN_GRID_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-card"]';
   private SELECTED_STAKE_POOLS_IN_LIST_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-item"]';
   private POOLS_COUNTER = '[data-testid="pools-counter"]';
+  private POOL_CARD = '[data-testid="stake-pool-card"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -163,6 +165,10 @@ class MultidelegationPage {
 
   get displayedPools() {
     return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_ITEM);
+  }
+
+  get displayedCards() {
+    return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_CARD);
   }
 
   get columnHeaderTicker() {
@@ -654,6 +660,46 @@ class MultidelegationPage {
     }
 
     return columnContent;
+  }
+
+  async extractGridContent(sortingOption: StakePoolSortingOption, poolLimit = 100): Promise<string[]> {
+    const gridContent: string[] = [];
+
+    await this.gridContainer.waitForStable();
+    await browser.pause(500);
+
+    for (let i = 0; i < poolLimit; i++) {
+      const displayedPoolsCounter = await this.displayedCards.length;
+      const card = new StakePoolGridCard(i);
+      // Load more pools if all visible ones were processed
+      if (i % (displayedPoolsCounter - 3) === 0) {
+        await card.container.scrollIntoView();
+        await this.stakePoolCardSkeleton.waitForExist({
+          reverse: true,
+          interval: 100,
+          timeout: 30_000
+        });
+      }
+
+      switch (sortingOption) {
+        case StakePoolSortingOption.Ticker:
+          gridContent.push(await card.title.getText());
+          break;
+        case StakePoolSortingOption.Saturation:
+          gridContent.push(await card.saturation.getText());
+          break;
+        case StakePoolSortingOption.Cost:
+        case StakePoolSortingOption.Margin:
+        case StakePoolSortingOption.ProducedBlocks:
+        case StakePoolSortingOption.Pledge:
+        case StakePoolSortingOption.LiveStake:
+          gridContent.push(await card.metricValue.getText());
+          break;
+        default:
+          throw new Error(`Not supported sorting option: ${sortingOption}`);
+      }
+    }
+    return gridContent;
   }
 }
 

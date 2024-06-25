@@ -86,6 +86,7 @@ const colors: TypographyVariants['color'][] = [
   'error',
   'success',
   'accent',
+  'warning',
 ];
 
 export const Overview = (): JSX.Element => (
