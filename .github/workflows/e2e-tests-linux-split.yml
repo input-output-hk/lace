@@ -145,6 +145,7 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          STANDALONE_DRIVER: true
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch2 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
@@ -197,6 +198,7 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          STANDALONE_DRIVER: true
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch3 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
@@ -249,6 +251,7 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          STANDALONE_DRIVER: true
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
