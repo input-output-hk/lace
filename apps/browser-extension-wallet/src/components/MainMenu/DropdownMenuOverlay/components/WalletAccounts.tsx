@@ -139,7 +139,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       accountIndex,
       state: 'error'
     });
-  }, []);
+  }, [enableAccountHWSigningDialog]);
 
   const unlockHWAccount = useCallback(
     async (accountIndex: number) => {
