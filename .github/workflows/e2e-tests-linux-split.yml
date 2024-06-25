@@ -69,6 +69,22 @@ jobs:
       - name: Start XVFB
         run: |
           Xvfb :99 &
+      - name: Start Chrome driver
+        working-directory: /usr/local/share/chrome_driver
+        run: |
+          if [ ${BROWSER} == "chrome" ]; then
+            ./chromedriver -port=4444 &
+          else
+            echo "Skipping start of ChromeDriver"
+          fi
+      - name: Start Edge driver
+        working-directory: /usr/local/share/edge_driver
+        run: |
+          if [ ${BROWSER} == "edge" ]; then
+            ./msedgedriver -port=4444 &
+          else
+            echo "Skipping start of EdgeDriver"
+          fi
       - name: Execute E2E tests
         id: e2e-tests
         working-directory: ./packages/e2e-tests
@@ -76,6 +92,7 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          STANDALONE_DRIVER: true
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch1 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
