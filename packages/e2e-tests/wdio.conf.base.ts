@@ -14,8 +14,13 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionSimplePopup*.feature',
       './src/features/SettingsPageExtended.feature'
     ],
-    batch2: ['./src/features/analytics/Analytics*.feature', './src/features/e2e/*.feature'],
+    batch2: [
+      './src/features/DAppConnector*.feature',
+      './src/features/analytics/Analytics*.feature',
+      './src/features/e2e/*.feature'
+    ],
     batch3: [
+      './src/features/AdaHandle*.feature',
       './src/features/AddressBookExtended.feature',
       './src/features/AddressBookPopup.feature',
       './src/features/Collateral*.feature',
@@ -24,8 +29,6 @@ export const config: WebdriverIO.Config = {
       './src/features/Transactions*.feature'
     ],
     batch4: [
-      './src/features/AdaHandle*.feature',
-      './src/features/DAppConnector*.feature',
       './src/features/EmptyStates*.feature',
       './src/features/FiatOnRampOffRampBanxa*.feature',
       './src/features/ForgotPassword.feature',
