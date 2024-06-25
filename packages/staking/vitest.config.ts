@@ -1,4 +1,8 @@
-// @ts-expect-error no need to add typings for the shared vitest.config
-import config from '@lace/configs/vitest.config';
+const { defineConfig } = require('vitest/config');
 
-export default config;
+module.exports = defineConfig({
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+  },
+});

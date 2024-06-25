@@ -1,5 +1,5 @@
 module.exports = {
-  extends: [require('@lace/configs').laceEslintConfigPath],
+  extends: ['./eslint.base.js'],
   overrides: [
     {
       files: ['.eslintrc.cjs'],

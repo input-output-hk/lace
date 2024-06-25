@@ -1,4 +1,6 @@
 module.exports = {
-  ...require('@lace/configs/.prettierrc.js'),
+  arrowParens: 'always',
+  printWidth: 120,
+  singleQuote: true,
   trailingComma: 'es5',
 };
