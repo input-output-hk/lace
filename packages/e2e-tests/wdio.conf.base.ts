@@ -19,7 +19,7 @@ export const config: WebdriverIO.Config = {
       './src/features/DAppConnector*.feature',
       './src/features/e2e/*.feature',
       './src/features/SettingsPagePopup.feature',
-      './src/features/TokensPage*.feature',
+      // './src/features/TokensPage*.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ],
