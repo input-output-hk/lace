@@ -2,7 +2,9 @@ import { addEllipsis } from '@lace/common';
 import { Box, FlowCard, ProfileDropdown, Text } from '@lace/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutNavigationProps, SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
+import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
+import { creationTimelineSteps } from '../timelineSteps';
+import { SharedWalletCreationStep } from '../types';
 import styles from './SetupSharedWallet.module.scss';
 import { WalletNameInput } from './WalletNameInput';
 
@@ -68,7 +70,8 @@ export const SetupSharedWallet = ({
       onBack={onBack}
       onNext={onNext}
       isNextEnabled={!walletNameErrorMessage}
-      currentTimelineStep={SharedWalletTimelineSteps.WALLET_NAME}
+      timelineSteps={creationTimelineSteps}
+      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
     >
       <WalletNameInput
         value={walletName}
