@@ -57,6 +57,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -92,7 +94,7 @@ jobs:
         if: always()
         working-directory: ./packages/e2e-tests
         run: |
-          dmesg > ./dmesg.log
+          sudo dmesg > ./dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -103,7 +105,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs
+          name: test-logs-1
           path: |
             ./packages/e2e-tests/chromedriver.log
             ./packages/e2e-tests/dmesg.log
@@ -151,7 +153,7 @@ jobs:
         if: always()
         working-directory: ./packages/e2e-tests
         run: |
-          dmesg > ./dmesg.log
+          sudo dmesg > ./dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -162,7 +164,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs
+          name: test-logs-2
           path: |
             ./packages/e2e-tests/chromedriver.log
             ./packages/e2e-tests/dmesg.log
@@ -210,7 +212,7 @@ jobs:
         if: always()
         working-directory: ./packages/e2e-tests
         run: |
-          dmesg > ./dmesg.log
+          sudo dmesg > ./dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -221,7 +223,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs
+          name: test-logs-3
           path: |
             ./packages/e2e-tests/chromedriver.log
             ./packages/e2e-tests/dmesg.log
@@ -269,7 +271,7 @@ jobs:
         if: always()
         working-directory: ./packages/e2e-tests
         run: |
-          dmesg > ./dmesg.log
+          sudo dmesg > ./dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -280,7 +282,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs
+          name: test-logs-4
           path: |
             ./packages/e2e-tests/chromedriver.log
             ./packages/e2e-tests/dmesg.log
