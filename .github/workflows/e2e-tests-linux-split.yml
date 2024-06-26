@@ -73,7 +73,7 @@ jobs:
         working-directory: ./packages/e2e-tests
         run: |
           if [ ${BROWSER} == "chrome" ]; then
-            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./packages/e2e-tests/reports/allure/results/chromedriver.log -port=4444 &
+            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./reports/allure/results/chromedriver.log -port=4444 &
           else
             echo "Skipping start of ChromeDriver"
           fi
@@ -88,6 +88,10 @@ jobs:
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch1 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
+      - name: Save dmesg logs
+        working-directory: ./packages/e2e-tests
+        run: |
+          dmesg > ./reports/allure/results/dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -118,7 +122,7 @@ jobs:
         working-directory: ./packages/e2e-tests
         run: |
           if [ ${BROWSER} == "chrome" ]; then
-            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./packages/e2e-tests/reports/allure/results/chromedriver.log -port=4444 &
+            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./reports/allure/results/chromedriver.log -port=4444 &
           else
             echo "Skipping start of ChromeDriver"
           fi
@@ -133,6 +137,10 @@ jobs:
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch2 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
+      - name: Save dmesg logs
+        working-directory: ./packages/e2e-tests
+        run: |
+          dmesg > ./reports/allure/results/dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -163,7 +171,7 @@ jobs:
         working-directory: ./packages/e2e-tests
         run: |
           if [ ${BROWSER} == "chrome" ]; then
-            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./packages/e2e-tests/reports/allure/results/chromedriver.log -port=4444 &
+            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./reports/allure/results/chromedriver.log -port=4444 &
           else
             echo "Skipping start of ChromeDriver"
           fi
@@ -178,6 +186,10 @@ jobs:
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch3 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
+      - name: Save dmesg logs
+        working-directory: ./packages/e2e-tests
+        run: |
+          dmesg > ./reports/allure/results/dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
@@ -208,7 +220,7 @@ jobs:
         working-directory: ./packages/e2e-tests
         run: |
           if [ ${BROWSER} == "chrome" ]; then
-            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./packages/e2e-tests/reports/allure/results/chromedriver.log -port=4444 &
+            /usr/local/share/chromedriver-linux64/chromedriver -log-path=./reports/allure/results/chromedriver.log -port=4444 &
           else
             echo "Skipping start of ChromeDriver"
           fi
@@ -223,6 +235,10 @@ jobs:
         run: |
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
+      - name: Save dmesg logs
+        working-directory: ./packages/e2e-tests
+        run: |
+          dmesg > ./reports/allure/results/dmesg.log
       - name: Save tests results
         if: always()
         uses: actions/upload-artifact@v4
