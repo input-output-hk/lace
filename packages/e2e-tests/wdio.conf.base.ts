@@ -4,7 +4,7 @@ import extensionUtils from './src/utils/utils';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
-  specs: ['./src/features/**/*.feature'],
+  specs: [['./src/features/**/*.feature']],
   suites: {
     batch1: [
       './src/features/governance/CIP95StaticMethods.feature',
@@ -15,9 +15,12 @@ export const config: WebdriverIO.Config = {
       './src/features/SettingsPageExtended.feature'
     ],
     batch2: [
-      './src/features/DAppConnector*.feature',
       './src/features/analytics/Analytics*.feature',
-      './src/features/e2e/*.feature'
+      './src/features/DAppConnector*.feature',
+      './src/features/e2e/*.feature',
+      // './src/features/TokensPage*.feature',
+      './src/features/Trezor/Trezor.feature',
+      './src/features/WalletAccounts*.feature'
     ],
     batch3: [
       './src/features/AdaHandle*.feature',
@@ -44,10 +47,7 @@ export const config: WebdriverIO.Config = {
       './src/features/OwnTags*.feature',
       './src/features/SendTransactionMetadata*.feature',
       './src/features/SendTransactionMultipleSelection*.feature',
-      './src/features/SettingsPagePopup.feature',
-      './src/features/TokensPage*.feature',
-      './src/features/Trezor/Trezor.feature',
-      './src/features/WalletAccounts*.feature'
+      './src/features/SettingsPagePopup.feature'
     ]
   },
   automationProtocol: 'webdriver',
