@@ -89,6 +89,7 @@ jobs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch1 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save dmesg logs
+        if: always()
         working-directory: ./packages/e2e-tests
         run: |
           dmesg > ./dmesg.log
@@ -99,6 +100,7 @@ jobs:
           name: tests-run-part-1-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Publish chromedriver and dmesg logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-logs
@@ -146,6 +148,7 @@ jobs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch2 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save dmesg logs
+        if: always()
         working-directory: ./packages/e2e-tests
         run: |
           dmesg > ./dmesg.log
@@ -156,6 +159,7 @@ jobs:
           name: tests-run-part-2-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Publish chromedriver and dmesg logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-logs
@@ -203,6 +207,7 @@ jobs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch3 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save dmesg logs
+        if: always()
         working-directory: ./packages/e2e-tests
         run: |
           dmesg > ./dmesg.log
@@ -213,6 +218,7 @@ jobs:
           name: tests-run-part-3-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Publish chromedriver and dmesg logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-logs
@@ -260,6 +266,7 @@ jobs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch4 --cucumberOpts.tags='@Testnet and not @Pending'"
           eval "$runCommand";
       - name: Save dmesg logs
+        if: always()
         working-directory: ./packages/e2e-tests
         run: |
           dmesg > ./dmesg.log
@@ -270,6 +277,7 @@ jobs:
           name: tests-run-part-4-results
           path: ./packages/e2e-tests/reports/allure/results
       - name: Publish chromedriver and dmesg logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-logs
