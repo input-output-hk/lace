@@ -123,11 +123,7 @@ class TransactionsDetailsAssert {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
-      if (
-        !txType.includes(stakeKeyRegistration) &&
-        !txType.includes('Rewards') &&
-        !txType.includes('Stake Key De-registration')
-      ) {
+      if ([stakeKeyRegistration, 'Rewards', 'Stake Key De-registration'].every((type) => !txType.includes(type))) {
         await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
       }
