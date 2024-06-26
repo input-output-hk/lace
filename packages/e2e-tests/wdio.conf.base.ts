@@ -18,7 +18,8 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/Analytics*.feature',
       './src/features/DAppConnector*.feature',
       './src/features/e2e/*.feature',
-      // './src/features/TokensPage*.feature',
+      './src/features/SettingsPagePopup.feature',
+      './src/features/TokensPage*.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ],
@@ -29,7 +30,9 @@ export const config: WebdriverIO.Config = {
       './src/features/Collateral*.feature',
       './src/features/NFTsFolders*.feature',
       './src/features/SendTransactionBundlesExtended.feature',
-      './src/features/Transactions*.feature'
+      './src/features/Transactions*.feature',
+      './src/features/NFTsExtended.feature',
+      './src/features/NFTsPopup.feature'
     ],
     batch4: [
       './src/features/EmptyStates*.feature',
@@ -42,12 +45,9 @@ export const config: WebdriverIO.Config = {
       './src/features/MultiDelegationPagePopup.feature',
       './src/features/Navigation*.feature',
       './src/features/NetworkSwitching*.feature',
-      './src/features/NFTsExtended.feature',
-      './src/features/NFTsPopup.feature',
       './src/features/OwnTags*.feature',
       './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature',
-      './src/features/SettingsPagePopup.feature'
+      './src/features/SendTransactionMultipleSelection*.feature'
     ]
   },
   automationProtocol: 'webdriver',
