@@ -21,6 +21,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 	libexecDir := ourpaths.LibexecDir + sep + "postgres" + sep + "bin"
 	dataDir := ourpaths.WorkDir + sep + shared.Network + sep + "postgres"
 	pwFile := dataDir + sep + "pg_stat_temp_5472"
+	pidFile := dataDir + sep + "postmaster.pid"
 
 	// Make it a little harder to break local Postgres state (esp. subtly). If you work around this,
 	// you claim to know what you’re doing, and you’re on your own.
@@ -40,6 +41,8 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 		Revision: constants.PostgresRevision,
 		MkArgv: func() ([]string, error) {
 			*shared.PostgresPort = getFreeTCPPort()
+
+			os.Remove(pidFile)  // arguable, but… useful in case of a power failure, we should talk about it
 
 			_, err := os.Stat(pwFile)
 			needsInitDb = err != nil
