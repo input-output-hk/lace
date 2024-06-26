@@ -34,7 +34,7 @@ import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
-import { KeyPurpose } from '@cardano-sdk/key-management/dist/cjs/types';
+import { KeyPurpose } from '@cardano-sdk/key-management';
 import * as KeyManagement from '@cardano-sdk/key-management';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
@@ -46,7 +46,12 @@ export interface CreateWalletParams {
   mnemonic: string[];
   password: string;
   chainId?: Wallet.Cardano.ChainId;
-  isSharedWallet: boolean;
+  isSharedWallet?: boolean;
+}
+
+export interface GenerateSharedKeysParams {
+  password: string;
+  chainId?: Wallet.Cardano.ChainId;
 }
 
 export interface CreateHardwareWallet {
@@ -83,6 +88,7 @@ export interface UseWalletManager {
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
+  generateSharedKeys: (args: GenerateSharedKeysParams) => Promise<string>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   createHardwareWalletRevamped: CreateHardwareWalletRevamped;
@@ -453,43 +459,6 @@ export const useWalletManager = (): UseWalletManager => {
     [updateAppSettings, setCardanoWallet, setCurrentChain]
   );
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const generateSharedKeys = async ({
-    mnemonic,
-    password,
-    chainId = getCurrentChainId(),
-    isSharedWallet = false
-  }: CreateWalletParams): Promise<string> => {
-    const accountIndex = 0;
-    const passphrase = Buffer.from(password, 'utf8');
-    const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-      {
-        chainId,
-        getPassphrase: async () => passphrase,
-        mnemonicWords: mnemonic,
-        accountIndex,
-        purpose: isSharedWallet ? KeyPurpose.MULTI_SIG : KeyPurpose.STANDARD
-      },
-      {
-        bip32Ed25519: Wallet.bip32Ed25519,
-        logger
-      }
-    );
-
-    const pubKey1 = await keyAgent.derivePublicKey({
-      index: 0,
-      role: KeyManagement.KeyRole.Stake
-    });
-
-    const pubKey2 = (await keyAgent.derivePublicKey({
-      index: 0,
-      role: KeyManagement.KeyRole.External
-    })) as string;
-
-    return `${pubKey1},${pubKey2}`;
-  };
-
   /**
    * Creates or restores a new in-memory wallet with the cardano-js-sdk and saves it in wallet repository
    */
@@ -795,6 +764,40 @@ export const useWalletManager = (): UseWalletManager => {
     [cardanoWallet]
   );
 
+  const generateSharedKeys = async ({
+    password,
+    chainId = getCurrentChainId()
+  }: GenerateSharedKeysParams): Promise<string> => {
+    const accountIndex = 0;
+    const passphrase = Buffer.from(password, 'utf8');
+    const mnemonic = await getMnemonic(Buffer.from(password));
+    const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+      {
+        chainId,
+        getPassphrase: async () => passphrase,
+        mnemonicWords: mnemonic,
+        accountIndex,
+        purpose: KeyPurpose.MULTI_SIG
+      },
+      {
+        bip32Ed25519: Wallet.bip32Ed25519,
+        logger
+      }
+    );
+
+    const pubKey1 = await keyAgent.derivePublicKey({
+      index: 0,
+      role: KeyManagement.KeyRole.Stake
+    });
+
+    const pubKey2 = (await keyAgent.derivePublicKey({
+      index: 0,
+      role: KeyManagement.KeyRole.External
+    })) as string;
+
+    return `${pubKey1},${pubKey2}`;
+  };
+
   const addAccount = useCallback(
     async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
       const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
@@ -833,6 +836,7 @@ export const useWalletManager = (): UseWalletManager => {
     createHardwareWalletRevamped,
     connectHardwareWallet,
     connectHardwareWalletRevamped,
+    generateSharedKeys,
     saveHardwareWallet,
     deleteWallet,
     reloadWallet,

@@ -22,7 +22,7 @@ export const SharedWallet = (): JSX.Element => {
     })();
   }, [walletRepository]);
 
-  const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
+  const sharedKeys: string = undefined;
 
   return (
     <AddSharedWalletModal
