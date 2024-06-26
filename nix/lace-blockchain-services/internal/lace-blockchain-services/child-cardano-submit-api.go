@@ -65,8 +65,8 @@ func childCardanoSubmitApi(appConfig appconfig.AppConfig) func(SharedState, chan
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
-			cardanoSubmitApiUrl := fmt.Sprintf("http://127.0.0.1:%d", *shared.CardanoSubmitApiPort)
-			err := probeHttpFor(405, cardanoSubmitApiUrl + "/api/submit/tx", 1 * time.Second)
+			cardanoSubmitApiUrl := fmt.Sprintf("http://127.0.0.1:%d/api/submit/tx", *shared.CardanoSubmitApiPort)
+			err := probeHttpFor(405, cardanoSubmitApiUrl, 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
 				statusCh <- StatusAndUrl {

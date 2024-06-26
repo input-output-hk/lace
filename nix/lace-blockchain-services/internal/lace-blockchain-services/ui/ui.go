@@ -101,6 +101,7 @@ func SetupTray(
 	fixme_OgmiosStatus := make(chan string)
 	fixme_PostgresStatus := make(chan string)
 	fixme_SetOgmiosDashboard := make(chan string)
+	fixme_SetCardanoSubmitApiUrl := make(chan string)
 	fixme_ProviderServerStatus := make(chan string)
 
 	go func(){
@@ -116,6 +117,7 @@ func SetupTray(
 				fixme_CardanoNodeStatus <- formatted
 			case "cardano-submit-api":
 				fixme_CardanoSubmitApiStatus <- formatted
+				fixme_SetCardanoSubmitApiUrl <- upd.Url
 			case "ogmios":
 				fixme_OgmiosStatus <- formatted
 				fixme_SetOgmiosDashboard <- upd.Url
@@ -141,6 +143,26 @@ func SetupTray(
 					OurLogPrefix, os.Getpid(), url, err)
 			}
 		}
+	}()
+
+	mCopyCardanoSubmitApiUrl := systray.AddMenuItem("Copy Cardano Submit API URL", "")
+	go func() {
+		url := ""
+		mCopyCardanoSubmitApiUrl.Disable()
+		for { select {
+		case <-mCopyCardanoSubmitApiUrl.ClickedCh:
+			err := clipboard.WriteAll(url)
+			if err != nil {
+				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
+					OurLogPrefix, os.Getpid(), url, err)
+			}
+		case url = <-fixme_SetCardanoSubmitApiUrl:
+			if url == "" {
+				mCopyCardanoSubmitApiUrl.Disable()
+			} else {
+				mCopyCardanoSubmitApiUrl.Enable()
+			}
+		}}
 	}()
 
 	systray.AddSeparator()
