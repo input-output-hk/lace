@@ -16,7 +16,9 @@ export const validateEventProperty = async (event: string, property: string, pro
       interval: 1000,
       timeout: 6000,
       timeoutMsg: `Failed while waiting for event '${event}' contains property '${property}' equal to ${propertyValue}. Actual event property value = '${
-        (await getEventPayload(event)).properties[property]
+        (
+          await getEventPayload(event)
+        ).properties[property]
       }'`
     }
   );
@@ -58,7 +60,9 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
     interval: 1000,
     timeout: 6000,
     timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
-      (await getAllEventsNames()).length
+      (
+        await getAllEventsNames()
+      ).length
     }\n
     Actual events:\n ${(await getAllEventsNames()).toString()}`
   });
