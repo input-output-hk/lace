@@ -1,24 +1,52 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { AnalyticsConfirmationBanner, Welcome as View } from '@lace/core';
+import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, Welcome as View } from '@lace/core';
 import { walletRoutePaths } from '@routes';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import {
+  EnhancedAnalyticsOptInStatus,
+  postHogNamiMigrationActions,
+  UserTrackingType
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
+import { useAnalyticsContext } from '@providers';
 import { useTheme } from '@lace/ui';
+import { WarningModal } from '@views/browser/components';
 
 export const Welcome = (): JSX.Element => {
   const history = useHistory();
   const { t: translate } = useTranslation();
-  const [, setIsAnalyticsModalOpen] = useState(false);
-  const [enhancedAnalyticsStatus] = useLocalStorage(
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.NotSet
   );
   const { colorScheme } = useTheme();
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+
+  const analytics = useAnalyticsContext();
+
+  useEffect(() => {
+    // Send pageview if user already had opted-in before
+    analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.INTRODUCTION_STEP);
+  }, [analytics]);
+
+  const handleAnalyticsChoice = async (isAccepted: boolean) => {
+    const analyticsStatus = isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
+    setDoesUserAllowAnalytics(analyticsStatus);
+    await analytics.setOptedInForEnhancedAnalytics(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
+
+    await analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.ANALYTICS_AGREE_CLICK, {
+      // eslint-disable-next-line camelcase
+      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
+    });
+    // Send pageview if user opts-in via banner
+    await analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.INTRODUCTION_STEP);
+  };
 
   return (
     <>
@@ -35,18 +63,27 @@ export const Welcome = (): JSX.Element => {
             <span data-testid="analytic-banner-message">{translate('analyticsConfirmationBanner.message')}</span>
             <span
               className={styles.learnMore}
+              data-testid="analytic-banner-learn-more"
               onClick={() => {
                 setIsAnalyticsModalOpen(true);
               }}
-              data-testid="analytic-banner-learn-more"
             >
               {translate('analyticsConfirmationBanner.learnMore')}
             </span>
           </>
         }
-        onConfirm={() => setIsAnalyticsModalOpen(true)}
-        onReject={() => setIsAnalyticsModalOpen(false)}
+        onConfirm={() => handleAnalyticsChoice(true)}
+        onReject={() => handleAnalyticsChoice(false)}
         show={enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet}
+      />
+      <WarningModal
+        header={<div className={styles.analyticsModalTitle}>{translate('core.walletAnalyticsInfo.title')}</div>}
+        content={<WalletAnalyticsInfo />}
+        visible={isAnalyticsModalOpen}
+        confirmLabel={translate('core.walletAnalyticsInfo.gotIt')}
+        onConfirm={() => {
+          setIsAnalyticsModalOpen(false);
+        }}
       />
     </>
   );

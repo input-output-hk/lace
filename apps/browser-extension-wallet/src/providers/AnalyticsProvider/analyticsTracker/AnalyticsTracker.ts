@@ -14,9 +14,9 @@ import {
 } from '../../PostHogClientProvider/client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
-import { PostHogMultiWalletAction, PostHogOnboardingAction } from './events';
+import { PostHogMultiWalletAction, PostHogOnboardingAction, PostHogNamiMigrationAction } from './events';
 
-type Action = PostHogAction | PostHogMultiWalletAction | PostHogOnboardingAction;
+type Action = PostHogAction | PostHogMultiWalletAction | PostHogOnboardingAction | PostHogNamiMigrationAction;
 
 interface AnalyticsTrackerArgs {
   postHogClient?: PostHogClient<Action>;
