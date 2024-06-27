@@ -1,5 +1,4 @@
 {
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
@@ -38,19 +37,20 @@
     supportedSystem = ["x86_64-linux" "x86_64-darwin" "aarch64-darwin"];
     inherit (inputs.nixpkgs) lib;
   in {
-    packages = lib.genAttrs supportedSystem (buildSystem:
-      import ./nix/lace-blockchain-services/packages.nix { inherit inputs buildSystem; }
+    packages = lib.genAttrs supportedSystem (
+      buildSystem:
+        import ./nix/lace-blockchain-services/packages.nix {inherit inputs buildSystem;}
     );
 
     internal = {
-      lace-blockchain-services = import ./nix/lace-blockchain-services/internal.nix { inherit inputs; };
+      lace-blockchain-services = import ./nix/lace-blockchain-services/internal.nix {inherit inputs;};
     };
 
     hydraJobs = {
       lace-blockchain-services-installer = {
-        x86_64-linux   = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer;
-        x86_64-darwin  = inputs.self.packages.x86_64-darwin.lace-blockchain-services-installer;
-        aarch64-darwin  = inputs.self.packages.aarch64-darwin.lace-blockchain-services-installer;
+        x86_64-linux = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer;
+        x86_64-darwin = inputs.self.packages.x86_64-darwin.lace-blockchain-services-installer;
+        aarch64-darwin = inputs.self.packages.aarch64-darwin.lace-blockchain-services-installer;
         x86_64-windows = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer-x86_64-windows;
       };
 
@@ -61,5 +61,4 @@
       };
     };
   };
-
 }
