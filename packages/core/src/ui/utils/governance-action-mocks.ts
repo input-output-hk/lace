@@ -136,7 +136,7 @@ export const mockProposalProcedure: Record<
             numerator: 36,
             denominator: 37
           },
-          commiteeNoConfidence: {
+          committeeNoConfidence: {
             numerator: 38,
             denominator: 39
           },
