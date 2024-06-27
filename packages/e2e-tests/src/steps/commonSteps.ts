@@ -45,6 +45,7 @@ import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 import MainLoader from '../elements/MainLoader';
+import Modal from '../elements/modal';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -316,6 +317,10 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
 
 Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Then(/^I wait until modal disappears$/, async () => {
+  await Modal.waitUntilModalDisappears();
 });
 
 Given(/^I enable showing Analytics consent banner$/, async () => {

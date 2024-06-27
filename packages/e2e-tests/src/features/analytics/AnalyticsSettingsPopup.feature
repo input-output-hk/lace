@@ -170,7 +170,8 @@ Feature: Analytics - Settings - Popup View
 
   @LW-8786
   Scenario: Analytics - Popup View - Settings - Theme switch
-    Given I am on Tokens popup page
+    Given I set light theme mode in Local Storage
+    And I am on Tokens popup page
     When I open settings from header menu
     And I set up request interception for posthog analytics request(s)
     And I set theme switch in settings to dark mode
@@ -188,5 +189,6 @@ Feature: Analytics - Settings - Popup View
     And I click on Remove wallet button
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I wait until modal disappears
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
     And I validate that 2 analytics event(s) have been sent
