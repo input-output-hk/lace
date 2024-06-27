@@ -52,6 +52,7 @@ jobs:
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Start XVFB
         run: |
           Xvfb :99 &
