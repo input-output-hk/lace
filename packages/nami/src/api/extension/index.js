@@ -1390,101 +1390,101 @@ export const createAccount = async (name, password, accountIndex = null) => {
 //   return index;
 // };
 
-// export const createHWAccounts = async (accounts) => {
-//   await Loader.load();
-//   const existingAccounts = await getStorage(STORAGE.accounts);
-//   accounts.forEach((account) => {
-//     const publicKey = Loader.Cardano.Bip32PublicKey.from_bytes(
-//       Buffer.from(account.publicKey, 'hex')
-//     );
+export const createHWAccounts = async (accounts) => {
+  await Loader.load();
+  const existingAccounts = await getStorage(STORAGE.accounts);
+  accounts.forEach((account) => {
+    const publicKey = Loader.Cardano.Bip32PublicKey.from_bytes(
+      Buffer.from(account.publicKey, 'hex')
+    );
 
-//     const paymentKeyHashRaw = publicKey.derive(0).derive(0).to_raw_key().hash();
-//     const stakeKeyHashRaw = publicKey.derive(2).derive(0).to_raw_key().hash();
+    const paymentKeyHashRaw = publicKey.derive(0).derive(0).to_raw_key().hash();
+    const stakeKeyHashRaw = publicKey.derive(2).derive(0).to_raw_key().hash();
 
-//     const paymentKeyHash = Buffer.from(paymentKeyHashRaw.to_bytes()).toString(
-//       'hex'
-//     );
+    const paymentKeyHash = Buffer.from(paymentKeyHashRaw.to_bytes()).toString(
+      'hex'
+    );
 
-//     const paymentKeyHashBech32 = paymentKeyHashRaw.to_bech32('addr_vkh');
+    const paymentKeyHashBech32 = paymentKeyHashRaw.to_bech32('addr_vkh');
 
-//     const stakeKeyHash = Buffer.from(stakeKeyHashRaw.to_bytes()).toString(
-//       'hex'
-//     );
+    const stakeKeyHash = Buffer.from(stakeKeyHashRaw.to_bytes()).toString(
+      'hex'
+    );
 
-//     const paymentAddrMainnet = Loader.Cardano.BaseAddress.new(
-//       Loader.Cardano.NetworkInfo.mainnet().network_id(),
-//       Loader.Cardano.StakeCredential.from_keyhash(paymentKeyHashRaw),
-//       Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
-//     )
-//       .to_address()
-//       .to_bech32();
+    const paymentAddrMainnet = Loader.Cardano.BaseAddress.new(
+      Loader.Cardano.NetworkInfo.mainnet().network_id(),
+      Loader.Cardano.StakeCredential.from_keyhash(paymentKeyHashRaw),
+      Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
+    )
+      .to_address()
+      .to_bech32();
 
-//     const rewardAddrMainnet = Loader.Cardano.RewardAddress.new(
-//       Loader.Cardano.NetworkInfo.mainnet().network_id(),
-//       Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
-//     )
-//       .to_address()
-//       .to_bech32();
+    const rewardAddrMainnet = Loader.Cardano.RewardAddress.new(
+      Loader.Cardano.NetworkInfo.mainnet().network_id(),
+      Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
+    )
+      .to_address()
+      .to_bech32();
 
-//     const paymentAddrTestnet = Loader.Cardano.BaseAddress.new(
-//       Loader.Cardano.NetworkInfo.testnet().network_id(),
-//       Loader.Cardano.StakeCredential.from_keyhash(paymentKeyHashRaw),
-//       Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
-//     )
-//       .to_address()
-//       .to_bech32();
+    const paymentAddrTestnet = Loader.Cardano.BaseAddress.new(
+      Loader.Cardano.NetworkInfo.testnet().network_id(),
+      Loader.Cardano.StakeCredential.from_keyhash(paymentKeyHashRaw),
+      Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
+    )
+      .to_address()
+      .to_bech32();
 
-//     const rewardAddrTestnet = Loader.Cardano.RewardAddress.new(
-//       Loader.Cardano.NetworkInfo.testnet().network_id(),
-//       Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
-//     )
-//       .to_address()
-//       .to_bech32();
+    const rewardAddrTestnet = Loader.Cardano.RewardAddress.new(
+      Loader.Cardano.NetworkInfo.testnet().network_id(),
+      Loader.Cardano.StakeCredential.from_keyhash(stakeKeyHashRaw)
+    )
+      .to_address()
+      .to_bech32();
 
-//     const index = account.accountIndex;
-//     const name = account.name;
+    const index = account.accountIndex;
+    const name = account.name;
 
-//     const networkDefault = {
-//       lovelace: null,
-//       minAda: 0,
-//       assets: [],
-//       history: { confirmed: [], details: {} },
-//     };
+    const networkDefault = {
+      lovelace: null,
+      minAda: 0,
+      assets: [],
+      history: { confirmed: [], details: {} },
+    };
 
-//     existingAccounts[index] = {
-//       index,
-//       publicKey: Buffer.from(publicKey.as_bytes()).toString('hex'),
-//       paymentKeyHash,
-//       paymentKeyHashBech32,
-//       stakeKeyHash,
-//       name,
-//       [NETWORK_ID.mainnet]: {
-//         ...networkDefault,
-//         paymentAddr: paymentAddrMainnet,
-//         rewardAddr: rewardAddrMainnet,
-//       },
-//       [NETWORK_ID.testnet]: {
-//         ...networkDefault,
-//         paymentAddr: paymentAddrTestnet,
-//         rewardAddr: rewardAddrTestnet,
-//       },
-//       [NETWORK_ID.preview]: {
-//         ...networkDefault,
-//         paymentAddr: paymentAddrTestnet,
-//         rewardAddr: rewardAddrTestnet,
-//       },
-//       [NETWORK_ID.preprod]: {
-//         ...networkDefault,
-//         paymentAddr: paymentAddrTestnet,
-//         rewardAddr: rewardAddrTestnet,
-//       },
-//       avatar: Math.random().toString(),
-//     };
-//   });
-//   await setStorage({
-//     [STORAGE.accounts]: existingAccounts,
-//   });
-// };
+    existingAccounts[index] = {
+      index,
+      publicKey: Buffer.from(publicKey.as_bytes()).toString('hex'),
+      paymentKeyHash,
+      paymentKeyHashBech32,
+      stakeKeyHash,
+      name,
+      [NETWORK_ID.mainnet]: {
+        ...networkDefault,
+        paymentAddr: paymentAddrMainnet,
+        rewardAddr: rewardAddrMainnet,
+      },
+      [NETWORK_ID.testnet]: {
+        ...networkDefault,
+        paymentAddr: paymentAddrTestnet,
+        rewardAddr: rewardAddrTestnet,
+      },
+      [NETWORK_ID.preview]: {
+        ...networkDefault,
+        paymentAddr: paymentAddrTestnet,
+        rewardAddr: rewardAddrTestnet,
+      },
+      [NETWORK_ID.preprod]: {
+        ...networkDefault,
+        paymentAddr: paymentAddrTestnet,
+        rewardAddr: rewardAddrTestnet,
+      },
+      avatar: Math.random().toString(),
+    };
+  });
+  await setStorage({
+    [STORAGE.accounts]: existingAccounts,
+  });
+};
 
 export const deleteAccount = async () => {
   // const storage = await getStorage();
@@ -1511,20 +1511,21 @@ export const indexToHw = (accountIndex) => ({
   account: parseInt(accountIndex.split('-')[2]),
 });
 
-// export const getHwAccounts = (accounts, { device, id }) => {
-//   const hwAccounts = {};
-//   Object.keys(accounts)
-//     .filter(
-//       (accountIndex) =>
-//         isHW(accountIndex) &&
-//         indexToHw(accountIndex).device == device &&
-//         indexToHw(accountIndex).id == id
-//     )
-//     .forEach(
-//       (accountIndex) => (hwAccounts[accountIndex] = accounts[accountIndex])
-//     );
-//   return hwAccounts;
-// };
+export const getHwAccounts = async ({ device, id }) => {
+  const accounts = await getStorage(STORAGE.accounts);
+  const hwAccounts = {};
+  Object.keys(accounts)
+    .filter(
+      (accountIndex) =>
+        isHW(accountIndex) &&
+        indexToHw(accountIndex).device == device &&
+        indexToHw(accountIndex).id == id
+    )
+    .forEach(
+      (accountIndex) => (hwAccounts[accountIndex] = accounts[accountIndex])
+    );
+  return hwAccounts;
+};
 
 export const isHW = (accountIndex) =>
   accountIndex != null &&

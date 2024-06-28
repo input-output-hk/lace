@@ -3,11 +3,19 @@ import { fn } from '@storybook/test';
 
 import * as actualApi from './';
 
+import type { HardwareDeviceInfo } from '../../ui/app/hw/types';
+
 export * from './';
 
 export const createTab = fn(actualApi.createTab).mockName('createTab');
 
 export const getAccounts = fn(actualApi.getAccounts).mockName('getAccounts');
+
+export const getHwAccounts = fn(
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async ({ device, id }: Readonly<HardwareDeviceInfo>) =>
+    actualApi.getHwAccounts({ device, id }),
+).mockName('getHwAccounts');
 
 export const getCurrentAccount = fn(actualApi.getCurrentAccount).mockName(
   'getCurrentAccount',
@@ -60,6 +68,16 @@ export const updateRecentSentToAddress = fn(
 export const getAdaHandle = fn(actualApi.getAdaHandle).mockName('getAdaHandle');
 
 export const getAsset = fn(actualApi.getAsset).mockName('getAsset');
+
+export const createHWAccounts = fn(actualApi.createHWAccounts).mockName(
+  'createHWAccounts',
+);
+
+export const initHW = fn(
+  async ({ device, id }: Readonly<HardwareDeviceInfo>) => {
+    return actualApi.initHW({ device, id });
+  },
+).mockName('initHW');
 
 export const getWhitelisted = fn(actualApi.getWhitelisted).mockName(
   'getWhitelisted',
