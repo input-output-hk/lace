@@ -60,3 +60,12 @@ export const updateRecentSentToAddress = fn(
 export const getAdaHandle = fn(actualApi.getAdaHandle).mockName('getAdaHandle');
 
 export const getAsset = fn(actualApi.getAsset).mockName('getAsset');
+
+export const getWhitelisted = fn(actualApi.getWhitelisted).mockName(
+  'getWhitelisted',
+);
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+export const getFavoriteIcon = fn(actualApi.getFavoriteIcon).mockName(
+  'getFavoriteIcon',
+);

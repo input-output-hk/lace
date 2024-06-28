@@ -101,6 +101,12 @@ export const getWhitelisted = async () => {
   // return result ? result : [];
 };
 
+export const getFavoriteIcon = (domain) => {
+  return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${domain}&size=32`;
+  // const result = await getStorage(STORAGE.whitelisted);
+  // return result ? result : [];
+};
+
 // export const isWhitelisted = async (_origin) => {
 //   const whitelisted = await getWhitelisted();
 //   let access = false;

@@ -22,13 +22,16 @@ const preview: Preview = {
 };
 
 export const decorators = [
-  (Story, { parameters: { colorMode } }) =>
-    <ChakraProvider theme={extendTheme({
-      ...theme,
-      config: { initialColorMode: colorMode }
-    })}>
-      {Story({ args: { colorMode: colorMode } })}
+  (Story, { parameters: { colorMode, path } }) => (
+    <ChakraProvider
+      theme={extendTheme({
+        ...theme,
+        config: { initialColorMode: colorMode },
+      })}
+    >
+      {Story({ args: { colorMode: colorMode, path } })}
     </ChakraProvider>
+  ),
 ];
 
 export default preview;

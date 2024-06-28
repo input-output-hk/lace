@@ -4,19 +4,33 @@ import { Box, useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/test';
 
-import { getCurrentAccount } from '../../../api/extension/api.mock';
+import {
+  getCurrentAccount,
+  getWhitelisted,
+  getFavoriteIcon,
+} from '../../../api/extension/api.mock';
 import { currentAccount } from '../../../mocks/account.mock';
 
 import Settings from './settings';
 import { useStoreState, useStoreActions } from '../../store.mock';
 import { store } from '../../../mocks/store.mock';
-import { Route } from '../../../../.storybook/mocks/react-router-dom.mock';
+import {
+  Route,
+  mockedHistory,
+  useHistory,
+} from '../../../../.storybook/mocks/react-router-dom.mock';
 
 const SettingsStory = ({
   colorMode,
-}: Readonly<{ colorMode: 'dark' | 'light' }>): React.ReactElement => {
+  path,
+}: Readonly<{
+  colorMode: 'dark' | 'light';
+  path: string;
+}>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
+  const history = useHistory();
+  history.replace(path ?? '*');
 
   return (
     <Box width="400" height="600">
@@ -56,8 +70,10 @@ const meta: Meta<typeof SettingsStory> = {
       return () => void 0;
     });
     Route.mockImplementation(({ path, component: Component }) => {
-      console.log(path);
-      return <>{path === 'general' ? <Component /> : null}</>;
+      return (mockedHistory[0] === '' && path === '*') ||
+        mockedHistory[0] === path ? (
+        <Component />
+      ) : null;
     });
 
     return () => {
@@ -74,18 +90,35 @@ export default meta;
 export const SettingsLight: Story = {
   parameters: {
     colorMode: 'light',
+    path: '',
   },
 };
 
 export const SettingsDark: Story = {
   parameters: {
+    ...SettingsLight.parameters,
     colorMode: 'dark',
   },
 };
 
-export const ChangePasswordLight: Story = {
+export const GeneralSettingsLight: Story = {
   parameters: {
     colorMode: 'light',
+    path: 'general',
+  },
+};
+
+export const GeneralSettingsDark: Story = {
+  parameters: {
+    ...GeneralSettingsLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const GeneralChangePasswordLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'general',
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -95,15 +128,17 @@ export const ChangePasswordLight: Story = {
   },
 };
 
-export const ChangePasswordDark: Story = {
-  ...ChangePasswordLight,
+export const GeneralChangePasswordDark: Story = {
+  ...GeneralChangePasswordLight,
   parameters: {
+    ...GeneralChangePasswordLight.parameters,
     colorMode: 'dark',
   },
 };
-export const ResetWalletLight: Story = {
+export const GeneralResetWalletLight: Story = {
   parameters: {
     colorMode: 'light',
+    path: 'general',
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -113,9 +148,60 @@ export const ResetWalletLight: Story = {
   },
 };
 
-export const ResetWalletDark: Story = {
-  ...ResetWalletLight,
+export const GeneralResetWalletDark: Story = {
+  ...GeneralResetWalletLight,
   parameters: {
+    ...GeneralResetWalletLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const WhitelistedLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'whitelisted',
+  },
+  beforeEach: () => {
+    getWhitelisted.mockImplementation(async () => {
+      return (await Promise.resolve(['https://app.sundae.fi'])) as never[];
+    });
+    getFavoriteIcon.mockImplementation(() => {
+      return 'https://app.sundae.fi/static/images/favicon.png';
+    });
+  },
+};
+
+export const WhitelistedDark: Story = {
+  ...WhitelistedLight,
+  parameters: {
+    ...WhitelistedLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const WhitelistedEmptyLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'whitelisted',
+  },
+};
+export const WhitelistedEmptyDark: Story = {
+  parameters: {
+    ...WhitelistedEmptyLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const NetworkLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'network',
+  },
+};
+
+export const NetworkDark: Story = {
+  parameters: {
+    ...NetworkLight.parameters,
     colorMode: 'dark',
   },
 };

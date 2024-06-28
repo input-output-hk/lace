@@ -28,6 +28,7 @@ import React from 'react';
 import {
   getCurrentAccount,
   getCurrentAccountIndex,
+  getFavoriteIcon,
   getNetwork,
   getStorage,
   getWhitelisted,
@@ -385,7 +386,7 @@ const Whitelisted = () => {
             >
               <Image
                 width="24px"
-                src={`chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${origin}&size=32`}
+                src={getFavoriteIcon(origin)}
                 fallback={<SkeletonCircle width="24px" height="24px" />}
               />
               <Text>{origin.split('//')[1]}</Text>

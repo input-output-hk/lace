@@ -25,21 +25,20 @@ const config: StorybookConfig = {
   },
   webpackFinal: config => {
     if (config.resolve?.alias) {
-    config.resolve.alias = {
+      config.resolve.alias = {
         ...config.resolve.alias,
         '@emotion/core': '@emotion/react',
         'emotion-theming': '@emotion/react',
-      }
+      };
     }
 
     if (config.plugins) {
-
       config.plugins.push(
         new ProvidePlugin({
           Buffer: ['buffer', 'Buffer'],
-          process: 'process/browser'
+          process: 'process/browser',
         }),
-      )
+      );
 
       config.plugins.push(
         new NormalModuleReplacementPlugin(
