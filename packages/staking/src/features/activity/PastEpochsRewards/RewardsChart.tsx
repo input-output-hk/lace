@@ -1,4 +1,4 @@
-import { Card } from '@lace/ui';
+import { Card } from '@input-output-hk/lace-ui-toolkit';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { RewardsByEpoch } from './hooks/useRewardsByEpoch';
 import { useRewardsChartPoolsColorMapper } from './hooks/useRewardsChartPoolsColorMapper';

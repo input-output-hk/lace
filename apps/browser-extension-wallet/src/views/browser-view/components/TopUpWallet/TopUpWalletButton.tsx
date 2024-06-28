@@ -1,7 +1,6 @@
 import { tabs } from 'webextension-polyfill';
-import { ReactComponent as AdaComponentTransparent } from '@lace/icons/dist/AdaComponentTransparent';
+import { AdaComponentTransparent, Button } from '@input-output-hk/lace-ui-toolkit';
 import React, { useRef, useState } from 'react';
-import { Button } from '@lace/ui';
 import { TopUpWalletDialog } from './TopUpWalletDialog';
 import { useTranslation } from 'react-i18next';
 import { BANXA_LACE_URL } from './config';

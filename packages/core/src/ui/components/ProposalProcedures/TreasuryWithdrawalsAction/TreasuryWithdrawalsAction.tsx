@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Grid, Divider, sx, Text, Metadata, Cell } from '@lace/ui';
+import { Grid, Divider, sx, Text, Metadata, Cell } from '@input-output-hk/lace-ui-toolkit';
 import * as Types from './TreasuryWithdrawalsActionTypes';
 import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
 import { ActionId } from '../components/ActionId';

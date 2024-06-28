@@ -7,10 +7,8 @@ yarn.lock               @input-output-hk/lace-core
 /packages/common/       @input-output-hk/lace-core
 /packages/core/         @input-output-hk/lace-core
 /packages/e2e-tests/    @input-output-hk/xsy-lace-test-engineers
-/packages/icons/        @input-output-hk/lace-core
 /packages/staking/      @input-output-hk/lace-core
 /packages/translation/  @input-output-hk/lace-core
-/packages/ui/           @input-output-hk/lace-core
 
 # Apps
 /apps/                  @input-output-hk/lace-core

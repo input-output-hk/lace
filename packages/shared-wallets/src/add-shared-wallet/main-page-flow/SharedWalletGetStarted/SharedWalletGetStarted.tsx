@@ -1,10 +1,15 @@
+import {
+  Box,
+  Copy,
+  Flex,
+  Key,
+  LaceLogoComponent,
+  Text,
+  UploadComponent,
+  UserGroupGradientComponent,
+  sx,
+} from '@input-output-hk/lace-ui-toolkit';
 import { toast } from '@lace/common';
-import { ReactComponent as CopyIcon } from '@lace/icons/dist/Copy';
-import { ReactComponent as KeyIcon } from '@lace/icons/dist/Key';
-import { ReactComponent as LaceLogo } from '@lace/icons/dist/LaceLogoComponent';
-import { ReactComponent as UploadIcon } from '@lace/icons/dist/UploadComponent';
-import { ReactComponent as UserGroupIcon } from '@lace/icons/dist/UserGroupGradientComponent';
-import { Box, Flex, Text, sx } from '@lace/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styles from './SharedWalletGetStarted.module.scss';
@@ -86,7 +91,7 @@ export const SharedWalletGetStarted = ({
     await restProps.copyKeysToClipboard();
     toast.notify({
       duration: TOAST_DURATION,
-      icon: CopyIcon,
+      icon: Copy,
       text: translations.keysCopyToastText,
     });
   };
@@ -106,7 +111,7 @@ export const SharedWalletGetStarted = ({
           className={styles.header}
           data-testid="shared-wallet-setup-options-header"
         >
-          <LaceLogo className={styles.image} data-testid="shared-wallet-setup-logo" />
+          <LaceLogoComponent className={styles.image} data-testid="shared-wallet-setup-logo" />
           <Text.Heading
             className={sx({
               color: '$text_primary',
@@ -131,7 +136,7 @@ export const SharedWalletGetStarted = ({
           {restProps.keysMode === 'generate' && (
             <SharedWalletGetStartedOption
               copies={translations.keysGenerateOption}
-              Icon={KeyIcon}
+              Icon={Key}
               onClick={onKeysGenerateClick}
               testId="shared-wallet-generate"
             />
@@ -139,7 +144,7 @@ export const SharedWalletGetStarted = ({
           {restProps.keysMode === 'copy' && (
             <SharedWalletGetStartedOption
               copies={translations.keysCopyOption}
-              Icon={KeyIcon}
+              Icon={Key}
               onClick={onKeysCopyClick}
               testId="shared-wallet-copy"
             />
@@ -147,7 +152,7 @@ export const SharedWalletGetStarted = ({
           <div className={styles.separator} />
           <SharedWalletGetStartedOption
             copies={translations.createSharedWalletOption}
-            Icon={UserGroupIcon}
+            Icon={UserGroupGradientComponent}
             onClick={onCreateSharedWalletClick}
             testId="shared-wallet-new"
             disabled={createAndImportOptionsDisabled}
@@ -155,7 +160,7 @@ export const SharedWalletGetStarted = ({
           <div className={styles.separator} />
           <SharedWalletGetStartedOption
             copies={translations.importSharedWalletOption}
-            Icon={UploadIcon}
+            Icon={UploadComponent}
             onClick={onImportSharedWalletClick}
             testId="shared-wallet-import"
             disabled={createAndImportOptionsDisabled}

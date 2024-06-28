@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
-import { Box, Table } from '@lace/ui';
+import { Box, Table } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import {
   mapStakePoolToDisplayData,

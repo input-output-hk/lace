@@ -18,7 +18,7 @@ import {
   Text,
   Box,
   Divider
-} from '@lace/ui';
+} from '@input-output-hk/lace-ui-toolkit';
 import { DappAddressSections } from '../DappAddressSections/DappAddressSections';
 import { useTranslation } from 'react-i18next';
 

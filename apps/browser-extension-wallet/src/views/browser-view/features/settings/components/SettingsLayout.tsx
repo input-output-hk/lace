@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Layout, SectionLayout } from '@src/views/browser-view/components/Layout';
 import { SettingsRemoveWallet } from './SettingsRemoveWallet';
 import { MidnightPreLaunchSettingsBanner } from '@lace/core';
-import { Box } from '@lace/ui';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
 
 export interface SettingsLayoutProps {

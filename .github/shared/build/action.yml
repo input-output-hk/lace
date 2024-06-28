@@ -1,13 +1,16 @@
 name: Shared Build
 description: Shared build config for both Chromium and Safari workflows
 inputs:
+  LACE_EXTENSION_KEY:
+    description: 'Public extended manifest key'
+    required: true
+  GITHUB_TOKEN:
+    description: 'GitHub Token'
+    required: true
   BUILD_DEV_PREVIEW:
     description: 'Build developer preview of Lace'
     required: false
     default: 'false'
-  LACE_EXTENSION_KEY:
-    description: 'Public extended manifest key'
-    required: true
   POSTHOG_PRODUCTION_TOKEN_MAINNET:
     description: 'Post hog production mainnet token'
     required: false
@@ -43,6 +46,13 @@ runs:
           node_modules
           **/node_modules
         key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+    - name: Configure Yarn to use GitHub Packages
+      run: |
+        echo "npmScopes:" >> ~/.yarnrc.yml
+        echo "  input-output-hk:" >> ~/.yarnrc.yml
+        echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> ~/.yarnrc.yml
+        echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> ~/.yarnrc.yml
+      shell: bash
     - name: Install dependencies
       shell: bash
       run: yarn install --immutable --inline-builds

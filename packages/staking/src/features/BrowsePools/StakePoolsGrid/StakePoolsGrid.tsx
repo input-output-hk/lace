@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { Box, Text, useVisibleItemsCount } from '@lace/ui';
+import { Box, Text, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
 import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
 import { ReactElement, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';

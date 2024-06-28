@@ -21,6 +21,7 @@ jobs:
         uses: ./.github/shared/build
         with:
           BUILD_DEV_PREVIEW: 'true'
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues

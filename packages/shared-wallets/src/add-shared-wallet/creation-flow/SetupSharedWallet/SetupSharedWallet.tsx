@@ -1,5 +1,5 @@
+import { Box, FlowCard, ProfileDropdown, Text } from '@input-output-hk/lace-ui-toolkit';
 import { addEllipsis } from '@lace/common';
-import { Box, FlowCard, ProfileDropdown, Text } from '@lace/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
@@ -84,7 +84,7 @@ export const SetupSharedWallet = ({
       <Box mt="$12" mb="$20">
         <Text.Body.Normal weight="$semibold">{translations.body}</Text.Body.Normal>
       </Box>
-      <FlowCard.Card flowCardClassName={styles.walletCard}>
+      <FlowCard.Card flowCardClassName={styles.walletCard ?? ''}>
         <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type="hot" />} name={activeWalletName} />
         <FlowCard.Details
           subtitle={addEllipsis(activeWalletAddress, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)}

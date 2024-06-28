@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AddressTag, AddressTagVariants } from '@lace/ui';
+import { AddressTag, AddressTagVariants } from '@input-output-hk/lace-ui-toolkit';
 import type { TFunction } from 'i18next';
 
 export type AddressTagTranslations = { own: string; foreign: string };

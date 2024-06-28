@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useMemo, useState } from 'react';
 import styles from './WalletSetupSelectAccountsStepRevamp.module.scss';
 import { Input } from '@lace/common';
-import { Box, Select } from '@lace/ui';
+import { Box, Select } from '@input-output-hk/lace-ui-toolkit';
 import { WalletTimelineSteps } from '../WalletSetup';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { useTranslation } from 'react-i18next';

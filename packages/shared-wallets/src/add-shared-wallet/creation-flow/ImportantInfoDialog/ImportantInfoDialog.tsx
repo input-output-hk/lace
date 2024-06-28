@@ -1,4 +1,4 @@
-import { Box, Checkbox, Dialog, Flex, Text } from '@lace/ui';
+import { Box, Checkbox, Dialog, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './ImportantInfoDialog.module.scss';

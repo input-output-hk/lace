@@ -1,5 +1,5 @@
+import { Table } from '@input-output-hk/lace-ui-toolkit';
 import { PostHogAction } from '@lace/common';
-import { Table } from '@lace/ui';
 import { MultidelegationDAppCompatibilityModal } from 'features/modals/MultidelegationDAppCompatibilityModal';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';

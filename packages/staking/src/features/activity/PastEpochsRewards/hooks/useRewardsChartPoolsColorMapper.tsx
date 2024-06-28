@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { PIE_CHART_DEFAULT_COLOR_SET } from '@lace/ui';
+import { PIE_CHART_DEFAULT_COLOR_SET } from '@input-output-hk/lace-ui-toolkit';
 import { useDelegationPortfolioStore } from 'features/store';
 import difference from 'lodash/difference';
 import { useMemo } from 'react';

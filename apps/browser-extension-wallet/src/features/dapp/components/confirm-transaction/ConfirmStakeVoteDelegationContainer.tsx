@@ -5,7 +5,7 @@ import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useViewsFlowContext } from '@providers';
 import { Skeleton } from 'antd';
-import { Box } from '@lace/ui';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 
 const { CertificateType, RewardAddress } = Wallet.Cardano;
 

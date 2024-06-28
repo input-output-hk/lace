@@ -1,4 +1,4 @@
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import AdaIcon from 'assets/icons/ada.svg';
 import ChartPieIcon from 'assets/icons/chart-pie.svg';
 import CubeIcon from 'assets/icons/cube.svg';

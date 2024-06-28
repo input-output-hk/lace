@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Flex, Card as UICard, Box, sx, Text, TextLink, Tooltip, Cell } from '@lace/ui';
+import { Grid, Flex, Card as UICard, Box, sx, Text, TextLink, Tooltip, Cell } from '@input-output-hk/lace-ui-toolkit';
 import styles from './Card.module.scss';
 
 interface Item {
@@ -25,7 +25,7 @@ export const Card = ({ title, tooltip, data }: Props): JSX.Element => {
       <Cell>
         <Flex>
           {props.tooltip ? (
-            <Tooltip label={props.tooltip}>
+            <Tooltip align="center" side="top" label={props.tooltip}>
               <Text.Body.Small className={textCss} weight="$semibold">
                 {props.label}
               </Text.Body.Small>
@@ -59,7 +59,7 @@ export const Card = ({ title, tooltip, data }: Props): JSX.Element => {
     if (tooltip) {
       return (
         <Box mb="$24">
-          <Tooltip label={tooltip}>
+          <Tooltip align="center" side="top" label={tooltip}>
             <Text.Body.Small className={textCss} weight="$bold">
               {title}
             </Text.Body.Small>

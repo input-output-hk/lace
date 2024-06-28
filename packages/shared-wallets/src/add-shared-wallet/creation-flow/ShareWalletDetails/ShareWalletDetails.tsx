@@ -1,5 +1,5 @@
+import { ActionCard, Box, Divider, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Button } from '@lace/common';
-import { ActionCard, Box, Divider, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
 import { creationTimelineSteps } from '../timelineSteps';

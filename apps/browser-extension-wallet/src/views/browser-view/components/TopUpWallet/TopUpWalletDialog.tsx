@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Box, Dialog, Text, TextLink } from '@lace/ui';
+import { Box, Dialog, Text, TextLink } from '@input-output-hk/lace-ui-toolkit';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
 import { tabs } from 'webextension-polyfill';

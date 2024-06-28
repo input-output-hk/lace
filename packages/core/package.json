@@ -29,6 +29,7 @@
     "build": "run -T rollup -c rollup.config.mjs",
     "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "yarn exec rm -rf dist node_modules",
+    "dev": "yarn run storybook",
     "format-check": "echo \"@lace/core: no format-check command specified\"",
     "lint": "cd ../.. && yarn core:lint",
     "prepack": "yarn build",
@@ -42,11 +43,10 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@input-output-hk/lace-ui-toolkit": "1.2.0",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
-    "@lace/icons": "0.1.0",
     "@lace/translation": "0.1.0",
-    "@lace/ui": "^0.1.0",
     "antd": "^4.24.10",
     "axios": "0.28.0",
     "axios-cache-adapter": "2.7.3",
@@ -86,6 +86,7 @@
     "@types/uuid": "^8",
     "sass": "^1.68.0",
     "storybook": "^7.4.3",
+    "storybook-addon-pseudo-states": "^1.15.2",
     "tsconfig-paths-webpack-plugin": "3.5.2",
     "typescript": "^4.9.5"
   },

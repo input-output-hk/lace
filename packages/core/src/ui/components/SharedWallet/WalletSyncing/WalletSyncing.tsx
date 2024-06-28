@@ -1,5 +1,5 @@
 import React from 'react';
-import { sx, Flex, Text, Loader } from '@lace/ui';
+import { sx, Flex, Text, Loader } from '@input-output-hk/lace-ui-toolkit';
 
 interface Props {
   translations: {
