@@ -83,7 +83,7 @@ export const currencyToSymbol = (currency) => {
 //  * @param {string} hex
 //  * @returns
 //  */
-// export const hexToAscii = (hex) => Buffer.from(hex, 'hex').toString();
+export const hexToAscii = (hex) => Buffer.from(hex, 'hex').toString();
 
 // export const networkNameToId = (name) => {
 //   const names = {
@@ -141,13 +141,13 @@ export const currencyToSymbol = (currency) => {
 //  * @param {OutputList} outputList - The set of outputs requested for payment.
 //  * @return {AmountList} - The compiled set of amounts requested for payment.
 //  */
-// export const compileOutputs = (outputList) => {
+export const compileOutputs = (outputList) => {
 //   let compiledAmountList = [];
 
 //   outputList.forEach((output) => addAmounts(output.amount, compiledAmountList));
 
 //   return compiledAmountList;
-// };
+};
 
 // /**
 //  * Add up an AmountList values to an other AmountList

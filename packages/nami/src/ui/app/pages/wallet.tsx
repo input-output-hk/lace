@@ -81,7 +81,7 @@ import provider from '../../../config/provider';
 import UnitDisplay from '../components/unitDisplay';
 import { onAccountChange } from '../../../api/extension';
 import AssetsViewer from '../components/assetsViewer';
-// import HistoryViewer from '../components/historyViewer';
+import HistoryViewer from '../components/historyViewer';
 import Copy from '../components/copy';
 import About from '../components/about';
 import { useStoreState } from '../../store';
@@ -762,6 +762,7 @@ const Wallet = () => {
                 onClick={() => {
                   capture(Events.ActivityActivityClick);
                 }}
+                data-testid="clockIcon"
               />
             </Tab>
           </TabList>
@@ -776,17 +777,17 @@ const Wallet = () => {
               /> */}
             </TabPanel>
             <TabPanel>
-              {/* <HistoryViewer
+              <HistoryViewer
                 network={state.network}
                 history={state.account && state.account.history}
                 currentAddr={state.account && state.account.paymentAddr}
                 addresses={
                   state.accounts &&
                   Object.keys(state.accounts).map(
-                    (index) => state.accounts[index].paymentAddr
+                    index => state.accounts[index].paymentAddr,
                   )
                 }
-              /> */}
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>

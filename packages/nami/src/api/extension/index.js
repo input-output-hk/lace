@@ -249,7 +249,7 @@ export const getTransactions = async (paginate = 1, count = 10) => {
 //   return result;
 // };
 
-// export const updateTxInfo = async (txHash) => {
+export const updateTxInfo = async (txHash) => {
 //   const currentAccount = await getCurrentAccount();
 //   const network = await getNetwork();
 
@@ -265,12 +265,12 @@ export const getTransactions = async (paginate = 1, count = 10) => {
 //     if (info) detail.block = await getBlock(detail.info.block_height);
 //     detail.utxos = await uTxOs;
 //     detail.metadata = await metadata;
-//   }
+  }
 
 //   return detail;
 // };
 
-// export const setTxDetail = async (txObject) => {
+export const setTxDetail = async (txObject) => {
 //   const currentIndex = await getCurrentAccountIndex();
 //   const network = await getNetwork();
 //   const accounts = await getStorage(STORAGE.accounts);
@@ -285,7 +285,7 @@ export const getTransactions = async (paginate = 1, count = 10) => {
 //     delete txObject[txHash];
 //   }
 //   return true;
-// };
+};
 
 // export const getSpecificUtxo = async (txHash, txId) => {
 //   const result = await blockfrostRequest(`/txs/${txHash}/utxos`);
@@ -1917,7 +1917,7 @@ export const getAsset = async (unit) => {
 //   return true;
 // };
 
-// export const setTransactions = async (txs) => {
+export const setTransactions = async (txs) => {
 //   const currentIndex = await getCurrentAccountIndex();
 //   const network = await getNetwork();
 //   const accounts = await getStorage(STORAGE.accounts);
@@ -1927,7 +1927,7 @@ export const getAsset = async (unit) => {
 //       ...accounts,
 //     },
 //   });
-// };
+};
 
 export const setCollateral = async (collateral) => {
   // const currentIndex = await getCurrentAccountIndex();

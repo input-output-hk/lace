@@ -814,3 +814,41 @@ export const EmptyAssetListDark: Story = {
     colorMode: 'dark',
   },
 };
+
+export const EmptyHistoryListLight: Story = {
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([
+        {
+          ...account,
+          history: {
+            confirmed: [],
+          },
+        },
+      ]);
+    });
+    getTransactions.mockImplementation(async () => {
+      return await Promise.resolve([]);
+    });
+    return () => {
+      getAccounts.mockReset();
+      getTransactions.mockReset();
+    };
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Switch to history tab', async () => {
+      await userEvent.click(canvas.getByTestId('clockIcon'));
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const EmptyHistoryListDark: Story = {
+  ...EmptyHistoryListLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};

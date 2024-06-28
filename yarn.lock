@@ -13573,6 +13573,7 @@ __metadata:
     eslint-plugin-unicorn: ^45.0.2
     focus-visible: ^5.2.0
     framer-motion: ^4.1.16
+    javascript-time-ago: ^2.5.10
     msw: ^2.3.1
     msw-storybook-addon: ^2.0.2
     prettier: 3.2.5
@@ -13585,6 +13586,7 @@ __metadata:
     react-lazy-load-image-component: ^1.5.1
     react-middle-ellipsis: ^1.2.1
     react-number-format: ^5.3.1
+    react-time-ago: ^7.3.3
     react-window: ^1.8.10
     rollup-plugin-import-css: ^3.5.0
     rollup-plugin-svg: ^2.0.0
@@ -41541,6 +41543,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"javascript-time-ago@npm:^2.5.10":
+  version: 2.5.10
+  resolution: "javascript-time-ago@npm:2.5.10"
+  dependencies:
+    relative-time-format: ^1.1.6
+  checksum: f0ddb6ba9361b96b3ec08fc4720fe84c45c8f71b044968e5c2a3c57d816b4b5d260a9513d25ed77ce9832ab5ac4a5bdd3f21bd0bebb4266b1292e19f39b070c6
+  languageName: node
+  linkType: hard
+
 "jayson@npm:^4.1.0":
   version: 4.1.0
   resolution: "jayson@npm:4.1.0"
@@ -45231,6 +45242,13 @@ __metadata:
   version: 5.2.1
   resolution: "memoize-one@npm:5.2.1"
   checksum: a3cba7b824ebcf24cdfcd234aa7f86f3ad6394b8d9be4c96ff756dafb8b51c7f71320785fbc2304f1af48a0467cbbd2a409efc9333025700ed523f254cb52e3d
+  languageName: node
+  linkType: hard
+
+"memoize-one@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "memoize-one@npm:6.0.0"
+  checksum: f185ea69f7cceae5d1cb596266dcffccf545e8e7b4106ec6aa93b71ab9d16460dd118ac8b12982c55f6d6322fcc1485de139df07eacffaae94888b9b3ad7675f
   languageName: node
   linkType: hard
 
@@ -50204,7 +50222,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raf@npm:^3.1.0":
+"raf@npm:^3.1.0, raf@npm:^3.4.1":
   version: 3.4.1
   resolution: "raf@npm:3.4.1"
   dependencies:
@@ -51576,6 +51594,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-time-ago@npm:^7.3.3":
+  version: 7.3.3
+  resolution: "react-time-ago@npm:7.3.3"
+  dependencies:
+    memoize-one: ^6.0.0
+    prop-types: ^15.8.1
+    raf: ^3.4.1
+  peerDependencies:
+    javascript-time-ago: ^2.3.7
+    react: ">=0.16.8"
+    react-dom: ">=0.16.8"
+  checksum: 07a05fa2be8c0ed8ff343cf07e00e06affffea7bdbf2d31d5592fac4fa66900eefc7b1eaafc5e3ab6e1991d2d34d792dcfd36a92b13f8c1f5f7ae8a3ee4aa139
+  languageName: node
+  linkType: hard
+
 "react-tooltip@npm:4.2.7":
   version: 4.2.7
   resolution: "react-tooltip@npm:4.2.7"
@@ -52393,6 +52426,13 @@ __metadata:
   version: 0.2.7
   resolution: "relateurl@npm:0.2.7"
   checksum: 5891e792eae1dfc3da91c6fda76d6c3de0333a60aa5ad848982ebb6dccaa06e86385fb1235a1582c680a3d445d31be01c6bfc0804ebbcab5aaf53fa856fde6b6
+  languageName: node
+  linkType: hard
+
+"relative-time-format@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "relative-time-format@npm:1.1.6"
+  checksum: b0c14f2d81bb086d0bcedabab78cff0cd31d3ad5040db88f0dc671361c33bf5ec924fe897e9308a43c2f569b114dd543557b9df659f7a06e2d06d392b539d5d7
   languageName: node
   linkType: hard
 
