@@ -167,6 +167,7 @@ Feature: Analytics - Settings - Popup View
     And Analytics toggle is enabled: false
     Then I validate latest analytics single event "settings | analytics | skip | click"
     Then I validate that 1 analytics event(s) have been sent
+    And Analytics toggle is enabled: true
 
   @LW-8786
   Scenario: Analytics - Popup View - Settings - Theme switch
