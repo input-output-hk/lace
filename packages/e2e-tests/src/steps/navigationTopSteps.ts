@@ -96,6 +96,10 @@ When(/^I click on the Address Book option$/, async () => {
   await menuHeaderPageObject.clickAddressBookOption();
 });
 
+When(/^I click on "Add new wallet" option$/, async () => {
+  await MenuHeader.clickOnAddNewWalletOption();
+});
+
 When(/^I click on then network sub-menu back button$/, async () => {
   await menuHeaderNetwork.backButton.click();
 });

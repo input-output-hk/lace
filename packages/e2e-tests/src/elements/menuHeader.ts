@@ -146,6 +146,11 @@ export class MenuHeader {
   async hoverOverExpandButton(): Promise<void> {
     await this.expandButton.moveTo();
   }
+
+  async clickOnAddNewWalletOption(): Promise<void> {
+    await this.menuAddNewWalletButton.waitForClickable();
+    await this.menuAddNewWalletButton.click();
+  }
 }
 
 export default new MenuHeader();

@@ -14,7 +14,11 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionSimplePopup*.feature',
       './src/features/SettingsPageExtended.feature'
     ],
-    batch2: ['./src/features/analytics/Analytics*.feature', './src/features/e2e/*.feature'],
+    batch2: [
+      './src/features/analytics/Analytics*.feature',
+      './src/features/e2e/*.feature',
+      './src/features/AddNewWallet*.feature'
+    ],
     batch3: [
       './src/features/AddressBookExtended.feature',
       './src/features/AddressBookPopup.feature',
