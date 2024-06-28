@@ -1,10 +1,12 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
 import { getTestWallet, TestWalletName } from '../../support/walletConfiguration';
 import CommonOnboardingElements from './commonOnboardingElements';
 import recoveryPhrasePage from './recoveryPhrasePage';
 import walletSetupPage from './walletSetupPage';
 import topNavigationAssert from '../../assert/topNavigationAssert';
 
-class OnboardingMainPage extends CommonOnboardingElements {
+export class OnboardingMainPage extends CommonOnboardingElements {
   private LOGO_IMAGE = '[data-testid="wallet-setup-logo"]';
   private TITLE = '[data-testid="wallet-setup-title"]';
   private SUBTITLE = '[data-testid="wallet-setup-subtitle"]';
@@ -24,75 +26,75 @@ class OnboardingMainPage extends CommonOnboardingElements {
   private AGREEMENT_TERMS_OF_SERVICE_LINK = '[data-testid="agreement-terms-of-service-link"]';
   private AGREEMENT_PRIVACY_POLICY_LINK = '[data-testid="agreement-privacy-policy-link"]';
 
-  get logo() {
+  get logo(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LOGO_IMAGE);
   }
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
   }
 
-  get subtitle() {
+  get subtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SUBTITLE);
   }
 
-  get createWalletIcon() {
+  get createWalletIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CREATE_WALLET_ICON);
   }
 
-  get createWalletTitle() {
+  get createWalletTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CREATE_WALLET_TITLE);
   }
 
-  get createWalletDescription() {
+  get createWalletDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CREATE_WALLET_DESCRIPTION);
   }
 
-  get createWalletButton() {
+  get createWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CREATE_WALLET_BUTTON);
   }
 
-  get hardwareWalletIcon() {
+  get hardwareWalletIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HARDWARE_WALLET_ICON);
   }
 
-  get hardwareWalletTitle() {
+  get hardwareWalletTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HARDWARE_WALLET_TITLE);
   }
 
-  get hardwareWalletDescription() {
+  get hardwareWalletDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HARDWARE_WALLET_DESCRIPTION);
   }
 
-  get hardwareWalletButton() {
+  get hardwareWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HARDWARE_WALLET_BUTTON);
   }
 
-  get restoreWalletIcon() {
+  get restoreWalletIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESTORE_WALLET_ICON);
   }
 
-  get restoreWalletTitle() {
+  get restoreWalletTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESTORE_WALLET_TITLE);
   }
 
-  get restoreWalletDescription() {
+  get restoreWalletDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESTORE_WALLET_DESCRIPTION);
   }
 
-  get restoreWalletButton() {
+  get restoreWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESTORE_WALLET_BUTTON);
   }
 
-  get agreementText() {
+  get agreementText(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.AGREEMENT_TEXT);
   }
 
-  get agreementTermsOfServiceLink() {
+  get agreementTermsOfServiceLink(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.AGREEMENT_TERMS_OF_SERVICE_LINK);
   }
 
-  get agreementPrivacyPolicyLink() {
+  get agreementPrivacyPolicyLink(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.AGREEMENT_PRIVACY_POLICY_LINK);
   }
 
