@@ -60,6 +60,8 @@ const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEleme
   [ConwayEraCertificatesTypes.RegisterDelegateRepresentative]: RegisterDelegateRepresentativeIcon,
   [ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]: UnregisterDelegateRepresentativeIcon,
   [ConwayEraCertificatesTypes.VoteDelegation]: VoteDelegationIcon,
+  [ConwayEraCertificatesTypes.Registration]: ClipboardCheckOutlineIcon,
+  [ConwayEraCertificatesTypes.Unregistration]: ClipboardXOutlineComponentIcon,
   [TransactionActivityType.rewards]: RewardsIcon,
   [TransactionActivityType.incoming]: IncomingIcon,
   [TransactionActivityType.outgoing]: OutgoingIcon,
@@ -73,10 +75,14 @@ export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactEl
   const icon = (type && activityTypeIcon[type]) || RefreshOutlinedIcon;
   const iconStyle = { fontSize: txIconSize() };
 
+  const isDelegationActivity =
+    type === ConwayEraCertificatesTypes.Unregistration || type === ConwayEraCertificatesTypes.Registration;
+
   const isGovernanceTx =
-    Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
-    type in ConwayEraGovernanceActions ||
-    type in Cip1694GovernanceActivityType;
+    !isDelegationActivity &&
+    (Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
+      type in ConwayEraGovernanceActions ||
+      type in Cip1694GovernanceActivityType);
 
   return (
     <Flex
