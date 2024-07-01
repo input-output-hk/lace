@@ -3,8 +3,9 @@ import uniq from 'lodash/uniq';
 import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
 import { Wallet } from '@lace/cardano';
-import type { ActivityType } from '@lace/core';
 import {
+  ActivityType,
+  ConwayEraCertificatesTypes,
   ActivityStatus,
   AssetActivityListProps,
   DelegationActivityType,
@@ -83,8 +84,10 @@ interface ActivityDetailProps {
 }
 
 const getTypeLabel = (type: ActivityType): TranslationKey => {
-  if (type === DelegationActivityType.delegationRegistration) return 'core.activityDetails.registration';
-  if (type === DelegationActivityType.delegationDeregistration) return 'core.activityDetails.deregistration';
+  if (type === DelegationActivityType.delegationRegistration || type === ConwayEraCertificatesTypes.Registration)
+    return 'core.activityDetails.registration';
+  if (type === DelegationActivityType.delegationDeregistration || type === ConwayEraCertificatesTypes.Unregistration)
+    return 'core.activityDetails.deregistration';
   if (type === TransactionActivityType.incoming) return 'core.activityDetails.received';
   if (type === TransactionActivityType.outgoing) return 'core.activityDetails.sent';
   return `core.activityDetails.${type}`;
