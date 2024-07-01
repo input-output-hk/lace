@@ -1,10 +1,10 @@
 import { Dialog, FileUpload, Text } from '@lace/ui';
+import { SharedWalletLayout } from '../SharedWalletLayout';
 import { VFC, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { SharedWalletLayout } from '../SharedWalletLayout';
-import { restorationTimelineSteps } from './timelineSteps';
 import { FileErrorMessage, FileValidationError, SharedWalletRestorationStep } from './types';
 import { validateJson } from './validateJson';
+import { restorationTimelineSteps } from './timelineSteps';
 
 type SharedWalletRestorationProps = {
   navigateToAppHome: () => void;
@@ -13,9 +13,9 @@ type SharedWalletRestorationProps = {
 
 const UPLOAD_JSON_ID = 'upload-json';
 
-export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
+export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({ 
   navigateToStart,
-  navigateToAppHome,
+  navigateToAppHome
 }) => {
   const [file, setFile] = useState<File | undefined>();
   const [isFileValid, setFileValid] = useState(false);
@@ -24,31 +24,33 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
   const { t } = useTranslation();
 
   const translations = {
-    incorrectWalletError: {
-      description: t('sharedWallets.addSharedWallet.import.error.incorrectWallet.description'),
-      exit: t('sharedWallets.addSharedWallet.import.error.incorrectWallet.exit'),
-      title: t('sharedWallets.addSharedWallet.import.error.incorrectWallet.title'),
-    },
     next: t('sharedWallets.addSharedWallet.import.next'),
     subtitle: t('sharedWallets.addSharedWallet.import.subtitle'),
     title: t('sharedWallets.addSharedWallet.import.title'),
-    unrecognizedError: {
-      description: t('sharedWallets.addSharedWallet.import.error.unrecognized.description'),
-      exit: t('sharedWallets.addSharedWallet.import.error.unrecognized.exit'),
-      retry: t('sharedWallets.addSharedWallet.import.error.unrecognized.retry'),
-      title: t('sharedWallets.addSharedWallet.import.error.unrecognized.title'),
-    },
-    uploadBtnFormats: t('sharedWallets.addSharedWallet.import.uploadBtnFormats'),
-    uploadBtnRemove: t('sharedWallets.addSharedWallet.import.uploadBtnRemove'),
     uploadBtnTitle: (
       <Trans
         i18nKey="sharedWallets.addSharedWallet.import.uploadBtnTitle"
         t={t}
         components={{
-          Link: <Text.Button color="highlight" />,
+          Link: (
+            <Text.Button color="highlight" />
+          )
         }}
       />
     ),
+    uploadBtnFormats: t('sharedWallets.addSharedWallet.import.uploadBtnFormats'),
+    uploadBtnRemove: t('sharedWallets.addSharedWallet.import.uploadBtnRemove'),
+    unrecognizedError: {
+      title: t('sharedWallets.addSharedWallet.import.error.unrecognized.title'),
+      description: t('sharedWallets.addSharedWallet.import.error.unrecognized.description'),
+      exit: t('sharedWallets.addSharedWallet.import.error.unrecognized.exit'),
+      retry: t('sharedWallets.addSharedWallet.import.error.unrecognized.retry')
+    },
+    incorrectWalletError: {
+      title: t('sharedWallets.addSharedWallet.import.error.incorrectWallet.title'),
+      description: t('sharedWallets.addSharedWallet.import.error.incorrectWallet.description'),
+      exit: t('sharedWallets.addSharedWallet.import.error.incorrectWallet.exit')
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,13 +58,13 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
   };
 
   useEffect(() => {
-    setError();
+    setError(undefined);
     const validate = async (importedFile: File) => {
       try {
         const result = await validateJson(importedFile);
         setFileValid(result.isFileValid);
-      } catch (error_: unknown) {
-        setError(error_ as FileValidationError);
+      } catch (e: unknown) {
+        setError(e as FileValidationError);
       }
     };
 
@@ -91,7 +93,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
           supportedFormats={translations.uploadBtnFormats}
           removeButtonLabel={translations.uploadBtnRemove}
           files={file ? [file.name] : undefined}
-          onRemove={() => setFile()}
+          onRemove={() => setFile(undefined)}
           key={file ? file.name : ''}
         />
       </SharedWalletLayout>
@@ -102,7 +104,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
           <Dialog.Action
             cancel
             label={translations.unrecognizedError.exit}
-            onClick={() => setFile()}
+            onClick={() => setFile(undefined)}
             testId="error-unrecognized-exit-btn"
           />
           <Dialog.Action
