@@ -29,11 +29,13 @@ module.exports = {
     '@typescript-eslint/no-shadow': ['error'],
     'no-invalid-this': 0,
     'react/prop-types': 'off',
+    'no-unused-vars': ['error', { varsIgnorePattern: 'React' }],
+    '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^React$' }], // Ignore unused React imports for TypeScript
     'max-len': 'off', // prettier is already handling this automatically,
     '@typescript-eslint/no-explicit-any': ['error'],
     'no-console': ['error', { allow: ['warn', 'error', 'info', 'debug'] }],
     'lodash/import-scope': ['error', 'method'],
-    'promise/avoid-new': 'off',
+    'promise/avoid-new': 'off'
   },
   overrides: [
     {

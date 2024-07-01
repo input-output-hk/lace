@@ -43,6 +43,7 @@ module.exports = {
         groups: ['external', 'type', 'internal', 'parent', 'sibling', 'index'],
       },
     ],
+    'no-unused-vars': ['error', { varsIgnorePattern: 'React' }],
     'promise/avoid-new': 'off',
     'react/jsx-curly-brace-presence': 'error',
     'react/jsx-handler-names': 'off',

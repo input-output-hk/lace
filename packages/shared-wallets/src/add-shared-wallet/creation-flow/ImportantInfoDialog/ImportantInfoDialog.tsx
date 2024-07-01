@@ -1,5 +1,5 @@
 import { Box, Checkbox, Dialog, Flex, Text } from '@lace/ui';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './ImportantInfoDialog.module.scss';
 

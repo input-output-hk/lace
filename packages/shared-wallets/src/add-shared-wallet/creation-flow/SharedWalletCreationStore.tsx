@@ -1,4 +1,13 @@
-import { Dispatch, ReactElement, ReactNode, createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import React, {
+  Dispatch,
+  ReactElement,
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 import { v1 as uuid } from 'uuid';
 import { makeInitialStateProvider } from '../../initial-state-provider';
 import { StateType, defineStateShape } from '../../state-utils';
@@ -299,14 +308,15 @@ const makeStateMachine = ({
   },
 });
 
-export type SharedWalletCreationStoreSharedProps = {
+export type SharedWalletFlowProps = {
   activeWalletName: string;
+  generateSharedKeys: () => Promise<string>;
   initialWalletName: string;
   navigateToAppHome: () => void;
   navigateToParentFlow: () => void;
 };
 
-export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
+export type SharedWalletCreationStoreProps = SharedWalletFlowProps & {
   children: (value: ContextValue) => ReactNode;
 };
 

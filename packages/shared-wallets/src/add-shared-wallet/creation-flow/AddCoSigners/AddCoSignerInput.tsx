@@ -1,6 +1,6 @@
 import { Box, TextBox } from '@lace/ui';
 import { TFunction } from 'i18next';
-import { ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CoSigner, CoSignerDirty, CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './type';
 

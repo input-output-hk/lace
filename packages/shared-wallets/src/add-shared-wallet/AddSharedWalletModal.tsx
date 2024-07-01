@@ -1,6 +1,6 @@
 import { NavigationButton } from '@lace/common';
 import { Modal } from 'antd';
-import { FC } from 'react';
+import React, { FC } from 'react';
 import styles from './AddSharedWalletModal.module.scss';
 
 type AddSharedWalletModalProps = {

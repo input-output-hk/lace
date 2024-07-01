@@ -1,4 +1,5 @@
 import { Box, Divider } from '@lace/ui';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
 import { AddCoSignerInput } from './AddCoSignerInput';

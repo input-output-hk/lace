@@ -1,1 +1,1 @@
-export { AddSharedWalletMainPageFlow } from './AddSharedWalletMainPageFlow';
+export { SharedWalletEntry } from './SharedWalletEntry';

@@ -1,19 +1,13 @@
-import { VFC } from 'react';
+import React, { VFC } from 'react';
 import { AddCoSigners } from './AddCoSigners';
 import { ImportantInfoDialog } from './ImportantInfoDialog';
 import { QuorumOption } from './Quorum';
 import { SetupSharedWallet } from './SetupSharedWallet';
-import {
-  SharedWalletActionType,
-  SharedWalletCreationStore,
-  SharedWalletCreationStoreSharedProps,
-} from './SharedWalletCreationStore';
+import { SharedWalletActionType, SharedWalletCreationStore, SharedWalletFlowProps } from './SharedWalletCreationStore';
 import { ShareWalletDetails } from './ShareWalletDetails';
 import { SharedWalletCreationStep } from './types';
 
-type SharedWalletCreationFlowProps = SharedWalletCreationStoreSharedProps;
-
-export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (props) => (
+export const SharedWalletCreationFlow: VFC<SharedWalletFlowProps> = (props) => (
   <SharedWalletCreationStore {...props}>
     {({ state, dispatch }) => (
       <>

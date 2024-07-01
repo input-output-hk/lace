@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
-import { AddSharedWalletModal, SharedWalletCreationFlow, AddSharedWalletMainPageFlow } from '@lace/shared-wallets';
+import { AddSharedWalletModal, SharedWalletCreationFlow } from '@lace/shared-wallets';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
-import { useWalletManager } from '@hooks';
+import { GenerateSharedKeysParams, useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
+import { SharedWalletEntry } from '@lace/shared-wallets/src';
 
 export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
-  const { walletRepository } = useWalletManager();
+  const { walletRepository, generateSharedKeys } = useWalletManager();
   const { walletInfo } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
@@ -22,8 +23,10 @@ export const SharedWallet = (): JSX.Element => {
     })();
   }, [walletRepository]);
 
-  const sharedKeys: string = undefined;
-
+  // const sharedKeys: string = undefined;
+  const sharedKeysParams: GenerateSharedKeysParams = {
+    password: 'string'
+  };
   return (
     <AddSharedWalletModal
       onClose={() => {
@@ -41,6 +44,7 @@ export const SharedWallet = (): JSX.Element => {
               initialWalletName={initialWalletName}
               navigateToAppHome={() => setBackgroundPage()}
               navigateToParentFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
+              generateSharedKeys={async () => generateSharedKeys(sharedKeysParams)}
             />
           )}
         />
@@ -48,11 +52,11 @@ export const SharedWallet = (): JSX.Element => {
           exact
           path={walletRoutePaths.sharedWallet.root}
           render={() => (
-            <AddSharedWalletMainPageFlow
+            <SharedWalletEntry
               onCreateSharedWalletClick={() => history.push(walletRoutePaths.sharedWallet.create)}
-              sharedKeys={sharedKeys}
-              onImportSharedWalletClick={() => void 0}
-              onKeysGenerateClick={() => void 0}
+              onImportSharedWalletClick={(): void => void 0}
+              getSharedKeys={async () => generateSharedKeys(sharedKeysParams)}
+              createAndImportOptionsDisabled
             />
           )}
         />

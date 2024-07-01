@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": "src",
     "declaration": true,
-    "declarationDir": "dts"
+    "declarationDir": "dts",
+    "noUnusedLocals": false
   },
   "include": ["src"]
 }

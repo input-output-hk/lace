@@ -1,8 +1,9 @@
 import { Button } from '@lace/common';
 import { ActionCard, Box, Divider, Text } from '@lace/ui';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout, SharedWalletTimelineSteps } from '../SharedWalletLayout';
-import { ReactComponent as DownloadFileIcon } from './download-file.svg';
+import { DownloadFileIcon } from './DownloadFileIcon';
 import styles from './ShareWalletDetails.module.scss';
 import { downloadWalletData } from './utils';
 
