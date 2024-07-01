@@ -82,7 +82,7 @@ runs:
     - name: Get built extension
       uses: actions/download-artifact@v4
       with:
-        name: lace-browser-extension
+        name: lace-browser-extension-dist-build
         path: ./apps/browser-extension-wallet/dist
 
     - name: Execute E2E tests

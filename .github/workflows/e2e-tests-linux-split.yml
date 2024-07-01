@@ -58,59 +58,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
+#      - name: Build Lace browser extension
+#        uses: ./.github/actions/build/app
+#        with:
+#          DIR: apps/browser-extension-wallet
+#          NAME: lace-browser-extension
+#          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+#          POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
+#          POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
+#          POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
+#          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
+#          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
+
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
         with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Download packages-common
-        uses: actions/download-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: packages-common
-          path: packages/common/dist
-
-      - name: Download packages-cardano
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-cardano
-          path: packages/cardano/dist
-
-      - name: Download packages-translation
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-translation
-          path: packages/translation/dist
-
-      - name: Download packages-core
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-core
-          path: packages/core/dist
-
-      - name: Download packages-shared-wallets
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-shared-wallets
-          path: packages/shared-wallets/dist
-
-      - name: Download packages-staking
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-staking
-          path: packages/staking/dist
-
-      - name: Build Lace browser extension
-        uses: ./.github/actions/build/app
-        with:
-          DIR: apps/browser-extension-wallet
-          NAME: lace-browser-extension
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
-          POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
-          POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
-          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
-          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
+          name: lace-browser-extension-dist-build
+          path: ./apps/browser-extension-wallet/dist
 
   tests-run-part-1:
     runs-on: ${{ needs.prereq.outputs.runner }}
