@@ -66,11 +66,17 @@ runs:
   using: 'composite'
 
   steps:
-    - name: Setup Node.js and install dependencies
-      uses: ./.github/actions/install
-      with:
-        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+#    - name: Setup Node.js and install dependencies
+#      uses: ./.github/actions/install
+#      with:
+#        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+#        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+    - name: Decrypt test data
+      shell: bash
+      working-directory: ./packages/e2e-tests
+      run: ./decrypt_secret.sh
+      env:
+        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
 
     - name: Start XVFB
       shell: bash
