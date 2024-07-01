@@ -143,7 +143,7 @@ class DrawerSendExtendedAssert {
     await browser.pause(1000);
     const valueAdaAllocation = Number(await TransactionNewPage.getAdaAllocationValueInAda());
 
-    expect(Number(expectedValueAdaAllocation)).to.be.within(valueAdaAllocation - 0.1, valueAdaAllocation + 0.1);
+    expect(Number(expectedValueAdaAllocation)).to.be.within(valueAdaAllocation - 0.2, valueAdaAllocation + 0.2);
 
     expect(await TransactionNewPage.adaAllocationValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }

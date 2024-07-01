@@ -152,6 +152,7 @@ Feature: Analytics - Settings - Extended View
     And Analytics toggle is enabled: false
     Then I validate latest analytics single event "settings | analytics | skip | click"
     Then I validate that 1 analytics event(s) have been sent
+    And Analytics toggle is enabled: true
 
   @LW-8790
   Scenario: Analytics - Extended View - Settings - Theme switch
