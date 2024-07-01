@@ -52,7 +52,6 @@ jobs:
 
   build-dist-version:
     runs-on: ${{ needs.prereq.outputs.runner }}
-    if: always()
     needs: prereq
     steps:
       - name: Checkout repository
@@ -84,7 +83,7 @@ jobs:
 
   tests-run-part-1:
     runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: build-dist-version
+    needs: [prereq, build-dist-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -100,7 +99,7 @@ jobs:
 
   tests-run-part-2:
     runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: build-dist-version
+    needs: [prereq, build-dist-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -116,7 +115,7 @@ jobs:
 
   tests-run-part-3:
     runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: build-dist-version
+    needs: [prereq, build-dist-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -132,7 +131,7 @@ jobs:
 
   tests-run-part-4:
     runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: build-dist-version
+    needs: [prereq, build-dist-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
