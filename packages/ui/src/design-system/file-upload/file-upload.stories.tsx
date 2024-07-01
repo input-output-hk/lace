@@ -18,12 +18,6 @@ export default {
   decorators: [page({ title: 'File Upload', subtitle })],
 } as Meta;
 
-const label = [
-  { text: 'Drag & drop or', highlight: false },
-  { text: 'choose file', highlight: true },
-  { text: 'to upload', highlight: false },
-];
-
 const supportedFormats = 'Supported formats: JSON';
 
 const removeButtonLabel = 'Remove';
@@ -33,7 +27,7 @@ const RenderFileUpload = ({
   files,
 }: Readonly<{ id?: string; files?: string[] }>): JSX.Element => (
   <FileUpload
-    label={label}
+    label="Drag & drop or choose file to upload"
     supportedFormats={supportedFormats}
     removeButtonLabel={removeButtonLabel}
     id={id}

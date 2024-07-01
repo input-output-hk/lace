@@ -48,6 +48,7 @@ export const checkIconBox = style([
     h: '$24',
     fontSize: '$25',
     color: '$data_green',
+    lineHeight: undefined,
   }),
 ]);
 

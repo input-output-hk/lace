@@ -38,8 +38,8 @@ export const QuorumOption = ({
   const { t } = useTranslation();
 
   const translations = {
-    buttonBack: t('sharedWallets.addSharedWallet.quorum.buttonBack'),
-    buttonNext: t('sharedWallets.addSharedWallet.quorum.buttonNext'),
+    buttonBack: t('sharedWallets.addSharedWallet.quorum.button.back'),
+    buttonNext: t('sharedWallets.addSharedWallet.quorum.button.next'),
     cosignersAmountPickerText: t('sharedWallets.addSharedWallet.quorum.cosignersAmountPickerText', {
       amount: totalCosignersNumber,
     }),
