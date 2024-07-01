@@ -5,58 +5,20 @@ inputs:
   WALLET_PASSWORD:
     description: 'Test wallet password'
     required: true
-
   TEST_DAPP_URL:
     description: 'Test DApp Url'
     required: true
-
   GITHUB_TOKEN:
     description: 'Github token'
     required: true
-  #
-  #  E2E_AWS_ACCESS_KEY_ID:
-  #    description: 'AWS access key id'
-  #    required: true
-  #
-  #  E2E_AWS_SECRET_ACCESS_KEY:
-  #    description: 'AWS secret access key'
-  #    required: true
-  #
-  #  E2E_REPORTS_USER:
-  #    description: 'E2E reports user'
-  #    required: true
-  #
-  #  E2E_REPORTS_PASSWORD:
-  #    description: 'E2E reports password'
-  #    required: true
-  #
-  #  E2E_REPORTS_URL:
-  #    description: 'E2E reports url'
-  #    required: true
-  #
-  #  RUN:
-  #    description: 'Runner number'
-  #    required: true
-  #
-  #  BRANCH:
-  #    description: 'Branch'
-  #    required: true
-  #
-  #  TAGS:
-  #    description: 'tags'
-  #    required: false
-  #    default: '@Smoke and @Testnet'
-
   BROWSER:
     description: 'browser'
     required: false
     default: 'chrome'
-
   DISPLAY:
     description: ''
     required: false
     default: ':99.0'
-
   BATCH:
     description: 'Tests batch'
     required: true
@@ -77,20 +39,17 @@ runs:
       run: ./decrypt_secret.sh
       env:
         WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-
     - name: Start XVFB
       shell: bash
       env:
         DISPLAY: ${{ inputs.DISPLAY }}
       run: |
         Xvfb :99 &
-
     - name: Get built extension
       uses: actions/download-artifact@v4
       with:
         name: lace-browser-extension-dist-build
         path: ./apps/browser-extension-wallet/dist
-
     - name: Execute E2E tests
       shell: bash
       id: e2e-tests
@@ -102,48 +61,24 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
       run: |
-        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite ${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
+        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
         eval "$runCommand";
-
     - name: Save dmesg logs
       shell: bash
       if: always()
       working-directory: ./packages/e2e-tests
       run: |
         sudo dmesg > ./dmesg.log
-
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
       uses: actions/upload-artifact@v4
+      env:
+        BATCH: ${{ inputs.BATCH }}
       with:
-        name: runner-artifacts-${{ inputs.BRANCH }}
+        name: runner-artifacts-${BATCH}
         path: |
           ./packages/e2e-tests/screenshots
           ./packages/e2e-tests/logs
           ./packages/e2e-tests/reports/allure/results
           ./packages/e2e-tests/dmesg.log
         retention-days: 5
-#    - name: Execute e2e smoke tests
-#      shell: bash
-#      id: e2e-tests
-#      working-directory: ./packages/e2e-tests
-#      env:
-#        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-#        TEST_DAPP_URL: ${{ inputs.TEST_DAPP_URL }}
-#        TAGS: ${{ inputs.TAGS }}
-#        BROWSER: ${{ inputs.BROWSER }}
-#        RUN: ${{ inputs.RUN }}
-#        DISPLAY: ${{ inputs.DISPLAY }}
-#        BRANCH: ${{ inputs.BRANCH }}
-#      run: yarn wdio run wdio.conf.${{ inputs.BROWSER }}.ts --cucumberOpts.tags="@Smoke and not @Pending"
-#
-#    - name: Publish artifacts (logs, reports, screenshots)
-#      uses: actions/upload-artifact@v4
-#      if: always()
-#      with:
-#        name: test-artifacts
-#        path: |
-#          ./packages/e2e-tests/screenshots
-#          ./packages/e2e-tests/logs
-#          ./packages/e2e-tests/reports
-#        retention-days: 5

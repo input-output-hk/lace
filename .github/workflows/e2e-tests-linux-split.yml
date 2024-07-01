@@ -56,25 +56,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-#      - name: Build Lace browser extension
-#        uses: ./.github/actions/build/app
-#        with:
-#          DIR: apps/browser-extension-wallet
-#          NAME: lace-browser-extension
-#          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-#          POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
-#          POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
-#          POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
-#          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
-#          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
-
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -87,15 +73,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Execute E2E tests
-        id: e2e-tests-1
         uses: ./.github/actions/test/e2e
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BATCH: batch1
+          BATCH: 1
 
   tests-run-part-2:
     runs-on: ${{ needs.prereq.outputs.runner }}
@@ -103,15 +87,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Execute E2E tests
-        id: e2e-tests-1
         uses: ./.github/actions/test/e2e
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BATCH: batch2
+          BATCH: 2
 
   tests-run-part-3:
     runs-on: ${{ needs.prereq.outputs.runner }}
@@ -119,15 +101,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Execute E2E tests
-        id: e2e-tests-1
         uses: ./.github/actions/test/e2e
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BATCH: batch3
+          BATCH: 3
 
   tests-run-part-4:
     runs-on: ${{ needs.prereq.outputs.runner }}
@@ -135,15 +115,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Execute E2E tests
-        id: e2e-tests-1
         uses: ./.github/actions/test/e2e
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BATCH: batch4
+          BATCH: 4
 
   results-processing:
     needs: [tests-run-part-1, tests-run-part-2, tests-run-part-3, tests-run-part-4]
