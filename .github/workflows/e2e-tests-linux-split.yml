@@ -73,7 +73,7 @@ jobs:
       matrix:
         batch: [1, 2, 3, 4]
     runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: [ prereq, build-dist-version ]
+    needs: [prereq, build-dist-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
           BATCH: ${{ matrix.batch }}
 
   results-processing:
-    needs: [tests-run-split]
+    needs: [prereq, tests-run-split]
     runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     steps:
