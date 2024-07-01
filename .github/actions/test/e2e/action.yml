@@ -28,17 +28,11 @@ runs:
   using: 'composite'
 
   steps:
-#    - name: Setup Node.js and install dependencies
-#      uses: ./.github/actions/install
-#      with:
-#        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-#        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-    - name: Decrypt test data
-      shell: bash
-      working-directory: ./packages/e2e-tests
-      run: ./decrypt_secret.sh
-      env:
-        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+    - name: Setup Node.js and install dependencies
+      uses: ./.github/actions/install
+      with:
+        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
     - name: Start XVFB
       shell: bash
       env:
@@ -72,10 +66,10 @@ runs:
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
       uses: actions/upload-artifact@v4
-      env:
-        BATCH: ${{ inputs.BATCH }}
+#      env:
+#        BATCH: ${{ inputs.BATCH }}
       with:
-        name: runner-artifacts-${BATCH}
+        name: runner-artifacts-"${{ inputs.BATCH }}"
         path: |
           ./packages/e2e-tests/screenshots
           ./packages/e2e-tests/logs
