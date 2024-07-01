@@ -69,6 +69,7 @@ jobs:
 
   tests-run-split:
     strategy:
+      fail-fast: false
       matrix:
         batch: [1, 2, 3, 4]
     runs-on: ${{ needs.prereq.outputs.runner }}
@@ -83,62 +84,6 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BATCH: ${{ matrix.batch }}
-
-#  tests-run-part-1:
-#    runs-on: ${{ needs.prereq.outputs.runner }}
-#    needs: [prereq, build-dist-version]
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Execute E2E tests
-#        uses: ./.github/actions/test/e2e
-#        with:
-#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-#          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#          BATCH: 1
-#
-#  tests-run-part-2:
-#    runs-on: ${{ needs.prereq.outputs.runner }}
-#    needs: [prereq, build-dist-version]
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Execute E2E tests
-#        uses: ./.github/actions/test/e2e
-#        with:
-#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-#          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#          BATCH: 2
-#
-#  tests-run-part-3:
-#    runs-on: ${{ needs.prereq.outputs.runner }}
-#    needs: [prereq, build-dist-version]
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Execute E2E tests
-#        uses: ./.github/actions/test/e2e
-#        with:
-#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-#          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#          BATCH: 3
-#
-#  tests-run-part-4:
-#    runs-on: ${{ needs.prereq.outputs.runner }}
-#    needs: [prereq, build-dist-version]
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Execute E2E tests
-#        uses: ./.github/actions/test/e2e
-#        with:
-#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-#          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#          BATCH: 4
 
   results-processing:
     needs: [tests-run-split]
