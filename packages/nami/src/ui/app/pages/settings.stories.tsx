@@ -95,6 +95,7 @@ export const SettingsLight: Story = {
 };
 
 export const SettingsDark: Story = {
+  ...SettingsLight,
   parameters: {
     ...SettingsLight.parameters,
     colorMode: 'dark',
@@ -202,6 +203,62 @@ export const NetworkLight: Story = {
 export const NetworkDark: Story = {
   parameters: {
     ...NetworkLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const LegalLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'legal',
+  },
+};
+
+export const LegalDark: Story = {
+  parameters: {
+    ...LegalLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const LegalTermsOfUseLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'legal',
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('modal', async () => {
+      await userEvent.click(canvas.getByText('Terms of Use'));
+    });
+  },
+};
+
+export const LegalTermsOfUseDark: Story = {
+  ...LegalTermsOfUseLight,
+  parameters: {
+    ...LegalTermsOfUseLight.parameters,
+    colorMode: 'dark',
+  },
+};
+
+export const LegalPrivacyPolicyLight: Story = {
+  parameters: {
+    colorMode: 'light',
+    path: 'legal',
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('modal', async () => {
+      await userEvent.click(canvas.getByText('Privacy Policy'));
+    });
+  },
+};
+
+export const LegalPrivacyPolicyDark: Story = {
+  ...LegalPrivacyPolicyLight,
+  parameters: {
+    ...LegalPrivacyPolicyLight.parameters,
     colorMode: 'dark',
   },
 };

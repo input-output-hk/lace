@@ -48,7 +48,7 @@ import AvatarLoader from '../components/avatarLoader';
 import { ChangePasswordModal } from '../components/changePasswordModal';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
-// import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
+import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
 
 const Settings = () => {
   const history = useHistory();
@@ -84,7 +84,7 @@ const Settings = () => {
           />
           <Route path="whitelisted" component={() => <Whitelisted />} />
           <Route path="network" component={() => <Network />} />
-          {/* <Route path="legal" component={<LegalSettings />} /> */}
+          <Route path="legal" component={() => <LegalSettings />} />
         </HashRouter>
       </Box>
     </>
