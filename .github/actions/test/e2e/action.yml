@@ -66,10 +66,10 @@ runs:
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
       uses: actions/upload-artifact@v4
-#      env:
-#        BATCH: ${{ inputs.BATCH }}
+      env:
+        BATCH: ${{ inputs.BATCH }}
       with:
-        name: runner-artifacts-"${{ inputs.BATCH }}"
+        name: runner-artifacts-${{ env.BATCH }}
         path: |
           ./packages/e2e-tests/screenshots
           ./packages/e2e-tests/logs
