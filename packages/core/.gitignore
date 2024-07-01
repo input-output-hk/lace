@@ -1,2 +1,2 @@
 # Do not ignore the following
-!src/ui/typings/*
+!*.d.ts

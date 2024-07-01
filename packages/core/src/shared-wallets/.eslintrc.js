@@ -1,23 +1,32 @@
+const path = require('node:path');
+
 module.exports = {
   env: {
     node: true,
   },
-  extends: ['prettier'],
+  extends: ['prettier', 'plugin:typescript-sort-keys/recommended'],
   overrides: [
     {
-      files: ['src/**/*.d.ts', 'tsup.config.ts', 'vitest.config.ts', '*.stories.{ts,tsx}'],
+      files: ['./.eslintrc.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+    {
+      files: ['**/**/*.stories.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
-        'react/no-multi-comp': 0,
+        'react/no-multi-comp': 'off',
+        'sonarjs/no-duplicate-string': 'off',
       },
     },
   ],
   parserOptions: {
-    extraFileExtensions: ['.cjs', '.mjs'],
-    project: 'tsconfig.eslint.json',
+    extraFileExtensions: ['.cjs', '.mjs', '.js'],
+    project: 'tsconfig.json',
     tsconfigRootDir: __dirname,
   },
-  plugins: ['sort-keys'],
+  plugins: ['sort-keys', 'typescript-sort-keys'],
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -25,7 +34,7 @@ module.exports = {
     '@typescript-eslint/switch-exhaustiveness-check': 'error',
     curly: ['error', 'multi-line'],
     'import/no-default-export': 'error',
-    'import/no-extraneous-dependencies': 2,
+    'import/no-extraneous-dependencies': 'error',
     'import/no-unresolved': 'off',
     'import/order': [
       'error',
@@ -34,23 +43,11 @@ module.exports = {
           caseInsensitive: true,
           order: 'asc',
         },
-        groups: ['builtin', 'external', 'type', 'internal', 'parent', 'sibling', 'index'],
-      },
-    ],
-    'no-restricted-imports': [
-      'error',
-      {
-        paths: [
-          {
-            importNames: ['sx', 'style', 'recipe', 'vars', 'LocalThemeProvider'],
-            message: "Please import from 'features/theme' or directly e.g. '@vanilla-extract/css'.",
-            name: '@lace/ui',
-          },
-        ],
+        groups: ['external', 'type', 'internal', 'parent', 'sibling', 'index'],
       },
     ],
     'promise/avoid-new': 'off',
-    'react/jsx-curly-brace-presence': 2,
+    'react/jsx-curly-brace-presence': 'error',
     'react/jsx-handler-names': 'off',
     'react/react-in-jsx-scope': 'off',
     'sort-imports': [

@@ -26,6 +26,6 @@
       "path": "../../common/src"
     }
   ],
-  "exclude": ["dist/"],
+  "exclude": ["dist/", "shared-wallets"],
   "include": ["**/*.ts", "**/*.tsx", "**/*.json"]
 }
