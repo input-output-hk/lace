@@ -135,6 +135,7 @@ const Transaction = ({
         )}
         {displayInfo ? (
           <AccordionButton
+            data-testid={`transaction-button-${displayInfo.txHash}`}
             display="flex"
             wordBreak="break-word"
             justifyContent="space-between"

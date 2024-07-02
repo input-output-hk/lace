@@ -13556,7 +13556,10 @@ __metadata:
     "@storybook/react": ^8.1.6
     "@storybook/react-webpack5": ^8.1.6
     "@storybook/test": ^8.1.6
+    "@types/chrome": ^0.0.268
     "@types/react": 17.0.2
+    "@types/react-kawaii": ^0.17.3
+    "@types/react-lazy-load-image-component": 1.6.4
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
     crc: ^4.1.1
@@ -23229,6 +23232,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chrome@npm:^0.0.268":
+  version: 0.0.268
+  resolution: "@types/chrome@npm:0.0.268"
+  dependencies:
+    "@types/filesystem": "*"
+    "@types/har-format": "*"
+  checksum: c7ae2479b225beea673681df0a6022f251e98bdf1c162c84363d52efb32edf5d26cf8007d6ed92d497837212a1c2cfa6ad9c3c1c0d0169e0a5189fa084555ee4
+  languageName: node
+  linkType: hard
+
 "@types/color-convert@npm:^2.0.0":
   version: 2.0.0
   resolution: "@types/color-convert@npm:2.0.0"
@@ -23562,6 +23575,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/filesystem@npm:*":
+  version: 0.0.36
+  resolution: "@types/filesystem@npm:0.0.36"
+  dependencies:
+    "@types/filewriter": "*"
+  checksum: fad9f6b291598e65a0c5e73e685977b2c86c9bdb1ede5ce29eb35f196bbdf8d668a32bd4361624391ae1eb699362daa13442b75177dd73c6b300967fdd1ed765
+  languageName: node
+  linkType: hard
+
+"@types/filewriter@npm:*":
+  version: 0.0.33
+  resolution: "@types/filewriter@npm:0.0.33"
+  checksum: 56ba7f0d3c2dafbb899e7f5a9574df41d2f07494040aa09f9fd51c7004c0b255c36c554333c380b23625afb50e50cf1d13f5925d956a627d4ee6e3fbe8f3176b
+  languageName: node
+  linkType: hard
+
 "@types/find-cache-dir@npm:^3.2.1":
   version: 3.2.1
   resolution: "@types/find-cache-dir@npm:3.2.1"
@@ -23621,6 +23650,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: d076bb61f45d0fc42dee496ef8b1c2f8742e15d5e47e90e20d0243386e426c04d4efd408a48875ab432f7960b4ce3414db20ed0fbbfc7bcc89d84e574f6e045a
+  languageName: node
+  linkType: hard
+
+"@types/har-format@npm:*":
+  version: 1.2.15
+  resolution: "@types/har-format@npm:1.2.15"
+  checksum: e3e8197e0ac74747736d13e0b54ec862e55ecf57cc962e1a24c801c7940b7b829d281dddc67f297877f1c4bc014b4ac29d35b2c6a9a1e6bc26bcff5fd7f835b0
   languageName: node
   linkType: hard
 
@@ -24170,6 +24206,25 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: b7e898e1a22643a371f58e801a3d1d8cf13a82d77063c24be73e840ef8d877ca1d04adc5db168d0dac3167dc050a26b1d70efc5fe8566a7f46a3c488a8322989
+  languageName: node
+  linkType: hard
+
+"@types/react-kawaii@npm:^0.17.3":
+  version: 0.17.3
+  resolution: "@types/react-kawaii@npm:0.17.3"
+  dependencies:
+    "@types/react": "*"
+  checksum: 136f577d0dee2ba463b6d74a4d10c958eb2dcd11c2d2d32f1f40c84d6033f38d8afe149fdbf9ececf8c4b46a11889e7a4e2b0244b8339d2b09b153b6dc836269
+  languageName: node
+  linkType: hard
+
+"@types/react-lazy-load-image-component@npm:1.6.4":
+  version: 1.6.4
+  resolution: "@types/react-lazy-load-image-component@npm:1.6.4"
+  dependencies:
+    "@types/react": "*"
+    csstype: ^3.0.2
+  checksum: ab6fef9ecb43b547f7ebcc1b4c281f28287afcd503c78656864e2b81b43620a5a46ba7f0536f7b265e1fb44dc775f13ebd45dbebf5b03313be1bbce95a59d2e3
   languageName: node
   linkType: hard
 

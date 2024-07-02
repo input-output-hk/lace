@@ -40,3 +40,36 @@ export const transactions = [
     blockHeight: 2_270_926,
   },
 ];
+
+export const transactions2 = [
+  {
+    txHash: 'c79f37caa73e2db87367c8ca9a802d4c50032f21c7057757659f39ba3b68a224',
+    txIndex: 2,
+    blockHeight: 2_298_116,
+    blockTime: 1_716_995_236,
+  },
+  {
+    txHash: '35df1fdedc85bc84fab4d4aa112e6a3e6322d23c8ef1dd0401a5a6afeeb00f80',
+    txIndex: 0,
+    blockHeight: 2_293_683,
+    blockTime: 1_716_898_095,
+  },
+  {
+    txHash: '3eafd8a177c0806c89835601fde8797d467ee199df83cbe07632781a5cc7d6d3',
+    txIndex: 0,
+    blockHeight: 2_248_117,
+    blockTime: 1_715_867_287,
+  },
+  {
+    txHash: '3e0e7f8ae7732277ec14c87b58b7c6bbc641aa1b70bfe198f30d74733aeaf189',
+    txIndex: 0,
+    blockHeight: 2_248_114,
+    blockTime: 1_715_867_251,
+  },
+  {
+    txHash: '49acbc6d2d30e7ba7a829d93ce0d32f26d8046765d6a1b50c8380b1595fb5c21',
+    txIndex: 2,
+    blockHeight: 2_226_747,
+    blockTime: 1_715_359_290,
+  },
+];

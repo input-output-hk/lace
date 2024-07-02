@@ -69,6 +69,14 @@ export const getAdaHandle = fn(actualApi.getAdaHandle).mockName('getAdaHandle');
 
 export const getAsset = fn(actualApi.getAsset).mockName('getAsset');
 
+export const updateTxInfo = fn(actualApi.updateTxInfo).mockName('updateTxInfo');
+
+export const setTransactions = fn(actualApi.setTransactions).mockName(
+  'setTransactions',
+);
+
+export const setTxDetail = fn(actualApi.setTxDetail).mockName('setTxDetail');
+
 export const createHWAccounts = fn(actualApi.createHWAccounts).mockName(
   'createHWAccounts',
 );

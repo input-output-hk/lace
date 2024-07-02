@@ -25,6 +25,7 @@ import {
   getNetwork,
   getTransactions,
   getAsset,
+  updateTxInfo,
 } from '../../../api/extension/api.mock';
 import {
   buildTx,
@@ -35,10 +36,11 @@ import {
 import {
   account,
   account1,
+  account2,
   accountHW,
   currentAccount,
 } from '../../../mocks/account.mock';
-import { transactions } from '../../../mocks/history.mock';
+import { transactions, transactions2 } from '../../../mocks/history.mock';
 import { network } from '../../../mocks/network.mock';
 import { store } from '../../../mocks/store.mock';
 import { tokens } from '../../../mocks/token.mock';
@@ -58,7 +60,7 @@ const WalletStory = ({
   setColorMode(colorMode);
 
   return (
-    <Box width="400" height="600">
+    <Box overflowX="hidden">
       <Wallet />
     </Box>
   );
@@ -110,6 +112,7 @@ const meta: Meta<typeof WalletStory> = {
     });
     onAccountChange.mockImplementation(() => {
       return {
+        // @ts-ignore
         remove: () => void 0,
       };
     });
@@ -139,6 +142,7 @@ const meta: Meta<typeof WalletStory> = {
       return callback(store);
     });
     useStoreActions.mockImplementation(() => {
+      // @ts-ignore
       return () => void 0;
     });
     getAsset.mockImplementation(async (unit: keyof typeof tokens) => {
@@ -848,6 +852,121 @@ export const EmptyHistoryListLight: Story = {
 
 export const EmptyHistoryListDark: Story = {
   ...EmptyHistoryListLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const HistoryLight: Story = {
+  beforeEach: () => {
+    updateTxInfo.mockImplementation(txHash => {
+      return account.history.details[txHash];
+    });
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([account2]);
+    });
+    getTransactions.mockImplementation(async () => {
+      return await Promise.resolve(transactions2);
+    });
+    return () => {
+      updateTxInfo.mockReset();
+      getAccounts.mockReset();
+      getTransactions.mockReset();
+    };
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Open transaction history', async () => {
+      await userEvent.click(canvas.getByTestId('clockIcon'));
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const HistoryDark: Story = {
+  ...HistoryLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const HistoryTxLight: Story = {
+  beforeEach: () => {
+    updateTxInfo.mockImplementation(txHash => {
+      return account.history.details[txHash];
+    });
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([account2]);
+    });
+    getTransactions.mockImplementation(async () => {
+      return await Promise.resolve(transactions2);
+    });
+    return () => {
+      updateTxInfo.mockReset();
+      getAccounts.mockReset();
+      getTransactions.mockReset();
+    };
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Open transaction history', async () => {
+      await userEvent.click(canvas.getByTestId('clockIcon'));
+    });
+    await step('Open first transaction', async () => {
+      const button = await canvas.findByTestId(
+        `transaction-button-${account2.history.confirmed[0]}`,
+      );
+      await userEvent.click(button);
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const HistoryTxDark: Story = {
+  ...HistoryTxLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const HistoryTxAssetsLight: Story = {
+  beforeEach: () => {
+    updateTxInfo.mockImplementation(txHash => {
+      return account.history.details[txHash];
+    });
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([account2]);
+    });
+    getTransactions.mockImplementation(async () => {
+      return await Promise.resolve(transactions2);
+    });
+    return () => {
+      updateTxInfo.mockReset();
+      getAccounts.mockReset();
+      getTransactions.mockReset();
+    };
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('Open transaction history', async () => {
+      await userEvent.click(canvas.getByTestId('clockIcon'));
+    });
+    await step('Open transaction assets popover', async () => {
+      const button = await canvas.findByTestId('asset-popover-trigger');
+      await userEvent.click(button);
+    });
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const HistoryTxAssetsDark: Story = {
+  ...HistoryTxAssetsLight,
   parameters: {
     colorMode: 'dark',
   },

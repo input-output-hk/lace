@@ -18,12 +18,12 @@ import MiddleEllipsis from 'react-middle-ellipsis';
 import { getAsset } from '../../../api/extension';
 import UnitDisplay from './unitDisplay';
 
-const abs = (big) => {
+const abs = big => {
   return big < 0 ? big * BigInt(-1) : big;
 };
 
 const CustomScrollbars = ({ onScroll, forwardedRef, style, children }) => {
-  const refSetter = React.useCallback((scrollbarsRef) => {
+  const refSetter = React.useCallback(scrollbarsRef => {
     if (scrollbarsRef) {
       forwardedRef(scrollbarsRef.view);
     }
@@ -49,8 +49,9 @@ const AssetsPopover = ({ assets, isDifference }) => {
     <Popover placement="top-start">
       <PopoverTrigger>
         <Button
+          data-testid="asset-popover-trigger"
           size="xs"
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
           style={{
             all: 'revert',
             background: 'none',
@@ -69,7 +70,7 @@ const AssetsPopover = ({ assets, isDifference }) => {
         </Button>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent onClick={(e) => e.stopPropagation()} w="98%">
+        <PopoverContent onClick={e => e.stopPropagation()} w="98%">
           <PopoverArrow ml="4px" />
           <PopoverCloseButton />
           <PopoverHeader fontWeight="bold">Assets</PopoverHeader>

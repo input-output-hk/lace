@@ -76,38 +76,20 @@ module.exports = {
         pathGroupsExcludedImportTypes: ['react'],
       },
     ],
-    'unicorn/prevent-abbreviations': [
-      'error',
-      {
-        allowList: {
-          Props: true,
-          props: true,
-          args: true,
-          vars: true,
-          createVar: true,
-          ref: true,
-        },
-        replacements: {
-          s: {
-            currentState: true,
-          },
-        },
-      },
-    ],
+    'import/no-default-export': 'off',
+    'unicorn/no-useless-undefined': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-unsafe-call': 'off',
+    '@typescript-eslint/no-dynamic-delete': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-throw-literal': 'off',
+    '@typescript-eslint/no-unnecessary-condition': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/consistent-type-imports': 'error',
     '@typescript-eslint/consistent-type-exports': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'error',
-    '@typescript-eslint/explicit-member-accessibility': [
-      'error',
-      {
-        accessibility: 'explicit',
-        overrides: {
-          parameterProperties: 'no-public',
-        },
-      },
-    ],
-    '@typescript-eslint/explicit-module-boundary-types': 'error',
-    '@typescript-eslint/member-ordering': 'error',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/naming-convention': [
       'error',
       {
@@ -128,29 +110,29 @@ module.exports = {
         allowMappedTypes: 'in-unions-and-intersections',
       },
     ],
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/explicit-member-accessibility': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/prefer-enum-initializers': 'error',
     '@typescript-eslint/prefer-readonly': 'error',
     '@typescript-eslint/promise-function-async': 'error',
+    '@typescript-eslint/restrict-template-expressions': 'off',
     '@typescript-eslint/sort-type-constituents': 'error',
-    '@typescript-eslint/strict-boolean-expressions': 'error',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/switch-exhaustiveness-check': 'error',
-    'functional/immutable-data': [
-      'error',
-      {
-        ignoreAccessorPattern: [
-          'draft.*',
-          '**.parameters',
-          '**.play',
-          '**.argTypes',
-          '**.args',
-        ],
-      },
-    ],
+    '@typescript-eslint/member-ordering': 'off',
+    'functional/no-classes': 'off',
+    'functional/immutable-data': 'off',
+    'functional/no-loop-statements': 'off',
     'functional/functional-parameters': 'off',
+    'functional/no-let': 'off',
     'functional/no-mixed-types': 'off',
     'functional/no-return-void': 'off',
     'functional/no-expression-statements': 'off',
+    'unicorn/prefer-spread': 'off',
+    'unicorn/prevent-abbreviations': 'off',
     'no-restricted-imports': [
       'error',
       {
@@ -176,7 +158,7 @@ module.exports = {
       files: [
         'index.js',
         '.eslintrc.js',
-        'rollup.config.js',
+        'rollup.config.ts',
         '.storybook/*.js',
       ],
       rules: {
@@ -191,7 +173,6 @@ module.exports = {
         '@typescript-eslint/strict-boolean-expressions': ['off'],
         '@typescript-eslint/explicit-module-boundary-types': ['off'],
         '@typescript-eslint/explicit-function-return-type': ['off'],
-        'import/no-default-export': ['off'],
         '@typescript-eslint/no-unsafe-member-access': ['off'],
         '@typescript-eslint/no-unsafe-return': ['off'],
       },
@@ -204,7 +185,7 @@ module.exports = {
       },
     },
     {
-      files: ['jest.config.js'],
+      files: ['jest.config.ts'],
       rules: {
         '@typescript-eslint/restrict-template-expressions': ['off'],
         '@typescript-eslint/no-unsafe-call': ['off'],

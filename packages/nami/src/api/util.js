@@ -116,59 +116,59 @@ export const hexToAscii = (hex) => Buffer.from(hex, 'hex').toString();
 //   return count;
 // };
 
-// /**
-//  * @typedef {Object} Amount - Unit/Quantity pair
-//  * @property {string} unit - Token Type
-//  * @property {int} quantity - Token Amount
-//  */
+/**
+ * @typedef {Object} Amount - Unit/Quantity pair
+ * @property {string} unit - Token Type
+ * @property {int} quantity - Token Amount
+ */
 
-// /**
-//  * @typedef {Amount[]} AmountList - List of unit/quantity pair
-//  */
+/**
+ * @typedef {Amount[]} AmountList - List of unit/quantity pair
+ */
 
-// /**
-//  * @typedef {Output[]} OutputList - List of Output
-//  */
+/**
+ * @typedef {Output[]} OutputList - List of Output
+ */
 
-// /**
-//  * @typedef {Object} Output - Outputs Format
-//  * @property {string} address - Address Output
-//  * @property {AmountList} amount - Amount (lovelace & Native Token)
-//  */
+/**
+ * @typedef {Object} Output - Outputs Format
+ * @property {string} address - Address Output
+ * @property {AmountList} amount - Amount (lovelace & Native Token)
+ */
 
-// /**
-//  * Compile all required output to a flat amount list
-//  * @param {OutputList} outputList - The set of outputs requested for payment.
-//  * @return {AmountList} - The compiled set of amounts requested for payment.
-//  */
+/**
+ * Compile all required output to a flat amount list
+ * @param {OutputList} outputList - The set of outputs requested for payment.
+ * @return {AmountList} - The compiled set of amounts requested for payment.
+ */
 export const compileOutputs = (outputList) => {
-//   let compiledAmountList = [];
+  let compiledAmountList = [];
 
-//   outputList.forEach((output) => addAmounts(output.amount, compiledAmountList));
+  outputList.forEach((output) => addAmounts(output.amount, compiledAmountList));
 
-//   return compiledAmountList;
+  return compiledAmountList;
 };
 
-// /**
-//  * Add up an AmountList values to an other AmountList
-//  * @param {AmountList} amountList - Set of amounts to be added.
-//  * @param {AmountList} compiledAmountList - The compiled set of amounts.
-//  */
-// function addAmounts(amountList, compiledAmountList) {
-//   amountList.forEach((amount) => {
-//     let entry = compiledAmountList.find(
-//       (compiledAmount) => compiledAmount.unit === amount.unit
-//     );
+/**
+ * Add up an AmountList values to an other AmountList
+ * @param {AmountList} amountList - Set of amounts to be added.
+ * @param {AmountList} compiledAmountList - The compiled set of amounts.
+ */
+function addAmounts(amountList, compiledAmountList) {
+  amountList.forEach((amount) => {
+    let entry = compiledAmountList.find(
+      (compiledAmount) => compiledAmount.unit === amount.unit
+    );
 
-//     // 'Add to' or 'insert' in compiledOutputList
-//     const am = JSON.parse(JSON.stringify(amount)); // Deep Copy
-//     entry
-//       ? (entry.quantity = (
-//           BigInt(entry.quantity) + BigInt(amount.quantity)
-//         ).toString())
-//       : compiledAmountList.push(am);
-//   });
-// }
+    // 'Add to' or 'insert' in compiledOutputList
+    const am = JSON.parse(JSON.stringify(amount)); // Deep Copy
+    entry
+      ? (entry.quantity = (
+          BigInt(entry.quantity) + BigInt(amount.quantity)
+        ).toString())
+      : compiledAmountList.push(am);
+  });
+}
 
 // /** Cardano metadata properties can hold a max of 64 bytes. The alternative is to use an array of strings. */
 // export const convertMetadataPropToString = (src) => {

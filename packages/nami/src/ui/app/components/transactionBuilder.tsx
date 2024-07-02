@@ -1,15 +1,6 @@
 import React from 'react';
-import {
-  delegationTx,
-  initTx,
-  buildTx,
-  signAndSubmit,
-  withdrawalTx,
-  signAndSubmitHW,
-  undelegateTx,
-} from '../../../api/extension/wallet';
-import ConfirmModal from './confirmModal';
-import UnitDisplay from './unitDisplay';
+
+import { CheckIcon, WarningIcon } from '@chakra-ui/icons';
 import {
   Box,
   Link,
@@ -32,13 +23,9 @@ import {
   Input,
   Tooltip,
 } from '@chakra-ui/react';
-import { CheckIcon, WarningIcon } from '@chakra-ui/icons';
+import { FaRegFileCode } from 'react-icons/fa';
 import { GoStop } from 'react-icons/go';
-// Assets
-import IOHK from '../../../assets/img/iohk.svg';
-import { ERROR, HW, TAB } from '../../../config/config';
-import { useStoreState } from '../../store';
-import { Loader } from '../../../api/loader';
+
 import {
   createTab,
   getUtxos,
@@ -47,9 +34,26 @@ import {
   toUnit,
   getPoolMetadata,
 } from '../../../api/extension';
-import { FaRegFileCode } from 'react-icons/fa';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
+import {
+  delegationTx,
+  initTx,
+  buildTx,
+  signAndSubmit,
+  withdrawalTx,
+  signAndSubmitHW,
+  undelegateTx,
+} from '../../../api/extension/wallet';
+import { Loader } from '../../../api/loader';
+import IOHK from '../../../assets/img/iohk.svg';
+import { ERROR, HW, TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useStoreState } from '../../store';
+
+import ConfirmModal from './confirmModal';
+import UnitDisplay from './unitDisplay';
+
+// Assets
 
 const PoolStates = {
   LOADING: 'LOADING',
@@ -67,7 +71,7 @@ const poolDefaultValue = {
   showTooltip: false,
 };
 
-const poolRightElementStyle = (pool) => {
+const poolRightElementStyle = pool => {
   if (pool.state === PoolStates.DONE || pool.state === PoolStates.ERROR) {
     return {
       width: 'auto',
@@ -84,11 +88,11 @@ const poolRightElementStyle = (pool) => {
   };
 };
 
-const poolHasTicker = (pool) => {
+const poolHasTicker = pool => {
   return pool.state === PoolStates.DONE && Boolean(pool.ticker);
 };
 
-const poolTooltipMessage = (pool) => {
+const poolTooltipMessage = pool => {
   if (pool.state !== PoolStates.DONE) {
     return undefined;
   }
@@ -101,7 +105,7 @@ const poolTooltipMessage = (pool) => {
 
 const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
   const capture = useCaptureEvent();
-  const settings = useStoreState((state) => state.settings.settings);
+  const settings = useStoreState(state => state.settings.settings);
   const toast = useToast();
   const {
     isOpen: isOpenCol,
@@ -128,7 +132,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
   const prepareDelegationTx = async () => {
     if (data.pool.id === '') return;
 
-    setData((d) => ({
+    setData(d => ({
       ...d,
       pool: {
         ...d.pool,
@@ -145,14 +149,14 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
         data.account,
         data.delegation,
         data.protocolParameters,
-        metadata.hex
+        metadata.hex,
       ).catch(() => {
         throw new Error(
-          'Transaction not possible (maybe insufficient balance)'
+          'Transaction not possible (maybe insufficient balance)',
         );
       });
 
-      setData((d) => ({
+      setData(d => ({
         ...d,
         fee: tx.body().fee().to_str(),
         tx,
@@ -163,13 +167,13 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
           state: PoolStates.DONE,
         },
       }));
-    } catch (e) {
-      console.log(e);
-      setData((d) => ({
+    } catch (error_) {
+      console.log(error_);
+      setData(d => ({
         ...d,
         pool: {
           ...d.pool,
-          error: e.message,
+          error: error_.message,
           state: PoolStates.ERROR,
         },
       }));
@@ -177,7 +181,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
   };
 
   React.useImperativeHandle(ref, () => ({
-    async initDelegation(account, delegation) {
+    initDelegation: async (account, delegation) => {
       setData({
         fee: '',
         stakeRegistration: '',
@@ -191,7 +195,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
       try {
         const protocolParameters = await initTx();
 
-        setData((s) => ({
+        setData(s => ({
           ...s,
           account,
           delegation,
@@ -201,13 +205,13 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
           ready: true,
         }));
       } catch {
-        setData((d) => ({
+        setData(d => ({
           ...d,
           error: 'Transaction not possible (maybe insufficient balance)',
         }));
       }
     },
-    async initWithdrawal(account, delegation) {
+    initWithdrawal: async (account, delegation) => {
       setData({
         pool: { ...poolDefaultValue },
         fee: '',
@@ -228,14 +232,14 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
           fee: tx.body().fee().to_str(),
           ready: true,
         });
-      } catch (e) {
-        setData((d) => ({
+      } catch {
+        setData(d => ({
           ...d,
           error: 'Transaction not possible (maybe reward amount too small)',
         }));
       }
     },
-    async initUndelegate(account, delegation) {
+    initUndelegate: async (account, delegation) => {
       setData({
         pool: { ...poolDefaultValue },
         fee: '',
@@ -255,14 +259,14 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
           fee: tx.body().fee().to_str(),
           ready: true,
         });
-      } catch (e) {
-        setData((d) => ({
+      } catch {
+        setData(d => ({
           ...d,
           error: 'Transaction not possible (maybe account balance too low)',
         }));
       }
     },
-    async initCollateral(account) {
+    initCollateral: async account => {
       setData({
         pool: { ...poolDefaultValue },
         fee: '',
@@ -284,9 +288,9 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
         Loader.Cardano.TransactionOutput.new(
           Loader.Cardano.Address.from_bech32(account.paymentAddr),
           Loader.Cardano.Value.new(
-            Loader.Cardano.BigNum.from_str(toUnit(COLLATERAL))
-          )
-        )
+            Loader.Cardano.BigNum.from_str(toUnit(COLLATERAL)),
+          ),
+        ),
       );
       try {
         const tx = await buildTx(account, utxos, outputs, protocolParameters);
@@ -297,8 +301,8 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
           fee: tx.body().fee().to_str(),
           ready: true,
         });
-      } catch (e) {
-        setData((d) => ({
+      } catch {
+        setData(d => ({
           ...d,
           error: 'Transaction not possible (maybe insufficient balance)',
         }));
@@ -318,7 +322,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
             if (hw.device === HW.trezor) {
               return createTab(
                 TAB.trezorTx,
-                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`
+                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
               );
             }
             return await signAndSubmitHW(data.tx, {
@@ -339,7 +343,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
               ],
               accountIndex: data.account.index,
             },
-            password
+            password,
           );
         }}
         onConfirm={(status, signedTx) => {
@@ -403,8 +407,8 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                     data.pool.state === PoolStates.DONE ? '#A3AEBE' : undefined
                   }
                   value={data.pool.id}
-                  onChange={(e) => {
-                    setData((s) => ({
+                  onChange={e => {
+                    setData(s => ({
                       ...s,
                       pool: {
                         ...s.pool,
@@ -414,11 +418,11 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                     }));
                   }}
                   placeholder="Enter Pool ID"
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key == 'Enter') prepareDelegationTx();
                   }}
                   onMouseEnter={() => {
-                    setData((s) => ({
+                    setData(s => ({
                       ...s,
                       pool: {
                         ...s.pool,
@@ -427,7 +431,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                     }));
                   }}
                   onMouseLeave={() => {
-                    setData((s) => ({
+                    setData(s => ({
                       ...s,
                       pool: {
                         ...s.pool,
@@ -444,7 +448,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                       colorScheme="teal"
                       disabled={data.pool.id === '' || data.pool.isLoading}
                       isLoading={data.pool.isLoading}
-                      onClick={() => prepareDelegationTx()}
+                      onClick={async () => prepareDelegationTx()}
                     >
                       Verify
                     </Button>
@@ -503,7 +507,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
             if (hw.device === HW.trezor) {
               return createTab(
                 TAB.trezorTx,
-                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`
+                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
               );
             }
             return await signAndSubmitHW(data.tx, {
@@ -524,7 +528,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
               ],
               accountIndex: data.account.index,
             },
-            password
+            password,
           );
         }}
         onConfirm={(status, signedTx) => {
@@ -606,7 +610,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
             if (hw.device === HW.trezor) {
               return createTab(
                 TAB.trezorTx,
-                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`
+                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
               );
             }
             return await signAndSubmitHW(data.tx, {
@@ -627,7 +631,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
               ],
               accountIndex: data.account.index,
             },
-            password
+            password,
           );
         }}
         onConfirm={(status, signedTx) => {
@@ -722,7 +726,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
             if (hw.device === HW.trezor) {
               return createTab(
                 TAB.trezorTx,
-                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`
+                `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
               );
             }
             return await signAndSubmitHW(data.tx, {
@@ -737,7 +741,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
               keyHashes: [data.account.paymentKeyHash],
               accountIndex: data.account.index,
             },
-            password
+            password,
           );
         }}
         onCloseBtn={() => {
