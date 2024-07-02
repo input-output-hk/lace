@@ -90,26 +90,29 @@ jobs:
     runs-on: ${{ needs.prereq.outputs.runner }}
     if: always()
     steps:
-      - name: Download artifacts from runner 1
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           name: runner-artifacts-1
-          path: ./runner-artifacts-1
-      - name: Download artifacts from runner 2
-        uses: actions/download-artifact@v4
-        with:
-          name: runner-artifacts-2
-          path: ./runner-artifacts-2
-      - name: Download artifacts from runner 3
-        uses: actions/download-artifact@v4
-        with:
-          name: runner-artifacts-3
-          path: ./runner-artifacts-3
-      - name: Download artifacts from runner 4
-        uses: actions/download-artifact@v4
-        with:
-          name: runner-artifacts-4
-          path: ./runner-artifacts-4
+          path: ./
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+      - run: ls -R ./
+#      - name: Download artifacts from runner 2
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: runner-artifacts-2
+#          path: ./runner-artifacts-2
+#      - name: Download artifacts from runner 3
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: runner-artifacts-3
+#          path: ./runner-artifacts-3
+#      - name: Download artifacts from runner 4
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: runner-artifacts-4
+#          path: ./runner-artifacts-4
       - name: Copy allure results
         if: always()
         run: |
@@ -118,6 +121,7 @@ jobs:
           cp -r ./runner-artifacts-2/reports/allure/results/* ./allure/results
           cp -r ./runner-artifacts-3/reports/allure/results/* ./allure/results
           cp -r ./runner-artifacts-4/reports/allure/results/* ./allure/results
+          ls -R ./allure/results
       - name: Create allure properties
         if: success()
         working-directory: './allure/results'
