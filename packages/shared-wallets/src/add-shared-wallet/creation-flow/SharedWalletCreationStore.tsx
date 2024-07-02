@@ -177,7 +177,7 @@ const makeStateMachine = ({
     }
     if (action.type === SharedWalletActionType.NEXT) {
       if (!prevState.walletName) return prevState;
-      const coSigners = [createEmptyCosignerObject(), createEmptyCosignerObject()];
+      const coSigners = [createEmptyCosignerObject(), createEmptyCosignerObject(), createEmptyCosignerObject()];
       return stateCoSigners({
         ...prevState,
         coSignerInputsDirty: coSigners.map(({ id }) => ({ id, keys: false, name: false })),
@@ -263,10 +263,12 @@ const makeStateMachine = ({
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
     if (action.type === SharedWalletActionType.BACK) {
       // Having two cosigner fields fixed we need to fall back to two entries if user specified
-      // just one because the empty one was filtere out in brevious step.
+      // just one because the empty one was filters out in previous step.
       const coSigners = [
         prevState.coSigners[0] || createEmptyCosignerObject(),
         prevState.coSigners[1] || createEmptyCosignerObject(),
+        // eslint-disable-next-line no-magic-numbers
+        prevState.coSigners[2] || createEmptyCosignerObject(),
       ];
       return stateCoSigners({
         ...prevState,
