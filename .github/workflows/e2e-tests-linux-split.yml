@@ -23,12 +23,13 @@ on:
       runner:
         type: choice
         required: true
-        default: 'self-hosted'
+        default: 'ubuntu-22.04'
         description: runner to use
         options:
           - self-hosted
           - ubuntu-22.04
           - ubuntu-20.04
+          - ubuntu-latest
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
 
