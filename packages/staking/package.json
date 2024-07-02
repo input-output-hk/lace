@@ -82,7 +82,6 @@
     "@cardano-sdk/util": "0.15.2",
     "@cardano-sdk/wallet": "0.38.3",
     "@cardano-sdk/web-extension": "0.29.3",
-    "@lace/configs": "workspace:^",
     "@storybook/addon-actions": "^7.6.7",
     "@storybook/addon-essentials": "^7.6.7",
     "@storybook/addon-interactions": "^7.6.7",
