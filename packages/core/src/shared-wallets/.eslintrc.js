@@ -24,7 +24,7 @@ module.exports = {
   parserOptions: {
     extraFileExtensions: ['.cjs', '.mjs', '.js'],
     project: 'tsconfig.json',
-    tsconfigRootDir: __dirname,
+    tsconfigRootDir: path.resolve(__dirname, '..'),
   },
   plugins: ['sort-keys', 'typescript-sort-keys'],
   rules: {
