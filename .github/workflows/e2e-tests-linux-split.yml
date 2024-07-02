@@ -93,8 +93,8 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: runner-artifacts-1
-          path: ./
+#          name: runner-artifacts-1
+          path: ./allure/results
           pattern: 'runner-artifacts-*'
           merge-multiple: true
       - run: ls -R ./
@@ -113,15 +113,15 @@ jobs:
 #        with:
 #          name: runner-artifacts-4
 #          path: ./runner-artifacts-4
-      - name: Copy allure results
-        if: always()
-        run: |
-          mkdir -p ./allure/results
-          cp -r ./runner-artifacts-1/reports/allure/results/* ./allure/results
-          cp -r ./runner-artifacts-2/reports/allure/results/* ./allure/results
-          cp -r ./runner-artifacts-3/reports/allure/results/* ./allure/results
-          cp -r ./runner-artifacts-4/reports/allure/results/* ./allure/results
-          ls -R ./allure/results
+#      - name: Copy allure results
+#        if: always()
+#        run: |
+#          mkdir -p ./allure/results
+#          cp -r ./runner-artifacts-1/reports/allure/results/* ./allure/results
+#          cp -r ./runner-artifacts-2/reports/allure/results/* ./allure/results
+#          cp -r ./runner-artifacts-3/reports/allure/results/* ./allure/results
+#          cp -r ./runner-artifacts-4/reports/allure/results/* ./allure/results
+#          ls -R ./allure/results
       - name: Create allure properties
         if: success()
         working-directory: './allure/results'
