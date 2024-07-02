@@ -124,7 +124,7 @@ jobs:
 #          ls -R ./allure/results
       - name: Create allure properties
         if: success()
-        working-directory: './allure/results'
+        working-directory: './artifacts/reports/allure/results'
         run: |
           echo "
           branch=${BRANCH}
