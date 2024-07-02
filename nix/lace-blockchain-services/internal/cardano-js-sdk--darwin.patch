@@ -1,8 +1,8 @@
 diff --git a/yarn-project.nix b/yarn-project.nix
-index 640e32823..def5fb1f9 100644
+index c45c20165c..3b8b993b4c 100644
 --- a/yarn-project.nix
 +++ b/yarn-project.nix
-@@ -1376,6 +1376,7 @@ cacheEntries = {
+@@ -1421,6 +1421,7 @@ cacheEntries = {
  "fs-minipass@npm:3.0.0" = { filename = "fs-minipass-npm-3.0.0-3692c14b65-b72e9fe426.zip"; sha512 = "b72e9fe426e39f05b35bf237c8218b7ab3f68a65f325725ad7b4e431ff5a10725946fc62883b78446c07515ab938d25fdde3d08fb5ac8693f7f9eb9990da21f0"; };
  "fs.realpath@npm:1.0.0" = { filename = "fs.realpath-npm-1.0.0-c8f05d8126-99ddea01a7.zip"; sha512 = "99ddea01a7e75aa276c250a04eedeffe5662bce66c65c07164ad6264f9de18fb21be9433ead460e54cff20e31721c811f4fb5d70591799df5f85dce6d6746fd0"; };
  "fsevents@npm:2.3.2" = { filename = "fsevents-npm-2.3.2-a881d6ac9f-97ade64e75.zip"; sha512 = "97ade64e75091afee5265e6956cb72ba34db7819b4c3e94c431d4be2b19b8bb7a2d4116da417950c3425f17c8fe693d25e20212cac583ac1521ad066b77ae31f"; };

@@ -21,7 +21,7 @@ import           Development.NSIS (Attrib (IconFile, IconIndex, RebootOK, Recurs
                                    strLength, uninstall, unsafeInject, unsafeInjectGlobal,
                                    loadLanguage, sleep, (@=), detailPrint, (%<), (%&&),
                                    not_, mutableInt_, mutable_, while, false, true, strShow, (&),
-                                   writeRegDWORD, writeRegStr, (%/=), fileExists)
+                                   writeRegDWORD, writeRegStr, (%/=), fileExists, execWait)
 import           Prelude ((!!))
 import qualified System.IO as IO
 import qualified Options.Applicative as O
@@ -37,6 +37,7 @@ data CliOptions = CliOptions
   , cliLockFile :: Text
   , cliContentsDirectory :: Text
   , cliShortcutExe :: Text
+  , cliExtraExec :: [Text]
   }
 
 cliOptionsParser :: O.Parser CliOptions
@@ -50,6 +51,7 @@ cliOptionsParser = CliOptions
   <*> O.strOption (O.long "lock-file" <> O.metavar "FILE")
   <*> O.strOption (O.long "contents-dir" <> O.metavar "DIR")
   <*> O.strOption (O.long "shortcut-exe" <> O.metavar "EXE")
+  <*> many (O.strOption (O.long "extra-exec" <> O.metavar "CMD"))
 
 main :: IO ()
 main = do
@@ -196,6 +198,9 @@ writeInstallerNSIS CliOptions{..} = do
                   rmdir [Recursive] "$INSTDIR"
 
                 file [Recursive] (str $ T.unpack cliContentsDirectory)
+
+                forM_ cliExtraExec $ \extraExec -> do
+                  execWait (fromString (T.unpack extraExec))
 
                 createShortcut "$DESKTOP\\$SpacedName.lnk" (desktopShortcut CliOptions{..})
 

@@ -52,7 +52,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 
 	return ManagedChild{
 		ServiceName: "cardano-node",
-		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + ourpaths.ExeSuffix,
+		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + sep + "cardano-node" + ourpaths.ExeSuffix,
 		Version: constants.CardanoNodeVersion,
 		Revision: constants.CardanoNodeRevision,
 		MkArgv: func() ([]string, error) {

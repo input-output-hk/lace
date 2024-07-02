@@ -12,41 +12,18 @@ in rec {
 
   laceVersion = (builtins.fromJSON (builtins.readFile ../../../apps/browser-extension-wallet/package.json)).version;
 
-  cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
-
   # These are configs of ‘cardano-node’ for all networks we make available from the UI.
   # The patching of the official networks needs to happen to:
   #   • turn off ‘EnableP2P’ (and modify topology accordingly), because it doesn’t work on Windows,
   #   • and turn off ‘hadPrometheus’, because it makes cardano-node hang on Windows during graceful exit.
   networkConfigs = let
     selectedNetworks = [ "mainnet" "preprod" "preview" ];
-    website = cardanoWorldFlake.${buildSystem}.cardano.packages.cardano-config-html-internal;
   in pkgs.runCommand "network-configs" {
     nativeBuildInputs = [ pkgs.jq ];
-  } ((lib.concatMapStringsSep "\n" (network: ''
+  } (lib.concatMapStringsSep "\n" (network: ''
     mkdir -p $out/${network}
-    cp -r ${website}/config/${network}/. $out/${network}
-  '') selectedNetworks) + (lib.optionalString (targetSystem == "x86_64-windows") ''
-    # Transform P2P topologies to non-P2P (or else, on Windows, we’d require C:\etc\resolv.conf)
-    chmod -R +w $out
-    find $out -type f -name 'topology.*' | while IFS= read -r file ; do
-      addr=$(jq -er '.PublicRoots[0].publicRoots.accessPoints[0].address' "$file") || continue
-      port=$(jq -er '.PublicRoots[0].publicRoots.accessPoints[0].port'    "$file") || continue
-      jq --arg addr "$addr" --argjson port "$port" --null-input \
-        '.Producers = [.addr = $addr | .port = $port | .valency = 1]' > tmp.json
-      mv tmp.json "$file"
-    done
-    find $out -type f -name 'config.*' | while IFS= read -r file ; do
-      if [ "$(jq .EnableP2P "$file")" == "true" ] ; then
-        jq '.EnableP2P = false' "$file" >tmp.json
-        mv tmp.json "$file"
-      fi
-
-      # With '.hasPrometheus', cardano-node hangs during graceful exit on Windows:
-      jq 'del(.hasPrometheus)' "$file" >tmp.json
-      mv tmp.json "$file"
-    done
-  ''));
+    cp -r ${inputs.cardano-js-sdk}/packages/cardano-services/config/network/${network}/. $out/${network}
+  '') selectedNetworks);
 
   # XXX: they don’t enable aarch64-darwin builds yet:
   cardanoNodeFlake = if targetSystem != "aarch64-darwin" then inputs.cardano-node else let
@@ -110,6 +87,25 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
+  cardano-submit-api = {
+    x86_64-linux = cardanoNodeFlake.hydraJobs.linux.musl.cardano-submit-api;
+    x86_64-windows = cardanoNodeFlake.hydraJobs.linux.windows.cardano-submit-api;
+    x86_64-darwin = cardanoNodeFlake.packages.x86_64-darwin.cardano-submit-api;
+    aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-submit-api;
+  }.${targetSystem};
+
+  postgresPackage = {
+    x86_64-linux = pkgs.postgresql_15_jit;
+    x86_64-darwin = pkgs.postgresql_15_jit;
+    aarch64-darwin = pkgs.postgresql_15_jit;
+    x86_64-windows = let
+      version = "15.4-1";
+    in (pkgs.fetchurl {
+      url = "https://get.enterprisedb.com/postgresql/postgresql-${version}-windows-x64.exe";
+      hash = "sha256-Su4VKwJkeQ6HqCXTIZIK2c4AJHloqm72BZLs2JCnmN8=";
+    }) // { inherit version; };
+  }.${targetSystem};
+
   lace-blockchain-services-exe-vendorHash = "sha256-A1SGcW3+a5jTVMu2H2blEhnvlBD8S+zm61GriF47B0A=";
 
   constants = pkgs.writeText "constants.go" ''
@@ -122,8 +118,19 @@ in rec {
       CardanoNodeRevision = ${__toJSON inputs.cardano-node.sourceInfo.rev}
       OgmiosVersion = ${__toJSON ogmios.version}
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
+      PostgresVersion = ${__toJSON postgresPackage.version}
+      PostgresRevision = ${__toJSON postgresPackage.version}
       ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
-      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
+      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.rev}
+      CardanoJsSdkBuildInfo = ${__toJSON (let self = inputs.cardano-js-sdk; in builtins.toJSON {
+        inherit (self) lastModified lastModifiedDate rev;
+        shortRev = self.shortRev or "no rev";
+        extra = {
+          inherit (self) narHash;
+          sourceInfo = self;
+          path = self.outPath;
+        };
+      })}
       MithrilClientRevision = ${__toJSON inputs.mithril.sourceInfo.rev}
       MithrilClientVersion = ${__toJSON mithril-bin.version}
       MithrilGVKPreview = ${__toJSON mithrilGenesisVerificationKeys.preview}
@@ -201,19 +208,24 @@ in rec {
     ver = (__fromJSON (__readFile (inputs.self + "/flake.lock"))).nodes.mithril.original.ref;
   in {
     x86_64-linux = pkgs.fetchzip {
+      name = "mithril-${ver}-linux-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-linux-x64.tar.gz";
-      hash = "sha256-oyBhhSG/kvZge3tpZfheGHtD1ivY56+jYgSAH09rswE=";
+      hash = "sha256-BvKBZWEd9b+hCfNyEKr0SVivUDK5lGxZhwLJuSlHCpY=";
       stripRoot = false;
     };
     x86_64-windows = pkgs.fetchzip {
+      name = "mithril-${ver}-windows-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-windows-x64.tar.gz";
-      hash = "sha256-SWPk9zTlmRElOe3l7Ic+jeqo3VNST6wuXfiFogkcrA4=";
+      hash = "sha256-3/KZSxK46Akeno5VUHC0ZX9EZa5vLuMbAdCq7gy1oRw=";
+      stripRoot = false;
     };
     x86_64-darwin = pkgs.fetchzip {
+      name = "mithril-${ver}-macos-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-macos-x64.tar.gz";
-      hash = "sha256-u0S9ClTE38Uv5uyFO4dlS0P/O1cAjeUwl3zarhwk9no=";
+      hash = "sha256-5rQEhBjAQHKS86N7uLzjAp9L/w0c0pGwEA2vbN4n8NI=";
+      stripRoot = false;
     };
-    aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client;
+    aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client-cli;
   }.${targetSystem} // { version = ver; };
 
 }
