@@ -94,7 +94,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
 #          name: runner-artifacts-1
-          path: ./allure/results
+          path: ./artifacts
           pattern: 'runner-artifacts-*'
           merge-multiple: true
       - run: ls -R ./
@@ -140,7 +140,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './allure/results'
+          resultsGlob: './artifacts/allure/results'
           bucket: lace-e2e-test-results
           prefix: 'all/linux/${BROWSER}/${RUN}'
           copyLatest: true
