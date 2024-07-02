@@ -52,7 +52,14 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
           />
         )}
         {state.step === SharedWalletCreationStep.ShareDetails && (
-          <ShareWalletDetails onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })} />
+          <ShareWalletDetails
+            onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
+            fileContent={{
+              coSigners: state.coSigners,
+              name: state.walletName,
+              quorumRules: state.quorumRules,
+            }}
+          />
         )}
         {state.step === SharedWalletCreationStep.CoSignersImportantInfo && (
           <ImportantInfoDialog

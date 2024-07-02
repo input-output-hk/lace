@@ -1,19 +1,23 @@
 import { ActionCard, Box, Divider, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Button } from '@lace/common';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
 import { creationTimelineSteps } from '../timelineSteps';
 import { SharedWalletCreationStep } from '../types';
-import { ReactComponent as DownloadFileIcon } from './download-file.svg';
+import { DownloadFileIcon } from './DownloadFileIcon';
 import styles from './ShareWalletDetails.module.scss';
 import { downloadWalletData } from './utils';
 
 const FILENAME = 'shared-wallet-config.json';
-const FILE_CONTENTS = { hello: 'world' };
 
-export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Element => {
+type ShareWalletDetailsProps = Pick<LayoutNavigationProps, 'onNext'> & {
+  fileContent?: Record<string, unknown>;
+};
+
+export const ShareWalletDetails = ({ onNext, fileContent = {} }: ShareWalletDetailsProps): JSX.Element => {
   const { t } = useTranslation();
+  const [isFileDownloaded, setIsFileDownloaded] = useState<boolean>(false);
 
   const translations = {
     body: t('sharedWallets.addSharedWallet.shareWalletDetails.body'),
@@ -25,7 +29,8 @@ export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Eleme
   };
 
   const onDownload = () => {
-    downloadWalletData(FILE_CONTENTS, FILENAME);
+    downloadWalletData(fileContent, FILENAME);
+    setIsFileDownloaded(true);
   };
 
   return (
@@ -36,7 +41,7 @@ export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Eleme
       timelineSteps={creationTimelineSteps}
       timelineCurrentStep={SharedWalletCreationStep.ShareDetails}
       customNextLabel={translations.next}
-      isNextEnabled
+      isNextEnabled={isFileDownloaded}
     >
       <Box mt="$12">
         <Text.Body.Normal>{translations.body}</Text.Body.Normal>

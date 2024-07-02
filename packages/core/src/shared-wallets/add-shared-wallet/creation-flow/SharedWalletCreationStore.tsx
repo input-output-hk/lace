@@ -169,9 +169,11 @@ const getNextCoSignersDirtyValue = ({
 const makeStateMachine = ({
   exitTheFlow,
   navigateToAppHome,
+  onCreateSharedWallet,
 }: {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
+  onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
 }): SharedWalletCreationStateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.CHANGE_WALLET_NAME) {
@@ -300,6 +302,11 @@ const makeStateMachine = ({
   },
   [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.NEXT) {
+      onCreateSharedWallet({
+        coSigners: prevState.coSigners,
+        name: prevState.walletName,
+        quorumRules: prevState.quorumRules,
+      });
       navigateToAppHome();
       return prevState;
     }
@@ -313,6 +320,7 @@ export type SharedWalletCreationStoreSharedProps = {
   exitTheFlow: () => void;
   initialWalletName: string;
   navigateToAppHome: () => void;
+  onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
 };
 
 export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
@@ -325,6 +333,7 @@ export const SharedWalletCreationStore = ({
   exitTheFlow,
   initialWalletName,
   navigateToAppHome,
+  onCreateSharedWallet,
 }: SharedWalletCreationStoreProps): ReactElement => {
   const initialState = useInitialState(makeInitialState(activeWalletName));
   const [state, dispatch] = useReducer(
@@ -332,6 +341,7 @@ export const SharedWalletCreationStore = ({
       const stateMachine = makeStateMachine({
         exitTheFlow,
         navigateToAppHome,
+        onCreateSharedWallet,
       });
       const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
       return handler(prevState, action);
