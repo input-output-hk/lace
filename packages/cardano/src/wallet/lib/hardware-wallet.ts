@@ -65,7 +65,7 @@ export const ledgerDescriptors = [
 
 // eslint-disable-next-line unicorn/number-literal-case
 const trezorModelTProductId = 0x53_c1;
-const trezorDescriptors = TREZOR_USB_DESCRIPTORS.filter(({ productId }) => productId === trezorModelTProductId);
+export const trezorDescriptors = TREZOR_USB_DESCRIPTORS.filter(({ productId }) => productId === trezorModelTProductId);
 export const supportedHwUsbDescriptors = [...ledgerDescriptors, ...trezorDescriptors];
 
 export const connectDeviceRevamped = async (usbDevice: USBDevice): Promise<HardwareWalletConnection> => {
