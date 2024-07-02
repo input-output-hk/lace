@@ -62,12 +62,6 @@ jobs:
           DIR: packages/core
           NAME: packages-core
 
-      - name: Build shared wallets
-        uses: ./.github/actions/build/package
-        with:
-          DIR: packages/shared-wallets
-          NAME: packages-shared-wallets
-
       - name: Build staking
         uses: ./.github/actions/build/package
         with:
@@ -112,12 +106,6 @@ jobs:
         with:
           name: packages-core
           path: packages/core/dist
-
-      - name: Download packages-shared-wallets
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-shared-wallets
-          path: packages/shared-wallets/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v4
@@ -171,12 +159,6 @@ jobs:
         with:
           name: packages-core
           path: packages/core/dist
-
-      - name: Download packages-shared-wallets
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-shared-wallets
-          path: packages/shared-wallets/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v4

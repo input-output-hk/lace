@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
-import { AddSharedWalletModal, SharedWalletCreationFlow, AddSharedWalletMainPageFlow } from '@lace/shared-wallets';
+import { AddSharedWalletModal, SharedWalletCreationFlow, AddSharedWalletMainPageFlow } from '@lace/core';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';

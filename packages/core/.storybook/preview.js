@@ -1,7 +1,9 @@
 import React from 'react';
 import { ThemeColorScheme, ThemeProvider, colorSchemaDecorator } from '@input-output-hk/lace-ui-toolkit';
 import '@lace/translation';
-import '@lace/configs/storybook/base-styles';
+import 'antd/dist/antd.css';
+import 'normalize.css';
+import './index.scss';
 
 export const preview = {
   actions: { argTypesRegex: '^on[A-Z].*' },

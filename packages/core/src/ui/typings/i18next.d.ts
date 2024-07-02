@@ -1,10 +1,10 @@
 import 'i18next';
-import type { CoreTranslations } from '@lace/translation';
+import type { CoreTranslations, SharedWalletsTranslations } from '@lace/translation';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
     resources: {
-      translation: CoreTranslations;
+      translation: CoreTranslations & SharedWalletsTranslations;
     };
   }
 }

@@ -1,0 +1,78 @@
+name: e2e-split
+description: Execute e2e regression split tests
+
+inputs:
+  WALLET_PASSWORD:
+    description: 'Test wallet password'
+    required: true
+  TEST_DAPP_URL:
+    description: 'Test DApp Url'
+    required: true
+  GITHUB_TOKEN:
+    description: 'Github token'
+    required: true
+  BROWSER:
+    description: 'browser'
+    required: false
+    default: 'chrome'
+  DISPLAY:
+    description: ''
+    required: false
+    default: ':99.0'
+  BATCH:
+    description: 'Tests batch'
+    required: true
+    default: 'batch1'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Setup Node.js and install dependencies
+      uses: ./.github/actions/install
+      with:
+        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+    - name: Start XVFB
+      shell: bash
+      env:
+        DISPLAY: ${{ inputs.DISPLAY }}
+      run: |
+        Xvfb :99 &
+    - name: Get built extension
+      uses: actions/download-artifact@v4
+      with:
+        name: lace-browser-extension-dist-build
+        path: ./apps/browser-extension-wallet/dist
+    - name: Execute E2E tests
+      shell: bash
+      id: e2e-tests
+      working-directory: ./packages/e2e-tests
+      env:
+        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+        TEST_DAPP_URL: ${{ inputs.TEST_DAPP_URL }}
+        BROWSER: ${{ inputs.BROWSER }}
+        DISPLAY: ${{ inputs.DISPLAY }}
+        BATCH: ${{ inputs.BATCH }}
+      run: |
+        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
+        eval "$runCommand";
+    - name: Save dmesg logs
+      shell: bash
+      if: always()
+      working-directory: ./packages/e2e-tests
+      run: |
+        sudo dmesg > ./dmesg.log
+    - name: Publish artifacts (logs, reports, screenshots)
+      if: always()
+      uses: actions/upload-artifact@v4
+      env:
+        BATCH: ${{ inputs.BATCH }}
+      with:
+        name: runner-artifacts-${{ env.BATCH }}
+        path: |
+          ./packages/e2e-tests/screenshots
+          ./packages/e2e-tests/logs
+          ./packages/e2e-tests/reports/allure/results
+          ./packages/e2e-tests/dmesg.log
+        retention-days: 5
