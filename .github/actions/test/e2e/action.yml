@@ -28,12 +28,16 @@ runs:
   using: 'composite'
 
   steps:
-    - name: Setup Node.js and install dependencies
+    - name: Install dependencies
       working-directory: ./packages/e2e-tests
-      uses: ./.github/actions/install
-      with:
-        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+      shell: bash
+      run: yarn install --immutable --inline-builds
+#    - name: Setup Node.js and install dependencies
+#      working-directory: ./packages/e2e-tests
+#      uses: ./.github/actions/install
+#      with:
+#        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+#        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
     - name: Start XVFB
       shell: bash
       env:
