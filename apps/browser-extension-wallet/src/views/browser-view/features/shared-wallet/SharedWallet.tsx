@@ -5,7 +5,12 @@ import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
-import { AddSharedWalletMainPageFlow, AddSharedWalletModal, SharedWalletCreationFlow, SharedWalletRestorationFlow } from '@lace/core/src/shared-wallets';
+import {
+  AddSharedWalletModal,
+  SharedWalletCreationFlow,
+  SharedWalletRestorationFlow,
+  AddSharedWalletMainPageFlow
+} from '@lace/core';
 
 export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
