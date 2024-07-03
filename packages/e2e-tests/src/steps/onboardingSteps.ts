@@ -188,7 +188,7 @@ Then(/^I do not see autocomplete options list$/, async () => {
 
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords);
+  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true);
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
@@ -231,7 +231,8 @@ Given(/^I restore a wallet$/, async () => {
   await OnboardingMainPage.restoreWalletButton.click();
   await OnboardingWalletSetupPage.goToWalletSetupPage(
     'Restore',
-    getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []
+    getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [],
+    true
   );
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();

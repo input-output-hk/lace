@@ -8,6 +8,7 @@ class WalletOption {
   private TITLE = '//span[@data-testid="wallet-option-title"]';
   private SUBTITLE = '//span[@data-testid="wallet-option-subtitle"]';
   private ACCOUNTS_MENU_BUTTON = '//div[@data-testid="wallet-option-accounts-menu-button"]';
+  private STATUS = '//p[@data-testid="header-wallet-status"]';
 
   constructor(index = 1) {
     this.CONTAINER_SELECTOR = `(${this.ITEM})[${index}]`;
@@ -31,6 +32,10 @@ class WalletOption {
 
   get accountsMenuButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER_SELECTOR}${this.ACCOUNTS_MENU_BUTTON}`);
+  }
+
+  get status(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER_SELECTOR}${this.STATUS}`);
   }
 
   async clickOnWalletOptionContainer(): Promise<void> {

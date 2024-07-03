@@ -173,3 +173,13 @@ Feature: Add new wallet - Create wallet
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
 
+  @LW-9357
+  Scenario: Extended-view - Multi-wallet - Create - Add new wallet - happy path
+    Given I opened "Create" flow via "Add new wallet" feature
+    When I go to "Wallet setup" page from "Create" wallet flow
+    And I enter wallet name: "Wallet 2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Enter wallet" button
+    Then I see LW homepage
+    And "Wallet 2" is displayed as a wallet name on the menu button
+    When I click the menu button
+    Then Wallet number 2 with "Wallet 2" name is displayed on the user menu
