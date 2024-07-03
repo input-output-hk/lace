@@ -28,16 +28,31 @@ runs:
   using: 'composite'
 
   steps:
+    - name: Configure Yarn to use GitHub Packages
+      run: |
+        SCOPE="input-output-hk"
+        FILE="$HOME/.yarnrc.yml"
+        if grep -q "npmScopes:" "$FILE"; then
+          if ! grep -q "$SCOPE:" "$FILE"; then
+            echo "  $SCOPE:" >> "$FILE"
+            echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> "$FILE"
+            echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
+            echo "Added $SCOPE to $FILE"
+          else
+            echo "$SCOPE already present in $FILE"
+          fi
+        else
+          echo "npmScopes:" >> "$FILE"
+          echo "  $SCOPE:" >> "$FILE"
+          echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> "$FILE"
+          echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
+          echo "Added npmScopes and $SCOPE to $FILE"
+        fi
+
+      shell: bash
     - name: Install dependencies
-      working-directory: ./packages/e2e-tests
       shell: bash
       run: yarn install --immutable --inline-builds
-#    - name: Setup Node.js and install dependencies
-#      working-directory: ./packages/e2e-tests
-#      uses: ./.github/actions/install
-#      with:
-#        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-#        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
     - name: Start XVFB
       shell: bash
       env:
