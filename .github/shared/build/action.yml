@@ -34,6 +34,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: deubg
+      run: |
+        FILE="$HOME/.yarnrc.yml"
+        cat $FILE
+      shell: bash
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -50,6 +55,7 @@ runs:
       run: |
         SCOPE="input-output-hk"
         FILE="$HOME/.yarnrc.yml"
+        cat $FILE
         if grep -q "npmScopes:" "$FILE"; then
           if ! grep -q "$SCOPE:" "$FILE"; then
             echo "  $SCOPE:" >> "$FILE"

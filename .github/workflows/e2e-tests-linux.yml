@@ -48,6 +48,12 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: deubg
+        run: |
+          FILE="$HOME/.yarnrc.yml"
+          cat $FILE
+
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
