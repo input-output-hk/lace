@@ -8,7 +8,12 @@ export class NetworkManager {
   private readonly NETWORK_ENABLE = 'Network.enable';
   private static cdpSessions: CDPSession[] = [];
 
-  changeNetworkCapabilitiesOfBrowser = async (offline: boolean): Promise<any> => {
+  changeNetworkCapabilitiesOfBrowser = async (
+    offline: boolean,
+    latency: number,
+    downloadThroughput: number,
+    uploadThroughput: number
+  ): Promise<any> => {
     await browser.call(async () => {
       const puppeteer = await browser.getPuppeteer();
       const targets = puppeteer
@@ -22,9 +27,9 @@ export class NetworkManager {
         await client.send(this.NETWORK_ENABLE);
         await client.send('Network.emulateNetworkConditions', {
           offline,
-          latency: 0,
-          downloadThroughput: 0,
-          uploadThroughput: 0
+          latency,
+          downloadThroughput,
+          uploadThroughput
         });
       });
     });
