@@ -128,10 +128,11 @@ Before(
   async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral2)
 );
 
-Before(
-  { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
-  async () => await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
-);
+Before({ tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' }, async () => {
+  await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+});
 
 Before(
   { tags: '@Staking-SwitchingPools-Popup-E2E' },

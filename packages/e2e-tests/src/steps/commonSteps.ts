@@ -198,7 +198,11 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true');
+  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);
+});
+
+When(/^I am in the slow network mode$/, async () => {
+  await networkManager.changeNetworkCapabilitiesOfBrowser(false, 0, 1000, 1000);
 });
 
 When(/^I click outside the drawer$/, async () => {
