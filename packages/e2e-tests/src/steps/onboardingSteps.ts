@@ -27,7 +27,6 @@ import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnal
 import { shuffle } from '../utils/arrayUtils';
 import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
 import ModalAssert from '../assert/modalAssert';
-import { setClipboardReadPermission } from '../utils/browserPermissionsUtils';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -361,11 +360,10 @@ When(
   async (button: 'Copy to clipboard' | 'Paste from clipboard') => {
     switch (button) {
       case 'Copy to clipboard':
-        await RecoveryPhrasePage.copyToClipboardButton.click();
+        await RecoveryPhrasePage.clickOnCopyToClipboardButton();
         break;
       case 'Paste from clipboard':
-        await setClipboardReadPermission('granted');
-        await RecoveryPhrasePage.pasteFromClipboardButton.click();
+        await RecoveryPhrasePage.clickOnPasteFromClipboardButton();
         break;
       default:
         throw new Error(`Unsupported button : ${button}`);
