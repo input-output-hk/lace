@@ -3,11 +3,33 @@ import { NftDetailProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import i18n from 'i18next';
-import { EnvironmentTypes } from '@stores';
 import { AssetOrHandleInfo } from '@hooks';
 import { getAssetImage } from '@src/utils/get-asset-image';
 import { useNftsFoldersContext } from '@src/features/nfts/context';
 import { NftFoldersSchema } from '@lib/storage';
+import { addEllipsis } from '@lace/common';
+
+const DISPLAY_FALLBACK = '-';
+const NAME_TRUNCATE_LENGTH = 10;
+const NAME_TRUNCATE_TRAILING_CHARS = 4;
+
+/**
+ * Converts a Cardano asset name to a UTF-8 string.
+ *
+ * @param value - The asset name to convert.
+ * @returns The UTF-8 representation of the asset name, or undefined if the conversion fails.
+ */
+const assetNameToUtf8 = (value: Wallet.Cardano.AssetName): string | undefined => {
+  let result;
+
+  try {
+    result = Wallet.Cardano.AssetName.toUTF8(value);
+  } catch {
+    result = undefined;
+  }
+
+  return result;
+};
 
 export const nftImageSelector = (imageUri: Wallet.Asset.Uri | Wallet.Asset.Uri[]): string | undefined => {
   const uri = Array.isArray(imageUri) ? imageUri[0] : imageUri;
@@ -63,5 +85,8 @@ export const nftDetailSelector = (asset: AssetOrHandleInfo): NftDetailProps => {
   };
 };
 
-export const nftNameSelector = ({ nftMetadata }: Wallet.Asset.AssetInfo, environmentName: EnvironmentTypes): string =>
-  nftMetadata?.name || `SingleNFT${environmentName || ''}`;
+export const nftNameSelector = ({ nftMetadata, tokenMetadata, name }: Wallet.Asset.AssetInfo): string =>
+  nftMetadata?.name ||
+  tokenMetadata?.name ||
+  assetNameToUtf8(name) ||
+  addEllipsis(name || DISPLAY_FALLBACK, NAME_TRUNCATE_LENGTH, NAME_TRUNCATE_TRAILING_CHARS);

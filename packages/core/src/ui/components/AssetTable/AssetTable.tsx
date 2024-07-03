@@ -5,10 +5,12 @@ import { ColumnsType } from 'antd/lib/table';
 import React, { useState } from 'react';
 import styles from './AssetTable.module.scss';
 import { useTranslation } from 'react-i18next';
+import { ImageWithFallback } from '../ImageWithFallback';
 
 export interface IRow {
   id: string;
   logo: string;
+  defaultLogo: string;
   name: string;
   ticker: string;
   price: string;
@@ -27,16 +29,32 @@ interface IAssetColumn {
 const renderCell = (
   {
     src,
+    defaultSrc,
     title,
     subtitle,
     testIdForTitle,
     testIdForSubtitle
-  }: { src?: string; title: string; subtitle: string; testIdForTitle?: string; testIdForSubtitle?: string },
+  }: {
+    src?: string;
+    defaultSrc?: string;
+    title: string;
+    subtitle: string;
+    testIdForTitle?: string;
+    testIdForSubtitle?: string;
+  },
   subtitleColor?: 'red' | 'green' | 'neutral',
   popupView?: boolean
 ) => (
   <div data-testid="asset-table-cell" className={styles.cellContainer}>
-    {src && <img data-testid="asset-table-cell-logo" src={src} alt="" className={styles.image} />}
+    {src && (
+      <ImageWithFallback
+        data-testid="asset-table-cell-logo"
+        src={src}
+        fallbackSrc={defaultSrc}
+        alt=""
+        className={styles.image}
+      />
+    )}
     <div>
       <p
         data-testid={testIdForTitle ? `token-table-cell-${testIdForTitle}` : 'asset-table-cell-title'}
@@ -68,6 +86,7 @@ const renderRows = (rows: IRow[], popupView: boolean): IAssetColumn[] =>
     token: renderCell(
       {
         src: row.logo,
+        defaultSrc: row.defaultLogo,
         title: row.name,
         subtitle: row.ticker || '-',
         testIdForTitle: 'name',

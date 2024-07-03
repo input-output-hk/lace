@@ -20,6 +20,7 @@ describe('getTokensList', () => {
         Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c42'),
         {
           ...mockNft,
+          tokenMetadata: undefined,
           nftMetadata: undefined
         }
       ],
@@ -27,6 +28,7 @@ describe('getTokensList', () => {
         Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c43'),
         {
           ...mockNft,
+          tokenMetadata: undefined,
           nftMetadata: { name: undefined, image: undefined } as Asset.NftMetadata
         }
       ]
@@ -68,14 +70,10 @@ describe('getTokensList', () => {
     expect(tokenList[0].assetId).toEqual(mockAsset.assetId);
     expect(tokenList[1].fiat).toEqual('880.000 USD');
 
-    expect(nftList[1].name).toEqual(`SingleNFT${testEnvironment}`);
-    expect(nftList[2].name).toEqual(`SingleNFT${testEnvironment}`);
+    expect(nftList[1].name).toEqual('TSLA');
+    expect(nftList[2].name).toEqual('TSLA');
     expect(nftList[1].image).toEqual(undefined);
     expect(nftList[2].image).toEqual(undefined);
-  });
-
-  test('should return proper asset name in case environment name is missing', () => {
-    expect(getTokenList({ ...payload, environmentName: undefined }).nftList[1].name).toEqual('SingleNFT');
   });
 
   test('should return proper fiat value in case prices are missing', () => {
@@ -188,5 +186,162 @@ describe('getTokensList', () => {
     expect(nftList).toHaveLength(0);
     expect(tokenList).toHaveLength(1);
     expect(tokenList[0].assetId).toEqual(mockAsset.assetId);
+  });
+
+  test('token metadata should have preference over nft metadata for tokens', async () => {
+    const { nftList, tokenList } = getTokenList({
+      assetsInfo: new Map([
+        [
+          mockAsset.assetId,
+          {
+            ...mockAsset,
+            tokenMetadata: {
+              assetId: Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
+              decimals: 6,
+              desc: 'Testcoin crypto powered by Cardano testnet.',
+              icon: 'some_icon',
+              name: 'Testcoin',
+              ticker: 'TEST',
+              url: 'https://developers.cardano.org/'
+            },
+            nftMetadata: {
+              image: Wallet.Asset.Uri('ipfs://asd.io'),
+              name: 'Some Token',
+              version: '2',
+              description: 'NFT MOCK',
+              otherProperties: new Map([
+                ['ticker', 'NFT'],
+                ['decimals', '6']
+              ])
+            }
+          }
+        ]
+      ]),
+      balance: new Map([[mockAsset.assetId, BigInt(20)]]),
+      fiatCurrency: defaultCurrency
+    });
+
+    expect(nftList).toHaveLength(0);
+    expect(tokenList).toHaveLength(1);
+    expect(tokenList[0].assetId).toEqual(mockAsset.assetId);
+    expect(tokenList[0].name).toEqual('Testcoin');
+    expect(tokenList[0].logo).toEqual('data:image/png;base64,some_icon');
+
+    // Test vector computed with getRandomIcon({ id: mockAsset.assetId.toString(), size: 30 })
+    expect(tokenList[0].defaultLogo).toEqual(
+      'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23a8383e%22%20d%3D%22M9%209L9%203L15%203ZM15%203L21%203L21%209ZM21%2021L21%2027L15%2027ZM15%2027L9%2027L9%2021ZM3%2015L3%209L9%209ZM21%209L27%209L27%2015ZM27%2015L27%2021L21%2021ZM9%2021L3%2021L3%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23d1757a%22%20d%3D%22M9%203L9%209L3%209ZM27%209L21%209L21%203ZM21%2027L21%2021L27%2021ZM3%2021L9%2021L9%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23e8babc%22%20d%3D%22M15%2012L15%2015L12%2015ZM18%2015L15%2015L15%2012ZM15%2018L15%2015L18%2015ZM12%2015L15%2015L15%2018Z%22%2F%3E%3C%2Fsvg%3E'
+    );
+    expect(tokenList[0].description).toEqual('TEST');
+    expect(tokenList[0].decimals).toEqual(6);
+  });
+
+  test('token metadata should fell-back to nft metadata if token metadata is missing', async () => {
+    const { nftList, tokenList } = getTokenList({
+      assetsInfo: new Map([
+        [
+          mockAsset.assetId,
+          {
+            ...mockAsset,
+            tokenMetadata: undefined,
+            nftMetadata: {
+              image: Wallet.Asset.Uri('ipfs://asd.io'),
+              name: 'Some Token',
+              version: '2',
+              description: 'NFT MOCK',
+              otherProperties: new Map([
+                ['ticker', 'NFT'],
+                ['decimals', '6']
+              ])
+            }
+          }
+        ]
+      ]),
+      balance: new Map([[mockAsset.assetId, BigInt(20)]]),
+      fiatCurrency: defaultCurrency
+    });
+
+    expect(nftList).toHaveLength(0);
+    expect(tokenList).toHaveLength(1);
+    expect(tokenList[0].assetId).toEqual(mockAsset.assetId);
+    expect(tokenList[0].name).toEqual('Some Token');
+    expect(tokenList[0].logo).toEqual('https://ipfs.blockfrost.dev/ipfs/asd.io');
+
+    // Test vector computed with getRandomIcon({ id: mockAsset.assetId.toString(), size: 30 })
+    expect(tokenList[0].defaultLogo).toEqual(
+      'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23a8383e%22%20d%3D%22M9%209L9%203L15%203ZM15%203L21%203L21%209ZM21%2021L21%2027L15%2027ZM15%2027L9%2027L9%2021ZM3%2015L3%209L9%209ZM21%209L27%209L27%2015ZM27%2015L27%2021L21%2021ZM9%2021L3%2021L3%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23d1757a%22%20d%3D%22M9%203L9%209L3%209ZM27%209L21%209L21%203ZM21%2027L21%2021L27%2021ZM3%2021L9%2021L9%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23e8babc%22%20d%3D%22M15%2012L15%2015L12%2015ZM18%2015L15%2015L15%2012ZM15%2018L15%2015L18%2015ZM12%2015L15%2015L15%2018Z%22%2F%3E%3C%2Fsvg%3E'
+    );
+    expect(tokenList[0].description).toEqual('NFT');
+    expect(tokenList[0].decimals).toEqual(6);
+  });
+
+  test('nft metadata should have preference over token metadata for NFTs', async () => {
+    const { nftList, tokenList } = getTokenList({
+      assetsInfo: new Map([
+        [
+          mockNft.assetId,
+          {
+            ...mockNft,
+            tokenMetadata: {
+              assetId: Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
+              decimals: 6,
+              desc: 'Testcoin crypto powered by Cardano testnet.',
+              icon: 'some_icon',
+              name: 'Testcoin',
+              ticker: 'TEST',
+              url: 'https://developers.cardano.org/'
+            },
+            nftMetadata: {
+              image: Wallet.Asset.Uri('ipfs://asd.io'),
+              name: 'Some Token',
+              version: '2',
+              description: 'NFT MOCK',
+              otherProperties: new Map([
+                ['ticker', 'NFT'],
+                ['decimals', '6']
+              ])
+            }
+          }
+        ]
+      ]),
+      balance: new Map([[mockNft.assetId, BigInt(1)]]),
+      fiatCurrency: defaultCurrency
+    });
+
+    expect(tokenList).toHaveLength(0);
+    expect(nftList).toHaveLength(1);
+    expect(nftList[0].assetId).toEqual(mockNft.assetId);
+    expect(nftList[0].name).toEqual('Some Token');
+    expect(nftList[0].image).toEqual('https://ipfs.blockfrost.dev/ipfs/asd.io');
+  });
+
+  test('nft metadata should fell-back to token metadata if nft metadata is missing', async () => {
+    const { nftList, tokenList } = getTokenList({
+      assetsInfo: new Map([
+        [
+          mockNft.assetId,
+          {
+            ...mockNft,
+            tokenMetadata: {
+              assetId: mockNft.assetId,
+              decimals: undefined,
+              desc: 'Mock NFT',
+              icon: 'some_icon',
+              name: 'Mock NFT',
+              ticker: 'NFT'
+            },
+            nftMetadata: undefined
+          }
+        ]
+      ]),
+      balance: new Map([[mockNft.assetId, BigInt(1)]]),
+      fiatCurrency: defaultCurrency
+    });
+
+    expect(tokenList).toHaveLength(0);
+    expect(nftList).toHaveLength(1);
+
+    expect(nftList[0].assetId).toEqual(mockNft.assetId);
+    expect(nftList[0].name).toEqual('Mock NFT');
+    expect(nftList[0].image).toEqual('data:image/png;base64,some_icon');
   });
 });
