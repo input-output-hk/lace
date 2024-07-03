@@ -380,6 +380,85 @@ export const AssetDark: Story = {
   },
 };
 
+export const CollectiblesLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('NFTs tab', async () => {
+      const menu = await canvas.findByTestId('collectibles');
+      await userEvent.click(menu.children[0]);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([
+        {
+          ...account,
+          preprod: {
+            ...account.preprod,
+            assets: account.preprod.assets.slice(0, 4),
+          },
+          assets: account.preprod.assets.slice(0, 4),
+        },
+      ]);
+    });
+
+    return () => {
+      getAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const CollectiblesDark: Story = {
+  ...CollectiblesLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
+export const CollectibleMetadataLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('NFTs tab', async () => {
+      const menu = await canvas.findByTestId('collectibles');
+      await userEvent.click(menu.children[0]);
+
+      const nft = await canvas.findByTestId('collectible-0');
+      await userEvent.click(nft.children[0]);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([
+        {
+          ...account,
+          preprod: {
+            ...account.preprod,
+            assets: account.preprod.assets.slice(0, 4),
+          },
+          assets: account.preprod.assets.slice(0, 4),
+        },
+      ]);
+    });
+
+    return () => {
+      getAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const CollectibleMetadataDark: Story = {
+  ...CollectibleMetadataLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
 export const StakePoolDelegationLight: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);

@@ -92,7 +92,7 @@ import { NETWORK_ID, TAB } from '../../../config/config';
 import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
 import { BiWallet } from 'react-icons/bi';
 import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
-// import CollectiblesViewer from '../components/collectiblesViewer';
+import CollectiblesViewer from '../components/collectiblesViewer';
 import AssetFingerprint from '@emurgo/cip14-js';
 
 // Assets
@@ -200,9 +200,9 @@ const Wallet = () => {
         (asset.has_nft_onchain_metadata === true &&
           !fromAssetUnit(asset.unit).label) ||
         fromAssetUnit(asset.unit).label === 222
-      )
+      ) {
         currentAccount.nft.push(asset);
-      else currentAccount.ft.push(asset);
+      } else currentAccount.ft.push(asset);
     });
     let price = fiatPrice.current;
     try {
@@ -752,6 +752,7 @@ const Wallet = () => {
               onClick={() => {
                 capture(Events.NFTsClick);
               }}
+              data-testid="collectibles"
             >
               <Icon as={FaGamepad} boxSize={5} />
             </Tab>
@@ -771,10 +772,10 @@ const Wallet = () => {
               <AssetsViewer assets={state.account && state.account.ft} />
             </TabPanel>
             <TabPanel>
-              {/* <CollectiblesViewer
+              <CollectiblesViewer
                 assets={state.account && state.account.nft}
                 onUpdateAvatar={() => getData()}
-              /> */}
+              />
             </TabPanel>
             <TabPanel>
               <HistoryViewer
