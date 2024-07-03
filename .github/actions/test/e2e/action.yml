@@ -22,17 +22,24 @@ inputs:
   BATCH:
     description: 'Tests batch'
     required: true
-    default: 'batch1'
+    default: '1'
 
 runs:
   using: 'composite'
 
   steps:
-    - name: Setup Node.js and install dependencies
-      uses: ./.github/actions/install
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+    - name: Node modules cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          **/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Start XVFB
       shell: bash
       env:
@@ -44,6 +51,12 @@ runs:
       with:
         name: lace-browser-extension-dist-build
         path: ./apps/browser-extension-wallet/dist
+    - name: Decrypt test data
+      working-directory: ./packages/e2e-tests
+      run: ./decrypt_secret.sh
+      shell: bash
+      env:
+        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
     - name: Execute E2E tests
       shell: bash
       id: e2e-tests
