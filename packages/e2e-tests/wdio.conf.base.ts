@@ -7,31 +7,26 @@ export const config: WebdriverIO.Config = {
   specs: ['./src/features/**/*.feature'],
   suites: {
     batch1: [
-      // './src/features/governance/CIP95StaticMethods.feature',
-      // './src/features/MultiDelegationPageExtended*.feature',
-      // './src/features/Onboarding*.feature',
-      // './src/features/SendTransactionSimpleExtended*.feature',
-      // './src/features/SendTransactionSimplePopup*.feature',
-      // './src/features/SettingsPageExtended.feature'
-
-      './src/features/SendTransactionSimplePopupPart1.feature',
-      './src/features/SendTransactionSimplePopupPart2.feature'
+      './src/features/governance/CIP95StaticMethods.feature',
+      './src/features/MultiDelegationPageExtended*.feature',
+      './src/features/Onboarding*.feature',
+      './src/features/SendTransactionSimpleExtended*.feature',
+      './src/features/SendTransactionSimplePopup*.feature',
+      './src/features/SettingsPageExtended.feature'
     ],
     batch2: [
-      // './src/features/AddNewWallet*.feature',
-      // './src/features/analytics/Analytics*.feature',
-      // './src/features/e2e/*.feature',
-      // './src/features/TokensPage*.feature'
-
-      './src/features/TokensPageExtended.feature'
+      './src/features/AddNewWallet*.feature',
+      './src/features/analytics/Analytics*.feature',
+      './src/features/e2e/*.feature',
+      './src/features/TokensPage*.feature'
     ],
     batch3: [
-      './src/features/AddressBookExtended.feature'
-      // './src/features/AddressBookPopup.feature',
-      // './src/features/Collateral*.feature',
-      // './src/features/NFTsFolders*.feature',
-      // './src/features/SendTransactionBundlesExtended.feature',
-      // './src/features/Transactions*.feature'
+      './src/features/AddressBookExtended.feature',
+      './src/features/AddressBookPopup.feature',
+      './src/features/Collateral*.feature',
+      './src/features/NFTsFolders*.feature',
+      './src/features/SendTransactionBundlesExtended.feature',
+      './src/features/Transactions*.feature'
     ],
     batch4: [
       './src/features/AdaHandle*.feature',

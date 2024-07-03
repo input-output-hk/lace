@@ -116,7 +116,7 @@ export class CoinConfigure {
   };
 
   clickCoinSelectorName = async (): Promise<void> => {
-    await this.nameElement.waitForClickable();
+    await this.nameElement.waitForEnabled();
     await this.nameElement.click();
     await browser.pause(500);
   };
