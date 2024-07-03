@@ -62,6 +62,7 @@ class TopNavigationAssert {
 
   async assertSeeWalletStatusComponent() {
     await MenuHeader.menuUserDetailsButton.waitForExist();
+    await MenuHeader.menuUserDetailsButton.waitForStable();
     const status = await MenuHeader.menuWalletStatus.getText();
     const synced = await t('browserView.topNavigationBar.walletStatus.walletSynced');
     const notSynced = await t('browserView.topNavigationBar.walletStatus.notSyncedToTheBlockchain');

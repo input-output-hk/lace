@@ -22,13 +22,14 @@ inputs:
   BATCH:
     description: 'Tests batch'
     required: true
-    default: 'batch1'
+    default: '1'
 
 runs:
   using: 'composite'
 
   steps:
     - name: Setup Node.js and install dependencies
+      working-directory: ./packages/e2e-tests
       uses: ./.github/actions/install
       with:
         WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
