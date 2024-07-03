@@ -44,7 +44,7 @@ class WalletAddressPageAssert {
     const handleNames: string[] = [];
     const handleImageSrcs: string[] = [];
     const handleNameElements = await WalletAddressPage.handleNames;
-    await handleNameElements[0].waitForStable();
+    await handleNameElements[0].waitForDisplayed();
 
     // to fully load all handle cards
     await handleNameElements[handleNameElements.length - 1].scrollIntoView();
