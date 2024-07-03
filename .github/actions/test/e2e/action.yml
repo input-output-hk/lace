@@ -48,7 +48,6 @@ runs:
           echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
           echo "Added npmScopes and $SCOPE to $FILE"
         fi
-
       shell: bash
     - name: Install dependencies
       working-directory: ./packages/e2e-tests
@@ -65,6 +64,12 @@ runs:
       with:
         name: lace-browser-extension-dist-build
         path: ./apps/browser-extension-wallet/dist
+    - name: Decrypt test data
+      working-directory: ./packages/e2e-tests
+      run: ./decrypt_secret.sh
+      shell: bash
+      env:
+        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
     - name: Execute E2E tests
       shell: bash
       id: e2e-tests
