@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
-import {
-  AddSharedWalletModal,
-  SharedWalletCreationFlow,
-  AddSharedWalletMainPageFlow,
-  SharedWalletRestorationFlow
-} from '@lace/shared-wallets';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
+import { AddSharedWalletMainPageFlow, AddSharedWalletModal, SharedWalletCreationFlow, SharedWalletRestorationFlow } from '@lace/core/src/shared-wallets';
 
 export const SharedWallet = (): JSX.Element => {
   const history = useHistory();

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { StartOverDialog } from './StartOverDialog';
 import { ComponentProps } from 'react';
-import { ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 const meta: Meta<typeof StartOverDialog> = {
   title: 'Shared Wallets/StartOverAgainDialog',

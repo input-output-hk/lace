@@ -1,5 +1,5 @@
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
-import { SearchBox } from '@lace/ui';
+import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import { EmptySearch, FundWalletBanner } from '@views/browser/components';
 import { Skeleton } from 'antd';
 import { AssetTable, IRow } from '@lace/core';

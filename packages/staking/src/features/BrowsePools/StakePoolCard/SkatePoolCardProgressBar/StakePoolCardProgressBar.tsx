@@ -1,4 +1,4 @@
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { getSaturationLevel } from '../../utils';
 import * as styles from './StakePoolCardProgressBar.css';

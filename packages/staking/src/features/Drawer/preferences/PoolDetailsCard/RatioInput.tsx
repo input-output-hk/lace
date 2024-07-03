@@ -1,4 +1,4 @@
-import { Box } from '@lace/ui';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { PERCENTAGE_SCALE_MAX } from 'features/store/delegationPortfolioStore/constants';
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import * as styles from './RatioInput.css';

@@ -152,10 +152,12 @@ Feature: Analytics - Settings - Extended View
     And Analytics toggle is enabled: false
     Then I validate latest analytics single event "settings | analytics | skip | click"
     Then I validate that 1 analytics event(s) have been sent
+    And Analytics toggle is enabled: true
 
   @LW-8790
   Scenario: Analytics - Extended View - Settings - Theme switch
-    When I open settings from header menu
+    When I set light theme mode in Local Storage
+    And I open settings from header menu
     And I set up request interception for posthog analytics request(s)
     And I set theme switch in settings to dark mode
     Then I validate latest analytics single event "settings | theme | dark mode | click"
@@ -168,6 +170,7 @@ Feature: Analytics - Settings - Extended View
     When I open settings from header menu
     And I set up request interception for posthog analytics request(s)
     And I click on "Sync" button
+    And I wait until modal disappears
     Then I validate latest analytics single event "settings | wallet | hd wallet sync | sync | click"
     And I validate that 1 analytics event(s) have been sent
 
@@ -179,5 +182,6 @@ Feature: Analytics - Settings - Extended View
     And I click on Remove wallet button
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I wait until modal disappears
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
     And I validate that 2 analytics event(s) have been sent

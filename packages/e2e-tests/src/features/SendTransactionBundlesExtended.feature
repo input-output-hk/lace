@@ -139,7 +139,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And click on the coin selector for "tADA" asset in bundle 2
     And click on an token with name: "LaceCoin"
     And I enter a value of: 1 to the "LaceCoin1" asset in bundle 2
-    Then transaction fee is around 0.20 ADA and Ada allocation cost is around 1.07 ADA
+    Then transaction fee is around 0.19 ADA and Ada allocation cost is around 1.07 ADA
 
   @LW-4505
   Scenario: Extended-view - Cancel transaction with multiple bundles on Summary page
@@ -235,7 +235,8 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
 
-  @LW-3749
+  @LW-3749 @Pending
+  @issue=LW-10818
   Scenario: Extended-view - When adding MAX amount of a token, it isn't displayed in next bundle
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Divider, Metadata, MetadataLink, Cell } from '@lace/ui';
+import { Box, Grid, Divider, Metadata, MetadataLink, Cell } from '@input-output-hk/lace-ui-toolkit';
 import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
 import * as Types from './ParameterChangeActionTypes';
 import { EconomicGroup } from './EconomicGroup';

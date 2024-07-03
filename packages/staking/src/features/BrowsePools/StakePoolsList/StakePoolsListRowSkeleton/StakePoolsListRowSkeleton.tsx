@@ -1,4 +1,4 @@
-import { Box, Flex } from '@lace/ui';
+import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import { stakePoolCellPlaceholderRenderer } from './StakePoolSkeletonCellRenderer';
 import * as styles from './StakePoolsListRowSkeleton.css';

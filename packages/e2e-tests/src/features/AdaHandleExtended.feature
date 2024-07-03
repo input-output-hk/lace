@@ -152,6 +152,7 @@ Feature: ADA handle - extended view
   @LW-5025 @LW-5028 @LW-5030
   Scenario: Extended View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on page header
+    And I am in the slow network mode
     And I enter "$test_handle_3" in the bundle 1 recipient's address
     Then search loader is displayed inside address input field
     And Green tick icon is displayed next to ADA handle
@@ -160,6 +161,7 @@ Feature: ADA handle - extended view
   @LW-5026 @LW-5032
   Scenario: Extended View - Send flow - Enter ADA handle and confirm invalid
     When I click "Send" button on page header
+    And I am in the slow network mode
     And I enter "$fake_handle" in the bundle 1 recipient's address
     Then search loader is displayed inside address input field
     And Red exclamation icon is displayed next to ADA handle

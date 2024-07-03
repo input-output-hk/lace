@@ -45,6 +45,7 @@ import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 import MainLoader from '../elements/MainLoader';
+import Modal from '../elements/modal';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -197,7 +198,11 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true');
+  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);
+});
+
+When(/^I am in the slow network mode$/, async () => {
+  await networkManager.changeNetworkCapabilitiesOfBrowser(false, 0, 1000, 1000);
 });
 
 When(/^I click outside the drawer$/, async () => {
@@ -316,6 +321,10 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
 
 Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Then(/^I wait until modal disappears$/, async () => {
+  await Modal.waitUntilModalDisappears();
 });
 
 Given(/^I enable showing Analytics consent banner$/, async () => {

@@ -4,8 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { NavigationButton, PostHogAction, toast } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from './WalletAccounts.module.scss';
-import { ProfileDropdown } from '@lace/ui';
-import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
+import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
+import type { AccountData } from '@input-output-hk/lace-ui-toolkit';
 import {
   DisableAccountConfirmation,
   EditAccountDrawer,
@@ -134,12 +134,15 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [disableAccountConfirmation, accountsData]
   );
 
-  const showHWErrorState = useCallback((accountIndex: number) => {
-    enableAccountHWSigningDialog.setData({
-      accountIndex,
-      state: 'error'
-    });
-  }, []);
+  const showHWErrorState = useCallback(
+    (accountIndex: number) => {
+      enableAccountHWSigningDialog.setData({
+        accountIndex,
+        state: 'error'
+      });
+    },
+    [enableAccountHWSigningDialog]
+  );
 
   const unlockHWAccount = useCallback(
     async (accountIndex: number) => {

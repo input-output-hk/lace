@@ -19,7 +19,7 @@
     "apps/*"
   ],
   "scripts": {
-    "base-command-for-build-scripts": "wsrun --prefix -trame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
+    "base-command-for-build-scripts": "wsrun --prefix -srame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
     "build": "yarn base-command-for-build-scripts -c build",
     "build-deps": "EXCLUDE_APP=true yarn build",
@@ -29,7 +29,7 @@
     "cleanup": "yarn workspaces foreach run cleanup && yarn exec rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
     "common:lint": "yarn eslint-cmd \"packages/common/**/*.{js,ts,tsx}\"",
     "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
-    "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
+    "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore --max-warnings=0",
     "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
     "format-check": "yarn workspaces foreach -ptv run format-check",
     "postinstall": "husky install & ts-patch install -s",
@@ -47,23 +47,15 @@
     "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {
-    "*(apps/**/*.{js,ts,tsx}|packages/!(ui|translation)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
-      "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore",
+    "*(apps/**/*.{js,ts,tsx}|packages/!(translation)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
+      "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore --max-warnings=0",
       "prettier --write"
-    ],
-    "*(packages/ui/**/*.{js,ts,tsx})": [
-      "yarn workspace @lace/ui lint --fix",
-      "yarn workspace @lace/ui format"
     ],
     "*(packages/translation/**/*.{js,ts,tsx})": [
       "yarn workspace @lace/translation lint --fix",
       "yarn workspace @lace/translation format"
     ],
     "*.json": "prettier --write",
-    "{packages/!(ui),apps}/**/*.md": [
-      "prettier --write",
-      "markdownlint --fix"
-    ],
     "package.json": "sort-package-json"
   },
   "resolutions": {
@@ -93,6 +85,7 @@
     "trim-off-newlines": "^1.0.3"
   },
   "dependencies": {
+    "@input-output-hk/lace-ui-toolkit": "1.4.1",
     "normalize.css": "^8.0.1"
   },
   "devDependencies": {
@@ -201,7 +194,7 @@
     "typedoc": "^0.21.5",
     "typescript": "^4.9.5",
     "typescript-transform-paths": "3.3.1",
-    "webpack": "5.76.0",
+    "webpack": "5.91.0",
     "webpack-cli": "4.7.2",
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "5.8.0",

@@ -4,11 +4,11 @@
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
-import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
+import { inspectTxValues, inspectTxType, txIncludesConwayCertificates } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
-import { ActivityStatus, DelegationActivityType } from '@lace/core';
+import { ActivityStatus, ConwayEraCertificatesTypes, DelegationActivityType } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
@@ -43,7 +43,7 @@ export const getFormattedFiatAmount = ({
   return fiatAmount ? `${fiatAmount} ${fiatCurrency.code}` : '-';
 };
 
-const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActivity[] => {
+const splitDelegationTx = (tx: TransformedActivity, hasConwayEraCerts: boolean): TransformedTransactionActivity[] => {
   if (tx.deposit) {
     return [
       {
@@ -54,7 +54,9 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
       },
       {
         ...tx,
-        type: DelegationActivityType.delegationRegistration,
+        type: hasConwayEraCerts
+          ? ConwayEraCertificatesTypes.Registration
+          : DelegationActivityType.delegationRegistration,
         // Let registration show just the deposit,
         // and the other transaction show fee to avoid duplicity
         fee: '0'
@@ -70,7 +72,9 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
       },
       {
         ...tx,
-        type: DelegationActivityType.delegationDeregistration,
+        type: hasConwayEraCerts
+          ? ConwayEraCertificatesTypes.Unregistration
+          : DelegationActivityType.delegationDeregistration,
         // Let de-registration show just the returned deposit,
         // and the other transaction show fee to avoid duplicity
         fee: '0'
@@ -239,7 +243,7 @@ export const txTransformer = async ({
   });
 
   if (type === DelegationActivityType.delegation) {
-    return splitDelegationTx(baseTransformedActivity);
+    return splitDelegationTx(baseTransformedActivity, txIncludesConwayCertificates(tx.body.certificates));
   }
 
   return [

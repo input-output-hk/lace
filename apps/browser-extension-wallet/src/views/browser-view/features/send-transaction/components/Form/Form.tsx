@@ -16,8 +16,7 @@ import { getReachedMaxAmountList } from '../../helpers';
 import { MetadataInput } from './MetadataInput';
 import { BundlesList } from './BundlesList';
 import { formatAdaAllocation, getNextBundleCoinId } from './util';
-import { Box, Text } from '@lace/ui';
-import { ReactComponent as WarningIconCircle } from '@lace/icons/dist/WarningIconCircleComponent';
+import { Box, Text, WarningIconCircleComponent } from '@input-output-hk/lace-ui-toolkit';
 import styles from './Form.module.scss';
 
 export interface Props {
@@ -122,7 +121,7 @@ export const Form = ({
             message={utxoDepletedMsg}
             customIcon={
               <Text.Label color="warning">
-                <WarningIconCircle />
+                <WarningIconCircleComponent />
               </Text.Label>
             }
           />

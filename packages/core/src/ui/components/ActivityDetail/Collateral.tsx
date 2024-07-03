@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, TransactionSummary, InfoBar } from '@lace/ui';
-import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
+import { Box, TransactionSummary, InfoBar, InfoComponent } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 
 export enum CollateralStatus {
@@ -56,7 +55,7 @@ export const Collateral = ({
       />
       {status === CollateralStatus.ERROR && (
         <Box mt="$32">
-          <InfoBar icon={<InfoIcon />} message={t('core.activityDetails.collateral.error')} />
+          <InfoBar icon={<InfoComponent />} message={t('core.activityDetails.collateral.error')} />
         </Box>
       )}
     </>

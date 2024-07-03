@@ -14,7 +14,12 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionSimplePopup*.feature',
       './src/features/SettingsPageExtended.feature'
     ],
-    batch2: ['./src/features/analytics/Analytics*.feature', './src/features/e2e/*.feature'],
+    batch2: [
+      './src/features/AddNewWallet*.feature',
+      './src/features/analytics/Analytics*.feature',
+      './src/features/e2e/*.feature',
+      './src/features/TokensPage*.feature'
+    ],
     batch3: [
       './src/features/AddressBookExtended.feature',
       './src/features/AddressBookPopup.feature',
@@ -42,7 +47,6 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionMetadata*.feature',
       './src/features/SendTransactionMultipleSelection*.feature',
       './src/features/SettingsPagePopup.feature',
-      './src/features/TokensPage*.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ]

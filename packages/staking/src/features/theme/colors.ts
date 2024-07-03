@@ -1,4 +1,4 @@
-import { darkColorScheme, laceGradient, lightColorScheme } from '@lace/ui';
+import { darkColorScheme, laceGradient, lightColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 export const colorsContract = {
   $activityNoActivityTextColor: '',

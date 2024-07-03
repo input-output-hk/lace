@@ -1,1 +1,1 @@
-# Staking
+# Lace | Packages | Staking

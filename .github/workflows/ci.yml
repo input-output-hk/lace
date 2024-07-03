@@ -36,18 +36,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-      - name: Build icons
-        uses: ./.github/actions/build/package
-        with:
-          DIR: packages/icons
-          NAME: packages-icons
-
-      - name: Build ui
-        uses: ./.github/actions/build/package
-        with:
-          DIR: packages/ui
-          NAME: packages-ui
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Build common
         uses: ./.github/actions/build/package
@@ -73,12 +62,6 @@ jobs:
           DIR: packages/core
           NAME: packages-core
 
-      - name: Build shared wallets
-        uses: ./.github/actions/build/package
-        with:
-          DIR: packages/shared-wallets
-          NAME: packages-shared-wallets
-
       - name: Build staking
         uses: ./.github/actions/build/package
         with:
@@ -98,18 +81,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-      - name: Download packages-icons
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-icons
-          path: packages/icons/dist
-
-      - name: Download packages-ui
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-ui
-          path: packages/ui/dist
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
         uses: actions/download-artifact@v4
@@ -134,12 +106,6 @@ jobs:
         with:
           name: packages-core
           path: packages/core/dist
-
-      - name: Download packages-shared-wallets
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-shared-wallets
-          path: packages/shared-wallets/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v4
@@ -168,18 +134,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-      - name: Download packages-icons
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-icons
-          path: packages/icons/dist
-
-      - name: Download packages-ui
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-ui
-          path: packages/ui/dist
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
         uses: actions/download-artifact@v4
@@ -204,12 +159,6 @@ jobs:
         with:
           name: packages-core
           path: packages/core/dist
-
-      - name: Download packages-shared-wallets
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-shared-wallets
-          path: packages/shared-wallets/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v4
@@ -239,7 +188,7 @@ jobs:
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           E2E_AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
           E2E_AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
           E2E_REPORTS_USER: ${{ secrets.E2E_REPORTS_USER }}
@@ -288,20 +237,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-      - name: Download packages-icons
-        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-icons
-          path: packages/icons/dist
-
-      - name: Download packages-ui
-        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-ui
-          path: packages/ui/dist
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
         if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
@@ -384,20 +320,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-      - name: Download packages-icons
-        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-icons
-          path: packages/icons/dist
-
-      - name: Download packages-ui
-        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-ui
-          path: packages/ui/dist
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
         if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
@@ -445,72 +368,4 @@ jobs:
       - name: Skip
         if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 0 }}
         run: echo "Chromatic check for packages/staking not needed"
-          exit 0
-
-  if-ui-changed:
-    name: When ui changed
-    if: ${{ github.event.pull_request.draft == false }}
-    runs-on: ubuntu-20.04
-    outputs:
-      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - id: diffcheck
-        run: |
-          set +e
-          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/ui/**
-          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
-          cat $GITHUB_OUTPUT
-          set -e
-
-  chromaticUi:
-    name: >
-      Run Chromatic check: UI
-    runs-on: ubuntu-20.04
-    needs:
-      - prepare
-      - if-ui-changed
-
-    steps:
-      - name: Checkout repository
-        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js and install dependencies
-        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
-        uses: ./.github/actions/install
-        with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-
-      - name: Download packages-icons
-        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-icons
-          path: packages/icons/dist
-
-      - name: Download packages-ui
-        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-ui
-          path: packages/ui/dist
-
-      - name: Chromatic packages-ui
-        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 1 }}
-        uses: ./.github/actions/chromatic
-        with:
-          DIR: packages/ui
-          NAME: packages-ui
-          TOKEN: ${{ secrets.CHROMATIC_LACE_UI_TOOLKIT_TOKEN }}
-
-      - name: Skip
-        if: ${{ needs.if-ui-changed.outputs.requireChromaticCheck == 0 }}
-        run: echo "Chromatic check for packages/ui not needed"
           exit 0

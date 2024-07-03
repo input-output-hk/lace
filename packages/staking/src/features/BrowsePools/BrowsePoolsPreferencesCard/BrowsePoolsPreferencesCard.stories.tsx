@@ -1,4 +1,4 @@
-import { Box, Cell, Flex, Grid, Section, ThemeColorScheme, Variants } from '@lace/ui';
+import { Box, Cell, Flex, Grid, Section, ThemeColorScheme, Variants } from '@input-output-hk/lace-ui-toolkit';
 import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 import { expect, userEvent, waitFor, within } from '@storybook/test';

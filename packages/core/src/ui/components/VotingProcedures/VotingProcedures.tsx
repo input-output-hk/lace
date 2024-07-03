@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Box, Cell, Grid, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
+import { Box, Cell, Grid, Metadata, MetadataLink, Text, Divider, sx } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { CoreTranslationKey } from '@lace/translation';
 import { VoterTypeEnum, VotesEnum } from '@lace/cardano/dist/wallet/util';

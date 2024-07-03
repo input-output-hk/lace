@@ -26,7 +26,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "run -T rollup -c rollup.config.mjs",
+    "build": "run -T rollup -c rollup.config.js",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "format-check": "echo \"@lace/common: no format-check command specified\"",
     "lint": "cd ../.. && yarn common:lint",
@@ -35,7 +35,7 @@
     "prestart": "yarn build",
     "start": "node dist/index.js",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
-    "type-check": "echo \"@lace/icons: no type-check command specified\"",
+    "type-check": "echo \"@lace/common: no type-check command specified\"",
     "watch": "yarn build --watch"
   },
   "dependencies": {
