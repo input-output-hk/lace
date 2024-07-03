@@ -8,7 +8,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I set up request interception for posthog analytics request(s)
     And I <enable_analytics> analytics banner on "Get started" page
     And I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow and "not fill" values
+    And I go to "Wallet setup" page from "Create" wallet flow and not fill values
     Then I validate that <number_of_events> analytics event(s) have been sent
     Examples:
       | enable_analytics | number_of_events |
@@ -19,7 +19,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
     When I click "Next" button during wallet setup
     Then "Wallet setup" page is displayed
@@ -41,7 +41,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics single event "onboarding | analytics banner | agree | click"
     When I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
-    When I go to "Mnemonic verification" page from "Create" wallet flow
+    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | next | click"
     When I click "Next" button during wallet setup
     Then "Wallet setup" page is displayed

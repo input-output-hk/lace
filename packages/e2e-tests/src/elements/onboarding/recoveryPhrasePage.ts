@@ -5,6 +5,7 @@ import CommonOnboardingElements from './commonOnboardingElements';
 import { RecoveryPhrase } from '../../types/onboarding';
 import { clearInputFieldValue, setInputFieldValue } from '../../utils/inputFieldUtils';
 import testContext from '../../utils/testContext';
+import { browser } from '@wdio/globals';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -159,7 +160,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   async goToMnemonicVerificationPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
-    fillValues = true
+    fillValues = false
   ): Promise<void> {
     if (flowType === 'Create') {
       this.mnemonicWordsList = await this.getMnemonicWordTexts();

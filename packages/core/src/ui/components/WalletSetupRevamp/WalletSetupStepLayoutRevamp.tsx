@@ -83,7 +83,11 @@ export const WalletSetupStepLayoutRevamp = ({
       <div className={styles.sideTimelineContainer}>
         <Timeline>
           {timelineSteps.map(({ name, key, active }) => (
-            <Timeline.Item key={key} active={active}>
+            <Timeline.Item
+              key={key}
+              active={active}
+              data-testid={`${currentTimelineStep === key ? 'active' : 'inactive'}-onboarding-step`}
+            >
               <div className={cn({ [styles.activeText]: currentTimelineStep === key })}>{name}</div>
             </Timeline.Item>
           ))}
