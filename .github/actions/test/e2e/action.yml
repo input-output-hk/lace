@@ -51,6 +51,7 @@ runs:
 
       shell: bash
     - name: Install dependencies
+      working-directory: ./packages/e2e-tests
       shell: bash
       run: yarn install --immutable --inline-builds
     - name: Start XVFB
