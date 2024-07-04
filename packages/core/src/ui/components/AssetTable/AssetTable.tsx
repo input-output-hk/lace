@@ -2,7 +2,7 @@
 import classnames from 'classnames';
 import { InfiniteScrollableTable, useHasScrollBar } from '@lace/common';
 import { ColumnsType } from 'antd/lib/table';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './AssetTable.module.scss';
 import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from '../ImageWithFallback';
@@ -139,33 +139,39 @@ export const AssetTable = ({
   });
   const { t } = useTranslation();
 
-  const columns: ColumnsType<IAssetColumn> = [
-    {
-      title: popupView ? '' : t('core.assetTable.columns.token'),
-      dataIndex: 'token',
-      key: 'token',
-      width: '45%'
-    },
-    { title: popupView ? '' : t('core.assetTable.columns.balance'), dataIndex: 'balance', key: 'balance' }
-  ];
+  const columns: ColumnsType<IAssetColumn> = useMemo(() => {
+    const result = [
+      {
+        title: popupView ? '' : t('core.assetTable.columns.token'),
+        dataIndex: 'token',
+        key: 'token',
+        width: '45%'
+      },
+      { title: popupView ? '' : t('core.assetTable.columns.balance'), dataIndex: 'balance', key: 'balance' }
+    ];
 
-  if (!popupView)
-    columns.splice(1, 0, {
-      title: t('core.assetTable.columns.price'),
-      dataIndex: 'price',
-      key: 'price'
-    });
+    if (!popupView)
+      result.splice(1, 0, {
+        title: t('core.assetTable.columns.price'),
+        dataIndex: 'price',
+        key: 'price'
+      });
+
+    return result;
+  }, [popupView, t]);
 
   const [hasScrollBar, setHasScrollBar] = useState<boolean>(false);
   useHasScrollBar({ current: document.querySelector(`#${scrollableTargetId}`) }, (withScroll) =>
     setHasScrollBar(withScroll && popupView)
   );
 
+  const dataSource = useMemo(() => renderRows(rows, popupView), [rows, popupView]);
+
   return (
     <InfiniteScrollableTable
       data-testid="asset-table"
       columns={columns}
-      dataSource={renderRows(rows, popupView)}
+      dataSource={dataSource}
       onRow={onRowClick ? handleRowClick : undefined}
       infiniteScrollContainerClass={hasScrollBar && styles.scrollContainer}
       infiniteScrollProps={{
