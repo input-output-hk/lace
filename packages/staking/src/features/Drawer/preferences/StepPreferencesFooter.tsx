@@ -1,5 +1,5 @@
+import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { PostHogAction } from '@lace/common';
-import { Button, Flex } from '@lace/ui';
 import { Tooltip } from 'antd';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';

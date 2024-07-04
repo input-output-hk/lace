@@ -34,6 +34,10 @@ class TopNavigationAssert {
 
   async assertDropdownVisible() {
     await MenuHeader.menuWalletAccount.waitForDisplayed();
+    await MenuHeader.menuAddNewWalletButton.waitForDisplayed();
+    expect(await MenuHeader.menuAddNewWalletButton.getText()).to.equal(
+      await t('browserView.sideMenu.links.addNewWallet')
+    );
     await MenuHeader.menuAddressBookButton.waitForDisplayed();
     expect(await MenuHeader.menuAddressBookButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addressBook')
@@ -78,7 +82,7 @@ class TopNavigationAssert {
   async assertWalletIsInSyncedStatus() {
     await settingsExtendedPageObject.waitUntilHdWalletSynced();
     await this.assertLogoPresent();
-    await MenuHeader.menuButton.waitForDisplayed();
+    await MenuHeader.menuButton.waitForClickable({ timeout: 10_000 });
     await MenuHeader.menuButton.click();
     await this.assertSeeWalletStatusComponent();
     await this.assertSyncStatusValid('browserView.topNavigationBar.walletStatus.walletSynced');

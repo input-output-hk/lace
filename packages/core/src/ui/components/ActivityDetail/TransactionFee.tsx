@@ -1,5 +1,5 @@
 import React from 'react';
-import { TransactionSummary } from '@lace/ui';
+import { TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 
 export interface TransactionFeeProps {

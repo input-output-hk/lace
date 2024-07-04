@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { MidnightEventBanner as View } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
-import { Box, Dialog, sx } from '@lace/ui';
+import { Box, Dialog, sx } from '@input-output-hk/lace-ui-toolkit';
 import { storage } from 'webextension-polyfill';
 import { MIDNIGHT_EVENT_BANNER_KEY, MidnightEventBannerStorage } from '@lib/scripts/types';
 import { useTranslation } from 'react-i18next';

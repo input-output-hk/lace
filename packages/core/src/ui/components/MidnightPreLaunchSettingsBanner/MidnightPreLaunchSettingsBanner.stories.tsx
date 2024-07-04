@@ -2,7 +2,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { Box } from '@lace/ui';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 
 import { MidnightPreLaunchSettingsBanner } from './index';
 import MidnightPreLaunchBannerImage from '../../assets/images/midnight-launch-event-sidebar-banner.png';

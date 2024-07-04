@@ -135,3 +135,48 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
       | AZUR  | 3               | delegated     | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
       | 8BETA | 2               | non-delegated | Stake all on this pool        | I see Changing Staking Preferences modal    |
       | 8BETA | 2               | non-delegated | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
+
+  @LW-2642 @Smoke
+  Scenario: Extended View - Staking  - Currently staking components
+    When I navigate to Staking extended page
+    Then I see currently staking component for stake pool:
+      | position | poolName                        | poolTickerOrId | hasMetadata |
+      | 1        | AzureADA                        | AZUR           | true        |
+      | 2        | AVA - Testnet Pool              | AVA            | true        |
+      | 3        | ATADA Austria - PreProd Pool #1 | ATADA          | true        |
+      | 4        | Artemis Preprod Stakepool       | ARTMS          | true        |
+
+  @LW-2643 @Smoke
+  Scenario: Extended View - Staking - Details of currently staked pool
+    And I navigate to Staking extended page
+    When I click on pool name in the first currently staking component
+    Then I see stake pool details drawer for "AzureADA" stake pool opened from currently staked component
+
+  @LW-4877
+  Scenario: Extended View - Stake pool details - Enter and Escape buttons support
+    Given I am on Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I input "APEX" to the search bar
+    And I click on the stake pool with ticker "APEX"
+    Then Drawer is displayed
+    When I press keyboard Enter button
+    Then I see Changing Staking Preferences modal
+    When I press keyboard Enter button
+    Then I see Manage delegation drawer
+    # When I press keyboard Enter button # TODO: update when LW-8625 is resolved
+    # Then I see Manage delegation drawer Confirmation page
+    # When I press keyboard Escape button # TODO: update when LW-8623 is resolved
+    # Then Staking exit modal is displayed
+    # When I press keyboard Escape button
+    # Then I see Manage delegation drawer Confirmation page
+    # When I press keyboard Enter button
+    # And I press keyboard Enter button
+    # Then staking password drawer is displayed
+    # When I press keyboard Escape button # TODO: update when LW-8623 is resolved
+    # Then Staking exit modal is displayed
+    # When I press keyboard Escape button
+    # Then staking password drawer is displayed
+    When I press keyboard Escape button
+    # When I press keyboard Enter button
+    Then Drawer is not displayed

@@ -5,7 +5,15 @@ import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
 
 import styles from './DappAddressSections.module.scss';
 
-import { Text, TransactionAssets, DappTransactionSummary, Tooltip, SummaryExpander, Box, Flex } from '@lace/ui';
+import {
+  Text,
+  TransactionAssets,
+  DappTransactionSummary,
+  Tooltip,
+  SummaryExpander,
+  Box,
+  Flex
+} from '@input-output-hk/lace-ui-toolkit';
 import { getAddressTagTranslations, renderAddressTag } from '@src/ui/utils';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
@@ -143,7 +151,7 @@ export const DappAddressSection = ({
                 )}
                 <Box mb={addressName ? '$4' : '$12'} className={styles.addressText}>
                   <Text.Address color={addressName ? 'secondary' : 'primary'} data-testid="dapp-transaction-address">
-                    <Tooltip label={address}>
+                    <Tooltip align="center" side="top" label={address}>
                       {addEllipsis(address, charBeforeEllipsisName, charAfterEllipsisName)}
                     </Tooltip>
                   </Text.Address>

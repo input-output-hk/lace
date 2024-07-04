@@ -1,5 +1,5 @@
+import { ThemeColorScheme, ThemeProvider } from '@input-output-hk/lace-ui-toolkit';
 import { i18n } from '@lace/translation';
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { PropsWithChildren, Suspense } from 'react';
 import { I18nextProvider } from 'react-i18next';

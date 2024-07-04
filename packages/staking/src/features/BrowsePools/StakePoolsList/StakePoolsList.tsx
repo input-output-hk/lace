@@ -1,4 +1,4 @@
-import { Box, Flex, Table, Text, useVisibleItemsCount } from '@lace/ui';
+import { Box, Flex, Table, Text, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';

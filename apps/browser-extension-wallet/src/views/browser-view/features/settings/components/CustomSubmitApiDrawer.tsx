@@ -3,7 +3,7 @@ import { Drawer, DrawerHeader, DrawerNavigation, PostHogAction, toast } from '@l
 import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
-import { Button, TextBox } from '@lace/ui';
+import { Button, TextBox } from '@input-output-hk/lace-ui-toolkit';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { useCustomSubmitApi, useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';

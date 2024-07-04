@@ -3,7 +3,7 @@ import React from 'react';
 import cn from 'classnames';
 
 import { Ellipsis, toast } from '@lace/common';
-import { Box, Text } from '@lace/ui';
+import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
 
 import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';

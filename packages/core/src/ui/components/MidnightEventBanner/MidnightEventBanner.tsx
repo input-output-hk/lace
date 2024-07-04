@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
-import { sx, Flex, Text, Box, Button, NavigationButton } from '@lace/ui';
+import { sx, Flex, Text, Box, Button, NavigationButton } from '@input-output-hk/lace-ui-toolkit';
 import styles from './MidnightEventBanner.module.scss';
 import cx from 'classnames';
 import banner from '../../assets/images/midnight_banner.png';

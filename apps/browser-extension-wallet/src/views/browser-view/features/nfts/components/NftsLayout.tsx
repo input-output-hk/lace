@@ -29,7 +29,7 @@ import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext }
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
 import { useAssetInfo } from '@hooks';
-import { SearchBox } from '@lace/ui';
+import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import { useNftSearch } from '@hooks/useNftSearch';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;

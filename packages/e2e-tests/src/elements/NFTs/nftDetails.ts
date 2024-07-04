@@ -14,6 +14,8 @@ class NftDetails {
   private INFO_LIST_ITEM = '[data-testid="info-list-item"]';
   private INFO_LIST_ITEM_KEY = '[data-testid="info-list-item-key"]';
   private INFO_LIST_ITEM_VALUE = '[data-testid="info-list-item-value"]';
+  private FOLDER_PATH_PART_1 = '[data-testid="folder-path-1"]';
+  private FOLDER_PATH_PART_2 = '[data-testid="folder-path-2"] [data-testid="ellipsis-text"]';
   private SEND_NFT_BUTTON = '#send-nft-btn';
   private NFT_TITLE_ON_POPUP = '[data-testid="drawer-content"] h2';
 
@@ -81,6 +83,14 @@ class NftDetails {
     return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[2].$(this.INFO_LIST_ITEM_VALUE);
   }
 
+  get folderPathPart1() {
+    return this.tokenInfoSection.$(this.FOLDER_PATH_PART_1);
+  }
+
+  get folderPathPart2() {
+    return this.tokenInfoSection.$(this.FOLDER_PATH_PART_2);
+  }
+
   get attributesSectionTitle() {
     return this.drawerBody.$(this.ATTRIBUTES_LABEL);
   }
@@ -102,6 +112,16 @@ class NftDetails {
 
   async loadNFTDetails(): Promise<any> {
     return testContext.load('nftDetails');
+  }
+
+  async getFolderPath(): Promise<string> {
+    await this.folderPathPart1.waitUntil(async () => (await this.folderPathPart1.getText()) !== '');
+    const folderPathText1 = await this.folderPathPart1.getText();
+    if (await this.folderPathPart2.isDisplayed()) {
+      const folderPathText2 = await this.folderPathPart2.getText();
+      return `${folderPathText1}/${folderPathText2}`;
+    }
+    return folderPathText1;
   }
 }
 

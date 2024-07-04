@@ -9,6 +9,7 @@ import { WalletOnboardingProvider } from './walletOnboardingContext';
 
 type WalletOnboardingProps = {
   aliasEventRequired?: boolean;
+  mergeEventRequired?: boolean;
   flowsEnabled?: boolean;
   forgotPasswordFlowActive?: boolean;
   postHogActions: WalletOnboardingPostHogActions;
@@ -19,6 +20,7 @@ type WalletOnboardingProps = {
 
 export const WalletOnboardingFlows: VFC<WalletOnboardingProps> = ({
   aliasEventRequired = false,
+  mergeEventRequired = false,
   flowsEnabled = true,
   forgotPasswordFlowActive = false,
   postHogActions,
@@ -26,20 +28,23 @@ export const WalletOnboardingFlows: VFC<WalletOnboardingProps> = ({
   setFormDirty = () => void 0,
   urlPath
 }) => {
-  useKeyboardShortcut(['Enter'], () => {
+  useKeyboardShortcut(['Enter'], (event) => {
     const nextBnt: HTMLButtonElement = document.querySelector('[data-testid="wallet-setup-step-btn-next"]');
     const confirmGoBack: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
 
     if (confirmGoBack) {
       confirmGoBack.click();
     } else if (nextBnt && !nextBnt.getAttribute('disabled')) {
+      event.preventDefault();
       nextBnt.click();
     }
   });
 
   const { path } = useRouteMatch();
   return (
-    <WalletOnboardingProvider value={{ aliasEventRequired, forgotPasswordFlowActive, postHogActions, setFormDirty }}>
+    <WalletOnboardingProvider
+      value={{ aliasEventRequired, mergeEventRequired, forgotPasswordFlowActive, postHogActions, setFormDirty }}
+    >
       <Switch>
         <Route exact path={`${path}/`} render={renderHome} />
         {flowsEnabled && (

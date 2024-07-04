@@ -1,5 +1,5 @@
 import React from 'react';
-import { Metadata, Text, sx, Cell } from '@lace/ui';
+import { Metadata, Text, sx, Cell } from '@input-output-hk/lace-ui-toolkit';
 import * as Types from './ProposalProcedureTransactionDetailsTypes';
 
 interface Props {

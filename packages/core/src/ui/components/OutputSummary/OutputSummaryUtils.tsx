@@ -3,7 +3,7 @@ import { Tooltip } from 'antd';
 import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import styles from './OutputSummary.module.scss';
 import { SentAssetsList } from './OutputSummary';
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 
 export const RowContainer = (props: { children: React.ReactNode; key?: string }): React.ReactElement => (
   <div key={props.key} className={styles.rowContent}>

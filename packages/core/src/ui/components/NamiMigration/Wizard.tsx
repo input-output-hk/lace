@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flex, Card, Divider } from '@lace/ui';
+import { Flex, Card, Divider } from '@input-output-hk/lace-ui-toolkit';
 import { Timeline } from '@lace/common';
 import styles from './Wizard.module.scss';
 

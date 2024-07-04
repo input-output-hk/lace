@@ -11,7 +11,7 @@ import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ProfileDropdown } from '@lace/ui';
+import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';

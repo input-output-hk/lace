@@ -1,7 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
-import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import Modal from '../elements/modal';
@@ -225,14 +224,6 @@ When(
 Then(/^I (do not see|see) incorrect passphrase error displayed$/, async (shouldBeDisplayed: 'do not see' | 'see') => {
   await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicError(shouldBeDisplayed === 'see');
 });
-
-Then(
-  /^"(Cookie policy|Privacy policy|Terms of service)" is displayed in new tab$/,
-  async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service') => {
-    await switchToLastWindow();
-    await new OnboardingCommonAssert().assertLegalContentIsDisplayed(link);
-  }
-);
 
 Then(/^wallet name error "([^"]*)" (is|is not) displayed$/, async (errorText: string, isDisplayed: 'is' | 'is not') => {
   const expectedMessage = await t(errorText);

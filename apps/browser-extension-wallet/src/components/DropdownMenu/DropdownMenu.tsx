@@ -10,7 +10,7 @@ import { useWalletStore } from '@src/stores';
 import { UserAvatar } from '../MainMenu/DropdownMenuOverlay/components';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ProfileDropdown } from '@lace/ui';
+import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletAvatar } from '@hooks';
 import { getActiveWalletSubtitle } from '@src/utils/get-wallet-subtitle';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';

@@ -1,8 +1,7 @@
 import { flatten } from 'flat';
 import { readFromFile } from './fileUtils';
-import { en as staking } from '../../../staking/src/features/i18n/translations/en';
 
-type TranslationsOrigin = 'base' | 'staking';
+type TranslationsOrigin = 'base' | 'staking'; // FIXME: remove this type and translationOrigin parameter when all usages of await t(.*, 'staking') are replaced with await t(.*)
 type Translations = { [index: string]: any };
 
 const loadTranslations = async function (translationOrigin: TranslationsOrigin) {
@@ -11,16 +10,25 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
   const extensionTranslationPath = `../../../../packages/translation/src/lib/translations/browser-extension-wallet/${language}.json`;
   const coreTranslationPath = `../../../../packages/translation/src/lib/translations/core/${language}.json`;
   const cardanoTranslationPath = `../../../../packages/translation/src/lib/translations/cardano/${language}.json`;
+  const stakingTranslationPath = `../../../../packages/translation/src/lib/translations/staking/${language}.json`;
 
   const extension: Translations = await flatten(
-    JSON.parse(readFromFile(__dirname, extensionTranslationPath).toString())
+    JSON.parse(readFromFile(import.meta.dirname, extensionTranslationPath).toString())
   );
-  const core: Translations = await flatten(JSON.parse(readFromFile(__dirname, coreTranslationPath).toString()));
-  const cardano: Translations = await flatten(JSON.parse(readFromFile(__dirname, cardanoTranslationPath).toString()));
+  const core: Translations = await flatten(
+    JSON.parse(readFromFile(import.meta.dirname, coreTranslationPath).toString())
+  );
+  const cardano: Translations = await flatten(
+    JSON.parse(readFromFile(import.meta.dirname, cardanoTranslationPath).toString())
+  );
+  const staking: Translations = await flatten(
+    JSON.parse(readFromFile(import.meta.dirname, stakingTranslationPath).toString())
+  );
   const baseTranslations = {
     ...cardano,
     ...core,
-    ...extension
+    ...extension,
+    ...staking
   };
   return translationOrigin === 'base' ? baseTranslations : staking;
 };

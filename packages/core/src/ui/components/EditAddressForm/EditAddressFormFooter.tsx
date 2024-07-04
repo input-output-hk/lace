@@ -52,9 +52,7 @@ export const EditAddressFormFooter = ({
 
           return (
             <Button block disabled={!isFormValid} onClick={onSubmit} data-testid="address-form-button-save">
-              {isNewAddress
-                ? t('browserView.addressBook.addressForm.saveAddress')
-                : t('core.editAddressForm.doneButton')}
+              {isNewAddress ? t('core.addressForm.doneButton') : t('core.editAddressForm.doneButton')}
             </Button>
           );
         }}

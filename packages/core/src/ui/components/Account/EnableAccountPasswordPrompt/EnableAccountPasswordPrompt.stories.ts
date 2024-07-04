@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { EnableAccountPasswordPrompt } from './EnableAccountPasswordPrompt';
 import { ComponentProps } from 'react';
-import { ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 const meta: Meta<typeof EnableAccountPasswordPrompt> = {
   title: 'Accounts/EnableAccountPasswordPrompt',

@@ -2,7 +2,7 @@ import { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { EnableAccountConfirmWithHW } from './EnableAccountConfirmWithHW';
-import { ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 const meta: Meta<typeof EnableAccountConfirmWithHW> = {
   title: 'Accounts/EnableAccountConfirmWithHW',

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { AssetSelectorOverlay, AssetSelectorOverlayProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
-import { useFetchCoinPrice, PriceResult, useMaxAda, AssetOrHandleInfoMap, useAssetInfo } from '@hooks';
+import { useFetchCoinPrice, PriceResult, AssetOrHandleInfoMap, useAssetInfo } from '@hooks';
 import { EnvironmentTypes, useWalletStore } from '@src/stores';
 import {
   useCoinStateSelector,
@@ -140,7 +140,6 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
   const coinId = useCurrentCoinIdToChange();
   const { setPrevSection } = useSections();
   const tokensUsed = useSpentBalances();
-  const spendableCoin = useMaxAda();
   const { setSelectedTokenList, selectedTokenList, removeTokenFromList } = useSelectedTokenList();
   const [multipleSelectionAvailable] = useMultipleSelection();
   const { fiatCurrency } = useCurrencyStore();
@@ -159,9 +158,9 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
   const reachedMaxAmountList = getReachedMaxAmountList({
     assets,
     tokensUsed,
-    spendableCoin,
     balance,
-    cardanoCoin
+    cardanoCoin,
+    availableRewards
   });
 
   const usedAssetsIds = new Set([...list.map(({ id }) => id), ...reachedMaxAmountList]);

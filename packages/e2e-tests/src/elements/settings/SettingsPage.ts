@@ -1,6 +1,9 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
 import AboutLaceWidget from './extendedView/AboutLaceWidget';
 import { SettingsLink } from './SettingsLink';
 import CommonDrawerElements from '../CommonDrawerElements';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class SettingsPage extends CommonDrawerElements {
   private readonly WALLET_HEADER = '[data-testid="wallet-settings-heading"]';
@@ -11,8 +14,9 @@ class SettingsPage extends CommonDrawerElements {
   private readonly REMOVE_WALLET_HEADER = '[data-testid="remove-wallet-heading"]';
   private readonly REMOVE_WALLET_DESCRIPTION = '[data-testid="remove-wallet-description"]';
   private readonly REMOVE_WALLET_BUTTON = '[data-testid="remove-wallet-button"]';
-  private readonly ANALYTICS_SWITCH_XPATH = "*[data-testid='settings-analytics-section'] button";
-  private readonly SECURITY_SETTINGS_ELEMENTS = '[data-testid=security-settings-heading] + div';
+  private readonly ANALYTICS_SWITCH = '[data-testid="settings-analytics-switch"]';
+  private readonly SECURITY_SETTINGS_ELEMENTS = '[data-testid="security-settings-heading"] + div';
+  private readonly SYNC_BUTTON = '[data-testid="settings-wallet-wallet-sync-cta"]';
 
   private readonly ABOUT_LINK = 'settings-wallet-about-link';
   private readonly NETWORK_LINK_TEST_ID = 'settings-wallet-network-link';
@@ -33,35 +37,35 @@ class SettingsPage extends CommonDrawerElements {
     return AboutLaceWidget;
   }
 
-  get walletHeader() {
+  get walletHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_HEADER);
   }
 
-  get securityHeader() {
+  get securityHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SECURITY_HEADER);
   }
 
-  get supportHeader() {
+  get supportHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SUPPORT_HEADER);
   }
 
-  get legalHeader() {
+  get legalHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LEGAL_HEADER);
   }
 
-  get removeWalletHeader() {
+  get removeWalletHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.REMOVE_WALLET_HEADER);
   }
 
-  get removeWalletDescription() {
+  get removeWalletDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.REMOVE_WALLET_DESCRIPTION);
   }
 
-  get removeWalletButton() {
+  get removeWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.REMOVE_WALLET_BUTTON);
   }
 
-  get mainTitle() {
+  get mainTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAIN_TITLE);
   }
 
@@ -118,16 +122,25 @@ class SettingsPage extends CommonDrawerElements {
     return new SettingsLink(this.COOKIE_POLICY_LINK_TEST_ID);
   }
 
-  get analyticsSwitch() {
-    return $(this.ANALYTICS_SWITCH_XPATH);
+  get analyticsSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ANALYTICS_SWITCH);
   }
 
-  get themeSwitch() {
+  get themeSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.THEME_SWITCH_TEST_ID);
   }
 
-  get securitySettingsElements() {
+  get securitySettingsElements(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.SECURITY_SETTINGS_ELEMENTS);
+  }
+
+  get syncButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SYNC_BUTTON);
+  }
+
+  async clickSyncButton(): Promise<void> {
+    await this.syncButton.waitForClickable();
+    await this.syncButton.click();
   }
 }
 

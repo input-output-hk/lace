@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '@lace/ui';
+import { Dialog } from '@input-output-hk/lace-ui-toolkit';
 
 interface Props {
   open: boolean;

@@ -3,7 +3,7 @@ import { SetupBase } from '../src/features/staking/Setup/SetupBase';
 // @ts-ignore
 import { OutsideHandlesContextValue, OutsideHandlesProvider } from '../src/features/outside-handles-provider';
 import React, { ReactNode } from 'react';
-import { ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 type StakingStorybookProviderProps = {
   children: ReactNode;

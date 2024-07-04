@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
+import { browser } from '@wdio/globals';
 
 class Modal {
   private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
@@ -37,6 +38,15 @@ class Modal {
     await this.confirmButton.waitForStable();
     await this.confirmButton.waitForClickable();
     await this.confirmButton.click();
+  }
+
+  async waitUntilModalDisappears() {
+    await browser.pause(500);
+    await browser.waitUntil(async () => !(await this.container.isDisplayed()), {
+      timeout: 10_000,
+      interval: 500,
+      timeoutMsg: 'failed while waiting for the modal to disappear'
+    });
   }
 }
 

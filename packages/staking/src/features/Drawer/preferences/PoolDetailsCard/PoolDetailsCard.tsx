@@ -1,12 +1,19 @@
+import {
+  Box,
+  Card,
+  ChevronDownComponent,
+  ChevronUpComponent,
+  ControlButton,
+  Flex,
+  PieChartColor,
+  Text,
+} from '@input-output-hk/lace-ui-toolkit';
 import { PostHogAction } from '@lace/common';
-import { ReactComponent as ChevronDownIcon } from '@lace/icons/dist/ChevronDownComponent';
-import { ReactComponent as ChevronUpIcon } from '@lace/icons/dist/ChevronUpComponent';
-import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useOutsideHandles } from 'features/outside-handles-provider';
+import { PERCENTAGE_SCALE_MAX } from 'features/store/delegationPortfolioStore/constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
-import { PERCENTAGE_SCALE_MAX } from '../../../store';
 import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
 import { PoolDetailsCardData } from './PoolDetailsCardData';
@@ -59,7 +66,7 @@ export const PoolDetailsCard = ({
         </Flex>
         <ControlButton.Icon
           testId={`pool-details-icon-${expand ? 'up' : 'down'}`}
-          icon={expand ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          icon={expand ? <ChevronUpComponent /> : <ChevronDownComponent />}
           onClick={() => setExpand((prevExpand) => !prevExpand)}
         />
       </Flex>

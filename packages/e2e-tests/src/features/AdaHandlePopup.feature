@@ -149,6 +149,7 @@ Feature: ADA handle - popup view
   @LW-5023 @LW-5029 @LW-5033
   Scenario: Popup View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on Tokens page in popup mode
+    And I am in the slow network mode
     And I enter "$test_handle_3" in the bundle 1 recipient's address
     Then search loader is displayed inside address input field
     And Green tick icon is displayed next to ADA handle
@@ -157,6 +158,7 @@ Feature: ADA handle - popup view
   @LW-5024 @LW-5031
   Scenario: Popup View - Send flow - Enter ADA handle and confirm invalid
     When I click "Send" button on Tokens page in popup mode
+    And I am in the slow network mode
     And I enter "$fake_handle" in the bundle 1 recipient's address
     Then search loader is displayed inside address input field
     And Red exclamation icon is displayed next to ADA handle

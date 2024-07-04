@@ -9,7 +9,7 @@ import { ParameterChangeActionContainer } from './proposal-procedures/ParameterC
 import { TreasuryWithdrawalsActionContainer } from './proposal-procedures/TreasuryWithdrawalsActionContainer';
 import { UpdateCommitteeActionContainer } from './proposal-procedures/UpdateCommitteeActionContainer';
 import { useViewsFlowContext } from '@providers';
-import { Box, Flex } from '@lace/ui';
+import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { DappInfo } from '@lace/core';
 
 export const ProposalProceduresContainer = (): React.ReactElement => {

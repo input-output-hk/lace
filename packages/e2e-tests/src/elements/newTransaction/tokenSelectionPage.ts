@@ -116,14 +116,17 @@ class TokenSelectionPage extends CommonDrawerElements {
 
   clickNftItemInAssetSelector = async (nftName: string) => {
     const nftNameElement = await this.getNftName(nftName);
+    await nftNameElement.waitForClickable();
     await nftNameElement.click();
   };
 
   clickTokensButton = async () => {
+    await this.tokensButton.waitForClickable();
     await this.tokensButton.click();
   };
 
   clickNFTsButton = async () => {
+    await this.nftsButton.waitForClickable();
     await this.nftsButton.click();
   };
 

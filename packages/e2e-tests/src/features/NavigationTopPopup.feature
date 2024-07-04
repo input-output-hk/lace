@@ -7,7 +7,7 @@ Feature: Top Navigation - Popup view
   @LW-4724 @Mainnet @Testnet
   Scenario: Avatar dropdown displayed on click with content
     When I click the menu button
-    Then the dropdown menu is visible
+    Then the user menu is displayed
     And chevron icon is changed to up
 
   @LW-4725 @Mainnet @Testnet
@@ -57,7 +57,7 @@ Feature: Top Navigation - Popup view
     And I click on the network option
     And I see network sub-menu
     When I click on then network sub-menu back button
-    Then the dropdown menu is visible
+    Then the user menu is displayed
 
   @LW-6078 @Testnet @Mainnet
   Scenario: Popup View - Toast displayed after switching network to Preview

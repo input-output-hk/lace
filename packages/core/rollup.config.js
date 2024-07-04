@@ -1,4 +1,4 @@
-import rollupBase from '../../rollup.config';
+import rollupBase from '../../rollup.config.js';
 import packageJson from './package.json';
 import copy from 'rollup-plugin-copy';
 import json from '@rollup/plugin-json';

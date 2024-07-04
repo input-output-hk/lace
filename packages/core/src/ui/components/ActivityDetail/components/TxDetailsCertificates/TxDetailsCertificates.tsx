@@ -4,7 +4,7 @@ import { TxDetailsGroup } from '../../TxDetailsGroup';
 import { CertificateView } from './CertificateView';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
-import { Box } from '@lace/ui';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import styles from './TxDetailsCertificates.module.scss';
 
 interface TxDetailsCertificatesProps {

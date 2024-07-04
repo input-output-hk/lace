@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Flex, Text } from '@lace/ui';
+import { Card, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
 import { TopUpWalletButton } from './TopUpWalletButton';

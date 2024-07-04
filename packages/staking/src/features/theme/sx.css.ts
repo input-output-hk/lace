@@ -1,4 +1,4 @@
-import { sprinklesConfig } from '@lace/ui';
+import { sprinklesConfig } from '@input-output-hk/lace-ui-toolkit';
 import { createSprinkles, defineProperties } from '@vanilla-extract/sprinkles';
 import { theme } from './theme.css';
 

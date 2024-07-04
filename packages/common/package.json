@@ -35,11 +35,11 @@
     "prestart": "yarn build",
     "start": "node dist/index.js",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
-    "type-check": "echo \"@lace/icons: no type-check command specified\"",
+    "type-check": "echo \"@lace/common: no type-check command specified\"",
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/util": "0.15.1",
+    "@cardano-sdk/util": "0.15.2",
     "antd": "^4.24.10",
     "classnames": "^2.3.1",
     "jdenticon": "3.1.0",

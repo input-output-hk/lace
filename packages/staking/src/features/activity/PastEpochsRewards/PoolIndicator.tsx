@@ -1,4 +1,4 @@
-import { PIE_CHART_DEFAULT_COLOR_SET } from '@lace/ui';
+import { PIE_CHART_DEFAULT_COLOR_SET } from '@input-output-hk/lace-ui-toolkit';
 
 export const PoolIndicator = ({ color = PIE_CHART_DEFAULT_COLOR_SET[0] }: { color?: string }) => (
   <svg width="4" height="41" viewBox="0 0 4 41" fill="none" xmlns="http://www.w3.org/2000/svg">

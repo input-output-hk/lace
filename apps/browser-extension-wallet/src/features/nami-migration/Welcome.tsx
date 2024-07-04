@@ -13,7 +13,7 @@ import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
 import { useAnalyticsContext } from '@providers';
-import { useTheme } from '@lace/ui';
+import { useTheme } from '@input-output-hk/lace-ui-toolkit';
 import { WarningModal } from '@views/browser/components';
 
 export const Welcome = (): JSX.Element => {

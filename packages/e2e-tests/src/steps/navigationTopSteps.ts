@@ -18,7 +18,7 @@ When(/I click on the logo icon/, async () => {
   await menuHeaderPageObject.clickLogo();
 });
 
-Then(/the dropdown menu is visible/, async () => {
+Then(/^the user menu is displayed$/, async () => {
   await topNavigationAssert.assertDropdownVisible();
 });
 
@@ -94,6 +94,10 @@ When(/^I click on the Lock Wallet option$/, async () => {
 
 When(/^I click on the Address Book option$/, async () => {
   await menuHeaderPageObject.clickAddressBookOption();
+});
+
+When(/^I click on "Add new wallet" option$/, async () => {
+  await MenuHeader.clickOnAddNewWalletOption();
 });
 
 When(/^I click on then network sub-menu back button$/, async () => {

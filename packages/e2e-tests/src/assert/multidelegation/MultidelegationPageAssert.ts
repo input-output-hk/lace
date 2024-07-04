@@ -17,6 +17,9 @@ import {
 } from '../../utils/stakePoolListContent';
 import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
 import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
+import StakingInfoCard from '../../elements/multidelegation/StakingInfoCard';
+import { isPopupMode } from '../../utils/pageUtils';
+import { sortGridContent } from '../../utils/stakePoolGridContent';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -334,8 +337,10 @@ class MultidelegationPageAssert {
     await MultidelegationPage.waitForPoolsCounterToBeGreaterThanZero();
     poolLimit ??= await MultidelegationPage.getNumberOfPoolsFromCounter();
     if (stakePoolsDisplayType === 'cards') {
-      // TODO: add code to handle grid cards - LW-10284
-      throw new Error('Please add validation for grid cards sorting');
+      const gridContent = await MultidelegationPage.extractGridContent(sortingOption, poolLimit);
+      const sortedGridContent = await sortGridContent(gridContent, sortingOption, order);
+      expect(gridContent).to.not.be.empty;
+      expect(gridContent).to.deep.equal(sortedGridContent);
     } else {
       const columnContent = await MultidelegationPage.extractColumnContent(
         mapSortingOptionToColumnNameEnum(sortingOption),
@@ -387,6 +392,93 @@ class MultidelegationPageAssert {
     }
     expect(await MultidelegationPage.sortingOptionTooltip.getText()).to.equal(expectedTooltipText);
   };
+
+  assertSeeCurrentlyStakingComponent = async (
+    index: number,
+    poolName: string,
+    poolTickerOrId: string,
+    hasMetadata = true
+  ) => {
+    const stakingInfoCard = new StakingInfoCard(index);
+    await stakingInfoCard.container.waitForDisplayed();
+
+    await stakingInfoCard.logo.waitForDisplayed();
+
+    await stakingInfoCard.name.waitForDisplayed();
+    expect(await stakingInfoCard.name.getText()).to.equal(poolName);
+
+    await stakingInfoCard.ticker.waitForDisplayed();
+    hasMetadata
+      ? expect(await stakingInfoCard.ticker.getText()).to.equal(poolTickerOrId)
+      : expect(await stakingInfoCard.ticker.getText()).to.contain(poolTickerOrId.slice(0, 6));
+
+    await this.assertSeeStatsROS(stakingInfoCard);
+    await this.assertSeeStatsFee(stakingInfoCard);
+    await this.assertSeeStatsMargin(stakingInfoCard);
+
+    const isPopup = await isPopupMode();
+    if (!isPopup) {
+      await this.assertSeeStatsTotalRewards(stakingInfoCard);
+    }
+    await this.assertSeeStatsTotalStaked(stakingInfoCard);
+    await this.assertSeeLastReward(stakingInfoCard);
+  };
+
+  private async assertSeeLastReward(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsLastReward.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsLastReward.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.lastReward.title')
+    );
+    await stakingInfoCard.statsLastReward.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsLastReward.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+  }
+
+  private async assertSeeStatsTotalStaked(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsTotalStaked.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalStaked.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.totalStaked.title')
+    );
+    await stakingInfoCard.statsTotalStaked.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalStaked.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+  }
+
+  private async assertSeeStatsTotalRewards(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsTotalRewards.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalRewards.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.totalRewards.title')
+    );
+    await stakingInfoCard.statsTotalRewards.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalRewards.value.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX_OR_0
+    );
+  }
+
+  private async assertSeeStatsMargin(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsMargin.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsMargin.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.stats.Margin')
+    );
+    await stakingInfoCard.statsMargin.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsMargin.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
+
+  private async assertSeeStatsFee(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsFee.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsFee.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.stats.Fee')
+    );
+    await stakingInfoCard.statsFee.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsFee.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+  }
+
+  private async assertSeeStatsROS(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsROS.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsROS.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.stats.ros')
+    );
+    await stakingInfoCard.statsROS.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsROS.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
 }
 
 export default new MultidelegationPageAssert();

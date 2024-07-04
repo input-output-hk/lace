@@ -21,6 +21,7 @@ import {
   ActivityStatus,
   AssetActivityItemProps,
   AssetActivityListProps,
+  ConwayEraCertificatesTypes,
   DelegationActivityType,
   TransactionActivityType
 } from '@lace/core';
@@ -69,21 +70,34 @@ type MappedActivityListProps = Omit<AssetActivityListProps, 'items'> & {
 };
 export type FetchWalletActivitiesReturn = MappedActivityListProps[];
 
+type extendedDelegationActivityType =
+  | DelegationActivityType
+  | ConwayEraCertificatesTypes.Registration
+  | ConwayEraCertificatesTypes.Unregistration;
+
 type DelegationActivityItemProps = Omit<ExtendedActivityProps, 'type'> & {
-  type: DelegationActivityType;
+  type: extendedDelegationActivityType;
 };
 
 const isDelegationActivity = (activity: ExtendedActivityProps): activity is DelegationActivityItemProps =>
-  activity.type in DelegationActivityType;
+  activity.type in DelegationActivityType ||
+  activity.type === ConwayEraCertificatesTypes.Registration ||
+  activity.type === ConwayEraCertificatesTypes.Unregistration;
 
 const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
 
-  if (activity.type === DelegationActivityType.delegationRegistration) {
+  if (
+    activity.type === DelegationActivityType.delegationRegistration ||
+    activity.type === ConwayEraCertificatesTypes.Registration
+  ) {
     return fee.plus(activity.deposit);
   }
 
-  if (activity.type === DelegationActivityType.delegationDeregistration) {
+  if (
+    activity.type === DelegationActivityType.delegationDeregistration ||
+    activity.type === ConwayEraCertificatesTypes.Unregistration
+  ) {
     return new BigNumber(activity.depositReclaim).minus(fee);
   }
 
@@ -363,7 +377,7 @@ const mapWalletActivities = memoize(
     { cardanoFiatPrice, fiatCurrency, assetId },
     { cardanoCoin, assetDetails }
   ) =>
-    `${transactions.history.length}_${transactions.outgoing.inFlight.length}_${assetInfo.size}_${
+    `${transactions.history.length}_${transactions.outgoing.inFlight.map(({ id }) => id).join('')}_${assetInfo.size}_${
       rewardsHistory.all.length
     }_${cardanoFiatPrice}_${fiatCurrency.code}_${assetId || ''}_${cardanoCoin?.id}_${assetDetails?.id}_${
       addresses[0]?.address

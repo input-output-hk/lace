@@ -7,7 +7,7 @@ import { Wallet } from '@lace/cardano';
 import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
 import { useViewsFlowContext } from '@providers';
 import { useWalletStore } from '@src/stores';
-import { Box, Flex } from '@lace/ui';
+import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 
 export const VotingProceduresContainer = (): React.ReactElement => {
   const {

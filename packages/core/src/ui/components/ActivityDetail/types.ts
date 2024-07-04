@@ -2,6 +2,8 @@ import { Wallet } from '@lace/cardano';
 
 // supported certificates actions
 export enum ConwayEraCertificatesTypes {
+  'Registration' = Wallet.Cardano.CertificateType.Registration,
+  'Unregistration' = Wallet.Cardano.CertificateType.Unregistration,
   'AuthorizeCommitteeHot' = Wallet.Cardano.CertificateType.AuthorizeCommitteeHot,
   'RegisterDelegateRepresentative' = Wallet.Cardano.CertificateType.RegisterDelegateRepresentative,
   'ResignCommitteeCold' = Wallet.Cardano.CertificateType.ResignCommitteeCold,
