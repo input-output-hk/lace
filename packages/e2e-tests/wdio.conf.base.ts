@@ -6,28 +6,28 @@ export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./src/features/**/*.feature'],
   suites: {
-    batch1: [
-      './src/features/Onboarding*.feature',
-      './src/features/SendTransactionSimplePopup*.feature',
-      './src/features/SettingsPageExtended.feature'
-    ],
+    batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended.feature'],
     batch2: [
-      './src/features/MultiDelegationPageExtended*.feature',
       './src/features/SendTransactionSimpleExtended*.feature',
       './src/features/governance/CIP95StaticMethods.feature'
     ],
     batch3: [
       './src/features/AddNewWallet*.feature',
-      './src/features/analytics/Analytics*.feature',
-      './src/features/TokensPage*.feature'
+      './src/features/analytics/AnalyticsActivity*.feature',
+      './src/features/analytics/AnalyticsAddress*.feature',
+      './src/features/analytics/AnalyticsEventProperites*.feature',
+      './src/features/analytics/AnalyticsFiatOnRampOffRamp.feature',
+      './src/features/analytics/AnalyticsForgotPassword.feature',
+      './src/features/analytics/AnalyticsNavigation*.feature',
+      './src/features/analytics/AnalyticsNFTs*.feature',
+      './src/features/analytics/AnalyticsOnboardingEvents.feature'
     ],
-    batch4: ['./src/features/e2e/*.feature'],
-    batch5: ['./src/features/AddressBook*.feature', './src/features/Transactions*.feature'],
-    batch6: [
-      './src/features/Collateral*.feature',
-      './src/features/NFTsFolders*.feature',
-      './src/features/SendTransactionBundlesExtended.feature'
+    batch4: [
+      './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
+      './src/features/e2e/SendNft*.feature'
     ],
+    batch5: ['./src/features/AddressBook*.feature'],
+    batch6: ['./src/features/Collateral*.feature'],
     batch7: [
       './src/features/AdaHandle*.feature',
       './src/features/DAppConnector*.feature',
@@ -51,7 +51,28 @@ export const config: WebdriverIO.Config = {
       './src/features/SettingsPagePopup.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
-    ]
+    ],
+    batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
+    batch10: ['./src/features/MultiDelegationPageExtended*.feature'],
+    batch11: [
+      './src/features/analytics/AnalyticsSend*.feature',
+      './src/features/analytics/AnalyticsSetting*.feature',
+      './src/features/analytics/AnalyticsStaking*.feature',
+      './src/features/analytics/AnalyticsToggle*.feature',
+      './src/features/analytics/AnalyticsToken*.feature'
+    ],
+    batch12: [
+      './src/features/e2e/SendTransactionDappE2E.feature',
+      './src/features/e2e/SendTransactionBundlesE2E.feature'
+    ],
+    batch13: [
+      './src/features/e2e/SendTransactionSimple*.feature',
+      './src/features/e2e/StakingInitialFundsE2E.feature',
+      './src/features/e2e/StakingSwitchingPools*.feature'
+    ],
+    batch14: ['./src/features/Transactions*.feature'],
+    batch15: ['./src/features/NFTsFolders*.feature'],
+    batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],
