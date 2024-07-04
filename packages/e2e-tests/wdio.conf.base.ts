@@ -20,7 +20,9 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature'
+      './src/features/analytics/AnalyticsOnboardingEvents.feature',
+      './src/features/SendTransactionMetadata*.feature',
+      './src/features/SendTransactionMultipleSelection*.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
@@ -35,7 +37,7 @@ export const config: WebdriverIO.Config = {
     batch7: [
       './src/features/DAppConnector*.feature',
       './src/features/FiatOnRampOffRampBanxa*.feature',
-      './src/features/MultidelegationDelegatedFunds*.feature',
+      './src/features/MultidelegationDelegatedFundsMultiple*.feature',
       './src/features/NFTsExtended.feature',
       './src/features/NFTsPopup.feature'
     ],
@@ -49,8 +51,6 @@ export const config: WebdriverIO.Config = {
       './src/features/NavigationMain*.feature',
       './src/features/NetworkSwitching*.feature',
       './src/features/OwnTags*.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ],
@@ -75,7 +75,7 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/StakingSwitchingPools*.feature',
       './src/features/SettingsPagePopup.feature'
     ],
-    batch14: ['./src/features/Transactions*.feature'],
+    batch14: ['./src/features/Transactions*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature'],
     batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended.feature']
   },
