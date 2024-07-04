@@ -26,6 +26,7 @@ import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWall
 import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
 import { shuffle } from '../utils/arrayUtils';
 import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
+import ModalAssert from '../assert/modalAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -37,19 +38,7 @@ const mnemonicWordsForReference: string[] = [];
 When(
   /^I click "(Create|Connect|Restore)" button on wallet setup page$/,
   async (button: 'Create' | 'Connect' | 'Restore') => {
-    switch (button) {
-      case 'Create':
-        await OnboardingMainPage.createWalletButton.click();
-        break;
-      case 'Connect':
-        await OnboardingMainPage.hardwareWalletButton.click();
-        break;
-      case 'Restore':
-        await OnboardingMainPage.restoreWalletButton.click();
-        break;
-      default:
-        throw new Error(`Unsupported button name: ${button}`);
-    }
+    await OnboardingMainPage.clickOnOnboardingTypeButton(button);
   }
 );
 
@@ -65,6 +54,10 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+Then(/^I (see|do not see) "Are you sure you want to start again\?" modal$/, async (state: 'see' | 'do not see') => {
+  await ModalAssert.assertSeeOnboardingStartAgainModal(state === 'see');
 });
 
 When(
@@ -195,7 +188,7 @@ Then(/^I do not see autocomplete options list$/, async () => {
 
 Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords);
+  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true);
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
@@ -238,7 +231,8 @@ Given(/^I restore a wallet$/, async () => {
   await OnboardingMainPage.restoreWalletButton.click();
   await OnboardingWalletSetupPage.goToWalletSetupPage(
     'Restore',
-    getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []
+    getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [],
+    true
   );
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
@@ -257,19 +251,26 @@ Given(
   }
 );
 
+When(/^I enter wallet password "([^"]*)"$/, async (password: string) => {
+  await OnboardingWalletSetupPage.setWalletPasswordInput(password);
+});
+
+Then(/^empty password confirmation input (is|is not) displayed$/, async (state: 'is' | 'is not') => {
+  await OnboardingWalletSetupPageAssert.assertSeeEmptyPasswordConfirmationInput(state === 'is');
+});
+
 When(/^I restore previously changed mnemonic word$/, async () => {
   await RecoveryPhrasePage.restorePreviousMnemonicWord();
 });
 
 Given(
-  /^I go to "(Mnemonic verification|Wallet setup)" page(?: with wallet ([^"]*))? from "(Create|Restore)" wallet flow(?: and "(fill|not fill)" values)?$/,
+  /^I go to "(Mnemonic verification|Wallet setup)" page(?: with wallet ([^"]*))? from "(Create|Restore)" wallet flow(?: and (fill|not fill) values)?$/,
   async (
     endPage: 'Mnemonic verification' | 'Wallet setup',
     walletName: string,
     flowType: 'Create' | 'Restore',
     fillValues: 'fill' | 'not fill'
   ) => {
-    if (!fillValues) fillValues = 'fill';
     let mnemonicsToUse = mnemonicWords;
     if (walletName) mnemonicsToUse = getTestWallet(walletName).mnemonic ?? [];
     switch (endPage) {
@@ -318,7 +319,12 @@ When(/^I click "Read More" link in modal$/, async () => {
   await watchVideoModal.readMoreLink.click();
 });
 
+When(/^I click "Got it" link in "Keeping your wallet secure" modal$/, async () => {
+  await watchVideoModal.gotItButton.click();
+});
+
 When(/^I save mnemonic words$/, async () => {
+  mnemonicWordsForReference.length = 0;
   mnemonicWordsForReference.push(...(await RecoveryPhrasePage.getMnemonicWordTexts()));
 });
 
@@ -349,6 +355,22 @@ When(/^I click on "clipboard tooltip link"$/, async () => {
 Then(/^I see clipboard tooltip with information about copying and pasting words$/, async () => {
   await onboardingRecoveryPhrasePageAssert.assertSeeClipboardTooltip();
 });
+
+When(
+  /^I click on "(Copy to clipboard|Paste from clipboard)" button$/,
+  async (button: 'Copy to clipboard' | 'Paste from clipboard') => {
+    switch (button) {
+      case 'Copy to clipboard':
+        await RecoveryPhrasePage.clickOnCopyToClipboardButton();
+        break;
+      case 'Paste from clipboard':
+        await RecoveryPhrasePage.clickOnPasteFromClipboardButton();
+        break;
+      default:
+        throw new Error(`Unsupported button : ${button}`);
+    }
+  }
+);
 
 Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mnemonicWordsLength: RecoveryPhrase) => {
   await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage(mnemonicWordsLength);
@@ -391,3 +413,26 @@ When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order
   const shuffledWords = shuffle([...mnemonicWordsForReference]);
   await RecoveryPhrasePage.enterMnemonicWords(shuffledWords);
 });
+
+Then(
+  /^"(Recovery phrase|Wallet setup|Enter wallet)" step is marked as active on progress timeline$/,
+  async (step: 'Recovery phrase' | 'Wallet setup' | 'Enter wallet') => {
+    await new OnboardingCommonAssert().assertSeeActiveStepOnProgressTimeline(step);
+  }
+);
+
+When(
+  /^I click on "(Show|Hide) password" for "(Password|Confirm password)" input field$/,
+  async (action: 'Show' | 'Hide', field: 'Password' | 'Confirm password') => {
+    await OnboardingWalletSetupPage.switchPasswordVisibility(action, field);
+  }
+);
+
+Then(
+  /^password value is (visible|hidden) for "(Password|Confirm password)" input field$/,
+  async (isVisible: 'visible' | 'hidden', field: 'Password' | 'Confirm password') => {
+    field === 'Password'
+      ? await OnboardingWalletSetupPageAssert.assertPasswordIsVisible(isVisible === 'visible')
+      : await OnboardingWalletSetupPageAssert.assertConfirmPasswordIsVisible(isVisible === 'visible');
+  }
+);

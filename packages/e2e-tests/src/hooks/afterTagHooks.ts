@@ -8,7 +8,7 @@ After(
   async () => await switchToWindowWithLace()
 );
 
-After({ tags: '@LW-7125' }, async () => {
+After({ tags: '@LW-7125 or @LW-9335' }, async () => {
   await browser.reloadSession();
   await extendedView.visit();
 });
