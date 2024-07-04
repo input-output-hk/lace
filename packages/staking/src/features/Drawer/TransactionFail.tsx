@@ -1,7 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { Button, WarningBanner } from '@lace/common';
-import { Box } from '@lace/ui';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';

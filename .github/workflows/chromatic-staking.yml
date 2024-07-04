@@ -46,6 +46,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Build
         if: ${{ needs.check-if-should-run.outputs.requireChromaticCheck == 1 }}

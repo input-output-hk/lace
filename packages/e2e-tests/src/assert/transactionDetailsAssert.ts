@@ -21,9 +21,11 @@ export type PoolData = {
   poolId: string;
 };
 
+export type AddressTag = 'own' | 'foreign';
+
 export type TransactionData = {
   address: string;
-  addressTag?: string;
+  addressTag?: AddressTag;
   ada: string;
   assets?: string[];
 };
@@ -41,9 +43,9 @@ class TransactionsDetailsAssert {
 
   async assertSeeActivityDetailsDrawer(shouldBeDisplayed: boolean) {
     await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
-    await TransactionDetailsPage.transactionDetails.waitForStable({ reverse: !shouldBeDisplayed });
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
+      await TransactionDetailsPage.transactionDetails.waitForStable();
       expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(await t(headerTranslationKey));
     }
   }
@@ -121,7 +123,7 @@ class TransactionsDetailsAssert {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
-      if (!txType.includes(stakeKeyRegistration) && !txType.includes('Rewards')) {
+      if ([stakeKeyRegistration, 'Rewards', 'Stake Key De-registration'].every((type) => !txType.includes(type))) {
         await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
       }

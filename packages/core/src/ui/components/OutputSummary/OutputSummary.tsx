@@ -2,7 +2,7 @@ import React from 'react';
 import { renderLabel, renderSentAssets, RowContainer } from './OutputSummaryUtils';
 import styles from './OutputSummary.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { Text, Flex, Box } from '@lace/ui';
+import { Text, Flex, Box } from '@input-output-hk/lace-ui-toolkit';
 import { getAddressTagTranslations, renderAddressTag } from '@src/ui/utils';
 import { useTranslation } from 'react-i18next';
 

@@ -1,4 +1,4 @@
-import { Table } from '@lace/ui';
+import { Table } from '@input-output-hk/lace-ui-toolkit';
 import { SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

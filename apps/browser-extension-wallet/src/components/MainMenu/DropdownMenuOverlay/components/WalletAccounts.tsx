@@ -4,8 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { NavigationButton, PostHogAction, toast } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from './WalletAccounts.module.scss';
-import { ProfileDropdown } from '@lace/ui';
-import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
+import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
+import type { AccountData } from '@input-output-hk/lace-ui-toolkit';
 import {
   DisableAccountConfirmation,
   EditAccountDrawer,
@@ -134,18 +134,21 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [disableAccountConfirmation, accountsData]
   );
 
-  const showHWErrorState = useCallback(() => {
-    enableAccountHWSigningDialog.setData({
-      ...enableAccountHWSigningDialog.data,
-      state: 'error'
-    });
-  }, [enableAccountHWSigningDialog]);
+  const showHWErrorState = useCallback(
+    (accountIndex: number) => {
+      enableAccountHWSigningDialog.setData({
+        accountIndex,
+        state: 'error'
+      });
+    },
+    [enableAccountHWSigningDialog]
+  );
 
   const unlockHWAccount = useCallback(
     async (accountIndex: number) => {
       const name = defaultAccountName(accountIndex);
       try {
-        const timeout = setTimeout(showHWErrorState, HW_CONNECT_TIMEOUT_MS);
+        const timeout = setTimeout(() => showHWErrorState(accountIndex), HW_CONNECT_TIMEOUT_MS);
         if (wallet.type === WalletType.InMemory) return;
         await Wallet.connectDevice(wallet.type);
         await addAccount({
@@ -161,7 +164,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         enableAccountHWSigningDialog.hide();
         closeDropdownAndShowAccountActivated(name);
       } catch {
-        showHWErrorState();
+        showHWErrorState(accountIndex);
       }
     },
     [

@@ -38,7 +38,7 @@ export const DappTransactionFail = (): React.ReactElement => {
           {t('dapp.sign.failure.description')}
         </div>
         {getCustomSubmitApiForNetwork(environmentName).status && (
-          <WarningBanner message={t('browserView.transaction.send.customSubmitApiBannerText')} />
+          <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />
         )}
       </div>
       <div className={styles.footer}>

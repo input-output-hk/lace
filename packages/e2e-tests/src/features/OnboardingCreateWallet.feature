@@ -206,7 +206,7 @@ Feature: Onboarding - Create wallet
     And "Next" button is <is_disabled> during onboarding process
     Examples:
       | value | is_displayed | is_disabled |
-      | 20    | is not       | enabled     |
+#      | 20    | is not       | enabled     | TODO: uncomment when LW-10695 is resolved
       | 21    | is           | disabled    |
 
   @LW-5844

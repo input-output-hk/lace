@@ -3,7 +3,6 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
-    "module": "commonjs",
     "types": [
       "node",
       "@wdio/globals/types",
@@ -21,5 +20,10 @@
     "rootDir": "../../"
   },
   "files": ["../staking/src/features/i18n/translations/en.ts"],
-  "include": ["."]
+  "include": ["."],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "files": true
+  }
 }

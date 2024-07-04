@@ -1,39 +1,45 @@
-import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
 import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import postcss from 'rollup-plugin-postcss';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
 import svgr from '@svgr/rollup';
+import nodePolyfills from 'rollup-plugin-node-polyfills';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import postcss from 'rollup-plugin-postcss';
+
+const defaultTsPluginOptions = {
+  composite: false,
+  exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx'],
+  tsconfig: 'src/tsconfig.json',
+}
 
 export default ({
-  tsPluginOptions = {
-    tsconfig: 'src/tsconfig.json',
-    composite: false,
-    exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx']
-  }
+  tsPluginOptions = defaultTsPluginOptions,
+  input = 'src/index.ts',
 } = {}) => ({
-  input: 'src/index.ts',
+  external: [/node_modules/],
+  input,
   plugins: [
     resolve({
       preferBuiltins: false,
     }),
-    typescript(tsPluginOptions),
+    typescript({
+      ...defaultTsPluginOptions,
+      ...tsPluginOptions,
+    }),
     peerDepsExternal(),
     postcss({
       // postcss plugin includes always path to the es version of the style-inject
       // no matter what build type it is. It makes cjs build requiring esm version
       // https://github.com/egoist/rollup-plugin-postcss/issues/381
       // https://github.com/egoist/rollup-plugin-postcss/issues/367
-      inject: cssVariableName => `
+      inject: (cssVariableName) => `
 import styleInject from 'style-inject';
-styleInject(${cssVariableName});`
+styleInject(${cssVariableName});`,
     }),
     commonjs(),
     nodePolyfills(),
     image(),
-    svgr({ icon: true })
+    svgr({ icon: true }),
   ],
-  external: [/node_modules/]
 });

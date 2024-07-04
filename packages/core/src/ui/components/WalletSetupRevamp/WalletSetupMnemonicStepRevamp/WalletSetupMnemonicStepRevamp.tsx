@@ -7,7 +7,7 @@ import styles from './WalletSetupMnemonicStepRevamp.module.scss';
 import './WalletSetupMnemonicRevampCommon.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { hasEmptyString } from './WalletSetupMnemonicVerificationStepRevamp';
-import { Dialog } from '@lace/ui';
+import { Dialog } from '@input-output-hk/lace-ui-toolkit';
 import { MnemonicWordsConfirmInputRevamp } from './MnemonicWordsConfirmInputRevamp';
 import { Wallet } from '@lace/cardano';
 import { readMnemonicFromClipboard, writeMnemonicToClipboard } from './wallet-utils';
@@ -94,6 +94,7 @@ export const WalletSetupMnemonicStepRevamp = ({
 
   useKeyboardShortcut((event) => {
     if (!event.ctrlKey && !event.metaKey) return;
+
     if (event.key === 'c' && mnemonicStage === 'writedown') {
       void copyRecoveryPhrase();
     }

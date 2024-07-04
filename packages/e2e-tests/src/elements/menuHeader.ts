@@ -14,6 +14,7 @@ export class MenuHeader {
   private OFFLINE_NETWORK_PILL = '[data-testid="network-offline-indicator"]';
   private MENU_BUTTON = '//button[@data-testid="profile-dropdown-trigger-menu"]';
   private MENU_ADDRESS_BOOK_BUTTON = '//li[@data-testid="header-menu-address-book"]';
+  private MENU_ADD_NEW_WALLET_BUTTON = '[data-testid="header-menu-new-wallet"]';
   private MENU_SETTINGS_BUTTON = '//li[@data-testid="header-menu-settings"]';
   private MENU_LOCK_BUTTON = '//li[@data-testid="header-menu-lock"]';
   private MENU_WALLET_OPTION_ITEM = '//button[@data-testid="wallet-option-item"]';
@@ -94,6 +95,10 @@ export class MenuHeader {
     return $(this.MENU_ADDRESS_BOOK_BUTTON);
   }
 
+  get menuAddNewWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_ADD_NEW_WALLET_BUTTON);
+  }
+
   get menuSettingsButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MENU_SETTINGS_BUTTON);
   }
@@ -140,6 +145,11 @@ export class MenuHeader {
 
   async hoverOverExpandButton(): Promise<void> {
     await this.expandButton.moveTo();
+  }
+
+  async clickOnAddNewWalletOption(): Promise<void> {
+    await this.menuAddNewWalletButton.waitForClickable();
+    await this.menuAddNewWalletButton.click();
   }
 }
 

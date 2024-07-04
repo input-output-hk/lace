@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flex, Box, Button, Message } from '@lace/ui';
+import { Flex, Box, Button, Message } from '@input-output-hk/lace-ui-toolkit';
 
 import { Wizard } from '../Wizard';
 

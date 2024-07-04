@@ -1,4 +1,4 @@
-import { darkColorScheme, laceGradient, lightColorScheme } from '@lace/ui';
+import { darkColorScheme, laceGradient, lightColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 export const colorsContract = {
   $activityNoActivityTextColor: '',
@@ -90,7 +90,7 @@ export const lightThemeColors: typeof colorsContract = {
   $stakePoolGridSeparatorColor: lightColorScheme.$primary_light_grey_plus,
   $stakePoolListCellDotHighColor: lightColorScheme.$secondary_data_orange,
   $stakePoolListCellDotMediumColor: lightColorScheme.$secondary_data_green,
-  $stakePoolListCellDotVeryHighColor: lightColorScheme.$primary_grey,
+  $stakePoolListCellDotVeryHighColor: darkColorScheme.$secondary_data_pink,
   $stakePoolListPlaceholderCheckboxColor: lightColorScheme.$primary_grey,
   $titleColor: lightColorScheme.$primary_dark_grey,
   $tooltipBgColor: lightColorScheme.$primary_white,

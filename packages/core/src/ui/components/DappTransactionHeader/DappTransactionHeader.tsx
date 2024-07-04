@@ -3,7 +3,7 @@ import { Typography } from 'antd';
 
 import styles from './DappTransactionHeader.module.scss';
 
-import { TransactionType, SummaryExpander, Card } from '@lace/ui';
+import { TransactionType, SummaryExpander, Card } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;

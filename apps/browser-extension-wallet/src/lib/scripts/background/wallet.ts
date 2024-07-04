@@ -21,7 +21,7 @@ import {
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
-import { Cardano, NotImplementedError } from '@cardano-sdk/core';
+import { Cardano, HandleProvider, NotImplementedError } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 
@@ -70,24 +70,27 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
+    const mockHandleResolver: HandleProvider = {
+      resolveHandles: async () => [],
+      healthCheck: async () => ({ ok: true }),
+      getPolicyIds: async () => []
+    };
+
+    const baseUrl = HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic];
+
     return createPersonalWallet(
       { name: walletAccount.metadata.name },
       {
         logger,
         ...providers,
         stores,
-        handleProvider: handleHttpProvider({
-          adapter: axiosFetchAdapter,
-          baseUrl:
-            HANDLE_SERVER_URLS[
-              // TODO: remove exclude to support sanchonet
-              Cardano.ChainIds[chainName].networkMagic as Exclude<
-                Cardano.NetworkMagics,
-                Cardano.NetworkMagics.Sanchonet
-              >
-            ],
-          logger
-        }),
+        handleProvider: baseUrl
+          ? handleHttpProvider({
+              adapter: axiosFetchAdapter,
+              baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+              logger
+            })
+          : mockHandleResolver,
         addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
         witnesser,
         bip32Account

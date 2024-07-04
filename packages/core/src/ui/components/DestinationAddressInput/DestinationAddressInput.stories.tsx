@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { DestinationAddressInput, DestinationAddressInputProps } from './DestinationAddressInput';
 import noop from 'lodash/noop';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 const meta: Meta<DestinationAddressInputProps> = {
   title: 'Components/DestinationAddressInput',

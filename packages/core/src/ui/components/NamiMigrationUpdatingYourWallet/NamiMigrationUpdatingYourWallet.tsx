@@ -1,5 +1,5 @@
 import React, { VFC } from 'react';
-import { Card, Flex, Loader, Text } from '@lace/ui';
+import { Card, Flex, Loader, Text } from '@input-output-hk/lace-ui-toolkit';
 import styles from './NamiMigrationUpdatingYourWallet.module.scss';
 import { useTranslation } from 'react-i18next';
 

@@ -12,7 +12,7 @@ import { useWalletStore } from '@stores';
 import { useBalances, useFetchCoinPrice } from '@src/hooks';
 import LightBulb from '@src/assets/icons/light.svg';
 import { BrowsePoolsPreferencesCard } from '@lace/staking';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useTheme } from '@providers';
 
 type StakingSkeletonProps = {

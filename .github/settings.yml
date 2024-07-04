@@ -29,10 +29,6 @@ labels:
     description: Changes to the staking package.
     color: '#685369'
 
-  - name: ui-toolkit
-    description: Changes to the ui package.
-    color: '#FFBF00'
-
   - name: e2e
     description: Changes to the e2e testing instrumentation.
     color: '#0B4F6C'

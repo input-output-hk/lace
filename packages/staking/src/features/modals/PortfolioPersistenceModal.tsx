@@ -1,4 +1,4 @@
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StakingModal } from './StakingModal';

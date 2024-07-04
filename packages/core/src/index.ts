@@ -1,6 +1,7 @@
 export * from '@ui/hooks';
 export * from '@ui/lib';
 export * from '@ui/utils';
+export * from './shared-wallets';
 
 export * from '@ui/components/ActivityDetail';
 export * from '@ui/components/WalletAvatar';

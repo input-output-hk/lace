@@ -75,7 +75,8 @@ export const createProviders = ({
     txSubmitProvider: createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl),
     stakePoolProvider: stakePoolHttpProvider(httpProviderConfig),
     utxoProvider: utxoHttpProvider(httpProviderConfig),
-    chainHistoryProvider: chainHistoryHttpProvider(httpProviderConfig),
+    // TODO: remove apiVersion override once the back-ends are all updated to P2P (Node 8.9.2)
+    chainHistoryProvider: chainHistoryHttpProvider({ ...httpProviderConfig, apiVersion: '3.0.1' }),
     rewardsProvider: rewardsHttpProvider(httpProviderConfig)
   };
 };

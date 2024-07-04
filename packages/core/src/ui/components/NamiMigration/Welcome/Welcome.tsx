@@ -1,8 +1,15 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Flex, Text, Box, Button, ThemeColorScheme, useTheme } from '@lace/ui';
-import { ReactComponent as CloseComponent } from '@lace/icons/dist/CloseComponent';
-import { ReactComponent as CheckComponent } from '@lace/icons/dist/CheckComponent';
+import {
+  Flex,
+  Text,
+  Box,
+  Button,
+  ThemeColorScheme,
+  useTheme,
+  CloseComponent,
+  CheckComponent
+} from '@input-output-hk/lace-ui-toolkit';
 import NamiImg from './nami.png';
 import LaceImg from './lace.png';
 import LaceDarkImg from './lace-dark.png';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cell, Grid, TransactionSummary, Flex } from '@lace/ui';
+import { Cell, Grid, TransactionSummary, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 
 interface Props {

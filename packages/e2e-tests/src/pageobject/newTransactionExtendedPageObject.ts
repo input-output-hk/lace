@@ -20,6 +20,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoBundlesWithMultipleAssets() {
     await this.setTwoAssetsForBundle(1, 2, 1);
+    await TransactionNewPage.addBundleButton.waitForClickable();
     await TransactionNewPage.addBundleButton.click();
     await new AddressInput(2).fillAddress(shelley.getAddress());
     await TransactionNewPage.coinConfigure(2, Asset.CARDANO.ticker).clickCoinSelectorName();
@@ -34,6 +35,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoBundlesWithTheSameAssets() {
     await this.setTwoAssetsForBundle(1, 1, 2);
+    await TransactionNewPage.addBundleButton.waitForClickable();
     await TransactionNewPage.addBundleButton.click();
     await this.setTwoAssetsForBundle(2, 3, 4);
   }

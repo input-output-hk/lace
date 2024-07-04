@@ -1,5 +1,5 @@
+import { IconButton } from '@input-output-hk/lace-ui-toolkit';
 import { PostHogAction } from '@lace/common';
-import { IconButton } from '@lace/ui';
 import * as Slider from '@radix-ui/react-slider';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import React from 'react';

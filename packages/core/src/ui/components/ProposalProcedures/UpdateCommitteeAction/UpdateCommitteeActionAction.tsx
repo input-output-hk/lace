@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Divider, sx, Text, Metadata, Cell } from '@lace/ui';
+import { Grid, Divider, sx, Text, Metadata, Cell } from '@input-output-hk/lace-ui-toolkit';
 import * as Types from './UpdateCommitteeActionTypes';
 import { Procedure } from '../components/Procedure';
 import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';

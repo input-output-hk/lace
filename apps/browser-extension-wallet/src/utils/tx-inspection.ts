@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable consistent-return */
 import {
   createTxInspector,
@@ -8,6 +9,7 @@ import {
   sentInspector,
   totalAddressOutputsValueInspector
 } from '@cardano-sdk/core';
+import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 import { Wallet } from '@lace/cardano';
 import {
   ActivityType,
@@ -54,7 +56,6 @@ const governanceCertificateInspection = (
 
   switch (true) {
     case signedCertificateTypenames.includes(CertificateType.RegisterDelegateRepresentative):
-      // TODO: can we map to Cip30TxType instead?
       return ConwayEraCertificatesTypes.RegisterDelegateRepresentative;
     case signedCertificateTypenames.includes(CertificateType.UnregisterDelegateRepresentative):
       return ConwayEraCertificatesTypes.UnregisterDelegateRepresentative;
@@ -108,7 +109,7 @@ const getWalletAccounts = (walletAddresses: Wallet.KeyManagement.GroupedAddress[
     { paymentAddresses: [], rewardAccounts: [] }
   );
 
-const txIncludesConwayCertificates = (certificates?: Wallet.Cardano.Certificate[]) =>
+export const txIncludesConwayCertificates = (certificates?: Wallet.Cardano.Certificate[]): boolean =>
   certificates?.length > 0
     ? certificates.some((certificate) =>
         Object.values(ConwayEraCertificatesTypes).includes(
@@ -158,11 +159,16 @@ export const inspectTxType = async ({
     delegation: delegationInspector,
     stakeKeyRegistration: stakeKeyRegistrationInspector,
     stakeKeyDeregistration: stakeKeyDeregistrationInspector,
+    conwayEraStakeKeyRegistration: certificateInspectorFactory(CertificateType.Registration),
+    conwayEraStakeKeyDeregistration: certificateInspectorFactory(CertificateType.Unregistration),
     selfTransaction: selfTxInspector(paymentAddresses)
   })(tx);
 
   if (txIncludesConwayCertificates(tx.body.certificates)) {
-    return governanceCertificateInspection(tx.body.certificates);
+    const inspection = governanceCertificateInspection(tx.body.certificates);
+    if (inspection) {
+      return inspection;
+    }
   }
 
   const withRewardsWithdrawal = isTxWithRewardsWithdrawal(
@@ -179,6 +185,10 @@ export const inspectTxType = async ({
         return DelegationActivityType.delegationRegistration;
       case inspectionProperties.stakeKeyDeregistration.length > 0:
         return DelegationActivityType.delegationDeregistration;
+      case !!inspectionProperties.conwayEraStakeKeyRegistration:
+        return ConwayEraCertificatesTypes.Registration;
+      case !!inspectionProperties.conwayEraStakeKeyDeregistration:
+        return ConwayEraCertificatesTypes.Unregistration;
       // Voting procedures take priority over proposals
       // TODO: use proper inspector when available on sdk side (LW-9569)
       case tx.body.votingProcedures?.length > 0:

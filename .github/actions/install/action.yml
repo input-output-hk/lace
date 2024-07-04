@@ -5,6 +5,10 @@ inputs:
   WALLET_PASSWORD:
     description: 'Test wallet password'
     required: true
+  GITHUB_TOKEN:
+    description: 'GitHub Token'
+    required: true
+
 
 runs:
   using: 'composite'
@@ -14,6 +18,14 @@ runs:
       with:
         node-version-file: '.nvmrc'
         cache: 'yarn'
+
+    - name: Configure Yarn to use GitHub Packages
+      run: |
+        echo "npmScopes:" >> ~/.yarnrc.yml
+        echo "  input-output-hk:" >> ~/.yarnrc.yml
+        echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> ~/.yarnrc.yml
+        echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> ~/.yarnrc.yml
+      shell: bash
 
     - name: Node modules cache
       uses: actions/cache@v4

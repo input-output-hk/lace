@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-restricted-imports
-import { ThemeColorScheme, LocalThemeProvider as UIToolkitLocalThemeProvider } from '@lace/ui';
+import { ThemeColorScheme, LocalThemeProvider as UIToolkitLocalThemeProvider } from '@input-output-hk/lace-ui-toolkit';
 import { ReactNode } from 'react';
 import { darkTheme, lightTheme } from './theme.css';
 

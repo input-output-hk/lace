@@ -42,9 +42,7 @@ export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFail
             <div data-testid="send-error-description2" className={styles.message}>
               {t('browserView.transaction.fail.clickBackAndTryAgain')}
             </div>
-            {showCustomApiBanner && (
-              <WarningBanner message={t('browserView.transaction.send.customSubmitApiBannerText')} />
-            )}
+            {showCustomApiBanner && <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />}
           </>
         }
       />

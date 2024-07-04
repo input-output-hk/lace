@@ -54,10 +54,6 @@ Then(
   }
 );
 
-Then(/^I click pool name in currently staking component$/, async () => {
-  await StakingPageObject.clickPoolNameInStakingInfoComponent();
-});
-
 Then(
   /^(Initial|Switching) Delegation success screen is displayed in (extended|popup) mode$/,
   async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {

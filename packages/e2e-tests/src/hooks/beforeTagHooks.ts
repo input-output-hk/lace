@@ -5,6 +5,7 @@ import popupView from '../page/popupView';
 import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
 import analyticsBanner from '../elements/analyticsBanner';
+import { addAndActivateWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 
 const extendedViewWalletInitialization = async (walletName = TestWalletName.TestAutomationWallet): Promise<void> => {
   await extendedView.visit();
@@ -16,6 +17,19 @@ const extendedViewWalletInitialization = async (walletName = TestWalletName.Test
 const popupViewWalletInitialization = async (walletName = TestWalletName.TestAutomationWallet): Promise<void> => {
   await extendedView.visit();
   await localStorageInitializer.initializeWallet(walletName);
+  await popupView.visit();
+  await networkManager.logFailedRequests();
+};
+
+const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
+  await extendedView.visit();
+  await addAndActivateWalletsInRepository(walletNames);
+  await networkManager.logFailedRequests();
+};
+
+const popupViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
+  await extendedView.visit();
+  await addAndActivateWalletsInRepository(walletNames);
   await popupView.visit();
   await networkManager.logFailedRequests();
 };
@@ -34,7 +48,7 @@ Before(
 
 Before(
   {
-    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended'
+    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended or @AddNewWalletCreate'
   },
   async () => {
     await extendedViewWalletInitialization();
@@ -114,10 +128,11 @@ Before(
   async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral2)
 );
 
-Before(
-  { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
-  async () => await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
-);
+Before({ tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' }, async () => {
+  await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+});
 
 Before(
   { tags: '@Staking-SwitchingPools-Popup-E2E' },
@@ -149,7 +164,7 @@ Before(
   async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 
-Before({ tags: '@Staking-NonDelegatedFunds-Extended' }, async () => {
+Before({ tags: '@Staking-NonDelegatedFunds-Extended or @CIP-95-Extended' }, async () => {
   await extendedViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
@@ -157,6 +172,18 @@ Before({ tags: '@Staking-NonDelegatedFunds-Extended' }, async () => {
 
 Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
   await popupViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Before({ tags: '@OwnTags-Extended' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Before({ tags: '@OwnTags-Popup' }, async () => {
+  await popupViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
@@ -216,3 +243,25 @@ Before({ tags: '@Multidelegation-DelegatedFunds-MultiplePools-Extended' }, async
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
+
+Before(
+  {
+    tags: '@Accounts-Extended'
+  },
+  async () => {
+    await extendedViewRepositoryWalletInitialization([TestWalletName.MultiAccActive1]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  }
+);
+
+Before(
+  {
+    tags: '@Accounts-Popup'
+  },
+  async () => {
+    await popupViewRepositoryWalletInitialization([TestWalletName.MultiAccActive1]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  }
+);

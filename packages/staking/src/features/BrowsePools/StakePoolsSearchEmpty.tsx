@@ -1,4 +1,4 @@
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Empty from '../../assets/images/empty.svg';
@@ -16,7 +16,6 @@ export const StakePoolsSearchEmpty = (): React.ReactElement => {
       h="$fill"
       w="$fill"
       data-testid="stake-pool-table-empty"
-      className={styles.wrapper}
     >
       <Empty data-testid="stake-pool-table-empty-image" className={styles.icon} />
       <Text.Body.Small className={styles.text} weight="$medium" data-testid="stake-pool-table-empty-message">

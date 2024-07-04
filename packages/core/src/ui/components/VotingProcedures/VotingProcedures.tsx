@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
-import { Box, Cell, Grid, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
+import { Box, Cell, Grid, Metadata, MetadataLink, Text, Divider, sx } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '@lace/translation';
+import { CoreTranslationKey } from '@lace/translation';
 import { VoterTypeEnum, VotesEnum } from '@lace/cardano/dist/wallet/util';
 
 type VotingProcedure = {
@@ -66,7 +66,7 @@ export const VotingProcedures = ({ data }: Props): JSX.Element => {
             <Cell>
               <Metadata
                 label={translations.voterType}
-                text={t(`core.VotingProcedures.voterTypes.${voter.type}` as unknown as TranslationKey)}
+                text={t(`core.VotingProcedures.voterTypes.${voter.type}` as unknown as CoreTranslationKey)}
               />
             </Cell>
             {voter.dRepId && (
@@ -87,7 +87,7 @@ export const VotingProcedures = ({ data }: Props): JSX.Element => {
                 <Cell>
                   <Metadata
                     label={translations.vote}
-                    text={t(`core.VotingProcedures.votes.${votingProcedure.vote}` as unknown as TranslationKey)}
+                    text={t(`core.VotingProcedures.votes.${votingProcedure.vote}` as unknown as CoreTranslationKey)}
                   />
                 </Cell>
                 {votingProcedure.anchor && (

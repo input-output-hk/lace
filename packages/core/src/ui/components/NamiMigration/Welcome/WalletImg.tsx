@@ -1,5 +1,5 @@
 import React from 'react';
-import { sx, Flex, Card } from '@lace/ui';
+import { sx, Flex, Card } from '@input-output-hk/lace-ui-toolkit';
 import cx from 'classnames';
 import styles from './WalletImg.module.scss';
 

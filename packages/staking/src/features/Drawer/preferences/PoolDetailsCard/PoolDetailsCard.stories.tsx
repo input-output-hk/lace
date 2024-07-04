@@ -1,4 +1,4 @@
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import type { Meta } from '@storybook/react';
 import { PoolDetailsCard } from './';
 

@@ -4,7 +4,7 @@ import { renderAmountInfo, renderLabel, RowContainer } from '../OutputSummary/Ou
 import { Typography } from 'antd';
 import styles from './OutputSummaryList.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 const { Text } = Typography;
 
