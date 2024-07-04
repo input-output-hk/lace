@@ -1,7 +1,7 @@
 import { Box, Button, Flex, LoadingComponent, ScrollArea, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Timeline } from '@lace/common';
 import cn from 'classnames';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './SharedWalletLayout.module.scss';
 import { LayoutNavigationProps } from './type';
@@ -20,37 +20,72 @@ const parseTimelineSteps = <Key extends string>(timelineSteps: TimelineStep<Key>
   }));
 };
 
-export interface SharedWalletLayoutProps<Key extends string> extends LayoutNavigationProps {
-  children: React.ReactNode;
-  customBackLabel?: string;
-  customNextLabel?: string;
-  description: React.ReactNode;
-  isNextEnabled?: boolean;
-  loading?: boolean;
+type MakeButtonsParams = {
+  defaultLabel: {
+    back: string;
+    next: string;
+  };
+  props: SharedWalletLayoutProps<string>;
+};
+
+const makeButtons = ({ props, defaultLabel }: MakeButtonsParams) => {
+  let leftButton = 'customBackButton' in props ? props.customBackButton : undefined;
+  if (!leftButton && 'onBack' in props) {
+    leftButton = (
+      <Button.Secondary
+        label={props.customBackLabel || defaultLabel.back}
+        onClick={props.onBack}
+        data-testid="shared-wallet-step-btn-back"
+      />
+    );
+  }
+
+  let rightButton = 'customNextButton' in props ? props.customNextButton : undefined;
+  if (!rightButton && 'onNext' in props) {
+    rightButton = (
+      <Button.CallToAction
+        icon={props.isLoading ? <LoadingComponent className={styles.loadingIcon} /> : undefined}
+        label={props.customNextLabel || defaultLabel.next}
+        onClick={props.onNext}
+        disabled={!props.isNextEnabled || props.isLoading}
+        data-testid="shared-wallet-step-btn-next"
+      />
+    );
+  }
+
+  return {
+    leftButton,
+    rightButton,
+  };
+};
+
+export type SharedWalletLayoutProps<Key extends string> = {
+  children: ReactNode;
+  description: ReactNode;
   timelineCurrentStep: Key;
   timelineSteps: TimelineStep<Key>[];
-  title: React.ReactNode;
-}
+  title: ReactNode;
+} & (
+  | {
+      customBackButton?: ReactNode;
+      customNextButton?: ReactNode;
+    }
+  | (LayoutNavigationProps & {
+      customBackLabel?: string;
+      customNextLabel?: string;
+      isLoading?: boolean;
+      isNextEnabled?: boolean;
+    })
+);
 
-export const SharedWalletLayout = <Key extends string>({
-  children,
-  customBackLabel,
-  customNextLabel,
-  description,
-  isNextEnabled,
-  loading = false,
-  onBack,
-  onNext,
-  timelineCurrentStep,
-  timelineSteps,
-  title,
-}: SharedWalletLayoutProps<Key>): React.ReactElement => {
+export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayoutProps<Key>): React.ReactElement => {
+  const { children, description, timelineCurrentStep, timelineSteps, title } = props;
   const { t } = useTranslation();
-
   const defaultLabel = {
     back: t('sharedWallets.addSharedWallet.layout.defaultBackButtonLabel'),
     next: t('sharedWallets.addSharedWallet.layout.defaultNextButtonLabel'),
   };
+  const { leftButton, rightButton } = makeButtons({ defaultLabel, props });
 
   return (
     <Flex h="$fill" w="$fill" className={styles.root}>
@@ -84,27 +119,13 @@ export const SharedWalletLayout = <Key extends string>({
 
         <Flex
           data-testid="shared-wallet-step-footer"
-          justifyContent={onBack ? 'space-between' : 'flex-end'}
+          justifyContent={leftButton ? 'space-between' : 'flex-end'}
           w="$fill"
           alignItems="center"
           mt="$16"
         >
-          {onBack && (
-            <Button.Secondary
-              label={customBackLabel || defaultLabel.back}
-              onClick={onBack}
-              data-testid="shared-wallet-step-btn-back"
-            />
-          )}
-          {onNext && (
-            <Button.CallToAction
-              icon={loading ? <LoadingComponent className={styles.loadingIcon} /> : undefined}
-              label={customNextLabel || defaultLabel.next}
-              onClick={onNext}
-              disabled={!isNextEnabled || loading}
-              data-testid="shared-wallet-step-btn-next"
-            />
-          )}
+          {leftButton}
+          {rightButton}
         </Flex>
       </Flex>
     </Flex>

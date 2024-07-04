@@ -81,7 +81,8 @@ export const QuorumOption = ({
       onNext={onNext}
       onBack={onBack}
       timelineSteps={creationTimelineSteps}
-      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
+      timelineCurrentStep={SharedWalletCreationStep.Quorum}
+      isNextEnabled
     >
       <Flex gap="$16" flexDirection="column" alignItems="stretch">
         <RadioButtonGroup
