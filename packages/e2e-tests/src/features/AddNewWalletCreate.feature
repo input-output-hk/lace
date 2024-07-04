@@ -20,7 +20,7 @@ Feature: Add new wallet - Create wallet
 
   @LW-9336
   Scenario: Extended-view - Multi-wallet - Create - Create button click
-    Given I opened "Create" flow via "Add new wallet" feature
+    When I opened "Create" flow via "Add new wallet" feature
     Then "Mnemonic writedown" page is displayed with 24 words
     And "Recovery phrase" step is marked as active on progress timeline
     And "Next" button is enabled during onboarding process

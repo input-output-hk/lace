@@ -8,11 +8,11 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I set up request interception for posthog analytics request(s)
     And I <enable_analytics> analytics banner on "Get started" page
     And I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow and not fill values
+    And I go to "Wallet setup" page from "Create" wallet flow and fill values
     Then I validate that <number_of_events> analytics event(s) have been sent
     Examples:
       | enable_analytics | number_of_events |
-      | accept           | 4                |
+      | accept           | 6                |
       | reject           | 1                |
 
   @LW-7363
@@ -41,8 +41,12 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics single event "onboarding | analytics banner | agree | click"
     When I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
-    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    When I click on "Copy to clipboard" button
+    Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click"
+    When I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | next | click"
+    When I click on "Paste from clipboard" button
+    Then I validate latest analytics single event "onboarding | new wallet revamp | enter your recovery phrase | paste from clipboard | click"
     When I click "Next" button during wallet setup
     Then "Wallet setup" page is displayed
     And I validate latest analytics single event "onboarding | new wallet revamp | enter your recovery phrase | next | click"
@@ -51,8 +55,8 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics multiple events:
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | onboarding \| new wallet revamp \| added                                                 |
-      | $create_alias                                                                                |
-    And I validate that 7 analytics event(s) have been sent
+      | $create_alias                                                                            |
+    And I validate that 9 analytics event(s) have been sent
 
   @LW-7364 @Pending
     # Disabled as user is opted out until he decision about tracking.
