@@ -27,9 +27,9 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/SendNft*.feature'
     ],
     batch5: ['./src/features/AddressBook*.feature'],
-    batch6: ['./src/features/Collateral*.feature'],
+    batch6: ['./src/features/Collateral*.feature', './src/features/NavigationTop*.feature'],
     batch7: [
-      './src/features/AdaHandle*.feature',
+      './src/features/AdaHandleSend*.feature',
       './src/features/DAppConnector*.feature',
       './src/features/FiatOnRampOffRampBanxa*.feature',
       './src/features/MultidelegationDelegatedFunds*.feature',
@@ -43,7 +43,7 @@ export const config: WebdriverIO.Config = {
       './src/features/HdWalletExtended.feature',
       './src/features/LockWallet*.feature',
       './src/features/MultiDelegationPagePopup.feature',
-      './src/features/Navigation*.feature',
+      './src/features/NavigationMain*.feature',
       './src/features/NetworkSwitching*.feature',
       './src/features/OwnTags*.feature',
       './src/features/SendTransactionMetadata*.feature',
@@ -62,6 +62,8 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsToken*.feature'
     ],
     batch12: [
+      './src/features/AdaHandleExtended.feature',
+      './src/features/AdaHandlePopup.feature',
       './src/features/e2e/SendTransactionDappE2E.feature',
       './src/features/e2e/SendTransactionBundlesE2E.feature'
     ],
