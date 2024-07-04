@@ -16,7 +16,7 @@ Feature: Onboarding - Restore wallet
   @LW-2460
   Scenario: Restore Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     When I add characters "asd" in word 7
     Then "Next" button is disabled during onboarding process
 
@@ -39,7 +39,7 @@ Feature: Onboarding - Restore wallet
   @LW-2977
   Scenario Outline: Restore Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow and "not fill" values
+    And I go to "Wallet setup" page from "Restore" wallet flow and not fill values
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -53,14 +53,14 @@ Feature: Onboarding - Restore wallet
   @LW-2464
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
 
   @LW-3063
   Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
     When I confirm multi-address discovery modal
@@ -71,7 +71,7 @@ Feature: Onboarding - Restore wallet
     And I click "Remove wallet" button on "Remove wallet" modal
     And I reject analytics banner on "Get started" page
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
     When I confirm multi-address discovery modal
@@ -141,7 +141,7 @@ Feature: Onboarding - Restore wallet
   @LW-4743
   Scenario: Restore wallet - Enter button support
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     When I press keyboard Enter button
     And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -151,13 +151,13 @@ Feature: Onboarding - Restore wallet
   @LW-5835
   Scenario: Restore Wallet - "Recovery phrase page" displayed
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and "not fill" values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
 
   @LW-5842
   Scenario: Restore Wallet - "Recovery phrase length page" back button
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and "not fill" values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I click "Back" button during wallet setup
     Then "Get started" page is displayed

@@ -6,6 +6,7 @@ import { ParsedCSSValue } from 'webdriverio';
 import extensionUtils from '../utils/utils';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import { browser } from '@wdio/globals';
+import WalletOption from '../elements/WalletOption';
 
 class TopNavigationAssert {
   private readonly CSS_COLOR = 'color';
@@ -30,6 +31,22 @@ class TopNavigationAssert {
     await MenuHeader.avatarOnButton.waitForDisplayed();
     await MenuHeader.walletNameOnButton.waitForDisplayed();
     await MenuHeader.accountNameOnButton.waitForDisplayed();
+  }
+
+  async assertSeeWalletNameOnMenuButton(expectedName: string): Promise<void> {
+    await MenuHeader.walletNameOnButton.waitForDisplayed();
+    expect(await MenuHeader.walletNameOnButton.getText()).to.equal(expectedName);
+  }
+
+  async assertSeeWalletOnUserMenu(index: number, expectedName: string): Promise<void> {
+    const wallet = new WalletOption(index);
+    await wallet.container.waitForDisplayed();
+    await wallet.title.waitForDisplayed();
+    expect(await wallet.title.getText()).to.equal(expectedName);
+  }
+
+  async assertWalletIsActive(index: number): Promise<void> {
+    await new WalletOption(index).status.waitForDisplayed();
   }
 
   async assertDropdownVisible() {
