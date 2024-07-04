@@ -58,3 +58,20 @@ This schema defines the structure of a transaction JSON file.
   "additionalProperties": false
 }
 ```
+
+## Example
+
+```js
+const multsigTxData = {
+  version: '1.0.0',
+  metadata: {
+    createdAt: '2023-09-29T14:00:00Z',
+    note: "Shared account transaction",
+    createdBy: 'acct_shared_xvk1z8kc04y...',
+    chainId: 'cip34:0-1'
+  },
+  transaction: {
+    cborHex: '84a30081825820a0b16c2044cfa596ab3274fae8879d4c98d1dcd0539a95a96...',
+  },
+}
+```
