@@ -27,9 +27,12 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/SendNft*.feature'
     ],
     batch5: ['./src/features/AddressBook*.feature'],
-    batch6: ['./src/features/Collateral*.feature', './src/features/NavigationTop*.feature'],
+    batch6: [
+      './src/features/Collateral*.feature',
+      './src/features/NavigationTop*.feature',
+      './src/features/AdaHandleSend*.feature'
+    ],
     batch7: [
-      './src/features/AdaHandleSend*.feature',
       './src/features/DAppConnector*.feature',
       './src/features/FiatOnRampOffRampBanxa*.feature',
       './src/features/MultidelegationDelegatedFunds*.feature',
@@ -48,7 +51,6 @@ export const config: WebdriverIO.Config = {
       './src/features/OwnTags*.feature',
       './src/features/SendTransactionMetadata*.feature',
       './src/features/SendTransactionMultipleSelection*.feature',
-      './src/features/SettingsPagePopup.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ],
@@ -70,7 +72,8 @@ export const config: WebdriverIO.Config = {
     batch13: [
       './src/features/e2e/SendTransactionSimple*.feature',
       './src/features/e2e/StakingInitialFundsE2E.feature',
-      './src/features/e2e/StakingSwitchingPools*.feature'
+      './src/features/e2e/StakingSwitchingPools*.feature',
+      './src/features/SettingsPagePopup.feature'
     ],
     batch14: ['./src/features/Transactions*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature'],
