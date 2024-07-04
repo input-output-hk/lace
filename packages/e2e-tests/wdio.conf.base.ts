@@ -8,7 +8,8 @@ export const config: WebdriverIO.Config = {
   suites: {
     batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended.feature'],
     batch2: [
-      './src/features/SendTransactionSimpleExtended*.feature',
+      './src/features/SendTransactionSimpleExtended.part2.feature',
+      './src/features/SendTransactionSimpleExtended.part3.feature',
       './src/features/governance/CIP95StaticMethods.feature'
     ],
     batch3: [
@@ -32,7 +33,8 @@ export const config: WebdriverIO.Config = {
     batch6: [
       './src/features/Collateral*.feature',
       './src/features/NavigationTop*.feature',
-      './src/features/AdaHandleSend*.feature'
+      './src/features/AdaHandleSend*.feature',
+      './src/features/SendTransactionSimpleExtended.part1.feature'
     ],
     batch7: [
       './src/features/DAppConnector*.feature',
