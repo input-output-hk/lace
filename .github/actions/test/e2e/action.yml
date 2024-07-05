@@ -120,14 +120,16 @@ runs:
         BATCH: ${{ inputs.BATCH }}
         RUNNERS_AMOUNT: ${{ inputs.RUNNERS_AMOUNT }}
       run: |
+        echo "^^^Determine SUITE var"
         case ${{ inputs.RUNNERS_AMOUNT }} in
           16)
-            export SUITES=--suite batch{env.BATCH};
+            export SUITES=--suite batch$BATCH;
             ;;
           8)
-            batch1=${BATCH} * 2 - 1;
-            batch2=${BATCH} * 2;
-            export SUITES=--suite batch{batch1} --suite batch{batch2};
+            echo "^^^BATCH: $BATCH"
+            batch1=$BATCH * 2 - 1;
+            batch2=$BATCH * 2;
+            export SUITES=--suite batch$batch1 --suite batch$batch2;
             ;;
           4)
             export SUITES=--suite batch${BATCH};
