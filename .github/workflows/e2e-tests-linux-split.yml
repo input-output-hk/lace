@@ -141,3 +141,8 @@ jobs:
         run: |
           runCommand="rm -rf /tmp/.org.chromium.*"
           eval "$runCommand";
+      - name: Upload allure tests results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: ./artifacts/reports/allure/results
