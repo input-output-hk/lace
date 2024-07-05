@@ -63,7 +63,7 @@ jobs:
               export runners_array="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16";
               ;;
             8)
-              export runners_array="1, 2, 3, 4, 5, 6, 7, 8";
+              export runners_array="[1, 2, 3, 4, 5, 6, 7, 8]";
               ;;
             4)
               export runners_array="1, 2, 3, 4";
@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [ "${{ needs.prereq.outputs.runners_array }}" ]
+        batch: ${{ needs.prereq.outputs.runners_array }}
     runs-on: ${{ needs.prereq.outputs.runner }}
     needs: [prereq]
     steps:
