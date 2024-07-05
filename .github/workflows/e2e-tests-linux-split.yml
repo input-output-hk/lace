@@ -128,11 +128,11 @@ jobs:
           BATCH: ${{ matrix.batch }}
           RUNNERS_AMOUNT: ${{ github.event.inputs.runners_amount }}
 
-  results-processing:
-    needs: [prereq, tests-run-split]
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    if: always()
-    steps:
+#  results-processing:
+#    needs: [prereq, tests-run-split]
+#    runs-on: ${{ needs.prereq.outputs.runner }}
+#    if: always()
+#    steps:
 #      - name: Download all artifacts
 #        uses: actions/download-artifact@v4
 #        with:
