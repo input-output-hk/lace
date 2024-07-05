@@ -1,6 +1,7 @@
 import { CoSigner } from '../creation-flow/AddCoSigners';
 import { FileErrorMessage, FileValidationError } from './types';
 
+// TODO: remove it when we have generation of keys
 const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
 
 export const validateJson = (file: File): Promise<{ error?: FileValidationError; isFileValid: boolean }> =>
