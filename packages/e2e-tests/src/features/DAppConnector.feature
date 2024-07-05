@@ -2,7 +2,7 @@
 Feature: DAppConnector - Common
 
   Background:
-    Given Wallet is synced
+    Given Lace is ready for test
     And I de-authorize all DApps in extended mode
     And I reclaim collateral (if active) in extended mode
 
