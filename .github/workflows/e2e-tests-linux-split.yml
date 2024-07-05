@@ -33,7 +33,7 @@ on:
       runners_amount:
         type: choice
         required: true
-        default: '16'
+        default: '8'
         description: How many runners to use
         options:
           - '1'
@@ -60,26 +60,26 @@ jobs:
           echo "Provisioning ${{ github.event.inputs.runner }}"
           case ${{ github.event.inputs.runners_amount }} in
             16)
-              runners_array="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16";
+              export runners_array="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16";
               ;;
             8)
-              runners_array="1, 2, 3, 4, 5, 6, 7, 8";
+              export runners_array="1, 2, 3, 4, 5, 6, 7, 8";
               ;;
             4)
-              runners_array="1, 2, 3, 4";
+              export runners_array="1, 2, 3, 4";
               ;;
             1)
-              runners_array="1";
+              export runners_array="1";
               ;;
             *)
-              runners_array="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16";
+              export runners_array="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16";
               exit 1
               ;;
           esac
           echo "Provisioning runners array: $runners_array"
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
-      runners_array: ${{ runners_array }}
+      runners_array: ${{ env.runners_array }}
 
 #        env:
 #          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
