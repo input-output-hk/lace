@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [ ${{ RUNNERS_ARRAY }} ]
+        batch: ${{ needs.prereq.outputs.runners_array }}
     runs-on: ${{ needs.prereq.outputs.runner }}
     needs: [prereq]
     steps:
