@@ -110,10 +110,12 @@ jobs:
 #          path: ./apps/browser-extension-wallet/dist
 
   tests-run-split:
+    env:
+      RUNNERS_ARRAY: ${{ needs.prereq.outputs.runners_array }}
     strategy:
       fail-fast: false
       matrix:
-        batch: ["${{ needs.prereq.outputs.runners_array }}"]
+        batch: [${{ env.RUNNERS_ARRAY }}]
     runs-on: ${{ needs.prereq.outputs.runner }}
     needs: [prereq]
     steps:
