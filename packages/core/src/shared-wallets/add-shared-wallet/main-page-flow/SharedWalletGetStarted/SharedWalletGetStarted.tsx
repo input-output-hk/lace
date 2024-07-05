@@ -30,7 +30,7 @@ type SharedWalletGetStartedProps = SharedWalletGetStartedSharedProps &
         keysMode: 'generate';
       }
     | {
-        copyKeysToClipboard?: () => Promise<void>;
+        copyKeysToClipboard: () => Promise<void>;
         createAndImportOptionsDisabled: false;
         keysMode: 'copy';
       }

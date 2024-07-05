@@ -58,7 +58,7 @@
   "sharedWallets.addSharedWallet.import.uploadBtnTitle": "Drag & drop or <Link>choose file</Link> to upload",
   "sharedWallets.addSharedWallet.import.uploadBtnFormats": "Supported formats: JSON",
   "sharedWallets.addSharedWallet.import.uploadBtnRemove": "Remove",
-  "sharedWallets.addSharedWallet.import.next": "Continue",
+  "sharedWallets.addSharedWallet.import.next": "Open wallet",
   "sharedWallets.addSharedWallet.import.error.unrecognized.title": "Unrecognized JSON File",
   "sharedWallets.addSharedWallet.import.error.unrecognized.description": "No shared wallet setup details were found in the uploaded file. Please upload the correct wallet setup file.",
   "sharedWallets.addSharedWallet.import.error.unrecognized.exit": "Exit",
