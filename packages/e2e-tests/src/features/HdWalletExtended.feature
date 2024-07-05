@@ -13,7 +13,7 @@ Feature: HD wallet - extended view
     And I see NFT with name: "$rinodino" on the NFTs page
 
   @LW-7552
-  Scenario Outline: Transactions - HD wallet transactions displayed correctly
+  Scenario Outline: Transactions - HD wallet transactions displayed correctly - transaction <txNumber>
     When I navigate to Transactions extended page
     Then I can see transaction <txNumber> has type "<txType>" and value "<txValue>"
     Examples:

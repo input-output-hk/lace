@@ -61,7 +61,7 @@ Feature: Main Navigation - Extended view
       | Address Book | I see Address Book "About your wallet" widget with all relevant items |
 
   @LW-6661
-  Scenario Outline: Extended view - Main Navigation - Right side panel displayed in <section> section
+  Scenario Outline: Extended view - Main Navigation - Right side panel displayed in <section> section - width <width>
     And I navigate to <section> extended page
     And I resize the window to a width of: <width> and a height of: 840
     Then I do not see the right side panel for <section> section

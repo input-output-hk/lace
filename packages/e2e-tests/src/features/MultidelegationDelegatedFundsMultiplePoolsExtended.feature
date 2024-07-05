@@ -119,7 +119,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     And I see "Add stake pool" button is disabled
 
   @LW-9086
-  Scenario Outline: Extended View - button <button> click on stake pool details drawer
+  Scenario Outline: Extended View - <delegation> pools - click <button> button on stake pool details drawer
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab

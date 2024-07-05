@@ -117,7 +117,7 @@ Feature: Top Navigation - Extended view
     And sync status displays "Not synced to the blockchain" state
 
   @LW-6769
-  Scenario Outline: Extended view - Main Navigation - Collapsible Lace icon
+  Scenario Outline: Extended view - Main Navigation - Collapsible Lace icon - width <width>
     And I navigate to Tokens extended page
     When I resize the window to a width of: <width> and a height of: 840
     Then I <should_see> expanded icon
@@ -127,7 +127,7 @@ Feature: Top Navigation - Extended view
       | 768   | do not see |
 
   @LW-6907
-  Scenario Outline: Extended view - Main Navigation - Collapsible Lace menu
+  Scenario Outline: Extended view - Main Navigation - Collapsible Lace menu - width <width>
     And I navigate to Tokens extended page
     When I resize the window to a width of: <width> and a height of: 840
     Then I see <menu_format> menu for <width> resolution

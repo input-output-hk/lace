@@ -101,7 +101,7 @@ Feature: DAppConnector - Common
     When I switch to tab with restore wallet process
     Then "Wallet setup" page is displayed
 
-  @LW-4060
+  @LW-4060 @Testnet
   Scenario Outline: DApp connector window displayed in <theme> mode
     Given I click the menu button
     And I set theme switcher to <theme> mode
@@ -121,7 +121,7 @@ Feature: DAppConnector - Common
       | light |
       | dark  |
 
-  @LW-7743
+  @LW-7743 @Testnet
   Scenario: DApp connector window theme updated from light to dark while using DApp
     Given I click the menu button
     And I set theme switcher to light mode
@@ -141,7 +141,7 @@ Feature: DAppConnector - Common
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in dark mode
 
-  @LW-4071
+  @LW-4071 @Testnet
   Scenario: DApp remains authorised after choosing "Always" and removing & restoring a wallet
     Given I open and authorize test DApp with "Always" setting
     And I switch to window with Lace
@@ -158,7 +158,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I don't see DApp window
 
-  @LW-4070
+  @LW-4070 @Testnet
   Scenario: Authorize Dapp with 'Only once' and leaving/closing DApp
     Given I open and authorize test DApp with "Only once" setting
     And I switch to window with DApp
@@ -190,7 +190,7 @@ Feature: DAppConnector - Common
     And I verify there are no errors in console logs
     And I see Lace wallet info in DApp when connected
 
-  @LW-8403 @LW-8406
+  @LW-8403 @LW-8406 @Testnet
   Scenario: Automatically trigger collateral setup - happy path
     Given I am on Settings extended page
     And I see collateral as: "Inactive" in settings
@@ -210,7 +210,7 @@ Feature: DAppConnector - Common
     And I click "Set Collateral" button in test DApp
     Then I see DApp collateral window
 
-  @LW-8404
+  @LW-8404 @Testnet
   Scenario: Automatically trigger collateral setup - click cancel on Collateral modal
     Given I open and authorize test DApp with "Only once" setting
     And I click "Set Collateral" button in test DApp
@@ -220,7 +220,7 @@ Feature: DAppConnector - Common
     And I click "Set Collateral" button in test DApp
     And I see DApp collateral window
 
-  @LW-8405
+  @LW-8405 @Testnet
   Scenario: Automatically trigger collateral setup - Do not show automatic collateral window if it has been set manually
     Given I am on Settings extended page
     And I click on "Collateral" setting
@@ -230,7 +230,7 @@ Feature: DAppConnector - Common
     When I click "Set Collateral" button in test DApp
     Then I don't see DApp window
 
-  @LW-8410
+  @LW-8410 @Testnet
   Scenario: Automatically trigger collateral setup - network change
     Given I am on Settings extended page
     And I see collateral as: "Inactive" in settings
