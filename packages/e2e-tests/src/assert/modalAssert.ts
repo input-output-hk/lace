@@ -46,6 +46,18 @@ class ModalAssert {
       await this.assertSeeModalContainer(false);
     }
   }
+
+  async assertSeeOnboardingStartAgainModal(shouldBeDisplayed: boolean) {
+    if (shouldBeDisplayed) {
+      const title = await t('browserView.walletSetup.mnemonicResetModal.header');
+      const description = await t('browserView.walletSetup.mnemonicResetModal.content');
+      const cancelButtonLabel = await t('browserView.walletSetup.mnemonicResetModal.cancel');
+      const confirmButtonLabel = await t('browserView.walletSetup.mnemonicResetModal.confirm');
+      await this.assertSeeModal(title, description, cancelButtonLabel, confirmButtonLabel);
+    } else {
+      await this.assertSeeModalContainer(false);
+    }
+  }
 }
 
 export default new ModalAssert();

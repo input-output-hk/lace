@@ -6,50 +6,80 @@ export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./src/features/**/*.feature'],
   suites: {
-    batch1: [
-      './src/features/governance/CIP95StaticMethods.feature',
-      './src/features/MultiDelegationPageExtended*.feature',
-      './src/features/Onboarding*.feature',
-      './src/features/SendTransactionSimpleExtended*.feature',
-      './src/features/SendTransactionSimplePopup*.feature',
-      './src/features/SettingsPageExtended.feature'
-    ],
+    batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended.feature'],
     batch2: [
-      './src/features/AddNewWallet*.feature',
-      './src/features/analytics/Analytics*.feature',
-      './src/features/e2e/*.feature',
-      './src/features/TokensPage*.feature'
+      './src/features/SendTransactionSimpleExtended.part2.feature',
+      './src/features/SendTransactionSimpleExtended.part3.feature',
+      './src/features/governance/CIP95StaticMethods.feature'
     ],
     batch3: [
-      './src/features/AddressBookExtended.feature',
-      './src/features/AddressBookPopup.feature',
-      './src/features/Collateral*.feature',
-      './src/features/NFTsFolders*.feature',
-      './src/features/SendTransactionBundlesExtended.feature',
-      './src/features/Transactions*.feature'
+      './src/features/AddNewWallet*.feature',
+      './src/features/analytics/AnalyticsActivity*.feature',
+      './src/features/analytics/AnalyticsAddress*.feature',
+      './src/features/analytics/AnalyticsEventProperites*.feature',
+      './src/features/analytics/AnalyticsFiatOnRampOffRamp.feature',
+      './src/features/analytics/AnalyticsForgotPassword.feature',
+      './src/features/analytics/AnalyticsNavigation*.feature',
+      './src/features/analytics/AnalyticsNFTs*.feature',
+      './src/features/analytics/AnalyticsOnboardingEvents.feature',
+      './src/features/SendTransactionMetadata*.feature',
+      './src/features/SendTransactionMultipleSelection*.feature'
     ],
     batch4: [
-      './src/features/AdaHandle*.feature',
+      './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
+      './src/features/e2e/SendNft*.feature'
+    ],
+    batch5: ['./src/features/AddressBook*.feature'],
+    batch6: [
+      './src/features/Collateral*.feature',
+      './src/features/NavigationTop*.feature',
+      './src/features/AdaHandleSend*.feature',
+      './src/features/SendTransactionSimpleExtended.part1.feature'
+    ],
+    batch7: [
       './src/features/DAppConnector*.feature',
-      './src/features/EmptyStates*.feature',
       './src/features/FiatOnRampOffRampBanxa*.feature',
+      './src/features/MultidelegationDelegatedFundsMultiple*.feature',
+      './src/features/NFTsExtended.feature',
+      './src/features/NFTsPopup.feature'
+    ],
+    batch8: [
+      './src/features/EmptyStates*.feature',
       './src/features/ForgotPassword.feature',
       './src/features/FullExperiencePopup.feature',
       './src/features/HdWalletExtended.feature',
       './src/features/LockWallet*.feature',
-      './src/features/MultidelegationDelegatedFunds*.feature',
       './src/features/MultiDelegationPagePopup.feature',
-      './src/features/Navigation*.feature',
+      './src/features/NavigationMain*.feature',
       './src/features/NetworkSwitching*.feature',
-      './src/features/NFTsExtended.feature',
-      './src/features/NFTsPopup.feature',
       './src/features/OwnTags*.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature',
-      './src/features/SettingsPagePopup.feature',
       './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
-    ]
+    ],
+    batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
+    batch10: ['./src/features/MultiDelegationPageExtended*.feature'],
+    batch11: [
+      './src/features/analytics/AnalyticsSend*.feature',
+      './src/features/analytics/AnalyticsSetting*.feature',
+      './src/features/analytics/AnalyticsStaking*.feature',
+      './src/features/analytics/AnalyticsToggle*.feature',
+      './src/features/analytics/AnalyticsToken*.feature'
+    ],
+    batch12: [
+      './src/features/AdaHandleExtended.feature',
+      './src/features/AdaHandlePopup.feature',
+      './src/features/e2e/SendTransactionDappE2E.feature',
+      './src/features/e2e/SendTransactionBundlesE2E.feature'
+    ],
+    batch13: [
+      './src/features/e2e/SendTransactionSimple*.feature',
+      './src/features/e2e/StakingInitialFundsE2E.feature',
+      './src/features/e2e/StakingSwitchingPools*.feature',
+      './src/features/SettingsPagePopup.feature'
+    ],
+    batch14: ['./src/features/Transactions*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
+    batch15: ['./src/features/NFTsFolders*.feature'],
+    batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],

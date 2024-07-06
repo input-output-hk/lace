@@ -1,6 +1,7 @@
 import { useObservable } from '@lace/common';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from 'features/store';
+import isUndefined from 'lodash/isUndefined';
 import { useEffect } from 'react';
 
 export const useSyncDelegationPortfolioStore = () => {
@@ -13,16 +14,19 @@ export const useSyncDelegationPortfolioStore = () => {
 
   useEffect(() => {
     if (
-      [delegationDistribution, delegationRewardsHistory, currentEpoch, currentChain, delegationPortfolio].every(Boolean)
+      [delegationDistribution, delegationRewardsHistory, currentEpoch, currentChain, delegationPortfolio].some((val) =>
+        isUndefined(val)
+      )
     ) {
-      portfolioMutators.setCardanoCoinSymbol(currentChain);
-      portfolioMutators.setCurrentPortfolio({
-        currentEpoch,
-        delegationDistribution: [...delegationDistribution.values()],
-        delegationPortfolio,
-        delegationRewardsHistory,
-      });
+      return;
     }
+    portfolioMutators.setCardanoCoinSymbol(currentChain);
+    portfolioMutators.setCurrentPortfolio({
+      currentEpoch,
+      delegationDistribution: [...delegationDistribution.values()],
+      delegationPortfolio,
+      delegationRewardsHistory,
+    });
   }, [
     currentChain,
     currentEpoch,
