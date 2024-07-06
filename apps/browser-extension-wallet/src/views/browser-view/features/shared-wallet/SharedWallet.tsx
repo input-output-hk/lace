@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
-import { AddSharedWalletModal, SharedWalletCreationFlow, AddSharedWalletMainPageFlow } from '@lace/core';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
+import {
+  AddSharedWalletModal,
+  SharedWalletCreationFlow,
+  SharedWalletRestorationFlow,
+  AddSharedWalletMainPageFlow
+} from '@lace/core';
 
 export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
@@ -40,7 +45,17 @@ export const SharedWallet = (): JSX.Element => {
               activeWalletName={walletInfo?.name || ''}
               initialWalletName={initialWalletName}
               navigateToAppHome={() => setBackgroundPage()}
-              navigateToParentFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
+              navigateToStart={() => history.push(walletRoutePaths.sharedWallet.root)}
+            />
+          )}
+        />
+        <Route
+          exact
+          path={walletRoutePaths.sharedWallet.import}
+          render={() => (
+            <SharedWalletRestorationFlow
+              navigateToAppHome={() => setBackgroundPage()}
+              navigateToStart={() => history.push(walletRoutePaths.sharedWallet.root)}
             />
           )}
         />
@@ -51,7 +66,7 @@ export const SharedWallet = (): JSX.Element => {
             <AddSharedWalletMainPageFlow
               onCreateSharedWalletClick={() => history.push(walletRoutePaths.sharedWallet.create)}
               sharedKeys={sharedKeys}
-              onImportSharedWalletClick={() => void 0}
+              onImportSharedWalletClick={() => history.push(walletRoutePaths.sharedWallet.import)}
               onKeysGenerateClick={() => void 0}
             />
           )}
