@@ -42,7 +42,7 @@ Feature: Address book - popup view
     Then I see address detail page in popup mode with details of "Shelley" address
 
   @LW-4566
-  Scenario Outline: Popup-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
+  Scenario Outline: Popup-view - Address Book - Edit wallet name/address and display error message for name: <wallet_name> and address: <address>
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
@@ -125,7 +125,7 @@ Feature: Address book - popup view
       | ęóąśłżźćń_ASDFÓŚ     | Shelley        |
 
   @LW-4480
-  Scenario Outline: Popup-view - Address Book - Add new address and display error message  - Name: <name_error> - Address: <address_error>
+  Scenario Outline: Popup-view - Address Book - Add new address and display error message for name: <wallet_name> and address: <address>
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
     And I fill address form with "<wallet_name>" name and "<address>" address

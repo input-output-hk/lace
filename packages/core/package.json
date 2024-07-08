@@ -44,7 +44,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@cardano-sdk/web-extension": "0.29.3",
-    "@input-output-hk/lace-ui-toolkit": "1.4.1",
+    "@input-output-hk/lace-ui-toolkit": "1.6.0",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/translation": "0.1.0",

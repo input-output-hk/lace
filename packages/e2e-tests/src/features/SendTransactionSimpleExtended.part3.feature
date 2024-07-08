@@ -42,7 +42,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And "Review transaction" button is disabled on "Send" page
 
   @LW-5184 @Testnet
-  Scenario Outline: Extended View - Send flow - Values switched from <value> to <displayed_value> when building a transaction
+  Scenario Outline: Extended View - Send flow - Values switched from <value_to_enter> to <displayed_value> when building a transaction
     And I click "Send" button on page header
     And click on the coin selector for "tADA" asset in bundle 1
     And click on an token with name: "tHOSKY"

@@ -46,7 +46,7 @@ Feature: Address book - extended view
       | ęóąśłżźćń_ASDFÓŚ     | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       |
 
   @LW-4465
-  Scenario Outline: Extended-view - Address Book - Add new address and display error message - Name: <name_error> - Address: <address_error>
+  Scenario Outline: Extended-view - Address Book - Add new address and display error message for name: <wallet_name> and address: <address>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
     And I see "Add new address" drawer in extended mode
@@ -143,7 +143,7 @@ Feature: Address book - extended view
     Then I see address detail page in extended mode with details of "Shelley" address
 
   @LW-4565
-  Scenario Outline: Extended-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
+  Scenario Outline: Extended-view - Address Book - Edit wallet name/address and display error message for name: <wallet_name> and address: <address>
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page

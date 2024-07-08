@@ -26,7 +26,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Popup View
     Then I see Lace extension main page in extended mode
 
   @LW-2652
-  Scenario: Popup View - Staking  - Currently staking components
+  Scenario: Popup View - Staking  - Currently staking components - <position>
     When I navigate to Staking popup page
     Then I see currently staking component for stake pool:
       | position | poolName                        | poolTickerOrId | hasMetadata |

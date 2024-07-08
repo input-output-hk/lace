@@ -7,7 +7,7 @@ Feature: LW: Network Switching - extended view
     And I disable showing Multidelegation persistence banner
 
   @LW-3226
-  Scenario Outline: Extended View - Currency symbol is correct when on different network
+  Scenario Outline: Extended View - Currency symbol is correct when on different network - <network> <ticker>
     Given I switch network to: "<network>" in extended mode
     And Wallet is synced
     When I navigate to Tokens extended page

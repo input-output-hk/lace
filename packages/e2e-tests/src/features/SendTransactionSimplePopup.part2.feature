@@ -79,7 +79,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
 
   @LW-3553 @Testnet
-  Scenario Outline: Popup View - Removing assets from Tx
+  Scenario Outline: Popup View - Removing assets from Tx - <assetName>
     And I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I click "Add token or NFT" button for bundle 1
@@ -92,7 +92,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
       | tADA      |
 
   @LW-3553 @Mainnet
-  Scenario Outline: Popup View - Removing assets from Tx
+  Scenario Outline: Popup View - Removing assets from Tx - <assetName>
     And I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I click "Add token or NFT" button for bundle 1

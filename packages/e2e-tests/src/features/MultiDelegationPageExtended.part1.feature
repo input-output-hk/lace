@@ -196,7 +196,7 @@ Feature: Staking Page - Extended View
     Then stake pool grid card skeleton is not displayed
 
   @LW-9995 @Testnet @Mainnet
-  Scenario Outline: Extended View - Browse pools - preserve selected pools and view type
+  Scenario Outline: Extended View - Browse pools - preserve selected pools and view type - <view> - <action>
     When I am on Staking extended page
     And I open Browse pools tab
     And I switch to <view> view on "Browse pools" tab
