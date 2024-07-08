@@ -418,6 +418,44 @@ export const CollectiblesDark: Story = {
   },
 };
 
+export const CollectiblesEmptyListLight: Story = {
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    await step('NFTs tab', async () => {
+      const menu = await canvas.findByTestId('collectibles');
+      await userEvent.click(menu.children[0]);
+    });
+  },
+  beforeEach: () => {
+    getAccounts.mockImplementation(async () => {
+      return await Promise.resolve([
+        {
+          ...account,
+          preprod: {
+            ...account.preprod,
+            assets: [],
+          },
+          assets: [],
+        },
+      ]);
+    });
+
+    return () => {
+      getAccounts.mockReset();
+    };
+  },
+  parameters: {
+    colorMode: 'light',
+  },
+};
+
+export const CollectiblesEmptyListDark: Story = {
+  ...CollectiblesEmptyListLight,
+  parameters: {
+    colorMode: 'dark',
+  },
+};
+
 export const CollectibleMetadataLight: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);

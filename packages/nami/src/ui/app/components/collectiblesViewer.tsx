@@ -49,7 +49,7 @@ const CollectiblesViewer = ({ assets, onUpdateAvatar }) => {
     await new Promise((res, rej) => setTimeout(() => res(), 10));
     const assetsArray = [];
     let i = 0;
-    const filter = (asset) =>
+    const filter = asset =>
       search
         ? asset.name.toLowerCase().includes(search.toLowerCase()) ||
           asset.policy.includes(search) ||
@@ -122,8 +122,8 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
   const background = useColorModeValue('white', 'gray.800');
   const dividerColor = useColorModeValue('gray.200', 'gray.700');
   const [value, setValue] = [
-    useStoreState((state) => state.globalModel.sendStore.value),
-    useStoreActions((actions) => actions.globalModel.sendStore.setValue),
+    useStoreState(state => state.globalModel.sendStore.value),
+    useStoreActions(actions => actions.globalModel.sendStore.setValue),
   ];
   const history = useHistory();
   const navigate = history.navigate;
@@ -206,7 +206,7 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
                 right="16px"
                 top="22px"
                 size="xs"
-                onClick={async (e) => {
+                onClick={async e => {
                   await setAccountAvatar(asset.image);
                   onUpdateAvatar();
                 }}
@@ -220,7 +220,7 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
                 top="-10px"
                 size="xs"
                 rightIcon={<BsArrowUpRight />}
-                onClick={(e) => {
+                onClick={e => {
                   setValue({ ...value, assets: [asset] });
                   navigate('/send');
                 }}
@@ -237,7 +237,7 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
                 Policy
               </Box>
 
-              <Box width="340px" onClick={(e) => e.stopPropagation()}>
+              <Box width="340px" onClick={e => e.stopPropagation()}>
                 <Copy label="Copied policy" copy={asset.policy}>
                   {asset.policy}{' '}
                 </Copy>
@@ -249,7 +249,7 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
                 Asset
               </Box>
 
-              <Box width="340px" onClick={(e) => e.stopPropagation()}>
+              <Box width="340px" onClick={e => e.stopPropagation()}>
                 <Copy label="Copied asset" copy={asset.fingerprint}>
                   {asset.fingerprint}
                 </Copy>
@@ -274,7 +274,11 @@ const AssetsGrid = React.forwardRef(({ assets }, ref) => {
         {assets.map((asset, index) => (
           <Box key={index}>
             <LazyLoadComponent>
-              <Collectible ref={ref} asset={asset} testId={`collectible-${index}`} />
+              <Collectible
+                ref={ref}
+                asset={asset}
+                testId={`collectible-${index}`}
+              />
             </LazyLoadComponent>
           </Box>
         ))}
@@ -326,10 +330,10 @@ const Search = ({ setSearch, assets }) => {
               rounded="md"
               placeholder="Search policy, asset, name"
               fontSize="xs"
-              onInput={(e) => {
+              onInput={e => {
                 setInput(e.target.value);
               }}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter' && input) setSearch(input);
               }}
             />

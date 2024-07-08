@@ -136,9 +136,9 @@ class TransactionsPageAssert {
 
     await browser.waitUntil(
       async () =>
-        (await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()).includes(
-          expectedTransactionRowAssetDetails.tokensAmount
-        ),
+        (
+          await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()
+        ).includes(expectedTransactionRowAssetDetails.tokensAmount),
       {
         timeout: 8000,
         interval: 1000,
