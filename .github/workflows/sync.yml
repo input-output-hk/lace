@@ -73,7 +73,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [ -z "$(gh pr list --head conflict-branch --state open)" ] ; then
+          num_existing=$(curl -fsSL -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls?state=open&head=input-output-hk:conflict-branch" \
+              | jq length)
+          if [ "$num_existing" = 0 ] ; then
             # For some reason `gh pr create` fails with `GraphQL: Resource not accessible by integration (createPullRequest)`, so:
             curl -fsSL -X POST -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
