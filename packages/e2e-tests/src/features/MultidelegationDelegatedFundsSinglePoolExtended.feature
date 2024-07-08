@@ -5,7 +5,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     Given Lace is ready for test
 
   @LW-8436 @LW-8439 @LW-8440 @LW-8598
-  Scenario Outline: Extended View - Staking - Close drawer
+  Scenario Outline: Extended View - Staking - Close drawer - <delegationStep> page - <action>
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
@@ -91,7 +91,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see selected pools counter is showing "2"
 
   @LW-9490
-  Scenario Outline: Extended View - Staking - Manage staking add button disabled when selected max pools for staking
+  Scenario: Extended View - Staking - Manage staking add button disabled when selected max pools for staking
     When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
@@ -100,15 +100,12 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see "Add stake pool" button is enabled
     When I click "Add stake pool" button
     And I switch to list view on "Browse pools" tab
-    And I pick "<pools_after>" pools for delegation from browse pools view: "<pool_tickers>"
+    And I pick "10" pools for delegation from browse pools view: "8BETA, SMAUG, WOOF, TEKO, ADV, MOC2, SQRL, SEA, ALFA"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I see Manage delegation drawer
-    And I see selected pools counter is showing "<pools_after>"
+    And I see selected pools counter is showing "10"
     And I see "Add stake pool" button is disabled
-    Examples:
-      | pools_after | pool_tickers                                         |
-      | 10          | 8BETA, SMAUG, WOOF, TEKO, ADV, MOC2, SQRL, SEA, ALFA |
 
   @LW-9493
   Scenario: Extended View - Staking - Manage staking remove button enabled when staking to 1 pool

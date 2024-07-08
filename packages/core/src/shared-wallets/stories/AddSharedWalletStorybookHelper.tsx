@@ -51,7 +51,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
                 activeWalletName={activeWalletName}
                 initialWalletName="Wallet 2"
                 navigateToAppHome={() => setOpen(false)}
-                navigateToParentFlow={() => setFlow(AddSharedWalletFlowType.GetStarted)}
+                navigateToStart={() => setFlow(AddSharedWalletFlowType.GetStarted)}
               />
             </SharedWalletCreationFlowInitialStateProvider>
           )}

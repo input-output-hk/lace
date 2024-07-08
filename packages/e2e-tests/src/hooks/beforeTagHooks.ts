@@ -48,7 +48,7 @@ Before(
 
 Before(
   {
-    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended or @AddNewWalletCreate'
+    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended'
   },
   async () => {
     await extendedViewWalletInitialization();
@@ -128,10 +128,11 @@ Before(
   async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral2)
 );
 
-Before(
-  { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
-  async () => await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
-);
+Before({ tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' }, async () => {
+  await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+});
 
 Before(
   { tags: '@Staking-SwitchingPools-Popup-E2E' },
@@ -264,3 +265,10 @@ Before(
     await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
+
+Before({ tags: '@AddNewWalletCreate' }, async () => {
+  await extendedViewWalletInitialization();
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});

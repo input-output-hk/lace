@@ -111,6 +111,25 @@ export class OnboardingMainPage extends CommonOnboardingElements {
     }
   }
 
+  async clickOnOnboardingTypeButton(button: 'Create' | 'Connect' | 'Restore'): Promise<void> {
+    switch (button) {
+      case 'Create':
+        await this.createWalletButton.waitForClickable();
+        await this.createWalletButton.click();
+        break;
+      case 'Connect':
+        await this.hardwareWalletButton.waitForClickable();
+        await this.hardwareWalletButton.click();
+        break;
+      case 'Restore':
+        await this.restoreWalletButton.waitForClickable();
+        await this.restoreWalletButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+
   async restoreWallet(): Promise<void> {
     await this.restoreWalletButton.click();
     await recoveryPhrasePage.enterMnemonicWords(getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []);

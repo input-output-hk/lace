@@ -5,7 +5,7 @@ Feature: Send - Multiple selection for Popup View
     Given Wallet is synced
 
   @LW-5044
-  Scenario Outline: Popup view - Send - Multiple tokens selection - happy path
+  Scenario Outline: Popup view - Send - Multiple tokens selection - <assetsType> - happy path
     And I click "Send" button on Tokens page in popup mode
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 10 to the "tADA" asset in bundle 1
@@ -27,7 +27,7 @@ Feature: Send - Multiple selection for Popup View
       | NFTs       |
 
   @LW-5045
-  Scenario Outline: Extended view - Send - Multiple tokens selection - clear and cancel
+  Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - clear and cancel
     And I click "Send" button on Tokens page in popup mode
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 10 to the "tADA" asset in bundle 1
@@ -53,7 +53,7 @@ Feature: Send - Multiple selection for Popup View
       | NFTs       |
 
   @LW-5268
-  Scenario Outline: Extended view - Send - Multiple tokens selection - Maximum amount to select is 30
+  Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - Maximum amount to select is 30
     And I click "Send" button on Tokens page in popup mode
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 10 to the "tADA" asset in bundle 1

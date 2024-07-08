@@ -1,6 +1,7 @@
 import CommonOnboardingElements from '../../elements/onboarding/commonOnboardingElements';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
+import type { TimelineStep } from '../../types/onboarding';
 
 class OnboardingCommonAssert {
   private commonOnboardingElements: CommonOnboardingElements;
@@ -54,6 +55,25 @@ class OnboardingCommonAssert {
     expect(await this.commonOnboardingElements.helpAndSupportButton.getText()).to.equal(
       await t('general.lock.helpAndSupport')
     );
+  }
+
+  async assertSeeActiveStepOnProgressTimeline(step: TimelineStep): Promise<void> {
+    await this.commonOnboardingElements.activeStepIndicator.waitForDisplayed();
+    let expectedStepTitle;
+    switch (step) {
+      case 'Recovery phrase':
+        expectedStepTitle = await t('core.walletSetupStep.recoveryPhrase');
+        break;
+      case 'Wallet setup':
+        expectedStepTitle = await t('core.walletSetupStep.walletSetup');
+        break;
+      case 'Enter wallet':
+        expectedStepTitle = await t('core.walletSetupStep.enterWallet');
+        break;
+      default:
+        throw new Error(`Unsupported step: ${step}`);
+    }
+    expect(await this.commonOnboardingElements.activeStepIndicator.getText()).to.equal(expectedStepTitle);
   }
 }
 
