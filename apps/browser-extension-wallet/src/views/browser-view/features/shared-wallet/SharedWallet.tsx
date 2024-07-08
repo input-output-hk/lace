@@ -73,7 +73,7 @@ export const SharedWallet = (): JSX.Element => {
                 activeWalletName={walletInfo?.name || ''}
                 initialWalletName={initialWalletName}
                 navigateToAppHome={() => setBackgroundPage()}
-                navigateToStart={() => history.push(walletRoutePaths.sharedWallet.root)}
+                exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
               />
             )}
           />
@@ -85,7 +85,7 @@ export const SharedWallet = (): JSX.Element => {
             render={() => (
               <SharedWalletRestorationFlow
                 navigateToAppHome={() => setBackgroundPage()}
-                navigateToStart={() => history.push(walletRoutePaths.sharedWallet.root)}
+                exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
               />
             )}
           />
