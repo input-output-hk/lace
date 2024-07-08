@@ -10157,9 +10157,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.4.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.4.1%2Fd4b41feaa8a0b7f046e12a124a8405f0e31547a5"
+"@input-output-hk/lace-ui-toolkit@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.6.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.6.0%2F4358e84fb8dc077e6801717f5b59ee1c7affc7da"
   dependencies:
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
@@ -10191,7 +10191,7 @@ __metadata:
   peerDependencies:
     react: ">=17.0.2"
     react-dom: ">=17.0.2"
-  checksum: 120ca8475b7ea1774e3da96c006ecbe4a6bc399535807b21a3d4c5e405c891ce5933ccb374e1083bf20783f5227fed97b1b2101d1b79a91ef4af93626a5cba13
+  checksum: 6512e25f6e3483325f62870b1a064462bcaca1559b99a11bff53265d8e83141253d1aa9312c77fbd48a9aa2af120562f97cec356323dd6220a83891452a00d55
   languageName: node
   linkType: hard
 
@@ -11055,7 +11055,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.29.3
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@input-output-hk/lace-ui-toolkit": 1.4.1
+    "@input-output-hk/lace-ui-toolkit": 1.6.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
@@ -11183,7 +11183,7 @@ __metadata:
     "@babel/preset-env": ^7.22.20
     "@babel/preset-react": ^7.22.15
     "@babel/preset-typescript": ^7.22.15
-    "@input-output-hk/lace-ui-toolkit": 1.4.1
+    "@input-output-hk/lace-ui-toolkit": 1.6.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0
@@ -11282,7 +11282,7 @@ __metadata:
     "@cardano-sdk/util": 0.15.2
     "@cardano-sdk/wallet": 0.38.3
     "@cardano-sdk/web-extension": 0.29.3
-    "@input-output-hk/lace-ui-toolkit": 1.4.1
+    "@input-output-hk/lace-ui-toolkit": 1.6.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
@@ -38739,7 +38739,7 @@ __metadata:
     "@babel/runtime": 7.15.3
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    "@input-output-hk/lace-ui-toolkit": 1.4.1
+    "@input-output-hk/lace-ui-toolkit": 1.6.0
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-json": ^6.0.0
