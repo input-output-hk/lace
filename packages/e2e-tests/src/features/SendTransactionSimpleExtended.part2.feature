@@ -67,7 +67,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then Drawer is not displayed
 
   @LW-3552 @Testnet
-  Scenario Outline: Extended View - Removing assets from Tx
+  Scenario Outline: Extended View - Removing assets from Tx - <assetName>
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I click "Add token or NFT" button for bundle 1
@@ -80,7 +80,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
       | tADA      |
 
   @LW-3552 @Mainnet
-  Scenario Outline: Extended View - Removing assets from Tx
+  Scenario Outline: Extended View - Removing assets from Tx - <assetName>
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I click "Add token or NFT" button for bundle 1

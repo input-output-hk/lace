@@ -4,6 +4,7 @@ import { ChainablePromiseElement } from 'webdriverio';
 export class StakePoolGridCard {
   private SELECTED_POOLS_LIST = '[data-testid="selected-pools-list"]';
   private AVAILABLE_POOLS_LIST = '[data-testid="stake-pool-list-scroll-wrapper"]';
+  private CARD = '[data-testid="stake-pool-card"]';
   private CARD_TITLE = '[data-testid="stake-pool-card-title"]';
   private SATURATION_VALUE = '[data-testid="saturation-value"]';
   private METRIC_VALUE = '[data-testid="stake-pool-metric-value"]';
@@ -11,9 +12,9 @@ export class StakePoolGridCard {
   protected card: ChainablePromiseElement<WebdriverIO.Element | undefined>;
 
   constructor(index = 0, isOnSelectedPoolsList = false) {
-    this.card = $(isOnSelectedPoolsList ? this.SELECTED_POOLS_LIST : this.AVAILABLE_POOLS_LIST).$(
-      `[data-index="${index}"]`
-    );
+    this.card = isOnSelectedPoolsList
+      ? $$(`${this.SELECTED_POOLS_LIST} ${this.CARD}`)[index]
+      : $(`${this.AVAILABLE_POOLS_LIST} [data-index="${index}"]`);
   }
 
   get container(): ChainablePromiseElement<WebdriverIO.Element | undefined> {

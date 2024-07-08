@@ -47,7 +47,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
       | Single NFT Preprod |
 
   @LW-5183 @Testnet
-  Scenario Outline: Popup View - Send flow - Values switched from <value> to <displayed_value> when building a transaction
+  Scenario Outline: Popup View - Send flow - Values switched from <value_to_enter> to <displayed_value> when building a transaction
     And I click "Send" button on Tokens page in popup mode
     When I enter a value of: <value_to_enter> to the "tADA" asset in bundle 1 without clearing input
     Then I see <displayed_value> as displayed value
