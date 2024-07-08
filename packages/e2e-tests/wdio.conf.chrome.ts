@@ -6,7 +6,7 @@ import { config as baseConfig } from './wdio.conf.base';
 const chromeConfig = {
   capabilities: [
     {
-      maxInstances: 1,
+      maxInstances: 2,
       browserName: 'chrome',
       browserVersion: 'stable',
       ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
@@ -24,8 +24,7 @@ const chromeConfig = {
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
           '--disable-dev-shm-usage',
-          '--remote-allow-origins=*',
-          '--headless=new'
+          '--remote-allow-origins=*'
         ]
       },
       'wdio:devtoolsOptions': {
