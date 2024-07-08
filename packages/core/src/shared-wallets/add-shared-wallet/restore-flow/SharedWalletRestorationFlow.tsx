@@ -16,7 +16,7 @@ const UPLOAD_JSON_ID = 'upload-json';
 
 export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({ exitTheFlow, navigateToAppHome }) => {
   const [file, setFile] = useState<File | undefined>();
-  const [isFileValid, setFileValid] = useState(false);
+  const [isFileValid, setIsFileValid] = useState(false);
   const [error, setError] = useState<FileValidationError | undefined>();
 
   const { t } = useTranslation();
@@ -58,7 +58,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
     const validate = async (importedFile: File) => {
       try {
         const result = await validateJson(importedFile);
-        setFileValid(result.isFileValid);
+        setIsFileValid(result.isFileValid);
       } catch (error_: unknown) {
         setError(error_ as FileValidationError);
       }
