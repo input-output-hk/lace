@@ -65,6 +65,10 @@ const config: StorybookConfig = {
           /loader$/,
           join(__dirname, '../src/api/loader.mock.ts'),
         ),
+        new NormalModuleReplacementPlugin(
+          /signTxUtil$/,
+          join(__dirname, '../src/ui/app/pages/dapp-connector/signTxUtil.mock.ts'),
+        ),
       );
     }
 

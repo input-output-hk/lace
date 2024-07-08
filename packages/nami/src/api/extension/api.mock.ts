@@ -95,3 +95,7 @@ export const getWhitelisted = fn(actualApi.getWhitelisted).mockName(
 export const getFavoriteIcon = fn(actualApi.getFavoriteIcon).mockName(
   'getFavoriteIcon',
 );
+
+export const extractKeyOrScriptHash = fn(
+  actualApi.extractKeyOrScriptHash,
+).mockName('extractKeyOrScriptHash');

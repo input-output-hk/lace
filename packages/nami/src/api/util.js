@@ -884,432 +884,432 @@ export const minAdaRequired = async (output, coinsPerUtxoWord) => {
 //   return ledgerOutputs;
 // };
 
-// /**
-//  *
-//  * @param {Transaction} tx
-//  */
-// export const txToLedger = async (tx, network, keys, address, index) => {
-//   await Loader.load();
+/**
+ *
+ * @param {Transaction} tx
+ */
+export const txToLedger = async (tx, network, keys, address, index) => {
+  await Loader.load();
 
-//   let signingMode = TransactionSigningMode.ORDINARY_TRANSACTION;
-//   const inputs = tx.body().inputs();
-//   const ledgerInputs = [];
-//   for (let i = 0; i < inputs.len(); i++) {
-//     const input = inputs.get(i);
-//     ledgerInputs.push({
-//       txHashHex: Buffer.from(input.transaction_id().to_bytes()).toString('hex'),
-//       outputIndex: parseInt(input.index().to_str()),
-//       path: keys.payment.path, // needed to include payment key witness if available
-//     });
-//   }
+  let signingMode = TransactionSigningMode.ORDINARY_TRANSACTION;
+  const inputs = tx.body().inputs();
+  const ledgerInputs = [];
+  for (let i = 0; i < inputs.len(); i++) {
+    const input = inputs.get(i);
+    ledgerInputs.push({
+      txHashHex: Buffer.from(input.transaction_id().to_bytes()).toString('hex'),
+      outputIndex: parseInt(input.index().to_str()),
+      path: keys.payment.path, // needed to include payment key witness if available
+    });
+  }
 
-//   const ledgerOutputs = outputsToLedger(tx.body().outputs(), address, index);
+  const ledgerOutputs = outputsToLedger(tx.body().outputs(), address, index);
 
-//   let ledgerCertificates = null;
-//   const certificates = tx.body().certs();
-//   if (certificates) {
-//     ledgerCertificates = [];
-//     for (let i = 0; i < certificates.len(); i++) {
-//       const cert = certificates.get(i);
-//       const certificate = {};
-//       if (cert.kind() === 0) {
-//         const credential = cert.as_stake_registration().stake_credential();
-//         certificate.type = CertificateType.STAKE_REGISTRATION;
-//         if (credential.kind() === 0) {
-//           certificate.params = {
-//             stakeCredential: {
-//               type: StakeCredentialParamsType.KEY_PATH,
-//               keyPath: keys.stake.path,
-//             },
-//           };
-//         } else {
-//           const scriptHash = Buffer.from(
-//             credential.to_scripthash().to_bytes()
-//           ).toString('hex');
-//           certificate.params = {
-//             stakeCredential: {
-//               type: StakeCredentialParamsType.SCRIPT_HASH,
-//               scriptHash,
-//             },
-//           };
-//         }
-//       } else if (cert.kind() === 1) {
-//         const credential = cert.as_stake_deregistration().stake_credential();
-//         certificate.type = CertificateType.STAKE_DEREGISTRATION;
-//         if (credential.kind() === 0) {
-//           certificate.params = {
-//             stakeCredential: {
-//               type: StakeCredentialParamsType.KEY_PATH,
-//               keyPath: keys.stake.path,
-//             },
-//           };
-//         } else {
-//           const scriptHash = Buffer.from(
-//             credential.to_scripthash().to_bytes()
-//           ).toString('hex');
-//           certificate.params = {
-//             stakeCredential: {
-//               type: StakeCredentialParamsType.SCRIPT_HASH,
-//               scriptHash,
-//             },
-//           };
-//         }
-//       } else if (cert.kind() === 2) {
-//         const delegation = cert.as_stake_delegation();
-//         const credential = delegation.stake_credential();
-//         const poolKeyHashHex = Buffer.from(
-//           delegation.pool_keyhash().to_bytes()
-//         ).toString('hex');
-//         certificate.type = CertificateType.STAKE_DELEGATION;
-//         if (credential.kind() === 0) {
-//           certificate.params = {
-//             stakeCredential: {
-//               type: StakeCredentialParamsType.KEY_PATH,
-//               keyPath: keys.stake.path,
-//             },
-//           };
-//         } else {
-//           const scriptHash = Buffer.from(
-//             credential.to_scripthash().to_bytes()
-//           ).toString('hex');
-//           certificate.params = {
-//             stakeCredential: {
-//               type: StakeCredentialParamsType.SCRIPT_HASH,
-//               scriptHash,
-//             },
-//           };
-//         }
-//         certificate.params.poolKeyHashHex = poolKeyHashHex;
-//       } else if (cert.kind() === 3) {
-//         const params = cert.as_pool_registration().pool_params();
-//         certificate.type = CertificateType.STAKE_POOL_REGISTRATION;
-//         const owners = params.pool_owners();
-//         const poolOwners = [];
-//         for (let i = 0; i < owners.len(); i++) {
-//           const keyHash = Buffer.from(owners.get(i).to_bytes()).toString('hex');
-//           if (keyHash == keys.stake.hash) {
-//             signingMode = TransactionSigningMode.POOL_REGISTRATION_AS_OWNER;
-//             poolOwners.push({
-//               type: PoolOwnerType.DEVICE_OWNED,
-//               stakingPath: keys.stake.path,
-//             });
-//           } else {
-//             poolOwners.push({
-//               type: PoolOwnerType.THIRD_PARTY,
-//               stakingKeyHashHex: keyHash,
-//             });
-//           }
-//         }
-//         const relays = params.relays();
-//         const ledgerRelays = [];
-//         for (let i = 0; i < relays.len(); i++) {
-//           const relay = relays.get(i);
-//           if (relay.kind() === 0) {
-//             const singleHostAddr = relay.as_single_host_addr();
-//             const type = RelayType.SINGLE_HOST_IP_ADDR;
-//             const portNumber = singleHostAddr.port();
-//             const ipv4 = singleHostAddr.ipv4()
-//               ? bytesToIp(singleHostAddr.ipv4().ip())
-//               : null;
-//             const ipv6 = singleHostAddr.ipv6()
-//               ? bytesToIp(singleHostAddr.ipv6().ip())
-//               : null;
-//             ledgerRelays.push({ type, params: { portNumber, ipv4, ipv6 } });
-//           } else if (relay.kind() === 1) {
-//             const type = RelayType.SINGLE_HOST_HOSTNAME;
-//             const singleHostName = relay.as_single_host_name();
-//             const portNumber = singleHostName.port();
-//             const dnsName = singleHostName.dns_name().record();
-//             ledgerRelays.push({
-//               type,
-//               params: { portNumber, dnsName },
-//             });
-//           } else if (relay.kind() === 2) {
-//             const type = RelayType.MULTI_HOST;
-//             const multiHostName = relay.as_multi_host_name();
-//             const dnsName = multiHostName.dns_name();
-//             ledgerRelays.push({
-//               type,
-//               params: { dnsName },
-//             });
-//           }
-//         }
-//         const cost = params.cost().to_str();
-//         const margin = params.margin();
-//         const pledge = params.pledge().to_str();
-//         const operator = Buffer.from(params.operator().to_bytes()).toString(
-//           'hex'
-//         );
-//         let poolKey;
-//         if (operator == keys.stake.hash) {
-//           signingMode = TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR;
-//           poolKey = {
-//             type: PoolKeyType.DEVICE_OWNED,
-//             params: { path: keys.stake.path },
-//           };
-//         } else {
-//           poolKey = {
-//             type: PoolKeyType.THIRD_PARTY,
-//             params: { keyHashHex: operator },
-//           };
-//         }
-//         const metadata = params.pool_metadata()
-//           ? {
-//               metadataUrl: params.pool_metadata().url().url(),
-//               metadataHashHex: Buffer.from(
-//                 params.pool_metadata().pool_metadata_hash().to_bytes()
-//               ).toString('hex'),
-//             }
-//           : null;
-//         const rewardAccountHex = Buffer.from(
-//           params.reward_account().to_address().to_bytes()
-//         ).toString('hex');
-//         let rewardAccount;
-//         if (rewardAccountHex == address) {
-//           rewardAccount = {
-//             type: PoolRewardAccountType.DEVICE_OWNED,
-//             params: { path: keys.stake.path },
-//           };
-//         } else {
-//           rewardAccount = {
-//             type: PoolRewardAccountType.THIRD_PARTY,
-//             params: { rewardAccountHex },
-//           };
-//         }
-//         const vrfKeyHashHex = Buffer.from(
-//           params.vrf_keyhash().to_bytes()
-//         ).toString('hex');
+  let ledgerCertificates = null;
+  const certificates = tx.body().certs();
+  if (certificates) {
+    ledgerCertificates = [];
+    for (let i = 0; i < certificates.len(); i++) {
+      const cert = certificates.get(i);
+      const certificate = {};
+      if (cert.kind() === 0) {
+        const credential = cert.as_stake_registration().stake_credential();
+        certificate.type = CertificateType.STAKE_REGISTRATION;
+        if (credential.kind() === 0) {
+          certificate.params = {
+            stakeCredential: {
+              type: StakeCredentialParamsType.KEY_PATH,
+              keyPath: keys.stake.path,
+            },
+          };
+        } else {
+          const scriptHash = Buffer.from(
+            credential.to_scripthash().to_bytes()
+          ).toString('hex');
+          certificate.params = {
+            stakeCredential: {
+              type: StakeCredentialParamsType.SCRIPT_HASH,
+              scriptHash,
+            },
+          };
+        }
+      } else if (cert.kind() === 1) {
+        const credential = cert.as_stake_deregistration().stake_credential();
+        certificate.type = CertificateType.STAKE_DEREGISTRATION;
+        if (credential.kind() === 0) {
+          certificate.params = {
+            stakeCredential: {
+              type: StakeCredentialParamsType.KEY_PATH,
+              keyPath: keys.stake.path,
+            },
+          };
+        } else {
+          const scriptHash = Buffer.from(
+            credential.to_scripthash().to_bytes()
+          ).toString('hex');
+          certificate.params = {
+            stakeCredential: {
+              type: StakeCredentialParamsType.SCRIPT_HASH,
+              scriptHash,
+            },
+          };
+        }
+      } else if (cert.kind() === 2) {
+        const delegation = cert.as_stake_delegation();
+        const credential = delegation.stake_credential();
+        const poolKeyHashHex = Buffer.from(
+          delegation.pool_keyhash().to_bytes()
+        ).toString('hex');
+        certificate.type = CertificateType.STAKE_DELEGATION;
+        if (credential.kind() === 0) {
+          certificate.params = {
+            stakeCredential: {
+              type: StakeCredentialParamsType.KEY_PATH,
+              keyPath: keys.stake.path,
+            },
+          };
+        } else {
+          const scriptHash = Buffer.from(
+            credential.to_scripthash().to_bytes()
+          ).toString('hex');
+          certificate.params = {
+            stakeCredential: {
+              type: StakeCredentialParamsType.SCRIPT_HASH,
+              scriptHash,
+            },
+          };
+        }
+        certificate.params.poolKeyHashHex = poolKeyHashHex;
+      } else if (cert.kind() === 3) {
+        const params = cert.as_pool_registration().pool_params();
+        certificate.type = CertificateType.STAKE_POOL_REGISTRATION;
+        const owners = params.pool_owners();
+        const poolOwners = [];
+        for (let i = 0; i < owners.len(); i++) {
+          const keyHash = Buffer.from(owners.get(i).to_bytes()).toString('hex');
+          if (keyHash == keys.stake.hash) {
+            signingMode = TransactionSigningMode.POOL_REGISTRATION_AS_OWNER;
+            poolOwners.push({
+              type: PoolOwnerType.DEVICE_OWNED,
+              stakingPath: keys.stake.path,
+            });
+          } else {
+            poolOwners.push({
+              type: PoolOwnerType.THIRD_PARTY,
+              stakingKeyHashHex: keyHash,
+            });
+          }
+        }
+        const relays = params.relays();
+        const ledgerRelays = [];
+        for (let i = 0; i < relays.len(); i++) {
+          const relay = relays.get(i);
+          if (relay.kind() === 0) {
+            const singleHostAddr = relay.as_single_host_addr();
+            const type = RelayType.SINGLE_HOST_IP_ADDR;
+            const portNumber = singleHostAddr.port();
+            const ipv4 = singleHostAddr.ipv4()
+              ? bytesToIp(singleHostAddr.ipv4().ip())
+              : null;
+            const ipv6 = singleHostAddr.ipv6()
+              ? bytesToIp(singleHostAddr.ipv6().ip())
+              : null;
+            ledgerRelays.push({ type, params: { portNumber, ipv4, ipv6 } });
+          } else if (relay.kind() === 1) {
+            const type = RelayType.SINGLE_HOST_HOSTNAME;
+            const singleHostName = relay.as_single_host_name();
+            const portNumber = singleHostName.port();
+            const dnsName = singleHostName.dns_name().record();
+            ledgerRelays.push({
+              type,
+              params: { portNumber, dnsName },
+            });
+          } else if (relay.kind() === 2) {
+            const type = RelayType.MULTI_HOST;
+            const multiHostName = relay.as_multi_host_name();
+            const dnsName = multiHostName.dns_name();
+            ledgerRelays.push({
+              type,
+              params: { dnsName },
+            });
+          }
+        }
+        const cost = params.cost().to_str();
+        const margin = params.margin();
+        const pledge = params.pledge().to_str();
+        const operator = Buffer.from(params.operator().to_bytes()).toString(
+          'hex'
+        );
+        let poolKey;
+        if (operator == keys.stake.hash) {
+          signingMode = TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR;
+          poolKey = {
+            type: PoolKeyType.DEVICE_OWNED,
+            params: { path: keys.stake.path },
+          };
+        } else {
+          poolKey = {
+            type: PoolKeyType.THIRD_PARTY,
+            params: { keyHashHex: operator },
+          };
+        }
+        const metadata = params.pool_metadata()
+          ? {
+              metadataUrl: params.pool_metadata().url().url(),
+              metadataHashHex: Buffer.from(
+                params.pool_metadata().pool_metadata_hash().to_bytes()
+              ).toString('hex'),
+            }
+          : null;
+        const rewardAccountHex = Buffer.from(
+          params.reward_account().to_address().to_bytes()
+        ).toString('hex');
+        let rewardAccount;
+        if (rewardAccountHex == address) {
+          rewardAccount = {
+            type: PoolRewardAccountType.DEVICE_OWNED,
+            params: { path: keys.stake.path },
+          };
+        } else {
+          rewardAccount = {
+            type: PoolRewardAccountType.THIRD_PARTY,
+            params: { rewardAccountHex },
+          };
+        }
+        const vrfKeyHashHex = Buffer.from(
+          params.vrf_keyhash().to_bytes()
+        ).toString('hex');
 
-//         certificate.params = {
-//           poolKey,
-//           vrfKeyHashHex,
-//           pledge,
-//           cost,
-//           margin: {
-//             numerator: margin.numerator().to_str(),
-//             denominator: margin.denominator().to_str(),
-//           },
-//           rewardAccount,
-//           poolOwners,
-//           relays: ledgerRelays,
-//           metadata,
-//         };
-//       }
-//       ledgerCertificates.push(certificate);
-//     }
-//   }
-//   const fee = tx.body().fee().to_str();
-//   const ttl = tx.body().ttl() ? tx.body().ttl().to_str() : null;
-//   const withdrawals = tx.body().withdrawals();
-//   let ledgerWithdrawals = null;
-//   if (withdrawals) {
-//     ledgerWithdrawals = [];
-//     for (let i = 0; i < withdrawals.keys().len(); i++) {
-//       const withdrawal = { stakeCredential: {} };
-//       const rewardAddress = withdrawals.keys().get(i);
-//       if (rewardAddress.payment_cred().kind() === 0) {
-//         withdrawal.stakeCredential.type = StakeCredentialParamsType.KEY_PATH;
-//         withdrawal.stakeCredential.keyPath = keys.stake.path;
-//       } else {
-//         withdrawal.stakeCredential.type = StakeCredentialParamsType.SCRIPT_HASH;
-//         withdrawal.stakeCredential.scriptHash = Buffer.from(
-//           rewardAddress.payment_cred().to_scripthash().to_bytes()
-//         ).toString('hex');
-//       }
-//       withdrawal.amount = withdrawals.get(rewardAddress).to_str();
-//       ledgerWithdrawals.push(withdrawal);
-//     }
-//   }
-//   const auxiliaryData = tx.body().auxiliary_data_hash()
-//     ? {
-//         type: TxAuxiliaryDataType.ARBITRARY_HASH,
-//         params: {
-//           hashHex: Buffer.from(
-//             tx.body().auxiliary_data_hash().to_bytes()
-//           ).toString('hex'),
-//         },
-//       }
-//     : null;
-//   const validityIntervalStart = tx.body().validity_start_interval()
-//     ? tx.body().validity_start_interval().to_str()
-//     : null;
+        certificate.params = {
+          poolKey,
+          vrfKeyHashHex,
+          pledge,
+          cost,
+          margin: {
+            numerator: margin.numerator().to_str(),
+            denominator: margin.denominator().to_str(),
+          },
+          rewardAccount,
+          poolOwners,
+          relays: ledgerRelays,
+          metadata,
+        };
+      }
+      ledgerCertificates.push(certificate);
+    }
+  }
+  const fee = tx.body().fee().to_str();
+  const ttl = tx.body().ttl() ? tx.body().ttl().to_str() : null;
+  const withdrawals = tx.body().withdrawals();
+  let ledgerWithdrawals = null;
+  if (withdrawals) {
+    ledgerWithdrawals = [];
+    for (let i = 0; i < withdrawals.keys().len(); i++) {
+      const withdrawal = { stakeCredential: {} };
+      const rewardAddress = withdrawals.keys().get(i);
+      if (rewardAddress.payment_cred().kind() === 0) {
+        withdrawal.stakeCredential.type = StakeCredentialParamsType.KEY_PATH;
+        withdrawal.stakeCredential.keyPath = keys.stake.path;
+      } else {
+        withdrawal.stakeCredential.type = StakeCredentialParamsType.SCRIPT_HASH;
+        withdrawal.stakeCredential.scriptHash = Buffer.from(
+          rewardAddress.payment_cred().to_scripthash().to_bytes()
+        ).toString('hex');
+      }
+      withdrawal.amount = withdrawals.get(rewardAddress).to_str();
+      ledgerWithdrawals.push(withdrawal);
+    }
+  }
+  const auxiliaryData = tx.body().auxiliary_data_hash()
+    ? {
+        type: TxAuxiliaryDataType.ARBITRARY_HASH,
+        params: {
+          hashHex: Buffer.from(
+            tx.body().auxiliary_data_hash().to_bytes()
+          ).toString('hex'),
+        },
+      }
+    : null;
+  const validityIntervalStart = tx.body().validity_start_interval()
+    ? tx.body().validity_start_interval().to_str()
+    : null;
 
-//   const mint = tx.body().mint();
-//   let additionalWitnessPaths = null;
-//   let mintBundle = null;
-//   if (mint) {
-//     mintBundle = [];
-//     for (let j = 0; j < mint.keys().len(); j++) {
-//       const policy = mint.keys().get(j);
-//       const assets = mint.get(policy);
-//       const tokens = [];
-//       for (let k = 0; k < assets.keys().len(); k++) {
-//         const assetName = assets.keys().get(k);
-//         const amount = assets.get(assetName);
-//         tokens.push({
-//           assetNameHex: Buffer.from(assetName.name()).toString('hex'),
-//           amount: amount.is_positive()
-//             ? amount.as_positive().to_str()
-//             : '-' + amount.as_negative().to_str(),
-//         });
-//       }
-//       // sort canonical
-//       tokens.sort((a, b) => {
-//         if (a.assetNameHex.length == b.assetNameHex.length) {
-//           return a.assetNameHex > b.assetNameHex ? 1 : -1;
-//         } else if (a.assetNameHex.length > b.assetNameHex.length) return 1;
-//         else return -1;
-//       });
-//       mintBundle.push({
-//         policyIdHex: Buffer.from(policy.to_bytes()).toString('hex'),
-//         tokens,
-//       });
-//     }
-//   }
-//   additionalWitnessPaths = [];
-//   if (keys.payment.path) additionalWitnessPaths.push(keys.payment.path);
-//   if (keys.stake.path) additionalWitnessPaths.push(keys.stake.path);
+  const mint = tx.body().mint();
+  let additionalWitnessPaths = null;
+  let mintBundle = null;
+  if (mint) {
+    mintBundle = [];
+    for (let j = 0; j < mint.keys().len(); j++) {
+      const policy = mint.keys().get(j);
+      const assets = mint.get(policy);
+      const tokens = [];
+      for (let k = 0; k < assets.keys().len(); k++) {
+        const assetName = assets.keys().get(k);
+        const amount = assets.get(assetName);
+        tokens.push({
+          assetNameHex: Buffer.from(assetName.name()).toString('hex'),
+          amount: amount.is_positive()
+            ? amount.as_positive().to_str()
+            : '-' + amount.as_negative().to_str(),
+        });
+      }
+      // sort canonical
+      tokens.sort((a, b) => {
+        if (a.assetNameHex.length == b.assetNameHex.length) {
+          return a.assetNameHex > b.assetNameHex ? 1 : -1;
+        } else if (a.assetNameHex.length > b.assetNameHex.length) return 1;
+        else return -1;
+      });
+      mintBundle.push({
+        policyIdHex: Buffer.from(policy.to_bytes()).toString('hex'),
+        tokens,
+      });
+    }
+  }
+  additionalWitnessPaths = [];
+  if (keys.payment.path) additionalWitnessPaths.push(keys.payment.path);
+  if (keys.stake.path) additionalWitnessPaths.push(keys.stake.path);
 
-//   // Plutus
-//   const scriptDataHashHex = tx.body().script_data_hash()
-//     ? Buffer.from(tx.body().script_data_hash().to_bytes()).toString('hex')
-//     : null;
+  // Plutus
+  const scriptDataHashHex = tx.body().script_data_hash()
+    ? Buffer.from(tx.body().script_data_hash().to_bytes()).toString('hex')
+    : null;
 
-//   let collateralInputs = null;
-//   if (tx.body().collateral()) {
-//     collateralInputs = [];
-//     const coll = tx.body().collateral();
-//     for (let i = 0; i < coll.len(); i++) {
-//       const input = coll.get(i);
-//       if (keys.payment.path) {
-//         collateralInputs.push({
-//           txHashHex: Buffer.from(input.transaction_id().to_bytes()).toString(
-//             'hex'
-//           ),
-//           outputIndex: parseInt(input.index().to_str()),
-//           path: keys.payment.path, // needed to include payment key witness if available
-//         });
-//       } else {
-//         collateralInputs.push({
-//           txHashHex: Buffer.from(input.transaction_id().to_bytes()).toString(
-//             'hex'
-//           ),
-//           outputIndex: parseInt(input.index().to_str()),
-//         });
-//       }
-//       signingMode = TransactionSigningMode.PLUTUS_TRANSACTION;
-//     }
-//   }
+  let collateralInputs = null;
+  if (tx.body().collateral()) {
+    collateralInputs = [];
+    const coll = tx.body().collateral();
+    for (let i = 0; i < coll.len(); i++) {
+      const input = coll.get(i);
+      if (keys.payment.path) {
+        collateralInputs.push({
+          txHashHex: Buffer.from(input.transaction_id().to_bytes()).toString(
+            'hex'
+          ),
+          outputIndex: parseInt(input.index().to_str()),
+          path: keys.payment.path, // needed to include payment key witness if available
+        });
+      } else {
+        collateralInputs.push({
+          txHashHex: Buffer.from(input.transaction_id().to_bytes()).toString(
+            'hex'
+          ),
+          outputIndex: parseInt(input.index().to_str()),
+        });
+      }
+      signingMode = TransactionSigningMode.PLUTUS_TRANSACTION;
+    }
+  }
 
-//   let collateralOutput = (() => {
-//     if (tx.body().collateral_return()) {
-//       const outputs = Loader.Cardano.TransactionOutputs.new();
-//       outputs.add(tx.body().collateral_return());
-//       const [out] = outputsToLedger(outputs, address, index);
-//       return out;
-//     }
-//     return null;
-//   })();
+  let collateralOutput = (() => {
+    if (tx.body().collateral_return()) {
+      const outputs = Loader.Cardano.TransactionOutputs.new();
+      outputs.add(tx.body().collateral_return());
+      const [out] = outputsToLedger(outputs, address, index);
+      return out;
+    }
+    return null;
+  })();
 
-//   const totalCollateral = tx.body().total_collateral()
-//     ? tx.body().total_collateral().to_str()
-//     : null;
+  const totalCollateral = tx.body().total_collateral()
+    ? tx.body().total_collateral().to_str()
+    : null;
 
-//   let referenceInputs = null;
-//   if (tx.body().reference_inputs()) {
-//     referenceInputs = [];
-//     const refInputs = tx.body().reference_inputs();
-//     for (let i = 0; i < refInputs.len(); i++) {
-//       const input = refInputs.get(i);
-//       referenceInputs.push({
-//         txHashHex: input.transaction_id().to_hex(),
-//         outputIndex: parseInt(input.index().to_str()),
-//         path: null,
-//       });
-//     }
-//   }
+  let referenceInputs = null;
+  if (tx.body().reference_inputs()) {
+    referenceInputs = [];
+    const refInputs = tx.body().reference_inputs();
+    for (let i = 0; i < refInputs.len(); i++) {
+      const input = refInputs.get(i);
+      referenceInputs.push({
+        txHashHex: input.transaction_id().to_hex(),
+        outputIndex: parseInt(input.index().to_str()),
+        path: null,
+      });
+    }
+  }
 
-//   let requiredSigners = null;
-//   if (tx.body().required_signers()) {
-//     requiredSigners = [];
-//     const r = tx.body().required_signers();
-//     for (let i = 0; i < r.len(); i++) {
-//       const signer = Buffer.from(r.get(i).to_bytes()).toString('hex');
-//       if (signer === keys.payment.hash) {
-//         requiredSigners.push({
-//           type: TxRequiredSignerType.PATH,
-//           path: keys.payment.path,
-//         });
-//       } else if (signer === keys.stake.hash) {
-//         requiredSigners.push({
-//           type: TxRequiredSignerType.PATH,
-//           path: keys.stake.path,
-//         });
-//       } else {
-//         requiredSigners.push({
-//           type: TxRequiredSignerType.HASH,
-//           hashHex: signer,
-//         });
-//       }
-//     }
-//     signingMode = TransactionSigningMode.PLUTUS_TRANSACTION;
-//   }
+  let requiredSigners = null;
+  if (tx.body().required_signers()) {
+    requiredSigners = [];
+    const r = tx.body().required_signers();
+    for (let i = 0; i < r.len(); i++) {
+      const signer = Buffer.from(r.get(i).to_bytes()).toString('hex');
+      if (signer === keys.payment.hash) {
+        requiredSigners.push({
+          type: TxRequiredSignerType.PATH,
+          path: keys.payment.path,
+        });
+      } else if (signer === keys.stake.hash) {
+        requiredSigners.push({
+          type: TxRequiredSignerType.PATH,
+          path: keys.stake.path,
+        });
+      } else {
+        requiredSigners.push({
+          type: TxRequiredSignerType.HASH,
+          hashHex: signer,
+        });
+      }
+    }
+    signingMode = TransactionSigningMode.PLUTUS_TRANSACTION;
+  }
 
-//   const includeNetworkId = !!tx.body().network_id();
+  const includeNetworkId = !!tx.body().network_id();
 
-//   const ledgerTx = {
-//     network: {
-//       protocolMagic: network === 1 ? 764824073 : 42,
-//       networkId: network,
-//     },
-//     inputs: ledgerInputs,
-//     outputs: ledgerOutputs,
-//     fee,
-//     ttl,
-//     certificates: ledgerCertificates,
-//     withdrawals: ledgerWithdrawals,
-//     auxiliaryData,
-//     validityIntervalStart,
-//     mint: mintBundle,
-//     scriptDataHashHex,
-//     collateralInputs,
-//     requiredSigners,
-//     includeNetworkId,
-//     collateralOutput,
-//     totalCollateral,
-//     referenceInputs,
-//   };
+  const ledgerTx = {
+    network: {
+      protocolMagic: network === 1 ? 764824073 : 42,
+      networkId: network,
+    },
+    inputs: ledgerInputs,
+    outputs: ledgerOutputs,
+    fee,
+    ttl,
+    certificates: ledgerCertificates,
+    withdrawals: ledgerWithdrawals,
+    auxiliaryData,
+    validityIntervalStart,
+    mint: mintBundle,
+    scriptDataHashHex,
+    collateralInputs,
+    requiredSigners,
+    includeNetworkId,
+    collateralOutput,
+    totalCollateral,
+    referenceInputs,
+  };
 
-//   Object.keys(ledgerTx).forEach(
-//     (key) => !ledgerTx[key] && ledgerTx[key] != 0 && delete ledgerTx[key]
-//   );
+  Object.keys(ledgerTx).forEach(
+    (key) => !ledgerTx[key] && ledgerTx[key] != 0 && delete ledgerTx[key]
+  );
 
-//   const fullTx = {
-//     signingMode,
-//     tx: ledgerTx,
-//     additionalWitnessPaths,
-//   };
-//   Object.keys(fullTx).forEach(
-//     (key) => !fullTx[key] && fullTx[key] != 0 && delete fullTx[key]
-//   );
+  const fullTx = {
+    signingMode,
+    tx: ledgerTx,
+    additionalWitnessPaths,
+  };
+  Object.keys(fullTx).forEach(
+    (key) => !fullTx[key] && fullTx[key] != 0 && delete fullTx[key]
+  );
 
-//   return fullTx;
-// };
+  return fullTx;
+};
 
-// const bytesToIp = (bytes) => {
-//   if (!bytes) return null;
-//   if (bytes.length === 4) {
-//     return { ipv4: bytes.join('.') };
-//   } else if (bytes.length === 16) {
-//     let ipv6 = '';
-//     for (let i = 0; i < bytes.length; i += 2) {
-//       ipv6 += bytes[i].toString(16) + bytes[i + 1].toString(16) + ':';
-//     }
-//     ipv6 = ipv6.slice(0, -1);
-//     return { ipv6 };
-//   }
-//   return null;
-// };
+const bytesToIp = (bytes) => {
+  if (!bytes) return null;
+  if (bytes.length === 4) {
+    return { ipv4: bytes.join('.') };
+  } else if (bytes.length === 16) {
+    let ipv6 = '';
+    for (let i = 0; i < bytes.length; i += 2) {
+      ipv6 += bytes[i].toString(16) + bytes[i + 1].toString(16) + ':';
+    }
+    ipv6 = ipv6.slice(0, -1);
+    return { ipv6 };
+  }
+  return null;
+};
 
 function checksum(num) {
   return crc8(Buffer.from(num, 'hex')).toString(16).padStart(2, '0');

@@ -17,7 +17,7 @@ import {
 // import { POPUP_WINDOW } from '../../config/config';
 // import { mnemonicToEntropy } from 'bip39';
 // import cryptoRandomString from 'crypto-random-string';
-// import Loader from '../loader';
+import { Loader } from '../loader';
 import { createAvatar } from '@dicebear/avatars';
 import * as style from '@dicebear/avatars-bottts-sprites';
 // import { initTx } from './wallet';
@@ -26,7 +26,7 @@ import {
   // networkNameToId,
   // utxoFromJson,
   // assetsToValue,
-  // txToLedger,
+  txToLedger,
   // txToTrezor,
   // linkToSrc,
   // convertMetadataPropToString,
@@ -36,7 +36,7 @@ import {
 } from '../util';
 // import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 // import Ada, { HARDENED } from '@cardano-foundation/ledgerjs-hw-app-cardano';
-// import TrezorConnect from '@trezor/connect-web';
+import TrezorConnect from '@trezor/connect-web';
 // import AssetFingerprint from '@emurgo/cip14-js';
 // import { isAddress } from 'web3-validator';
 // import { milkomedaNetworks } from '@dcspark/milkomeda-constants';
@@ -114,11 +114,11 @@ export const getFavoriteIcon = (domain) => {
 //   return access;
 // };
 
-// export const setWhitelisted = async (origin) => {
-//   let whitelisted = await getWhitelisted();
-//   whitelisted ? whitelisted.push(origin) : (whitelisted = [origin]);
-//   return await setStorage({ [STORAGE.whitelisted]: whitelisted });
-// };
+export const setWhitelisted = async (origin) => {
+  // let whitelisted = await getWhitelisted();
+  // whitelisted ? whitelisted.push(origin) : (whitelisted = [origin]);
+  // return await setStorage({ [STORAGE.whitelisted]: whitelisted });
+};
 
 export const removeWhitelisted = async (origin) => {
   // const whitelisted = await getWhitelisted();
@@ -287,11 +287,11 @@ export const setTxDetail = async (txObject) => {
 //   return true;
 };
 
-// export const getSpecificUtxo = async (txHash, txId) => {
-//   const result = await blockfrostRequest(`/txs/${txHash}/utxos`);
-//   if (!result || result.error) return null;
-//   return result.outputs[txId];
-// };
+export const getSpecificUtxo = async (txHash, txId) => {
+  const result = await blockfrostRequest(`/txs/${txHash}/utxos`);
+  if (!result || result.error) return null;
+  return result.outputs[txId];
+};
 
 /**
  *
@@ -658,8 +658,8 @@ export const createTab = (tab, query = '') =>
 //   return 0x80000000 + num;
 // };
 
-// export const bytesAddressToBinary = (bytes) =>
-//   bytes.reduce((str, byte) => str + byte.toString(2).padStart(8, '0'), '');
+export const bytesAddressToBinary = (bytes) =>
+  bytes.reduce((str, byte) => str + byte.toString(2).padStart(8, '0'), '');
 
 export const isValidAddress = async (address) => {
   return true;
@@ -692,35 +692,35 @@ export const isValidAddress = async (address) => {
   return false;
 };
 
-// const isValidAddressBytes = async (address) => {
-//   await Loader.load();
-//   const network = await getNetwork();
-//   try {
-//     const addr = Loader.Cardano.Address.from_bytes(address);
-//     if (
-//       (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
-//       (addr.network_id() === 0 &&
-//         (network.id === NETWORK_ID.testnet ||
-//           network.id === NETWORK_ID.preview ||
-//           network.id === NETWORK_ID.preprod))
-//     )
-//       return true;
-//     return false;
-//   } catch (e) {}
-//   try {
-//     const addr = Loader.Cardano.ByronAddress.from_bytes(address);
-//     if (
-//       (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
-//       (addr.network_id() === 0 &&
-//         (network.id === NETWORK_ID.testnet ||
-//           network.id === NETWORK_ID.preview ||
-//           network.id === NETWORK_ID.preprod))
-//     )
-//       return true;
-//     return false;
-//   } catch (e) {}
-//   return false;
-// };
+const isValidAddressBytes = async (address) => {
+  await Loader.load();
+  const network = await getNetwork();
+  try {
+    const addr = Loader.Cardano.Address.from_bytes(address);
+    if (
+      (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
+      (addr.network_id() === 0 &&
+        (network.id === NETWORK_ID.testnet ||
+          network.id === NETWORK_ID.preview ||
+          network.id === NETWORK_ID.preprod))
+    )
+      return true;
+    return false;
+  } catch (e) {}
+  try {
+    const addr = Loader.Cardano.ByronAddress.from_bytes(address);
+    if (
+      (addr.network_id() === 1 && network.id === NETWORK_ID.mainnet) ||
+      (addr.network_id() === 0 &&
+        (network.id === NETWORK_ID.testnet ||
+          network.id === NETWORK_ID.preview ||
+          network.id === NETWORK_ID.preprod))
+    )
+      return true;
+    return false;
+  } catch (e) {}
+  return false;
+};
 
 export const isValidEthAddress = function (address) {
   return isAddress(address);
@@ -757,53 +757,53 @@ export const isValidEthAddress = function (address) {
 //   throw DataSignError.AddressNotPK;
 // };
 
-// export const extractKeyOrScriptHash = async (address) => {
-//   await Loader.load();
-//   if (!(await isValidAddressBytes(Buffer.from(address, 'hex'))))
-//     throw DataSignError.InvalidFormat;
-//   try {
-//     const addr = Loader.Cardano.BaseAddress.from_address(
-//       Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
-//     );
+export const extractKeyOrScriptHash = async (address) => {
+  await Loader.load();
+  if (!(await isValidAddressBytes(Buffer.from(address, 'hex'))))
+    throw DataSignError.InvalidFormat;
+  try {
+    const addr = Loader.Cardano.BaseAddress.from_address(
+      Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
+    );
 
-//     const credential = addr.payment_cred();
-//     if (credential.kind() === 0)
-//       return credential.to_keyhash().to_bech32('addr_vkh');
-//     if (credential.kind() === 1)
-//       return credential.to_scripthash().to_bech32('script');
-//   } catch (e) {}
-//   try {
-//     const addr = Loader.Cardano.EnterpriseAddress.from_address(
-//       Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
-//     );
-//     const credential = addr.payment_cred();
-//     if (credential.kind() === 0)
-//       return credential.to_keyhash().to_bech32('addr_vkh');
-//     if (credential.kind() === 1)
-//       return credential.to_scripthash().to_bech32('script');
-//   } catch (e) {}
-//   try {
-//     const addr = Loader.Cardano.PointerAddress.from_address(
-//       Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
-//     );
-//     const credential = addr.payment_cred();
-//     if (credential.kind() === 0)
-//       return credential.to_keyhash().to_bech32('addr_vkh');
-//     if (credential.kind() === 1)
-//       return credential.to_scripthash().to_bech32('script');
-//   } catch (e) {}
-//   try {
-//     const addr = Loader.Cardano.RewardAddress.from_address(
-//       Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
-//     );
-//     const credential = addr.payment_cred();
-//     if (credential.kind() === 0)
-//       return credential.to_keyhash().to_bech32('stake_vkh');
-//     if (credential.kind() === 1)
-//       return credential.to_scripthash().to_bech32('script');
-//   } catch (e) {}
-//   throw new Error('No address type matched.');
-// };
+    const credential = addr.payment_cred();
+    if (credential.kind() === 0)
+      return credential.to_keyhash().to_bech32('addr_vkh');
+    if (credential.kind() === 1)
+      return credential.to_scripthash().to_bech32('script');
+  } catch (e) {}
+  try {
+    const addr = Loader.Cardano.EnterpriseAddress.from_address(
+      Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
+    );
+    const credential = addr.payment_cred();
+    if (credential.kind() === 0)
+      return credential.to_keyhash().to_bech32('addr_vkh');
+    if (credential.kind() === 1)
+      return credential.to_scripthash().to_bech32('script');
+  } catch (e) {}
+  try {
+    const addr = Loader.Cardano.PointerAddress.from_address(
+      Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
+    );
+    const credential = addr.payment_cred();
+    if (credential.kind() === 0)
+      return credential.to_keyhash().to_bech32('addr_vkh');
+    if (credential.kind() === 1)
+      return credential.to_scripthash().to_bech32('script');
+  } catch (e) {}
+  try {
+    const addr = Loader.Cardano.RewardAddress.from_address(
+      Loader.Cardano.Address.from_bytes(Buffer.from(address, 'hex'))
+    );
+    const credential = addr.payment_cred();
+    if (credential.kind() === 0)
+      return credential.to_keyhash().to_bech32('stake_vkh');
+    if (credential.kind() === 1)
+      return credential.to_scripthash().to_bech32('script');
+  } catch (e) {}
+  throw new Error('No address type matched.');
+};
 
 // export const verifySigStructure = async (sigStructure) => {
 //   await Loader.load();
@@ -971,175 +971,175 @@ export const isValidEthAddress = function (address) {
 //   };
 // };
 
-// /**
-//  *
-//  * @param {string} tx - cbor hex string
-//  * @param {Array<string>} keyHashes
-//  * @param {string} password
-//  * @returns {Promise<string>} witness set as hex string
-//  */
-// export const signTx = async (
-//   tx,
-//   keyHashes,
-//   password,
-//   accountIndex,
-//   partialSign = false
-// ) => {
-//   await Loader.load();
-//   let { paymentKey, stakeKey } = await requestAccountKey(
-//     password,
-//     accountIndex
-//   );
-//   const paymentKeyHash = Buffer.from(
-//     paymentKey.to_public().hash().to_bytes(),
-//     'hex'
-//   ).toString('hex');
-//   const stakeKeyHash = Buffer.from(
-//     stakeKey.to_public().hash().to_bytes(),
-//     'hex'
-//   ).toString('hex');
+/**
+ *
+ * @param {string} tx - cbor hex string
+ * @param {Array<string>} keyHashes
+ * @param {string} password
+ * @returns {Promise<string>} witness set as hex string
+ */
+export const signTx = async (
+  tx,
+  keyHashes,
+  password,
+  accountIndex,
+  partialSign = false
+) => {
+  await Loader.load();
+  let { paymentKey, stakeKey } = await requestAccountKey(
+    password,
+    accountIndex
+  );
+  const paymentKeyHash = Buffer.from(
+    paymentKey.to_public().hash().to_bytes(),
+    'hex'
+  ).toString('hex');
+  const stakeKeyHash = Buffer.from(
+    stakeKey.to_public().hash().to_bytes(),
+    'hex'
+  ).toString('hex');
 
-//   const rawTx = Loader.Cardano.Transaction.from_bytes(Buffer.from(tx, 'hex'));
+  const rawTx = Loader.Cardano.Transaction.from_bytes(Buffer.from(tx, 'hex'));
 
-//   const txWitnessSet = Loader.Cardano.TransactionWitnessSet.new();
-//   const vkeyWitnesses = Loader.Cardano.Vkeywitnesses.new();
-//   const txHash = Loader.Cardano.hash_transaction(rawTx.body());
-//   keyHashes.forEach((keyHash) => {
-//     let signingKey;
-//     if (keyHash === paymentKeyHash) signingKey = paymentKey;
-//     else if (keyHash === stakeKeyHash) signingKey = stakeKey;
-//     else if (!partialSign) throw TxSignError.ProofGeneration;
-//     else return;
-//     const vkey = Loader.Cardano.make_vkey_witness(txHash, signingKey);
-//     vkeyWitnesses.add(vkey);
-//   });
+  const txWitnessSet = Loader.Cardano.TransactionWitnessSet.new();
+  const vkeyWitnesses = Loader.Cardano.Vkeywitnesses.new();
+  const txHash = Loader.Cardano.hash_transaction(rawTx.body());
+  keyHashes.forEach((keyHash) => {
+    let signingKey;
+    if (keyHash === paymentKeyHash) signingKey = paymentKey;
+    else if (keyHash === stakeKeyHash) signingKey = stakeKey;
+    else if (!partialSign) throw TxSignError.ProofGeneration;
+    else return;
+    const vkey = Loader.Cardano.make_vkey_witness(txHash, signingKey);
+    vkeyWitnesses.add(vkey);
+  });
 
-//   stakeKey.free();
-//   stakeKey = null;
-//   paymentKey.free();
-//   paymentKey = null;
+  stakeKey.free();
+  stakeKey = null;
+  paymentKey.free();
+  paymentKey = null;
 
-//   txWitnessSet.set_vkeys(vkeyWitnesses);
-//   return txWitnessSet;
-// };
+  txWitnessSet.set_vkeys(vkeyWitnesses);
+  return txWitnessSet;
+};
 
-// export const signTxHW = async (
-//   tx,
-//   keyHashes,
-//   account,
-//   hw,
-//   partialSign = false
-// ) => {
-//   await Loader.load();
-//   const rawTx = Loader.Cardano.Transaction.from_bytes(Buffer.from(tx, 'hex'));
-//   const address = Loader.Cardano.Address.from_bech32(account.paymentAddr);
-//   const network = address.network_id();
-//   const keys = {
-//     payment: { hash: null, path: null },
-//     stake: { hash: null, path: null },
-//   };
-//   if (hw.device === HW.ledger) {
-//     const appAda = hw.appAda;
-//     keyHashes.forEach((keyHash) => {
-//       if (keyHash === account.paymentKeyHash)
-//         keys.payment = {
-//           hash: keyHash,
-//           path: [HARDENED + 1852, HARDENED + 1815, HARDENED + hw.account, 0, 0],
-//         };
-//       else if (keyHash === account.stakeKeyHash)
-//         keys.stake = {
-//           hash: keyHash,
-//           path: [HARDENED + 1852, HARDENED + 1815, HARDENED + hw.account, 2, 0],
-//         };
-//       else if (!partialSign) throw TxSignError.ProofGeneration;
-//       else return;
-//     });
-//     const ledgerTx = await txToLedger(
-//       rawTx,
-//       network,
-//       keys,
-//       Buffer.from(address.to_bytes()).toString('hex'),
-//       hw.account
-//     );
-//     const result = await appAda.signTransaction(ledgerTx);
-//     // getting public keys
-//     const witnessSet = Loader.Cardano.TransactionWitnessSet.new();
-//     const vkeys = Loader.Cardano.Vkeywitnesses.new();
-//     result.witnesses.forEach((witness) => {
-//       if (
-//         witness.path[3] == 0 // payment key
-//       ) {
-//         const vkey = Loader.Cardano.Vkey.new(
-//           Loader.Cardano.Bip32PublicKey.from_bytes(
-//             Buffer.from(account.publicKey, 'hex')
-//           )
-//             .derive(0)
-//             .derive(0)
-//             .to_raw_key()
-//         );
-//         const signature = Loader.Cardano.Ed25519Signature.from_hex(
-//           witness.witnessSignatureHex
-//         );
-//         vkeys.add(Loader.Cardano.Vkeywitness.new(vkey, signature));
-//       } else if (
-//         witness.path[3] == 2 // stake key
-//       ) {
-//         const vkey = Loader.Cardano.Vkey.new(
-//           Loader.Cardano.Bip32PublicKey.from_bytes(
-//             Buffer.from(account.publicKey, 'hex')
-//           )
-//             .derive(2)
-//             .derive(0)
-//             .to_raw_key()
-//         );
-//         const signature = Loader.Cardano.Ed25519Signature.from_hex(
-//           witness.witnessSignatureHex
-//         );
-//         vkeys.add(Loader.Cardano.Vkeywitness.new(vkey, signature));
-//       }
-//     });
-//     witnessSet.set_vkeys(vkeys);
-//     return witnessSet;
-//   } else {
-//     keyHashes.forEach((keyHash) => {
-//       if (keyHash === account.paymentKeyHash)
-//         keys.payment = {
-//           hash: keyHash,
-//           path: `m/1852'/1815'/${hw.account}'/0/0`,
-//         };
-//       else if (keyHash === account.stakeKeyHash)
-//         keys.stake = {
-//           hash: keyHash,
-//           path: `m/1852'/1815'/${hw.account}'/2/0`,
-//         };
-//       else if (!partialSign) throw TxSignError.ProofGeneration;
-//       else return;
-//     });
-//     const trezorTx = await txToTrezor(
-//       rawTx,
-//       network,
-//       keys,
-//       Buffer.from(address.to_bytes()).toString('hex'),
-//       hw.account
-//     );
-//     const result = await TrezorConnect.cardanoSignTransaction(trezorTx);
-//     if (!result.success) throw new Error('Trezor could not sign tx');
-//     // getting public keys
-//     const witnessSet = Loader.Cardano.TransactionWitnessSet.new();
-//     const vkeys = Loader.Cardano.Vkeywitnesses.new();
-//     result.payload.witnesses.forEach((witness) => {
-//       const vkey = Loader.Cardano.Vkey.new(
-//         Loader.Cardano.PublicKey.from_bytes(Buffer.from(witness.pubKey, 'hex'))
-//       );
-//       const signature = Loader.Cardano.Ed25519Signature.from_hex(
-//         witness.signature
-//       );
-//       vkeys.add(Loader.Cardano.Vkeywitness.new(vkey, signature));
-//     });
-//     witnessSet.set_vkeys(vkeys);
-//     return witnessSet;
-//   }
-// };
+export const signTxHW = async (
+  tx,
+  keyHashes,
+  account,
+  hw,
+  partialSign = false
+) => {
+  await Loader.load();
+  const rawTx = Loader.Cardano.Transaction.from_bytes(Buffer.from(tx, 'hex'));
+  const address = Loader.Cardano.Address.from_bech32(account.paymentAddr);
+  const network = address.network_id();
+  const keys = {
+    payment: { hash: null, path: null },
+    stake: { hash: null, path: null },
+  };
+  if (hw.device === HW.ledger) {
+    const appAda = hw.appAda;
+    keyHashes.forEach((keyHash) => {
+      if (keyHash === account.paymentKeyHash)
+        keys.payment = {
+          hash: keyHash,
+          path: [HARDENED + 1852, HARDENED + 1815, HARDENED + hw.account, 0, 0],
+        };
+      else if (keyHash === account.stakeKeyHash)
+        keys.stake = {
+          hash: keyHash,
+          path: [HARDENED + 1852, HARDENED + 1815, HARDENED + hw.account, 2, 0],
+        };
+      else if (!partialSign) throw TxSignError.ProofGeneration;
+      else return;
+    });
+    const ledgerTx = await txToLedger(
+      rawTx,
+      network,
+      keys,
+      Buffer.from(address.to_bytes()).toString('hex'),
+      hw.account
+    );
+    const result = await appAda.signTransaction(ledgerTx);
+    // getting public keys
+    const witnessSet = Loader.Cardano.TransactionWitnessSet.new();
+    const vkeys = Loader.Cardano.Vkeywitnesses.new();
+    result.witnesses.forEach((witness) => {
+      if (
+        witness.path[3] == 0 // payment key
+      ) {
+        const vkey = Loader.Cardano.Vkey.new(
+          Loader.Cardano.Bip32PublicKey.from_bytes(
+            Buffer.from(account.publicKey, 'hex')
+          )
+            .derive(0)
+            .derive(0)
+            .to_raw_key()
+        );
+        const signature = Loader.Cardano.Ed25519Signature.from_hex(
+          witness.witnessSignatureHex
+        );
+        vkeys.add(Loader.Cardano.Vkeywitness.new(vkey, signature));
+      } else if (
+        witness.path[3] == 2 // stake key
+      ) {
+        const vkey = Loader.Cardano.Vkey.new(
+          Loader.Cardano.Bip32PublicKey.from_bytes(
+            Buffer.from(account.publicKey, 'hex')
+          )
+            .derive(2)
+            .derive(0)
+            .to_raw_key()
+        );
+        const signature = Loader.Cardano.Ed25519Signature.from_hex(
+          witness.witnessSignatureHex
+        );
+        vkeys.add(Loader.Cardano.Vkeywitness.new(vkey, signature));
+      }
+    });
+    witnessSet.set_vkeys(vkeys);
+    return witnessSet;
+  } else {
+    keyHashes.forEach((keyHash) => {
+      if (keyHash === account.paymentKeyHash)
+        keys.payment = {
+          hash: keyHash,
+          path: `m/1852'/1815'/${hw.account}'/0/0`,
+        };
+      else if (keyHash === account.stakeKeyHash)
+        keys.stake = {
+          hash: keyHash,
+          path: `m/1852'/1815'/${hw.account}'/2/0`,
+        };
+      else if (!partialSign) throw TxSignError.ProofGeneration;
+      else return;
+    });
+    const trezorTx = await txToTrezor(
+      rawTx,
+      network,
+      keys,
+      Buffer.from(address.to_bytes()).toString('hex'),
+      hw.account
+    );
+    const result = await TrezorConnect.cardanoSignTransaction(trezorTx);
+    if (!result.success) throw new Error('Trezor could not sign tx');
+    // getting public keys
+    const witnessSet = Loader.Cardano.TransactionWitnessSet.new();
+    const vkeys = Loader.Cardano.Vkeywitnesses.new();
+    result.payload.witnesses.forEach((witness) => {
+      const vkey = Loader.Cardano.Vkey.new(
+        Loader.Cardano.PublicKey.from_bytes(Buffer.from(witness.pubKey, 'hex'))
+      );
+      const signature = Loader.Cardano.Ed25519Signature.from_hex(
+        witness.signature
+      );
+      vkeys.add(Loader.Cardano.Vkeywitness.new(vkey, signature));
+    });
+    witnessSet.set_vkeys(vkeys);
+    return witnessSet;
+  }
+};
 
 // /**
 //  *
