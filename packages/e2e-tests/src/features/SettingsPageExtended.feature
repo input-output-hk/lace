@@ -348,7 +348,7 @@ Feature: General Settings - Extended Browser View
     And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow
+    And I go to "Wallet setup" page from "Create" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
@@ -361,7 +361,7 @@ Feature: General Settings - Extended Browser View
     And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page with wallet TAWalletNoFunds from "Restore" wallet flow
+    And I go to "Wallet setup" page with wallet TAWalletNoFunds from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet

@@ -1,0 +1,14 @@
+{
+  "cosigners": [
+    {
+      "id": 0,
+      "keys": "addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7",
+      "name": "Cosigner0"
+    },
+    {
+      "id": 1,
+      "keys": "addr_shared_vksdhgfsft578s6tf68tdsg,stake_shared_vkgyufieus65cuv76s5vrs8",
+      "name": "Cosigner1"
+    }
+  ]
+}

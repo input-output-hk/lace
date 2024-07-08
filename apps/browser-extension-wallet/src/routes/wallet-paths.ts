@@ -30,7 +30,8 @@ export const walletRoutePaths = {
   sharedWallet: {
     root: '/shared-wallet',
     generateKeys: '/shared-wallet/generate-keys',
-    create: '/shared-wallet/create'
+    create: '/shared-wallet/create',
+    import: '/shared-wallet/import'
   }
 };
 

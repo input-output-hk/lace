@@ -96,7 +96,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
                   setOpen(false);
                   setFlow(AddSharedWalletFlowType.GetStarted);
                 }}
-                navigateToParentFlow={() => setFlow(AddSharedWalletFlowType.GetStarted)}
+                exitTheFlow={() => setFlow(AddSharedWalletFlowType.GetStarted)}
               />
             </SharedWalletCreationFlowInitialStateProvider>
           )}

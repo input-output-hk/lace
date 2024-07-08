@@ -43,7 +43,7 @@ Feature: Forgot password
     When I click on "Forgot password?" button on unlock screen
     And I click on "Proceed" button on "Forgot password?" modal
     And I switch to tab with restore wallet process
-    And I go to "Wallet setup" page from "Restore" wallet flow and "not fill" values
+    And I go to "Wallet setup" page from "Restore" wallet flow and not fill values
     # When I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -114,7 +114,7 @@ Feature: Forgot password
     And I switch to tab with restore wallet process
     And I close all remaining tabs except current one
     Then "Wallet setup" page is displayed
-    When I go to "Mnemonic verification" page from "Restore" wallet flow
+    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     And I click "Enter wallet" button
     Then I see LW homepage
     And I click the menu button

@@ -147,6 +147,12 @@ export class MenuHeader {
     await this.expandButton.moveTo();
   }
 
+  async openUserMenu(): Promise<void> {
+    await this.menuButton.waitForClickable({ timeout: 15_000 });
+    await this.menuButton.click();
+    await this.menuContainer.waitForStable();
+  }
+
   async clickOnAddNewWalletOption(): Promise<void> {
     await this.menuAddNewWalletButton.waitForClickable();
     await this.menuAddNewWalletButton.click();

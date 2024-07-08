@@ -33,7 +33,7 @@ Feature: Onboarding - Create wallet
   @LW-2975
   Scenario Outline: Create Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow and "not fill" values
+    And I go to "Wallet setup" page from "Create" wallet flow and not fill values
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -109,19 +109,19 @@ Feature: Onboarding - Create wallet
   @LW-2443
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     Then "Next" button is enabled during onboarding process
 
   @LW-3212
   Scenario: Create Wallet - Mnemonic verification - all empty fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and "not fill" values
+    And I go to "Mnemonic verification" page from "Create" wallet flow and not fill values
     Then "Next" button is disabled during onboarding process
 
   @LW-3213
   Scenario: Create Wallet - Mnemonic verification - clear one of fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     Then "Next" button is enabled during onboarding process
     And I clear one random field
     Then "Next" button is disabled during onboarding process
@@ -129,21 +129,21 @@ Feature: Onboarding - Create wallet
   @LW-2444
   Scenario: Create Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2445 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow
+    And I go to "Wallet setup" page from "Create" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
 
   @LW-3060
   Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I click "Next" button during wallet setup
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
@@ -155,7 +155,7 @@ Feature: Onboarding - Create wallet
     And I click "Remove wallet" button on "Remove wallet" modal
     And I reject analytics banner on "Get started" page
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I click "Next" button during wallet setup
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
@@ -248,7 +248,7 @@ Feature: Onboarding - Create wallet
   @LW-8500
   Scenario: Create Wallet - Mnemonic verification - incorrect word
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I change one random field
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process
