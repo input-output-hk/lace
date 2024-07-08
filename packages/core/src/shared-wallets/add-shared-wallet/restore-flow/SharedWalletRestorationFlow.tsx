@@ -8,16 +8,13 @@ import { FileErrorMessage, FileValidationError, SharedWalletRestorationStep } fr
 import { validateJson } from './validateJson';
 
 type SharedWalletRestorationProps = {
+  exitTheFlow: () => void;
   navigateToAppHome: () => void;
-  navigateToStart: () => void;
 };
 
 const UPLOAD_JSON_ID = 'upload-json';
 
-export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
-  navigateToStart,
-  navigateToAppHome,
-}) => {
+export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({ exitTheFlow, navigateToAppHome }) => {
   const [file, setFile] = useState<File | undefined>();
   const [isFileValid, setFileValid] = useState(false);
   const [error, setError] = useState<FileValidationError | undefined>();
@@ -77,7 +74,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
       <SharedWalletLayout
         title={translations.title}
         description={translations.subtitle}
-        onBack={navigateToStart}
+        onBack={exitTheFlow}
         onNext={navigateToAppHome}
         isNextEnabled={!!file && isFileValid}
         customNextLabel={translations.next}
