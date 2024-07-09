@@ -5,6 +5,55 @@ Feature: NFT - Folders - Popup view
     Given Wallet is synced
     And all NFT folders are removed
 
+  @LW-7268 @LW-7269
+  Scenario: Popup-view - NFT Folders - Select NFTs page displayed
+    Given I navigate to NFTs popup page
+    And I save all NFTs that I have
+    When I click "Create folder" button on NFTs page
+    And I enter a folder name "example folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    Then I see "Select NFTs" page in popup mode
+    And No NFT is selected
+    And "Select NFTs" page is showing all NFTs that I have
+    And "Next" button is disabled on "Create folder" page
+
+  @LW-7270
+  Scenario: Popup-view - NFT Folders - Select NFTs page - back button click
+    Given I navigate to "Select NFTs" page in popup mode
+    When I close the drawer by clicking back button
+    Then I see "Create NFT folder" drawer in popup mode
+
+  @LW-7273
+  Scenario: Popup-view - NFT Folders - Select NFTs page - select and unselect a NFT
+    Given I navigate to "Select NFTs" page in popup mode
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is selected
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is not selected
+
+  @LW-7274
+  Scenario: Popup-view - NFT Folders - Select NFTs page - search for NFT - no results
+    Given I navigate to "Select NFTs" page in popup mode
+    When I enter "some random phrase" into the search bar on "Select NFTs" drawer
+    Then I see no results for "Select NFTs" drawer
+
+  @LW-7267
+  Scenario: Popup-view - NFT Folders - Creating a folder happy path
+    Given I navigate to NFTs popup page
+    And I click "Create folder" button on NFTs page
+    And I enter a folder name "Sample NFT folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    And I click NFT with name "Ibilecoin"
+    And I click NFT with name "Bison Coin"
+    And I click "Next" button on "Select NFTs" page
+    Then I see a toast with text: "Folder created successfully"
+    And I do not see "Select NFTs" page in popup mode
+    And I see folder with name "Sample NFT folder" on the NFTs page
+    When I left click on the NFT folder with name "Sample NFT folder"
+    Then I see "Sample NFT folder" NFT folder page in popup mode
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "Bison Coin" on the NFT folder page
+
   @LW-7272
   Scenario: Popup-view - NFT Folders - Select NFTs page - clear button
     Given I navigate to "Select NFTs" page in popup mode
@@ -123,66 +172,3 @@ Feature: NFT - Folders - Popup view
     And I enter a folder name "Sample NFT folder3" into "Folder name" input
     Then I do not see "Given name already exists" error on "Name your folder" page
     And "Confirm" button is enabled on "Rename your folder" drawer
-
-  @LW-7179
-  Scenario Outline: Popup-view - NFT Folders - Folder thumbnail when there are <number_of_nfts_in_folder> in it
-    Given I navigate to NFTs popup page
-    When I create folder with name: "Sample NFT folder1" that contains <number_of_nfts_in_folder> NFTs
-    Then Folder "Sample NFT folder1" displays <number_of_nft_thumbnails> NFT thumbnails
-    And There is a NFTs counter showing <number_of_remaining_nfts> of remaining NFTs in folder "Sample NFT folder1"
-
-    Examples:
-      | number_of_nfts_in_folder | number_of_nft_thumbnails | number_of_remaining_nfts |
-      | 1                        | 1                        | 0                        |
-      | 2                        | 2                        | 0                        |
-      | 3                        | 3                        | 0                        |
-      | 4                        | 4                        | 0                        |
-      | 5                        | 3                        | 2                        |
-      | 9                        | 3                        | 6                        |
-
-  @LW-7180
-  Scenario Outline: Popup-view - NFT Folders - Folder thumbnail & counter updated when <action> NFT to <number_of_nfts_in_folder> NFTs
-    Given I navigate to NFTs popup page
-    And I create folder with name: "Sample NFT folder1" that contains <number_of_nfts_in_folder> NFTs
-    When I left click on the NFT folder with name "Sample NFT folder1"
-    When I <action> 1 NFT to or from the folder
-    And I close the drawer by clicking back button
-    Then Folder "Sample NFT folder1" displays <number_of_nft_thumbnails> NFT thumbnails
-    And There is a NFTs counter showing <number_of_remaining_nfts> of remaining NFTs in folder "Sample NFT folder1"
-    Examples:
-      | number_of_nfts_in_folder | action |  number_of_nft_thumbnails | number_of_remaining_nfts |
-      | 1                        | add    |  2                        | 0                        |
-      | 3                        | add    |  4                        | 0                        |
-      | 4                        | add    |  3                        | 2                        |
-      | 6                        | add    |  3                        | 4                        |
-      | 1                        | remove |  0                        | 0                        |
-      | 4                        | remove |  3                        | 0                        |
-      | 5                        | remove |  4                        | 0                        |
-      | 6                        | remove |  3                        | 2                        |
-
-  @LW-7852
-  Scenario: Popup-view - NFT Folders - Click NFT in Folder
-    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
-    And I navigate to NFTs popup page
-    And I left click on the NFT folder with name "Sample NFT folder"
-    And I see "Sample NFT folder" NFT folder page in popup mode
-    When I click NFT with name "Ibilecoin"
-    Then I am on a NFT details on the popup view for NFT with name: "Ibilecoin"
-
-  @LW-10456 @Pending
-  @issue=LW-10634
-  Scenario: Popup-view - NFT Folders - Search bar for NFTs
-    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
-    And I navigate to NFTs popup page
-    And I search for NFT with name: "LaceNFT"
-    Then I see NFT with name "LaceNFT" on the NFT folder page
-    And I do not see NFT with name: "Ibilecoin" on the NFTs page
-
-  @LW-10457
-  Scenario: Popup-view - NFT Folders - NFTs details show NFTs path
-    Given the NFT folder with name "SampleFolder" and 2 NFT was created
-    And I navigate to NFTs popup page
-    And I left click on the NFT folder with name "SampleFolder"
-    And I see "SampleFolder" NFT folder page in popup mode
-    When I click NFT with name "Ibilecoin"
-    Then I see NFTs Folder path: "Root/SampleFolder"

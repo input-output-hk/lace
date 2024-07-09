@@ -6,7 +6,7 @@ export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./src/features/**/*.feature'],
   suites: {
-    batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended.feature'],
+    batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended*.feature'],
     batch2: [
       './src/features/SendTransactionSimpleExtended.part2.feature',
       './src/features/SendTransactionSimpleExtended.part3.feature',
@@ -34,7 +34,8 @@ export const config: WebdriverIO.Config = {
       './src/features/Collateral*.feature',
       './src/features/NavigationTop*.feature',
       './src/features/AdaHandleSend*.feature',
-      './src/features/SendTransactionSimpleExtended.part1.feature'
+      './src/features/SendTransactionSimpleExtended.part1.feature',
+      './src/features/SendTransactionSimpleExtended.part4.feature'
     ],
     batch7: [
       './src/features/DAppConnector*.feature',
@@ -75,15 +76,15 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/SendTransactionSimple*.feature',
       './src/features/e2e/StakingInitialFundsE2E.feature',
       './src/features/e2e/StakingSwitchingPools*.feature',
-      './src/features/SettingsPagePopup.feature'
+      './src/features/SettingsPagePopup*.feature'
     ],
     batch14: ['./src/features/Transactions*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature'],
-    batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended.feature']
+    batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended*.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],
-  maxInstances: 2,
+  maxInstances: 1,
   maxInstancesPerCapability: 1,
   path: '/',
   logLevel: 'error',
