@@ -3,8 +3,8 @@ import { addEllipsis } from '@lace/common';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
+import { SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
-import { SharedWalletCreationStep } from '../types';
 import styles from './SetupSharedWallet.module.scss';
 import { WalletNameInput } from './WalletNameInput';
 
