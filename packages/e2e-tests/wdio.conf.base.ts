@@ -10,7 +10,11 @@ export const config: WebdriverIO.Config = {
     batch2: [
       './src/features/SendTransactionSimpleExtended.part2.feature',
       './src/features/SendTransactionSimpleExtended.part3.feature',
-      './src/features/governance/CIP95StaticMethods.feature'
+      './src/features/governance/CIP95StaticMethods.feature',
+      './src/features/FiatOnRampOffRampBanxa*.feature',
+      './src/features/MultidelegationDelegatedFundsMultiple*.feature',
+      './src/features/NFTsExtended.feature',
+      './src/features/NFTsPopup.feature'
     ],
     batch3: [
       './src/features/AddNewWallet*.feature',
@@ -21,9 +25,7 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature'
+      './src/features/analytics/AnalyticsOnboardingEvents.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
@@ -37,13 +39,7 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionSimpleExtended.part1.feature',
       './src/features/SendTransactionSimpleExtended.part4.feature'
     ],
-    batch7: [
-      './src/features/DAppConnector*.feature',
-      './src/features/FiatOnRampOffRampBanxa*.feature',
-      './src/features/MultidelegationDelegatedFundsMultiple*.feature',
-      './src/features/NFTsExtended.feature',
-      './src/features/NFTsPopup.feature'
-    ],
+    batch7: ['./src/features/DAppConnector*.feature'],
     batch8: [
       './src/features/EmptyStates*.feature',
       './src/features/ForgotPassword.feature',
@@ -64,7 +60,9 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsSetting*.feature',
       './src/features/analytics/AnalyticsStaking*.feature',
       './src/features/analytics/AnalyticsToggle*.feature',
-      './src/features/analytics/AnalyticsToken*.feature'
+      './src/features/analytics/AnalyticsToken*.feature',
+      './src/features/SendTransactionMetadata*.feature',
+      './src/features/SendTransactionMultipleSelection*.feature'
     ],
     batch12: [
       './src/features/AdaHandleExtended.feature',
