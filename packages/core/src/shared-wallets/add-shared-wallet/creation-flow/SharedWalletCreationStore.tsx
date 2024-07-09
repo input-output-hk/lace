@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { v1 as uuid } from 'uuid';
 import { makeInitialStateProvider } from '../../initial-state-provider';
-import { StateType, defineStateShape } from '../../state-utils';
+import { StateType, TransitionHandler, defineStateShape } from '../../state-utils';
 import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
 import { SharedWalletCreationStep } from './types';
@@ -91,7 +91,7 @@ export type CreationFlowState =
   | StateQuorum
   | StateShareDetails;
 
-export enum SharedWalletActionType {
+export enum SharedWalletCreationActionType {
   BACK = 'BACK',
   CHANGE_WALLET_NAME = 'CHANGE_WALLET_NAME',
   COSIGNERS_CHANGED = 'COSIGNERS_CHANGED',
@@ -99,16 +99,16 @@ export enum SharedWalletActionType {
   QUORUM_RULES_CHANGED = 'QUORUM_RULES_CHANGED',
 }
 
-type Action =
-  | { type: SharedWalletActionType.NEXT }
-  | { type: SharedWalletActionType.BACK }
-  | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string }
-  | { coSigner: CoSigner; type: SharedWalletActionType.COSIGNERS_CHANGED }
-  | { quorumRules: QuorumOptionValue; type: SharedWalletActionType.QUORUM_RULES_CHANGED };
+type SharedWalletCreationAction =
+  | { type: SharedWalletCreationActionType.NEXT }
+  | { type: SharedWalletCreationActionType.BACK }
+  | { type: SharedWalletCreationActionType.CHANGE_WALLET_NAME; walletName: string }
+  | { coSigner: CoSigner; type: SharedWalletCreationActionType.COSIGNERS_CHANGED }
+  | { quorumRules: QuorumOptionValue; type: SharedWalletCreationActionType.QUORUM_RULES_CHANGED };
 
-type Handler<S extends CreationFlowState> = (prevState: S, action: Action) => CreationFlowState;
+type Handler<S extends CreationFlowState> = TransitionHandler<S, CreationFlowState, SharedWalletCreationAction>;
 
-type StateMachine = {
+type SharedWalletCreationStateMachine = {
   [SharedWalletCreationStep.Setup]: Handler<StateSetup>;
   [SharedWalletCreationStep.CoSigners]: Handler<StateCoSigners>;
   [SharedWalletCreationStep.CoSignersImportantInfo]: Handler<StateCoSignersImportantInfo>;
@@ -117,7 +117,7 @@ type StateMachine = {
 };
 
 type ContextValue = {
-  dispatch: Dispatch<Action>;
+  dispatch: Dispatch<SharedWalletCreationAction>;
   state: CreationFlowState;
 };
 
@@ -152,7 +152,7 @@ const getNextCoSignersDirtyValue = ({
   matchingPrevCoSigner,
   prevState,
 }: {
-  action: { coSigner: CoSigner; type: SharedWalletActionType.COSIGNERS_CHANGED };
+  action: { coSigner: CoSigner; type: SharedWalletCreationActionType.COSIGNERS_CHANGED };
   matchingPrevCoSigner: CoSigner;
   prevState: StateCoSigners;
 }) =>
@@ -167,24 +167,24 @@ const getNextCoSignersDirtyValue = ({
   );
 
 const makeStateMachine = ({
+  exitTheFlow,
   navigateToAppHome,
-  navigateToStart,
 }: {
+  exitTheFlow: () => void;
   navigateToAppHome: () => void;
-  navigateToStart: () => void;
-}): StateMachine => ({
+}): SharedWalletCreationStateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
-    if (action.type === SharedWalletActionType.CHANGE_WALLET_NAME) {
+    if (action.type === SharedWalletCreationActionType.CHANGE_WALLET_NAME) {
       return stateSetup({
         ...prevState,
         walletName: action.walletName,
       });
     }
-    if (action.type === SharedWalletActionType.BACK) {
-      navigateToStart();
+    if (action.type === SharedWalletCreationActionType.BACK) {
+      exitTheFlow();
       return prevState;
     }
-    if (action.type === SharedWalletActionType.NEXT) {
+    if (action.type === SharedWalletCreationActionType.NEXT) {
       if (!prevState.walletName) return prevState;
       const coSigners = [createEmptyCosignerObject(), createEmptyCosignerObject()];
       return stateCoSigners({
@@ -199,7 +199,7 @@ const makeStateMachine = ({
     return prevState;
   },
   [SharedWalletCreationStep.CoSigners]: (prevState, action) => {
-    if (action.type === SharedWalletActionType.COSIGNERS_CHANGED) {
+    if (action.type === SharedWalletCreationActionType.COSIGNERS_CHANGED) {
       const matchingPrevCoSigner = prevState.coSigners.find((prevCosigner) => prevCosigner.id === action.coSigner.id);
       if (!matchingPrevCoSigner) return prevState;
 
@@ -227,7 +227,7 @@ const makeStateMachine = ({
         coSigners: nextCoSigners,
       });
     }
-    if (action.type === SharedWalletActionType.BACK) {
+    if (action.type === SharedWalletCreationActionType.BACK) {
       return stateSetup({
         ...prevState,
         coSignerInputsDirty: undefined,
@@ -236,7 +236,7 @@ const makeStateMachine = ({
         step: SharedWalletCreationStep.Setup,
       });
     }
-    if (action.type === SharedWalletActionType.NEXT) {
+    if (action.type === SharedWalletCreationActionType.NEXT) {
       if (prevState.coSigners.length === 0) return prevState;
 
       return stateCoSignersImportantInfo({
@@ -247,13 +247,13 @@ const makeStateMachine = ({
     return prevState;
   },
   [SharedWalletCreationStep.CoSignersImportantInfo]: (prevState, action) => {
-    if (action.type === SharedWalletActionType.BACK) {
+    if (action.type === SharedWalletCreationActionType.BACK) {
       return stateCoSigners({
         ...prevState,
         step: SharedWalletCreationStep.CoSigners,
       });
     }
-    if (action.type === SharedWalletActionType.NEXT) {
+    if (action.type === SharedWalletCreationActionType.NEXT) {
       // Having two cosigner fields fixed we need to filter out the empty cosigner
       const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
       if (coSigners.length === 0) return prevState;
@@ -270,7 +270,7 @@ const makeStateMachine = ({
     return prevState;
   },
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
-    if (action.type === SharedWalletActionType.BACK) {
+    if (action.type === SharedWalletCreationActionType.BACK) {
       // Having two cosigner fields fixed we need to fall back to two entries if user specified
       // just one because the empty one was filtere out in brevious step.
       const coSigners = [
@@ -284,13 +284,13 @@ const makeStateMachine = ({
         step: SharedWalletCreationStep.CoSigners,
       });
     }
-    if (action.type === SharedWalletActionType.NEXT) {
+    if (action.type === SharedWalletCreationActionType.NEXT) {
       return stateShareDetails({
         ...prevState,
         step: SharedWalletCreationStep.ShareDetails,
       });
     }
-    if (action.type === SharedWalletActionType.QUORUM_RULES_CHANGED) {
+    if (action.type === SharedWalletCreationActionType.QUORUM_RULES_CHANGED) {
       return stateQuorum({
         ...prevState,
         quorumRules: action.quorumRules,
@@ -299,7 +299,7 @@ const makeStateMachine = ({
     return prevState;
   },
   [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
-    if (action.type === SharedWalletActionType.NEXT) {
+    if (action.type === SharedWalletCreationActionType.NEXT) {
       navigateToAppHome();
       return prevState;
     }
@@ -310,9 +310,9 @@ const makeStateMachine = ({
 
 export type SharedWalletCreationStoreSharedProps = {
   activeWalletName: string;
+  exitTheFlow: () => void;
   initialWalletName: string;
   navigateToAppHome: () => void;
-  navigateToStart: () => void;
 };
 
 export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
@@ -322,23 +322,26 @@ export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProp
 export const SharedWalletCreationStore = ({
   activeWalletName,
   children,
+  exitTheFlow,
   initialWalletName,
   navigateToAppHome,
-  navigateToStart,
 }: SharedWalletCreationStoreProps): ReactElement => {
   const initialState = useInitialState(makeInitialState(activeWalletName));
-  const [state, dispatch] = useReducer((prevState: CreationFlowState, action: Action): CreationFlowState => {
-    const stateMachine = makeStateMachine({
-      navigateToAppHome,
-      navigateToStart,
-    });
-    const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
-    return handler(prevState, action);
-  }, initialState);
+  const [state, dispatch] = useReducer(
+    (prevState: CreationFlowState, action: SharedWalletCreationAction): CreationFlowState => {
+      const stateMachine = makeStateMachine({
+        exitTheFlow,
+        navigateToAppHome,
+      });
+      const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
+      return handler(prevState, action);
+    },
+    initialState,
+  );
 
   useEffect(() => {
     if (state.walletName !== undefined || initialWalletName === undefined) return;
-    dispatch({ type: SharedWalletActionType.CHANGE_WALLET_NAME, walletName: initialWalletName });
+    dispatch({ type: SharedWalletCreationActionType.CHANGE_WALLET_NAME, walletName: initialWalletName });
   }, [state.walletName, initialWalletName]);
 
   const contextValue: ContextValue = useMemo(
