@@ -36,7 +36,7 @@
       "additionalProperties": true
     },
     "nativeScript": {
-      "$ref": "https://raw.githubusercontent.com/cardano-foundation/CIPs/master/CIP-0116/cardano-babbage.json#/definitions/NativeScript"
+      "$ref": "./cardano-babbage.json#/definitions/NativeScript"
     }
   },
   "required": ["metadata", "nativeScript"],

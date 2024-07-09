@@ -1,11 +1,7 @@
-import Ajv from 'ajv';
 import type { StateShareDetails } from '../../creation-flow/state-and-types';
-import sharedWalletSchema from '../../../docs/shared-wallet-schema.json';
 import { QuorumRadioOption } from '../Quorum';
 
 export const FILENAME = 'shared-wallet-config.json';
-
-const ajv = new Ajv();
 
 interface SharedWalletSchema {
   coSigners: Array<{
@@ -44,15 +40,6 @@ export const downloadWalletData = (state: StateShareDetails): void => {
   try {
     // Map the state to the schema structure
     const data = mapStateToSchema(state);
-
-    // Validate the data against the schema
-    const validate = ajv.compile(sharedWalletSchema);
-    const valid = validate(data);
-
-    if (!valid) {
-      console.error('Validation errors:', validate.errors);
-      throw new Error('Validation failed. Please check the data and try again.');
-    }
 
     // Create a JSON blob from the validated data
     const indentation = 2;
