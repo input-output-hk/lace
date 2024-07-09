@@ -9,10 +9,10 @@ import React, {
   useReducer,
 } from 'react';
 import { v1 as uuid } from 'uuid';
-import { downloadWalletData } from '@src/shared-wallets/add-shared-wallet/creation-flow/ShareWalletDetails/utils';
 import { makeInitialStateProvider } from '../../initial-state-provider';
 import { CoSigner } from './AddCoSigners';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
+import { downloadWalletData } from './ShareWalletDetails/utils';
 import {
   CreationFlowState,
   SharedWalletCreationStep,
