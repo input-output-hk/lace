@@ -9,7 +9,7 @@ import {
   SharedWalletCreationStoreSharedProps,
 } from './SharedWalletCreationStore';
 import { ShareWalletDetails } from './ShareWalletDetails';
-import { SharedWalletCreationStep } from './types';
+import { SharedWalletCreationStep } from './state-and-types';
 
 type SharedWalletCreationFlowProps = SharedWalletCreationStoreSharedProps;
 
@@ -50,7 +50,10 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
           />
         )}
         {state.step === SharedWalletCreationStep.ShareDetails && (
-          <ShareWalletDetails onNext={() => dispatch({ type: SharedWalletActionType.NEXT })} />
+          <ShareWalletDetails
+            onNext={() => dispatch({ type: SharedWalletActionType.NEXT })}
+            onDownload={() => dispatch({ type: SharedWalletActionType.DOWNLOAD_SHARED_WALLET_JSON })}
+          />
         )}
         {state.step === SharedWalletCreationStep.CoSignersImportantInfo && (
           <ImportantInfoDialog

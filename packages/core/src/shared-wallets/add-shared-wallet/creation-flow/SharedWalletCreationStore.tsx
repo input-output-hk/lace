@@ -9,92 +9,31 @@ import React, {
   useReducer,
 } from 'react';
 import { v1 as uuid } from 'uuid';
+import { downloadWalletData } from '@src/shared-wallets/add-shared-wallet/creation-flow/ShareWalletDetails/utils';
 import { makeInitialStateProvider } from '../../initial-state-provider';
-import { StateType, defineStateShape } from '../../state-utils';
-import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
+import { CoSigner } from './AddCoSigners';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
-import { SharedWalletCreationStep } from './types';
+import {
+  CreationFlowState,
+  SharedWalletCreationStep,
+  StateCoSigners,
+  StateCoSignersImportantInfo,
+  StateQuorum,
+  StateSetup,
+  StateShareDetails,
+  stateCoSigners,
+  stateCoSignersImportantInfo,
+  stateQuorum,
+  stateSetup,
+  stateShareDetails,
+} from './state-and-types';
 import { validateCoSigners } from './validateCoSigners';
-
-const makeState = defineStateShape<{
-  constantDataPart: {
-    activeWalletName: string;
-  };
-  mainPart: {
-    step: SharedWalletCreationStep;
-  };
-  variableDataPart: {
-    coSignerInputsDirty: CoSignerDirty[];
-    coSignerInputsErrors: CoSignerError[];
-    coSigners: CoSigner[];
-    quorumRules: QuorumOptionValue;
-    walletName: string;
-  };
-}>();
-
-const stateSetup = makeState<{
-  coSignerInputsDirty: undefined;
-  coSignerInputsErrors: undefined;
-  coSigners: undefined;
-  quorumRules: undefined;
-  step: SharedWalletCreationStep.Setup;
-  walletName: string | undefined;
-}>();
-type StateSetup = StateType<typeof stateSetup>;
-
-type StateCoSignersCommon = {
-  coSignerInputsDirty: CoSignerDirty[];
-  coSignerInputsErrors: CoSignerError[];
-  coSigners: CoSigner[];
-  quorumRules: undefined;
-  walletName: string;
-};
-
-const stateCoSigners = makeState<
-  StateCoSignersCommon & {
-    step: SharedWalletCreationStep.CoSigners;
-  }
->();
-type StateCoSigners = StateType<typeof stateCoSigners>;
-
-const stateCoSignersImportantInfo = makeState<
-  StateCoSignersCommon & {
-    step: SharedWalletCreationStep.CoSignersImportantInfo;
-  }
->();
-type StateCoSignersImportantInfo = StateType<typeof stateCoSignersImportantInfo>;
-
-const stateQuorum = makeState<{
-  coSignerInputsDirty: CoSignerDirty[];
-  coSignerInputsErrors: CoSignerError[];
-  coSigners: CoSigner[];
-  quorumRules: QuorumOptionValue;
-  step: SharedWalletCreationStep.Quorum;
-  walletName: string;
-}>();
-type StateQuorum = StateType<typeof stateQuorum>;
-
-const stateShareDetails = makeState<{
-  coSignerInputsDirty: CoSignerDirty[];
-  coSignerInputsErrors: CoSignerError[];
-  coSigners: CoSigner[];
-  quorumRules: QuorumOptionValue;
-  step: SharedWalletCreationStep.ShareDetails;
-  walletName: string;
-}>();
-type StateShareDetails = StateType<typeof stateShareDetails>;
-
-export type CreationFlowState =
-  | StateSetup
-  | StateCoSigners
-  | StateCoSignersImportantInfo
-  | StateQuorum
-  | StateShareDetails;
 
 export enum SharedWalletActionType {
   BACK = 'BACK',
   CHANGE_WALLET_NAME = 'CHANGE_WALLET_NAME',
   COSIGNERS_CHANGED = 'COSIGNERS_CHANGED',
+  DOWNLOAD_SHARED_WALLET_JSON = 'DOWNLOAD_SHARED_WALLET_JSON',
   NEXT = 'NEXT',
   QUORUM_RULES_CHANGED = 'QUORUM_RULES_CHANGED',
 }
@@ -102,6 +41,7 @@ export enum SharedWalletActionType {
 type Action =
   | { type: SharedWalletActionType.NEXT }
   | { type: SharedWalletActionType.BACK }
+  | { type: SharedWalletActionType.DOWNLOAD_SHARED_WALLET_JSON }
   | { type: SharedWalletActionType.CHANGE_WALLET_NAME; walletName: string }
   | { coSigner: CoSigner; type: SharedWalletActionType.COSIGNERS_CHANGED }
   | { quorumRules: QuorumOptionValue; type: SharedWalletActionType.QUORUM_RULES_CHANGED };
@@ -301,6 +241,9 @@ const makeStateMachine = ({
   [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
     if (action.type === SharedWalletActionType.NEXT) {
       navigateToAppHome();
+      return prevState;
+    } else if (action.type === SharedWalletActionType.DOWNLOAD_SHARED_WALLET_JSON) {
+      downloadWalletData(prevState);
       return prevState;
     }
 

@@ -2,8 +2,8 @@ import { Box, Card, Flex, RadioButtonGroup, Select, Text } from '@input-output-h
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
+import { SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
-import { SharedWalletCreationStep } from '../types';
 
 const minimumTotalCosignersForEnablingDropdown = 3;
 

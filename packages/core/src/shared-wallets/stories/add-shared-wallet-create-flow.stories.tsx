@@ -2,11 +2,10 @@ import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { QuorumRadioOption } from '../add-shared-wallet/creation-flow/Quorum';
 import {
-  CreationFlowState,
   createEmptyCosignerObject,
   makeInitialState,
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
-import { SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/types';
+import { CreationFlowState, SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/state-and-types';
 import { validateCoSigners } from '../add-shared-wallet/creation-flow/validateCoSigners';
 import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper } from './AddSharedWalletStorybookHelper';
 
