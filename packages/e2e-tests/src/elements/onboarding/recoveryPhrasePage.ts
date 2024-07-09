@@ -7,6 +7,7 @@ import { clearInputFieldValue, setInputFieldValue } from '../../utils/inputField
 import testContext from '../../utils/testContext';
 import { browser } from '@wdio/globals';
 import { setClipboardReadPermission } from '../../utils/browserPermissionsUtils';
+import clipboard from 'clipboardy';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -179,9 +180,10 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
       await this.nextButton.click();
     }
     if (fillValues) {
-      flowType === 'Create'
-        ? await this.clickOnPasteFromClipboardButton()
-        : await this.enterMnemonicWords(mnemonicWords);
+      if (flowType === 'Restore') {
+        await clipboard.write(mnemonicWords.join(','));
+      }
+      await this.clickOnPasteFromClipboardButton();
     }
   }
 }
