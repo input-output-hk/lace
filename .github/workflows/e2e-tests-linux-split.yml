@@ -65,7 +65,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lace-browser-extension-dist-build-${{ github.ref_name }}.${{ github.sha }}
+          name: lace-browser-extension-dist-build-${{ github.sha }}
           path: ./apps/browser-extension-wallet/dist
 
   tests-run-split:

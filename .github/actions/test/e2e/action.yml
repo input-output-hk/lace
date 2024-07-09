@@ -49,7 +49,7 @@ runs:
     - name: Get built extension
       uses: actions/download-artifact@v4
       with:
-        name: lace-browser-extension-dist-build-${{ github.ref_name }}.${{ github.sha }}
+        name: lace-browser-extension-dist-build-${{ github.sha }}
         path: ./apps/browser-extension-wallet/dist
     - name: Decrypt test data
       working-directory: ./packages/e2e-tests
