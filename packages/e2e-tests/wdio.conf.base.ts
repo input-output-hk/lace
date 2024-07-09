@@ -13,7 +13,6 @@ export const config: WebdriverIO.Config = {
       './src/features/governance/CIP95StaticMethods.feature'
     ],
     batch3: [
-      './src/features/AddNewWallet*.feature',
       './src/features/analytics/AnalyticsActivity*.feature',
       './src/features/analytics/AnalyticsAddress*.feature',
       './src/features/analytics/AnalyticsEventProperites*.feature',
@@ -69,6 +68,7 @@ export const config: WebdriverIO.Config = {
     batch12: [
       './src/features/AdaHandleExtended.feature',
       './src/features/AdaHandlePopup.feature',
+      './src/features/AddNewWallet*.feature',
       './src/features/e2e/SendTransactionDappE2E.feature',
       './src/features/e2e/SendTransactionBundlesE2E.feature'
     ],
