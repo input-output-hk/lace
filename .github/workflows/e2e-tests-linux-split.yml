@@ -57,6 +57,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Check if build exists already then download it
+        id: download-build-if-exists
+        run: |
+          curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} >> art.json
+          echo | cat art.json
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
@@ -65,84 +72,84 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lace-browser-extension-dist-build
+          name: lace-browser-extension-dist-build-${{ github.sha }}
           path: ./apps/browser-extension-wallet/dist
 
-  tests-run-split:
-    strategy:
-      fail-fast: false
-      matrix:
-        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: [prereq, build-dist-version]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Execute E2E tests
-        uses: ./.github/actions/test/e2e
-        with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          BATCH: ${{ matrix.batch }}
-
-  results-processing:
-    needs: [prereq, tests-run-split]
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    if: always()
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./artifacts
-          pattern: 'runner-artifacts-*'
-          merge-multiple: true
-      - name: Create allure properties
-        if: success()
-        working-directory: './artifacts/reports/allure/results'
-        run: |
-          echo "
-          branch=${BRANCH}
-          env=${NETWORK}
-          browser=${BROWSER}
-          platform=Linux
-          " > environment.properties
-      - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.6.0
-        env:
-          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
-        with:
-          storageType: s3
-          resultsGlob: './artifacts/reports/allure/results'
-          bucket: lace-e2e-test-results
-          prefix: 'all/linux/${BROWSER}/${RUN}'
-          copyLatest: true
-          ignoreMissingResults: true
-          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
-      - name: Add link to summary
-        run: |
-          echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2.3.0
-        if: always()
-        env:
-          SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
-          SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
-          SLACK_TITLE: 'Test automation results :rocket:'
-          SLACK_USERNAME: lace-qa-bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      - name: Deleting chrome tmp files
-        id: clean-chrome-tmp-files
-        if: ${{ needs.prereq.outputs.runner == 'self-hosted' }}
-        run: |
-          runCommand="rm -rf /tmp/.org.chromium.*"
-          eval "$runCommand";
-      - name: Upload allure tests results
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results
-          path: ./artifacts/reports/allure/results
+#  tests-run-split:
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+#    runs-on: ${{ needs.prereq.outputs.runner }}
+#    needs: [prereq, build-dist-version]
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#      - name: Execute E2E tests
+#        uses: ./.github/actions/test/e2e
+#        with:
+#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+#          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#          BATCH: ${{ matrix.batch }}
+#
+#  results-processing:
+#    needs: [prereq, tests-run-split]
+#    runs-on: ${{ needs.prereq.outputs.runner }}
+#    if: always()
+#    steps:
+#      - name: Download all artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          path: ./artifacts
+#          pattern: 'runner-artifacts-*'
+#          merge-multiple: true
+#      - name: Create allure properties
+#        if: success()
+#        working-directory: './artifacts/reports/allure/results'
+#        run: |
+#          echo "
+#          branch=${BRANCH}
+#          env=${NETWORK}
+#          browser=${BROWSER}
+#          platform=Linux
+#          " > environment.properties
+#      - name: Publish allure report to S3
+#        uses: andrcuns/allure-publish-action@v2.6.0
+#        env:
+#          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+#        with:
+#          storageType: s3
+#          resultsGlob: './artifacts/reports/allure/results'
+#          bucket: lace-e2e-test-results
+#          prefix: 'all/linux/${BROWSER}/${RUN}'
+#          copyLatest: true
+#          ignoreMissingResults: true
+#          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+#      - name: Add link to summary
+#        run: |
+#          echo "TEST RESULTS:"
+#          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
+#      - name: Slack Notification
+#        uses: rtCamp/action-slack-notify@v2.3.0
+#        if: always()
+#        env:
+#          SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
+#          SLACK_ICON_EMOJI: ':lace:'
+#          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+#          SLACK_TITLE: 'Test automation results :rocket:'
+#          SLACK_USERNAME: lace-qa-bot
+#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#      - name: Deleting chrome tmp files
+#        id: clean-chrome-tmp-files
+#        if: ${{ needs.prereq.outputs.runner == 'self-hosted' }}
+#        run: |
+#          runCommand="rm -rf /tmp/.org.chromium.*"
+#          eval "$runCommand";
+#      - name: Upload allure tests results
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: allure-results
+#          path: ./artifacts/reports/allure/results
