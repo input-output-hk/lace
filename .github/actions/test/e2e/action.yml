@@ -55,7 +55,7 @@ runs:
         echo 4^ $ART_ID
         if [ "$ART_ID" != "null" ]; then
           echo $(pwd)
-          curl -v -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}"
+          curl -v -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${GITHUB_TOKEN}"
           echo $(ls -lh | grep build_artifact.zip)
           mkdir ./apps/browser-extension-wallet/dist
           unzip -f build_artifact.zip -o ./apps/browser-extension-wallet/dist

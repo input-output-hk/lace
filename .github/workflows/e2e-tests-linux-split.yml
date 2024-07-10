@@ -77,6 +77,8 @@ jobs:
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
       - name: Build dist version of Lace
+        env:
+            ART_ID: ${{ env.ART_ID }}
         if: ${{ env.ART_ID == ''}}
         uses: ./.github/shared/build
         with:
