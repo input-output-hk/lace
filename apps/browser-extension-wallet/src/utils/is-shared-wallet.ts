@@ -4,9 +4,9 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
 export const isSharedWallet = (wallet?: Wallet.CardanoWallet): boolean => {
-  if (wallet?.source.wallet.type !== WalletType.Script) return false;
+  if (!wallet || wallet.source.wallet.type !== WalletType.Script) return false;
 
-  const { paymentScript, stakingScript } = wallet?.source.wallet;
+  const { paymentScript, stakingScript } = wallet.source.wallet;
 
   return (
     Cardano.isNativeScript(paymentScript) &&

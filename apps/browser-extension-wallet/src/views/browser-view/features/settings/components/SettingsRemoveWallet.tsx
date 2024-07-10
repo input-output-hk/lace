@@ -75,7 +75,9 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
             className={styles.modalDescription}
             data-testid={'remove-wallet-description'}
           >
-            {t('browserView.settings.wallet.general.removeWalletDescription')}
+            {isSharedWallet
+              ? t('browserView.settings.wallet.general.removeSharedWalletDescription')
+              : t('browserView.settings.wallet.general.removeWalletDescription')}
           </Text>
           <Button
             size="medium"
@@ -85,9 +87,7 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
             data-testid="remove-wallet-button"
             disabled={isSharedWallet}
           >
-            {isSharedWallet
-              ? t('browserView.settings.wallet.general.removeSharedWalletDescription')
-              : t('browserView.settings.wallet.general.removeAction', { walletName: walletInfo.name })}
+            {t('browserView.settings.wallet.general.removeAction', { walletName: walletInfo.name })}
           </Button>
         </div>
       </SettingsCard>

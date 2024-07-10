@@ -26,12 +26,12 @@ export type SharedWalletEntrySharedProps = {
 type SharedWalletEntryProps = SharedWalletEntrySharedProps &
   (
     | {
-        createAndImportOptionsDisabled: boolean;
+        createAndImportOptionsDisabled: true;
         keysMode: 'generate';
       }
     | {
         copyKeysToClipboard?: () => Promise<void>;
-        createAndImportOptionsDisabled: boolean;
+        createAndImportOptionsDisabled: false;
         keysMode: 'copy';
       }
   );
