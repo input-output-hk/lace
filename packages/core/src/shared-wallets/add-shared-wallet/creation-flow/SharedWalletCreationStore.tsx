@@ -283,8 +283,6 @@ const makeStateMachine = ({
   },
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.BACK) {
-      // Having three cosigner fields fixed we need to fall back to three entries if user specified
-      // less because the empty ones were filtered out in previous step.
       const coSigners = ensureCorrectCoSignersDataShape(prevState.coSigners);
       return stateCoSigners({
         ...prevState,
