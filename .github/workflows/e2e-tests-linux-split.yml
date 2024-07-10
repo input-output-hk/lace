@@ -67,11 +67,11 @@ jobs:
           if [ "$ART_ID" == "null" ]; then
 #            echo "ART_ID=''" >> $GITHUB_OUTPUT
             echo "No Lace build artifact found, will build it now"
-            exit 0
+#            exit 0
           else
 #            echo "ART_ID=$ART_ID" >> $GITHUB_OUTPUT
             echo "Lace build artifact found no need to build again"
-            exit 1
+#            exit 1
           fi
 #          echo 2^ $ART_ID
 #          echo 2a^ $GITHUB_OUTPUT
