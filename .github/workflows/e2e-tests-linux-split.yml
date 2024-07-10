@@ -67,7 +67,8 @@ jobs:
           echo 1^ $ART_ID
           if [ "$ART_ID" == "null" ]; then
             echo "No Lace build artifact found"
-            ART_ID=''
+            export ART_ID=''
+            export env.ART_ID=''
           else
             echo "Lace build artifact found no need to build again"
           fi
