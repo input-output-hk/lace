@@ -65,26 +65,26 @@ jobs:
           ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
           echo 1^ $ART_ID
           if [ "$ART_ID" == "null" ]; then
-            echo "ART_ID=''" >> $GITHUB_OUTPUT
+#            echo "ART_ID=''" >> $GITHUB_OUTPUT
             echo "No Lace build artifact found, will build it now"
+            exit 0
           else
-            echo "ART_ID=$ART_ID" >> $GITHUB_OUTPUT
+#            echo "ART_ID=$ART_ID" >> $GITHUB_OUTPUT
             echo "Lace build artifact found no need to build again"
+            exit 1
           fi
           echo 2^ $ART_ID
           echo 2a^ $GITHUB_OUTPUT
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
       - name: Build dist version of Lace
-        env:
-            ART_ID: ${{ steps.check-build-exists.outputs.ART_ID }}
-        if: steps.check-build-exists.outputs.ART_ID == ''
+        if: success()
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Upload artifact
-        if: ${{ env.ART_ID == ''}}
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: lace-browser-extension-dist-build-${{ github.sha }}
