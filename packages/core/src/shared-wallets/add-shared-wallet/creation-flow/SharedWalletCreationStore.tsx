@@ -8,10 +8,14 @@ import React, {
   useMemo,
   useReducer,
 } from 'react';
-import { v1 as uuid } from 'uuid';
 import { makeInitialStateProvider } from '../../initial-state-provider';
 import { StateType, TransitionHandler, defineStateShape } from '../../state-utils';
 import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
+import {
+  createCosignerObject,
+  ensureCorrectCoSignersDataShape,
+  indexOfCoSignersDataOfCurrentUser,
+} from './co-signers-data-structure';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
 import { SharedWalletCreationStep } from './types';
 import { validateCoSigners } from './validateCoSigners';
@@ -145,8 +149,6 @@ export const makeInitialState = (activeWalletName: string) =>
     walletName: undefined,
   });
 
-export const createEmptyCosignerObject = (): CoSigner => ({ id: uuid(), keys: '', name: '' });
-
 const getNextCoSignersDirtyValue = ({
   action,
   matchingPrevCoSigner,
@@ -169,9 +171,11 @@ const getNextCoSignersDirtyValue = ({
 const makeStateMachine = ({
   exitTheFlow,
   navigateToAppHome,
+  sharedKeys,
 }: {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
+  sharedKeys: string;
 }): SharedWalletCreationStateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.CHANGE_WALLET_NAME) {
@@ -186,7 +190,7 @@ const makeStateMachine = ({
     }
     if (action.type === SharedWalletCreationActionType.NEXT) {
       if (!prevState.walletName) return prevState;
-      const coSigners = [createEmptyCosignerObject(), createEmptyCosignerObject(), createEmptyCosignerObject()];
+      const coSigners = ensureCorrectCoSignersDataShape([createCosignerObject(sharedKeys)]);
       return stateCoSigners({
         ...prevState,
         coSignerInputsDirty: coSigners.map(({ id }) => ({ id, keys: false, name: false })),
@@ -206,6 +210,14 @@ const makeStateMachine = ({
       const nextCoSigners = prevState.coSigners.map((coSigner) =>
         coSigner.id === action.coSigner.id ? action.coSigner : coSigner,
       );
+
+      if (
+        prevState.coSigners[indexOfCoSignersDataOfCurrentUser].keys !==
+        nextCoSigners[indexOfCoSignersDataOfCurrentUser].keys
+      ) {
+        return prevState;
+      }
+
       const coSignersDirty = getNextCoSignersDirtyValue({
         action,
         matchingPrevCoSigner,
@@ -254,9 +266,9 @@ const makeStateMachine = ({
       });
     }
     if (action.type === SharedWalletCreationActionType.NEXT) {
-      // Having two cosigner fields fixed we need to filter out the empty cosigner
       const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
-      if (coSigners.length === 0) return prevState;
+      const minCoSignersCount = 2;
+      if (coSigners.length < minCoSignersCount) return prevState;
 
       return stateQuorum({
         ...prevState,
@@ -271,14 +283,9 @@ const makeStateMachine = ({
   },
   [SharedWalletCreationStep.Quorum]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.BACK) {
-      // Having two cosigner fields fixed we need to fall back to two entries if user specified
-      // just one because the empty one was filters out in previous step.
-      const coSigners = [
-        prevState.coSigners[0] || createEmptyCosignerObject(),
-        prevState.coSigners[1] || createEmptyCosignerObject(),
-        // eslint-disable-next-line no-magic-numbers
-        prevState.coSigners[2] || createEmptyCosignerObject(),
-      ];
+      // Having three cosigner fields fixed we need to fall back to three entries if user specified
+      // less because the empty ones were filtered out in previous step.
+      const coSigners = ensureCorrectCoSignersDataShape(prevState.coSigners);
       return stateCoSigners({
         ...prevState,
         coSigners,
@@ -315,6 +322,7 @@ export type SharedWalletCreationStoreSharedProps = {
   exitTheFlow: () => void;
   initialWalletName: string;
   navigateToAppHome: () => void;
+  sharedKeys: string;
 };
 
 export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
@@ -327,6 +335,7 @@ export const SharedWalletCreationStore = ({
   exitTheFlow,
   initialWalletName,
   navigateToAppHome,
+  sharedKeys,
 }: SharedWalletCreationStoreProps): ReactElement => {
   const initialState = useInitialState(makeInitialState(activeWalletName));
   const [state, dispatch] = useReducer(
@@ -334,6 +343,7 @@ export const SharedWalletCreationStore = ({
       const stateMachine = makeStateMachine({
         exitTheFlow,
         navigateToAppHome,
+        sharedKeys,
       });
       const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
       return handler(prevState, action);

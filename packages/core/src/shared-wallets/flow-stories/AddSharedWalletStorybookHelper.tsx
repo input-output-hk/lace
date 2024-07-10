@@ -103,6 +103,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
                   setFlow(AddSharedWalletFlowType.GetStarted);
                 }}
                 exitTheFlow={() => setFlow(AddSharedWalletFlowType.GetStarted)}
+                sharedKeys={generatedKeys}
               />
             </SharedWalletCreationFlowInitialStateProvider>
           )}
