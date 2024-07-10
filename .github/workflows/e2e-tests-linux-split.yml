@@ -78,7 +78,7 @@ jobs:
       - name: Build dist version of Lace
         env:
             ART_ID: ${{ steps.check-build-exists.outputs.ART_ID }}
-        if: always()
+        if: ${{ ART_ID == '' }}
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
