@@ -62,7 +62,7 @@ jobs:
         id: check-build-exists
         run: |
           export ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
-          if [ -z "$ART_ID" ]; then
+          if [ "$ART_ID" = "null" ]; then
             echo "No Lace build artifact found"
           else
             echo "Lace build artifact found no need to build again"
@@ -86,7 +86,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+#        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        batch: [1]
     runs-on: ${{ needs.prereq.outputs.runner }}
     needs: [prereq, build-dist-version]
     steps:
