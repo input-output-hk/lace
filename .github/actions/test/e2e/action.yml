@@ -50,10 +50,12 @@ runs:
       shell: bash
       id: download-build-if-exists
       run: |
-        export ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
+        ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
+        echo $ART_ID
         if [ "$ART_ID" != "null" ]; then
           echo $(pwd)
           echo $(ls -ltrh)
+          echo $ART_ID
           curl -o build_artifact.zip --location 'https://api.github.com/repos/input-output-hk/lace/actions/artifacts/'$ART_ID'/zip' -H "$(echo Authorization: Bearer $INPUT_GITHUB_TOKEN)"
           mkdir ./apps/browser-extension-wallet/dist
           unzip -f build_artifact.zip -o ./apps/browser-extension-wallet/dist
