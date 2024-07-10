@@ -62,6 +62,8 @@ runs:
 #      with:
 #        name: lace-browser-extension-dist-build-${{ github.sha }}
 #        path: ./apps/browser-extension-wallet/dist
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
     - name: Decrypt test data
       working-directory: ./packages/e2e-tests
       run: ./decrypt_secret.sh
