@@ -79,7 +79,8 @@ jobs:
       - name: Build dist version of Lace
         env:
             ART_ID: $ART_ID
-        if: ${{ env.ART_ID == ''}}
+            ART_ID2: ${ART_ID}
+        if: ${{ env.ART_ID }}
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
