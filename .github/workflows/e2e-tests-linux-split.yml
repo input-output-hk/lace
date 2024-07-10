@@ -64,14 +64,14 @@ jobs:
           ART_ID: ''
         run: |
           ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
-          echo 1.> $ART_ID
+          echo 1^ $ART_ID
           if [ "$ART_ID" == "null" ]; then
             echo "No Lace build artifact found"
-          ART_ID=''
+            ART_ID=''
           else
             echo "Lace build artifact found no need to build again"
           fi
-          echo 2.> $ART_ID
+          echo 2^ $ART_ID
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
       - name: Build dist version of Lace
