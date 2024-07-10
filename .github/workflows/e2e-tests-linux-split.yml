@@ -61,9 +61,10 @@ jobs:
         shell: bash
         id: check-build-exists
         env:
-          ART_ID: ''
+          ART_ID: 'tempValue'
         run: |
-          ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
+          echo 0^ $ART_ID
+          export ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} | jq -r .artifacts[0].id)
           echo 1^ $ART_ID
           if [ "$ART_ID" == "null" ]; then
             echo "No Lace build artifact found"
