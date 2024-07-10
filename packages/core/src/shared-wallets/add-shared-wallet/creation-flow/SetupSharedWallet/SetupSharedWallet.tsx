@@ -71,7 +71,7 @@ export const SetupSharedWallet = ({
       onNext={onNext}
       isNextEnabled={!walletNameErrorMessage}
       timelineSteps={creationTimelineSteps}
-      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
+      timelineCurrentStep={SharedWalletCreationStep.Setup}
     >
       <WalletNameInput
         value={walletName}

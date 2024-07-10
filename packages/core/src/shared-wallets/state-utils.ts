@@ -20,4 +20,15 @@ export const defineStateShape =
     state;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type StateType<T extends (state: any) => any> = ReturnType<T>;
+type StateHelper = (state: any) => any;
+
+export type StateType<T extends StateHelper> = ReturnType<T>;
+
+export type TransitionHandler<
+  CurrentState extends StateObject,
+  TargetState extends StateObject,
+  A extends { type: string },
+> = (
+  prevState: CurrentState extends StateHelper ? StateType<StateHelper> : CurrentState,
+  action: A,
+) => TargetState extends StateHelper ? StateType<StateHelper> : TargetState;

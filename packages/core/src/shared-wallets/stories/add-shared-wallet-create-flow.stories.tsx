@@ -7,11 +7,12 @@ import {
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { CreationFlowState, SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/state-and-types';
 import { validateCoSigners } from '../add-shared-wallet/creation-flow/validateCoSigners';
-import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper } from './AddSharedWalletStorybookHelper';
+import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper, sharedKeys } from './AddSharedWalletStorybookHelper';
 
 const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
   component: AddSharedWalletStorybookHelper,
   parameters: {
+    chromatic: { disableSnapshot: true },
     decorators: {
       colorSchema: false,
     },
@@ -22,8 +23,6 @@ const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
 export default meta;
 
 type Story = StoryObj<typeof AddSharedWalletStorybookHelper>;
-
-const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
 
 export const Setup: Story = {
   name: 'Setup',

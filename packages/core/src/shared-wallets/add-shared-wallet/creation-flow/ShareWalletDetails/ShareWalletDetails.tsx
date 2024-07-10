@@ -28,8 +28,9 @@ export const ShareWalletDetails = ({ onNext, onDownload }: LayoutNavigationDownl
       description={translations.subtitle}
       onNext={onNext}
       timelineSteps={creationTimelineSteps}
-      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
+      timelineCurrentStep={SharedWalletCreationStep.ShareDetails}
       customNextLabel={translations.next}
+      isNextEnabled
     >
       <Box mt="$12">
         <Text.Body.Normal>{translations.body}</Text.Body.Normal>

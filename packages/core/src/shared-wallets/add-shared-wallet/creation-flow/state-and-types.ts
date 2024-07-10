@@ -88,3 +88,20 @@ export type CreationFlowState =
   | StateCoSignersImportantInfo
   | StateQuorum
   | StateShareDetails;
+
+export enum SharedWalletCreationActionType {
+  BACK = 'BACK',
+  CHANGE_WALLET_NAME = 'CHANGE_WALLET_NAME',
+  COSIGNERS_CHANGED = 'COSIGNERS_CHANGED',
+  DOWNLOAD_SHARED_WALLET_JSON = 'DOWNLOAD_SHARED_WALLET_JSON',
+  NEXT = 'NEXT',
+  QUORUM_RULES_CHANGED = 'QUORUM_RULES_CHANGED',
+}
+
+export type SharedWalletCreationAction =
+  | { type: SharedWalletCreationActionType.NEXT }
+  | { type: SharedWalletCreationActionType.BACK }
+  | { type: SharedWalletCreationActionType.DOWNLOAD_SHARED_WALLET_JSON }
+  | { type: SharedWalletCreationActionType.CHANGE_WALLET_NAME; walletName: string }
+  | { coSigner: CoSigner; type: SharedWalletCreationActionType.COSIGNERS_CHANGED }
+  | { quorumRules: QuorumOptionValue; type: SharedWalletCreationActionType.QUORUM_RULES_CHANGED };

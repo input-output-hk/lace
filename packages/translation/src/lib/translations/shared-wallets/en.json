@@ -65,5 +65,16 @@
   "sharedWallets.addSharedWallet.import.error.unrecognized.retry": "Upload new file",
   "sharedWallets.addSharedWallet.import.error.incorrectWallet.title": "Incorrect active wallet",
   "sharedWallets.addSharedWallet.import.error.incorrectWallet.description": "This shared wallet setup file does not reference shared wallet keys of your currently active wallet. Please ensure the correct personal wallet is active in Lace before attempting to add this shared wallet.",
-  "sharedWallets.addSharedWallet.import.error.incorrectWallet.exit": "Exit shared wallet setup"
+  "sharedWallets.addSharedWallet.import.error.incorrectWallet.exit": "Exit shared wallet setup",
+  "sharedWallets.addSharedWallet.keysGeneration.enterPassword.title": "Generate shared wallet keys",
+  "sharedWallets.addSharedWallet.keysGeneration.enterPassword.subtitle": "Enter your personal wallet password to generate shared wallet keys within this wallet.",
+  "sharedWallets.addSharedWallet.keysGeneration.enterPassword.nextButtonLabel": "Generate keys",
+  "sharedWallets.addSharedWallet.keysGeneration.enterPassword.activeWalletLabel": "Personal Wallet",
+  "sharedWallets.addSharedWallet.keysGeneration.enterPassword.passwordInputLabel": "Password",
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.toastText": "Shared keys copied to clipboard",
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.title": "Copy shared wallet keys",
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.subtitle": "Copy and send these keys to someone setting up a new shared wallet. You can review these keys at any time.",
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.backButtonLabel": "Copy keys to clipboard",
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.nextButtonLabel": "Close",
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.keysBoxTitle": "Shared Wallet Keys"
 }
