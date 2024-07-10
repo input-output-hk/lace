@@ -81,3 +81,22 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     When I click on a transaction: 1
     Then The Tx details are displayed for Staking without metadata
 
+  @LW-8437 @Testnet
+  Scenario: Extended View - Staking - Staking error screen displayed on transaction submit error
+    Given I save identifiers of stake pools currently in use
+    When I open Browse pools tab
+    And I enable network interception to finish request: "*/tx-submit/submit" with error 400
+    And I switch to list view on "Browse pools" tab
+    And I input "OtherStakePool" into stake pool search bar
+    And I click on the stake pool with ticker "OtherStakePool"
+    Then I see stake pool details drawer for "OtherStakePool" stake pool
+    When I save stake pool details
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    Then I click "Fine by me" button on "Changing staking preferences?" modal
+    And I click on "Next" button on staking preferences drawer
+    And I click on "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
+    Then the staking error screen is displayed
+    When I close the drawer by clicking close button
+#   bug LW-10100
+#   Then Staking exit modal is displayed
