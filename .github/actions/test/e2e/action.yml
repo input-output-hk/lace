@@ -46,11 +46,22 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
       run: |
         Xvfb :99 &
-    - name: Get built extension
-      uses: actions/download-artifact@v4
-      with:
-        name: lace-browser-extension-dist-build-${{ github.sha }}
-        path: ./apps/browser-extension-wallet/dist
+    - name: Check if build exists already then download it
+      shell: bash
+      id: download-build-if-exists
+      run: |
+        export ART_ID=$(https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }}) | jq -r .artifacts[0].id
+        if [ -z "$ART_ID" ]; then
+          curl -o build_artifact.zip --location 'https://api.github.com/repos/input-output-hk/lace/actions/artifacts/'$ART_ID'/zip' -H "$(echo Authorization: Bearer $INPUT_GITHUB_TOKEN)"
+          mkdir ./apps/browser-extension-wallet/dist
+          unzip -f build_artifact.zip -o ./apps/browser-extension-wallet/dist
+          echo "Build artifact found and downloaded"
+        fi
+#    - name: Get built extension
+#      uses: actions/download-artifact@v4
+#      with:
+#        name: lace-browser-extension-dist-build-${{ github.sha }}
+#        path: ./apps/browser-extension-wallet/dist
     - name: Decrypt test data
       working-directory: ./packages/e2e-tests
       run: ./decrypt_secret.sh

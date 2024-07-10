@@ -57,19 +57,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Check if build exists already then download it
-        id: download-build-if-exists
+      - name: Check if build exists already
+        id: check-build-exists
         run: |
-          curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }} >> art.json
-          echo | cat art.json
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+          export ART_ID=$(https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-browser-extension-dist-build-${{ github.sha }}) | jq -r .artifacts[0].id
+          if [ -z "$ART_ID" ]; then
+            echo "Lace build artifact found"
+          else
+            echo "No Lace build artifact found"
+          fi
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
       - name: Build dist version of Lace
+        if: env.ART_ID == null
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Upload artifact
+        if: env.ART_ID == null
         uses: actions/upload-artifact@v4
         with:
           name: lace-browser-extension-dist-build-${{ github.sha }}
