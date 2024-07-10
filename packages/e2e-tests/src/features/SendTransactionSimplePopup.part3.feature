@@ -4,6 +4,156 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
   Background:
     Given Wallet is synced
 
+  @LW-4705 @Testnet @Mainnet
+  Scenario: Popup View: Send - "Add asset" button becomes disabled once there are no assets to add
+    When I click "Send" button on Tokens page in popup mode
+    Then the 'Add asset' is enabled for bundle 1
+    When I add all available token types to bundle 1
+    And I add all available NFT types to bundle 1
+    Then the 'Add asset' is disabled for bundle 1
+
+  @LW-4648 @Testnet @Mainnet
+  Scenario: Popup view - transaction drawer is displayed as specified
+    When I click "Send" button on Tokens page in popup mode
+    Then send drawer is displayed with all its components in popup mode
+
+  @LW-3745 @Testnet
+  Scenario: Popup-view - send maximum amount of a token available in the wallet by clicking MAX button
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I click MAX button in bundle 1 for "tADA" asset
+    Then the maximum available amount is displayed in bundle: 1 for "tADA" asset
+
+  @LW-4736 @Testnet
+  Scenario: Popup-view - send maximum amount of a token available in the wallet by clicking MAX button
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I click "Add token or NFT" button for bundle 1
+    And click on an token with name: "LaceCoin"
+    And I click MAX button in bundle 1 for "LaceCoin1" asset
+    Then the maximum available amount is displayed in bundle: 1 for "LaceCoin1" asset
+
+  @LW-4736 @Mainnet
+  Scenario: Popup-view - send maximum amount of a token available in the wallet by clicking MAX button
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I click "Add token or NFT" button for bundle 1
+    And click on an token with name: "HOSKY Token"
+    And I click MAX button in bundle 1 for "HOSKY" asset
+    Then the maximum available amount is displayed in bundle: 1 for "HOSKY" asset
+
+  @LW-4737 @Testnet
+  Scenario: Popup-view - send maximum amount of multiple assets by clicking MAX button
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+#    disabled until "utxo fully depleted" error is fixed for MAX tADA
+#    And I click MAX button in bundle 1 for "tADA" asset
+#    Then the maximum available amount is displayed in bundle: 1 for "tADA" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on an token with name: "LaceCoin"
+    And I click MAX button in bundle 1 for "LaceCoin1" asset
+    Then the maximum available amount is displayed in bundle: 1 for "LaceCoin1" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on an token with name: "LaceCoin2"
+    And I click MAX button in bundle 1 for "LaceCoin2" asset
+    Then the maximum available amount is displayed in bundle: 1 for "LaceCoin2" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on the NFTs button in the coin selector dropdown
+    And I click on NFT with name: "Ibilecoin" in asset selector
+    Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on the NFTs button in the coin selector dropdown
+    And I click on NFT with name: "Bison Coin" in asset selector
+    Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
+    And "Review transaction" button is enabled on "Send" page
+
+  @LW-4737 @Mainnet
+  Scenario: Popup-view - send maximum amount of multiple assets by clicking MAX button
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I click MAX button in bundle 1 for "tADA" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on an token with name: "HOSKY Token"
+    And I click MAX button in bundle 1 for "HOSKY" asset
+    Then the maximum available amount is displayed in bundle: 1 for "HOSKY" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on an token with name: "SUNDAE"
+    And I click MAX button in bundle 1 for "SUNDAE" asset
+    Then the maximum available amount is displayed in bundle: 1 for "SUNDAE" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on the NFTs button in the coin selector dropdown
+    And I click on NFT with name: "Ibilecoin" in asset selector
+    Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
+    When I click "Add token or NFT" button for bundle 1
+    And click on the NFTs button in the coin selector dropdown
+    And I click on NFT with name: "Bison Coin" in asset selector
+    Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
+    And "Review transaction" button is enabled on "Send" page
+
+  @LW-4887 @Testnet @Mainnet
+  Scenario: Popup-view - MAX button not displayed by default
+    When I click "Send" button on Tokens page in popup mode
+    Then the "MAX" button is not displayed
+
+  @LW-4888 @Testnet @Mainnet
+  Scenario: Popup-view - MAX button is displayed on hover when token value is 0
+    And I click "Send" button on Tokens page in popup mode
+    When I hover over the value for "tADA" asset in bundle 1
+    Then the "MAX" button is displayed
+
+  @LW-4889 @Testnet @Mainnet
+  Scenario: Popup-view - MAX button is not displayed on hover when token value > 0
+    And I click "Send" button on Tokens page in popup mode
+    And I enter a value of: 1 to the "tADA" asset in bundle 1
+    When I hover over the value for "tADA" asset in bundle 1
+    Then the "MAX" button is not displayed
+
+  @LW-4890 @Testnet @Mainnet
+  Scenario: Popup-view - MAX button is not displayed on hover when max token value is set
+    And I click "Send" button on Tokens page in popup mode
+    And I click MAX button in bundle 1 for "tADA" asset
+    When I hover over the value for "tADA" asset in bundle 1
+    Then the "MAX" button is not displayed
+
+  @LW-5148 @Testnet @Mainnet
+  Scenario: Popup View - Send - Empty state in token selector - All tokens have been selected
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I add all available token types to bundle 1
+    And I click "Add token or NFT" button for bundle 1
+    Then "All gone! You've already selected everything" message is displayed inside asset selector
+    When click on the NFTs button in the coin selector dropdown
+    Then "All gone! You've already selected everything" message is not displayed inside asset selector
+
+  @LW-5149 @Testnet @Mainnet
+  Scenario: Popup View - Send - Empty state in token selector - All NFTs have been selected
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I add all available NFT types to bundle 1
+    And I click "Add token or NFT" button for bundle 1
+    Then "All gone! You've already selected everything" message is not displayed inside asset selector
+    When click on the NFTs button in the coin selector dropdown
+    Then "All gone! You've already selected everything" message is displayed inside asset selector
+
+  @LW-5150 @Testnet @Mainnet
+  Scenario: Popup View - Send - Empty state in token selector - All tokens and NFTs have been selected
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I add all available token types to bundle 1
+    And I add all available NFT types to bundle 1
+    And click on the coin selector for "tADA" asset in bundle 1
+    Then "All gone! You've already selected everything" message is displayed inside asset selector
+    When click on the NFTs button in the coin selector dropdown
+    Then "All gone! You've already selected everything" message is displayed inside asset selector
+
+  @LW-5145 @Testnet @Mainnet
+  Scenario: Popup View - Send - Empty state in token selector - No search result for tokens
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    And I click "Add token or NFT" button for bundle 1
+    And I enter "random characters" in asset search input
+    Then "No results matching your search" message is displayed inside asset selector
+
   @LW-5146 @Testnet @Mainnet
   Scenario: Popup View - Send - Empty state in token selector - No search result for NFTs
     When I click "Send" button on Tokens page in popup mode
@@ -28,50 +178,6 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
       | LaceCoin3 |
       | LaceCoin  |
       | LaceCoin2 |
-
-  @LW-5181 @Testnet
-  Scenario Outline: Popup View - Send flow - Ticker displaying only 5 characters for <nft> NFT
-    And I click "Send" button on Tokens page in popup mode
-    And click on the coin selector for "tADA" asset in bundle 1
-    And click on the NFTs button in the coin selector dropdown
-    When I save ticker for the NFT with name: <nft>
-    And I click on NFT with name: "<nft>" in asset selector
-    Then the displayed ticker for NFTs has the correct amount of characters
-    When I hover over the ticker for "<nft>" asset in bundle 1
-    Then I see a tooltip showing full name: "<nft>" for NFTs
-    Examples:
-      | nft                |
-      | LaceNFT            |
-      | Pixel NFT          |
-      | Bored Ape          |
-      | Single NFT Preprod |
-
-  @LW-5183 @Testnet
-  Scenario Outline: Popup View - Send flow - Values switched from <value_to_enter> to <displayed_value> when building a transaction
-    And I click "Send" button on Tokens page in popup mode
-    When I enter a value of: <value_to_enter> to the "tADA" asset in bundle 1 without clearing input
-    Then I see <displayed_value> as displayed value
-    And I press keyboard Enter button
-    Then the displayed value switches to: <conv_value>
-    When I click on transaction drawer background to lose focus
-    When I hover over the value for "tADA" asset in bundle 1
-    Then I <should_see_tooltip> a tooltip showing full value: "<displayed_value>" for Tokens
-    Examples:
-      | value_to_enter    | displayed_value        | conv_value | should_see_tooltip |
-      | 100               | 100                    | 100.00     | do not see         |
-      | 987654            | 987,654                | 987,654.00 | do not see         |
-      | 1000000           | 1,000,000              | 1.00M      | see                |
-      | 1234567           | 1,234,567              | 1.23M      | see                |
-      | 12345678          | 12,345,678             | 12.34M     | see                |
-      | 123456789         | 123,456,789            | 123.45M    | see                |
-      | 1234567891        | 1,234,567,891          | 1.23B      | see                |
-      | 12345678912       | 12,345,678,912         | 12.34B     | see                |
-      | 123456789123      | 123,456,789,123        | 123.45B    | see                |
-      | 1234567891234     | 1,234,567,891,234      | 1.23T      | see                |
-      | 12345678912345    | 12,345,678,912,345     | 12.34T     | see                |
-      | 123456789123456   | 123,456,789,123,456    | 123.45T    | see                |
-      | 1234567891234567  | 1,234,567,891,234,567  | 1.23Q      | see                |
-      | 12345678912345678 | 12,345,678,912,345,678 | 12.34Q     | see                |
 
   @LW-4595 @Testnet
   Scenario: Popup view - Send - Different network address, mainnet address from testnet
@@ -100,35 +206,3 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
     Then the NFT displays 1.00 in the value field
     And "Review transaction" button is enabled on "Send" page
-
-  @LW-2408 @Testnet
-  Scenario: Popup-view - Transaction error screen displayed on transaction submit error
-    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
-    And I click "Send" button on Tokens page in popup mode
-    And I’ve entered accepted values for all fields of simple Tx
-    And I click "Review transaction" button on "Send" page
-    And I click "Confirm" button on "Transaction summary" page
-    When I enter correct password and confirm the transaction
-    Then The Transaction error screen is displayed in popup mode
-
-  @LW-7826 @Testnet @Pending
-  @issue=LW-8579
-  Scenario: Popup view - Validate if contact name that has up to 12 characters is not truncated
-    Given address book contains address with name that has 12 characters
-    When I navigate to Tokens popup page
-    And I click "Send" button on Tokens page in popup mode
-    And I enter "abcdefghijkl" in the bundle 1 recipient's address
-    Then first result in address dropdown has name "abcdefghijkl"
-    When I click on one of the contacts on the dropdown
-    Then recipients address input contains address entry with name "abcdefghijkl"
-
-  @LW-7827 @Testnet @Pending
-  @issue=LW-8579
-  Scenario: Popup view - Validate if contact name that has >12 characters is truncated
-    Given address book contains address with name that has more than 12 characters
-    When I navigate to Tokens popup page
-    And I click "Send" button on Tokens page in popup mode
-    And I enter "abcdefghijklm" in the bundle 1 recipient's address
-    Then first result in address dropdown has name "abcdefghi..."
-    When I click on one of the contacts on the dropdown
-    Then recipients address input contains address entry with name "abcdefghi..."
