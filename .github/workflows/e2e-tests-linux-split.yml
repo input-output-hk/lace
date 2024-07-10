@@ -72,12 +72,13 @@ jobs:
             echo "Lace build artifact found no need to build again"
           fi
           echo 2^ $ART_ID
+          echo 2a^ $GITHUB_OUTPUT
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
       - name: Build dist version of Lace
         env:
             ART_ID: ${{ steps.check-build-exists.outputs.ART_ID }}
-        if: ${{ env.ART_ID == '' }}
+        if: always()
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
