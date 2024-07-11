@@ -139,7 +139,7 @@ jobs:
   smokeTests:
     name: Smoke tests
     runs-on: ubuntu-22.04
-    needs: prepare
+    needs: [ prepare, build_extension ]
     strategy:
       fail-fast: false
       matrix:
