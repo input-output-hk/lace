@@ -201,7 +201,7 @@ jobs:
     if: always()
     steps:
       - run: |
-          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+          if [[ ${{ needs.smokeTests.result }} == "success12" ]]; then
             exit 0
           else
             exit 1
