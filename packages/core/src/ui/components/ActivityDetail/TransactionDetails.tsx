@@ -1,13 +1,9 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable complexity */
 import React from 'react';
 import cn from 'classnames';
-
-import { Ellipsis, toast } from '@lace/common';
-import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
-import { getAddressTagTranslations, renderAddressTag } from '@ui/utils';
-
+import { Ellipsis } from '@lace/common';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import { ActivityStatus } from '../Activity';
 import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
@@ -18,8 +14,8 @@ import { Wallet } from '@lace/cardano';
 import { TxDetailsCertificates } from './components/TxDetailsCertificates/TxDetailsCertificates';
 import { TxDetailsVotingProcedures } from './components/TxDetailsVotingProcedures';
 import { TxDetailsProposalProcedures } from './components/TxDetailsProposalProcedures';
-import { TransactionActivityType } from './types';
 import { useTranslation } from 'react-i18next';
+import { Transaction } from '../Transaction';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -89,24 +85,6 @@ export interface TransactionDetailsProps {
   explorerBaseUrl: string;
 }
 
-const TOAST_DEFAULT_DURATION = 3;
-
-const CopiableHash = ({ hash, copiedText }: { hash: string; copiedText: string }) => (
-  <CopyToClipboard text={hash}>
-    <div
-      onClick={() =>
-        toast.notify({
-          duration: TOAST_DEFAULT_DURATION,
-          text: copiedText
-        })
-      }
-    >
-      {hash}
-    </div>
-  </CopyToClipboard>
-);
-
-// eslint-disable-next-line react/no-multi-comp,complexity
 export const TransactionDetails = ({
   hash,
   name,
@@ -139,7 +117,6 @@ export const TransactionDetails = ({
   explorerBaseUrl
 }: TransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-
   const isSending = status === ActivityStatus.PENDING;
   const isSuccess = status === ActivityStatus.SUCCESS;
 
@@ -171,40 +148,18 @@ export const TransactionDetails = ({
   );
 
   return (
-    <div data-testid="transaction-detail" className={styles.content}>
+    <Transaction.Content>
       <ActivityDetailHeader name={name} description={headerDescription} />
       <div>
-        <div className={styles.header} data-testid="tx-header">
-          {t('core.activityDetails.header')}
-        </div>
-        <div className={styles.block}>
-          <div data-testid="tx-hash" className={styles.hashContainer}>
-            <div className={cn(styles.title, styles.labelWidth)}>
-              <div className={styles.hashLabel} data-testid="tx-hash-title">
-                {t('core.activityDetails.transactionID')}
-              </div>
-            </div>
-            <div
-              data-testid="tx-hash-detail"
-              className={cn(styles.detail, {
-                [styles.hash]: handleOpenExternalHashLink,
-                [styles.txLink]: isSuccess && !!handleOpenExternalHashLink
-              })}
-              onClick={handleOpenExternalHashLink}
-            >
-              <div>
-                {isSending ? (
-                  <CopiableHash hash={hash} copiedText={t('core.activityDetails.copiedToClipboard')} />
-                ) : (
-                  hash
-                )}
-              </div>
-            </div>
-          </div>
-
-          <h1 className={styles.summary} data-testid="summary-title">
-            {t('core.activityDetails.summary')}
-          </h1>
+        <Transaction.HeaderDescription>{t('core.activityDetails.header')}</Transaction.HeaderDescription>
+        <Transaction.Block>
+          <Transaction.TxHash
+            hash={hash}
+            success={isSuccess}
+            sending={isSending}
+            openLink={handleOpenExternalHashLink}
+          />
+          <Transaction.Summary>{t('core.activityDetails.summary')}</Transaction.Summary>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
               <div className={cn(styles.title, styles.poolsTitle)}>{t('core.activityDetails.pools')}</div>
@@ -233,98 +188,16 @@ export const TransactionDetails = ({
               </div>
             </div>
           )}
-          {txSummary.map((summary, index) => (
-            <div key={index.toString()} data-testid="tx-detail-bundle">
-              <div className={styles.details}>
-                <div className={styles.title} data-testid="tx-sent-title">
-                  {name}
-                </div>
-                <div data-testid="tx-sent-detail" className={styles.detail}>
-                  {summary.assetList?.map((asset, i) => (
-                    <div className={styles.amount} key={`asset${i}`}>
-                      <span data-testid="tx-sent-detail-token">
-                        {asset.amount} {asset.symbol}
-                      </span>
-                      {asset?.fiatBalance && (
-                        <span className={styles.fiat} data-testid="tx-sent-detail-token-fiat">
-                          {asset.fiatBalance}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                  <div className={styles.amount}>
-                    <span
-                      className={styles.ada}
-                      data-testid="tx-sent-detail-ada"
-                    >{`${summary.amount} ${coinSymbol}`}</span>{' '}
-                    <span className={styles.fiat} data-testid="tx-sent-detail-fiat">{`${amountTransformer(
-                      summary.amount
-                    )}`}</span>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.details}>
-                <div className={styles.title} data-testid="tx-to-from-title">
-                  {t(`core.activityDetails.${summary.type === TransactionActivityType.outgoing ? 'to' : 'from'}`)}
-                </div>
-                <div>
-                  {summary.addr.length > 1 && (
-                    <div
-                      data-testid="tx-to-detail-multiple-addresses"
-                      className={cn(styles.detail, styles.detailTitle)}
-                    >
-                      {t('core.activityDetails.multipleAddresses')}
-                    </div>
-                  )}
-                  {(summary.addr as string[]).map((addr) => {
-                    const addressName = addressToNameMap?.get(addr);
-                    const address = isPopupView ? (
-                      <Ellipsis
-                        className={cn(styles.addr, styles.fiat)}
-                        text={addr}
-                        dataTestId="tx-to-address"
-                        ellipsisInTheMiddle
-                      />
-                    ) : (
-                      <span className={cn(styles.addr, styles.fiat)} data-testid="tx-to-address">
-                        {addr}
-                      </span>
-                    );
-                    return (
-                      <div key={addr} className={cn([styles.detail, styles.addr, styles.addressTag])}>
-                        {addressName && <Text.Body.Normal weight="$semibold">{addressName}</Text.Body.Normal>}
-                        {<Text.Address color={addressName ? 'secondary' : 'primary'}>{address}</Text.Address>}
-                        {renderAddressTag({
-                          address: addr,
-                          translations: getAddressTagTranslations(t),
-                          ownAddresses
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ))}
-          <div className={styles.details}>
-            <div className={styles.title} data-testid="tx-status-title">
-              {t('core.activityDetails.status')}
-            </div>
-            {status && (
-              <div data-testid="tx-status" className={styles.detail}>{`${status.charAt(0).toUpperCase()}${status.slice(
-                1
-              )}`}</div>
-            )}
-          </div>
-          <div data-testid="tx-date" className={cn(styles.details, styles.timestampContainer)}>
-            <div className={cn(styles.title, styles.timestamp)} data-testid="tx-timestamp-title">
-              {t('core.activityDetails.timestamp')}
-            </div>
-            <div data-testid="tx-timestamp" className={styles.detail}>
-              <span>{includedDate}</span>
-              <span>&nbsp;{includedTime}</span>
-            </div>
-          </div>
+          <Transaction.TxSummarySection
+            {...{ txSummary, name, amountTransformer, coinSymbol, addressToNameMap, isPopupView, ownAddresses }}
+          />
+          <Transaction.Detail
+            titleTestId="tx-status-title"
+            detailTestId="tx-status"
+            title={t('core.activityDetails.status')}
+            detail={status && `${status.charAt(0).toUpperCase()}${status.slice(1)}`}
+          />
+          <Transaction.Timestamp includedDate={includedDate} includedTime={includedTime} />
           {collateral && (
             <Box mb="$32" data-testid="tx-collateral">
               <Collateral
@@ -351,7 +224,7 @@ export const TransactionDetails = ({
               value: depositReclaim,
               label: t('core.activityDetails.depositReclaim')
             })}
-        </div>
+        </Transaction.Block>
         {votingProcedures?.length > 0 && (
           <TxDetailsVotingProcedures votingProcedures={votingProcedures} explorerBaseUrl={explorerBaseUrl} />
         )}
@@ -418,6 +291,6 @@ export const TransactionDetails = ({
           </div>
         )}
       </div>
-    </div>
+    </Transaction.Content>
   );
 };
