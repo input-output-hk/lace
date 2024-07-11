@@ -167,8 +167,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           INSTALL_DEPENDENCIES: false
 
-  smokeTests:
-    name: Smoke tests
+  smokeTestsRun:
+    name: Smoke tests run
     runs-on: ubuntu-22.04
     needs: [ prepare, build_extension ]
     strategy:
@@ -194,14 +194,14 @@ jobs:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: true
 
-  smokeTestsResults:
-    name: Smoke tests results
+  smokeTests:
+    name: Smoke tests
     runs-on: ubuntu-22.04
     needs: smokeTests
     if: always()
     steps:
       - run: |
-          if [[ ${{ needs.smokeTests.result }} == "success12" ]]; then
+          if [[ ${{ needs.smokeTestsRun.result }} == "success" ]]; then
             exit 0
           else
             exit 1
