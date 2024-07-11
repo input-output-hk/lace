@@ -197,7 +197,7 @@ jobs:
   smokeTests:
     name: Smoke tests
     runs-on: ubuntu-22.04
-    needs: smokeTests
+    needs: smokeTestsRun
     if: always()
     steps:
       - run: |
