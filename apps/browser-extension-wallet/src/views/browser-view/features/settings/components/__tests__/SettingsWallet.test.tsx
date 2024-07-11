@@ -186,9 +186,9 @@ describe('Testing SettingsWalletBase component', () => {
         exact: false
       });
 
-      expect(settingsLinks.length).toBe(12);
-      expect(settingsLinks[0]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
-      expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
+      expect(settingsLinks.length).toBe(16);
+      expect(settingsLinks[4]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
+      expect(settingsLinks[7]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
     });
 
     test('should render all avail sections for browser mode', async () => {
@@ -208,11 +208,12 @@ describe('Testing SettingsWalletBase component', () => {
         exact: false
       });
 
-      expect(settingsLinks.length).toBe(18);
+      expect(settingsLinks.length).toBe(22);
       expect(settingsLinks[0]).toHaveAttribute('data-testid', 'settings-wallet-network-link');
-      expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-authorized-dapps-link');
-      expect(settingsLinks[6]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
-      expect(settingsLinks[9]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
+      expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-custom-submit-api-link');
+      expect(settingsLinks[7]).toHaveAttribute('data-testid', 'settings-wallet-authorized-dapps-link');
+      expect(settingsLinks[10]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
+      expect(settingsLinks[13]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
     });
 
     test('should render all avail sections for popup mode', async () => {
@@ -232,12 +233,13 @@ describe('Testing SettingsWalletBase component', () => {
         exact: false
       });
 
-      expect(settingsLinks.length).toBe(20);
+      expect(settingsLinks.length).toBe(24);
       expect(settingsLinks[0]).toHaveAttribute('data-testid', 'settings-wallet-about-link');
       expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-network-link');
-      expect(settingsLinks[6]).toHaveAttribute('data-testid', 'settings-wallet-authorized-dapps-link');
-      expect(settingsLinks[9]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
-      expect(settingsLinks[12]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
+      expect(settingsLinks[6]).toHaveAttribute('data-testid', 'settings-wallet-custom-submit-api-link');
+      expect(settingsLinks[10]).toHaveAttribute('data-testid', 'settings-wallet-authorized-dapps-link');
+      expect(settingsLinks[13]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
+      expect(settingsLinks[16]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
     });
 
     test.todo('should render local node slot');

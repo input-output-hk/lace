@@ -27,15 +27,16 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Opening and closing drawers
     When I open settings from header menu
     Then click on the following settings in extended view opens a drawer:
-      | Title: Settings item that opens drawer             |
-      | browserView.settings.wallet.network.title          |
-      | browserView.settings.wallet.authorizedDApps.title  |
-      | browserView.settings.wallet.general.title          |
+      | Title: Settings item that opens drawer                        |
+      | browserView.settings.wallet.network.title                     |
+      | browserView.settings.wallet.customSubmitApi.settingsLinkTitle |
+      | browserView.settings.wallet.authorizedDApps.title             |
+      | browserView.settings.wallet.general.title                     |
 #     temporarily disabled LW-2907
 #     | Passphrase verification  |
-      | browserView.settings.wallet.collateral.title       |
-      | browserView.settings.security.showPassphrase.title |
-      | browserView.settings.help.support.help             |
+      | browserView.settings.wallet.collateral.title                  |
+      | browserView.settings.security.showPassphrase.title            |
+      | browserView.settings.help.support.help                        |
 
   @LW-2522 @Mainnet @Testnet
   Scenario: Extended View - Try to remove wallet and cancel
