@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 
 type MultisigTxData = {
   metadata: {
-    chainId: 'cip34:0-1';
+    chainId: `cip34:${number}-${number}`;
     createdAt: Date;
     createdBy: string;
     note?: string;
@@ -40,14 +40,15 @@ export const importMultiSigTransaction = async (file: File): Promise<Wallet.Card
 
 export const exportMultisigTransaction = async (
   signedTx: Wallet.KeyManagement.WitnessedTx,
-  address: string,
+  publicKey: Wallet.Crypto.Bip32PublicKeyHex,
+  chainId: Wallet.Cardano.ChainId,
   note?: string,
 ) => {
   const multisigTxData: MultisigTxData = {
     metadata: {
-      chainId: 'cip34:0-1',
+      chainId: `cip34:${chainId.networkId}-${chainId.networkMagic}`,
       createdAt: new Date(),
-      createdBy: address,
+      createdBy: publicKey,
       note,
     },
     transaction: {
