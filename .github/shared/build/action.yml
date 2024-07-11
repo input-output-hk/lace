@@ -34,18 +34,18 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'yarn'
-    - name: Node modules cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          node_modules
-          **/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+#    - name: Setup Node.js
+#      uses: actions/setup-node@v4
+#      with:
+#        node-version-file: '.nvmrc'
+#        cache: 'yarn'
+#    - name: Node modules cache
+#      uses: actions/cache@v4
+#      with:
+#        path: |
+#          node_modules
+#          **/node_modules
+#        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Check if build exists already
       shell: bash
       id: check-build-exists
