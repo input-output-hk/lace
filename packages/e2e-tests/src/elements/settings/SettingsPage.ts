@@ -23,6 +23,7 @@ class SettingsPage extends CommonDrawerElements {
   private readonly DAPPS_LINK_TEST_ID = 'settings-wallet-authorized-dapps-link';
   private readonly YOUR_KEYS_LINK_TEST_ID = 'settings-wallet-general-link';
   private readonly COLLATERAL_LINK_TEST_ID = 'settings-wallet-collateral-link';
+  private readonly CUSTOM_SUBMIT_API_LINK_TEST_ID = 'settings-wallet-custom-submit-api-link';
   private readonly THEME_SWITCH_TEST_ID = '[data-testid="switch"]';
   private readonly SHOW_RECOVERY_PHRASE_LINK_TEST_ID = 'settings-show-recovery-phrase-link';
   private readonly PASSPHRASE_VERIFICATION_LINK_TEST_ID = 'settings-passphrase-verification-link';
@@ -84,6 +85,10 @@ class SettingsPage extends CommonDrawerElements {
 
   get collateralLink() {
     return new SettingsLink(this.COLLATERAL_LINK_TEST_ID);
+  }
+
+  get customSubmitAPILink() {
+    return new SettingsLink(this.CUSTOM_SUBMIT_API_LINK_TEST_ID);
   }
 
   get yourKeysLink() {

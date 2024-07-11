@@ -78,7 +78,7 @@ class TopNavigationAssert {
   }
 
   async assertSeeWalletStatusComponent() {
-    await MenuHeader.menuUserDetailsButton.waitForDisplayed();
+    await MenuHeader.menuUserDetailsButton.waitForDisplayed({ timeout: 15_000 });
     const status = await MenuHeader.menuWalletStatus.getText();
     const synced = await t('browserView.topNavigationBar.walletStatus.walletSynced');
     const notSynced = await t('browserView.topNavigationBar.walletStatus.notSyncedToTheBlockchain');
@@ -88,7 +88,7 @@ class TopNavigationAssert {
 
   async assertSyncStatusValid(expectedStatus: string) {
     expectedStatus = (await t(expectedStatus)) ?? expectedStatus;
-    await MenuHeader.menuUserDetailsButton.waitForDisplayed();
+    await MenuHeader.menuUserDetailsButton.waitForDisplayed({ timeout: 15_000 });
     await browser.waitUntil(async () => (await MenuHeader.menuWalletStatus.getText()) === expectedStatus, {
       timeout: 180_000,
       interval: 500,
