@@ -22,7 +22,7 @@ export const importMultiSigTransaction = async (file: File): Promise<Wallet.Card
           transaction: { cborHex },
         } = JSON.parse(<string>e.target.result);
 
-        const coSignedTx = Wallet.util.transactionToCbor(cborHex);
+        const coSignedTx = Wallet.util.cborToTransaction(cborHex);
 
         resolve(coSignedTx);
       } catch (error) {
