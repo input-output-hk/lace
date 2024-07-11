@@ -12,7 +12,7 @@ import { makeInitialStateProvider } from '../../initial-state-provider';
 import { StateType, TransitionHandler, defineStateShape } from '../../state-utils';
 import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
 import {
-  createCosignerObject,
+  createCoSignerObject,
   ensureCorrectCoSignersDataShape,
   indexOfCoSignersDataOfCurrentUser,
 } from './co-signers-data-structure';
@@ -190,7 +190,7 @@ const makeStateMachine = ({
     }
     if (action.type === SharedWalletCreationActionType.NEXT) {
       if (!prevState.walletName) return prevState;
-      const coSigners = ensureCorrectCoSignersDataShape([createCosignerObject(sharedKeys)]);
+      const coSigners = ensureCorrectCoSignersDataShape([createCoSignerObject(sharedKeys)]);
       return stateCoSigners({
         ...prevState,
         coSignerInputsDirty: coSigners.map(({ id }) => ({ id, keys: false, name: false })),

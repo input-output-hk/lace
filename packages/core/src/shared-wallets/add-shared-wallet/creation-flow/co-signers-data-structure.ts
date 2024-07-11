@@ -5,11 +5,11 @@ import { CoSigner } from './AddCoSigners';
 // The coSignersIndexOfCurrentUser helps to identify that data to differentiate them in the UI.
 export const indexOfCoSignersDataOfCurrentUser = 0;
 
-export const createCosignerObject = (keys = ''): CoSigner => ({ id: uuid(), keys, name: '' });
+export const createCoSignerObject = (keys = ''): CoSigner => ({ id: uuid(), keys, name: '' });
 
 export const ensureCorrectCoSignersDataShape = (inputCoSigners: CoSigner[]) => {
   if (!inputCoSigners[indexOfCoSignersDataOfCurrentUser]?.keys) {
     throw new Error('CoSigner data of current user missing keys');
   }
-  return Array.from({ length: 3 }, (_, index) => inputCoSigners[index] || createCosignerObject());
+  return Array.from({ length: 3 }, (_, index) => inputCoSigners[index] || createCoSignerObject());
 };

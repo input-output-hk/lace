@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import {
-  createCosignerObject,
+  createCoSignerObject,
   ensureCorrectCoSignersDataShape,
 } from '../add-shared-wallet/creation-flow/co-signers-data-structure';
 import { QuorumRadioOption } from '../add-shared-wallet/creation-flow/Quorum';
@@ -65,7 +65,7 @@ export const CoSigners: Story = {
   name: 'CoSigners',
   render: () => {
     const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
-      createCosignerObject(sharedKeys),
+      createCoSignerObject(sharedKeys),
     ]);
     return (
       <AddSharedWalletStorybookHelper

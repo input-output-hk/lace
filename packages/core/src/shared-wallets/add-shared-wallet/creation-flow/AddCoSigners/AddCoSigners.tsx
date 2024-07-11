@@ -47,14 +47,16 @@ export const AddCoSigners = ({
             onChange={onValueChange}
             keysFieldDisabled={index === indexOfCoSignersDataOfCurrentUser}
             labels={{
-              keys:
-                index === indexOfCoSignersDataOfCurrentUser
-                  ? t('sharedWallets.addSharedWallet.addCosigners.yourKeysInputLabel')
-                  : t('sharedWallets.addSharedWallet.addCosigners.coSignerKeysInputLabel'),
-              name:
-                index === indexOfCoSignersDataOfCurrentUser
-                  ? t('sharedWallets.addSharedWallet.addCosigners.yourNameInputLabel')
-                  : t('sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel'),
+              keys: t(
+                `sharedWallets.addSharedWallet.addCosigners.${
+                  index === indexOfCoSignersDataOfCurrentUser ? 'yourKeysInputLabel' : 'coSignerKeysInputLabel'
+                }`,
+              ),
+              name: t(
+                `sharedWallets.addSharedWallet.addCosigners.${
+                  index === indexOfCoSignersDataOfCurrentUser ? 'yourNameInputLabel' : 'coSignerNameInputLabel'
+                }`,
+              ),
             }}
             dirty={coSignersDirty.find((dirty) => dirty.id === value.id)}
             error={errors.find((error) => error.id === value.id)}
