@@ -194,6 +194,19 @@ jobs:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: true
 
+  smokeTestsResults:
+    name: Smoke tests results
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: always()
+    steps:
+      - run: |
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
   if-core-changed:
     name: When core changed
     if: ${{ github.event.pull_request.draft == false }}
