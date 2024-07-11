@@ -31,10 +31,6 @@ inputs:
     description: 'Banxa`s integration URL'
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
-  INSTALL_DEPENDENCIES:
-    description: 'Install dependencies'
-    required: true
-    default: 'true'
 
 runs:
   using: 'composite'
@@ -88,7 +84,7 @@ runs:
         fi
       shell: bash
     - name: Install dependencies
-      if: ${{ inputs.INSTALL_DEPENDENCIES == 'true' }}
+      if: steps.check-build-exists.outputs.build_exists == 'false'
       shell: bash
       run: yarn install --immutable --inline-builds
     - name: Build dist version

@@ -54,7 +54,6 @@ jobs:
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          INSTALL_DEPENDENCIES: true
       - name: Save Lace extension build
         uses: actions/upload-artifact@v4
         with:
