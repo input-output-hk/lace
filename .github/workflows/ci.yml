@@ -128,8 +128,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-        batch: [ 1 ]
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -183,28 +182,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: true
-#    name: Smoke tests
-#    runs-on: ubuntu-20.04
-#    needs: prepare
-#
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#
-#
-#      - name: Execute smoke tests
-#        uses: ./.github/actions/test/smoke
-#        with:
-#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-#          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-#          E2E_AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-#          E2E_AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
-#          E2E_REPORTS_USER: ${{ secrets.E2E_REPORTS_USER }}
-#          E2E_REPORTS_PASSWORD: ${{ secrets.E2E_REPORTS_PASSWORD }}
-#          E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
-#          RUN: ${{ github.run_number }}
-#          BRANCH: ${{ github.ref_name }}
 
   if-core-changed:
     name: When core changed
