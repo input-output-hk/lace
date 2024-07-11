@@ -173,6 +173,7 @@ jobs:
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: Execute smoke tests
         uses: ./.github/actions/test/e2e
         with:
