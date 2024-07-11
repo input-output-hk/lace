@@ -24,6 +24,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
           PRODUCTION_MODE_TRACKING: 'false'
+          INSTALL_DEPENDENCIES: true
       - name: Check for linter issues
         run: yarn lint
       - name: Run unit tests

@@ -46,6 +46,7 @@ runs:
       with:
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        INSTALL_DEPENDENCIES: false
     - name: Decrypt test data
       if: success()
       working-directory: ./packages/e2e-tests

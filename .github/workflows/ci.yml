@@ -165,6 +165,7 @@ jobs:
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          INSTALL_DEPENDENCIES: false
 
   smokeTests:
     name: Smoke tests
