@@ -121,6 +121,21 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
+  build_extension:
+    name: Build Lace browser extension
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Lace browser extension
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
   smokeTests:
     name: Smoke tests
     runs-on: ubuntu-22.04
@@ -133,46 +148,46 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download packages-common
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-common
-          path: packages/common/dist
-
-      - name: Download packages-cardano
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-cardano
-          path: packages/cardano/dist
-
-      - name: Download packages-translation
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-translation
-          path: packages/translation/dist
-
-      - name: Download packages-core
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-core
-          path: packages/core/dist
-
-      - name: Download packages-staking
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-staking
-          path: packages/staking/dist
+#      - name: Download packages-common
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: packages-common
+#          path: packages/common/dist
+#
+#      - name: Download packages-cardano
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: packages-cardano
+#          path: packages/cardano/dist
+#
+#      - name: Download packages-translation
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: packages-translation
+#          path: packages/translation/dist
+#
+#      - name: Download packages-core
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: packages-core
+#          path: packages/core/dist
+#
+#      - name: Download packages-staking
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: packages-staking
+#          path: packages/staking/dist
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
 
-      - name: Build Lace browser extension
-        uses: ./.github/shared/build
-        with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#      - name: Build Lace browser extension
+#        uses: ./.github/shared/build
+#        with:
+#          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Execute smoke tests
         uses: ./.github/actions/test/e2e
