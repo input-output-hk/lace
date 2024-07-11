@@ -34,18 +34,18 @@ inputs:
 runs:
   using: 'composite'
   steps:
-#    - name: Setup Node.js
-#      uses: actions/setup-node@v4
-#      with:
-#        node-version-file: '.nvmrc'
-#        cache: 'yarn'
-#    - name: Node modules cache
-#      uses: actions/cache@v4
-#      with:
-#        path: |
-#          node_modules
-#          **/node_modules
-#        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+    - name: Node modules cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          **/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Check if build exists already
       shell: bash
       id: check-build-exists
@@ -54,7 +54,6 @@ runs:
         if [ "$ART_ID" == "null" ]; then
           echo "No Lace build artifact found, will build it now"
           echo "build_exists=false" >> $GITHUB_OUTPUT
-        echo "{build_exists2}={false}" >> $GITHUB_OUTPUT
         else
           curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
           unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
@@ -62,9 +61,6 @@ runs:
           echo "build_exists=true" >> $GITHUB_OUTPUT
         fi
     - name: Configure Yarn to use GitHub Packages
-      env:
-        TMP1: ${{ steps.check-build-exists.outputs.build_exists }}
-        TMP2: ${{ steps.check-build-exists.outputs.build_exists2 }}
       if: steps.check-build-exists.outputs.build_exists == 'false'
       run: |
         SCOPE="input-output-hk"
