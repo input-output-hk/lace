@@ -77,15 +77,15 @@ runs:
         ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
         if [ "$ART_ID" == "null" ]; then
           echo "No Lace build artifact found, will build it now"
-          exit 0
+          echo "::set-output name=build_exists::false"
         else
           curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
           unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
           echo "Build artifact found and downloaded"
-          exit 1
+          echo "::set-output name=build_exists::true"
         fi
     - name: Build dist version
-      if: success()
+      if: steps.check-build-exists.outputs.build_exists == 'false'
       shell: bash
       env:
         NODE_OPTIONS: '--max_old_space_size=8192'
@@ -98,7 +98,7 @@ runs:
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
       run: yarn browser build
     - name: Upload artifact
-      if: success()
+      if: steps.check-build-exists.outputs.build_exists == 'false'
       uses: actions/upload-artifact@v4
       with:
         name: lace-build-${{ github.sha }}
