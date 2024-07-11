@@ -66,12 +66,26 @@ runs:
           echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
           echo "Added npmScopes and $SCOPE to $FILE"
         fi
-
       shell: bash
     - name: Install dependencies
       shell: bash
       run: yarn install --immutable --inline-builds
+    - name: Check if build exists already
+      shell: bash
+      id: check-build-exists
+      run: |
+        ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
+        if [ "$ART_ID" == "null" ]; then
+          echo "No Lace build artifact found, will build it now"
+          exit 0
+        else
+          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
+          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
+          echo "Build artifact found and downloaded"
+          exit 1
+        fi
     - name: Build dist version
+      if: success()
       shell: bash
       env:
         NODE_OPTIONS: '--max_old_space_size=8192'
@@ -83,3 +97,9 @@ runs:
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
       run: yarn browser build
+    - name: Upload artifact
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lace-build-${{ github.sha }}
+        path: ./apps/browser-extension-wallet/dist

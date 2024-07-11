@@ -62,13 +62,9 @@ jobs:
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lace-browser-extension-dist-build
-          path: ./apps/browser-extension-wallet/dist
 
   tests-run-split:
+    if: always()
     strategy:
       fail-fast: false
       matrix:
