@@ -53,14 +53,18 @@ runs:
         ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
         if [ "$ART_ID" == "null" ]; then
           echo "No Lace build artifact found, will build it now"
-          echo "{build_exists}={false} >> $GITHUB_OUTPUT
+          echo "build_exists=false >> $GITHUB_OUTPUT
+        echo "{build_exists2}={false} >> $GITHUB_OUTPUT
         else
           curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
           unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
           echo "Build artifact found and downloaded"
-          echo "{build_exists}={true} >> $GITHUB_OUTPUT
+          echo "build_exists=true >> $GITHUB_OUTPUT
         fi
     - name: Configure Yarn to use GitHub Packages
+      env:
+        TMP1: ${{ steps.check-build-exists.outputs.build_exists }}
+        TMP2: ${{ steps.check-build-exists.outputs.build_exists2 }}
       if: steps.check-build-exists.outputs.build_exists == 'false'
       run: |
         SCOPE="input-output-hk"
