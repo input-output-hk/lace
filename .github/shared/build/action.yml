@@ -87,5 +87,5 @@ runs:
       if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: lace-browser-extension-dist-build-${{ github.sha }}
+        name: lace-build-${{ github.sha }}
         path: ./apps/browser-extension-wallet/dist
