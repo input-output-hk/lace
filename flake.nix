@@ -22,7 +22,7 @@
     ogmios-CHaP.url = "github:input-output-hk/cardano-haskell-packages/316e0a626fed1a928e659c7fc2577c7773770f7f";
     ogmios-CHaP.flake = false;
 
-    mithril.url = "github:input-output-hk/mithril/2418.1";
+    mithril.url = "github:input-output-hk/mithril/2423.0";
 
     nix-bundle-exe.url = "github:3noch/nix-bundle-exe";
     nix-bundle-exe.flake = false;
