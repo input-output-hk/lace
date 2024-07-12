@@ -172,16 +172,14 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
+          path: .
           pattern: 'runner-artifacts-*'
           merge-multiple: true
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       - name: Create allure properties
         shell: bash
         if: always()
-        working-directory: ./packages/e2e-tests/reports/allure/results
+        working-directory: ./reports/allure/results
         run: |
           echo "
           branch=${{ inputs.BRANCH }}
@@ -199,7 +197,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ inputs.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './packages/e2e-tests/reports/allure/results'
+          resultsGlob: './reports/allure/results'
           bucket: lace-e2e-test-results
           prefix: 'smoke/linux/${{ inputs.BROWSER }}/${{ inputs.RUN }}'
           copyLatest: true
