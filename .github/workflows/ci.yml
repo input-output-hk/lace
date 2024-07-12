@@ -124,7 +124,7 @@ jobs:
   build_extension:
     name: Build Lace browser extension
     runs-on: ubuntu-22.04
-    needs: prepare
+#    needs: prepare
 
     steps:
       - name: Checkout repository
@@ -139,7 +139,7 @@ jobs:
   smokeTestsRun:
     name: Smoke tests run
     runs-on: ubuntu-22.04
-    needs: [ prepare, build_extension ]
+    needs: build_extension
     strategy:
       fail-fast: false
       matrix:
