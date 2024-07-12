@@ -216,6 +216,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
               ? t('browserView.settings.wallet.customSubmitApi.enabled')
               : t('browserView.settings.wallet.customSubmitApi.disabled')
           }
+          data-testid="settings-wallet-custom-submit-api-link"
         >
           {t('browserView.settings.wallet.customSubmitApi.settingsLinkTitle')}
         </SettingsLink>

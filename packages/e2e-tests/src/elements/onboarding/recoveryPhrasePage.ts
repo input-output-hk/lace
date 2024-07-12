@@ -5,6 +5,9 @@ import CommonOnboardingElements from './commonOnboardingElements';
 import { RecoveryPhrase } from '../../types/onboarding';
 import { clearInputFieldValue, setInputFieldValue } from '../../utils/inputFieldUtils';
 import testContext from '../../utils/testContext';
+import { browser } from '@wdio/globals';
+import { setClipboardReadPermission } from '../../utils/browserPermissionsUtils';
+import clipboard from 'clipboardy';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -156,17 +159,31 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     }
   }
 
+  async clickOnCopyToClipboardButton(): Promise<void> {
+    await this.copyToClipboardButton.waitForClickable();
+    await this.copyToClipboardButton.click();
+  }
+
+  async clickOnPasteFromClipboardButton(): Promise<void> {
+    await setClipboardReadPermission('granted');
+    await this.pasteFromClipboardButton.waitForClickable();
+    await this.pasteFromClipboardButton.click();
+  }
+
   async goToMnemonicVerificationPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
-    fillValues = true
+    fillValues = false
   ): Promise<void> {
     if (flowType === 'Create') {
-      this.mnemonicWordsList = await this.getMnemonicWordTexts();
+      await this.clickOnCopyToClipboardButton();
       await this.nextButton.click();
     }
     if (fillValues) {
-      flowType === 'Create' ? await this.enterMnemonicWords() : await this.enterMnemonicWords(mnemonicWords);
+      if (flowType === 'Restore') {
+        await clipboard.write(mnemonicWords.join(','));
+      }
+      await this.clickOnPasteFromClipboardButton();
     }
   }
 }

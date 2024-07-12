@@ -29,7 +29,9 @@ export const walletRoutePaths = {
   },
   sharedWallet: {
     root: '/shared-wallet',
-    create: '/shared-wallet/create'
+    generateKeys: '/shared-wallet/generate-keys',
+    create: '/shared-wallet/create',
+    import: '/shared-wallet/import'
   },
   namiMigration: {
     root: '/nami/migration',

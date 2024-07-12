@@ -14,19 +14,19 @@ class Modal {
   }
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.container.$(this.TITLE);
+    return $(`${this.CONTAINER} ${this.TITLE}`);
   }
 
   get description(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.container.$(this.DESCRIPTION);
+    return $(`${this.CONTAINER} ${this.DESCRIPTION}`);
   }
 
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.container.$(this.CANCEL_BUTTON);
+    return $(`${this.CONTAINER} ${this.CANCEL_BUTTON}`);
   }
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.container.$(this.CONFIRM_BUTTON);
+    return $(`${this.CONTAINER} ${this.CONFIRM_BUTTON}`);
   }
 
   async clickCancelButton() {

@@ -48,7 +48,7 @@ Before(
 
 Before(
   {
-    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended or @AddNewWalletCreate'
+    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended'
   },
   async () => {
     await extendedViewWalletInitialization();
@@ -265,3 +265,10 @@ Before(
     await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
+
+Before({ tags: '@AddNewWalletCreate or @AddNewWalletRestore' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});

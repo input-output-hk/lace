@@ -39,8 +39,8 @@ export const QuorumOption = ({
   const { t } = useTranslation();
 
   const translations = {
-    buttonBack: t('sharedWallets.addSharedWallet.quorum.buttonBack'),
-    buttonNext: t('sharedWallets.addSharedWallet.quorum.buttonNext'),
+    buttonBack: t('sharedWallets.addSharedWallet.quorum.button.back'),
+    buttonNext: t('sharedWallets.addSharedWallet.quorum.button.next'),
     cosignersAmountPickerText: t('sharedWallets.addSharedWallet.quorum.cosignersAmountPickerText', {
       amount: totalCosignersNumber,
     }),
@@ -81,7 +81,8 @@ export const QuorumOption = ({
       onNext={onNext}
       onBack={onBack}
       timelineSteps={creationTimelineSteps}
-      timelineCurrentStep={SharedWalletCreationStep.CoSigners}
+      timelineCurrentStep={SharedWalletCreationStep.Quorum}
+      isNextEnabled
     >
       <Flex gap="$16" flexDirection="column" alignItems="stretch">
         <RadioButtonGroup

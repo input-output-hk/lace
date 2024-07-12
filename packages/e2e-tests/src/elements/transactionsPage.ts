@@ -119,6 +119,7 @@ class TransactionsPage {
 
   async getIndexOfTxTypeWithScroll(txType: string): Promise<number> {
     await this.scrollToTheLastRow();
+    await this.transactionsInfiniteScroll.waitForDisplayed({ reverse: true, timeout: 10_000 });
     return await this.getIndexOfTxTypeWithoutScroll(txType);
   }
 

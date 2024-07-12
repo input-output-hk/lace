@@ -401,3 +401,7 @@ Then(
     await commonAssert.assertLegalContentIsDisplayed(link);
   }
 );
+
+When(/^I wait for main loader to disappear$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
+});

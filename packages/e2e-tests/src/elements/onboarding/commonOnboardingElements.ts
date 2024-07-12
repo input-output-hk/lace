@@ -11,6 +11,7 @@ export default class CommonOnboardingElements {
   private COOKIE_POLICY_LINK = '[data-testid="cookie-policy-link"]';
   private PRIVACY_POLICY_LINK = '[data-testid="privacy-policy-link"]';
   private TERMS_OF_SERVICE_LINK = '[data-testid="terms-of-service-link"]';
+  private ACTIVE_STEP_INDICATOR = '[data-testid="active-onboarding-step"]';
 
   get stepHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STEP_HEADER);
@@ -46,6 +47,10 @@ export default class CommonOnboardingElements {
 
   get termsOfServiceLink(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TERMS_OF_SERVICE_LINK);
+  }
+
+  get activeStepIndicator(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ACTIVE_STEP_INDICATOR);
   }
 
   async clickOnNextButton(): Promise<void> {

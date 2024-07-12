@@ -88,7 +88,9 @@ export const SharedWalletGetStarted = ({
 
   const onKeysCopyClick = async () => {
     if (restProps.keysMode !== 'copy') return;
-    await restProps.copyKeysToClipboard();
+    if (restProps.copyKeysToClipboard) {
+      await restProps.copyKeysToClipboard();
+    }
     toast.notify({
       duration: TOAST_DURATION,
       icon: Copy,
