@@ -1,4 +1,5 @@
 {
+  "sharedWallets.userInfo.label": "Shared Wallet",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.button": "Create",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.description": "Create a new<br>shared wallet",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.title": "New shared wallet",
@@ -76,5 +77,26 @@
   "sharedWallets.addSharedWallet.keysGeneration.copyKeys.subtitle": "Copy and send these keys to someone setting up a new shared wallet. You can review these keys at any time.",
   "sharedWallets.addSharedWallet.keysGeneration.copyKeys.backButtonLabel": "Copy keys to clipboard",
   "sharedWallets.addSharedWallet.keysGeneration.copyKeys.nextButtonLabel": "Close",
-  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.keysBoxTitle": "Shared Wallet Keys"
+  "sharedWallets.addSharedWallet.keysGeneration.copyKeys.keysBoxTitle": "Shared Wallet Keys",
+  "sharedWallets.transaction.cosignerList.title.signed": "Signed",
+  "sharedWallets.transaction.cosignerList.title.unsigned": "Unsigned",
+  "sharedWallets.transaction.cosignerList.signed": "Signed",
+  "sharedWallets.transaction.cosignerList.you": "You",
+  "sharedWallets.transaction.summary.header": "Transaction summary",
+  "sharedWallets.transaction.summary.unsigned.description": "Confirm details and sign transaction to proceed.",
+  "sharedWallets.transaction.summary.unsubmitted.headerDescription": "(unsubmited)",
+  "sharedWallets.transaction.summary.unsubmitted.description": "The transaction can be submitted once all required co-signers have signed. Review the co-signer list and forward the transaction JSON file.",
+  "sharedWallets.transaction.sent.header": "Sent",
+  "sharedWallets.transaction.sent.description": "Summary of the transaction, costs and co-signatures.",
+  "sharedWallets.transaction.summary.title": "Transaction",
+  "sharedWallets.transaction.summary.sending": "Sending",
+  "sharedWallets.transaction.summary.validityPeriod.title": "Transaction validity period",
+  "sharedWallets.transaction.summary.validityPeriod.value": "24 Hours",
+  "sharedWallets.transaction.summary.validityPeriod.tooltip": "The maximum duration a transaction remains valid before it is automatically canceled if not completed with all the required signatures.",
+  "sharedWallets.transaction.cosigners.title": "Co-signers",
+  "sharedWallets.transaction.cosigners.quorum.reached": "Quorum reached. Transaction ready for network submission.",
+  "sharedWallets.transaction.cosigners.quorum.required": "Additional co-signatures are required before transaction can be submitted.",
+  "sharedWallets.transaction.cosigners.quorum.current": "<stat><b>{{quorum}}</b> of <b>{{participants}}</b></stat><span>required</span>",
+  "sharedWallets.transaction.cosigners.unsigned.description": "The transaction can be submitted once the required number of co-signers have signed. Confirm details and sign transaction to proceed.",
+  "sharedWallets.transaction.cosigners.unsubmitted.description": "The transaction can be submitted as all required co-signers have signed."
 }

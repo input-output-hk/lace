@@ -31,9 +31,7 @@ export const useAppInit = (): void => {
   const addresses = walletState?.addresses;
   useEffect(() => {
     if (!cardanoWallet || !addresses) return;
-    if (!cardanoWallet.source.account) {
-      throw new Error('Script wallet support is not implemented');
-    }
+
     setWalletInfo({
       name: cardanoWallet.source.wallet.metadata.name,
       // TODO: script address support LW-9574

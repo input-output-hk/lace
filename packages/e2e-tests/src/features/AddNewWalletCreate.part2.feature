@@ -88,6 +88,7 @@ Feature: Add new wallet - Create wallet
     When I go to "Wallet setup" page from "Create" wallet flow
     And I enter wallet name: "Wallet 2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
+    And I wait for main loader to disappear
     Then I see LW homepage
     And "Wallet 2" is displayed as a wallet name on the menu button
     When I click the menu button

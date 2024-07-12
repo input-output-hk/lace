@@ -1,6 +1,6 @@
 import { CoSigner, CoSignerError, CoSignerErrorKeys, CoSignerErrorName, maxCoSignerNameLength } from './AddCoSigners';
 
-const keysRegex = /(?<payment>addr_shared_vk[\da-z]*),(?<stake>stake_shared_vk[\da-z]*)?/;
+const keysRegex = /^[\dA-Fa-f]{128}$/;
 export const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
   let coSignersErrors: CoSignerError[] = [];
 

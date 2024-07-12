@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Text, sx } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import React from 'react';
-import styles from './SharedWalletGetStartedOption.module.scss';
+import styles from './SharedWalletEntryOption.module.scss';
 
 export interface WalletSetupOptionProps {
   Icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -15,7 +15,7 @@ export interface WalletSetupOptionProps {
   testId?: string;
 }
 
-export const SharedWalletGetStartedOption = ({
+export const SharedWalletEntryOption = ({
   Icon,
   copies: { title, description, button },
   disabled = false,

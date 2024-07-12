@@ -18,6 +18,8 @@ class SettingsExtendedPageObject {
 
   clickOnCollateral = async () => await SettingsPage.collateralLink.element.click();
 
+  clickOnCustomSubmitAPI = async () => await SettingsPage.customSubmitAPILink.element.click();
+
   clickOnCookiePolicy = async () => await SettingsPage.cookiePolicy.element.click();
 
   clickOnYourKeys = async () => await SettingsPage.yourKeysLink.element.click();
@@ -110,6 +112,11 @@ class SettingsExtendedPageObject {
       case 'Cookie policy':
         await this.clickOnCookiePolicy();
         break;
+      case 'Custom Submit API':
+        await this.clickOnCustomSubmitAPI();
+        break;
+      default:
+        throw new Error(`Unsupported element: ${elementName}`);
     }
   };
 

@@ -10,103 +10,27 @@ import React, {
 } from 'react';
 import { v1 as uuid } from 'uuid';
 import { makeInitialStateProvider } from '../../initial-state-provider';
-import { StateType, TransitionHandler, defineStateShape } from '../../state-utils';
-import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
+import { CoSigner } from './AddCoSigners';
 import { QuorumOptionValue, QuorumRadioOption } from './Quorum';
-import { SharedWalletCreationStep } from './types';
+import {
+  CreationFlowState,
+  SharedWalletCreationAction,
+  SharedWalletCreationActionType,
+  SharedWalletCreationStep,
+  StateCoSigners,
+  StateCoSignersImportantInfo,
+  StateQuorum,
+  StateSetup,
+  StateShareDetails,
+  stateCoSigners,
+  stateCoSignersImportantInfo,
+  stateQuorum,
+  stateSetup,
+  stateShareDetails,
+} from './state-and-types';
 import { validateCoSigners } from './validateCoSigners';
 
-const makeState = defineStateShape<{
-  constantDataPart: {
-    activeWalletName: string;
-  };
-  mainPart: {
-    step: SharedWalletCreationStep;
-  };
-  variableDataPart: {
-    coSignerInputsDirty: CoSignerDirty[];
-    coSignerInputsErrors: CoSignerError[];
-    coSigners: CoSigner[];
-    quorumRules: QuorumOptionValue;
-    walletName: string;
-  };
-}>();
-
-const stateSetup = makeState<{
-  coSignerInputsDirty: undefined;
-  coSignerInputsErrors: undefined;
-  coSigners: undefined;
-  quorumRules: undefined;
-  step: SharedWalletCreationStep.Setup;
-  walletName: string | undefined;
-}>();
-type StateSetup = StateType<typeof stateSetup>;
-
-type StateCoSignersCommon = {
-  coSignerInputsDirty: CoSignerDirty[];
-  coSignerInputsErrors: CoSignerError[];
-  coSigners: CoSigner[];
-  quorumRules: undefined;
-  walletName: string;
-};
-
-const stateCoSigners = makeState<
-  StateCoSignersCommon & {
-    step: SharedWalletCreationStep.CoSigners;
-  }
->();
-type StateCoSigners = StateType<typeof stateCoSigners>;
-
-const stateCoSignersImportantInfo = makeState<
-  StateCoSignersCommon & {
-    step: SharedWalletCreationStep.CoSignersImportantInfo;
-  }
->();
-type StateCoSignersImportantInfo = StateType<typeof stateCoSignersImportantInfo>;
-
-const stateQuorum = makeState<{
-  coSignerInputsDirty: CoSignerDirty[];
-  coSignerInputsErrors: CoSignerError[];
-  coSigners: CoSigner[];
-  quorumRules: QuorumOptionValue;
-  step: SharedWalletCreationStep.Quorum;
-  walletName: string;
-}>();
-type StateQuorum = StateType<typeof stateQuorum>;
-
-const stateShareDetails = makeState<{
-  coSignerInputsDirty: CoSignerDirty[];
-  coSignerInputsErrors: CoSignerError[];
-  coSigners: CoSigner[];
-  quorumRules: QuorumOptionValue;
-  step: SharedWalletCreationStep.ShareDetails;
-  walletName: string;
-}>();
-type StateShareDetails = StateType<typeof stateShareDetails>;
-
-export type CreationFlowState =
-  | StateSetup
-  | StateCoSigners
-  | StateCoSignersImportantInfo
-  | StateQuorum
-  | StateShareDetails;
-
-export enum SharedWalletCreationActionType {
-  BACK = 'BACK',
-  CHANGE_WALLET_NAME = 'CHANGE_WALLET_NAME',
-  COSIGNERS_CHANGED = 'COSIGNERS_CHANGED',
-  NEXT = 'NEXT',
-  QUORUM_RULES_CHANGED = 'QUORUM_RULES_CHANGED',
-}
-
-type SharedWalletCreationAction =
-  | { type: SharedWalletCreationActionType.NEXT }
-  | { type: SharedWalletCreationActionType.BACK }
-  | { type: SharedWalletCreationActionType.CHANGE_WALLET_NAME; walletName: string }
-  | { coSigner: CoSigner; type: SharedWalletCreationActionType.COSIGNERS_CHANGED }
-  | { quorumRules: QuorumOptionValue; type: SharedWalletCreationActionType.QUORUM_RULES_CHANGED };
-
-type Handler<S extends CreationFlowState> = TransitionHandler<S, CreationFlowState, SharedWalletCreationAction>;
+type Handler<S extends CreationFlowState> = (prevState: S, action: SharedWalletCreationAction) => CreationFlowState;
 
 type SharedWalletCreationStateMachine = {
   [SharedWalletCreationStep.Setup]: Handler<StateSetup>;
@@ -169,9 +93,11 @@ const getNextCoSignersDirtyValue = ({
 const makeStateMachine = ({
   exitTheFlow,
   navigateToAppHome,
+  onCreateSharedWallet,
 }: {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
+  onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
 }): SharedWalletCreationStateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.CHANGE_WALLET_NAME) {
@@ -300,10 +226,14 @@ const makeStateMachine = ({
   },
   [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.NEXT) {
+      onCreateSharedWallet({
+        coSigners: prevState.coSigners,
+        name: prevState.walletName,
+        quorumRules: prevState.quorumRules,
+      });
       navigateToAppHome();
       return prevState;
     }
-
     return prevState;
   },
 });
@@ -313,6 +243,7 @@ export type SharedWalletCreationStoreSharedProps = {
   exitTheFlow: () => void;
   initialWalletName: string;
   navigateToAppHome: () => void;
+  onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
 };
 
 export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
@@ -325,6 +256,7 @@ export const SharedWalletCreationStore = ({
   exitTheFlow,
   initialWalletName,
   navigateToAppHome,
+  onCreateSharedWallet,
 }: SharedWalletCreationStoreProps): ReactElement => {
   const initialState = useInitialState(makeInitialState(activeWalletName));
   const [state, dispatch] = useReducer(
@@ -332,6 +264,7 @@ export const SharedWalletCreationStore = ({
       const stateMachine = makeStateMachine({
         exitTheFlow,
         navigateToAppHome,
+        onCreateSharedWallet,
       });
       const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
       return handler(prevState, action);

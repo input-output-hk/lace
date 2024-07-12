@@ -6,10 +6,10 @@ import {
   SharedWalletRestorationFlow,
 } from '../add-shared-wallet';
 import {
-  CreationFlowState,
   SharedWalletCreationFlowInitialStateProvider,
   makeInitialState as makeSharedWalletCreationInitialState,
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
+import { CreationFlowState } from '../add-shared-wallet/creation-flow/state-and-types';
 import { GenerateSharedKeysFlow } from '../add-shared-wallet/generate-keys-flow';
 import { LinkedWalletType } from '../add-shared-wallet/generate-keys-flow/GenerateSharedKeysFlow';
 import { GenerateSharedKeysState } from '../add-shared-wallet/generate-keys-flow/Store';
@@ -103,6 +103,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
                   setFlow(AddSharedWalletFlowType.GetStarted);
                 }}
                 exitTheFlow={() => setFlow(AddSharedWalletFlowType.GetStarted)}
+                onCreateSharedWallet={() => void 0}
               />
             </SharedWalletCreationFlowInitialStateProvider>
           )}

@@ -29,7 +29,7 @@ import type { NetworkType } from '../types/network';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 
 Given(
-  /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
+  /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API)" setting$/,
   async (settingsElement) => {
     await settingsExtendedPageObject.clickSettingsItem(settingsElement);
   }
