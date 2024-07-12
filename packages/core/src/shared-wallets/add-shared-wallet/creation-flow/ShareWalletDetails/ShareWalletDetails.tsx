@@ -3,16 +3,17 @@ import { Button } from '@lace/common';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
+import { CreationFlowState, SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
-import { SharedWalletCreationStep } from '../types';
 import { ReactComponent as DownloadFileIcon } from './download-file.svg';
 import styles from './ShareWalletDetails.module.scss';
-import { downloadWalletData } from './utils';
+import { FILENAME, downloadWalletData } from './utils';
 
-const FILENAME = 'shared-wallet-config.json';
-const FILE_CONTENTS = { hello: 'world' };
+export type LayoutNavigationDownloadProps = LayoutNavigationProps & {
+  stateSharedWallet: CreationFlowState;
+};
 
-export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Element => {
+export const ShareWalletDetails = ({ onNext, stateSharedWallet }: LayoutNavigationDownloadProps): JSX.Element => {
   const { t } = useTranslation();
 
   const translations = {
@@ -22,10 +23,6 @@ export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Eleme
     next: t('sharedWallets.addSharedWallet.shareWalletDetails.next'),
     subtitle: t('sharedWallets.addSharedWallet.shareWalletDetails.subtitle'),
     title: t('sharedWallets.addSharedWallet.shareWalletDetails.title'),
-  };
-
-  const onDownload = () => {
-    downloadWalletData(FILE_CONTENTS, FILENAME);
   };
 
   return (
@@ -48,7 +45,12 @@ export const ShareWalletDetails = ({ onNext }: LayoutNavigationProps): JSX.Eleme
         rootClassName={styles.root}
         iconClassName={styles.icon}
         icon={
-          <Button block onClick={onDownload} color="gradient" data-testid="download-json-btn">
+          <Button
+            block
+            onClick={() => downloadWalletData(stateSharedWallet)}
+            color="gradient"
+            data-testid="download-json-btn"
+          >
             <DownloadFileIcon />
             <Text.Body.Normal weight="$semibold">{translations.cta}</Text.Body.Normal>
           </Button>
