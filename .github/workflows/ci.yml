@@ -169,6 +169,53 @@ jobs:
     needs: smokeTestsRun
     if: always()
     steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        shell: bash
+        if: always()
+        working-directory: ./packages/e2e-tests/reports/allure/results
+        run: |
+          echo "
+          branch=${{ inputs.BRANCH }}
+          browser=${{ inputs.BROWSER }}
+          tags=${{ inputs.TAGS }}
+          platform=Linux
+          " > environment.properties
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.6.0
+        if: always()
+        env:
+          GITHUB_AUTH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ inputs.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ inputs.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './packages/e2e-tests/reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'smoke/linux/${{ inputs.BROWSER }}/${{ inputs.RUN }}'
+          copyLatest: true
+          ignoreMissingResults: true
+          updatePr: comment
+          baseUrl: 'https://${{ inputs.E2E_REPORTS_USER }}:${{ inputs.E2E_REPORTS_PASSWORD }}@${{ inputs.E2E_REPORTS_URL }}'
+
+      - name: Publish artifacts (logs, reports, screenshots)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            ./packages/e2e-tests/screenshots
+            ./packages/e2e-tests/logs
+            ./packages/e2e-tests/reports
+          retention-days: 5
+
       - run: |
           if [[ ${{ needs.smokeTestsRun.result }} == "success" ]]; then
             exit 0
