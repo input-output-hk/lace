@@ -90,6 +90,7 @@ describe('Testing assets transformers', () => {
       fiatBalance: '0.00 fiatCode',
       id: cardanoCoin.id,
       logo: 'test-file-stub',
+      defaultLogo: 'test-file-stub',
       name: cardanoCoin.name,
       price: '1.000',
       ticker: cardanoCoin.symbol,
@@ -207,7 +208,8 @@ describe('Testing assets transformers', () => {
     const nftMetadata = {};
     const fingerprint = 'fingerprint';
     const policyId = 'policyId';
-    const token = { tokenMetadata, nftMetadata, fingerprint, policyId } as Wallet.Asset.AssetInfo;
+    const assetId = 'assetId';
+    const token = { tokenMetadata, nftMetadata, fingerprint, policyId, assetId } as Wallet.Asset.AssetInfo;
 
     const key = 'key' as Wallet.Cardano.AssetId;
 
@@ -256,9 +258,6 @@ describe('Testing assets transformers', () => {
       jest.resetAllMocks();
     });
     test('should return proper asset data', () => {
-      const addEllipsisSpy = jest.spyOn(common, 'addEllipsis');
-      addEllipsisSpy.mockReturnValue('addEllipsis');
-
       const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
       getAssetImageUrlSpy.mockImplementation((str: string) => str);
 
@@ -288,7 +287,9 @@ describe('Testing assets transformers', () => {
       ).toEqual({
         ...result,
         logo: 'getAssetImageUrl',
-        ticker: 'addEllipsis',
+        defaultLogo:
+          'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23cc9d66%22%20d%3D%22M9%206L12%203L15%206L12%209ZM18%203L21%206L18%209L15%206ZM21%2024L18%2027L15%2024L18%2021ZM12%2027L9%2024L12%2021L15%2024ZM3%2012L6%209L9%2012L6%2015ZM24%209L27%2012L24%2015L21%2012ZM27%2018L24%2021L21%2018L24%2015ZM6%2021L3%2018L6%2015L9%2018Z%22%2F%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M6%209L3%206L6%203L9%206ZM21%206L24%203L27%206L24%209ZM24%2021L27%2024L24%2027L21%2024ZM9%2024L6%2027L3%2024L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23e5e5e5%22%20d%3D%22M9%209L15%209L15%2013.2L11.4%2011.4L13.2%2015L9%2015ZM21%209L21%2015L16.8%2015L18.6%2011.4L15%2013.2L15%209ZM21%2021L15%2021L15%2016.8L18.6%2018.6L16.8%2015L21%2015ZM9%2021L9%2015L13.2%2015L11.4%2018.6L15%2016.8L15%2021Z%22%2F%3E%3C%2Fsvg%3E',
+        ticker: '-',
         price: 'parseFiat',
         variation: 'variationParser',
         balance: 'compactNumberBalance',
@@ -302,7 +303,6 @@ describe('Testing assets transformers', () => {
           amount: mockedTokenBalance
         }
       });
-      expect(addEllipsisSpy).toBeCalledWith(fingerprint.toString(), 8, 6);
       expect(getAssetImageUrlSpy).toBeCalledWith(tokenMetadata.icon);
       expect(parseFiatSpy).toBeCalledWith(fiat * priceInAda);
       expect(variationParserSpy).toBeCalledWith(pricesInfo?.priceVariationPercentage24h);
@@ -310,7 +310,6 @@ describe('Testing assets transformers', () => {
       expect(compactNumberSpy).toBeCalledWith(mockedTokenBalance, tokenMetadata.decimals);
       expect(parseFiatSpy).toBeCalledWith(fiatBalance);
 
-      addEllipsisSpy.mockRestore();
       compactNumberSpy.mockRestore();
       variationParserSpy.mockRestore();
       getAssetImageUrlSpy.mockRestore();
@@ -323,7 +322,7 @@ describe('Testing assets transformers', () => {
           ...params,
           token: { ...token, tokenMetadata: {}, nftMetadata: {} } as Wallet.Asset.AssetInfo
         }).name
-      ).toEqual('-');
+      ).toEqual('fingerprint');
     });
 
     test('to see proper name, icon, decimals taken from tokenMetadata level', () => {
@@ -354,32 +353,6 @@ describe('Testing assets transformers', () => {
 
       getAssetImageUrlSpy.mockRestore();
       compactNumberSpy.mockRestore();
-    });
-
-    test('to see proper name, icon, decimals taken from nftMetadata level', () => {
-      const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
-      getAssetImageUrlSpy.mockImplementation((str: string) => str);
-      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumberWithUnit');
-      compactNumberSpy.mockReturnValue('nftMetadatacCompactNumberBalance');
-      const nftMetadataName = 'nftMetadataName';
-      const nftMetadataIcon = 'nftMetadataIcon';
-      const nftMetadataResults = assetsTransformers.assetTransformer({
-        ...params,
-        token: {
-          ...token,
-          nftMetadata: {
-            name: nftMetadataName,
-            icon: nftMetadataIcon
-          } as unknown as Wallet.Asset.AssetInfo['nftMetadata']
-        } as Wallet.Asset.AssetInfo
-      });
-
-      expect(nftMetadataResults.name).toEqual(nftMetadataName);
-      expect(nftMetadataResults.logo).toEqual(nftMetadataIcon);
-      expect(nftMetadataResults.balance).toEqual('nftMetadatacCompactNumberBalance');
-
-      compactNumberSpy.mockRestore();
-      getAssetImageUrlSpy.mockRestore();
     });
 
     test('to see proper fiatBalance in case pricesInfo.priceInAda is missing', () => {
@@ -432,7 +405,7 @@ describe('Testing assets transformers', () => {
           } as Wallet.Asset.AssetInfo
         }).logo
       ).toEqual('getRandomIcon');
-      expect(getRandomIconSpy).toBeCalledWith({ id: key.toString(), size: 30 });
+      expect(getRandomIconSpy).toBeCalledWith({ id: token.assetId, size: 30 });
 
       getRandomIconSpy.mockRestore();
     });

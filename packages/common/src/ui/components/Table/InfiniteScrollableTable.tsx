@@ -26,6 +26,14 @@ const TableBodyWrapper = ({
   </InfiniteScroll>
 );
 
+// Caution: setting this as a new object on every render inline re-creates the entire table body
+const tableComponents = {
+  body: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    row: (rowProps: any) => <tr {...rowProps} className={styles.rows} data-testid="infinite-scrollable-table-row" />
+  }
+};
+
 export const InfiniteScrollableTable = ({
   infiniteScrollProps,
   infiniteScrollContainerClass,
@@ -38,18 +46,7 @@ export const InfiniteScrollableTable = ({
     infiniteScrollContainerClass={infiniteScrollContainerClass}
   >
     <div data-testid="infinite-scrollable-table" className={styles.tableContainer}>
-      <Table
-        {...props}
-        pagination={false}
-        components={{
-          body: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            row: (rowProps: any) => (
-              <tr {...rowProps} className={styles.rows} data-testid="infinite-scrollable-table-row" />
-            )
-          }
-        }}
-      />
+      <Table {...props} pagination={false} components={tableComponents} />
     </div>
   </TableBodyWrapper>
 );
