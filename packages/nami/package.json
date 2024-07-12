@@ -1,0 +1,120 @@
+{
+  "name": "@lace/nami",
+  "version": "0.1.0",
+  "description": "Nami mode package",
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/nami/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/lace.git"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "IOHK"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "typings": "dist/index.d.ts",
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "run -T rollup -c rollup.config.js",
+    "build-storybook": "storybook build",
+    "chromatic": "echo \"@lace/nami: no chromatic command specified\"",
+    "cleanup": "yarn exec rm -rf dist node_modules",
+    "format": "yarn prettier --write .",
+    "format-check": "yarn prettier --check .",
+    "lint": "eslint .",
+    "prepack": "yarn build",
+    "prestart": "yarn build",
+    "start": "node dist/index.js",
+    "storybook": "storybook dev -p 6006",
+    "test": "echo \"@lace/nami: no test command specified\"",
+    "test-storybook:ci": "echo \"@lace/nami: no test-storybook:ci specified\"",
+    "type-check": "echo \"@lace/nami: no type-check command specified\"",
+    "watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "@chakra-ui/css-reset": "1.0.0",
+    "@chakra-ui/icons": "1.0.13",
+    "@chakra-ui/react": "1.6.4",
+    "@dicebear/avatars": "^4.6.4",
+    "@dicebear/avatars-bottts-sprites": "^4.6.4",
+    "@emotion/react": "^11.4.0",
+    "@emotion/styled": "^11.3.0",
+    "@fontsource/ubuntu": "^5.0.8",
+    "crc": "^4.1.1",
+    "debounce-promise": "^3.1.2",
+    "easy-peasy": "^6.0.4",
+    "focus-visible": "^5.2.0",
+    "framer-motion": "^4.1.16",
+    "javascript-time-ago": "^2.5.10",
+    "promise-latest": "^1.0.4",
+    "react-custom-scrollbars-2": "^4.5.0",
+    "react-icons": "4.2.0",
+    "react-kawaii": "^0.18.0",
+    "react-lazy-load-image-component": "^1.5.1",
+    "react-middle-ellipsis": "^1.2.1",
+    "react-number-format": "^5.3.1",
+    "react-time-ago": "^7.3.3",
+    "react-window": "^1.8.10",
+    "use-constant": "^1.1.0"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^1.5.0",
+    "@rollup/plugin-image": "^3.0.3",
+    "@storybook/addon-essentials": "^8.1.6",
+    "@storybook/addon-interactions": "^8.1.6",
+    "@storybook/addon-links": "^8.1.6",
+    "@storybook/addon-webpack5-compiler-swc": "^1.0.3",
+    "@storybook/blocks": "^8.1.6",
+    "@storybook/react": "^8.1.6",
+    "@storybook/react-webpack5": "^8.1.6",
+    "@storybook/test": "^8.1.6",
+    "@types/chrome": "^0.0.268",
+    "@types/react": "17.0.2",
+    "@types/react-kawaii": "^0.17.3",
+    "@types/react-lazy-load-image-component": "1.6.4",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "eslint": "8.33.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-functional": "^5.0.4",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prefer-arrow-functions": "^3.1.4",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "7.31.8",
+    "eslint-plugin-storybook": "^0.8.0",
+    "eslint-plugin-unicorn": "^45.0.2",
+    "msw": "^2.3.1",
+    "msw-storybook-addon": "^2.0.2",
+    "prettier": "3.2.5",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "rollup-plugin-import-css": "^3.5.0",
+    "rollup-plugin-svg": "^2.0.0",
+    "sass": "^1.68.0",
+    "storybook": "^8.1.6",
+    "tsconfig-paths-webpack-plugin": "3.5.2",
+    "typescript": "^4.9.5"
+  },
+  "peerDependencies": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

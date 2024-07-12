@@ -1,0 +1,10 @@
+dist/**
+rollup.config.js
+storybook-static
+node_modules
+test
+typings
+.storybook/**
+src/ui/app/components/**
+src/ui/app/pages/**
+**/*.js

@@ -30,6 +30,10 @@ export interface BackgroundStorage {
   usePersistentUserId?: boolean;
   experimentsConfiguration?: Record<string, string | boolean>;
   customSubmitTxUrl?: string;
+  namiMigration?: {
+    completed: boolean;
+    mode: 'lace' | 'nami';
+  };
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;

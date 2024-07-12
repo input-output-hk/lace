@@ -45,3 +45,5 @@ export * from '@ui/components/WalletSetupRevamp';
 export * from '@ui/components/ListEmptyState';
 export * from '@ui/components/MidnightEventBanner';
 export * from '@ui/components/MidnightPreLaunchSettingsBanner';
+export * from '@ui/components/NamiMigrationUpdatingYourWallet';
+export * from '@ui/components/NamiMigration';

@@ -559,7 +559,14 @@ describe('Testing useWalletManager hook', () => {
         ]
       });
       expect(clearBackgroundStorage).toBeCalledWith({
-        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration', 'customSubmitTxUrl']
+        except: [
+          'fiatPrices',
+          'userId',
+          'usePersistentUserId',
+          'experimentsConfiguration',
+          'customSubmitTxUrl',
+          'namiMigration'
+        ]
       });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
