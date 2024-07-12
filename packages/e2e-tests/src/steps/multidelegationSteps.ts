@@ -28,13 +28,16 @@ import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/staking';
-import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
+import SwitchingStakePoolModal from '../elements/multidelegation/SwitchingStakePoolModal';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
 import { mapColumnNameStringToEnum, mapSortingOptionNameStringToEnum } from '../utils/stakePoolListContent';
 import { browser } from '@wdio/globals';
 import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
-import MultidelegationDAppIssueModal from '../elements/staking/MultidelegationDAppIssueModal';
+import MultidelegationDAppIssueModal from '../elements/multidelegation/MultidelegationDAppIssueModal';
 import StakingInfoCard from '../elements/multidelegation/StakingInfoCard';
+import StakingExitModal from '../elements/multidelegation/StakingExitModal';
+import StakingExitModalAssert from '../assert/multidelegation/StakingExitModalAssert';
+import StakingErrorDrawerAssert from '../assert/multidelegation/StakingErrorDrawerAssert';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -615,4 +618,47 @@ Then(/^I see currently staking component for stake pool:$/, async (stakePools: D
 
 When(/^I click on pool name in the first currently staking component$/, async () => {
   await new StakingInfoCard(1).clickOnPoolName();
+});
+
+Then(
+  /^I click "(Cancel|Exit)" button for staking "You'll have to start again" modal$/,
+  async (button: 'Cancel' | 'Exit') => {
+    switch (button) {
+      case 'Cancel':
+        await StakingExitModal.cancelButton.waitForClickable();
+        await StakingExitModal.cancelButton.click();
+        break;
+      case 'Exit':
+        await StakingExitModal.exitButton.waitForClickable();
+        await StakingExitModal.exitButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
+
+Then(/^Staking exit modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  shouldBeDisplayed === 'is'
+    ? await StakingExitModalAssert.assertSeeStakingExitModal()
+    : await StakingExitModalAssert.assertDontSeeStakingExitModal();
+});
+
+When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
+  switch (button) {
+    case 'Cancel':
+      await SwitchingStakePoolModal.cancelButton.waitForClickable();
+      await SwitchingStakePoolModal.cancelButton.click();
+      break;
+    case 'Fine by me':
+      await SwitchingStakePoolModal.fineByMeButton.waitForClickable();
+      await SwitchingStakePoolModal.fineByMeButton.click();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+Then(/^the staking error screen is displayed$/, async () => {
+  await StakingErrorDrawerAssert.assertSeeStakingError();
 });

@@ -11,12 +11,12 @@ Feature: Analytics - Posthog - Switching pools - Extended View
     When I navigate to Staking extended page
     Then I validate latest analytics single event "staking | staking | click"
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to the search bar
+    When I input "OtherStakePool" into stake pool search bar
     And I wait for single search result
-    And I click stake pool with name "OtherStakePool"
+    And I click on the stake pool with ticker "OtherStakePool"
     Then I validate latest analytics single event "staking | staking | stake pool | click"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    When I click "Stake on this pool" button on stake pool details drawer
+    When I click on "Stake all on this pool" button on stake pool details drawer
     Then I validate latest analytics single event "staking | stake pool detail | stake on this pool | click"
     And I click "Fine by me" button on "Switching pool?" modal
     Then I validate latest analytics single event "staking | switching pool? | fine by me | click"
@@ -24,7 +24,7 @@ Feature: Analytics - Posthog - Switching pools - Extended View
     And I click "Next" button on staking confirmation drawer
     Then I validate latest analytics single event "staking | manage delegation | stake pool confirmation | next | click"
     And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed in extended mode
+    Then Switching staking success drawer is displayed
     And I validate latest analytics multiple events:
       | staking \| manage delegation \| hurray! \| view                           |
       | staking \| manage delegation \| password confirmation \| confirm \| click |
@@ -39,12 +39,12 @@ Feature: Analytics - Posthog - Switching pools - Extended View
     When I navigate to Staking extended page
     Then I validate latest analytics single event "staking | staking | click"
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to the search bar
+    When I input "OtherStakePool" into stake pool search bar
     And I wait for single search result
-    And I click stake pool with name "OtherStakePool"
+    And I click on the stake pool with ticker "OtherStakePool"
     Then I validate latest analytics single event "staking | staking | stake pool | click"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    When I click "Stake on this pool" button on stake pool details drawer
+    When I click on "Stake all on this pool" button on stake pool details drawer
     Then I validate latest analytics single event "staking | stake pool detail | stake on this pool | click"
     And I click "Fine by me" button on "Switching pool?" modal
     Then I validate latest analytics single event "staking | switching pool? | fine by me | click"
@@ -52,7 +52,7 @@ Feature: Analytics - Posthog - Switching pools - Extended View
     And I click "Next" button on staking confirmation drawer
     Then I validate latest analytics single event "staking | manage delegation | stake pool confirmation | next | click"
     And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed in extended mode
+    Then Switching staking success drawer is displayed
     And I validate latest analytics multiple events:
       | staking \| manage delegation \| hurray! \| view                           |
       | staking \| manage delegation \| password confirmation \| confirm \| click |

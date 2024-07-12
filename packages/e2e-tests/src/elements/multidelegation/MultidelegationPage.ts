@@ -4,7 +4,6 @@ import MultidelegationPageAssert from '../../assert/multidelegation/Multidelegat
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 import { ChainablePromiseElement } from 'webdriverio';
-import StakePoolDetails from '../staking/stakePoolDetails';
 import testContext from '../../utils/testContext';
 import { isPopupMode } from '../../utils/pageUtils';
 import CommonDrawerElements from '../CommonDrawerElements';
@@ -14,6 +13,7 @@ import StakePoolDetailsDrawer from './StakePoolDetailsDrawer';
 import MoreOptionsComponent from './MoreOptionsComponent';
 import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
 import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class MultidelegationPage {
   private ACTIVITY_TAB = '[data-testid="activity-tab"]';
@@ -79,155 +79,155 @@ class MultidelegationPage {
   private POOLS_COUNTER = '[data-testid="pools-counter"]';
   private POOL_CARD = '[data-testid="stake-pool-card"]';
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return SectionTitle.sectionTitle;
   }
 
-  get overviewTab() {
+  get overviewTab(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.OVERVIEW_TAB);
   }
 
-  get browseTab() {
+  get browseTab(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BROWSE_POOLS_TAB);
   }
 
-  get activityTab() {
+  get activityTab(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ACTIVITY_TAB);
   }
 
-  get gridViewToggle() {
+  get gridViewToggle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GRID_VIEW_TOGGLE);
   }
 
-  get listViewToggle() {
+  get listViewToggle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LIST_VIEW_TOGGLE);
   }
 
-  get gridContainer() {
+  get gridContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOLS_GRID_CONTAINER);
   }
 
-  get listContainer() {
+  get listContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOLS_LIST_CONTAINER);
   }
 
-  get delegationCardStatusLabel() {
+  get delegationCardStatusLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_STATUS_LABEL);
   }
 
-  get delegationCardStatusValue() {
+  get delegationCardStatusValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_STATUS_VALUE);
   }
 
-  get delegationCardBalanceLabel() {
+  get delegationCardBalanceLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_BALANCE_LABEL);
   }
 
-  get delegationCardBalanceValue() {
+  get delegationCardBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_BALANCE_VALUE);
   }
 
-  get delegationCardPoolsLabel() {
+  get delegationCardPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_POOLS_LABEL);
   }
 
-  get delegationCardPoolsValue() {
+  get delegationCardPoolsValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_POOLS_VALUE);
   }
 
-  get delegationCardChartSlices() {
+  get delegationCardChartSlices(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.DELEGATION_CARD_CHART_PIE_SLICE);
   }
 
-  get delegatedPoolItems() {
+  get delegatedPoolItems(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.DELEGATED_POOL_ITEM);
   }
 
-  get stakingPageSearchInput() {
+  get stakingPageSearchInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_INPUT);
   }
 
-  get searchIcon() {
+  get searchIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_ICON);
   }
 
-  get searchLoader() {
+  get searchLoader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_LOADER);
   }
 
-  get emptySearchResultsImage() {
+  get emptySearchResultsImage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_SEARCH_RESULTS_IMAGE);
   }
 
-  get emptySearchResultsMessage() {
+  get emptySearchResultsMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_SEARCH_RESULTS_MESSAGE);
   }
 
-  get displayedPools() {
+  get displayedPools(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_ITEM);
   }
 
-  get displayedCards() {
+  get displayedCards(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_CARD);
   }
 
-  get columnHeaderTicker() {
+  get columnHeaderTicker(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_TICKER);
   }
 
-  get columnHeaderSaturation() {
+  get columnHeaderSaturation(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_SATURATION);
   }
 
-  get columnHeaderROS() {
+  get columnHeaderROS(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_ROS);
   }
 
-  get columnHeaderCost() {
+  get columnHeaderCost(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_COST);
   }
 
-  get columnHeaderMargin() {
+  get columnHeaderMargin(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_MARGIN);
   }
 
-  get columnHeaderBlocks() {
+  get columnHeaderBlocks(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_BLOCKS);
   }
 
-  get columnHeaderPledge() {
+  get columnHeaderPledge(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_PLEDGE);
   }
 
-  get columnHeaderLiveStake() {
+  get columnHeaderLiveStake(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_LIVE_STAKE);
   }
 
-  get manageStakingBtnNext() {
+  get manageStakingBtnNext(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MANAGE_STAKING_BTN_NEXT);
   }
 
-  get confirmationBtnNext() {
+  get confirmationBtnNext(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRMATION_BTN_NEXT);
   }
 
-  get stakingPoolInfoItems() {
+  get stakingPoolInfoItems(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.STAKING_POOL_INFO);
   }
 
-  get tooltip() {
+  get tooltip(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOOLTIP);
   }
 
-  get sortingOptionTooltip() {
+  get sortingOptionTooltip(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SORTING_OPTION_TOOLTIP);
   }
 
-  get manageBtn() {
+  get manageBtn(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MANAGE_BTN);
   }
 
-  get poolsCounter() {
+  get poolsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.POOLS_COUNTER);
   }
 
@@ -291,19 +291,19 @@ class MultidelegationPage {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_VALUE);
   }
 
-  get stakePoolListRowSkeleton() {
+  get stakePoolListRowSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOL_LIST_ROW_SKELETON);
   }
 
-  get stakePoolCardSkeleton() {
+  get stakePoolCardSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOL_CARD_SKELETON);
   }
 
-  get selectedPoolsInGridView() {
+  get selectedPoolsInGridView(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.SELECTED_STAKE_POOLS_IN_GRID_VIEW);
   }
 
-  get selectedPoolsInListView() {
+  get selectedPoolsInListView(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.SELECTED_STAKE_POOLS_IN_LIST_VIEW);
   }
 
@@ -450,14 +450,14 @@ class MultidelegationPage {
     const stakingPoolInfoItems = await this.stakingPoolInfoItems;
     for (const stakingPoolInfoItem of stakingPoolInfoItems) {
       await stakingPoolInfoItem.click();
-      await StakePoolDetails.container.waitForDisplayed();
-      await StakePoolDetails.container.waitForStable();
-      await StakePoolDetails.poolId.waitForDisplayed();
-      await StakePoolDetails.poolName.waitForDisplayed();
-      await StakePoolDetails.poolTicker.waitForDisplayed();
-      const poolId = await StakePoolDetails.poolId.getText();
-      const poolName = await StakePoolDetails.poolName.getText();
-      const poolTicker = await StakePoolDetails.poolTicker.getText();
+      await StakePoolDetailsDrawer.container.waitForDisplayed();
+      await StakePoolDetailsDrawer.container.waitForStable();
+      await StakePoolDetailsDrawer.poolId.waitForDisplayed();
+      await StakePoolDetailsDrawer.poolName.waitForDisplayed();
+      await StakePoolDetailsDrawer.poolTicker.waitForDisplayed();
+      const poolId = await StakePoolDetailsDrawer.poolId.getText();
+      const poolName = await StakePoolDetailsDrawer.poolName.getText();
+      const poolTicker = await StakePoolDetailsDrawer.poolTicker.getText();
       const poolData = { poolId, poolName, poolTicker };
       poolDataToBeSaved.push(poolData);
       (await isPopupMode())
