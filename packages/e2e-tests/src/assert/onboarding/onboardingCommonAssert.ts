@@ -70,6 +70,9 @@ class OnboardingCommonAssert {
       case 'Enter wallet':
         expectedStepTitle = await t('core.walletSetupStep.enterWallet');
         break;
+      case 'Connect device':
+        expectedStepTitle = await t('core.walletSetupStep.connectWallet');
+        break;
       default:
         throw new Error(`Unsupported step: ${step}`);
     }

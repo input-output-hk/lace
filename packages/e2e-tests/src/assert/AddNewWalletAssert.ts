@@ -4,6 +4,8 @@ import OnboardingWalletSetupPageAssert from './onboarding/onboardingWalletSetupP
 import { t } from '../utils/translationService';
 import { isPopupMode } from '../utils/pageUtils';
 import { expect } from 'chai';
+import ConnectYourDevicePage from '../elements/onboarding/ConnectYourDevicePage';
+import ConnectYourDevicePageAssert from './onboarding/ConnectYourDevicePageAssert';
 
 class AddNewWalletAssert {
   async assertMainModalIsDisplayedInExtendedMode() {
@@ -29,6 +31,21 @@ class AddNewWalletAssert {
     await OnboardingWalletSetupPageAssert.assertSeePasswordInput();
     await OnboardingWalletSetupPageAssert.assertSeeBackButton();
     await OnboardingWalletSetupPageAssert.assertSeeEnterWalletButton();
+  }
+
+  async asserSeeConnectYourDevicePageInModal() {
+    await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
+    await AddNewWalletMainModal.closeButton.waitForEnabled();
+    await ConnectYourDevicePageAssert.assertSeeStepTitle(
+      await t('core.walletSetupConnectHardwareWalletStepRevamp.title')
+    );
+    await ConnectYourDevicePageAssert.assertSeeStepSubtitle(
+      await t('core.walletSetupConnectHardwareWalletStepRevamp.subTitle')
+    );
+    await ConnectYourDevicePage.loader.waitForDisplayed();
+
+    await ConnectYourDevicePageAssert.assertSeeBackButton();
+    await ConnectYourDevicePageAssert.assertSeeTryAgainButton(false);
   }
 }
 
