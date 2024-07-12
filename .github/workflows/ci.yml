@@ -169,7 +169,7 @@ jobs:
     needs: smokeTestsRun
     if: always()
     steps:
-      - name: Download all artifacts
+      - name: Download all smoke tests artifacts
         uses: actions/download-artifact@v4
         with:
           path: .
@@ -199,7 +199,7 @@ jobs:
           storageType: s3
           resultsGlob: './reports/allure/results'
           bucket: lace-e2e-test-results
-          prefix: 'smoke/linux/chrome/${{ github.run_id }}'
+          prefix: 'smoke/linux/chrome/${{ github.run_number }}'
           copyLatest: true
           ignoreMissingResults: true
           updatePr: comment
