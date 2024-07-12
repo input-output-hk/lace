@@ -48,7 +48,6 @@ Feature: Own Tags - Extended View
     Then I see own tag on under address in "From address" section
     And I expand "To address" section in DApp transaction window
     Then I see <tag> tag on under address in "To address" section
-
     Examples:
       | wallet                            | addressType        | tag     | ada  |
       | MultiWallet1                      | other multiaddress | own     | 0.00 |
