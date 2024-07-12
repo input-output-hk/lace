@@ -3,13 +3,9 @@ import { AddCoSigners } from './AddCoSigners';
 import { ImportantInfoDialog } from './ImportantInfoDialog';
 import { QuorumOption } from './Quorum';
 import { SetupSharedWallet } from './SetupSharedWallet';
-import {
-  SharedWalletCreationActionType,
-  SharedWalletCreationStore,
-  SharedWalletCreationStoreSharedProps,
-} from './SharedWalletCreationStore';
+import { SharedWalletCreationStore, SharedWalletCreationStoreSharedProps } from './SharedWalletCreationStore';
 import { ShareWalletDetails } from './ShareWalletDetails';
-import { SharedWalletCreationStep } from './types';
+import { SharedWalletCreationActionType, SharedWalletCreationStep } from './state-and-types';
 
 type SharedWalletCreationFlowProps = SharedWalletCreationStoreSharedProps;
 
@@ -54,11 +50,7 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
         {state.step === SharedWalletCreationStep.ShareDetails && (
           <ShareWalletDetails
             onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
-            fileContent={{
-              coSigners: state.coSigners,
-              name: state.walletName,
-              quorumRules: state.quorumRules,
-            }}
+            stateSharedWallet={state}
           />
         )}
         {state.step === SharedWalletCreationStep.CoSignersImportantInfo && (

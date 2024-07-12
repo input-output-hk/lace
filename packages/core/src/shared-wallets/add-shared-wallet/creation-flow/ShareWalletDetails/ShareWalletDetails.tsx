@@ -1,23 +1,20 @@
 import { ActionCard, Box, Divider, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Button } from '@lace/common';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
+import { CreationFlowState, SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
-import { SharedWalletCreationStep } from '../types';
 import { DownloadFileIcon } from './DownloadFileIcon';
 import styles from './ShareWalletDetails.module.scss';
-import { downloadWalletData } from './utils';
+import { FILENAME, downloadWalletData } from './utils';
 
-const FILENAME = 'shared-wallet-config.json';
-
-type ShareWalletDetailsProps = Pick<LayoutNavigationProps, 'onNext'> & {
-  fileContent?: Record<string, unknown>;
+export type LayoutNavigationDownloadProps = LayoutNavigationProps & {
+  stateSharedWallet: CreationFlowState;
 };
 
-export const ShareWalletDetails = ({ onNext, fileContent = {} }: ShareWalletDetailsProps): JSX.Element => {
+export const ShareWalletDetails = ({ onNext, stateSharedWallet }: LayoutNavigationDownloadProps): JSX.Element => {
   const { t } = useTranslation();
-  const [isFileDownloaded, setIsFileDownloaded] = useState<boolean>(false);
 
   const translations = {
     body: t('sharedWallets.addSharedWallet.shareWalletDetails.body'),
@@ -28,11 +25,6 @@ export const ShareWalletDetails = ({ onNext, fileContent = {} }: ShareWalletDeta
     title: t('sharedWallets.addSharedWallet.shareWalletDetails.title'),
   };
 
-  const onDownload = () => {
-    downloadWalletData(fileContent, FILENAME);
-    setIsFileDownloaded(true);
-  };
-
   return (
     <SharedWalletLayout
       title={translations.title}
@@ -41,7 +33,7 @@ export const ShareWalletDetails = ({ onNext, fileContent = {} }: ShareWalletDeta
       timelineSteps={creationTimelineSteps}
       timelineCurrentStep={SharedWalletCreationStep.ShareDetails}
       customNextLabel={translations.next}
-      isNextEnabled={isFileDownloaded}
+      isNextEnabled
     >
       <Box mt="$12">
         <Text.Body.Normal>{translations.body}</Text.Body.Normal>
@@ -53,7 +45,12 @@ export const ShareWalletDetails = ({ onNext, fileContent = {} }: ShareWalletDeta
         rootClassName={styles.root}
         iconClassName={styles.icon}
         icon={
-          <Button block onClick={onDownload} color="gradient" data-testid="download-json-btn">
+          <Button
+            block
+            onClick={() => downloadWalletData(stateSharedWallet)}
+            color="gradient"
+            data-testid="download-json-btn"
+          >
             <DownloadFileIcon />
             <Text.Body.Normal weight="$semibold">{translations.cta}</Text.Body.Normal>
           </Button>

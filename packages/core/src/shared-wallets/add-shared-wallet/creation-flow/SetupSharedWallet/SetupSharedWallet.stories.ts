@@ -7,7 +7,7 @@ const meta: Meta<typeof SetupSharedWallet> = {
   parameters: {
     layout: 'centered',
   },
-  title: 'Shared Wallets / Components /SetupSharedWallet',
+  title: 'Shared Wallets / Components / SetupSharedWallet',
 };
 
 export default meta;

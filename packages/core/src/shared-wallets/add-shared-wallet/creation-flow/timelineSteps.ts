@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { SharedWalletCreationStep } from './types';
+import { SharedWalletCreationStep } from './state-and-types';
 
 export const creationTimelineSteps = [
   {
