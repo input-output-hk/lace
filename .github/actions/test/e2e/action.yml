@@ -2,6 +2,9 @@ name: e2e-split
 description: Execute e2e regression split tests
 
 inputs:
+  LACE_EXTENSION_KEY:
+    description: 'Public extended manifest key'
+    required: true
   WALLET_PASSWORD:
     description: 'Test wallet password'
     required: true
@@ -23,41 +26,26 @@ inputs:
     description: 'Tests batch'
     required: true
     default: '1'
+  SMOKE_ONLY:
+    description: 'Run only smoke tests'
+    required: true
+    default: 'false'
 
 runs:
   using: 'composite'
 
   steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'yarn'
-    - name: Node modules cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          node_modules
-          **/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Start XVFB
       shell: bash
       env:
         DISPLAY: ${{ inputs.DISPLAY }}
       run: |
         Xvfb :99 &
-    - name: Check if build exists already then download it
-      shell: bash
-      id: download-build-if-exists
-      run: |
-        ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-        if [ "$ART_ID" != "null" ]; then
-          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
-          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
-          echo "Build artifact found and downloaded"
-        else
-          echo "No build artifact found"
-        fi
+    - name: Build dist version of Lace
+      uses: ./.github/shared/build
+      with:
+        LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
     - name: Decrypt test data
       if: success()
       working-directory: ./packages/e2e-tests
@@ -77,7 +65,11 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
       run: |
-        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
+        if [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Smoke and @Testnet and not @Pending'"
+        else
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
+        fi
         eval "$runCommand";
     - name: Save dmesg logs
       shell: bash
