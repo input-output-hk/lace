@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import { Box, Card, Flex, RadioButtonGroup, Select, Text } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -84,9 +85,12 @@ export const QuorumOption = ({
       description={translations.description}
       onNext={onNext}
       onBack={onBack}
+      isNextEnabled={
+        value.option === QuorumRadioOption.AllAddresses ||
+        (value.option === QuorumRadioOption.NOfK && value.numberOfCosigner > 0)
+      }
       timelineSteps={creationTimelineSteps}
       timelineCurrentStep={SharedWalletCreationStep.Quorum}
-      isNextEnabled
     >
       <Flex gap="$16" flexDirection="column" alignItems="stretch">
         <RadioButtonGroup

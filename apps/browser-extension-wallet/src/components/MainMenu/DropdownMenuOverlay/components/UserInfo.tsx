@@ -12,7 +12,7 @@ import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
-import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
@@ -43,7 +43,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
-  const fullWalletName = cardanoWallet.source.wallet.metadata.name;
+  const fullWalletName = cardanoWallet.source.wallet.metadata.name || '';
   const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const { activeWalletAvatar, getAvatar } = useWalletAvatar();
@@ -77,6 +77,47 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       return wallet.accounts[0];
     },
     [cardanoWallet]
+  );
+
+  // TODO: merge with renderBip32Wallet in case wallet option is not different
+  const renderScriptWallet = useCallback(
+    (wallet: ScriptWallet<Wallet.WalletMetadata>) => {
+      const walletAvatar = getAvatar(wallet.walletId);
+
+      return (
+        <ProfileDropdown.WalletOption
+          key={wallet.walletId}
+          title={wallet.metadata.name}
+          subtitle={t('sharedWallets.userInfo.label')}
+          id={`wallet-option-${wallet.walletId}`}
+          onClick={async () => {
+            if (activeWalletId === wallet.walletId) {
+              return;
+            }
+            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+
+            await activateWallet({
+              walletId: wallet.walletId
+            });
+            setIsDropdownMenuOpen(false);
+            toast.notify({
+              duration: TOAST_DEFAULT_DURATION,
+              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
+            });
+          }}
+          type={getUiWalletType(wallet.type)}
+          profile={
+            walletAvatar
+              ? {
+                  fallbackText: fullWalletName,
+                  imageSrc: walletAvatar
+                }
+              : undefined
+          }
+        />
+      );
+    },
+    [activateWallet, activeWalletId, analytics, fullWalletName, getAvatar, setIsDropdownMenuOpen, t]
   );
 
   const renderBip32Wallet = useCallback(
@@ -135,11 +176,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const renderWallet = useCallback(
     (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>, isLast: boolean) => (
       <div key={wallet.walletId}>
-        {wallet.type !== WalletType.Script
-          ? renderBip32Wallet(wallet)
-          : (() => {
-              throw new Error('Script wallets are not implemented');
-            })()}
+        {wallet.type === WalletType.Script ? renderScriptWallet(wallet) : renderBip32Wallet(wallet)}
         {wallet.walletId === cardanoWallet?.source.wallet.walletId ? (
           <div className={styles.walletStatusInfo}>
             <WalletStatusContainer />
@@ -148,7 +185,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
         {isLast ? undefined : <Separator />}
       </div>
     ),
-    [renderBip32Wallet, cardanoWallet?.source.wallet.walletId]
+    [renderScriptWallet, renderBip32Wallet, cardanoWallet?.source.wallet.walletId]
   );
 
   return (

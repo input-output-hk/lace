@@ -1,13 +1,13 @@
 import React, { VFC } from 'react';
-import { SharedWalletGetStarted, SharedWalletGetStartedSharedProps } from './SharedWalletGetStarted';
+import { SharedWalletEntry, SharedWalletEntrySharedProps } from './SharedWalletEntry';
 
-type AddSharedWalletMainPageFlowProps = SharedWalletGetStartedSharedProps & {
+type AddSharedWalletMainPageFlowProps = SharedWalletEntrySharedProps & {
   sharedKeys?: string;
 };
 
 export const AddSharedWalletMainPageFlow: VFC<AddSharedWalletMainPageFlowProps> = ({ sharedKeys, ...restProps }) =>
   sharedKeys ? (
-    <SharedWalletGetStarted
+    <SharedWalletEntry
       keysMode="copy"
       createAndImportOptionsDisabled={false}
       copyKeysToClipboard={async () => {
@@ -16,5 +16,5 @@ export const AddSharedWalletMainPageFlow: VFC<AddSharedWalletMainPageFlowProps> 
       {...restProps}
     />
   ) : (
-    <SharedWalletGetStarted keysMode="generate" createAndImportOptionsDisabled {...restProps} />
+    <SharedWalletEntry keysMode="generate" createAndImportOptionsDisabled {...restProps} />
   );

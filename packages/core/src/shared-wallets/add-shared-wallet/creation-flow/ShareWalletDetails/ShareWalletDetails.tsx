@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
 import { CreationFlowState, SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
-import { ReactComponent as DownloadFileIcon } from './download-file.svg';
+import { DownloadFileIcon } from './DownloadFileIcon';
 import styles from './ShareWalletDetails.module.scss';
 import { FILENAME, downloadWalletData } from './utils';
 

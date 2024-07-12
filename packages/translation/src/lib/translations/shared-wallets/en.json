@@ -1,4 +1,5 @@
 {
+  "sharedWallets.userInfo.label": "Shared Wallet",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.button": "Create",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.description": "Create a new<br>shared wallet",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.title": "New shared wallet",
