@@ -176,6 +176,8 @@ jobs:
           pattern: 'runner-artifacts-*'
           merge-multiple: true
 
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Create allure properties
         shell: bash
         if: always()
