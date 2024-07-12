@@ -1,4 +1,4 @@
-import { defineStateShape } from '../../state-utils';
+import { StateType, defineStateShape } from '../../state-utils';
 import { CoSigner, CoSignerDirty, CoSignerError } from './AddCoSigners';
 import { QuorumOptionValue } from './Quorum';
 
@@ -34,9 +34,6 @@ export const stateSetup = makeState<{
   step: SharedWalletCreationStep.Setup;
   walletName: string | undefined;
 }>();
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type StateType<T extends (state: any) => any> = ReturnType<T>;
 
 export type StateSetup = StateType<typeof stateSetup>;
 

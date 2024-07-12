@@ -162,7 +162,7 @@ export const Quorum: Story = {
         ...coSignersStateData,
         quorumRules: {
           numberOfCosigner: 1,
-          option: QuorumRadioOption.SomeAddress,
+          option: QuorumRadioOption.NOfK,
         },
         step: SharedWalletCreationStep.Quorum,
       }}
@@ -180,7 +180,7 @@ export const ShareDetails: Story = {
         ...coSignersStateData,
         quorumRules: {
           numberOfCosigner: 1,
-          option: QuorumRadioOption.SomeAddress,
+          option: QuorumRadioOption.NOfK,
         },
         step: SharedWalletCreationStep.ShareDetails,
       }}

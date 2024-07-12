@@ -4,6 +4,8 @@
 .lh
 *.crx
 *.d.ts
+*.ts.map
+*.tsbuildinfo
 !declaration.d.ts
 *dist/
 *demo/

@@ -12,7 +12,6 @@ import { v1 as uuid } from 'uuid';
 import { makeInitialStateProvider } from '../../initial-state-provider';
 import { CoSigner } from './AddCoSigners';
 import { QuorumRadioOption } from './Quorum';
-import { downloadWalletData } from './ShareWalletDetails/utils';
 import {
   CreationFlowState,
   SharedWalletCreationAction,
@@ -227,11 +226,7 @@ const makeStateMachine = ({
     if (action.type === SharedWalletCreationActionType.NEXT) {
       navigateToAppHome();
       return prevState;
-    } else if (action.type === SharedWalletCreationActionType.DOWNLOAD_SHARED_WALLET_JSON) {
-      downloadWalletData(prevState);
-      return prevState;
     }
-
     return prevState;
   },
 });

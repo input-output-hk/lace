@@ -2,15 +2,18 @@ import { ActionCard, Box, Divider, Text } from '@input-output-hk/lace-ui-toolkit
 import { Button } from '@lace/common';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SharedWalletLayout } from '../../SharedWalletLayout';
-import { LayoutNavigationDownloadProps } from '../../SharedWalletLayout/type';
-import { SharedWalletCreationStep } from '../state-and-types';
+import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
+import { CreationFlowState, SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
 import { ReactComponent as DownloadFileIcon } from './download-file.svg';
 import styles from './ShareWalletDetails.module.scss';
-import { FILENAME } from './utils';
+import { FILENAME, downloadWalletData } from './utils';
 
-export const ShareWalletDetails = ({ onNext, onDownload }: LayoutNavigationDownloadProps): JSX.Element => {
+export type LayoutNavigationDownloadProps = LayoutNavigationProps & {
+  stateSharedWallet: CreationFlowState;
+};
+
+export const ShareWalletDetails = ({ onNext, stateSharedWallet }: LayoutNavigationDownloadProps): JSX.Element => {
   const { t } = useTranslation();
 
   const translations = {
@@ -42,7 +45,12 @@ export const ShareWalletDetails = ({ onNext, onDownload }: LayoutNavigationDownl
         rootClassName={styles.root}
         iconClassName={styles.icon}
         icon={
-          <Button block onClick={onDownload} color="gradient" data-testid="download-json-btn">
+          <Button
+            block
+            onClick={() => downloadWalletData(stateSharedWallet)}
+            color="gradient"
+            data-testid="download-json-btn"
+          >
             <DownloadFileIcon />
             <Text.Body.Normal weight="$semibold">{translations.cta}</Text.Body.Normal>
           </Button>

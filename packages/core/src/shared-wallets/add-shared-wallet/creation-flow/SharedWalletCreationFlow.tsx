@@ -50,7 +50,7 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
         {state.step === SharedWalletCreationStep.ShareDetails && (
           <ShareWalletDetails
             onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
-            onDownload={() => dispatch({ type: SharedWalletCreationActionType.DOWNLOAD_SHARED_WALLET_JSON })}
+            stateSharedWallet={state}
           />
         )}
         {state.step === SharedWalletCreationStep.CoSignersImportantInfo && (

@@ -36,7 +36,7 @@
       "additionalProperties": true
     },
     "nativeScript": {
-      "$ref": "./cardano-babbage.json#/definitions/NativeScript"
+      "$ref": "cardano-babbage.json#/definitions/NativeScript"
     }
   },
   "required": ["metadata", "nativeScript"],
