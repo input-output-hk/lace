@@ -1,4 +1,3 @@
-import { Serialization, TxCBOR, Cardano } from '@cardano-sdk/core';
+import { TxCBOR, Cardano } from '@cardano-sdk/core';
 
-export const cborToTransaction = (cborHex: TxCBOR): Cardano.Tx<Cardano.TxBody> =>
-  Serialization.Transaction.fromCbor(cborHex).toCore();
+export const cborToTransaction = (cborHex: TxCBOR): Cardano.Tx<Cardano.TxBody> => TxCBOR.deserialize(cborHex);
