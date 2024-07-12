@@ -266,7 +266,7 @@ Before(
   }
 );
 
-Before({ tags: '@AddNewWalletCreate or @AddNewWalletRestore' }, async () => {
+Before({ tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();

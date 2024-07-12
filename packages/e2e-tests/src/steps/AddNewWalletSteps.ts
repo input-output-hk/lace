@@ -19,3 +19,7 @@ Given(
 Then(/^"Wallet setup" page is displayed in modal$/, async () => {
   await AddNewWalletAssert.assertSeeWalletSetupPageInModal();
 });
+
+Then(/^"Connect your device" page is displayed in modal$/, async () => {
+  await AddNewWalletAssert.asserSeeConnectYourDevicePageInModal();
+});
