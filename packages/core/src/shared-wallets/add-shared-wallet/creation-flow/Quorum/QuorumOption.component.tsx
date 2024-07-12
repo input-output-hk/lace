@@ -90,12 +90,11 @@ export const QuorumOption = ({
           options={[
             {
               label: translations.optionAll,
+              // eslint-disable-next-line react/no-multi-comp
               render: ({ optionElement }) => (
                 <Box mb="$16">
                   <Card.Outlined data-testid={`setup-quorum-user-option-${QuorumRadioOption.AllAddresses}`}>
-                    <Flex p="$16">
-                      <Text.Body.Large>{optionElement}</Text.Body.Large>
-                    </Flex>
+                    <Flex p="$16">{optionElement}</Flex>
                   </Card.Outlined>
                 </Box>
               ),
@@ -103,12 +102,11 @@ export const QuorumOption = ({
             },
             {
               label: translations.optionSome,
+              // eslint-disable-next-line react/no-multi-comp
               render: ({ optionElement }) => (
                 <Card.Outlined data-testid={`setup-quorum-user-option-${QuorumRadioOption.SomeAddress}`}>
                   <Flex p="$16" flexDirection="column">
-                    <Box mb="$10">
-                      <Text.Body.Large>{optionElement}</Text.Body.Large>
-                    </Box>
+                    <Box mb="$10">{optionElement}</Box>
                     <Flex
                       pl="$40"
                       w="$fill"

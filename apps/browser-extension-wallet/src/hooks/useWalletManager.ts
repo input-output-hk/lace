@@ -894,20 +894,13 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const addAccount = useCallback(
-    async ({
-      wallet,
-      accountIndex,
-      metadata,
-      passphrase,
-      purpose = KeyManagement.KeyPurpose.STANDARD
-    }: WalletManagerAddAccountProps): Promise<void> => {
+    async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
       const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey,
         metadata,
-        walletId: wallet.walletId,
-        purpose
+        walletId: wallet.walletId
       });
       await walletManager.activate({ chainId: getCurrentChainId(), walletId: wallet.walletId, accountIndex });
     },

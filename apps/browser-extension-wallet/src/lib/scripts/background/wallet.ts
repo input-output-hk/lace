@@ -65,7 +65,9 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     const providers = await getProviders(chainName);
 
     const baseUrl = HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic];
-    const mockHandleResolver: HandleProvider = {
+
+    // This is used in place of the handle provider for environments where the handle provider is not available
+    const noopHandleResolver: HandleProvider = {
       resolveHandles: async () => [],
       healthCheck: async () => ({ ok: true }),
       getPolicyIds: async () => []
@@ -88,7 +90,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
                 baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
                 logger
               })
-            : mockHandleResolver,
+            : noopHandleResolver,
           stores,
           witnesser
         }
@@ -117,7 +119,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
               baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
               logger
             })
-          : mockHandleResolver,
+          : noopHandleResolver,
         addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
         witnesser,
         bip32Account
