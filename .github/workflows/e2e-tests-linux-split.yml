@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'release/**'
-      - '*lw-10859-e2e-enhance'
+      - 'chore/lw-10859-e2e-enhance'
   workflow_dispatch:
     inputs:
       browser:
