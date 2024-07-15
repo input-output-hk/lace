@@ -10,24 +10,24 @@ const meta: Meta<typeof SharedWalletEntry> = {
 export default meta;
 type Story = StoryObj<typeof SharedWalletEntry>;
 
-const generateSharedKeysMock = async (): Promise<string> => {
-  action('keys generate')();
-  return Promise.resolve('mocked-key');
-};
-
 export const NoKeys: Story = {
   args: {
     createAndImportOptionsDisabled: true,
-    getSharedKeys: generateSharedKeysMock,
+    keysMode: 'generate',
     onCreateSharedWalletClick: action('create click'),
     onImportSharedWalletClick: action('import click'),
+    onKeysCopyClick: action('keys copy'),
+    onKeysGenerateClick: action('keys generate'),
   },
 };
 
 export const KeysAvailable: Story = {
   args: {
-    createAndImportOptionsDisabled: true,
+    createAndImportOptionsDisabled: false,
+    keysMode: 'copy',
     onCreateSharedWalletClick: action('create click'),
     onImportSharedWalletClick: action('import click'),
+    onKeysCopyClick: action('keys copy'),
+    onKeysGenerateClick: action('keys generate'),
   },
 };

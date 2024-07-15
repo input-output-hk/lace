@@ -33,7 +33,14 @@ interface UserInfoProps {
   onOpenWalletAccounts?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
 }
 
+interface RenderWalletOptionsParams {
+  wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  lastActiveAccount?: Bip32WalletAccount<Wallet.AccountMetadata>;
+}
+
 const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [];
+const isBip32Wallet = <T, U>(wallet: AnyWallet<T, U>): wallet is AnyBip32Wallet<T, U> =>
+  wallet.type === WalletType.InMemory || wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor;
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -79,59 +86,16 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
     [cardanoWallet]
   );
 
-  // TODO: merge with renderBip32Wallet in case wallet option is not different
-  const renderScriptWallet = useCallback(
-    (wallet: ScriptWallet<Wallet.WalletMetadata>) => {
+  const renderWalletOption = useCallback(
+    ({ wallet, lastActiveAccount }: RenderWalletOptionsParams) => {
       const walletAvatar = getAvatar(wallet.walletId);
 
       return (
         <ProfileDropdown.WalletOption
           key={wallet.walletId}
           title={wallet.metadata.name}
-          subtitle={t('sharedWallets.userInfo.label')}
+          subtitle={lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label')}
           id={`wallet-option-${wallet.walletId}`}
-          onClick={async () => {
-            if (activeWalletId === wallet.walletId) {
-              return;
-            }
-            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
-
-            await activateWallet({
-              walletId: wallet.walletId
-            });
-            setIsDropdownMenuOpen(false);
-            toast.notify({
-              duration: TOAST_DEFAULT_DURATION,
-              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
-            });
-          }}
-          type={getUiWalletType(wallet.type)}
-          profile={
-            walletAvatar
-              ? {
-                  fallbackText: fullWalletName,
-                  imageSrc: walletAvatar
-                }
-              : undefined
-          }
-        />
-      );
-    },
-    [activateWallet, activeWalletId, analytics, fullWalletName, getAvatar, setIsDropdownMenuOpen, t]
-  );
-
-  const renderBip32Wallet = useCallback(
-    (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
-      const lastActiveAccount = getLastActiveAccount(wallet);
-      const walletAvatar = getAvatar(wallet.walletId);
-
-      return (
-        <ProfileDropdown.WalletOption
-          key={wallet.walletId}
-          title={wallet.metadata.name}
-          subtitle={lastActiveAccount.metadata.name}
-          id={`wallet-option-${wallet.walletId}`}
-          onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
           onClick={async () => {
             if (activeWalletId === wallet.walletId) {
               return;
@@ -140,7 +104,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
 
             await activateWallet({
               walletId: wallet.walletId,
-              accountIndex: lastActiveAccount.accountIndex
+              ...(lastActiveAccount && { accountIndex: lastActiveAccount.accountIndex })
             });
             setIsDropdownMenuOpen(false);
             toast.notify({
@@ -157,20 +121,33 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 }
               : undefined
           }
+          {...(isBip32Wallet(wallet) && {
+            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
+          })}
         />
       );
     },
     [
-      getLastActiveAccount,
-      getAvatar,
-      fullWalletName,
-      onOpenWalletAccounts,
+      activateWallet,
       activeWalletId,
       analytics,
-      activateWallet,
+      fullWalletName,
+      getAvatar,
+      onOpenWalletAccounts,
       setIsDropdownMenuOpen,
       t
     ]
+  );
+
+  const renderScriptWallet = useCallback(
+    (wallet: ScriptWallet<Wallet.WalletMetadata>) => renderWalletOption({ wallet }),
+    [renderWalletOption]
+  );
+
+  const renderBip32Wallet = useCallback(
+    (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) =>
+      renderWalletOption({ wallet, lastActiveAccount: getLastActiveAccount(wallet) }),
+    [getLastActiveAccount, renderWalletOption]
   );
 
   const renderWallet = useCallback(
