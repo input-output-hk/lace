@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'release/**'
-      - 'chore/lw-10859-e2e-enhance'
   workflow_dispatch:
     inputs:
       browser:
@@ -35,9 +34,9 @@ on:
         type: boolean
         description: 'Run only smoke tests'
         required: true
-        default: true
+        default: false
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || false }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || preprod }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || false }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -88,7 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [1]
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     runs-on: ${{ needs.prereq.outputs.runner }}
     needs: [prereq, build-dist-version]
     steps:
@@ -124,7 +123,7 @@ jobs:
           env=${NETWORK}
           browser=${BROWSER}
           platform=Linux
-          smoke only=${{ needs.prereq.outputs.smoke_only }}
+          smoke_only=${{ needs.prereq.outputs.smoke_only }}
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
