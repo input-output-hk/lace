@@ -1,99 +1,103 @@
 import {
   Box,
-  Copy,
+  Copy as CopyIcon,
   Flex,
-  Key,
-  LaceLogoComponent,
+  Key as KeyIcon,
+  LaceLogoComponent as LaceLogo,
   Text,
-  UploadComponent,
-  UserGroupGradientComponent,
+  UploadComponent as UploadIcon,
+  UserGroupGradientComponent as UserGroupIcon,
   sx,
 } from '@input-output-hk/lace-ui-toolkit';
 import { toast } from '@lace/common';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styles from './SharedWalletGetStarted.module.scss';
-import { SharedWalletGetStartedOption } from './SharedWalletGetStartedOption';
+import styles from './SharedWalletEntry.module.scss';
+import { SharedWalletEntryOption } from './SharedWalletEntryOption';
 
 const TOAST_DURATION = 3;
 
-export type SharedWalletGetStartedSharedProps = {
+export type SharedWalletEntrySharedProps = {
   onCreateSharedWalletClick: () => void;
   onImportSharedWalletClick: () => void;
   onKeysGenerateClick: () => void;
 };
 
-type SharedWalletGetStartedProps = SharedWalletGetStartedSharedProps &
+type SharedWalletEntryProps = SharedWalletEntrySharedProps &
   (
     | {
         createAndImportOptionsDisabled: true;
         keysMode: 'generate';
       }
     | {
-        copyKeysToClipboard: () => Promise<void>;
+        copyKeysToClipboard?: () => Promise<void>;
         createAndImportOptionsDisabled: false;
         keysMode: 'copy';
       }
   );
 
-export const SharedWalletGetStarted = ({
+export const SharedWalletEntry = ({
   createAndImportOptionsDisabled,
   onCreateSharedWalletClick,
   onImportSharedWalletClick,
   onKeysGenerateClick,
   ...restProps
-}: SharedWalletGetStartedProps): React.ReactElement => {
+}: SharedWalletEntryProps): React.ReactElement => {
   const { t } = useTranslation();
 
-  const commonKeysOptionCopies = {
-    description: (
-      <Trans i18nKey="sharedWallets.addSharedWallet.getStarted.keysOption.description" components={{ br: <br /> }} />
-    ),
-    title: t('sharedWallets.addSharedWallet.getStarted.keysOption.title'),
-  };
+  const commonKeysOptionCopies = useMemo(
+    () => ({
+      description: (
+        <Trans i18nKey="sharedWallets.addSharedWallet.getStarted.keysOption.description" components={{ br: <br /> }} />
+      ),
+      title: t('sharedWallets.addSharedWallet.getStarted.keysOption.title'),
+    }),
+    [t],
+  );
 
-  const translations = {
-    createSharedWalletOption: {
-      button: t('sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.button'),
-      description: (
-        <Trans
-          i18nKey="sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.description"
-          components={{ br: <br /> }}
-        />
-      ),
-      title: t('sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.title'),
-    },
-    importSharedWalletOption: {
-      button: t('sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.button'),
-      description: (
-        <Trans
-          i18nKey="sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.description"
-          components={{ br: <br /> }}
-        />
-      ),
-      title: t('sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.title'),
-    },
-    keysCopyOption: {
-      ...commonKeysOptionCopies,
-      button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.copy'),
-    },
-    keysCopyToastText: t('sharedWallets.addSharedWallet.getStarted.keysOption.copyToast'),
-    keysGenerateOption: {
-      ...commonKeysOptionCopies,
-      button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.generate'),
-    },
-    subTitle: t('sharedWallets.addSharedWallet.getStarted.subTitle'),
-    title: t('sharedWallets.addSharedWallet.getStarted.title'),
-  };
+  const translations = useMemo(
+    () => ({
+      createSharedWalletOption: {
+        button: t('sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.button'),
+        description: (
+          <Trans
+            i18nKey="sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.description"
+            components={{ br: <br /> }}
+          />
+        ),
+        title: t('sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.title'),
+      },
+      importSharedWalletOption: {
+        button: t('sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.button'),
+        description: (
+          <Trans
+            i18nKey="sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.description"
+            components={{ br: <br /> }}
+          />
+        ),
+        title: t('sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.title'),
+      },
+      keysCopyOption: {
+        ...commonKeysOptionCopies,
+        button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.copy'),
+      },
+      keysCopyToastText: t('sharedWallets.addSharedWallet.getStarted.keysOption.copyToast'),
+      keysGenerateOption: {
+        ...commonKeysOptionCopies,
+        button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.generate'),
+      },
+      subTitle: t('sharedWallets.addSharedWallet.getStarted.subTitle'),
+      title: t('sharedWallets.addSharedWallet.getStarted.title'),
+    }),
+    [t, commonKeysOptionCopies],
+  );
 
   const onKeysCopyClick = async () => {
     if (restProps.keysMode !== 'copy') return;
-    if (restProps.copyKeysToClipboard) {
-      await restProps.copyKeysToClipboard();
-    }
+    await restProps.copyKeysToClipboard?.();
     toast.notify({
       duration: TOAST_DURATION,
-      icon: Copy,
+      icon: CopyIcon,
       text: translations.keysCopyToastText,
     });
   };
@@ -113,7 +117,7 @@ export const SharedWalletGetStarted = ({
           className={styles.header}
           data-testid="shared-wallet-setup-options-header"
         >
-          <LaceLogoComponent className={styles.image} data-testid="shared-wallet-setup-logo" />
+          <LaceLogo className={styles.image} data-testid="shared-wallet-setup-logo" />
           <Text.Heading
             className={sx({
               color: '$text_primary',
@@ -136,33 +140,33 @@ export const SharedWalletGetStarted = ({
         </Flex>
         <div className={styles.options}>
           {restProps.keysMode === 'generate' && (
-            <SharedWalletGetStartedOption
+            <SharedWalletEntryOption
               copies={translations.keysGenerateOption}
-              Icon={Key}
+              Icon={KeyIcon}
               onClick={onKeysGenerateClick}
               testId="shared-wallet-generate"
             />
           )}
           {restProps.keysMode === 'copy' && (
-            <SharedWalletGetStartedOption
+            <SharedWalletEntryOption
               copies={translations.keysCopyOption}
-              Icon={Key}
+              Icon={KeyIcon}
               onClick={onKeysCopyClick}
               testId="shared-wallet-copy"
             />
           )}
           <div className={styles.separator} />
-          <SharedWalletGetStartedOption
+          <SharedWalletEntryOption
             copies={translations.createSharedWalletOption}
-            Icon={UserGroupGradientComponent}
+            Icon={UserGroupIcon}
             onClick={onCreateSharedWalletClick}
             testId="shared-wallet-new"
             disabled={createAndImportOptionsDisabled}
           />
           <div className={styles.separator} />
-          <SharedWalletGetStartedOption
+          <SharedWalletEntryOption
             copies={translations.importSharedWalletOption}
-            Icon={UploadComponent}
+            Icon={UploadIcon}
             onClick={onImportSharedWalletClick}
             testId="shared-wallet-import"
             disabled={createAndImportOptionsDisabled}

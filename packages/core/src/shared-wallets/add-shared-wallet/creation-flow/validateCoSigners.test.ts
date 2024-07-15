@@ -1,14 +1,15 @@
 import { CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './AddCoSigners';
 import { validateCoSigners } from './validateCoSigners';
 
-const fakeKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
+const fakeSharedKey =
+  '979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d';
 
 describe('validateCoSigners', () => {
   test('name duplicated', () => {
     expect(
       validateCoSigners([
-        { id: '1', keys: fakeKeys, name: 'John Doe' },
-        { id: '2', keys: fakeKeys, name: 'John Doe' },
+        { id: '1', keys: fakeSharedKey, name: 'John Doe' },
+        { id: '2', keys: fakeSharedKey, name: 'John Doe' },
       ]),
     ).toEqual([
       { id: '1', name: CoSignerErrorName.Duplicated },
@@ -17,13 +18,13 @@ describe('validateCoSigners', () => {
   });
 
   test('name empty', () => {
-    expect(validateCoSigners([{ id: '1', keys: fakeKeys, name: '' }])).toEqual([
+    expect(validateCoSigners([{ id: '1', keys: fakeSharedKey, name: '' }])).toEqual([
       { id: '1', name: CoSignerErrorName.Required },
     ] as CoSignerError[]);
   });
 
   test('name to long', () => {
-    expect(validateCoSigners([{ id: '1', keys: fakeKeys, name: '123456789012345678901' }])).toEqual([
+    expect(validateCoSigners([{ id: '1', keys: fakeSharedKey, name: '123456789012345678901' }])).toEqual([
       { id: '1', name: CoSignerErrorName.TooLong },
     ] as CoSignerError[]);
   });
@@ -41,13 +42,13 @@ describe('validateCoSigners', () => {
   });
 
   test('no errors', () => {
-    expect(validateCoSigners([{ id: '1', keys: fakeKeys, name: 'John Doe' }])).toEqual([] as CoSignerError[]);
+    expect(validateCoSigners([{ id: '1', keys: fakeSharedKey, name: 'John Doe' }])).toEqual([] as CoSignerError[]);
   });
 
   test('two errors on a single co-signer', () => {
     expect(
       validateCoSigners([
-        { id: '1', keys: fakeKeys, name: '123456789012345678901' },
+        { id: '1', keys: fakeSharedKey, name: '123456789012345678901' },
         { id: '2', keys: 'incorrect', name: 'John Doe' },
       ]),
     ).toEqual([

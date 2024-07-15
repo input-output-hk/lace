@@ -11,6 +11,9 @@ class SettingsPageAssert {
     expect(await SettingsPage.networkLink.getTitleText()).to.equal(
       await t('browserView.settings.wallet.network.title')
     );
+    expect(await SettingsPage.customSubmitAPILink.getTitleText()).to.equal(
+      await t('browserView.settings.wallet.customSubmitApi.settingsLinkTitle')
+    );
     expect(await SettingsPage.authorizedDAppsLink.getTitleText()).to.equal(
       await t('browserView.settings.wallet.authorizedDApps.title')
     );
@@ -49,6 +52,9 @@ class SettingsPageAssert {
     }
     expect(await SettingsPage.networkLink.getDescriptionText()).to.equal(
       await t('browserView.settings.wallet.network.description')
+    );
+    expect(await SettingsPage.customSubmitAPILink.getDescriptionText()).to.equal(
+      await t('browserView.settings.wallet.customSubmitApi.settingsLinkDescription')
     );
     expect(await SettingsPage.authorizedDAppsLink.getDescriptionText()).to.equal(
       await t('browserView.settings.wallet.authorizedDApps.description')

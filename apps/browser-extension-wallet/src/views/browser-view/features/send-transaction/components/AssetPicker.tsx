@@ -74,7 +74,9 @@ const formatAssetPickerLists = (
       fiat: `$${cardanoBalance?.fiatBalance}`,
       name: cardanoCoin.name,
       description: cardanoCoin.symbol,
-      logo: CardanoLogo
+      logo: CardanoLogo,
+      defaultLogo: CardanoLogo,
+      decimals: 6
     });
   }
 

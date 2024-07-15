@@ -121,81 +121,107 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
-  smokeTests:
-    name: Smoke tests
-    runs-on: ubuntu-20.04
-    needs: prepare
+  build_extension:
+    name: Build Lace browser extension
+    runs-on: ubuntu-22.04
+#    needs: prepare
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
+      - name: Build Lace browser extension
+        uses: ./.github/shared/build
         with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Download packages-common
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-common
-          path: packages/common/dist
-
-      - name: Download packages-cardano
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-cardano
-          path: packages/cardano/dist
-
-      - name: Download packages-translation
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-translation
-          path: packages/translation/dist
-
-      - name: Download packages-core
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-core
-          path: packages/core/dist
-
-      - name: Download packages-staking
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-staking
-          path: packages/staking/dist
+  smokeTestsRun:
+    name: Smoke tests run
+    runs-on: ubuntu-22.04
+    needs: build_extension
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 4, 5, 6, 7, 8, 12, 13, 14, 16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
 
-      - name: Build Lace browser extension
-        uses: ./.github/actions/build/app
-        with:
-          DIR: apps/browser-extension-wallet
-          NAME: lace-browser-extension
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
-          POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
-          POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
-          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
-          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
-
       - name: Execute smoke tests
-        uses: ./.github/actions/test/smoke
+        uses: ./.github/actions/test/e2e
         with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          E2E_AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          E2E_AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
-          E2E_REPORTS_USER: ${{ secrets.E2E_REPORTS_USER }}
-          E2E_REPORTS_PASSWORD: ${{ secrets.E2E_REPORTS_PASSWORD }}
-          E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
-          RUN: ${{ github.run_number }}
-          BRANCH: ${{ github.ref_name }}
+          BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: true
+
+  smokeTests:
+    name: Smoke tests
+    runs-on: ubuntu-22.04
+    needs: smokeTestsRun
+    if: always()
+    steps:
+      - name: Download all smoke tests artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        shell: bash
+        if: always()
+        working-directory: ./reports/allure/results
+        run: |
+          echo "
+          branch=${{ github.ref_name }}
+          browser= 'Chrome'
+          tags= '@Smoke'
+          platform=Linux
+          " > environment.properties
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.6.0
+        if: always()
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'smoke/linux/chrome/${{ github.run_number }}'
+          copyLatest: true
+          ignoreMissingResults: true
+          updatePr: comment
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
+      - name: Publish artifacts (logs, reports, screenshots)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            ./packages/e2e-tests/screenshots
+            ./packages/e2e-tests/logs
+            ./packages/e2e-tests/reports
+          retention-days: 5
+
+      - run: |
+          if [[ ${{ needs.smokeTestsRun.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
 
   if-core-changed:
     name: When core changed
