@@ -4,15 +4,16 @@ import { Wallet } from '@lace/cardano';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityStatus, Transaction, TransactionFee, TxSummary } from '@src/ui/components/Transaction';
-import { CosignersList, CosignersListItem } from './CosignersList';
+import { CosignersList } from './CosignersList';
 import { InfoBar } from './InfoBar';
 import styles from './TransactionDetails.module.scss';
+import { CoSignersListItem, SignPolicy } from './types';
 
 export interface TransactionDetailsProps {
   addressToNameMap: Map<string, string>;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
-  cosigners: CosignersListItem[];
+  cosigners: CoSignersListItem[];
   fee?: string;
   handleOpenExternalHashLink?: () => void;
   hash?: string;
@@ -20,10 +21,7 @@ export interface TransactionDetailsProps {
   includedTime?: string;
   isPopupView?: boolean;
   ownSharedKey: Wallet.Crypto.Ed25519KeyHashHex;
-  signPolicy: {
-    participants: number;
-    quorum: number;
-  };
+  signPolicy: SignPolicy;
   status?: ActivityStatus;
   txInitiator: string;
   txSummary?: TxSummary[];
@@ -57,7 +55,7 @@ export const TransactionDetails = ({
   const headerDescription = !hash && t('sharedWallets.transaction.summary.unsubmitted.headerDescription');
 
   const role = ownSharedKey === txInitiator ? 'summary' : 'cosigners';
-  const signStatus = !cosigners.some((c) => c.key === ownSharedKey && c.signed) ? 'unsigned' : 'unsubmitted';
+  const signStatus = !cosigners.some((c) => c.keyHash === ownSharedKey && c.signed) ? 'unsigned' : 'unsubmitted';
   const description = t(`sharedWallets.transaction.${role}.${signStatus}.description`);
 
   const signed = cosigners.filter((c) => c.signed);

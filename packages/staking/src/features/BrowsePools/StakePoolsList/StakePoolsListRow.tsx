@@ -10,7 +10,7 @@ import { config } from './config';
 
 export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolDetails): React.ReactElement => {
   const { t } = useTranslation();
-  const { analytics } = useOutsideHandles();
+  const { analytics, isSharedWallet } = useOutsideHandles();
 
   const { portfolioMutators, selectionsFull, poolAlreadySelected } = useDelegationPortfolioStore((store) => ({
     poolAlreadySelected: isPoolSelectedSelector(hexId)(store),
@@ -59,11 +59,11 @@ export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolDe
         onClick={onClick}
         selectionDisabledMessage={t('browsePools.tooltips.maxNumberPoolsSelected')}
         dataTestId="stake-pool"
-        withSelection
+        withSelection={!isSharedWallet}
         keyProp={id}
         {...((!selectionsFull || poolAlreadySelected) && { onSelect })}
       />
-      {showDAppCompatibilityModal && (
+      {showDAppCompatibilityModal && !isSharedWallet && (
         <MultidelegationDAppCompatibilityModal
           visible={multidelegationDAppCompatibility}
           onConfirm={onDAppCompatibilityConfirm}

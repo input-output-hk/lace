@@ -44,6 +44,7 @@ export const StakePoolDetailsDrawer = ({
     delegationStoreSetDelegationTxBuilder,
     password: { password, removePassword },
     submittingState: { setIsRestaking },
+    isSharedWallet,
   } = useOutsideHandles();
 
   const closeDrawer = useCallback(() => {
@@ -93,6 +94,8 @@ export const StakePoolDetailsDrawer = ({
     return undefined;
   };
 
+  const titleSecond = t(`drawer.${isSharedWallet ? 'titleSharedWallet' : 'titleSecond'}`);
+
   return (
     <Drawer
       visible={drawerVisible}
@@ -100,7 +103,7 @@ export const StakePoolDetailsDrawer = ({
       onClose={closeDrawer}
       navigation={
         <DrawerNavigation
-          title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t('drawer.titleSecond')}
+          title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : titleSecond}
           // If undefined is passed to onArrowIconClick, arrow component will not be rendered
           onArrowIconClick={
             !shouldShowBackIcon

@@ -11,11 +11,7 @@ import { StakePoolsListRow } from './StakePoolsListRow';
 import { StakePoolsListRowSkeleton } from './StakePoolsListRowSkeleton';
 
 const itemContent = (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
-  data ? (
-    <StakePoolsListRow {...data} />
-  ) : (
-    <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection />
-  );
+  data ? <StakePoolsListRow {...data} /> : <StakePoolsListRowSkeleton index={index} columns={config.columns} />;
 
 export type StakePoolsListProps = {
   scrollableTargetId: string;

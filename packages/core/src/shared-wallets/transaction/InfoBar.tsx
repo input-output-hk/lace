@@ -1,15 +1,12 @@
 import { InfoBar as InfoBarUiToolkit, InfoComponent } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { CosignersListItem } from './CosignersList';
 import styles from './InfoBar.module.scss';
+import { CoSignersListItem, SignPolicy } from './types';
 
 type InfoBarProps = {
-  signPolicy: {
-    participants: number;
-    quorum: number;
-  };
-  signed: CosignersListItem[];
+  signPolicy: SignPolicy;
+  signed: CoSignersListItem[];
 };
 
 export const InfoBar = ({ signPolicy, signed }: InfoBarProps) => {
@@ -20,7 +17,7 @@ export const InfoBar = ({ signPolicy, signed }: InfoBarProps) => {
       message={
         <div className={styles.infoBar}>
           <span className={styles.infoMessage}>
-            {signed.length >= signPolicy.quorum
+            {signed.length >= signPolicy.required
               ? t('sharedWallets.transaction.cosigners.quorum.reached')
               : t('sharedWallets.transaction.cosigners.quorum.required')}
           </span>
@@ -31,7 +28,7 @@ export const InfoBar = ({ signPolicy, signed }: InfoBarProps) => {
                 span: <span />,
                 stat: <span className={styles.stats} />,
               }}
-              values={{ participants: signPolicy.participants, quorum: signPolicy.quorum }}
+              values={{ participants: signPolicy.signers.length, quorum: signPolicy.required }}
               i18nKey="sharedWallets.transaction.cosigners.quorum.current"
             />
           </span>

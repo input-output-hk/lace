@@ -57,6 +57,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
     compactNumber,
     multidelegationDAppCompatibility,
     triggerMultidelegationDAppCompatibility,
+    isSharedWallet,
   } = useOutsideHandles();
 
   const {
@@ -132,15 +133,17 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
   return (
     <>
       <Flex flexDirection="column" gap="$32" alignItems="stretch">
-        <Box className={styles.delegationCardWrapper}>
-          <DelegationCard
-            balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
-            cardanoCoinSymbol={symbol}
-            distribution={displayData}
-            status={delegationStatus}
-            showDistribution
-          />
-        </Box>
+        {isSharedWallet && (
+          <Box className={styles.delegationCardWrapper}>
+            <DelegationCard
+              balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
+              cardanoCoinSymbol={symbol}
+              distribution={displayData}
+              status={delegationStatus}
+              showDistribution
+            />
+          </Box>
+        )}
         <Flex justifyContent="space-between">
           <Text.Body.Large weight="$semibold" data-testid="manage-delegation-selected-pools-label">
             {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}

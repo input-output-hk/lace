@@ -4,20 +4,15 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactComponent as StakeRegistrationDelegationIcon } from '../../ui/assets/icons/badge-check-outline-green.component.svg';
 import styles from './CosignersList.module.scss';
+import { CoSignersListItem } from './types';
 
-export interface CosignersListItem {
-  key: Wallet.Crypto.Ed25519KeyHashHex;
-  name: string;
-  signed: boolean;
-}
-
-export interface CosignerItemProps {
-  list: CosignersListItem[];
+interface CoSignerItemProps {
+  list: CoSignersListItem[];
   ownSharedKey: Wallet.Crypto.Ed25519KeyHashHex;
   title: string;
 }
 
-export const CosignersList = ({ list, title, ownSharedKey }: CosignerItemProps) => {
+export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) => {
   const { t } = useTranslation();
 
   return (
@@ -26,7 +21,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CosignerItemProps) 
         <div data-testid="cosigner-list-header" className={styles.cosignersListHeader}>
           {title}
         </div>
-        {list.map(({ key, name: cosignerName, signed }) => (
+        {list.map(({ keyHash: key, name: cosignerName, signed }) => (
           <Flex
             py="$0"
             px="$24"

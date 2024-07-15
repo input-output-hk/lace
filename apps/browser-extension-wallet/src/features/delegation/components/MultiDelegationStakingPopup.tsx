@@ -1,5 +1,6 @@
+/* eslint-disable max-statements */
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   useAnalyticsContext,
   useBackgroundServiceAPIContext,
@@ -7,7 +8,14 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
+import {
+  useBalances,
+  useCustomSubmitApi,
+  useFetchCoinPrice,
+  useLocalStorage,
+  useStakingRewards,
+  useWalletManager
+} from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -26,6 +34,10 @@ import {
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
+import { useObservable } from '@lace/common';
+import { getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
+import { SignPolicy } from '@lace/core';
+import { Wallet } from '@lace/cardano';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -51,7 +63,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     blockchainProvider,
     walletInfo,
     currentChain,
-    environmentName
+    environmentName,
+    isSharedWallet
   } = useWalletStore((state) => ({
     walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
@@ -64,8 +77,26 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     blockchainProvider: state.blockchainProvider,
     walletInfo: state.walletInfo,
     currentChain: state.currentChain,
-    environmentName: state.environmentName
+    environmentName: state.environmentName,
+    isSharedWallet: state.isSharedWallet
   }));
+
+  const [sharedKey, setSharedKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
+  const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
+  const { walletManager, walletRepository } = useWalletManager();
+
+  const activeWalletId = useObservable(walletManager.activeWalletId$);
+  const wallets = useObservable(walletRepository.wallets$);
+
+  useEffect(() => {
+    if (!activeWalletId || !isSharedWallet) return;
+    const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
+    if (isScriptWallet(activeWallet)) {
+      setSignPolicy(getSharedWalletSignPolicy(activeWallet));
+      setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
+    }
+  }, [activeWalletId, isSharedWallet, wallets]);
+
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
     const analytics = {
@@ -98,6 +129,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const walletName = walletInfo.name;
   const analytics = useAnalyticsContext();
 
   useEffect(() => {
@@ -147,9 +179,13 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         walletAddress,
+        walletName,
         currentChain,
         isMultidelegationSupportedByDevice,
-        isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status
+        isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
+        isSharedWallet,
+        signPolicy,
+        sharedKey
       }}
     >
       <ContentLayout
