@@ -2,6 +2,7 @@ import { Box, Divider } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
+import { indexOfCoSignersDataOfCurrentUser } from '../co-signers-data-structure';
 import { SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
 import { AddCoSignerInput } from './AddCoSignerInput';
@@ -44,6 +45,19 @@ export const AddCoSigners = ({
           <AddCoSignerInput
             value={value}
             onChange={onValueChange}
+            keysFieldDisabled={index === indexOfCoSignersDataOfCurrentUser}
+            labels={{
+              keys: t(
+                `sharedWallets.addSharedWallet.addCosigners.${
+                  index === indexOfCoSignersDataOfCurrentUser ? 'yourKeysInputLabel' : 'coSignerKeysInputLabel'
+                }`,
+              ),
+              name: t(
+                `sharedWallets.addSharedWallet.addCosigners.${
+                  index === indexOfCoSignersDataOfCurrentUser ? 'yourNameInputLabel' : 'coSignerNameInputLabel'
+                }`,
+              ),
+            }}
             dirty={coSignersDirty.find((dirty) => dirty.id === value.id)}
             error={errors.find((error) => error.id === value.id)}
           />
