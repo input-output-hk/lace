@@ -123,7 +123,7 @@ jobs:
           env=${NETWORK}
           browser=${BROWSER}
           platform=Linux
-          smoke_only=${{ needs.prereq.outputs.smoke_only }}
+          smoke_only=${{ needs.prereq.outputs.smoke_only || false }}
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
