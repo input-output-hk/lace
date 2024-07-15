@@ -61,6 +61,9 @@ runs:
           echo "Build artifact found and downloaded"
           echo "build_exists=true" >> $GITHUB_OUTPUT
         fi
+    - name: Setup upterm session
+      if: always()
+      uses: lhotari/action-upterm@v1
     - name: Configure Yarn to use GitHub Packages
       if: steps.check-build-exists.outputs.build_exists == 'false'
       run: |
