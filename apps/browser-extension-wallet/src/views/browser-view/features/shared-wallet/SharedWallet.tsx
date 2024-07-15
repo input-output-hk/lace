@@ -54,8 +54,7 @@ export const SharedWallet = (): JSX.Element => {
   const handleCreateWallet = async (data: CreateWalletParams) => {
     const activeWalletId = cardanoWallet.source.wallet.walletId;
 
-    const coSignersKeys = data.coSigners.map(({ keys }: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(keys));
-    const publicKeys = [sharedKey, ...coSignersKeys];
+    const publicKeys = data.coSigners.map(({ keys }: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(keys));
 
     await createInMemorySharedWallet({
       name: data.name,
