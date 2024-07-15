@@ -101,7 +101,7 @@ export const SharedWallet = (): JSX.Element => {
                 initialWalletName={initialWalletName}
                 navigateToAppHome={() => setBackgroundPage()}
                 exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
-                sharedKeys={sharedKeys}
+                sharedKeys={sharedKey}
                 onCreateSharedWallet={handleCreateWallet}
               />
             )}
