@@ -27,12 +27,12 @@ type SharedWalletEntryProps = SharedWalletEntrySharedProps &
   (
     | {
         createAndImportOptionsDisabled: true;
-        keysMode: 'generate';
+        sharedWalletKeyMode: 'generate';
       }
     | {
-        copyKeysToClipboard?: () => Promise<void>;
         createAndImportOptionsDisabled: false;
-        keysMode: 'copy';
+        onKeysCopyClick: () => Promise<void>;
+        sharedWalletKeyMode: 'copy';
       }
   );
 
@@ -48,9 +48,9 @@ export const SharedWalletEntry = ({
   const commonKeysOptionCopies = useMemo(
     () => ({
       description: (
-        <Trans i18nKey="sharedWallets.addSharedWallet.getStarted.keysOption.description" components={{ br: <br /> }} />
+        <Trans i18nKey="sharedWallets.addSharedWallet.getStarted.keyOption.description" components={{ br: <br /> }} />
       ),
-      title: t('sharedWallets.addSharedWallet.getStarted.keysOption.title'),
+      title: t('sharedWallets.addSharedWallet.getStarted.keyOption.title'),
     }),
     [t],
   );
@@ -77,14 +77,14 @@ export const SharedWalletEntry = ({
         ),
         title: t('sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.title'),
       },
-      keysCopyOption: {
+      keyCopyOption: {
         ...commonKeysOptionCopies,
-        button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.copy'),
+        button: t('sharedWallets.addSharedWallet.getStarted.keyOption.button.copy'),
       },
-      keysCopyToastText: t('sharedWallets.addSharedWallet.getStarted.keysOption.copyToast'),
-      keysGenerateOption: {
+      keyCopyToastText: t('sharedWallets.addSharedWallet.getStarted.keyOption.copyToast'),
+      keyGenerateOption: {
         ...commonKeysOptionCopies,
-        button: t('sharedWallets.addSharedWallet.getStarted.keysOption.button.generate'),
+        button: t('sharedWallets.addSharedWallet.getStarted.keyOption.button.generate'),
       },
       subTitle: t('sharedWallets.addSharedWallet.getStarted.subTitle'),
       title: t('sharedWallets.addSharedWallet.getStarted.title'),
@@ -93,12 +93,12 @@ export const SharedWalletEntry = ({
   );
 
   const onKeysCopyClick = async () => {
-    if (restProps.keysMode !== 'copy') return;
-    await restProps.copyKeysToClipboard?.();
+    if (restProps.sharedWalletKeyMode !== 'copy') return;
+    await restProps.onKeysCopyClick();
     toast.notify({
       duration: TOAST_DURATION,
       icon: CopyIcon,
-      text: translations.keysCopyToastText,
+      text: translations.keyCopyToastText,
     });
   };
 
@@ -139,17 +139,17 @@ export const SharedWalletEntry = ({
           </Box>
         </Flex>
         <div className={styles.options}>
-          {restProps.keysMode === 'generate' && (
+          {restProps.sharedWalletKeyMode === 'generate' && (
             <SharedWalletEntryOption
-              copies={translations.keysGenerateOption}
+              copies={translations.keyGenerateOption}
               Icon={KeyIcon}
               onClick={onKeysGenerateClick}
               testId="shared-wallet-generate"
             />
           )}
-          {restProps.keysMode === 'copy' && (
+          {restProps.sharedWalletKeyMode === 'copy' && (
             <SharedWalletEntryOption
-              copies={translations.keysCopyOption}
+              copies={translations.keyCopyOption}
               Icon={KeyIcon}
               onClick={onKeysCopyClick}
               testId="shared-wallet-copy"

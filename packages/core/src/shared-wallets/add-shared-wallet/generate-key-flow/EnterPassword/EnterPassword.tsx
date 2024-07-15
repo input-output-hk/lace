@@ -9,7 +9,7 @@ import cn from 'classnames';
 import React, { ReactElement, VFC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
-import { keysGenerationTimelineSteps } from '../timelineSteps';
+import { keyGenerationTimelineSteps } from '../timelineSteps';
 import styles from './EnterPassword.module.scss';
 
 export type WalletKind = 'hot' | 'cold';
@@ -47,15 +47,15 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
 
   return (
     <SharedWalletLayout
-      title={t('sharedWallets.addSharedWallet.keysGeneration.enterPassword.title')}
-      description={t('sharedWallets.addSharedWallet.keysGeneration.enterPassword.subtitle')}
-      timelineSteps={keysGenerationTimelineSteps}
+      title={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.title')}
+      description={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.subtitle')}
+      timelineSteps={keyGenerationTimelineSteps}
       timelineCurrentStep="enter-password"
       onBack={onBack}
       onNext={next}
       isLoading={loading}
       isNextEnabled={!!password}
-      customNextLabel={t('sharedWallets.addSharedWallet.keysGeneration.enterPassword.nextButtonLabel')}
+      customNextLabel={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.nextButtonLabel')}
     >
       <Flex gap="$32" flexDirection="column" alignItems="stretch">
         <Flex flexDirection="row" gap="$16" alignItems="center">
@@ -71,14 +71,14 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
           </Flex>
           <Flex flexDirection="column">
             <Text.Address className={styles.walletNameLabel}>
-              {t('sharedWallets.addSharedWallet.keysGeneration.enterPassword.activeWalletLabel')}
+              {t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.activeWalletLabel')}
             </Text.Address>
             <Text.Body.Large weight="$bold">{walletName}</Text.Body.Large>
           </Flex>
         </Flex>
         <PasswordBox
           value={password}
-          label={t('sharedWallets.addSharedWallet.keysGeneration.enterPassword.passwordInputLabel')}
+          label={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordInputLabel')}
           onChange={(event) => setPassword(event.target.value)}
           onSubmit={(event) => {
             event.preventDefault();

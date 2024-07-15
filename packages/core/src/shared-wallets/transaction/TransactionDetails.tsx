@@ -3,9 +3,7 @@ import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-
 import { Wallet } from '@lace/cardano';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityStatus } from '@src/ui/components/Activity';
-import { TransactionFee, TxSummary } from '@src/ui/components/ActivityDetail';
-import { Transaction } from '@src/ui/components/Transaction';
+import { ActivityStatus, Transaction, TransactionFee, TxSummary } from '@src/ui/components/Transaction';
 import { CosignersList, CosignersListItem } from './CosignersList';
 import { InfoBar } from './InfoBar';
 import styles from './TransactionDetails.module.scss';

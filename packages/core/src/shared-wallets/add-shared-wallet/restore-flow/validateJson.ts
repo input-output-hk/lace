@@ -19,10 +19,10 @@ export const validateJson = (
         }
 
         // change json file in this directory to test happy path or mismatch error modal
-        const isAddrMatch = json.cosigners.findIndex((item: CoSigner) => item.keys === sharedKeys);
+        const isAddrMatch = json.cosigners.findIndex((item: CoSigner) => item.sharedWalletKey === sharedKeys);
 
         if (isAddrMatch === -1) {
-          reject({ message: FileErrorMessage.INVALID_KEYS });
+          reject({ message: FileErrorMessage.INVALID_KEY });
         }
 
         resolve({ isFileValid: true });

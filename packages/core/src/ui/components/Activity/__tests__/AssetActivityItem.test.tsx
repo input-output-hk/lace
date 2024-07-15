@@ -2,7 +2,8 @@
 import * as React from 'react';
 import { render, within, fireEvent, queryByTestId } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AssetActivityItem, AssetActivityItemProps, ActivityStatus } from '../AssetActivityItem';
+import { AssetActivityItem, AssetActivityItemProps } from '../AssetActivityItem';
+import { ActivityStatus } from '../../Transaction';
 import { TransactionActivityType } from '../../ActivityDetail/types';
 import { ActivityType } from '../../ActivityDetail';
 

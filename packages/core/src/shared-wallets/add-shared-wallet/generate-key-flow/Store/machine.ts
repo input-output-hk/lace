@@ -1,10 +1,10 @@
 import { TransitionHandler } from '../../../state-utils';
 import {
-  GenerateSharedKeysState,
-  GenerateSharedKeysStep,
-  StateCopyKeys,
+  GenerateSharedWalletKeyState,
+  GenerateSharedWalletKeyStep,
+  StateCopyKey,
   StateEnterPassword,
-  stateCopyKeys,
+  stateCopyKey,
   stateEnterPassword,
 } from './state';
 
@@ -19,15 +19,19 @@ export enum ActionType {
 export type Action =
   | { type: ActionType.Back }
   | { password: string; type: ActionType.KeysGenerationTriggered }
-  | { sharedKeys: string; type: ActionType.KeysGenerationCompleted }
+  | { sharedWalletKey: string; type: ActionType.KeysGenerationCompleted }
   | { errorMessage: string; type: ActionType.KeysGenerationFailed }
   | { type: ActionType.CloseFlow };
 
-export type Handler<S extends GenerateSharedKeysState> = TransitionHandler<S, GenerateSharedKeysState, Action>;
+export type Handler<S extends GenerateSharedWalletKeyState> = TransitionHandler<
+  S,
+  GenerateSharedWalletKeyState,
+  Action
+>;
 
 type StateMachine = {
-  [GenerateSharedKeysStep.EnterPassword]: Handler<StateEnterPassword>;
-  [GenerateSharedKeysStep.CopyKeys]: Handler<StateCopyKeys>;
+  [GenerateSharedWalletKeyStep.EnterPassword]: Handler<StateEnterPassword>;
+  [GenerateSharedWalletKeyStep.CopyKey]: Handler<StateCopyKey>;
 };
 
 type MakeStateMachineParams = {
@@ -39,7 +43,7 @@ export const makeStateMachine = ({
   navigateToParentFlow,
   triggerKeysGeneration,
 }: MakeStateMachineParams): StateMachine => ({
-  [GenerateSharedKeysStep.EnterPassword]: (prevState, action) => {
+  [GenerateSharedWalletKeyStep.EnterPassword]: (prevState, action) => {
     if (action.type === ActionType.Back) {
       navigateToParentFlow();
       return prevState;
@@ -62,18 +66,18 @@ export const makeStateMachine = ({
     }
 
     if (action.type === ActionType.KeysGenerationCompleted) {
-      return stateCopyKeys({
+      return stateCopyKey({
         loading: undefined,
         passwordErrorMessage: undefined,
-        sharedKeys: action.sharedKeys,
-        sharedKeysCollapsed: true,
-        step: GenerateSharedKeysStep.CopyKeys,
+        sharedWalletKey: action.sharedWalletKey,
+        sharedWalletKeyCollapsed: true,
+        step: GenerateSharedWalletKeyStep.CopyKey,
       });
     }
 
     return prevState;
   },
-  [GenerateSharedKeysStep.CopyKeys]: (prevState, action) => {
+  [GenerateSharedWalletKeyStep.CopyKey]: (prevState, action) => {
     if (action.type === ActionType.CloseFlow) {
       navigateToParentFlow();
       return prevState;

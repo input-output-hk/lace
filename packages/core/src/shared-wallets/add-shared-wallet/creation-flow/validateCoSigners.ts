@@ -1,16 +1,16 @@
 import { CoSigner, CoSignerError, CoSignerErrorKeys, CoSignerErrorName, maxCoSignerNameLength } from './AddCoSigners';
 
-const keysRegex = /^[\dA-Fa-f]{128}$/;
+const keyRegex = /^[\dA-Fa-f]{128}$/;
 export const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
   let coSignersErrors: CoSignerError[] = [];
 
-  coSigners.forEach(({ id, keys, name }) => {
-    let keysError: CoSignerErrorKeys | undefined;
+  coSigners.forEach(({ id, sharedWalletKey, name }) => {
+    let keyError: CoSignerErrorKeys | undefined;
     let nameError: CoSignerErrorName | undefined;
 
-    const keysValidationResult = keysRegex.exec(keys);
-    if (!keys) keysError = CoSignerErrorKeys.Required;
-    else if (!keysValidationResult) keysError = CoSignerErrorKeys.Invalid;
+    const keyValidationResult = keyRegex.exec(sharedWalletKey);
+    if (!sharedWalletKey) keyError = CoSignerErrorKeys.Required;
+    else if (!keyValidationResult) keyError = CoSignerErrorKeys.Invalid;
 
     if (!name) nameError = CoSignerErrorName.Required;
     else if (name.length > maxCoSignerNameLength) nameError = CoSignerErrorName.TooLong;
@@ -18,8 +18,8 @@ export const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
       nameError = CoSignerErrorName.Duplicated;
     }
 
-    if (keysError || nameError) {
-      coSignersErrors = [...coSignersErrors, { id, keys: keysError, name: nameError }];
+    if (keyError || nameError) {
+      coSignersErrors = [...coSignersErrors, { id, name: nameError, sharedWalletKey: keyError }];
     }
   });
 

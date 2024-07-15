@@ -111,7 +111,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
           />
         </Dialog.Actions>
       </Dialog.Root>
-      <Dialog.Root open={error?.message === FileErrorMessage.INVALID_KEYS} zIndex={1000} setOpen={() => void 0}>
+      <Dialog.Root open={error?.message === FileErrorMessage.INVALID_KEY} zIndex={1000} setOpen={() => void 0}>
         <Dialog.Title>{translations.incorrectWalletError.title}</Dialog.Title>
         <Dialog.Description>{translations.incorrectWalletError.description}</Dialog.Description>
         <Dialog.Actions>
@@ -119,7 +119,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
             autoFocus
             label={translations.incorrectWalletError.exit}
             onClick={navigateToAppHome}
-            testId="error-invalid-keys-exit-btn"
+            testId="error-invalid-shared-wallet-key-exit-btn"
           />
         </Dialog.Actions>
       </Dialog.Root>

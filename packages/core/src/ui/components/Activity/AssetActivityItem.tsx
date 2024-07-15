@@ -11,22 +11,16 @@ import { ReactComponent as PendingIcon } from '../../assets/icons/pending.compon
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
-import { DelegationActivityType, TransactionActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
+import { DelegationActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
 import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
 import { useTranslation } from 'react-i18next';
 import { CoreTranslationKey } from '@lace/translation';
+import { ActivityStatus, TransactionActivityType } from '@ui/components/Transaction';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
-
-export enum ActivityStatus {
-  SUCCESS = 'success',
-  PENDING = 'sending',
-  ERROR = 'error',
-  SPENDABLE = 'spendable'
-}
 
 const DEFAULT_DEBOUNCE = 200;
 

@@ -1,5 +1,5 @@
 export enum FileErrorMessage {
-  INVALID_KEYS = 'Invalid keys',
+  INVALID_KEY = 'Invalid key',
   UNRECOGNIZED = 'File is unrecognized',
 }
 

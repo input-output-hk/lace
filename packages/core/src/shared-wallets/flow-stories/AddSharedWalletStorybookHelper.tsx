@@ -10,56 +10,57 @@ import {
   makeInitialState as makeSharedWalletCreationInitialState,
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { CreationFlowState } from '../add-shared-wallet/creation-flow/state-and-types';
-import { GenerateSharedKeysFlow } from '../add-shared-wallet/generate-keys-flow';
-import { LinkedWalletType } from '../add-shared-wallet/generate-keys-flow/GenerateSharedKeysFlow';
-import { GenerateSharedKeysState } from '../add-shared-wallet/generate-keys-flow/Store';
+import { GenerateSharedWalletKeyFlow } from '../add-shared-wallet/generate-key-flow';
+import { LinkedWalletType } from '../add-shared-wallet/generate-key-flow/GenerateSharedWalletKeyFlow';
+import { GenerateSharedWalletKeyState } from '../add-shared-wallet/generate-key-flow/Store';
 import {
-  GenerateSharedKeysInitialStateProvider,
-  makeInitialState as makeGenerateSharedKeysInitialState,
-} from '../add-shared-wallet/generate-keys-flow/Store/Store';
+  GenerateSharedWalletKeyInitialStateProvider,
+  makeInitialState as makeGenerateSharedWalletKeyInitialState,
+} from '../add-shared-wallet/generate-key-flow/Store/Store';
 
 export enum AddSharedWalletFlowType {
   Creation = 'Creation',
   GetStarted = 'GetStarted',
   Import = 'Import',
-  KeysDerivation = 'KeysDerivation',
+  KeyDerivation = 'KeyDerivation',
 }
 
 type AddSharedWalletFlowProps = {
-  activeWalletSharedKeys?: string;
+  activeWalletSharedKey?: string;
   activeWalletType?: LinkedWalletType;
   creationInitialState?: CreationFlowState;
-  generateKeys?: (password: string) => Promise<string>;
+  generateKey?: (password: string) => Promise<string>;
   initialFlow?: AddSharedWalletFlowType;
-  keysGenerationInitialState?: GenerateSharedKeysState;
+  keyGenerationInitialState?: GenerateSharedWalletKeyState;
   modalOpen?: boolean;
 };
 
-export const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
+export const sharedWalletKey =
+  '979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d';
 
 export const activeWalletName = 'My wallet';
 
 export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
-  activeWalletSharedKeys,
+  activeWalletSharedKey,
   activeWalletType = 'InMemory',
   modalOpen = false,
   initialFlow = AddSharedWalletFlowType.GetStarted,
   creationInitialState: providedCreationInitialState = makeSharedWalletCreationInitialState(activeWalletName),
-  keysGenerationInitialState: providedKeysGenerationInitialState = makeGenerateSharedKeysInitialState(),
-  generateKeys = async () => sharedKeys,
+  keyGenerationInitialState: providedKeysGenerationInitialState = makeGenerateSharedWalletKeyInitialState(),
+  generateKey = async () => sharedWalletKey,
 }) => {
   const [open, setOpen] = useState(modalOpen);
   const [flow, setFlow] = useState(initialFlow);
-  const [generatedKeys, setGeneratedKeys] = useState<string | undefined>(activeWalletSharedKeys);
+  const [generatedKeys, setGeneratedKeys] = useState<string | undefined>(activeWalletSharedKey);
   const [creationInitialState, setCreationInitialState] = useState<CreationFlowState | null>(
     providedCreationInitialState,
   );
-  const [keysGenerationInitialState, setKeysGenerationInitialState] = useState<GenerateSharedKeysState | null>(
+  const [keyGenerationInitialState, setKeyGenerationInitialState] = useState<GenerateSharedWalletKeyState | null>(
     providedKeysGenerationInitialState,
   );
   useEffect(() => {
     setCreationInitialState(null);
-    setKeysGenerationInitialState(null);
+    setKeyGenerationInitialState(null);
   }, []);
 
   return (
@@ -76,22 +77,22 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
             <AddSharedWalletMainPageFlow
               onCreateSharedWalletClick={() => setFlow(AddSharedWalletFlowType.Creation)}
               onImportSharedWalletClick={() => setFlow(AddSharedWalletFlowType.Import)}
-              onKeysGenerateClick={() => setFlow(AddSharedWalletFlowType.KeysDerivation)}
-              sharedKeys={generatedKeys}
+              onKeysGenerateClick={() => setFlow(AddSharedWalletFlowType.KeyDerivation)}
+              sharedWalletKey={generatedKeys}
             />
           )}
-          {flow === AddSharedWalletFlowType.KeysDerivation && (
-            <GenerateSharedKeysInitialStateProvider value={keysGenerationInitialState}>
-              <GenerateSharedKeysFlow
-                generateKeys={generateKeys}
+          {flow === AddSharedWalletFlowType.KeyDerivation && (
+            <GenerateSharedWalletKeyInitialStateProvider value={keyGenerationInitialState}>
+              <GenerateSharedWalletKeyFlow
+                generateKey={generateKey}
                 navigateToParentFlow={() => {
-                  setGeneratedKeys(sharedKeys);
+                  setGeneratedKeys(sharedWalletKey);
                   setFlow(AddSharedWalletFlowType.GetStarted);
                 }}
                 activeWalletName={activeWalletName}
                 activeWalletType={activeWalletType}
               />
-            </GenerateSharedKeysInitialStateProvider>
+            </GenerateSharedWalletKeyInitialStateProvider>
           )}
           {flow === AddSharedWalletFlowType.Creation && (
             <SharedWalletCreationFlowInitialStateProvider value={creationInitialState}>
@@ -103,7 +104,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
                   setFlow(AddSharedWalletFlowType.GetStarted);
                 }}
                 exitTheFlow={() => setFlow(AddSharedWalletFlowType.GetStarted)}
-                sharedKeys={generatedKeys}
+                sharedWalletKey={generatedKeys}
                 onCreateSharedWallet={() => void 0}
               />
             </SharedWalletCreationFlowInitialStateProvider>
