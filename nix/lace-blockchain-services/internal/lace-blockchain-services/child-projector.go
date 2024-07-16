@@ -53,10 +53,11 @@ func childProjector(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChi
 					url.QueryEscape(*shared.PostgresPassword),
 					"127.0.0.1",
 					*shared.PostgresPort,
-					"postgres",
+					"projections",
 				),
 			}
 		},
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -86,6 +87,6 @@ func childProjector(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChi
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }

@@ -27,6 +27,7 @@ type ManagedChild struct {
 	Revision    string
 	MkArgv      func() ([]string, error) // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
 	MkExtraEnv  func() []string
+	PostStart   func() error
 	AllocatePTY bool
 	StatusCh    chan<- StatusAndUrl
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
@@ -34,7 +35,7 @@ type ManagedChild struct {
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	TerminateGracefullyByInheritedFd3 bool // <https://github.com/input-output-hk/cardano-node/issues/726>
 	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
-	AfterExit   func() error
+	PostStop    func() error
 }
 
 type StatusAndUrl struct {
@@ -306,9 +307,9 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
 					child.ServiceName, childPid)
-				err := child.AfterExit()
+				err := child.PostStop()
 				if err != nil {
-					fmt.Printf("%s[%d]: AfterExit of %s[%d] returned an error: %v\n",
+					fmt.Printf("%s[%d]: PostStop of %s[%d] returned an error: %v\n",
 						OurLogPrefix, os.Getpid(), child.ServiceName, childPid, err)
 				} else if child.ServiceName == "mithril-client" {
 					// don’t wait after a successful Mithril resync
@@ -344,8 +345,15 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 					}
 					next.Initialized = prev.Initialized || next.Initialized // remember true
 					if !prev.Initialized && next.Initialized {
-						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized\n",
+						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized, will run PostStart\n",
 							OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
+						err := child.PostStart()
+						if err != nil {
+							fmt.Printf("%s[%d]: restarting session, as PostStart of %s[%d] returned an error: %v\n",
+								OurLogPrefix, os.Getpid(), child.ServiceName, childPid, err)
+							terminateCh <- struct{}{}
+							return
+						}
 						initializedCh <- struct{}{} // continue launching the next process
 					}
 					time.Sleep(next.NextProbeIn)

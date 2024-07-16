@@ -69,6 +69,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -147,6 +148,6 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		},
 		TerminateGracefullyByInheritedFd3: true,
 		ForceKillAfter: 10 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }

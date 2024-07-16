@@ -31,6 +31,7 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -66,6 +67,6 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }}

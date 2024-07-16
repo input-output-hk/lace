@@ -22,6 +22,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 	dataDir := ourpaths.WorkDir + sep + shared.Network + sep + "postgres"
 	pwFile := dataDir + sep + "pg_stat_temp_5472"
 	pidFile := dataDir + sep + "postmaster.pid"
+	dbName := "projections";
 
 	// Make it a little harder to break local Postgres state (esp. subtly). If you work around this,
 	// you claim to know what you’re doing, and you’re on your own.
@@ -77,6 +78,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 					[]string{"--username", "postgres", "--pwfile", pwFileClear.Name()},
 					extraEnv,
 					60 * time.Second,
+					nil,
 				)
 
 				if err != nil {
@@ -121,6 +123,35 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 			return []string{}, nil
 		},
 		MkExtraEnv: func() []string { return extraEnv },
+		PostStart: func() error {
+			fmt.Printf("%s[%d]: creating a '%s' DB if it doesn't exist\n", serviceName, -1, dbName)
+
+			stdin := fmt.Sprintf("SELECT 'CREATE DATABASE %s' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '%s')\\gexec", dbName, dbName)
+
+			stdout, stderr, err, pid := runCommandWithTimeout(
+				libexecDir + sep + "psql" + ourpaths.ExeSuffix,
+				[]string{
+					"-h", "127.0.0.1",
+					"-p", fmt.Sprintf("%d", *shared.PostgresPort),
+					"-U", "postgres",
+				},
+				[]string{
+					fmt.Sprintf("PGPASSWORD=%s", *shared.PostgresPassword),
+				},
+				15 * time.Second,
+				&stdin,
+			)
+
+			if err != nil {
+				fmt.Printf("%s[%d]: psql failed: %v (stderr: %v) (stdout: %v)\n",
+					serviceName, pid, err, string(stdout), string(stderr))
+				return err
+			}
+
+			fmt.Printf("%s[%d]: %s\n", serviceName, pid, strings.ReplaceAll(string(stdout), "\n",
+				fmt.Sprintf("\n%s[%d]: ", serviceName, pid)))
+			return nil
+		},
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -148,7 +179,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }
 

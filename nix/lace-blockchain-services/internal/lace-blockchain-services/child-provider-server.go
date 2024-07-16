@@ -71,6 +71,7 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 				"BUILD_INFO=" + constants.CardanoJsSdkBuildInfo,
 			}
 		},
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -100,6 +101,6 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }

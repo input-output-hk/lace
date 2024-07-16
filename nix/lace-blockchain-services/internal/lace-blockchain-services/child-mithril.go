@@ -114,6 +114,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 				[]string{"cardano-db", "snapshot", "list", "--json"},
 				extraEnv[shared.Network],
 				10 * time.Second,
+				nil,
 			)
 
 			if err != nil {
@@ -165,6 +166,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		MkExtraEnv: func() []string {
 			return extraEnv[shared.Network]
 		},
+		PostStart: func() error { return nil },
 		AllocatePTY: true,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -273,7 +275,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error {
+		PostStop: func() error {
 			if currentStatus != SGoodSignature {
 				// Since Mithril cannot resume interrupted downloads, let’s clear them on failures:
 				os.RemoveAll(downloadDir)
@@ -315,6 +317,7 @@ func runCommandWithTimeout(
 	args []string,
 	extraEnv []string,
 	timeout time.Duration,
+	stdin *string,  // use nil to not set
 ) ([]byte, []byte, error, int) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -333,6 +336,10 @@ func runCommandWithTimeout(
 	var stdoutBuf, stderrBuf bytes.Buffer
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
+
+    if stdin != nil {
+        cmd.Stdin = strings.NewReader(*stdin)
+    }
 
 	err := cmd.Run()
 	var rerr error

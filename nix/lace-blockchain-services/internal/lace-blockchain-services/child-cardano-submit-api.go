@@ -62,6 +62,7 @@ func childCardanoSubmitApi(appConfig appconfig.AppConfig) func(SharedState, chan
 			return rv, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -100,6 +101,6 @@ func childCardanoSubmitApi(appConfig appconfig.AppConfig) func(SharedState, chan
 		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 10 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }}
