@@ -819,13 +819,14 @@ export const useWalletManager = (): UseWalletManager => {
         role: KeyManagement.KeyRole.Stake
       };
 
-      const scriptKind: ScriptKind =
-        quorumRules.option === QuorumRadioOption.AllAddresses
-          ? { kind: Wallet.Cardano.NativeScriptKind.RequireAllOf }
-          : // eslint-disable-next-line unicorn/no-nested-ternary
-          quorumRules.option === QuorumRadioOption.NOfK
-          ? { kind: Wallet.Cardano.NativeScriptKind.RequireNOf, required: quorumRules.numberOfCosigner }
-          : { kind: Wallet.Cardano.NativeScriptKind.RequireAnyOf };
+      let scriptKind: ScriptKind;
+      if (quorumRules.option === QuorumRadioOption.AllAddresses) {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireAllOf };
+      } else if (quorumRules.option === QuorumRadioOption.NOfK) {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireNOf, required: quorumRules.numberOfCosigner };
+      } else {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireAnyOf };
+      }
 
       const paymentScript = await buildSharedWalletScript({
         expectedSigners: publicKeys,

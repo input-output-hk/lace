@@ -5,7 +5,7 @@ import { Menu, Tooltip as AntdTooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { toast, addEllipsis, useObservable } from '@lace/common';
+import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
@@ -39,8 +39,6 @@ interface RenderWalletOptionsParams {
 }
 
 const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [];
-const isBip32Wallet = <T, U>(wallet: AnyWallet<T, U>): wallet is AnyBip32Wallet<T, U> =>
-  wallet.type === WalletType.InMemory || wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor;
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -121,7 +119,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 }
               : undefined
           }
-          {...(isBip32Wallet(wallet) && {
+          {...(wallet.type !== WalletType.Script && {
             onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
           })}
         />
