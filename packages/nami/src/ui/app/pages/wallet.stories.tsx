@@ -159,6 +159,8 @@ const meta: Meta<typeof WalletStory> = {
 
     (window.setInterval as unknown as any) = fn();
 
+    process.env.npm_package_version = '0.1.0';
+
     // 👇 Reset the Date after each story
     return () => {
       createTab.mockReset();

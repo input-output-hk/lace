@@ -180,6 +180,12 @@ jobs:
           name: packages-staking
           path: packages/staking/dist
 
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist     
+
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
         with:

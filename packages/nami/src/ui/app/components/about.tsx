@@ -23,8 +23,6 @@ import PrivacyPolicy from './privacyPolicy';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 
-const { version } = require('../../../../package.json');
-
 const About = React.forwardRef((props, ref) => {
   const capture = useCaptureEvent();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -68,7 +66,7 @@ const About = React.forwardRef((props, ref) => {
               src={Logo}
             />
             <Box height="4" />
-            <Text fontSize="sm">{version}</Text>
+            <Text fontSize="sm">{process.env.npm_package_version}</Text>
             <Box height="6" />
             <Box
               display="flex"
