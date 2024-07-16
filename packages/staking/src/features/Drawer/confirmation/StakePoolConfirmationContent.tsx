@@ -17,6 +17,8 @@ import { StakePoolConfirmationBody } from './StakePoolConfirmationBody';
 import styles from './StakePoolConfirmationContent.module.scss';
 import { StakePoolDepositReclaimDetails } from './StakePoolDepositReclaimDetails';
 
+const TX_VALIDITY_PERIOD = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
+
 const ERROR_MESSAGES: { [key: string]: StakingError } = {
   [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
   [InputSelectionFailure.UtxoBalanceInsufficient]: StakingError.UTXO_BALANCE_INSUFFICIENT,
@@ -24,9 +26,8 @@ const ERROR_MESSAGES: { [key: string]: StakingError } = {
 
 export const stakingScriptKeyPath = {
   index: 0,
-  role: Wallet.KeyManagement.KeyRole.Stake
+  role: Wallet.KeyManagement.KeyRole.Stake,
 };
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isInputSelectionError = (error: any): error is { failure: InputSelectionFailure } =>
@@ -62,7 +63,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
         setSharedKeyHash(await deriveSharedWalletExtendedPublicKeyHash(sharedKey, stakingScriptKeyPath));
       }
     })();
-  }, [deriveSharedWalletExtendedPublicKeyHash, isSharedWallet, sharedKey])
+  }, [deriveSharedWalletExtendedPublicKeyHash, isSharedWallet, sharedKey]);
 
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
@@ -163,7 +164,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
             {isSharedWallet && (
               <RowContainer>
                 <TransactionSummary.Amount
-                  amount={t('drawer.confirmation.validityPeriod.value')}
+                  amount={t('drawer.confirmation.validityPeriod.value', { hours: TX_VALIDITY_PERIOD })}
                   label={t('drawer.confirmation.validityPeriod.title')}
                   tooltip={t('drawer.confirmation.validityPeriod.tooltip')}
                   data-testid="validity-period"

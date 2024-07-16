@@ -43,7 +43,7 @@ export const CosignersList = ({ list, title, ownSharedKeyHash }: CoSignerItemPro
               </div>
               <div className={styles.cosignersListItemContent}>
                 <Box w="$fill" className={styles.cosignersListItemName}>
-                  {key === ownSharedKeyHash ? t('sharedWallets.transaction.cosignerList.you') : (cosignerName || '...')}
+                  {key === ownSharedKeyHash ? t('sharedWallets.transaction.cosignerList.you') : cosignerName || '...'}
                 </Box>
                 <Box w="$fill" className={styles.cosignersListItemAddress}>
                   {key}
