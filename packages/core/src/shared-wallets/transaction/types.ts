@@ -7,6 +7,6 @@ export interface SignPolicy {
 
 export interface CoSignersListItem {
   keyHash: Wallet.Crypto.Ed25519KeyHashHex;
-  name: string;
+  name?: string;
   signed?: boolean;
 }

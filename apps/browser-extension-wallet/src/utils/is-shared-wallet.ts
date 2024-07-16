@@ -1,5 +1,6 @@
 import { isValidSharedWalletScript } from '@cardano-sdk/wallet';
 import { AnyWallet, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
+import { deriveSharedWalletExtendedPublicKeyHash } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { SignPolicy } from '@lace/core';
 
@@ -34,28 +35,22 @@ export const isSharedWallet = (wallet?: Wallet.CardanoWallet): boolean => {
   );
 };
 
-export const getSharedWalletSignPolicy = (wallet: ScriptWallet<Wallet.WalletMetadata>): SignPolicy | undefined => {
+export const getSharedWalletSignPolicy = (script: Wallet.Cardano.Script): SignPolicy | undefined => {
   let signPolicy;
-  const { stakingScript } = wallet;
 
-  if (
-    Wallet.Cardano.isNativeScript(stakingScript) &&
-    isValidSharedWalletScript(stakingScript) &&
-    isSharedWalletScriptKind(stakingScript)
-  ) {
-    // eslint-disable-next-line unicorn/no-array-callback-reference
-    const signers = stakingScript.scripts.filter(isRequireSignatureScriptKind).map(({ keyHash }) => ({
-      keyHash,
-      name: keyHash
-    }));
+  if (Wallet.Cardano.isNativeScript(script) && isValidSharedWalletScript(script) && isSharedWalletScriptKind(script)) {
+    const signers = script.scripts
+      // eslint-disable-next-line unicorn/no-array-callback-reference
+      .filter(isRequireSignatureScriptKind)
+      .map(({ keyHash }: Wallet.Cardano.RequireSignatureScript) => ({ keyHash }));
     let required;
 
-    switch (stakingScript.kind) {
+    switch (script.kind) {
       case Wallet.Cardano.NativeScriptKind.RequireAllOf:
         required = signers.length;
         break;
       case Wallet.Cardano.NativeScriptKind.RequireNOf:
-        required = stakingScript.required;
+        required = script.required;
         break;
       default:
         required = 1;
@@ -70,18 +65,22 @@ export const getSharedWalletSignPolicy = (wallet: ScriptWallet<Wallet.WalletMeta
   return signPolicy;
 };
 
-export const getSharedWalletOwnSharedKeys = (
-  wallet: ScriptWallet<Wallet.WalletMetadata>
-): Wallet.Crypto.Ed25519KeyHashHex | undefined => {
-  let sharedKeys;
-  const { stakingScript } = wallet;
+interface KeyHashToWalletNameMapProps {
+  participants?: { walletName: string; sharedWalletKey: string }[];
+  derivationPath: Wallet.KeyManagement.AccountKeyDerivationPath;
+}
 
-  if (
-    Wallet.Cardano.isNativeScript(stakingScript) &&
-    isValidSharedWalletScript(stakingScript) &&
-    isSharedWalletScriptKind(stakingScript)
-  ) {
-    sharedKeys = stakingScript.scripts.find(isRequireSignatureScriptKind).keyHash;
-  }
-  return sharedKeys;
+export const getKeyHashToWalletNameMap = async ({
+  participants = [],
+  derivationPath
+}: KeyHashToWalletNameMapProps): Promise<Map<Wallet.Crypto.Ed25519KeyHashHex, string>> => {
+  const result = await Promise.all(
+    participants.map(
+      async ({ walletName, sharedWalletKey }): Promise<[Wallet.Crypto.Ed25519KeyHashHex, string]> => [
+        await deriveSharedWalletExtendedPublicKeyHash(Wallet.Crypto.Bip32PublicKeyHex(sharedWalletKey), derivationPath),
+        walletName
+      ]
+    )
+  );
+  return new Map(result);
 };

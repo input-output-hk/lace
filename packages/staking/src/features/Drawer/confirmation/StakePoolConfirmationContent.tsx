@@ -4,7 +4,7 @@ import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { Banner, useObservable } from '@lace/common';
-import { CoSignersListItem, CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
+import { CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -21,6 +21,12 @@ const ERROR_MESSAGES: { [key: string]: StakingError } = {
   [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
   [InputSelectionFailure.UtxoBalanceInsufficient]: StakingError.UTXO_BALANCE_INSUFFICIENT,
 };
+
+export const stakingScriptKeyPath = {
+  index: 0,
+  role: Wallet.KeyManagement.KeyRole.Stake
+};
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isInputSelectionError = (error: any): error is { failure: InputSelectionFailure } =>
@@ -42,10 +48,22 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
     isSharedWallet,
     signPolicy,
+    sharedKey,
+    deriveSharedWalletExtendedPublicKeyHash,
   } = useOutsideHandles();
   const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio || [],
   }));
+  const [sharedKeyHash, setSharedKeyHash] = useState<Wallet.Crypto.Ed25519KeyHashHex | undefined>();
+
+  useEffect(() => {
+    (async () => {
+      if (isSharedWallet && sharedKey) {
+        setSharedKeyHash(await deriveSharedWalletExtendedPublicKeyHash(sharedKey, stakingScriptKeyPath));
+      }
+    })();
+  }, [deriveSharedWalletExtendedPublicKeyHash, isSharedWallet, sharedKey])
+
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -202,7 +220,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
                   <InfoBar signed={[]} signPolicy={signPolicy} />
                   {signPolicy.signers.length > 0 && (
                     <CosignersList
-                      ownSharedKey={signPolicy?.signers[0]?.keyHash as CoSignersListItem['keyHash']}
+                      ownSharedKeyHash={sharedKeyHash}
                       list={signPolicy.signers}
                       title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
                     />

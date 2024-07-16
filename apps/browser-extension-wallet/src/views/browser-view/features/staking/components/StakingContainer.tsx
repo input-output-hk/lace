@@ -11,7 +11,14 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
-import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
+import {
+  stakingScriptKeyPath,
+  useBalances,
+  useCustomSubmitApi,
+  useFetchCoinPrice,
+  useLocalStorage,
+  useWalletManager
+} from '@hooks';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -22,7 +29,7 @@ import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useObservable } from '@lace/common';
-import { getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
+import { getKeyHashToWalletNameMap, getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
 import { SignPolicy } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 
@@ -102,18 +109,28 @@ export const StakingContainer = (): React.ReactElement => {
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const walletName = walletInfo.name;
 
-  const { walletManager, walletRepository } = useWalletManager();
+  const { walletManager, walletRepository, deriveSharedWalletExtendedPublicKeyHash } = useWalletManager();
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
 
   useEffect(() => {
-    if (!activeWalletId || !isSharedWallet) return;
-    const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
-    if (isScriptWallet(activeWallet)) {
-      setSignPolicy(getSharedWalletSignPolicy(activeWallet));
-      setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
-    }
+    (async () => {
+      if (!activeWalletId || !isSharedWallet) return;
+      const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
+      if (isScriptWallet(activeWallet)) {
+        const policy = getSharedWalletSignPolicy(activeWallet.stakingScript);
+        const keyToNameMap = await getKeyHashToWalletNameMap({
+          participants: activeWallet.metadata.participants,
+          derivationPath: stakingScriptKeyPath
+        });
+        setSignPolicy({
+          ...policy,
+          signers: policy.signers.map((s) => ({ ...s, name: keyToNameMap.get(s.keyHash) || s.keyHash }))
+        });
+        setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
+      }
+    })();
   }, [activeWalletId, isSharedWallet, wallets]);
 
   return (
@@ -164,7 +181,8 @@ export const StakingContainer = (): React.ReactElement => {
           isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
           isSharedWallet,
           signPolicy,
-          sharedKey
+          sharedKey,
+          deriveSharedWalletExtendedPublicKeyHash
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

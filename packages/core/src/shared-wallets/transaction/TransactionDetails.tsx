@@ -132,14 +132,14 @@ export const TransactionDetails = ({
           {!hash && <InfoBar signed={signed} signPolicy={signPolicy} />}
           {signed.length > 0 && (
             <CosignersList
-              ownSharedKey={ownSharedKey}
+              ownSharedKeyHash={ownSharedKey}
               list={signed}
               title={t('sharedWallets.transaction.cosignerList.title.signed')}
             />
           )}
           {unsigned.length > 0 && (
             <CosignersList
-              ownSharedKey={ownSharedKey}
+              ownSharedKeyHash={ownSharedKey}
               list={unsigned}
               title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
             />

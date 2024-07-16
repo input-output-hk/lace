@@ -8,11 +8,11 @@ import { CoSignersListItem } from './types';
 
 interface CoSignerItemProps {
   list: CoSignersListItem[];
-  ownSharedKey: Wallet.Crypto.Ed25519KeyHashHex;
+  ownSharedKeyHash?: Wallet.Crypto.Ed25519KeyHashHex;
   title: string;
 }
 
-export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) => {
+export const CosignersList = ({ list, title, ownSharedKeyHash }: CoSignerItemProps) => {
   const { t } = useTranslation();
 
   return (
@@ -35,7 +35,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
               <div className={styles.cosignersListItemAvatar}>
                 <ProfilePicture.UserProfile
                   imageSrc=""
-                  fallbackText={cosignerName.slice(0, 1)}
+                  fallbackText={cosignerName.slice(0, 1).toUpperCase()}
                   delayMs={0}
                   data-testid="cosigner-list-item-profile-icon"
                   testId="cosigner-list-item-profile-icon"
@@ -43,7 +43,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
               </div>
               <div className={styles.cosignersListItemContent}>
                 <Box w="$fill" className={styles.cosignersListItemName}>
-                  {key === ownSharedKey ? t('sharedWallets.transaction.cosignerList.you') : cosignerName}
+                  {key === ownSharedKeyHash ? t('sharedWallets.transaction.cosignerList.you') : (cosignerName || '...')}
                 </Box>
                 <Box w="$fill" className={styles.cosignersListItemAddress}>
                   {key}

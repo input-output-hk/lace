@@ -9,6 +9,7 @@ import {
   useTheme
 } from '@providers';
 import {
+  stakingScriptKeyPath,
   useBalances,
   useCustomSubmitApi,
   useFetchCoinPrice,
@@ -35,7 +36,7 @@ import {
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useObservable } from '@lace/common';
-import { getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
+import { getKeyHashToWalletNameMap, getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
 import { SignPolicy } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 
@@ -83,18 +84,29 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
 
   const [sharedKey, setSharedKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
   const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
-  const { walletManager, walletRepository } = useWalletManager();
+  const { walletManager, walletRepository, deriveSharedWalletExtendedPublicKeyHash } = useWalletManager();
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
 
   useEffect(() => {
-    if (!activeWalletId || !isSharedWallet) return;
-    const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
-    if (isScriptWallet(activeWallet)) {
-      setSignPolicy(getSharedWalletSignPolicy(activeWallet));
-      setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
-    }
+    (async () => {
+      if (!activeWalletId || !isSharedWallet) return;
+      const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
+
+      if (isScriptWallet(activeWallet)) {
+        const policy = getSharedWalletSignPolicy(activeWallet.stakingScript);
+        const keyToNameMap = await getKeyHashToWalletNameMap({
+          participants: activeWallet.metadata.participants,
+          derivationPath: stakingScriptKeyPath
+        });
+        setSignPolicy({
+          ...policy,
+          signers: policy.signers.map((s) => ({ ...s, name: keyToNameMap.get(s.keyHash) || s.keyHash }))
+        });
+        setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
+      }
+    })();
   }, [activeWalletId, isSharedWallet, wallets]);
 
   const sendAnalytics = useCallback(() => {
@@ -185,7 +197,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
         isSharedWallet,
         signPolicy,
-        sharedKey
+        sharedKey,
+        deriveSharedWalletExtendedPublicKeyHash
       }}
     >
       <ContentLayout

@@ -106,4 +106,8 @@ export type OutsideHandlesContextValue = {
   isSharedWallet: boolean | undefined;
   signPolicy: SignPolicy;
   sharedKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
+  deriveSharedWalletExtendedPublicKeyHash: (
+    key: Wallet.Crypto.Bip32PublicKeyHex,
+    derivationPath: Wallet.KeyManagement.AccountKeyDerivationPath
+  ) => Promise<Wallet.Crypto.Ed25519KeyHashHex>;
 };
