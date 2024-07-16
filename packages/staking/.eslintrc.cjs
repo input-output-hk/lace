@@ -37,6 +37,18 @@ module.exports = {
         groups: ['builtin', 'external', 'type', 'internal', 'parent', 'sibling', 'index'],
       },
     ],
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          {
+            importNames: ['sx', 'style', 'recipe', 'vars', 'LocalThemeProvider'],
+            message: "Please import from 'features/theme' or directly e.g. '@vanilla-extract/css'.",
+            name: '@lace/ui',
+          },
+        ],
+      },
+    ],
     'promise/avoid-new': 'off',
     'react/jsx-curly-brace-presence': 2,
     'react/jsx-handler-names': 'off',

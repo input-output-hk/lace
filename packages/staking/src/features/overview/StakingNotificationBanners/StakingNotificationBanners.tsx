@@ -1,5 +1,5 @@
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { Banner } from '@lace/common';
-import { Box } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../assets/icons/info-icon.svg';
 import WarningTriangleIcon from '../../../assets/icons/warning-triangle.svg';

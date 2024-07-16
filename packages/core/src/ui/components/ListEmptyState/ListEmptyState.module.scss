@@ -1,0 +1,27 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/mixins';
+
+.emptyMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100% !important;
+  gap: size_unit(2.75);
+
+  .text {
+    @include text-body-medium;
+    color: var(--dark-mode-light-grey, var(--light-mode-dark-grey, #878e9e)) !important;
+    text-align: center;
+  }
+
+  .img {
+    height: size_unit(10.5);
+    width: size_unit(10.5);
+  }
+
+  @media (max-width: $breakpoint-popup) {
+    justify-content: flex-start;
+    padding-top: size_unit(6);
+  }
+}

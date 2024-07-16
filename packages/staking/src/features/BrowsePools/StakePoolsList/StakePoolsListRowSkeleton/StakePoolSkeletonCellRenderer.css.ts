@@ -1,19 +1,13 @@
-import { style, sx } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
-import { theme } from 'features/theme';
+import { sx } from 'features/theme';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 
 export const cellPlaceholder = recipe({
-  base: [
-    style([
-      sx({
-        borderRadius: '$medium',
-      }),
-      {
-        background: theme.colors.$stakePoolCellPlaceholder,
-      },
-    ]),
-  ],
+  base: sx({
+    background: '$stakePoolCellPlaceholder',
+    borderRadius: '$medium',
+  }),
   variants: {
     fade: {
       0: style({ opacity: '0.7' }),

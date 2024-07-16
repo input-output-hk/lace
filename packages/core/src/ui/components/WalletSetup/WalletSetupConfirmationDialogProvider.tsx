@@ -1,17 +1,17 @@
 /* eslint-disable unicorn/no-null */
 import React, { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslate } from '@src/ui/hooks';
 import { BehaviorSubject } from 'rxjs';
 import { StartOverDialog } from '@ui/components/SharedWallet/StartOverDialog';
-
-interface Props {
-  children: React.ReactNode;
-}
+import { useTranslation } from 'react-i18next';
 
 interface ContextType {
   isDialogOpen: boolean;
   shouldShowDialog$: BehaviorSubject<boolean>;
   withConfirmationDialog: (confirmedCallback: () => void) => () => void;
+}
+
+interface Props {
+  children: (value: ContextType) => React.ReactNode;
 }
 
 const WalletSetupConfirmationDialogContext = createContext<ContextType>(null);
@@ -27,7 +27,7 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
   const handleOnConfirmRef = useRef(() => void 0);
   const shouldShowDialog = useRef<boolean>(false);
   const shouldShowDialog$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const subscription = shouldShowDialog$.subscribe((value) => {
@@ -69,10 +69,10 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
         open={isDialogOpen}
         zIndex={300}
         translations={{
-          title: t('multiWallet.confirmationDialog.title'),
-          description: t('multiWallet.confirmationDialog.description'),
-          cancel: t('multiWallet.confirmationDialog.cancel'),
-          confirm: t('multiWallet.confirmationDialog.confirm')
+          title: t('core.multiWallet.confirmationDialog.title'),
+          description: t('core.multiWallet.confirmationDialog.description'),
+          cancel: t('core.multiWallet.confirmationDialog.cancel'),
+          confirm: t('core.multiWallet.confirmationDialog.confirm')
         }}
         events={{
           onConfirm: handleOnConfirmRef.current,
@@ -80,7 +80,7 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
           onOpenChanged: setIsDialogOpen
         }}
       />
-      {children}
+      {children(value)}
     </WalletSetupConfirmationDialogContext.Provider>
   );
 };

@@ -57,10 +57,29 @@
     gap: size_unit(4);
     width: 100%;
 
-    .separator {
-      background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey)) !important;
-      height: 1px;
-      width: 100%;
+    :global {
+      .ant-breadcrumb-link {
+        min-width: 100px;
+        padding: size_unit(1);
+        display: inline-flex;
+        justify-content: center;
+        gap: size_unit(0.75);
+        align-items: center;
+        background-color: var(--dark-mode-grey, #f9f9f9);
+        border-radius: 100px;
+        color: var(--text-color-primary);
+        font-weight: 500;
+      }
+
+      .ant-breadcrumb-separator {
+        display: inline-block;
+        color: var(--text-color-primary);
+        margin: 0 size_unit(1.5);
+      }
+
+      li:last-child > .ant-breadcrumb-separator {
+        display: none !important;
+      }    
     }
 
     .section {

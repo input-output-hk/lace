@@ -1,8 +1,8 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
-import { Flex, Text } from '@lace/ui';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Balance, CurrencyInfo } from '../../../outside-handles-provider';

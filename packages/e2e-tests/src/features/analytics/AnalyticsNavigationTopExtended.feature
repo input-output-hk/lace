@@ -29,8 +29,8 @@ Feature: Analytics - Top Navigation - Extended view
     Then I validate latest analytics single event "user/wallet profile | network | click"
     And I validate that 8 analytics event(s) have been sent
 
+  # TODO: enable when "lock wallet" feature is fixed
   @LW-8753 @Pending
-  @issue=LW-10007
   Scenario: Analytics - Extended view - Lace menu - User/wallet profile events - Lock wallet
     Given I click the menu button
     And I set up request interception for posthog analytics request(s)

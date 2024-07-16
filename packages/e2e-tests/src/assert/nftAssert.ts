@@ -201,6 +201,11 @@ class NftAssert {
     const nftItem = await TokenSelectionPage.getNftContainer(Asset.ADA_HANDLE_3.name);
     await adaHandleAssert.assertSeeCustomImage(await nftItem.$(TokenSelectionPage.NFT_IMAGE));
   }
+
+  async assertSeeNFTDetailsFolderPath(folderPath: string) {
+    const actualFolderPath = await NftDetails.getFolderPath();
+    expect(actualFolderPath).to.equal(folderPath);
+  }
 }
 
 export default new NftAssert();

@@ -1,2 +1,2 @@
 export * from './components/StakingContainer';
-export * from './helpers';
+export * from './isMultidelegationSupportedByDevice';

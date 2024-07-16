@@ -5,7 +5,7 @@ Feature: Send - Multiple selection for Extended Browser View
     Given Wallet is synced
 
   @LW-5043
-  Scenario Outline: Extended view - Send - Multiple tokens selection - happy path
+  Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - happy path
     And I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 10 to the "tADA" asset in bundle 1
@@ -27,7 +27,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | NFTs       |
 
   @LW-5038
-  Scenario Outline: Extended-view - Multi asset / bundle transaction
+  Scenario Outline: Extended-view - Multi asset / bundle transaction - <assetsType>
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 1 to the "tADA" asset in bundle 1
@@ -66,7 +66,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | NFTs       |
 
   @LW-5046
-  Scenario Outline: Extended view - Send - Multiple tokens selection - clear and cancel
+  Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - clear and cancel
     And I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 10 to the "tADA" asset in bundle 1
@@ -92,7 +92,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | NFTs       |
 
   @LW-5267
-  Scenario Outline: Extended view - Send - Multiple tokens selection - Maximum amount to select is 30
+  Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - Maximum amount to select is 30
     And I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a value of: 10 to the "tADA" asset in bundle 1

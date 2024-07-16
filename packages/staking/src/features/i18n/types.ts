@@ -134,6 +134,7 @@ type KeysStructure = {
         title: '';
         subTitle: '';
       };
+      customSubmitApiWarning: '';
     };
     details: {
       metrics: {
@@ -235,6 +236,11 @@ type KeysStructure = {
         title: '';
         description: '';
       };
+    };
+    dapp: {
+      title: '';
+      description: '';
+      button: '';
     };
     poolsManagement: {
       title: '';

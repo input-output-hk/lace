@@ -41,6 +41,7 @@ export const IBlockchainProvider = {
 
 export const getProviderByChain: BlockchainProviderFactory = (chain = CHAIN) => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chain);
+
   const providers = Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
     baseUrl: baseCardanoServicesUrl

@@ -1,0 +1,47 @@
+name: setup and install
+description: Setup Node.js and install dependencies
+
+inputs:
+  WALLET_PASSWORD:
+    description: 'Test wallet password'
+    required: true
+  GITHUB_TOKEN:
+    description: 'GitHub Token'
+    required: true
+
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+
+    - name: Configure Yarn to use GitHub Packages
+      run: |
+        echo "npmScopes:" >> ~/.yarnrc.yml
+        echo "  input-output-hk:" >> ~/.yarnrc.yml
+        echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> ~/.yarnrc.yml
+        echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> ~/.yarnrc.yml
+      shell: bash
+
+    - name: Node modules cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          **/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+    - name: Install dependencies
+      run: yarn install --immutable --inline-builds
+      shell: bash
+
+    - name: Decrypt test data
+      working-directory: ./packages/e2e-tests
+      run: ./decrypt_secret.sh
+      shell: bash
+      env:
+        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}

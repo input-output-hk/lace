@@ -3,7 +3,7 @@ import * as React from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import i18n from '../../../../lib/i18n';
+import { i18n } from '../../../../lib/i18n';
 import { UnlockWallet, UnlockWalletProps } from '../UnlockWallet';
 import { MemoryRouter } from 'react-router-dom';
 

@@ -6,6 +6,7 @@ import { isPopupMode } from '../../utils/pageUtils';
 
 interface ExpectedTransactionSummaryData {
   recipientAddress: string;
+  recipientAddressTag?: string;
   valueToBeSent: valuesToBeSend[];
 }
 
@@ -89,6 +90,10 @@ class TransactionSummaryAssert {
     expect(await TransactionSummaryPage.recipientAddressValue(bundleIndex + 1).getText()).to.equal(
       expectedTransactionSummaryData.recipientAddress
     );
+    if (expectedTransactionSummaryData.recipientAddressTag)
+      expect(await TransactionSummaryPage.recipientAddressTag(bundleIndex + 1).getText()).to.equal(
+        expectedTransactionSummaryData.recipientAddressTag
+      );
 
     for (let i = 0; i < expectedTransactionSummaryData.valueToBeSent.length; i++) {
       const expectedValue = expectedTransactionSummaryData.valueToBeSent[i].value;

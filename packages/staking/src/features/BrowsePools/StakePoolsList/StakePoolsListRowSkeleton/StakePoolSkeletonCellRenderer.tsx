@@ -1,4 +1,4 @@
-import { Box } from '@lace/ui';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import * as styles from './StakePoolSkeletonCellRenderer.css';
 
 const fadeScale = 10;

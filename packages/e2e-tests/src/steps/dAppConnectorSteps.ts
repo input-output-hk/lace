@@ -15,6 +15,9 @@ import popupView from '../page/popupView';
 import { Logger } from '../support/logger';
 import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
+import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
+import { parseWalletAddress } from '../utils/parseWalletAddress';
+import { AddressTag } from '../assert/transactionDetailsAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -28,7 +31,7 @@ When(/^I open test DApp$/, async () => {
 
 Then(/^I see DApp authorization window$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage();
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
 });
 
 Then(/^I see DApp collateral window$/, async () => {
@@ -43,7 +46,7 @@ Then(/^I see DApp insufficient funds window$/, async () => {
 
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage();
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
@@ -69,17 +72,28 @@ Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => 
 });
 
 Then(
-  /^I see DApp connector "Confirm transaction" page with: "([^"]*)" tADA - fee, "([^"]*)" assets and receiving wallet "([^"]*)"$/,
-  async (adaValue: string, assetValue: string, walletName: string) => {
+  /^I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:$/,
+  async (dataTable) => {
     await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-
     const expectedTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: Number(adaValue),
-      amountAsset: assetValue,
-      recipientAddress: String(getTestWallet(walletName).address)
+      assetsDetails: dataTableAsStringArray(dataTable)
     };
     await DAppConnectorAssert.assertSeeConfirmTransactionPage(expectedTransactionData);
+  }
+);
+
+Then(
+  /^I see DApp connector "Confirm transaction" page "(From address|To address)" section with following data:$/,
+  async (section: 'From address' | 'To address', entries) => {
+    await DAppConnectorAssert.assertSeeConfirmFromAddressTransactionPage(section, dataTableAsStringArray(entries));
+  }
+);
+
+Then(
+  /^I see (own|foreign) tag on under address in "(From address|To address)" section$/,
+  async (addressTag: AddressTag, section: 'From address' | 'To address') => {
+    await DAppConnectorAssert.assertSeeAddressTag(addressTag, section);
   }
 );
 
@@ -90,9 +104,7 @@ Then(
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
-      amountADA: -3,
-      amountAsset: '0',
-      recipientAddress: String(getTestWallet('WalletReceiveDappTransactionE2E').address)
+      assetsDetails: ['-3 tADA - FEE']
     };
 
     switch (expectedPage) {
@@ -147,6 +159,13 @@ Then(/^I see DApp removal confirmation window$/, async () => {
 Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async (button: 'Authorize' | 'Cancel') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow(button);
 });
+
+Then(
+  /^I expand "(Origin|From address|To address)" section in DApp transaction window$/,
+  async (section: 'Origin' | 'From address' | 'To address') => {
+    await ConfirmTransactionPage.expandSectionInDappTransactionWindow(section);
+  }
+);
 
 Then(/^I click "(Always|Only once)" button in DApp authorization window$/, async (button: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(button);
@@ -306,3 +325,10 @@ Then(/^I save fee value on DApp "Confirm transaction" page$/, async () => {
 Then(/^I set send to wallet address to: "([^"]*)" in test DApp$/, async (walletName: string) => {
   await TestDAppPage.sendAdaAddressInput.setValue(String(getTestWallet(walletName).address));
 });
+
+Then(
+  /^I set send to wallet address to: "([^"]*)" (main|other multiaddress|second account) in test DApp$/,
+  async (walletName: string, addressType) => {
+    await TestDAppPage.sendAdaAddressInput.setValue(parseWalletAddress(walletName, addressType));
+  }
+);

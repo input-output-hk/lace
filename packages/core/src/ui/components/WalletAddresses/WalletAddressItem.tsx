@@ -5,7 +5,7 @@ import { Typography, Tooltip } from 'antd';
 import { Ellipsis, addEllipsis } from '@lace/common';
 import { ReactComponent as MissingIcon } from '../../assets/icons/missing.component.svg';
 import styles from './WalletAddressItem.module.scss';
-import { useTranslate } from '@src/ui/hooks';
+import { useTranslation } from 'react-i18next';
 const { Text } = Typography;
 
 interface AddressBookSchema {
@@ -43,7 +43,7 @@ export const WalletAddressItem = ({
   shouldUseEllipsis,
   isAddressWarningVisible = false
 }: WalletAddressItemProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <div
@@ -68,7 +68,7 @@ export const WalletAddressItem = ({
       </div>
       <div className={cn(styles.listItemBlock, styles.addressBox)}>
         {isAddressWarningVisible && (
-          <Tooltip title={t('package.core.addressBook.addressHandleTooltip')}>
+          <Tooltip title={t('core.addressBook.addressHandleTooltip')}>
             <MissingIcon data-testid="address-list-item-warning" className={cn(styles.listItemWarning)} />
           </Tooltip>
         )}

@@ -20,6 +20,7 @@ export interface ExtensionUpdateData {
 
 export const AUTHORIZED_DAPPS_KEY = 'authorizedDapps';
 export const ABOUT_EXTENSION_KEY = 'aboutExtension';
+export const MIDNIGHT_EVENT_BANNER_KEY = 'midnightEventBanner';
 
 export interface BackgroundStorage {
   message?: Message;
@@ -28,9 +29,15 @@ export interface BackgroundStorage {
   userId?: string;
   usePersistentUserId?: boolean;
   experimentsConfiguration?: Record<string, string | boolean>;
+  customSubmitTxUrl?: string;
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;
+
+export interface MidnightEventBannerStorage {
+  lastSeen: number;
+  closed: boolean;
+}
 
 // TODO: Improve use of extension storage (get/set). We have keys all over the place [LW-6495]
 export interface ExtensionStorage {
@@ -38,4 +45,5 @@ export interface ExtensionStorage {
   BACKGROUND_STORAGE?: BackgroundStorage;
   [ABOUT_EXTENSION_KEY]?: ExtensionUpdateData;
   [AUTHORIZED_DAPPS_KEY]?: AuthorizedDappStorage;
+  [MIDNIGHT_EVENT_BANNER_KEY]?: MidnightEventBannerStorage;
 }

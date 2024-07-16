@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { ReactNode } from 'react';
 import { StakePoolDetails } from '../../store';
 import { getFormattedStakePoolProp } from '../formatters';

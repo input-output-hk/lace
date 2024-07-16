@@ -1,5 +1,5 @@
 /* eslint-disable import/imports-first */
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 jest.doMock('@hooks/useWalletManager', () => ({
   useWalletManager: jest.fn().mockReturnValue({
     createWallet: jest.fn().mockResolvedValue({
@@ -18,116 +18,116 @@ jest.doMock('@hooks/useWalletManager', () => ({
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { Providers } from './types';
-import { walletRoutePaths } from '@routes';
-import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
+import {
+  DEFAULT_MNEMONIC_LENGTH,
+  createAssetsRoute,
+  fillMnemonic,
+  getNextButton,
+  setupStep,
+  getBackButton,
+  mnemonicWords
+} from '../tests/utils';
 import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
 import { UseWalletManager } from '@hooks/useWalletManager';
-import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
-import { CreateWallet } from './CreateWallet';
+import { AnalyticsTracker, postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { MemoryRouter, Router } from 'react-router-dom';
+import { WalletOnboardingFlows } from '../WalletOnboardingFlows';
+import { walletRoutePaths } from '@routes';
+import { createMemoryHistory } from 'history';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
-  useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
-    sendMergeEvent: jest.fn().mockReturnValue(''),
-    sendEventToPostHog: jest.fn().mockReturnValue('')
-  })
+  useAnalyticsContext: jest
+    .fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog' | 'sendAliasEvent'>, []>()
+    .mockReturnValue({
+      sendMergeEvent: jest.fn().mockReturnValue(''),
+      sendEventToPostHog: jest.fn().mockReturnValue(''),
+      sendAliasEvent: jest.fn().mockReturnValue('')
+    })
 }));
 
-const keepWalletSecureStep = async () => {
-  const nextButton = getNextButton();
-
-  fireEvent.click(nextButton);
-
-  await screen.findByText('Write down your secret passphrase');
-};
+jest.mock('@lace/cardano', () => {
+  const actual = jest.requireActual('@lace/cardano');
+  return {
+    ...actual,
+    Wallet: {
+      ...actual.Wallet,
+      KeyManagement: {
+        ...actual.Wallet.KeyManagement,
+        util: {
+          ...actual.Wallet.KeyManagement.util,
+          generateMnemonicWords: () => mnemonicWords
+        }
+      }
+    }
+  };
+});
 
 const recoveryPhraseStep = async () => {
-  const nextButton = getNextButton();
-
-  // 08/24
+  let nextButton = getNextButton();
   fireEvent.click(nextButton);
-  // 16/24
+  await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
+  nextButton = getNextButton();
   fireEvent.click(nextButton);
-  // 24/24
-  fireEvent.click(nextButton);
-
-  const step1 = 8;
-  const step2 = 16;
-  const step3 = 24;
-
-  await fillMnemonic(0, step1);
-  await fillMnemonic(step1, step2);
-  await fillMnemonic(step2, step3);
-
-  await screen.findByText('Total wallet balance');
+  await screen.findByText("Let's set up your new wallet");
 };
 
 describe('Multi Wallet Setup/Create Wallet', () => {
-  let providers = {} as {
-    createWallet: jest.Mock;
-    generateMnemonicWords: jest.Mock;
-    confirmationDialog: {
-      shouldShowDialog$: BehaviorSubject<boolean>;
-    };
-  };
-
-  beforeEach(() => {
-    providers = {
-      createWallet: jest.fn(),
-      generateMnemonicWords: jest.fn(),
-      confirmationDialog: {
-        shouldShowDialog$: new BehaviorSubject(false)
-      }
-    };
-  });
-
   test('setting up a new hot wallet', async () => {
-    providers.generateMnemonicWords.mockReturnValue(mnemonicWords);
-    providers.createWallet.mockResolvedValue(void 0);
-
+    const history = createMemoryHistory();
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
-              <CreateWallet providers={providers as Providers} />
+            <Router history={history}>
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+              />
               {createAssetsRoute()}
-            </MemoryRouter>
+            </Router>
           </StoreProvider>
         </DatabaseProvider>
       </AppSettingsProvider>
     );
 
-    await setupStep();
-    await keepWalletSecureStep();
+    history.push(walletRoutePaths.newWallet.create);
     await recoveryPhraseStep();
+    await setupStep();
   });
 
-  test('should emit correct value for shouldShowDialog', async () => {
+  test('should properly mark for dirty', async () => {
+    let formDirty = false;
     render(
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_BROWSER}>
-            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
-              <CreateWallet providers={providers as Providers} />
-              {createAssetsRoute()}
+            <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create]}>
+              <WalletOnboardingFlows
+                urlPath={walletRoutePaths.newWallet}
+                postHogActions={postHogMultiWalletActions}
+                renderHome={() => <></>}
+                setFormDirty={(dirty) => {
+                  formDirty = dirty;
+                }}
+              />
             </MemoryRouter>
           </StoreProvider>
         </DatabaseProvider>
       </AppSettingsProvider>
     );
 
-    const nameInput = screen.getByTestId('wallet-name-input');
+    expect(formDirty).toBe(false);
 
-    fireEvent.change(nameInput, { target: { value: 'My X Wallet' } });
+    const nextButton = getNextButton();
+    fireEvent.click(nextButton);
+    expect(formDirty).toBe(true);
 
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(true);
-
-    fireEvent.change(nameInput, { target: { value: '' } });
-
-    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
+    const backButton = getBackButton();
+    fireEvent.click(backButton);
+    fireEvent.click(screen.queryByTestId('delete-address-modal-confirm'));
+    expect(formDirty).toBe(false);
   });
 });

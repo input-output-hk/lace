@@ -1,33 +1,23 @@
 @import '../../styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/typography';
 
-@mixin right-item-display {
+@mixin half-display {
   flex: 50%;
   max-width: 50%;
+  display: flex;
+}
+
+@mixin right-align {
+  @include half-display;
   text-align: right;
   display: flex;
   flex-direction: column;
 }
 
 .assetInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-
-  span.asset,
-  span.fiat {
-    @include text-body-semi-bold;
-    overflow-wrap: break-word;
-    text-align: right;
-    max-width: 100%;
-  }
-
-  span.asset {
-    color: var(--text-color-primary);
-  }
-  span.fiat {
-    color: var(--text-color-secondary);
-  }
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .container {
@@ -40,14 +30,10 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  .labelContainer {
-    display: flex;
-    justify-content: flex-start;
-    gap: 5px;
 
-    flex: 50%;
-    max-width: 50%;
-    color: var(--text-color-primary, #3d3b39);
+  .labelContainer {
+    @include half-display;
+    gap: 5px;
 
     .infoIcon {
       width: size_unit(2.25);
@@ -55,39 +41,20 @@
       margin-bottom: -5px;
       color: var(--text-color-secondary);
     }
-
-    .label {
-      @include text-body-semi-bold;
-      color: var(--text-color-primary, #3d3b39);
-    }
-  }
-
-  .recipientAddress {
-    @include text-address($weight: 500);
-    color: var(--text-color-primary, #3d3b39);
-    flex: 50%;
-    overflow-wrap: break-word;
-    max-width: 50%;
-    text-align: right;
   }
 }
 
 .assetList {
-  @include right-item-display;
+  @include right-align;
   gap: size_unit(4);
 }
 
 .recipient {
-  @include right-item-display;
+  @include half-display;
+  text-align: right;
+}
 
-  .name {
-    @include text-body-semi-bold;
-    margin-bottom: size_unit(2);
-    color: var(--text-color-primary, #3d3b39);
-  }
-
-  .address {
-    @include text-address($weight: 500);
-    color: var(--text-color-secondary, #878e9e);
-  }
+.address {
+  word-break: break-all;
+  line-height: 17px;
 }

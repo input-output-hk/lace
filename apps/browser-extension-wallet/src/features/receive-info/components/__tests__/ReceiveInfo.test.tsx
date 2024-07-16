@@ -5,7 +5,7 @@ import { I18nextProvider } from 'react-i18next';
 import { render } from '@testing-library/react';
 import { ReceiveInfo, ReceiveInfoProps } from '../ReceiveInfo';
 import '@testing-library/jest-dom';
-import i18n from '../../../../lib/i18n';
+import { i18n } from '../../../../lib/i18n';
 import { mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
 import { ThemeProvider } from '@providers/ThemeProvider';
 

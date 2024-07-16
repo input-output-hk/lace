@@ -1,9 +1,0 @@
-<svg width="0" height="0">
-   <defs>
-    <linearGradient id="laceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="-18.3%" stop-color="#FF92E1" />
-      <stop offset="118.89%" stop-color="#FDC300" />
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#laceGradient)" />
-</svg>

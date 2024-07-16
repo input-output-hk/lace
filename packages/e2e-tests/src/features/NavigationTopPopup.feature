@@ -7,7 +7,7 @@ Feature: Top Navigation - Popup view
   @LW-4724 @Mainnet @Testnet
   Scenario: Avatar dropdown displayed on click with content
     When I click the menu button
-    Then the dropdown menu is visible
+    Then the user menu is displayed
     And chevron icon is changed to up
 
   @LW-4725 @Mainnet @Testnet
@@ -15,15 +15,6 @@ Feature: Top Navigation - Popup view
     When I click the menu button
     Then wallet sync status component is visible
     And sync status displays "Wallet synced" state
-
-  @LW-4727 @Mainnet @Testnet @Pending
-  @issue=LW-10057
-  Scenario: Avatar dropdown wallet address copy functions as expected
-    Given I close wallet synced toast
-    When I click the menu button
-    Then the dropdown menu is visible
-    When I click on the user details button
-    Then I see a toast with message: "general.clipboard.copiedToClipboard"
 
   @LW-4599 @Testnet
   Scenario: Popup View - network id is visible for Testnet
@@ -66,14 +57,14 @@ Feature: Top Navigation - Popup view
     And I click on the network option
     And I see network sub-menu
     When I click on then network sub-menu back button
-    Then the dropdown menu is visible
+    Then the user menu is displayed
 
   @LW-6078 @Testnet @Mainnet
   Scenario: Popup View - Toast displayed after switching network to Preview
     When I click the menu button
     And I click on the network option
     When I click on "Preview" radio button
-    Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
+    Then I see a toast with text: "Switched network"
     And Lace is loaded properly
 
   @LW-6079 @Testnet @Mainnet
@@ -94,7 +85,7 @@ Feature: Top Navigation - Popup view
     Given I close wallet synced toast
     When I am in the offline network mode: true
     Then I see network id with status: offline
-    And I see a toast with message: "general.errors.networkError"
+    And I see a toast with text: "Network Error"
     When I click the menu button
     Then wallet sync status component is visible
     And sync status displays "Not synced to the blockchain" state

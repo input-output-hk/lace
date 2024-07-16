@@ -1,4 +1,4 @@
-import { PieChartGradientColor } from '@lace/ui';
+import { PieChartGradientColor } from '@input-output-hk/lace-ui-toolkit';
 import type { Meta } from '@storybook/react';
 import { DelegationCard } from './DelegationCard';
 

@@ -1,5 +1,5 @@
 class DeleteFolderModal {
-  private CONTAINER = '.ant-modal-content';
+  private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="create-folder-modal-title"]';
   private DESCRIPTION = '[data-testid="create-folder-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-folder-modal-cancel"]';
@@ -10,19 +10,19 @@ class DeleteFolderModal {
   }
 
   get title() {
-    return $(this.TITLE);
+    return this.container.$(this.TITLE);
   }
 
   get description() {
-    return $(this.DESCRIPTION);
+    return this.container.$(this.DESCRIPTION);
   }
 
   get cancelButton() {
-    return $(this.CANCEL_BUTTON);
+    return this.container.$(this.CANCEL_BUTTON);
   }
 
   get confirmButton() {
-    return $(this.CONFIRM_BUTTON);
+    return this.container.$(this.CONFIRM_BUTTON);
   }
 
   async clickCancelButton() {

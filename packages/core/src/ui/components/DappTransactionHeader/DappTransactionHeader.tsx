@@ -2,9 +2,9 @@ import React from 'react';
 import { Typography } from 'antd';
 
 import styles from './DappTransactionHeader.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 
-import { TransactionType, SummaryExpander, Card } from '@lace/ui';
+import { TransactionType, SummaryExpander, Card } from '@input-output-hk/lace-ui-toolkit';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -26,12 +26,12 @@ export interface DappTransactionHeaderProps {
 }
 
 export const DappTransactionHeader = ({ transactionType, name }: DappTransactionHeaderProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <div data-testid="transaction-type-container">
-      <TransactionType label={t('package.core.dappTransaction.transaction')} transactionType={transactionType} />
-      <SummaryExpander title={t('package.core.dappTransaction.origin')}>
+      <TransactionType label={t('core.dappTransaction.transaction')} transactionType={transactionType} />
+      <SummaryExpander title={t('core.dappTransaction.origin')} testId="dapp-transaction-origin-expander">
         <Card.Outlined className={styles.dappInfoContainer}>
           <Text className={styles.dappInfo}>
             <span data-testid="dapp-transaction-origin">{name}</span>

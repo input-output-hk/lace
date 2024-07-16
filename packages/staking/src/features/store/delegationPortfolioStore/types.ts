@@ -1,15 +1,23 @@
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
+import { BrowsePoolsView } from 'features/BrowsePools';
 import { ExecuteCommand, State } from './stateMachine';
 
 export type AdaSymbol = 'ADA' | 'tADA';
 
 export type DelegationPortfolioState = State & {
   view?: 'popup' | 'expanded';
+  hydrated: boolean;
 };
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
   mutators: {
+    hydrate: (params: {
+      poolIds: Wallet.Cardano.PoolId[];
+      stakePoolProvider: Wallet.StakePoolProvider;
+      view: 'popup' | 'expanded';
+      poolsView: BrowsePoolsView;
+    }) => void;
     executeCommand: ExecuteCommand;
     forceAbortFlows: () => void;
     setCardanoCoinSymbol: (currentChain: Wallet.Cardano.ChainId) => void;

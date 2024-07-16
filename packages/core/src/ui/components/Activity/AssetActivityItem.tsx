@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable react/no-multi-comp */
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
@@ -10,11 +11,12 @@ import { ReactComponent as PendingIcon } from '../../assets/icons/pending.compon
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
-import { useTranslate } from '@src/ui/hooks';
-import { DelegationActivityType, TransactionActivityType } from '../ActivityDetail/types';
+import { DelegationActivityType, TransactionActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
 import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
+import { useTranslation } from 'react-i18next';
+import { CoreTranslationKey } from '@lace/translation';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
@@ -92,6 +94,7 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
 const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
   TransactionActivityType.outgoing,
   DelegationActivityType.delegationRegistration,
+  ConwayEraCertificatesTypes.Registration,
   TransactionActivityType.self,
   DelegationActivityType.delegation
 ]);
@@ -108,13 +111,19 @@ export const AssetActivityItem = ({
   assets,
   formattedTimestamp
 }: AssetActivityItemProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const ref = useRef<HTMLHeadingElement>(null);
   const [assetsToShow, setAssetsToShow] = React.useState<number>(0);
 
   const getText = useCallback(
     (items: number): { text: string; suffix: string } => {
-      if (type in DelegationActivityType || type === TransactionActivityType.self) return { text: amount, suffix: '' };
+      if (
+        type in DelegationActivityType ||
+        type === ConwayEraCertificatesTypes.Registration ||
+        type === ConwayEraCertificatesTypes.Unregistration ||
+        type === TransactionActivityType.self
+      )
+        return { text: amount, suffix: '' };
 
       const assetsIdsText = assets
         ?.slice(0, items)
@@ -160,13 +169,15 @@ export const AssetActivityItem = ({
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
-    type in DelegationActivityType ? (
+    type in DelegationActivityType ||
+    type === ConwayEraCertificatesTypes.Registration ||
+    type === ConwayEraCertificatesTypes.Unregistration ? (
       <p data-testid="tokens-amount" className={styles.description}>
-        {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
+        {DELEGATION_ASSET_NUMBER} {t('core.assetActivityItem.entry.token')}
       </p>
     ) : (
       <p data-testid="tokens-amount" className={styles.description}>
-        {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
+        {pluralize('core.assetActivityItem.entry.token', assetsNumber, true)}
       </p>
     );
   const descriptionContent = formattedTimestamp ? (
@@ -191,9 +202,13 @@ export const AssetActivityItem = ({
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
-            {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationActivityType)
-              ? t('package.core.assetActivityItem.entry.name.sending')
-              : t(`package.core.assetActivityItem.entry.name.${type}`)}
+            {isPendingTx &&
+            type !== TransactionActivityType.self &&
+            !(type in DelegationActivityType) &&
+            type !== ConwayEraCertificatesTypes.Registration &&
+            type !== ConwayEraCertificatesTypes.Unregistration
+              ? t('core.assetActivityItem.entry.name.sending')
+              : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
           </h6>
           {descriptionContent}
         </div>
@@ -202,8 +217,9 @@ export const AssetActivityItem = ({
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.negativeBalance]: isNegativeBalance,
-            [styles.positiveBalance]: !isNegativeBalance
+            [styles.pendingNegativeBalance]: isNegativeBalance && status === ActivityStatus.PENDING,
+            [styles.positiveBalance]: !isNegativeBalance,
+            [styles.negativeBalance]: isNegativeBalance && status !== ActivityStatus.PENDING
           })}
           ref={ref}
         >

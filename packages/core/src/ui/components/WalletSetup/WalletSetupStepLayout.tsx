@@ -4,9 +4,9 @@ import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
 import { Tooltip } from 'antd';
 import { urls } from '../../utils/constants';
-import { useTranslate } from '@ui/hooks/useTranslate';
-import i18n from '@ui/lib/i18n';
+import { i18n } from '@lace/translation';
 import { WalletSetupFlow, useWalletSetupFlow } from './WalletSetupFlowProvider';
+import { useTranslation } from 'react-i18next';
 
 export enum WalletTimelineSteps {
   LEGAL_AND_ANALYTICS,
@@ -48,17 +48,17 @@ const removeLegalAndAnalyticsStep = (
 
 const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, flow: WalletSetupFlow) => {
   const inMemoryWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
-    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
-    { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('package.core.walletSetupStep.recoveryPhrase') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('core.walletSetupStep.legalAndAnalytics') },
+    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') },
+    { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('core.walletSetupStep.recoveryPhrase') },
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.allDone') }
   ];
 
   const hardwareWalletSteps = [
-    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
-    { key: WalletTimelineSteps.CONNECT_WALLET, name: i18n.t('package.core.walletSetupStep.connectWallet') },
-    { key: WalletTimelineSteps.NAME_WALLET, name: i18n.t('package.core.walletSetupStep.nameWallet') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('package.core.walletSetupStep.allDone') }
+    { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('core.walletSetupStep.legalAndAnalytics') },
+    { key: WalletTimelineSteps.CONNECT_WALLET, name: i18n.t('core.walletSetupStep.connectWallet') },
+    { key: WalletTimelineSteps.NAME_WALLET, name: i18n.t('core.walletSetupStep.nameWallet') },
+    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.allDone') }
   ];
 
   const walletSteps = isHardwareWallet ? hardwareWalletSteps : inMemoryWalletSteps;
@@ -95,14 +95,14 @@ export const WalletSetupStepLayout = ({
   currentTimelineStep,
   isHardwareWallet = false
 }: WalletSetupStepLayoutProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const nextButtonContainerRef = useRef(null);
   const flow = useWalletSetupFlow();
 
   const defaultLabel = {
-    next: t('package.core.walletSetupStep.next'),
-    back: t('package.core.walletSetupStep.back'),
-    skip: t('package.core.walletSetupStep.skip')
+    next: t('core.walletSetupStep.next'),
+    back: t('core.walletSetupStep.back'),
+    skip: t('core.walletSetupStep.skip')
   };
 
   const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet, flow);

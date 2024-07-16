@@ -1,10 +1,10 @@
 import React, { ChangeEvent, useMemo, useState } from 'react';
 import styles from './WalletSetupSelectAccountsStepRevamp.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 import { Input } from '@lace/common';
-import { Box, SelectGroup } from '@lace/ui';
+import { Box, Select } from '@input-output-hk/lace-ui-toolkit';
 import { WalletTimelineSteps } from '../WalletSetup';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
+import { useTranslation } from 'react-i18next';
 
 const INITIAL_WALLET_NAME = 'Wallet 1';
 const nameShouldHaveRightLengthRegex = /^.{1,20}$/;
@@ -15,21 +15,21 @@ export interface WalletSetupSelectAccountsStepRevampProps {
   accounts: number;
   onBack: () => void;
   onSubmit: (accountIndex: number, name: string) => void;
-  isHardwareWallet?: boolean;
-  wallet?: string;
   isNextLoading?: boolean;
+  onSelectedAccountChange?: () => void;
 }
 
 export const WalletSetupSelectAccountsStepRevamp = ({
   accounts,
   onBack,
   onSubmit,
-  isNextLoading
+  isNextLoading,
+  onSelectedAccountChange
 }: WalletSetupSelectAccountsStepRevampProps): React.ReactElement => {
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>('0');
   const [walletName, setWalletName] = useState(INITIAL_WALLET_NAME);
   const [isDirty, setIsDirty] = useState(false);
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const isNameValid = useMemo(() => validateName(walletName), [walletName]);
 
@@ -59,10 +59,10 @@ export const WalletSetupSelectAccountsStepRevamp = ({
         <div>
           <Input
             dataTestId="wallet-setup-register-name-input"
-            className={styles.inputName}
             label={t('core.walletSetupSelectAccountsStep.walletName')}
             value={walletName}
             onChange={handleNameChange}
+            labelClassName={styles.label}
           />
           {isDirty && walletName && !isNameValid && (
             <p className={styles.formError} data-testid="wallet-setup-register-name-error">
@@ -71,14 +71,22 @@ export const WalletSetupSelectAccountsStepRevamp = ({
           )}
         </div>
         <Box mt="$16">
-          <SelectGroup
+          <Select.Root
+            variant="outline"
             placeholder="Accounts"
-            options={options}
-            onValueChange={(value) => setSelectedAccount(value)}
+            value={selectedAccount}
+            triggerTestId="wallet-setup-account-select-input"
+            onChange={(value) => {
+              setSelectedAccount(value);
+              onSelectedAccountChange?.();
+            }}
             showArrow
-            withOutline
-            selectedValue={selectedAccount}
-          />
+            zIndex={1000}
+          >
+            {options.map(({ value, label }) => (
+              <Select.Item key={value} value={value} title={label} />
+            ))}
+          </Select.Root>
         </Box>
       </Box>
     </WalletSetupStepLayoutRevamp>

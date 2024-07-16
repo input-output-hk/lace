@@ -5,11 +5,21 @@
 }
 
 .portfolio {
-  margin-bottom: size_unit(5);
+  margin-bottom: size_unit(2);
 }
 
 .testPopupClass {
   @media (max-width: $breakpoint-popup) {
     width: 1000px;
   }
+}
+
+.searchBoxContainer {
+  @media (max-width: $breakpoint-popup) {
+    margin-top: size_unit(3);
+  }
+}
+
+.topupWalletDisclaimerShort {
+  color: var(--light-mode-mid-grey, var(--dark-mode-light-grey, #c0c0c0)) !important;
 }

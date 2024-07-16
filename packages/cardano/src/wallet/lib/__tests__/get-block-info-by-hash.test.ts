@@ -1,7 +1,6 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable promise/avoid-new */
 import '@testing-library/jest-dom';
 import { getBlockInfoByHash } from '../get-block-info-by-hash';
 import { stakepoolSearchProviderStub, mockedStakePools } from '../../test/mocks/StakepoolSearchProviderStub';

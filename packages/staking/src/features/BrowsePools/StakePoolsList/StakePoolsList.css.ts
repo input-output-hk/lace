@@ -1,12 +1,20 @@
-import { style } from '@lace/ui';
-import { theme } from 'features/theme';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 
-export const selectedTitle = style({
-  color: theme.colors.$titleColor,
+export const selectedTitle = sx({
+  color: '$titleColor',
+});
+
+export const box = style({
+  position: 'relative',
 });
 
 export const selectedPools = style([
+  sx({
+    borderBottomColor: '$selectedPoolsSectionBorderColor',
+  }),
   {
-    borderBottom: `1px solid ${theme.colors.$selectedPoolsSectionBorderColor}`,
+    borderBottomStyle: 'solid',
+    borderBottomWidth: 1,
   },
 ]);

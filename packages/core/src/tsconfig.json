@@ -10,11 +10,22 @@
     },
     "declarationDir": "./",
     "declaration": true,
+    "resolveJsonModule": true,
     "plugins": [
-      { "transform": "typescript-transform-paths" },
-      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+      {
+        "transform": "typescript-transform-paths"
+      },
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
     ]
   },
-  "references": [{ "path": "../../common/src" }],
-  "exclude": ["dist/"]
+  "references": [
+    {
+      "path": "../../common/src"
+    }
+  ],
+  "exclude": ["dist/"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.json"]
 }

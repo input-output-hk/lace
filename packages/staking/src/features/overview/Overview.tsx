@@ -1,5 +1,5 @@
+import { Box, ControlButton, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useObservable } from '@lace/common';
-import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';

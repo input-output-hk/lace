@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
+import { ThemeColorScheme, ThemeProvider } from '@input-output-hk/lace-ui-toolkit';
 
 import { useTheme } from '@providers/ThemeProvider';
 

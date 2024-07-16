@@ -10,9 +10,10 @@ import { compactNumberWithUnit } from '@utils/format-number';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
-import { OutsideHandlesProvider } from '@lace/staking';
-import { useBalances, useFetchCoinPrice, useLocalStorage } from '@hooks';
+import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
+import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import {
+  MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
@@ -27,11 +28,13 @@ export const StakingContainer = (): React.ReactElement => {
 
   const analytics = useAnalyticsContext();
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
+    useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
   const [
     multidelegationFirstVisitSincePortfolioPersistence,
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
@@ -58,6 +61,7 @@ export const StakingContainer = (): React.ReactElement => {
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const password = usePassword();
   const submittingState = useSubmitingState();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   const {
     walletInfo,
@@ -71,7 +75,8 @@ export const StakingContainer = (): React.ReactElement => {
     fetchNetworkInfo,
     networkInfo,
     blockchainProvider,
-    currentChain
+    currentChain,
+    environmentName
   } = useWalletStore((state) => ({
     walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
@@ -85,8 +90,7 @@ export const StakingContainer = (): React.ReactElement => {
     blockchainProvider: state.blockchainProvider,
     walletInfo: state.walletInfo,
     currentChain: state.currentChain,
-    activityDetail: state.activityDetail,
-    resetActivityState: state.resetActivityState
+    environmentName: state.environmentName
   }));
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
 
@@ -124,6 +128,8 @@ export const StakingContainer = (): React.ReactElement => {
           compactNumber: compactNumberWithUnit,
           multidelegationFirstVisit,
           triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+          multidelegationDAppCompatibility,
+          triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
           multidelegationFirstVisitSincePortfolioPersistence,
           triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
             setMultidelegationFirstVisit(false);
@@ -131,7 +137,8 @@ export const StakingContainer = (): React.ReactElement => {
           },
           walletAddress,
           currentChain,
-          isMultidelegationSupportedByDevice
+          isMultidelegationSupportedByDevice,
+          isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

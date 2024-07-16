@@ -1,5 +1,6 @@
-import { Cell, Flex, Grid, LocalThemeProvider, Section, ThemeColorScheme, Variants } from '@lace/ui';
+import { Cell, Flex, Grid, Section, ThemeColorScheme, Variants } from '@input-output-hk/lace-ui-toolkit';
 
+import { LocalThemeProvider } from 'features/theme';
 import type { Meta } from '@storybook/react';
 import { StakePoolCardSkeleton } from './';
 

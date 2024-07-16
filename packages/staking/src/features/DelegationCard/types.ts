@@ -1,4 +1,4 @@
-import { PieChartColor } from '@lace/ui';
+import { PieChartColor } from '@input-output-hk/lace-ui-toolkit';
 
 export type DistributionItem = {
   name: string;

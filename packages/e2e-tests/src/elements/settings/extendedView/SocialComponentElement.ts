@@ -7,7 +7,7 @@ export enum SocialComponentEnum {
   Website = 'WEBSITE',
   Github = 'GITHUB',
   Youtube = 'YOUTUBE',
-  Medium = 'MEDIUM'
+  Discord = 'DISCORD'
 }
 
 export class SocialComponentElement {

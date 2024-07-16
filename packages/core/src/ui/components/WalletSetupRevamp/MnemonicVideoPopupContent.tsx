@@ -1,4 +1,4 @@
-import { Button } from '@lace/ui';
+import { Button } from '@input-output-hk/lace-ui-toolkit';
 import { TranslationsFor } from '@ui/utils/types';
 import { urls } from '@ui/utils/constants';
 import React, { ReactElement, useRef, useState } from 'react';

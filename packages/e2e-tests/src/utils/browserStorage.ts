@@ -71,3 +71,29 @@ export const clearBackgroundStorageKey: any = async (): Promise<void> => {
     Logger.warn(`Clearing background storage key failed: ${error}`);
   }
 };
+
+export const shiftBackFiatPriceFetchedTimeInBrowserStorage = async (seconds: number): Promise<void> => {
+  const backgroundStorage = await getBackgroundStorage();
+  backgroundStorage.fiatPrices.timestamp -= seconds * 1000;
+  try {
+    await browser.execute(
+      `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
+      []
+    );
+  } catch (error) {
+    throw new Error(`Setting browser storage failed: ${error}`);
+  }
+};
+
+export const deleteFiatPriceTimestampFromBackgroundStorage = async (): Promise<void> => {
+  const backgroundStorage = await getBackgroundStorage();
+  delete backgroundStorage.fiatPrices.timestamp;
+  try {
+    await browser.execute(
+      `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
+      []
+    );
+  } catch (error) {
+    throw new Error(`Setting browser storage failed: ${error}`);
+  }
+};

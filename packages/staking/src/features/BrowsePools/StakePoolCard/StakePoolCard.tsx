@@ -1,4 +1,4 @@
-import { Card, Flex, Text } from '@lace/ui';
+import { Card, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import { SortField } from 'features/BrowsePools/types';
 import { PoolMetric } from './PoolMetric';

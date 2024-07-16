@@ -184,7 +184,7 @@ export const StakePoolSearch = ({
       <Select
         ref={ref}
         showSearch
-        value={value || ''}
+        value={value}
         data-testid="search-input"
         placeholder={translations.searchPlaceholder}
         defaultActiveFirstOption={false}

@@ -116,14 +116,17 @@ class TokenSelectionPage extends CommonDrawerElements {
 
   clickNftItemInAssetSelector = async (nftName: string) => {
     const nftNameElement = await this.getNftName(nftName);
+    await nftNameElement.waitForClickable();
     await nftNameElement.click();
   };
 
   clickTokensButton = async () => {
+    await this.tokensButton.waitForClickable();
     await this.tokensButton.click();
   };
 
   clickNFTsButton = async () => {
+    await this.nftsButton.waitForClickable();
     await this.nftsButton.click();
   };
 
@@ -134,7 +137,7 @@ class TokenSelectionPage extends CommonDrawerElements {
   };
 
   deselectToken = async (assetType: string, index: number) => {
-    assetType === 'Tokens' ? await this.tokenItem(index).container.click() : await this.nftNames[index].click();
+    assetType === 'Tokens' ? await this.tokenItem(Number(index)).container.click() : await this.nftNames[index].click();
   };
 
   saveSelectedTokens = async (assetType: string, bundle: number) => {

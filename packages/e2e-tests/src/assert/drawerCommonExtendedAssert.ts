@@ -11,10 +11,11 @@ class DrawerCommonExtendedAssert {
   }
 
   async assertSeeDrawer(shouldSee: boolean) {
+    const visibilityMessage = shouldSee ? 'see' : 'not see';
     await new CommonDrawerElements().drawerBody.waitForClickable({
       reverse: !shouldSee,
       timeout: 2000,
-      timeoutMsg: 'expected to not see drawer in 2s'
+      timeoutMsg: `expected to ${visibilityMessage} drawer in 2s`
     });
   }
 }

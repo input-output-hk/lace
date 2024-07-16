@@ -1,6 +1,4 @@
-import webTester from '../actor/webTester';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import { Asset } from '../data/Asset';
 import extensionUtils from '../utils/utils';
@@ -9,10 +7,6 @@ import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
 
 export default new (class NewTransactionExtendedPageObject {
-  clickRemoveBundleButton = async (outputIndex: number) => {
-    await webTester.clickElement(new TransactionBundle(outputIndex).bundleRemoveButton());
-  };
-
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
     await new AddressInput(bundleIndex).fillAddress(byron.getAddress());
     await new AssetInput(bundleIndex).clickAddAssetButton();
@@ -26,6 +20,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoBundlesWithMultipleAssets() {
     await this.setTwoAssetsForBundle(1, 2, 1);
+    await TransactionNewPage.addBundleButton.waitForClickable();
     await TransactionNewPage.addBundleButton.click();
     await new AddressInput(2).fillAddress(shelley.getAddress());
     await TransactionNewPage.coinConfigure(2, Asset.CARDANO.ticker).clickCoinSelectorName();
@@ -40,6 +35,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoBundlesWithTheSameAssets() {
     await this.setTwoAssetsForBundle(1, 1, 2);
+    await TransactionNewPage.addBundleButton.waitForClickable();
     await TransactionNewPage.addBundleButton.click();
     await this.setTwoAssetsForBundle(2, 3, 4);
   }

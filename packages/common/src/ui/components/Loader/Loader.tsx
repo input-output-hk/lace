@@ -8,5 +8,5 @@ export interface LoaderProps {
 }
 
 export const Loader = ({ className }: LoaderProps): React.ReactElement => (
-  <img src={LoaderIcon} className={cn(styles.loader, { [className]: className })} />
+  <img src={LoaderIcon} className={cn(styles.loader, { [className]: className })} data-testid="loader-image" />
 );

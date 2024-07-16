@@ -16,10 +16,12 @@ export const ActivityDetailHeader = ({
 }: ActivityDetailHeaderProps): React.ReactElement => (
   <div data-testid="tx-description" className={styles.row}>
     <div className={styles.title}>
-      <div className={styles.type}>{name}</div>
+      <div className={styles.type} data-testid="tx-description-type">
+        {name}
+      </div>
       {tooltipContent && (
         <Tooltip title={tooltipContent}>
-          <Info className={styles.infoIcon} />
+          <Info className={styles.infoIcon} data-testid="tx-description-tooltip-icon" />
         </Tooltip>
       )}
     </div>

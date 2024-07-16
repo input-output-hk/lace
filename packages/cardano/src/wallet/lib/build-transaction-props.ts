@@ -17,7 +17,7 @@ type OutputsMap = Map<string, CardanoOutput>;
 
 type TokenBalanceMap = Map<Cardano.AssetId, bigint>;
 
-const convertAssetsToBigInt = (
+export const convertAssetsToBigInt = (
   assets: CardanoOutput['value']['assets'],
   assetsInfo: Assets = new Map()
 ): TokenBalanceMap => {

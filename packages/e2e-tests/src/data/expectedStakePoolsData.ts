@@ -22,6 +22,14 @@ const adacapitalMainnet: StakePool = {
   owners: ['stake1u8a9qstrmj4rvc3k5z8fems7f0j2vztz8det2klgakhfc8ce79fma']
 };
 
+const azureAda: StakePool = {
+  name: 'AzureADA',
+  ticker: 'AZUR',
+  information: 'AzureADA Preprod testnet',
+  poolId: 'pool1njr03m7t9k808fcav8phxnskacr4v59w5cnqgqsgnug2j2lvn85',
+  owners: ['stake_test1uqecgdad0vm478qlms7jtq6kv786jfg28ak0cq0gffdhcfq6cmnml']
+};
+
 const canadaStakes: StakePool = {
   name: 'CanadaStakes',
   ticker: 'CAN1',
@@ -49,7 +57,14 @@ const noMetadataPool2: StakePool = {
 };
 
 export const StakePoolsData = { adaocean, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet };
-const StakePoolsArray: StakePool[] = [adaocean, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet];
+const StakePoolsArray: StakePool[] = [
+  adaocean,
+  canadaStakes,
+  noMetadataPool1,
+  noMetadataPool2,
+  adacapitalMainnet,
+  azureAda
+];
 
 export const StakePoolsDataMainnet = { adacapitalMainnet };
 const StakePoolsMainnetArray: StakePool[] = [adacapitalMainnet];

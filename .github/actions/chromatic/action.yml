@@ -1,0 +1,42 @@
+name: deploy chromatic
+description: Deploy storybook to Chromatic
+
+inputs:
+  TOKEN:
+    description: 'Chromatic token'
+    required: true
+  DIR:
+    description: 'Package directory'
+    required: true
+  NAME:
+    description: 'Package name'
+    required: true
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Tests
+      working-directory: ./${{ inputs.DIR }}
+      run: yarn test-storybook:ci
+      shell: bash
+
+    - name: Publish to Chromatic
+      if: github.ref != 'refs/heads/main'
+      uses: chromaui/action@v1
+      with:
+        projectToken: ${{ inputs.TOKEN }}
+        workingDir: ./${{ inputs.DIR }}
+        buildScriptName: build-storybook
+        onlyChanged: true
+        exitOnceUploaded: true
+
+    - name: Publish to Chromatic and auto accept changes
+      if: github.ref == 'refs/heads/main'
+      uses: chromaui/action@v1
+      with:
+        projectToken: ${{ inputs.TOKEN }}
+        autoAcceptChanges: true
+        workingDir: ./${{ inputs.DIR }}
+        onlyChanged: true
+        exitOnceUploaded: true

@@ -6,6 +6,7 @@ import { ParsedCSSValue } from 'webdriverio';
 import extensionUtils from '../utils/utils';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import { browser } from '@wdio/globals';
+import WalletOption from '../elements/WalletOption';
 
 class TopNavigationAssert {
   private readonly CSS_COLOR = 'color';
@@ -32,8 +33,28 @@ class TopNavigationAssert {
     await MenuHeader.accountNameOnButton.waitForDisplayed();
   }
 
+  async assertSeeWalletNameOnMenuButton(expectedName: string): Promise<void> {
+    await MenuHeader.walletNameOnButton.waitForDisplayed();
+    expect(await MenuHeader.walletNameOnButton.getText()).to.equal(expectedName);
+  }
+
+  async assertSeeWalletOnUserMenu(index: number, expectedName: string): Promise<void> {
+    const wallet = new WalletOption(index);
+    await wallet.container.waitForDisplayed();
+    await wallet.title.waitForDisplayed();
+    expect(await wallet.title.getText()).to.equal(expectedName);
+  }
+
+  async assertWalletIsActive(index: number): Promise<void> {
+    await new WalletOption(index).status.waitForDisplayed();
+  }
+
   async assertDropdownVisible() {
     await MenuHeader.menuWalletAccount.waitForDisplayed();
+    await MenuHeader.menuAddNewWalletButton.waitForDisplayed();
+    expect(await MenuHeader.menuAddNewWalletButton.getText()).to.equal(
+      await t('browserView.sideMenu.links.addNewWallet')
+    );
     await MenuHeader.menuAddressBookButton.waitForDisplayed();
     expect(await MenuHeader.menuAddressBookButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addressBook')
@@ -57,7 +78,7 @@ class TopNavigationAssert {
   }
 
   async assertSeeWalletStatusComponent() {
-    await MenuHeader.menuUserDetailsButton.waitForDisplayed();
+    await MenuHeader.menuUserDetailsButton.waitForDisplayed({ timeout: 15_000 });
     const status = await MenuHeader.menuWalletStatus.getText();
     const synced = await t('browserView.topNavigationBar.walletStatus.walletSynced');
     const notSynced = await t('browserView.topNavigationBar.walletStatus.notSyncedToTheBlockchain');
@@ -67,7 +88,7 @@ class TopNavigationAssert {
 
   async assertSyncStatusValid(expectedStatus: string) {
     expectedStatus = (await t(expectedStatus)) ?? expectedStatus;
-    await MenuHeader.menuUserDetailsButton.waitForDisplayed();
+    await MenuHeader.menuUserDetailsButton.waitForDisplayed({ timeout: 15_000 });
     await browser.waitUntil(async () => (await MenuHeader.menuWalletStatus.getText()) === expectedStatus, {
       timeout: 180_000,
       interval: 500,
@@ -77,9 +98,8 @@ class TopNavigationAssert {
 
   async assertWalletIsInSyncedStatus() {
     await settingsExtendedPageObject.waitUntilHdWalletSynced();
-    await settingsExtendedPageObject.multiAddressModalConfirm();
     await this.assertLogoPresent();
-    await MenuHeader.menuButton.waitForDisplayed();
+    await MenuHeader.menuButton.waitForClickable({ timeout: 10_000 });
     await MenuHeader.menuButton.click();
     await this.assertSeeWalletStatusComponent();
     await this.assertSyncStatusValid('browserView.topNavigationBar.walletStatus.walletSynced');
@@ -177,6 +197,11 @@ class TopNavigationAssert {
   async assertSeeWalletName(expectedWalletName: string) {
     await MenuHeader.menuWalletName.waitForStable();
     expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
+  }
+
+  async assertSeeCustomAvatar(expectedImageSrc: string) {
+    await MenuHeader.avatarOnButton.waitForDisplayed();
+    expect(await MenuHeader.avatarOnButton.getAttribute('src')).to.equal(expectedImageSrc);
   }
 
   async assertSeeRightSidePanelButton(shouldBeVisible: boolean) {

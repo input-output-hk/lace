@@ -1,4 +1,4 @@
-import { Box, Flex } from '@lace/ui';
+import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import { stakePoolCellPlaceholderRenderer } from './StakePoolSkeletonCellRenderer';
 import * as styles from './StakePoolsListRowSkeleton.css';
@@ -19,7 +19,7 @@ export const StakePoolsListRowSkeleton = <E extends string>({
   <div
     data-testid="stake-pool-list-row-skeleton"
     className={cn(styles.row, {
-      [styles.selectable]: withSelection,
+      [styles.selectableRow]: withSelection,
     })}
   >
     {withSelection && <Box />}

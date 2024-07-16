@@ -20,7 +20,7 @@ export const verifyHandle = async (
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
     const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1).toLowerCase()] });
-    if (resolvedHandles.length === 0 || resolvedHandles === null) {
+    if (!resolvedHandles[0]) {
       return { valid: false };
     }
     return { valid: true, handles: resolvedHandles };
@@ -95,12 +95,10 @@ export const validateWalletHandle = async ({ value, handleResolver }: validateWa
   }
 
   const response = await verifyHandle(value, handleResolver);
-  const handles = response.handles;
 
-  if (!handles) {
+  if (!response.valid) {
     throw new Error(i18n.t('general.errors.incorrectHandle'));
   }
-
   return '';
 };
 
@@ -118,21 +116,20 @@ export const ensureHandleOwnerHasntChanged = async ({
   }
 
   const { handle, cardanoAddress } = handleResolution;
-  const response = await handleResolver.resolveHandles({ handles: [handle] });
-  const newHandleResolution = response[0];
+  const resolvedHandle = await handleResolver.resolveHandles({ handles: [handle] });
 
-  if (!newHandleResolution) {
+  if (!resolvedHandle[0]) {
     throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);
   }
 
-  if (!Cardano.util.addressesShareAnyKey(cardanoAddress, newHandleResolution.cardanoAddress)) {
+  if (!Cardano.util.addressesShareAnyKey(cardanoAddress, resolvedHandle[0].cardanoAddress)) {
     throw new CustomConflictError({
       message: `${i18n.t('general.errors.handleConflict', {
         receivedAddress: cardanoAddress,
-        actualAddress: newHandleResolution.cardanoAddress
+        actualAddress: resolvedHandle[0].cardanoAddress
       })}`,
       expectedAddress: cardanoAddress,
-      actualAddress: newHandleResolution.cardanoAddress
+      actualAddress: resolvedHandle[0].cardanoAddress
     });
   }
 };

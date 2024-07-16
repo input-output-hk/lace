@@ -2,7 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class YoullHaveToStartAgainModal {
-  private CONTAINER = '.ant-modal-content';
+  private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="create-folder-modal-title"]';
   private DESCRIPTION = '[data-testid="create-folder-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="create-folder-modal-cancel"]';
@@ -13,19 +13,19 @@ class YoullHaveToStartAgainModal {
   }
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TITLE);
+    return this.container.$(this.TITLE);
   }
 
   get description(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DESCRIPTION);
+    return this.container.$(this.DESCRIPTION);
   }
 
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CANCEL_BUTTON);
+    return this.container.$(this.CANCEL_BUTTON);
   }
 
   get agreeButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.AGREE_BUTTON);
+    return this.container.$(this.AGREE_BUTTON);
   }
 }
 

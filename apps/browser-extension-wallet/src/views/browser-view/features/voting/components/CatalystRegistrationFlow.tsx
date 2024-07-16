@@ -60,7 +60,7 @@ export const CatalystRegistrationFlow = ({
   };
 
   const registerStepTranslations = {
-    registerNow: t('cardano.catalystRegistrationStep.activeStake'),
+    registerNow: t('cardano.catalystRegistrationStep.registerNow'),
     cancelButton: t('cardano.general.cancelButton'),
     nextButton: t('cardano.general.nextButton')
   };

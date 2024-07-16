@@ -5,7 +5,7 @@ import { HandleInfo } from '@cardano-sdk/wallet';
 
 export const useGetHandles = (): HandleInfo[] => {
   const { inMemoryWallet } = useWalletStore();
-  const handles = (useObservable(inMemoryWallet.handles$) || []).sort(
+  const handles = (useObservable(inMemoryWallet?.handles$) || []).sort(
     ({ nftMetadata: { name: a } }, { nftMetadata: { name: b } }) => a.length - b.length
   );
 

@@ -43,14 +43,14 @@ Feature: Forgot password
     When I click on "Forgot password?" button on unlock screen
     And I click on "Proceed" button on "Forgot password?" modal
     And I switch to tab with restore wallet process
-    And I go to "Wallet setup" page from "Restore" wallet flow and "not fill" values
+    And I go to "Wallet setup" page from "Restore" wallet flow and not fill values
     # When I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
       | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
-      | a           |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | P@ss        |               | package.core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | N_8J@bne    |               | package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
+      | a           |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | P@ss        |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
+      | N_8J@bne    |               | core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
       | N_8J@bne87  |               | empty                                                                           |               3 | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
 
@@ -114,7 +114,7 @@ Feature: Forgot password
     And I switch to tab with restore wallet process
     And I close all remaining tabs except current one
     Then "Wallet setup" page is displayed
-    When I go to "Mnemonic verification" page from "Restore" wallet flow
+    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     And I click "Enter wallet" button
     Then I see LW homepage
     And I click the menu button

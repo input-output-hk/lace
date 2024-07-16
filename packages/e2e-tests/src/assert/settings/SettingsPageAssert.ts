@@ -11,6 +11,9 @@ class SettingsPageAssert {
     expect(await SettingsPage.networkLink.getTitleText()).to.equal(
       await t('browserView.settings.wallet.network.title')
     );
+    expect(await SettingsPage.customSubmitAPILink.getTitleText()).to.equal(
+      await t('browserView.settings.wallet.customSubmitApi.settingsLinkTitle')
+    );
     expect(await SettingsPage.authorizedDAppsLink.getTitleText()).to.equal(
       await t('browserView.settings.wallet.authorizedDApps.title')
     );
@@ -49,6 +52,9 @@ class SettingsPageAssert {
     }
     expect(await SettingsPage.networkLink.getDescriptionText()).to.equal(
       await t('browserView.settings.wallet.network.description')
+    );
+    expect(await SettingsPage.customSubmitAPILink.getDescriptionText()).to.equal(
+      await t('browserView.settings.wallet.customSubmitApi.settingsLinkDescription')
     );
     expect(await SettingsPage.authorizedDAppsLink.getDescriptionText()).to.equal(
       await t('browserView.settings.wallet.authorizedDApps.description')
@@ -119,7 +125,7 @@ class SettingsPageAssert {
   async assertSeeRemoveWalletButton() {
     await SettingsPage.removeWalletButton.waitForDisplayed();
     expect(await SettingsPage.removeWalletButton.getText()).to.equal(
-      await t('browserView.settings.wallet.general.removeWalletAction')
+      await t('browserView.settings.wallet.general.removeAction')
     );
   }
 
@@ -179,8 +185,8 @@ class SettingsPageAssert {
     await SettingsPage.aboutLaceWidget.twitter.icon.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.youtube.element.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.youtube.icon.waitForDisplayed();
-    await SettingsPage.aboutLaceWidget.medium.element.waitForDisplayed();
-    await SettingsPage.aboutLaceWidget.medium.icon.waitForDisplayed();
+    await SettingsPage.aboutLaceWidget.discord.element.waitForDisplayed();
+    await SettingsPage.aboutLaceWidget.discord.icon.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.github.element.waitForDisplayed();
     await SettingsPage.aboutLaceWidget.github.icon.waitForDisplayed();
   }

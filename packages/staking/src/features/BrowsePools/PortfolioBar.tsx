@@ -1,5 +1,5 @@
+import { Button, Card, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { PostHogAction } from '@lace/common';
-import { Button, Card, Flex, Text } from '@lace/ui';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';

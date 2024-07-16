@@ -5,6 +5,8 @@ import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { useWalletManager } from './useWalletManager';
 import { useWalletState } from './useWalletState';
+import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 
 export const useAppInit = (): void => {
   const {
@@ -19,6 +21,8 @@ export const useAppInit = (): void => {
   } = useWalletStore();
   const { loadWallet, walletManager, walletRepository } = useWalletManager();
   const walletState = useWalletState();
+  const { environmentName } = useWalletStore();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   useEffect(() => {
     setWalletState(walletState);
@@ -27,9 +31,7 @@ export const useAppInit = (): void => {
   const addresses = walletState?.addresses;
   useEffect(() => {
     if (!cardanoWallet || !addresses) return;
-    if (!cardanoWallet.source.account) {
-      throw new Error('Script wallet support is not implemented');
-    }
+
     setWalletInfo({
       name: cardanoWallet.source.wallet.metadata.name,
       // TODO: script address support LW-9574
@@ -45,6 +47,13 @@ export const useAppInit = (): void => {
       setAddressesDiscoveryCompleted(true);
     }
   }, [walletInfo, initialHdDiscoveryCompleted, setAddressesDiscoveryCompleted]);
+
+  useEffect(() => {
+    (async () => {
+      environmentName &&
+        (await setBackgroundStorage({ customSubmitTxUrl: getCustomSubmitApiForNetwork(environmentName).url }));
+    })();
+  }, [environmentName, getCustomSubmitApiForNetwork]);
 
   const wallets = useObservable(walletRepository.wallets$);
   const activeWalletProps = useObservable(walletManager.activeWalletId$);

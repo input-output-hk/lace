@@ -1,26 +1,18 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
 import { Setup } from './steps/Setup';
 import { NewRecoveryPhrase } from './steps/NewRecoveryPhrase';
 import { CreateWalletProvider } from './context';
-import { walletRoutePaths } from '@routes';
-import { KeepWalletSecure } from './steps/KeepWalletSecure';
-import { Providers } from './types';
+import { WalletCreateStep } from './types';
 
-const {
-  newWallet: { create }
-} = walletRoutePaths;
-
-interface Props {
-  providers: Providers;
-}
-
-export const CreateWallet = ({ providers }: Props): JSX.Element => (
-  <CreateWalletProvider providers={providers}>
-    <Switch>
-      <Route path={create.setup} component={Setup} />
-      <Route path={create.keepSecure} component={KeepWalletSecure} />
-      <Route path={create.recoveryPhrase} component={NewRecoveryPhrase} />
-    </Switch>
+export const CreateWallet = (): JSX.Element => (
+  <CreateWalletProvider>
+    {({ step }) => (
+      <>
+        {(step === WalletCreateStep.RecoveryPhraseWriteDown || step === WalletCreateStep.RecoveryPhraseInput) && (
+          <NewRecoveryPhrase />
+        )}
+        {step === WalletCreateStep.Setup && <Setup />}
+      </>
+    )}
   </CreateWalletProvider>
 );

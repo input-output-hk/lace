@@ -6,8 +6,9 @@ import classNames from 'classnames';
 
 interface InlineInfo {
   name: string;
-  value: string;
+  value?: string;
   showCopyIcon?: boolean;
+  renderValueAs?: React.ReactNode;
   onClick?: () => void;
 }
 
@@ -17,7 +18,7 @@ export interface InlineInfoListProps {
 
 export const InlineInfoList = ({ items }: InlineInfoListProps): React.ReactElement => (
   <div data-testid="info-list" className={styles.inlineInfoList}>
-    {items.map(({ name, value, showCopyIcon, onClick }, index) => (
+    {items.map(({ name, value, showCopyIcon, onClick, renderValueAs }, index) => (
       <div data-testid="info-list-item" key={index} className={styles.inlineInfo}>
         <p data-testid="info-list-item-key" className={styles.name}>
           {`${name.slice(0, 1).toUpperCase()}${name.slice(1)}`}
@@ -28,9 +29,9 @@ export const InlineInfoList = ({ items }: InlineInfoListProps): React.ReactEleme
             className={classNames(styles.value, { [styles.link]: !!onClick })}
             onClick={onClick}
           >
-            {value}
+            {renderValueAs || value}
           </h5>
-          {showCopyIcon && (
+          {showCopyIcon && value && (
             <CopyToClipboard text={value}>
               <CopyIcon className={styles.copyButton} data-testid="info-list-item-copy-btn" />
             </CopyToClipboard>

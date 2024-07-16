@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useObservable } from '@lace/common';
 import { DappTransaction } from '@lace/core';
-import { Flex } from '@lace/ui';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 
 import { Wallet } from '@lace/cardano';
-import { withAddressBookContext } from '@src/features/address-book/context';
+import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { runtime } from 'webextension-polyfill';
 import { useFetchCoinPrice, useChainHistoryProvider } from '@hooks';
 import {
   createTxInspector,
@@ -21,13 +18,14 @@ import {
 } from '@cardano-sdk/core';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
-import type { UserPromptService } from '@lib/scripts/background/services';
-import { of, take } from 'rxjs';
 
 import { useCurrencyStore, useAppSettingsContext } from '@providers';
-import { logger, signingCoordinator } from '@lib/wallet-api-ui';
+import { logger, walletRepository } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
+import { AddressBookSchema, useDbStateValue } from '@lib/storage';
+import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 
 interface DappTransactionContainerProps {
   errorMessage?: string;
@@ -36,7 +34,7 @@ interface DappTransactionContainerProps {
 export const DappTransactionContainer = withAddressBookContext(
   ({ errorMessage }: DappTransactionContainerProps): React.ReactElement => {
     const {
-      signTxRequest: { request: req, set: setSignTxRequest },
+      signTxRequest: { request: req },
       dappInfo
     } = useViewsFlowContext();
 
@@ -47,6 +45,10 @@ export const DappTransactionContainer = withAddressBookContext(
       walletUI: { cardanoCoin },
       walletState
     } = useWalletStore();
+
+    const ownAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
+    const { list: addressBook } = useAddressBookContext() as useDbStateValue<AddressBookSchema>;
+    const addressToNameMap = new Map(addressBook?.map((entry) => [entry.address as string, entry.name]));
 
     const { fiatCurrency } = useCurrencyStore();
     const { priceResult } = useFetchCoinPrice();
@@ -78,34 +80,12 @@ export const DappTransactionContainer = withAddressBookContext(
     const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
     const txCollateral = useComputeTxCollateral(walletState, tx);
 
-    useEffect(() => {
-      const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
-        setSignTxRequest(r);
-      });
-
-      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-        {
-          api$: of({
-            async readyToSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger: console, runtime }
-      );
-
-      return () => {
-        subscription.unsubscribe();
-        api.shutdown();
-      };
-    }, [setSignTxRequest]);
-
     const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
     const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
     const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
     const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+    const eraSummaries = useObservable(inMemoryWallet?.eraSummaries$);
+    const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
 
     useEffect(() => {
       if (!req || !protocolParameters) {
@@ -175,6 +155,9 @@ export const DappTransactionContainer = withAddressBookContext(
             errorMessage={errorMessage}
             toAddress={toAddressTokens}
             collateral={txCollateral}
+            expiresBy={eraSlotDateTime(eraSummaries, tx.body.validityInterval?.invalidHereafter)}
+            ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
+            addressToNameMap={addressToNameMap}
           />
         ) : (
           <Skeleton loading />

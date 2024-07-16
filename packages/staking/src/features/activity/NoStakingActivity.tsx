@@ -1,5 +1,5 @@
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import SadFaceIcon from '@lace/core/src/ui/assets/icons/sad-face.component.svg';
-import { Flex } from '@lace/ui';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import * as styles from './NoStakingActivity.css';

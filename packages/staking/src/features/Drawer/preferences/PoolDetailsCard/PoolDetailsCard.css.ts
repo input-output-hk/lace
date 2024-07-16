@@ -1,8 +1,11 @@
-import { style, sx } from '@lace/ui';
-import { theme } from '../../../theme';
+import { sx } from 'features/theme';
 
-export const root = style({
-  width: theme.spacing.$584,
+export const root = sx({
+  width: '$584',
 });
 
-export const poolIndicator = sx({ borderRadius: '$tiny', height: '$40', width: '$4' });
+export const poolIndicator = sx({
+  borderRadius: '$tiny',
+  height: '$40',
+  width: '$4',
+});

@@ -27,6 +27,8 @@ export interface WalletMetadata {
   name: string;
   lockValue?: HexBlob;
   lastActiveAccountIndex?: number;
+  walletAddresses?: Cardano.PaymentAddress[];
+  extendedAccountPublicKey?: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
 export interface AccountMetadata {

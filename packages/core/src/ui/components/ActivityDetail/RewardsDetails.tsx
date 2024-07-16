@@ -1,10 +1,10 @@
 import React from 'react';
 import cn from 'classnames';
 import styles from './TransactionDetails.module.scss';
-import { useTranslate } from '@src/ui/hooks';
 import { ActivityStatus } from '../Activity/AssetActivityItem';
 import { Ellipsis } from '@lace/common';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
+import { useTranslation } from 'react-i18next';
 
 type RewardItem = {
   pool?: { name: string; ticker: string; id: string };
@@ -38,27 +38,33 @@ export const RewardsDetails = ({
   coinSymbol,
   rewards
 }: RewardsDetailsProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const poolRewards = rewards.rewards.filter((reward) => !!reward.pool);
-  const tooltipContent = t('package.core.activityDetails.rewardsDescription');
+  const tooltipContent = t('core.activityDetails.rewardsDescription');
 
   return (
-    <div data-testid="rewards-detail" className={styles.content}>
+    <div data-testid="transaction-detail" className={styles.content}>
       <ActivityDetailHeader tooltipContent={tooltipContent} name={name} description={headerDescription} />
       <div>
-        <div className={styles.header}>{t('package.core.activityDetails.header')}</div>
-        <h1 className={styles.summary}>{t('package.core.activityDetails.summary')}</h1>
+        <div className={styles.header} data-testid="tx-header">
+          {t('core.activityDetails.header')}
+        </div>
+        <h1 className={styles.summary} data-testid="summary-title">
+          {t('core.activityDetails.summary')}
+        </h1>
         <div className={styles.block}>
           <div data-testid="rewards-detail-bundle">
             <div className={styles.details}>
-              <div className={styles.title}>{name}</div>
+              <div className={styles.title} data-testid="rewards-detail-title">
+                {name}
+              </div>
               <div data-testid="rewards-sent-detail" className={styles.detail}>
                 <div className={styles.amount}>
                   <span
                     className={styles.ada}
                     data-testid="rewards-received-detail-ada"
-                  >{`${rewards.totalAmount} ${coinSymbol}`}</span>
-                  <span className={styles.fiat} data-testid="rewars-received-detail-fiat">{`${amountTransformer(
+                  >{`${rewards.totalAmount} ${coinSymbol}`}</span>{' '}
+                  <span className={styles.fiat} data-testid="rewards-received-detail-fiat">{`${amountTransformer(
                     rewards.totalAmount
                   )}`}</span>
                 </div>
@@ -68,7 +74,9 @@ export const RewardsDetails = ({
 
           {poolRewards.length > 0 && (
             <div className={styles.stakingInfo}>
-              <div className={cn(styles.title, styles.poolsTitle)}>{t('package.core.activityDetails.pools')}</div>
+              <div className={cn(styles.title, styles.poolsTitle)} data-testid="rewards-pools-title">
+                {t('core.activityDetails.pools')}
+              </div>
               <div className={styles.poolsList}>
                 {poolRewards.map(({ pool, amount }) => (
                   <div key={pool.id} className={styles.poolEntry}>
@@ -107,17 +115,23 @@ export const RewardsDetails = ({
           )}
 
           <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.activityDetails.status')}</div>
+            <div className={styles.title} data-testid="rewards-status-title">
+              {t('core.activityDetails.status')}
+            </div>
             <div data-testid="rewards-status" className={styles.detail}>{`${status
               .charAt(0)
               .toUpperCase()}${status.slice(1)}`}</div>
           </div>
           <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.activityDetails.epoch')}</div>
+            <div className={styles.title} data-testid="rewards-epoch-title">
+              {t('core.activityDetails.epoch')}
+            </div>
             <div data-testid="rewards-epoch" className={styles.detail}>{`${rewards.spendableEpoch}`}</div>
           </div>
           <div data-testid="rewards-date" className={cn(styles.details, styles.timestampContainer)}>
-            <div className={cn(styles.title, styles.timestamp)}>{t('package.core.activityDetails.timestamp')}</div>
+            <div className={cn(styles.title, styles.timestamp)} data-testid="rewards-date-title">
+              {t('core.activityDetails.timestamp')}
+            </div>
             <div data-testid="rewards-timestamp" className={styles.detail}>
               <span>{includedDate}</span>
               <span>&nbsp;{includedTime}</span>

@@ -2,10 +2,10 @@ import React, { ReactElement } from 'react';
 import Check from '../../assets/icons/check.svg';
 import NotAllowed from '../../assets/icons/x.svg';
 import styles from './WalletAnalyticsInfo.module.scss';
-import { useTranslate } from '@ui/hooks';
+import { useTranslation } from 'react-i18next';
 
 export const WalletAnalyticsInfo = (): ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const infoTexts = [
     {
       icon: <img src={Check} alt="check" data-testid="wallet-setup-analytics-options-allow-optout-icon" />,

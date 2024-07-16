@@ -8,7 +8,6 @@ export const TxSubmitProviderFake = {
     return {
       submittedTxs$: submittedTxs.asObservable(),
       submitTx: ({ signedTransaction }): Promise<void> =>
-        // eslint-disable-next-line promise/avoid-new
         new Promise((resolve) => {
           submittedTxs.next(signedTransaction);
           resolve();

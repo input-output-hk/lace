@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Flex, Button, Text, TextBox } from '@lace/ui';
+import { Box, Flex, Button, Text, TextBox } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { ACCOUNT_NAME_MAX_LENGTH } from './config';
 

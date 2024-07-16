@@ -1,11 +1,13 @@
+import '@lace/translation';
 import { StakingPage } from 'features/staking';
+import { SetupBase } from 'features/staking/Setup/SetupBase';
 import { PoolsFilter, QueryStakePoolsFilters, activePageSelector, useDelegationPortfolioStore } from 'features/store';
 import { useState } from 'react';
 import { useQueryStakePools } from '../hooks';
 import { BrowsePoolsPreferencesCard } from './BrowsePoolsPreferencesCard';
 import { SortAndFilterTab } from './types';
 
-export const BrowsePoolsPreferencesCardContainer = () => {
+export const BrowsePoolsPreferencesCardContainer = ({ theme }: { theme: 'light' | 'dark' }) => {
   const activePage = useDelegationPortfolioStore(activePageSelector);
 
   const { sort, setSort } = useQueryStakePools();
@@ -21,13 +23,15 @@ export const BrowsePoolsPreferencesCardContainer = () => {
   if (activePage !== StakingPage.browsePools) return null;
 
   return (
-    <BrowsePoolsPreferencesCard
-      activeTab={activeTab}
-      sort={sort}
-      filter={filter}
-      onSortChange={setSort}
-      onFilterChange={setFilter}
-      onTabChange={setActiveTab}
-    />
+    <SetupBase theme={theme}>
+      <BrowsePoolsPreferencesCard
+        activeTab={activeTab}
+        sort={sort}
+        filter={filter}
+        onSortChange={setSort}
+        onFilterChange={setFilter}
+        onTabChange={setActiveTab}
+      />
+    </SetupBase>
   );
 };

@@ -2,9 +2,9 @@ import { Wallet } from '@lace/cardano';
 
 export const LACE_APP_ID = 'lace-app';
 
-type ADAEnumType = 'ADA' | 'tADA';
+export type ADASymbols = 'ADA' | 'tADA';
 
-export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADAEnumType } = {
+export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADASymbols } = {
   [Wallet.Cardano.NetworkId.Mainnet]: 'ADA',
   [Wallet.Cardano.NetworkId.Testnet]: 'tADA'
 };
@@ -107,4 +107,5 @@ export const COINGECKO_URL = 'https://www.coingecko.com';
 export const MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY =
   'multidelegationFirstVisitSincePortfolioPersistence';
 export const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
+export const MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY = 'isMultiDelegationDAppCompatibilityModalVisible';
 export const STAKING_BROWSER_PREFERENCES_LS_KEY = 'stakingBrowserPreferences';

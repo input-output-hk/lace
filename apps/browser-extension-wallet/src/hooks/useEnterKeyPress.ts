@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /* eslint-disable sonarjs/no-duplicate-string */
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { useEffect } from 'react';

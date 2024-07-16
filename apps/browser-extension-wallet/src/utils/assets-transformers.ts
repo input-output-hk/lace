@@ -8,12 +8,12 @@ import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../assets/icons/browser-view/cardano-logo.svg';
 import { AssetSortBy, IAssetDetails } from '@views/browser/features/assets/types';
 import { compactNumberWithUnit, formatLocaleNumber, isNumeric } from '@src/utils/format-number';
-import { addEllipsis, getRandomIcon } from '@lace/common';
-import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import isNumber from 'lodash/isNumber';
 import { CurrencyInfo } from '@src/types';
 import { TokenPrice } from '@lib/scripts/types';
 import { PriceResult } from '@hooks';
+import { getTokenDisplayMetadata } from '@utils/get-token-list';
+import { getRandomIcon } from '@lace/common';
 
 export const variationParser = (variation: number): string =>
   `${variation > 0 ? '+' : ''}${formatLocaleNumber(variation.toString())}`;
@@ -38,6 +38,7 @@ export const cardanoTransformer = (params: {
   return {
     id: cardanoCoin.id,
     logo: CardanoLogo,
+    defaultLogo: CardanoLogo,
     name: cardanoCoin.name,
     ticker: cardanoCoin.symbol,
     price: isNumber(fiatPrice?.price) ? formatLocaleNumber(fiatPrice.price.toString(), 3) : '-',
@@ -74,15 +75,7 @@ export const assetTransformer = (params: {
     areBalancesVisible = true,
     balancesPlaceholder = ''
   } = params;
-  const { tokenMetadata, nftMetadata, fingerprint, policyId } = token;
-
-  const assetMetadata = {
-    name: '-',
-    ticker: addEllipsis(fingerprint.toString(), 8, 6),
-    ...tokenMetadata,
-    ...nftMetadata
-  };
-  const { ticker, name, icon, decimals } = assetMetadata;
+  const { tokenMetadata, fingerprint, policyId } = token;
 
   const bigintBalance = total?.assets?.get(key) || BigInt(1);
   const tokenBalance = Wallet.util.calculateAssetBalance(bigintBalance, token);
@@ -99,14 +92,17 @@ export const assetTransformer = (params: {
   const formattedFiatBalance =
     fiatBalance !== undefined ? `${parseFiat(fiatBalance.toNumber())} ${fiatCurrency.code}` : '-';
 
+  const displayMetadata = getTokenDisplayMetadata(token);
+
   return {
     id: key.toString(),
-    logo: icon ? getAssetImageUrl(icon) : getRandomIcon({ id: key.toString(), size: 30 }),
-    name,
-    ticker,
+    logo: displayMetadata.logo,
+    defaultLogo: getRandomIcon({ id: key.toString(), size: 30 }),
+    name: displayMetadata.name,
+    ticker: displayMetadata.description,
     price,
     variation,
-    balance: areBalancesVisible ? compactNumberWithUnit(tokenBalance, decimals) : balancesPlaceholder,
+    balance: areBalancesVisible ? compactNumberWithUnit(tokenBalance, displayMetadata.decimals) : balancesPlaceholder,
     fiatBalance: areBalancesVisible ? formattedFiatBalance : balancesPlaceholder,
     policyId,
     fingerprint,

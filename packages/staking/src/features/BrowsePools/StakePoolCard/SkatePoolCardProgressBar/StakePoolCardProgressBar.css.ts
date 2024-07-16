@@ -1,21 +1,17 @@
-import { style, sx } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
-import { theme } from '../../../theme';
+import { sx, theme } from 'features/theme';
 
 export const wrapper = sx({
   width: '$fill',
 });
 
-export const bar = style([
-  sx({
-    borderRadius: '$medium',
-    height: '$4',
-    width: '$fill',
-  }),
-  {
-    backgroundColor: theme.colors.$poolCardProgressBarBaseBackgroundColor,
-  },
-]);
+export const bar = sx({
+  backgroundColor: '$poolCardProgressBarBaseBackgroundColor',
+  borderRadius: '$medium',
+  height: '$4',
+  width: '$fill',
+});
 
 export const progress = recipe({
   base: style([
@@ -36,6 +32,6 @@ export const progress = recipe({
   },
 });
 
-export const progressValue = style({
-  color: theme.colors.$poolCardProgressBarValue,
+export const progressValue = sx({
+  color: '$poolCardProgressBarValue',
 });

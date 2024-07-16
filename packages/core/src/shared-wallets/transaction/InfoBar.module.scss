@@ -1,0 +1,31 @@
+@import '../../ui/styles/index.scss';
+@import '../../../../common/src/ui/styles/abstracts/typography';
+
+.infoBar {
+  display: flex;
+  align-items: center;
+  .infoMessage {
+    text-align: start;
+    padding-right: size_unit(3);
+  }
+
+  .infoStats {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
+    line-height: 18px !important;
+    padding-left: size_unit(3);
+    border-left: 1px solid;
+    border-color: $theme-light-grey-border;
+    @include text-bodySmall-medium;
+    .stats {
+      @include text-bodyLarge-medium;
+      color: var(--primary-default, #7f5af0);
+    }
+  }
+
+  .infoIcon {
+    color: var(--primary-default, #7f5af0);
+  }
+}

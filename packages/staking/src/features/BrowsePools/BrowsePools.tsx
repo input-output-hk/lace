@@ -1,5 +1,5 @@
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { Search } from '@lace/common';
-import { Box } from '@lace/ui';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
 import { useTranslation } from 'react-i18next';
 import { useDelegationPortfolioStore } from '../store';
@@ -49,7 +49,7 @@ export const BrowsePools = () => {
               showSkeleton={fetching}
               loadMoreData={paginatePools}
               scrollableTargetId={LACE_APP_ID}
-              sortField={sort.field}
+              sortField={sort?.field}
             />
           ) : (
             <StakePoolsList

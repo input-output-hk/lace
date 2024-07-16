@@ -148,7 +148,6 @@ describe('AssetsPortfolio', () => {
       />
     );
     expect(queryByTestId('asset-table')).not.toBeInTheDocument();
-    expect(queryByTestId('fund-wallet-banner-mock')).not.toBeInTheDocument();
     expect(queryByTestId('section-title-counter')).toHaveTextContent('(0)');
   });
 

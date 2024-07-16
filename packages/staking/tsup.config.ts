@@ -14,19 +14,19 @@ const tsupConfig = defineConfig([
     },
     entry: ['./src/index.ts'],
     esbuildPlugins: [
+      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } }, identifiers: 'short' }),
       // eslint-disable-next-line new-cap
       ScssModulesPlugin() as never,
-      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
       svgr({ icon: true, plugins: [svgrJsx] }),
     ],
     external: Object.keys(peerDependencies),
-    format: ['esm', 'cjs'],
+    format: ['cjs'],
     loader: {
       '.png': 'dataurl',
     },
     name: 'lace/staking',
     outDir: './dist',
-    sourcemap: true,
+    sourcemap: false,
   },
 ]);
 

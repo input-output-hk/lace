@@ -30,12 +30,13 @@ import { DappTransactionContainer } from '../DappTransactionContainer';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
-import { buildMockTx } from '@src/utils/mocks/tx';
+import { buildMockTx, sendingAddress } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { SignTxData } from '../types';
 import { getWrapper } from '../testing.utils';
 import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 import { cardanoCoin } from '@src/utils/constants';
+import { AddressBookSchema } from '@lib/storage';
 
 const { Cardano, Crypto } = Wallet;
 
@@ -51,6 +52,7 @@ const mockedAssetsInfo = new Map([['id', 'data']]);
 const assetInfo$ = new BehaviorSubject(mockedAssetsInfo);
 const available$ = new BehaviorSubject([]);
 const signed$ = new BehaviorSubject([]);
+const addresses$ = new BehaviorSubject([sendingAddress]);
 const rewardAccounts$ = new BehaviorSubject([
   {
     // eslint-disable-next-line unicorn/consistent-destructuring
@@ -65,6 +67,7 @@ const protocolParameters$ = new BehaviorSubject({
 });
 
 const inMemoryWallet = {
+  addresses$,
   assetInfo$,
   balance: {
     utxo: {
@@ -133,12 +136,12 @@ jest.mock('react-i18next', () => {
   };
 });
 
-const addressList = ['addressList'];
+const addressBook: AddressBookSchema[] = [];
 jest.mock('@src/features/address-book/context', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...jest.requireActual<any>('@src/features/address-book/context'),
   withAddressBookContext: mockWithAddressBookContext,
-  useAddressBookContext: () => ({ list: addressList })
+  useAddressBookContext: () => ({ list: addressBook })
 }));
 
 jest.mock('antd', () => {
@@ -332,7 +335,9 @@ describe('Testing DappTransactionContainer component', () => {
         errorMessage,
         coinSymbol: 'ADA',
         collateral: BigInt(1_000_000),
-        txInspectionDetails
+        txInspectionDetails,
+        ownAddresses: [sendingAddress.address],
+        addressToNameMap: new Map()
       },
       {}
     );

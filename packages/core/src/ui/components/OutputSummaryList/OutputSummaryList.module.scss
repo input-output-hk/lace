@@ -27,6 +27,15 @@
     color: var(--text-color-primary);
   }
 
+  .validityIntervalExpiresBy {
+    @include text-body-medium;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-color-primary);
+    overflow-wrap: break-word;
+    text-align: right;
+  }
+
   .metadataRow {
     display: flex;
     justify-content: space-between;

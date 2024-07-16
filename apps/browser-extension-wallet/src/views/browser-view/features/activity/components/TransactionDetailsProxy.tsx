@@ -7,8 +7,11 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import type { TransactionActivityDetail, TxDirection } from '@src/types';
 import { TxDirections } from '@src/types';
 import { APP_MODE_POPUP } from '@src/utils/constants';
-import { config } from '@src/config';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useCexplorerBaseUrl } from '@src/features/dapp/components/confirm-transaction/hooks';
+import { useObservable } from '@lace/common';
+import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
+import { walletRepository } from '@lib/wallet-api-ui';
 
 type TransactionDetailsProxyProps = {
   name: string;
@@ -21,19 +24,26 @@ export const TransactionDetailsProxy = withAddressBookContext(
   ({ name, activityInfo, direction, status, amountTransformer }: TransactionDetailsProxyProps): ReactElement => {
     const analytics = useAnalyticsContext();
     const {
+      inMemoryWallet,
       walletInfo,
-      environmentName,
-      walletUI: { cardanoCoin, appMode }
+      walletUI: { cardanoCoin, appMode },
+      currentChain
     } = useWalletStore();
     const isPopupView = appMode === APP_MODE_POPUP;
     const openExternalLink = useExternalLinkOpener();
-    const { list: addressList } = useAddressBookContext();
 
-    const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
-    const explorerBaseUrl = useMemo(
-      () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
-      [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
+    // Prepare own addresses of active account
+    const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
+    const walletAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
+
+    // Prepare address book data as Map<address, name>
+    const { list: addressList } = useAddressBookContext();
+    const explorerBaseUrl = useCexplorerBaseUrl();
+    const addressToNameMap = useMemo(
+      () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
+      [addressList]
     );
+
     const getHeaderDescription = () => {
       if (activityInfo.type === DelegationActivityType.delegation) return '1 token';
       return ` (${activityInfo?.assetAmount})`;
@@ -72,11 +82,6 @@ export const TransactionDetailsProxy = withAddressBookContext(
       externalLink && status === ActivityStatus.SUCCESS && openExternalLink(externalLink);
     };
 
-    const addressToNameMap = useMemo(
-      () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
-      [addressList]
-    );
-
     return (
       // eslint-disable-next-line react/jsx-pascal-case
       <TransactionDetails
@@ -95,6 +100,7 @@ export const TransactionDetailsProxy = withAddressBookContext(
         amountTransformer={amountTransformer}
         headerDescription={getHeaderDescription() || cardanoCoin.symbol}
         txSummary={txSummary}
+        ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : walletAddresses}
         addressToNameMap={addressToNameMap}
         coinSymbol={cardanoCoin.symbol}
         isPopupView={isPopupView}
@@ -104,8 +110,10 @@ export const TransactionDetailsProxy = withAddressBookContext(
         votingProcedures={votingProcedures}
         certificates={certificates}
         handleOpenExternalHashLink={handleOpenExternalHashLink}
-        openExternalLink={openExternalLink}
         collateral={collateral}
+        chainNetworkId={currentChain.networkId}
+        cardanoCoin={cardanoCoin}
+        explorerBaseUrl={explorerBaseUrl}
       />
     );
   }

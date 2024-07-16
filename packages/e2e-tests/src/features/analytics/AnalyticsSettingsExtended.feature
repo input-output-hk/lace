@@ -1,4 +1,4 @@
-@Analytics-Settings-Extended @Analytics
+@Analytics-Settings-Extended @Analytics @Testnet
 Feature: Analytics - Settings - Extended View
 
   Background:
@@ -93,9 +93,7 @@ Feature: Analytics - Settings - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click on "Terms and conditions" setting
     Then I validate latest analytics single event "settings | terms and conditions | click"
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "settings | terms and conditions | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8556
   Scenario: Analytics - Extended View - Settings - Privacy policy events
@@ -103,9 +101,7 @@ Feature: Analytics - Settings - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click on "Privacy policy" setting
     Then I validate latest analytics single event "settings | privacy policy | click"
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "settings | privacy policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8557
   Scenario: Analytics - Extended View - Settings - Cookie policy events
@@ -113,9 +109,7 @@ Feature: Analytics - Settings - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click on "Cookie policy" setting
     Then I validate latest analytics single event "settings | cookie policy | click"
-    When I close the drawer by clicking close button
-    Then I validate latest analytics single event "settings | cookie policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
 
   @LW-8558
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Cancel
@@ -158,16 +152,27 @@ Feature: Analytics - Settings - Extended View
     And Analytics toggle is enabled: false
     Then I validate latest analytics single event "settings | analytics | skip | click"
     Then I validate that 1 analytics event(s) have been sent
+    And Analytics toggle is enabled: true
 
   @LW-8790
   Scenario: Analytics - Extended View - Settings - Theme switch
-    When I open settings from header menu
+    When I set light theme mode in Local Storage
+    And I open settings from header menu
     And I set up request interception for posthog analytics request(s)
     And I set theme switch in settings to dark mode
     Then I validate latest analytics single event "settings | theme | dark mode | click"
     And I set theme switch in settings to light mode
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
+
+  @LW-9098
+  Scenario: Analytics - Extended View - Settings - Sync
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Sync" button
+    And I wait until modal disappears
+    Then I validate latest analytics single event "settings | wallet | hd wallet sync | sync | click"
+    And I validate that 1 analytics event(s) have been sent
 
   # this test should be executed as the last one in this suite
   @LW-8559
@@ -177,5 +182,6 @@ Feature: Analytics - Settings - Extended View
     And I click on Remove wallet button
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
+    And I wait until modal disappears
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
     And I validate that 2 analytics event(s) have been sent

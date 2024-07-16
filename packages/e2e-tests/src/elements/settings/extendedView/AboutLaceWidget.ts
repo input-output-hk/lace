@@ -54,8 +54,8 @@ class AboutLaceWidget {
     return new SocialComponentElement(SocialComponentEnum.Youtube);
   }
 
-  get medium() {
-    return new SocialComponentElement(SocialComponentEnum.Medium);
+  get discord() {
+    return new SocialComponentElement(SocialComponentEnum.Discord);
   }
 
   get github() {

@@ -1,4 +1,6 @@
+/* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
+import { ChainablePromiseElement } from 'webdriverio';
 
 class StakingConfirmationDrawer extends CommonDrawerElements {
   // TODO: add remaining elements
@@ -10,31 +12,31 @@ class StakingConfirmationDrawer extends CommonDrawerElements {
   private TRANSACTION_COST_TITLE = '[data-testid="transaction-cost-title"]';
   private TRANSACTION_FEE_LABEL = '[data-testid="sp-confirmation-staking-fee-label"]';
 
-  get nextButton() {
+  get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEXT_BUTTON);
   }
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
   }
 
-  get subtitle() {
+  get subtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SUBTITLE);
   }
 
-  get delegateFrom() {
+  get delegateFrom(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATE_FROM_CONTAINER);
   }
 
-  get delegateTo() {
+  get delegateTo(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATE_TO_CONTAINER);
   }
 
-  get transactionCostTitle() {
+  get transactionCostTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_COST_TITLE);
   }
 
-  get transactionFeeLabel() {
+  get transactionFeeLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_LABEL);
   }
 }

@@ -8,9 +8,6 @@ staking:
   - any: ['packages/staking/**/*']
   - any: ['.github/workflows/packages-staking.yml']
 
-# UI Toolkit
-ui-toolkit:
-  - any: ['packages/ui/**/*']
 # E2E
 e2e:
   - any: ['packages/e2e-tests/**/*']

@@ -8,7 +8,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { Connect } from '../Connect';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { I18nextProvider } from 'react-i18next';
 
 jest.mock('react-router-dom', () => ({

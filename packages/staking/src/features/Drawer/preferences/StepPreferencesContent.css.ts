@@ -1,5 +1,5 @@
-import { style } from '@lace/ui';
-import { theme } from '../../theme';
+import { style } from '@vanilla-extract/css';
+import { theme } from 'features/theme';
 
 export const delegationCardWrapper = style({
   '@media': {

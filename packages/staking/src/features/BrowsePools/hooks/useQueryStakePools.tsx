@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { PostHogAction } from '@lace/common';
 import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
 import { StakePoolDetails, mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
@@ -5,7 +6,7 @@ import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { useCallback, useMemo, useRef } from 'react';
 import { ListRange } from 'react-virtuoso';
-import { DEFAULT_SORT_OPTIONS, SEARCH_DEBOUNCE_IN_MS } from '../constants';
+import { SEARCH_DEBOUNCE_IN_MS } from '../constants';
 import { StakePoolSortOptions } from '../types';
 
 type QueryStatus = 'idle' | 'fetching' | 'paginating';
@@ -17,7 +18,7 @@ type UseQueryStakePoolsResult = {
   searchQuery: string;
   setSearchQuery: (searchString: string) => void;
   setSort: (sortOptions: StakePoolSortOptions) => void;
-  sort: StakePoolSortOptions;
+  sort?: StakePoolSortOptions;
   totalPoolsCount: number;
 };
 
@@ -32,10 +33,11 @@ export const useQueryStakePools = () => {
 
   const { searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
     searchQuery: store.searchQuery || '',
-    sortField: store.sortField ?? DEFAULT_SORT_OPTIONS.field,
-    sortOrder: store.sortOrder ?? DEFAULT_SORT_OPTIONS.order,
+    sortField: store.sortField,
+    sortOrder: store.sortOrder,
   }));
-  const previousRequest = useRef<{ searchQuery: string; sortField: string; sortOrder: string } | null>(null);
+
+  const previousRequest = useRef<{ searchQuery: string; sortField?: string; sortOrder?: string } | null>(null);
   const status = useMemo(() => {
     const nextRequest = { searchQuery, sortField, sortOrder };
     const requestChanged = !isEqual(previousRequest.current, nextRequest);
@@ -48,12 +50,12 @@ export const useQueryStakePools = () => {
 
   const debouncedSearch = useMemo(
     () =>
-      debounce(async (params: Required<Parameters<typeof fetchStakePools>[0]>) => {
+      debounce(async (params: Parameters<typeof fetchStakePools>[0]) => {
         await fetchStakePools(params);
         previousRequest.current = {
           searchQuery: params.searchString,
-          sortField: params.sort.field,
-          sortOrder: params.sort.order,
+          sortField: params.sort?.field,
+          sortOrder: params.sort?.order,
         };
       }, SEARCH_DEBOUNCE_IN_MS),
     [fetchStakePools]
@@ -67,7 +69,7 @@ export const useQueryStakePools = () => {
         limit: endIndex,
         searchString: searchQuery ?? '',
         skip: startIndex,
-        sort: { field: sortField, order: sortOrder },
+        ...(sortField && sortOrder && { sort: { field: sortField, order: sortOrder } }),
       });
     },
     [debouncedSearch, searchQuery, sortField, sortOrder]
@@ -108,10 +110,13 @@ export const useQueryStakePools = () => {
       searchQuery,
       setSearchQuery,
       setSort,
-      sort: {
-        field: sortField,
-        order: sortOrder,
-      },
+      ...(sortField &&
+        sortOrder && {
+          sort: {
+            field: sortField,
+            order: sortOrder,
+          },
+        }),
       status,
       totalPoolsCount,
     }),

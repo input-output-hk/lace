@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLayout';
 import { PasswordVerification } from '@lace/common';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
-import { useTranslate } from '@src/ui/hooks';
 import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
 import styles from './styles.module.scss';
 import {
@@ -15,6 +14,7 @@ import {
 import { WalletNameInput } from './WalletNameInput';
 import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
 import { TranslationsFor } from '@ui/utils/types';
+import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
@@ -43,7 +43,7 @@ export const WalletSetupNamePasswordStep = ({
   onChange,
   translations
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);

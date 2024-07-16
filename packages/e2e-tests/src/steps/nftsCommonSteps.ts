@@ -12,9 +12,9 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
-import { browser } from '@wdio/globals';
 import { expect } from 'chai';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
+import nftDetails from '../elements/NFTs/nftDetails';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
@@ -35,7 +35,6 @@ Then(
     name: string,
     mode: 'extended' | 'popup'
   ) => {
-    await browser.pause(2000);
     const fee = typeOfAsset === 'NFT' ? '1.17' : '1.19';
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
@@ -55,6 +54,10 @@ Then(/^NFTs counter matches the number of wallet NFTs$/, async () => {
   await nftAssert.assertCounterNumberMatchesWalletNFTs();
 });
 
+When(/^I search for NFT with name: "([^"]*)"$/, async (nftName: string) => {
+  await NftsPage.nftSearchInput.setValue(nftName);
+});
+
 When(
   /^I (see|do not see) NFT with name: "([^"]*)" on the NFTs page$/,
   async (shouldBeDisplayed: 'see' | 'do not see', nftName: string) => {
@@ -65,8 +68,7 @@ When(
 Then(
   /^The Tx details are displayed as (sent|received) for NFT with name: "([^"]*)" and wallet: "([^"]*)" address$/,
   async (type: string, nftName: string, walletName: string) => {
-    const typeTranslationKey =
-      type === 'sent' ? 'package.core.activityDetails.sent' : 'package.core.activityDetails.received';
+    const typeTranslationKey = type === 'sent' ? 'core.activityDetails.sent' : 'core.activityDetails.received';
 
     const expectedActivityDetails = {
       transactionDescription: `${await t(typeTranslationKey)}\n(2)`,
@@ -149,4 +151,8 @@ When(/^I open NFT receiving HD wallet$/, async () => {
 
 When(/^I save all NFTs that I have$/, async () => {
   await nftsPageObject.saveNfts();
+});
+
+When(/^I save NFT details$/, async () => {
+  await nftDetails.saveNFTDetails();
 });

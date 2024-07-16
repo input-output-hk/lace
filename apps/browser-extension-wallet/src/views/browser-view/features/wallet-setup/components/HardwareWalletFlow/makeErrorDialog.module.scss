@@ -1,0 +1,38 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.errorDialog {
+  :global(.ant-modal-content) {
+    background: var(--color-white, var(--dark-mode-light-black));
+    box-shadow: var(--shadow-setup-box);
+    border-radius: size_unit(4);
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: size_unit(5) !important;
+  }
+}
+
+.title {
+  font-size: var(--subHeading) !important;
+  font-weight: 700 !important;
+  line-height: size_unit(4) !important;
+  color: var(--text-color-primary) !important;
+  margin-bottom: 0 !important;
+}
+
+.description {
+  font-size: var(--bodyLarge) !important;
+  font-weight: 500 !important;
+  line-height: size_unit(3) !important;
+  color: var(--text-color-secondary) !important;
+  margin-top: size_unit(3) !important;
+  text-align: center;
+}
+
+.retryButton {
+  margin-top: size_unit(3) !important;
+}

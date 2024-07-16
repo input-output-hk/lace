@@ -22,15 +22,13 @@ export const mockedAssets: Asset.AssetInfo[] = [
 ];
 
 export const assetsProviderStub = (assets: Asset.AssetInfo[] = mockedAssets): AssetProvider => ({
-  getAsset: jest.fn().mockImplementation(
-    ({ assetId }) =>
-      // eslint-disable-next-line promise/avoid-new
-      new Promise((resolve) => resolve(assets.find((asset) => asset.assetId === assetId) || assets[0]))
-  ),
-  getAssets: jest.fn().mockImplementation(
-    ({ assetIds }) =>
-      // eslint-disable-next-line promise/avoid-new
-      new Promise((resolve) => resolve(assets.filter((asset) => assetIds.includes(asset.assetId)) || assets[0]))
-  ),
+  getAsset: jest
+    .fn()
+    .mockImplementation(async ({ assetId }) => assets.find((asset) => asset.assetId === assetId) || assets[0]),
+  getAssets: jest
+    .fn()
+    .mockImplementation(
+      async ({ assetIds }) => assets.filter((asset) => assetIds.includes(asset.assetId)) || assets[0]
+    ),
   healthCheck: jest.fn().mockResolvedValue({ ok: true })
 });

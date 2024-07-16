@@ -1,0 +1,70 @@
+name: Sync main with Upstream
+
+on:
+  schedule:
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Add upstream remote
+        run: git remote add upstream git@github.com:input-output-hk/lace.git
+
+      - name: Fetch upstream main
+        run: git fetch upstream main
+
+      - name: Checkout main branch
+        run: git checkout main
+
+      - name: Rebase upstream/main onto main
+        id: rebase
+        run: |
+          git rebase upstream/main || echo "Rebase conflict detected" > rebase_conflict
+
+      - name: Check for rebase conflicts
+        id: check_conflict
+        run: |
+          if [ -f rebase_conflict ]; then
+            echo "conflict=true" >> $GITHUB_ENV
+          else
+            echo "conflict=false" >> $GITHUB_ENV
+          fi
+
+      - name: Push changes if no conflicts
+        if: env.conflict == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin main --force-with-lease
+
+      - name: Create a branch and push if conflicts exist
+        if: env.conflict == 'true'
+        run: |
+          git rebase --abort
+          git checkout -b conflict-branch
+          git add .
+          git commit -m "Rebase conflict with upstream/main"
+          git push origin conflict-branch
+
+      - name: Create Pull Request if conflicts exist
+        if: env.conflict == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Resolve rebase conflicts with upstream'
+          branch: conflict-branch
+          title: 'Resolve rebase conflicts with upstream'
+          body: 'This PR resolves rebase conflicts between the main branch and upstream/main.'
+          base: main

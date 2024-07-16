@@ -1,8 +1,8 @@
 import React, { ReactPortal, useState } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './AnalyticsConfirmationBanner.module.scss';
-import { useTranslate } from '@ui/hooks';
 import { Button } from '@lace/common';
+import { useTranslation } from 'react-i18next';
 
 type ConfirmationBannerProps = {
   message: string | React.ReactElement;
@@ -18,7 +18,7 @@ export const AnalyticsConfirmationBanner = ({
   show = true
 }: ConfirmationBannerProps): ReactPortal | null => {
   const [isVisible, setIsVisible] = useState(show);
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const handleConfirm = () => {
     setIsVisible(false);
@@ -38,10 +38,10 @@ export const AnalyticsConfirmationBanner = ({
             <div className={styles.confirmationBannerMessage}>{message}</div>
             <div className={styles.buttons}>
               <Button onClick={handleConfirm} className={styles.secondaryButton} data-testid="analytics-accept-button">
-                {t('package.core.confirmationBanner.agree')}
+                {t('core.confirmationBanner.agree')}
               </Button>
               <Button onClick={handleReject} data-testid="analytics-reject-button">
-                {t('package.core.confirmationBanner.reject')}
+                {t('core.confirmationBanner.reject')}
               </Button>
             </div>
           </div>

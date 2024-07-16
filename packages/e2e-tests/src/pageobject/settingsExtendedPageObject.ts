@@ -18,6 +18,8 @@ class SettingsExtendedPageObject {
 
   clickOnCollateral = async () => await SettingsPage.collateralLink.element.click();
 
+  clickOnCustomSubmitAPI = async () => await SettingsPage.customSubmitAPILink.element.click();
+
   clickOnCookiePolicy = async () => await SettingsPage.cookiePolicy.element.click();
 
   clickOnYourKeys = async () => await SettingsPage.yourKeysLink.element.click();
@@ -110,6 +112,11 @@ class SettingsExtendedPageObject {
       case 'Cookie policy':
         await this.clickOnCookiePolicy();
         break;
+      case 'Custom Submit API':
+        await this.clickOnCustomSubmitAPI();
+        break;
+      default:
+        throw new Error(`Unsupported element: ${elementName}`);
     }
   };
 
@@ -169,7 +176,7 @@ class SettingsExtendedPageObject {
   }
 
   async multiAddressModalConfirm() {
-    if (await Modal.confirmButton.isDisplayed()) {
+    if (await Modal.container.isDisplayed()) {
       expect(await Modal.confirmButton.getText()).to.equal(await t('modals.beta.button', 'staking'));
       await Modal.confirmButton.click();
     }

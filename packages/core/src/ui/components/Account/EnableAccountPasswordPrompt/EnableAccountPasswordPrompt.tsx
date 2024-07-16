@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Flex, PasswordBox, Text } from '@lace/ui';
+import { Box, Button, Flex, PasswordBox, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import styles from './EnableAccountPasswordPrompt.module.scss';
 
@@ -78,6 +78,10 @@ export const EnableAccountPasswordPrompt = ({
             label={translations.passwordPlaceholder}
             data-testid="enable-account-password-input"
             onChange={(e) => setCurrentPassword(e.target.value)}
+            onSubmit={(event): void => {
+              event.preventDefault();
+              onConfirm(Buffer.from(currentPassword));
+            }}
             errorMessage={wasPasswordIncorrect ? translations.wrongPassword : undefined}
             rootStyle={{ width: '100%' }}
           />

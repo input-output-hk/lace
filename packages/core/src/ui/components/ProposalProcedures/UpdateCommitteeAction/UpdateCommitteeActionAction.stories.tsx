@@ -7,7 +7,7 @@ const customViewports = {
   popup: {
     name: 'Popup',
     styles: {
-      width: '360px',
+      width: '720px',
       height: '600'
     }
   }
@@ -29,14 +29,8 @@ export default meta;
 type Story = StoryObj<typeof UpdateCommitteeAction>;
 
 const data: ComponentProps<typeof UpdateCommitteeAction> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
   data: {
     txDetails: {
-      txType: 'Hard Fork Initiation',
       deposit: '2000',
       rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr'
     },
@@ -77,54 +71,11 @@ const data: ComponentProps<typeof UpdateCommitteeAction> = {
       denominator: '5',
       numerator: '1'
     }
-  },
-  translations: {
-    txDetails: {
-      title: 'Transaction Details',
-      txType: 'Transaction Type',
-      deposit: 'Deposit',
-      rewardAccount: 'Reward Account'
-    },
-    procedure: {
-      anchor: {
-        hash: 'Anchor Hash',
-        url: 'Anchor URL'
-      },
-      title: 'Procedure'
-    },
-    actionId: {
-      title: 'Action ID',
-      index: 'Index',
-      txId: 'TX ID'
-    },
-    membersToBeAdded: {
-      title: 'Members To Be Added',
-      coldCredential: {
-        hash: 'Cold Credential Hash',
-        epoch: 'Epoch'
-      }
-    },
-    membersToBeRemoved: {
-      title: 'Members To Be Removed',
-      hash: 'Hash'
-    },
-    newQuorumThreshold: {
-      title: 'New Quorum Threshold',
-      denominator: 'Denominator',
-      numerator: 'Numerator'
-    }
   }
 };
 
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };

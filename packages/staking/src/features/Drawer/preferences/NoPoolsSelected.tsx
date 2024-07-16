@@ -1,4 +1,4 @@
-import { Box, Button, Text } from '@lace/ui';
+import { Box, Button, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import * as styles from './NoPoolsSelected.css';
 import SadSmiley from './sad-smiley.svg';

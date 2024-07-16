@@ -1,4 +1,4 @@
-import { ControlButton, Flex, Text } from '@lace/ui';
+import { ControlButton, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import styles from './EpochsSwitch.module.scss';
 

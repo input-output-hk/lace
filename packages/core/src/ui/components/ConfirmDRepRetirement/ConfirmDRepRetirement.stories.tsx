@@ -7,7 +7,7 @@ const customViewports = {
   popup: {
     name: 'Popup',
     styles: {
-      width: '360px',
+      width: '720px',
       height: '600'
     }
   }
@@ -29,18 +29,6 @@ export default meta;
 type Story = StoryObj<typeof ConfirmDRepRetirement>;
 
 const data: ComponentProps<typeof ConfirmDRepRetirement> = {
-  dappInfo: {
-    logo: 'https://cdn.mint.handle.me/favicon.png',
-    name: 'Mint',
-    url: 'https://preprod.mint.handle.me'
-  },
-  translations: {
-    labels: {
-      depositReturned: 'Deposit paid',
-      drepId: 'DRep ID'
-    },
-    metadata: 'Metadata'
-  },
   metadata: {
     depositReturned: '0.35 ADA',
     drepId: '65ge6g54g5dd5'
@@ -50,11 +38,5 @@ const data: ComponentProps<typeof ConfirmDRepRetirement> = {
 export const Overview: Story = {
   args: {
     ...data
-  }
-};
-export const WithError: Story = {
-  args: {
-    ...data,
-    errorMessage: 'Something went wrong'
   }
 };

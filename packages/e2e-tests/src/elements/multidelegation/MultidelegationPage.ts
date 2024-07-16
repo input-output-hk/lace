@@ -4,15 +4,16 @@ import MultidelegationPageAssert from '../../assert/multidelegation/Multidelegat
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 import { ChainablePromiseElement } from 'webdriverio';
-import StakePoolDetails from '../staking/stakePoolDetails';
 import testContext from '../../utils/testContext';
 import { isPopupMode } from '../../utils/pageUtils';
 import CommonDrawerElements from '../CommonDrawerElements';
-import { StakePoolListColumnType } from '../../types/staking';
 import { StakePoolListItem } from './StakePoolListItem';
 import { StakePoolGridCard } from './StakePoolGridCard';
 import StakePoolDetailsDrawer from './StakePoolDetailsDrawer';
 import MoreOptionsComponent from './MoreOptionsComponent';
+import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
+import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class MultidelegationPage {
   private ACTIVITY_TAB = '[data-testid="activity-tab"]';
@@ -41,6 +42,7 @@ class MultidelegationPage {
   private COLUMN_HEADER_BLOCKS = '[data-testid="stake-pool-list-header-blocks"]';
   private COLUMN_HEADER_PLEDGE = '[data-testid="stake-pool-list-header-pledge"]';
   private COLUMN_HEADER_LIVE_STAKE = '[data-testid="stake-pool-list-header-liveStake"]';
+  private COLUMN_SORTING_INDICATOR_TEMPLATE = '[data-testid="stake-pool-sort-order-###"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
   private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
@@ -63,6 +65,7 @@ class MultidelegationPage {
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
   private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
   private TOOLTIP = 'div.ant-tooltip-inner';
+  private SORTING_OPTION_TOOLTIP = '[data-testid="tooltip-content"]';
   private CHECKBOX = '[data-testid="stake-pool-list-checkbox"]';
   private MANAGE_BTN = '[data-testid="manage-btn"]';
   private GRID_VIEW_TOGGLE = '[data-testid="grid-view-toggle"]';
@@ -71,147 +74,161 @@ class MultidelegationPage {
   private STAKE_POOLS_LIST_CONTAINER = '[data-testid="stake-pools-list-container"]';
   private STAKE_POOL_LIST_ROW_SKELETON = '[data-testid="stake-pool-list-row-skeleton"]';
   private STAKE_POOL_CARD_SKELETON = '[data-testid="stake-pool-card-skeleton"]';
-  private SELCECTED_STAKE_POOLS_IN_GRID_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-card"]';
-  private SELCECTED_STAKE_POOLS_IN_LIST_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-item"]';
+  private SELECTED_STAKE_POOLS_IN_GRID_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-card"]';
+  private SELECTED_STAKE_POOLS_IN_LIST_VIEW = '[data-testid="selected-pools-list"] [data-testid="stake-pool-item"]';
+  private POOLS_COUNTER = '[data-testid="pools-counter"]';
+  private POOL_CARD = '[data-testid="stake-pool-card"]';
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return SectionTitle.sectionTitle;
   }
 
-  get overviewTab() {
+  get overviewTab(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.OVERVIEW_TAB);
   }
 
-  get browseTab() {
+  get browseTab(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BROWSE_POOLS_TAB);
   }
 
-  get activityTab() {
+  get activityTab(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ACTIVITY_TAB);
   }
 
-  get gridViewToggle() {
+  get gridViewToggle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GRID_VIEW_TOGGLE);
   }
 
-  get listViewToggle() {
+  get listViewToggle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LIST_VIEW_TOGGLE);
   }
 
-  get gridContainer() {
+  get gridContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOLS_GRID_CONTAINER);
   }
 
-  get listContainer() {
+  get listContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOLS_LIST_CONTAINER);
   }
 
-  get delegationCardStatusLabel() {
+  get delegationCardStatusLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_STATUS_LABEL);
   }
 
-  get delegationCardStatusValue() {
+  get delegationCardStatusValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_STATUS_VALUE);
   }
 
-  get delegationCardBalanceLabel() {
+  get delegationCardBalanceLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_BALANCE_LABEL);
   }
 
-  get delegationCardBalanceValue() {
+  get delegationCardBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_BALANCE_VALUE);
   }
 
-  get delegationCardPoolsLabel() {
+  get delegationCardPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_POOLS_LABEL);
   }
 
-  get delegationCardPoolsValue() {
+  get delegationCardPoolsValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELEGATION_CARD_POOLS_VALUE);
   }
 
-  get delegationCardChartSlices() {
+  get delegationCardChartSlices(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.DELEGATION_CARD_CHART_PIE_SLICE);
   }
 
-  get delegatedPoolItems() {
+  get delegatedPoolItems(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.DELEGATED_POOL_ITEM);
   }
 
-  get stakingPageSearchInput() {
+  get stakingPageSearchInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_INPUT);
   }
 
-  get searchIcon() {
+  get searchIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_ICON);
   }
 
-  get searchLoader() {
+  get searchLoader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_LOADER);
   }
 
-  get emptySearchResultsImage() {
+  get emptySearchResultsImage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_SEARCH_RESULTS_IMAGE);
   }
 
-  get emptySearchResultsMessage() {
+  get emptySearchResultsMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_SEARCH_RESULTS_MESSAGE);
   }
 
-  get displayedPools() {
+  get displayedPools(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_ITEM);
   }
 
-  get columnHeaderTicker() {
+  get displayedCards(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $(this.STAKE_POOL_LIST_SCROLL_WRAPPER).$$(this.POOL_CARD);
+  }
+
+  get columnHeaderTicker(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_TICKER);
   }
 
-  get columnHeaderSaturation() {
+  get columnHeaderSaturation(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_SATURATION);
   }
 
-  get columnHeaderROS() {
+  get columnHeaderROS(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_ROS);
   }
 
-  get columnHeaderCost() {
+  get columnHeaderCost(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_COST);
   }
 
-  get columnHeaderMargin() {
+  get columnHeaderMargin(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_MARGIN);
   }
 
-  get columnHeaderBlocks() {
+  get columnHeaderBlocks(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_BLOCKS);
   }
 
-  get columnHeaderPledge() {
+  get columnHeaderPledge(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_PLEDGE);
   }
 
-  get columnHeaderLiveStake() {
+  get columnHeaderLiveStake(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLUMN_HEADER_LIVE_STAKE);
   }
 
-  get manageStakingBtnNext() {
+  get manageStakingBtnNext(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MANAGE_STAKING_BTN_NEXT);
   }
 
-  get confirmationBtnNext() {
+  get confirmationBtnNext(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRMATION_BTN_NEXT);
   }
 
-  get stakingPoolInfoItems() {
+  get stakingPoolInfoItems(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.STAKING_POOL_INFO);
   }
 
-  get tooltip() {
+  get tooltip(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOOLTIP);
   }
 
-  get manageBtn() {
+  get sortingOptionTooltip(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SORTING_OPTION_TOOLTIP);
+  }
+
+  get manageBtn(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MANAGE_BTN);
+  }
+
+  get poolsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.POOLS_COUNTER);
   }
 
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -274,20 +291,20 @@ class MultidelegationPage {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_VALUE);
   }
 
-  get stakePoolListRowSkeleton() {
+  get stakePoolListRowSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOL_LIST_ROW_SKELETON);
   }
 
-  get stakePoolCardSkeleton() {
+  get stakePoolCardSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_POOL_CARD_SKELETON);
   }
 
-  get selectedPoolsInGridView() {
-    return $$(this.SELCECTED_STAKE_POOLS_IN_GRID_VIEW);
+  get selectedPoolsInGridView(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.SELECTED_STAKE_POOLS_IN_GRID_VIEW);
   }
 
-  get selectedPoolsInListView() {
-    return $$(this.SELCECTED_STAKE_POOLS_IN_LIST_VIEW);
+  get selectedPoolsInListView(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.SELECTED_STAKE_POOLS_IN_LIST_VIEW);
   }
 
   get moreOptionsComponent(): typeof MoreOptionsComponent {
@@ -298,6 +315,43 @@ class MultidelegationPage {
     return (await this.displayedPools.find(
       async (item) => (await item.$(this.POOL_TICKER).getText()) === ticker
     )) as WebdriverIO.Element;
+  }
+
+  async getColumnSortingIndicator(columnName: StakePoolListColumn, order: 'ascending' | 'descending') {
+    const orderDirection = order === 'ascending' ? 'asc' : 'desc';
+    const orderDirectionSelector = `${this.COLUMN_SORTING_INDICATOR_TEMPLATE.replace('###', orderDirection)}`;
+    let selector = '';
+
+    switch (columnName) {
+      case StakePoolListColumn.Ticker:
+        selector = `${this.COLUMN_HEADER_TICKER} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.Saturation:
+        selector = `${this.COLUMN_HEADER_SATURATION} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.ROS:
+        selector = `${this.COLUMN_HEADER_ROS} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.Cost:
+        selector = `${this.COLUMN_HEADER_COST} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.Margin:
+        selector = `${this.COLUMN_HEADER_MARGIN} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.Blocks:
+        selector = `${this.COLUMN_HEADER_BLOCKS} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.Pledge:
+        selector = `${this.COLUMN_HEADER_PLEDGE} ${orderDirectionSelector}`;
+        break;
+      case StakePoolListColumn.LiveStake:
+        selector = `${this.COLUMN_HEADER_LIVE_STAKE} ${orderDirectionSelector}`;
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${columnName}`);
+    }
+
+    return $(selector);
   }
 
   async clickAndGetTabStateAttribute(tab: 'Overview' | 'Browse pools') {
@@ -328,7 +382,7 @@ class MultidelegationPage {
     });
     for (const ticker of poolsToMark) {
       await this.fillSearch(ticker);
-      await MultidelegationPageAssert.assertSeeSearchResultsCountExact(1);
+      await MultidelegationPageAssert.assertSeeSearchResultsCountGreaterOrEqual(1);
       await this.markStakePoolWithTicker(ticker);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);
@@ -396,14 +450,14 @@ class MultidelegationPage {
     const stakingPoolInfoItems = await this.stakingPoolInfoItems;
     for (const stakingPoolInfoItem of stakingPoolInfoItems) {
       await stakingPoolInfoItem.click();
-      await StakePoolDetails.container.waitForDisplayed();
-      await StakePoolDetails.container.waitForStable();
-      await StakePoolDetails.poolId.waitForDisplayed();
-      await StakePoolDetails.poolName.waitForDisplayed();
-      await StakePoolDetails.poolTicker.waitForDisplayed();
-      const poolId = await StakePoolDetails.poolId.getText();
-      const poolName = await StakePoolDetails.poolName.getText();
-      const poolTicker = await StakePoolDetails.poolTicker.getText();
+      await StakePoolDetailsDrawer.container.waitForDisplayed();
+      await StakePoolDetailsDrawer.container.waitForStable();
+      await StakePoolDetailsDrawer.poolId.waitForDisplayed();
+      await StakePoolDetailsDrawer.poolName.waitForDisplayed();
+      await StakePoolDetailsDrawer.poolTicker.waitForDisplayed();
+      const poolId = await StakePoolDetailsDrawer.poolId.getText();
+      const poolName = await StakePoolDetailsDrawer.poolName.getText();
+      const poolTicker = await StakePoolDetailsDrawer.poolTicker.getText();
       const poolData = { poolId, poolName, poolTicker };
       poolDataToBeSaved.push(poolData);
       (await isPopupMode())
@@ -418,68 +472,69 @@ class MultidelegationPage {
     await poolItem.click();
   }
 
-  async hoverOverColumnWithName(columnName: StakePoolListColumnType) {
+  async hoverOverColumn(column: StakePoolListColumn) {
     let header;
-    switch (columnName) {
-      case 'Ticker':
+
+    switch (column) {
+      case StakePoolListColumn.Ticker:
         header = await this.columnHeaderTicker;
         break;
-      case 'Saturation':
+      case StakePoolListColumn.Saturation:
         header = await this.columnHeaderSaturation;
         break;
-      case 'ROS':
+      case StakePoolListColumn.ROS:
         header = await this.columnHeaderROS;
         break;
-      case 'Cost':
+      case StakePoolListColumn.Cost:
         header = await this.columnHeaderCost;
         break;
-      case 'Margin':
+      case StakePoolListColumn.Margin:
         header = await this.columnHeaderMargin;
         break;
-      case 'Blocks':
+      case StakePoolListColumn.Blocks:
         header = await this.columnHeaderBlocks;
         break;
-      case 'Pledge':
+      case StakePoolListColumn.Pledge:
         header = await this.columnHeaderPledge;
         break;
-      case 'Live Stake':
+      case StakePoolListColumn.LiveStake:
         header = await this.columnHeaderLiveStake;
         break;
       default:
-        throw new Error(`Unsupported column name: ${columnName}`);
+        throw new Error(`Unsupported column name: ${column}`);
     }
     // make hovering over ANTD component more stable
     await header?.$('span span span').moveTo();
   }
 
-  async clickOnColumnWithName(columnName: StakePoolListColumnType) {
-    switch (columnName) {
-      case 'Ticker':
+  async clickOnColumn(column: StakePoolListColumn) {
+    switch (column) {
+      case StakePoolListColumn.Ticker:
         await this.columnHeaderTicker.click();
         break;
-      case 'Saturation':
+      case StakePoolListColumn.Saturation:
         await this.columnHeaderSaturation.click();
         break;
-      case 'ROS':
+      case StakePoolListColumn.ROS:
         await this.columnHeaderROS.click();
         break;
-      case 'Cost':
+      case StakePoolListColumn.Cost:
         await this.columnHeaderCost.click();
         break;
-      case 'Margin':
+      case StakePoolListColumn.Margin:
         await this.columnHeaderMargin.click();
         break;
-      case 'Blocks':
+      case StakePoolListColumn.Blocks:
         await this.columnHeaderBlocks.click();
         break;
-      case 'Pledge':
+      case StakePoolListColumn.Pledge:
         await this.columnHeaderPledge.click();
         break;
-      case 'Live Stake':
+      case StakePoolListColumn.LiveStake:
         await this.columnHeaderLiveStake.click();
         break;
       default:
-        throw new Error(`Unsupported column name: ${columnName}`);
+        throw new Error(`Unsupported column name: ${column}`);
     }
   }
 
@@ -542,6 +597,109 @@ class MultidelegationPage {
   async saveTickers(viewType: 'grid' | 'list') {
     const selectedTickers = await this.getTickersOfSelectedPools(viewType);
     testContext.save('selectedTickers', selectedTickers);
+  }
+
+  async getNumberOfPoolsFromCounter(): Promise<number> {
+    const poolsCounterText = await this.poolsCounter.getText();
+    return Number(Number(poolsCounterText.replace(/.*\(/, '').replace(')', '').replace(',', '')));
+  }
+
+  async waitForPoolsCounterToBeGreaterThanZero(): Promise<void> {
+    await this.poolsCounter.waitForDisplayed();
+    await browser.waitUntil(async () => (await this.getNumberOfPoolsFromCounter()) > 0, {
+      timeoutMsg: 'No stake pools!'
+    });
+  }
+
+  async extractColumnContent(columnName: StakePoolListColumn, poolLimit = 100): Promise<string[]> {
+    const columnContent: string[] = [];
+
+    await this.listContainer.waitForStable();
+    await browser.pause(500);
+
+    for (let i = 0; i < poolLimit; i++) {
+      const displayedPoolsCounter = await this.displayedPools.length;
+      const listItem = new StakePoolListItem(i);
+      // Load more pools if all visible ones were processed
+      if (i % (displayedPoolsCounter - 1) === 0) {
+        await listItem.container.scrollIntoView();
+        await this.stakePoolListRowSkeleton.waitForExist({
+          reverse: true,
+          interval: 100,
+          timeout: 30_000
+        });
+      }
+      switch (columnName) {
+        case StakePoolListColumn.Ticker:
+          columnContent.push(await listItem.ticker.getText());
+          break;
+        case StakePoolListColumn.Saturation:
+          columnContent.push(await listItem.saturation.getText());
+          break;
+        case StakePoolListColumn.ROS:
+          columnContent.push(await listItem.ros.getText());
+          break;
+        case StakePoolListColumn.Cost:
+          columnContent.push(await listItem.cost.getText());
+          break;
+        case StakePoolListColumn.Margin:
+          columnContent.push(await listItem.margin.getText());
+          break;
+        case StakePoolListColumn.Blocks:
+          columnContent.push(await listItem.blocks.getText());
+          break;
+        case StakePoolListColumn.Pledge:
+          columnContent.push(await listItem.pledge.getText());
+          break;
+        case StakePoolListColumn.LiveStake:
+          columnContent.push(await listItem.liveStake.getText());
+          break;
+        default:
+          throw new Error(`Not supported column name: ${columnName}`);
+      }
+    }
+
+    return columnContent;
+  }
+
+  async extractGridContent(sortingOption: StakePoolSortingOption, poolLimit = 100): Promise<string[]> {
+    const gridContent: string[] = [];
+
+    await this.gridContainer.waitForStable();
+    await browser.pause(500);
+
+    for (let i = 0; i < poolLimit; i++) {
+      const displayedPoolsCounter = await this.displayedCards.length;
+      const card = new StakePoolGridCard(i);
+      // Load more pools if all visible ones were processed
+      if (i % (displayedPoolsCounter - 3) === 0) {
+        await card.container.scrollIntoView();
+        await this.stakePoolCardSkeleton.waitForExist({
+          reverse: true,
+          interval: 100,
+          timeout: 30_000
+        });
+      }
+
+      switch (sortingOption) {
+        case StakePoolSortingOption.Ticker:
+          gridContent.push(await card.title.getText());
+          break;
+        case StakePoolSortingOption.Saturation:
+          gridContent.push(await card.saturation.getText());
+          break;
+        case StakePoolSortingOption.Cost:
+        case StakePoolSortingOption.Margin:
+        case StakePoolSortingOption.ProducedBlocks:
+        case StakePoolSortingOption.Pledge:
+        case StakePoolSortingOption.LiveStake:
+          gridContent.push(await card.metricValue.getText());
+          break;
+        default:
+          throw new Error(`Not supported sorting option: ${sortingOption}`);
+      }
+    }
+    return gridContent;
   }
 }
 

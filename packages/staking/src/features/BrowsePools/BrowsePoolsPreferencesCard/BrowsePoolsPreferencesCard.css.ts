@@ -1,13 +1,17 @@
-import { style, sx } from '@lace/ui';
-import { theme } from 'features/theme';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 
-export const textBoxLeft = style({
-  borderBottomRightRadius: 0,
-  borderRightColor: theme.colors.$browsePoolsFilterInputRightBorderColor,
-  borderRightStyle: 'solid',
-  borderRightWidth: 2,
-  borderTopRightRadius: 0,
-});
+export const textBoxLeft = style([
+  sx({
+    borderRightColor: '$browsePoolsFilterInputRightBorderColor',
+  }),
+  {
+    borderBottomRightRadius: 0,
+    borderRightStyle: 'solid',
+    borderRightWidth: 2,
+    borderTopRightRadius: 0,
+  },
+]);
 
 export const textBoxRight = style({
   borderBottomLeftRadius: 0,
@@ -15,9 +19,5 @@ export const textBoxRight = style({
 });
 
 export const radioGroup = sx({
-  width: '$fill',
-});
-
-export const selectGroup = sx({
   width: '$fill',
 });

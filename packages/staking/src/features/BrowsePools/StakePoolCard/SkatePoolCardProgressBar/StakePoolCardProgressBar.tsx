@@ -1,4 +1,4 @@
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { getSaturationLevel } from '../../utils';
 import * as styles from './StakePoolCardProgressBar.css';
@@ -27,7 +27,7 @@ export const StakePoolCardProgressBar = ({ percentage, dataTestId }: Props) => {
       <div className={styles.bar} data-testid="stake-pool-card-saturation-bar">
         <div className={styles.progress({ level: saturationLevel })} style={{ backgroundSize: `${progressWidth}%` }} />
       </div>
-      <Text.Body.Small weight="$medium" className={styles.progressValue} data-testid="stake-pool-card-saturation-value">
+      <Text.Body.Small weight="$medium" className={styles.progressValue} data-testid="saturation-value">
         {!Number.isNaN(percentageNumber) ? `${percentage}%` : t('browsePools.stakePoolGrid.notAvailable')}
       </Text.Body.Small>
     </Flex>

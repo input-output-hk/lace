@@ -4,6 +4,7 @@ import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import menuHeaderNetwork from '../elements/menuHeaderNetwork';
 import MenuHeader from '../elements/menuHeader';
 import { browser } from '@wdio/globals';
+import nftDetails from '../elements/NFTs/nftDetails';
 
 When(/I click the menu button/, async () => {
   await menuHeaderPageObject.clickMenuButton();
@@ -17,7 +18,7 @@ When(/I click on the logo icon/, async () => {
   await menuHeaderPageObject.clickLogo();
 });
 
-Then(/the dropdown menu is visible/, async () => {
+Then(/^the user menu is displayed$/, async () => {
   await topNavigationAssert.assertDropdownVisible();
 });
 
@@ -71,6 +72,10 @@ Then(/^Menu button is displayed$/, async () => {
   await topNavigationAssert.assertSeeMenuButton();
 });
 
+Then(/^"([^"]*)" is displayed as a wallet name on the menu button$/, async (expectedWalletName: string) => {
+  await topNavigationAssert.assertSeeWalletNameOnMenuButton(expectedWalletName);
+});
+
 Then(/^chevron icon is changed to (up|down)$/, async (chevronDirection: 'up' | 'down') => {
   await topNavigationAssert.assertChevronDirection(chevronDirection);
 });
@@ -95,6 +100,10 @@ When(/^I click on the Address Book option$/, async () => {
   await menuHeaderPageObject.clickAddressBookOption();
 });
 
+When(/^I click on "Add new wallet" option$/, async () => {
+  await MenuHeader.clickOnAddNewWalletOption();
+});
+
 When(/^I click on then network sub-menu back button$/, async () => {
   await menuHeaderNetwork.backButton.click();
 });
@@ -105,6 +114,11 @@ Then(/^I see network sub-menu$/, async () => {
 
 Then(/^header menu displays "([^"]*)" as a wallet name$/, async (walletName) => {
   await topNavigationAssert.assertSeeWalletName(walletName);
+});
+
+Then(/^the NFT is set as a wallet profile avatar$/, async () => {
+  const savedNftDetails = await nftDetails.loadNFTDetails();
+  await topNavigationAssert.assertSeeCustomAvatar(savedNftDetails.mediaUrl);
 });
 
 When(/^I close header menu$/, async () => {

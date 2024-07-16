@@ -9,15 +9,12 @@ import localStorageInitializer from '../fixture/localStorageInitializer';
 import publicKeyDrawerAssert from '../assert/settings/PublicKeyDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import drawerNetworkSettingsAssert from '../assert/settings/NetworkSettingsDrawerAssert';
-import drawerTermsAndConditionsSettingsAssert from '../assert/settings/TermsAndConditionsSettingsDrawerAssert';
-import PrivacyPolicyDrawerAssert from '../assert/settings/PrivacyPolicyDrawerAssert';
 import drawerHelpSettingsAssert from '../assert/settings/HelpSettingsDrawerAssert';
 import { t } from '../utils/translationService';
 import passphraseDrawerAssert from '../assert/settings/PassphraseDrawerAssert';
 import PassphraseDrawer from '../elements/settings/PassphraseDrawer';
 import localStorageAssert from '../assert/localStorageAssert';
 import collateralDrawerAssert from '../assert/settings/CollateralDrawerAssert';
-import CookiePolicyDrawerAssert from '../assert/settings/CookiePolicyDrawerAssert';
 import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
@@ -32,7 +29,7 @@ import type { NetworkType } from '../types/network';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 
 Given(
-  /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
+  /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API)" setting$/,
   async (settingsElement) => {
     await settingsExtendedPageObject.clickSettingsItem(settingsElement);
   }
@@ -94,6 +91,10 @@ Then(/^I see Remove wallet section/, async () => {
 
 Then(/I click on Remove wallet button/, async () => {
   await settingsExtendedPageObject.clickOnRemoveWallet();
+});
+
+Then(/^I click on "Sync" button$/, async () => {
+  await SettingsPage.clickSyncButton();
 });
 
 Then(/^I click on Show public key button$/, async () => {
@@ -160,32 +161,6 @@ Then(
     await localStorageInitializer.initializeUnconfirmedTransactions(JSON.stringify(entry));
   }
 );
-
-Then(/the Terms and Conditions copy is displayed/, async () => {
-  await drawerTermsAndConditionsSettingsAssert.assertTermsAndConditionsContent();
-});
-
-Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  if (mode === 'extended') {
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerCloseButton();
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
-  } else {
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerBackButton();
-  }
-  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyTitle();
-  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyContent();
-});
-
-Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  if (mode === 'extended') {
-    await CookiePolicyDrawerAssert.assertSeeDrawerCloseButton();
-    await CookiePolicyDrawerAssert.assertSeeDrawerNavigationTitle();
-  } else {
-    await CookiePolicyDrawerAssert.assertSeeDrawerBackButton();
-  }
-  await CookiePolicyDrawerAssert.assertSeeCookiePolicyTitle();
-  await CookiePolicyDrawerAssert.assertSeeCookiePolicyContent();
-});
 
 Then(/^I see help details drawer in (extended|popup) mode/, async (mode: 'extended' | 'popup') => {
   await drawerHelpSettingsAssert.assertSeeHelpDrawer(mode);
@@ -335,3 +310,14 @@ When(/^I reclaim collateral \(if active\) in (extended|popup) mode$/, async (mod
 When(/^I set theme switch in settings to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
   await settingsExtendedPageObject.setExtensionTheme(mode);
 });
+
+Then(/^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/, async (network: NetworkType) => {
+  await settingsPageExtendedAssert.assertSeeCurrentNetworkName(network);
+});
+
+Then(
+  /^I see current network: "(Mainnet|Preprod|Preview)" name in "About Lace" widget$/,
+  async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
+    await settingsPageExtendedAssert.assertSeeNetworkInAboutComponent(network);
+  }
+);

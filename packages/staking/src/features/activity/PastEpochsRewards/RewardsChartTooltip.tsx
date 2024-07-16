@@ -1,4 +1,4 @@
-import { Card, Flex, Text } from '@lace/ui';
+import { Card, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';

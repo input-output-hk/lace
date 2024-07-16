@@ -1,36 +1,36 @@
 import { CurrencyInfo } from '../../types';
 
 export enum currencyCode {
-  usd = 'USD',
-  aud = 'AUD',
-  brl = 'BRL',
-  cad = 'CAD',
-  eur = 'EUR',
-  inr = 'INR',
-  jpy = 'JPY',
-  krw = 'KRW',
-  chf = 'CHF',
-  gbp = 'GBP',
-  vnd = 'VND'
+  USD = 'USD',
+  AUD = 'AUD',
+  BRL = 'BRL',
+  CAD = 'CAD',
+  EUR = 'EUR',
+  INR = 'INR',
+  JPY = 'JPY',
+  KRW = 'KRW',
+  CHF = 'CHF',
+  GBP = 'GBP',
+  VND = 'VND'
 }
 
 export const currencies: Record<currencyCode, string> = {
-  [currencyCode.usd]: '$',
-  [currencyCode.aud]: 'A$',
-  [currencyCode.brl]: 'R$',
-  [currencyCode.cad]: 'C$',
-  [currencyCode.eur]: '€',
-  [currencyCode.inr]: '₹',
-  [currencyCode.jpy]: '￥',
-  [currencyCode.krw]: '₩',
-  [currencyCode.chf]: 'CHf',
-  [currencyCode.gbp]: '£',
-  [currencyCode.vnd]: '₫'
+  [currencyCode.USD]: '$',
+  [currencyCode.AUD]: 'A$',
+  [currencyCode.BRL]: 'R$',
+  [currencyCode.CAD]: 'C$',
+  [currencyCode.EUR]: '€',
+  [currencyCode.INR]: '₹',
+  [currencyCode.JPY]: '￥',
+  [currencyCode.KRW]: '₩',
+  [currencyCode.CHF]: 'CHf',
+  [currencyCode.GBP]: '£',
+  [currencyCode.VND]: '₫'
 };
 
 export const currencyMap = new Map(Object.entries(currencies));
 
 export const defaultCurrency: CurrencyInfo = {
-  code: currencyCode.usd,
-  symbol: currencies[currencyCode.usd]
+  code: currencyCode.USD,
+  symbol: currencies[currencyCode.USD]
 };

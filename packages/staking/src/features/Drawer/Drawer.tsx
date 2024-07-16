@@ -97,7 +97,7 @@ export const Drawer = ({
   const contentsMap = useMemo(
     (): Record<DrawerStep, React.ReactElement> => ({
       [DrawerDefaultStep.PoolDetails]: <StakePoolDetail popupView={popupView} />,
-      [DrawerManagementStep.Preferences]: <StepPreferencesContent />,
+      [DrawerManagementStep.Preferences]: <StepPreferencesContent popupView={popupView} />,
       [DrawerManagementStep.Confirmation]: <StakePoolConfirmationContent />,
       [DrawerManagementStep.Sign]: <SignConfirmation />,
       [DrawerManagementStep.Success]: <TransactionSuccess />,

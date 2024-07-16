@@ -1,28 +1,44 @@
-import { style } from '@lace/ui';
-import { theme } from '../../../theme';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 
-export const root = style({
-  border: `1px solid ${theme.colors.$preferencesPoolCardBorderColor}`,
-  borderLeftWidth: 0,
-  borderRightWidth: 0,
-});
-
-export const valueBox = style({
-  ':last-of-type': {
+export const root = style([
+  sx({
+    borderColor: '$preferencesPoolCardBorderColor',
+  }),
+  {
+    borderLeftWidth: 0,
     borderRightWidth: 0,
+    borderStyle: 'solid',
+    borderWidth: 1,
   },
-  borderRight: `solid 1px ${theme.colors.$preferencesPoolCardBorderColor}`,
-  flexGrow: 1,
-  paddingBottom: theme.spacing.$20,
-  paddingTop: theme.spacing.$16,
+]);
+
+export const valueBox = style([
+  sx({
+    borderRightColor: '$preferencesPoolCardBorderColor',
+    paddingBottom: '$20',
+    paddingTop: '$16',
+  }),
+  {
+    ':last-of-type': {
+      borderRightWidth: 0,
+    },
+    borderRightStyle: 'solid',
+    borderRightWidth: 1,
+    flexGrow: 1,
+  },
+]);
+
+export const valueLabel = sx({
+  color: '$preferencesPoolCardDataTextColor',
 });
 
-export const valueLabel = style({
-  color: theme.colors.$preferencesPoolCardDataTextColor,
-});
-
-export const valueInfoIcon = style({
-  color: theme.colors.$preferencesPoolCardDataIconColor,
-  fontSize: theme.spacing.$24,
-  marginLeft: theme.spacing.$8,
-});
+export const valueInfoIcon = style([
+  sx({
+    color: '$preferencesPoolCardDataIconColor',
+    marginLeft: '$8',
+  }),
+  {
+    fontSize: 24,
+  },
+]);

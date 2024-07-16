@@ -1,0 +1,22 @@
+@import '../../../styles/theme.scss';
+@import '../../../../../../common/src/ui/styles/abstracts/typography';
+@import './WalletSetupMnemonicRevampCommon.module';
+
+.containerWordsConfirm {
+  margin-top: size_unit(2) !important;
+}
+
+.link {
+  color: var(--data-blue);
+  cursor: pointer;
+}
+
+.errorMessage {
+  @include text-bodyXs-semi-bold;
+  margin-top: size_unit(2) !important;
+  color: var(--color-pink, #ff5470);
+}
+
+:global(.ant-tooltip).copyPasteTooltip {
+  max-width: initial;
+}

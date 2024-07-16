@@ -41,7 +41,8 @@ const initialState = {
   isPasswordValid: true,
   isMultipleSelectionAvailable: false,
   selectedTokenList: [] as Array<string>,
-  selectedNFTs: [] as Array<string>
+  selectedNFTs: [] as Array<string>,
+  isMaxAdaLoading: false
 };
 
 const MAX_TOKEN_SELECTED_ALLOW = 30;
@@ -108,6 +109,9 @@ export interface Store {
   // Analytics specific properties
   triggerPoint?: SendFlowTriggerPoints;
   setTriggerPoint: (param: SendFlowTriggerPoints) => void;
+  // ====== Max Ada calculation ======
+  isMaxAdaLoading: boolean;
+  setMaxAdaLoading: (maxAdaInProgress?: boolean) => void;
 }
 
 // ====== state setters ======
@@ -345,7 +349,8 @@ const useStore = create<Store>((set, get) => ({
   resetTokenList: () => set({ selectedTokenList: [], selectedNFTs: [] }),
   setIsRestaking: (isRestaking) => set({ isRestaking }),
   setLastFocusedInput: (lastFocusedInput) => set({ lastFocusedInput }), // keep track of the last focused input element, this way we know where to display the error
-  setTriggerPoint: (triggerPoint) => set({ triggerPoint })
+  setTriggerPoint: (triggerPoint) => set({ triggerPoint }),
+  setMaxAdaLoading: (isMaxAdaLoading) => set({ isMaxAdaLoading })
 }));
 
 // ====== selectors ======
@@ -566,5 +571,8 @@ export const useAnalyticsSendFlowTriggerPoint = (): {
   triggerPoint: Store['triggerPoint'];
   setTriggerPoint: Store['setTriggerPoint'];
 } => useStore(({ triggerPoint, setTriggerPoint }) => ({ triggerPoint, setTriggerPoint }));
+
+export const useMaxAdaStatus = (): Pick<Store, 'isMaxAdaLoading' | 'setMaxAdaLoading'> =>
+  useStore(({ isMaxAdaLoading, setMaxAdaLoading }) => ({ isMaxAdaLoading, setMaxAdaLoading }));
 
 export { useStore as sendTransactionStore };

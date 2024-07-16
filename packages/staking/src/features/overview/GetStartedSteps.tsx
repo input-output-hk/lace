@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';

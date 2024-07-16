@@ -19,7 +19,8 @@ export {
   SortField,
   EraSummary,
   HandleResolution,
-  TxSubmissionError
+  TxSubmissionError,
+  TxCBOR
 } from '@cardano-sdk/core';
 
 export { testnetEraSummaries } from '@cardano-sdk/util-dev';

@@ -4,8 +4,11 @@ import { CoinId } from '../types';
 const LOVELACE_VALUE = 1_000_000;
 const DEFAULT_DECIMALS = 2;
 
-export const lovelacesToAdaString = (lovelaces: string, decimalValues: number = DEFAULT_DECIMALS): string =>
-  new BigNumber(lovelaces).dividedBy(LOVELACE_VALUE).toFixed(decimalValues);
+export const lovelacesToAdaString = (
+  lovelaces: string,
+  decimalValues: number = DEFAULT_DECIMALS,
+  roudingMode: BigNumber.RoundingMode = BigNumber.ROUND_HALF_UP
+): string => new BigNumber(lovelaces).dividedBy(LOVELACE_VALUE).toFixed(decimalValues, roudingMode);
 
 export const adaToLovelacesString = (ada: string): string => new BigNumber(ada).multipliedBy(LOVELACE_VALUE).toString();
 

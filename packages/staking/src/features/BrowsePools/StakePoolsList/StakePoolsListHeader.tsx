@@ -1,9 +1,10 @@
-import { Table } from '@lace/ui';
+import { Table } from '@input-output-hk/lace-ui-toolkit';
 import { SortField, StakePoolSortOptions } from 'features/BrowsePools/types';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { analyticsActionsMap } from '../analytics';
+import { getDefaultSortOrderByField } from '../utils';
 import { config } from './config';
 
 export interface TableHeaders {
@@ -14,7 +15,7 @@ export interface TableHeaders {
 
 export type StakePoolsListHeaderProps = {
   setActiveSort: (props: StakePoolSortOptions) => void;
-  activeSort: StakePoolSortOptions;
+  activeSort?: StakePoolSortOptions;
 };
 
 export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsListHeaderProps) => {
@@ -66,7 +67,8 @@ export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsLi
   }));
 
   const onSortChange = (field: SortField) => {
-    const order = field === activeSort?.field && activeSort?.order === 'asc' ? 'desc' : 'asc';
+    const inverseOrder = activeSort?.order === 'asc' ? 'desc' : 'asc';
+    const order = field !== activeSort?.field ? getDefaultSortOrderByField(field) : inverseOrder;
 
     analytics.sendEventToPostHog(analyticsActionsMap[field]);
     setActiveSort({ field, order });

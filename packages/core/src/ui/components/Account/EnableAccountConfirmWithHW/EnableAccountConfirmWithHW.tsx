@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Flex, Loader, Text } from '@lace/ui';
+import { Box, Button, Flex, Loader, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { ReactComponent as HardwareWalletIcon } from '../../../assets/images/hardware-wallet.svg';
 import { ReactComponent as ExclamationCircle } from '../../../assets/icons/exclamation-circle.svg';

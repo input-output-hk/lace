@@ -15,6 +15,7 @@ interface WarningModalProps {
   confirmLabel?: React.ReactNode;
   confirmCustomClassName?: string;
   dataTestId?: string;
+  destroyOnClose?: boolean;
 }
 
 const modalWidth = 480;
@@ -30,7 +31,8 @@ export const WarningModal = ({
   confirmLabel,
   confirmCustomClassName,
   isPopupView,
-  dataTestId
+  dataTestId,
+  destroyOnClose = false
 }: WarningModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
 
@@ -48,6 +50,7 @@ export const WarningModal = ({
       open={visible}
       width={isPopupView ? '100%' : modalWidth}
       data-testid={dataTestId}
+      destroyOnClose={destroyOnClose}
     >
       <div data-testid="delete-address-modal-title" className={styles.header}>
         {header}

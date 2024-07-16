@@ -16,7 +16,7 @@ class TransactionsPage {
   private TRANSACTIONS_TABLE_ITEM_FIAT_AMOUNT = '[data-testid="fiat-amount"]';
   private TRANSACTIONS_TABLE_ITEM_TIMESTAMP = '[data-testid="timestamp"]';
   private TRANSACTIONS_SKELETON = '[data-testid="infinite-scroll-skeleton"]';
-  private TRANSACTIONS_COST_ADA = '[data-testid="send-transaction-fee-ada"]';
+  private TRANSACTIONS_COST_ADA = '[data-testid="transaction-fee-value-ada"]';
   private ASSET_INFO_AMOUNT = '[data-testid="asset-info-amount"]';
   private SUMMARY_FEE_CONTAINER = '[data-testid="summary-fee-container"]';
   private OUTPUT_SUMMARY_CONTAINER = '[data-testid="output-summary-container"]';
@@ -107,6 +107,28 @@ class TransactionsPage {
       await this.scrollToTheRow(rowsVisible);
       await browser.pause(1000);
     }
+  }
+  async getIndexOfTxTypeWithoutScroll(txType: string): Promise<number> {
+    const txTypes: string[] = [];
+    const tableItems = await $$(this.TRANSACTIONS_TABLE_ITEM_TYPE);
+    for (const tableItem of tableItems) {
+      txTypes.push(await tableItem.getText());
+    }
+    return txTypes.indexOf(txType);
+  }
+
+  async getIndexOfTxTypeWithScroll(txType: string): Promise<number> {
+    await this.scrollToTheLastRow();
+    await this.transactionsInfiniteScroll.waitForDisplayed({ reverse: true, timeout: 10_000 });
+    return await this.getIndexOfTxTypeWithoutScroll(txType);
+  }
+
+  async getIndexOfTxType(txType: string): Promise<number> {
+    const index = await this.getIndexOfTxTypeWithoutScroll(txType);
+    if (index === -1) {
+      return await this.getIndexOfTxTypeWithScroll(txType);
+    }
+    return index;
   }
 
   async saveNumberOfVisibleRows() {

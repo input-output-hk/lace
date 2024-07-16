@@ -13,9 +13,7 @@ Feature: Delegating funds to new pool E2E
     When I open wallet: "WalletSendingAdaToStakingE2E" in: extended mode
     And Wallet is synced
     And I click "Send" button on page header
-    And I fill bundle 1 with "CopiedAddress" address with following assets:
-      | type | assetName | amount |
-      | ADA  | tADA      | 15     |
+    And I fill bundle with copied address and 15 ADA
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
@@ -28,6 +26,7 @@ Feature: Delegating funds to new pool E2E
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
     And I disable showing Multidelegation beta banner
+    And I disable showing Multidelegation DApps issue modal
     And I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab

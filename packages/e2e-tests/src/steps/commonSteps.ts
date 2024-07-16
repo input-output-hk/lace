@@ -12,7 +12,11 @@ import localStorageManager from '../utils/localStorageManager';
 import networkManager from '../utils/networkManager';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import { cleanBrowserStorage } from '../utils/browserStorage';
+import {
+  shiftBackFiatPriceFetchedTimeInBrowserStorage,
+  cleanBrowserStorage,
+  deleteFiatPriceTimestampFromBackgroundStorage
+} from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -25,7 +29,8 @@ import {
   switchToWindowWithRetry
 } from '../utils/window';
 import { Given } from '@wdio/cucumber-framework';
-import tokensPageObject from '../pageobject/tokensPageObject';
+import TokensPage from '../elements/tokensPage';
+import ToastMessage from '../elements/toastMessage';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
@@ -39,22 +44,27 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import MainLoader from '../elements/MainLoader';
+import Modal from '../elements/modal';
 
 Given(/^Lace is ready for test$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.multiAddressModalConfirm();
-  await tokensPageObject.waitUntilCardanoTokenLoaded();
+  await TokensPage.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
 });
 
 Then(/^Lace is loaded properly$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
-  await tokensPageObject.waitUntilCardanoTokenLoaded();
+  await TokensPage.waitUntilCardanoTokenLoaded();
 });
 
 Given(/^Lace with empty wallet is ready for test$/, async () => {
-  await tokensPageObject.waitUntilHeadersLoaded();
+  await TokensPage.waitUntilHeadersLoaded();
 });
+
 Then(/I navigate to home page on (popup|extended) view/, async (viewType: string) => {
   await browser.pause(1000);
   await (viewType === 'popup' ? popupView.visit() : extendedView.visit());
@@ -104,12 +114,8 @@ When(
   }
 );
 
-// TODO: deprecated step, to be removed when remaining usages are replaced inside StakingPageDelegatedFundsExtended.feature
-Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
-  await $(`//*[contains(text(), "${(await t(expectedText)) ?? expectedText}")]`).waitForDisplayed({
-    timeout: 5000,
-    reverse: expectedResult === 'No'
-  });
+When(/^I close a toast message$/, async () => {
+  await ToastMessage.clickCloseButton();
 });
 
 Then(
@@ -122,10 +128,37 @@ Then(
   }
 );
 
-Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
+Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
   await settingsExtendedPageObject.closeWalletSyncedToast();
-  await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
-  if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+
+  const toastTextToTranslationKeyMap: { [key: string]: string } = {
+    'Handle copied': 'core.infoWallet.handleCopied',
+    'Address copied': 'core.infoWallet.addressCopied',
+    'NFTs added to folder': 'browserView.nfts.folderDrawer.toast.update',
+    'NFT removed': 'browserView.nfts.folderDrawer.toast.delete',
+    'Folder created successfully': 'browserView.nfts.folderDrawer.toast.create',
+    'Folder deleted successfully': 'browserView.nfts.deleteFolderSuccess',
+    'Folder renamed successfully': 'browserView.nfts.renameFolderSuccess',
+    'Edited successfully': 'browserView.addressBook.toast.editAddress',
+    'Address added': 'browserView.addressBook.toast.addAddress',
+    'Given address already exists': 'addressBook.errors.givenAddressAlreadyExist',
+    'Given name already exists': 'addressBook.errors.givenNameAlreadyExist',
+    'Switched network': 'browserView.settings.wallet.network.networkSwitched',
+    'Network Error': 'general.errors.networkError',
+    'Copied to clipboard': 'general.clipboard.copiedToClipboard',
+    'Collateral added': 'browserView.settings.wallet.collateral.toast.add'
+  };
+
+  const translationKey = toastTextToTranslationKeyMap[toastText];
+  if (!translationKey) {
+    throw new Error(`Unsupported toast text: ${toastText}`);
+  }
+
+  await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), shouldSee === 'see');
+
+  if (translationKey === 'general.clipboard.copiedToClipboard') {
+    Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+  }
 });
 
 Then(/^I don't see any toast message$/, async () => {
@@ -154,6 +187,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
     await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
   } else {
     await localStorageInitializer.initializeWallet(walletName);
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
   }
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
@@ -164,15 +198,12 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true');
+  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);
 });
 
-When(
-  /^I enable network interception to fail request: "([^"]*)" with error (\d*)$/,
-  async (urlPattern: string, errorCode: number) => {
-    await networkManager.failResponse(urlPattern, errorCode);
-  }
-);
+When(/^I am in the slow network mode$/, async () => {
+  await networkManager.changeNetworkCapabilitiesOfBrowser(false, 0, 1000, 1000);
+});
 
 When(/^I click outside the drawer$/, async () => {
   await new CommonDrawerElements().areaOutsideDrawer.click();
@@ -288,6 +319,14 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
+Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Then(/^I wait until modal disappears$/, async () => {
+  await Modal.waitUntilModalDisappears();
+});
+
 Given(/^I enable showing Analytics consent banner$/, async () => {
   await localStorageInitializer.enableShowingAnalyticsBanner();
   await browser.refresh();
@@ -329,4 +368,40 @@ When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixel
 
 Given(/^I confirm multi-address discovery modal$/, async () => {
   await settingsExtendedPageObject.multiAddressModalConfirm();
+});
+
+When(/^I enable network interception to fail request: "([^"]*)"$/, async (urlPattern: string) => {
+  await networkManager.failRequest(urlPattern);
+});
+
+When(
+  /^I enable network interception to finish request: "([^"]*)" with error (\d*)$/,
+  async (urlPattern: string, errorCode: number) => {
+    await networkManager.finishWithResponseCode(urlPattern, errorCode);
+  }
+);
+
+Given(/^I shift back last fiat price fetch time in local storage by (\d+) seconds$/, async (seconds: number) => {
+  await shiftBackFiatPriceFetchedTimeInBrowserStorage(seconds);
+});
+
+Then(/^I disable network interception$/, async () => {
+  await networkManager.closeOpenedCdpSessions();
+});
+
+Given(/^I delete fiat price timestamp from background storage$/, async () => {
+  await deleteFiatPriceTimestampFromBackgroundStorage();
+});
+
+Then(
+  /^"(Cookie policy|Privacy policy|Terms of service|Terms and conditions)" (is|are) displayed in new tab$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (link: 'Cookie policy' | 'Privacy policy' | 'Terms of service' | 'Terms and conditions', _ignored) => {
+    await switchToLastWindow();
+    await commonAssert.assertLegalContentIsDisplayed(link);
+  }
+);
+
+When(/^I wait for main loader to disappear$/, async () => {
+  await MainLoader.waitUntilLoaderDisappears();
 });

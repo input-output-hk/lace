@@ -11,13 +11,13 @@ export const useSyncingTheFirstTime = (): boolean => {
     () =>
       concat(
         of(true),
-        inMemoryWallet.syncStatus.isSettled$.pipe(
+        inMemoryWallet?.syncStatus?.isSettled$.pipe(
           filter((s: boolean) => s),
           map(() => false),
           take(1)
         )
       ),
-    [inMemoryWallet.syncStatus.isSettled$]
+    [inMemoryWallet?.syncStatus?.isSettled$]
   );
 
   return useObservable(isSyncingForTheFirstTime$);

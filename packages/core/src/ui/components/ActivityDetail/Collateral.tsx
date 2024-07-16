@@ -1,7 +1,6 @@
 import React from 'react';
-import { useTranslate } from '@src/ui/hooks';
-import { Box, TransactionSummary, InfoBar } from '@lace/ui';
-import { ReactComponent as InfoIcon } from '@lace/icons/dist/InfoComponent';
+import { Box, TransactionSummary, InfoBar, InfoComponent } from '@input-output-hk/lace-ui-toolkit';
+import { useTranslation } from 'react-i18next';
 
 export enum CollateralStatus {
   REVIEW = 'review',
@@ -17,6 +16,7 @@ export interface Props {
   displayFiat?: boolean;
   className?: string;
   status?: CollateralStatus;
+  testId?: string;
 }
 
 export const Collateral = ({
@@ -25,17 +25,18 @@ export const Collateral = ({
   coinSymbol,
   displayFiat,
   className,
+  testId,
   status = CollateralStatus.REVIEW
 }: Props): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   const getTooltipText = (): string => {
     switch (status) {
       case 'review':
       case 'error':
-        return t('package.core.activityDetails.collateral.tooltip.info');
+        return t('core.activityDetails.collateral.tooltip.info');
       case 'success':
-        return t('package.core.activityDetails.collateral.tooltip.success');
+        return t('core.activityDetails.collateral.tooltip.success');
     }
 
     return '';
@@ -46,14 +47,15 @@ export const Collateral = ({
       <TransactionSummary.Amount
         amount={`${collateral} ${coinSymbol}`}
         fiatPrice={amountTransformer(collateral)}
-        label={t('package.core.activityDetails.collateral.label')}
+        label={t('core.activityDetails.collateral.label')}
         tooltip={getTooltipText()}
         displayFiat={displayFiat}
         className={className}
+        data-testid={testId ?? 'collateral'}
       />
       {status === CollateralStatus.ERROR && (
         <Box mt="$32">
-          <InfoBar icon={<InfoIcon />} message={t('package.core.activityDetails.collateral.error')} />
+          <InfoBar icon={<InfoComponent />} message={t('core.activityDetails.collateral.error')} />
         </Box>
       )}
     </>

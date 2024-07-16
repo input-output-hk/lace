@@ -71,12 +71,6 @@ jest.mock('@lace/cardano', () => {
   };
 });
 
-const dappInfo = {
-  name: 'dappName',
-  logo: 'dappLogo',
-  url: 'dappUrl'
-};
-const errorMessage = 'errorMessage';
 const deposit = BigInt('10000');
 const rewardAccount = Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
 const anchor = {
@@ -104,7 +98,7 @@ describe('Testing ProposalProceduresContainer component', () => {
     await act(async () => {
       ({ queryByTestId } = render(
         <TreasuryWithdrawalsActionContainer
-          {...{ errorMessage, dappInfo, deposit, rewardAccount, anchor, governanceAction: treasuryWithdrawalsAction }}
+          {...{ deposit, rewardAccount, anchor, governanceAction: treasuryWithdrawalsAction }}
         />,
         {
           wrapper: getWrapper()
@@ -115,10 +109,8 @@ describe('Testing ProposalProceduresContainer component', () => {
     expect(queryByTestId('TreasuryWithdrawalsAction')).toBeInTheDocument();
     expect(mockTreasuryWithdrawalsAction).toHaveBeenLastCalledWith(
       {
-        dappInfo,
         data: {
           txDetails: {
-            txType: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
             deposit: depositPaidWithSymbol(deposit, cardanoCoinMock as Wallet.CoinId),
             rewardAccount
           },
@@ -136,33 +128,7 @@ describe('Testing ProposalProceduresContainer component', () => {
               cardanoCoin: cardanoCoinMock as Wallet.CoinId
             })
           }))
-        },
-        translations: {
-          txDetails: {
-            title: t('core.ProposalProcedure.txDetails.title'),
-            txType: t('core.ProposalProcedure.txDetails.txType'),
-            deposit: t('core.ProposalProcedure.txDetails.deposit'),
-            rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
-          },
-          procedure: {
-            title: t('core.ProposalProcedure.procedure.title'),
-            anchor: {
-              url: t('core.ProposalProcedure.procedure.anchor.url'),
-              hash: t('core.ProposalProcedure.procedure.anchor.hash')
-            }
-          },
-          actionId: {
-            title: t('core.ProposalProcedure.governanceAction.actionId.title'),
-            index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
-          },
-          withdrawals: {
-            title: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
-            rewardAccount: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.rewardAccount'),
-            lovelace: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.lovelace')
-          }
-        },
-        errorMessage
+        }
       },
       {}
     );

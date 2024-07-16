@@ -8,6 +8,18 @@ import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListI
 import Tooltip from '../../elements/Tooltip';
 import testContext from '../../utils/testContext';
 import { StakePoolGridCard } from '../../elements/multidelegation/StakePoolGridCard';
+import { StakePoolListColumnName } from '../../types/staking';
+import { SortingOrder } from '../../types/sortingOrder';
+import {
+  mapColumnNameStringToEnum,
+  mapSortingOptionToColumnNameEnum,
+  sortColumnContent
+} from '../../utils/stakePoolListContent';
+import { StakePoolListColumn } from '../../enums/StakePoolListColumn';
+import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
+import StakingInfoCard from '../../elements/multidelegation/StakingInfoCard';
+import { isPopupMode } from '../../utils/pageUtils';
+import { sortGridContent } from '../../utils/stakePoolGridContent';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -16,10 +28,10 @@ class MultidelegationPageAssert {
     expect(poolsCounter).to.equal(poolsCount);
   };
 
-  assertSeeSearchResultsCountExact = async (items: number) => {
-    await browser.waitUntil(async () => (await MultidelegationPage.displayedPools.length) === items, {
+  assertSeeSearchResultsCountGreaterOrEqual = async (expectedPoolsCount: number) => {
+    await browser.waitUntil(async () => (await MultidelegationPage.displayedPools.length) >= expectedPoolsCount, {
       timeout: 20_000,
-      timeoutMsg: `Search result does not match exact items count expected: ${items}`
+      timeoutMsg: `There should be ${expectedPoolsCount} or more stake pools returned`
     });
   };
 
@@ -188,36 +200,37 @@ class MultidelegationPageAssert {
     expect(await firstStakePool.ticker.getText()).to.equal(expectedTicker);
   };
 
-  assertSeeTooltipForColumn = async (columnName: string) => {
+  assertSeeTooltipForColumn = async (column: StakePoolListColumn) => {
+    await MultidelegationPage.tooltip.waitForStable();
     await MultidelegationPage.tooltip.waitForDisplayed();
     let expectedTooltipText;
-    switch (columnName) {
-      case 'Ticker':
+    switch (column) {
+      case StakePoolListColumn.Ticker:
         expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
         break;
-      case 'Saturation':
+      case StakePoolListColumn.Saturation:
         expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
         break;
-      case 'ROS':
+      case StakePoolListColumn.ROS:
         expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
         break;
-      case 'Cost':
+      case StakePoolListColumn.Cost:
         expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
         break;
-      case 'Margin':
+      case StakePoolListColumn.Margin:
         expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
         break;
-      case 'Blocks':
+      case StakePoolListColumn.Blocks:
         expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
         break;
-      case 'Pledge':
+      case StakePoolListColumn.Pledge:
         expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
         break;
-      case 'Live Stake':
+      case StakePoolListColumn.LiveStake:
         expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
         break;
       default:
-        throw new Error(`Unsupported column name: ${columnName}`);
+        throw new Error(`Unsupported column name: ${column}`);
     }
     expect(await MultidelegationPage.tooltip.getText()).to.equal(expectedTooltipText);
   };
@@ -231,8 +244,7 @@ class MultidelegationPageAssert {
     expect(await stakePoolListItem.saturation.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     if (process.env.USE_ROS_STAKING_COLUMN) {
       await stakePoolListItem.ros.waitForDisplayed();
-      expect(await stakePoolListItem.ros.getText()).to.equal('-');
-      // expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX); // TODO: update when issue with ROS not returned is resolved
+      expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     }
     await stakePoolListItem.cost.waitForDisplayed();
     expect(await stakePoolListItem.cost.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
@@ -300,6 +312,173 @@ class MultidelegationPageAssert {
     const cardsInARow = Math.floor(rowWidth / cardWidth);
     expect(cardsInARow).to.equal(expectedCardsCount);
   };
+
+  assertSeeColumnSortingIndicator = async (column: StakePoolListColumnName, order: 'ascending' | 'descending') => {
+    await (
+      await MultidelegationPage.getColumnSortingIndicator(mapColumnNameStringToEnum(column), order)
+    ).waitForDisplayed();
+  };
+
+  assertSeeSortingOptionOrderButton = async (
+    sortingOption: StakePoolSortingOption,
+    order: 'ascending' | 'descending'
+  ) => {
+    await (
+      await MultidelegationPage.moreOptionsComponent.getSortingOptionOrderButton(sortingOption, order)
+    ).waitForDisplayed();
+  };
+
+  assertSeeStakePoolsSorted = async (
+    stakePoolsDisplayType: 'list rows' | 'cards',
+    sortingOption: StakePoolSortingOption,
+    order: SortingOrder,
+    poolLimit?: number
+  ) => {
+    await MultidelegationPage.waitForPoolsCounterToBeGreaterThanZero();
+    poolLimit ??= await MultidelegationPage.getNumberOfPoolsFromCounter();
+    if (stakePoolsDisplayType === 'cards') {
+      const gridContent = await MultidelegationPage.extractGridContent(sortingOption, poolLimit);
+      const sortedGridContent = await sortGridContent(gridContent, sortingOption, order);
+      expect(gridContent).to.not.be.empty;
+      expect(gridContent).to.deep.equal(sortedGridContent);
+    } else {
+      const columnContent = await MultidelegationPage.extractColumnContent(
+        mapSortingOptionToColumnNameEnum(sortingOption),
+        poolLimit
+      );
+      const sortedColumnContent = await sortColumnContent(
+        columnContent,
+        mapSortingOptionToColumnNameEnum(sortingOption),
+        order
+      );
+
+      expect(columnContent).to.not.be.empty;
+      expect(columnContent).to.deep.equal(sortedColumnContent);
+    }
+  };
+
+  assertSeeTooltipForSortingOption = async (sortingOption: StakePoolSortingOption) => {
+    await browser.pause(800); // Those tooltips are displayed after delay
+    await MultidelegationPage.sortingOptionTooltip.waitForStable();
+    await MultidelegationPage.sortingOptionTooltip.waitForDisplayed();
+    let expectedTooltipText;
+    switch (sortingOption) {
+      case StakePoolSortingOption.Ticker:
+        expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
+        break;
+      case StakePoolSortingOption.Saturation:
+        expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
+        break;
+      case StakePoolSortingOption.ROS:
+        expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
+        break;
+      case StakePoolSortingOption.Cost:
+        expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
+        break;
+      case StakePoolSortingOption.Margin:
+        expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
+        break;
+      case StakePoolSortingOption.ProducedBlocks:
+        expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
+        break;
+      case StakePoolSortingOption.Pledge:
+        expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
+        break;
+      case StakePoolSortingOption.LiveStake:
+        expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${sortingOption}`);
+    }
+    expect(await MultidelegationPage.sortingOptionTooltip.getText()).to.equal(expectedTooltipText);
+  };
+
+  assertSeeCurrentlyStakingComponent = async (
+    index: number,
+    poolName: string,
+    poolTickerOrId: string,
+    hasMetadata = true
+  ) => {
+    const stakingInfoCard = new StakingInfoCard(index);
+    await stakingInfoCard.container.waitForDisplayed();
+
+    await stakingInfoCard.logo.waitForDisplayed();
+
+    await stakingInfoCard.name.waitForDisplayed();
+    expect(await stakingInfoCard.name.getText()).to.equal(poolName);
+
+    await stakingInfoCard.ticker.waitForDisplayed();
+    hasMetadata
+      ? expect(await stakingInfoCard.ticker.getText()).to.equal(poolTickerOrId)
+      : expect(await stakingInfoCard.ticker.getText()).to.contain(poolTickerOrId.slice(0, 6));
+
+    await this.assertSeeStatsROS(stakingInfoCard);
+    await this.assertSeeStatsFee(stakingInfoCard);
+    await this.assertSeeStatsMargin(stakingInfoCard);
+
+    const isPopup = await isPopupMode();
+    if (!isPopup) {
+      await this.assertSeeStatsTotalRewards(stakingInfoCard);
+    }
+    await this.assertSeeStatsTotalStaked(stakingInfoCard);
+    await this.assertSeeLastReward(stakingInfoCard);
+  };
+
+  private async assertSeeLastReward(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsLastReward.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsLastReward.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.lastReward.title')
+    );
+    await stakingInfoCard.statsLastReward.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsLastReward.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+  }
+
+  private async assertSeeStatsTotalStaked(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsTotalStaked.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalStaked.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.totalStaked.title')
+    );
+    await stakingInfoCard.statsTotalStaked.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalStaked.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+  }
+
+  private async assertSeeStatsTotalRewards(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsTotalRewards.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalRewards.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.totalRewards.title')
+    );
+    await stakingInfoCard.statsTotalRewards.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsTotalRewards.value.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX_OR_0
+    );
+  }
+
+  private async assertSeeStatsMargin(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsMargin.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsMargin.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.stats.Margin')
+    );
+    await stakingInfoCard.statsMargin.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsMargin.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
+
+  private async assertSeeStatsFee(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsFee.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsFee.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.stats.Fee')
+    );
+    await stakingInfoCard.statsFee.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsFee.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+  }
+
+  private async assertSeeStatsROS(stakingInfoCard: StakingInfoCard) {
+    await stakingInfoCard.statsROS.title.waitForDisplayed();
+    expect(await stakingInfoCard.statsROS.title.getText()).to.equal(
+      await t('browserView.staking.stakingInfo.stats.ros')
+    );
+    await stakingInfoCard.statsROS.value.waitForDisplayed();
+    expect(await stakingInfoCard.statsROS.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
 }
 
 export default new MultidelegationPageAssert();

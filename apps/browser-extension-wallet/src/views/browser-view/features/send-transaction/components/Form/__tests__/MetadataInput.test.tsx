@@ -2,7 +2,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MetadataInput } from '../MetadataInput';
-import i18n from '@lib/i18n';
+import { i18n } from '@lace/translation';
 import { I18nextProvider } from 'react-i18next';
 
 const WrappedMetadataInput = () => (

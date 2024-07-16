@@ -7,5 +7,6 @@ export const writeMnemonicToClipboard = async (mnemonic: string[], joiner = ' ')
 export const readMnemonicFromClipboard = async (limitTo = 24, offset = 0): Promise<string[]> => {
   const text = await navigator.clipboard.readText();
   navigator.clipboard.writeText('');
-  return text.split(/[\s,]+/).slice(offset, limitTo);
+  const mnemonic = text.split(/[\s,]+/).slice(offset, limitTo);
+  return mnemonic.length === 1 && !mnemonic[0] ? [] : mnemonic;
 };

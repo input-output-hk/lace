@@ -4,13 +4,13 @@ Feature: Analytics - Posthog - Sending - Popup View
   Background:
     Given Wallet is synced
 
-  @LW-7828 @LW-9109
+  @LW-7828 @LW-9109 @E2E
   Scenario: Analytics - Popup-view - Send - Success Screen - View transaction
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
     Then I validate latest analytics single event "send | send | click"
-    And I fill bundle 1 with "WalletAnalyticsReceiveSimpleTransaction2E2E" address with following assets:
+    And I fill bundle 1 with "WalletAnalyticsReceiveSimpleTransaction2E2E" main address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page

@@ -1,6 +1,6 @@
+import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
-import { Box, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../DelegationCard';

@@ -1,0 +1,1 @@
+export { TxDetailsProposalProcedures } from './TxDetailsProposalProcedures';

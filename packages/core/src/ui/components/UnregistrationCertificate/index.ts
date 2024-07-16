@@ -1,0 +1,1 @@
+export { UnregistrationCertificate } from './UnregistrationCertificate';

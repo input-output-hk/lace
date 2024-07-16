@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "sharedWalletName": "MySharedWallet",
+    "participants": [
+      {
+        "name": "Alice",
+        "publicKey": "8abf8e53f1532d344cbeae9be1ce14b6e9b70c22db91e6deab81b90b2f3a5904"
+      },
+      {
+        "name": "Bob",
+        "publicKey": "21a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d0"
+      },
+      {
+        "name": "Charlie",
+        "publicKey": "5a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d12"
+      }
+    ]
+  },
+  "nativeScript": {
+    "tag": "n_of_k",
+    "scripts": [
+      {
+        "tag": "pubkey",
+        "pubkey": "8abf8e53f1532d344cbeae9be1ce14b6e9b70c22db91e6deab81b90b2f3a5904"
+      },
+      {
+        "tag": "pubkey",
+        "pubkey": "21a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d0"
+      },
+      {
+        "tag": "pubkey",
+        "pubkey": "5a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d12"
+      }
+    ],
+    "n": 2
+  }
+}

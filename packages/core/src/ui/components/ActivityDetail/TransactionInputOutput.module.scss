@@ -10,12 +10,6 @@
     display: flex;
     justify-content: space-between;
     padding: size_unit(3) 0px;
-    color: var(--text-color-primary);
-    @include text-bodyLarge-bold;
-
-    .label {
-      @include text-bodyLarge-bold;
-    }
 
     button.arrowBtn[data-color='secondary'] {
       border-radius: size_unit(1) !important;
@@ -35,7 +29,6 @@
   .addressContainer {
     display: flex;
     flex-direction: column;
-    gap: size_unit(3);
     border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
     padding: size_unit(5) 0;
 
@@ -47,22 +40,12 @@
       width: 100%;
       display: flex;
       justify-content: space-between;
+      margin-bottom: size_unit(1.5);
 
       .label {
         display: flex;
         flex: 0 0 50%;
         align-self: baseline;
-        color: var(--text-color-primary, #fff);
-        @include text-body-semi-bold;
-      }
-
-      .address {
-        @include text-address;
-        font-weight: 500;
-        text-align: right;
-      }
-      .addressDetail {
-        font-size: var(--bodySmall, 14px) !important;
       }
 
       .content {
@@ -70,9 +53,6 @@
         flex-direction: column;
         align-items: end;
         gap: size_unit(2);
-
-        color: var(--text-color-primary, #ffffff);
-        @include text-body-medium;
 
         text-align: right;
         word-break: break-all;
@@ -82,14 +62,6 @@
           flex-direction: column;
           width: 100%;
           align-items: flex-end;
-
-          .asset {
-            color: var(--text-color-primary, #ffffff);
-          }
-
-          .fiat {
-            color: var(--text-color-secondary, #878e9e);
-          }
         }
       }
     }
@@ -114,7 +86,6 @@
 }
 
 .listHeader {
-  color: var(--text-color-primary, #ffffff);
   display: flex;
   justify-content: space-between;
   margin-bottom: size_unit(4);
@@ -124,17 +95,24 @@
     display: flex;
     flex: 0 0 50%;
     align-self: baseline;
-    color: var(--text-color-primary, #ffffff);
-    @include text-body-bold;
   }
 }
 
-.rotateOpen  {
+.rotateOpen {
   transform: rotate(180deg);
-  transition: transform .2s linear;
+  transition: transform 0.2s linear;
 }
 
-.rotateClose  {
+.rotateClose {
   transform: rotate(0deg);
-  transition: transform .2s linear;
+  transition: transform 0.2s linear;
+}
+
+.rightAlign {
+  text-align: right;
+  word-break: break-all;
+}
+
+.addressTextContainer {
+  line-height: size_unit(2);
 }

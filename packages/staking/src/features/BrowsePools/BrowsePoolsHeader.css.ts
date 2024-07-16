@@ -1,6 +1,5 @@
-import { style } from '@lace/ui';
-import { theme } from 'features/theme';
+import { sx } from 'features/theme';
 
-export const title = style({
-  color: theme.colors.$titleColor,
+export const title = sx({
+  color: '$titleColor',
 });

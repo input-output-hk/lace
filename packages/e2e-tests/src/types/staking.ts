@@ -1,4 +1,4 @@
-export type StakePoolListColumnType =
+export type StakePoolListColumnName =
   | 'Ticker'
   | 'Saturation'
   | 'ROS'

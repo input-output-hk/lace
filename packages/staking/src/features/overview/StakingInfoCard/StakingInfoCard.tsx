@@ -1,14 +1,14 @@
 import Icon from '@ant-design/icons';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { getRandomIcon } from '@lace/common';
-import { Flex } from '@lace/ui';
+import { TranslationKey } from '@lace/translation';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
 import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import MoonIcon from '../../../assets/icons/moon.component.svg';
 import WarningIcon from '../../../assets/icons/warning.component.svg';
-import { TranslationKey } from '../../i18n';
 import { StakePoolInfo } from './StakePoolInfo';
 import styles from './StakingInfoCard.module.scss';
 import { Stats } from './Stats';

@@ -44,6 +44,10 @@ export const faqArticles: Record<string, Record<string, string>> = {
   'What type of governance actions are supported by Lace?': {
     question: 'what-type-of-governance-actions-are-supported-by-lace',
     title: 'What type of governance actions are supported by Lace?'
+  },
+  'Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features': {
+    question: 'best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features',
+    title: 'Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features'
   }
 };
 

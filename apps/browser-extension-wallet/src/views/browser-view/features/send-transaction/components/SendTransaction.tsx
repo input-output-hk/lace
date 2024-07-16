@@ -19,8 +19,9 @@ import { sectionsWithArrowIcon } from './SendTransactionDrawer';
 import { AddressChangeDetail } from '@src/features/address-book/components/AddressChangeDetail';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
-import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
+import { useCustomSubmitApi, useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { AddressBookSchema } from '@lib/storage';
+import { useWalletStore } from '@stores';
 
 interface SendTransactionProps {
   isPopupView?: boolean;
@@ -37,6 +38,8 @@ export const SendTransaction = withAddressBookContext(
       addressToEdit: { name, address }
     } = useAddressBookStore();
     const handleResolver = useHandleResolver();
+    const { environmentName } = useWalletStore();
+    const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
     const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
 
@@ -60,7 +63,9 @@ export const SendTransaction = withAddressBookContext(
       [Sections.SUMMARY]: <SendTransactionSummary isPopupView={isPopupView} />,
       [Sections.CONFIRMATION]: <ConfirmPassword />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,
-      [Sections.FAIL_TX]: <TransactionFail />,
+      [Sections.FAIL_TX]: (
+        <TransactionFail showCustomApiBanner={getCustomSubmitApiForNetwork(environmentName).status} />
+      ),
       [Sections.UNAUTHORIZED_TX]: <UnauthorizedTransaction />,
       [Sections.ADDRESS_LIST]: <AddressList isPopupView={isPopupView} scrollableTargetId={scrollableTargetId} />,
       [Sections.ADDRESS_FORM]: <AddressForm isPopupView={isPopupView} />,

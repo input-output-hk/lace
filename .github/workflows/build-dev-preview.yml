@@ -5,7 +5,10 @@ on:
 jobs:
   build:
     name: Build + test
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,6 +21,7 @@ jobs:
         uses: ./.github/shared/build
         with:
           BUILD_DEV_PREVIEW: 'true'
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues

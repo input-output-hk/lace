@@ -1,18 +1,17 @@
-import { style, sx, vars } from '@lace/ui';
+import { style } from '@vanilla-extract/css';
+import { sx } from 'features/theme';
 
-export const icon = style([
-  {
-    fontSize: vars.spacing.$112,
-  },
-]);
+export const icon = style({
+  fontSize: 112,
+});
 
 export const text = style([
   sx({
-    color: '$text_secondary',
+    color: '$browsePoolsSearchEmptyTextColor',
     lineHeight: '$32',
   }),
   {
-    marginTop: `-${vars.spacing.$6}`,
+    marginTop: -6,
     textAlign: 'center',
   },
 ]);

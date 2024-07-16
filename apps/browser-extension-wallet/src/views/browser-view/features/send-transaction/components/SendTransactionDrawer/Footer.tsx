@@ -19,7 +19,8 @@ import {
   useTransactionProps,
   usePassword,
   useMetadata,
-  useAnalyticsSendFlowTriggerPoint
+  useAnalyticsSendFlowTriggerPoint,
+  useMaxAdaStatus
 } from '../../store';
 import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
@@ -38,8 +39,9 @@ import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import type { TranslationKey } from '@lace/translation';
 
-export const nextStepBtnLabels: Partial<Record<Sections, string>> = {
+export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
   [Sections.SUMMARY]: 'browserView.transaction.send.footer.confirm',
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',
@@ -84,6 +86,7 @@ export const Footer = withAddressBookContext(
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
+    const { isMaxAdaLoading } = useMaxAdaStatus();
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -231,22 +234,28 @@ export const Footer = withAddressBookContext(
       }
 
       switch (true) {
-        case isReviewingAddress:
+        case isReviewingAddress: {
           return handleReviewAddress('UPDATE');
-        case isSummaryStep && !isInMemoryWallet:
+        }
+        case isSummaryStep && !isInMemoryWallet: {
           if (isPopupView) {
             return openContinueDialog();
           }
           return handleVerifyPass();
-        case isConfirmPass:
+        }
+        case isConfirmPass: {
           return handleVerifyPass();
-        case txHasSucceeded:
+        }
+        case txHasSucceeded: {
           return onCloseSubmitedTransaction();
-        case txHasFailed:
+        }
+        case txHasFailed: {
           setSubmitingTxState({ isPasswordValid: true });
           return setSection(sectionsConfig.form);
-        default:
+        }
+        default: {
           return setSection();
+        }
       }
     }, [
       currentSection.currentSection,
@@ -303,7 +312,8 @@ export const Footer = withAddressBookContext(
     }, [t, currentSection.currentSection]);
 
     const isConfirmButtonDisabled =
-      (confirmDisable || isSubmitDisabled) && currentSection.currentSection !== Sections.ADDRESS_CHANGE;
+      (confirmDisable || isSubmitDisabled || isMaxAdaLoading) &&
+      currentSection.currentSection !== Sections.ADDRESS_CHANGE;
 
     const submitHwFormStep = useCallback(() => {
       triggerSubmit();

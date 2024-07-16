@@ -1,0 +1,26 @@
+name: check
+description: Code check
+
+inputs:
+  DIR:
+    description: 'package directory'
+    required: true
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Format check
+      run: yarn format-check
+      shell: bash
+      working-directory: ${{ inputs.DIR }}
+
+    - name: Code check
+      run: yarn lint
+      shell: bash
+      working-directory: ${{ inputs.DIR }}
+
+    - name: Type check
+      run: yarn type-check
+      shell: bash
+      working-directory: ${{ inputs.DIR }}

@@ -1,8 +1,9 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
+import { browser } from '@wdio/globals';
 
 class Modal {
-  private CONTAINER = '.ant-modal-content';
+  private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="delete-address-modal-title"]';
   private DESCRIPTION = '[data-testid="delete-address-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-address-modal-cancel"]';
@@ -13,23 +14,19 @@ class Modal {
   }
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TITLE);
+    return $(`${this.CONTAINER} ${this.TITLE}`);
   }
 
   get description(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DESCRIPTION);
+    return $(`${this.CONTAINER} ${this.DESCRIPTION}`);
   }
 
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CANCEL_BUTTON);
+    return $(`${this.CONTAINER} ${this.CANCEL_BUTTON}`);
   }
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONFIRM_BUTTON);
-  }
-
-  buttonWithText(value: string): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(`//button/span[text() = '${value}']`);
+    return $(`${this.CONTAINER} ${this.CONFIRM_BUTTON}`);
   }
 
   async clickCancelButton() {
@@ -41,6 +38,15 @@ class Modal {
     await this.confirmButton.waitForStable();
     await this.confirmButton.waitForClickable();
     await this.confirmButton.click();
+  }
+
+  async waitUntilModalDisappears() {
+    await browser.pause(500);
+    await browser.waitUntil(async () => !(await this.container.isDisplayed()), {
+      timeout: 10_000,
+      interval: 500,
+      timeoutMsg: 'failed while waiting for the modal to disappear'
+    });
   }
 }
 

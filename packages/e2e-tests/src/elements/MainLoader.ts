@@ -1,13 +1,12 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
+import { browser } from '@wdio/globals';
+
 class MainLoader {
   private MAIN_LOADER_COMPONENT = '[data-testid="main-loader"]';
-  private MAIN_LOADER_TEXT = '[data-testid="main-loader-text"]';
 
-  get mainLoaderComponent() {
+  get mainLoaderComponent(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAIN_LOADER_COMPONENT);
-  }
-
-  get mainLoaderText() {
-    return $(this.MAIN_LOADER_TEXT);
   }
 
   async waitUntilLoaderDisappears() {

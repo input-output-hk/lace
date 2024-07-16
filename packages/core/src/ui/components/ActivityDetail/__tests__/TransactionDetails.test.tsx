@@ -3,8 +3,16 @@ import * as React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TransactionDetails, TransactionDetailsProps } from '../TransactionDetails';
+import { Wallet } from '@lace/cardano';
 
 const transactionDate = '2021/09/10';
+
+export const cardanoCoin: Wallet.CoinId = {
+  id: '1',
+  name: 'Cardano',
+  decimals: 6,
+  symbol: 'A'
+};
 
 describe('Testing ActivityDetailsBrowser component', () => {
   const addrListProps: TransactionDetailsProps = {
@@ -35,7 +43,11 @@ describe('Testing ActivityDetailsBrowser component', () => {
     ],
     amountTransformer: (amount) => `${amount} $`,
     coinSymbol: 'ADA',
-    addressToNameMap: new Map()
+    ownAddresses: [],
+    addressToNameMap: new Map(),
+    chainNetworkId: Wallet.Cardano.NetworkId.Testnet,
+    cardanoCoin,
+    explorerBaseUrl: ''
   };
 
   test('should display transaction hash and copy button', async () => {
@@ -82,5 +94,23 @@ describe('Testing ActivityDetailsBrowser component', () => {
   test('should not display transaction metadata if not available', async () => {
     const { queryByTestId: query } = render(<TransactionDetails {...addrListProps} />);
     expect(query('tx-metadata')).not.toBeInTheDocument();
+  });
+
+  test('should show address tag for inputs', async () => {
+    // use empty addrOutputs (so we get only one toggle button for inputs)
+    const { findByTestId } = render(<TransactionDetails {...addrListProps} addrOutputs={[]} />);
+    const inputsSectionToggle = await findByTestId('tx-addr-list_toggle');
+    fireEvent.click(inputsSectionToggle);
+
+    expect(await findByTestId('address-tag')).toBeVisible();
+  });
+
+  test('should show address tag for outputs', async () => {
+    // use empty addrOutputs (so we get only one toggle button for outputs)
+    const { findByTestId } = render(<TransactionDetails {...addrListProps} addrOutputs={[]} />);
+    const outputsSectionToggle = await findByTestId('tx-addr-list_toggle');
+    fireEvent.click(outputsSectionToggle);
+
+    expect(await findByTestId('address-tag')).toBeVisible();
   });
 });

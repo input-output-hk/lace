@@ -22,8 +22,8 @@ class EmptyStateAssert {
   }
 
   async assertSeeEmptyStateStaking() {
-    expect(await FundWalletBanner.getTitle()).to.equal(await t('overview.noFunds.title', 'staking'));
-    expect(await FundWalletBanner.getSubtitle()).to.equal(await t('overview.noFunds.description', 'staking'));
+    expect(await FundWalletBanner.getTitle()).to.equal(await t('overview.noFunds.title'));
+    expect(await FundWalletBanner.getSubtitle()).to.equal(await t('overview.noFunds.description'));
     await this.assertSeeCommonEmptyStateElements();
   }
 

@@ -16,14 +16,14 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import { ActivityStatus, DelegationActivityType, TransactionActivityType } from '@lace/core';
+import {
+  ActivityStatus,
+  ConwayEraCertificatesTypes,
+  DelegationActivityType,
+  TransactionActivityType
+} from '@lace/core';
 import type { ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
-import {
-  certificateTransformer,
-  governanceProposalsTransformer,
-  votingProceduresTransformer
-} from '@src/views/browser-view/features/activity/helpers/common-tx-transformer';
 import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
 import { getCollateral } from '@cardano-sdk/core';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
@@ -73,10 +73,12 @@ const shouldIncludeFee = (
 
   return !(
     type === DelegationActivityType.delegationRegistration ||
+    type === ConwayEraCertificatesTypes.Registration ||
     // Existence of any (new) delegationInfo means that this "de-registration"
     // activity is accompanied by a "delegation" activity, which carries the fees.
     // However, fees should be shown if de-registration activity is standalone.
-    (type === DelegationActivityType.delegationDeregistration && !!delegationInfo?.length)
+    ((type === DelegationActivityType.delegationDeregistration || type === ConwayEraCertificatesTypes.Unregistration) &&
+      !!delegationInfo?.length)
   );
 };
 
@@ -129,7 +131,6 @@ const buildGetActivityDetail =
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
-      walletUI: { cardanoCoin },
       activityDetail,
       walletInfo,
       walletState
@@ -219,14 +220,16 @@ const buildGetActivityDetail =
     const deposit =
       // since one tx can be split into two (delegation, registration) actions,
       // ensure only the registration tx carries the deposit
-      implicitCoin.deposit && type === DelegationActivityType.delegationRegistration
+      implicitCoin.deposit &&
+      (type === DelegationActivityType.delegationRegistration || type === ConwayEraCertificatesTypes.Registration)
         ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
         : undefined;
     const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
     const depositReclaim =
       // since one tx can be split into two (delegation, de-registration) actions,
       // ensure only the de-registration tx carries the reclaimed deposit
-      depositReclaimValue && type === DelegationActivityType.delegationDeregistration
+      depositReclaimValue &&
+      (type === DelegationActivityType.delegationDeregistration || type === ConwayEraCertificatesTypes.Unregistration)
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
@@ -250,16 +253,10 @@ const buildGetActivityDetail =
       metadata: txMetadata,
       includedUtcDate: blocks?.utcDate,
       includedUtcTime: blocks?.utcTime,
-      // TODO: store the raw data here and transform it later so we always have the raw data when needed.(LW-9570)
-      votingProcedures: votingProceduresTransformer(tx.body.votingProcedures),
-      proposalProcedures: governanceProposalsTransformer({
-        cardanoCoin,
-        coinPrices,
-        fiatCurrency,
-        proposalProcedures: tx.body.proposalProcedures
-      }),
-      certificates: certificateTransformer(cardanoCoin, coinPrices, fiatCurrency, tx.body.certificates),
-      collateral: collateralInAda
+      collateral: collateralInAda,
+      votingProcedures: tx.body.votingProcedures,
+      proposalProcedures: tx.body.proposalProcedures,
+      certificates: tx.body.certificates
     };
 
     if (type === DelegationActivityType.delegation && delegationInfo) {

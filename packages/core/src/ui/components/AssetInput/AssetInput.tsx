@@ -3,11 +3,13 @@
 import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { Tooltip, Input } from 'antd';
 import { Button, getTextWidth } from '@lace/common';
-import { useTranslate } from '@src/ui/hooks/useTranslate';
 import { ReactComponent as Chevron } from '../../assets/icons/chevron-right.component.svg';
 import styles from './AssetInput.module.scss';
 import { validateNumericValue } from '@src/ui/utils/validate-numeric-value';
 import { sanitizeNumber } from '@ui/utils/sanitize-number';
+import { useTranslation } from 'react-i18next';
+import cn from 'classnames';
+import { CoreTranslationKey } from '@lace/translation';
 
 const isSameNumberFormat = (num1: string, num2: string) => {
   if (!num1 || !num2) return false;
@@ -35,10 +37,11 @@ export interface AssetInputProps {
   onNameClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   max?: string;
   hasMaxBtn?: boolean;
+  displayMaxBtn?: boolean;
   hasReachedMaxAmount?: boolean;
   focused?: boolean;
   onBlurErrors?: Set<string>;
-  getErrorMessage: (message: string) => string;
+  getErrorMessage: (message: string) => CoreTranslationKey;
   setFocusInput?: (input?: string) => void;
   setFocus?: (focus: boolean) => void;
 }
@@ -66,6 +69,7 @@ export const AssetInput = ({
   formattedFiatValue = fiatValue,
   max,
   hasMaxBtn = true,
+  displayMaxBtn = false,
   hasReachedMaxAmount,
   focused,
   setFocusInput,
@@ -103,7 +107,7 @@ export const AssetInput = ({
     }
   }, [compactValue, value, focused]);
 
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsInvalid(invalid);
@@ -186,7 +190,7 @@ export const AssetInput = ({
         </div>
 
         <div className={styles.amountContainer}>
-          {hasMaxBtn && !Number.parseFloat(value) && (
+          {hasMaxBtn && (!Number.parseFloat(value) || displayMaxBtn) && (
             // There is a span element as children of the button that propagates the click event when the button is disabled, this makes the input element to focus adding 0 as value.
             // To fix this issue, I moved the button click event to a parent div, so, when the button is disabled the event propagation can be stopped.
             <div onClick={setMaxValue}>
@@ -194,10 +198,10 @@ export const AssetInput = ({
                 data-testid="max-bttn"
                 size="small"
                 color="secondary"
-                className={styles.maxBtn}
+                className={cn(styles.maxBtn, { [styles.show]: displayMaxBtn })}
                 disabled={hasReachedMaxAmount}
               >
-                {t('package.core.assetInput.maxButton')}
+                {t('core.assetInput.maxButton')}
               </Button>
             </div>
           )}

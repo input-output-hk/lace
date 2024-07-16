@@ -1,0 +1,34 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+
+.container {
+  background-color: black;
+  position: relative;
+
+  background-repeat: no-repeat;
+  background-position: right 10px bottom -10px;
+
+  @media screen and (min-width: $breakpoint-minimum) {
+    background-position: right 40px bottom -10px;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  button {
+    background: transparent;
+    color: white;
+  }
+}
+
+.title {
+  color: white !important;
+  white-space: pre-wrap;
+}
+
+.description {
+  color: #a9a9a9 !important;
+  white-space: pre-wrap;
+}

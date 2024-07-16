@@ -1,11 +1,11 @@
-@NetworkSwitching-popup
+@NetworkSwitching-popup @Testnet @Mainnet
 Feature: LW: Network Switching - popup view
 
   Background:
     Given Wallet is synced
 
   @LW-3227
-  Scenario Outline: Popup View - Currency symbol is correct when on different network
+  Scenario Outline: Popup View - Currency symbol is correct when on different network - <network> <ticker>
     Given I switch network to: "<network>" in popup mode
     And Wallet is synced
     When I navigate to Tokens popup page

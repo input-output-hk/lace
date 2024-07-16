@@ -1,18 +1,30 @@
-import React, { createContext, useContext, useState } from 'react';
-import { Data, Providers } from './types';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { WalletRestoreStep } from './types';
+import { CreateWalletParams } from '@hooks';
+import { useHistory } from 'react-router';
+import { walletRoutePaths } from '@routes';
+import { useHotWalletCreation } from '../useHotWalletCreation';
+import { RecoveryPhraseLength } from '@lace/core';
+import { useWalletOnboarding } from '../walletOnboardingContext';
+import { deleteFromLocalStorage } from '@utils/local-storage';
 
-interface Props {
-  children: React.ReactNode;
-  providers: Providers;
-}
+type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+
+type OnRecoveryPhraseLengthChange = (length: RecoveryPhraseLength) => void;
 
 interface State {
-  data: Data;
+  back: () => void;
+  createWalletData: CreateWalletParams;
+  finalizeWalletRestoration: () => Promise<void>;
+  next: () => Promise<void>;
+  onNameAndPasswordChange: OnNameAndPasswordChange;
+  onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange;
   setMnemonic: (mnemonic: string[]) => void;
-  setLength: (length: number) => void;
-  setName: (name: string) => void;
-  setPassword: (password: string) => void;
-  onChange: (state: { name: string; password: string }) => void;
+  step: WalletRestoreStep;
+}
+
+interface Props {
+  children: (state: State) => React.ReactNode;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -24,47 +36,106 @@ export const useRestoreWallet = (): State => {
   return state;
 };
 
-export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
-  const [state, setState] = useState<Data>({
-    mnemonic: [],
-    length: 0,
-    name: '',
-    password: ''
-  });
+const initialMnemonicLength: RecoveryPhraseLength = 24;
 
-  const setMnemonic = (mnemonic: string[]) => {
-    providers.confirmationDialog.shouldShowDialog$.next(Boolean(mnemonic));
-    setState((prevState) => ({ ...prevState, mnemonic }));
-  };
+export const RestoreWalletProvider = ({ children }: Props): React.ReactElement => {
+  const history = useHistory();
+  const { forgotPasswordFlowActive, postHogActions, setFormDirty } = useWalletOnboarding();
+  const [step, setStep] = useState<WalletRestoreStep>(WalletRestoreStep.RecoveryPhrase);
+  const { clearSecrets, createWallet, createWalletData, sendPostWalletAddAnalytics, setCreateWalletData } =
+    useHotWalletCreation({
+      initialMnemonic: Array.from({ length: initialMnemonicLength }, () => '')
+    });
 
-  const setLength = (length: number) => {
-    setState((prevState) => ({ ...prevState, length, mnemonic: Array.from({ length }) }));
-  };
-
-  const setName = (name: string) => {
-    setState((prevState) => ({ ...prevState, name }));
-  };
-
-  const setPassword = (password: string) => {
-    setState((prevState) => ({ ...prevState, password }));
-  };
-
-  const onChange = (s: { name: string; password: string }) => {
-    providers.confirmationDialog.shouldShowDialog$.next(Boolean(s.name || s.password));
-  };
-
-  return (
-    <RestoreWalletContext.Provider
-      value={{
-        data: state,
-        setMnemonic,
-        setLength,
-        setName,
-        setPassword,
-        onChange
-      }}
-    >
-      {children}
-    </RestoreWalletContext.Provider>
+  const setMnemonic = useCallback(
+    (mnemonic: string[]) => {
+      const mnemonicNotEmpty = mnemonic.some((m) => m);
+      setFormDirty(mnemonicNotEmpty);
+      setCreateWalletData((prevState) => ({ ...prevState, mnemonic }));
+    },
+    [setCreateWalletData, setFormDirty]
   );
+
+  const onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange = useCallback(
+    (length) => {
+      setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Array.from({ length }, () => '') }));
+    },
+    [setCreateWalletData]
+  );
+
+  const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
+    ({ name, password }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+    },
+    [setCreateWalletData]
+  );
+
+  const finalizeWalletRestoration = useCallback(async () => {
+    const { source, wallet } = await createWallet();
+    void sendPostWalletAddAnalytics({
+      extendedAccountPublicKey: source.account.extendedAccountPublicKey,
+      postHogActionHdWallet: postHogActions.restore.HD_WALLET,
+      postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
+      wallet
+    });
+    if (forgotPasswordFlowActive) {
+      deleteFromLocalStorage('isForgotPasswordFlow');
+    }
+    clearSecrets();
+  }, [
+    clearSecrets,
+    createWallet,
+    forgotPasswordFlowActive,
+    postHogActions.restore.HD_WALLET,
+    postHogActions.restore.WALLET_ADDED,
+    sendPostWalletAddAnalytics
+  ]);
+
+  const next = useCallback(async () => {
+    switch (step) {
+      case WalletRestoreStep.RecoveryPhrase:
+        setStep(WalletRestoreStep.Setup);
+        break;
+      case WalletRestoreStep.Setup:
+        history.push(walletRoutePaths.assets);
+        break;
+    }
+  }, [history, step]);
+
+  const back = useCallback(() => {
+    switch (step) {
+      case WalletRestoreStep.RecoveryPhrase:
+        setFormDirty(false);
+        history.push(walletRoutePaths.newWallet.root);
+        break;
+      case WalletRestoreStep.Setup:
+        setStep(WalletRestoreStep.RecoveryPhrase);
+        break;
+    }
+  }, [history, setFormDirty, step]);
+
+  const state = useMemo(
+    () => ({
+      back,
+      createWalletData,
+      finalizeWalletRestoration,
+      next,
+      onNameAndPasswordChange,
+      onRecoveryPhraseLengthChange,
+      setMnemonic,
+      step
+    }),
+    [
+      back,
+      createWalletData,
+      finalizeWalletRestoration,
+      next,
+      onNameAndPasswordChange,
+      onRecoveryPhraseLengthChange,
+      setMnemonic,
+      step
+    ]
+  );
+
+  return <RestoreWalletContext.Provider value={state}>{children(state)}</RestoreWalletContext.Provider>;
 };

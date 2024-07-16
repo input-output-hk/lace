@@ -33,7 +33,7 @@ export const useCollateral = (): UseCollateralReturn => {
   const { setBuiltTxData } = useBuiltTxState();
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const addresses = useObservable(inMemoryWallet.addresses$);
+  const addresses = useObservable(inMemoryWallet?.addresses$);
   const walletAddress = addresses?.[0]?.address;
   const maxAvailableAda = useMaxAda();
   const hasEnoughAda = useMemo(() => maxAvailableAda >= COLLATERAL_AMOUNT_LOVELACES, [maxAvailableAda]);

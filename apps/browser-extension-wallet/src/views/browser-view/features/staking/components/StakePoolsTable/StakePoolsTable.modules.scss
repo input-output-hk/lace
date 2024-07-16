@@ -1,6 +1,10 @@
 @import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
 
+.tableWrapper {
+  position: relative;
+}
+
 .table {
   display: flex;
   flex-direction: column;

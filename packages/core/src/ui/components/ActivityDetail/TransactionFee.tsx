@@ -1,6 +1,6 @@
 import React from 'react';
-import { useTranslate } from '@src/ui/hooks';
-import { TransactionSummary } from '@lace/ui';
+import { TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
+import { useTranslation } from 'react-i18next';
 
 export interface TransactionFeeProps {
   fee: string;
@@ -24,13 +24,13 @@ export const TransactionFee = ({
   displayFiat,
   highlightPositiveAmount
 }: TransactionFeeProps): React.ReactElement => {
-  const { t } = useTranslate();
+  const { t } = useTranslation();
 
   return (
     <TransactionSummary.Amount
       amount={`${fee} ${coinSymbol}`}
       fiatPrice={amountTransformer(fee)}
-      label={label ?? t('package.core.activityDetails.transactionFee')}
+      label={label ?? t('core.activityDetails.transactionFee')}
       tooltip={tooltipInfo}
       data-testid={testId ?? 'fee'}
       className={className}

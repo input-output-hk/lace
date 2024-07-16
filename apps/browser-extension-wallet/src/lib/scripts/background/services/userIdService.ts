@@ -1,4 +1,4 @@
-import { WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
+import { WalletManagerApi, WalletRepositoryApi } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { BehaviorSubject, ReplaySubject, combineLatest, distinctUntilChanged } from 'rxjs';
 import { getActiveWallet, hashExtendedAccountPublicKey } from '@lib/scripts/background/util';
@@ -69,9 +69,7 @@ export class UserIdService implements UserIdServiceInterface {
       walletRepository: this.walletRepository
     });
     if (!active) return;
-    if (active.wallet.type === WalletType.Script || !active.account) {
-      throw new Error('Script wallet support not implemented');
-    }
+
     const { usePersistentUserId } = await this.storage.get();
 
     if (!usePersistentUserId) {

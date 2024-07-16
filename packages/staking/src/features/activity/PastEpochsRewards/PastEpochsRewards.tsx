@@ -1,4 +1,4 @@
-import { Flex, Text } from '@lace/ui';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EpochsSwitch } from '../EpochsSwitch';

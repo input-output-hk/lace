@@ -5,6 +5,9 @@ import CommonOnboardingElements from './commonOnboardingElements';
 import { RecoveryPhrase } from '../../types/onboarding';
 import { clearInputFieldValue, setInputFieldValue } from '../../utils/inputFieldUtils';
 import testContext from '../../utils/testContext';
+import { browser } from '@wdio/globals';
+import { setClipboardReadPermission } from '../../utils/browserPermissionsUtils';
+import clipboard from 'clipboardy';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -12,12 +15,14 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_AUTOCOMPLETE_DROPDOWN = '.ant-select-dropdown';
   private MNEMONIC_WORD_AUTOCOMPLETE_OPTIONS = '.ant-select-item-option-content';
   private MNEMONIC_ERROR_MESSAGE = '[data-testid="passphrase-error"]';
-  private MNEMONIC_LENGTH_SELECTOR_12 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="12"]';
-  private MNEMONIC_LENGTH_SELECTOR_15 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="15"]';
-  private MNEMONIC_LENGTH_SELECTOR_24 = '//p[@data-testid="wallet-setup-step-subtitle"]//div[@title="24"]';
+  private MNEMONIC_LENGTH_SELECTOR_12 = '[data-testid="recovery-phrase-12"]';
+  private MNEMONIC_LENGTH_SELECTOR_15 = '[data-testid="recovery-phrase-15"]';
+  private MNEMONIC_LENGTH_SELECTOR_24 = '[data-testid="recovery-phrase-24"]';
   private WATCH_VIDEO_LINK = '[data-testid="watch-video-link"]';
   private COPY_TO_CLIPBOARD_BUTTON = '[data-testid="copy-to-clipboard-button"]';
   private PASTE_FROM_CLIPBOARD_BUTTON = '[data-testid="paste-from-clipboard-button"]';
+  private CLIPBOARD_TOOLTIP = '[data-testid="mnemonic-copy-paste-tooltip"]';
+  private CLIPBOARD_TOOLTIP_LINK = '[data-testid="mnemonic-copy-paste-tooltip"] a';
   private mnemonicWordsList: string[] = [];
 
   get mnemonicWords(): ChainablePromiseArray<WebdriverIO.ElementArray> {
@@ -64,6 +69,14 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     return $(this.MNEMONIC_LENGTH_SELECTOR_24);
   }
 
+  get clipboardTooltip(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLIPBOARD_TOOLTIP);
+  }
+
+  get clipboardTooltipLink(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLIPBOARD_TOOLTIP_LINK);
+  }
+
   async selectMnemonicLength(length: RecoveryPhrase): Promise<void> {
     switch (length) {
       case '12':
@@ -88,6 +101,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   async clickHeaderToLoseFocus() {
     await this.stepHeader.click();
   }
+
   async addCharToMnemonicField(characters: string, inputNumber: number) {
     const inputs = await this.mnemonicInputs;
     await inputs[inputNumber].addValue(characters);
@@ -145,17 +159,31 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     }
   }
 
+  async clickOnCopyToClipboardButton(): Promise<void> {
+    await this.copyToClipboardButton.waitForClickable();
+    await this.copyToClipboardButton.click();
+  }
+
+  async clickOnPasteFromClipboardButton(): Promise<void> {
+    await setClipboardReadPermission('granted');
+    await this.pasteFromClipboardButton.waitForClickable();
+    await this.pasteFromClipboardButton.click();
+  }
+
   async goToMnemonicVerificationPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
-    fillValues = true
+    fillValues = false
   ): Promise<void> {
     if (flowType === 'Create') {
-      this.mnemonicWordsList = await this.getMnemonicWordTexts();
+      await this.clickOnCopyToClipboardButton();
       await this.nextButton.click();
     }
     if (fillValues) {
-      flowType === 'Create' ? await this.enterMnemonicWords() : await this.enterMnemonicWords(mnemonicWords);
+      if (flowType === 'Restore') {
+        await clipboard.write(mnemonicWords.join(','));
+      }
+      await this.clickOnPasteFromClipboardButton();
     }
   }
 }

@@ -22,6 +22,7 @@ interface Props {
   assets: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
   setIsBundle: (value: boolean) => void;
   assetBalances: Tokens;
+  spendableCoin: bigint;
 }
 
 export const BundlesList = ({
@@ -32,7 +33,8 @@ export const BundlesList = ({
   insufficientBalanceInputs,
   reachedMaxAmountList,
   assets,
-  assetBalances
+  assetBalances,
+  spendableCoin
 }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const { setSection } = useSections();
@@ -89,6 +91,7 @@ export const BundlesList = ({
             onAddAsset={() => handleAssetPicker(bundleId)}
             openAssetPicker={(coinId) => handleAssetPicker(bundleId, coinId)}
             canAddMoreAssets={canAddMoreAssets(bundleId)}
+            spendableCoin={spendableCoin}
           />
         </RowContainer>
       ))}

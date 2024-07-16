@@ -1,6 +1,6 @@
 import Icon from '@ant-design/icons';
+import { useTheme } from '@input-output-hk/lace-ui-toolkit';
 import { Button, QRCode, toast, useBoundingBox } from '@lace/common';
-import { useTheme } from '@lace/ui';
 import React, { useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useTranslation } from 'react-i18next';

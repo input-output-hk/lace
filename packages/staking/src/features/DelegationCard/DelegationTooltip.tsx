@@ -1,4 +1,4 @@
-import { Box, Flex, RichTooltipContent, TooltipContentRendererProps } from '@lace/ui';
+import { Box, Flex, RichTooltipContent, TooltipContentRendererProps } from '@input-output-hk/lace-ui-toolkit';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DistributionItem } from './types';

@@ -2,17 +2,17 @@
 /* eslint-disable unicorn/no-null */
 import { useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
-import { useWalletStore } from '@stores';
+import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
 import { logger, observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import {
-  deleteFromLocalStorage,
+  bufferReviver,
   clearLocalStorage,
+  deleteFromLocalStorage,
   getValueFromLocalStorage,
-  saveValueInLocalStorage,
-  bufferReviver
+  saveValueInLocalStorage
 } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
@@ -24,6 +24,7 @@ import {
   AddWalletProps,
   AnyBip32Wallet,
   AnyWallet,
+  WalletId,
   WalletManagerActivateProps,
   WalletManagerApi,
   WalletRepositoryApi,
@@ -32,22 +33,30 @@ import {
 import { deepEquals, HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
+import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
+import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import * as KeyManagement from '@cardano-sdk/key-management';
+import { Buffer } from 'buffer';
+import { Cardano } from '@cardano-sdk/core';
+import * as Crypto from '@cardano-sdk/crypto';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
 export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
 
-export interface CreateWallet {
+export interface CreateWalletParams {
   name: string;
   mnemonic: string[];
   password: string;
   chainId?: Wallet.Cardano.ChainId;
 }
 
-export interface SetWallet {
-  walletInstance: Wallet.CardanoWallet;
-  chainName?: Wallet.ChainName;
-  mnemonicVerificationFrequency?: string;
+interface CreateSharedWalletParams {
+  name: string;
+  accountIndex?: number;
+  chainId?: Wallet.Cardano.ChainId;
+  publicKeys: Wallet.Crypto.Bip32PublicKeyHex[];
+  ownSignerWalletId: WalletId;
 }
 
 export interface CreateHardwareWallet {
@@ -62,9 +71,18 @@ type WalletManagerAddAccountProps = {
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
   passphrase?: Uint8Array;
+  purpose?: KeyManagement.KeyPurpose;
 };
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
+
+type CreateHardwareWalletRevampedParams = {
+  accountIndex: number;
+  name: string;
+  connection: Wallet.HardwareWalletConnection;
+};
+
+type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
 
 export interface UseWalletManager {
   walletManager: WalletManagerApi;
@@ -75,44 +93,34 @@ export interface UseWalletManager {
     wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
-  createWallet: (args: CreateWallet) => Promise<Wallet.CardanoWallet>;
+  createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
+  createInMemorySharedWallet: (args: CreateSharedWalletParams) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
+  createHardwareWalletRevamped: CreateHardwareWalletRevamped;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
+  connectHardwareWalletRevamped: typeof connectHardwareWalletRevamped;
   saveHardwareWallet: (wallet: Wallet.CardanoWallet, chainName?: Wallet.ChainName) => Promise<void>;
   /**
    * @returns active wallet id after deleting the wallet; undefined if deleted the last wallet
    */
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<WalletManagerActivateProps | undefined>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
+
+  /**
+   * Force the wallet to recreate all providers and reload. This is useful for changing
+   * provider properties or configurations without switching the wallet.
+   */
+  reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
+  enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
+  generateSharedWalletKey: (password: string, walletId: WalletId) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = 0;
-  }
-};
-
-const getHwExtendedAccountPublicKey = async (
-  walletType: Wallet.HardwareWallets,
-  accountIndex: number,
-  deviceConnection?: Wallet.DeviceConnection
-) => {
-  switch (walletType) {
-    case WalletType.Ledger:
-      await Wallet.Ledger.LedgerKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
-      return Wallet.Ledger.LedgerKeyAgent.getXpub({
-        communicationType: Wallet.KeyManagement.CommunicationType.Web,
-        deviceConnection: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined,
-        accountIndex
-      });
-    case WalletType.Trezor:
-      return Wallet.Trezor.TrezorKeyAgent.getXpub({
-        communicationType: Wallet.KeyManagement.CommunicationType.Web,
-        accountIndex
-      });
   }
 };
 
@@ -143,7 +151,7 @@ const getExtendedAccountPublicKey = async (
     }
     case WalletType.Ledger:
     case WalletType.Trezor:
-      return getHwExtendedAccountPublicKey(wallet.type, accountIndex);
+      return Wallet.getHwExtendedAccountPublicKey(wallet.type, accountIndex);
   }
 };
 
@@ -210,6 +218,41 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
 export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
   await Wallet.connectDevice(model);
 
+const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
+  Wallet.connectDeviceRevamped(usbDevice);
+
+const deriveSharedWalletExtendedPublicKeyHash = async (
+  key: Crypto.Bip32PublicKeyHex,
+  derivationPath: KeyManagement.AccountKeyDerivationPath
+): Promise<Crypto.Ed25519KeyHashHex> => {
+  const accountKey = Crypto.Bip32PublicKey.fromHex(key);
+  const paymentKey = await accountKey.derive([derivationPath.role, derivationPath.index]);
+  return Crypto.Ed25519KeyHashHex(await paymentKey.hash());
+};
+
+const buildSharedWalletScript = async (
+  expectedSigners: Array<Crypto.Bip32PublicKeyHex>,
+  derivationPath: KeyManagement.AccountKeyDerivationPath
+) => {
+  const signers = [...expectedSigners].sort((key1, key2) => key1.localeCompare(key2));
+
+  const script: Cardano.NativeScript = {
+    __type: Cardano.ScriptType.Native,
+    kind: Cardano.NativeScriptKind.RequireAllOf,
+    scripts: []
+  };
+
+  for (const signer of signers) {
+    script.scripts.push({
+      __type: Cardano.ScriptType.Native,
+      keyHash: await deriveSharedWalletExtendedPublicKeyHash(signer, derivationPath),
+      kind: Cardano.NativeScriptKind.RequireSignature
+    });
+  }
+
+  return script;
+};
+
 export const useWalletManager = (): UseWalletManager => {
   const {
     walletLock,
@@ -233,6 +276,7 @@ export const useWalletManager = (): UseWalletManager => {
   } = useDbState<NftFoldersSchema, NftFoldersSchema>([], nftFoldersSchema);
   const backgroundService = useBackgroundServiceAPIContext();
   const userIdService = getUserIdService();
+  const { getCustomSubmitApiForNetwork, updateCustomSubmitApi } = useCustomSubmitApi();
 
   const getCurrentChainId = useCallback(() => {
     if (currentChain) return currentChain;
@@ -241,25 +285,21 @@ export const useWalletManager = (): UseWalletManager => {
     return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
   }, [currentChain]);
 
-  /**
-   * Creates a Ledger or Trezor hardware wallet
-   * and saves it in browser storage with the data to lock/unlock it
-   */
-  const createHardwareWallet = useCallback(
-    async ({
-      accountIndex = 0,
-      deviceConnection,
-      name,
-      connectedDevice
-    }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> => {
-      const extendedAccountPublicKey = await getHwExtendedAccountPublicKey(
-        connectedDevice,
-        accountIndex,
-        deviceConnection
-      );
+  const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
+    async ({ accountIndex, connection, name }) => {
+      let extendedAccountPublicKey;
+      try {
+        extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey(
+          connection.type,
+          accountIndex,
+          connection.type === WalletType.Ledger ? connection.value : undefined
+        );
+      } catch (error: unknown) {
+        throw error;
+      }
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
         metadata: { name, lastActiveAccountIndex: accountIndex },
-        type: connectedDevice,
+        type: connection.type,
         accounts: [
           {
             extendedAccountPublicKey,
@@ -289,6 +329,28 @@ export const useWalletManager = (): UseWalletManager => {
       };
     },
     [getCurrentChainId]
+  );
+
+  /**
+   * Creates a Ledger or Trezor hardware wallet
+   * and saves it in browser storage with the data to lock/unlock it
+   */
+  const createHardwareWallet = useCallback(
+    async ({
+      accountIndex = 0,
+      deviceConnection,
+      name,
+      connectedDevice
+    }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> =>
+      createHardwareWalletRevamped({
+        accountIndex,
+        connection: {
+          type: connectedDevice,
+          value: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined
+        },
+        name
+      }),
+    [createHardwareWalletRevamped]
   );
 
   const tryMigrateToWalletRepository = useCallback(async (): Promise<
@@ -445,7 +507,7 @@ export const useWalletManager = (): UseWalletManager => {
       name,
       password,
       chainId = getCurrentChainId()
-    }: CreateWallet): Promise<Wallet.CardanoWallet> => {
+    }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
       const accountIndex = 0;
       const passphrase = Buffer.from(password, 'utf8');
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
@@ -453,7 +515,8 @@ export const useWalletManager = (): UseWalletManager => {
           chainId,
           getPassphrase: async () => passphrase,
           mnemonicWords: mnemonic,
-          accountIndex
+          accountIndex,
+          purpose: KeyManagement.KeyPurpose.STANDARD
         },
         {
           bip32Ed25519: Wallet.bip32Ed25519,
@@ -588,7 +651,7 @@ export const useWalletManager = (): UseWalletManager => {
       deleteFromLocalStorage('userInfo');
       deleteFromLocalStorage('keyAgentData');
       await backgroundService.clearBackgroundStorage({
-        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
+        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration', 'customSubmitTxUrl']
       });
       resetWalletLock();
       setCardanoWallet();
@@ -600,6 +663,7 @@ export const useWalletManager = (): UseWalletManager => {
         'hideBalance',
         'isForgotPasswordFlow',
         'multidelegationFirstVisit',
+        'isMultiDelegationDAppCompatibilityModalVisible',
         'multidelegationFirstVisitSincePortfolioPersistence'
       ];
 
@@ -635,6 +699,12 @@ export const useWalletManager = (): UseWalletManager => {
     ]
   );
 
+  const reloadWallet = useCallback(async (): Promise<void> => {
+    const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
+
+    await walletManager.activate(activeWallet, true);
+  }, []);
+
   /**
    * Deactivates current wallet and activates it again with the new network
    */
@@ -647,11 +717,22 @@ export const useWalletManager = (): UseWalletManager => {
 
       setAddressesDiscoveryCompleted(false);
       updateAppSettings({ ...settings, chainName });
+      const customSubmitApi = getCustomSubmitApiForNetwork(chainName);
+      await setBackgroundStorage({ customSubmitTxUrl: customSubmitApi.url });
+      await reloadWallet();
 
       setCurrentChain(chainName);
       setCardanoCoin(chainId);
     },
-    [setAddressesDiscoveryCompleted, updateAppSettings, settings, setCurrentChain, setCardanoCoin]
+    [
+      setAddressesDiscoveryCompleted,
+      updateAppSettings,
+      settings,
+      getCustomSubmitApiForNetwork,
+      reloadWallet,
+      setCurrentChain,
+      setCardanoCoin
+    ]
   );
 
   /**
@@ -720,6 +801,98 @@ export const useWalletManager = (): UseWalletManager => {
     [cardanoWallet]
   );
 
+  const generateSharedWalletKey = useCallback(
+    async (password: string, walletId: WalletId): Promise<Wallet.Crypto.Bip32PublicKeyHex> => {
+      const chainId = getCurrentChainId();
+      const mnemonic = await getMnemonic(Buffer.from(password));
+      const [wallets] = await firstValueFrom(combineLatest([walletRepository.wallets$, walletManager.activeWalletId$]));
+      const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+        {
+          chainId,
+          getPassphrase: async () => Buffer.from('password', 'utf8'),
+          mnemonicWords: mnemonic,
+          accountIndex: 0,
+          purpose: KeyManagement.KeyPurpose.MULTI_SIG
+        },
+        {
+          bip32Ed25519: Wallet.bip32Ed25519,
+          logger
+        }
+      );
+
+      await walletRepository.updateWalletMetadata({
+        walletId,
+        metadata: {
+          ...wallets.find(({ walletId: id }) => id === walletId).metadata,
+          extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+        }
+      });
+
+      return keyAgent.extendedAccountPublicKey;
+    },
+    [getCurrentChainId, getMnemonic]
+  );
+
+  const createInMemorySharedWallet = useCallback(
+    async ({
+      accountIndex = 0,
+      name,
+      chainId = getCurrentChainId(),
+      publicKeys,
+      ownSignerWalletId
+    }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
+      const paymentScriptKeyPath = {
+        index: 0,
+        role: KeyManagement.KeyRole.External
+      };
+
+      const stakingScriptKeyPath = {
+        index: 0,
+        role: KeyManagement.KeyRole.Stake
+      };
+
+      const paymentScript = await buildSharedWalletScript(publicKeys, paymentScriptKeyPath);
+      const stakingScript = await buildSharedWalletScript(publicKeys, stakingScriptKeyPath);
+
+      const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+        metadata: { name },
+        ownSigners: [
+          {
+            accountIndex: 0,
+            paymentScriptKeyPath,
+            purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+            stakingScriptKeyPath,
+            walletId: ownSignerWalletId
+          }
+        ],
+        paymentScript,
+        stakingScript,
+        type: WalletType.Script
+      };
+
+      const scriptWalletId = await walletRepository.addWallet(createScriptWalletProps);
+
+      await walletManager.activate({
+        walletId: scriptWalletId,
+        chainId,
+        accountIndex
+      });
+
+      return {
+        name,
+        signingCoordinator,
+        wallet: observableWallet,
+        source: {
+          wallet: {
+            ...createScriptWalletProps,
+            walletId: scriptWalletId
+          }
+        }
+      };
+    },
+    [getCurrentChainId]
+  );
+
   const addAccount = useCallback(
     async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
       const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
@@ -734,6 +907,19 @@ export const useWalletManager = (): UseWalletManager => {
     [getCurrentChainId]
   );
 
+  const enableCustomNode = useCallback(
+    async (network: EnvironmentTypes, value: string) => {
+      const customApiData = {
+        status: !!value,
+        url: value
+      };
+      updateCustomSubmitApi(network, customApiData);
+      await backgroundService.setBackgroundStorage({ customSubmitTxUrl: value });
+      await reloadWallet();
+    },
+    [backgroundService, reloadWallet, updateCustomSubmitApi]
+  );
+
   return {
     activateWallet,
     addAccount,
@@ -741,13 +927,19 @@ export const useWalletManager = (): UseWalletManager => {
     unlockWallet,
     loadWallet,
     createWallet,
+    createInMemorySharedWallet,
     createHardwareWallet,
+    createHardwareWalletRevamped,
     connectHardwareWallet,
+    connectHardwareWalletRevamped,
     saveHardwareWallet,
     deleteWallet,
+    reloadWallet,
     switchNetwork,
     walletManager,
     walletRepository,
-    getMnemonic
+    getMnemonic,
+    enableCustomNode,
+    generateSharedWalletKey
   };
 };

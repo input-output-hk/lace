@@ -18,15 +18,15 @@ const transformManifest = (content, mode) => {
       )
       .replace(
         '$ADA_HANDLE_URLS',
-        `${process.env.ADA_HANDLE_URL_MAINNET} ${process.env.ADA_HANDLE_URL_PREPROD} ${process.env.ADA_HANDLE_URL_PREVIEW}`
+        `${process.env.ADA_HANDLE_URL_MAINNET} ${process.env.ADA_HANDLE_URL_PREPROD} ${process.env.ADA_HANDLE_URL_PREVIEW} ${process.env.ADA_HANDLE_URL_SANCHONET}`
       )
       .replace('$LOCALHOST_DEFAULT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace('$LOCALHOST_SCRIPT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace(
         '$LOCALHOST_CONNECT_SRC',
         mode === 'development'
-          ? 'http://localhost:3000 http://localhost:3001 http://localhost:8080 ws://localhost:3000 ws://0.0.0.0:3000/ws wss://localhost:3000  ws://localhost:3001 ws://0.0.0.0:3001/ws wss://localhost:3001'
-          : ''
+          ? 'http://localhost:* http://127.0.0.1:* ws://localhost:3000 ws://0.0.0.0:3000/ws wss://localhost:3000  ws://localhost:3001 ws://0.0.0.0:3001/ws wss://localhost:3001'
+          : 'http://localhost:* http://127.0.0.1:*'
       );
 
     return JSON.stringify(manifest);

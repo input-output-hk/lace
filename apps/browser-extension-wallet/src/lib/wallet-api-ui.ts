@@ -57,7 +57,7 @@ export const keyAgentFactory = createKeyAgentFactory({ bip32Ed25519: Wallet.bip3
 
 export const signingCoordinator = new SigningCoordinator<Wallet.WalletMetadata, Wallet.AccountMetadata>(
   { hwOptions: { manifest: Wallet.manifest, communicationType: Wallet.KeyManagement.CommunicationType.Web } },
-  { keyAgentFactory }
+  { keyAgentFactory, logger }
 );
 exposeSigningCoordinatorApi({ signingCoordinator }, { logger, runtime });
 

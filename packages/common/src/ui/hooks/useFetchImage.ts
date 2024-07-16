@@ -31,7 +31,6 @@ type FetchAction = {
 const handleImageFetch = (image: string) => {
   const downloadingImage = new Image();
 
-  // eslint-disable-next-line promise/avoid-new
   const imageResponse: Promise<ImageResponse> = new Promise<ImageResponse>((resolve) => {
     const onLoadEvent = (event: any) => {
       resolve({

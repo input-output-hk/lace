@@ -1,6 +1,14 @@
 import React from 'react';
-import { sx, Box, Flex, Text, Button, FileUpload, ActionCard } from '@lace/ui';
-import { ReactComponent as RefreshIcon } from '@lace/icons/dist/RefreshComponent';
+import {
+  sx,
+  Box,
+  Flex,
+  Text,
+  Button,
+  FileUpload,
+  ActionCard,
+  RefreshComponent
+} from '@input-output-hk/lace-ui-toolkit';
 
 type Title = { text: string; highlight: boolean };
 
@@ -67,7 +75,7 @@ export const FindYourSharedWallet = ({ translations, onChange, onBack, onNext, f
             <ActionCard
               title={translations.syncNetwork.title}
               description={translations.syncNetwork.description}
-              icon={<RefreshIcon />}
+              icon={<RefreshComponent />}
             />
           </Box>
         )}

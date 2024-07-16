@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable promise/avoid-new */
 import { createQueue, TaskQueue } from '../taskQueue';
 
 describe('createQueue', () => {

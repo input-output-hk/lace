@@ -1,5 +1,5 @@
+import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 import { AssetActivityListProps, GroupedAssetActivityList } from '@lace/core';
-import { Box, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { StateStatus } from 'features/outside-handles-provider';
 import { useTranslation } from 'react-i18next';

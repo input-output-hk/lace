@@ -1,4 +1,4 @@
-import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
+import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
 import {
   useAnalyticsContext,
@@ -7,7 +7,7 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
+import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
+  MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
@@ -37,6 +38,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
+  const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
   const {
     walletType,
     inMemoryWallet,
@@ -48,7 +50,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     networkInfo,
     blockchainProvider,
     walletInfo,
-    currentChain
+    currentChain,
+    environmentName
   } = useWalletStore((state) => ({
     walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
@@ -60,7 +63,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchNetworkInfo: state.fetchNetworkInfo,
     blockchainProvider: state.blockchainProvider,
     walletInfo: state.walletInfo,
-    currentChain: state.currentChain
+    currentChain: state.currentChain,
+    environmentName: state.environmentName
   }));
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
@@ -83,13 +87,15 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
+    useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
   const [
     multidelegationFirstVisitSincePortfolioPersistence,
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
-    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY);
+    useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();
@@ -106,6 +112,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         setStakingBrowserPreferencesPersistence,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        multidelegationDAppCompatibility,
+        triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
         multidelegationFirstVisitSincePortfolioPersistence,
         triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
           setMultidelegationFirstVisit(false);
@@ -140,14 +148,15 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         compactNumber: compactNumberWithUnit,
         walletAddress,
         currentChain,
-        isMultidelegationSupportedByDevice
+        isMultidelegationSupportedByDevice,
+        isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status
       }}
     >
       <ContentLayout
         title={<SectionTitle title={t('staking.sectionTitle')} classname={styles.sectionTilte} />}
         isLoading={isLoadingNetworkInfo}
       >
-        <StakingPopup currentChain={currentChain} theme={theme.name} />
+        <StakingPopup theme={theme.name} />
       </ContentLayout>
     </OutsideHandlesProvider>
   );

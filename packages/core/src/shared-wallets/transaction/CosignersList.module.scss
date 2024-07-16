@@ -1,0 +1,48 @@
+@import '../../ui/styles/index.scss';
+@import '../../../../common/src/ui/styles/abstracts/typography';
+
+.cosignersListHeader {
+  @include text-body-semi-bold;
+}
+
+.cosignersListItemContainer {
+  flex: 1;
+  min-width: 0;
+}
+
+.cosignersListItemAvatar {
+  flex-wrap: 1;
+}
+
+.cosignersListItem {
+  border: 1.5px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef));
+  border-radius: 16px;
+
+  .cosignersListItemContent {
+    flex: 1;
+    min-width: 0;
+
+    .cosignersListItemName {
+      @include text-bodyLarge-medium;
+      overflow: hidden;
+      white-space: normal;
+      text-overflow: ellipsis;
+    }
+    .cosignersListItemAddress {
+      @include text-body-regular;
+      color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
+      overflow: hidden;
+      white-space: normal;
+      text-overflow: ellipsis;
+    }
+  }
+  .cosignersBadge {
+    @include text-body-semi-bold;
+    border-left: 1.5px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef));
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #6f7786));
+
+    .badgeIcon {
+      font-size: 22px !important;
+    }
+  }
+}

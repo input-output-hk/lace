@@ -20,10 +20,18 @@ Given(
   }
 );
 
-When(/^I click "Send NFT" button on NFT details drawer$/, async () => {
-  await NftDetails.sendNFTButton.waitForStable();
-  await NftDetails.sendNFTButton.click();
-});
+When(
+  /^I click "(Send NFT|Set as your wallet avatar)" button on NFT details drawer$/,
+  async (button: 'Send NFT' | 'Set as your wallet avatar') => {
+    if (button === 'Send NFT') {
+      await NftDetails.sendNFTButton.waitForStable();
+      await NftDetails.sendNFTButton.click();
+    } else if (button === 'Set as your wallet avatar') {
+      await NftDetails.setAsAvatarButton.waitForStable();
+      await NftDetails.setAsAvatarButton.click();
+    }
+  }
+);
 
 Then(/^"Send NFT" button (is|is not) displayed on NFT details drawer$/, async (shouldBeDisplayed: 'is' | 'is not') => {
   await nftAssert.assertSeeSendNFTButton(shouldBeDisplayed === 'is');

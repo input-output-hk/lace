@@ -3,6 +3,7 @@ coverage/
 *.log
 dist
 node_modules
+.yalc/*
 
 # Do not ignore the following
 !src/typings/*

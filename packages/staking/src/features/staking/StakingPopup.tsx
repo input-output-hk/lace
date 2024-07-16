@@ -2,8 +2,8 @@ import { Setup } from './Setup';
 import { StakingPopupView } from './StakingPopupView';
 import { StakingProps } from './types';
 
-export const StakingPopup = ({ currentChain, language, theme }: StakingProps) => (
-  <Setup currentChain={currentChain} theme={theme} language={language} view="popup">
+export const StakingPopup = ({ language, theme }: StakingProps) => (
+  <Setup theme={theme} language={language} view="popup">
     <StakingPopupView />
   </Setup>
 );

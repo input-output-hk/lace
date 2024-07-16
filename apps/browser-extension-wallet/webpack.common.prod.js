@@ -16,7 +16,7 @@ module.exports = () => ({
       path: '.env',
       safe: false,
       silent: false,
-      defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.devpreview' : true,
+      defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.developerpreview' : true,
       systemvars: true,
       allowEmptyValues: true
     }),

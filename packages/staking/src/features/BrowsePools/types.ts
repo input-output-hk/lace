@@ -22,3 +22,8 @@ export type StakePoolSortOptions = {
 };
 
 export type TranslationsFor<T extends string> = Record<T, string>;
+
+export type StakingBrowserPreferences = {
+  poolsView: BrowsePoolsView;
+  selectedPoolIds: string[];
+};

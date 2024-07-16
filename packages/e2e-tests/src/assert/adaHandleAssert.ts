@@ -3,7 +3,7 @@
 import { browser } from '@wdio/globals';
 
 class AdaHandleAssert {
-  public customHandleSrcValue = 'https://ipfs.io/ipfs/zdj7WX1C4V25M3YwFkj8ySLAnKR2eCQZ76pn96CNMc27Es2LP';
+  public customHandleSrcValue = 'https://ipfs.blockfrost.dev/ipfs/zdj7WX1C4V25M3YwFkj8ySLAnKR2eCQZ76pn96CNMc27Es2LP';
 
   async assertSeeCustomImage(imageElement: WebdriverIO.Element) {
     await imageElement.scrollIntoView();

@@ -1,75 +1,60 @@
-import React, { useState } from 'react';
-import { SettingsCard, SettingsLink, TermsDrawer, PrivacyPolicyDrawer, CookiePolicyDrawer } from './';
+import React from 'react';
+import { SettingsCard, SettingsLink } from './';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Title } = Typography;
 
-interface SettingsLegalProps {
-  popupView?: boolean;
-}
+const PRIVACY_POLICY_URL = process.env.PRIVACY_POLICY_URL;
+const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
+const COOKIE_POLICY_URL = process.env.COOKIE_POLICY_URL;
 
-export const SettingsLegal = ({ popupView = false }: SettingsLegalProps): React.ReactElement => {
+export const SettingsLegal = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
+  const openExternalLink = useExternalLinkOpener();
   const { t } = useTranslation();
-  const [isTermsDrawerOpen, setIsTermsDrawerOpen] = useState(false);
-  const [isPrivacyPolicyDrawerOpen, setIsPrivacyPolicyDrawerOpen] = useState(false);
-  const [isCookiePolicyDrawerOpen, setIsCookiePolicyDrawerOpen] = useState(false);
 
-  const toggleTermsDrawer = () => {
-    setIsTermsDrawerOpen(!isTermsDrawerOpen);
-    analytics.sendEventToPostHog(
-      isTermsDrawerOpen ? PostHogAction.SettingsTermsAndConditionsXClick : PostHogAction.SettingsTermsAndConditionsClick
-    );
+  const openTermsOfUse = () => {
+    openExternalLink(TERMS_OF_USE_URL);
+    analytics.sendEventToPostHog(PostHogAction.SettingsTermsAndConditionsClick);
   };
 
-  const togglePrivacyPolicyDrawer = () => {
-    setIsPrivacyPolicyDrawerOpen(!isPrivacyPolicyDrawerOpen);
-    analytics.sendEventToPostHog(
-      isPrivacyPolicyDrawerOpen ? PostHogAction.SettingsPrivacyPolicyXClick : PostHogAction.SettingsPrivacyPolicyClick
-    );
+  const openPrivacyPolicy = () => {
+    openExternalLink(PRIVACY_POLICY_URL);
+    analytics.sendEventToPostHog(PostHogAction.SettingsPrivacyPolicyClick);
   };
 
-  const toggleCookiePolicyDrawer = () => {
-    setIsCookiePolicyDrawerOpen(!isCookiePolicyDrawerOpen);
-    analytics.sendEventToPostHog(
-      isCookiePolicyDrawerOpen ? PostHogAction.SettingsCookiePolicyXClick : PostHogAction.SettingsCookiePolicyClick
-    );
+  const openCookiePolicy = () => {
+    openExternalLink(COOKIE_POLICY_URL);
+    analytics.sendEventToPostHog(PostHogAction.SettingsCookiePolicyClick);
   };
 
   return (
     <>
-      <TermsDrawer visible={isTermsDrawerOpen} onClose={toggleTermsDrawer} popupView={popupView} />
-      <PrivacyPolicyDrawer
-        visible={isPrivacyPolicyDrawerOpen}
-        onClose={togglePrivacyPolicyDrawer}
-        popupView={popupView}
-      />
-      <CookiePolicyDrawer visible={isCookiePolicyDrawerOpen} onClose={toggleCookiePolicyDrawer} popupView={popupView} />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="legal-settings-heading">
           {t('browserView.settings.legal.title')}
         </Title>
         <SettingsLink
           description={t('browserView.settings.legal.tnc.description')}
-          onClick={toggleTermsDrawer}
+          onClick={openTermsOfUse}
           data-testid="settings-legal-tnc-link"
         >
           {t('browserView.settings.legal.tnc.title')}
         </SettingsLink>
         <SettingsLink
           description={t('browserView.settings.legal.privacyPolicy.description')}
-          onClick={togglePrivacyPolicyDrawer}
+          onClick={openPrivacyPolicy}
           data-testid="settings-legal-privacy-policy-link"
         >
           {t('browserView.settings.legal.privacyPolicy.title')}
         </SettingsLink>
         <SettingsLink
           description={t('browserView.settings.legal.cookiePolicy.description')}
-          onClick={toggleCookiePolicyDrawer}
+          onClick={openCookiePolicy}
           data-testid="settings-legal-cookie-policy-link"
         >
           {t('browserView.settings.legal.cookiePolicy.title')}

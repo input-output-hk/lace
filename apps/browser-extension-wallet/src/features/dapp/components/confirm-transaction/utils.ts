@@ -7,7 +7,6 @@ import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
-import { VoterTypeEnum, getVoterType } from '@src/utils/tx-inspection';
 
 const { CertificateType } = Wallet.Cardano;
 
@@ -145,9 +144,6 @@ export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxTy
   return Wallet.Cip30TxType.Send;
 };
 
-export const drepIDasBech32FromHash = (value: Wallet.Crypto.Hash28ByteBase16): Wallet.Cardano.DRepID =>
-  Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(value)));
-
 export const pubDRepKeyToHash = async (
   pubDRepKeyHex: Wallet.Crypto.Ed25519PublicKeyHex
 ): Promise<Wallet.Crypto.Hash28ByteBase16> => {
@@ -182,8 +178,3 @@ export const hasValidDrepRegistration = (history: Wallet.Cardano.HydratedTx[]): 
   }
   return false;
 };
-
-export const getDRepId = (voter: Wallet.Cardano.Voter): Wallet.Cardano.DRepID | string =>
-  getVoterType(voter.__typename) === VoterTypeEnum.DREP
-    ? drepIDasBech32FromHash(voter.credential.hash)
-    : voter.credential.hash.toString();

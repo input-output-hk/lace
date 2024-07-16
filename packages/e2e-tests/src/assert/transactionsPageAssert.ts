@@ -5,6 +5,9 @@ import testContext from '../utils/testContext';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 import { isPopupMode } from '../utils/pageUtils';
+import { ParsedCSSValue } from 'webdriverio';
+import { TransactionStyle } from '../types/transactionStyle';
+import { TransactionType } from '../types/transactionType';
 
 export type ExpectedTransactionRowAssetDetails = {
   type: string;
@@ -13,6 +16,8 @@ export type ExpectedTransactionRowAssetDetails = {
 };
 
 class TransactionsPageAssert {
+  private readonly CSS_COLOR = 'color';
+
   assertSeeSkeleton = async (shouldBeVisible: boolean) => {
     await TransactionsPage.transactionsInfiniteScroll.waitForDisplayed({ reverse: !shouldBeVisible });
   };
@@ -129,8 +134,16 @@ class TransactionsPageAssert {
       }
     );
 
-    expect(await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()).contains(
-      expectedTransactionRowAssetDetails.tokensAmount
+    await browser.waitUntil(
+      async () =>
+        (
+          await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()
+        ).includes(expectedTransactionRowAssetDetails.tokensAmount),
+      {
+        timeout: 8000,
+        interval: 1000,
+        timeoutMsg: 'failed while waiting for tx token details'
+      }
     );
 
     expect(await TransactionsPage.transactionsTableItemTimestamp(rowIndex).getText()).to.match(
@@ -162,6 +175,24 @@ class TransactionsPageAssert {
     if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim());
 
     expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
+  }
+
+  async assertSeeStylingForTxType(styling: TransactionStyle, txType: TransactionType) {
+    const index = await TransactionsPage.getIndexOfTxType(txType);
+    expect(await TransactionsPage.transactionsTableItemType(index).getText()).to.equal(txType);
+
+    let expectedColors: string[];
+    const amountElement = await TransactionsPage.transactionsTableItemTokensAmount(index);
+    if (styling === 'default - negative') {
+      expectedColors = ['#3d3b39', '#ffffff'];
+      expect((await amountElement.getText())[0]).to.equal('-');
+    } else {
+      expectedColors = ['#2cb67d'];
+      expect((await amountElement.getText())[0]).to.not.equal('-');
+    }
+    expect(((await amountElement.getCSSProperty(this.CSS_COLOR)) as ParsedCSSValue).parsed.hex).to.be.oneOf(
+      expectedColors
+    );
   }
 }
 

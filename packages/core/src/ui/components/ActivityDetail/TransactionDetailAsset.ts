@@ -1,3 +1,5 @@
+import { TransactionActivityType } from '@ui/components/ActivityDetail/types';
+
 export interface TransactionDetailAsset {
   icon?: string;
   title: string;
@@ -22,6 +24,7 @@ export interface TxOutputInput {
 
 export interface TxSummary extends Omit<TxOutputInput, 'addr'> {
   addr: string[];
+  type: TransactionActivityType;
 }
 
 interface TxMetadata {

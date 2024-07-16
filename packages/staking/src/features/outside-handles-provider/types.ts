@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
-import { BrowsePoolsView, StakePoolSortOptions } from 'features/BrowsePools/types';
+import { StakePoolSortOptions, StakingBrowserPreferences } from 'features/BrowsePools';
 import type { IAnalyticsTracker } from '@lace/common';
 
 type WalletBalance = {
@@ -38,11 +38,6 @@ export enum StateStatus {
   LOADING = 'loading',
   LOADED = 'loaded',
   ERROR = 'error',
-}
-
-export interface StakingBrowserPreferences {
-  poolsView: BrowsePoolsView;
-  selectedPoolIds: string[];
 }
 
 export interface IBlockchainProvider {
@@ -94,23 +89,17 @@ export type OutsideHandlesContextValue = {
     sort?: StakePoolSortOptions;
   }) => Promise<void>;
   walletStoreResetStakePools?: () => void;
-  walletStoreNetworkInfo?: {
-    nextEpochIn: Date;
-    currentEpochIn: Date;
-    currentEpoch: string;
-    stakePoolsAmount: string;
-    totalStakedPercentage: string | number;
-    totalStaked: { number: string; unit?: string };
-  };
-  walletStoreFetchNetworkInfo: () => Promise<void>;
   walletStoreBlockchainProvider: IBlockchainProvider;
   currencyStoreFiatCurrency: CurrencyInfo;
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  multidelegationDAppCompatibility: boolean;
+  triggerMultidelegationDAppCompatibility: () => void;
   multidelegationFirstVisitSincePortfolioPersistence: boolean;
   triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
   currentChain: Wallet.Cardano.ChainId;
   isMultidelegationSupportedByDevice: (walletType: string) => Promise<boolean>;
+  isCustomSubmitApiEnabled: boolean;
 };

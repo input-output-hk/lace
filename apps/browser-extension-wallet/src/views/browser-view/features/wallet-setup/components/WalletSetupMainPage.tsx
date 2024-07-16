@@ -1,18 +1,12 @@
 import React, { ReactElement, useState } from 'react';
-import { WalletSetupLayout, WarningModal } from '@views/browser/components';
-import {
-  AnalyticsConfirmationBanner,
-  useTranslate,
-  WalletAnalyticsInfo,
-  WalletSetupOptionsStepRevamp
-} from '@lace/core';
+import { Trans, useTranslation } from 'react-i18next';
+import { WarningModal } from '@views/browser/components';
+import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, WalletSetupOptionsStepRevamp } from '@lace/core';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
 import { walletRoutePaths } from '@routes';
 import {
   EnhancedAnalyticsOptInStatus,
-  PostHogAction,
   postHogOnboardingActions,
-  PostHogProperties,
   UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -20,11 +14,13 @@ import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { useHistory } from 'react-router-dom';
 
+const PRIVACY_POLICY_URL = process.env.PRIVACY_POLICY_URL;
+const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
+
 export const WalletSetupMainPage = (): ReactElement => {
   const history = useHistory();
-  const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
-  const { t: translate, Trans } = useTranslate();
+  const { t: translate } = useTranslation();
 
   const analytics = useAnalyticsContext();
   const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
@@ -49,16 +45,37 @@ export const WalletSetupMainPage = (): ReactElement => {
       title: translate('core.walletSetupOptionsStep.restoreWallet.title'),
       description: translate('core.walletSetupOptionsStep.restoreWallet.description'),
       button: translate('core.walletSetupOptionsStep.restoreWallet.button')
-    }
+    },
+    agreementText: (
+      <Trans
+        i18nKey="core.walletSetupOptionsStep.agreementText"
+        components={{
+          a1: (
+            <a
+              href={TERMS_OF_USE_URL}
+              target="_blank"
+              className={styles.link}
+              data-testid="agreement-terms-of-service-link"
+              rel="noreferrer"
+            />
+          ),
+          a2: (
+            <a
+              href={PRIVACY_POLICY_URL}
+              target="_blank"
+              className={styles.link}
+              data-testid="agreement-privacy-policy-link"
+              rel="noreferrer"
+            />
+          )
+        }}
+      />
+    )
   };
 
   const handleStartHardwareOnboarding = () => {
-    setIsDappConnectorWarningOpen(true);
+    history.push(walletRoutePaths.setup.hardware);
     analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
-  };
-
-  const sendAnalytics = async (args: { postHogAction: PostHogAction; postHogProperties?: PostHogProperties }) => {
-    await analytics.sendEventToPostHog(args.postHogAction, args?.postHogProperties);
   };
 
   const handleAnalyticsChoice = async (isAccepted: boolean) => {
@@ -76,7 +93,7 @@ export const WalletSetupMainPage = (): ReactElement => {
       // eslint-disable-next-line camelcase
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
-    await sendAnalytics({ postHogAction, postHogProperties });
+    await analytics.sendEventToPostHog(postHogAction, postHogProperties);
   };
 
   const handleRestoreWallet = () => {
@@ -85,39 +102,18 @@ export const WalletSetupMainPage = (): ReactElement => {
   };
 
   const handleCreateNewWallet = () => {
-    sendAnalytics({
-      postHogAction: postHogOnboardingActions.create.SETUP_OPTION_CLICK
-    });
+    analytics.sendEventToPostHog(postHogOnboardingActions.create.SETUP_OPTION_CLICK);
     history.push(walletRoutePaths.setup.create);
   };
 
   return (
     <>
-      <WalletSetupLayout>
-        <WalletSetupOptionsStepRevamp
-          onNewWalletRequest={handleCreateNewWallet}
-          onHardwareWalletRequest={handleStartHardwareOnboarding}
-          onRestoreWalletRequest={handleRestoreWallet}
-          translations={walletSetupOptionsStepTranslations}
-        />
-        <WarningModal
-          header={translate('browserView.walletSetup.confirmExperimentalHwDapp.header')}
-          content={
-            <div className={styles.confirmResetContent}>
-              <p>
-                <Trans i18nKey="browserView.walletSetup.confirmExperimentalHwDapp.content" />
-              </p>
-            </div>
-          }
-          visible={isDappConnectorWarningOpen}
-          confirmLabel={translate('browserView.walletSetup.confirmExperimentalHwDapp.confirm')}
-          onCancel={() => setIsDappConnectorWarningOpen(false)}
-          onConfirm={() => {
-            setIsDappConnectorWarningOpen(false);
-            history.push(walletRoutePaths.setup.hardware);
-          }}
-        />
-      </WalletSetupLayout>
+      <WalletSetupOptionsStepRevamp
+        onNewWalletRequest={handleCreateNewWallet}
+        onHardwareWalletRequest={handleStartHardwareOnboarding}
+        onRestoreWalletRequest={handleRestoreWallet}
+        translations={walletSetupOptionsStepTranslations}
+      />
       <AnalyticsConfirmationBanner
         message={
           <>
@@ -126,9 +122,7 @@ export const WalletSetupMainPage = (): ReactElement => {
               className={styles.learnMore}
               onClick={() => {
                 setIsAnalyticsModalOpen(true);
-                sendAnalytics({
-                  postHogAction: postHogOnboardingActions.onboarding.LEARN_MORE_CLICK
-                });
+                analytics.sendEventToPostHog(postHogOnboardingActions.onboarding.LEARN_MORE_CLICK);
               }}
               data-testid="analytic-banner-learn-more"
             >
@@ -147,9 +141,7 @@ export const WalletSetupMainPage = (): ReactElement => {
         confirmLabel={translate('core.walletAnalyticsInfo.gotIt')}
         onConfirm={() => {
           setIsAnalyticsModalOpen(false);
-          sendAnalytics({
-            postHogAction: postHogOnboardingActions.onboarding.GOT_IT_CLICK
-          });
+          analytics.sendEventToPostHog(postHogOnboardingActions.onboarding.GOT_IT_CLICK);
         }}
       />
     </>

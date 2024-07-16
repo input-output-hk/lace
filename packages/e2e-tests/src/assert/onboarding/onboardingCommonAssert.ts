@@ -1,7 +1,7 @@
 import CommonOnboardingElements from '../../elements/onboarding/commonOnboardingElements';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
-import { browser } from '@wdio/globals';
+import type { TimelineStep } from '../../types/onboarding';
 
 class OnboardingCommonAssert {
   private commonOnboardingElements: CommonOnboardingElements;
@@ -26,12 +26,6 @@ class OnboardingCommonAssert {
     expect(await backButton.getText()).to.equal(await t('walletSetup.layout.btns.back'));
   }
 
-  async assertSeeNextButton(): Promise<void> {
-    const nextButton = this.commonOnboardingElements.nextButton;
-    await nextButton.waitForDisplayed();
-    expect(await nextButton.getText()).to.equal(await t('walletSetup.layout.btns.next'));
-  }
-
   async assertNextButtonEnabled(shouldBeEnabled: boolean): Promise<void> {
     await this.commonOnboardingElements.nextButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
@@ -39,25 +33,6 @@ class OnboardingCommonAssert {
   async assertNextButtonTextEquals(expectedText: string): Promise<void> {
     await this.commonOnboardingElements.nextButton.waitForDisplayed();
     expect(await this.commonOnboardingElements.nextButton.getText()).to.equal(expectedText);
-  }
-
-  async assertLegalContentIsDisplayed(linkName: string): Promise<void> {
-    let expectedUrl;
-    switch (linkName) {
-      case 'Cookie policy':
-        expectedUrl = 'https://www.lace.io/lace-cookie-policy.pdf';
-        break;
-      case 'Privacy policy':
-        expectedUrl = 'https://www.lace.io/iog-privacy-policy.pdf';
-        break;
-      case 'Terms of service':
-        expectedUrl = 'https://www.lace.io/lace-terms-of-use.pdf';
-        break;
-      default:
-        throw new Error(`Unsupported legal link - ${linkName}`);
-    }
-    const currentUrl = await browser.getUrl();
-    expect(currentUrl).to.contain(expectedUrl);
   }
 
   async assertSeeLegalLinks(): Promise<void> {
@@ -80,6 +55,28 @@ class OnboardingCommonAssert {
     expect(await this.commonOnboardingElements.helpAndSupportButton.getText()).to.equal(
       await t('general.lock.helpAndSupport')
     );
+  }
+
+  async assertSeeActiveStepOnProgressTimeline(step: TimelineStep): Promise<void> {
+    await this.commonOnboardingElements.activeStepIndicator.waitForDisplayed();
+    let expectedStepTitle;
+    switch (step) {
+      case 'Recovery phrase':
+        expectedStepTitle = await t('core.walletSetupStep.recoveryPhrase');
+        break;
+      case 'Wallet setup':
+        expectedStepTitle = await t('core.walletSetupStep.walletSetup');
+        break;
+      case 'Enter wallet':
+        expectedStepTitle = await t('core.walletSetupStep.enterWallet');
+        break;
+      case 'Connect device':
+        expectedStepTitle = await t('core.walletSetupStep.connectWallet');
+        break;
+      default:
+        throw new Error(`Unsupported step: ${step}`);
+    }
+    expect(await this.commonOnboardingElements.activeStepIndicator.getText()).to.equal(expectedStepTitle);
   }
 }
 
