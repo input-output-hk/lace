@@ -6,3 +6,4 @@ export * from './TransactionDetailAsset';
 export * from './TransactionInputOutput';
 export * from './TransactionFee';
 export * from './Collateral';
+export * from './components';
