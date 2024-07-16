@@ -5,15 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { CoSigner, CoSignerDirty, CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './type';
 
 export const maxCoSignerNameLength = 20;
+type FieldName = 'keys' | 'name';
 
-interface Props {
+interface AddCoSignerInputProps {
   dirty?: CoSignerDirty;
   error?: CoSignerError;
+  keysFieldDisabled: boolean;
+  labels: Record<FieldName, string>;
   onChange: (coSigner: CoSigner) => void;
   value: CoSigner;
 }
-
-type FieldName = 'keys' | 'name';
 
 const parseError = (error: CoSignerError | undefined, t: TFunction): Partial<Record<FieldName, string>> => {
   if (!error) return {};
@@ -45,7 +46,14 @@ const parseError = (error: CoSignerError | undefined, t: TFunction): Partial<Rec
   };
 };
 
-export const AddCoSignerInput = ({ dirty, onChange, value, error }: Props): JSX.Element => {
+export const AddCoSignerInput = ({
+  dirty,
+  onChange,
+  keysFieldDisabled,
+  labels,
+  value,
+  error,
+}: AddCoSignerInputProps): JSX.Element => {
   const { t } = useTranslation();
   const errorMessage = parseError(error, t);
 
@@ -57,7 +65,7 @@ export const AddCoSignerInput = ({ dirty, onChange, value, error }: Props): JSX.
     <>
       <Box mb="$8">
         <TextBox
-          label={t('sharedWallets.addSharedWallet.addCosigners.nameInputLabel')}
+          label={labels.name}
           value={value.name}
           errorMessage={(dirty?.name && errorMessage.name) || undefined}
           onChange={makeChangeHandler('name')}
@@ -66,11 +74,12 @@ export const AddCoSignerInput = ({ dirty, onChange, value, error }: Props): JSX.
       </Box>
       <Box>
         <TextBox
-          label={t('sharedWallets.addSharedWallet.addCosigners.keysInputLabel')}
+          label={labels.keys}
           value={value.keys}
           errorMessage={(dirty?.keys && errorMessage.keys) || undefined}
           onChange={makeChangeHandler('keys')}
           w="$fill"
+          disabled={keysFieldDisabled}
         />
       </Box>
     </>

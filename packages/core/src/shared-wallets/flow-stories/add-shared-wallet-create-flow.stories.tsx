@@ -1,10 +1,11 @@
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { QuorumRadioOption } from '../add-shared-wallet/creation-flow/Quorum';
 import {
-  createEmptyCosignerObject,
-  makeInitialState,
-} from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
+  createCoSignerObject,
+  ensureCorrectCoSignersDataShape,
+} from '../add-shared-wallet/creation-flow/co-signers-data-structure';
+import { QuorumRadioOption } from '../add-shared-wallet/creation-flow/Quorum';
+import { makeInitialState } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { CreationFlowState, SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/state-and-types';
 import { validateCoSigners } from '../add-shared-wallet/creation-flow/validateCoSigners';
 import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper, sharedKeys } from './AddSharedWalletStorybookHelper';
@@ -38,7 +39,7 @@ export const Setup: Story = {
     />
   ),
 };
-const coSignersData: CreationFlowState['coSigners'] = [
+const coSignersData: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
   {
     id: 'cosigner1',
     keys: sharedKeys,
@@ -49,7 +50,7 @@ const coSignersData: CreationFlowState['coSigners'] = [
     keys: sharedKeys,
     name: 'Martha',
   },
-];
+]);
 const coSignersStateData: CreationFlowState = {
   activeWalletName: 'My Wallet',
   coSignerInputsDirty: coSignersData.map((signer) => ({ id: signer.id, keys: true, name: true })),
@@ -63,7 +64,9 @@ const coSignersStateData: CreationFlowState = {
 export const CoSigners: Story = {
   name: 'CoSigners',
   render: () => {
-    const coSigners: CreationFlowState['coSigners'] = [createEmptyCosignerObject(), createEmptyCosignerObject()];
+    const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
+      createCoSignerObject(sharedKeys),
+    ]);
     return (
       <AddSharedWalletStorybookHelper
         activeWalletSharedKeys={sharedKeys}
@@ -79,17 +82,26 @@ export const CoSigners: Story = {
   },
 };
 
-export const CoSignersSingleEntry: Story = {
-  name: 'CoSigners - single entry',
+export const CoSignersUserPlus2: Story = {
+  name: 'CoSigners - user + 2',
   render: () => {
-    const coSigners: CreationFlowState['coSigners'] = [
+    const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
       {
-        id: 'cosigner',
+        id: 'cosigner1',
         keys: sharedKeys,
-        name: 'Bob',
+        name: 'Initiator',
       },
-      createEmptyCosignerObject(),
-    ];
+      {
+        id: 'cosigner2',
+        keys: sharedKeys,
+        name: 'Sophia',
+      },
+      {
+        id: 'cosigner3',
+        keys: sharedKeys,
+        name: 'Martha',
+      },
+    ]);
     return (
       <AddSharedWalletStorybookHelper
         activeWalletSharedKeys={sharedKeys}
@@ -108,7 +120,7 @@ export const CoSignersSingleEntry: Story = {
 export const CoSignersWithErrors: Story = {
   name: 'CoSigners - with errors',
   render: () => {
-    const coSigners: CreationFlowState['coSigners'] = [
+    const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
       {
         id: 'cosigner1',
         keys: 'invalid keys',
@@ -119,7 +131,7 @@ export const CoSignersWithErrors: Story = {
         keys: '',
         name: 'Sophia',
       },
-    ];
+    ]);
     return (
       <AddSharedWalletStorybookHelper
         activeWalletSharedKeys={sharedKeys}
@@ -151,6 +163,7 @@ export const CoSignersConfirmation: Story = {
   ),
 };
 
+const filteredCosigners = coSignersStateData.coSigners.filter((c) => c.keys && c.name);
 export const Quorum: Story = {
   name: 'Quorum',
   render: () => (
@@ -160,6 +173,8 @@ export const Quorum: Story = {
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
         ...coSignersStateData,
+        coSignerInputsDirty: filteredCosigners.map((signer) => ({ id: signer.id, keys: true, name: true })),
+        coSigners: filteredCosigners,
         quorumRules: {
           numberOfCosigner: 1,
           option: QuorumRadioOption.NOfK,

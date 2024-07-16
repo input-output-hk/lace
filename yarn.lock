@@ -11437,6 +11437,7 @@ __metadata:
     "@types/babel__preset-env": ^7
     "@types/debounce-promise": ^3.1.6
     "@types/uuid": ^8
+    ajv: ^8.16.0
     antd: ^4.24.10
     axios: 0.28.0
     axios-cache-adapter: 2.7.3
@@ -23063,6 +23064,18 @@ __metadata:
     require-from-string: ^2.0.2
     uri-js: ^4.2.2
   checksum: 53435bf79ee7d1eabba8085962dba4c08d08593334b304db7772887f0b7beebc1b3d957432f7437ed4b60e53b5d966a57b439869890209c50fed610459999e3e
+  languageName: node
+  linkType: hard
+
+"ajv@npm:^8.16.0":
+  version: 8.16.0
+  resolution: "ajv@npm:8.16.0"
+  dependencies:
+    fast-deep-equal: ^3.1.3
+    json-schema-traverse: ^1.0.0
+    require-from-string: ^2.0.2
+    uri-js: ^4.4.1
+  checksum: bdf3d4c9f1d11e220850051ef4cd89346e951cfb933d6d41be36d45053c1092af1523ee6c62525cce567355caf0a4f4c19a08a93851649c1fa32b4a39b7c4858
   languageName: node
   linkType: hard
 
@@ -52898,7 +52911,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uri-js@npm:^4.2.2":
+"uri-js@npm:^4.2.2, uri-js@npm:^4.4.1":
   version: 4.4.1
   resolution: "uri-js@npm:4.4.1"
   dependencies:

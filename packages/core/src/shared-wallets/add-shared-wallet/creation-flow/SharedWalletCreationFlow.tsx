@@ -43,7 +43,7 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
             onChange={(quorumRules) =>
               dispatch({ quorumRules, type: SharedWalletCreationActionType.QUORUM_RULES_CHANGED })
             }
-            totalCosignersNumber={state.coSigners.length + 1}
+            totalCosignersNumber={state.coSigners.length}
             value={state.quorumRules}
           />
         )}

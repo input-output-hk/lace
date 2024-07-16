@@ -21,7 +21,8 @@ export const Closed: Story = {
   render: () => <AddSharedWalletStorybookHelper />,
 };
 
-export const Open: Story = {
+export const OpenNoKeys: Story = {
+  name: 'Open - no keys',
   render: () => <AddSharedWalletStorybookHelper modalOpen />,
 };
 

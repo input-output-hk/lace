@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { t } from '../utils/translationService';
-import StakingExitModal from '../elements/staking/StakingExitModal';
+import { t } from '../../utils/translationService';
+import StakingExitModal from '../../elements/multidelegation/StakingExitModal';
 
 class StakingExitModalAssert {
   assertSeeStakingExitModal = async () => {
