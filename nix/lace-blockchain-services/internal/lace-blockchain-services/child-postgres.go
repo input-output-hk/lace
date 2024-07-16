@@ -110,7 +110,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 				"fsync = on\n" +
 				"logging_collector = off\n" +
 				"log_destination = 'stderr'\n" +
-				"log_statement = 'all'\n" +
+				"log_statement = 'ddl'\n" +
 				"log_line_prefix = ''\n" +
 				"datestyle = 'iso'\n" +
 				"timezone = 'utc'\n" +

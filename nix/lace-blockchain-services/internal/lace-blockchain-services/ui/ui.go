@@ -103,6 +103,7 @@ func SetupTray(
 	fixme_SetOgmiosDashboard := make(chan string)
 	fixme_SetCardanoSubmitApiUrl := make(chan string)
 	fixme_ProviderServerStatus := make(chan string)
+	fixme_ProjectorStatus := make(chan string)
 
 	go func(){
 		for upd := range comm.ServiceUpdate {
@@ -125,6 +126,8 @@ func SetupTray(
 				fixme_PostgresStatus <- formatted
 			case "provider-server":
 				fixme_ProviderServerStatus <- formatted
+			case "projector":
+				fixme_ProjectorStatus <- formatted
 			case "mithril-client":
 				chMithrilStatus <- upd
 			}
@@ -174,6 +177,7 @@ func SetupTray(
 		{ "cardano-submit-api": fixme_CardanoSubmitApiStatus },
 		{ "postgres":           fixme_PostgresStatus },
 		{ "provider-server":    fixme_ProviderServerStatus },
+		{ "projector":          fixme_ProjectorStatus },
 	}
 
 	for _, statusItem := range statuses {

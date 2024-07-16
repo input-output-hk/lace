@@ -133,7 +133,10 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 			usedChildren = append(usedChildren, childOgmios(ogmiosSyncProgressCh))
 			usedChildren = append(usedChildren, childCardanoSubmitApi(appConfig))
 			usedChildren = append(usedChildren, childPostgres)
-			if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
+			if cardanoServicesAvailable {
+				usedChildren = append(usedChildren, childProviderServer)
+				usedChildren = append(usedChildren, childProjector)
+			}
 		} else {
 			usedChildren = append(usedChildren, childMithril)
 			runMithril = false  // one-time thing (restart to regular mode – successfully or by force)

@@ -120,8 +120,8 @@ in rec {
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
       PostgresVersion = ${__toJSON postgresPackage.version}
       PostgresRevision = ${__toJSON postgresPackage.version}
-      ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
-      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.rev}
+      CardanoJsSdkVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
+      CardanoJsSdkRevision = ${__toJSON inputs.cardano-js-sdk.rev}
       CardanoJsSdkBuildInfo = ${__toJSON (let self = inputs.cardano-js-sdk; in builtins.toJSON {
         inherit (self) lastModified lastModifiedDate rev;
         shortRev = self.shortRev or "no rev";
