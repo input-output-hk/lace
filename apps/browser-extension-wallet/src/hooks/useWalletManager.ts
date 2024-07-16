@@ -776,7 +776,7 @@ export const useWalletManager = (): UseWalletManager => {
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
         {
           chainId,
-          getPassphrase: async () => Buffer.from('password', 'utf8'),
+          getPassphrase: async () => Buffer.from(password, 'utf8'),
           mnemonicWords: mnemonic,
           accountIndex: 0,
           purpose: KeyManagement.KeyPurpose.MULTI_SIG
