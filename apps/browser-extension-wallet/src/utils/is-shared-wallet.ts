@@ -40,8 +40,7 @@ export const getSharedWalletSignPolicy = (script: Wallet.Cardano.Script): SignPo
 
   if (Wallet.Cardano.isNativeScript(script) && isValidSharedWalletScript(script) && isSharedWalletScriptKind(script)) {
     const signers = script.scripts
-      // eslint-disable-next-line unicorn/no-array-callback-reference
-      .filter(isRequireSignatureScriptKind)
+      .filter((s): s is Wallet.Cardano.RequireSignatureScript => isRequireSignatureScriptKind(s))
       .map(({ keyHash }: Wallet.Cardano.RequireSignatureScript) => ({ keyHash }));
     let required;
 

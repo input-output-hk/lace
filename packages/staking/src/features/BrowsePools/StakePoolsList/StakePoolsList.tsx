@@ -1,4 +1,6 @@
+/* eslint-disable react/no-multi-comp */
 import { Box, Flex, Table, Text, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
@@ -10,8 +12,13 @@ import { StakePoolsListHeader } from './StakePoolsListHeader';
 import { StakePoolsListRow } from './StakePoolsListRow';
 import { StakePoolsListRowSkeleton } from './StakePoolsListRowSkeleton';
 
+const WrappedStakePoolsListRowSkeleton = ({ index }: { index: number }) => {
+  const { isSharedWallet } = useOutsideHandles();
+  return <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection={!isSharedWallet} />;
+};
+
 const itemContent = (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
-  data ? <StakePoolsListRow {...data} /> : <StakePoolsListRowSkeleton index={index} columns={config.columns} />;
+  data ? <StakePoolsListRow {...data} /> : <WrappedStakePoolsListRowSkeleton index={index} />;
 
 export type StakePoolsListProps = {
   scrollableTargetId: string;
