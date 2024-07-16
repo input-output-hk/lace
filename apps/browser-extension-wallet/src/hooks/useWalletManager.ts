@@ -37,7 +37,7 @@ import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
-import { buildSharedWalletScript, QuorumOptionValue, ScriptKind } from '@lace/core';
+import { buildSharedWalletScript, QuorumOptionValue, QuorumRadioOption, ScriptKind } from '@lace/core';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -820,10 +820,10 @@ export const useWalletManager = (): UseWalletManager => {
       };
 
       const scriptKind: ScriptKind =
-        quorumRules.option === 'AllAddresses'
+        quorumRules.option === QuorumRadioOption.AllAddresses
           ? { kind: Wallet.Cardano.NativeScriptKind.RequireAllOf }
           : // eslint-disable-next-line unicorn/no-nested-ternary
-          quorumRules.option === 'RequireNOf'
+          quorumRules.option === QuorumRadioOption.NOfK
           ? { kind: Wallet.Cardano.NativeScriptKind.RequireNOf, required: quorumRules.numberOfCosigner }
           : { kind: Wallet.Cardano.NativeScriptKind.RequireAnyOf };
 
