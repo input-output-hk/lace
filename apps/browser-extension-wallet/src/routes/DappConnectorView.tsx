@@ -39,6 +39,8 @@ export const DappConnectorView = (): React.ReactElement => {
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
   const { inMemoryWallet, cardanoWallet, walletInfo, initialHdDiscoveryCompleted } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
+  const isSharedWallet = useWalletStore((state) => state.isSharedWallet);
+
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
   useAppInit();
 
@@ -65,6 +67,22 @@ export const DappConnectorView = (): React.ReactElement => {
           title={t('dapp.noWallet.heading')}
           description={t('dapp.noWallet.description')}
           closeButtonLabel={t('dapp.noWallet.closeButton')}
+          onCloseClick={onCloseClick}
+          containerTestId="no-wallet-container"
+          imageTestId="no-wallet-image"
+          titleTestId="no-wallet-heading"
+          descriptionTestId="no-wallet-description"
+          closeButtonTestId="create-or-restore-wallet-btn"
+        />
+      </MainLayout>
+    );
+  } else if (isSharedWallet) {
+    return (
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
+        <DappError
+          title={t('dapp.sharedWallet.heading')}
+          description={t('dapp.sharedWallet.description')}
+          closeButtonLabel={t('dapp.sharedWallet.closeButton')}
           onCloseClick={onCloseClick}
           containerTestId="no-wallet-container"
           imageTestId="no-wallet-image"
