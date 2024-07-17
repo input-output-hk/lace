@@ -192,9 +192,7 @@ in rec {
 
     mkdir -p $out/libexec/cardano-node
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/cardano-node/
-
-    mkdir -p $out/libexec/cardano-submit-api
-    cp -Lf ${cardano-submit-api}/bin/*.{exe,dll} $out/libexec/cardano-submit-api/
+    cp -Lf ${cardano-submit-api}/bin/*.{exe,dll} $out/libexec/cardano-node/
 
     mkdir -p $out/libexec/sigbreak
     cp -Lf ${sigbreak}/*.exe $out/libexec/sigbreak/

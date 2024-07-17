@@ -226,6 +226,13 @@ in rec {
 
   icons = svg2icns ./macos-app-icon.svg;
 
+  # cardano-node is already bundled by Haskell.nix; otherwise we’re getting missing
+  # symbols in dyld (TODO: investigate why)
+  cardano-node-bundle = pkgs.runCommand "bundle-cardano-node" {} ''
+    mkdir -p $out
+    cp -Rf ${cardano-node}/bin/. ${cardano-submit-api}/bin/. $out/
+  '';
+
   lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {
     meta.mainProgram = lace-blockchain-services-exe.name;
   } ''
@@ -239,10 +246,7 @@ in rec {
     mkdir -p $out/bin/
     ln -s "$app"/MacOS/lace-blockchain-services $out/bin/
 
-    # cardano-node is already bundled by Haskell.nix; otherwise we’re getting missing
-    # symbols in dyld (TODO: investigate why)
-    ln -s ${cardano-node}/bin "$app"/MacOS/cardano-node
-    ln -s ${cardano-submit-api}/bin "$app"/MacOS/cardano-submit-api
+    ln -s ${cardano-node-bundle} "$app"/MacOS/cardano-node
 
     ln -s ${mkBundle { "ogmios"         = lib.getExe ogmios;                }} "$app"/MacOS/ogmios
     ln -s ${mkBundle { "mithril-client" = lib.getExe mithril-client;        }} "$app"/MacOS/mithril-client

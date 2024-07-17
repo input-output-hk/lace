@@ -40,7 +40,7 @@ func childCardanoSubmitApi(appConfig appconfig.AppConfig) func(SharedState, chan
 
 	return ManagedChild{
 		ServiceName: "cardano-submit-api",
-		ExePath: ourpaths.LibexecDir + sep + "cardano-submit-api" + sep + "cardano-submit-api" + ourpaths.ExeSuffix,
+		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + sep + "cardano-submit-api" + ourpaths.ExeSuffix,
 		Version: constants.CardanoNodeVersion,
 		Revision: constants.CardanoNodeRevision,
 		MkArgv: func() ([]string, error) {
