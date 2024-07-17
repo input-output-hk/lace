@@ -357,6 +357,12 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 						initializedCh <- struct{}{} // continue launching the next process
 					}
 					time.Sleep(next.NextProbeIn)
+					if childDidExit {
+						// Let’s not log this, as it's confusing even 60 seconds too late:
+						// fmt.Printf("%s[%d]: stopping health monitor of %s[%d]\n",
+						// 	OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
+						break
+					}
 					prev = next
 				}
 			}()
