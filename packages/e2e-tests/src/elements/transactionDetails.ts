@@ -31,6 +31,7 @@ class ActivityDetailsPage extends CommonDrawerElements {
   private TRANSACTION_DETAILS_FEE_TITLE_TOOLTIP_ICON = '[data-testid="tx-amount-fee-tooltip-icon"]';
   private TRANSACTION_DETAILS_FEE_ADA = '[data-testid="tx-amount-fee-amount"]';
   private TRANSACTION_DETAILS_FEE_FIAT = '[data-testid="tx-amount-fee-fiat"]';
+  private TRANSACTION_DETAILS_CERTIFICATES_SECTION = '[data-testid="certificates"]';
   private TRANSACTION_DETAILS_INPUTS_SECTION = '[data-testid="tx-inputs"]';
   private TRANSACTION_DETAILS_OUTPUTS_SECTION = '[data-testid="tx-outputs"]';
   private TRANSACTION_DETAILS_DROPDOWN = '[data-testid="tx-addr-list_toggle"]';
@@ -39,6 +40,7 @@ class ActivityDetailsPage extends CommonDrawerElements {
   private TRANSACTION_DETAILS_ADA_AMOUNT = '[data-testid="tx-ada-amount"]';
   private TRANSACTION_DETAILS_FIAT_AMOUNT = '[data-testid="tx-fiat-amount"]';
   private TRANSACTION_DETAILS_TOKEN = '[data-testid="tx-asset"]';
+  private TRANSACTION_DETAILS_METADATA_SECTION = '[data-testid="tx-metadata-section"]';
   private TRANSACTION_DETAILS_METADATA_TITLE = '[data-testid="tx-metadata-title"]';
   private TRANSACTION_DETAILS_METADATA = '[data-testid="tx-metadata"]';
 
@@ -61,6 +63,10 @@ class ActivityDetailsPage extends CommonDrawerElements {
   private TRANSACTION_DETAILS_REWARDS_EPOCH = '[data-testid="rewards-epoch"]';
   private TRANSACTION_DETAILS_REWARDS_TIMESTAMP_TITLE = '[data-testid="rewards-date-title"]';
   private TRANSACTION_DETAILS_REWARDS_TIMESTAMP = '[data-testid="rewards-timestamp"]';
+
+  private TRANSACTION_DETAILS_DEPOSIT_TITLE = '[data-testid="deposit-value-title"]';
+  private TRANSACTION_DETAILS_DEPOSIT_ADA_VALUE = '[data-testid="deposit-value-ada"]';
+  private TRANSACTION_DETAILS_DEPOSIT_FIAT_VALUE = '[data-testid="deposit-value-fiat"]';
 
   get transactionDetailsSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_SKELETON);
@@ -174,6 +180,10 @@ class ActivityDetailsPage extends CommonDrawerElements {
     return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION);
   }
 
+  get transactionDetailsCertificatesSection(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS_CERTIFICATES_SECTION);
+  }
+
   get transactionDetailsInputsSection(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_INPUTS_SECTION);
   }
@@ -220,6 +230,10 @@ class ActivityDetailsPage extends CommonDrawerElements {
 
   get transactionDetailsOutputTokens(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
+  }
+
+  get transactionDetailsMetadataSection(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS_METADATA_SECTION);
   }
 
   get transactionDetailsMetadataTitle(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -312,6 +326,18 @@ class ActivityDetailsPage extends CommonDrawerElements {
 
   get transactionDetailsRewardsTimestamp(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_REWARDS_TIMESTAMP);
+  }
+
+  get transactionDetailsDepositTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS_DEPOSIT_TITLE);
+  }
+
+  get transactionDetailsDepositAdaValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS_DEPOSIT_ADA_VALUE);
+  }
+
+  get transactionDetailsDepositFiatValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS_DEPOSIT_FIAT_VALUE);
   }
 
   async getTransactionSentTokensForBundle(index = 0): Promise<string[]> {
