@@ -48,9 +48,6 @@ env:
 
 jobs:
   prereq:
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - name: Provision step
@@ -86,6 +83,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   tests-run-split:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: true
     if: always()
     strategy:
       fail-fast: false
