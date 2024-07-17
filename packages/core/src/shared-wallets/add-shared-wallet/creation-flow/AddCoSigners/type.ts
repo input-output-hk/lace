@@ -1,13 +1,13 @@
 export type CoSigner = {
   id: string;
-  keys: string;
   name: string;
+  sharedWalletKey: string;
 };
 
 export type CoSignerDirty = {
   id: string;
-  keys: boolean;
   name: boolean;
+  sharedWalletKey: boolean;
 };
 
 export enum CoSignerErrorName {
@@ -23,6 +23,6 @@ export enum CoSignerErrorKeys {
 
 export type CoSignerError = {
   id: string;
-  keys?: CoSignerErrorKeys;
   name?: CoSignerErrorName;
+  sharedWalletKey?: CoSignerErrorKeys;
 };

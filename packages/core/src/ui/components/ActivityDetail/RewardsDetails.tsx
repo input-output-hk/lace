@@ -1,7 +1,7 @@
 import React from 'react';
 import cn from 'classnames';
 import styles from './TransactionDetails.module.scss';
-import { ActivityStatus } from '../Activity/AssetActivityItem';
+import { ActivityStatus } from '../Transaction';
 import { Ellipsis } from '@lace/common';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { useTranslation } from 'react-i18next';

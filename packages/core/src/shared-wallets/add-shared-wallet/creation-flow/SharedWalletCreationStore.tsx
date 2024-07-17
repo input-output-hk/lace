@@ -86,8 +86,9 @@ const getNextCoSignersDirtyValue = ({
     dirty.id === action.coSigner.id
       ? {
           id: dirty.id,
-          keys: matchingPrevCoSigner.keys !== action.coSigner.keys ? true : dirty.keys,
           name: matchingPrevCoSigner.name !== action.coSigner.name ? true : dirty.name,
+          sharedWalletKey:
+            matchingPrevCoSigner.sharedWalletKey !== action.coSigner.sharedWalletKey ? true : dirty.sharedWalletKey,
         }
       : dirty,
   );
@@ -96,12 +97,12 @@ const makeStateMachine = ({
   exitTheFlow,
   navigateToAppHome,
   onCreateSharedWallet,
-  sharedKeys,
+  sharedWalletKey,
 }: {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
   onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
-  sharedKeys: string;
+  sharedWalletKey: string;
 }): SharedWalletCreationStateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.CHANGE_WALLET_NAME) {
@@ -116,10 +117,10 @@ const makeStateMachine = ({
     }
     if (action.type === SharedWalletCreationActionType.NEXT) {
       if (!prevState.walletName) return prevState;
-      const coSigners = ensureCorrectCoSignersDataShape([createCoSignerObject(sharedKeys)]);
+      const coSigners = ensureCorrectCoSignersDataShape([createCoSignerObject(sharedWalletKey)]);
       return stateCoSigners({
         ...prevState,
-        coSignerInputsDirty: coSigners.map(({ id }) => ({ id, keys: false, name: false })),
+        coSignerInputsDirty: coSigners.map(({ id }) => ({ id, name: false, sharedWalletKey: false })),
         coSignerInputsErrors: [],
         coSigners,
         step: SharedWalletCreationStep.CoSigners,
@@ -138,8 +139,8 @@ const makeStateMachine = ({
       );
 
       if (
-        prevState.coSigners[indexOfCoSignersDataOfCurrentUser].keys !==
-        nextCoSigners[indexOfCoSignersDataOfCurrentUser].keys
+        prevState.coSigners[indexOfCoSignersDataOfCurrentUser].sharedWalletKey !==
+        nextCoSigners[indexOfCoSignersDataOfCurrentUser].sharedWalletKey
       ) {
         return prevState;
       }
@@ -155,7 +156,7 @@ const makeStateMachine = ({
       // fields should stay empty and should not show errors.
       // This filter should be removed once we enable the "add cosigner" button
       const filteredCosignerErrors = coSignersErrors.filter(
-        ({ id }) => !nextCoSigners.some((c) => c.id === id && !c.keys && !c.name),
+        ({ id }) => !nextCoSigners.some((c) => c.id === id && !c.sharedWalletKey && !c.name),
       );
 
       return stateCoSigners({
@@ -192,7 +193,7 @@ const makeStateMachine = ({
       });
     }
     if (action.type === SharedWalletCreationActionType.NEXT) {
-      const coSigners = prevState.coSigners.filter((c) => c.keys && c.name);
+      const coSigners = prevState.coSigners.filter((c) => c.sharedWalletKey && c.name);
       const minCoSignersCount = 2;
       if (coSigners.length < minCoSignersCount) return prevState;
 
@@ -251,7 +252,7 @@ export type SharedWalletCreationStoreSharedProps = {
   initialWalletName: string;
   navigateToAppHome: () => void;
   onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
-  sharedKeys: string;
+  sharedWalletKey: string;
 };
 
 export type SharedWalletCreationStoreProps = SharedWalletCreationStoreSharedProps & {
@@ -265,7 +266,7 @@ export const SharedWalletCreationStore = ({
   initialWalletName,
   navigateToAppHome,
   onCreateSharedWallet,
-  sharedKeys,
+  sharedWalletKey,
 }: SharedWalletCreationStoreProps): ReactElement => {
   const initialState = useInitialState(makeInitialState(activeWalletName));
   const [state, dispatch] = useReducer(
@@ -274,7 +275,7 @@ export const SharedWalletCreationStore = ({
         exitTheFlow,
         navigateToAppHome,
         onCreateSharedWallet,
-        sharedKeys,
+        sharedWalletKey,
       });
       const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
       return handler(prevState, action);

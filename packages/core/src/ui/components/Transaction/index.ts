@@ -21,3 +21,6 @@ export const Transaction = {
   Timestamp,
   CopiableHash
 };
+
+export * from './types';
+export { TransactionFee } from './TransactionFee';
