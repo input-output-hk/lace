@@ -101,6 +101,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     const signedTx = await delegationTxBuilder.build().sign();
 
     if (isSharedWallet && sharedKey) {
+      // TODO: integrate with tx summary drawer LW-10970
       exportMultisigTransaction(signedTx, sharedKey, currentChain);
     } else {
       await inMemoryWallet.submitTx(signedTx);
