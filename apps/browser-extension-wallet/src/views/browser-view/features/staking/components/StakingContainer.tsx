@@ -24,7 +24,8 @@ import { usePassword, useSubmitingState } from '@views/browser/features/send-tra
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { AnyWallet } from '@cardano-sdk/web-extension';
+import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
+import { stakingScriptKeyPath } from '@lace/core';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -108,7 +109,12 @@ export const StakingContainer = (): React.ReactElement => {
     (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
   );
 
-  const { signPolicy, sharedKey } = useSharedWalletData({ activeWallet, isSharedWallet });
+  const { signPolicy, sharedKey } = useSharedWalletData({
+    activeWallet,
+    isSharedWallet,
+    script: activeWallet?.type === WalletType.Script ? activeWallet.stakingScript : undefined,
+    derivationPath: stakingScriptKeyPath
+  });
 
   return (
     <Layout>

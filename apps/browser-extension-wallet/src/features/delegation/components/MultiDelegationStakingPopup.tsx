@@ -37,7 +37,8 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { AnyWallet } from '@cardano-sdk/web-extension';
+import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
+import { stakingScriptKeyPath } from '@lace/core';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -89,7 +90,12 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
   );
 
-  const { signPolicy, sharedKey } = useSharedWalletData({ activeWallet, isSharedWallet });
+  const { signPolicy, sharedKey } = useSharedWalletData({
+    activeWallet,
+    isSharedWallet,
+    script: activeWallet?.type === WalletType.Script ? activeWallet.stakingScript : undefined,
+    derivationPath: stakingScriptKeyPath
+  });
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
