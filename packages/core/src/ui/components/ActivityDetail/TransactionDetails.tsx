@@ -3,87 +3,18 @@ import React from 'react';
 import cn from 'classnames';
 import { Ellipsis } from '@lace/common';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
-import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
-import { ActivityStatus } from '../Activity';
+import { ActivityStatus, Transaction, TransactionDetailsProps, TransactionFee } from '../Transaction';
 import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
-import { TransactionFee } from './TransactionFee';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { Collateral, CollateralStatus } from './Collateral';
-import { Wallet } from '@lace/cardano';
 import { TxDetailsCertificates } from './components/TxDetailsCertificates/TxDetailsCertificates';
 import { TxDetailsVotingProcedures } from './components/TxDetailsVotingProcedures';
 import { TxDetailsProposalProcedures } from './components/TxDetailsProposalProcedures';
 import { useTranslation } from 'react-i18next';
-import { Transaction } from '../Transaction';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
-
-export interface TransactionDetailsProps {
-  hash?: string;
-  name: string;
-  status?: ActivityStatus;
-  /**
-   * Transaction generation date
-   */
-  includedDate?: string;
-  /**
-   * Transaction generation time
-   */
-  includedTime?: string;
-  assets?: TransactionDetailAsset[];
-  /**
-   * Input address list
-   */
-  addrInputs?: TxOutputInput[];
-  /**
-   * Output address list
-   */
-  addrOutputs?: TxOutputInput[];
-  /**
-   * Transaction total output
-   */
-  totalOutput?: string;
-  /**
-   * Transaction collateral
-   */
-  collateral?: string;
-  /**
-   * Transaction fee
-   */
-  fee?: string;
-  pools?: { name: string; ticker: string; id: string }[];
-  /**
-   * Transaction deposit
-   */
-  deposit?: string;
-  /**
-   * Transaction returned deposit
-   */
-  depositReclaim?: string;
-  /**
-   * Transaction metadata
-   */
-  metadata?: TransactionMetadataProps['metadata'];
-  amountTransformer: (amount: string) => string;
-  headerDescription?: string;
-  txSummary?: TxSummary[];
-  coinSymbol: string;
-  tooltipContent?: string;
-  ownAddresses: string[];
-  addressToNameMap: Map<string, string>;
-  isPopupView?: boolean;
-  handleOpenExternalHashLink?: () => void;
-  sendAnalyticsInputs?: () => void;
-  sendAnalyticsOutputs?: () => void;
-  votingProcedures?: Wallet.Cardano.VotingProcedures;
-  proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
-  certificates?: Wallet.Cardano.Certificate[];
-  chainNetworkId: Wallet.Cardano.NetworkId;
-  cardanoCoin: Wallet.CoinId;
-  explorerBaseUrl: string;
-}
 
 export const TransactionDetails = ({
   hash,

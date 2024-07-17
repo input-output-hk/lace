@@ -30,10 +30,9 @@ import {
   ConwayEraCertificatesTypes,
   ConwayEraGovernanceActions,
   DelegationActivityType,
-  TransactionActivityType,
   Cip1694GovernanceActivityType
 } from './types';
-
+import { TransactionActivityType } from '../Transaction';
 import styles from './ActivityTypeIcon.module.scss';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 

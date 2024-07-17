@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { TransactionDetailsProps } from '../ActivityDetail';
+import { TransactionDetailsProps } from './types';
 import styles from '../ActivityDetail/TransactionDetails.module.scss';
 import { CopiableHash } from './CopiableHash';
 

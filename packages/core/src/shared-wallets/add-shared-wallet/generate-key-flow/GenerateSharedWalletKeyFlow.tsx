@@ -1,11 +1,11 @@
 import { WalletType } from '@cardano-sdk/web-extension';
 import React, { VFC } from 'react';
-import { CopyKeys } from './CopyKeys';
+import { CopyKey } from './CopyKey';
 import { EnterPassword, WalletKind } from './EnterPassword';
-import { ActionType, GenerateSharedKeysStep, Store, StoreSharedProps } from './Store';
+import { ActionType, GenerateSharedWalletKeyStep, Store, StoreSharedProps } from './Store';
 
-const makeCopyKeysToClipboard = (sharedKeys: string) => async () => {
-  await navigator.clipboard.writeText(sharedKeys);
+const makeCopyKeysToClipboard = (sharedWalletKey: string) => async () => {
+  await navigator.clipboard.writeText(sharedWalletKey);
 };
 
 export type LinkedWalletType = Exclude<`${WalletType}`, `${WalletType.Script}`>;
@@ -16,21 +16,21 @@ const mapWalletType: Record<LinkedWalletType, WalletKind> = {
   Trezor: 'cold',
 };
 
-type GenerateSharedKeysFlowProps = StoreSharedProps & {
+type GenerateSharedWalletKeyFlowProps = StoreSharedProps & {
   activeWalletName: string;
   activeWalletType: LinkedWalletType;
 };
 
-export const GenerateSharedKeysFlow: VFC<GenerateSharedKeysFlowProps> = ({
+export const GenerateSharedWalletKeyFlow: VFC<GenerateSharedWalletKeyFlowProps> = ({
   activeWalletName,
   activeWalletType,
-  generateKeys,
+  generateKey,
   navigateToParentFlow,
 }) => (
-  <Store generateKeys={generateKeys} navigateToParentFlow={navigateToParentFlow}>
+  <Store generateKey={generateKey} navigateToParentFlow={navigateToParentFlow}>
     {({ dispatch, state }) => (
       <>
-        {state.step === GenerateSharedKeysStep.EnterPassword && (
+        {state.step === GenerateSharedWalletKeyStep.EnterPassword && (
           <EnterPassword
             loading={state.loading}
             onBack={() => dispatch({ type: ActionType.Back })}
@@ -40,11 +40,11 @@ export const GenerateSharedKeysFlow: VFC<GenerateSharedKeysFlowProps> = ({
             walletName={activeWalletName}
           />
         )}
-        {state.step === GenerateSharedKeysStep.CopyKeys && (
-          <CopyKeys
+        {state.step === GenerateSharedWalletKeyStep.CopyKey && (
+          <CopyKey
             onClose={() => dispatch({ type: ActionType.CloseFlow })}
-            onCopyKeys={makeCopyKeysToClipboard(state.sharedKeys)}
-            sharedKeys={state.sharedKeys}
+            onCopyKey={makeCopyKeysToClipboard(state.sharedWalletKey)}
+            sharedWalletKey={state.sharedWalletKey}
           />
         )}
       </>
