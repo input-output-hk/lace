@@ -2,15 +2,8 @@
 import SectionTitle from '../sectionTitle';
 
 class StakingPage {
-  private SEARCH_INPUT = '.ant-select-selection-search input';
-  private SEARCH_LOADER = '[data-testid="search-loader"]';
-  private STAKE_POOL_LIST_COST = '[data-testid="stake-pool-list-cost"]';
   private STATS_TITLE = '[data-testid="stats-title"]';
   private STATS_VALUE = '[data-testid="stats-value"]';
-
-  get title() {
-    return SectionTitle.sectionTitle;
-  }
 
   get counter() {
     return SectionTitle.sectionCounter;
@@ -18,10 +11,6 @@ class StakingPage {
 
   get statsTitle() {
     return $$(this.STATS_TITLE);
-  }
-
-  get stakingPageSearchInput() {
-    return $(this.SEARCH_INPUT);
   }
 
   get statsValues() {
@@ -38,18 +27,6 @@ class StakingPage {
       }
     }
     return tickers;
-  }
-
-  get stakePoolListCostList() {
-    return $$(this.STAKE_POOL_LIST_COST);
-  }
-
-  get searchLoader() {
-    return $(this.SEARCH_LOADER);
-  }
-
-  stakingPoolWithName(poolName: string) {
-    return $(`h6=${poolName}`);
   }
 }
 

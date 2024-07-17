@@ -44,10 +44,11 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@cardano-sdk/web-extension": "0.29.3",
-    "@input-output-hk/lace-ui-toolkit": "1.6.0",
+    "@input-output-hk/lace-ui-toolkit": "1.9.0",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/translation": "0.1.0",
+    "ajv": "^8.16.0",
     "antd": "^4.24.10",
     "axios": "0.28.0",
     "axios-cache-adapter": "2.7.3",

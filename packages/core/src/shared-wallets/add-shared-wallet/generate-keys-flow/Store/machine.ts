@@ -56,6 +56,7 @@ export const makeStateMachine = ({
     if (action.type === ActionType.KeysGenerationFailed) {
       return stateEnterPassword({
         ...prevState,
+        loading: false,
         passwordErrorMessage: action.errorMessage,
       });
     }

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Image } from 'antd';
 import DefaultActivityImage from '../../assets/images/token-default-logo.png';
 import { ReactComponent as SelectedIcon } from '../../assets/icons/check-token-icon.svg';
 
 import styles from './TokenItem.module.scss';
 import { useTranslation } from 'react-i18next';
+import { ImageWithFallback } from '../ImageWithFallback';
 
 export interface TokenItemProps {
   amount: string;
@@ -12,6 +12,7 @@ export interface TokenItemProps {
   name: string;
   description: string;
   logo?: string;
+  defaultLogo?: string;
   onClick?: () => void;
   selected?: boolean;
 }
@@ -23,7 +24,8 @@ export const TokenItem = ({
   name,
   description,
   selected,
-  logo = DefaultActivityImage
+  logo = DefaultActivityImage,
+  defaultLogo = DefaultActivityImage
 }: TokenItemProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isDeselectVisible, setDeselectVisibility] = useState(false);
@@ -44,7 +46,7 @@ export const TokenItem = ({
         <div data-testid="coin-search-row-icon" className={styles.iconWrapper}>
           {selected && <div className={styles.overlay} />}
           {selected && SelectedIcon && <SelectedIcon className={styles.selectedIcon} />}
-          <Image src={logo} className={styles.icon} preview={false} alt="asset image" />
+          <ImageWithFallback src={logo} fallbackSrc={defaultLogo} className={styles.icon} alt="asset image" />
         </div>
         <div data-testid="coin-search-row-info" className={styles.info}>
           <h6>{name}</h6>

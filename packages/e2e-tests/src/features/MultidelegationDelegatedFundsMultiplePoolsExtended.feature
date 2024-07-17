@@ -157,7 +157,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     Given I am on Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    And I input "APEX" to the search bar
+    And I input "APEX" into stake pool search bar
     And I click on the stake pool with ticker "APEX"
     Then Drawer is displayed
     When I press keyboard Enter button

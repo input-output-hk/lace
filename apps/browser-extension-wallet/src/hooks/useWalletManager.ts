@@ -8,11 +8,11 @@ import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI'
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
 import { logger, observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import {
-  deleteFromLocalStorage,
+  bufferReviver,
   clearLocalStorage,
+  deleteFromLocalStorage,
   getValueFromLocalStorage,
-  saveValueInLocalStorage,
-  bufferReviver
+  saveValueInLocalStorage
 } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
@@ -24,6 +24,7 @@ import {
   AddWalletProps,
   AnyBip32Wallet,
   AnyWallet,
+  WalletId,
   WalletManagerActivateProps,
   WalletManagerApi,
   WalletRepositoryApi,
@@ -34,6 +35,9 @@ import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import * as KeyManagement from '@cardano-sdk/key-management';
+import { Buffer } from 'buffer';
+import { buildSharedWalletScript, QuorumOptionValue, QuorumRadioOption, ScriptKind } from '@lace/core';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -44,6 +48,15 @@ export interface CreateWalletParams {
   mnemonic: string[];
   password: string;
   chainId?: Wallet.Cardano.ChainId;
+}
+
+interface CreateSharedWalletParams {
+  name: string;
+  accountIndex?: number;
+  chainId?: Wallet.Cardano.ChainId;
+  publicKeys: Wallet.Crypto.Bip32PublicKeyHex[];
+  ownSignerWalletId: WalletId;
+  quorumRules: QuorumOptionValue;
 }
 
 export interface CreateHardwareWallet {
@@ -80,6 +93,7 @@ export interface UseWalletManager {
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
+  createInMemorySharedWallet: (args: CreateSharedWalletParams) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
   createHardwareWalletRevamped: CreateHardwareWalletRevamped;
@@ -100,6 +114,7 @@ export interface UseWalletManager {
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
+  generateSharedWalletKey: (password: string, walletId: WalletId) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -467,7 +482,8 @@ export const useWalletManager = (): UseWalletManager => {
           chainId,
           getPassphrase: async () => passphrase,
           mnemonicWords: mnemonic,
-          accountIndex
+          accountIndex,
+          purpose: KeyManagement.KeyPurpose.STANDARD
         },
         {
           bip32Ed25519: Wallet.bip32Ed25519,
@@ -752,6 +768,117 @@ export const useWalletManager = (): UseWalletManager => {
     [cardanoWallet]
   );
 
+  const generateSharedWalletKey = useCallback(
+    async (password: string, walletId: WalletId): Promise<Wallet.Crypto.Bip32PublicKeyHex> => {
+      const chainId = getCurrentChainId();
+      const mnemonic = await getMnemonic(Buffer.from(password));
+      const [wallets] = await firstValueFrom(combineLatest([walletRepository.wallets$, walletManager.activeWalletId$]));
+      const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+        {
+          chainId,
+          getPassphrase: async () => Buffer.from(password, 'utf8'),
+          mnemonicWords: mnemonic,
+          accountIndex: 0,
+          purpose: KeyManagement.KeyPurpose.MULTI_SIG
+        },
+        {
+          bip32Ed25519: Wallet.bip32Ed25519,
+          logger
+        }
+      );
+
+      await walletRepository.updateWalletMetadata({
+        walletId,
+        metadata: {
+          ...wallets.find(({ walletId: id }) => id === walletId).metadata,
+          extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+        }
+      });
+
+      return keyAgent.extendedAccountPublicKey;
+    },
+    [getCurrentChainId, getMnemonic]
+  );
+
+  const createInMemorySharedWallet = useCallback(
+    async ({
+      accountIndex = 0,
+      name,
+      chainId = getCurrentChainId(),
+      publicKeys,
+      ownSignerWalletId,
+      quorumRules
+    }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
+      const paymentScriptKeyPath = {
+        index: 0,
+        role: KeyManagement.KeyRole.External
+      };
+
+      const stakingScriptKeyPath = {
+        index: 0,
+        role: KeyManagement.KeyRole.Stake
+      };
+
+      let scriptKind: ScriptKind;
+      if (quorumRules.option === QuorumRadioOption.AllAddresses) {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireAllOf };
+      } else if (quorumRules.option === QuorumRadioOption.NOfK) {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireNOf, required: quorumRules.numberOfCosigner };
+      } else {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireAnyOf };
+      }
+
+      const paymentScript = await buildSharedWalletScript({
+        expectedSigners: publicKeys,
+        derivationPath: paymentScriptKeyPath,
+        kindInfo: scriptKind
+      });
+
+      const stakingScript = await buildSharedWalletScript({
+        expectedSigners: publicKeys,
+        derivationPath: stakingScriptKeyPath,
+        kindInfo: scriptKind
+      });
+
+      const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+        metadata: { name },
+        ownSigners: [
+          {
+            accountIndex: 0,
+            paymentScriptKeyPath,
+            purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+            stakingScriptKeyPath,
+            walletId: ownSignerWalletId
+          }
+        ],
+        paymentScript,
+        stakingScript,
+        type: WalletType.Script
+      };
+
+      const scriptWalletId = await walletRepository.addWallet(createScriptWalletProps);
+
+      await walletManager.activate({
+        walletId: scriptWalletId,
+        chainId,
+        accountIndex
+      });
+
+      return {
+        name,
+        signingCoordinator,
+        wallet: observableWallet,
+        source: {
+          wallet: {
+            ...createScriptWalletProps,
+            walletId: scriptWalletId
+          }
+        }
+      };
+    },
+    [getCurrentChainId]
+  );
+
   const addAccount = useCallback(
     async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
       const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
@@ -786,6 +913,7 @@ export const useWalletManager = (): UseWalletManager => {
     unlockWallet,
     loadWallet,
     createWallet,
+    createInMemorySharedWallet,
     createHardwareWallet,
     createHardwareWalletRevamped,
     connectHardwareWallet,
@@ -797,6 +925,7 @@ export const useWalletManager = (): UseWalletManager => {
     walletManager,
     walletRepository,
     getMnemonic,
-    enableCustomNode
+    enableCustomNode,
+    generateSharedWalletKey
   };
 };

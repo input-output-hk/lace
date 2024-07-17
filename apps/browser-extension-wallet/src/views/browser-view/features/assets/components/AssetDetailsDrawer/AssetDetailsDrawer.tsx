@@ -74,7 +74,12 @@ export const AssetDetailsDrawer = ({
       closable
     >
       <div className={classnames(styles.container, { [styles.popupContainer]: popupView })}>
-        <AssetDrawerTitle logo={assetDetails?.logo} title={assetDetails?.name} code={assetDetails?.ticker} />
+        <AssetDrawerTitle
+          logo={assetDetails?.logo}
+          defaultLogo={assetDetails?.defaultLogo}
+          title={assetDetails?.name}
+          code={assetDetails?.ticker}
+        />
         <AssetDetailsContainer fiatCode={fiatCode} popupView={popupView} />
       </div>
     </Drawer>

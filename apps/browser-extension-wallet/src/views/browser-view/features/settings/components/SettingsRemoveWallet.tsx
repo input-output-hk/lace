@@ -21,11 +21,12 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
   const { deleteWallet, walletRepository } = useWalletManager();
-  const { walletInfo, setDeletingWallet } = useWalletStore();
+  const { walletInfo, setDeletingWallet, isSharedWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
   const toggleRemoveWalletAlert = () => {
+    if (isSharedWallet) return;
     setIsRemoveWalletAlertVisible(!isRemoveWalletAlertVisible);
 
     analytics.sendEventToPostHog(
@@ -74,7 +75,9 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
             className={styles.modalDescription}
             data-testid={'remove-wallet-description'}
           >
-            {t('browserView.settings.wallet.general.removeWalletDescription')}
+            {isSharedWallet
+              ? t('browserView.settings.wallet.general.removeSharedWalletDescription')
+              : t('browserView.settings.wallet.general.removeWalletDescription')}
           </Text>
           <Button
             size="medium"
@@ -82,6 +85,7 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
             onClick={toggleRemoveWalletAlert}
             block={popupView}
             data-testid="remove-wallet-button"
+            disabled={isSharedWallet}
           >
             {t('browserView.settings.wallet.general.removeAction', { walletName: walletInfo.name })}
           </Button>

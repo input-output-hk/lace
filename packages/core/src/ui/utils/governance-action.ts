@@ -58,7 +58,7 @@ export const getParameterChangeActionViewData = ({
       dRepVotingThresholds: {
         motionNoConfidence,
         committeeNormal,
-        commiteeNoConfidence,
+        committeeNoConfidence,
         updateConstitution,
         hardForkInitiation,
         ppNetworkGroup,
@@ -139,7 +139,7 @@ export const getParameterChangeActionViewData = ({
         dRepVotingThresholds: {
           motionNoConfidence: formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator),
           committeeNormal: formatPercentages(committeeNormal.numerator / committeeNormal.denominator),
-          committeeNoConfidence: formatPercentages(commiteeNoConfidence.numerator / commiteeNoConfidence.denominator),
+          committeeNoConfidence: formatPercentages(committeeNoConfidence.numerator / committeeNoConfidence.denominator),
           updateToConstitution: formatPercentages(updateConstitution.numerator / updateConstitution.denominator),
           hardForkInitiation: formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator),
           ppNetworkGroup: formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator),

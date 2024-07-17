@@ -29,7 +29,6 @@ export const DetailsDrawer = ({
 }: GeneralSettingsDrawerProps): ReactElement => {
   const { t } = useTranslation();
   const {
-    environmentName,
     walletUI: { appMode }
   } = useWalletStore();
   const assetInfo = useMemo(
@@ -56,7 +55,7 @@ export const DetailsDrawer = ({
     <Drawer
       open={!!selectedNft}
       onClose={onClose}
-      title={assetInfo ? <DrawerHeader title={nftNameSelector(assetInfo, environmentName)} /> : undefined}
+      title={assetInfo ? <DrawerHeader title={nftNameSelector(assetInfo)} /> : undefined}
       navigation={
         selectedNft ? <DrawerNavigation title={t('core.nftDetail.title')} onCloseIconClick={onClose} /> : undefined
       }

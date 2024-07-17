@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import debounce from 'lodash/debounce';
-import { Box, Table } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Table, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import {
   mapStakePoolToDisplayData,
@@ -35,6 +35,7 @@ type LoadMoreDataParam = Parameters<typeof Table.Body>[0]['loadMoreData'];
 
 const searchDebounce = 300;
 const increaseViewportBy = { bottom: 100, top: 0 };
+const DEFAULT_ROW_HIGHT = 44;
 
 export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): React.ReactElement => {
   const componentRef = useRef<HTMLDivElement | null>(null);
@@ -44,6 +45,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   const { setSelectedStakePool } = useDelegationStore();
   const { setIsDrawerVisible } = useStakePoolDetails();
   const analytics = useAnalyticsContext();
+  const tableReference = useRef<HTMLDivElement | null>(null);
+  const [initialItemsCount, setInitialItemsCount] = useState(0);
 
   const {
     stakePoolSearchResults: { pageResults, totalResultCount },
@@ -52,6 +55,39 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     fetchStakePools
   } = useWalletStore(stakePoolResultsSelector);
   const { blockchainProvider } = useWalletStore();
+
+  const initialItemsLimit = useVisibleItemsCount({
+    containerRef: tableReference,
+    rowHeight: DEFAULT_ROW_HIGHT
+  });
+
+  useEffect(() => {
+    if (initialItemsLimit !== undefined) {
+      const overscanRows = Math.ceil(increaseViewportBy.bottom / DEFAULT_ROW_HIGHT);
+
+      setInitialItemsCount(overscanRows + Math.max(initialItemsLimit, 0));
+    }
+  }, [initialItemsLimit]);
+
+  const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
+
+  const loadMoreData = useCallback(
+    ({ startIndex, endIndex }: Parameters<LoadMoreDataParam>[0]) => {
+      if (startIndex !== endIndex) {
+        debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
+      }
+    },
+    [debouncedSearch, searchValue, sort]
+  );
+
+  useEffect(() => {
+    if (initialItemsCount !== undefined) {
+      loadMoreData({
+        endIndex: initialItemsCount,
+        startIndex: 0
+      });
+    }
+  }, [initialItemsCount, loadMoreData]);
 
   const tableHeaderTranslations: TranslationsFor<SortField> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker.title'),
@@ -74,17 +110,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
     liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake.tooltip')
   };
 
-  const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
-
-  const loadMoreData = useCallback(
-    ({ startIndex, endIndex }: Parameters<LoadMoreDataParam>[0]) => {
-      if (startIndex !== endIndex) {
-        debouncedSearch({ limit: endIndex, searchString: searchValue, skip: startIndex, sort });
-      }
-    },
-    [debouncedSearch, searchValue, sort]
-  );
-
   useEffect(() => {
     if (!componentRef?.current) return;
     // Fetch pools on network switching, searchValue change and sort change
@@ -95,6 +120,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
   const onSearch = (searchString: string) => {
     setSearchValue(searchString);
   };
+
   const list = useMemo(
     () => pageResults?.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
     [pageResults]
@@ -164,7 +190,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           loading={fetchingPools}
         />
       </div>
-      <Box mt="$16" data-testid="stake-pool-list-container">
+      <Box mt="$16" className={styles.tableWrapper} data-testid="stake-pool-list-container">
         <Table.Header
           dataTestId="stake-pool"
           headers={headers}
@@ -174,8 +200,10 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
         />
         {!fetchingPools && totalResultCount === 0 && <StakePoolsTableEmpty />}
         <Table.Body<StakePoolsListRowProps>
+          tableReference={tableReference}
           scrollableTargetId={scrollableTargetId}
           loadMoreData={loadMoreData}
+          totalCount={list.length}
           items={list}
           itemContent={itemContent}
           increaseViewportBy={increaseViewportBy}

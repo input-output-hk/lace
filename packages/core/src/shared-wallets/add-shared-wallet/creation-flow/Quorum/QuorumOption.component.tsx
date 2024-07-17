@@ -1,15 +1,17 @@
+/* eslint-disable react/no-multi-comp */
 import { Box, Card, Flex, RadioButtonGroup, Select, Text } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
+import { SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
-import { SharedWalletCreationStep } from '../types';
 
 const minimumTotalCosignersForEnablingDropdown = 3;
 
 export enum QuorumRadioOption {
   AllAddresses = 'AllAddresses',
-  SomeAddress = 'SomeAddress',
+  Any = 'AnyAddress',
+  NOfK = 'RequireNOf',
 }
 
 export type QuorumOptionValue =
@@ -17,8 +19,11 @@ export type QuorumOptionValue =
       option: QuorumRadioOption.AllAddresses;
     }
   | {
+      option: QuorumRadioOption.Any;
+    }
+  | {
       numberOfCosigner: number;
-      option: QuorumRadioOption.SomeAddress;
+      option: QuorumRadioOption.NOfK;
     };
 
 export interface QuorumOptionProps {
@@ -60,17 +65,17 @@ export const QuorumOption = ({
       return;
     }
 
-    const numberOfCosigner = value.option === option ? value.numberOfCosigner : 1;
+    const numberOfCosigner = value.option === QuorumRadioOption.NOfK ? value?.numberOfCosigner : 1;
     onChange({
       numberOfCosigner,
-      option: QuorumRadioOption.SomeAddress,
+      option: QuorumRadioOption.NOfK,
     });
   };
 
   const onNumberOfCosignerChange = (num: string) => {
     onChange({
       numberOfCosigner: Number(num),
-      option: QuorumRadioOption.SomeAddress,
+      option: QuorumRadioOption.NOfK,
     });
   };
 
@@ -80,9 +85,12 @@ export const QuorumOption = ({
       description={translations.description}
       onNext={onNext}
       onBack={onBack}
+      isNextEnabled={
+        value.option === QuorumRadioOption.AllAddresses ||
+        (value.option === QuorumRadioOption.NOfK && value.numberOfCosigner > 0)
+      }
       timelineSteps={creationTimelineSteps}
       timelineCurrentStep={SharedWalletCreationStep.Quorum}
-      isNextEnabled
     >
       <Flex gap="$16" flexDirection="column" alignItems="stretch">
         <RadioButtonGroup
@@ -103,7 +111,7 @@ export const QuorumOption = ({
               label: translations.optionSome,
               // eslint-disable-next-line react/no-multi-comp
               render: ({ optionElement }) => (
-                <Card.Outlined data-testid={`setup-quorum-user-option-${QuorumRadioOption.SomeAddress}`}>
+                <Card.Outlined data-testid={`setup-quorum-user-option-${QuorumRadioOption.NOfK}`}>
                   <Flex p="$16" flexDirection="column">
                     <Box mb="$10">{optionElement}</Box>
                     <Flex
@@ -121,7 +129,7 @@ export const QuorumOption = ({
                         }
                         variant="outline"
                         placeholder="0"
-                        value={value.option === QuorumRadioOption.SomeAddress ? String(value.numberOfCosigner) : '1'}
+                        value={value.option === QuorumRadioOption.NOfK ? String(value.numberOfCosigner) : '1'}
                         onChange={onNumberOfCosignerChange}
                         showArrow
                         zIndex={1001}
@@ -135,7 +143,7 @@ export const QuorumOption = ({
                   </Flex>
                 </Card.Outlined>
               ),
-              value: QuorumRadioOption.SomeAddress,
+              value: QuorumRadioOption.NOfK,
             },
           ]}
           onValueChange={onOptionChange}

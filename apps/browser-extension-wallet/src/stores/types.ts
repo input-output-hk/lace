@@ -116,6 +116,7 @@ export interface WalletInfoSlice {
   walletType: WalletType;
   isInMemoryWallet: boolean;
   isHardwareWallet: boolean;
+  isSharedWallet: boolean;
   deletingWallet?: boolean;
   stayOnAllDonePage?: boolean;
   setDeletingWallet: (deletingWallet: boolean) => void;
