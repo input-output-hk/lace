@@ -128,6 +128,11 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 
 			stdin := fmt.Sprintf("SELECT 'CREATE DATABASE %s' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '%s')\\gexec", dbName, dbName)
 
+			// Sometimes we get a fatal error here, when the TCP port is already up but the DB system is still starting up:
+			//   FATAL:  the database system is starting up
+			// It’s self-healing, but still let’s wait a bit to decrease the probability of awkwardness:
+			time.Sleep(1 * time.Second)
+
 			stdout, stderr, err, pid := runCommandWithTimeout(
 				libexecDir + sep + "psql" + ourpaths.ExeSuffix,
 				[]string{
