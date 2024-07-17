@@ -4,7 +4,7 @@ import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { Banner, useObservable } from '@lace/common';
-import { CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
+import { CosignersList, InfoBar, RowContainer, renderLabel, stakingScriptKeyPath } from '@lace/core';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -17,16 +17,11 @@ import { StakePoolConfirmationBody } from './StakePoolConfirmationBody';
 import styles from './StakePoolConfirmationContent.module.scss';
 import { StakePoolDepositReclaimDetails } from './StakePoolDepositReclaimDetails';
 
-const TX_VALIDITY_PERIOD = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
+const SHARED_WALLET_TX_VALIDITY_INTERVAL = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
 
 const ERROR_MESSAGES: { [key: string]: StakingError } = {
   [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
   [InputSelectionFailure.UtxoBalanceInsufficient]: StakingError.UTXO_BALANCE_INSUFFICIENT,
-};
-
-export const stakingScriptKeyPath = {
-  index: 0,
-  role: Wallet.KeyManagement.KeyRole.Stake,
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -164,7 +159,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
             {isSharedWallet && (
               <RowContainer>
                 <TransactionSummary.Amount
-                  amount={t('drawer.confirmation.validityPeriod.value', { hours: TX_VALIDITY_PERIOD })}
+                  amount={t('drawer.confirmation.validityPeriod.value', { hours: SHARED_WALLET_TX_VALIDITY_INTERVAL })}
                   label={t('drawer.confirmation.validityPeriod.title')}
                   tooltip={t('drawer.confirmation.validityPeriod.tooltip')}
                   data-testid="validity-period"

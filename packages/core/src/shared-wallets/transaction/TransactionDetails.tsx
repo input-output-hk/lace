@@ -9,7 +9,7 @@ import { InfoBar } from './InfoBar';
 import styles from './TransactionDetails.module.scss';
 import { CoSignersListItem, SignPolicy } from './types';
 
-const TX_VALIDITY_PERIOD = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
+const SHARED_WALLET_TX_VALIDITY_INTERVAL = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
 
 export interface TransactionDetailsProps {
   addressToNameMap: Map<string, string>;
@@ -109,7 +109,9 @@ export const TransactionDetails = ({
           )}
           {/* TODO: TransactionSummary.Amount is the only component with tooltip */}
           <TransactionSummary.Amount
-            amount={t('sharedWallets.transaction.summary.validityPeriod.value', { hours: TX_VALIDITY_PERIOD })}
+            amount={t('sharedWallets.transaction.summary.validityPeriod.value', {
+              hours: SHARED_WALLET_TX_VALIDITY_INTERVAL,
+            })}
             label={t('sharedWallets.transaction.summary.validityPeriod.title')}
             tooltip={t('sharedWallets.transaction.summary.validityPeriod.tooltip')}
             data-testid="validity-period"

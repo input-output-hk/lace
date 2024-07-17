@@ -25,6 +25,7 @@ export interface SharedWalletSchema {
     /**
      * The list of participants in the shared wallet
      */
+    // TDOO; rename to CoSigners
     participants: {
       [k: string]: unknown;
       /**

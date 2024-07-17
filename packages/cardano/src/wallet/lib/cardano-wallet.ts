@@ -29,7 +29,7 @@ export interface WalletMetadata {
   lastActiveAccountIndex?: number;
   walletAddresses?: Cardano.PaymentAddress[];
   extendedAccountPublicKey?: Wallet.Crypto.Bip32PublicKeyHex;
-  participants?: { sharedWalletKey: string; walletName: string }[];
+  coSigners?: { sharedWalletKey: string; name: string }[];
 }
 
 export interface AccountMetadata {

@@ -103,11 +103,8 @@ export type OutsideHandlesContextValue = {
   currentChain: Wallet.Cardano.ChainId;
   isMultidelegationSupportedByDevice: (walletType: string) => Promise<boolean>;
   isCustomSubmitApiEnabled: boolean;
-  isSharedWallet: boolean | undefined;
+  isSharedWallet: boolean;
   signPolicy: SignPolicy;
   sharedKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
-  deriveSharedWalletExtendedPublicKeyHash: (
-    key: Wallet.Crypto.Bip32PublicKeyHex,
-    derivationPath: Wallet.KeyManagement.AccountKeyDerivationPath
-  ) => Promise<Wallet.Crypto.Ed25519KeyHashHex>;
+  deriveSharedWalletExtendedPublicKeyHash: typeof Wallet.util.deriveEd25519KeyHashFromBip32PublicKey;
 };

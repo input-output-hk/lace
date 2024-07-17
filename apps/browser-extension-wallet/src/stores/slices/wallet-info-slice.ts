@@ -2,7 +2,7 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { BlockchainProviderSlice, SliceCreator, WalletInfoSlice } from '../types';
 import { Wallet } from '@lace/cardano';
 import { ObservableWalletState } from '@hooks/useWalletState';
-import { isSharedWallet } from '@src/utils/is-shared-wallet';
+import { isSharedWallet } from '@lace/core';
 
 /**
  * has all wallet info related actions and states

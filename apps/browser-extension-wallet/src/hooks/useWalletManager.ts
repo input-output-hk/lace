@@ -37,8 +37,15 @@ import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
-import { buildSharedWalletScript, CoSigner, QuorumOptionValue, QuorumRadioOption, ScriptKind } from '@lace/core';
-import * as Crypto from '@cardano-sdk/crypto';
+import {
+  buildSharedWalletScript,
+  CoSigner,
+  paymentScriptKeyPath,
+  QuorumOptionValue,
+  QuorumRadioOption,
+  ScriptKind,
+  stakingScriptKeyPath
+} from '@lace/core';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -117,26 +124,12 @@ export interface UseWalletManager {
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: (password: string, walletId: WalletId) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
-  deriveSharedWalletExtendedPublicKeyHash: (
-    key: Wallet.Crypto.Bip32PublicKeyHex,
-    derivationPath: KeyManagement.AccountKeyDerivationPath
-  ) => Promise<Wallet.Crypto.Ed25519KeyHashHex>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = 0;
   }
-};
-
-export const paymentScriptKeyPath = {
-  index: 0,
-  role: KeyManagement.KeyRole.External
-};
-
-export const stakingScriptKeyPath = {
-  index: 0,
-  role: KeyManagement.KeyRole.Stake
 };
 
 const getExtendedAccountPublicKey = async (
@@ -235,15 +228,6 @@ export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Prom
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
   Wallet.connectDeviceRevamped(usbDevice);
-
-export const deriveSharedWalletExtendedPublicKeyHash = async (
-  key: Crypto.Bip32PublicKeyHex,
-  derivationPath: KeyManagement.AccountKeyDerivationPath
-): Promise<Crypto.Ed25519KeyHashHex> => {
-  const accountKey = Crypto.Bip32PublicKey.fromHex(key);
-  const paymentKey = await accountKey.derive([derivationPath.role, derivationPath.index]);
-  return Crypto.Ed25519KeyHashHex(await paymentKey.hash());
-};
 
 export const useWalletManager = (): UseWalletManager => {
   const {
@@ -948,7 +932,6 @@ export const useWalletManager = (): UseWalletManager => {
     walletRepository,
     getMnemonic,
     enableCustomNode,
-    generateSharedWalletKey,
-    deriveSharedWalletExtendedPublicKeyHash
+    generateSharedWalletKey
   };
 };

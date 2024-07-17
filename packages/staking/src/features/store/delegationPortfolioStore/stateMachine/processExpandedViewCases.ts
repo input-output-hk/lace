@@ -259,8 +259,10 @@ export const processExpandedViewCases: Handler = (params) =>
 
             return {
               ...state,
-              ...atomicStateMutators.beginNewPortfolioCreation({ selections: [portfolioPool] }),
-              ...(data.isSharedWallet && { activeDrawerStep: DrawerManagementStep.Confirmation }),
+              ...atomicStateMutators.beginNewPortfolioCreation({
+                isSharedWallet: data.isSharedWallet,
+                selections: [portfolioPool],
+              }),
               viewedStakePool: undefined,
             };
           }),
@@ -471,8 +473,10 @@ export const processExpandedViewCases: Handler = (params) =>
             if (!state.pendingSelectedPortfolio) return state;
             return {
               ...state,
-              ...atomicStateMutators.beginNewPortfolioCreation({ selections: state.pendingSelectedPortfolio }),
-              ...(data.isSharedWallet && { activeDrawerStep: DrawerManagementStep.Confirmation }),
+              ...atomicStateMutators.beginNewPortfolioCreation({
+                isSharedWallet: data.isSharedWallet,
+                selections: state.pendingSelectedPortfolio,
+              }),
               pendingSelectedPortfolio: undefined,
             };
           }),

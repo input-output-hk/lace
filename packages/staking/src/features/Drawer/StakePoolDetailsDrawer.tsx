@@ -94,7 +94,10 @@ export const StakePoolDetailsDrawer = ({
     return undefined;
   };
 
-  const titleSecond = t(`drawer.${isSharedWallet ? 'titleSharedWallet' : 'titleSecond'}`);
+  const title =
+    DrawerDefaultStep.PoolDetails === activeDrawerStep
+      ? t('drawer.title')
+      : t(`drawer.${isSharedWallet ? 'titleSharedWallet' : 'titleSecond'}`);
 
   return (
     <Drawer
@@ -103,7 +106,7 @@ export const StakePoolDetailsDrawer = ({
       onClose={closeDrawer}
       navigation={
         <DrawerNavigation
-          title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : titleSecond}
+          title={title}
           // If undefined is passed to onArrowIconClick, arrow component will not be rendered
           onArrowIconClick={
             !shouldShowBackIcon

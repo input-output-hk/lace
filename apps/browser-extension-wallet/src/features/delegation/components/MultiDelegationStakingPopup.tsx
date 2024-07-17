@@ -35,7 +35,9 @@ import {
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useObservable } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
+import { AnyWallet } from '@cardano-sdk/web-extension';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -79,11 +81,13 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     isSharedWallet: state.isSharedWallet
   }));
 
-  const { walletManager, walletRepository, deriveSharedWalletExtendedPublicKeyHash } = useWalletManager();
+  const { walletManager, walletRepository } = useWalletManager();
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
-  const activeWallet = wallets.find((w) => w.walletId === activeWalletId?.walletId);
+  const activeWallet = wallets?.find(
+    (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
+  );
 
   const { signPolicy, sharedKey } = useSharedWalletData({ activeWallet, isSharedWallet });
 
@@ -176,7 +180,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isSharedWallet,
         signPolicy,
         sharedKey,
-        deriveSharedWalletExtendedPublicKeyHash
+        deriveSharedWalletExtendedPublicKeyHash: Wallet.util.deriveEd25519KeyHashFromBip32PublicKey
       }}
     >
       <ContentLayout

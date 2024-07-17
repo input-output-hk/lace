@@ -22,7 +22,9 @@ import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useObservable } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
+import { AnyWallet } from '@cardano-sdk/web-extension';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -98,11 +100,13 @@ export const StakingContainer = (): React.ReactElement => {
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const walletName = walletInfo.name;
 
-  const { walletManager, walletRepository, deriveSharedWalletExtendedPublicKeyHash } = useWalletManager();
+  const { walletManager, walletRepository } = useWalletManager();
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
-  const activeWallet = wallets.find((w) => w.walletId === activeWalletId?.walletId);
+  const activeWallet = wallets?.find(
+    (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
+  );
 
   const { signPolicy, sharedKey } = useSharedWalletData({ activeWallet, isSharedWallet });
 
@@ -155,7 +159,7 @@ export const StakingContainer = (): React.ReactElement => {
           isSharedWallet,
           signPolicy,
           sharedKey,
-          deriveSharedWalletExtendedPublicKeyHash
+          deriveSharedWalletExtendedPublicKeyHash: Wallet.util.deriveEd25519KeyHashFromBip32PublicKey
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

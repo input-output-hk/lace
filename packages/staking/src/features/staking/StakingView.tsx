@@ -41,7 +41,7 @@ export const StakingView = () => {
                 <BrowsePools />
               </Box>
             )}
-            {activePage === StakingPage.activity && !isSharedWallet && (
+            {activePage === StakingPage.activity && (
               <Box mt="$40">
                 <Activity />
               </Box>

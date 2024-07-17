@@ -42,12 +42,12 @@ export const StakePoolsListRow = ({ stakePool, hexId, id, ...data }: StakePoolDe
   }, [onPoolSelect, triggerMultidelegationDAppCompatibility]);
 
   const onSelect = useCallback(() => {
-    if (multidelegationDAppCompatibility && !poolAlreadySelected) {
+    if (multidelegationDAppCompatibility && !poolAlreadySelected && !isSharedWallet) {
       setShowDAppCompatibilityModal(true);
     } else {
       onPoolSelect();
     }
-  }, [multidelegationDAppCompatibility, onPoolSelect, poolAlreadySelected]);
+  }, [multidelegationDAppCompatibility, onPoolSelect, poolAlreadySelected, isSharedWallet]);
 
   return (
     <>

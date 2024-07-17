@@ -1,9 +1,14 @@
 import { AnyWallet } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { SignPolicy } from '@lace/core';
-import { getKeyHashToWalletNameMap, getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
+import {
+  SignPolicy,
+  stakingScriptKeyPath,
+  CoSignersListItem,
+  getKeyHashToWalletNameMap,
+  getSharedWalletSignPolicy,
+  isScriptWallet
+} from '@lace/core';
 import { useEffect, useState } from 'react';
-import { stakingScriptKeyPath } from './useWalletManager';
 
 interface Props {
   activeWallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -24,17 +29,20 @@ export const useSharedWalletData = ({
       if (isScriptWallet(activeWallet)) {
         const policy = getSharedWalletSignPolicy(activeWallet.stakingScript);
         const keyToNameMap = await getKeyHashToWalletNameMap({
-          participants: activeWallet.metadata.participants,
+          coSigners: activeWallet.metadata.coSigners,
           derivationPath: stakingScriptKeyPath
         });
         setSignPolicy({
           ...policy,
-          signers: policy.signers.map((s) => ({ ...s, name: keyToNameMap.get(s.keyHash) || s.keyHash }))
+          signers: policy.signers.map((signer: CoSignersListItem) => ({
+            ...signer,
+            name: keyToNameMap.get(signer.keyHash) || signer.keyHash
+          }))
         });
         setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
       }
     })();
-  }, [activeWallet, isSharedWallet, signPolicy]);
+  }, [activeWallet, isSharedWallet]);
 
   return { signPolicy, sharedKey };
 };
