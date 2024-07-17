@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 	"net/url"
+	"regexp"
+	"strconv"
 
 	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
@@ -17,6 +19,17 @@ func childProjector(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChi
 	serviceName := "projector"
 
 	var projectorPort int
+
+	const SInitializing = "initializing"
+	const SRollingForward = "listening"
+
+	currentStatus := SInitializing
+	currentProgress := -1.0
+
+	reInitializing := regexp.MustCompile(
+		`^.*"msg":"\[Projector\] Initializing (\d*\.\d+)% at block #\d+.*$`)
+	reRollingForward := regexp.MustCompile(
+		`^.*"msg":"\[Projector\] Processed event RollForward slot \d+.*$`)
 
 	return ManagedChild{
 		ServiceName: serviceName,
@@ -67,8 +80,8 @@ func childProjector(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChi
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
 				statusCh <- StatusAndUrl {
-					Status: "listening",
-					Progress: -1,
+					Status: currentStatus,
+					Progress: currentProgress,
 					TaskSize: -1,
 					SecondsLeft: -1,
 					Url: backendUrl,
@@ -83,7 +96,20 @@ func childProjector(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChi
 				LastErr: err,
 			}
 		},
-		LogMonitor: func(line string) {},
+		LogMonitor: func(line string) {
+			if ms := reInitializing.FindStringSubmatch(line); len(ms) > 0 {
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				currentStatus = SInitializing
+				currentProgress = pr/100
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: currentProgress,
+					TaskSize: -1, SecondsLeft: -1 }
+			} else if reRollingForward.MatchString(line) {
+				currentStatus = SRollingForward
+				currentProgress = -1
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: currentProgress,
+					TaskSize: -1, SecondsLeft: -1 }
+			}
+		},
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
