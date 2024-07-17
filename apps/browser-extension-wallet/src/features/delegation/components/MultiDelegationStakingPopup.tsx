@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   useAnalyticsContext,
   useBackgroundServiceAPIContext,
@@ -9,7 +9,6 @@ import {
   useTheme
 } from '@providers';
 import {
-  stakingScriptKeyPath,
   useBalances,
   useCustomSubmitApi,
   useFetchCoinPrice,
@@ -36,9 +35,7 @@ import {
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useObservable } from '@lace/common';
-import { getKeyHashToWalletNameMap, getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
-import { SignPolicy } from '@lace/core';
-import { Wallet } from '@lace/cardano';
+import { useSharedWalletData } from '@hooks/useSharedWalletData';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -82,32 +79,13 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     isSharedWallet: state.isSharedWallet
   }));
 
-  const [sharedKey, setSharedKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
   const { walletManager, walletRepository, deriveSharedWalletExtendedPublicKeyHash } = useWalletManager();
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
+  const activeWallet = wallets.find((w) => w.walletId === activeWalletId?.walletId);
 
-  useEffect(() => {
-    (async () => {
-      if (!activeWalletId || !isSharedWallet) return;
-      const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
-
-      if (isScriptWallet(activeWallet)) {
-        const policy = getSharedWalletSignPolicy(activeWallet.stakingScript);
-        const keyToNameMap = await getKeyHashToWalletNameMap({
-          participants: activeWallet.metadata.participants,
-          derivationPath: stakingScriptKeyPath
-        });
-        setSignPolicy({
-          ...policy,
-          signers: policy.signers.map((s) => ({ ...s, name: keyToNameMap.get(s.keyHash) || s.keyHash }))
-        });
-        setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
-      }
-    })();
-  }, [activeWalletId, isSharedWallet, wallets]);
+  const { signPolicy, sharedKey } = useSharedWalletData({ activeWallet, isSharedWallet });
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow

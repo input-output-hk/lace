@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Layout } from '@src/views/browser-view/components';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { StakingSkeleton } from './StakingSkeleton';
 import { useMultiDelegationEnabled } from '@hooks/useMultiDelegationEnabled';
 import { MultiDelegationStaking } from './MultiDelegationStaking';
@@ -11,14 +11,7 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
-import {
-  stakingScriptKeyPath,
-  useBalances,
-  useCustomSubmitApi,
-  useFetchCoinPrice,
-  useLocalStorage,
-  useWalletManager
-} from '@hooks';
+import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -29,15 +22,11 @@ import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useObservable } from '@lace/common';
-import { getKeyHashToWalletNameMap, getSharedWalletSignPolicy, isScriptWallet } from '@src/utils/is-shared-wallet';
-import { SignPolicy } from '@lace/core';
-import { Wallet } from '@lace/cardano';
+import { useSharedWalletData } from '@hooks/useSharedWalletData';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
   const multiDelegationEnabled = useMultiDelegationEnabled();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
-  const [sharedKey, setSharedKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
   const analytics = useAnalyticsContext();
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
     useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
@@ -113,25 +102,9 @@ export const StakingContainer = (): React.ReactElement => {
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
+  const activeWallet = wallets.find((w) => w.walletId === activeWalletId?.walletId);
 
-  useEffect(() => {
-    (async () => {
-      if (!activeWalletId || !isSharedWallet) return;
-      const activeWallet = wallets.find((w) => w.walletId === activeWalletId.walletId);
-      if (isScriptWallet(activeWallet)) {
-        const policy = getSharedWalletSignPolicy(activeWallet.stakingScript);
-        const keyToNameMap = await getKeyHashToWalletNameMap({
-          participants: activeWallet.metadata.participants,
-          derivationPath: stakingScriptKeyPath
-        });
-        setSignPolicy({
-          ...policy,
-          signers: policy.signers.map((s) => ({ ...s, name: keyToNameMap.get(s.keyHash) || s.keyHash }))
-        });
-        setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
-      }
-    })();
-  }, [activeWalletId, isSharedWallet, wallets]);
+  const { signPolicy, sharedKey } = useSharedWalletData({ activeWallet, isSharedWallet });
 
   return (
     <Layout>
