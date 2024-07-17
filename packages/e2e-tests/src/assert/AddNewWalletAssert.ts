@@ -6,6 +6,7 @@ import { isPopupMode } from '../utils/pageUtils';
 import { expect } from 'chai';
 import ConnectYourDevicePage from '../elements/onboarding/ConnectYourDevicePage';
 import ConnectYourDevicePageAssert from './onboarding/ConnectYourDevicePageAssert';
+import CancelAddingNewWalletDialog from '../elements/addNewWallet/CancelAddingNewWalletDialog';
 
 class AddNewWalletAssert {
   async assertMainModalIsDisplayedInExtendedMode() {
@@ -18,6 +19,10 @@ class AddNewWalletAssert {
     await OnboardingMainPageAssert.assertSeeCreateWalletOption();
     await OnboardingMainPageAssert.assertSeeHardwareWalletOption();
     await OnboardingMainPageAssert.assertSeeRestoreWalletOption();
+  }
+
+  async assertMainModalIsNotDisplayed() {
+    await AddNewWalletMainModal.container.waitForDisplayed({ reverse: true });
   }
 
   async assertSeeWalletSetupPageInModal() {
@@ -46,6 +51,29 @@ class AddNewWalletAssert {
 
     await ConnectYourDevicePageAssert.assertSeeBackButton();
     await ConnectYourDevicePageAssert.assertSeeTryAgainButton(false);
+  }
+
+  async assertSeeStartOverDialog(shouldSee: boolean) {
+    await CancelAddingNewWalletDialog.body.waitForDisplayed({ reverse: !shouldSee });
+    if (shouldSee) {
+      await CancelAddingNewWalletDialog.title.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.title.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.title')
+      );
+      // TODO: uncomment when https://github.com/input-output-hk/lace-ui-toolkit/pull/31 is merged and released
+      // await CancelAddingNewWalletDialog.description.waitForDisplayed();
+      // expect(await CancelAddingNewWalletDialog.description.getText()).to.equal(
+      //   await t('core.multiWallet.confirmationDialog.description')
+      // );
+      await CancelAddingNewWalletDialog.goBackButton.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.goBackButton.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.cancel')
+      );
+      await CancelAddingNewWalletDialog.proceedButton.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.proceedButton.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.confirm')
+      );
+    }
   }
 }
 
