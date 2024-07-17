@@ -30,8 +30,8 @@ export const StartOverDialog = ({
     <Dialog.Title>{title}</Dialog.Title>
     <Dialog.Description>{description}</Dialog.Description>
     <Dialog.Actions>
-      <Dialog.Action cancel label={cancel} onClick={events.onCancel} />
-      <Dialog.Action label={confirm} onClick={events.onConfirm} />
+      <Dialog.Action cancel label={cancel} onClick={events.onCancel} testId={'cancel-button'} />
+      <Dialog.Action label={confirm} onClick={events.onConfirm} testId={'confirm-button'} />
     </Dialog.Actions>
   </Dialog.Root>
 );
