@@ -60,7 +60,8 @@ export const SharedWallet = (): JSX.Element => {
       name: data.name,
       chainId: DEFAULT_CHAIN_ID,
       publicKeys,
-      ownSignerWalletId: activeWalletId
+      ownSignerWalletId: activeWalletId,
+      quorumRules: data.quorumRules
     });
   };
 

@@ -37,8 +37,7 @@ import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
-import { Cardano } from '@cardano-sdk/core';
-import * as Crypto from '@cardano-sdk/crypto';
+import { buildSharedWalletScript, QuorumOptionValue, QuorumRadioOption, ScriptKind } from '@lace/core';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -57,6 +56,7 @@ interface CreateSharedWalletParams {
   chainId?: Wallet.Cardano.ChainId;
   publicKeys: Wallet.Crypto.Bip32PublicKeyHex[];
   ownSignerWalletId: WalletId;
+  quorumRules: QuorumOptionValue;
 }
 
 export interface CreateHardwareWallet {
@@ -71,7 +71,6 @@ type WalletManagerAddAccountProps = {
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
   passphrase?: Uint8Array;
-  purpose?: KeyManagement.KeyPurpose;
 };
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
@@ -220,38 +219,6 @@ export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Prom
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
   Wallet.connectDeviceRevamped(usbDevice);
-
-const deriveSharedWalletExtendedPublicKeyHash = async (
-  key: Crypto.Bip32PublicKeyHex,
-  derivationPath: KeyManagement.AccountKeyDerivationPath
-): Promise<Crypto.Ed25519KeyHashHex> => {
-  const accountKey = Crypto.Bip32PublicKey.fromHex(key);
-  const paymentKey = await accountKey.derive([derivationPath.role, derivationPath.index]);
-  return Crypto.Ed25519KeyHashHex(await paymentKey.hash());
-};
-
-const buildSharedWalletScript = async (
-  expectedSigners: Array<Crypto.Bip32PublicKeyHex>,
-  derivationPath: KeyManagement.AccountKeyDerivationPath
-) => {
-  const signers = [...expectedSigners].sort((key1, key2) => key1.localeCompare(key2));
-
-  const script: Cardano.NativeScript = {
-    __type: Cardano.ScriptType.Native,
-    kind: Cardano.NativeScriptKind.RequireAllOf,
-    scripts: []
-  };
-
-  for (const signer of signers) {
-    script.scripts.push({
-      __type: Cardano.ScriptType.Native,
-      keyHash: await deriveSharedWalletExtendedPublicKeyHash(signer, derivationPath),
-      kind: Cardano.NativeScriptKind.RequireSignature
-    });
-  }
-
-  return script;
-};
 
 export const useWalletManager = (): UseWalletManager => {
   const {
@@ -809,7 +776,7 @@ export const useWalletManager = (): UseWalletManager => {
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
         {
           chainId,
-          getPassphrase: async () => Buffer.from('password', 'utf8'),
+          getPassphrase: async () => Buffer.from(password, 'utf8'),
           mnemonicWords: mnemonic,
           accountIndex: 0,
           purpose: KeyManagement.KeyPurpose.MULTI_SIG
@@ -839,7 +806,8 @@ export const useWalletManager = (): UseWalletManager => {
       name,
       chainId = getCurrentChainId(),
       publicKeys,
-      ownSignerWalletId
+      ownSignerWalletId,
+      quorumRules
     }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
       const paymentScriptKeyPath = {
         index: 0,
@@ -851,8 +819,26 @@ export const useWalletManager = (): UseWalletManager => {
         role: KeyManagement.KeyRole.Stake
       };
 
-      const paymentScript = await buildSharedWalletScript(publicKeys, paymentScriptKeyPath);
-      const stakingScript = await buildSharedWalletScript(publicKeys, stakingScriptKeyPath);
+      let scriptKind: ScriptKind;
+      if (quorumRules.option === QuorumRadioOption.AllAddresses) {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireAllOf };
+      } else if (quorumRules.option === QuorumRadioOption.NOfK) {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireNOf, required: quorumRules.numberOfCosigner };
+      } else {
+        scriptKind = { kind: Wallet.Cardano.NativeScriptKind.RequireAnyOf };
+      }
+
+      const paymentScript = await buildSharedWalletScript({
+        expectedSigners: publicKeys,
+        derivationPath: paymentScriptKeyPath,
+        kindInfo: scriptKind
+      });
+
+      const stakingScript = await buildSharedWalletScript({
+        expectedSigners: publicKeys,
+        derivationPath: stakingScriptKeyPath,
+        kindInfo: scriptKind
+      });
 
       const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
         metadata: { name },
