@@ -94,10 +94,9 @@ export const StakePoolDetailsDrawer = ({
     return undefined;
   };
 
+  const sharedWalletTitleKey = isSharedWallet ? 'titleSharedWallet' : 'titleSecond';
   const title =
-    DrawerDefaultStep.PoolDetails === activeDrawerStep
-      ? t('drawer.title')
-      : t(`drawer.${isSharedWallet ? 'titleSharedWallet' : 'titleSecond'}`);
+    DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t(`drawer.${sharedWalletTitleKey}`);
 
   return (
     <Drawer

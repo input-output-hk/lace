@@ -845,7 +845,7 @@ export const useWalletManager = (): UseWalletManager => {
       const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
         metadata: {
           name,
-          coSigners: coSigners.map((p: CoSigner) => ({ sharedWalletKey: p.keys, name: p.name })),
+          coSigners,
           extendedAccountPublicKey: sharedWalletKey
         },
         ownSigners: [
