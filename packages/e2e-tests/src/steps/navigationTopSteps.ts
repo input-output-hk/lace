@@ -1,21 +1,20 @@
 import { Then, When } from '@wdio/cucumber-framework';
 import topNavigationAssert from '../assert/topNavigationAssert';
-import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import menuHeaderNetwork from '../elements/menuHeaderNetwork';
 import MenuHeader from '../elements/menuHeader';
 import { browser } from '@wdio/globals';
 import nftDetails from '../elements/NFTs/nftDetails';
 
-When(/I click the menu button/, async () => {
-  await menuHeaderPageObject.clickMenuButton();
+When(/^I click the menu button$/, async () => {
+  await MenuHeader.clickMenuButton();
 });
 
-When(/I click on the user details button/, async () => {
-  await menuHeaderPageObject.clickUserDetailsButton();
+When(/^I click on the user details button$/, async () => {
+  await MenuHeader.clickUserDetailsButton();
 });
 
-When(/I click on the logo icon/, async () => {
-  await menuHeaderPageObject.clickLogo();
+When(/^I click on the logo icon$/, async () => {
+  await MenuHeader.clickLogo();
 });
 
 Then(/^the user menu is displayed$/, async () => {
@@ -85,19 +84,19 @@ Then(/^I see current network in user menu$/, async () => {
 });
 
 When(/^I click on the network option$/, async () => {
-  await menuHeaderPageObject.clickNetworkOption();
+  await MenuHeader.clickNetworkOption();
 });
 
 When(/^I click on the settings option$/, async () => {
-  await menuHeaderPageObject.clickSettingsOption();
+  await MenuHeader.clickSettingsOption();
 });
 
 When(/^I click on the Lock Wallet option$/, async () => {
-  await menuHeaderPageObject.clickLockWalletOption();
+  await MenuHeader.clickLockWalletOption();
 });
 
 When(/^I click on the Address Book option$/, async () => {
-  await menuHeaderPageObject.clickAddressBookOption();
+  await MenuHeader.clickAddressBookOption();
 });
 
 When(/^I click on "Add new wallet" option$/, async () => {
@@ -122,7 +121,7 @@ Then(/^the NFT is set as a wallet profile avatar$/, async () => {
 });
 
 When(/^I close header menu$/, async () => {
-  await menuHeaderPageObject.closeMenu();
+  await MenuHeader.closeUserMenu();
 });
 
 When(/^I click "(Receive|Send)" button on page header$/, async (button: 'Receive' | 'Send') => {
@@ -145,5 +144,5 @@ Then(/^I (see|do not see) a button to open the right side panel$/, async (should
 });
 
 When(/^I click on right side panel icon$/, async () => {
-  await menuHeaderPageObject.clickRightSidePanelButton();
+  await MenuHeader.clickRightSidePanelButton();
 });
