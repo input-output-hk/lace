@@ -21,12 +21,12 @@ import { browser } from '@wdio/globals';
 import CollateralDrawer from '../elements/settings/CollateralDrawer';
 import HelpDrawer from '../elements/settings/HelpDrawer';
 import ModalAssert from '../assert/modalAssert';
-import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import SettingsPage from '../elements/settings/SettingsPage';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import type { NetworkType } from '../types/network';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import MenuHeader from '../elements/menuHeader';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API)" setting$/,
@@ -266,7 +266,7 @@ When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (
 });
 
 When(/^I remove wallet$/, async () => {
-  await menuHeaderPageObject.openSettings();
+  await MenuHeader.openSettings();
   await settingsExtendedPageObject.clickOnRemoveWallet();
   await Modal.confirmButton.click();
 });

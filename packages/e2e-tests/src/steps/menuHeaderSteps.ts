@@ -1,22 +1,22 @@
 import { Then, When } from '@cucumber/cucumber';
-import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import WalletOption from '../elements/WalletOption';
 import topNavigationAssert from '../assert/topNavigationAssert';
+import MenuHeader from '../elements/menuHeader';
 
 Then(/^I open header menu$/, async () => {
-  await menuHeaderPageObject.openMenu();
+  await MenuHeader.openUserMenu();
 });
 
 Then(/^I open address book from header menu$/, async () => {
-  await menuHeaderPageObject.openAddressBook();
+  await MenuHeader.openAddressBook();
 });
 
 Then(/^I open settings from header menu$/, async () => {
-  await menuHeaderPageObject.openSettings();
+  await MenuHeader.openSettings();
 });
 
 When(/^I set theme switcher to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
-  await menuHeaderPageObject.setExtensionTheme(mode);
+  await MenuHeader.setExtensionTheme(mode);
 });
 
 When(/^I click on wallet number (\d)$/, async (walletIndex: number) => {
