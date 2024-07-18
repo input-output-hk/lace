@@ -805,7 +805,7 @@ export const useWalletManager = (): UseWalletManager => {
         walletId,
         metadata: {
           ...activeWallet.metadata,
-          sharedWalletKey
+          multiSigExtendedPublicKey: sharedWalletKey
         }
       });
     },
@@ -849,7 +849,7 @@ export const useWalletManager = (): UseWalletManager => {
         metadata: {
           name,
           coSigners,
-          sharedWalletKey
+          multiSigExtendedPublicKey: sharedWalletKey
         },
         ownSigners: [
           {

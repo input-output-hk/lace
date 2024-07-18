@@ -46,7 +46,7 @@ export const SharedWallet = (): JSX.Element => {
 
       const activeWalletId = cardanoWallet.source.wallet.walletId;
       const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
-      setSharedWalletKey(activeWallet.metadata.sharedWalletKey);
+      setSharedWalletKey(activeWallet.metadata.multiSigExtendedPublicKey);
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
       setActiveWalletType(activeWallet.type);
     })();

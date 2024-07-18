@@ -37,7 +37,8 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
     !isSharedWallet &&
     wallets?.some(
       ({ type, metadata }) =>
-        type === WalletType.Script && metadata.sharedWalletKey === activeWallet?.metadata.sharedWalletKey
+        type === WalletType.Script &&
+        metadata.multiSigExtendedPublicKey === activeWallet?.metadata.multiSigExtendedPublicKey
     );
 
   const toggleRemoveWalletAlert = () => {

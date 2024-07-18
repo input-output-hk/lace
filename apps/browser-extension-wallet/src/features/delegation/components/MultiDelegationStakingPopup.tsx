@@ -90,7 +90,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
   );
 
-  const { signPolicy, sharedKey } = useSharedWalletData({
+  const { signPolicy, sharedWalletKey } = useSharedWalletData({
     activeWallet,
     isSharedWallet,
     script: activeWallet?.type === WalletType.Script ? activeWallet.stakingScript : undefined,
@@ -185,7 +185,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
         isSharedWallet,
         signPolicy,
-        sharedKey,
+        sharedWalletKey,
         deriveSharedWalletExtendedPublicKeyHash: Wallet.util.deriveEd25519KeyHashFromBip32PublicKey
       }}
     >

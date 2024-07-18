@@ -21,9 +21,9 @@ export const useSharedWalletData = ({
   isSharedWallet,
   script,
   derivationPath
-}: Props): { signPolicy: SignPolicy | undefined; sharedKey: Wallet.Crypto.Bip32PublicKeyHex | undefined } => {
+}: Props): { signPolicy: SignPolicy | undefined; sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined } => {
   const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
-  const [sharedKey, setSharedKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
+  const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
 
   useEffect(() => {
     (async () => {
@@ -42,10 +42,10 @@ export const useSharedWalletData = ({
             name: keyToNameMap.get(signer.keyHash) || signer.keyHash
           }))
         });
-        setSharedKey(activeWallet.metadata.sharedWalletKey);
+        setSharedWalletKey(activeWallet.metadata.multiSigExtendedPublicKey);
       }
     })();
   }, [activeWallet, isSharedWallet, script, derivationPath]);
 
-  return { signPolicy, sharedKey };
+  return { signPolicy, sharedWalletKey };
 };
