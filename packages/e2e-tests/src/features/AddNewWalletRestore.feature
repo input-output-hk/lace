@@ -131,7 +131,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9245
   Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page without any user input interaction - <action>
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "<page>" page from "Restore" wallet flow and fill values
+    When I go to "<page>" page from "Restore" wallet flow and not fill values
     And <action>
     Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
     And "Add new wallet" modal is not displayed
