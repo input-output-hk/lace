@@ -68,11 +68,15 @@ export const TransactionDetails = ({
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
     <div className={styles.details}>
-      <div className={styles.title}>{label}</div>
+      <div className={styles.title} data-testid="deposit-value-title">
+        {label}
+      </div>
       <div className={styles.detail}>
-        <div className={styles.amount}>
-          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>{' '}
-          <span className={styles.fiat}>{amountTransformer(value)}</span>
+        <div className={styles.amount} data-testid="deposit-values">
+          <span className={styles.ada} data-testid="deposit-value-ada">{`${value} ${coinSymbol}`}</span>{' '}
+          <span className={styles.fiat} data-testid="deposit-value-fiat">
+            {amountTransformer(value)}
+          </span>
         </div>
       </div>
     </div>
@@ -93,7 +97,9 @@ export const TransactionDetails = ({
           <Transaction.Summary>{t('core.activityDetails.summary')}</Transaction.Summary>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
-              <div className={cn(styles.title, styles.poolsTitle)}>{t('core.activityDetails.pools')}</div>
+              <div className={cn(styles.title, styles.poolsTitle)} data-testid="rewards-pools-title">
+                {t('core.activityDetails.pools')}
+              </div>
               <div className={styles.poolsList}>
                 {pools?.map((pool) => (
                   <div key={pool.id} className={styles.poolEntry}>
@@ -207,7 +213,7 @@ export const TransactionDetails = ({
           />
         )}
         {metadata?.length > 0 && (
-          <div className={styles.metadataContainer}>
+          <div className={styles.metadataContainer} data-testid="tx-metadata-section">
             <div className={styles.metadataLabel} data-testid="tx-metadata-title">
               {t('core.activityDetails.metadata')}
             </div>
