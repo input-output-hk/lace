@@ -133,7 +133,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
   return (
     <>
       <Flex flexDirection="column" gap="$32" alignItems="stretch">
-        {isSharedWallet && (
+        {!isSharedWallet && (
           <Box className={styles.delegationCardWrapper}>
             <DelegationCard
               balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
