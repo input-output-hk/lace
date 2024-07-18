@@ -24,13 +24,13 @@ const mockStateShareDetails: CreationFlowState = {
   coSigners: [
     {
       id: '1',
-      keys: '3a2b5f9e8d2a3b4e5f6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8g',
       name: 'Alice',
+      sharedWalletKey: '3a2b5f9e8d2a3b4e5f6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8g',
     },
     {
       id: '2',
-      keys: '1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f',
       name: 'Bob',
+      sharedWalletKey: '1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f',
     },
   ],
   quorumRules: {

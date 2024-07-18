@@ -2,8 +2,8 @@
 import * as React from 'react';
 import { render, within, fireEvent, queryByTestId } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AssetActivityItem, AssetActivityItemProps, ActivityStatus } from '../AssetActivityItem';
-import { TransactionActivityType } from '../../ActivityDetail/types';
+import { AssetActivityItem, AssetActivityItemProps } from '../AssetActivityItem';
+import { ActivityStatus, TransactionActivityType } from '../../Transaction';
 import { ActivityType } from '../../ActivityDetail';
 
 const assetsAmountTestId = 'asset-amount';

@@ -3,18 +3,19 @@ import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-
 import { Wallet } from '@lace/cardano';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityStatus } from '@src/ui/components/Activity';
-import { TransactionFee, TxSummary } from '@src/ui/components/ActivityDetail';
-import { Transaction } from '@src/ui/components/Transaction';
-import { CosignersList, CosignersListItem } from './CosignersList';
+import { ActivityStatus, Transaction, TransactionFee, TxSummary } from '@src/ui/components/Transaction';
+import { CosignersList } from './CosignersList';
 import { InfoBar } from './InfoBar';
 import styles from './TransactionDetails.module.scss';
+import { CoSignersListItem, SignPolicy } from './types';
+
+const SHARED_WALLET_TX_VALIDITY_INTERVAL = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
 
 export interface TransactionDetailsProps {
   addressToNameMap: Map<string, string>;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
-  cosigners: CosignersListItem[];
+  cosigners: CoSignersListItem[];
   fee?: string;
   handleOpenExternalHashLink?: () => void;
   hash?: string;
@@ -22,10 +23,7 @@ export interface TransactionDetailsProps {
   includedTime?: string;
   isPopupView?: boolean;
   ownSharedKey: Wallet.Crypto.Ed25519KeyHashHex;
-  signPolicy: {
-    participants: number;
-    quorum: number;
-  };
+  signPolicy: SignPolicy;
   status?: ActivityStatus;
   txInitiator: string;
   txSummary?: TxSummary[];
@@ -59,7 +57,7 @@ export const TransactionDetails = ({
   const headerDescription = !hash && t('sharedWallets.transaction.summary.unsubmitted.headerDescription');
 
   const role = ownSharedKey === txInitiator ? 'summary' : 'cosigners';
-  const signStatus = !cosigners.some((c) => c.key === ownSharedKey && c.signed) ? 'unsigned' : 'unsubmitted';
+  const signStatus = !cosigners.some((c) => c.keyHash === ownSharedKey && c.signed) ? 'unsigned' : 'unsubmitted';
   const description = t(`sharedWallets.transaction.${role}.${signStatus}.description`);
 
   const signed = cosigners.filter((c) => c.signed);
@@ -111,7 +109,9 @@ export const TransactionDetails = ({
           )}
           {/* TODO: TransactionSummary.Amount is the only component with tooltip */}
           <TransactionSummary.Amount
-            amount={t('sharedWallets.transaction.summary.validityPeriod.value')}
+            amount={t('sharedWallets.transaction.summary.validityPeriod.value', {
+              hours: SHARED_WALLET_TX_VALIDITY_INTERVAL,
+            })}
             label={t('sharedWallets.transaction.summary.validityPeriod.title')}
             tooltip={t('sharedWallets.transaction.summary.validityPeriod.tooltip')}
             data-testid="validity-period"
@@ -136,14 +136,14 @@ export const TransactionDetails = ({
           {!hash && <InfoBar signed={signed} signPolicy={signPolicy} />}
           {signed.length > 0 && (
             <CosignersList
-              ownSharedKey={ownSharedKey}
+              ownSharedKeyHash={ownSharedKey}
               list={signed}
               title={t('sharedWallets.transaction.cosignerList.title.signed')}
             />
           )}
           {unsigned.length > 0 && (
             <CosignersList
-              ownSharedKey={ownSharedKey}
+              ownSharedKeyHash={ownSharedKey}
               list={unsigned}
               title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
             />

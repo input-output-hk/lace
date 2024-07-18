@@ -19,7 +19,7 @@ const mapStateToSchema = (state: CreationFlowState): SharedWalletSchema => {
     case QuorumRadioOption.AllAddresses: {
       nativeScript = {
         scripts: coSigners.map((coSigner) => ({
-          pubkey: coSigner.keys,
+          pubkey: coSigner.sharedWalletKey,
           tag: 'pubkey',
         })),
         tag: 'all',
@@ -29,7 +29,7 @@ const mapStateToSchema = (state: CreationFlowState): SharedWalletSchema => {
     case QuorumRadioOption.Any: {
       nativeScript = {
         scripts: coSigners.map((coSigner) => ({
-          pubkey: coSigner.keys,
+          pubkey: coSigner.sharedWalletKey,
           tag: 'pubkey',
         })),
         tag: 'any',
@@ -40,7 +40,7 @@ const mapStateToSchema = (state: CreationFlowState): SharedWalletSchema => {
       nativeScript = {
         n: quorumRules.numberOfCosigner,
         scripts: coSigners.map((coSigner) => ({
-          pubkey: coSigner.keys,
+          pubkey: coSigner.sharedWalletKey,
           tag: 'pubkey',
         })),
         tag: 'n_of_k',
@@ -54,9 +54,9 @@ const mapStateToSchema = (state: CreationFlowState): SharedWalletSchema => {
 
   return {
     metadata: {
-      participants: coSigners.map((coSigner) => ({
+      coSigners: coSigners.map((coSigner) => ({
         name: coSigner.name,
-        publicKey: coSigner.keys,
+        sharedWalletKey: coSigner.sharedWalletKey,
       })),
       sharedWalletName: walletName || '',
     },

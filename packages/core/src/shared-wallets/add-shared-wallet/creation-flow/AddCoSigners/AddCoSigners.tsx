@@ -27,7 +27,7 @@ export const AddCoSigners = ({
   coSignersDirty,
 }: Props): JSX.Element => {
   const { t } = useTranslation();
-  const atLeastOneValidCoSigner = coSigners.some((c) => c.keys && c.name) && errors.length === 0;
+  const atLeastOneValidCoSigner = coSigners.some((c) => c.sharedWalletKey && c.name) && errors.length === 0;
 
   return (
     <SharedWalletLayout
@@ -45,16 +45,16 @@ export const AddCoSigners = ({
           <AddCoSignerInput
             value={value}
             onChange={onValueChange}
-            keysFieldDisabled={index === indexOfCoSignersDataOfCurrentUser}
+            keyFieldDisabled={index === indexOfCoSignersDataOfCurrentUser}
             labels={{
-              keys: t(
-                `sharedWallets.addSharedWallet.addCosigners.${
-                  index === indexOfCoSignersDataOfCurrentUser ? 'yourKeysInputLabel' : 'coSignerKeysInputLabel'
-                }`,
-              ),
               name: t(
                 `sharedWallets.addSharedWallet.addCosigners.${
                   index === indexOfCoSignersDataOfCurrentUser ? 'yourNameInputLabel' : 'coSignerNameInputLabel'
+                }`,
+              ),
+              sharedWalletKey: t(
+                `sharedWallets.addSharedWallet.addCosigners.${
+                  index === indexOfCoSignersDataOfCurrentUser ? 'yourKeysInputLabel' : 'coSignerKeysInputLabel'
                 }`,
               ),
             }}

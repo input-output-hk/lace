@@ -23,7 +23,13 @@ export const atomicStateMutators = {
       selectedPortfolio: state.draftPortfolio,
     } as const;
   },
-  beginNewPortfolioCreation: ({ selections }: { selections: DraftPortfolioStakePool[] }) => {
+  beginNewPortfolioCreation: ({
+    selections,
+    isSharedWallet,
+  }: {
+    selections: DraftPortfolioStakePool[];
+    isSharedWallet?: boolean;
+  }) => {
     // RESPONSIBLITY: If all new pools have 0 percentages (just added pools), rebalance equally
     let targetDraftPortfolio;
     const allPoolsHaveZeroPercentages = selections.every(
@@ -43,7 +49,7 @@ export const atomicStateMutators = {
 
     return {
       activeDelegationFlow: DelegationFlow.NewPortfolio,
-      activeDrawerStep: DrawerManagementStep.Preferences,
+      activeDrawerStep: isSharedWallet ? DrawerManagementStep.Confirmation : DrawerManagementStep.Preferences,
       draftPortfolio: targetDraftPortfolio,
     } as const;
   },

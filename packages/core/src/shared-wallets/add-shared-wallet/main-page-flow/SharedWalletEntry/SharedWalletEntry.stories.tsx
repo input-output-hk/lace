@@ -1,6 +1,6 @@
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import { SharedWalletEntry } from '@src/shared-wallets';
+import { SharedWalletEntry } from './SharedWalletEntry';
 
 const meta: Meta<typeof SharedWalletEntry> = {
   component: SharedWalletEntry,
@@ -10,24 +10,23 @@ const meta: Meta<typeof SharedWalletEntry> = {
 export default meta;
 type Story = StoryObj<typeof SharedWalletEntry>;
 
-const generateSharedKeysMock = async (): Promise<string> => {
-  action('keys generate')();
-  return Promise.resolve('mocked-key');
-};
-
 export const NoKeys: Story = {
   args: {
     createAndImportOptionsDisabled: true,
-    getSharedKeys: generateSharedKeysMock,
     onCreateSharedWalletClick: action('create click'),
     onImportSharedWalletClick: action('import click'),
+    onKeysGenerateClick: action('key generate'),
+    sharedWalletKeyMode: 'generate',
   },
 };
 
 export const KeysAvailable: Story = {
   args: {
-    createAndImportOptionsDisabled: true,
+    createAndImportOptionsDisabled: false,
     onCreateSharedWalletClick: action('create click'),
     onImportSharedWalletClick: action('import click'),
+    onKeysCopyClick: action('key copy'),
+    onKeysGenerateClick: action('key generate'),
+    sharedWalletKeyMode: 'copy',
   },
 };

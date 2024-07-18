@@ -127,3 +127,54 @@ Feature: Add new wallet - Restore wallet
       | 12             |
       | 15             |
       | 24             |
+
+  @LW-9245
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page without any user input interaction - <action>
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and not fill values
+    And <action>
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
+    And "Add new wallet" modal is not displayed
+    Examples:
+      | page                  | action                                       |
+      | Mnemonic verification | I click "X" button on "Add new wallet" modal |
+#      | Mnemonic verification | I click outside "Add new wallet" modal       | BUG: LW-10975
+
+  @LW-9246
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page with any user input interaction - <action>
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and fill values
+    And <action>
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is displayed
+    Examples:
+      | page                  | action                                       |
+      | Mnemonic verification | I click "X" button on "Add new wallet" modal |
+#      | Mnemonic verification | I click outside "Add new wallet" modal       | BUG: LW-10975
+      | Wallet setup          | I click "X" button on "Add new wallet" modal |
+#      | Wallet setup          | I click outside "Add new wallet" modal       | BUG: LW-10975
+
+  @LW-9247
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - go back
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and fill values
+    And I click "X" button on "Add new wallet" modal
+    And I click "Go back" button on "Are you sure you want to cancel adding a new wallet?" dialog
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
+    And <step>
+    Examples:
+      | page                  | step                                                                               |
+      | Mnemonic verification | "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words |
+      | Wallet setup          | "Wallet setup" page is displayed in modal                                          |
+
+  @LW-9248
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - proceed
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and fill values
+    And I click "X" button on "Add new wallet" modal
+    And I click "Proceed" button on "Are you sure you want to cancel adding a new wallet?" dialog
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
+    And "Add new wallet" modal is not displayed
+    Examples:
+      | page                  |
+      | Mnemonic verification |
+      | Wallet setup          |

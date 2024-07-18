@@ -46,3 +46,4 @@ export * from '@ui/components/ListEmptyState';
 export * from '@ui/components/MidnightEventBanner';
 export * from '@ui/components/MidnightPreLaunchSettingsBanner';
 export * from '@ui/components/ImageWithFallback';
+export * from '@ui/components/Transaction';
