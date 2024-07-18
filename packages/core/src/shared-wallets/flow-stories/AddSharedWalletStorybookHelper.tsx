@@ -1,6 +1,9 @@
 import { Wallet } from '@lace/cardano';
-import { GenerateSharedWalletKeyFn, makeGenerateSharedWalletKey } from '@src/shared-wallets/add-shared-wallet/generate-key-flow/generate-shared-wallet-key';
 import React, { VFC, useEffect, useState } from 'react';
+import {
+  GenerateSharedWalletKeyFn,
+  makeGenerateSharedWalletKey,
+} from '@src/shared-wallets/add-shared-wallet/generate-key-flow/generate-shared-wallet-key';
 import {
   AddSharedWalletMainPageFlow,
   AddSharedWalletModal,
