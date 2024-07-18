@@ -39,9 +39,12 @@ import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
 import {
   buildSharedWalletScript,
+  CoSigner,
+  paymentScriptKeyPath,
   QuorumOptionValue,
   QuorumRadioOption,
   ScriptKind,
+  stakingScriptKeyPath,
   GenerateSharedWalletKeyFn,
   makeGenerateSharedWalletKey
 } from '@lace/core';
@@ -61,9 +64,10 @@ interface CreateSharedWalletParams {
   name: string;
   accountIndex?: number;
   chainId?: Wallet.Cardano.ChainId;
-  publicKeys: Wallet.Crypto.Bip32PublicKeyHex[];
+  coSigners: CoSigner[];
   ownSignerWalletId: WalletId;
   quorumRules: QuorumOptionValue;
+  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
 export interface CreateHardwareWallet {
@@ -813,19 +817,12 @@ export const useWalletManager = (): UseWalletManager => {
       accountIndex = 0,
       name,
       chainId = getCurrentChainId(),
-      publicKeys,
       ownSignerWalletId,
-      quorumRules
+      quorumRules,
+      coSigners,
+      sharedWalletKey
     }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
-      const paymentScriptKeyPath = {
-        index: 0,
-        role: KeyManagement.KeyRole.External
-      };
-
-      const stakingScriptKeyPath = {
-        index: 0,
-        role: KeyManagement.KeyRole.Stake
-      };
+      const publicKeys = coSigners.map((c: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(c.sharedWalletKey));
 
       let scriptKind: ScriptKind;
       if (quorumRules.option === QuorumRadioOption.AllAddresses) {
@@ -849,7 +846,11 @@ export const useWalletManager = (): UseWalletManager => {
       });
 
       const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name },
+        metadata: {
+          name,
+          coSigners,
+          sharedWalletKey
+        },
         ownSigners: [
           {
             accountIndex: 0,

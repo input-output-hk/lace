@@ -95,7 +95,7 @@
   "sharedWallets.transaction.summary.title": "Transaction",
   "sharedWallets.transaction.summary.sending": "Sending",
   "sharedWallets.transaction.summary.validityPeriod.title": "Transaction validity period",
-  "sharedWallets.transaction.summary.validityPeriod.value": "24 Hours",
+  "sharedWallets.transaction.summary.validityPeriod.value": "{{hours}} Hours",
   "sharedWallets.transaction.summary.validityPeriod.tooltip": "The maximum duration a transaction remains valid before it is automatically canceled if not completed with all the required signatures.",
   "sharedWallets.transaction.cosigners.title": "Co-signers",
   "sharedWallets.transaction.cosigners.quorum.reached": "Quorum reached. Transaction ready for network submission.",

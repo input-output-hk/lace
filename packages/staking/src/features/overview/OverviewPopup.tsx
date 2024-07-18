@@ -23,6 +23,7 @@ export const OverviewPopup = () => {
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
+    isSharedWallet,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -90,21 +91,23 @@ export const OverviewPopup = () => {
           <StakingNotificationBanners notifications={stakingNotifications} popupView />
         </Flex>
       )}
-      <Box mb="$32">
-        <DelegationCard
-          balance={compactNumber(balancesBalance.available.coinBalance)}
-          cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          arrangement="vertical"
-          distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
-            color,
-            name: name || '-',
-            percentage: onChainPercentage,
-            ros: ros ? String(ros) : undefined,
-            saturation: saturation ? String(saturation) : undefined,
-          }))}
-          status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
-        />
-      </Box>
+      {!isSharedWallet && (
+        <Box mb="$32">
+          <DelegationCard
+            balance={compactNumber(balancesBalance.available.coinBalance)}
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
+            arrangement="vertical"
+            distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
+              color,
+              name: name || '-',
+              percentage: onChainPercentage,
+              ros: ros ? String(ros) : undefined,
+              saturation: saturation ? String(saturation) : undefined,
+            }))}
+            status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
+          />
+        </Box>
+      )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
       </Flex>
