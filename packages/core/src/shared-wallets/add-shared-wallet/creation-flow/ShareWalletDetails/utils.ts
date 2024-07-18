@@ -54,9 +54,9 @@ const mapStateToSchema = (state: CreationFlowState): SharedWalletSchema => {
 
   return {
     metadata: {
-      participants: coSigners.map((coSigner) => ({
+      coSigners: coSigners.map((coSigner) => ({
         name: coSigner.name,
-        publicKey: coSigner.sharedWalletKey,
+        sharedWalletKey: coSigner.sharedWalletKey,
       })),
       sharedWalletName: walletName || '',
     },

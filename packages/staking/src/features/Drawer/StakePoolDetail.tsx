@@ -312,10 +312,26 @@ const makeActionButtons = (
     ] as (ActionButtonSpec | false)[]
   ).filter(Boolean) as ActionButtonSpec[];
 
+type SahredWalletButtonNames = 'stakeOnThisPool';
+const makeSharedWalletActionButtons = (
+  t: TFunction,
+  { stakeOnThisPool }: Record<SahredWalletButtonNames, boolean | Partial<ActionButtonSpec>>
+): ActionButtonSpec[] =>
+  (
+    [
+      stakeOnThisPool && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-stake-btn',
+        label: t('drawer.details.stakeOnSinglePoolButton'),
+        ...getSpecOverride(stakeOnThisPool),
+      },
+    ] as (ActionButtonSpec | false)[]
+  ).filter(Boolean) as ActionButtonSpec[];
+
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics, multidelegationDAppCompatibility, triggerMultidelegationDAppCompatibility } = useOutsideHandles();
-  const { walletStoreWalletType } = useOutsideHandles();
+  const { walletStoreWalletType, isSharedWallet } = useOutsideHandles();
   const [showDAppCompatibilityModal, setShowDAppCompatibilityModal] = useState(false);
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
@@ -335,8 +351,8 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const onStakeOnThisPool = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);
-    portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
-  }, [analytics, portfolioMutators]);
+    portfolioMutators.executeCommand({ data: { isSharedWallet }, type: 'BeginSingleStaking' });
+  }, [analytics, portfolioMutators, isSharedWallet]);
 
   const selectPoolFromDetails = useCallback(() => {
     if (!viewedStakePool) return;
@@ -387,20 +403,23 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const actionButtons = useMemo(
     () =>
-      makeActionButtons(t, {
-        addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
-        manageDelegation: poolInCurrentPortfolio && { callback: onManageDelegationClick },
-        selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
-        stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
-        unselectPool: poolSelected && { callback: onUnselectClick },
-      }),
+      !isSharedWallet
+        ? makeActionButtons(t, {
+            addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
+            manageDelegation: poolInCurrentPortfolio && { callback: onManageDelegationClick },
+            selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
+            stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
+            unselectPool: poolSelected && { callback: onUnselectClick },
+          })
+        : makeSharedWalletActionButtons(t, { stakeOnThisPool: { callback: onStakeOnThisPool } }),
     [
+      isSharedWallet,
       t,
       ableToSelect,
       selectionsEmpty,
-      onManageDelegationClick,
       onSelectClick,
       poolInCurrentPortfolio,
+      onManageDelegationClick,
       ableToStakeOnlyOnThisPool,
       onStakeOnThisPool,
       poolSelected,
