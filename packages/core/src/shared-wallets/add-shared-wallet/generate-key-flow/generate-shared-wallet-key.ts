@@ -16,14 +16,15 @@ type GenerateSharedWalletKeyDependencies = {
 export const makeGenerateSharedWalletKey =
   ({ chainId, getMnemonic }: GenerateSharedWalletKeyDependencies): GenerateSharedWalletKeyFn =>
   async (password) => {
-    const getPassphrase = async () => Buffer.from(password, 'utf8');
+    const passphrase = Buffer.from(password, 'utf8');
+    password = '';
     try {
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
         {
           accountIndex: 0,
           chainId,
-          getPassphrase,
-          mnemonicWords: await getMnemonic(await getPassphrase()),
+          getPassphrase: async () => passphrase,
+          mnemonicWords: await getMnemonic(passphrase),
           purpose: Wallet.KeyManagement.KeyPurpose.MULTI_SIG,
         },
         {
@@ -38,5 +39,8 @@ export const makeGenerateSharedWalletKey =
         throw new SharedWalletKeyGenerationAuthError();
       }
       throw error;
+    } finally {
+      // Clear any sensitive data from memory if possible
+      passphrase.fill(0);
     }
   };
