@@ -54,7 +54,7 @@ Then(
     const tHosky = {
       name: Asset.THOSKY.name,
       ticker: Asset.THOSKY.ticker,
-      value: 100.82
+      value: 100
     };
 
     const happyCoin = {
