@@ -113,6 +113,8 @@ export const SharedWallet = (): JSX.Element => {
             path={walletRoutePaths.sharedWallet.import}
             render={() => (
               <SharedWalletRestorationFlow
+                onRestoreSharedWallet={handleCreateWallet}
+                sharedKeys={sharedKey}
                 exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
                 navigateToAppHome={() => setBackgroundPage()}
               />
