@@ -1,2 +1,2 @@
-export { EnterPassword } from './EnterPassword';
+export { EnterPassword, PasswordErrorType } from './EnterPassword';
 export type { WalletKind } from './EnterPassword';

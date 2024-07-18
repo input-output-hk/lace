@@ -1,3 +1,5 @@
+import { Wallet } from '@lace/cardano';
+import { GenerateSharedWalletKeyFn, makeGenerateSharedWalletKey } from '@src/shared-wallets/add-shared-wallet/generate-key-flow/generate-shared-wallet-key';
 import React, { VFC, useEffect, useState } from 'react';
 import {
   AddSharedWalletMainPageFlow,
@@ -29,11 +31,16 @@ type AddSharedWalletFlowProps = {
   activeWalletSharedKey?: string;
   activeWalletType?: LinkedWalletType;
   creationInitialState?: CreationFlowState;
-  generateKey?: (password: string) => Promise<string>;
+  generateKey?: GenerateSharedWalletKeyFn;
   initialFlow?: AddSharedWalletFlowType;
   keyGenerationInitialState?: GenerateSharedWalletKeyState;
   modalOpen?: boolean;
 };
+
+const generateSharedWalletKey = makeGenerateSharedWalletKey({
+  chainId: Wallet.Cardano.ChainIds.Preprod,
+  getMnemonic: async () => Wallet.KeyManagement.util.generateMnemonicWords(),
+});
 
 export const sharedWalletKey =
   '979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d';
@@ -47,7 +54,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
   initialFlow = AddSharedWalletFlowType.GetStarted,
   creationInitialState: providedCreationInitialState = makeSharedWalletCreationInitialState(activeWalletName),
   keyGenerationInitialState: providedKeysGenerationInitialState = makeGenerateSharedWalletKeyInitialState(),
-  generateKey = async () => sharedWalletKey,
+  generateKey = generateSharedWalletKey,
 }) => {
   const [open, setOpen] = useState(modalOpen);
   const [flow, setFlow] = useState(initialFlow);

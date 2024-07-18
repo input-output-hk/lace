@@ -35,7 +35,7 @@ export const GenerateSharedWalletKeyFlow: VFC<GenerateSharedWalletKeyFlowProps> 
             loading={state.loading}
             onBack={() => dispatch({ type: ActionType.Back })}
             onGenerateKeys={(password) => dispatch({ password, type: ActionType.KeysGenerationTriggered })}
-            passwordErrorMessage={state.passwordErrorMessage}
+            passwordErrorType={state.passwordErrorType}
             walletKind={mapWalletType[activeWalletType]}
             walletName={activeWalletName}
           />

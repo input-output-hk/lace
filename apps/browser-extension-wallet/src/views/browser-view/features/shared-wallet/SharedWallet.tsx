@@ -30,7 +30,8 @@ type CreateWalletParams = {
 
 export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
-  const { walletRepository, generateSharedWalletKey, createInMemorySharedWallet } = useWalletManager();
+  const { walletRepository, generateSharedWalletKey, saveSharedWalletKey, createInMemorySharedWallet } =
+    useWalletManager();
   const { walletInfo, cardanoWallet } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
@@ -45,7 +46,7 @@ export const SharedWallet = (): JSX.Element => {
 
       const activeWalletId = cardanoWallet.source.wallet.walletId;
       const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
-      setSharedWalletKey(activeWallet.metadata.extendedAccountPublicKey);
+      setSharedWalletKey(activeWallet.metadata.sharedWalletKey);
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
       setActiveWalletType(activeWallet.type);
     })();
@@ -66,7 +67,8 @@ export const SharedWallet = (): JSX.Element => {
 
   const generateKey = async (enteredPassword: string) => {
     if (sharedWalletKey) return sharedWalletKey;
-    const key = await generateSharedWalletKey(enteredPassword, cardanoWallet.source.wallet.walletId);
+    const key = await generateSharedWalletKey(enteredPassword);
+    await saveSharedWalletKey(key);
     setSharedWalletKey(key);
     return key;
   };
