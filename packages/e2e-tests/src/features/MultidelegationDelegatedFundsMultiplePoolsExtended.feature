@@ -181,7 +181,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     # When I press keyboard Enter button
     Then Drawer is not displayed
 
-  @LW-10998 @Testnet
+  @LW-10998
   Scenario Outline: Extended View - Multidelegation - 'Switching pool' modal displayed while reducing number of staked pools, click <action>
     When I navigate to Staking extended page
     And I open Overview tab
