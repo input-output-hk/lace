@@ -5,18 +5,18 @@ import SwitchingStakePoolModal from '../elements/multidelegation/SwitchingStakeP
 class SwitchingPoolsModalAssert {
   async assertSeeSwitchingToLessPoolsModal() {
     await SwitchingStakePoolModal.title.waitForDisplayed();
-    expect(await SwitchingStakePoolModal.title.getText()).to.equal(await t('modals.poolsManagement.title', 'staking'));
+    expect(await SwitchingStakePoolModal.title.getText()).to.equal(await t('modals.poolsManagement.title'));
     await SwitchingStakePoolModal.description.waitForDisplayed();
     expect(await SwitchingStakePoolModal.description.getText()).to.equal(
-      await t('modals.poolsManagement.description.reduction', 'staking')
+      await t('modals.poolsManagement.description.reduction')
     );
     await SwitchingStakePoolModal.fineByMeButton.waitForDisplayed();
     expect(await SwitchingStakePoolModal.fineByMeButton.getText()).to.equal(
-      await t('modals.poolsManagement.buttons.confirm', 'staking')
+      await t('modals.poolsManagement.buttons.confirm')
     );
     await SwitchingStakePoolModal.cancelButton.waitForDisplayed();
     expect(await SwitchingStakePoolModal.cancelButton.getText()).to.equal(
-      await t('modals.poolsManagement.buttons.cancel', 'staking')
+      await t('modals.poolsManagement.buttons.cancel')
     );
   }
 }
