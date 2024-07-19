@@ -2,9 +2,14 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class MultidelegationDAppIssueModal {
+  private CONTAINER = '.ant-modal-body';
   private TITLE = '[data-testid="stake-modal-title"]';
   private DESCRIPTION = '[data-testid="stake-modal-description"]';
   private GOT_IT_BUTTON = '[data-testid="multidelegation-dapp-modal-button"]';
+
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER);
+  }
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
