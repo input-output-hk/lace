@@ -41,6 +41,7 @@ import StakingErrorDrawerAssert from '../assert/multidelegation/StakingErrorDraw
 import MultidelegationDAppIssueModalAssert from '../assert/multidelegation/MultidelegationDAppIssueModalAssert';
 import { StakePoolGridCard } from '../elements/multidelegation/StakePoolGridCard';
 import { StakePoolListItem } from '../elements/multidelegation/StakePoolListItem';
+import SwitchingPoolsModalAssert from '../assert/switchingPoolsModalAssert';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -688,4 +689,8 @@ When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async
 
 Then(/^the staking error screen is displayed$/, async () => {
   await StakingErrorDrawerAssert.assertSeeStakingError();
+});
+
+Then(/^I see "Switching to less pools" modal$/, async () => {
+  await SwitchingPoolsModalAssert.assertSeeSwitchingToLessPoolsModal();
 });
