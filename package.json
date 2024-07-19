@@ -29,7 +29,7 @@
     "cleanup": "yarn workspaces foreach run cleanup && yarn exec rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
     "common:lint": "yarn eslint-cmd \"packages/common/**/*.{js,ts,tsx}\"",
     "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
-    "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore --max-warnings=0",
+    "eslint-cmd": "eslint_d --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore --max-warnings=0",
     "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
     "format-check": "yarn workspaces foreach -ptv run format-check",
     "postinstall": "husky install & ts-patch install -s",
@@ -48,7 +48,7 @@
   },
   "lint-staged": {
     "*(apps/**/*.{js,ts,tsx}|packages/!(translation)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
-      "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore --max-warnings=0",
+      "eslint_d --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore --max-warnings=0",
       "prettier --write"
     ],
     "*(packages/translation/**/*.{js,ts,tsx})": [
@@ -148,6 +148,7 @@
     "eslint-plugin-sort-keys": "^2.3.5",
     "eslint-plugin-storybook": "^0.6.1",
     "eslint-plugin-unicorn": "^35.0.0",
+    "eslint_d": "^13.1.2",
     "faker": "5.5.3",
     "file-loader": "^6.2.0",
     "html-webpack-harddisk-plugin": "2.0.0",
