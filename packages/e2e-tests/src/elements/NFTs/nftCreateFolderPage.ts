@@ -1,11 +1,13 @@
+/* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
 import NftFolderNameInput from './nftFolderNameInput';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
+import { ChainablePromiseElement } from 'webdriverio';
 
 class NftCreateFolderPage extends CommonDrawerElements {
   private NEXT_BUTTON = '[data-testid="create-folder-drawer-form-cta"]';
 
-  get nextButton() {
+  get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEXT_BUTTON);
   }
 

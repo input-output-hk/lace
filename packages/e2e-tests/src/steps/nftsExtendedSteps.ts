@@ -1,10 +1,10 @@
 import { Given, Then, When } from '@cucumber/cucumber';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import nftAssert from '../assert/nftAssert';
 import NftDetails from '../elements/NFTs/nftDetails';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
 import nftSelectNftsAssert from '../assert/nftSelectNftsAssert';
+import { progressWithSendUntilPasswordPage } from '../helpers/NFTPageHelper';
 
 Then(
   /^NFT with name: "([^"]*)" (is displayed|is not displayed) in coin selector$/,
@@ -40,21 +40,21 @@ Then(/^"Send NFT" button (is|is not) displayed on NFT details drawer$/, async (s
 Given(
   /^I'm sending the NFT with name: "([^"]*)" in (popup|extended) mode$/,
   async (nftName: string, mode: 'extended' | 'popup') => {
-    await nftsPageObject.progressWithSendUntilPasswordPage(nftName, mode);
+    await progressWithSendUntilPasswordPage(nftName, mode);
   }
 );
 
 Given(
   /^I'm sending the ADA handle with name: "([^"]*)" in (popup|extended) mode$/,
   async (nftName: string, mode: 'extended' | 'popup') => {
-    await nftsPageObject.progressWithSendUntilPasswordPage(nftName, mode, false, true);
+    await progressWithSendUntilPasswordPage(nftName, mode, false, true);
   }
 );
 
 Given(
   /^I'm sending the NFT with name: "([^"]*)" with HD wallet in (popup|extended) mode$/,
   async (nftName: string, mode: 'extended' | 'popup') => {
-    await nftsPageObject.progressWithSendUntilPasswordPage(nftName, mode, true);
+    await progressWithSendUntilPasswordPage(nftName, mode, true);
   }
 );
 
