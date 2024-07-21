@@ -82,7 +82,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
             {icon}
           </Flex>
           <Flex flexDirection="column">
-            <Text.Address className={styles.walletNameLabel}>
+            <Text.Address color="secondary">
               {t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.activeWalletLabel')}
             </Text.Address>
             <Text.Body.Large weight="$bold">{walletName}</Text.Body.Large>

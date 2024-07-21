@@ -17,6 +17,7 @@ export const makeGenerateSharedWalletKey =
   ({ chainId, getMnemonic }: GenerateSharedWalletKeyDependencies): GenerateSharedWalletKeyFn =>
   async (password) => {
     const passphrase = Buffer.from(password, 'utf8');
+    // Intentionally erasing password string for the security purpose
     password = '';
     try {
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
