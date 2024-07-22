@@ -164,8 +164,7 @@ export const StakingContainer = (): React.ReactElement => {
           isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
           isSharedWallet,
           signPolicy,
-          sharedWalletKey,
-          deriveSharedWalletExtendedPublicKeyHash: Wallet.util.deriveEd25519KeyHashFromBip32PublicKey
+          sharedWalletKey
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

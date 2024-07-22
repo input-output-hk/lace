@@ -1,1 +1,2 @@
-export * from './TransactionDetails';
+export * from './InfoBar';
+export * from './CosignersList';

@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
@@ -312,22 +313,6 @@ const makeActionButtons = (
     ] as (ActionButtonSpec | false)[]
   ).filter(Boolean) as ActionButtonSpec[];
 
-type SahredWalletButtonNames = 'stakeOnThisPool';
-const makeSharedWalletActionButtons = (
-  t: TFunction,
-  { stakeOnThisPool }: Record<SahredWalletButtonNames, boolean | Partial<ActionButtonSpec>>
-): ActionButtonSpec[] =>
-  (
-    [
-      stakeOnThisPool && {
-        callback: tmpNoop,
-        dataTestId: 'stake-pool-details-stake-btn',
-        label: t('drawer.details.stakeOnSinglePoolButton'),
-        ...getSpecOverride(stakeOnThisPool),
-      },
-    ] as (ActionButtonSpec | false)[]
-  ).filter(Boolean) as ActionButtonSpec[];
-
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics, multidelegationDAppCompatibility, triggerMultidelegationDAppCompatibility } = useOutsideHandles();
@@ -403,15 +388,13 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const actionButtons = useMemo(
     () =>
-      !isSharedWallet
-        ? makeActionButtons(t, {
-            addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
-            manageDelegation: poolInCurrentPortfolio && { callback: onManageDelegationClick },
-            selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
-            stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
-            unselectPool: poolSelected && { callback: onUnselectClick },
-          })
-        : makeSharedWalletActionButtons(t, { stakeOnThisPool: { callback: onStakeOnThisPool } }),
+      makeActionButtons(t, {
+        addStakingPool: !isSharedWallet && ableToSelect && !selectionsEmpty && { callback: onSelectClick },
+        manageDelegation: !isSharedWallet && poolInCurrentPortfolio && { callback: onManageDelegationClick },
+        selectForMultiStaking: !isSharedWallet && ableToSelect && selectionsEmpty && { callback: onSelectClick },
+        stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
+        unselectPool: !isSharedWallet && poolSelected && { callback: onUnselectClick },
+      }),
     [
       isSharedWallet,
       t,

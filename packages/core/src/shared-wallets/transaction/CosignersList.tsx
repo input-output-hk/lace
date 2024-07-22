@@ -8,11 +8,11 @@ import { CoSignersListItem } from './types';
 
 interface CoSignerItemProps {
   list: CoSignersListItem[];
-  ownSharedKeyHash?: Wallet.Crypto.Ed25519KeyHashHex;
+  ownSharedWalletKeyHash?: Wallet.Crypto.Ed25519KeyHashHex;
   title: string;
 }
 
-export const CosignersList = ({ list, title, ownSharedKeyHash }: CoSignerItemProps) => {
+export const CosignersList = ({ list, title, ownSharedWalletKeyHash }: CoSignerItemProps) => {
   const { t } = useTranslation();
 
   return (
@@ -43,7 +43,9 @@ export const CosignersList = ({ list, title, ownSharedKeyHash }: CoSignerItemPro
               </div>
               <div className={styles.cosignersListItemContent}>
                 <Box w="$fill" className={styles.cosignersListItemName}>
-                  {key === ownSharedKeyHash ? t('sharedWallets.transaction.cosignerList.you') : cosignerName || '...'}
+                  {key === ownSharedWalletKeyHash
+                    ? t('sharedWallets.transaction.cosignerList.you')
+                    : cosignerName || '...'}
                 </Box>
                 <Box w="$fill" className={styles.cosignersListItemAddress}>
                   {key}
