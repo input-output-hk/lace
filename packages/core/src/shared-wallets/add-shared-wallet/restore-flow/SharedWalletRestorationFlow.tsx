@@ -2,23 +2,15 @@
 import { Dialog, FileUpload, Text } from '@input-output-hk/lace-ui-toolkit';
 import React, { VFC, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { CoSigner } from '../creation-flow/AddCoSigners';
-import { QuorumOptionValue } from '../creation-flow/Quorum';
 import { SharedWalletLayout } from '../SharedWalletLayout';
 import { restorationTimelineSteps } from './timelineSteps';
-import { FileErrorMessage, FileValidationError, SharedWalletRestorationStep } from './types';
+import { CreateWalletParams, FileErrorMessage, FileValidationError, SharedWalletRestorationStep } from './types';
 import { validateJson } from './validateJson';
-
-type CosignerData = {
-  coSigners: CoSigner[];
-  name: string;
-  quorumRules: QuorumOptionValue;
-};
 
 type SharedWalletRestorationProps = {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
-  onRestoreSharedWallet: (data: CosignerData) => void;
+  onRestoreSharedWallet: (data: CreateWalletParams) => void;
   sharedKeys: string;
 };
 
@@ -31,7 +23,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
   onRestoreSharedWallet,
 }) => {
   const [file, setFile] = useState<File | undefined>();
-  const [cosignerData, setCosignerData] = useState<CosignerData | undefined>(undefined);
+  const [cosignerData, setCosignerData] = useState<CreateWalletParams | undefined>(undefined);
   const [error, setError] = useState<FileValidationError | undefined>();
 
   const { t } = useTranslation();
