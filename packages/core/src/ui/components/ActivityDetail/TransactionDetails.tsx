@@ -56,6 +56,7 @@ export const TransactionDetails = ({
       case ActivityStatus.SPENDABLE:
         return CollateralStatus.NONE;
       case ActivityStatus.PENDING:
+      case ActivityStatus.AWAITING_COSIGNATURES:
         return CollateralStatus.REVIEW;
       case ActivityStatus.SUCCESS:
         return CollateralStatus.SUCCESS;

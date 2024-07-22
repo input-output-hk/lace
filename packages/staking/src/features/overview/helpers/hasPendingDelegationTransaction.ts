@@ -8,5 +8,5 @@ export const hasPendingDelegationTransaction = (walletActivities: AssetActivityL
       (type in DelegationActivityType ||
         type === ConwayEraCertificatesTypes.Registration ||
         type === ConwayEraCertificatesTypes.Unregistration) &&
-      status === ActivityStatus.PENDING
+      (status === ActivityStatus.PENDING || ActivityStatus.AWAITING_COSIGNATURES)
   );

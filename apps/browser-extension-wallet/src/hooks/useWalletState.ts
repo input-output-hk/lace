@@ -34,7 +34,7 @@ export type ObservableWalletState = FlattenObservableProperties<
   Omit<ObservableWallet, 'fatalError$' | 'transactions'> & {
     transactions: {
       history$: ObservableWallet['transactions']['history$'];
-      outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$'>;
+      outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$' | 'signed$'>;
     };
   }
 >;
@@ -105,6 +105,7 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
     wallet.tip$,
     wallet.transactions.history$,
     wallet.transactions.outgoing.inFlight$,
+    wallet.transactions.outgoing.signed$,
     wallet.utxo.available$,
     wallet.utxo.total$,
     wallet.utxo.unspendable$
@@ -136,6 +137,7 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         tip,
         transactionsHistory,
         transactionsHistoryOutgoingInFlight,
+        transactionsHistoryOutgoingSigned,
         utxoAvailable,
         utxoTotal,
         utxoUnspendable
@@ -177,7 +179,8 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         transactions: {
           history: transactionsHistory,
           outgoing: {
-            inFlight: transactionsHistoryOutgoingInFlight
+            inFlight: transactionsHistoryOutgoingInFlight,
+            signed: transactionsHistoryOutgoingSigned
           }
         },
         utxo: {
