@@ -604,20 +604,15 @@ Then(
 );
 
 When(/^I click on "Got it" button inside the modal about issues with multi-delegation and DApps$/, async () => {
-  await MultidelegationDAppIssueModal.gotItButton.waitForClickable();
-  await MultidelegationDAppIssueModal.gotItButton.click();
+  await MultidelegationDAppIssueModal.clickOnGotItButton();
 });
 
 When(/^I click on a random stake pool from the (grid|list)$/, async (mode: 'grid' | 'list') => {
   if (mode === 'grid') {
-    const cardsQuantity = await MultidelegationPage.displayedCards.length;
-    const min = 1;
-    const randomCardIndex = Math.floor(Math.random() * (cardsQuantity - min + 1)) + min;
+    const randomCardIndex = await MultidelegationPage.getRandomStakePooGridCardIndex();
     await new StakePoolGridCard(randomCardIndex).container.click();
   } else {
-    const rowsQuantity = await MultidelegationPage.displayedPools.length;
-    const min = 1;
-    const randomItemIndex = Math.floor(Math.random() * (rowsQuantity - min + 1)) + min;
+    const randomItemIndex = await MultidelegationPage.getRandomStakePoolListItemIndex();
     await new StakePoolListItem(randomItemIndex).container.click();
   }
 });

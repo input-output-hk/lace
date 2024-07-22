@@ -22,6 +22,11 @@ class MultidelegationDAppIssueModal {
   get gotItButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GOT_IT_BUTTON);
   }
+
+  async clickOnGotItButton(): Promise<void> {
+    await this.gotItButton.waitForClickable();
+    await this.gotItButton.click();
+  }
 }
 
 export default new MultidelegationDAppIssueModal();
