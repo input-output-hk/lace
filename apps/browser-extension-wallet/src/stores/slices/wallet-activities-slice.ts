@@ -332,11 +332,9 @@ const mapWalletActivities = memoize(
           firstTx.status !== ActivityStatus.AWAITING_COSIGNATURES
         )
           return 1;
-        // ensure pending txs are always next
-        if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return -1;
-        if (secondTx.status === ActivityStatus.PENDING && firstTx.status !== ActivityStatus.PENDING) return 1;
+
         // otherwise sort by date
-        return secondTx.date?.getTime() - firstTx.date?.getTime();
+        return (secondTx.date?.getTime() || 0) - (firstTx.date?.getTime() || 0);
       }),
       'formattedDate'
     );

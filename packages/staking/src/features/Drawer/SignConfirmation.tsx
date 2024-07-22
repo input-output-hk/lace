@@ -103,14 +103,14 @@ export const SignConfirmationFooter = (): ReactElement => {
       const tx = await delegationTxBuilder.build().inspect();
 
       const signedTx = await inMemoryWallet.finalizeTx({ tx });
-      if (signPolicy.required === 1) {
+      if (signPolicy.requiredCosigners === 1) {
         await inMemoryWallet.submitTx(signedTx);
       }
     } else {
       const signedTx = await delegationTxBuilder.build().sign();
       await inMemoryWallet.submitTx(signedTx);
     }
-  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy.required, sharedKey]);
+  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy.requiredCosigners, sharedKey]);
 
   const handleVerifyPass = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
