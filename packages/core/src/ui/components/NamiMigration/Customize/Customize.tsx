@@ -64,7 +64,10 @@ export const Customize = ({ onDone, onBack, videosURL, onChange = noop }: Props)
       </Box>
       <Flex w="$fill" justifyContent="space-between">
         <Button.Secondary label={t('core.namiMigration.customize.back')} onClick={onBack} />
-        <Button.CallToAction label={t('core.namiMigration.customize.cta')} onClick={() => onDone(mode)} />
+        <Button.CallToAction
+          label={mode === 'lace' ? t('core.namiMigration.customize.done') : t('core.namiMigration.customize.next')}
+          onClick={() => onDone(mode)}
+        />
       </Flex>
     </Wizard>
   );

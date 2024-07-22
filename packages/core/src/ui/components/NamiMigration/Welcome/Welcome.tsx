@@ -51,7 +51,9 @@ export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl, colorSche
           </Box>
         </Flex>
         <Box mt="$32">
-          <Text.Body.Normal>{t('core.namiMigration.description')}</Text.Body.Normal>
+          <Text.Body.Normal>{t('core.namiMigration.description.1')}</Text.Body.Normal>
+          <Box mt="$24" />
+          <Text.Body.Normal>{t('core.namiMigration.description.2')}</Text.Body.Normal>
           <Box mt="$24" />
           <Text.Body.Normal>
             <Trans
@@ -62,7 +64,7 @@ export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl, colorSche
             />
           </Text.Body.Normal>
           <Box mt="$24" />
-          <Text.Body.Small weight="$medium">
+          <Text.Body.Normal>
             <Trans
               i18nKey="core.namiMigration.tos"
               components={{
@@ -79,10 +81,10 @@ export const Welcome = ({ termsOfServiceUrl, privacyPolicyUrl, faqUrl, colorSche
                 )
               }}
             />
-          </Text.Body.Small>
+          </Text.Body.Normal>
         </Box>
       </Box>
-      <Flex w="$fill" justifyContent="flex-end" mt="$64">
+      <Flex w="$fill" justifyContent="flex-end">
         <Button.CallToAction label={t('core.namiMigration.cta')} onClick={onNext} />
       </Flex>
     </Wizard>
