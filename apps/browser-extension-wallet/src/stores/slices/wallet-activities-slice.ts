@@ -405,7 +405,7 @@ const mapWalletActivities = memoize(
   ) =>
     `${transactions.history.length}_${transactions.outgoing.inFlight
       .map(({ id }) => id)
-      .join('')}_${transactions.outgoing.signed.map(({ tx: { id } }) => id).join('')}_${assetInfo.size}_${
+      .join('')}_${transactions.outgoing.signed?.map(({ tx: { id } }) => id).join('')}_${assetInfo.size}_${
       rewardsHistory.all.length
     }_${cardanoFiatPrice}_${fiatCurrency.code}_${assetId || ''}_${cardanoCoin?.id}_${assetDetails?.id}_${
       addresses[0]?.address

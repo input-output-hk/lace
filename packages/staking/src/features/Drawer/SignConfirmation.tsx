@@ -110,7 +110,7 @@ export const SignConfirmationFooter = (): ReactElement => {
       const signedTx = await delegationTxBuilder.build().sign();
       await inMemoryWallet.submitTx(signedTx);
     }
-  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy.requiredCosigners, sharedKey]);
+  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy?.requiredCosigners, sharedKey]);
 
   const handleVerifyPass = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
