@@ -39,6 +39,9 @@ const parseError = (error: CoSignerError | undefined, t: TFunction): Partial<Rec
   if (error.sharedWalletKey === CoSignerErrorKeys.Invalid) {
     keyErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keyInputError.invalid');
   }
+  if (error.sharedWalletKey === CoSignerErrorKeys.Duplicated) {
+    keyErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keyInputError.duplicated');
+  }
 
   return {
     name: nameErrorMessage,

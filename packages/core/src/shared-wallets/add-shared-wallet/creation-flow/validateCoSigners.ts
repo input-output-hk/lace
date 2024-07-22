@@ -11,6 +11,9 @@ export const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
     const keyValidationResult = keyRegex.exec(sharedWalletKey);
     if (!sharedWalletKey) keyError = CoSignerErrorKeys.Required;
     else if (!keyValidationResult) keyError = CoSignerErrorKeys.Invalid;
+    else if (coSigners.some((coSigner) => coSigner.id !== id && coSigner.sharedWalletKey === sharedWalletKey)) {
+      keyError = CoSignerErrorKeys.Duplicated;
+    }
 
     if (!name) nameError = CoSignerErrorName.Required;
     else if (name.length > maxCoSignerNameLength) nameError = CoSignerErrorName.TooLong;

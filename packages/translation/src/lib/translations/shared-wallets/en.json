@@ -45,6 +45,7 @@
   "sharedWallets.addSharedWallet.addCosigners.nameInputError.tooLong": "Max. {{amount}} characters",
   "sharedWallets.addSharedWallet.addCosigners.keyInputError.required": "Shared wallet key is required",
   "sharedWallets.addSharedWallet.addCosigners.keyInputError.invalid": "Incorrect key format",
+  "sharedWallets.addSharedWallet.addCosigners.keyInputError.duplicated": "Provided key is duplicated",
   "sharedWallets.addSharedWallet.importantInfo.title": "Important information about shared wallets",
   "sharedWallets.addSharedWallet.importantInfo.subtitle": "When a shared wallet is created its settings, including the keys of each co-signer, are no longer editable. Inputing of incorrect keys may prevent operation of the shared wallet and funds it receives may be unrecoverable.",
   "sharedWallets.addSharedWallet.importantInfo.checkBoxLabel": "I understand that upon creating the shared wallet I will be unable to change its configuration",

@@ -12,8 +12,8 @@ describe('validateCoSigners', () => {
         { id: '2', name: 'John Doe', sharedWalletKey: fakeSharedKey },
       ]),
     ).toEqual([
-      { id: '1', name: CoSignerErrorName.Duplicated },
-      { id: '2', name: CoSignerErrorName.Duplicated },
+      { id: '1', name: CoSignerErrorName.Duplicated, sharedWalletKey: CoSignerErrorKeys.Duplicated },
+      { id: '2', name: CoSignerErrorName.Duplicated, sharedWalletKey: CoSignerErrorKeys.Duplicated },
     ] as CoSignerError[]);
   });
 
