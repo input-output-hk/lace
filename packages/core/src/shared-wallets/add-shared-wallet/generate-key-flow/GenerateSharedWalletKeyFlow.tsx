@@ -42,7 +42,7 @@ export const GenerateSharedWalletKeyFlow: VFC<GenerateSharedWalletKeyFlowProps> 
         )}
         {state.step === GenerateSharedWalletKeyStep.CopyKey && (
           <CopyKey
-            onClose={() => dispatch({ type: ActionType.CloseFlow })}
+            onClose={navigateToParentFlow}
             onCopyKey={makeCopyKeysToClipboard(state.sharedWalletKey)}
             sharedWalletKey={state.sharedWalletKey}
           />

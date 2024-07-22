@@ -80,7 +80,7 @@
   "sharedWallets.addSharedWallet.keyGeneration.copyKeys.title": "Copy shared wallet key",
   "sharedWallets.addSharedWallet.keyGeneration.copyKeys.subtitle": "Copy and send this key to someone setting up a new shared wallet. You can review this key at any time.",
   "sharedWallets.addSharedWallet.keyGeneration.copyKeys.backButtonLabel": "Copy key to clipboard",
-  "sharedWallets.addSharedWallet.keyGeneration.copyKeys.nextButtonLabel": "Close",
+  "sharedWallets.addSharedWallet.keyGeneration.copyKeys.nextButtonLabel": "Next",
   "sharedWallets.addSharedWallet.keyGeneration.copyKeys.keyBoxTitle": "Shared Wallet Keys",
   "sharedWallets.transaction.cosignerList.title.signed": "Signed",
   "sharedWallets.transaction.cosignerList.title.unsigned": "Unsigned",
