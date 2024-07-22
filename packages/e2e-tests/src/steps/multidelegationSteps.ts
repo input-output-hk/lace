@@ -38,6 +38,9 @@ import StakingInfoCard from '../elements/multidelegation/StakingInfoCard';
 import StakingExitModal from '../elements/multidelegation/StakingExitModal';
 import StakingExitModalAssert from '../assert/multidelegation/StakingExitModalAssert';
 import StakingErrorDrawerAssert from '../assert/multidelegation/StakingErrorDrawerAssert';
+import MultidelegationDAppIssueModalAssert from '../assert/multidelegation/MultidelegationDAppIssueModalAssert';
+import { StakePoolGridCard } from '../elements/multidelegation/StakePoolGridCard';
+import { StakePoolListItem } from '../elements/multidelegation/StakePoolListItem';
 import SwitchingPoolsModalAssert from '../assert/switchingPoolsModalAssert';
 
 const validPassword = 'N_8J@bne87A';
@@ -600,10 +603,29 @@ Then(
   }
 );
 
-When(/^I close the modal about issues with multidelegation and DApps$/, async () => {
-  if (await MultidelegationDAppIssueModal.gotItButton.isDisplayed()) {
-    await MultidelegationDAppIssueModal.gotItButton.click();
+When(/^I click on "Got it" button inside the modal about issues with multi-delegation and DApps$/, async () => {
+  await MultidelegationDAppIssueModal.clickOnGotItButton();
+});
+
+When(/^I click on a random stake pool from the (grid|list)$/, async (mode: 'grid' | 'list') => {
+  if (mode === 'grid') {
+    const randomCardIndex = await MultidelegationPage.getRandomStakePooGridCardIndex();
+    await new StakePoolGridCard(randomCardIndex).container.click();
+  } else {
+    const randomItemIndex = await MultidelegationPage.getRandomStakePoolListItemIndex();
+    await new StakePoolListItem(randomItemIndex).container.click();
   }
+});
+
+Then(
+  /^I (see|do not see) the modal about issues with multi-delegation and DApps$/,
+  async (status: 'see' | 'do not see') => {
+    await MultidelegationDAppIssueModalAssert.assertSeeModal(status === 'see');
+  }
+);
+
+When(/^I reset default behaviour for modal about issues with multi-delegation and DApps$/, async () => {
+  await localStorageInitializer.removeConfigurationForShowingMultidelegationDAppsIssueModal();
 });
 
 Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {

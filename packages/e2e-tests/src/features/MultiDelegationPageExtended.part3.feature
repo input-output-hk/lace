@@ -85,3 +85,45 @@ Feature: Staking Page - Extended View
       | Pledge          | descending    | ascending      |
       | Live Stake      | descending    | ascending      |
       | Ticker          | ascending     | descending     |
+
+  @LW-10583 @Testnet
+  Scenario: Modal about multi-delegation and DApp issues is displayed for user that hasn't delegated any funds yet - "Add stake pool" option
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    And I open Browse pools tab
+    And I click on a random stake pool from the grid
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    And I click "Add stake pool" button
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps
+
+  @LW-10585 @Testnet
+  Scenario: Modal about multi-delegation and DApp issues is displayed for user that hasn't delegated any funds yet - select pool from list
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I click on a random stake pool from the list
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    And I click "Add stake pool" button
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps
+
+  @LW-10587 @Testnet
+  Scenario: Modal about multi-delegation and DApp issues is displayed for user that hasn't delegated any funds yet - "Select pool for multi-staking" option
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    And I open Browse pools tab
+    And I click on a random stake pool from the grid
+    And I click on "Select pool for multi-staking" button on stake pool details drawer
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps
