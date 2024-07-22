@@ -1,6 +1,5 @@
 import { Wallet } from '@lace/cardano';
 import { QuorumOptionValue, QuorumRadioOption } from '../creation-flow/Quorum';
-import { deriveSharedWalletExtendedPublicKeyHash } from './sharedKeyToHash';
 
 type Tag = 'any' | 'all' | 'n_of_k' | 'pubkey' | 'timelock_start' | 'timelock_expiry';
 
@@ -20,8 +19,8 @@ export const getQuorumRulesByTag = (tag: Tag, n?: number): QuorumOptionValue | n
   }
 };
 
-export const getHash = async (
+export const getHashFromPublicKey = async (
   publicKey: string,
   scriptKeyPath: Wallet.KeyManagement.AccountKeyDerivationPath,
 ): Promise<Wallet.Crypto.Ed25519KeyHashHex> =>
-  await deriveSharedWalletExtendedPublicKeyHash(Wallet.Crypto.Bip32PublicKeyHex(publicKey), scriptKeyPath);
+  await Wallet.util.deriveEd25519KeyHashFromBip32PublicKey(Wallet.Crypto.Bip32PublicKeyHex(publicKey), scriptKeyPath);
