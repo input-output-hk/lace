@@ -1,4 +1,5 @@
 import { StateType, defineStateShape } from '../../../state-utils';
+import { PasswordErrorType } from '../EnterPassword';
 
 export enum GenerateSharedWalletKeyStep {
   CopyKey = 'CopyKey',
@@ -11,26 +12,23 @@ const makeState = defineStateShape<{
   };
   variableDataPart: {
     loading: boolean;
-    passwordErrorMessage: string;
+    passwordErrorType: PasswordErrorType;
     sharedWalletKey: string;
-    sharedWalletKeyCollapsed: boolean;
   };
 }>();
 
 export const stateEnterPassword = makeState<{
   loading: boolean;
-  passwordErrorMessage: string | undefined;
+  passwordErrorType: PasswordErrorType | undefined;
   sharedWalletKey: undefined;
-  sharedWalletKeyCollapsed: undefined;
   step: GenerateSharedWalletKeyStep.EnterPassword;
 }>();
 export type StateEnterPassword = StateType<typeof stateEnterPassword>;
 
 export const stateCopyKey = makeState<{
   loading: undefined;
-  passwordErrorMessage: undefined;
+  passwordErrorType: undefined;
   sharedWalletKey: string;
-  sharedWalletKeyCollapsed: boolean;
   step: GenerateSharedWalletKeyStep.CopyKey;
 }>();
 export type StateCopyKey = StateType<typeof stateCopyKey>;

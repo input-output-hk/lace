@@ -1,4 +1,5 @@
 import { TransitionHandler } from '../../../state-utils';
+import { PasswordErrorType } from '../EnterPassword';
 import {
   GenerateSharedWalletKeyState,
   GenerateSharedWalletKeyStep,
@@ -20,7 +21,7 @@ export type Action =
   | { type: ActionType.Back }
   | { password: string; type: ActionType.KeysGenerationTriggered }
   | { sharedWalletKey: string; type: ActionType.KeysGenerationCompleted }
-  | { errorMessage: string; type: ActionType.KeysGenerationFailed }
+  | { errorType: PasswordErrorType; type: ActionType.KeysGenerationFailed }
   | { type: ActionType.CloseFlow };
 
 export type Handler<S extends GenerateSharedWalletKeyState> = TransitionHandler<
@@ -61,16 +62,15 @@ export const makeStateMachine = ({
       return stateEnterPassword({
         ...prevState,
         loading: false,
-        passwordErrorMessage: action.errorMessage,
+        passwordErrorType: action.errorType,
       });
     }
 
     if (action.type === ActionType.KeysGenerationCompleted) {
       return stateCopyKey({
         loading: undefined,
-        passwordErrorMessage: undefined,
+        passwordErrorType: undefined,
         sharedWalletKey: action.sharedWalletKey,
-        sharedWalletKeyCollapsed: true,
         step: GenerateSharedWalletKeyStep.CopyKey,
       });
     }

@@ -44,7 +44,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
     isSharedWallet,
     signPolicy,
-    sharedKey,
+    sharedWalletKey,
     deriveSharedWalletExtendedPublicKeyHash,
   } = useOutsideHandles();
   const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
@@ -54,11 +54,11 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
 
   useEffect(() => {
     (async () => {
-      if (isSharedWallet && sharedKey) {
-        setSharedKeyHash(await deriveSharedWalletExtendedPublicKeyHash(sharedKey, stakingScriptKeyPath));
+      if (isSharedWallet && sharedWalletKey) {
+        setSharedKeyHash(await deriveSharedWalletExtendedPublicKeyHash(sharedWalletKey, stakingScriptKeyPath));
       }
     })();
-  }, [deriveSharedWalletExtendedPublicKeyHash, isSharedWallet, sharedKey]);
+  }, [deriveSharedWalletExtendedPublicKeyHash, isSharedWallet, sharedWalletKey]);
 
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);

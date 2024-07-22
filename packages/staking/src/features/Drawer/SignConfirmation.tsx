@@ -78,7 +78,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     walletManagerExecuteWithPassword: executeWithPassword,
     isSharedWallet,
-    sharedKey,
+    sharedWalletKey,
     signPolicy,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
@@ -98,7 +98,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
 
-    if (isSharedWallet && sharedKey) {
+    if (isSharedWallet && sharedWalletKey) {
       // TODO: integrate with tx summary drawer LW-10970
       const tx = await delegationTxBuilder.build().inspect();
 
@@ -110,7 +110,7 @@ export const SignConfirmationFooter = (): ReactElement => {
       const signedTx = await delegationTxBuilder.build().sign();
       await inMemoryWallet.submitTx(signedTx);
     }
-  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy?.requiredCosigners, sharedKey]);
+  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy?.requiredCosigners, sharedWalletKey]);
 
   const handleVerifyPass = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
