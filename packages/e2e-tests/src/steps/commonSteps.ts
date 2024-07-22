@@ -323,6 +323,10 @@ Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
+Given(/^I disable showing multi-address discovery modal$/, async () => {
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});
+
 Then(/^I wait until modal disappears$/, async () => {
   await Modal.waitUntilModalDisappears();
 });

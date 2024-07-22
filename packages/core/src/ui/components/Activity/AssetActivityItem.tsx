@@ -78,6 +78,7 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
     case ActivityStatus.SPENDABLE:
       return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
+    case ActivityStatus.AWAITING_COSIGNATURES:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.ERROR:
     default:
@@ -160,6 +161,7 @@ export const AssetActivityItem = ({
   }, [debouncedSetText]);
 
   const isPendingTx = status === ActivityStatus.PENDING;
+  const isAwaitingCoSigningTx = status === ActivityStatus.AWAITING_COSIGNATURES;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
@@ -204,16 +206,22 @@ export const AssetActivityItem = ({
               ? t('core.assetActivityItem.entry.name.sending')
               : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
           </h6>
-          {descriptionContent}
+          {isAwaitingCoSigningTx ? (
+            <p data-testid="timestamp" className={styles.description}>
+              {t('core.assetActivityItem.entry.name.awaitingCosignatures')}
+            </p>
+          ) : (
+            descriptionContent
+          )}
         </div>
       </div>
       <div data-testid="asset-amount" className={styles.rightSide}>
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.pendingNegativeBalance]: isNegativeBalance && status === ActivityStatus.PENDING,
+            [styles.pendingNegativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx),
             [styles.positiveBalance]: !isNegativeBalance,
-            [styles.negativeBalance]: isNegativeBalance && status !== ActivityStatus.PENDING
+            [styles.negativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx)
           })}
           ref={ref}
         >

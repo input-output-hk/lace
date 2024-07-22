@@ -4,7 +4,8 @@ export enum ActivityStatus {
   SUCCESS = 'success',
   PENDING = 'sending',
   ERROR = 'error',
-  SPENDABLE = 'spendable'
+  SPENDABLE = 'spendable',
+  AWAITING_COSIGNATURES = 'awaiting_cosignatures'
 }
 
 export enum TransactionActivityType {

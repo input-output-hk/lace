@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 
 export interface SignPolicy {
-  required: number;
+  requiredCosigners: number;
   signers: CoSignersListItem[];
 }
 

@@ -1,7 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Button, Password, PostHogAction, inputProps } from '@lace/common';
-import { exportMultisigTransaction } from '@lace/core';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -80,7 +79,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     walletManagerExecuteWithPassword: executeWithPassword,
     isSharedWallet,
     sharedWalletKey,
-    currentChain,
+    signPolicy,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
@@ -98,15 +97,20 @@ export const SignConfirmationFooter = (): ReactElement => {
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-    const signedTx = await delegationTxBuilder.build().sign();
 
     if (isSharedWallet && sharedWalletKey) {
       // TODO: integrate with tx summary drawer LW-10970
-      exportMultisigTransaction(signedTx, sharedWalletKey, currentChain);
+      const tx = await delegationTxBuilder.build().inspect();
+
+      const signedTx = await inMemoryWallet.finalizeTx({ tx });
+      if (signPolicy.requiredCosigners === 1) {
+        await inMemoryWallet.submitTx(signedTx);
+      }
     } else {
+      const signedTx = await delegationTxBuilder.build().sign();
       await inMemoryWallet.submitTx(signedTx);
     }
-  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, sharedWalletKey, currentChain]);
+  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy?.requiredCosigners, sharedWalletKey]);
 
   const handleVerifyPass = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);

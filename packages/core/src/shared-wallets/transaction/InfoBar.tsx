@@ -17,7 +17,7 @@ export const InfoBar = ({ signPolicy, signed }: InfoBarProps) => {
       message={
         <div className={styles.infoBar}>
           <span className={styles.infoMessage}>
-            {signed.length >= signPolicy.required
+            {signed.length >= signPolicy.requiredCosigners
               ? t('sharedWallets.transaction.cosigners.quorum.reached')
               : t('sharedWallets.transaction.cosigners.quorum.required')}
           </span>
@@ -28,7 +28,7 @@ export const InfoBar = ({ signPolicy, signed }: InfoBarProps) => {
                 span: <span />,
                 stat: <span className={styles.stats} />,
               }}
-              values={{ participants: signPolicy.signers.length, quorum: signPolicy.required }}
+              values={{ participants: signPolicy.signers.length, quorum: signPolicy.requiredCosigners }}
               i18nKey="sharedWallets.transaction.cosigners.quorum.current"
             />
           </span>

@@ -149,8 +149,8 @@ Feature: DAppConnector - Common
     And I remove wallet
     Then I accept analytics banner on "Get started" page
     And I restore a wallet
+    And I disable showing multi-address discovery modal
     And Wallet is synced
-    When I confirm multi-address discovery modal
     And I switch network to: "Preprod" in extended mode
     And Wallet is synced
     And I open settings from header menu
