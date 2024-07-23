@@ -349,12 +349,12 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   }, [viewedStakePool, portfolioMutators, analytics]);
 
   const onSelectClick = useCallback(() => {
-    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility) {
+    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility && !isSharedWallet) {
       setShowDAppCompatibilityModal(true);
     } else {
       selectPoolFromDetails();
     }
-  }, [multidelegationDAppCompatibility, selectPoolFromDetails, userAlreadyMultidelegated]);
+  }, [multidelegationDAppCompatibility, selectPoolFromDetails, userAlreadyMultidelegated, isSharedWallet]);
 
   const onDAppCompatibilityConfirm = useCallback(() => {
     triggerMultidelegationDAppCompatibility();
@@ -429,7 +429,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
           <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
         ))}
       </Flex>
-      {showDAppCompatibilityModal && (
+      {showDAppCompatibilityModal && !isSharedWallet && (
         <MultidelegationDAppCompatibilityModal
           visible={multidelegationDAppCompatibility}
           onConfirm={onDAppCompatibilityConfirm}
