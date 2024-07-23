@@ -74,7 +74,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
     const validate = async (importedFile: File) => {
       try {
         const result = await validateJson(importedFile, sharedKeys);
-        // TODO: wallet already exist should be blocked before this line executes (it must have an error registered)
+        // TODO: LW-11018 wallet already exist should be blocked before this line executes (it must have an error registered)
         if (result.data) {
           setCosignerData(result.data);
         }
