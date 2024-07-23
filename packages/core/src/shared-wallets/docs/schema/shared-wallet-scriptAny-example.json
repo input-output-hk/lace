@@ -1,7 +1,7 @@
 {
   "metadata": {
     "sharedWalletName": "MySharedWallet",
-    "participants": [
+    "coSigners": [
       {
         "name": "Alice",
         "publicKey": "8abf8e53f1532d344cbeae9be1ce14b6e9b70c22db91e6deab81b90b2f3a5904"
