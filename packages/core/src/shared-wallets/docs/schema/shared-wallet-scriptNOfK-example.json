@@ -4,15 +4,15 @@
     "participants": [
       {
         "name": "Alice",
-        "publicKey": "8abf8e53f1532d344cbeae9be1ce14b6e9b70c22db91e6deab81b90b2f3a5904"
+        "publicKey": "e0a8a80a28f205b69029ac8448265da2cef6e2c70d6a91fcd699ea859df45860f6788ff36f7ed44ccf564974ad2c033e640a5f25b943308935d7103612ef2c1f"
       },
       {
         "name": "Bob",
-        "publicKey": "21a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d0"
+        "publicKey": "e0a8a80a28f205b69029ac8448265da2cef6e2c70d6a91fcd699ea859df45860f6788ff36f7ed44ccf564974ad2c033e640a5f25b943308935d7103612ef2c1f"
       },
       {
         "name": "Charlie",
-        "publicKey": "5a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d12"
+        "publicKey": "b14c6e042df1d47e0d6d76559b8587de821ec96727f372e7d809d8489788f551a71c5dab280ae3440b7965f6455bf14d734eab82ab2ab8e2fe803374fd9db8df"
       }
     ]
   },
