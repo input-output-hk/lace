@@ -36,6 +36,7 @@ export const useWalletActivities = ({
     fetchWalletActivities,
     walletState?.transactions.history,
     walletState?.transactions.outgoing.inFlight,
+    walletState?.transactions.outgoing.signed,
     walletState?.addresses,
     walletState?.assetInfo,
     walletState?.delegation.rewardsHistory,

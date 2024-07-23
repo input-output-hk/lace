@@ -23,21 +23,21 @@ export const getSharedWalletSignPolicy = (script: Wallet.Cardano.Script): SignPo
     const signers = script.scripts
       .filter((s): s is Wallet.Cardano.RequireSignatureScript => isRequireSignatureScriptKind(s))
       .map(({ keyHash }: Wallet.Cardano.RequireSignatureScript) => ({ keyHash }));
-    let required;
+    let requiredCosigners;
 
     switch (script.kind) {
       case Wallet.Cardano.NativeScriptKind.RequireAllOf:
-        required = signers.length;
+        requiredCosigners = signers.length;
         break;
       case Wallet.Cardano.NativeScriptKind.RequireNOf:
-        required = script.required;
+        requiredCosigners = script.required;
         break;
       default:
-        required = 1;
+        requiredCosigners = 1;
     }
 
     signPolicy = {
-      required,
+      requiredCosigners,
       signers,
     };
   }

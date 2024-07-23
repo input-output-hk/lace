@@ -14,6 +14,8 @@ import styles from './EnterPassword.module.scss';
 
 export type WalletKind = 'hot' | 'cold';
 
+export type PasswordErrorType = 'invalid-password' | 'generic';
+
 const mapOfWalletTypeIconProperties: Record<WalletKind, ReactElement> = {
   cold: <ColdWalletIcon />,
   hot: <HotWalletIcon />,
@@ -23,7 +25,7 @@ type EnterPasswordProps = {
   loading?: boolean;
   onBack: () => void;
   onGenerateKeys: (password: string) => void;
-  passwordErrorMessage?: string;
+  passwordErrorType?: PasswordErrorType;
   walletKind: WalletKind;
   walletName: string;
 };
@@ -32,7 +34,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
   loading,
   onBack,
   onGenerateKeys,
-  passwordErrorMessage,
+  passwordErrorType,
   walletKind: kind,
   walletName,
 }) => {
@@ -44,6 +46,16 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
     onGenerateKeys(password);
     setPassword('');
   };
+
+  let passwordErrorMessage;
+  if (passwordErrorType === 'invalid-password') {
+    passwordErrorMessage = t(
+      'sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordErrorMessage.invalidPassword',
+    );
+  }
+  if (passwordErrorType === 'generic') {
+    passwordErrorMessage = t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordErrorMessage.generic');
+  }
 
   return (
     <SharedWalletLayout
@@ -70,13 +82,14 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
             {icon}
           </Flex>
           <Flex flexDirection="column">
-            <Text.Address className={styles.walletNameLabel}>
+            <Text.Address color="secondary">
               {t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.activeWalletLabel')}
             </Text.Address>
             <Text.Body.Large weight="$bold">{walletName}</Text.Body.Large>
           </Flex>
         </Flex>
         <PasswordBox
+          disabled={loading}
           value={password}
           label={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordInputLabel')}
           onChange={(event) => setPassword(event.target.value)}

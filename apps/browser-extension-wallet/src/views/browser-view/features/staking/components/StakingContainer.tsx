@@ -109,7 +109,7 @@ export const StakingContainer = (): React.ReactElement => {
     (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
   );
 
-  const { signPolicy, sharedKey } = useSharedWalletData({
+  const { signPolicy, sharedWalletKey } = useSharedWalletData({
     activeWallet,
     isSharedWallet,
     script: activeWallet?.type === WalletType.Script ? activeWallet.stakingScript : undefined,
@@ -164,8 +164,7 @@ export const StakingContainer = (): React.ReactElement => {
           isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
           isSharedWallet,
           signPolicy,
-          sharedKey,
-          deriveSharedWalletExtendedPublicKeyHash: Wallet.util.deriveEd25519KeyHashFromBip32PublicKey
+          sharedWalletKey
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

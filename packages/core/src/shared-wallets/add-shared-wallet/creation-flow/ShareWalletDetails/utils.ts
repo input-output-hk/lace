@@ -61,10 +61,7 @@ const mapStateToSchema = async (state: CreationFlowState): Promise<SharedWalletS
 
   return {
     metadata: {
-      coSigners: coSigners.map((coSigner) => ({
-        name: coSigner.name,
-        sharedWalletKey: coSigner.sharedWalletKey,
-      })),
+      coSigners,
       sharedWalletName: walletName || '',
     },
     nativeScript,

@@ -1,5 +1,7 @@
 import { Dispatch, FC, ReactElement, useReducer } from 'react';
 import { makeInitialStateProvider } from '../../../initial-state-provider';
+import { PasswordErrorType } from '../EnterPassword';
+import { GenerateSharedWalletKeyFn, SharedWalletKeyGenerationAuthError } from '../generate-shared-wallet-key';
 import { Action, ActionType, Handler, makeStateMachine } from './machine';
 import { GenerateSharedWalletKeyState, GenerateSharedWalletKeyStep, stateEnterPassword } from './state';
 
@@ -13,7 +15,7 @@ type GenerateSharedWalletKeyStoreValue = {
 };
 
 export type StoreSharedProps = {
-  generateKey: (password: string) => Promise<string>;
+  generateKey: GenerateSharedWalletKeyFn;
   navigateToParentFlow: () => void;
 };
 
@@ -24,9 +26,8 @@ type StoreProps = StoreSharedProps & {
 export const makeInitialState = () =>
   stateEnterPassword({
     loading: false,
-    passwordErrorMessage: undefined,
+    passwordErrorType: undefined,
     sharedWalletKey: undefined,
-    sharedWalletKeyCollapsed: undefined,
     step: GenerateSharedWalletKeyStep.EnterPassword,
   });
 
@@ -38,7 +39,11 @@ export const Store: FC<StoreProps> = ({ children, generateKey, navigateToParentF
       triggerKeysGeneration: (password) => {
         generateKey(password)
           .then((sharedWalletKey) => dispatch({ sharedWalletKey, type: ActionType.KeysGenerationCompleted }))
-          .catch((error) => dispatch({ errorMessage: error.message, type: ActionType.KeysGenerationFailed }));
+          .catch((error) => {
+            const errorType: PasswordErrorType =
+              error instanceof SharedWalletKeyGenerationAuthError ? 'invalid-password' : 'generic';
+            dispatch({ errorType, type: ActionType.KeysGenerationFailed });
+          });
       },
     });
     const handler = stateMachine[prevState.step] as Handler<GenerateSharedWalletKeyState>;

@@ -44,21 +44,22 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
     isSharedWallet,
     signPolicy,
-    sharedKey,
-    deriveSharedWalletExtendedPublicKeyHash,
+    sharedWalletKey,
   } = useOutsideHandles();
   const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio || [],
   }));
-  const [sharedKeyHash, setSharedKeyHash] = useState<Wallet.Crypto.Ed25519KeyHashHex | undefined>();
+  const [sharedWalletKeyHash, setSharedWalletKeyHash] = useState<Wallet.Crypto.Ed25519KeyHashHex | undefined>();
 
   useEffect(() => {
     (async () => {
-      if (isSharedWallet && sharedKey) {
-        setSharedKeyHash(await deriveSharedWalletExtendedPublicKeyHash(sharedKey, stakingScriptKeyPath));
+      if (isSharedWallet && sharedWalletKey) {
+        setSharedWalletKeyHash(
+          await Wallet.util.deriveEd25519KeyHashFromBip32PublicKey(sharedWalletKey, stakingScriptKeyPath)
+        );
       }
     })();
-  }, [deriveSharedWalletExtendedPublicKeyHash, isSharedWallet, sharedKey]);
+  }, [isSharedWallet, sharedWalletKey]);
 
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
@@ -213,10 +214,10 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
                 title={t('sharedWallets.transaction.cosigners.title')}
               >
                 <Box mb="$32">
-                  <InfoBar signed={[]} signPolicy={signPolicy} />
+                  <InfoBar signPolicy={signPolicy} />
                   {signPolicy.signers.length > 0 && (
                     <CosignersList
-                      ownSharedKeyHash={sharedKeyHash}
+                      ownSharedWalletKeyHash={sharedWalletKeyHash}
                       list={signPolicy.signers}
                       title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
                     />

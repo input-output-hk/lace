@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
+import { GenerateSharedWalletKeyFn } from '../add-shared-wallet';
 import {
   GenerateSharedWalletKeyStep,
   stateCopyKey,
@@ -31,6 +32,28 @@ export const EnterPassword: Story = {
   render: () => <AddSharedWalletStorybookHelper modalOpen initialFlow={AddSharedWalletFlowType.KeyDerivation} />,
 };
 
+const failingGenerateKey: GenerateSharedWalletKeyFn = () => {
+  const oneSecond = 1000;
+  // eslint-disable-next-line promise/param-names
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Some unexpected error')), oneSecond));
+};
+export const EnterPasswordFailing: Story = {
+  name: 'EnterPassword - failing key generation',
+  render: () => (
+    <AddSharedWalletStorybookHelper
+      modalOpen
+      initialFlow={AddSharedWalletFlowType.KeyDerivation}
+      generateKey={failingGenerateKey}
+      keyGenerationInitialState={stateEnterPassword({
+        loading: false,
+        passwordErrorType: undefined,
+        sharedWalletKey: undefined,
+        step: GenerateSharedWalletKeyStep.EnterPassword,
+      })}
+    />
+  ),
+};
+
 export const EnterIncorrectPassword: Story = {
   name: 'EnterPassword - error message',
   render: () => (
@@ -39,9 +62,8 @@ export const EnterIncorrectPassword: Story = {
       initialFlow={AddSharedWalletFlowType.KeyDerivation}
       keyGenerationInitialState={stateEnterPassword({
         loading: false,
-        passwordErrorMessage: 'Incorrect password',
+        passwordErrorType: 'invalid-password',
         sharedWalletKey: undefined,
-        sharedWalletKeyCollapsed: undefined,
         step: GenerateSharedWalletKeyStep.EnterPassword,
       })}
     />
@@ -56,9 +78,8 @@ export const CopyKeys: Story = {
       initialFlow={AddSharedWalletFlowType.KeyDerivation}
       keyGenerationInitialState={stateCopyKey({
         loading: undefined,
-        passwordErrorMessage: undefined,
+        passwordErrorType: undefined,
         sharedWalletKey,
-        sharedWalletKeyCollapsed: true,
         step: GenerateSharedWalletKeyStep.CopyKey,
       })}
     />

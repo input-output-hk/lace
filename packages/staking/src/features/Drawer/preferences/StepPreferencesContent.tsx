@@ -118,12 +118,12 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
   }, [analytics, portfolioMutators]);
 
   const onAddPoolButtonClick = useCallback(() => {
-    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility) {
+    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility && !isSharedWallet) {
       setShowDAppCompatibilityModal(true);
     } else {
       onAddPool();
     }
-  }, [multidelegationDAppCompatibility, onAddPool, userAlreadyMultidelegated]);
+  }, [multidelegationDAppCompatibility, onAddPool, userAlreadyMultidelegated, isSharedWallet]);
 
   const onDAppCompatibilityConfirm = useCallback(() => {
     triggerMultidelegationDAppCompatibility();
@@ -188,7 +188,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
           )}
         </Flex>
       </Flex>
-      {showDAppCompatibilityModal && (
+      {showDAppCompatibilityModal && !isSharedWallet && (
         <MultidelegationDAppCompatibilityModal
           visible={multidelegationDAppCompatibility}
           onConfirm={onDAppCompatibilityConfirm}
