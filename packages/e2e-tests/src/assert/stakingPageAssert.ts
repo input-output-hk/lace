@@ -1,20 +1,10 @@
-import StakingPage from '../elements/staking/stakingPage';
 import { TestnetPatterns } from '../support/patterns';
 import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { StakePool } from '../data/expectedStakePoolsData';
-import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
-  assertStakePoolSwitched = async (stakePoolName: string) => {
-    await browser.waitUntil(async () => (await StakingInfoComponent.poolName.getText()) === stakePoolName, {
-      timeout: 180_000,
-      interval: 2000,
-      timeoutMsg: 'failed while waiting for stake Pool Switch'
-    });
-  };
-
   assertSeeCurrentlyStakingComponent = async (
     expectedStakePool: StakePool,
     mode: 'extended' | 'popup',
@@ -68,26 +58,6 @@ class StakingPageAssert {
       TestnetPatterns.ADA_LITERAL_VALUE_REGEX
     );
   };
-
-  assertSeeSingleSearchResult = async () => {
-    await browser.waitUntil(async () => (await StakingPage.counter.getText()) === '(1)', {
-      timeout: 20_000,
-      timeoutMsg: 'failed while waiting for single search result'
-    });
-  };
-
-  async assertSeeTickerInCurrentStakedPool(expectedTicker: 'ADA' | 'tADA') {
-    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
-
-    const tickerList = (await StakingPage.getStatsTickers()).map((ticker) => String(ticker.match(regex)));
-    this.assertTickerInList(expectedTicker, tickerList);
-  }
-
-  assertTickerInList(expectedTicker: 'ADA' | 'tADA', tickerList: string[]) {
-    if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim().slice(-3));
-
-    expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
-  }
 }
 
 export default new StakingPageAssert();

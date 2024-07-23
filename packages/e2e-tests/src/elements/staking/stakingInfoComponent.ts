@@ -60,20 +60,5 @@ class StakingInfoComponent {
     );
     await el.click();
   }
-
-  async hoverOverTotalStakedValue(): Promise<void> {
-    await this.statsTotalStaked.value.scrollIntoView();
-    await this.statsTotalStaked.value.moveTo();
-  }
-
-  async hoverOverTotalRewardsValue(): Promise<void> {
-    await this.statsTotalRewards.value.scrollIntoView();
-    await this.statsTotalRewards.value.moveTo();
-  }
-
-  async hoverOverLastRewardValue(): Promise<void> {
-    await this.statsLastReward.value.scrollIntoView();
-    await this.statsLastReward.value.moveTo();
-  }
 }
 export default new StakingInfoComponent();

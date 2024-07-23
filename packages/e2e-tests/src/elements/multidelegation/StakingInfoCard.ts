@@ -65,6 +65,21 @@ class StakingInfoCard {
     await this.name.waitForClickable();
     await this.name.click();
   }
+
+  async hoverOverLastRewardValue(): Promise<void> {
+    await this.statsLastReward.value.scrollIntoView();
+    await this.statsLastReward.value.moveTo();
+  }
+
+  async hoverOverTotalStakedValue(): Promise<void> {
+    await this.statsTotalStaked.value.scrollIntoView();
+    await this.statsTotalStaked.value.moveTo();
+  }
+
+  async hoverOverTotalRewardsValue(): Promise<void> {
+    await this.statsTotalRewards.value.scrollIntoView();
+    await this.statsTotalRewards.value.moveTo();
+  }
 }
 
 export default StakingInfoCard;

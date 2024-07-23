@@ -14,7 +14,7 @@ Feature: LW: Network Switching - popup view
     And I wait for the transaction history to be loaded and all transactions to be confirmed
     Then I see <ticker> in the list of transactions
     When I navigate to Staking popup page
-    Then I see <ticker> in current staked pool
+    Then I see <ticker> in currently staked pools
     When I navigate to Tokens popup page
     And I click "Send" button on Tokens page in popup mode
     And I've entered accepted values for all <network> fields of simple Tx

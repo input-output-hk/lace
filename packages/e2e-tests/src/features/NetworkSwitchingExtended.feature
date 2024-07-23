@@ -16,7 +16,7 @@ Feature: LW: Network Switching - extended view
     And I wait for the transaction history to be loaded and all transactions to be confirmed
     Then I see <ticker> in the list of transactions
     When I navigate to Staking extended page
-    Then I see <ticker> in current staked pool
+    Then I see <ticker> in currently staked pools
     When I click "Send" button on page header
     And I've entered accepted values for all <network> fields of simple Tx
     Then I see <ticker> in transaction fee

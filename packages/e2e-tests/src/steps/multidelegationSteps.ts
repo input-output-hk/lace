@@ -308,13 +308,13 @@ When(
   async (elementToHover: string) => {
     switch (elementToHover) {
       case 'last reward':
-        await StakingInfoComponent.hoverOverLastRewardValue();
+        await new StakingInfoCard(1).hoverOverLastRewardValue();
         break;
       case 'total staked':
-        await StakingInfoComponent.hoverOverTotalStakedValue();
+        await new StakingInfoCard(1).hoverOverTotalStakedValue();
         break;
       case 'total rewards':
-        await StakingInfoComponent.hoverOverTotalRewardsValue();
+        await new StakingInfoCard(1).hoverOverTotalRewardsValue();
         break;
       default:
         throw new Error(`Unsupported element: ${elementToHover}`);
@@ -688,4 +688,17 @@ Then(/^the staking error screen is displayed$/, async () => {
 
 Then(/^I see "Switching to less pools" modal$/, async () => {
   await SwitchingPoolsModalAssert.assertSeeSwitchingToLessPoolsModal();
+});
+
+When(/^I click "Next" button on staking confirmation drawer$/, async () => {
+  await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 15_000 });
+  await StakingConfirmationDrawer.nextButton.click();
+});
+
+When(/^I wait for single search result$/, async () => {
+  await MultidelegationPageAssert.assertSeeSingleSearchResult();
+});
+
+Then(/^I see (ADA|tADA) in currently staked pools$/, async (expectedCurrency: 'ADA' | 'tADA') => {
+  await MultidelegationPageAssert.assertSeeCurrencyInCurrentlyStakingComponents(expectedCurrency);
 });

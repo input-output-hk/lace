@@ -28,6 +28,13 @@ class MultidelegationPageAssert {
     expect(poolsCounter).to.equal(poolsCount);
   };
 
+  assertSeeSingleSearchResult = async () => {
+    await browser.waitUntil(async () => (await MultidelegationPage.getNumberOfPoolsFromCounter()) === 1, {
+      timeout: 20_000,
+      timeoutMsg: 'failed while waiting for single search result'
+    });
+  };
+
   assertSeeSearchResultsCountGreaterOrEqual = async (expectedPoolsCount: number) => {
     await browser.waitUntil(async () => (await MultidelegationPage.displayedPools.length) >= expectedPoolsCount, {
       timeout: 20_000,
@@ -479,6 +486,19 @@ class MultidelegationPageAssert {
     await stakingInfoCard.statsROS.value.waitForDisplayed();
     expect(await stakingInfoCard.statsROS.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
   }
+
+  assertSeeCurrencyInCurrentlyStakingComponents = async (currency: string) => {
+    const numberOfPoolsInUse = await MultidelegationPage.stakingPoolInfoItems.length;
+    for (let i = 1; i <= numberOfPoolsInUse; i++) {
+      const pool = new StakingInfoCard(i);
+      expect(await pool.statsFee.value.getText()).to.endWith(currency);
+      expect(await pool.statsTotalStaked.value.getText()).to.endWith(currency);
+      expect(await pool.statsLastReward.value.getText()).to.endWith(currency);
+      if (!(await isPopupMode())) {
+        expect(await pool.statsTotalRewards.value.getText()).to.endsWith(currency);
+      }
+    }
+  };
 }
 
 export default new MultidelegationPageAssert();
