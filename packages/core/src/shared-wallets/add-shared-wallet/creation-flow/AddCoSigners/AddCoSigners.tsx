@@ -9,7 +9,7 @@ import { AddCoSignerInput } from './AddCoSignerInput';
 import styles from './AddCoSigners.module.scss';
 import { CoSigner, CoSignerDirty, CoSignerError } from './type';
 
-const MIN_NUMBER_OF_COSIGNERS = 2;
+const MIN_NUMBER_OF_COSIGNERS = Number.parseInt(process.env.MIN_NUMBER_OF_COSIGNERS);
 
 interface Props {
   coSigners: CoSigner[];
@@ -29,7 +29,7 @@ export const AddCoSigners = ({
   coSignersDirty,
 }: Props): JSX.Element => {
   const { t } = useTranslation();
-  const atLeastTwoValidCoSigners =
+  const hasAtLeastMinValidCoSigners =
     coSigners.filter((c) => c.sharedWalletKey && c.name).length >= MIN_NUMBER_OF_COSIGNERS && errors.length === 0;
 
   return (
@@ -40,7 +40,7 @@ export const AddCoSigners = ({
       timelineCurrentStep={SharedWalletCreationStep.CoSigners}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={atLeastTwoValidCoSigners}
+      isNextEnabled={hasAtLeastMinValidCoSigners}
     >
       {coSigners.map((value, index) => (
         <Box key={value.id} className={styles.coSigners}>
