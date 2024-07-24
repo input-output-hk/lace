@@ -65,3 +65,23 @@ Feature: Wallet accounts
     And I click the menu button
     And I click on chevron for wallet number 1
     Then I do not see unlock button: 4
+
+  @LW-9333
+  Scenario: Popup View - Accounts menu - Switching account
+    Given I see address for account: 0 and wallet "MultiAccActive1" on empty state banner
+    And I click the menu button
+    And I click on chevron for wallet number 1
+    When I click account item: 2
+    Then I see "Account #1 activated" toast
+    And I wait for main loader to disappear
+    Then I see address for account: 1 and wallet "MultiAccActive1" on empty state banner
+
+  @LW-11034
+  Scenario: Popup View - Accounts menu - Trying to switch to the same account
+    Given I see address for account: 0 and wallet "MultiAccActive1" on empty state banner
+    And I click the menu button
+    And I click on chevron for wallet number 1
+    When I click account item: 1
+    Then "Accounts" menu is displayed
+    And I click on back arrow button on "Accounts" menu
+    And I see address for account: 0 and wallet "MultiAccActive1" on empty state banner

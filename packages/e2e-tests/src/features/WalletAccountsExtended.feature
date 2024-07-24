@@ -70,3 +70,29 @@ Feature: Wallet accounts
     When I click the menu button
     And I click on chevron for wallet number 1
     Then I do not see unlock button: 4
+
+  @LW-9313
+  Scenario: Extended View - Accounts menu - Switching account
+    Given I click "Receive" button on page header
+    And I see "Wallet Address" page in extended mode for account: 0 and wallet "MultiAccActive1"
+    And I close the drawer by clicking close button
+    And I click the menu button
+    And I click on chevron for wallet number 1
+    When I click account item: 2
+    Then I see "Account #1 activated" toast
+    And I wait for main loader to disappear
+    When I click "Receive" button on page header
+    Then I see "Wallet Address" page in extended mode for account: 1 and wallet "MultiAccActive1"
+
+  @LW-11033
+  Scenario: Extended View - Accounts menu - Trying to switch to the same account
+    Given I click "Receive" button on page header
+    And I see "Wallet Address" page in extended mode for account: 0 and wallet "MultiAccActive1"
+    And I close the drawer by clicking close button
+    And I click the menu button
+    And I click on chevron for wallet number 1
+    When I click account item: 1
+    Then "Accounts" menu is displayed
+    And I click on back arrow button on "Accounts" menu
+    When I click "Receive" button on page header
+    Then I see "Wallet Address" page in extended mode for account: 0 and wallet "MultiAccActive1"

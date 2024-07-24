@@ -47,6 +47,12 @@ When(
   }
 );
 
+When(/^I click account item: (\d+)$/, async (accountNumber: number) => {
+  const accountItem = new WalletAccountsMenuItem(accountNumber);
+  await accountItem.container.waitForClickable();
+  await accountItem.container.click();
+});
+
 Then(
   /^I (see|do not see) account unlock drawer with all elements in (popup|extended) mode$/,
   async (shouldBeDisplayed: 'see' | 'do not', mode: 'popup' | 'extended') => {
