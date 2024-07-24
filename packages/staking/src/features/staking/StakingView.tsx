@@ -51,7 +51,7 @@ export const StakingView = () => {
       </Navigation>
       <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
       <ChangingPreferencesModal />
-      <OneTimeModals />
+      {!isSharedWallet && <OneTimeModals />}
     </>
   );
 };

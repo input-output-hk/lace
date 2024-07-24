@@ -2,22 +2,22 @@ import { InfoBar as InfoBarUiToolkit, InfoComponent } from '@input-output-hk/lac
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styles from './InfoBar.module.scss';
-import { CoSignersListItem, SignPolicy } from './types';
+import { SignPolicy } from './types';
 
 type InfoBarProps = {
   signPolicy: SignPolicy;
-  signed: CoSignersListItem[];
 };
 
-export const InfoBar = ({ signPolicy, signed }: InfoBarProps) => {
+export const InfoBar = ({ signPolicy }: InfoBarProps) => {
   const { t } = useTranslation();
+  const quorumIsReached = signPolicy.signers.filter(({ signed }) => !!signed).length >= signPolicy.requiredCosigners;
   return (
     <InfoBarUiToolkit
       icon={<InfoComponent className={styles.infoIcon} />}
       message={
         <div className={styles.infoBar}>
           <span className={styles.infoMessage}>
-            {signed.length >= signPolicy.requiredCosigners
+            {quorumIsReached
               ? t('sharedWallets.transaction.cosigners.quorum.reached')
               : t('sharedWallets.transaction.cosigners.quorum.required')}
           </span>

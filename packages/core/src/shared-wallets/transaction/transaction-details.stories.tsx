@@ -1,7 +1,7 @@
 import { action } from '@storybook/addon-actions';
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { TransactionDetails, TransactionDetailsProps } from '.';
+import { TransactionDetails, TransactionDetailsProps } from './TransactionDetails';
 
 const meta: Meta<typeof TransactionDetails> = {
   component: TransactionDetails,

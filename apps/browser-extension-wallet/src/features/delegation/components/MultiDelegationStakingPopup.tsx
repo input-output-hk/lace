@@ -185,8 +185,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
         isSharedWallet,
         signPolicy,
-        sharedWalletKey,
-        deriveSharedWalletExtendedPublicKeyHash: Wallet.util.deriveEd25519KeyHashFromBip32PublicKey
+        sharedWalletKey
       }}
     >
       <ContentLayout
