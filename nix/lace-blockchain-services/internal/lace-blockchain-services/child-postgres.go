@@ -170,7 +170,12 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 					Progress: -1,
 					TaskSize: -1,
 					SecondsLeft: -1,
-					Url: "",
+					Url: fmt.Sprintf(
+						"postgresql://%s@%s:%d",
+						"postgres",
+						"127.0.0.1",
+						*shared.PostgresPort,
+					),
 					OmitUrl: false,
 				}
 				nextProbeIn = 60 * time.Second

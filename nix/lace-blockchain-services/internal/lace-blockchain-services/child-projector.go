@@ -102,12 +102,12 @@ func childProjector(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChi
 				currentStatus = SInitializing
 				currentProgress = pr/100
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: currentProgress,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 			} else if reRollingForward.MatchString(line) {
 				currentStatus = SRollingForward
 				currentProgress = -1
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: currentProgress,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 			}
 		},
 		LogModifier: func(line string) string { return line },
