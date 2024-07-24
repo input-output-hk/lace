@@ -334,7 +334,6 @@ const mapWalletActivities = memoize(
           firstTx.status !== ActivityStatus.AWAITING_COSIGNATURES
         )
           return 1;
-
         // otherwise sort by date
         return (secondTx.date?.getTime() || 0) - (firstTx.date?.getTime() || 0);
       }),
