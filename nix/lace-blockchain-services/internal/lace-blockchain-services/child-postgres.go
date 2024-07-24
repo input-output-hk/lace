@@ -98,6 +98,8 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 				*shared.PostgresPassword = string(xorWithKey(pwData, pwKey))
 			}
 
+			fmt.Printf("%s[%d]: TMP-DEBUG: Postgres password is '%s'\n", serviceName, -1, *shared.PostgresPassword)
+
 			err = ioutil.WriteFile(dataDir + sep + "pg_hba.conf", []byte(
 				"host  all  all  127.0.0.1/32  scram-sha-256\n" +
 				"host  all  all  ::1/128       scram-sha-256\n",
