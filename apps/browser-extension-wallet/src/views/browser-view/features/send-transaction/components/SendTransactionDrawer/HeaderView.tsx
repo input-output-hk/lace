@@ -236,13 +236,16 @@ export const useGetHeaderText = (): Record<
   { title?: TranslationKey; subtitle?: TranslationKey; name?: string }
 > => {
   const { addressToEdit } = useAddressBookStore();
+  const { isSharedWallet } = useWalletStore();
 
   return {
     [Sections.FORM]: { title: 'browserView.transaction.send.drawer.newTransaction' },
-    [Sections.SUMMARY]: {
-      title: 'browserView.transaction.send.drawer.transactionSummary',
-      subtitle: 'browserView.transaction.send.drawer.breakdownOfYourTransactionCost'
-    },
+    [Sections.SUMMARY]: isSharedWallet
+      ? {}
+      : {
+          title: 'browserView.transaction.send.drawer.transactionSummary',
+          subtitle: 'browserView.transaction.send.drawer.breakdownOfYourTransactionCost'
+        },
     [Sections.CONFIRMATION]: {
       title: 'browserView.transaction.send.confirmationTitle',
       subtitle: 'browserView.transaction.send.signTransactionWithPassword'

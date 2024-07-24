@@ -1,12 +1,16 @@
 import { Wallet } from '@lace/cardano';
 
-export interface SignPolicy {
-  requiredCosigners: number;
-  signers: CoSignersListItem[];
+export interface CoSignersListItem {
+  name?: string;
+  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex;
+  signed?: boolean;
 }
 
-export interface CoSignersListItem {
+export type SignerWithKeyHash = Omit<CoSignersListItem, 'sharedWalletKey'> & {
   keyHash: Wallet.Crypto.Ed25519KeyHashHex;
-  name?: string;
-  signed?: boolean;
+};
+
+export interface SignPolicy {
+  requiredCosigners: number;
+  signers: SignerWithKeyHash[];
 }

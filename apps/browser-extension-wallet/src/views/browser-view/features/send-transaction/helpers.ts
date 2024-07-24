@@ -12,6 +12,15 @@ import BigNumber from 'bignumber.js';
 import isNil from 'lodash/isNil';
 import { isNFT } from '@src/utils/is-nft';
 import flatMapDeep from 'lodash/flatMapDeep';
+import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@types';
+import { PriceResult } from '@hooks';
+import { SentAssetsList } from '@lace/core';
+import { walletBalanceTransformer } from '@src/api/transformers';
+import isUndefined from 'lodash/isUndefined';
+import { getTokenAmountInFiat, parseFiat } from '@utils/assets-transformers';
+
+type Unpacked<T> = T extends (infer U)[] ? U : T;
+type AssetsListItem = Unpacked<SentAssetsList>;
 
 export const calculateSpentBalance = (outputs: OutputList): SpentBalances => {
   let spentBalances: Record<string, string> = {};
@@ -179,4 +188,52 @@ export const getTokensProperty = (
     }
   }
   return [...tokensAnalyticsPropertyMap.values()];
+};
+
+export const formatRow = ({
+  output,
+  assetInfo,
+  cardanoCoin,
+  fiatCurrency,
+  prices
+}: {
+  output: CardanoTxOut;
+  assetInfo: Map<Wallet.Cardano.AssetId, TokensDetails>;
+  cardanoCoin: Wallet.CoinId;
+  fiatCurrency: CurrencyInfo;
+  prices?: PriceResult;
+}): SentAssetsList => {
+  const cardanoAmount = walletBalanceTransformer(output.value.coins.toString(), prices?.cardano?.price);
+
+  const cardano: AssetsListItem = {
+    assetAmount: `${cardanoAmount.coinBalance} ${cardanoCoin.symbol}`,
+    fiatAmount: `${cardanoAmount.fiatBalance} ${fiatCurrency?.code}`
+  };
+
+  if (isUndefined(output.value.assets)) return [cardano];
+
+  const mapEntries = [...output.value.assets.entries()];
+
+  const assetList: SentAssetsList = [];
+  for (const [id, balance] of mapEntries) {
+    const asset = assetInfo?.get(id);
+    if (asset) {
+      const ticker = asset.nftMetadata?.name ?? asset.tokenMetadata?.ticker ?? asset.tokenMetadata?.name;
+      const amount = Wallet.util.calculateAssetBalance(balance, asset);
+      const tokenPriceInAda = prices?.tokens?.get(id)?.priceInAda;
+      const fiatAmount =
+        asset.tokenMetadata !== undefined && tokenPriceInAda
+          ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${
+              fiatCurrency?.code
+            }`
+          : '-';
+
+      assetList.push({
+        assetAmount: `${amount} ${ticker ?? asset.assetId}`,
+        fiatAmount
+      });
+    }
+  }
+
+  return [cardano, ...assetList];
 };

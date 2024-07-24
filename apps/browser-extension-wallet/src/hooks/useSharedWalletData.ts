@@ -1,51 +1,76 @@
-import { AnyWallet } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import {
   SignPolicy,
-  CoSignersListItem,
   getKeyHashToWalletNameMap,
   getSharedWalletSignPolicy,
-  isScriptWallet
+  isScriptWallet,
+  paymentScriptKeyPath,
+  stakingScriptKeyPath
 } from '@lace/core';
-import { useEffect, useState } from 'react';
 
-interface Props {
-  activeWallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
-  isSharedWallet?: boolean;
-  script?: Wallet.Cardano.Script;
-  derivationPath: Wallet.KeyManagement.AccountKeyDerivationPath;
-}
+import { useCallback, useEffect, useState } from 'react';
+import { useWalletManager } from '@hooks/useWalletManager';
+import { useObservable } from '@lace/common';
+import { useWalletStore } from '@stores';
+import { AnyWallet } from '@cardano-sdk/web-extension';
+import { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 
-export const useSharedWalletData = ({
-  activeWallet,
-  isSharedWallet,
-  script,
-  derivationPath
-}: Props): { signPolicy: SignPolicy | undefined; sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined } => {
-  const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
-  const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
+type SigningPolicyType = 'payment' | 'staking';
+
+type Cosigner = { sharedWalletKey: Bip32PublicKeyHex; name: string };
+
+type UseSharedWalletData = {
+  getSignPolicy: (type: SigningPolicyType) => Promise<SignPolicy | undefined>;
+  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
+  coSigners: Cosigner[];
+  name: string;
+};
+
+export const useSharedWalletData = (): UseSharedWalletData => {
+  const [activeWallet, setActiveWallet] = useState<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>();
+  const [metadata, setMetadata] = useState<Wallet.WalletMetadata>();
+  const { walletRepository } = useWalletManager();
+  const { cardanoWallet } = useWalletStore();
+  const wallets = useObservable(walletRepository.wallets$);
 
   useEffect(() => {
     (async () => {
-      if (!activeWallet || !isSharedWallet || !script) return;
-
-      if (isScriptWallet(activeWallet)) {
-        const policy = getSharedWalletSignPolicy(script);
-        const keyToNameMap = await getKeyHashToWalletNameMap({
-          coSigners: activeWallet.metadata.coSigners,
-          derivationPath
-        });
-        setSignPolicy({
-          ...policy,
-          signers: policy.signers.map((signer: CoSignersListItem) => ({
-            ...signer,
-            name: keyToNameMap.get(signer.keyHash) || signer.keyHash
-          }))
-        });
-        setSharedWalletKey(activeWallet.metadata.multiSigExtendedPublicKey);
-      }
+      const activeWalletId = cardanoWallet.source.wallet.walletId;
+      const currentWallet = wallets?.find(({ walletId }) => walletId === activeWalletId);
+      setActiveWallet(currentWallet);
+      setMetadata(currentWallet?.metadata);
     })();
-  }, [activeWallet, isSharedWallet, script, derivationPath]);
+  }, [cardanoWallet.source.wallet.walletId, wallets]);
 
-  return { signPolicy, sharedWalletKey };
+  const getSignPolicy = useCallback(
+    async (type: SigningPolicyType): Promise<SignPolicy | undefined> => {
+      if (!isScriptWallet(activeWallet)) return;
+
+      const script = type === 'payment' ? activeWallet.paymentScript : activeWallet.stakingScript;
+      const derivationPath = type === 'payment' ? paymentScriptKeyPath : stakingScriptKeyPath;
+
+      const policy = getSharedWalletSignPolicy(script);
+      const keyToNameMap = await getKeyHashToWalletNameMap({
+        coSigners: activeWallet.metadata.coSigners,
+        derivationPath
+      });
+
+      // eslint-disable-next-line consistent-return
+      return {
+        ...policy,
+        signers: policy.signers.map((signer) => ({
+          ...signer,
+          name: keyToNameMap.get(signer.keyHash) || signer.keyHash
+        }))
+      };
+    },
+    [activeWallet]
+  );
+
+  return {
+    getSignPolicy,
+    sharedWalletKey: metadata?.multiSigExtendedPublicKey,
+    coSigners: metadata?.coSigners,
+    name: metadata?.name
+  };
 };

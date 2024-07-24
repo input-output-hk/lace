@@ -8,11 +8,11 @@ import { CoSignersListItem } from './types';
 
 interface CoSignerItemProps {
   list: CoSignersListItem[];
-  ownSharedWalletKeyHash?: Wallet.Crypto.Ed25519KeyHashHex;
+  ownSharedKey?: Wallet.Crypto.Bip32PublicKeyHex;
   title: string;
 }
 
-export const CosignersList = ({ list, title, ownSharedWalletKeyHash }: CoSignerItemProps) => {
+export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) => {
   const { t } = useTranslation();
 
   return (
@@ -21,14 +21,14 @@ export const CosignersList = ({ list, title, ownSharedWalletKeyHash }: CoSignerI
         <div data-testid="cosigner-list-header" className={styles.cosignersListHeader}>
           {title}
         </div>
-        {list.map(({ keyHash: key, name: cosignerName, signed }) => (
+        {list.map(({ sharedWalletKey, name: cosignerName, signed }) => (
           <Flex
             py="$0"
             px="$24"
             mt="$8"
             h="$80"
             data-testid="cosigner-list-item"
-            key={key}
+            key={sharedWalletKey}
             className={styles.cosignersListItem}
           >
             <Flex h="$fill" gap="$16" alignItems="center" className={styles.cosignersListItemContainer}>
@@ -43,12 +43,12 @@ export const CosignersList = ({ list, title, ownSharedWalletKeyHash }: CoSignerI
               </div>
               <div className={styles.cosignersListItemContent}>
                 <Box w="$fill" className={styles.cosignersListItemName}>
-                  {key === ownSharedWalletKeyHash
+                  {sharedWalletKey === ownSharedKey
                     ? t('sharedWallets.transaction.cosignerList.you')
                     : cosignerName || '...'}
                 </Box>
                 <Box w="$fill" className={styles.cosignersListItemAddress}>
-                  {key}
+                  {sharedWalletKey}
                 </Box>
               </div>
               {signed && (
