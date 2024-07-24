@@ -84,6 +84,7 @@
   "core.activityDetails.self": "Self",
   "core.activityDetails.sending": "Sending",
   "core.activityDetails.sent": "Sent",
+  "core.activityDetails.awaitingCosignatures": "Awaiting co-signatures",
   "core.activityDetails.StakeRegistrationDelegateCertificate": "Stake Key Registration & Delgation",
   "core.activityDetails.StakeVoteDelegationCertificate": "Stake Key Registration & DRep Delegation",
   "core.activityDetails.StakeVoteRegistrationDelegateCertificate": "Stake Key Registration, Delegation, & DRep Delegation",

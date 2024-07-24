@@ -478,6 +478,8 @@
   "browserView.transaction.send.drawer.signTransaction": "Sign transaction",
   "browserView.transaction.send.drawer.transactionError": "Transaction error",
   "browserView.transaction.send.drawer.transactionSummary": "Transaction summary",
+  "browserView.transaction.send.drawer.coSignerTransactionConfirmation": "Transaction Confirmation {{cosigners}}",
+  "browserView.transaction.send.drawer.coSignerTransactionConfirmationSubtitle": "Please sign the transaction with your password for {{walletName}}",
   "browserView.transaction.send.enterWalletPasswordToConfirmTransaction": "Enter your wallet password to confirm transaction",
   "browserView.transaction.send.error.insufficientBalance": "Insufficient balance",
   "browserView.transaction.send.error.invalidAddress": "invalid address",

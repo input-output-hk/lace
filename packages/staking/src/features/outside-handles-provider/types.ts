@@ -106,4 +106,5 @@ export type OutsideHandlesContextValue = {
   isSharedWallet: boolean;
   signPolicy: SignPolicy;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
+  coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
 };

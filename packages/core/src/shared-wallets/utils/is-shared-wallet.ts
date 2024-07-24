@@ -1,4 +1,3 @@
-import { isValidSharedWalletScript } from '@cardano-sdk/wallet';
 import { AnyWallet, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
@@ -13,8 +12,8 @@ export const isSharedWallet = (wallet?: Wallet.CardanoWallet): boolean => {
 
   return (
     Wallet.Cardano.isNativeScript(paymentScript) &&
-    isValidSharedWalletScript(paymentScript) &&
+    Wallet.isValidSharedWalletScript(paymentScript) &&
     Wallet.Cardano.isNativeScript(stakingScript) &&
-    isValidSharedWalletScript(stakingScript)
+    Wallet.isValidSharedWalletScript(stakingScript)
   );
 };
