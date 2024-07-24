@@ -1,5 +1,4 @@
 import { When } from '@wdio/cucumber-framework';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import { Given, Then } from '@cucumber/cucumber';
 import nftAssert from '../assert/nftAssert';
 import { Asset } from '../data/Asset';
@@ -15,11 +14,18 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import { expect } from 'chai';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import nftDetails from '../elements/NFTs/nftDetails';
+import {
+  getNonActiveAdaHandle2WalletName,
+  getNonActiveAdaHandleWalletName,
+  getNonActiveNft2WalletName,
+  getNonActiveNftHdWalletName,
+  getNonActiveNftWalletName
+} from '../utils/walletUtils';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
   async (clickType: 'left' | 'right' | '', nftName: string) => {
-    await nftsPageObject.clickNftItemOnNftsPage(nftName, clickType === '' ? 'left' : clickType);
+    await NftsPage.clickNftItem(nftName, clickType === '' ? 'left' : clickType);
   }
 );
 
@@ -85,21 +91,18 @@ Then(
 Given(
   /^I use a (single|HD) wallet with "([^"]*)" NFT in (popup|extended) mode$/,
   async (walletType: 'single' | 'HD', nftName: string, mode: 'extended' | 'popup') => {
-    const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
+    const isNftDisplayed = await NftsPage.isNftDisplayed(nftName);
     if (!isNftDisplayed) {
       let walletToLoad;
       if (walletType === 'HD') {
-        walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
+        walletToLoad = getNonActiveNftHdWalletName();
       } else {
-        walletToLoad =
-          mode === 'extended'
-            ? await nftsPageObject.getNonActiveNftWalletName()
-            : await nftsPageObject.getNonActiveNft2WalletName();
+        walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
       }
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await mainMenuPageObject.navigateToSection('NFTs', mode);
-      expect(await nftsPageObject.isNftDisplayed(nftName)).to.be.true;
+      expect(await NftsPage.isNftDisplayed(nftName)).to.be.true;
     }
   }
 );
@@ -107,16 +110,13 @@ Given(
 Given(
   /^I use a wallet with ADA handle "([^"]*)" NFT in (popup|extended) mode$/,
   async (adahandle: string, mode: 'extended' | 'popup') => {
-    const isAdaHandle = await nftsPageObject.isNftDisplayed(adahandle);
+    const isAdaHandle = await NftsPage.isNftDisplayed(adahandle);
     if (!isAdaHandle) {
-      const walletToLoad =
-        mode === 'extended'
-          ? await nftsPageObject.getNonActiveAdaHandleWalletName()
-          : await nftsPageObject.getNonActiveAdaHandle2WalletName();
+      const walletToLoad = mode === 'extended' ? getNonActiveAdaHandleWalletName() : getNonActiveAdaHandle2WalletName();
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await mainMenuPageObject.navigateToSection('NFTs', mode);
-      expect(await nftsPageObject.isNftDisplayed(adahandle)).to.be.true;
+      expect(await NftsPage.isNftDisplayed(adahandle)).to.be.true;
     }
   }
 );
@@ -137,20 +137,17 @@ Then(/^each NFT has name and image displayed$/, async () => {
 });
 
 When(/^I open NFT receiving wallet in (popup|extended) mode$/, async (mode: 'extended' | 'popup') => {
-  const walletToLoad =
-    mode === 'extended'
-      ? await nftsPageObject.getNonActiveNftWalletName()
-      : await nftsPageObject.getNonActiveNft2WalletName();
+  const walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 
 When(/^I open NFT receiving HD wallet$/, async () => {
-  const walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
+  const walletToLoad = getNonActiveNftHdWalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 
 When(/^I save all NFTs that I have$/, async () => {
-  await nftsPageObject.saveNfts();
+  await NftsPage.saveNfts();
 });
 
 When(/^I save NFT details$/, async () => {
