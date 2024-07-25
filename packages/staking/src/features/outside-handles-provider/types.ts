@@ -107,7 +107,7 @@ export type OutsideHandlesContextValue = {
   isSharedWallet: boolean;
   signPolicy: SignPolicy;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
-  coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
+  coSigners: { name?: string; sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; signed?: boolean }[];
   eraSlotDateTime: (
     eraSummaries: EraSummary[] | undefined,
     slot: Wallet.Cardano.Slot | undefined

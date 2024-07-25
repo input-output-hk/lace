@@ -160,8 +160,8 @@ export const AssetActivityItem = ({
     };
   }, [debouncedSetText]);
 
-  const isPendingTx = status === ActivityStatus.PENDING;
   const isAwaitingCoSigningTx = status === ActivityStatus.AWAITING_COSIGNATURES;
+  const isPendingTx = status === ActivityStatus.PENDING || isAwaitingCoSigningTx;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
@@ -219,9 +219,9 @@ export const AssetActivityItem = ({
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.pendingNegativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx),
+            [styles.pendingNegativeBalance]: isNegativeBalance && isPendingTx,
             [styles.positiveBalance]: !isNegativeBalance,
-            [styles.negativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx)
+            [styles.negativeBalance]: isNegativeBalance && isPendingTx
           })}
           ref={ref}
         >

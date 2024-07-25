@@ -80,12 +80,13 @@ export const SignConfirmationFooter = (): ReactElement => {
     isSharedWallet,
     sharedWalletKey,
     signPolicy,
+    analytics,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const { analytics } = useOutsideHandles();
+
   const { t } = useTranslation();
 
   const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);

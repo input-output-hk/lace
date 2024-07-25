@@ -90,7 +90,7 @@ export const Footer = withAddressBookContext(
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
     const { isMaxAdaLoading } = useMaxAdaStatus();
-    const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
+    const { sharedWalletKey, signPolicy } = useSharedWalletData('payment');
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -170,8 +170,7 @@ export const Footer = withAddressBookContext(
         const tx = await inMemoryWallet.finalizeTx({ tx: inspectedTx });
         const txCbor = Serialization.Transaction.fromCore(tx).toCbor();
 
-        const policy = await getSignPolicy('payment');
-        await (policy.requiredCosigners === 1
+        await (signPolicy.requiredCosigners === 1
           ? inMemoryWallet.submitTx(tx)
           : exportMultisigTransaction(txCbor, sharedWalletKey, currentChain));
       } else {
@@ -183,7 +182,7 @@ export const Footer = withAddressBookContext(
           creationType: TxCreationType.Internal
         });
       }
-    }, [builtTxData.tx, currentChain, getSignPolicy, inMemoryWallet, isSharedWallet, sharedWalletKey]);
+    }, [builtTxData.tx, currentChain, inMemoryWallet, isSharedWallet, sharedWalletKey, signPolicy?.requiredCosigners]);
 
     const handleVerifyPass = useCallback(async () => {
       if (isSubmitingTx) return;
@@ -206,6 +205,7 @@ export const Footer = withAddressBookContext(
           setSection({ currentSection: Sections.FAIL_TX });
           setSubmitingTxState({ isSubmitingTx: false });
         }
+        console.error(error);
       } finally {
         removePassword();
       }

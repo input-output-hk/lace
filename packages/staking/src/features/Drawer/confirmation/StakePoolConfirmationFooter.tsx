@@ -18,8 +18,8 @@ type StakePoolConfirmationFooterProps = {
 
 export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmationFooterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { analytics } = useOutsideHandles();
   const {
+    analytics,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletType: walletType,
     submittingState: { setIsRestaking },

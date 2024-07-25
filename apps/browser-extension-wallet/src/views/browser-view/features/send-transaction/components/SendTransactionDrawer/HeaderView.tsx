@@ -191,9 +191,14 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const selectedTokenClick =
     selectedTokenList.length > 0 ? resetTokenList : () => setMultipleSelection(!isMultipleSelectionAvailable);
 
+  const title =
+    section.currentSection === Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON
+      ? t('sharedWallets.transaction.send.drawer.title')
+      : t('browserView.transaction.send.drawer.send');
+
   return (
     <DrawerNavigation
-      title={!isPopupView ? <div>{t('browserView.transaction.send.drawer.send')}</div> : undefined}
+      title={!isPopupView ? <div>{title}</div> : undefined}
       onArrowIconClick={shouldRenderArrow ? onArrowIconClick : undefined}
       rightActions={
         shouldDisplayAdvancedBtn ? (

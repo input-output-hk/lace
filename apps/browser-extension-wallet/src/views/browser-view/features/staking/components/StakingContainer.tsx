@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Layout } from '@src/views/browser-view/components';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { StakingSkeleton } from './StakingSkeleton';
 import { useMultiDelegationEnabled } from '@hooks/useMultiDelegationEnabled';
 import { MultiDelegationStaking } from './MultiDelegationStaking';
@@ -21,7 +21,6 @@ import {
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
-import { SignPolicy } from '@lace/core';
 import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 export const StakingContainer = (): React.ReactElement => {
@@ -63,7 +62,6 @@ export const StakingContainer = (): React.ReactElement => {
   const password = usePassword();
   const submittingState = useSubmitingState();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
 
   const {
     walletInfo,
@@ -98,14 +96,7 @@ export const StakingContainer = (): React.ReactElement => {
   }));
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const walletName = walletInfo.name;
-  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-
-  useEffect(() => {
-    (async () => {
-      const policy = await getSignPolicy('staking');
-      setSignPolicy(policy);
-    })();
-  }, [getSignPolicy]);
+  const { sharedWalletKey, transactionCosigners: coSigners, signPolicy } = useSharedWalletData('staking');
 
   return (
     <Layout>

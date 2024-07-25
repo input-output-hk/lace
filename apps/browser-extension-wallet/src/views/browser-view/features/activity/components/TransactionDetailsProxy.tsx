@@ -1,12 +1,5 @@
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityStatus,
-  CoSignersListItem,
-  hasSigned,
-  DelegationActivityType,
-  SignPolicy,
-  TransactionDetails
-} from '@lace/core';
+import React, { ReactElement, useMemo } from 'react';
+import { ActivityStatus, DelegationActivityType, TransactionDetails } from '@lace/core';
 import { AddressListType, getTransactionData } from './ActivityDetail';
 import { useWalletStore } from '@src/stores';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
@@ -42,26 +35,11 @@ export const TransactionDetailsProxy = withAddressBookContext(
     const isPopupView = appMode === APP_MODE_POPUP;
     const openExternalLink = useExternalLinkOpener();
 
-    const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-    const [signPolicy, setSignPolicy] = useState<SignPolicy>();
-    const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
-
-    useEffect(() => {
-      if (activityDetail.status !== ActivityStatus.AWAITING_COSIGNATURES) return;
-      (async () => {
-        const policy = await getSignPolicy('payment');
-        setSignPolicy(policy);
-
-        const signatures = activityDetail.activity.witness.signatures;
-        const cosignersWithSignStatus = await Promise.all(
-          coSigners.map(async (signer) => ({
-            ...signer,
-            signed: await hasSigned(signer.sharedWalletKey, 'payment', signatures)
-          }))
-        );
-        setTransactionCosigners(cosignersWithSignStatus);
-      })();
-    }, [activityDetail.activity, activityDetail.status, coSigners, getSignPolicy, sharedWalletKey]);
+    const signatures =
+      activityDetail?.status === ActivityStatus.AWAITING_COSIGNATURES
+        ? activityDetail.activity.witness.signatures
+        : undefined;
+    const { sharedWalletKey, transactionCosigners, signPolicy } = useSharedWalletData('payment', signatures);
 
     // Prepare own addresses of active account
     const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));

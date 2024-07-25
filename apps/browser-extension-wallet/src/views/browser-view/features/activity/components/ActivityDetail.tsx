@@ -123,7 +123,7 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
   if (fetchingActivityInfo || !activityInfo) return <Skeleton data-testid="transaction-details-skeleton" />;
 
   const name =
-    activityInfo.status === ActivityStatus.PENDING
+    activityInfo.status === ActivityStatus.PENDING || activityInfo.status === ActivityStatus.AWAITING_COSIGNATURES
       ? t('core.activityDetails.sending')
       : t(getTypeLabel(activityInfo.type));
 

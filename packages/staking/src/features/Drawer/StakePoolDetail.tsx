@@ -315,8 +315,13 @@ const makeActionButtons = (
 
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { analytics, multidelegationDAppCompatibility, triggerMultidelegationDAppCompatibility } = useOutsideHandles();
-  const { walletStoreWalletType, isSharedWallet } = useOutsideHandles();
+  const {
+    analytics,
+    multidelegationDAppCompatibility,
+    triggerMultidelegationDAppCompatibility,
+    walletStoreWalletType,
+    isSharedWallet,
+  } = useOutsideHandles();
   const [showDAppCompatibilityModal, setShowDAppCompatibilityModal] = useState(false);
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),

@@ -122,21 +122,19 @@ export const ActivityDetailFooter = ({ price }: ActivityDetailFooterProps): Reac
   const [callToActionButton, ...secondaryButtons] = actionButtons;
 
   return (
-    <>
-      <Flex flexDirection="column" alignItems="stretch" gap="$16">
-        {callToActionButton && (
-          <Button.CallToAction
-            label={callToActionButton.label}
-            data-testid={callToActionButton.dataTestId}
-            onClick={callToActionButton.callback}
-            w="$fill"
-          />
-        )}
-        <Text.Body.Small color="secondary">{t('sharedWallets.transaction.notification.downloadJSON')}</Text.Body.Small>
-        {secondaryButtons.map(({ callback, dataTestId, label }) => (
-          <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
-        ))}
-      </Flex>
-    </>
+    <Flex flexDirection="column" alignItems="stretch" gap="$16">
+      {callToActionButton && (
+        <Button.CallToAction
+          label={callToActionButton.label}
+          data-testid={callToActionButton.dataTestId}
+          onClick={callToActionButton.callback}
+          w="$fill"
+        />
+      )}
+      <Text.Body.Small color="secondary">{t('sharedWallets.transaction.notification.downloadJSON')}</Text.Body.Small>
+      {secondaryButtons.map(({ callback, dataTestId, label }) => (
+        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
+      ))}
+    </Flex>
   );
 };

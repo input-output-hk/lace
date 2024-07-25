@@ -5,7 +5,7 @@ export interface SharedWalletTransactionDetailsProps {
   expiresBy: { utcDate: string; utcTime: string } | undefined;
   ownSharedKey: Wallet.Crypto.Bip32PublicKeyHex;
   signPolicy: SignPolicy;
-  txInitiator: Wallet.Crypto.Bip32PublicKeyHex;
+  txInitiator?: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
 export interface CoSignersListItem {

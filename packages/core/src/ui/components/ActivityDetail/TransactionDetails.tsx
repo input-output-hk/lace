@@ -49,16 +49,16 @@ export const TransactionDetails = ({
   chainNetworkId,
   cardanoCoin,
   explorerBaseUrl,
-  cosigners,
+  cosigners = [],
   ownSharedKey,
   signPolicy,
   txInitiator
-}: TransactionDetailsProps & SharedWalletTransactionDetailsProps): React.ReactElement => {
+}: TransactionDetailsProps & Partial<SharedWalletTransactionDetailsProps>): React.ReactElement => {
   const { t } = useTranslation();
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
-  const isSending = status === ActivityStatus.PENDING;
-  const isSuccess = status === ActivityStatus.SUCCESS;
   const isAwaitingCosignatures = status === ActivityStatus.AWAITING_COSIGNATURES;
+  const isSending = status === ActivityStatus.PENDING || isAwaitingCosignatures;
+  const isSuccess = status === ActivityStatus.SUCCESS;
 
   const role = ownSharedKey === txInitiator ? 'summary' : 'cosigners';
   const signStatus = !cosigners.some((c) => c.sharedWalletKey === ownSharedKey && c.signed)
@@ -72,7 +72,7 @@ export const TransactionDetails = ({
     : t('core.activityDetails.summary');
 
   const signed = cosigners.filter((c) => c.signed);
-  const unsigned = cosigners.filter((c) => !c.signed);
+  const unsigned = cosigners?.filter((c) => !c.signed);
 
   const getCollateralStatus = (): CollateralStatus => {
     switch (status) {

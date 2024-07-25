@@ -4,10 +4,10 @@ import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { Banner, useObservable } from '@lace/common';
-import { CoSignersListItem, CosignersList, InfoBar, RowContainer, renderLabel, hasSigned } from '@lace/core';
+import { CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { StakingError, useDelegationPortfolioStore, useStakingStore } from '../../store';
@@ -127,15 +127,6 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('drawer.confirmation.errors.utxoBalanceInsufficient'),
   };
 
-  const stakingCosigners = useMemo(
-    (): CoSignersListItem[] =>
-      coSigners?.map((signer) => ({
-        ...signer,
-        signed: false,
-      })) || [],
-    [coSigners]
-  );
-
   return (
     <>
       <div className={styles.header}>
@@ -214,7 +205,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
           {delegationTxDeposit < 0 && <StakePoolDepositReclaimDetails {...{ delegationTxDeposit }} />}
 
           {isSharedWallet && (
-            <div>
+            <Box mt="$24">
               <SummaryExpander
                 onClick={() => setIsCosignersOpen(!isCosignersOpen)}
                 open={isCosignersOpen}
@@ -225,13 +216,13 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
                   {signPolicy.signers.length > 0 && (
                     <CosignersList
                       ownSharedKey={sharedWalletKey}
-                      list={stakingCosigners}
+                      list={coSigners}
                       title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
                     />
                   )}
                 </Box>
               </SummaryExpander>
-            </div>
+            </Box>
           )}
         </Skeleton>
       </div>

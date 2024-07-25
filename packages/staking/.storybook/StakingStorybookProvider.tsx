@@ -50,8 +50,8 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
   walletAddress: undefined,
   walletName: undefined,
   currentChain: undefined,
-  isSharedWallet: false,
-  eraSlotDateTime: () => void 0
+  isSharedWallet: undefined,
+  eraSlotDateTime: undefined,
 };
 
 // Please use <LocalThemeProvider> to present dark theme

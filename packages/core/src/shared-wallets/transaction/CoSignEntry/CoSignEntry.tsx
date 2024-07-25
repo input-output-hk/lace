@@ -65,6 +65,11 @@ export const CoSignEntry = ({ onCancel, onContinue }: CoSignEntryProps) => {
     onContinue(txData);
   };
 
+  const onRemove = () => {
+    setLoadedFileName('');
+    setTxData(null);
+  };
+
   const onErrorCancel = () => {
     if (errorKind !== ErrorKind.InvalidFile) return;
     onCancel();
@@ -92,11 +97,8 @@ export const CoSignEntry = ({ onCancel, onContinue }: CoSignEntryProps) => {
     <>
       <Flex gap="$32" flexDirection="column" h="$fill">
         <Flex gap="$8" flexDirection="column">
-          <Text.SubHeading>Import transaction</Text.SubHeading>
-          <Text.Body.Normal>
-            To co-sign a transaction initiated by another shared wallet member, upload the transaction JSON file you
-            received.
-          </Text.Body.Normal>
+          <Text.SubHeading>{t('sharedWallets.transaction.coSign.importJsonStep.title')}</Text.SubHeading>
+          <Text.Body.Normal>{t('sharedWallets.transaction.coSign.importJsonStep.description')}</Text.Body.Normal>
         </Flex>
         <Flex h="$fill" w="$fill">
           <FileUpload
@@ -115,7 +117,7 @@ export const CoSignEntry = ({ onCancel, onContinue }: CoSignEntryProps) => {
             supportedFormats="Supported formats: JSON"
             removeButtonLabel="Remove"
             files={loadedFileName ? [loadedFileName] : undefined}
-            onRemove={() => setLoadedFileName('')}
+            onRemove={() => onRemove()}
           />
         </Flex>
         <Flex gap="$16" flexDirection="column" mb="$24" w="$fill">

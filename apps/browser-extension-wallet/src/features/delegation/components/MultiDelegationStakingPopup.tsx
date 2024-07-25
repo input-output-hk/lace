@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   useAnalyticsContext,
   useBackgroundServiceAPIContext,
@@ -28,7 +28,6 @@ import {
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { SignPolicy } from '@lace/core';
 import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
@@ -72,15 +71,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     environmentName: state.environmentName,
     isSharedWallet: state.isSharedWallet
   }));
-  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
-
-  useEffect(() => {
-    (async () => {
-      const policy = await getSignPolicy('staking');
-      setSignPolicy(policy);
-    })();
-  }, [getSignPolicy]);
+  const { sharedWalletKey, signPolicy, transactionCosigners: coSigners } = useSharedWalletData('staking');
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow

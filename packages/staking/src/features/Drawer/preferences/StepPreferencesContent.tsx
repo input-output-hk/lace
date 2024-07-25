@@ -50,8 +50,8 @@ export type StepPreferencesContentProps = {
 export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProps) => {
   const { t } = useTranslation();
   const [showDAppCompatibilityModal, setShowDAppCompatibilityModal] = useState(false);
-  const { analytics } = useOutsideHandles();
   const {
+    analytics,
     balancesBalance,
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,

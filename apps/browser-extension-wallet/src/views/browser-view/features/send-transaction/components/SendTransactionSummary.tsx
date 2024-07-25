@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { CurrencyInfo } from '@src/types';
 import { Wallet } from '@lace/cardano';
@@ -10,12 +10,9 @@ import {
   OutputSummaryList,
   Costs,
   OutputSummaryProps,
-  SignPolicy,
   InfoBar,
-  CoSignersListItem,
   CosignersList,
   ActivityDetailHeader,
-  hasSigned,
   Transaction,
   ActivityStatus
 } from '@lace/core';
@@ -67,7 +64,6 @@ export const SendTransactionSummary = withAddressBookContext(
     const { builtTxData: { uiTx: { fee, outputs, handleResolutions, validityInterval } = {} } = {} } =
       useBuiltTxState();
     const [isCosignersOpen, setIsCosignersOpen] = useState(true);
-    const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const [metadata] = useMetadata();
     const {
       inMemoryWallet,
@@ -86,26 +82,11 @@ export const SendTransactionSummary = withAddressBookContext(
     const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
     const eraSummaries = useObservable(inMemoryWallet.eraSummaries$);
 
-    const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-    const [signPolicy, setSignPolicy] = useState<SignPolicy>();
-
-    useEffect(() => {
-      if (activityDetail.status !== ActivityStatus.AWAITING_COSIGNATURES) return;
-
-      (async () => {
-        const policy = await getSignPolicy('payment');
-        setSignPolicy(policy);
-
-        const signatures = activityDetail.activity.witness.signatures;
-        const cosignersWithSignStatus = await Promise.all(
-          coSigners.map(async (signer) => ({
-            ...signer,
-            signed: await hasSigned(signer.sharedWalletKey, 'payment', signatures)
-          }))
-        );
-        setTransactionCosigners(cosignersWithSignStatus);
-      })();
-    }, [activityDetail.activity, activityDetail.status, coSigners, getSignPolicy, sharedWalletKey]);
+    const signatures =
+      activityDetail?.status === ActivityStatus.AWAITING_COSIGNATURES
+        ? activityDetail.activity.witness.signatures
+        : undefined;
+    const { sharedWalletKey, transactionCosigners, signPolicy } = useSharedWalletData('payment', signatures);
 
     const signed = transactionCosigners.filter((c) => c.signed);
     const unsigned = transactionCosigners.filter((c) => !c.signed);
