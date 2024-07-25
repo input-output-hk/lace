@@ -24,13 +24,13 @@ export const Base = ({ copyText, children, copiedMessage, onCopyClick }: Readonl
   };
 
   return (
-    <div className={styles.root} data-testid="address-card">
-      {children}
-      <div className={styles.copyButtonContainer}>
-        <CopyToClipboard text={copyText}>
-          <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" onClick={doToast} />
-        </CopyToClipboard>
+    <CopyToClipboard text={copyText}>
+      <div className={styles.root} data-testid="address-card" onClick={doToast}>
+        {children}
+        <div className={styles.copyButtonContainer}>
+          <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" />
+        </div>
       </div>
-    </div>
+    </CopyToClipboard>
   );
 };

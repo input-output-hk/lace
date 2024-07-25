@@ -9,6 +9,7 @@
   padding: size_unit(2);
   border-radius: size_unit(2);
   position: relative;
+  cursor: pointer;
 
   @media (min-width: $breakpoint-minimum) {
     padding: size_unit(3);
@@ -43,7 +44,6 @@
 
     .copyButton {
       color: var(--light-mode-black, #fff);
-      cursor: pointer;
       height: size_unit(2);
       opacity: 0;
       width: size_unit(2);
