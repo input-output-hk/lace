@@ -1,4 +1,11 @@
-import { ActivityStatus, CoSignersListItem, SharedWalletTransactionDetails, SignPolicy, TxSummary } from '@lace/core';
+import {
+  ActivityStatus,
+  CoSignersListItem,
+  hasSigned,
+  SharedWalletTransactionDetails,
+  SignPolicy,
+  TxSummary
+} from '@lace/core';
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { Wallet } from '@lace/cardano';
@@ -41,27 +48,29 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
   ({ amountTransformer, activityInfo, direction }: SharedWalletTransactionDetailsProxyProps): ReactElement => {
     const {
       walletUI: { cardanoCoin },
-      walletInfo
+      walletInfo,
+      activityDetail
     } = useWalletStore();
     const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
     const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+    const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const { list: addressList } = useAddressBookContext();
 
     useEffect(() => {
       (async () => {
         const policy = await getSignPolicy('payment');
         setSignPolicy(policy);
-      })();
-    }, [getSignPolicy]);
 
-    const transactionCosigners = useMemo(
-      (): CoSignersListItem[] =>
-        coSigners?.map((signer) => ({
-          ...signer,
-          signed: false
-        })) || [],
-      [coSigners]
-    );
+        const signatures = (activityDetail.activity as Wallet.Cardano.Tx).witness.signatures;
+        const cosignersWithSignStatus = await Promise.all(
+          coSigners.map(async (signer) => ({
+            ...signer,
+            signed: await hasSigned(signer.sharedWalletKey, 'payment', signatures)
+          }))
+        );
+        setTransactionCosigners(cosignersWithSignStatus);
+      })();
+    }, [activityDetail.activity, coSigners, getSignPolicy, sharedWalletKey]);
 
     const addressToNameMap = useMemo(
       () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),

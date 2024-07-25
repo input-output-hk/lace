@@ -48,7 +48,7 @@
     "@cardano-sdk/key-management": "0.20.8",
     "@cardano-sdk/util": "0.15.2",
     "@cardano-sdk/wallet": "0.38.4",
-    "@cardano-sdk/web-extension": "0.29.4",
+    "@cardano-sdk/web-extension": "0.29.10",
     "@lace/common": "0.1.0",
     "@ledgerhq/devices": "^8.2.1",
     "@stablelib/chacha20poly1305": "1.0.1",

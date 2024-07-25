@@ -48,7 +48,7 @@
     "@cardano-sdk/tx-construction": "0.19.3",
     "@cardano-sdk/util": "0.15.2",
     "@cardano-sdk/wallet": "0.38.4",
-    "@cardano-sdk/web-extension": "0.29.4",
+    "@cardano-sdk/web-extension": "0.29.10",
     "@emurgo/cip14-js": "~3.0.1",
     "@input-output-hk/lace-ui-toolkit": "1.9.0",
     "@lace/cardano": "0.1.0",
