@@ -22,7 +22,7 @@ export type TransactionPool = {
   id: string;
 };
 
-type TransactionActivity = {
+export type TransactionActivity = {
   hash: string;
   includedUtcDate?: string;
   includedUtcTime?: string;
@@ -38,6 +38,7 @@ type TransactionActivity = {
   votingProcedures?: Wallet.Cardano.VotingProcedures;
   proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
   certificates?: Wallet.Cardano.Certificate[];
+  validityInterval: Wallet.Cardano.ValidityInterval;
 };
 
 type RewardsActivity = {

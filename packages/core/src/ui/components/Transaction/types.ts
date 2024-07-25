@@ -12,8 +12,7 @@ export enum TransactionActivityType {
   'outgoing' = 'outgoing',
   'incoming' = 'incoming',
   'self' = 'self',
-  'rewards' = 'rewards',
-  'awaitingCosignatures' = 'awaitingCosignatures'
+  'rewards' = 'rewards'
 }
 
 export interface TransactionDetailAsset {

@@ -22,6 +22,7 @@ import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { SignPolicy } from '@lace/core';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -155,7 +156,8 @@ export const StakingContainer = (): React.ReactElement => {
           isSharedWallet,
           signPolicy,
           sharedWalletKey,
-          coSigners
+          coSigners,
+          eraSlotDateTime
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

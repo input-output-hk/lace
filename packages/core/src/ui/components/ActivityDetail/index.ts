@@ -4,3 +4,4 @@ export * from './ActivityTypeIcon';
 export * from './types';
 export * from './TransactionInputOutput';
 export * from './Collateral';
+export * from './ActivityDetailHeader';

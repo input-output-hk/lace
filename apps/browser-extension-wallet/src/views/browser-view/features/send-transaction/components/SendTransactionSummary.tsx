@@ -1,10 +1,24 @@
-import React, { useMemo } from 'react';
+/* eslint-disable sonarjs/cognitive-complexity */
+/* eslint-disable complexity */
+import React, { useEffect, useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { CurrencyInfo } from '@src/types';
 import { Wallet } from '@lace/cardano';
-import { useFetchCoinPrice } from '@hooks';
+import { useFetchCoinPrice, useSharedWalletData } from '@hooks';
 import { walletBalanceTransformer } from '@src/api/transformers';
-import { OutputSummaryList, Costs, OutputSummaryProps } from '@lace/core';
+import {
+  OutputSummaryList,
+  Costs,
+  OutputSummaryProps,
+  SignPolicy,
+  InfoBar,
+  CoSignersListItem,
+  CosignersList,
+  ActivityDetailHeader,
+  hasSigned,
+  Transaction,
+  ActivityStatus
+} from '@lace/core';
 import { useBuiltTxState, useMetadata } from '../store';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
@@ -19,7 +33,7 @@ import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 import { walletRepository } from '@lib/wallet-api-ui';
 import { formatRow } from '../helpers';
-import SharedWalletSendTransactionSummary from '@views/browser/features/send-transaction/components/SharedWalletSendTransactionSummary';
+import { Box, SummaryExpander, Flex } from '@input-output-hk/lace-ui-toolkit';
 
 const { Text } = Typography;
 
@@ -52,13 +66,16 @@ export const SendTransactionSummary = withAddressBookContext(
     const { t } = useTranslation();
     const { builtTxData: { uiTx: { fee, outputs, handleResolutions, validityInterval } = {} } = {} } =
       useBuiltTxState();
+    const [isCosignersOpen, setIsCosignersOpen] = useState(true);
+    const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const [metadata] = useMetadata();
     const {
       inMemoryWallet,
       isHardwareWallet,
       walletType,
       walletUI: { cardanoCoin },
-      isSharedWallet
+      isSharedWallet,
+      activityDetail
     } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
     const isTrezor = walletType === WalletType.Trezor;
@@ -68,7 +85,30 @@ export const SendTransactionSummary = withAddressBookContext(
 
     const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
     const eraSummaries = useObservable(inMemoryWallet.eraSummaries$);
-    const feeValue = walletBalanceTransformer(fee.toString(), priceResult.cardano.price);
+
+    const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
+    const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+
+    useEffect(() => {
+      if (activityDetail.status !== ActivityStatus.AWAITING_COSIGNATURES) return;
+
+      (async () => {
+        const policy = await getSignPolicy('payment');
+        setSignPolicy(policy);
+
+        const signatures = activityDetail.activity.witness.signatures;
+        const cosignersWithSignStatus = await Promise.all(
+          coSigners.map(async (signer) => ({
+            ...signer,
+            signed: await hasSigned(signer.sharedWalletKey, 'payment', signatures)
+          }))
+        );
+        setTransactionCosigners(cosignersWithSignStatus);
+      })();
+    }, [activityDetail.activity, activityDetail.status, coSigners, getSignPolicy, sharedWalletKey]);
+
+    const signed = transactionCosigners.filter((c) => c.signed);
+    const unsigned = transactionCosigners.filter((c) => !c.signed);
 
     const outputSummaryListTranslation = {
       recipientAddress: t('core.outputSummaryList.recipientAddress'),
@@ -102,24 +142,57 @@ export const SendTransactionSummary = withAddressBookContext(
     const ownAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
     const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
 
-    if (isSharedWallet) {
-      return <SharedWalletSendTransactionSummary rows={rows} fee={feeValue.coinBalance} />;
-    }
-
     // Where do we get the deposit field? LW-1363
     return (
       <>
-        <OutputSummaryList
-          rows={rows}
-          expiresBy={eraSlotDateTime(eraSummaries, validityInterval?.invalidHereafter)}
-          txFee={{
-            ...getFee(fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
-            tootipText: t('send.theAmountYoullBeChargedToProcessYourTransaction')
-          }}
-          metadata={metadata}
-          translations={outputSummaryListTranslation}
-          ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
-        />
+        {isSharedWallet && (
+          <Flex flexDirection="column" gap="$8">
+            <ActivityDetailHeader name={t('sharedWallets.transaction.summary.header')} description="" />
+            <Transaction.HeaderDescription>
+              {t('sharedWallets.transaction.summary.unsigned.description')}
+            </Transaction.HeaderDescription>
+          </Flex>
+        )}
+        <Box mt={isSharedWallet ? '$0' : '$8'}>
+          <OutputSummaryList
+            rows={rows}
+            expiresBy={eraSlotDateTime(eraSummaries, validityInterval?.invalidHereafter)}
+            txFee={{
+              ...getFee(fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
+              tootipText: t('send.theAmountYoullBeChargedToProcessYourTransaction')
+            }}
+            metadata={metadata}
+            translations={outputSummaryListTranslation}
+            ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
+          />
+        </Box>
+        {isSharedWallet && (
+          <div>
+            <SummaryExpander
+              onClick={() => setIsCosignersOpen(!isCosignersOpen)}
+              open={isCosignersOpen}
+              title={t('sharedWallets.transaction.cosigners.title')}
+            >
+              <Box pb="$32">
+                {signPolicy && <InfoBar signPolicy={signPolicy} />}
+                {signed.length > 0 && (
+                  <CosignersList
+                    ownSharedKey={sharedWalletKey}
+                    list={signed}
+                    title={t('sharedWallets.transaction.cosignerList.title.signed')}
+                  />
+                )}
+                {unsigned.length > 0 && (
+                  <CosignersList
+                    ownSharedKey={sharedWalletKey}
+                    list={unsigned}
+                    title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
+                  />
+                )}
+              </Box>
+            </SummaryExpander>
+          </div>
+        )}
         {isHardwareWallet && !isPopupView && (
           <Text className={styles.connectLedgerText}>
             {isTrezor ? t('send.connectYourTrezor') : t('send.connectYourLedger')}

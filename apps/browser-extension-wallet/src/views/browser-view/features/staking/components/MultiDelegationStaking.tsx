@@ -3,9 +3,10 @@ import React, { useEffect } from 'react';
 import { useTheme } from '@providers';
 import { useFetchCoinPrice } from '@hooks';
 import { useWalletStore } from '@stores';
-import { ActivityDetail } from '../../activity';
+import { ActivityDetail, ActivityDetailFooter } from '../../activity';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
+import { ActivityStatus } from '@lace/core';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
@@ -23,6 +24,9 @@ export const MultiDelegationStaking = (): JSX.Element => {
     resetActivityState();
   }, [resetActivityState, blockchainProvider]);
 
+  const isCosignTx = activityDetail?.status === ActivityStatus.AWAITING_COSIGNATURES;
+  const drawerTitle = isCosignTx ? t('sharedWallets.transaction.detail.title') : t('transactions.detail.title');
+
   return (
     <>
       <Staking theme={theme.name} />
@@ -38,12 +42,13 @@ export const MultiDelegationStaking = (): JSX.Element => {
         onClose={resetActivityState}
         navigation={
           <DrawerNavigation
-            title={t('transactions.detail.title')}
+            title={drawerTitle}
             onCloseIconClick={() => {
               resetActivityState();
             }}
           />
         }
+        footer={activityDetail && priceResult && <ActivityDetailFooter price={priceResult} />}
       >
         {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
       </Drawer>

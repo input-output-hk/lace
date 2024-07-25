@@ -1,8 +1,9 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
-import React from 'react';
+import React, { useState } from 'react';
 import cn from 'classnames';
 import { Ellipsis } from '@lace/common';
-import { Box } from '@input-output-hk/lace-ui-toolkit';
+import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { ActivityStatus, Transaction, TransactionDetailsProps, TransactionFee } from '../Transaction';
 import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
@@ -12,6 +13,7 @@ import { TxDetailsCertificates } from './components/TxDetailsCertificates/TxDeta
 import { TxDetailsVotingProcedures } from './components/TxDetailsVotingProcedures';
 import { TxDetailsProposalProcedures } from './components/TxDetailsProposalProcedures';
 import { useTranslation } from 'react-i18next';
+import { CosignersList, InfoBar, SharedWalletTransactionDetailsProps } from '@src/shared-wallets';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -23,6 +25,7 @@ export const TransactionDetails = ({
   headerDescription,
   includedDate = '-',
   includedTime = '-',
+  expiresBy,
   fee = '-',
   deposit,
   depositReclaim,
@@ -45,11 +48,31 @@ export const TransactionDetails = ({
   certificates,
   chainNetworkId,
   cardanoCoin,
-  explorerBaseUrl
-}: TransactionDetailsProps): React.ReactElement => {
+  explorerBaseUrl,
+  cosigners,
+  ownSharedKey,
+  signPolicy,
+  txInitiator
+}: TransactionDetailsProps & SharedWalletTransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const isSending = status === ActivityStatus.PENDING;
   const isSuccess = status === ActivityStatus.SUCCESS;
+  const isAwaitingCosignatures = status === ActivityStatus.AWAITING_COSIGNATURES;
+
+  const role = ownSharedKey === txInitiator ? 'summary' : 'cosigners';
+  const signStatus = !cosigners.some((c) => c.sharedWalletKey === ownSharedKey && c.signed)
+    ? 'unsigned'
+    : 'unsubmitted';
+  const description = isAwaitingCosignatures
+    ? t(`sharedWallets.transaction.${role}.${signStatus}.description`)
+    : t('core.activityDetails.header');
+  const txSummaryTitle = isAwaitingCosignatures
+    ? t('sharedWallets.transaction.summary.title')
+    : t('core.activityDetails.summary');
+
+  const signed = cosigners.filter((c) => c.signed);
+  const unsigned = cosigners.filter((c) => !c.signed);
 
   const getCollateralStatus = (): CollateralStatus => {
     switch (status) {
@@ -87,7 +110,7 @@ export const TransactionDetails = ({
     <Transaction.Content>
       <ActivityDetailHeader name={name} description={headerDescription} />
       <div>
-        <Transaction.HeaderDescription>{t('core.activityDetails.header')}</Transaction.HeaderDescription>
+        <Transaction.HeaderDescription>{description}</Transaction.HeaderDescription>
         <Transaction.Block>
           <Transaction.TxHash
             hash={hash}
@@ -95,7 +118,7 @@ export const TransactionDetails = ({
             sending={isSending}
             openLink={handleOpenExternalHashLink}
           />
-          <Transaction.Summary>{t('core.activityDetails.summary')}</Transaction.Summary>
+          <Transaction.Summary>{txSummaryTitle}</Transaction.Summary>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
               <div className={cn(styles.title, styles.poolsTitle)} data-testid="rewards-pools-title">
@@ -133,9 +156,22 @@ export const TransactionDetails = ({
             titleTestId="tx-status-title"
             detailTestId="tx-status"
             title={t('core.activityDetails.status')}
-            detail={status && `${status.charAt(0).toUpperCase()}${status.slice(1)}`}
+            detail={t(`core.activityDetails.statuses.${status}`)}
           />
-          <Transaction.Timestamp includedDate={includedDate} includedTime={includedTime} />
+          {isAwaitingCosignatures && expiresBy ? (
+            <Box mb="$32" data-testid="expires-by">
+              <TransactionSummary.Amount
+                amount={expiresBy.utcDate}
+                fiatPrice={expiresBy.utcTime}
+                label={t('core.outputSummaryList.expiresBy')}
+                tooltip={t('core.outputSummaryList.expiresByTooltip')}
+                data-testid="validity-period"
+                className={styles.validityPeriod}
+              />
+            </Box>
+          ) : (
+            <Transaction.Timestamp includedDate={includedDate} includedTime={includedTime} />
+          )}
           {collateral && (
             <Box mb="$32" data-testid="tx-collateral">
               <Collateral
@@ -163,6 +199,31 @@ export const TransactionDetails = ({
               label: t('core.activityDetails.depositReclaim')
             })}
         </Transaction.Block>
+        {isAwaitingCosignatures && (
+          <SummaryExpander
+            onClick={() => setIsCosignersOpen(!isCosignersOpen)}
+            open={isCosignersOpen}
+            title={t('sharedWallets.transaction.cosigners.title')}
+          >
+            <Box pb="$32">
+              {signPolicy && <InfoBar signPolicy={signPolicy} />}
+              {signed.length > 0 && (
+                <CosignersList
+                  ownSharedKey={ownSharedKey}
+                  list={signed}
+                  title={t('sharedWallets.transaction.cosignerList.title.signed')}
+                />
+              )}
+              {unsigned.length > 0 && (
+                <CosignersList
+                  ownSharedKey={ownSharedKey}
+                  list={unsigned}
+                  title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
+                />
+              )}
+            </Box>
+          </SummaryExpander>
+        )}
         {votingProcedures?.length > 0 && (
           <TxDetailsVotingProcedures votingProcedures={votingProcedures} explorerBaseUrl={explorerBaseUrl} />
         )}

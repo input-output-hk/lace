@@ -21,7 +21,6 @@ import { useCurrencyStore } from '@providers';
 import { TransactionDetailsProxy } from './TransactionDetailsProxy';
 import { useTranslation } from 'react-i18next';
 import type { TranslationKey } from '@lace/translation';
-import { SharedWalletTransactionDetailsWrapper } from './SharedWalletTransactionDetailsWrapper';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -71,7 +70,7 @@ export const getTransactionData = ({
     }));
 };
 
-const getCurrentTransactionStatus = (
+export const getCurrentTransactionStatus = (
   activities: AssetActivityListProps[],
   txId: Wallet.Cardano.TransactionId
 ): ActivityStatus | undefined => {
@@ -91,7 +90,6 @@ const getTypeLabel = (type: ActivityType): TranslationKey => {
     return 'core.activityDetails.deregistration';
   if (type === TransactionActivityType.incoming) return 'core.activityDetails.received';
   if (type === TransactionActivityType.outgoing) return 'core.activityDetails.sent';
-  if (type === TransactionActivityType.awaitingCosignatures) return 'core.activityDetails.awaitingCosignatures';
   return `core.activityDetails.${type}`;
 };
 
@@ -142,16 +140,6 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
         amountTransformer={amountTransformer}
         coinSymbol={cardanoCoin.symbol}
         rewards={activityInfo.activity.rewards}
-      />
-    );
-  }
-
-  if (activityInfo.type === TransactionActivityType.awaitingCosignatures) {
-    return (
-      <SharedWalletTransactionDetailsWrapper
-        amountTransformer={amountTransformer}
-        activityInfo={activityInfo}
-        direction={activityDetail.direction}
       />
     );
   }

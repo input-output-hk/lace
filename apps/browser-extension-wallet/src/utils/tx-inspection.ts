@@ -137,8 +137,7 @@ const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => async (t
 export const inspectTxType = async ({
   walletAddresses,
   tx,
-  inputResolver,
-  isSharedWallet
+  inputResolver
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
@@ -197,8 +196,6 @@ export const inspectTxType = async ({
         return ConwayEraGovernanceActions.vote;
       case tx.body.proposalProcedures?.length > 0:
         return cip1694GovernanceActionsInspection(tx.body.proposalProcedures[0]);
-      case isSharedWallet && tx.witness?.scripts?.length > 0:
-        return TransactionActivityType.awaitingCosignatures;
       case inspectionProperties.selfTransaction:
         return TransactionActivityType.self;
       default:

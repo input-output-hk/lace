@@ -247,6 +247,7 @@ export const Footer = withAddressBookContext(
         clearTemporaryTxDataFromStorage();
       }
 
+      // TODO: open view cosigner drawer which is available only in the activities tab
       switch (true) {
         case isReviewingAddress: {
           return handleReviewAddress('UPDATE');

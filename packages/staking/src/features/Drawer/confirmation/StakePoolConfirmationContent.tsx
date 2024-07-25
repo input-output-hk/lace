@@ -4,7 +4,7 @@ import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { Banner, useObservable } from '@lace/common';
-import { CoSignersListItem, CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
+import { CoSignersListItem, CosignersList, InfoBar, RowContainer, renderLabel, hasSigned } from '@lace/core';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -16,8 +16,6 @@ import ExclamationMarkIcon from './exclamation-circle-small.svg';
 import { StakePoolConfirmationBody } from './StakePoolConfirmationBody';
 import styles from './StakePoolConfirmationContent.module.scss';
 import { StakePoolDepositReclaimDetails } from './StakePoolDepositReclaimDetails';
-
-const SHARED_WALLET_TX_VALIDITY_INTERVAL = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
 
 const ERROR_MESSAGES: { [key: string]: StakingError } = {
   [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
@@ -46,6 +44,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     signPolicy,
     sharedWalletKey,
     coSigners,
+    eraSlotDateTime,
   } = useOutsideHandles();
   const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio || [],
@@ -53,8 +52,10 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
 
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
+  const [expiresBy, setExpiresBy] = useState<ReturnType<typeof eraSlotDateTime>>();
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const eraSummaries = useObservable(inMemoryWallet.eraSummaries$);
   const loading = isNil(protocolParameters) || isNil(rewardAccounts);
 
   const delegateFirstStakeCredential = useCallback(
@@ -91,6 +92,9 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
         const newDelegationTxReclaim = Wallet.util.calculateDepositReclaim(implicitCoin) || BigInt(0);
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
+        if (isSharedWallet && tx.body.validityInterval?.invalidHereafter) {
+          setExpiresBy(eraSlotDateTime(eraSummaries, tx.body.validityInterval?.invalidHereafter));
+        }
         setStakingError();
         setDelegationTxDeposit(Number(newDelegationTxDeposit) - Number(newDelegationTxReclaim));
       } catch (error) {
@@ -113,6 +117,9 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     protocolParameters,
     loading,
     delegate,
+    isSharedWallet,
+    eraSummaries,
+    eraSlotDateTime,
   ]);
 
   const ErrorMessages: Record<StakingError, string> = {
@@ -156,12 +163,13 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
             {t(`drawer.confirmation.${isSharedWallet ? 'transactionDetails' : 'transactionCost'}.title`)}
           </h1>
           <div className={styles.txSummaryContainer} data-testid="summary-fee-container">
-            {isSharedWallet && (
+            {isSharedWallet && expiresBy && (
               <RowContainer>
                 <TransactionSummary.Amount
-                  amount={t('drawer.confirmation.validityPeriod.value', { hours: SHARED_WALLET_TX_VALIDITY_INTERVAL })}
-                  label={t('drawer.confirmation.validityPeriod.title')}
-                  tooltip={t('drawer.confirmation.validityPeriod.tooltip')}
+                  amount={expiresBy.utcDate}
+                  fiatPrice={expiresBy.utcTime}
+                  label={t('core.outputSummaryList.expiresBy')}
+                  tooltip={t('core.outputSummaryList.expiresByTooltip')}
                   data-testid="validity-period"
                   className={styles.validityPeriod}
                 />

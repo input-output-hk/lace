@@ -5,7 +5,6 @@
 .listContainer {
   display: flex;
   flex-direction: column;
-  margin-top: size_unit(8);
   @media (max-width: $breakpoint-popup) {
     margin-top: 0;
   }

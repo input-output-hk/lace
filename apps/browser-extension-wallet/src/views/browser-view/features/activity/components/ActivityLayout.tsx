@@ -1,11 +1,12 @@
 import React, { ReactElement, useEffect, useCallback } from 'react';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
-import { GroupedAssetActivityList } from '@lace/core';
+import { ActivityStatus, GroupedAssetActivityList } from '@lace/core';
 import { useFetchCoinPrice } from '../../../../../hooks';
 import { StateStatus, useWalletStore } from '../../../../../stores';
 import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { ActivityDetail } from './ActivityDetail';
+import { ActivityDetailFooter } from './ActivityDetailFooter';
 import { useTranslation } from 'react-i18next';
 import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -61,11 +62,15 @@ export const ActivityLayout = (): ReactElement => {
     }
   ];
 
+  const isCosignTx = activityDetail?.status === ActivityStatus.AWAITING_COSIGNATURES;
+
   // Reset current transaction details and close drawer if network (blockchainProvider) has changed
   useEffect(() => {
     resetActivityState();
   }, [resetActivityState, blockchainProvider]);
   const isLoadingFirstTime = isNil(total);
+
+  const drawerTitle = isCosignTx ? t('sharedWallets.transaction.detail.title') : t('transactions.detail.title');
 
   return (
     <Layout>
@@ -79,9 +84,10 @@ export const ActivityLayout = (): ReactElement => {
         <Drawer
           visible={!!activityDetail}
           onClose={resetActivityState}
+          footer={activityDetail && priceResult && <ActivityDetailFooter price={priceResult} />}
           navigation={
             <DrawerNavigation
-              title={t('transactions.detail.title')}
+              title={drawerTitle}
               onCloseIconClick={() => {
                 analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailXClick);
                 resetActivityState();

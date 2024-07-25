@@ -256,7 +256,8 @@ const buildGetActivityDetail =
       collateral: collateralInAda,
       votingProcedures: tx.body.votingProcedures,
       proposalProcedures: tx.body.proposalProcedures,
-      certificates: tx.body.certificates
+      certificates: tx.body.certificates,
+      ...('validityInterval' in tx.body && { validityInterval: tx.body.validityInterval })
     };
 
     if (type === DelegationActivityType.delegation && delegationInfo) {

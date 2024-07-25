@@ -1,5 +1,12 @@
-import React, { ReactElement, useMemo } from 'react';
-import { ActivityStatus, DelegationActivityType, TransactionDetails } from '@lace/core';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import {
+  ActivityStatus,
+  CoSignersListItem,
+  hasSigned,
+  DelegationActivityType,
+  SignPolicy,
+  TransactionDetails
+} from '@lace/core';
 import { AddressListType, getTransactionData } from './ActivityDetail';
 import { useWalletStore } from '@src/stores';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
@@ -12,6 +19,8 @@ import { useCexplorerBaseUrl } from '@src/features/dapp/components/confirm-trans
 import { useObservable } from '@lace/common';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 import { walletRepository } from '@lib/wallet-api-ui';
+import { useSharedWalletData } from '@hooks';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 type TransactionDetailsProxyProps = {
   name: string;
@@ -27,14 +36,37 @@ export const TransactionDetailsProxy = withAddressBookContext(
       inMemoryWallet,
       walletInfo,
       walletUI: { cardanoCoin, appMode },
-      currentChain
+      currentChain,
+      activityDetail
     } = useWalletStore();
     const isPopupView = appMode === APP_MODE_POPUP;
     const openExternalLink = useExternalLinkOpener();
 
+    const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
+    const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+    const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
+
+    useEffect(() => {
+      if (activityDetail.status !== ActivityStatus.AWAITING_COSIGNATURES) return;
+      (async () => {
+        const policy = await getSignPolicy('payment');
+        setSignPolicy(policy);
+
+        const signatures = activityDetail.activity.witness.signatures;
+        const cosignersWithSignStatus = await Promise.all(
+          coSigners.map(async (signer) => ({
+            ...signer,
+            signed: await hasSigned(signer.sharedWalletKey, 'payment', signatures)
+          }))
+        );
+        setTransactionCosigners(cosignersWithSignStatus);
+      })();
+    }, [activityDetail.activity, activityDetail.status, coSigners, getSignPolicy, sharedWalletKey]);
+
     // Prepare own addresses of active account
     const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
     const walletAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
+    const eraSummaries = useObservable(inMemoryWallet.eraSummaries$);
 
     // Prepare address book data as Map<address, name>
     const { list: addressList } = useAddressBookContext();
@@ -63,7 +95,8 @@ export const TransactionDetailsProxy = withAddressBookContext(
       proposalProcedures,
       votingProcedures,
       certificates,
-      collateral
+      collateral,
+      validityInterval
     } = activityInfo.activity;
     const txSummary = useMemo(
       () =>
@@ -74,6 +107,11 @@ export const TransactionDetailsProxy = withAddressBookContext(
           isIncomingTransaction
         }),
       [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
+    );
+
+    const expiresBy = useMemo(
+      () => eraSummaries && validityInterval && eraSlotDateTime(eraSummaries, validityInterval.invalidHereafter),
+      [eraSummaries, validityInterval]
     );
 
     const handleOpenExternalHashLink = () => {
@@ -114,6 +152,10 @@ export const TransactionDetailsProxy = withAddressBookContext(
         chainNetworkId={currentChain.networkId}
         cardanoCoin={cardanoCoin}
         explorerBaseUrl={explorerBaseUrl}
+        ownSharedKey={sharedWalletKey}
+        signPolicy={signPolicy}
+        cosigners={transactionCosigners}
+        expiresBy={expiresBy}
       />
     );
   }

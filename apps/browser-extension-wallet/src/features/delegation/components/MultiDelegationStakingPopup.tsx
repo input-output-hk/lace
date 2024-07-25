@@ -29,6 +29,7 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
 import { SignPolicy } from '@lace/core';
+import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -170,7 +171,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isSharedWallet,
         signPolicy,
         sharedWalletKey,
-        coSigners
+        coSigners,
+        eraSlotDateTime
       }}
     >
       <ContentLayout

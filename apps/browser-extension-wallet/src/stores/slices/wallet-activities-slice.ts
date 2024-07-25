@@ -245,7 +245,10 @@ const mapWalletActivities = memoize(
           setTransactionActivityDetail({
             activity: deserializedTx,
             direction: TxDirections.Outgoing,
-            status: ActivityStatus.PENDING,
+            status:
+              status === Wallet.TransactionStatus.AWAITING_COSIGNATURES
+                ? ActivityStatus.AWAITING_COSIGNATURES
+                : ActivityStatus.PENDING,
             type: transformedTx.type
           });
         }
@@ -257,7 +260,7 @@ const mapWalletActivities = memoize(
     const filterTransactionByAssetId = async (txs: Wallet.Cardano.HydratedTx[]) => {
       const txsWithType = await Promise.all(
         txs.map(async (tx) => {
-          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver, isSharedWallet });
+          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver });
           return { tx, type };
         })
       );

@@ -74,6 +74,7 @@ export const TransactionSuccessFooter = (): React.ReactElement => {
   const isInMemory = walletType === WalletType.InMemory;
 
   const closeDrawer = () => {
+    // TODO: open view cosigner drawer which is available only in the activities tab
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);
     setDelegationTxBuilder();
     portfolioMutators.executeCommand({ type: 'CancelDrawer' });

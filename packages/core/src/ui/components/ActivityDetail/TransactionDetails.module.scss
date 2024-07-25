@@ -13,19 +13,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
     padding: 0 0 size_unit(2) 0;
   }
 
-  .header {
-    color: var(--text-color-secondary, #878e9e);
-    @include text-body-medium;
-    margin-bottom: size_unit(9);
-
-    @media (max-width: $breakpoint-popup) {
-      font-size: var(--body, 16px);
-      font-weight: 400;
-      letter-spacing: -0.015em;
-      margin-bottom: size_unit(4);
-    }
-  }
-
   .block {
     border-bottom: $border-bottom;
 
@@ -268,5 +255,18 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
   line-height: 17px !important;
   @media (max-width: $breakpoint-popup) {
     flex: 60% !important;
+  }
+}
+
+.header {
+  color: var(--text-color-secondary, #878e9e);
+  @include text-body-medium;
+  margin-bottom: size_unit(9);
+
+  @media (max-width: $breakpoint-popup) {
+    font-size: var(--body, 16px);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin-bottom: size_unit(4);
   }
 }

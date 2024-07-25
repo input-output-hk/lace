@@ -1,3 +1,4 @@
+import { EraSummary } from '@cardano-sdk/core';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps, SignPolicy } from '@lace/core';
@@ -107,4 +108,8 @@ export type OutsideHandlesContextValue = {
   signPolicy: SignPolicy;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
   coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
+  eraSlotDateTime: (
+    eraSummaries: EraSummary[] | undefined,
+    slot: Wallet.Cardano.Slot | undefined
+  ) => { utcDate: string; utcTime: string } | undefined;
 };

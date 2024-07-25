@@ -9,7 +9,6 @@ import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
-import { ReactComponent as AwaitingSignatureIcon } from '../../assets/icons/awaiting-signatures.svg';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { DelegationActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
@@ -79,9 +78,8 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
     case ActivityStatus.SPENDABLE:
       return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
-      return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.AWAITING_COSIGNATURES:
-      return <Icon component={AwaitingSignatureIcon} style={iconStyle} data-testid="activity-status" />;
+      return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
@@ -93,8 +91,7 @@ const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
   DelegationActivityType.delegationRegistration,
   ConwayEraCertificatesTypes.Registration,
   TransactionActivityType.self,
-  DelegationActivityType.delegation,
-  TransactionActivityType.awaitingCosignatures
+  DelegationActivityType.delegation
 ]);
 
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
