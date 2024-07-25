@@ -1,11 +1,11 @@
 import { SimpleSectionsConfig } from '../../stores/sections-store';
 import { Sections } from './types';
 
-export const defaultOutputKey = 'output1';
-
-export const sectionsConfig: SimpleSectionsConfig<Sections> = {
-  [Sections.FORM]: {
-    currentSection: Sections.FORM,
+const makeSectionsConfig = (
+  entrySection: Sections.FORM | Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON
+): SimpleSectionsConfig<Sections> => ({
+  [entrySection]: {
+    currentSection: entrySection,
     nextSection: Sections.SUMMARY
   },
   [Sections.SUMMARY]: {
@@ -27,7 +27,11 @@ export const sectionsConfig: SimpleSectionsConfig<Sections> = {
     nextSection: Sections.FORM,
     prevSection: Sections.FORM
   }
-};
+});
+
+export const sectionsConfig = makeSectionsConfig(Sections.FORM);
+
+export const sharedWalletCoSignSectionsConfig = makeSectionsConfig(Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON);
 
 export const METADATA_MAX_LENGTH = 160;
 export const MAX_NFT_TICKER_LENGTH = 10;
