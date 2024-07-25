@@ -85,3 +85,44 @@ Feature: Wallet accounts
     Then "Accounts" menu is displayed
     And I click on back arrow button on "Accounts" menu
     And I see address for account: 0 and wallet "MultiAccActive1" on empty state banner
+
+  @LW-11052 @LW-9322 @LW-9323
+  Scenario: Popup View - Accounts menu - Disable button not displayed for active account
+    Given I click the menu button
+    When I click on chevron for wallet number 1
+    Then I do not see disable button: 1
+    And I see disable button: 2
+    And I see disable button: 3
+    And I see enable button: 4
+
+  @LW-11051
+  Scenario: Popup View - Accounts menu - Disable account modal displayed
+    Given I click the menu button
+    And I click on chevron for wallet number 1
+    When I click disable button: 2
+    Then I see Hold Up! account disable modal
+
+  @LW-11050
+  Scenario: Popup View - Accounts menu - Disable account modal cancel click
+    Given I click the menu button
+    And I click on chevron for wallet number 1
+    And I click disable button: 2
+    And I see Hold Up! account disable modal
+    When I click "Cancel" on Hold Up! account disable modal
+    Then I do not see Hold Up! account disable modal
+    And I see disable button: 2
+
+  @LW-11049
+  Scenario: Popup View - Accounts menu - Disable account
+    Given I click the menu button
+    And I click on chevron for wallet number 1
+    And I click disable button: 2
+    And I see Hold Up! account disable modal
+    When I click "Disable" on Hold Up! account disable modal
+    Then I do not see Hold Up! account disable modal
+    And I see enable button: 2
+    And I do not see disable button: 2
+    When I click account item: 2
+    Then "Accounts" menu is displayed
+    When I click enable button: 2
+    Then I see account unlock drawer with all elements in popup mode
