@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
-import React from 'react';
-import { DrawerContent } from '@src/views/browser-view/components/Drawer/DrawerUIContent';
+import React, { useCallback } from 'react';
+import { DrawerConfig, DrawerContent } from '@src/views/browser-view/components/Drawer/DrawerUIContent';
 import { Footer, HeaderNavigation, useHandleClose } from './components/SendTransactionDrawer';
 import { getTransactionSectionsHook, useAddressState, useCurrentRow, useMultipleSelection } from './store';
 import { Sections } from './types';
@@ -13,11 +13,13 @@ const FIRST_ROW = 'output1';
 type UseTransactionDrawerConfigParams = {
   content?: DrawerContent.SEND_TRANSACTION | DrawerContent.CO_SIGN_TRANSACTION;
   isPopupView?: boolean;
+  config?: Partial<DrawerConfig>;
 };
 
 export const useOpenTransactionDrawer = ({
   content = DrawerContent.SEND_TRANSACTION,
-  isPopupView = false
+  isPopupView = false,
+  config
 }: UseTransactionDrawerConfigParams = {}): (() => void) => {
   const [, setDrawerConfig] = useDrawer();
   const { onClose } = useHandleClose();
@@ -39,7 +41,7 @@ export const useOpenTransactionDrawer = ({
       Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON
     ].includes(currentSection) || shouldAssetPickerDisplayFooter;
 
-  return () => {
+  return useCallback(() => {
     setDrawerConfig({
       content,
       wrapperClassName: styles.drawer,
@@ -59,7 +61,19 @@ export const useOpenTransactionDrawer = ({
               />
             )
           }
-        : {})
+        : {}),
+      ...config
     });
-  };
+  }, [
+    config,
+    content,
+    currentSection,
+    isPopupView,
+    onClose,
+    row,
+    setAddressValue,
+    setDrawerConfig,
+    setSection,
+    shouldRenderFooter
+  ]);
 };

@@ -24,11 +24,11 @@ export const TransactionCTAs = ({
   const { t } = useTranslation();
   return (
     <div className={styles.buttonsContainer} data-testid="transaction-ctas-container">
-      <Button className={buttonClassName} block onClick={onReceiveClick} color="gradient" data-testid="send-button">
+      <Button className={buttonClassName} block onClick={onReceiveClick} color="gradient" data-testid="receive-button">
         <ArrowDiagonalUp className={classnames(styles.icon, !popupView && styles.iconInExpandedView)} />
         {t('core.transactionCtas.receive')}
       </Button>
-      <Button className={buttonClassName} block onClick={onSendClick} color="gradient" data-testid="receive-button">
+      <Button className={buttonClassName} block onClick={onSendClick} color="gradient" data-testid="send-button">
         <ArrowDiagonalDown className={classnames(styles.icon, !popupView && styles.iconInExpandedView)} />
         {t('core.transactionCtas.send')}
       </Button>
