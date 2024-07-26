@@ -25,8 +25,8 @@ export const DisableAccountConfirmation = ({
     <Dialog.Title>{title}</Dialog.Title>
     <Dialog.Description>{description}</Dialog.Description>
     <Dialog.Actions>
-      <Dialog.Action cancel label={cancel} onClick={onCancel} />
-      <Dialog.Action label={confirm} onClick={onConfirm} />
+      <Dialog.Action cancel label={cancel} onClick={onCancel} testId="dialog-action-cancel" />
+      <Dialog.Action label={confirm} onClick={onConfirm} testId="dialog-action-confirm" />
     </Dialog.Actions>
   </Dialog.Root>
 );
