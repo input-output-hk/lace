@@ -3,24 +3,20 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-    cardano-node = {
-      url = "github:input-output-hk/cardano-node/1.35.4";
-      inputs = {
-        cardano-node-workbench.follows = "";
-        node-measured.follows = "";
-        node-snapshot.follows = "";
-        node-process.follows = "";
-      };
-    };
+    flake-compat.url = "github:input-output-hk/flake-compat";
+    flake-compat.flake = false;
 
-    cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/@cardano-sdk/cardano-services@0.28.1";
+    cardano-node.url = "github:IntersectMBO/cardano-node/8.9.2";
+    cardano-node.flake = false; # prevent lockfile explosion
+
+    cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/@cardano-sdk/cardano-services@0.28.14";
     cardano-js-sdk.flake = false; # we patch it & to prevent lockfile explosion
 
-    # XXX: when updating Ogmios, make sure to update ogmios-CHaP below to the one they use:
-    ogmios.url = "github:CardanoSolutions/ogmios/v5.6.0";
+    ogmios.url = "github:CardanoSolutions/ogmios/v6.3.0";
     ogmios.flake = false;
-    ogmios-CHaP.url = "github:input-output-hk/cardano-haskell-packages/316e0a626fed1a928e659c7fc2577c7773770f7f";
-    ogmios-CHaP.flake = false;
+
+    cardano-node-for-building-ogmios.url = "github:IntersectMBO/cardano-node/8.10.1-pre";
+    cardano-node-for-building-ogmios.flake = false;
 
     mithril.url = "github:input-output-hk/mithril/2423.0";
 

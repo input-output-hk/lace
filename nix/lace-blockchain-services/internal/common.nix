@@ -6,7 +6,7 @@ let
   inherit (pkgs) lib;
 in rec {
 
-  flake-compat = import inputs.cardano-node.inputs.flake-compat;
+  flake-compat = import inputs.flake-compat;
 
   prettyName = "Lace Blockchain Services";
 
@@ -25,53 +25,36 @@ in rec {
     cp -r ${inputs.cardano-js-sdk}/packages/cardano-services/config/network/${network}/. $out/${network}
   '') selectedNetworks);
 
-  # XXX: they don’t enable aarch64-darwin builds yet:
-  cardanoNodeFlake = if targetSystem != "aarch64-darwin" then inputs.cardano-node else let
-    self = flake-compat {
-      src = {
-        outPath = toString (pkgs.runCommand "cardano-node-patched" {} ''
-          cp -r ${inputs.cardano-node} $out
-          chmod -R +w $out
-          echo '[ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ]' >$out/nix/supported-systems.nix
-        '');
-        inherit (inputs.cardano-node.sourceInfo) rev shortRev lastModified lastModifiedDate;
-      };
-    };
-  in self.defaultNix;
-
-  inherit (cardanoNodeFlake.legacyPackages.${buildSystem}) haskell-nix;
-
-  ogmiosCompiler = "ghc8107";
+  cardanoNodeFlake = (flake-compat { src = inputs.cardano-node; }).defaultNix;
 
   ogmiosPatched = {
     outPath = toString (pkgs.runCommand "ogmios-patched" {} ''
       cp -r ${inputs.ogmios} $out
       chmod -R +w $out
+      find $out -name cabal.project.freeze -delete -o -name package.yaml -delete
+      grep -RF -- -external-libsodium-vrf $out | cut -d: -f1 | sort --uniq | xargs -n1 -- sed -r s/-external-libsodium-vrf//g -i
       cd $out
+      patch -p1 -i ${./ogmios-6-3-0--missing-srp-hash.patch}
       patch -p1 -i ${./ogmios--on-windows.patch}
     '');
     inherit (inputs.ogmios.sourceInfo) rev shortRev lastModified lastModifiedDate;
   };
 
   ogmiosProject = let
-    theirDefaultNix = __readFile "${inputs.ogmios}/default.nix";
-  in
-    # XXX: make sure we're taking the correct CHaP revision & GHC that Ogmios builds against:
-    assert lib.hasInfix inputs.ogmios-CHaP.rev theirDefaultNix;
-    assert lib.hasInfix ogmiosCompiler theirDefaultNix;
-    haskell-nix.project {
-      compiler-nix-name = ogmiosCompiler;
-      projectFileName = "cabal.project";
-      inputMap = { "https://input-output-hk.github.io/cardano-haskell-packages" = inputs.ogmios-CHaP; };
-      src = haskell-nix.haskellLib.cleanSourceWith {
-        name = "ogmios-src";
-        src = ogmiosPatched;
-        subDir = "server";
-        filter = path: type: builtins.all (x: x) [
-          (baseNameOf path != "package.yaml")
-        ];
-      };
-    };
+    ogmiosNodeFlake = (flake-compat { src = inputs.cardano-node-for-building-ogmios; }).defaultNix;
+    inherit (ogmiosNodeFlake.legacyPackages.${buildSystem}) haskell-nix;
+  in haskell-nix.project {
+    compiler-nix-name = "ghc963";
+    projectFileName = "cabal.project";
+    inputMap = { "https://input-output-hk.github.io/cardano-haskell-packages" = ogmiosNodeFlake.inputs.CHaP; };
+    src = ogmiosPatched + "/server";
+    modules = [ ({ lib, pkgs, ... }: {
+      packages.cardano-crypto-praos.components.library.pkgconfig = lib.mkForce [ [ pkgs.libsodium-vrf ] ];
+      packages.cardano-crypto-class.components.library.pkgconfig = lib.mkForce [ ([ pkgs.libsodium-vrf pkgs.secp256k1 ]
+        ++ (if pkgs ? libblst then [pkgs.libblst] else [])) ];
+      packages.ogmios.components.library.preConfigure = "export GIT_SHA=${inputs.ogmios.rev}";
+    }) ];
+  };
 
   ogmios = {
     x86_64-linux = ogmiosProject.projectCross.musl64.hsPkgs.ogmios.components.exes.ogmios;
@@ -81,15 +64,15 @@ in rec {
   }.${targetSystem};
 
   cardano-node = {
-    x86_64-linux = cardanoNodeFlake.hydraJobs.linux.musl.cardano-node;
-    x86_64-windows = cardanoNodeFlake.hydraJobs.linux.windows.cardano-node;
+    x86_64-linux = cardanoNodeFlake.hydraJobs.x86_64-linux.musl.cardano-node;
+    x86_64-windows = cardanoNodeFlake.hydraJobs.x86_64-linux.windows.cardano-node;
     x86_64-darwin = cardanoNodeFlake.packages.x86_64-darwin.cardano-node;
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
   cardano-submit-api = {
-    x86_64-linux = cardanoNodeFlake.hydraJobs.linux.musl.cardano-submit-api;
-    x86_64-windows = cardanoNodeFlake.hydraJobs.linux.windows.cardano-submit-api;
+    x86_64-linux = cardanoNodeFlake.hydraJobs.x86_64-linux.musl.cardano-submit-api;
+    x86_64-windows = cardanoNodeFlake.hydraJobs.x86_64-linux.windows.cardano-submit-api;
     x86_64-darwin = cardanoNodeFlake.packages.x86_64-darwin.cardano-submit-api;
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-submit-api;
   }.${targetSystem};
@@ -114,8 +97,8 @@ in rec {
     const (
       LaceBlockchainServicesVersion = ${__toJSON laceVersion}
       LaceBlockchainServicesRevision = ${__toJSON (inputs.self.rev or "dirty")}
-      CardanoNodeVersion = ${__toJSON cardano-node.version}
-      CardanoNodeRevision = ${__toJSON inputs.cardano-node.sourceInfo.rev}
+      CardanoNodeVersion = ${__toJSON cardanoNodeFlake.project.${buildSystem}.hsPkgs.cardano-node.identifier.version}
+      CardanoNodeRevision = ${__toJSON inputs.cardano-node.rev}
       OgmiosVersion = ${__toJSON ogmios.version}
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
       PostgresVersion = ${__toJSON postgresPackage.version}

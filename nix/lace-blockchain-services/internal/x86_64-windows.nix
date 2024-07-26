@@ -283,7 +283,7 @@ in rec {
   };
 
   make-windows-installer = let
-    project = common.haskell-nix.project {
+    project = common.cardanoNodeFlake.legacyPackages.x86_64-linux.haskell-nix.project {
       compiler-nix-name = "ghc8107";
       projectFileName = "cabal.project";
       src = ./make-windows-installer;
@@ -402,7 +402,6 @@ in rec {
     ourPackage = theirPackage.overrideAttrs (drv: {
       name = "cardano-js-sdk";
       nativeBuildInputs = (drv.nativeBuildInputs or []) ++ [ pkgs.rsync ];
-      patches = (drv.patches or []) ++ [ ./cardano-js-sdk--windows-http.patch ];
       installPhase = ''
         mkdir $out
         rsync -Rah $(find . '(' '(' -type d -name 'dist' ')' -o -name 'package.json' ')' \
