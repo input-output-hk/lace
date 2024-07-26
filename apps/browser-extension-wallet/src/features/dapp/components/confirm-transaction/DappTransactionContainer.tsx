@@ -14,7 +14,8 @@ import {
   transactionSummaryInspector,
   Cardano,
   TokenTransferValue,
-  tokenTransferInspector
+  tokenTransferInspector,
+  Milliseconds
 } from '@cardano-sdk/core';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
@@ -30,6 +31,9 @@ import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 interface DappTransactionContainerProps {
   errorMessage?: string;
 }
+
+// eslint-disable-next-line no-magic-numbers
+const TIMEOUT = 6000 as Milliseconds;
 
 export const DappTransactionContainer = withAddressBookContext(
   ({ errorMessage }: DappTransactionContainerProps): React.ReactElement => {
@@ -106,7 +110,9 @@ export const DappTransactionContainer = withAddressBookContext(
               assetInfo$: inMemoryWallet.assetInfo$,
               tx,
               logger
-            })
+            }),
+            timeout: TIMEOUT,
+            logger: console
           }),
           summary: transactionSummaryInspector({
             addresses: userAddresses,
@@ -118,7 +124,9 @@ export const DappTransactionContainer = withAddressBookContext(
               assetInfo$: inMemoryWallet.assetInfo$,
               tx,
               logger
-            })
+            }),
+            timeout: TIMEOUT,
+            logger: console
           })
         });
 
