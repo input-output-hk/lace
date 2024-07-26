@@ -5,7 +5,7 @@ import CommonDrawerElements from '../CommonDrawerElements';
 class WalletAccountsUnlockDrawer extends CommonDrawerElements {
   private HEADLINE = '[data-testid="enable-account-headline"]';
   private DESCRIPTION = '[data-testid="enable-account-description"]';
-  private PASSWORD_FORM = '//div[@data-testid="enable-account-password-input"]';
+  private PASSWORD_FORM = '//div[@data-testid="enable-account-password"]';
   private PASSWORD_INPUT = `${this.PASSWORD_FORM}//form//input`;
   private PASSWORD_INPUT_PLACEHOLDER = `${this.PASSWORD_FORM}//label`;
   private PASSWORD_INPUT_BUTTON = `${this.PASSWORD_FORM}//form//button`;

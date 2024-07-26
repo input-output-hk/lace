@@ -6,6 +6,7 @@ import WalletAccountsMenuItem from '../elements/accounts/WalletAccountsMenuItem'
 import WalletAccountsUnlockDrawerAssert from '../assert/WalletAccountsUnlockDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import WalletAccountsUnlockDrawer from '../elements/accounts/WalletAccountsUnlockDrawer';
+import HoldUpDisableAccountDialog from '../elements/accounts/HoldUpDisableAccountDialog';
 
 When(/^I click on chevron for wallet number (\d)$/, async (walletIndex: number) => {
   await new WalletOption(walletIndex).clickOnAccountsMenuButton();
@@ -28,18 +29,22 @@ Then(/^each account item contains icon, logo and path$/, async () => {
 });
 
 When(
-  /^I (see|do not see|click) unlock button: (\d+)$/,
-  async (action: 'see' | 'do not see' | 'click', accountNumber: number) => {
+  /^I (see|do not see|click) "(enable|disable)" button: (\d+)$/,
+  async (action: 'see' | 'do not see' | 'click', expectedButton: 'enable' | 'disable', accountNumber: number) => {
     const accountItem = new WalletAccountsMenuItem(accountNumber);
+    const button = await (expectedButton === 'enable'
+      ? accountItem.accountEnableButton
+      : accountItem.accountDisableButton);
+
     switch (action) {
       case 'see':
-        await accountItem.accountEnableButton.waitForDisplayed();
+        await button.waitForDisplayed();
         break;
       case 'do not see':
-        await accountItem.accountEnableButton.waitForDisplayed({ reverse: true });
+        await button.waitForDisplayed({ reverse: true });
         break;
       case 'click':
-        await accountItem.accountEnableButton.click();
+        await button.click();
         break;
       default:
         throw new Error(`Unsupported action: ${action}`);
@@ -81,4 +86,14 @@ Then(/^I see wallet unlock error$/, async () => {
 
 Then(/^I see "Account #(\d+) activated" toast$/, async (accountNumber: number) => {
   await WalletAccountsUnlockDrawerAssert.assertSeeAccountActivatedToast(accountNumber);
+});
+
+Then(/^I (see|do not see) "Hold Up!" account disable modal$/, async (shouldSee: 'see' | 'do not see') => {
+  await WalletAccountsAssert.assertSeeHoldUpModal(shouldSee === 'see');
+});
+
+Then(/^I click "(Cancel|Disable)" on "Hold Up!" account disable modal$/, async (button: 'Cancel' | 'Disable') => {
+  await (button === 'Cancel'
+    ? HoldUpDisableAccountDialog.clickCancelButton()
+    : HoldUpDisableAccountDialog.clickConfirmButton());
 });
