@@ -135,7 +135,7 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-  smokeTestsRun:
+  smokeTests:
     name: Smoke tests run
     runs-on: ubuntu-22.04
     needs: build_extension
@@ -162,10 +162,10 @@ jobs:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: true
 
-  smokeTests:
-    name: Smoke tests
+  processReports:
+    name: Process smoke test reports
     runs-on: ubuntu-22.04
-    needs: smokeTestsRun
+    needs: smokeTests
     if: always()
     steps:
       - name: Download all smoke tests artifacts
@@ -216,7 +216,7 @@ jobs:
           retention-days: 5
 
       - run: |
-          if [[ ${{ needs.smokeTestsRun.result }} == "success" ]]; then
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
             exit 0
           else
             exit 1

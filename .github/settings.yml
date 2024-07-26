@@ -90,13 +90,11 @@ branches:
           - context: block-fixup
           - context: Prepare
           - context: Unit tests
-          - context: Smoke tests
+          - context: Process smoke test reports
           - context: >
             Run Chromatic check: Core
           - context: >
             Run Chromatic check: Staking
-          - context: >
-            Run Chromatic check: UI
       # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
       enforce_admins:
       # Prevent merge commits from being pushed to matching branches
