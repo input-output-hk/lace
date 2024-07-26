@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { Dialog } from '@input-output-hk/lace-ui-toolkit';
 import { SharedWalletsTranslationKey } from '@lace/translation';
 import React, { VFC } from 'react';
