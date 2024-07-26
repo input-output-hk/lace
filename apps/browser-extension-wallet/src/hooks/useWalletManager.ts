@@ -852,7 +852,7 @@ export const useWalletManager = (): UseWalletManager => {
             name: signer.name,
             sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
           })),
-          // TODO: multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
+          // TODO: LW-11069 multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
           multiSigExtendedPublicKey: sharedWalletKey
         },
         ownSigners: [
