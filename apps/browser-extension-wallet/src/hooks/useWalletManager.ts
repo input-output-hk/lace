@@ -852,11 +852,12 @@ export const useWalletManager = (): UseWalletManager => {
             name: signer.name,
             sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
           })),
+          // TODO: LW-11069 multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
           multiSigExtendedPublicKey: sharedWalletKey
         },
         ownSigners: [
           {
-            accountIndex: 0,
+            accountIndex,
             paymentScriptKeyPath,
             purpose: KeyManagement.KeyPurpose.MULTI_SIG,
             stakingScriptKeyPath,
@@ -869,6 +870,14 @@ export const useWalletManager = (): UseWalletManager => {
       };
 
       const scriptWalletId = await walletRepository.addWallet(createScriptWalletProps);
+
+      await walletRepository.addAccount({
+        accountIndex,
+        extendedAccountPublicKey: sharedWalletKey,
+        metadata: { name: defaultAccountName(accountIndex) },
+        purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+        walletId: ownSignerWalletId
+      });
 
       await walletManager.activate({
         walletId: scriptWalletId,
