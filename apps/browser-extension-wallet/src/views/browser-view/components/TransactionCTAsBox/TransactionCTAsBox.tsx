@@ -1,18 +1,26 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
-import { SendReceive } from '@lace/core';
+import { TransactionCTAs } from '@lace/core';
 import { DrawerContent } from '@views/browser/components/Drawer';
-import { DrawerNavigation, DrawerHeader } from '@lace/common';
+import { DrawerHeader, DrawerNavigation } from '@lace/common';
 import { useDrawer } from '../../stores';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext as useAnalytics } from '@providers/AnalyticsProvider';
-import styles from './SendReceiveBox.module.scss';
+import styles from './TransactionCTAsBox.module.scss';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { SendFlowTriggerPoints, useAnalyticsSendFlowTriggerPoint } from '../../features/send-transaction';
+import {
+  SendFlowTriggerPoints,
+  useAnalyticsSendFlowTriggerPoint,
+  useOpenTransactionDrawer
+} from '../../features/send-transaction';
+import { useWalletStore } from '@stores';
 
-export const SendReceiveBox = (): React.ReactElement => {
+export const TransactionCTAsBox = (): React.ReactElement => {
+  const { isSharedWallet } = useWalletStore();
   const analytics = useAnalytics();
   const [config, setDrawerConfig] = useDrawer();
+  const openSendTransactionDrawer = useOpenTransactionDrawer({ content: DrawerContent.SEND_TRANSACTION });
+  const openCoSignTransactionDrawer = useOpenTransactionDrawer({ content: DrawerContent.CO_SIGN_TRANSACTION });
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const { t } = useTranslation();
 
@@ -28,7 +36,7 @@ export const SendReceiveBox = (): React.ReactElement => {
       renderTitle: () => <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />,
       renderHeader: () => (
         <DrawerNavigation
-          title={<div>{t('core.sendReceive.receive')}</div>}
+          title={<div>{t('browserView.receiveDrawer.title')}</div>}
           onCloseIconClick={handleReceiveCloseIconClick}
         />
       )
@@ -39,22 +47,16 @@ export const SendReceiveBox = (): React.ReactElement => {
   const openSend = () => {
     // eslint-disable-next-line camelcase
     analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
-    setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION });
+    openSendTransactionDrawer();
     setTriggerPoint(SendFlowTriggerPoints.SEND_BUTTON);
   };
 
-  const sendReceiveTranslation = {
-    send: t('core.sendReceive.send'),
-    receive: t('core.sendReceive.receive')
-  };
-
   return (
-    <SendReceive
-      sharedClass={styles.btn}
-      isReversed
-      leftButtonOnClick={openSend}
-      rightButtonOnClick={openReceive}
-      translations={sendReceiveTranslation}
+    <TransactionCTAs
+      buttonClassName={styles.btn}
+      onSendClick={openSend}
+      onReceiveClick={openReceive}
+      onCoSignClick={isSharedWallet ? openCoSignTransactionDrawer : undefined}
     />
   );
 };

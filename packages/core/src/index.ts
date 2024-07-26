@@ -21,7 +21,7 @@ export * from '@ui/components/OutputSummary';
 export * from '@ui/components/OutputSummaryList';
 export * from '@ui/components/WalletSetup';
 export * from '@ui/components/ConnectedDapp';
-export * from '@ui/components/SendReceive';
+export * from '@ui/components/TransactionCTAs';
 export * from '@ui/components/DappInfo';
 export * from '@ui/components/AuthorizeDapp';
 export * from '@ui/components/AssetTable';

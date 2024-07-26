@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  SendTransaction,
+  Transaction,
   useCoinStateSelector,
   useAddressState,
   useSections,
@@ -76,7 +76,7 @@ export const Send = (): React.ReactElement => {
         }
         popupView
       >
-        <SendTransaction isPopupView />
+        <Transaction isPopupView />
       </Drawer>
     </>
   );

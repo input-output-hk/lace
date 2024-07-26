@@ -1,10 +1,9 @@
 @import '../../../ui/styles/theme.scss';
 @import '../../../../../common/src/ui/styles/theme.scss';
 
-@mixin buttonStyle {
+@mixin iconStyle {
   width: size_unit(2.5);
   height: size_unit(2.5);
-  color: $default-linear-gradient;
 }
 
 .buttonsContainer {
@@ -20,29 +19,14 @@
     text-align: center;
   }
 
-  .popupButton {
-    flex: 1;
-  }
+  .icon {
+    width: size_unit(2.5);
+    height: size_unit(2.5);
 
-  .iconArrowDown,
-  .iconArrowUp {
-    @include buttonStyle;
-
-    @media (max-width: $breakpoint-large) {
-      display: none;
+    .iconInExpandedView {
+      @media (max-width: $breakpoint-large) {
+        display: none;
+      }
     }
   }
-
-  .popupIconArrowDown,
-  .popupIconArrowUp {
-    @include buttonStyle;
-  }
-}
-
-.reversed {
-  flex-direction: row-reverse;
-}
-
-.popupContainer {
-  gap: size_unit(2);
 }
