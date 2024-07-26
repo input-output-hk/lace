@@ -32,7 +32,7 @@ export type OutputsMap = Map<string, CardanoOutput>;
 
 export interface BuiltTxData {
   totalMinimumCoins?: TxMinimumCoinQuantity;
-  tx?: Wallet.UnwitnessedTx;
+  tx?: Wallet.UnwitnessedTx | Wallet.KeyManagement.WitnessedTx;
   uiTx?: {
     hash: Wallet.Cardano.TransactionId;
     outputs: Set<Wallet.Cardano.TxOut & { handleResolution?: HandleResolution }>;
