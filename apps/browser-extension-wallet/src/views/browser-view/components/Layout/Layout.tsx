@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
 import debounce from 'lodash/debounce';
@@ -15,7 +15,6 @@ import styles from './Layout.module.scss';
 import { PinExtension } from '@views/browser/features/wallet-setup/components/PinExtension';
 import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
-import { useOpenTransactionDrawer } from '@views/browser/features/send-transaction';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,10 +32,6 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { walletState } = useWalletStore();
-  const openTransactionDrawer = useOpenTransactionDrawer({
-    content: DrawerContent.SEND_TRANSACTION,
-    config: { options: { isAdvancedFlow: true } }
-  });
 
   const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
   const [showMultiAddressModal] = useLocalStorage('showMultiAddressModal', true);
@@ -50,12 +45,11 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
         backgroundStorage.message?.data.section === BrowserViewSections.SEND_ADVANCED
       ) {
         await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
-        openTransactionDrawer();
-        setDrawerConfig();
+        setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION, options: { isAdvancedFlow: true } });
       }
     };
     openDrawer();
-  }, [backgroundServices, openTransactionDrawer, setDrawerConfig]);
+  }, [backgroundServices, setDrawerConfig]);
 
   useEffect(() => {
     const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {

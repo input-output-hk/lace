@@ -4,17 +4,16 @@ import { Wallet } from '@lace/cardano';
 import { HandleResolution } from '@cardano-sdk/core';
 
 export enum Sections {
-  FORM = 'FORM',
-  IMPORT_SHARED_WALLET_TRANSACTION_JSON = 'IMPORT_SHARED_WALLET_TRANSACTION_JSON',
-  SUMMARY = 'SUMMARY',
-  CONFIRMATION = 'CONFIRMATION',
-  SUCCESS_TX = 'SUCCESS_TX',
-  FAIL_TX = 'FAIL_TX',
-  UNAUTHORIZED_TX = 'UNAUTHORIZED_TX',
-  ADDRESS_LIST = 'ADDRESS_LIST',
-  ADDRESS_FORM = 'ADDRESS_FORM',
-  ASSET_PICKER = 'ASSET_PICKER',
-  ADDRESS_CHANGE = 'ADDRESS_CHANGE'
+  FORM = 'form',
+  SUMMARY = 'summary',
+  CONFIRMATION = 'confirmation',
+  SUCCESS_TX = 'success_tx',
+  FAIL_TX = 'fail_tx',
+  UNAUTHORIZED_TX = 'unauthorized_tx',
+  ADDRESS_LIST = 'address_list',
+  ADDRESS_FORM = 'address_form',
+  ASSET_PICKER = 'asset_picker',
+  ADDRESS_CHANGE = 'address_change'
 }
 
 export enum FormOptions {

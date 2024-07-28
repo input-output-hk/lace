@@ -14,12 +14,12 @@ class TopNavigationAssert {
 
   async assertSeeReceiveButton() {
     await MenuHeader.receiveButton.waitForDisplayed();
-    expect(await MenuHeader.receiveButton.getText()).to.equal(await t('core.transactionCtas.receive'));
+    expect(await MenuHeader.receiveButton.getText()).to.equal(await t('core.sendReceive.receive'));
   }
 
   async assertSeeSendButton() {
     await MenuHeader.sendButton.waitForDisplayed();
-    expect(await MenuHeader.sendButton.getText()).to.equal(await t('core.transactionCtas.send'));
+    expect(await MenuHeader.sendButton.getText()).to.equal(await t('core.sendReceive.send'));
   }
 
   async assertLogoPresent() {

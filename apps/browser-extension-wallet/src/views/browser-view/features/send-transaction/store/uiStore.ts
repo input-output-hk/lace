@@ -1,11 +1,12 @@
-import create, { UseStore } from 'zustand';
+import create from 'zustand';
 import { ASSET_COMPONENTS } from '@lace/core';
 import { FormOptions, Sections } from '../types';
-import { createSectionsStore, SectionsStore, useDrawer } from '@src/views/browser-view/stores';
-import { sectionsConfig, sharedWalletCoSignSectionsConfig } from '../constants';
-import { DrawerContent } from '@views/browser/components/Drawer';
+import { SectionsStore, createSectionsStore } from '@src/views/browser-view/stores';
+import { sectionsConfig } from '../constants';
 
 interface UIStore {
+  isDrawerVisible: boolean;
+  setIsDrawerVisible: (visibility: boolean) => void;
   isWarningModalVisible: boolean;
   formPickedOption: FormOptions;
   setFormType: (option: FormOptions) => void;
@@ -16,6 +17,7 @@ interface UIStore {
 }
 
 const initialState = {
+  isDrawerVisible: false,
   isWarningModalVisible: false,
   formPickedOption: FormOptions.SIMPLE
 };
@@ -24,6 +26,7 @@ const initialState = {
 
 const useStore = create<UIStore>((set) => ({
   ...initialState,
+  setIsDrawerVisible: (visibility: boolean) => set({ isDrawerVisible: visibility }),
   setWarnigModalVisibility: (visible: boolean) => set({ isWarningModalVisible: visible }),
   resetUiStates: () => set((state) => ({ ...state, ...initialState })),
   setFormType: (option) => set({ formPickedOption: option }),
@@ -32,53 +35,24 @@ const useStore = create<UIStore>((set) => ({
 
 // ====== Selectors ======
 
-const useSendTransactionSectionsStore = createSectionsStore<Sections>({
-  section: sectionsConfig[Sections.FORM],
+export const useDrawer = (): [UIStore['isDrawerVisible'], UIStore['setIsDrawerVisible']] =>
+  useStore((state) => [state.isDrawerVisible, state.setIsDrawerVisible]);
+
+const useSectionsStore = createSectionsStore<Sections>({
+  section: sectionsConfig.form,
   config: sectionsConfig
 });
 
-const useSharedWalletCoSignSectionsStore = createSectionsStore<Sections>({
-  section: sharedWalletCoSignSectionsConfig[Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON],
-  config: sharedWalletCoSignSectionsConfig
-});
-
-export type UseSections = () => Pick<
+export const useSections = (): Pick<
   SectionsStore<Sections>,
   'currentSection' | 'setPrevSection' | 'setSection' | 'resetSection'
->;
-
-const makeUseSections =
-  (store: UseStore<SectionsStore<Sections>>): UseSections =>
-  () =>
-    store(({ currentSection, setSection, setPrevSection, resetSection }) => ({
-      currentSection,
-      setSection,
-      setPrevSection,
-      resetSection
-    }));
-
-const useSendTransactionSections = makeUseSections(useSendTransactionSectionsStore);
-
-const useSharedWalletCoSignSections = makeUseSections(useSharedWalletCoSignSectionsStore);
-
-export const getTransactionSectionsHook = (drawerContent?: DrawerContent): UseSections => {
-  const hooksMap: Record<DrawerContent.SEND_TRANSACTION | DrawerContent.CO_SIGN_TRANSACTION, UseSections> = {
-    [DrawerContent.SEND_TRANSACTION]: useSendTransactionSections,
-    [DrawerContent.CO_SIGN_TRANSACTION]: useSharedWalletCoSignSections
-  };
-
-  return hooksMap[
-    drawerContent === DrawerContent.SEND_TRANSACTION || drawerContent === DrawerContent.CO_SIGN_TRANSACTION
-      ? drawerContent
-      : DrawerContent.SEND_TRANSACTION
-  ];
-};
-
-export const useSections: UseSections = () => {
-  const [config] = useDrawer();
-  const useTransactionSections = getTransactionSectionsHook(config?.content);
-  return useTransactionSections();
-};
+> =>
+  useSectionsStore(({ currentSection, setSection, setPrevSection, resetSection }) => ({
+    currentSection,
+    setSection,
+    setPrevSection,
+    resetSection
+  }));
 
 export const useWarningModal = (): [UIStore['isWarningModalVisible'], UIStore['setWarnigModalVisibility']] =>
   useStore((state) => [state.isWarningModalVisible, state.setWarnigModalVisibility]);
