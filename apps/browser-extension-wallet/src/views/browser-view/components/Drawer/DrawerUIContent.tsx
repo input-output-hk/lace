@@ -27,9 +27,9 @@ export interface DrawerConfig {
 const renderDrawerContent = (content?: DrawerContent) => {
   switch (content) {
     case DrawerContent.SEND_TRANSACTION:
-      return <Transaction />;
+      return <Transaction flow="send" />;
     case DrawerContent.CO_SIGN_TRANSACTION:
-      return <Transaction />;
+      return <Transaction flow="co-sign" />;
     case DrawerContent.RECEIVE_TRANSACTION:
       return <QRInfoWalletDrawer />;
     case DrawerContent.SHOW_USED_ADDRESSES:

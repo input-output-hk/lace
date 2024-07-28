@@ -22,17 +22,17 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import { useCustomSubmitApi, useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { AddressBookSchema } from '@lib/storage';
 import { useWalletStore } from '@stores';
-import { DrawerContent } from '@views/browser/components/Drawer';
 import { ImportSharedWalletTransaction } from './ImportSharedWalletTransaction';
 
 interface SendTransactionProps {
+  flow: 'send' | 'co-sign';
   isPopupView?: boolean;
   scrollableTargetId?: string;
   scrollableContainerRef?: React.RefObject<HTMLElement>;
 }
 
 export const Transaction = withAddressBookContext(
-  ({ isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
+  ({ flow, isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
     const { currentSection: section, setPrevSection } = useSections();
     const [config, clearContent] = useDrawer();
     const { list: addressList } = useAddressBookContext();
@@ -60,10 +60,10 @@ export const Transaction = withAddressBookContext(
     }, [section.currentSection, scrollableContainerRef]);
 
     const sectionMap: Record<Sections, React.ReactElement> = {
-      ...(config.content === DrawerContent.SEND_TRANSACTION && {
+      ...(flow === 'send' && {
         [Sections.FORM]: <TransactionForm isPopupView={isPopupView} />
       }),
-      ...(config.content === DrawerContent.CO_SIGN_TRANSACTION && {
+      ...(flow === 'co-sign' && {
         [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: <ImportSharedWalletTransaction />
       }),
       [Sections.SUMMARY]: <SendTransactionSummary isPopupView={isPopupView} />,
