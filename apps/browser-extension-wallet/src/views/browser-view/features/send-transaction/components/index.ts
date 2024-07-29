@@ -1,1 +1,1 @@
-export * from './SendTransaction';
+export * from './Transaction';

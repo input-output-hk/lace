@@ -22,15 +22,17 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import { useCustomSubmitApi, useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { AddressBookSchema } from '@lib/storage';
 import { useWalletStore } from '@stores';
+import { ImportSharedWalletTransaction } from './ImportSharedWalletTransaction';
 
 interface SendTransactionProps {
+  flow: 'send' | 'co-sign';
   isPopupView?: boolean;
   scrollableTargetId?: string;
   scrollableContainerRef?: React.RefObject<HTMLElement>;
 }
 
-export const SendTransaction = withAddressBookContext(
-  ({ isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
+export const Transaction = withAddressBookContext(
+  ({ flow, isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
     const { currentSection: section, setPrevSection } = useSections();
     const [config, clearContent] = useDrawer();
     const { list: addressList } = useAddressBookContext();
@@ -57,9 +59,13 @@ export const SendTransaction = withAddressBookContext(
       }
     }, [section.currentSection, scrollableContainerRef]);
 
-    // TODO: move isPopupView to store, jira ticket need to be added https://input-output.atlassian.net/browse/LW-5296
     const sectionMap: Record<Sections, React.ReactElement> = {
-      [Sections.FORM]: <TransactionForm isPopupView={isPopupView} />,
+      ...(flow === 'send' && {
+        [Sections.FORM]: <TransactionForm isPopupView={isPopupView} />
+      }),
+      ...(flow === 'co-sign' && {
+        [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: <ImportSharedWalletTransaction />
+      }),
       [Sections.SUMMARY]: <SendTransactionSummary isPopupView={isPopupView} />,
       [Sections.CONFIRMATION]: <ConfirmPassword />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,
