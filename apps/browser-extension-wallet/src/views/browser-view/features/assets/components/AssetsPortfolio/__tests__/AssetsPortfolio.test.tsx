@@ -162,6 +162,6 @@ describe('AssetsPortfolio', () => {
         portfolioTotalBalance="300"
       />
     );
-    expect(queryByTestId('transaction-ctas-container')).toBeInTheDocument();
+    expect(queryByTestId('send-receive-container')).toBeInTheDocument();
   });
 });

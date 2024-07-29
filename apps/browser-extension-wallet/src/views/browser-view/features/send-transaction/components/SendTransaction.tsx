@@ -22,8 +22,6 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import { useCustomSubmitApi, useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { AddressBookSchema } from '@lib/storage';
 import { useWalletStore } from '@stores';
-import { DrawerContent } from '@views/browser/components/Drawer';
-import { ImportSharedWalletTransaction } from './ImportSharedWalletTransaction';
 
 interface SendTransactionProps {
   isPopupView?: boolean;
@@ -31,7 +29,7 @@ interface SendTransactionProps {
   scrollableContainerRef?: React.RefObject<HTMLElement>;
 }
 
-export const Transaction = withAddressBookContext(
+export const SendTransaction = withAddressBookContext(
   ({ isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
     const { currentSection: section, setPrevSection } = useSections();
     const [config, clearContent] = useDrawer();
@@ -59,13 +57,9 @@ export const Transaction = withAddressBookContext(
       }
     }, [section.currentSection, scrollableContainerRef]);
 
+    // TODO: move isPopupView to store, jira ticket need to be added https://input-output.atlassian.net/browse/LW-5296
     const sectionMap: Record<Sections, React.ReactElement> = {
-      ...(config.content === DrawerContent.SEND_TRANSACTION && {
-        [Sections.FORM]: <TransactionForm isPopupView={isPopupView} />
-      }),
-      ...(config.content === DrawerContent.CO_SIGN_TRANSACTION && {
-        [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: <ImportSharedWalletTransaction />
-      }),
+      [Sections.FORM]: <TransactionForm isPopupView={isPopupView} />,
       [Sections.SUMMARY]: <SendTransactionSummary isPopupView={isPopupView} />,
       [Sections.CONFIRMATION]: <ConfirmPassword />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,

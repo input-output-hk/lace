@@ -2,7 +2,7 @@ import { Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IRow, TransactionCTAs } from '@lace/core';
+import { IRow, SendReceive } from '@lace/core';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { APP_MODE_POPUP, AppMode } from '@src/utils/constants';
 import { compactNumberWithUnit } from '@src/utils/format-number';
@@ -114,11 +114,16 @@ export const AssetsPortfolio = ({
         />
       </div>
       {isPopupView && portfolioBalanceAsBigNumber.gt(0) && (
-        <TransactionCTAs
-          onSendClick={openSend}
-          onReceiveClick={handleRedirectToReceive}
+        <SendReceive
+          leftButtonOnClick={openSend}
+          rightButtonOnClick={handleRedirectToReceive}
+          isReversed
           popupView
-          buttonClassName={styles.testPopupClass}
+          sharedClass={styles.testPopupClass}
+          translations={{
+            send: t('core.sendReceive.send'),
+            receive: t('core.sendReceive.receive')
+          }}
         />
       )}
       {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && isMainnet && (

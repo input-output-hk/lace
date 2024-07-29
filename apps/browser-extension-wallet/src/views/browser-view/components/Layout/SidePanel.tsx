@@ -4,7 +4,7 @@ import IntersectionObserver from 'intersection-observer-polyfill';
 import classnames from 'classnames';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { DropdownMenu } from '@components/DropdownMenu';
-import { TransactionCTAsBox } from '../TransactionCTAsBox';
+import { SendReceiveBox } from '../SendReceiveBox';
 import styles from './SectionLayout.modules.scss';
 import { SidePanelButton } from '../SidePanelButton/SidePanelButton';
 import { CollapsiblePanelContainer } from '../CollapsiblePanelContainer/CollapsiblePanelContainer';
@@ -64,7 +64,7 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
         [styles.navigationBoxFlexible]: process.env.USE_MULTI_WALLET === 'true'
       })}
     >
-      <TransactionCTAsBox />
+      <SendReceiveBox />
       <DropdownMenu />
       {isScreenTooSmallForSidePanel && <SidePanelButton active={isPanelVisible} onClick={toggleSidePanelVisibility} />}
     </div>

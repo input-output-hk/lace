@@ -45,7 +45,6 @@ import { exportMultisigTransaction } from '@lace/core';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
-  [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: 'browserView.transaction.send.footer.review',
   [Sections.SUMMARY]: 'browserView.transaction.send.footer.confirm',
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',
   [Sections.SUCCESS_TX]: 'browserView.transaction.send.footer.viewTransaction',
@@ -265,7 +264,7 @@ export const Footer = withAddressBookContext(
         }
         case txHasFailed: {
           setSubmitingTxState({ isPasswordValid: true });
-          return setSection(sectionsConfig[Sections.FORM]);
+          return setSection(sectionsConfig.form);
         }
         default: {
           return setSection();

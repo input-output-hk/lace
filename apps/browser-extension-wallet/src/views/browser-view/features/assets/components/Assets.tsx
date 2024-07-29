@@ -1,13 +1,14 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import isNil from 'lodash/isNil';
 import { AssetTableProps } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { useCurrencyStore } from '@providers/currency';
-import { assetTransformer, cardanoTransformer } from '@src/utils/assets-transformers';
-import { Layout, SectionLayout, TopUpWalletCard } from '@src/views/browser-view/components';
+import { cardanoTransformer, assetTransformer } from '@src/utils/assets-transformers';
+import { SectionLayout, Layout, TopUpWalletCard } from '@src/views/browser-view/components';
+import { useDrawer } from '@src/views/browser-view/stores';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { walletRoutePaths } from '@routes';
 import { APP_MODE_POPUP } from '@src/utils/constants';
@@ -17,10 +18,9 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
 import {
   SendFlowAnalyticsProperties,
-  SendFlowTriggerPoints,
-  useAnalyticsSendFlowTriggerPoint,
   useCoinStateSelector,
-  useOpenTransactionDrawer
+  useAnalyticsSendFlowTriggerPoint,
+  SendFlowTriggerPoints
 } from '../../send-transaction';
 import { getTotalWalletBalance, sortAssets } from '../utils';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
@@ -44,7 +44,7 @@ interface AssetsProps {
 // eslint-disable-next-line max-statements
 export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
-  const openTransactionDrawer = useOpenTransactionDrawer({ content: DrawerContent.SEND_TRANSACTION });
+  const [, setSendDrawerVisibility] = useDrawer();
   const { priceResult, status: fetchPriceStatus } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
   const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
@@ -226,7 +226,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       redirectToSend({ params: { id } });
     } else {
       setAssetDetails();
-      openTransactionDrawer();
+      setSendDrawerVisibility({ content: DrawerContent.SEND_TRANSACTION });
     }
   };
 
