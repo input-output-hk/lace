@@ -1,6 +1,7 @@
 import {
   ActivityStatus,
   CoSignersListItem,
+  exportMultisigTransaction,
   hasSigned,
   SharedWalletTransactionDetails,
   SignPolicy,
@@ -13,6 +14,7 @@ import { useSharedWalletData } from '@hooks';
 import { AddressListType, getTransactionData } from '@views/browser/features/activity';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { TransactionActivityDetail, TxDirection, TxDirections } from '@types';
+import { Serialization } from '@cardano-sdk/core';
 
 interface SharedWalletTransactionDetailsProxyProps {
   amountTransformer: (amount: string) => string;
@@ -49,7 +51,8 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
     const {
       walletUI: { cardanoCoin },
       walletInfo,
-      activityDetail
+      activityDetail,
+      currentChain
     } = useWalletStore();
     const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
     const [signPolicy, setSignPolicy] = useState<SignPolicy>();
@@ -95,6 +98,11 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
       [addressToNameMap, amountTransformer, cardanoCoin, txSummary]
     );
 
+    const onExportTransaction = async () => {
+      const cbor = Serialization.Transaction.fromCore(activityDetail.activity as Wallet.Cardano.Tx).toCbor();
+      await exportMultisigTransaction(cbor, sharedWalletKey, currentChain);
+    };
+
     return (
       <SharedWalletTransactionDetails
         amountTransformer={amountTransformer}
@@ -109,6 +117,7 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
         }}
         status={ActivityStatus.AWAITING_COSIGNATURES}
         txInitiator={sharedWalletKey}
+        onExportTransaction={onExportTransaction}
       />
     );
   }
