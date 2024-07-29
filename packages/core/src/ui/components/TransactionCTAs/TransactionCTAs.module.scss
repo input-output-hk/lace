@@ -9,6 +9,7 @@
 .buttonsContainer {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: size_unit(2);
   flex: 1;
 

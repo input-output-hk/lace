@@ -7,7 +7,6 @@ import { toast } from '@lace/common';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useTheme } from '@providers/ThemeProvider';
 import { BrowserViewSections, ChangeThemeData, Message, MessageTypes } from '@lib/scripts/types';
-import { useDrawer } from '../../stores';
 import { DrawerContent, DrawerUIContainer } from '../Drawer';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { LeftSidePanel } from '../LeftSidePanel';
@@ -29,7 +28,6 @@ const PIN_EXTENSION_TIMEOUT = 5000;
 
 export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: LayoutProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [, setDrawerConfig] = useDrawer();
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { walletState } = useWalletStore();
@@ -51,11 +49,10 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
       ) {
         await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         openTransactionDrawer();
-        setDrawerConfig();
       }
     };
     openDrawer();
-  }, [backgroundServices, openTransactionDrawer, setDrawerConfig]);
+  }, [backgroundServices, openTransactionDrawer]);
 
   useEffect(() => {
     const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
