@@ -61,6 +61,9 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
 
     useEffect(() => {
       (async () => {
+        if (!coSigners) {
+          return;
+        }
         const policy = await getSignPolicy('payment');
         setSignPolicy(policy);
 
