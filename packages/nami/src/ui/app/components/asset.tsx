@@ -8,12 +8,12 @@ import {
   Collapse,
 } from '@chakra-ui/react';
 import { useStoreActions, useStoreState } from '../../store';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import Copy from './copy';
 import UnitDisplay from './unitDisplay';
 import { useHistory } from 'react-router-dom';
 import { BsArrowUpRight } from 'react-icons/bs';
-import { getAsset } from '../../../api/extension';
+import { AssetInput } from '../../../types/assets';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -24,51 +24,29 @@ const useIsMounted = () => {
   return isMounted;
 };
 
-const Asset = ({ asset, enableSend, ...props }) => {
-  const isMounted = useIsMounted();
-  const [token, setToken] = React.useState(null);
+type Props = PropsWithChildren<{
+  asset: AssetInput;
+  enableSend: boolean;
+  background: string;
+  color: string;
+}>;
+
+const Asset = ({ asset, enableSend, ...props }: Props) => {
   const background = useColorModeValue('gray.100', 'gray.700');
   const color = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   const [show, setShow] = React.useState(false);
   const [value, setValue] = [
-    useStoreState((state) => state.globalModel.sendStore.value),
-    useStoreActions((actions) => actions.globalModel.sendStore.setValue),
+    useStoreState(state => state.globalModel.sendStore.value),
+    useStoreActions(actions => actions.globalModel.sendStore.setValue),
   ];
   const history = useHistory();
   const navigate = history.push;
-  const settings = useStoreState((state) => state.settings.settings);
+  const settings = useStoreState(state => state.settings.settings);
 
-  const fetchMetadata = async () => {
-    let detailedConstructedAsset;
+  const displayName = asset.unit === 'lovelace' ? 'Ada' : asset.displayName;
+  const decimals = asset.unit === 'lovelace' ? 6 : asset.decimals;
 
-    if (asset.unit !== 'lovelace') {
-      detailedConstructedAsset = await getAsset(asset.unit);
-    }
-
-    const detailedAsset =
-      asset.unit === 'lovelace'
-        ? {
-            ...asset,
-            displayName: 'Ada',
-            decimals: 6,
-          }
-        : {
-            ...detailedConstructedAsset,
-            quantity: asset.quantity,
-            input: asset.input,
-            fingerprint:
-              asset.fingerprint ?? detailedConstructedAsset.fingerprint,
-          };
-    if (!isMounted.current) return;
-    setToken(detailedAsset);
-  };
-
-  React.useEffect(() => {
-    fetchMetadata();
-  }, [asset]);
-  return !token ? (
-    <Skeleton width="90%" height="70px" rounded="xl" />
-  ) : (
+  return (
     <Box
       data-testid="asset"
       display="flex"
@@ -77,7 +55,7 @@ const Asset = ({ asset, enableSend, ...props }) => {
       rounded="xl"
       background={background}
       color={color}
-      onClick={() => token.unit !== 'lovelace' && setShow(!show)}
+      onClick={() => asset.unit !== 'lovelace' && setShow(!show)}
       cursor="pointer"
       overflow="hidden"
     >
@@ -93,10 +71,10 @@ const Asset = ({ asset, enableSend, ...props }) => {
             <Image
               draggable={false}
               width="full"
-              src={token.image}
+              src={asset.image}
               fallback={
-                !token.image ? (
-                  token.unit === 'lovelace' ? (
+                !asset.image ? (
+                  asset.unit === 'lovelace' ? (
                     <Box
                       width={'full'}
                       height={'full'}
@@ -108,13 +86,18 @@ const Asset = ({ asset, enableSend, ...props }) => {
                       fontSize={'xl'}
                       fontWeight={'normal'}
                     >
-                      {settings.adaSymbol}
+                      {settings?.adaSymbol}
                     </Box>
                   ) : (
-                    <Avatar fontWeight={'normal'} width="full" height="full" name={token.name} />
+                    <Avatar
+                      fontWeight={'normal'}
+                      width="full"
+                      height="full"
+                      name={asset.name}
+                    />
                   )
                 ) : (
-                  <Fallback name={token.name} />
+                  <Fallback name={asset.name} />
                 )
               }
             />
@@ -128,7 +111,7 @@ const Asset = ({ asset, enableSend, ...props }) => {
             overflow="hidden"
             fontSize={12}
           >
-            {token.displayName}
+            {displayName}
           </Box>
           <Box w={4} />
           <Box
@@ -140,10 +123,7 @@ const Asset = ({ asset, enableSend, ...props }) => {
             rounded={'xl'}
             fontSize={12}
           >
-            <UnitDisplay
-              quantity={token.quantity}
-              decimals={token.decimals ? token.decimals : 0}
-            />
+            <UnitDisplay quantity={asset.quantity} decimals={decimals ?? 0} />
           </Box>
         </Box>
         <Box h={4} />
@@ -151,9 +131,9 @@ const Asset = ({ asset, enableSend, ...props }) => {
           <Box width="140px" fontWeight="bold" fontSize={12}>
             Policy
           </Box>
-          <Box fontSize={10} width="340px" onClick={(e) => e.stopPropagation()}>
-            <Copy label="Copied policy" copy={token.policy}>
-              {token.policy}
+          <Box fontSize={10} width="340px" onClick={e => e.stopPropagation()}>
+            <Copy label="Copied policy" copy={asset.policy}>
+              {asset.policy}
             </Copy>
           </Box>
         </Box>
@@ -162,9 +142,9 @@ const Asset = ({ asset, enableSend, ...props }) => {
           <Box width="140px" fontWeight="bold" fontSize={12}>
             Asset
           </Box>
-          <Box fontSize={10} width="340px" onClick={(e) => e.stopPropagation()}>
-            <Copy label="Copied asset" copy={token.fingerprint}>
-              {token.fingerprint}
+          <Box fontSize={10} width="340px" onClick={e => e.stopPropagation()}>
+            <Copy label="Copied asset" copy={asset.fingerprint}>
+              {asset.fingerprint}
             </Copy>
           </Box>
         </Box>
@@ -178,7 +158,7 @@ const Asset = ({ asset, enableSend, ...props }) => {
                 background={background == 'gray.100' ? 'gray.200' : 'gray.600'}
                 size="xs"
                 rightIcon={<BsArrowUpRight />}
-                onClick={(e) => {
+                onClick={e => {
                   setValue({ ...value, assets: [asset] });
                   navigate('/send');
                 }}

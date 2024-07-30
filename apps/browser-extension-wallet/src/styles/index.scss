@@ -11,6 +11,15 @@
   }
 }
 
+#lace-popup-body:has(#nami-mode) {
+  max-width: 400px;
+  min-width: 400px;
+}
+
+#lace-popup:has(#nami-mode) {
+  width: 400px;
+}
+
 // TODO: confirm if we need to animate the transition between modes
 // $color-related-props: background-color, background, border, border-bottom-color, border-color, border-left-color,
 //   border-right-color, border-top-color, box-shadow, color, column-rule, column-rule-color, filter, opacity,

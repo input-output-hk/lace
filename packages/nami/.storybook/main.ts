@@ -67,7 +67,18 @@ const config: StorybookConfig = {
         ),
         new NormalModuleReplacementPlugin(
           /signTxUtil$/,
-          join(__dirname, '../src/ui/app/pages/dapp-connector/signTxUtil.mock.ts'),
+          join(
+            __dirname,
+            '../src/ui/app/pages/dapp-connector/signTxUtil.mock.ts',
+          ),
+        ),
+        new NormalModuleReplacementPlugin(
+          /@cardano-sdk/,
+          join(__dirname, './mocks/cardano-sdk.mock.ts'),
+        ),
+        new NormalModuleReplacementPlugin(
+          /@lace\/cardano$/,
+          join(__dirname, './mocks/lace-cardano.mock.ts'),
         ),
       );
     }

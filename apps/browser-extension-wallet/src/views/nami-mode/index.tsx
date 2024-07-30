@@ -7,6 +7,8 @@ import { useObservable } from '@lace/common';
 import { useCurrencyStore } from '@providers';
 import { useAppInit, useFetchCoinPrice } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import './index.scss';
 
 export const NamiPopup = (): React.ReactElement => {
   const {
@@ -15,7 +17,8 @@ export const NamiPopup = (): React.ReactElement => {
     walletInfo,
     cardanoWallet,
     walletState,
-    initialHdDiscoveryCompleted
+    initialHdDiscoveryCompleted,
+    currentChain
   } = useWalletStore();
 
   useAppInit();
@@ -42,13 +45,24 @@ export const NamiPopup = (): React.ReactElement => {
     [cardanoCoin, fiatCurrency?.code, priceResult?.cardano, utxoTotal, rewards]
   );
 
-  if (!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted) {
-    return (
-      <OutsideHandlesProvider {...{ transformedCardano, walletAddress, fullWalletName }}>
-        <Nami />
-      </OutsideHandlesProvider>
-    );
-  }
-
-  return <MainLoader />;
+  return (
+    <div id="nami-mode">
+      {!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain ? (
+        <OutsideHandlesProvider
+          {...{
+            transformedCardano,
+            walletAddress,
+            fullWalletName,
+            inMemoryWallet,
+            currentChain,
+            withSignTxConfirmation
+          }}
+        >
+          <Nami />
+        </OutsideHandlesProvider>
+      ) : (
+        <MainLoader />
+      )}
+    </div>
+  );
 };

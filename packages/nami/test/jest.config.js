@@ -1,22 +1,14 @@
-const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('../tsconfig.json');
-const { createJestConfig } = require('../../../test/createJestConfig');
-
-module.exports = createJestConfig({
-  moduleNameMapper: {
-    '.*\\.(scss|sass|css|less)$': '<rootDir>/test/__mocks__/styleMock.js',
-    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2)$':
-      '<rootDir>/test/__mocks__/fileMock.js',
-    '^[.]*(?!.*\\.component\\.svg$).*\\.svg*$':
-      '<rootDir>/test/__mocks__/fileMock.js',
-    'component\\.svg(\\?v=\\d+\\.d+\\.\\d+)?$':
-      '<rootDir>/test/__mocks__/svgMock.js',
-    ...pathsToModuleNameMapper(compilerOptions.paths, {
-      prefix: '<rootDir>/src',
-    }),
+const rootDir = process.cwd();
+module.exports = {
+  preset: 'ts-jest',
+  rootDir: process.cwd(),
+  transform: {
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        diagnostics: false,
+        tsconfig: `${rootDir}/src/tsconfig.json`,
+      },
+    ],
   },
-  roots: ['<rootDir>/src'],
-  testTimeout: 60000,
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
-});
+};

@@ -5,13 +5,8 @@ import {
   displayUnit,
   getAccounts,
   getAdaHandle,
-  getAsset,
   getCurrentAccount,
-  getMilkomedaData,
-  getNetwork,
-  getUtxos,
   isValidAddress,
-  isValidEthAddress,
   toUnit,
   updateRecentSentToAddress,
 } from '../../../api/extension';
@@ -22,7 +17,6 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   CloseIcon,
-  InfoOutlineIcon,
   SmallCloseIcon,
 } from '@chakra-ui/icons';
 import {
@@ -44,7 +38,6 @@ import {
   InputRightElement,
   InputLeftElement,
   Spinner,
-  Tooltip,
   useColorModeValue,
   useToast,
   Icon,
@@ -53,21 +46,14 @@ import MiddleEllipsis from 'react-middle-ellipsis';
 import UnitDisplay from '../components/unitDisplay';
 import {
   buildTx,
-  initTx,
   signAndSubmit,
   signAndSubmitHW,
 } from '../../../api/extension/wallet';
-import {
-  sumUtxos,
-  valueToAssets,
-  assetsToValue,
-  minAdaRequired,
-} from '../../../api/util';
+import { assetsToValue, minAdaRequired } from '../../../api/util';
 import { FixedSizeList as List } from 'react-window';
 import AssetBadge from '../components/assetBadge';
 import { ERROR, HW, TAB } from '../../../config/config';
 import { Planet } from 'react-kawaii';
-import { Loader } from '../../../api/loader';
 import { useStoreActions, useStoreState } from '../../store';
 import { action } from 'easy-peasy';
 import AvatarLoader from '../components/avatarLoader';
@@ -80,6 +66,19 @@ import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 import debouncePromise from 'debounce-promise';
 import latest from 'promise-latest';
+import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
+import { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
+import type { Wallet } from '@lace/cardano';
+import { useObservable } from '@lace/common';
+import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
+import { toAsset, withHandleInfo } from '../../../adapters/assets';
+import type { Asset } from '../../../types/assets';
+import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+
+type Props = Pick<
+  OutsideHandlesContextValue,
+  'currentChain' | 'inMemoryWallet' | 'walletAddress' | 'withSignTxConfirmation'
+>;
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -95,14 +94,11 @@ let timer = null;
 const initialState = {
   fee: { fee: '0' },
   value: { ada: '', assets: [], personalAda: '', minAda: '0' },
-  address: { result: '', display: '' },
+  address: { result: '', display: '', error: '' },
   message: '',
   tx: null,
   txInfo: {
-    protocolParameters: null,
-    utxos: [],
-    balance: { lovelace: '0', assets: null },
-    milkomedaAddress: '',
+    minUtxo: 0,
   },
 };
 
@@ -136,7 +132,12 @@ export const sendStore = {
   }),
 };
 
-const Send = () => {
+const Send = ({
+  inMemoryWallet,
+  walletAddress,
+  currentChain,
+  withSignTxConfirmation,
+}: Props) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
   const settings = useStoreState(state => state.settings.settings);
@@ -156,6 +157,7 @@ const Send = () => {
     useStoreState(state => state.globalModel.sendStore.txInfo),
     useStoreActions(actions => actions.globalModel.sendStore.setTxInfo),
   ];
+
   const [fee, setFee] = [
     useStoreState(state => state.globalModel.sendStore.fee),
     useStoreActions(actions => actions.globalModel.sendStore.setFee),
@@ -171,7 +173,6 @@ const Send = () => {
     setTxUpdate(update => !update);
   };
 
-  const utxos = React.useRef(null);
   const assets = React.useRef({});
   const account = React.useRef(null);
   const resetState = useStoreActions(
@@ -186,21 +187,37 @@ const Send = () => {
   const background = useColorModeValue('gray.100', 'gray.600');
   const containerBg = useColorModeValue('white', 'gray.800');
 
-  const network = React.useRef();
   const assetsModalRef = React.useRef();
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
+  const utxoTotal = useObservable(inMemoryWallet?.balance.utxo.total$);
+  const assetsInfo = withHandleInfo(
+    useObservable(inMemoryWallet.assetInfo$),
+    useObservable(inMemoryWallet.handles$),
+  );
+  const rewards = useObservable(
+    inMemoryWallet?.balance.rewardAccounts.rewards$,
+  );
 
-  const prepareTx = async (count, data) => {
+  const paymentKeyHash = Ed25519KeyHashHex(
+    Cardano.Address.fromBech32(walletAddress).asBase()!.getPaymentCredential()
+      .hash,
+  );
+
+  const walletAssets = Array.from(utxoTotal?.assets || [])
+    .filter(([assetId]) => assetsInfo.has(assetId))
+    .map(([assetId, quantity]) => toAsset(assetsInfo.get(assetId)!, quantity));
+
+  const prepareTx = async (
+    _,
+    data: {
+      value: any;
+      address: any;
+      message: any;
+      protocolParameters: Cardano.ProtocolParameters;
+    },
+  ) => {
     if (!isMounted.current) return;
-    await Loader.load();
-    await new Promise((res, rej) => {
-      const interval = setInterval(() => {
-        if (utxos.current) {
-          clearInterval(interval);
-          res();
-          return;
-        }
-      });
-    });
+
     const _value = data.value;
     const _address = data.address;
     const _message = data.message;
@@ -213,11 +230,7 @@ const Send = () => {
     if (
       _address.error ||
       !_address.result ||
-      (!_value.ada && _value.assets.length <= 0) ||
-      (_address.isM1 &&
-        BigInt(toUnit(_value.ada)) <
-          BigInt(_address.ada.minLovelace) +
-            BigInt(_address.ada.fromADAFeeLovelace))
+      (!_value.ada && _value.assets.length <= 0)
     ) {
       setFee({ fee: '0' });
       setTx(null);
@@ -226,7 +239,7 @@ const Send = () => {
 
     setFee({ fee: '' });
     setTx(null);
-    await new Promise((res, rej) => setTimeout(() => res()));
+    await new Promise((res, rej) => setTimeout(() => res(null)));
     try {
       const output = {
         address: _address.result,
@@ -252,18 +265,16 @@ const Send = () => {
         });
       }
 
-      const checkOutput = Loader.Cardano.TransactionOutput.new(
-        _address.isM1
-          ? Loader.Cardano.Address.from_bech32(_address.result)
-          : Loader.Cardano.Address.from_bytes(
-              await isValidAddress(_address.result),
-            ),
-        await assetsToValue(output.amount),
+      const checkOutput = new Serialization.TransactionOutput(
+        Cardano.Address.fromBytes(
+          isValidAddress(_address.result, currentChain),
+        ),
+        assetsToValue(output.amount),
       );
 
-      const minAda = await minAdaRequired(
+      const minAda = minAdaRequired(
         checkOutput,
-        Loader.Cardano.BigNum.from_str(protocolParameters.coinsPerUtxoWord),
+        BigInt(protocolParameters.coinsPerUtxoByte),
       );
 
       if (BigInt(minAda) <= BigInt(toUnit(_value.personalAda || '0'))) {
@@ -288,41 +299,16 @@ const Send = () => {
         return;
       }
 
-      const outputs = Loader.Cardano.TransactionOutputs.new();
-      outputs.add(
-        Loader.Cardano.TransactionOutput.new(
-          _address.isM1
-            ? Loader.Cardano.Address.from_bech32(_address.result)
-            : Loader.Cardano.Address.from_bytes(
-                await isValidAddress(_address.result),
-              ),
-          await assetsToValue(output.amount),
+      const transactionOutput = new Serialization.TransactionOutput(
+        Cardano.Address.fromBytes(
+          isValidAddress(_address.result, currentChain),
         ),
+        assetsToValue(output.amount),
       );
 
-      const auxiliaryData = Loader.Cardano.AuxiliaryData.new();
-      const generalMetadata = Loader.Cardano.GeneralTransactionMetadata.new();
-
-      // setting metadata for MilkomedaM1
-      if (_address.isM1) {
-        const ethAddress = _address.display;
-        if (!isValidEthAddress(ethAddress))
-          throw new Error('Not a valid ETH address');
-        generalMetadata.insert(
-          Loader.Cardano.BigNum.from_str('87'),
-          Loader.Cardano.encode_json_str_to_metadatum(
-            JSON.stringify(_address.protocolMagic),
-            0,
-          ),
-        );
-        generalMetadata.insert(
-          Loader.Cardano.BigNum.from_str('88'),
-          Loader.Cardano.encode_json_str_to_metadatum(
-            JSON.stringify(ethAddress),
-            0,
-          ),
-        );
-      }
+      const generalMetadata: Map<bigint, Serialization.TransactionMetadatum> =
+        new Map();
+      const auxiliaryData = new Serialization.AuxiliaryData();
 
       // setting metadata for optional message (CIP-0020)
       if (_message) {
@@ -337,25 +323,28 @@ const Send = () => {
           return chunks;
         }
         const msg = { msg: chunkSubstr(_message, 64) };
-        generalMetadata.insert(
-          Loader.Cardano.BigNum.from_str('674'),
-          Loader.Cardano.encode_json_str_to_metadatum(JSON.stringify(msg), 1),
+        generalMetadata.set(
+          BigInt('674'),
+          Serialization.TransactionMetadatum.fromCore(
+            ProviderUtil.jsonToMetadatum(msg),
+          ),
         );
       }
 
-      if (generalMetadata.len() > 0) {
-        auxiliaryData.set_metadata(generalMetadata);
+      if (generalMetadata.size > 0) {
+        auxiliaryData.setMetadata(
+          new Serialization.GeneralTransactionMetadata(generalMetadata),
+        );
       }
 
       const tx = await buildTx(
-        account.current,
-        utxos.current,
-        outputs,
-        protocolParameters,
-        auxiliaryData.metadata() ? auxiliaryData : null,
+        transactionOutput,
+        auxiliaryData,
+        inMemoryWallet,
       );
-      setFee({ fee: tx.body().fee().to_str() });
-      setTx(Buffer.from(tx.to_bytes()).toString('hex'));
+      const inspection = await tx.inspect();
+      setFee({ fee: inspection.inputSelection.fee.toString() });
+      setTx(tx);
     } catch (e) {
       setFee({ error: 'Transaction not possible' });
     }
@@ -366,48 +355,22 @@ const Send = () => {
   );
 
   const init = async () => {
-    if (!isMounted.current) return;
+    if (!isMounted.current || !protocolParameters) return;
     addAssets(value.assets);
-    await Loader.load();
-    const currentAccount = await getCurrentAccount();
-    const _network = await getNetwork();
-    network.current = _network;
-    account.current = currentAccount;
-    if (txInfo.protocolParameters) {
-      const _utxos = txInfo.utxos.map(utxo =>
-        Loader.Cardano.TransactionUnspentOutput.from_bytes(
-          Buffer.from(utxo, 'hex'),
-        ),
-      );
-      utxos.current = _utxos;
-      setIsLoading(false);
-      return;
-    }
-    let _utxos = await getUtxos();
-    const protocolParameters = await initTx();
 
-    const checkOutput = Loader.Cardano.TransactionOutput.new(
-      Loader.Cardano.Address.from_bech32(currentAccount.paymentAddr),
-      Loader.Cardano.Value.zero(),
+    account.current = {};
+
+    const checkOutput = new Serialization.TransactionOutput(
+      Cardano.Address.fromBech32(walletAddress),
+      new Serialization.Value(BigInt(0)),
     );
     const minUtxo = await minAdaRequired(
       checkOutput,
-      Loader.Cardano.BigNum.from_str(protocolParameters.coinsPerUtxoWord),
+      BigInt(protocolParameters.coinsPerUtxoByte),
     );
-    protocolParameters.minUtxo = minUtxo;
 
-    const utxoSum = await sumUtxos(_utxos);
-    let balance = await valueToAssets(utxoSum);
-    balance = {
-      lovelace: balance.find(v => v.unit === 'lovelace').quantity,
-      assets: balance.filter(v => v.unit !== 'lovelace'),
-    };
-    utxos.current = _utxos;
-    _utxos = _utxos.map(utxo => Buffer.from(utxo.to_bytes()).toString('hex'));
-    const { current_address: milkomedaAddress } = await getMilkomedaData('');
-    if (!isMounted.current) return;
     setIsLoading(false);
-    setTxInfo({ protocolParameters, utxos: _utxos, balance, milkomedaAddress });
+    setTxInfo({ minUtxo });
   };
 
   const objectToArray = obj => Object.keys(obj).map(key => obj[key]);
@@ -420,11 +383,6 @@ const Send = () => {
     triggerTxUpdate(() => setValue({ ...value, assets: assetsList }));
   };
 
-  const removeAllAssets = () => {
-    assets.current = {};
-    triggerTxUpdate(() => setValue({ ...value, assets: [] }));
-  };
-
   const removeAsset = asset => {
     delete assets.current[asset.unit];
     const assetsList = objectToArray(assets.current);
@@ -432,20 +390,23 @@ const Send = () => {
   };
 
   React.useEffect(() => {
-    if (txInfo.protocolParameters) {
+    if (protocolParameters) {
       setTx(null);
       setFee({ fee: '' });
       prepareTxDebounced(0, {
         value,
         address,
         message,
-        protocolParameters: txInfo.protocolParameters,
+        protocolParameters,
       });
     }
   }, [txUpdate]);
 
   React.useEffect(() => {
     init();
+  }, [protocolParameters]);
+
+  React.useEffect(() => {
     return () => {
       resetState();
     };
@@ -460,7 +421,7 @@ const Send = () => {
         position="relative"
         background={containerBg}
       >
-        {txInfo.protocolParameters && isLoading ? (
+        {protocolParameters && isLoading ? (
           <Box
             height="100vh"
             width="full"
@@ -496,11 +457,10 @@ const Send = () => {
               width="80%"
             >
               <AddressPopup
+                currentChain={currentChain}
                 setAddress={setAddress}
                 address={address}
-                removeAllAssets={removeAllAssets}
                 triggerTxUpdate={triggerTxUpdate}
-                txInfo={txInfo}
                 isLoading={isLoading}
               />
               {address.error && (
@@ -513,24 +473,6 @@ const Send = () => {
                 >
                   {address.error}
                 </Text>
-              )}
-              {!address.error && address.isM1 && (
-                <Box
-                  mb={-2}
-                  mt={1}
-                  width="full"
-                  display="flex"
-                  alignItems="center"
-                >
-                  <Box>Milkomeda Mode</Box>{' '}
-                  <Tooltip
-                    offset={[40, 8]}
-                    hasArrow
-                    label="Transfer ADA from your Cardano wallet to an address on the Milkomeda Sidechain."
-                  >
-                    <InfoOutlineIcon ml="1" cursor="help" />
-                  </Tooltip>
-                </Box>
               )}
               <Box height="5" />
               <Stack
@@ -581,14 +523,12 @@ const Send = () => {
                     isDisabled={isLoading}
                     isInvalid={
                       value.ada &&
-                      (address.isM1
-                        ? BigInt(toUnit(value.ada)) <
-                          BigInt(address.ada.minLovelace) +
-                            BigInt(address.ada.fromADAFeeLovelace) // milkomeda requires a minimium ada amount which is higher than the Cardano protocol min ada
-                        : BigInt(toUnit(value.ada)) <
-                            BigInt(txInfo.protocolParameters.minUtxo) ||
-                          BigInt(toUnit(value.ada)) >
-                            BigInt(txInfo.balance.lovelace || '0'))
+                      (BigInt(toUnit(value.ada)) < BigInt(txInfo.minUtxo) ||
+                        BigInt(toUnit(value.ada)) >
+                          BigInt(
+                            BigInt(utxoTotal?.coins || 0) +
+                              BigInt(rewards || 0) || '0',
+                          ))
                     }
                     onFocus={() => (focus.current = true)}
                     placeholder="0.000000"
@@ -598,10 +538,8 @@ const Send = () => {
                 <Box w={4} />
                 <AssetsSelector
                   addAssets={addAssets}
-                  assets={txInfo.balance.assets}
-                  setValue={setValue}
+                  assets={walletAssets}
                   value={value}
-                  isM1={address.isM1}
                 />
               </Stack>
               <Box height="4" />
@@ -644,10 +582,6 @@ const Send = () => {
                       <AssetBadge
                         onRemove={() => {
                           removeAsset(asset);
-                        }}
-                        onLoad={decimals => {
-                          if (!assets.current[asset.unit]) return;
-                          assets.current[asset.unit].decimals = decimals;
                         }}
                         onInput={async val => {
                           if (!assets.current[asset.unit]) return;
@@ -790,41 +724,27 @@ const Send = () => {
                 fee
               </Box>
             </Box>
-            {address.isM1 && (
-              <>
-                <Box h={4} />
-                <Box fontWeight={'bold'} fontSize={'sm'}>
-                  Sending to Milkomeda ⚠️
-                </Box>
-              </>
-            )}
             <Box h={6} />
           </Box>
         }
         ref={ref}
         sign={async (password, hw) => {
           capture(Events.SendTransactionConfirmationConfirmClick);
-          await Loader.load();
-          const txDes = Loader.Cardano.Transaction.from_bytes(
-            Buffer.from(tx, 'hex'),
-          );
           if (hw) {
             if (hw.device === HW.trezor) {
               return createTab(TAB.trezorTx, `?tx=${tx}`);
             }
             return await signAndSubmitHW(txDes, {
-              keyHashes: [account.current.paymentKeyHash],
+              keyHashes: [paymentKeyHash],
               account: account.current,
               hw,
             });
           } else
             return await signAndSubmit(
-              txDes,
-              {
-                accountIndex: account.current.index,
-                keyHashes: [account.current.paymentKeyHash],
-              },
+              tx,
               password,
+              withSignTxConfirmation,
+              inMemoryWallet,
             );
         }}
         onConfirm={async (status, signedTx) => {
@@ -835,7 +755,7 @@ const Send = () => {
               status: 'success',
               duration: 5000,
             });
-            if (await isValidAddress(address.result))
+            if (await isValidAddress(address.result, currentChain))
               await updateRecentSentToAddress(address.result);
           } else if (signedTx === ERROR.fullMempool) {
             toast({
@@ -853,7 +773,7 @@ const Send = () => {
               status: 'error',
               duration: 3000,
             });
-          ref.current.closeModal();
+          ref.current?.closeModal();
           setTimeout(() => {
             navigate(-1);
           }, 200);
@@ -865,12 +785,17 @@ const Send = () => {
 
 // Address Popup
 const AddressPopup = ({
+  currentChain,
   setAddress,
   address,
   triggerTxUpdate,
-  removeAllAssets,
-  txInfo,
   isLoading,
+}: {
+  currentChain: Wallet.Cardano.ChainId;
+  setAddress: any;
+  address: { result: string; display: string; error?: string };
+  triggerTxUpdate: any;
+  isLoading: boolean;
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const checkColor = useColorModeValue('teal.500', 'teal.200');
@@ -881,6 +806,8 @@ const AddressPopup = ({
     recentAddress: null,
   });
   const latestHandleInputToken = React.useRef(0);
+  const handleResolver = useHandleResolver(currentChain.networkMagic);
+
   const init = async () => {
     const currentAccount = await getCurrentAccount();
     const accounts = await getAccounts();
@@ -890,49 +817,16 @@ const AddressPopup = ({
     setState({ currentAccount, accounts, recentAddress });
   };
 
-  const milkomedaAddress = React.useRef(txInfo.milkomedaAddress);
-
-  React.useEffect(() => {
-    milkomedaAddress.current = txInfo.milkomedaAddress;
-  }, [txInfo]);
-
   const handleInput = async e => {
     const value = e.target.value;
     let addr;
     let isHandle = false;
-    let isM1 = false;
     if (!e.target.value) {
       addr = { result: '', display: '' };
     } else if (value.startsWith('$')) {
       isHandle = true;
       addr = { display: value };
-    } else if (value.startsWith('0x')) {
-      if (isValidEthAddress(value)) {
-        isM1 = true;
-        addr = {
-          display: value,
-          isM1: true,
-          ada: {
-            minLovelace: '2000000',
-            fromADAFeeLovelace: '500000',
-          },
-        };
-      } else {
-        addr = {
-          result: value,
-          display: value,
-          isM1: true,
-          ada: {
-            minLovelace: '2000000',
-            fromADAFeeLovelace: '500000',
-          },
-          error: 'Address is invalid (Milkomeda)',
-        };
-      }
-    } else if (
-      (await isValidAddress(value)) &&
-      value !== milkomedaAddress.current
-    ) {
+    } else if (isValidAddress(value, currentChain)) {
       addr = { result: value, display: value };
     } else {
       addr = {
@@ -945,8 +839,15 @@ const AddressPopup = ({
     if (isHandle) {
       const handle = value;
 
-      const resolvedAddress = await getAdaHandle(handle.slice(1));
-      if (handle.length > 1 && (await isValidAddress(resolvedAddress))) {
+      const resolvedAddress = await getAdaHandle(
+        handle.slice(1),
+        handleResolver,
+      );
+      if (
+        handle.length > 1 &&
+        resolvedAddress &&
+        isValidAddress(resolvedAddress, currentChain)
+      ) {
         addr = {
           result: resolvedAddress,
           display: handle,
@@ -956,32 +857,6 @@ const AddressPopup = ({
           result: '',
           display: handle,
           error: '$handle not found',
-        };
-      }
-    } else if (isM1) {
-      const { isAllowed, ada, current_address, protocolMagic, assets, ttl } =
-        await getMilkomedaData(value);
-
-      if (!isAllowed || !isValidEthAddress(value)) {
-        addr = {
-          result: '',
-          display: value,
-          isM1: true,
-          ada,
-          ttl,
-          protocolMagic,
-          assets,
-          error: 'Address is invalid (Milkomeda)',
-        };
-      } else {
-        addr = {
-          result: current_address,
-          display: value,
-          isM1: true,
-          ada,
-          ttl,
-          protocolMagic,
-          assets,
         };
       }
     }
@@ -996,6 +871,7 @@ const AddressPopup = ({
   React.useEffect(() => {
     init();
   }, []);
+
   return (
     <Popover
       isOpen={
@@ -1036,7 +912,7 @@ const AddressPopup = ({
               setTimeout(() => e.target.blur());
             }}
             fontSize="xs"
-            placeholder="Address, $handle or Milkomeda"
+            placeholder="Address or $handle"
             onInput={async e => {
               const handleInputToken = latestHandleInputToken.current + 1;
               latestHandleInputToken.current = handleInputToken;
@@ -1047,7 +923,6 @@ const AddressPopup = ({
                 return;
               }
 
-              if (addr.isM1) removeAllAssets();
               triggerTxUpdate(() => setAddress(addr));
               onClose();
             }}
@@ -1091,19 +966,6 @@ const AddressPopup = ({
                   width="full"
                   onClick={() => {
                     const address = state.recentAddress;
-                    if (address == milkomedaAddress.current) {
-                      triggerTxUpdate(() =>
-                        setAddress({
-                          result: '',
-                          display: address,
-                          error:
-                            'Disallowed sending directly to Milkomeda stargate',
-                        }),
-                      );
-                      onClose();
-                      return;
-                    }
-
                     triggerTxUpdate(() =>
                       setAddress({
                         result: address,
@@ -1237,7 +1099,15 @@ const CustomScrollbarsVirtualList = React.forwardRef((props, ref) => (
   <CustomScrollbars {...props} forwardedRef={ref} />
 ));
 
-const AssetsSelector = ({ assets, addAssets, value, isM1 }) => {
+const AssetsSelector = ({
+  assets,
+  addAssets,
+  value,
+}: {
+  assets: Asset[];
+  addAssets: any;
+  value: any;
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [search, setSearch] = React.useState('');
   const select = React.useRef(false);
@@ -1255,18 +1125,10 @@ const AssetsSelector = ({ assets, addAssets, value, isM1 }) => {
     return assets.filter(asset => filter1(asset) && filter2(asset));
   };
 
-  React.useEffect(() => {
-    if (isM1) onClose();
-  }, [isM1]);
-
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
       <PopoverTrigger>
-        <Button
-          isDisabled={isM1 || !assets || assets.length < 1}
-          flex={1}
-          size="sm"
-        >
+        <Button isDisabled={!assets || assets.length < 1} flex={1} size="sm">
           + Assets
         </Button>
       </PopoverTrigger>
@@ -1312,6 +1174,7 @@ const AssetsSelector = ({ assets, addAssets, value, isM1 }) => {
                 justifyContent="center"
               >
                 <IconButton
+                  aria-label="close button"
                   size="xs"
                   rounded="md"
                   onClick={() => setChoice({})}
@@ -1320,6 +1183,7 @@ const AssetsSelector = ({ assets, addAssets, value, isM1 }) => {
 
                 <Box w="3" />
                 <IconButton
+                  aria-label="add asset button"
                   colorScheme="teal"
                   size="xs"
                   rounded="md"
@@ -1410,23 +1274,22 @@ const AssetsSelector = ({ assets, addAssets, value, isM1 }) => {
   );
 };
 
-const Asset = ({ asset, choice, select, setChoice, onClose, addAssets }) => {
-  const [token, setToken] = React.useState(null);
-  const isMounted = useIsMounted();
+const Asset = ({
+  asset,
+  choice,
+  select,
+  setChoice,
+  onClose,
+  addAssets,
+}: {
+  asset: Asset;
+  choice;
+  select;
+  setChoice;
+  onClose;
+  addAssets;
+}) => {
   const hoverColor = useColorModeValue('gray.100', 'gray.600');
-
-  const fetchData = async () => {
-    const detailedAsset = {
-      ...(await getAsset(asset.unit)),
-      quantity: asset.quantity,
-    };
-    if (!isMounted.current) return;
-    setToken(detailedAsset);
-  };
-
-  React.useEffect(() => {
-    fetchData();
-  }, []);
 
   return (
     <Button
@@ -1451,48 +1314,56 @@ const Asset = ({ asset, choice, select, setChoice, onClose, addAssets }) => {
       justifyContent="start"
       variant="ghost"
     >
-      {token && (
-        <Stack
-          width="100%"
-          fontSize="xs"
-          direction="row"
-          alignItems="center"
-          justifyContent="start"
-        >
-          <Selection
-            asset={asset}
-            select={select}
-            choice={choice}
-            setChoice={setChoice}
-          />
+      <Stack
+        width="100%"
+        fontSize="xs"
+        direction="row"
+        alignItems="center"
+        justifyContent="start"
+      >
+        <Selection
+          asset={asset}
+          select={select}
+          choice={choice}
+          setChoice={setChoice}
+        />
 
-          <Box
-            textAlign="left"
-            width="200px"
-            whiteSpace="nowrap"
-            fontWeight="normal"
-          >
-            <Box mb="-1px">
-              <MiddleEllipsis>
-                <span>{token.name}</span>
-              </MiddleEllipsis>
-            </Box>
-            <Box whiteSpace="nowrap" fontSize="xx-small" fontWeight="light">
-              <MiddleEllipsis>
-                <span>Policy: {token.policy}</span>
-              </MiddleEllipsis>
-            </Box>
+        <Box
+          textAlign="left"
+          width="200px"
+          whiteSpace="nowrap"
+          fontWeight="normal"
+        >
+          <Box mb="-1px">
+            <MiddleEllipsis>
+              <span>{asset.labeledName}</span>
+            </MiddleEllipsis>
           </Box>
-          <Box>
-            <UnitDisplay quantity={token.quantity} decimals={token.decimals} />
+          <Box whiteSpace="nowrap" fontSize="xx-small" fontWeight="light">
+            <MiddleEllipsis>
+              <span>Policy: {asset.policy}</span>
+            </MiddleEllipsis>
           </Box>
-        </Stack>
-      )}
+        </Box>
+        <Box>
+          <UnitDisplay quantity={asset.quantity} decimals={asset.decimals} />
+        </Box>
+      </Stack>
     </Button>
   );
 };
 
-const Selection = ({ select, asset, choice, setChoice }) => {
+const Selection = ({
+  select,
+  asset,
+  choice,
+  setChoice,
+}: {
+  select;
+  asset: Asset;
+  choice;
+  setChoice;
+}) => {
   const selectColor = useColorModeValue('orange.500', 'orange.200');
   return (
     <Box

@@ -26,6 +26,7 @@ import { NETWORK_ID, NODE } from '../config/config';
 
 import { sendStore } from './app/pages/send';
 
+import type { AssetInput } from '../types/assets';
 import type { Action, Actions } from 'easy-peasy';
 
 interface Network {
@@ -62,6 +63,26 @@ interface RouteModel {
   setRoute: Action<RouteModel, string>;
 }
 
+interface Address {
+  result: string;
+  display: string;
+  error?: string;
+}
+
+interface Value {
+  ada: string;
+  assets: AssetInput[];
+  minAda: string;
+  personalAda: string;
+}
+
+interface SendModel {
+  address: Address;
+  setAddress: Action<SendModel, Address>;
+  value: Value;
+  setValue: Action<SendModel, Value>;
+}
+
 const routeStore: RouteModel = {
   route: null,
   setRoute: action((state, route) => {
@@ -73,7 +94,7 @@ const routeStore: RouteModel = {
 const globalModel = persist(
   {
     routeStore,
-    sendStore,
+    sendStore: sendStore as SendModel,
   },
   { storage: 'localStorage' },
 );
@@ -97,7 +118,7 @@ const initSettings = async (
 interface GlobalModel {
   globalModel: {
     routeStore: RouteModel;
-    sendStore: any;
+    sendStore: SendModel;
   };
   settings: SettingsModel;
 }

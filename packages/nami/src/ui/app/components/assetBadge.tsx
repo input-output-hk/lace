@@ -11,45 +11,41 @@ import {
   SkeletonCircle,
 } from '@chakra-ui/react';
 import React from 'react';
-import { getAsset, toUnit } from '../../../api/extension';
+import { toUnit } from '../../../api/extension';
 
 import AssetPopover from './assetPopover';
 import { NumericFormat } from 'react-number-format';
+import type { AssetInput } from '../../../types/assets';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
   React.useEffect(() => {
     isMounted.current = true;
-    return () => (isMounted.current = false);
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
   return isMounted;
 };
 
-const AssetBadge = ({ asset, onRemove, onInput, onLoad }) => {
-  const isMounted = useIsMounted();
+const AssetBadge = ({
+  asset,
+  onRemove,
+  onInput,
+}: {
+  asset: AssetInput;
+  onRemove;
+  onInput;
+}) => {
   const [width, setWidth] = React.useState(
-    BigInt(asset.quantity) <= 1 ? 60 : 200
+    BigInt(asset.quantity) <= 1 ? 60 : 200,
   );
-  const [token, setToken] = React.useState(null);
   const [value, setValue] = React.useState('');
 
-  const fetchData = async () => {
-    const detailedAsset = {
-      ...(await getAsset(asset.unit)),
-      quantity: asset.quantity,
-      input: asset.input,
-    };
-    if (!isMounted.current) return;
-    onLoad(detailedAsset.decimals);
-    setToken(detailedAsset);
-  };
-
   React.useEffect(() => {
-    setToken(null);
-    fetchData();
     const initialWidth = BigInt(asset.quantity) <= 1 ? 60 : 200;
     setWidth(initialWidth);
-    if (BigInt(asset.quantity) == 1) {
+    if (BigInt(asset.quantity) == BigInt(1)) {
       setValue('1');
       onInput(1);
     } else {
@@ -73,83 +69,76 @@ const AssetBadge = ({ asset, onRemove, onInput, onLoad }) => {
               alignItems="center"
               justifyContent="center"
             >
-              {!token ? (
-                <SkeletonCircle size="5" />
-              ) : (
-                <AssetPopover asset={token}>
-                  <Button
-                    style={{
-                      all: 'revert',
-                      margin: 0,
-                      padding: 0,
-                      background: 'none',
-                      border: 'none',
-                      outline: 'none',
-                      width: '100%',
-                      height: '100%',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Image
-                      width="full"
-                      rounded="sm"
-                      src={token.image}
-                      fallback={
-                        !token.image ? (
-                          <Avatar size="xs" name={token.name} />
-                        ) : (
-                          <Fallback name={token.name} />
-                        )
-                      }
-                    />
-                  </Button>
-                </AssetPopover>
-              )}
+              <AssetPopover asset={asset}>
+                <Button
+                  style={{
+                    all: 'revert',
+                    margin: 0,
+                    padding: 0,
+                    background: 'none',
+                    border: 'none',
+                    outline: 'none',
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Image
+                    width="full"
+                    rounded="sm"
+                    src={asset.image}
+                    fallback={
+                      !asset.image ? (
+                        <Avatar size="xs" name={asset.name} />
+                      ) : (
+                        <Fallback name={asset.name} />
+                      )
+                    }
+                  />
+                </Button>
+              </AssetPopover>
             </Box>
           }
         />
-        {token && (
-          <NumericFormat
-            allowNegative={false}
-            px="8"
-            thousandsGroupStyle="thousand"
-            decimalSeparator="."
-            displayType="input"
-            type="text"
-            thousandSeparator={true}
-            decimalScale={token.decimals}
-            width={`${width}px`}
-            maxWidth="152px"
-            isReadOnly={BigInt(asset.quantity) <= 1}
-            value={value}
-            rounded="xl"
-            variant="filled"
-            fontSize="xs"
-            placeholder="Set quantity"
-            onValueChange={({ formattedValue }) => {
-              setValue(formattedValue);
-              onInput(formattedValue);
-            }}
-            isInvalid={
-              token &&
-              asset.input &&
-              (BigInt(toUnit(asset.input, token.decimals)) >
-                BigInt(asset.quantity) ||
-                BigInt(toUnit(asset.input, token.decimals)) <= 0)
-            }
-            customInput={Input}
-          />
-        )}
+        <NumericFormat
+          allowNegative={false}
+          px="8"
+          thousandsGroupStyle="thousand"
+          decimalSeparator="."
+          displayType="input"
+          type="text"
+          thousandSeparator={true}
+          decimalScale={asset.decimals}
+          width={`${width}px`}
+          maxWidth="152px"
+          isReadOnly={BigInt(asset.quantity) <= 1}
+          value={value}
+          rounded="xl"
+          variant="filled"
+          fontSize="xs"
+          placeholder="Set quantity"
+          onValueChange={({ formattedValue }) => {
+            setValue(formattedValue);
+            onInput(formattedValue);
+          }}
+          isInvalid={
+            asset.input &&
+            (BigInt(toUnit(asset.input, asset.decimals)) >
+              BigInt(asset.quantity) ||
+              BigInt(toUnit(asset.input, asset.decimals)) <= 0)
+          }
+          customInput={Input}
+        />
         <InputRightElement
           rounded="lg"
           children={
             <SmallCloseIcon cursor="pointer" onClick={() => onRemove()} />
           }
         />
-        </InputGroup>
+      </InputGroup>
     </Box>
   );
 };

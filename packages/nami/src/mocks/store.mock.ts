@@ -20,7 +20,6 @@ export const store = {
         protocolParameters: null,
         utxos: [],
         balance: { lovelace: '0', assets: null },
-        milkomedaAddress: '',
       },
     },
   },

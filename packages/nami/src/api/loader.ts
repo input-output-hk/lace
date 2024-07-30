@@ -14,7 +14,7 @@ class LoaderClass {
     try {
       await wasm.instantiate();
       await wasm2.instantiate();
-    } catch (_e) {
+    } catch {
       // Only happens when running with Jest (Node.js)
     }
     /**

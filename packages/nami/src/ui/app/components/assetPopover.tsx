@@ -1,3 +1,4 @@
+import React, { PropsWithChildren } from 'react';
 import {
   Popover,
   PopoverArrow,
@@ -11,11 +12,16 @@ import {
   Avatar,
   Text,
 } from '@chakra-ui/react';
-import React from 'react';
 import Copy from './copy';
 import UnitDisplay from './unitDisplay';
+import type { Asset } from '../../../types/assets';
 
-const AssetPopover = ({ asset, gutter, ...props }) => {
+type Props = PropsWithChildren<{
+  asset: Asset;
+  gutter?: number;
+}>;
+
+const AssetPopover = ({ asset, gutter, ...props }: Props) => {
   return (
     <Popover placement="top-start" gutter={gutter}>
       <PopoverTrigger>

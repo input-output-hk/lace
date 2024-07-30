@@ -55,10 +55,6 @@ export const isValidAddress = fn(actualApi.isValidAddress).mockName(
   'isValidAddress',
 );
 
-export const isValidEthAddress = fn(actualApi.isValidEthAddress).mockName(
-  'isValidEthAddress',
-);
-
 export const getUtxos = fn(actualApi.getUtxos).mockName('getUtxos');
 
 export const updateRecentSentToAddress = fn(
