@@ -171,7 +171,7 @@ export const useMaxAda = (): bigint => {
   const balance = useObservable(inMemoryWallet?.balance?.utxo.available$);
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
   const assetInfo = useObservable(inMemoryWallet?.assetInfo$);
-  const { outputMap } = useTransactionProps();
+  const { outputsMap } = useTransactionProps();
   const { setMaxAdaLoading } = useMaxAdaStatus();
   const address = walletInfo.addresses[0].address;
 
@@ -203,7 +203,7 @@ export const useMaxAda = (): bigint => {
           txBuilder,
           validateOutputs,
           signal: abortController.signal,
-          outputMap
+          outputMap: outputsMap
         });
         if (!abortController.signal.aborted) {
           setMaxADA(result);
@@ -223,7 +223,7 @@ export const useMaxAda = (): bigint => {
     return () => {
       abortController.abort();
     };
-  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputMap, setMaxAdaLoading]);
+  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputsMap, setMaxAdaLoading]);
 
   return maxADA;
 };

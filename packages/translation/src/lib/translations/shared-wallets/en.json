@@ -103,5 +103,9 @@
   "sharedWallets.transaction.cosigners.quorum.current": "<stat><b>{{quorum}}</b> of <b>{{participants}}</b></stat><span>required</span>",
   "sharedWallets.transaction.cosigners.unsigned.description": "The transaction can be submitted once the required number of co-signers have signed. Confirm details and sign transaction to proceed.",
   "sharedWallets.transaction.cosigners.unsubmitted.description": "The transaction can be submitted as all required co-signers have signed.",
-  "sharedWallets.transaction.coSign.importJsonStep.uploadBtnTitle": "Drag & drop or <Link>choose file</Link> to upload"
+  "sharedWallets.transaction.coSign.importJsonStep.uploadBtnTitle": "Drag & drop or <Link>choose file</Link> to upload",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message": "No shared wallet transaction details were found in the uploaded file. Please upload the correct transaction file.",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton": "Upload new file",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.secondaryButton": "Exit",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title": "Unrecognised JSON file"
 }

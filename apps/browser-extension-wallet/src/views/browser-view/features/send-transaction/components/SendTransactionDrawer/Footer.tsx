@@ -42,6 +42,7 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
 import { exportMultisigTransaction } from '@lace/core';
+import { mergeWitnesses } from '@views/browser/features/send-transaction/components/SendTransactionDrawer/utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -166,14 +167,32 @@ export const Footer = withAddressBookContext(
 
     const signAndSubmitTransaction = useCallback(async () => {
       if (isSharedWallet) {
-        const inspectedTx = await builtTxData.tx.inspect();
-        const tx = await inMemoryWallet.finalizeTx({ tx: inspectedTx });
-        const txCbor = Serialization.Transaction.fromCore(tx).toCbor();
+        let sharedWalletTxCbor: Wallet.TxCBOR;
+        if (builtTxData.importedSharedWalletTx) {
+          const { auxiliaryData, body, id, witness } = builtTxData.importedSharedWalletTx.toCore();
+          const txWithOwnSignature = await inMemoryWallet.finalizeTx({
+            tx: {
+              body,
+              hash: id
+            },
+            auxiliaryData,
+            bodyCbor: builtTxData.importedSharedWalletTx.body().toCbor()
+          });
+          builtTxData.importedSharedWalletTx.setWitnessSet(
+            Serialization.TransactionWitnessSet.fromCore(mergeWitnesses(txWithOwnSignature.witness, witness))
+          );
+          sharedWalletTxCbor = builtTxData.importedSharedWalletTx.toCbor();
+        } else {
+          const signedTx = await inMemoryWallet.finalizeTx({
+            tx: await builtTxData.tx.inspect()
+          });
+          sharedWalletTxCbor = Serialization.Transaction.fromCore(signedTx).toCbor();
+        }
 
         const policy = await getSignPolicy('payment');
         await (policy.requiredCosigners === 1
-          ? inMemoryWallet.submitTx(tx)
-          : exportMultisigTransaction(txCbor, sharedWalletKey, currentChain));
+          ? inMemoryWallet.submitTx(sharedWalletTxCbor)
+          : exportMultisigTransaction(sharedWalletTxCbor, sharedWalletKey, currentChain));
       } else {
         const signedTx = await builtTxData.tx.sign();
         await inMemoryWallet.submitTx(signedTx);
@@ -183,7 +202,15 @@ export const Footer = withAddressBookContext(
           creationType: TxCreationType.Internal
         });
       }
-    }, [builtTxData.tx, currentChain, getSignPolicy, inMemoryWallet, isSharedWallet, sharedWalletKey]);
+    }, [
+      builtTxData.importedSharedWalletTx,
+      builtTxData.tx,
+      currentChain,
+      getSignPolicy,
+      inMemoryWallet,
+      isSharedWallet,
+      sharedWalletKey
+    ]);
 
     const handleVerifyPass = useCallback(async () => {
       if (isSubmitingTx) return;
@@ -361,6 +388,8 @@ export const Footer = withAddressBookContext(
     if (currentSection.currentSection === Sections.ASSET_PICKER) return <AssetPickerFooter />;
 
     if (currentSection.currentSection === Sections.ADDRESS_FORM) return <AddressFormFooter />;
+
+    if (currentSection.currentSection === Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON) return null;
 
     return (
       <>
