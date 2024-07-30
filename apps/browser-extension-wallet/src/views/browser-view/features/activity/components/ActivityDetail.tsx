@@ -21,6 +21,7 @@ import { useCurrencyStore } from '@providers';
 import { TransactionDetailsProxy } from './TransactionDetailsProxy';
 import { useTranslation } from 'react-i18next';
 import type { TranslationKey } from '@lace/translation';
+import { SharedWalletTransactionDetailsWrapper } from './SharedWalletTransactionDetailsWrapper';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -90,6 +91,7 @@ const getTypeLabel = (type: ActivityType): TranslationKey => {
     return 'core.activityDetails.deregistration';
   if (type === TransactionActivityType.incoming) return 'core.activityDetails.received';
   if (type === TransactionActivityType.outgoing) return 'core.activityDetails.sent';
+  if (type === TransactionActivityType.awaitingCosignatures) return 'core.activityDetails.awaitingCosignatures';
   return `core.activityDetails.${type}`;
 };
 
@@ -130,27 +132,37 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
   const amountTransformer = (ada: string) =>
     `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`;
 
+  if (activityInfo.type === TransactionActivityType.rewards) {
+    return (
+      <RewardsDetails
+        name={name}
+        status={activityInfo.status}
+        includedDate={activityInfo.activity.includedUtcDate}
+        includedTime={activityInfo.activity.includedUtcTime}
+        amountTransformer={amountTransformer}
+        coinSymbol={cardanoCoin.symbol}
+        rewards={activityInfo.activity.rewards}
+      />
+    );
+  }
+
+  if (activityInfo.type === TransactionActivityType.awaitingCosignatures) {
+    return (
+      <SharedWalletTransactionDetailsWrapper
+        amountTransformer={amountTransformer}
+        activityInfo={activityInfo}
+        direction={activityDetail.direction}
+      />
+    );
+  }
+
   return (
-    <>
-      {activityInfo.type === 'rewards' ? (
-        <RewardsDetails
-          name={name}
-          status={activityInfo.status}
-          includedDate={activityInfo.activity.includedUtcDate}
-          includedTime={activityInfo.activity.includedUtcTime}
-          amountTransformer={amountTransformer}
-          coinSymbol={cardanoCoin.symbol}
-          rewards={activityInfo.activity.rewards}
-        />
-      ) : (
-        <TransactionDetailsProxy
-          name={name}
-          activityInfo={activityInfo}
-          direction={activityDetail.direction}
-          status={currentTransactionStatus}
-          amountTransformer={amountTransformer}
-        />
-      )}
-    </>
+    <TransactionDetailsProxy
+      name={name}
+      activityInfo={activityInfo}
+      direction={activityDetail.direction}
+      status={currentTransactionStatus}
+      amountTransformer={amountTransformer}
+    />
   );
 };

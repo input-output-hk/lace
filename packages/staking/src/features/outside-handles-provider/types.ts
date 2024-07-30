@@ -1,6 +1,6 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
-import { AssetActivityListProps } from '@lace/core';
+import { AssetActivityListProps, SignPolicy } from '@lace/core';
 import { StakePoolSortOptions, StakingBrowserPreferences } from 'features/BrowsePools';
 import type { IAnalyticsTracker } from '@lace/common';
 
@@ -99,7 +99,12 @@ export type OutsideHandlesContextValue = {
   multidelegationFirstVisitSincePortfolioPersistence: boolean;
   triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
+  walletName: string;
   currentChain: Wallet.Cardano.ChainId;
   isMultidelegationSupportedByDevice: (walletType: string) => Promise<boolean>;
   isCustomSubmitApiEnabled: boolean;
+  isSharedWallet: boolean;
+  signPolicy: SignPolicy;
+  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
+  coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
 };

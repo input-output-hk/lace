@@ -1,5 +1,5 @@
 import WalletAddressPage from '../elements/walletAddressPage';
-import { WalletConfig } from '../support/walletConfiguration';
+import { Account, WalletConfig, WalletRepositoryConfig } from '../support/walletConfiguration';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import extensionUtils from '../utils/utils';
@@ -38,6 +38,23 @@ class WalletAddressPageAssert {
     const address = String(extensionUtils.isMainnet() ? wallet.mainnetAddress : wallet.address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
     expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
+  }
+
+  async assertSeeWalletNameAccountAndAddress(
+    wallet: WalletRepositoryConfig,
+    accountNumber: number,
+    mode: 'extended' | 'popup'
+  ) {
+    expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
+    let account: Account;
+    if (wallet.accounts) {
+      account = wallet.accounts[accountNumber];
+      const address = String(extensionUtils.isMainnet() ? account.mainnetAddress : account.address);
+      const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
+      expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
+    } else {
+      throw new Error(`Account: ${accountNumber} not found`);
+    }
   }
 
   async assertSeeAdaHandleAddressCard() {

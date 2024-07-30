@@ -239,7 +239,7 @@ export const processExpandedViewCases: Handler = (params) =>
             BeginSingleStaking,
             StatePoolDetails,
             StatePoolDetails | StateChangingPreferences | StateNewPortfolio
-          >(({ state }) => {
+          >(({ state, command: { data } }) => {
             if (!state.viewedStakePool) return state;
             const portfolioPool = initializeDraftPortfolioPool({
               // initialize the slider to MAX for single-pool staking
@@ -259,7 +259,10 @@ export const processExpandedViewCases: Handler = (params) =>
 
             return {
               ...state,
-              ...atomicStateMutators.beginNewPortfolioCreation({ selections: [portfolioPool] }),
+              ...atomicStateMutators.beginNewPortfolioCreation({
+                isSharedWallet: data.isSharedWallet,
+                selections: [portfolioPool],
+              }),
               viewedStakePool: undefined,
             };
           }),
@@ -466,11 +469,14 @@ export const processExpandedViewCases: Handler = (params) =>
             ConfirmChangingPreferences,
             StateChangingPreferences,
             StateNewPortfolio | StateChangingPreferences
-          >(({ state }) => {
+          >(({ state, command: { data } }) => {
             if (!state.pendingSelectedPortfolio) return state;
             return {
               ...state,
-              ...atomicStateMutators.beginNewPortfolioCreation({ selections: state.pendingSelectedPortfolio }),
+              ...atomicStateMutators.beginNewPortfolioCreation({
+                isSharedWallet: data.isSharedWallet,
+                selections: state.pendingSelectedPortfolio,
+              }),
               pendingSelectedPortfolio: undefined,
             };
           }),

@@ -6,7 +6,7 @@ import cn from 'classnames';
 import { InfoCircleOutlined, DownOutlined } from '@ant-design/icons';
 import { addEllipsis, Button } from '@lace/common';
 
-import { TxOutputInput } from './TransactionDetailAsset';
+import { TxOutputInput } from '../Transaction';
 import { TranslationsFor } from '../../utils/types';
 
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';

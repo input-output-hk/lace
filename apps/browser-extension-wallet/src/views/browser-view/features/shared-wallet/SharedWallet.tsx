@@ -5,7 +5,7 @@ import {
   AddSharedWalletMainPageFlow,
   AddSharedWalletModal,
   CoSigner,
-  GenerateSharedKeysFlow,
+  GenerateSharedWalletKeyFlow,
   LinkedWalletType,
   QuorumOptionValue,
   SharedWalletCreationFlow,
@@ -30,11 +30,12 @@ type CreateWalletParams = {
 
 export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
-  const { walletRepository, generateSharedWalletKey, createInMemorySharedWallet } = useWalletManager();
+  const { walletRepository, generateSharedWalletKey, saveSharedWalletKey, createInMemorySharedWallet } =
+    useWalletManager();
   const { walletInfo, cardanoWallet } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
-  const [sharedKey, setSharedKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
+  const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
   const [initialWalletName, setInitialWalletName] = useState('');
   const [activeWalletType, setActiveWalletType] = useState<LinkedWalletType>();
 
@@ -45,7 +46,7 @@ export const SharedWallet = (): JSX.Element => {
 
       const activeWalletId = cardanoWallet.source.wallet.walletId;
       const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
-      setSharedKey(activeWallet.metadata.extendedAccountPublicKey);
+      setSharedWalletKey(activeWallet.metadata.multiSigExtendedPublicKey);
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
       setActiveWalletType(activeWallet.type);
     })();
@@ -54,22 +55,22 @@ export const SharedWallet = (): JSX.Element => {
   const handleCreateWallet = async (data: CreateWalletParams) => {
     const activeWalletId = cardanoWallet.source.wallet.walletId;
 
-    const publicKeys = data.coSigners.map(({ keys }: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(keys));
-
     await createInMemorySharedWallet({
       name: data.name,
       chainId: DEFAULT_CHAIN_ID,
-      publicKeys,
       ownSignerWalletId: activeWalletId,
-      quorumRules: data.quorumRules
+      quorumRules: data.quorumRules,
+      coSigners: data.coSigners,
+      sharedWalletKey
     });
   };
 
-  const generateKeys = async (enteredPassword: string) => {
-    if (sharedKey) return sharedKey;
-    const sharedWalletKey = await generateSharedWalletKey(enteredPassword, cardanoWallet.source.wallet.walletId);
-    setSharedKey(sharedWalletKey);
-    return sharedWalletKey;
+  const generateKey = async (enteredPassword: string) => {
+    if (sharedWalletKey) return sharedWalletKey;
+    const key = await generateSharedWalletKey(enteredPassword);
+    await saveSharedWalletKey(key);
+    setSharedWalletKey(key);
+    return key;
   };
 
   return (
@@ -84,15 +85,15 @@ export const SharedWallet = (): JSX.Element => {
           exact
           path={walletRoutePaths.sharedWallet.generateKeys}
           render={() => (
-            <GenerateSharedKeysFlow
+            <GenerateSharedWalletKeyFlow
               activeWalletName={walletInfo?.name || ''}
               activeWalletType={activeWalletType}
-              generateKeys={generateKeys}
+              generateKey={generateKey}
               navigateToParentFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
             />
           )}
         />
-        {sharedKey && (
+        {sharedWalletKey && (
           <Route
             exact
             path={walletRoutePaths.sharedWallet.create}
@@ -102,18 +103,20 @@ export const SharedWallet = (): JSX.Element => {
                 initialWalletName={initialWalletName}
                 navigateToAppHome={() => setBackgroundPage()}
                 exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
-                sharedKeys={sharedKey}
+                sharedWalletKey={sharedWalletKey}
                 onCreateSharedWallet={handleCreateWallet}
               />
             )}
           />
         )}
-        {sharedKey && (
+        {sharedWalletKey && (
           <Route
             exact
             path={walletRoutePaths.sharedWallet.import}
             render={() => (
               <SharedWalletRestorationFlow
+                onRestoreSharedWallet={handleCreateWallet}
+                sharedKeys={sharedWalletKey}
                 exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
                 navigateToAppHome={() => setBackgroundPage()}
               />
@@ -128,7 +131,7 @@ export const SharedWallet = (): JSX.Element => {
               onCreateSharedWalletClick={() => history.push(walletRoutePaths.sharedWallet.create)}
               onImportSharedWalletClick={() => history.push(walletRoutePaths.sharedWallet.import)}
               onKeysGenerateClick={() => history.push(walletRoutePaths.sharedWallet.generateKeys)}
-              sharedKeys={sharedKey}
+              sharedWalletKey={sharedWalletKey}
             />
           )}
         />

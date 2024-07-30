@@ -36,7 +36,8 @@ export enum TransactionStatus {
   SUCCESS = 'success',
   PENDING = 'sending',
   ERROR = 'error',
-  SPENDABLE = 'spendable'
+  SPENDABLE = 'spendable',
+  AWAITING_COSIGNATURES = 'awaiting_cosignatures'
 }
 
 export enum Cip30TxType {

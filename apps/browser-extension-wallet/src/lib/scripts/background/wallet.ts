@@ -30,6 +30,7 @@ import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import { SharedWalletScriptKind } from '@lace/core';
 
 const logger = console;
 
@@ -74,8 +75,8 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     };
 
     if (wallet.type === WalletType.Script) {
-      const stakingScript = wallet.stakingScript as Cardano.RequireAllOfScript;
-      const paymentScript = wallet.paymentScript as Cardano.RequireAllOfScript;
+      const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
+      const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
 
       return createSharedWallet(
         { name: wallet.metadata.name },

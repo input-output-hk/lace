@@ -38,7 +38,8 @@ export {
   createWalletUtil,
   Assets,
   TxInFlight,
-  WalletAddress
+  WalletAddress,
+  isValidSharedWalletScript
 } from '@cardano-sdk/wallet';
 
 export {

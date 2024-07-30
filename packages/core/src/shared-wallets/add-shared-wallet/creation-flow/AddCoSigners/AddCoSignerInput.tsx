@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { CoSigner, CoSignerDirty, CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './type';
 
 export const maxCoSignerNameLength = 20;
-type FieldName = 'keys' | 'name';
+type FieldName = 'sharedWalletKey' | 'name';
 
 interface AddCoSignerInputProps {
   dirty?: CoSignerDirty;
   error?: CoSignerError;
-  keysFieldDisabled: boolean;
+  keyFieldDisabled: boolean;
   labels: Record<FieldName, string>;
   onChange: (coSigner: CoSigner) => void;
   value: CoSigner;
@@ -32,24 +32,27 @@ const parseError = (error: CoSignerError | undefined, t: TFunction): Partial<Rec
     });
   }
 
-  let keysErrorMessage;
-  if (error.keys === CoSignerErrorKeys.Required) {
-    keysErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keysInputError.required');
+  let keyErrorMessage;
+  if (error.sharedWalletKey === CoSignerErrorKeys.Required) {
+    keyErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keyInputError.required');
   }
-  if (error.keys === CoSignerErrorKeys.Invalid) {
-    keysErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keysInputError.invalid');
+  if (error.sharedWalletKey === CoSignerErrorKeys.Invalid) {
+    keyErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keyInputError.invalid');
+  }
+  if (error.sharedWalletKey === CoSignerErrorKeys.Duplicated) {
+    keyErrorMessage = t('sharedWallets.addSharedWallet.addCosigners.keyInputError.duplicated');
   }
 
   return {
-    keys: keysErrorMessage,
     name: nameErrorMessage,
+    sharedWalletKey: keyErrorMessage,
   };
 };
 
 export const AddCoSignerInput = ({
   dirty,
   onChange,
-  keysFieldDisabled,
+  keyFieldDisabled,
   labels,
   value,
   error,
@@ -74,12 +77,12 @@ export const AddCoSignerInput = ({
       </Box>
       <Box>
         <TextBox
-          label={labels.keys}
-          value={value.keys}
-          errorMessage={(dirty?.keys && errorMessage.keys) || undefined}
-          onChange={makeChangeHandler('keys')}
+          label={labels.sharedWalletKey}
+          value={value.sharedWalletKey}
+          errorMessage={(dirty?.sharedWalletKey && errorMessage.sharedWalletKey) || undefined}
+          onChange={makeChangeHandler('sharedWalletKey')}
           w="$fill"
-          disabled={keysFieldDisabled}
+          disabled={keyFieldDisabled}
         />
       </Box>
     </>

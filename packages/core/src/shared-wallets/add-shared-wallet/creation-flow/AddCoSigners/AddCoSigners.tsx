@@ -9,6 +9,8 @@ import { AddCoSignerInput } from './AddCoSignerInput';
 import styles from './AddCoSigners.module.scss';
 import { CoSigner, CoSignerDirty, CoSignerError } from './type';
 
+const MIN_NUMBER_OF_COSIGNERS = Number.parseInt(process.env.MIN_NUMBER_OF_COSIGNERS);
+
 interface Props {
   coSigners: CoSigner[];
   coSignersDirty: CoSignerDirty[];
@@ -27,7 +29,8 @@ export const AddCoSigners = ({
   coSignersDirty,
 }: Props): JSX.Element => {
   const { t } = useTranslation();
-  const atLeastOneValidCoSigner = coSigners.some((c) => c.keys && c.name) && errors.length === 0;
+  const hasAtLeastMinValidCoSigners =
+    coSigners.filter((c) => c.sharedWalletKey && c.name).length >= MIN_NUMBER_OF_COSIGNERS && errors.length === 0;
 
   return (
     <SharedWalletLayout
@@ -37,7 +40,7 @@ export const AddCoSigners = ({
       timelineCurrentStep={SharedWalletCreationStep.CoSigners}
       onBack={onBack}
       onNext={onNext}
-      isNextEnabled={atLeastOneValidCoSigner}
+      isNextEnabled={hasAtLeastMinValidCoSigners}
     >
       {coSigners.map((value, index) => (
         <Box key={value.id} className={styles.coSigners}>
@@ -45,16 +48,16 @@ export const AddCoSigners = ({
           <AddCoSignerInput
             value={value}
             onChange={onValueChange}
-            keysFieldDisabled={index === indexOfCoSignersDataOfCurrentUser}
+            keyFieldDisabled={index === indexOfCoSignersDataOfCurrentUser}
             labels={{
-              keys: t(
-                `sharedWallets.addSharedWallet.addCosigners.${
-                  index === indexOfCoSignersDataOfCurrentUser ? 'yourKeysInputLabel' : 'coSignerKeysInputLabel'
-                }`,
-              ),
               name: t(
                 `sharedWallets.addSharedWallet.addCosigners.${
                   index === indexOfCoSignersDataOfCurrentUser ? 'yourNameInputLabel' : 'coSignerNameInputLabel'
+                }`,
+              ),
+              sharedWalletKey: t(
+                `sharedWallets.addSharedWallet.addCosigners.${
+                  index === indexOfCoSignersDataOfCurrentUser ? 'yourKeysInputLabel' : 'coSignerKeysInputLabel'
                 }`,
               ),
             }}

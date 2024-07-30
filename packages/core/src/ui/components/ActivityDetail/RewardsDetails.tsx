@@ -1,7 +1,8 @@
 import React from 'react';
 import cn from 'classnames';
+import { Tooltip } from 'antd';
 import styles from './TransactionDetails.module.scss';
-import { ActivityStatus } from '../Activity/AssetActivityItem';
+import { ActivityStatus } from '../Transaction';
 import { Ellipsis } from '@lace/common';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { useTranslation } from 'react-i18next';
@@ -82,9 +83,11 @@ export const RewardsDetails = ({
                   <div key={pool.id} className={styles.poolEntry}>
                     <div className={styles.poolHeading}>
                       {pool.name && (
-                        <div data-testid="rewards-pool-name" className={styles.detail}>
-                          {pool.name}
-                        </div>
+                        <Tooltip title={pool.name}>
+                          <div data-testid="rewards-pool-name" className={cn(styles.detail, styles.poolName)}>
+                            {pool.name}
+                          </div>
+                        </Tooltip>
                       )}
                       {pool.ticker && (
                         <div data-testid="rewards-pool-ticker" className={cn(styles.detail, styles.lightLabel)}>

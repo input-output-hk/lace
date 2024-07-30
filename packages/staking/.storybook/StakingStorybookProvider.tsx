@@ -48,7 +48,9 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
   multidelegationFirstVisitSincePortfolioPersistence: undefined,
   triggerMultidelegationFirstVisitSincePortfolioPersistence: undefined,
   walletAddress: undefined,
+  walletName: undefined,
   currentChain: undefined,
+  isSharedWallet: false,
 };
 
 // Please use <LocalThemeProvider> to present dark theme

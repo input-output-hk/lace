@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
+
 class DeleteFolderModal {
   private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="create-folder-modal-title"]';
@@ -5,23 +8,23 @@ class DeleteFolderModal {
   private CANCEL_BUTTON = '[data-testid="delete-folder-modal-cancel"]';
   private CONFIRM_BUTTON = '[data-testid="delete-folder-modal-confirm"]';
 
-  get container() {
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
   }
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.TITLE);
   }
 
-  get description() {
+  get description(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.DESCRIPTION);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.CANCEL_BUTTON);
   }
 
-  get confirmButton() {
+  get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.CONFIRM_BUTTON);
   }
 

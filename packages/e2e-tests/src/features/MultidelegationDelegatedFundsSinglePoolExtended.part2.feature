@@ -112,3 +112,43 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
       | 8BETA  | non-delegated | Stake all on this pool        | I see Changing Staking Preferences modal    |
       | 8BETA  | non-delegated | Select pool for multi-staking | I see portfolio bar with "1" selected pools |
 
+  @LW-10854
+  Scenario: Modal about multi-delegation and DApp issues is displayed for user delegating to single stake pool - "Add stake pool" option
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    And I click Manage button
+    And I click "Add stake pool" button
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps
+
+  @LW-10586
+  Scenario: Modal about multi-delegation and DApp issues is displayed for user that is delegating to single stake pool - select pool from list
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    And I open Browse pools tab
+    And I switch to list view on "Browse pools" tab
+    And I click on a random stake pool from the list
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Changing staking preferences?" modal
+    And I click "Add stake pool" button
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps
+
+  @LW-10588
+  Scenario: Modal about multi-delegation and DApp issues is displayed for user that is delegating to single stake pool - "Select pool for multi-staking" option
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    And I open Browse pools tab
+    And I click on a random stake pool from the grid
+    And I click on "Select pool for multi-staking" button on stake pool details drawer
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps

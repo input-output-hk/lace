@@ -9,24 +9,19 @@ import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
+import { ReactComponent as AwaitingSignatureIcon } from '../../assets/icons/awaiting-signatures.svg';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
-import { DelegationActivityType, TransactionActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
+import { DelegationActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
 import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
 import { useTranslation } from 'react-i18next';
 import { CoreTranslationKey } from '@lace/translation';
+import { ActivityStatus, TransactionActivityType } from '@ui/components/Transaction';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
-
-export enum ActivityStatus {
-  SUCCESS = 'success',
-  PENDING = 'sending',
-  ERROR = 'error',
-  SPENDABLE = 'spendable'
-}
 
 const DEFAULT_DEBOUNCE = 200;
 
@@ -85,6 +80,8 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
       return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
+    case ActivityStatus.AWAITING_COSIGNATURES:
+      return <Icon component={AwaitingSignatureIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
@@ -96,7 +93,8 @@ const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
   DelegationActivityType.delegationRegistration,
   ConwayEraCertificatesTypes.Registration,
   TransactionActivityType.self,
-  DelegationActivityType.delegation
+  DelegationActivityType.delegation,
+  TransactionActivityType.awaitingCosignatures
 ]);
 
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
@@ -166,6 +164,7 @@ export const AssetActivityItem = ({
   }, [debouncedSetText]);
 
   const isPendingTx = status === ActivityStatus.PENDING;
+  const isAwaitingCoSigningTx = status === ActivityStatus.AWAITING_COSIGNATURES;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
@@ -210,16 +209,22 @@ export const AssetActivityItem = ({
               ? t('core.assetActivityItem.entry.name.sending')
               : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
           </h6>
-          {descriptionContent}
+          {isAwaitingCoSigningTx ? (
+            <p data-testid="timestamp" className={styles.description}>
+              {t('core.assetActivityItem.entry.name.awaitingCosignatures')}
+            </p>
+          ) : (
+            descriptionContent
+          )}
         </div>
       </div>
       <div data-testid="asset-amount" className={styles.rightSide}>
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.pendingNegativeBalance]: isNegativeBalance && status === ActivityStatus.PENDING,
+            [styles.pendingNegativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx),
             [styles.positiveBalance]: !isNegativeBalance,
-            [styles.negativeBalance]: isNegativeBalance && status !== ActivityStatus.PENDING
+            [styles.negativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx)
           })}
           ref={ref}
         >

@@ -1,11 +1,16 @@
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
+import { GenerateSharedWalletKeyFn } from '../add-shared-wallet';
 import {
-  GenerateSharedKeysStep,
-  stateCopyKeys,
+  GenerateSharedWalletKeyStep,
+  stateCopyKey,
   stateEnterPassword,
-} from '../add-shared-wallet/generate-keys-flow/Store/state';
-import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper, sharedKeys } from './AddSharedWalletStorybookHelper';
+} from '../add-shared-wallet/generate-key-flow/Store/state';
+import {
+  AddSharedWalletFlowType,
+  AddSharedWalletStorybookHelper,
+  sharedWalletKey,
+} from './AddSharedWalletStorybookHelper';
 
 const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
   component: AddSharedWalletStorybookHelper,
@@ -24,7 +29,29 @@ type Story = StoryObj<typeof AddSharedWalletStorybookHelper>;
 
 export const EnterPassword: Story = {
   name: 'EnterPassword',
-  render: () => <AddSharedWalletStorybookHelper modalOpen initialFlow={AddSharedWalletFlowType.KeysDerivation} />,
+  render: () => <AddSharedWalletStorybookHelper modalOpen initialFlow={AddSharedWalletFlowType.KeyDerivation} />,
+};
+
+const failingGenerateKey: GenerateSharedWalletKeyFn = () => {
+  const oneSecond = 1000;
+  // eslint-disable-next-line promise/param-names
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Some unexpected error')), oneSecond));
+};
+export const EnterPasswordFailing: Story = {
+  name: 'EnterPassword - failing key generation',
+  render: () => (
+    <AddSharedWalletStorybookHelper
+      modalOpen
+      initialFlow={AddSharedWalletFlowType.KeyDerivation}
+      generateKey={failingGenerateKey}
+      keyGenerationInitialState={stateEnterPassword({
+        loading: false,
+        passwordErrorType: undefined,
+        sharedWalletKey: undefined,
+        step: GenerateSharedWalletKeyStep.EnterPassword,
+      })}
+    />
+  ),
 };
 
 export const EnterIncorrectPassword: Story = {
@@ -32,13 +59,12 @@ export const EnterIncorrectPassword: Story = {
   render: () => (
     <AddSharedWalletStorybookHelper
       modalOpen
-      initialFlow={AddSharedWalletFlowType.KeysDerivation}
-      keysGenerationInitialState={stateEnterPassword({
+      initialFlow={AddSharedWalletFlowType.KeyDerivation}
+      keyGenerationInitialState={stateEnterPassword({
         loading: false,
-        passwordErrorMessage: 'Incorrect password',
-        sharedKeys: undefined,
-        sharedKeysCollapsed: undefined,
-        step: GenerateSharedKeysStep.EnterPassword,
+        passwordErrorType: 'invalid-password',
+        sharedWalletKey: undefined,
+        step: GenerateSharedWalletKeyStep.EnterPassword,
       })}
     />
   ),
@@ -49,13 +75,12 @@ export const CopyKeys: Story = {
   render: () => (
     <AddSharedWalletStorybookHelper
       modalOpen
-      initialFlow={AddSharedWalletFlowType.KeysDerivation}
-      keysGenerationInitialState={stateCopyKeys({
+      initialFlow={AddSharedWalletFlowType.KeyDerivation}
+      keyGenerationInitialState={stateCopyKey({
         loading: undefined,
-        passwordErrorMessage: undefined,
-        sharedKeys,
-        sharedKeysCollapsed: true,
-        step: GenerateSharedKeysStep.CopyKeys,
+        passwordErrorType: undefined,
+        sharedWalletKey,
+        step: GenerateSharedWalletKeyStep.CopyKey,
       })}
     />
   ),

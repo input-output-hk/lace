@@ -18,10 +18,17 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
   const {
     submittingState: { isRestaking },
     analytics,
+    isSharedWallet,
   } = useOutsideHandles();
   const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
 
   const { title, description } = useMemo(() => {
+    if (isSharedWallet) {
+      return {
+        description: t('drawer.success.sign.subTitle'),
+        title: t('drawer.success.sign.title'),
+      };
+    }
     // un-delegation case
     if (draftPortfolio?.length === 0) {
       return {
@@ -39,7 +46,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
       description: t('drawer.success.subTitle'),
       title: t('drawer.success.title'),
     };
-  }, [draftPortfolio, isRestaking, t]);
+  }, [draftPortfolio, isRestaking, isSharedWallet, t]);
 
   useEffect(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayView);
@@ -59,6 +66,7 @@ export const TransactionSuccessFooter = (): React.ReactElement => {
     analytics,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     walletStoreWalletType: walletType,
+    isSharedWallet,
   } = useOutsideHandles();
   const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
@@ -81,7 +89,7 @@ export const TransactionSuccessFooter = (): React.ReactElement => {
         size="large"
         data-testid="transaction-success-footer-close-button"
       >
-        {t('general.button.close')}
+        {isSharedWallet ? t('general.button.view-co-signers') : t('general.button.close')}
       </Button>
     </div>
   );

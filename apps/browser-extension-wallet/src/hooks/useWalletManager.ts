@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Wallet } from '@lace/cardano';
 import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
@@ -37,7 +37,17 @@ import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
-import { buildSharedWalletScript, QuorumOptionValue, QuorumRadioOption, ScriptKind } from '@lace/core';
+import {
+  buildSharedWalletScript,
+  CoSigner,
+  paymentScriptKeyPath,
+  QuorumOptionValue,
+  QuorumRadioOption,
+  ScriptKind,
+  stakingScriptKeyPath,
+  GenerateSharedWalletKeyFn,
+  makeGenerateSharedWalletKey
+} from '@lace/core';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -54,9 +64,10 @@ interface CreateSharedWalletParams {
   name: string;
   accountIndex?: number;
   chainId?: Wallet.Cardano.ChainId;
-  publicKeys: Wallet.Crypto.Bip32PublicKeyHex[];
+  coSigners: CoSigner[];
   ownSignerWalletId: WalletId;
   quorumRules: QuorumOptionValue;
+  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
 export interface CreateHardwareWallet {
@@ -114,7 +125,8 @@ export interface UseWalletManager {
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
-  generateSharedWalletKey: (password: string, walletId: WalletId) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+  generateSharedWalletKey: GenerateSharedWalletKeyFn;
+  saveSharedWalletKey: (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex) => Promise<void>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -768,36 +780,36 @@ export const useWalletManager = (): UseWalletManager => {
     [cardanoWallet]
   );
 
-  const generateSharedWalletKey = useCallback(
-    async (password: string, walletId: WalletId): Promise<Wallet.Crypto.Bip32PublicKeyHex> => {
-      const chainId = getCurrentChainId();
-      const mnemonic = await getMnemonic(Buffer.from(password));
+  const generateSharedWalletKey = useMemo(
+    () =>
+      makeGenerateSharedWalletKey({
+        chainId: getCurrentChainId(),
+        getMnemonic
+      }),
+    [getCurrentChainId, getMnemonic]
+  );
+
+  const saveSharedWalletKey = useCallback<UseWalletManager['saveSharedWalletKey']>(
+    async (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> => {
+      if (!cardanoWallet) {
+        throw new Error('Active wallet data not available');
+      }
+      const { walletId } = cardanoWallet.source.wallet;
       const [wallets] = await firstValueFrom(combineLatest([walletRepository.wallets$, walletManager.activeWalletId$]));
-      const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-        {
-          chainId,
-          getPassphrase: async () => Buffer.from(password, 'utf8'),
-          mnemonicWords: mnemonic,
-          accountIndex: 0,
-          purpose: KeyManagement.KeyPurpose.MULTI_SIG
-        },
-        {
-          bip32Ed25519: Wallet.bip32Ed25519,
-          logger
-        }
-      );
+      const activeWallet = wallets.find(({ walletId: id }) => id === walletId);
+      if (!activeWallet) {
+        throw new Error('Failed to identify an active wallet data');
+      }
 
       await walletRepository.updateWalletMetadata({
         walletId,
         metadata: {
-          ...wallets.find(({ walletId: id }) => id === walletId).metadata,
-          extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+          ...activeWallet.metadata,
+          multiSigExtendedPublicKey: sharedWalletKey
         }
       });
-
-      return keyAgent.extendedAccountPublicKey;
     },
-    [getCurrentChainId, getMnemonic]
+    [cardanoWallet]
   );
 
   const createInMemorySharedWallet = useCallback(
@@ -805,19 +817,12 @@ export const useWalletManager = (): UseWalletManager => {
       accountIndex = 0,
       name,
       chainId = getCurrentChainId(),
-      publicKeys,
       ownSignerWalletId,
-      quorumRules
+      quorumRules,
+      coSigners,
+      sharedWalletKey
     }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
-      const paymentScriptKeyPath = {
-        index: 0,
-        role: KeyManagement.KeyRole.External
-      };
-
-      const stakingScriptKeyPath = {
-        index: 0,
-        role: KeyManagement.KeyRole.Stake
-      };
+      const publicKeys = coSigners.map((c: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(c.sharedWalletKey));
 
       let scriptKind: ScriptKind;
       if (quorumRules.option === QuorumRadioOption.AllAddresses) {
@@ -841,10 +846,18 @@ export const useWalletManager = (): UseWalletManager => {
       });
 
       const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name },
+        metadata: {
+          name,
+          coSigners: coSigners.map((signer) => ({
+            name: signer.name,
+            sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
+          })),
+          // TODO: LW-11069 multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
+          multiSigExtendedPublicKey: sharedWalletKey
+        },
         ownSigners: [
           {
-            accountIndex: 0,
+            accountIndex,
             paymentScriptKeyPath,
             purpose: KeyManagement.KeyPurpose.MULTI_SIG,
             stakingScriptKeyPath,
@@ -857,6 +870,14 @@ export const useWalletManager = (): UseWalletManager => {
       };
 
       const scriptWalletId = await walletRepository.addWallet(createScriptWalletProps);
+
+      await walletRepository.addAccount({
+        accountIndex,
+        extendedAccountPublicKey: sharedWalletKey,
+        metadata: { name: defaultAccountName(accountIndex) },
+        purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+        walletId: ownSignerWalletId
+      });
 
       await walletManager.activate({
         walletId: scriptWalletId,
@@ -926,6 +947,7 @@ export const useWalletManager = (): UseWalletManager => {
     walletRepository,
     getMnemonic,
     enableCustomNode,
-    generateSharedWalletKey
+    generateSharedWalletKey,
+    saveSharedWalletKey
   };
 };
