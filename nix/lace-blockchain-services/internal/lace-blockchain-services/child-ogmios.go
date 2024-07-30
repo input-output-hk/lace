@@ -36,7 +36,7 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			ogmiosUrl := fmt.Sprintf("http://127.0.0.1:%d", *shared.OgmiosPort)
-			err := probeHttp200(ogmiosUrl + "/health", 1 * time.Second)
+			err := probeHttpFor([]int{ 200, 202 }, ogmiosUrl + "/health", 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
 				statusCh <- StatusAndUrl {
