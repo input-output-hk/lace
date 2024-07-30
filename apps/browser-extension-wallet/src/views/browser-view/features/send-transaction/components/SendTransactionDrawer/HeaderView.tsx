@@ -193,7 +193,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
 
   return (
     <DrawerNavigation
-      title={!isPopupView ? <div>{t('core.sendReceive.send')}</div> : undefined}
+      title={!isPopupView ? <div>{t('browserView.transaction.send.drawer.send')}</div> : undefined}
       onArrowIconClick={shouldRenderArrow ? onArrowIconClick : undefined}
       rightActions={
         shouldDisplayAdvancedBtn ? (
@@ -240,6 +240,7 @@ export const useGetHeaderText = (): Record<
 
   return {
     [Sections.FORM]: { title: 'browserView.transaction.send.drawer.newTransaction' },
+    [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: {},
     [Sections.SUMMARY]: isSharedWallet
       ? {}
       : {
@@ -275,9 +276,10 @@ export const HeaderTitle = ({
   const shouldDisplayTitle = ![Sections.FORM, Sections.FAIL_TX, Sections.UNAUTHORIZED_TX].includes(
     section.currentSection
   );
-  const title = shouldDisplayTitle
-    ? t(headerText[section.currentSection].title, { name: headerText[section.currentSection].name })
-    : undefined;
+  const title =
+    shouldDisplayTitle && headerText[section.currentSection]?.title
+      ? t(headerText[section.currentSection].title, { name: headerText[section.currentSection].name })
+      : undefined;
   const subtitle = headerText[section.currentSection]?.subtitle
     ? t(headerText[section.currentSection].subtitle)
     : undefined;
