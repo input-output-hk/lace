@@ -1,0 +1,23 @@
+.textArea {
+  height: 136px !important;
+  overflow-y: auto;
+  -webkit-text-security: disc;
+}
+
+.validationContainer {
+  height: 16px;
+  padding-left: 24px;
+  fill: var(--data-green);
+  stroke: var(--data-green);
+}
+
+.privateKeyEntryMethod {
+  label[for='pgp-private-key-upload'] {
+    height: 136px !important;
+  }
+  > div,
+  form,
+  .pgpKeyBlockWrapper {
+    width: 100%;
+  }
+}
