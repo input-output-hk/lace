@@ -9,7 +9,12 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
-  const { back, createWalletData, finalizeWalletRestoration, next } = useRestoreWallet();
+  const {
+    back,
+    createWalletData,
+    finalizeWalletRestoration,
+    next,
+  } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { t } = useTranslation();
