@@ -31,6 +31,9 @@ inputs:
     description: 'Banxa`s integration URL'
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
+  CARDANO_SERVICES_URL_PREPROD:
+    description: 'Url for preprod env'
+    required: false
 
 runs:
   using: 'composite'
@@ -52,8 +55,8 @@ runs:
       id: check-build-exists
       run: |
         ART_ID=$(curl -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}" https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-        if [ "$ART_ID" == "null" ]; then
-          echo "No Lace build artifact found, will build it now"
+        if ([ "$ART_ID" == "null" ] || [[ "${CARDANO_SERVICES_URL_PREPROD}" == *"staging"* ]]) then
+          echo "No Lace build artifact found or it is different than dev, will build it now"
           echo "build_exists=false" >> $GITHUB_OUTPUT
         else
           curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"

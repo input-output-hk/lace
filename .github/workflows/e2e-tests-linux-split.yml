@@ -15,8 +15,10 @@ on:
           - chrome
           - edge
       network:
+        description: 'network to use'
+        required: true
+        default: 'preprod'
         type: choice
-        description: network to use
         options:
           - preprod
           - mainnet
@@ -35,16 +37,25 @@ on:
         description: 'Run only smoke tests'
         required: true
         default: false
+      preprod_env:
+        type: choice
+        required: true
+        default: dev
+        description: 'preprod env to use'
+        options:
+          - dev
+          - staging
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || false }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only }} | preprod env: ${{ github.event.inputs.preprod_env }}"
 
 env:
-  BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
-  NETWORK: ${{ github.event.inputs.network || 'preprod' }}
+  BROWSER: ${{ github.event.inputs.browser }}
+  NETWORK: ${{ github.event.inputs.network }}
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
+  PREPROD_ENV: ${{ github.event.inputs.preprod_env }}
 
 jobs:
   prereq:
@@ -68,8 +79,8 @@ jobs:
         id: check-build-exists
         run: |
           ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-          if [ "$ART_ID" == "null" ]; then
-            echo "No Lace build artifact found, will build it now"
+          if ([ "$ART_ID" == "null" ] || [ "${PREPROD_ENV}" != "dev" ]) then
+            echo "No Lace build artifact found or it is different than dev, will build it now"
             echo "build_exists=false" >> $GITHUB_OUTPUT
           else
             echo "Lace build artifact found no need to build again"
@@ -81,6 +92,7 @@ jobs:
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CARDANO_SERVICES_URL_PREPROD: "https://${PREPROD_ENV}-preprod.lw.iog.io"
 
   tests-run-split:
     if: always()
@@ -124,6 +136,7 @@ jobs:
           browser=${BROWSER}
           platform=Linux
           smoke_only=${{ needs.prereq.outputs.smoke_only }}
+          preprod_env=${PREPROD_ENV}
           " > environment.properties
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
@@ -142,14 +155,14 @@ jobs:
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.prereq.outputs.smoke_only }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.prereq.outputs.smoke_only }} | preprod env: ${{ env.PREPROD_ENV }}" >> $GITHUB_STEP_SUMMARY
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
         if: always()
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.prereq.outputs.smoke_only }}'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.prereq.outputs.smoke_only }}  | preprod env: ${{ env.PREPROD_ENV }}'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
