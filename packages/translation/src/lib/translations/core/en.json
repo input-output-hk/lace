@@ -500,6 +500,7 @@
   "core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel": "Confirm password",
   "core.walletNameAndPasswordSetupStep.description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
   "core.walletNameAndPasswordSetupStep.enterWallet": "Enter wallet",
+  "core.walletNameAndPasswordSetupStep.generatePaperWallet": "Generate paper wallet",
   "core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger.",
   "core.walletNameAndPasswordSetupStep.forgotPasswordSubtitle": "You'll use this to log into your wallet and make transactions.",
   "core.walletNameAndPasswordSetupStep.forgotPasswordTitle": "Set up your new password",
@@ -617,5 +618,17 @@
   "core.walletSetupWalletNameStep.maxCharacters": "Max. 20 characters",
   "core.walletSetupWalletNameStep.nameYourWallet": "Name your wallet",
   "core.walletSetupWalletNameStep.walletName": "Wallet name",
-  "core.nftDetail.directory": "Folder"
+  "core.nftDetail.directory": "Folder",
+  "core.walletSetup.recoveryMethod": "Recovery method",
+  "core.walletSetup.recoveryDetails": "Recovery details",
+  "core.paperWallet.savePaperWallet.walletName": "{{walletName}}_PaperWallet.pdf",
+  "core.paperWallet.savePaperWallet.contains": "Contains:",
+  "core.paperWallet.savePaperWallet.privateQrTitle": "Private QR code",
+  "core.paperWallet.savePaperWallet.privateQrDescription": "This is an encrypted backup of your wallet seed phrase. You can use this to restore your wallet in Lace if needed.",
+  "core.paperWallet.savePaperWallet.publicQrTitle": "Public QR Code",
+  "core.paperWallet.savePaperWallet.publicQrDescription": "This is the public address of your new wallet. You can show this to others when transacting to receive funds.",
+  "core.paperWallet.securePaperWallet.pgpPublicKeyLabel": "Your public PGP key block",
+  "core.paperWallet.securePaperWallet.pgpPublicKeyReference": "Optional PGP key reference",
+  "core.paperWallet.privatePgpKeyLabel": "Your private PGP key block",
+  "core.paperWallet.privatePgpKeyPassphraseLabel": "PGP passphrase"
 }
