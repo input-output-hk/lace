@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import { CreateWalletParams } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
@@ -6,6 +7,9 @@ import { useHistory } from 'react-router';
 import { useHotWalletCreation } from '../useHotWalletCreation';
 import { useWalletOnboarding } from '../walletOnboardingContext';
 import { WalletCreateStep } from './types';
+import { RecoveryMethod } from '../types';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { PublicPgpKeyData } from '@src/types';
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
 
@@ -15,13 +19,16 @@ interface State {
   next: () => Promise<void>;
   onNameAndPasswordChange: OnNameAndPasswordChange;
   step: WalletCreateStep;
+  recoveryMethod: RecoveryMethod;
+  setRecoveryMethod: (value: RecoveryMethod) => void;
+  pgpInfo: PublicPgpKeyData;
+  setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>;
 }
 
 interface Props {
   children: (state: State) => React.ReactNode;
 }
 
-// eslint-disable-next-line unicorn/no-null
 const CreateWalletContext = createContext<State>(null);
 
 export const useCreateWallet = (): State => {
@@ -33,6 +40,8 @@ export const useCreateWallet = (): State => {
 export const CreateWalletProvider = ({ children }: Props): React.ReactElement => {
   const history = useHistory();
   const { postHogActions, setFormDirty } = useWalletOnboarding();
+  const posthog = usePostHogClientContext();
+  const paperWalletEnabled = posthog?.featureFlags['create-paper-wallet'] === true;
   const {
     clearSecrets,
     createWallet: createHotWallet,
@@ -42,8 +51,14 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   } = useHotWalletCreation({
     initialMnemonic: Wallet.KeyManagement.util.generateMnemonicWords()
   });
-  const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.RecoveryPhraseWriteDown);
-
+  const [step, setStep] = useState<WalletCreateStep>(
+    paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : WalletCreateStep.RecoveryPhraseWriteDown
+  );
+  const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
+  const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>({
+    pgpPublicKey: null,
+    pgpKeyReference: null
+  });
   const generateMnemonic = useCallback(() => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Wallet.KeyManagement.util.generateMnemonicWords() }));
   }, [setCreateWalletData]);
@@ -66,27 +81,54 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
 
   const next = useCallback(async () => {
     switch (step) {
+      case WalletCreateStep.ChooseRecoveryMethod: {
+        if (recoveryMethod === 'mnemonic') {
+          setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+          break;
+        }
+        setStep(WalletCreateStep.SecurePaperWallet);
+        break;
+      }
       case WalletCreateStep.RecoveryPhraseWriteDown: {
         setFormDirty(true);
         setStep(WalletCreateStep.RecoveryPhraseInput);
         break;
       }
+      case WalletCreateStep.SecurePaperWallet:
       case WalletCreateStep.RecoveryPhraseInput: {
         setStep(WalletCreateStep.Setup);
         break;
       }
       case WalletCreateStep.Setup: {
+        if (recoveryMethod === 'mnemonic') {
+          await finalizeWalletCreation();
+          history.push(walletRoutePaths.assets);
+          break;
+        }
+        setStep(WalletCreateStep.SavePaperWallet);
+        break;
+      }
+      case WalletCreateStep.SavePaperWallet: {
         await finalizeWalletCreation();
-        history.push(walletRoutePaths.assets);
         break;
       }
     }
-  }, [finalizeWalletCreation, history, setFormDirty, step]);
+  }, [finalizeWalletCreation, history, setFormDirty, step, recoveryMethod]);
 
   const back = useCallback(() => {
     switch (step) {
-      case WalletCreateStep.RecoveryPhraseWriteDown: {
+      case WalletCreateStep.ChooseRecoveryMethod: {
         history.push(walletRoutePaths.newWallet.root);
+        break;
+      }
+      case WalletCreateStep.RecoveryPhraseWriteDown: {
+        paperWalletEnabled
+          ? setStep(WalletCreateStep.ChooseRecoveryMethod)
+          : history.push(walletRoutePaths.newWallet.root);
+        break;
+      }
+      case WalletCreateStep.SecurePaperWallet: {
+        setStep(WalletCreateStep.ChooseRecoveryMethod);
         break;
       }
       case WalletCreateStep.RecoveryPhraseInput: {
@@ -96,21 +138,43 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
         break;
       }
       case WalletCreateStep.Setup: {
-        setStep(WalletCreateStep.RecoveryPhraseInput);
+        if (recoveryMethod === 'mnemonic') {
+          setStep(WalletCreateStep.RecoveryPhraseInput);
+          break;
+        }
+        setStep(WalletCreateStep.SecurePaperWallet);
+        break;
+      }
+      case WalletCreateStep.SavePaperWallet: {
+        setStep(WalletCreateStep.Setup);
         break;
       }
     }
-  }, [generateMnemonic, history, setFormDirty, step]);
+  }, [generateMnemonic, history, setFormDirty, step, recoveryMethod, paperWalletEnabled]);
 
   const state = useMemo(
-    () => ({
+    (): State => ({
       back,
       createWalletData,
       next,
       onNameAndPasswordChange,
-      step
+      step,
+      recoveryMethod,
+      setRecoveryMethod,
+      pgpInfo,
+      setPgpInfo
     }),
-    [back, createWalletData, next, onNameAndPasswordChange, step]
+    [
+      back,
+      createWalletData,
+      next,
+      onNameAndPasswordChange,
+      step,
+      recoveryMethod,
+      setRecoveryMethod,
+      pgpInfo,
+      setPgpInfo
+    ]
   );
 
   return <CreateWalletContext.Provider value={state}>{children(state)}</CreateWalletContext.Provider>;

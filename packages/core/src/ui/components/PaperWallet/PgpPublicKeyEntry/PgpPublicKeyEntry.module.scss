@@ -1,0 +1,14 @@
+@import '../../../../../../common/src/ui/styles/abstracts/mixins';
+
+.textArea {
+  min-height: 182px !important;
+}
+
+.textAreaContainer {
+  overflow-y: auto;
+  @include scroll-bar-style;
+}
+
+.wrapper {
+  max-height: 182px;
+}
