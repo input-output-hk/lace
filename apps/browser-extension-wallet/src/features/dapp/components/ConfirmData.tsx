@@ -45,8 +45,8 @@ export const DappConfirmData = (): React.ReactElement => {
   } = useViewsFlowContext();
   const { isHardwareWallet } = useWalletStore();
   const { t } = useTranslation();
-  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappDataSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappDataSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const analytics = useAnalyticsContext();
@@ -90,8 +90,8 @@ export const DappConfirmData = (): React.ReactElement => {
 
   useEffect(() => {
     if (!req) return;
-    const dataFromHex = fromHex(req.signContext.payload || req.blob);
-    const txDataAddress = req.signContext.address || `${req.derivationPath.role}/${req.derivationPath.index}`;
+    const dataFromHex = fromHex(req.signContext.payload);
+    const txDataAddress = req.signContext.signWith;
     const jsonStructureOrHexString = {
       address: txDataAddress,
       dataToSign: hasJsonStructure(dataFromHex)

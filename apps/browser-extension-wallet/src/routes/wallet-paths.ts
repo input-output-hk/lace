@@ -40,6 +40,8 @@ export const dAppRoutePaths = {
   dappConnect: '/dapp/connect',
   dappTxSignFailure: '/dapp/transaction/failure',
   dappTxSignSuccess: '/dapp/transaction/success',
+  dappDataSignFailure: '/dapp/data/failure',
+  dappDataSignSuccess: '/dapp/data/success',
   dappSignTx: '/dapp/sign-tx',
   dappSubmitTx: '/dapp/submit-tx',
   dappSignData: '/dapp/sign-data',
