@@ -16,7 +16,7 @@ import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.co
 import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
 import { useKeyboardShortcut } from '@lace/common';
 
-export type WalletSetupMnemonicStage = 'writedown' | 'input';
+export type WalletSetupMnemonicStage = 'recoverymethod' | 'writedown' | 'input';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
@@ -42,6 +42,7 @@ export interface WalletSetupMnemonicStepProps {
   renderVideoPopupContent: (params: { onClose: () => void }) => React.ReactNode;
   onCopyToClipboard?: () => void;
   onPasteFromClipboard?: () => void;
+  paperWalletEnabled: boolean;
 }
 
 export const WalletSetupMnemonicStepRevamp = ({
@@ -55,7 +56,8 @@ export const WalletSetupMnemonicStepRevamp = ({
   renderVideoPopupContent,
   onWatchVideoClick,
   onCopyToClipboard,
-  onPasteFromClipboard
+  onPasteFromClipboard,
+  paperWalletEnabled
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
   const [mnemonicConfirm, setMnemonicConfirm] = useState<string[]>([]);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -155,7 +157,10 @@ export const WalletSetupMnemonicStepRevamp = ({
         description={subtitle}
         onBack={handleBack}
         onNext={handleNext}
-        currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+        currentTimelineStep={
+          paperWalletEnabled ? WalletTimelineSteps.RECOVERY_DETAILS : WalletTimelineSteps.RECOVERY_PHRASE
+        }
+        paperWalletEnabled={paperWalletEnabled}
         customAction={
           <Tooltip
             placement="top"

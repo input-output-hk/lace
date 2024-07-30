@@ -7,7 +7,7 @@ import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
   const { postHogActions } = useWalletOnboarding();
-  const { back, createWalletData, next, onNameAndPasswordChange } = useCreateWallet();
+  const { back, createWalletData, next, onNameAndPasswordChange, recoveryMethod } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -20,13 +20,19 @@ export const Setup = (): JSX.Element => {
     confirmPasswordInputLabel: t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel'),
     nameRequiredMessage: t('core.walletNameAndPasswordSetupStep.nameRequiredMessage'),
     noMatchPassword: t('core.walletNameAndPasswordSetupStep.noMatchPassword'),
-    confirmButton: t('core.walletNameAndPasswordSetupStep.enterWallet'),
+    confirmButton:
+      recoveryMethod === 'mnemonic'
+        ? t('core.walletNameAndPasswordSetupStep.enterWallet')
+        : t('core.walletNameAndPasswordSetupStep.generatePaperWallet'), // If using paper wallet, there is another required step before entering the wallet
     secondLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback'),
     firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
   const onNext = async () => {
-    void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
+    if (recoveryMethod === 'mnemonic') {
+      void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
+    }
+    // TODO void analytics.sendEventToPostHog(postHogActions.create.GENERATE_PAPER_WALLET);
     await next();
   };
 
