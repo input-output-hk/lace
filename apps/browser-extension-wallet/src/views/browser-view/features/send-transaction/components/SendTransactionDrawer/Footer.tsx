@@ -167,32 +167,36 @@ export const Footer = withAddressBookContext(
 
     const signAndSubmitTransaction = useCallback(async () => {
       if (isSharedWallet) {
-        let sharedWalletTxCbor: Wallet.TxCBOR;
-        if (builtTxData.importedSharedWalletTx) {
-          const { auxiliaryData, body, id, witness } = builtTxData.importedSharedWalletTx.toCore();
-          const txWithOwnSignature = await inMemoryWallet.finalizeTx({
-            tx: {
-              body,
-              hash: id
-            },
-            auxiliaryData,
-            bodyCbor: builtTxData.importedSharedWalletTx.body().toCbor()
-          });
-          builtTxData.importedSharedWalletTx.setWitnessSet(
-            Serialization.TransactionWitnessSet.fromCore(mergeWitnesses(txWithOwnSignature.witness, witness))
-          );
-          sharedWalletTxCbor = builtTxData.importedSharedWalletTx.toCbor();
-        } else {
-          const signedTx = await inMemoryWallet.finalizeTx({
-            tx: await builtTxData.tx.inspect()
-          });
-          sharedWalletTxCbor = Serialization.Transaction.fromCore(signedTx).toCbor();
-        }
+        try {
+          let sharedWalletTx: Serialization.Transaction;
+          if (builtTxData.importedSharedWalletTx) {
+            const { auxiliaryData, body, id, witness } = builtTxData.importedSharedWalletTx.toCore();
+            const txWithOwnSignature = await inMemoryWallet.finalizeTx({
+              tx: {
+                body,
+                hash: id
+              },
+              auxiliaryData,
+              bodyCbor: builtTxData.importedSharedWalletTx.body().toCbor()
+            });
+            builtTxData.importedSharedWalletTx.setWitnessSet(
+              Serialization.TransactionWitnessSet.fromCore(mergeWitnesses(txWithOwnSignature.witness, witness))
+            );
+            sharedWalletTx = builtTxData.importedSharedWalletTx;
+          } else {
+            const signedTx = await inMemoryWallet.finalizeTx({
+              tx: await builtTxData.tx.inspect()
+            });
+            sharedWalletTx = Serialization.Transaction.fromCore(signedTx);
+          }
 
-        const policy = await getSignPolicy('payment');
-        await (policy.requiredCosigners === 1
-          ? inMemoryWallet.submitTx(sharedWalletTxCbor)
-          : exportMultisigTransaction(sharedWalletTxCbor, sharedWalletKey, currentChain));
+          const policy = await getSignPolicy('payment');
+          await (policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size
+            ? inMemoryWallet.submitTx(sharedWalletTx.toCbor())
+            : exportMultisigTransaction(sharedWalletTx.toCbor(), sharedWalletKey, currentChain));
+        } catch (error) {
+          console.error('DEBUG', error);
+        }
       } else {
         const signedTx = await builtTxData.tx.sign();
         await inMemoryWallet.submitTx(signedTx);
@@ -324,8 +328,10 @@ export const Footer = withAddressBookContext(
     };
 
     const confirmDisable = useMemo(
-      () => !builtTxData.tx || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
-      [builtTxData.tx, hasInvalidOutputs, metadata]
+      () =>
+        (!builtTxData.importedSharedWalletTx && (!builtTxData.tx || hasInvalidOutputs)) ||
+        metadata?.length > METADATA_MAX_LENGTH,
+      [builtTxData.importedSharedWalletTx, builtTxData.tx, hasInvalidOutputs, metadata?.length]
     );
     const isSubmitDisabled = useMemo(
       () =>

@@ -4,7 +4,6 @@ import { useDrawer } from '@views/browser/stores';
 import { useBuiltTxState, useSections } from '../store';
 import { Serialization } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { Sections } from '@views/browser/features/send-transaction';
 
 export const ImportSharedWalletTransaction = (): JSX.Element => {
   const [config] = useDrawer();
@@ -32,7 +31,7 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
           importedSharedWalletTx
         });
 
-        setSection({ currentSection: Sections.SUMMARY });
+        setSection();
       }}
     />
   );
