@@ -10,7 +10,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export const CreateWallet = (): JSX.Element => {
   const posthog = usePostHogClientContext();
-  const paperWalletEnabled = posthog?.featureFlags['create-paper-wallet'] === true;
+  const paperWalletEnabled = posthog?.featureFlags?.['create-paper-wallet'] === true;
 
   return (
     <CreateWalletProvider>

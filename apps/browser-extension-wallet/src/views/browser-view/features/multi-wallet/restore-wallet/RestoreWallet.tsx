@@ -11,7 +11,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export const RestoreWallet = (): JSX.Element => {
   const posthog = usePostHogClientContext();
-  const paperWalletEnabled = posthog?.featureFlags['restore-paper-wallet'] === true;
+  const paperWalletEnabled = posthog?.featureFlags?.['restore-paper-wallet'] === true;
   return (
     <RestoreWalletProvider>
       {({ step }) => {

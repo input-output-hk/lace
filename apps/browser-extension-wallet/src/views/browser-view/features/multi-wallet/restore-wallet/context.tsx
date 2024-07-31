@@ -57,7 +57,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
   const { forgotPasswordFlowActive, postHogActions, setFormDirty } = useWalletOnboarding();
   const posthog = usePostHogClientContext();
   const paperWalletEnabled = useMemo(
-    () => posthog?.featureFlags['restore-paper-wallet'] === true,
+    () => posthog?.featureFlags?.['restore-paper-wallet'] === true,
     [posthog?.featureFlags]
   );
 

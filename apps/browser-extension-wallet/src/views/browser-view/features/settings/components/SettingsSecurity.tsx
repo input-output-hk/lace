@@ -31,7 +31,7 @@ export const SettingsSecurity = ({
   defaultMnemonic
 }: SettingsSecurityProps): React.ReactElement | null => {
   const posthog = usePostHogClientContext();
-  const paperWalletEnabled = posthog?.featureFlags['create-paper-wallet'] === true;
+  const paperWalletEnabled = posthog?.featureFlags?.['create-paper-wallet'] === true;
   const [isPassphraseSettingsDrawerOpen, setIsPassphraseSettingsDrawerOpen] = useState(false);
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
