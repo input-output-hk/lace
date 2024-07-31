@@ -54,8 +54,8 @@ export const SavePaperWallet: VFC = () => {
   const [hasStoredPaperWallet, setHasStoredPaperWallet] = useState(false);
   const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>({
     blob: null,
-    url: null,
     loading: true,
+    url: null,
     error: null
   });
 

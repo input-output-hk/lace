@@ -14,7 +14,7 @@ import {
   PrinterComponent as PrinterIcon
 } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletStore } from '@src/stores';
-import { getFingerprintFromPublicPgpKey } from '@src/utils/pgp';
+import { pgpPublicKeyVerification } from '@src/utils/pgp';
 import { Typography } from 'antd';
 import { config } from '@src/config';
 import { generatePaperWalletPdf } from '@src/utils/PaperWallet';
@@ -42,8 +42,6 @@ interface Validation {
   success?: string;
 }
 
-const WEAK_KEY_REGEX = new RegExp(/RSA keys shorter than 2047 bits are considered too weak./);
-
 const SecureStage = ({
   setPgpInfo,
   pgpInfo
@@ -53,34 +51,7 @@ const SecureStage = ({
 }) => {
   const [validation, setValidation] = useState<Validation>({ error: null, success: null });
 
-  const handlePgpPublicKeyBlockChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValidation({ error: null, success: null });
-    if (!e.target.value) return;
-    try {
-      const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: e.target.value });
-      setPgpInfo({
-        ...pgpInfo,
-        pgpPublicKey: e.target.value
-      });
-      setValidation({
-        error: null,
-        success: fingerPrint
-          .toUpperCase()
-          .match(/.{1,4}/g)
-          .join(' ')
-      });
-    } catch (error) {
-      if (error.message === 'Misformed armored text') {
-        setValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
-      } else if (error.message === 'no valid encryption key packet in key.') {
-        setValidation({ error: i18n.t('pgp.error.noValidEncryptionKeyPacket') });
-      } else if (WEAK_KEY_REGEX.test(error.message)) {
-        setValidation({ error: error.message });
-      } else if (error.message === 'PGP key is not public') {
-        setValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
-      }
-    }
-  };
+  const handlePgpPublicKeyBlockChange = pgpPublicKeyVerification(setPgpInfo, setValidation);
 
   const handlePgpReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPgpInfo({ ...pgpInfo, pgpKeyReference: e.target.value });
@@ -92,6 +63,7 @@ const SecureStage = ({
         handlePgpPublicKeyBlockChange={handlePgpPublicKeyBlockChange}
         handlePgpReferenceChange={handlePgpReferenceChange}
         validation={validation}
+        pgpInfo={pgpInfo}
       />
     </Flex>
   );
@@ -156,8 +128,8 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   });
   const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>({
     blob: null,
-    // url: null,
     loading: true,
+    url: null,
     error: null
   });
   const [password, setPassword] = useState<string>('');

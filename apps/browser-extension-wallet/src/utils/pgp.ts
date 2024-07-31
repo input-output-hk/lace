@@ -1,5 +1,10 @@
+/* eslint-disable unicorn/no-null */
 import { createMessage, decrypt, encrypt, readKey, readMessage, readPrivateKey, decryptKey } from 'openpgp';
 import type { Key, MaybeArray, Message, PartialConfig, PrivateKey, PublicKey } from 'openpgp';
+import { i18n } from '@lace/translation';
+import { PublicPgpKeyData } from '@src/types';
+
+export const WEAK_KEY_REGEX = new RegExp(/RSA keys shorter than 2047 bits are considered too weak./);
 
 /**
  * Reads an armored PGP public key and returns the corresponding OpenPGP key object.
@@ -152,3 +157,42 @@ export const decryptMessageWithPgp = async ({
   }
   return decrypted;
 };
+
+export const pgpPublicKeyVerification =
+  (
+    setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>,
+    setValidation: React.Dispatch<
+      React.SetStateAction<{
+        error?: string;
+        success?: string;
+      }>
+    >
+  ): ((e: React.ChangeEvent<HTMLTextAreaElement>) => Promise<void>) =>
+  async (e: React.ChangeEvent<HTMLTextAreaElement>): Promise<void> => {
+    setValidation({ error: null, success: null });
+    if (!e.target.value) return;
+    try {
+      const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: e.target.value });
+      setPgpInfo((prevState) => ({
+        ...prevState,
+        pgpPublicKey: e.target.value
+      }));
+      setValidation({
+        error: null,
+        success: fingerPrint
+          .toUpperCase()
+          .match(/.{1,4}/g)
+          .join(' ')
+      });
+    } catch (error) {
+      if (error.message === 'Misformed armored text') {
+        setValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
+      } else if (error.message === 'no valid encryption key packet in key.') {
+        setValidation({ error: i18n.t('pgp.error.noValidEncryptionKeyPacket') });
+      } else if (WEAK_KEY_REGEX.test(error.message)) {
+        setValidation({ error: error.message });
+      } else if (error.message === 'PGP key is not public') {
+        setValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
+      }
+    }
+  };

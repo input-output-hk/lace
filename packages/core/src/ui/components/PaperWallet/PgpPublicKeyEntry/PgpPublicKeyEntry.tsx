@@ -11,12 +11,17 @@ interface Props {
     error?: string;
     success?: string;
   };
+  pgpInfo: {
+    pgpPublicKey: string;
+    pgpKeyReference?: string;
+  };
 }
 
 export const PgpPublicKeyEntry = ({
   handlePgpPublicKeyBlockChange,
   handlePgpReferenceChange,
-  validation
+  validation,
+  pgpInfo
 }: Props): JSX.Element => (
   <Flex gap="$16" alignItems="stretch" flexDirection="column" w="$fill" h="$fill">
     <TextBox
@@ -25,6 +30,7 @@ export const PgpPublicKeyEntry = ({
       data-testid="pgp-public-key-reference"
       maxLength={30}
       w={'$fill'}
+      value={pgpInfo.pgpKeyReference}
     />
     <div className={styles.textAreaContainer}>
       <TextArea
@@ -34,6 +40,7 @@ export const PgpPublicKeyEntry = ({
         isResizable={false}
         className={styles.textArea}
         wrapperClassName={styles.wrapper}
+        value={pgpInfo.pgpPublicKey}
       />
     </div>
     <Flex
