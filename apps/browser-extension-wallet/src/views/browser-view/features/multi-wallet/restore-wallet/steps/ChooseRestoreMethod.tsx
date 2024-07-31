@@ -41,7 +41,14 @@ export const ChooseRestoreMethod: VFC = () => {
           <Trans
             i18nKey="paperWallet.chooseRestoreMethod.description"
             components={{
-              a: <a href={FAQ_URL} target="_blank" rel="noopener noreferrer" />
+              a: (
+                <a
+                  href={FAQ_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="faq-what-is-paper-wallet-url"
+                />
+              )
             }}
           />
         }
@@ -71,13 +78,13 @@ export const ChooseRestoreMethod: VFC = () => {
                       <Flex flexDirection={'column'}>
                         <Flex mb={'$8'}>{optionElement}</Flex>
                         <Box pl={'$40'}>
-                          <Text.Body.Normal weight="$medium" color="secondary">
+                          <Text.Body.Normal weight="$medium" color="secondary" data-testid="mnemonic-words-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.mnemonicDescription')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <MnemonicWordsIcon style={{ width: 100, height: 'auto' }} />
+                        <MnemonicWordsIcon style={{ width: 100, height: 'auto' }} data-testid="mnemonic-words-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>
@@ -100,13 +107,13 @@ export const ChooseRestoreMethod: VFC = () => {
                           {optionElement}
                         </Flex>
                         <Box pl={'$40'}>
-                          <Text.Body.Normal weight="$medium" color="secondary">
+                          <Text.Body.Normal weight="$medium" color="secondary" data-testid="mpaper-wallet-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.paperWallet.description')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <PaperWalletIcon style={{ width: 100, height: 'auto' }} />
+                        <PaperWalletIcon style={{ width: 100, height: 'auto' }} data-testid="mpaper-wallet-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>

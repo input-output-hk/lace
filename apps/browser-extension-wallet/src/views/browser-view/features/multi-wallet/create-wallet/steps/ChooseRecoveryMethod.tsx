@@ -40,7 +40,7 @@ export const ChooseRecoveryMethod: VFC = () => {
           <Trans
             i18nKey="paperWallet.chooseRestoreMethod.description"
             components={{
-              a: <a href={FAQ_URL} target="_blank" rel="noopener noreferrer" />
+              a: <a href={FAQ_URL} target="_blank" rel="noopener noreferrer" data-testid="faq-what-is-paper-wallet" />
             }}
           />
         }
@@ -70,13 +70,13 @@ export const ChooseRecoveryMethod: VFC = () => {
                       <Flex flexDirection={'column'}>
                         <Flex mb={'$8'}>{optionElement}</Flex>
                         <Box pl={'$40'}>
-                          <Text.Body.Normal weight="$medium" color="secondary">
+                          <Text.Body.Normal weight="$medium" color="secondary" data-testid="mnemonic-words-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.mnemonicDescription')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <MnemonicWordsIcon style={{ width: 100, height: 'auto' }} />
+                        <MnemonicWordsIcon style={{ width: 100, height: 'auto' }} data-testid="mnemonic-words-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>
@@ -97,24 +97,28 @@ export const ChooseRecoveryMethod: VFC = () => {
                       <Flex flexDirection={'column'}>
                         <Flex mb={'$8'} gap={'$8'} alignItems={'center'}>
                           <Flex>{optionElement}</Flex>
-                          <Text.Body.Small className={styles.advancedBadge}>
+                          <Text.Body.Small className={styles.advancedBadge} data-testid="paper-wallet-advanced-badge">
                             {i18n.t('paperWallet.chooseRecoveryMethod.advanced')}
                           </Text.Body.Small>
                         </Flex>
                         <Box pl={'$40'}>
-                          <Text.Body.Normal weight="$medium" color="secondary">
+                          <Text.Body.Normal weight="$medium" color="secondary" data-testid="paper-wallet-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.paperWallet.description')}
                           </Text.Body.Normal>
                         </Box>
                         <Flex ml={'$40'} gap={'$8'} mt={'$8'}>
-                          <KeyIcon width={20} height={20} />
-                          <Text.Label weight="$medium" className={styles.pgpInfoLabel}>
+                          <KeyIcon width={20} height={20} data-testid="paper-wallet-pgp-keys-icon" />
+                          <Text.Label
+                            weight="$medium"
+                            className={styles.pgpInfoLabel}
+                            data-testid="paper-wallet-pgp-keys-label"
+                          >
                             {i18n.t('paperWallet.chooseRecoveryMethod.pgpKeysRequired')}
                           </Text.Label>
                         </Flex>
                       </Flex>
                       <Flex>
-                        <PaperWalletIcon style={{ width: 100, height: 'auto' }} />
+                        <PaperWalletIcon style={{ width: 100, height: 'auto' }} data-testid="paper-wallet-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>
