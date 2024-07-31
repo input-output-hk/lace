@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { z } from 'zod';
+import { FileErrorMessage } from '@src/shared-wallets/types';
 
 const uint32Schema = z.number().int().nonnegative().max(4_294_967_295);
 
@@ -81,7 +82,7 @@ export const schemaValidator = z.preprocess((data) => {
     throw new z.ZodError([
       {
         code: 'custom',
-        message: "File is unrecognized: 'metadata' and 'nativeScript' fields are required.",
+        message: FileErrorMessage.UNRECOGNIZED,
         path: [],
       },
     ]);

@@ -17,3 +17,13 @@ export type MultisigTxData = {
   };
   version: string;
 };
+
+export enum FileErrorMessage {
+  GENERIC = 'Error parsing file',
+  INVALID_KEY = 'Invalid key',
+  UNRECOGNIZED = 'File is unrecognized',
+}
+
+export interface FileValidationError extends Error {
+  message: FileErrorMessage;
+}

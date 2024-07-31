@@ -1,9 +1,11 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { v1 as uuid } from 'uuid';
+import { z } from 'zod';
 import { PubkeyScript, schemaValidator } from '../../../shared-wallets/docs/schema/shared-wallet.schema';
+import { FileErrorMessage, FileValidationError } from '../../../shared-wallets/types';
 import { paymentScriptKeyPath } from '../../../shared-wallets/utils';
 import { CoSigner } from '../creation-flow';
-import { CreateWalletParams, FileErrorMessage, FileValidationError } from './types';
+import { CreateWalletParams } from './types';
 import { getHashFromPublicKey, getQuorumRulesByTag } from './utils';
 
 export const validateJson = (
@@ -41,7 +43,7 @@ export const validateJson = (
           },
         });
       } catch (error) {
-        reject(error);
+        reject({ message: (error as z.ZodError).issues[0].message });
       }
     });
 
