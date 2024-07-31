@@ -26,7 +26,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useSharedWalletData } from '@hooks';
+import { useHandleResolver, useLocalStorage, useNetwork, useSharedWalletData } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -41,7 +41,7 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction } from '@lace/core';
+import { exportMultisigTransaction, organizeMultiSigTransaction } from '@lace/core';
 import { mergeWitnesses } from '@views/browser/features/send-transaction/components/SendTransactionDrawer/utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
@@ -92,6 +92,10 @@ export const Footer = withAddressBookContext(
     const handleResolver = useHandleResolver();
     const { isMaxAdaLoading } = useMaxAdaStatus();
     const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
+    const [sharedWalletTransactions, { updateLocalStorage: updateSharedWalletTransactions }] = useLocalStorage(
+      'sharedWalletTransactions',
+      []
+    );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -190,10 +194,26 @@ export const Footer = withAddressBookContext(
             sharedWalletTx = Serialization.Transaction.fromCore(signedTx);
           }
 
+          updateSharedWalletTransactions([
+            ...sharedWalletTransactions.filter((tx) => tx.id.toString() !== sharedWalletTx.toCore().id.toString()),
+            {
+              id: sharedWalletTx.toCore().id.toString(),
+              tx: organizeMultiSigTransaction({
+                cborHex: sharedWalletTx.toCbor(),
+                publicKey: sharedWalletKey,
+                chainId: currentChain
+              })
+            }
+          ]);
+
           const policy = await getSignPolicy('payment');
           await (policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size
             ? inMemoryWallet.submitTx(sharedWalletTx.toCbor())
-            : exportMultisigTransaction(sharedWalletTx.toCbor(), sharedWalletKey, currentChain));
+            : exportMultisigTransaction({
+                cborHex: sharedWalletTx.toCbor(),
+                publicKey: sharedWalletKey,
+                chainId: currentChain
+              }));
         } catch (error) {
           console.error('DEBUG', error);
         }
@@ -213,7 +233,9 @@ export const Footer = withAddressBookContext(
       getSignPolicy,
       inMemoryWallet,
       isSharedWallet,
-      sharedWalletKey
+      sharedWalletKey,
+      sharedWalletTransactions,
+      updateSharedWalletTransactions
     ]);
 
     const handleVerifyPass = useCallback(async () => {

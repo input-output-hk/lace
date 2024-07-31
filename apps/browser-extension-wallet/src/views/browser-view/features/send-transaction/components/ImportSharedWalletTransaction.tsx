@@ -23,7 +23,7 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
         const { body, id } = importedSharedWalletTx.toCore();
 
         const ownAddresses = new Set([...(walletState?.addresses || [])].map((address) => address.address));
-        const filteredOutputs = body.outputs.map((o) => o).filter((o) => ownAddresses.has(o.address));
+        const filteredOutputs = body.outputs.map((o) => o).filter((o) => !ownAddresses.has(o.address));
 
         setBuiltTxData({
           uiTx: {
