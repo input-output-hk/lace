@@ -79,8 +79,14 @@ jobs:
         id: check-build-exists
         run: |
           ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-          if ([ "$ART_ID" == "null" ] || [ "${PREPROD_ENV}" != "dev" ]) then
-            echo "No Lace build artifact found or it is different than dev, will build it now"
+          if ([ "$ART_ID" != "null" ] && [ "${PREPROD_ENV}" != "dev" ]) then
+            echo "deleting existing artifact"
+            curl -X DELETE -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}" "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }}"
+            ART_ID="null"
+          fi
+
+          if ([ "$ART_ID" == "null" ]) then
+            echo "No Lace build artifact found, will build it now"
             echo "build_exists=false" >> $GITHUB_OUTPUT
           else
             echo "Lace build artifact found no need to build again"
