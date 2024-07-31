@@ -28,6 +28,7 @@ import { shuffle } from '../utils/arrayUtils';
 import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
 import ModalAssert from '../assert/modalAssert';
 import clipboard from 'clipboardy';
+import ChooseRecoveryMethodPageAssert from '../assert/onboarding/ChooseRecoveryMethodPageAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -441,4 +442,8 @@ Then(
 When(/^I saved test mnemonic for "([^"]*)" to clipboard$/, async (walletName: string) => {
   const mnemonic = String(getTestWallet(walletName)?.mnemonic);
   await clipboard.write(mnemonic);
+});
+
+Then(/^"Choose a recovery method" page is displayed$/, async () => {
+  await ChooseRecoveryMethodPageAssert.assertSeeChooseRecoveryMethodPage();
 });
