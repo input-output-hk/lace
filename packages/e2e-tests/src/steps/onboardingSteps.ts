@@ -417,8 +417,16 @@ When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order
 });
 
 Then(
-  /^"(Recovery phrase|Wallet setup|Enter wallet|Connect device)" step is marked as active on progress timeline$/,
-  async (step: 'Recovery phrase' | 'Wallet setup' | 'Enter wallet' | 'Connect device') => {
+  /^"(Recovery phrase|Wallet setup|Enter wallet|Connect device|Recovery details|Recovery method)" step is marked as active on progress timeline$/,
+  async (
+    step:
+      | 'Recovery phrase'
+      | 'Wallet setup'
+      | 'Enter wallet'
+      | 'Connect device'
+      | 'Recovery details'
+      | 'Recovery method'
+  ) => {
     await new OnboardingCommonAssert().assertSeeActiveStepOnProgressTimeline(step);
   }
 );
