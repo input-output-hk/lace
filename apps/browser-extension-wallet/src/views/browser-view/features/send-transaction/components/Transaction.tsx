@@ -69,6 +69,7 @@ export const Transaction = withAddressBookContext(
       [Sections.SUMMARY]: <SendTransactionSummary isPopupView={isPopupView} />,
       [Sections.CONFIRMATION]: <ConfirmPassword />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,
+      [Sections.COSIGNED_TX]: <TransactionSuccess isPartialSignature />,
       [Sections.FAIL_TX]: (
         <TransactionFail showCustomApiBanner={getCustomSubmitApiForNetwork(environmentName).status} />
       ),

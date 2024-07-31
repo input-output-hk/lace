@@ -25,7 +25,13 @@ import { Wallet } from '@lace/cardano';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import SignatureAddedImg from '@assets/icons/circle-check-gradient.svg';
 
-export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.ReactElement }): React.ReactElement => {
+export const TransactionSuccessView = ({
+  footerSlot,
+  isPartialSignature = false
+}: {
+  footerSlot?: React.ReactElement;
+  isPartialSignature?: boolean;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { builtTxData: { uiTx: { hash, fee } = {} } = {} } = useBuiltTxState();
   const { uiOutputs } = useOutputs();
@@ -33,8 +39,7 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   const analytics = useAnalyticsContext();
   const {
     inMemoryWallet,
-    walletUI: { cardanoCoin },
-    isSharedWallet
+    walletUI: { cardanoCoin }
   } = useWalletStore();
   const assets = useObservable(inMemoryWallet.assetInfo$);
   const [customAnalyticsProperties, setCustomAnalyticsProperties] = useState<TokenAnalyticsProperties[]>();
@@ -95,7 +100,7 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   return (
     <>
       <div className={styles.successTxContainer} data-testid="transaction-success-container">
-        {isSharedWallet ? (
+        {isPartialSignature ? (
           <ResultMessage
             customBgImg={SignatureAddedImg}
             title={t('sharedWallets.transaction.summary.unsubmitted.title')}

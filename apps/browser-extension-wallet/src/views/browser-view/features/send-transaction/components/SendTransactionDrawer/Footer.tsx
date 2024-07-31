@@ -207,13 +207,15 @@ export const Footer = withAddressBookContext(
           ]);
 
           const policy = await getSignPolicy('payment');
-          await (policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size
-            ? inMemoryWallet.submitTx(sharedWalletTx.toCbor())
-            : exportMultisigTransaction({
+          const isMultiSignatureComplete = policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
+          isMultiSignatureComplete
+            ? await inMemoryWallet.submitTx(sharedWalletTx.toCbor())
+            : await exportMultisigTransaction({
                 cborHex: sharedWalletTx.toCbor(),
                 publicKey: sharedWalletKey,
                 chainId: currentChain
-              }));
+              });
+          setSection({ currentSection: isMultiSignatureComplete ? Sections.SUCCESS_TX : Sections.COSIGNED_TX });
         } catch (error) {
           console.error('DEBUG', error);
         }
@@ -235,7 +237,8 @@ export const Footer = withAddressBookContext(
       isSharedWallet,
       sharedWalletKey,
       sharedWalletTransactions,
-      updateSharedWalletTransactions
+      updateSharedWalletTransactions,
+      setSection
     ]);
 
     const handleVerifyPass = useCallback(async () => {
@@ -245,7 +248,8 @@ export const Footer = withAddressBookContext(
       try {
         await withSignTxConfirmation(signAndSubmitTransaction, password);
         // Send amount of bundles as value
-        setSection({ currentSection: Sections.SUCCESS_TX });
+        // console.log("section here");
+        // setSection({ currentSection: Sections.SUCCESS_TX });
         setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
       } catch (error) {
         if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {

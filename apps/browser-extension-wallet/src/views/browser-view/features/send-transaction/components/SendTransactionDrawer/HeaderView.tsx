@@ -93,7 +93,7 @@ export const useHandleClose = (): {
   }, [hasOutput, setWarnigModalVisibility, isPopup, redirect, closeDrawer]);
 
   const onClose = useCallback(() => {
-    if (section.currentSection === Sections.SUCCESS_TX) {
+    if (section.currentSection === Sections.SUCCESS_TX || section.currentSection === Sections.COSIGNED_TX) {
       isPopup ? redirect() : closeDrawer();
       if (!isInMemoryWallet) window.location.reload();
     } else {
@@ -252,6 +252,7 @@ export const useGetHeaderText = (): Record<
       subtitle: 'browserView.transaction.send.signTransactionWithPassword'
     },
     [Sections.SUCCESS_TX]: {},
+    [Sections.COSIGNED_TX]: {},
     [Sections.FAIL_TX]: {},
     [Sections.UNAUTHORIZED_TX]: {},
     [Sections.ADDRESS_LIST]: { title: 'browserView.transaction.send.drawer.addressBook' },
