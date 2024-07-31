@@ -67,5 +67,5 @@ export interface ILocalStorage {
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
-  sharedWalletTransactions?: { id: string; tx: MultisigTxData }[];
+  sharedWalletTransactions?: Record<string, MultisigTxData>;
 }

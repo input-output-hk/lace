@@ -41,6 +41,7 @@ export interface BuiltTxData {
     validityInterval?: Wallet.Cardano.ValidityInterval;
   };
   importedSharedWalletTx?: Serialization.Transaction;
+  signatures?: Wallet.Cardano.Signatures;
   error?: string;
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];
 }

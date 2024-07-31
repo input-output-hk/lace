@@ -56,7 +56,7 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
     const [signPolicy, setSignPolicy] = useState<SignPolicy>();
     const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const { list: addressList } = useAddressBookContext();
-    const [sharedWalletTransactions] = useLocalStorage('sharedWalletTransactions', []);
+    const [sharedWalletTransactions] = useLocalStorage('sharedWalletTransactions', {});
 
     useEffect(() => {
       (async () => {
@@ -66,10 +66,10 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
         if (!coSigners) return;
 
         const currentTransactionDetail = activityDetail.activity as Wallet.Cardano.Tx;
-        const sharedWalletTransaction = sharedWalletTransactions.find((tx) => tx.id === currentTransactionDetail.id);
+        const sharedWalletTransaction = sharedWalletTransactions[currentTransactionDetail.id];
 
         const signatures = sharedWalletTransaction
-          ? Serialization.Transaction.fromCbor(Wallet.TxCBOR(sharedWalletTransaction.tx.transaction.cborHex)).toCore()
+          ? Serialization.Transaction.fromCbor(Wallet.TxCBOR(sharedWalletTransaction.transaction.cborHex)).toCore()
               .witness.signatures
           : currentTransactionDetail.witness.signatures;
 

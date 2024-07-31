@@ -75,7 +75,7 @@ export const Footer = withAddressBookContext(
     const { t } = useTranslation();
     const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
     const { hasInvalidOutputs } = useTransactionProps();
-    const { builtTxData } = useBuiltTxState();
+    const { builtTxData, setBuiltTxData } = useBuiltTxState();
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
     const { inMemoryWallet, isInMemoryWallet, walletType, isSharedWallet, currentChain } = useWalletStore();
@@ -94,7 +94,7 @@ export const Footer = withAddressBookContext(
     const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
     const [sharedWalletTransactions, { updateLocalStorage: updateSharedWalletTransactions }] = useLocalStorage(
       'sharedWalletTransactions',
-      []
+      {}
     );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
@@ -194,17 +194,15 @@ export const Footer = withAddressBookContext(
             sharedWalletTx = Serialization.Transaction.fromCore(signedTx);
           }
 
-          updateSharedWalletTransactions([
-            ...sharedWalletTransactions.filter((tx) => tx.id.toString() !== sharedWalletTx.toCore().id.toString()),
-            {
-              id: sharedWalletTx.toCore().id.toString(),
-              tx: organizeMultiSigTransaction({
-                cborHex: sharedWalletTx.toCbor(),
-                publicKey: sharedWalletKey,
-                chainId: currentChain
-              })
-            }
-          ]);
+          const transaction = {
+            [sharedWalletTx.toCore().id.toString()]: organizeMultiSigTransaction({
+              cborHex: sharedWalletTx.toCbor(),
+              publicKey: sharedWalletKey,
+              chainId: currentChain
+            })
+          };
+          updateSharedWalletTransactions({ ...sharedWalletTransactions, ...transaction });
+          setBuiltTxData({ ...builtTxData, signatures: sharedWalletTx.toCore().witness.signatures });
 
           const policy = await getSignPolicy('payment');
           await (policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size
@@ -227,12 +225,12 @@ export const Footer = withAddressBookContext(
         });
       }
     }, [
-      builtTxData.importedSharedWalletTx,
-      builtTxData.tx,
+      builtTxData,
       currentChain,
       getSignPolicy,
       inMemoryWallet,
       isSharedWallet,
+      setBuiltTxData,
       sharedWalletKey,
       sharedWalletTransactions,
       updateSharedWalletTransactions
