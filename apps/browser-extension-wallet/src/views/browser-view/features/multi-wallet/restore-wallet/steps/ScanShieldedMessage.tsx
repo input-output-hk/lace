@@ -115,6 +115,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
+      if (canvas.width === 0 || canvas.height === 0) return;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -202,7 +203,7 @@ export const ScanShieldedMessage: VFC = () => {
   const onScanCode = async (code: QRCode) => {
     try {
       const [shieldedMessage, address, chain] = code.chunks as ScannedCode;
-      if (!shieldedMessage?.bytes || !address?.text || !chain?.text) throw new Error('QR code malformed');
+      if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
       const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
       onScanSuccess(shieldedPgpMessage, address.text, chain.text);
       setScanState('scanned');
@@ -267,7 +268,7 @@ export const ScanShieldedMessage: VFC = () => {
         <Flex gap="$16" alignItems="stretch" flexDirection="column" w="$fill" h="$fill">
           <Flex className={styles.scanArea} justifyContent="center" alignItems="center">
             {userNotifications}
-            {videoDevices.length > 0 && !pgpInfo.shieldedMessage && (
+            {videoDevices.length > 0 && (
               <VideoInputQrCodeReader
                 videoDevices={videoDevices}
                 setScanState={setScanState}
