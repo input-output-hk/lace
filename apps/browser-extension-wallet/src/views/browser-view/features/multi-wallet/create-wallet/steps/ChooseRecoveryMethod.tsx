@@ -28,7 +28,7 @@ export const ChooseRecoveryMethod: VFC = () => {
   const analytics = useAnalyticsContext();
 
   const handleNext = () => {
-    void analytics.sendEventToPostHog(postHogActions.create.ENTER_RECOVERY_PHRASE_NEXT_CLICK);
+    void analytics.sendEventToPostHog(postHogActions.create.CHOOSE_RECOVERY_MODE_NEXT_CLICK);
     next();
   };
 
@@ -60,7 +60,10 @@ export const ChooseRecoveryMethod: VFC = () => {
                 label: i18n.t('core.walletSetupStep.recoveryPhrase'),
                 render: ({ optionElement, onOptionClick }) => (
                   <Card.Outlined
-                    onClick={onOptionClick}
+                    onClick={() => {
+                      void analytics.sendEventToPostHog(postHogActions.create.CHOOSE_RECOVERY_MODE_PAPER_CLICK);
+                      onOptionClick();
+                    }}
                     className={cn({
                       [styles.selectedRestoreMethod]: recoveryMethod === 'mnemonic',
                       [styles.optionCard]: recoveryMethod !== 'mnemonic'

@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useWalletManager } from '@hooks';
-import { Banner, Drawer, DrawerHeader, DrawerNavigation, inputProps, Password } from '@lace/common';
+import { Banner, Drawer, DrawerHeader, DrawerNavigation, inputProps, Password, PostHogAction } from '@lace/common';
 import { PaperWalletInfoCard, PgpPublicKeyEntry } from '@lace/core';
 import { i18n } from '@lace/translation';
 import {
@@ -21,6 +21,7 @@ import { generatePaperWalletPdf } from '@src/utils/PaperWallet';
 import type { PublicPgpKeyData, PaperWalletPDF } from '@src/types';
 import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SettingsLayout.module.scss';
+import { useAnalyticsContext } from '@providers';
 
 const { Text: AntdText } = Typography;
 
@@ -148,6 +149,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     },
     [getMnemonic, validatePassword]
   );
+  const analytics = useAnalyticsContext();
 
   const handleClose = useCallback(() => {
     setStage('secure');
@@ -163,6 +165,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     try {
       await validatePassword(password);
       await getPassphrase(password);
+      analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
       setStage('save');
       setProcessingState({ isPasswordValid: true, isProcessing: false });
       removePassword();
@@ -170,7 +173,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       removePassword();
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, removePassword]);
+  }, [isProcessing, validatePassword, password, getPassphrase, removePassword, analytics]);
 
   useEffect(() => {
     generatePaperWalletPdf({
@@ -206,7 +209,10 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
           <Button.CallToAction
             disabled={!pgpInfo.pgpPublicKey}
             label={i18n.t('send.form.next')}
-            onClick={() => setStage('passphrase')}
+            onClick={() => {
+              analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPublicKeyNextClick);
+              setStage('passphrase');
+            }}
             w="$fill"
           />
         );
@@ -230,7 +236,10 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
               target="_blank"
               style={{ width: '100%' }}
               aria-disabled={pdfInstance.loading || !!pdfInstance.error}
-              onClick={handleClose}
+              onClick={() => {
+                analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletDownloadClick);
+                handleClose();
+              }}
             >
               <Button.Primary
                 disabled={pdfInstance.loading || !!pdfInstance.error}
@@ -241,6 +250,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
             </a>
             <Button.Secondary
               onClick={() => {
+                analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPrintClick);
                 const printWindow = window.open(URL.createObjectURL(pdfInstance.blob));
                 printWindow.print();
                 handleClose();
@@ -256,7 +266,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       default:
         throw new Error('incorrect stage supplied');
     }
-  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, walletInfo.name, handleClose]);
+  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, walletInfo.name, handleClose, analytics]);
 
   return (
     <>

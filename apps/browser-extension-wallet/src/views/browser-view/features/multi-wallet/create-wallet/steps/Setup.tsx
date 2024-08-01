@@ -32,7 +32,7 @@ export const Setup = (): JSX.Element => {
     if (recoveryMethod === 'mnemonic') {
       void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
     }
-    // TODO void analytics.sendEventToPostHog(postHogActions.create.GENERATE_PAPER_WALLET);
+    void analytics.sendEventToPostHog(postHogActions.create.WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK);
     await next();
   };
 

@@ -4,6 +4,8 @@ import React, { VFC, useState } from 'react';
 import { useCreateWallet } from '../context';
 import { pgpPublicKeyVerification } from '@src/utils/pgp';
 import { i18n } from '@lace/translation';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
+import { useAnalyticsContext } from '@providers';
 
 interface Validation {
   error?: string;
@@ -13,6 +15,8 @@ interface Validation {
 export const SecurePaperWallet: VFC = () => {
   const { back, next, pgpInfo, setPgpInfo } = useCreateWallet();
   const [validation, setValidation] = useState<Validation>({ error: null, success: null });
+  const { postHogActions } = useWalletOnboarding();
+  const analytics = useAnalyticsContext();
 
   const handlePgpPublicKeyBlockChange = pgpPublicKeyVerification(setPgpInfo, setValidation);
 
@@ -20,13 +24,8 @@ export const SecurePaperWallet: VFC = () => {
     setPgpInfo((prevState) => ({ ...prevState, pgpKeyReference: e.target.value }));
   };
 
-  const handleBack = () => {
-    // TODO: analytics
-    back();
-  };
-
   const handleNext = () => {
-    // TODO: analytics
+    void analytics.sendEventToPostHog(postHogActions.create.PGP_PUBLIC_KEY_NEXT_CLICK);
     next();
   };
 
@@ -35,7 +34,7 @@ export const SecurePaperWallet: VFC = () => {
       <WalletSetupStepLayoutRevamp
         title={i18n.t('paperWallet.securePaperWallet.title')}
         description={i18n.t('paperWallet.securePaperWallet.description')}
-        onBack={handleBack}
+        onBack={back}
         onNext={handleNext}
         isNextEnabled={!!pgpInfo.pgpPublicKey && !validation.error}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}

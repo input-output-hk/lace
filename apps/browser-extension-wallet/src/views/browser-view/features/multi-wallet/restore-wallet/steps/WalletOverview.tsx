@@ -14,9 +14,12 @@ import { getADAPriceFromBackgroundStorage } from '@lib/scripts/background/util';
 import { currencyCode } from '@providers/currency/constants';
 import BigNumber from 'bignumber.js';
 import styles from './WalletOverview.module.scss';
-import { useCurrencyStore } from '@providers';
+import { useAnalyticsContext, useCurrencyStore } from '@providers';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const WalletOverview = (): JSX.Element => {
+  const { postHogActions } = useWalletOnboarding();
+  const analytics = useAnalyticsContext();
   const { back, next, walletMetadata } = useRestoreWallet();
   const [walletAdaBalance, setWalletAdaBalance] = useState<BigNumber>(new BigNumber(0));
   const [isLoading, setIsLoading] = useState(true);
@@ -71,12 +74,17 @@ export const WalletOverview = (): JSX.Element => {
     [adaPrice, fiatCurrency.code, walletAdaBalance]
   );
 
+  const handleNext = () => {
+    void analytics.sendEventToPostHog(postHogActions.restore.WALLET_OVERVIEW_NEXT_CLICK);
+    next();
+  };
+
   return (
     <WalletSetupStepLayoutRevamp
       title={i18n.t('paperWallet.walletOverview.title')}
       description={i18n.t('paperWallet.walletOverview.description')}
       onBack={back}
-      onNext={next}
+      onNext={handleNext}
       nextLabel="Proceed"
       currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
       paperWalletEnabled

@@ -60,7 +60,7 @@ export const SavePaperWallet: VFC = () => {
   });
 
   const handleNext = () => {
-    void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
+    void analytics.sendEventToPostHog(postHogActions.create.PAPER_WALLET_COMPLETE_CLICK);
     setPgpInfo(null);
     next();
   };
@@ -97,6 +97,7 @@ export const SavePaperWallet: VFC = () => {
               <a
                 href={pdfInstance.url}
                 onClick={() => {
+                  void analytics.sendEventToPostHog(postHogActions.create.DOWNLOAD_PAPER_WALLET_CLICK);
                   setHasStoredPaperWallet(true);
                 }}
                 download={`${replaceWhitespace(createWalletData.name, '_')}_PaperWallet.pdf`}
@@ -113,6 +114,7 @@ export const SavePaperWallet: VFC = () => {
               </a>
               <Button.Secondary
                 onClick={() => {
+                  void analytics.sendEventToPostHog(postHogActions.create.PRINT_PAPER_WALLET_CLICK);
                   const printWindow = window.open(URL.createObjectURL(pdfInstance.blob));
                   printWindow.print();
                   setHasStoredPaperWallet(true);

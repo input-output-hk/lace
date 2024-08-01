@@ -79,6 +79,7 @@ export const SettingsSecurity = ({
 
   const handleOpenShowPaperWalletDrawer = () => {
     setIsPaperWalletSettingsDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.SettingsOpenGeneratePaperWalletDrawer);
   };
 
   useEffect(() => {

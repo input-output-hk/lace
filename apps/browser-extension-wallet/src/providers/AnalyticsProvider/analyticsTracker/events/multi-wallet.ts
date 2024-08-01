@@ -9,9 +9,23 @@ const makeMultiWalletRestoreEvent = <E extends string>(eventSuffix: E) =>
   `multiwallet | restore wallet revamp | ${eventSuffix}` as const;
 const makeMultiWalletHardwareEvent = <E extends string>(eventSuffix: E) =>
   `multiwallet | hardware wallet revamp | ${eventSuffix}` as const;
+const makePaperWalletOnboardingCreateEvent = <E extends string>(eventSuffix: E) =>
+  `onboarding | new wallet revamp paper wallet | ${eventSuffix}` as const;
+const makePaperWalletOnboardingRestoreEvent = <E extends string>(eventSuffix: E) =>
+  `onboarding | restore wallet revamp paper wallet | ${eventSuffix}` as const;
 
 const multiWalletActions = {
   create: {
+    CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | recovery phrase | click'), // done
+    CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | paper wallet | click'), // done
+    CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | next | click'), // done
+    PGP_PUBLIC_KEY_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('step: pgp key | next | click'), // done
+    WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent(
+      ' step: wallet info | Generate paper wallet | click'
+    ), // done
+    DOWNLOAD_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent(' download pdf | download pdf | click'), // done
+    PRINT_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('print pdf | print pdf | click'), // done
+    PAPER_WALLET_COMPLETE_CLICK: makePaperWalletOnboardingCreateEvent(' open wallet | open wallet | click'), // done
     SETUP_OPTION_CLICK: makeMultiWalletCreateEvent('create | click'),
     SAVE_RECOVERY_PHRASE_NEXT_CLICK: makeMultiWalletCreateEvent('save your recovery phrase | next | click'),
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: makeMultiWalletCreateEvent('enter your recovery phrase | next | click'),
@@ -35,6 +49,15 @@ const multiWalletActions = {
     WALLET_ADDED: makeMultiWalletCreateEvent('added')
   },
   restore: {
+    CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | recovery phrase | click'),
+    CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | paper wallet | click'),
+    CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | next | click'),
+    SCAN_QR_CODE_CAMERA_OK: makePaperWalletOnboardingRestoreEvent('step: scan qr code | camera ok'),
+    SCAN_QR_CODE_CAMERA_ERROR: makePaperWalletOnboardingRestoreEvent('step: scan qr code | camera error'),
+    SCAN_QR_CODE_READ_SUCCESS: makePaperWalletOnboardingRestoreEvent('step: scan qr code | read success'),
+    SCAN_QR_CODE_READ_ERROR: makePaperWalletOnboardingRestoreEvent('step: scan qr code | read error'),
+    WALLET_OVERVIEW_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('step: wallet overview | next | click'),
+    ENTER_PGP_PRIVATE_KEY_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('step: pgp private key | next | click'),
     SETUP_OPTION_CLICK: makeMultiWalletRestoreEvent('restore | click'),
     ENTER_WALLET: makeMultiWalletRestoreEvent("let's set up your new wallet | enter wallet | click"),
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: makeMultiWalletRestoreEvent(' enter your recovery phrase  | next | click'),

@@ -17,19 +17,18 @@ import { i18n } from '@lace/translation';
 
 import { RecoveryMethod } from '../../types';
 import { Trans } from 'react-i18next';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
+import { useAnalyticsContext } from '@providers';
 
 const FAQ_URL = `${process.env.FAQ_URL}?question=what-is-paper-wallet`;
 
 export const ChooseRestoreMethod: VFC = () => {
+  const { postHogActions } = useWalletOnboarding();
   const { back, next, recoveryMethod, setRecoveryMethod } = useRestoreWallet();
-
-  const handleBack = () => {
-    // TODO: analytics
-    back();
-  };
+  const analytics = useAnalyticsContext();
 
   const handleNext = () => {
-    // TODO: analytics
+    void analytics.sendEventToPostHog(postHogActions.restore.CHOOSE_RECOVERY_MODE_NEXT_CLICK);
     next();
   };
 
@@ -45,7 +44,7 @@ export const ChooseRestoreMethod: VFC = () => {
             }}
           />
         }
-        onBack={handleBack}
+        onBack={back}
         onNext={handleNext}
         currentTimelineStep={WalletTimelineSteps.CHOOSE_RECOVERY_METHOD}
         paperWalletEnabled

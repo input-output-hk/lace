@@ -16,6 +16,8 @@ import {
 } from '@input-output-hk/lace-ui-toolkit';
 import { TextArea } from '@lace/common';
 import { ShieldedPgpKeyData } from '@src/types';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
+import { useAnalyticsContext } from '@providers';
 
 interface Validation {
   error?: string;
@@ -52,6 +54,8 @@ const decryptQrCodeMnemonicWithPrivateKey = async ({ pgpInfo }: DecryptProps): P
 };
 
 export const EnterPgpPrivateKey: VFC = () => {
+  const { postHogActions } = useWalletOnboarding();
+  const analytics = useAnalyticsContext();
   const { back, createWalletData, next, pgpInfo, setPgpInfo, setMnemonic } = useRestoreWallet();
   const [validation, setValidation] = useState<Validation>({ error: null, success: null });
   const [entryType, setEntryType] = useState<PrivateKeyEntry>('file-upload');
@@ -77,13 +81,8 @@ export const EnterPgpPrivateKey: VFC = () => {
     [setValidation, pgpInfo, setPgpInfo]
   );
 
-  const handleBack = () => {
-    // TODO: analytics
-    back();
-  };
-
   const handleNext = () => {
-    // TODO: analytics
+    void analytics.sendEventToPostHog(postHogActions.restore.ENTER_PGP_PRIVATE_KEY_NEXT_CLICK);
     next();
   };
 
@@ -160,7 +159,7 @@ export const EnterPgpPrivateKey: VFC = () => {
       <WalletSetupStepLayoutRevamp
         title={i18n.t('paperWallet.enterPgpPrivateKey.title')}
         description={i18n.t('paperWallet.enterPgpPrivateKey.description')}
-        onBack={handleBack}
+        onBack={back}
         onNext={handleNext}
         isNextEnabled={!!createWalletData.mnemonic.every((w) => !!w)}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}

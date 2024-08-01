@@ -24,6 +24,8 @@ import { Trans } from 'react-i18next';
 import styles from './ScanShieldedMessage.module.scss';
 import cn from 'classnames';
 import { ChainName } from '@lace/cardano/dist/wallet';
+import { useAnalyticsContext } from '@providers';
+import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 interface Validation {
   error?: {
@@ -46,6 +48,8 @@ interface MediaReaderProps {
 }
 
 const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanState }: MediaReaderProps) => {
+  const { postHogActions } = useWalletOnboarding();
+  const analytics = useAnalyticsContext();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -94,11 +98,13 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
           videoRef.current.srcObject = stream;
         }
         setScanState('scanning');
+        void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_CAMERA_OK);
         streamRef.current = stream;
       } catch (error) {
         // Map error messages
         if (error.message === 'Permission denied' || error.name === 'NotAllowedError') {
           setScanState('blocked');
+          void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_CAMERA_ERROR);
         }
       }
     };
@@ -136,7 +142,15 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
     }
 
     return () => stopVideoTracks();
-  }, [deviceId, stopVideoTracks, setScanState, onScanCode]);
+  }, [
+    deviceId,
+    stopVideoTracks,
+    setScanState,
+    onScanCode,
+    analytics,
+    postHogActions.restore.SCAN_QR_CODE_CAMERA_ERROR,
+    postHogActions.restore.SCAN_QR_CODE_CAMERA_OK
+  ]);
 
   return (
     <Flex style={{ ...(scanState !== 'scanning' && { display: 'none' }) }} h="$fill" w="$fill">
@@ -175,6 +189,8 @@ interface ByteChunk<T> {
 type ScannedCode = [ByteChunk<null>, ByteChunk<string>, ByteChunk<ChainName>];
 
 export const ScanShieldedMessage: VFC = () => {
+  const { postHogActions } = useWalletOnboarding();
+  const analytics = useAnalyticsContext();
   const { back, next, pgpInfo, setPgpInfo, setWalletMetadata } = useRestoreWallet();
   const [validation, setValidation] = useState<Validation>({ error: null });
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
@@ -185,6 +201,7 @@ export const ScanShieldedMessage: VFC = () => {
     setWalletMetadata({ chain, address });
     setValidation({ error: null });
     setScanState('scanned');
+    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_SUCCESS);
   };
 
   useEffect(() => {
@@ -208,6 +225,7 @@ export const ScanShieldedMessage: VFC = () => {
       onScanSuccess(shieldedPgpMessage, address.text, chain.text);
       setScanState('scanned');
       // Immediately move to next step
+
       next();
     } catch {
       try {
@@ -221,7 +239,7 @@ export const ScanShieldedMessage: VFC = () => {
         setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
         throw error;
       }
-
+      void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
       setTimeout(() => {
         // Reset validation state
         setValidation({ error: null });
