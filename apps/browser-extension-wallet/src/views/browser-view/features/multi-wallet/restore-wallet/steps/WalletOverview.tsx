@@ -1,23 +1,20 @@
 /* eslint-disable no-magic-numbers */
 import { i18n } from '@lace/translation';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useRestoreWallet } from '../context';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
-import { Flex, Text, Tooltip, WalletComponent as WalletIcon } from '@input-output-hk/lace-ui-toolkit';
+import { Flex, Text, TextLink, Tooltip, WalletComponent as WalletIcon } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { compactNumberWithUnit } from '@src/utils/format-number';
 import { PortfolioBalance } from '@src/views/browser-view/components';
 import { addEllipsis } from '@lace/common';
 import { getProviderByChain } from '@src/stores/slices';
-import { COINGECKO_URL } from '@src/utils/constants';
+import { CARDANO_COIN_SYMBOL, COINGECKO_URL } from '@src/utils/constants';
 import { getADAPriceFromBackgroundStorage } from '@lib/scripts/background/util';
 import { currencyCode } from '@providers/currency/constants';
 import BigNumber from 'bignumber.js';
 import styles from './WalletOverview.module.scss';
 import { useCurrencyStore } from '@providers';
-import { useWalletStore } from '@src/stores';
-
-const openExternalLink = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
 
 export const WalletOverview = (): JSX.Element => {
   const { back, next, walletMetadata } = useRestoreWallet();
@@ -25,9 +22,6 @@ export const WalletOverview = (): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [adaPrice, setAdaPrice] = useState<number>(0);
   const { fiatCurrency } = useCurrencyStore();
-  const {
-    walletUI: { cardanoCoin }
-  } = useWalletStore();
 
   useEffect(() => {
     const getData = async () => {
@@ -52,6 +46,30 @@ export const WalletOverview = (): JSX.Element => {
       setIsLoading(true);
     };
   }, [walletMetadata, setIsLoading, setWalletAdaBalance]);
+
+  const handleOpenCoingeckoLink = useCallback(() => {
+    window.open(COINGECKO_URL, '_blank', 'noopener,noreferrer');
+  }, []);
+
+  const adaSymbol = useMemo(() => {
+    /**
+     * Ada symbol shown in overview is based on the chain supplied in the QR code, not the one from the background wallet current chain
+     **/
+    const networkType =
+      walletMetadata.chain === 'Mainnet' ? Wallet.Cardano.NetworkId.Mainnet : Wallet.Cardano.NetworkId.Testnet;
+    return CARDANO_COIN_SYMBOL[networkType];
+  }, [walletMetadata.chain]);
+
+  const adaBalanceInUsd = useMemo(
+    () =>
+      !!adaPrice && {
+        value: `${compactNumberWithUnit(
+          new BigNumber(Wallet.util.lovelacesToAdaString(walletAdaBalance.toString())).times(adaPrice).toString()
+        )} ${fiatCurrency.code}`,
+        isPercentage: false
+      },
+    [adaPrice, fiatCurrency.code, walletAdaBalance]
+  );
 
   return (
     <WalletSetupStepLayoutRevamp
@@ -90,30 +108,19 @@ export const WalletOverview = (): JSX.Element => {
             textSize="medium"
             loading={isLoading}
             balance={compactNumberWithUnit(Wallet.util.lovelacesToAdaString(walletAdaBalance.toString()))}
-            currencyCode={cardanoCoin.symbol}
-            label={i18n.t('browserView.assetDetails.assetBalance')}
-            balanceSubtitle={
-              !!adaPrice && {
-                value: `${compactNumberWithUnit(
-                  new BigNumber(Wallet.util.lovelacesToAdaString(walletAdaBalance.toString()))
-                    .times(adaPrice)
-                    .toString()
-                )} ${fiatCurrency.code}`,
-                isPercentage: false
-              }
-            }
+            currencyCode={adaSymbol}
+            label={i18n.t('browserView.crypto.dashboard.adaBalance')}
+            balanceSubtitle={adaBalanceInUsd}
           />
         </Flex>
         {!!adaPrice && (
-          <Flex gap="$4" alignItems="center">
+          <Flex alignItems="center" className={styles.credit}>
             <Text.Label className={styles.creditLink}>{i18n.t('general.credit.poweredBy')}</Text.Label>
-            <a
-              className={styles.creditLink}
-              onClick={() => openExternalLink(COINGECKO_URL)}
+            <TextLink
+              label={i18n.t('general.credit.coinGecko')}
+              onClick={handleOpenCoingeckoLink}
               data-testid="coingecko-link"
-            >
-              {i18n.t('general.credit.coinGecko')}
-            </a>
+            />
           </Flex>
         )}
       </Flex>

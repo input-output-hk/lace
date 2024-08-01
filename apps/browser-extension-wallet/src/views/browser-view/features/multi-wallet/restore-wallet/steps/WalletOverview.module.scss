@@ -17,7 +17,10 @@
   background-color: var(--data-pink);
 }
 
-.creditLink {
-  line-height: 20px;
-  font-size: 12px;
+.credit {
+  span,
+  div {
+    line-height: 20px;
+    font-size: 12px;
+  }
 }
