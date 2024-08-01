@@ -4,6 +4,7 @@ import { StakingBrowserPreferences } from '@lace/staking';
 import { currencyCode } from '@providers/currency/constants';
 import { ADASymbols } from '@src/utils/constants';
 import { EnvironmentTypes } from '@stores';
+import { MultisigTxData } from '@lace/core';
 
 export interface WalletStorage {
   name: string;
@@ -66,4 +67,5 @@ export interface ILocalStorage {
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
+  sharedWalletTransactions?: Record<string, MultisigTxData>;
 }

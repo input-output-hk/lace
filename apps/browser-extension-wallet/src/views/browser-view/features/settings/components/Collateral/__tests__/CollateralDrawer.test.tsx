@@ -69,7 +69,8 @@ jest.mock('@hooks', () => {
     ...original,
     useCollateral: mockUseCollateral,
     useSyncingTheFirstTime: mockUseSyncingTheFirstTime,
-    useRedirection: mockUseRedirection
+    useRedirection: mockUseRedirection,
+    useSharedWalletData: () => ({ getSignPolicy: () => {} })
   };
 });
 

@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { CardanoTxOut, TxMinimumCoinQuantity } from '../../../../types';
 import { Wallet } from '@lace/cardano';
-import { HandleResolution } from '@cardano-sdk/core';
+import { HandleResolution, Serialization } from '@cardano-sdk/core';
 
 export enum Sections {
   FORM = 'FORM',
@@ -40,6 +40,8 @@ export interface BuiltTxData {
     handleResolutions?: HandleResolution[];
     validityInterval?: Wallet.Cardano.ValidityInterval;
   };
+  importedSharedWalletTx?: Serialization.Transaction;
+  signatures?: Wallet.Cardano.Signatures;
   error?: string;
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];
 }

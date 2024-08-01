@@ -1,15 +1,17 @@
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import {
   ActivityStatus,
   OutputSummaryProps,
   SharedWalletTransactionDetails,
   CoSignersListItem,
-  SignPolicy
+  SignPolicy,
+  hasSigned
 } from '@lace/core';
 import { useWalletStore } from '@stores';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
 import { useFetchCoinPrice, useSharedWalletData } from '@hooks';
+import { useBuiltTxState } from '@views/browser/features/send-transaction';
 
 interface SharedWalletSendTransactionSummaryProps {
   rows: OutputSummaryProps[];
@@ -24,25 +26,36 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   const { priceResult } = useFetchCoinPrice();
   const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
   const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+  const { builtTxData } = useBuiltTxState();
+  const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
 
   useEffect(() => {
     (async () => {
       const policy = await getSignPolicy('payment');
       setSignPolicy(policy);
+
+      let currentCoSigners: CoSignersListItem[];
+      if (builtTxData.importedSharedWalletTx) {
+        const signatures = builtTxData.importedSharedWalletTx.toCore().witness.signatures;
+        currentCoSigners = await Promise.all(
+          coSigners?.map(async (signer) => ({
+            ...signer,
+            signed: await hasSigned(signer.sharedWalletKey, 'payment', signatures)
+          })) || []
+        );
+      } else {
+        currentCoSigners =
+          coSigners?.map((signer) => ({
+            ...signer,
+            signed: false
+          })) || [];
+      }
+      setTransactionCosigners(currentCoSigners);
     })();
-  }, [getSignPolicy]);
+  }, [builtTxData.importedSharedWalletTx, coSigners, getSignPolicy]);
 
   const amountTransformer = (ada: string) =>
     `${Wallet.util.convertAdaToFiat({ ada, fiat: priceResult?.cardano?.price })} ${fiatCurrency?.code}`;
-
-  const transactionCosigners = useMemo(
-    (): CoSignersListItem[] =>
-      coSigners?.map((signer) => ({
-        ...signer,
-        signed: false
-      })) || [],
-    [coSigners]
-  );
 
   return (
     <SharedWalletTransactionDetails
