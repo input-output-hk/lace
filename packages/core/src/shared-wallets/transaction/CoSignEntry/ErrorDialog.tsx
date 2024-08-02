@@ -18,13 +18,13 @@ type ErrorKindTranslations = Record<'title' | 'message' | 'primaryButton', Share
 
 const errorsTranslationKeysMap: Record<ErrorKind, ErrorKindTranslations> = {
   [ErrorKind.InsufficientFunds]: {
-    // TODO: add proper translations
+    // TODO: LW-11114 add proper translations
     message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
     primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
     title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.InvalidActiveWallet]: {
-    // TODO: add proper translations
+    // TODO: LW-11114 add proper translations
     message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
     primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
     title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
@@ -36,13 +36,13 @@ const errorsTranslationKeysMap: Record<ErrorKind, ErrorKindTranslations> = {
     title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.TxAlreadySigned]: {
-    // TODO: add proper translations
+    // TODO: LW-11114 add proper translations
     message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
     primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
     title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.TxExpired]: {
-    // TODO: add proper translations
+    // TODO: LW-11114 add proper translations
     message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
     primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
     title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
