@@ -19,16 +19,14 @@ export const TxDetailsProposalProcedures = ({
 
   return (
     <TxDetailsGroup title={t('core.activityDetails.proposalProcedures')} testId="proposal-procedures" withSeparatorLine>
-      <>
-        {proposalProcedures.map((procedure) => (
-          <ProposalProcedureAction
-            key={`${procedure.governanceAction.__typename}__${procedure.anchor.dataHash}`}
-            proposalProcedure={procedure}
-            cardanoCoin={cardanoCoin}
-            explorerBaseUrl={explorerBaseUrl}
-          />
-        ))}
-      </>
+      {proposalProcedures.map((procedure) => (
+        <ProposalProcedureAction
+          key={`${procedure.governanceAction.__typename}__${procedure.anchor.dataHash}`}
+          proposalProcedure={procedure}
+          cardanoCoin={cardanoCoin}
+          explorerBaseUrl={explorerBaseUrl}
+        />
+      ))}
     </TxDetailsGroup>
   );
 };

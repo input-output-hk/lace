@@ -34,6 +34,7 @@ inputs:
   CARDANO_SERVICES_URL_PREPROD:
     description: 'Url for preprod env'
     required: false
+    default: 'https://dev-preprod.lw.iog.io'
 
 runs:
   using: 'composite'
@@ -43,6 +44,7 @@ runs:
       with:
         node-version-file: '.nvmrc'
         cache: 'yarn'
+
     - name: Node modules cache
       uses: actions/cache@v4
       with:
@@ -50,22 +52,8 @@ runs:
           node_modules
           **/node_modules
         key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-    - name: Check if build exists already
-      shell: bash
-      id: check-build-exists
-      run: |
-        ART_ID=$(curl -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}" https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-        if ([ "$ART_ID" == "null" ] || [[ "${CARDANO_SERVICES_URL_PREPROD}" == *"staging"* ]]) then
-          echo "No Lace build artifact found or it is different than dev, will build it now"
-          echo "build_exists=false" >> $GITHUB_OUTPUT
-        else
-          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
-          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
-          echo "Build artifact found and downloaded"
-          echo "build_exists=true" >> $GITHUB_OUTPUT
-        fi
+
     - name: Configure Yarn to use GitHub Packages
-      if: steps.check-build-exists.outputs.build_exists == 'false'
       run: |
         SCOPE="input-output-hk"
         FILE="$HOME/.yarnrc.yml"
@@ -86,12 +74,12 @@ runs:
           echo "Added npmScopes and $SCOPE to $FILE"
         fi
       shell: bash
+
     - name: Install dependencies
-      if: steps.check-build-exists.outputs.build_exists == 'false'
       shell: bash
       run: yarn install --immutable --inline-builds
+
     - name: Build dist version
-      if: steps.check-build-exists.outputs.build_exists == 'false'
       shell: bash
       env:
         NODE_OPTIONS: '--max_old_space_size=8192'
@@ -102,11 +90,5 @@ runs:
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
+        CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
       run: yarn browser build
-    - name: Upload artifact
-      if: steps.check-build-exists.outputs.build_exists == 'false'
-      uses: actions/upload-artifact@v4
-      with:
-        name: lace-build-${{ github.sha }}
-        path: ./apps/browser-extension-wallet/dist
-        overwrite: true
