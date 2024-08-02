@@ -168,7 +168,7 @@ jobs:
           " > environment.properties
 
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.6.0
+        uses: andrcuns/allure-publish-action@v2.7.1
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
