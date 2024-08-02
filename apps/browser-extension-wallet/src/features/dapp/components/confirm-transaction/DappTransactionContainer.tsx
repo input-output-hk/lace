@@ -218,6 +218,7 @@ export const DappTransactionContainer = withAddressBookContext(
               <TxDetailsVotingProcedures
                 explorerBaseUrl={explorerBaseUrl}
                 votingProcedures={tx.body.votingProcedures}
+                withSeparatorLine={false}
               />
             )}
           </>
