@@ -27,7 +27,7 @@ import SignatureAddedImg from '@assets/icons/circle-check-gradient.svg';
 
 export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.ReactElement }): React.ReactElement => {
   const { t } = useTranslation();
-  const { builtTxData: { uiTx: { hash, fee } = {} } = {} } = useBuiltTxState();
+  const { builtTxData: { uiTx: { hash, fee } = {}, collectedEnoughSharedWalletTxSignatures } = {} } = useBuiltTxState();
   const { uiOutputs } = useOutputs();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const analytics = useAnalyticsContext();
@@ -95,7 +95,7 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   return (
     <>
       <div className={styles.successTxContainer} data-testid="transaction-success-container">
-        {isSharedWallet ? (
+        {isSharedWallet && !collectedEnoughSharedWalletTxSignatures ? (
           <ResultMessage
             customBgImg={SignatureAddedImg}
             title={t('sharedWallets.transaction.summary.unsubmitted.title')}

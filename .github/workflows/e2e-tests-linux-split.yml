@@ -15,8 +15,10 @@ on:
           - chrome
           - edge
       network:
+        description: 'network to use'
+        required: true
+        default: 'preprod'
         type: choice
-        description: network to use
         options:
           - preprod
           - mainnet
@@ -35,77 +37,115 @@ on:
         description: 'Run only smoke tests'
         required: true
         default: false
+      preprod_env:
+        type: choice
+        required: true
+        default: dev
+        description: 'preprod env to use'
+        options:
+          - dev
+          - staging
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || false }}"
+run-name: 'E2E | os: Linux | browser: ${{ github.event.inputs.browser }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only }} | preprod env: ${{ github.event.inputs.preprod_env }}'
 
 env:
-  BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
-  NETWORK: ${{ github.event.inputs.network || 'preprod' }}
+  BROWSER: ${{ github.event.inputs.browser }}
+  NETWORK: ${{ github.event.inputs.network }}
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
+  PREPROD_ENV: ${{ github.event.inputs.preprod_env }}
+  BUILD_ARTIFACT_NAME: 'lace-${{ github.event.inputs.preprod_env }}-${{ github.sha }}'
 
 jobs:
-  prereq:
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - name: Provision step
         run: |
           echo "Provisioning ${{ github.event.inputs.runner }}"
     outputs:
-      runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
-      smoke_only: ${{ github.event.inputs.smoke_only || false }}
+      runner: ${{ github.event.inputs.runner }}
+      smoke_only: ${{ github.event.inputs.smoke_only }}
 
-  build-dist-version:
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: prereq
+  build:
+    name: Build Lace
+    runs-on: ${{ needs.setup.outputs.runner }}
+    needs: setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Check if build exists already
+
+      - name: Check if build exists
         shell: bash
         id: check-build-exists
         run: |
-          ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-          if [ "$ART_ID" == "null" ]; then
-            echo "No Lace build artifact found, will build it now"
+          echo "ART_NAME: $BUILD_ARTIFACT_NAME"
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
+
+          if ([ "$ART_ID" == "null" ]) then
+            echo "Lace build artifact not found. Building..."
             echo "build_exists=false" >> $GITHUB_OUTPUT
           else
-            echo "Lace build artifact found no need to build again"
+            echo "Lace build artifact found. Downloading..."
             echo "build_exists=true" >> $GITHUB_OUTPUT
           fi
-      - name: Build dist version of Lace
+
+      - name: Build Lace artifact
         if: steps.check-build-exists.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          CARDANO_SERVICES_URL_PREPROD: 'https://${{ github.event.inputs.preprod_env }}-preprod.lw.iog.io'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
-  tests-run-split:
+      - name: Upload build artifact
+        if: steps.check-build-exists.outputs.build_exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+  tests:
+    name: E2E tests
     if: always()
     strategy:
       fail-fast: false
       matrix:
         batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: [prereq, build-dist-version]
+    runs-on: ${{ needs.setup.outputs.runner }}
+    needs: [setup, build]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download Lace build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+          github-token: ${{ secrets.GH_TOKEN }}
+
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BATCH: ${{ matrix.batch }}
-          SMOKE_ONLY: ${{ needs.prereq.outputs.smoke_only }}
+          SMOKE_ONLY: ${{ needs.setup.outputs.smoke_only }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
-  results-processing:
-    needs: [prereq, tests-run-split]
-    runs-on: ${{ needs.prereq.outputs.runner }}
+  processReports:
+    name: Process e2e test reports
+    needs: [setup, tests]
+    runs-on: ${{ needs.setup.outputs.runner }}
     if: always()
     steps:
       - name: Download all artifacts
@@ -114,6 +154,7 @@ jobs:
           path: ./artifacts
           pattern: 'runner-artifacts-*'
           merge-multiple: true
+
       - name: Create allure properties
         if: success()
         working-directory: './artifacts/reports/allure/results'
@@ -123,8 +164,10 @@ jobs:
           env=${NETWORK}
           browser=${BROWSER}
           platform=Linux
-          smoke_only=${{ needs.prereq.outputs.smoke_only }}
+          smoke_only=${{ needs.setup.outputs.smoke_only }}
+          preprod_env=${PREPROD_ENV}
           " > environment.properties
+
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
         env:
@@ -139,26 +182,30 @@ jobs:
           copyLatest: true
           ignoreMissingResults: true
           baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.prereq.outputs.smoke_only }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.setup.outputs.smoke_only }} | preprod env: ${{ env.PREPROD_ENV }}" >> $GITHUB_STEP_SUMMARY
+
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
         if: always()
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.prereq.outputs.smoke_only }}'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.setup.outputs.smoke_only }}  | preprod env: ${{ env.PREPROD_ENV }}'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
       - name: Deleting chrome tmp files
         id: clean-chrome-tmp-files
-        if: ${{ needs.prereq.outputs.runner == 'self-hosted' }}
+        if: ${{ needs.setup.outputs.runner == 'self-hosted' }}
         run: |
           runCommand="rm -rf /tmp/.org.chromium.*"
           eval "$runCommand";
+
       - name: Upload allure tests results
         uses: actions/upload-artifact@v4
         with:

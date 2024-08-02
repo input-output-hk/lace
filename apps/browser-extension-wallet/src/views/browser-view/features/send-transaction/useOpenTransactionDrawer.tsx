@@ -34,12 +34,8 @@ export const useOpenTransactionDrawer = ({
   const shouldAssetPickerDisplayFooter = multipleSelectionAvailable && currentSection === Sections.ASSET_PICKER;
 
   const shouldRenderFooter =
-    ![
-      Sections.ADDRESS_LIST,
-      Sections.ADDRESS_FORM,
-      Sections.ASSET_PICKER,
-      Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON
-    ].includes(currentSection) || shouldAssetPickerDisplayFooter;
+    ![Sections.ADDRESS_LIST, Sections.ADDRESS_FORM, Sections.ASSET_PICKER].includes(currentSection) ||
+    shouldAssetPickerDisplayFooter;
 
   return useCallback(() => {
     setDrawerConfig({

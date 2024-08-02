@@ -5,11 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './ConfirmTransaction.module.scss';
-import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { useDisallowSignTx, useSignWithHardwareWallet, useOnBeforeUnload } from './hooks';
-import { getTxType } from './utils';
-import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { useAnalyticsContext } from '@providers';
@@ -21,6 +18,7 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import { of, take } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
+import { DappTransactionContainer } from './DappTransactionContainer';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -29,22 +27,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
     setDappInfo,
     signTxRequest: { request: req, set: setSignTxRequest }
   } = useViewsFlowContext();
-
   const { walletType, isHardwareWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
-  const [confirmTransactionError, setConfirmTransactionError] = useState(false);
+  const [confirmTransactionError] = useState(false);
   const disallowSignTx = useDisallowSignTx(req);
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
-  const [txType, setTxType] = useState<Wallet.Cip30TxType>();
-
-  useEffect(() => {
-    const fetchTxType = async () => {
-      if (!req) return;
-      const type = await getTxType(req.transaction.toCore());
-      setTxType(type);
-    };
-    fetchTxType();
-  }, [req]);
 
   const onConfirmTransaction = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
@@ -96,11 +83,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   return (
     <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
-      {req && txType ? (
-        <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />
-      ) : (
-        <Skeleton loading />
-      )}
+      {req ? <DappTransactionContainer /> : <Skeleton loading />}
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button

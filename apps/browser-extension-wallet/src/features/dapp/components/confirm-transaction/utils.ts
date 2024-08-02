@@ -1,7 +1,6 @@
 /* eslint-disable sonarjs/no-small-switch */
 /* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
-import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
 import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
@@ -59,90 +58,6 @@ export const votingProceduresInspector = async (
 export const proposalProceduresInspector = async (
   tx: Wallet.Cardano.Tx
 ): Promise<Wallet.Cardano.ProposalProcedure[] | undefined> => tx?.body?.proposalProcedures;
-
-export const getTxType = async (tx: Wallet.Cardano.Tx): Promise<Wallet.Cip30TxType> => {
-  const inspector = createTxInspector({
-    minted: assetsMintedInspector,
-    burned: assetsBurnedInspector,
-    votingProcedures: votingProceduresInspector,
-    proposalProcedures: proposalProceduresInspector,
-    dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
-    dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
-    dRepUpdate: certificateInspectorFactory(CertificateType.UpdateDelegateRepresentative),
-    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation),
-    voteRegistrationDelegation: certificateInspectorFactory(CertificateType.VoteRegistrationDelegation),
-    stakeVoteDelegation: certificateInspectorFactory(CertificateType.StakeVoteDelegation),
-    stakeRegistrationDelegation: certificateInspectorFactory(CertificateType.StakeRegistrationDelegation),
-    stakeVoteDelegationRegistration: certificateInspectorFactory(CertificateType.StakeVoteRegistrationDelegation)
-  });
-
-  const {
-    minted,
-    burned,
-    votingProcedures,
-    dRepRegistration,
-    dRepRetirement,
-    dRepUpdate,
-    voteDelegation,
-    stakeVoteDelegation,
-    voteRegistrationDelegation,
-    stakeRegistrationDelegation,
-    stakeVoteDelegationRegistration,
-    proposalProcedures
-  } = await inspector(tx as Wallet.Cardano.HydratedTx);
-  const isMintTransaction = minted.length > 0;
-  const isBurnTransaction = burned.length > 0;
-
-  if (proposalProcedures) {
-    return Wallet.Cip30TxType.ProposalProcedures;
-  }
-
-  if (votingProcedures) {
-    return Wallet.Cip30TxType.VotingProcedures;
-  }
-
-  if (isMintTransaction) {
-    return Wallet.Cip30TxType.Mint;
-  }
-
-  if (isBurnTransaction) {
-    return Wallet.Cip30TxType.Burn;
-  }
-
-  if (dRepRegistration) {
-    return Wallet.Cip30TxType.DRepRegistration;
-  }
-
-  if (dRepRetirement) {
-    return Wallet.Cip30TxType.DRepRetirement;
-  }
-
-  if (voteDelegation) {
-    return Wallet.Cip30TxType.VoteDelegation;
-  }
-
-  if (stakeVoteDelegation) {
-    return Wallet.Cip30TxType.StakeVoteDelegation;
-  }
-
-  if (voteRegistrationDelegation) {
-    return Wallet.Cip30TxType.VoteRegistrationDelegation;
-  }
-
-  if (stakeRegistrationDelegation) {
-    return Wallet.Cip30TxType.StakeRegistrationDelegation;
-  }
-
-  if (stakeVoteDelegationRegistration) {
-    return Wallet.Cip30TxType.StakeVoteDelegationRegistration;
-  }
-
-  if (dRepUpdate) {
-    return Wallet.Cip30TxType.DRepUpdate;
-  }
-
-  return Wallet.Cip30TxType.Send;
-};
 
 export const pubDRepKeyToHash = async (
   pubDRepKeyHex: Wallet.Crypto.Ed25519PublicKeyHex

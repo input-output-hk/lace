@@ -2,6 +2,7 @@
 /* eslint-disable no-magic-numbers */
 import { Cardano } from '@cardano-sdk/core';
 import { Hash28ByteBase16, Hash32ByteBase16 } from '@cardano-sdk/crypto';
+import { Wallet } from '@lace/cardano';
 
 const DUMMY_DEPOSIT = '100000' as never as bigint;
 const rewardAccount = Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
@@ -126,7 +127,7 @@ export const mockProposalProcedure: Record<
         governanceActionValidityPeriod: Cardano.EpochNo(30),
         dRepInactivityPeriod: Cardano.EpochNo(31),
         minCommitteeSize: 32,
-        committeeTermLimit: 33,
+        committeeTermLimit: Wallet.Cardano.EpochNo(33),
         dRepVotingThresholds: {
           motionNoConfidence: {
             numerator: 34,

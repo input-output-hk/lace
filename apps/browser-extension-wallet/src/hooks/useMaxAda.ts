@@ -19,23 +19,91 @@ interface GetCoinsForTokens {
   balance: Wallet.Cardano.Value;
   txBuilder: TxBuilder;
   validateOutputs: WalletUtil['validateOutputs'];
+  validateOutput: WalletUtil['validateOutput'];
 }
 
-const getMinimunCoinsAndFee = async ({ address, balance, txBuilder, validateOutputs }: GetCoinsForTokens) => {
-  const outputs = new Set([
-    {
-      address,
-      value: {
-        coins: BigInt(0),
-        assets: balance.assets || new Map()
-      }
-    }
-  ]);
+interface SplitOutput {
+  address: Wallet.Cardano.PaymentAddress;
+  output: Wallet.Cardano.TxOut;
+  outputs: Set<Wallet.Cardano.TxOut>;
+  validateOutput: WalletUtil['validateOutput'];
+}
+
+const createOutput = (
+  address: Wallet.Cardano.PaymentAddress,
+  assets: Wallet.Cardano.TokenMap
+): Wallet.Cardano.TxOut => ({
+  address,
+  value: {
+    coins: BigInt(0),
+    assets
+  }
+});
+
+const splitOutput = async ({ address, output, outputs, validateOutput }: SplitOutput) => {
+  const assets = output.value.assets;
+  const assetEntries = [...assets.entries()];
+  const midpoint = Math.ceil(assetEntries.length / 2);
+  const assets1 = new Map(assetEntries.slice(0, midpoint));
+  const assets2 = new Map(assetEntries.slice(midpoint));
+
+  const output1 = createOutput(address, assets1);
+  const output2 = createOutput(address, assets2);
+
+  const validation1 = await validateOutput(output1);
+  const validation2 = await validateOutput(output2);
+
+  if (validation1.tokenBundleSizeExceedsLimit) {
+    await splitOutput({ address, output: output1, outputs, validateOutput });
+  } else {
+    outputs.add(output1);
+  }
+
+  if (validation2.tokenBundleSizeExceedsLimit) {
+    await splitOutput({ address, output: output2, outputs, validateOutput });
+  } else {
+    outputs.add(output2);
+  }
+};
+
+const distributeAssetsInMinOutputs = async (
+  address: Wallet.Cardano.PaymentAddress,
+  balance: Wallet.Cardano.Value,
+  validateOutput: WalletUtil['validateOutput']
+) => {
+  const outputs = new Set<Wallet.Cardano.TxOut>();
+  const initialOutput = createOutput(address, balance.assets || new Map());
+  const initialValidation = await validateOutput(initialOutput);
+
+  if (initialValidation.tokenBundleSizeExceedsLimit) {
+    await splitOutput({ address, output: initialOutput, outputs, validateOutput });
+  } else {
+    outputs.add(initialOutput);
+  }
+
+  return new Set(
+    [...outputs].map((output) => {
+      output.value.coins = BigInt(0);
+      return output;
+    })
+  );
+};
+
+const getMinimumCoinsAndFee = async ({
+  address,
+  balance,
+  txBuilder,
+  validateOutputs,
+  validateOutput
+}: GetCoinsForTokens) => {
+  const outputs = await distributeAssetsInMinOutputs(address, balance, validateOutput);
 
   const minimumCoinQuantities = await validateOutputs(outputs);
   const props = setMissingCoins(minimumCoinQuantities, outputs);
   const totalMinimumCoins = getTotalMinimumCoins(minimumCoinQuantities);
-  props.outputs.forEach((output) => txBuilder.addOutput(output));
+  props.outputs.forEach((output) => {
+    txBuilder.addOutput(output);
+  });
   const tx = await txBuilder.build().inspect();
   props.outputs.forEach((output) => txBuilder.removeOutput(output));
 
@@ -137,6 +205,7 @@ const calculateMaxAda = async ({
     throw new Error('Aborted');
   }
   const adaAmount = maxAdaAmount - adaErrorBuffer;
+
   const outputs = await createOutputsWithMaxAmount({
     address,
     adaAmount,
@@ -171,7 +240,7 @@ export const useMaxAda = (): bigint => {
   const balance = useObservable(inMemoryWallet?.balance?.utxo.available$);
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
   const assetInfo = useObservable(inMemoryWallet?.assetInfo$);
-  const { outputMap } = useTransactionProps();
+  const { outputsMap } = useTransactionProps();
   const { setMaxAdaLoading } = useMaxAdaStatus();
   const address = walletInfo.addresses[0].address;
 
@@ -181,14 +250,16 @@ export const useMaxAda = (): bigint => {
     const calculate = async () => {
       try {
         setMaxAdaLoading(true);
-        const { validateOutputs } = Wallet.createWalletUtil(inMemoryWallet);
+        const { validateOutputs, validateOutput } = Wallet.createWalletUtil(inMemoryWallet);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const { fee, minimumCoins } = await getMinimunCoinsAndFee({
+        const { fee, minimumCoins } = await getMinimumCoinsAndFee({
           address,
           balance,
           txBuilder,
-          validateOutputs
+          validateOutputs,
+          validateOutput
         });
+
         // substract the fee and the missing coins from the wallet balances
         const spendableBalance = subtractValueQuantities([
           { coins: balance.coins + BigInt(availableRewards || 0) }, // wallet balance
@@ -203,8 +274,9 @@ export const useMaxAda = (): bigint => {
           txBuilder,
           validateOutputs,
           signal: abortController.signal,
-          outputMap
+          outputMap: outputsMap
         });
+
         if (!abortController.signal.aborted) {
           setMaxADA(result);
         }
@@ -223,7 +295,7 @@ export const useMaxAda = (): bigint => {
     return () => {
       abortController.abort();
     };
-  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputMap, setMaxAdaLoading]);
+  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputsMap, setMaxAdaLoading]);
 
   return maxADA;
 };
