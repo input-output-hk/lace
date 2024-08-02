@@ -1,4 +1,4 @@
-// TODO: this is copied from SDK. We need to expose it from there instead
+// TODO: LW-11111 this is copied from SDK. We need to expose it from there instead
 import { Serialization, Cardano } from '@cardano-sdk/core';
 import { HexBlob } from '@cardano-sdk/util';
 

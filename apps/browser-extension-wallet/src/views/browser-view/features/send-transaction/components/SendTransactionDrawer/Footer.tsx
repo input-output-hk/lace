@@ -41,8 +41,8 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, organizeMultiSigTransaction } from '@lace/core';
-import { mergeWitnesses } from '@views/browser/features/send-transaction/components/SendTransactionDrawer/utils';
+import { exportMultisigTransaction, constructMultiSigTransactionData } from '@lace/core';
+import { mergeWitnesses } from './utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -171,8 +171,8 @@ export const Footer = withAddressBookContext(
 
     const signAndSubmitTransaction = useCallback(async () => {
       if (isSharedWallet) {
+        let sharedWalletTx: Serialization.Transaction;
         try {
-          let sharedWalletTx: Serialization.Transaction;
           if (builtTxData.importedSharedWalletTx) {
             const { auxiliaryData, body, id, witness } = builtTxData.importedSharedWalletTx.toCore();
             const txWithOwnSignature = await inMemoryWallet.finalizeTx({
@@ -188,36 +188,59 @@ export const Footer = withAddressBookContext(
             );
             sharedWalletTx = builtTxData.importedSharedWalletTx;
           } else {
+            const { auxiliaryData, body, hash } = await builtTxData.tx.inspect();
             const signedTx = await inMemoryWallet.finalizeTx({
-              tx: await builtTxData.tx.inspect()
+              tx: {
+                body,
+                hash
+              },
+              auxiliaryData
             });
             sharedWalletTx = Serialization.Transaction.fromCore(signedTx);
           }
-
-          const transaction = {
-            [sharedWalletTx.toCore().id.toString()]: organizeMultiSigTransaction({
-              cborHex: sharedWalletTx.toCbor(),
-              publicKey: sharedWalletKey,
-              chainId: currentChain
-            })
-          };
-          updateSharedWalletTransactions({ ...sharedWalletTransactions, ...transaction });
-          setBuiltTxData({ ...builtTxData, signatures: sharedWalletTx.toCore().witness.signatures });
-
-          const policy = await getSignPolicy('payment');
-          await (policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size
-            ? inMemoryWallet.submitTx(sharedWalletTx.toCbor())
-            : exportMultisigTransaction({
-                cborHex: sharedWalletTx.toCbor(),
-                publicKey: sharedWalletKey,
-                chainId: currentChain
-              }));
         } catch (error) {
-          console.error('DEBUG', error);
+          console.error('Shared wallet TX sign error', error);
+          throw error;
         }
+
+        const policy = await getSignPolicy('payment');
+        const collectedEnoughSharedWalletTxSignatures =
+          policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
+
+        // eslint-disable-next-line unicorn/prefer-ternary
+        if (collectedEnoughSharedWalletTxSignatures) {
+          try {
+            await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
+          } catch (error) {
+            console.error('Shared wallet TX submit error', error);
+            throw error;
+          }
+        } else {
+          await exportMultisigTransaction({
+            cborHex: sharedWalletTx.toCbor(),
+            publicKey: sharedWalletKey,
+            chainId: currentChain
+          });
+        }
+
+        const transaction = {
+          [sharedWalletTx.toCore().id.toString()]: constructMultiSigTransactionData({
+            cborHex: sharedWalletTx.toCbor(),
+            publicKey: sharedWalletKey,
+            chainId: currentChain
+          })
+        };
+        updateSharedWalletTransactions({ ...sharedWalletTransactions, ...transaction });
+        setBuiltTxData({ ...builtTxData, collectedEnoughSharedWalletTxSignatures });
       } else {
         const signedTx = await builtTxData.tx.sign();
-        await inMemoryWallet.submitTx(signedTx);
+
+        try {
+          await inMemoryWallet.submitTx(signedTx);
+        } catch (error) {
+          console.error('TX submit error', error);
+          throw error;
+        }
         txSubmitted$.next({
           id: signedTx.tx.id.toString(),
           date: new Date().toString(),

@@ -12,8 +12,6 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
   const { setSection } = useSections();
   const walletState = useWalletState();
 
-  // TODO: LW-10946 get the transaction data from the onContinue and set it using useBuiltTxState
-  // eslint-disable-next-line react/jsx-handler-names
   return (
     <CoSignEntry
       // eslint-disable-next-line react/jsx-handler-names
@@ -30,6 +28,7 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
             fee: body.fee,
             outputs: new Set(filteredOutputs.length === 0 ? body.outputs : filteredOutputs),
             hash: id,
+            // TODO: LW-11113 ada handles probably won't work with hardcoded empty array
             handleResolutions: [],
             validityInterval: body.validityInterval
           },

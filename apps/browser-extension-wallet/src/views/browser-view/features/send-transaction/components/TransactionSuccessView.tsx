@@ -24,12 +24,10 @@ import { getTokensProperty } from '../helpers';
 import { Wallet } from '@lace/cardano';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import SignatureAddedImg from '@assets/icons/circle-check-gradient.svg';
-import { SignPolicy } from '@lace/core';
-import { useSharedWalletData } from '@hooks';
 
 export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.ReactElement }): React.ReactElement => {
   const { t } = useTranslation();
-  const { builtTxData: { uiTx: { hash, fee } = {}, signatures = new Map() } = {} } = useBuiltTxState();
+  const { builtTxData: { uiTx: { hash, fee } = {}, collectedEnoughSharedWalletTxSignatures } = {} } = useBuiltTxState();
   const { uiOutputs } = useOutputs();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const analytics = useAnalyticsContext();
@@ -41,21 +39,14 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   const assets = useObservable(inMemoryWallet.assetInfo$);
   const [customAnalyticsProperties, setCustomAnalyticsProperties] = useState<TokenAnalyticsProperties[]>();
   const [metadata] = useMetadata();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
   const { getMatchedAddresses } = useGetFilteredAddressBook();
-  const { getSignPolicy } = useSharedWalletData();
 
   useEffect(() => {
     // run this only when assets value was emitted and customAnalyticsProperties is undefined
     if (assets && !customAnalyticsProperties) {
       setCustomAnalyticsProperties(getTokensProperty(uiOutputs, assets, cardanoCoin));
     }
-
-    (async () => {
-      const policy = await getSignPolicy('payment');
-      setSignPolicy(policy);
-    })();
-  }, [assets, cardanoCoin, customAnalyticsProperties, getSignPolicy, uiOutputs]);
+  }, [assets, cardanoCoin, customAnalyticsProperties, uiOutputs]);
 
   const sendEventOnDone = useCallback(async () => {
     // send analytics event after customAnalyticsProperties was set
@@ -104,7 +95,7 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   return (
     <>
       <div className={styles.successTxContainer} data-testid="transaction-success-container">
-        {isSharedWallet && signatures.size < signPolicy?.requiredCosigners ? (
+        {isSharedWallet && !collectedEnoughSharedWalletTxSignatures ? (
           <ResultMessage
             customBgImg={SignatureAddedImg}
             title={t('sharedWallets.transaction.summary.unsubmitted.title')}
