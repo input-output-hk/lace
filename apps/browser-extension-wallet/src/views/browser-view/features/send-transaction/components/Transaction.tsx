@@ -14,8 +14,7 @@ import { SendTransactionLayout } from './SendTransactionLayout';
 import { TransactionForm } from './Form';
 import { AssetPicker } from './AssetPicker';
 import { useKeyboardShortcut } from '@lace/common';
-import { useDrawer } from '@views/browser/stores';
-import { sectionsWithArrowIcon } from './SendTransactionDrawer';
+import { sectionsWithArrowIcon, useHandleClose } from './SendTransactionDrawer';
 import { AddressChangeDetail } from '@src/features/address-book/components/AddressChangeDetail';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
@@ -34,7 +33,7 @@ interface SendTransactionProps {
 export const Transaction = withAddressBookContext(
   ({ flow, isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
     const { currentSection: section, setPrevSection } = useSections();
-    const [config, clearContent] = useDrawer();
+    const { onClose } = useHandleClose();
     const { list: addressList } = useAddressBookContext();
     const {
       addressToEdit: { name, address }
@@ -49,7 +48,7 @@ export const Transaction = withAddressBookContext(
       if (sectionsWithArrowIcon.includes(section.currentSection)) {
         setPrevSection();
       } else {
-        config?.onClose ? config?.onClose() : clearContent();
+        onClose();
       }
     });
 
