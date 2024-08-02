@@ -1,1 +1,0 @@
-export { NoSharedWalletFoundDialog } from './NoSharedWalletFoundDialog';
