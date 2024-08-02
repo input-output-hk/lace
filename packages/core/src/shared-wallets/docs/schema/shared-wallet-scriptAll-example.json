@@ -4,11 +4,11 @@
     "coSigners": [
       {
         "name": "Alice",
-        "publicKey": "e0a8a80a28f205b69029ac8448265da2cef6e2c70d6a91fcd699ea859df45860f6788ff36f7ed44ccf564974ad2c033e640a5f25b943308935d7103612ef2c1f"
+        "sharedWalletKey": "e0a8a80a28f205b69029ac8448265da2cef6e2c70d6a91fcd699ea859df45860f6788ff36f7ed44ccf564974ad2c033e640a5f25b943308935d7103612ef2c1f"
       },
       {
         "name": "Bob",
-        "publicKey": "979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d"
+        "sharedWalletKey": "979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d"
       }
     ]
   },

@@ -2,9 +2,10 @@
 import { Dialog, FileUpload, Text } from '@input-output-hk/lace-ui-toolkit';
 import React, { VFC, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { FileErrorMessage, FileValidationError } from '../../../shared-wallets/types';
 import { SharedWalletLayout } from '../SharedWalletLayout';
 import { restorationTimelineSteps } from './timelineSteps';
-import { CreateWalletParams, FileErrorMessage, FileValidationError, SharedWalletRestorationStep } from './types';
+import { CreateWalletParams, SharedWalletRestorationStep } from './types';
 import { validateJson } from './validateJson';
 
 type SharedWalletRestorationProps = {

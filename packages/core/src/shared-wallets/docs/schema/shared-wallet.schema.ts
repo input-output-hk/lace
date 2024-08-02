@@ -47,7 +47,7 @@ const nativeScriptSchema = z.union([
 
 export type NativeScript = z.infer<typeof nativeScriptSchema>;
 
-const schema = z
+export const schema = z
   .object({
     metadata: z
       .object({
@@ -89,34 +89,3 @@ export const schemaValidator = z.preprocess((data) => {
   }
   return parsedData;
 }, schema);
-
-// Usage example
-
-/* 
-const exampleData = {
-  metadata: {
-    sharedWalletName: "SharedWallet",
-    coSigners: [
-      { name: "Alice", publicKey: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0" },
-      { name: "Bob", publicKey: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab" }
-    ]
-  },
-  nativeScript: {
-    tag: "all",
-    scripts: [
-      { tag: "pubkey", pubkey: "8abf8e53f1532d344cbeae9be1ce14b6e9b70c22db91e6deab81b90b2f3a5904" },
-      { tag: "pubkey", pubkey: "21a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d0" }
-    ]
-  }
-};
-
-// Validation example 
-
-try {
-  sharedWalletJsonSchema.parse(exampleData);
-  console.log("Data is valid!");
-} catch (e: any) {
-  console.error("Validation error:", e.errors);
-}
-
-*/

@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { v1 as uuid } from 'uuid';
 import { z } from 'zod';
-import { PubkeyScript, schemaValidator } from '../../../shared-wallets/docs/schema/shared-wallet.schema';
+import { PubkeyScript } from '../../../shared-wallets/docs/schema/shared-wallet.schema';
 import { FileErrorMessage, FileValidationError } from '../../../shared-wallets/types';
-import { paymentScriptKeyPath } from '../../../shared-wallets/utils';
+import { paymentScriptKeyPath, schemaValidator } from '../../../shared-wallets/utils';
 import { CoSigner } from '../creation-flow';
 import { CreateWalletParams } from './types';
 import { getHashFromPublicKey, getQuorumRulesByTag } from './utils';
