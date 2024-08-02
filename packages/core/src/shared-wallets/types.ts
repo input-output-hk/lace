@@ -1,4 +1,6 @@
 import { Wallet } from '@lace/cardano';
+import { z } from 'zod';
+import { nativeScriptSchema, pubkeyScriptSchema, schema } from './docs/schema/shared-wallet.schema';
 
 export type SharedWalletScriptKind =
   | Wallet.Cardano.RequireAllOfScript
@@ -27,3 +29,7 @@ export enum FileErrorMessage {
 export interface FileValidationError extends Error {
   message: FileErrorMessage;
 }
+
+export type PubkeyScript = z.infer<typeof pubkeyScriptSchema>;
+export type NativeScript = z.infer<typeof nativeScriptSchema>;
+export type SharedWalletData = z.infer<typeof schema>;

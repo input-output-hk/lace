@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { SharedWalletData, schema } from '../docs/schema/shared-wallet.schema';
-import { FileErrorMessage } from '../types';
+import { schema } from '../docs/schema/shared-wallet.schema';
+import { FileErrorMessage, SharedWalletData } from '../types';
 
 // Preprocess to ensure metadata and nativeScript are present
 export const schemaValidator = z.preprocess((data) => {

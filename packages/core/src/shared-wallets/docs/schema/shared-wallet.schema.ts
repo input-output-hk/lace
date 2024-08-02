@@ -1,20 +1,24 @@
+/**
+ * This file was automatically generated.
+ * DO NOT MODIFY IT BY HAND. Instead, modify the source JSONSchema file,
+ * and run the online validator referenced in the README to regenerate
+ * this file.
+ */
+
 /* eslint-disable no-magic-numbers */
 import { z } from 'zod';
-import { FileErrorMessage } from '@src/shared-wallets/types';
 
 const uint32Schema = z.number().int().nonnegative().max(4_294_967_295);
 
 // Schema for a pubkey script, common in all quorum variants
-const pubkeyScriptSchema = z.object({
+export const pubkeyScriptSchema = z.object({
   pubkey: z.string(),
   tag: z.literal('pubkey'),
 });
 
-export type PubkeyScript = z.infer<typeof pubkeyScriptSchema>;
-
 const scriptsArraySchema = z.array(pubkeyScriptSchema);
 
-const nativeScriptSchema = z.union([
+export const nativeScriptSchema = z.union([
   z
     .object({
       tag: z.literal('all'),
@@ -45,8 +49,6 @@ const nativeScriptSchema = z.union([
     ),
 ]);
 
-export type NativeScript = z.infer<typeof nativeScriptSchema>;
-
 export const schema = z
   .object({
     metadata: z
@@ -71,21 +73,3 @@ export const schema = z
   })
   .strict()
   .describe('Shared wallet structure based on CIP-1854');
-
-export type SharedWalletData = z.infer<typeof schema>;
-
-// Preprocess to ensure metadata and nativeScript are present
-export const schemaValidator = z.preprocess((data) => {
-  const parsedData = data as SharedWalletData;
-
-  if (!parsedData.metadata || !parsedData.nativeScript) {
-    throw new z.ZodError([
-      {
-        code: 'custom',
-        message: FileErrorMessage.UNRECOGNIZED,
-        path: [],
-      },
-    ]);
-  }
-  return parsedData;
-}, schema);
