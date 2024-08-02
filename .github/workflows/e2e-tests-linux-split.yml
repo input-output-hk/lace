@@ -132,6 +132,7 @@ jobs:
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./apps/browser-extension-wallet/dist
+          github-token: ${{ secrets.GH_TOKEN }}
 
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
