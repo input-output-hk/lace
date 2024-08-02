@@ -4,7 +4,7 @@ import { StakingBrowserPreferences } from '@lace/staking';
 import { currencyCode } from '@providers/currency/constants';
 import { ADASymbols } from '@src/utils/constants';
 import { EnvironmentTypes } from '@stores';
-import { MultisigTxData } from '@lace/core';
+import { SharedWalletTransactionSchema } from '@lace/core';
 
 export interface WalletStorage {
   name: string;
@@ -68,5 +68,5 @@ export interface ILocalStorage {
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
   // TODO: LW-11111 remove once we switch to read signatures from $signed stream
-  sharedWalletTransactions?: Record<string, MultisigTxData>;
+  sharedWalletTransactions?: Record<string, SharedWalletTransactionSchema>;
 }
