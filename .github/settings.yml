@@ -90,7 +90,7 @@ branches:
           - context: block-fixup
           - context: Prepare
           - context: Unit tests
-          - context: Process smoke test reports
+          - context: Process smoke e2e test reports
           - context: >
             Run Chromatic check: Core
           - context: >

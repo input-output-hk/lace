@@ -85,8 +85,22 @@ const inMemoryWallet = {
   delegation: {
     rewardAccounts$
   },
-  protocolParameters$
+  protocolParameters$,
+  governance: {
+    isRegisteredAsDRep$: new BehaviorSubject(true)
+  }
 };
+const REWARD_ACCOUNT = Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
+const STAKE_KEY_HASH = Cardano.RewardAccount.toHash(REWARD_ACCOUNT);
+const STAKE_CREDENTIAL = {
+  type: Cardano.CredentialType.KeyHash,
+  hash: Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
+};
+const DREP_CREDENTIAL = {
+  type: Cardano.CredentialType.KeyHash,
+  hash: Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
+};
+const POOL_ID = Cardano.PoolId('pool126zlx7728y7xs08s8epg9qp393kyafy9rzr89g4qkvv4cv93zem');
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -159,27 +173,67 @@ const dappInfo = {
   url: 'dappUrl'
 };
 
-const certificate: Wallet.Cardano.Certificate = {
+const mockCredentialKeyHash = Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'));
+
+const drepRegistrationcertificate: Wallet.Cardano.Certificate = {
   __typename: Cardano.CertificateType.RegisterDelegateRepresentative,
-  dRepCredential: {
-    type: Cardano.CredentialType.KeyHash,
-    hash: Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
-  },
+  dRepCredential: DREP_CREDENTIAL,
   deposit: BigInt('1000'),
   anchor: {
     url: 'anchorUrl',
     dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
   }
 };
-const tx = buildMockTx({
-  certificates: [certificate]
-});
 
-const request = {
-  transaction: {
-    toCore: jest.fn().mockReturnValue(tx)
-  } as any
-} as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+const drepRetirementCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.UnregisterDelegateRepresentative,
+  dRepCredential: DREP_CREDENTIAL,
+  deposit: BigInt('1000')
+};
+
+const drepUpdateCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.UpdateDelegateRepresentative,
+  dRepCredential: DREP_CREDENTIAL,
+  anchor: {
+    url: 'anchorUrl',
+    dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanch').toString('hex'))
+  }
+};
+
+const stakeRegistrationDelegationCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.StakeRegistrationDelegation,
+  poolId: POOL_ID,
+  stakeCredential: STAKE_CREDENTIAL,
+  deposit: BigInt('100000')
+};
+
+const stakeVoteDelegationCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.StakeVoteDelegation,
+  poolId: POOL_ID,
+  stakeCredential: STAKE_CREDENTIAL,
+  dRep: DREP_CREDENTIAL
+};
+
+const stakeVoteRegistrationDelegationCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.StakeVoteRegistrationDelegation,
+  poolId: POOL_ID,
+  stakeCredential: STAKE_CREDENTIAL,
+  dRep: DREP_CREDENTIAL,
+  deposit: BigInt('100000')
+};
+
+const voteDelegationCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.VoteDelegation,
+  dRep: DREP_CREDENTIAL,
+  stakeCredential: STAKE_CREDENTIAL
+};
+
+const voteRegistrationDelegationCertificate: Wallet.Cardano.Certificate = {
+  __typename: Cardano.CertificateType.VoteRegistrationDelegation,
+  stakeCredential: STAKE_CREDENTIAL,
+  dRep: DREP_CREDENTIAL,
+  deposit: BigInt('100000')
+};
 
 jest.mock('@providers/ViewFlowProvider', () => ({
   ...jest.requireActual<any>('@providers/ViewFlowProvider'),
@@ -193,7 +247,11 @@ describe('Testing DappTransactionContainer component', () => {
       inMemoryWallet,
       blockchainProvider: { assetProvider },
       walletInfo,
-      walletUI: { cardanoCoin }
+      walletUI: { cardanoCoin },
+      currentChain: {
+        networkId: 0,
+        networkMagic: 1
+      }
     }));
     mockDappTransaction.mockReset();
     mockDappTransaction.mockReturnValue(<span data-testid="DappTransaction" />);
@@ -204,10 +262,6 @@ describe('Testing DappTransactionContainer component', () => {
     mockSkeleton.mockReset();
     mockSkeleton.mockImplementation(() => <span data-testid="skeleton" />);
     mockUseViewsFlowContext.mockReset();
-    mockUseViewsFlowContext.mockImplementation(() => ({
-      signTxRequest: { request, set: jest.fn() },
-      dappInfo
-    }));
   });
 
   afterEach(() => {
@@ -219,8 +273,16 @@ describe('Testing DappTransactionContainer component', () => {
   test('should render DappTransaction component with proper props', async () => {
     let queryByTestId: any;
 
-    const errorMessage = 'errorMessage';
-    const props = { errorMessage };
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(buildMockTx({ certificates: [drepRegistrationcertificate] }))
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
 
     const toAddress = new Map([
       [
@@ -319,7 +381,7 @@ describe('Testing DappTransactionContainer component', () => {
     };
 
     await act(async () => {
-      ({ queryByTestId } = render(<DappTransactionContainer {...props} />, {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
         wrapper: getWrapper()
       }));
     });
@@ -332,7 +394,6 @@ describe('Testing DappTransactionContainer component', () => {
         fromAddress: new Map(),
         fiatCurrencyCode: 'usd',
         fiatCurrencyPrice: 2,
-        errorMessage,
         coinSymbol: 'ADA',
         collateral: BigInt(1_000_000),
         txInspectionDetails,
@@ -341,6 +402,290 @@ describe('Testing DappTransactionContainer component', () => {
       },
       {}
     );
+  });
+
+  it('should display drep registration certificate', async () => {
+    let queryByTestId: any;
+    const drepRegistrationTx = buildMockTx({ certificates: [drepRegistrationcertificate] });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(drepRegistrationTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display drep retirement certificate', async () => {
+    let queryByTestId: any;
+    const drepRetirementCertificateTx = buildMockTx({ certificates: [drepRetirementCertificate] });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(drepRetirementCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display drep update certificate', async () => {
+    let queryByTestId: any;
+    const drepUpdateCertificateTx = buildMockTx({ certificates: [drepUpdateCertificate] });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(drepUpdateCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display stake registration delegation certificate', async () => {
+    let queryByTestId: any;
+    const stakeRegistrationDelegationCertificateTx = buildMockTx({
+      certificates: [stakeRegistrationDelegationCertificate]
+    });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(stakeRegistrationDelegationCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display stake vote delegation certificate', async () => {
+    let queryByTestId: any;
+    const stakeVoteDelegationCertificateTx = buildMockTx({ certificates: [stakeVoteDelegationCertificate] });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(stakeVoteDelegationCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display stake vote registration delegation certificate', async () => {
+    let queryByTestId: any;
+    const stakeVoteRegistrationDelegationCertificateTx = buildMockTx({
+      certificates: [stakeVoteRegistrationDelegationCertificate]
+    });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(stakeVoteRegistrationDelegationCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display vote delegation certificate', async () => {
+    let queryByTestId: any;
+    const voteDelegationCertificateTx = buildMockTx({ certificates: [voteDelegationCertificate] });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(voteDelegationCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display vote registration delegation certificate', async () => {
+    let queryByTestId: any;
+    const voteRegistrationDelegationCertificateTx = buildMockTx({
+      certificates: [voteRegistrationDelegationCertificate]
+    });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(voteRegistrationDelegationCertificateTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('certificates')).toBeInTheDocument();
+  });
+
+  it('should display votes', async () => {
+    let queryByTestId: any;
+    const votingTx = buildMockTx({
+      votingProcedures: [
+        {
+          voter: {
+            __typename: Cardano.VoterType.dRepKeyHash,
+            credential: {
+              type: Cardano.CredentialType.KeyHash,
+              hash: mockCredentialKeyHash
+            }
+          },
+          votes: [
+            {
+              actionId: {
+                id: Cardano.TransactionId('724a0a88b9470a714fc5bf84daf5851fa259a9b89e1a5453f6f5cd6595ad9821'),
+                actionIndex: 0
+              },
+              votingProcedure: {
+                vote: Cardano.Vote.yes,
+                anchor: {
+                  url: 'anchorUrl',
+                  dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanc1').toString('hex'))
+                }
+              }
+            }
+          ]
+        }
+      ]
+    });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(votingTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockReset();
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: {
+        request
+      },
+      dappInfo
+    }));
+
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('voting-procedures')).toBeInTheDocument();
+  });
+
+  it('should render proposal procedures', async () => {
+    let queryByTestId: any;
+    const proposalProceduresTx = buildMockTx({
+      proposalProcedures: [
+        {
+          anchor: {
+            url: 'anchorUrl',
+            dataHash: Crypto.Hash32ByteBase16(Buffer.from('anchorDataHashanchorDataHashanc1').toString('hex'))
+          },
+          governanceAction: {
+            __typename: Cardano.GovernanceActionType.info_action
+          },
+          deposit: BigInt('100000'),
+          rewardAccount: REWARD_ACCOUNT
+        }
+      ]
+    });
+    const request = {
+      transaction: {
+        toCore: jest.fn().mockReturnValue(proposalProceduresTx)
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('DappTransaction')).toBeInTheDocument();
+    expect(queryByTestId('proposal-procedures')).toBeInTheDocument();
   });
 
   test('should render loader in case there is no tx data', async () => {

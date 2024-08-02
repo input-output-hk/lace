@@ -2,17 +2,11 @@ name: e2e-split
 description: Execute e2e regression split tests
 
 inputs:
-  LACE_EXTENSION_KEY:
-    description: 'Public extended manifest key'
-    required: true
   WALLET_PASSWORD:
     description: 'Test wallet password'
     required: true
   TEST_DAPP_URL:
     description: 'Test DApp Url'
-    required: true
-  GITHUB_TOKEN:
-    description: 'Github token'
     required: true
   BROWSER:
     description: 'browser'
@@ -41,18 +35,7 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
       run: |
         Xvfb :99 &
-    - name: Build dist version of Lace
-      uses: ./.github/shared/build
-      with:
-        LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-    - name: Decrypt test data
-      if: success()
-      working-directory: ./packages/e2e-tests
-      run: ./decrypt_secret.sh
-      shell: bash
-      env:
-        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+
     - name: Execute E2E tests
       if: success()
       shell: bash
@@ -71,12 +54,14 @@ runs:
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
         fi
         eval "$runCommand";
+
     - name: Save dmesg logs
       shell: bash
       if: always()
       working-directory: ./packages/e2e-tests
       run: |
         sudo dmesg > ./dmesg.log
+
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
       uses: actions/upload-artifact@v4

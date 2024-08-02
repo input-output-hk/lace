@@ -42,7 +42,7 @@ Feature: Staking Page - Extended View
       | ABC#                   | 0                 |                   |
       | HUA                    | 1                 | HUADA             |
       | 123456                 | 0                 |                   |
-      | ZZZ                    | 2                 | ZZZZX             |
+      | ZZZ                    | 3                 | ZZZZX             |
       | £££                    | 0                 |                   |
       | Abcde                  | 0                 |                   |
 
