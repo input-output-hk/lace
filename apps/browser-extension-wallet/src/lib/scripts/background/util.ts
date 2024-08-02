@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { POPUP_WINDOW } from '@src/utils/constants';
+import { HW_POPUP_WINDOW, POPUP_WINDOW } from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
@@ -41,8 +41,8 @@ const calculatePopupWindowPositionAndSize = (
   window: Windows.Window,
   popup: WindowSize
 ): WindowSizeAndPositionProps => ({
-  top: Math.floor(window.top + (window.height - POPUP_WINDOW.height) / 2),
-  left: Math.floor(window.left + (window.width - POPUP_WINDOW.width) / 2),
+  top: Math.floor(window.top + (window.height - popup.height) / 2),
+  left: Math.floor(window.left + (window.width - popup.width) / 2),
   ...popup
 });
 
@@ -77,7 +77,7 @@ export const launchCip30Popup = async (url: string, windowType: Windows.CreateTy
   const tab = await createTab(`../dappConnector.html${url}`, false);
   const newWindow = await createWindow(
     tab.id,
-    calculatePopupWindowPositionAndSize(currentWindow, POPUP_WINDOW),
+    calculatePopupWindowPositionAndSize(currentWindow, windowType === 'popup' ? POPUP_WINDOW : HW_POPUP_WINDOW),
     windowType,
     true
   );

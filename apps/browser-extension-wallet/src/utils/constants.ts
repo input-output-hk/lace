@@ -87,6 +87,11 @@ export const POPUP_WINDOW = {
   height: 630
 };
 
+export const HW_POPUP_WINDOW = {
+  width: 900,
+  height: 630
+};
+
 export const DAPP_CHANNELS = {
   userPrompt: `user-prompt-${process.env.WALLET_NAME}`,
   authenticator: `authenticator-${process.env.WALLET_NAME}`,

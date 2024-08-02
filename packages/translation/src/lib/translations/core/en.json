@@ -225,6 +225,7 @@
   "core.dappTransaction.send": "Send",
   "core.dappTransaction.sending": "Sending",
   "core.dappTransaction.signedSuccessfully": "The transaction was signed successfully.",
+  "core.dappSignData.signedSuccessfully": "The data was signed successfully.",
   "core.dappTransaction.toAddress": "To address",
   "core.dappTransaction.tokens": "Tokens",
   "core.dappTransaction.transaction": "Transaction",
