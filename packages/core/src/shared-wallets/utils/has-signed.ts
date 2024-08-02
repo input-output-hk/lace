@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { paymentScriptKeyPath, stakingScriptKeyPath } from '@src/shared-wallets/utils/derivation-path';
+import { paymentScriptKeyPath, stakingScriptKeyPath } from './derivation-path';
 
 export const hasSigned = async (
   key: Wallet.Crypto.Bip32PublicKeyHex,
