@@ -2,15 +2,16 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+/* eslint-disable no-magic-numbers */
 const mockGetKeyAgentType = jest.fn();
 const mockUseWalletStore = jest.fn();
 const mockExposeApi = jest.fn(() => ({ shutdown: jest.fn() }));
 const mockConfirmTransactionContent = jest.fn(() => <span data-testid="ConfirmTransactionContent" />);
-const mockGetTxType = jest.fn();
 const mockUseDisallowSignTx = jest.fn();
 const mockUseViewsFlowContext = jest.fn();
 const mockUseSignWithHardwareWallet = jest.fn();
 const mockUseOnBeforeUnload = jest.fn();
+const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
 const mockCreateTxInspector = jest.fn().mockReturnValue(() => ({ minted: [] as any, burned: [] as any }));
 import * as React from 'react';
 import { cleanup, render, act, fireEvent } from '@testing-library/react';
@@ -19,6 +20,7 @@ import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
+import * as UseComputeTxCollateral from '@hooks/useComputeTxCollateral';
 
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
@@ -33,7 +35,11 @@ const inMemoryWallet = {
     utxo: {
       available$
     }
-  }
+  },
+  delegation: {
+    rewardAccounts$: new BehaviorSubject([])
+  },
+  addresses$: new BehaviorSubject([])
 };
 
 jest.mock('@src/stores', () => ({
@@ -73,21 +79,11 @@ jest.mock('@lace/common', () => {
   };
 });
 
-jest.mock('../ConfirmTransactionContent', () => {
-  const original = jest.requireActual('../ConfirmTransactionContent');
-  return {
-    __esModule: true,
-    ...original,
-    ConfirmTransactionContent: mockConfirmTransactionContent
-  };
-});
-
 jest.mock('../utils.ts', () => {
   const original = jest.requireActual('../utils.ts');
   return {
     __esModule: true,
-    ...original,
-    getTxType: mockGetTxType
+    ...original
   };
 });
 
@@ -101,6 +97,11 @@ jest.mock('../hooks.ts', () => {
     useOnBeforeUnload: mockUseOnBeforeUnload
   };
 });
+
+jest.mock('@hooks/useComputeTxCollateral', (): typeof UseComputeTxCollateral => ({
+  ...jest.requireActual<typeof UseComputeTxCollateral>('@hooks/useComputeTxCollateral'),
+  useComputeTxCollateral: mockUseComputeTxCollateral
+}));
 
 jest.mock('@providers/ViewFlowProvider', () => {
   const original = jest.requireActual('@providers/ViewFlowProvider');
@@ -146,7 +147,6 @@ describe('Testing ConfirmTransaction component', () => {
   test('Should render proper state for inMemory wallet', async () => {
     let queryByTestId: any;
 
-    const txType = 'txType';
     mockGetKeyAgentType.mockReset();
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
     mockUseWalletStore.mockReset();
@@ -154,11 +154,11 @@ describe('Testing ConfirmTransaction component', () => {
       getKeyAgentType: mockGetKeyAgentType,
       inMemoryWallet,
       walletUI: {},
-      walletInfo: {},
+      walletInfo: {
+        addresses: []
+      },
       blockchainProvider: { assetProvider }
     }));
-    mockGetTxType.mockReset();
-    mockGetTxType.mockReturnValue(txType);
 
     const signTxData = { tx: { id: 'test-tx-id' } };
     const disallowSignTx = jest.fn();
@@ -184,14 +184,6 @@ describe('Testing ConfirmTransaction component', () => {
       }));
     });
 
-    expect(queryByTestId('ConfirmTransactionContent')).toBeInTheDocument();
-    expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith(
-      {
-        txType,
-        onError: expect.any(Function)
-      },
-      {}
-    );
     expect(mockUseOnBeforeUnload).toHaveBeenCalledWith(disallowSignTx);
     expect(queryByTestId(testIds.dappTransactionConfirm)).toHaveTextContent('Confirm');
     expect(queryByTestId(testIds.dappTransactionConfirm)).not.toBeDisabled();
@@ -222,7 +214,9 @@ describe('Testing ConfirmTransaction component', () => {
       isHardwareWallet: true,
       walletType: 'Ledger',
       walletUI: {},
-      walletInfo: {},
+      walletInfo: {
+        addresses: []
+      },
       blockchainProvider: { assetProvider }
     }));
 

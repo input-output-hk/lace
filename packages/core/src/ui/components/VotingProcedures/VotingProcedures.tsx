@@ -56,13 +56,15 @@ export const VotingProcedures = ({ data }: Props): JSX.Element => {
   return (
     <>
       {data.map(({ voter, votes }, idx) => (
-        <Box key={voter.dRepId} mt={idx > 0 ? '$40' : '$0'}>
+        <Box mb="$16" key={voter.dRepId} mt={idx > 0 ? '$40' : '$0'}>
           <Grid columns="$1" gutters="$16">
-            <Cell>
-              <Text.Body.Large className={textCss} weight="$bold">
-                {indexCounter(translations.vote, idx, data.length)}
-              </Text.Body.Large>
-            </Cell>
+            {data.length > 1 && (
+              <Cell>
+                <Text.Body.Large className={textCss} weight="$bold">
+                  {indexCounter(translations.vote, idx, data.length)}
+                </Text.Body.Large>
+              </Cell>
+            )}
             <Cell>
               <Metadata
                 label={translations.voterType}
