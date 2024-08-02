@@ -67,5 +67,6 @@ export interface ILocalStorage {
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
+  // TODO: LW-11111 remove once we switch to read signatures from $signed stream
   sharedWalletTransactions?: Record<string, MultisigTxData>;
 }

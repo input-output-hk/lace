@@ -9,7 +9,7 @@ type MultisigTxParams = {
   publicKey: Wallet.Crypto.Bip32PublicKeyHex;
 };
 
-export const organizeMultiSigTransaction = ({
+export const constructMultiSigTransactionData = ({
   cborHex,
   publicKey,
   chainId,
@@ -56,7 +56,7 @@ export const importMultiSigTransaction = async (file: File): Promise<Wallet.Card
 };
 
 export const exportMultisigTransaction = async ({ cborHex, publicKey, chainId, note }: MultisigTxParams) => {
-  const multisigTxData = organizeMultiSigTransaction({ cborHex, chainId, note, publicKey });
+  const multisigTxData = constructMultiSigTransactionData({ cborHex, chainId, note, publicKey });
 
   // eslint-disable-next-line no-magic-numbers
   const jsonStr = JSON.stringify(multisigTxData, null, 2);
