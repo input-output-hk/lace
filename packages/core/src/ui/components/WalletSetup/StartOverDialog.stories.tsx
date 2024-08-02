@@ -4,7 +4,7 @@ import { ComponentProps } from 'react';
 import { ThemeColorScheme } from '@input-output-hk/lace-ui-toolkit';
 
 const meta: Meta<typeof StartOverDialog> = {
-  title: 'Shared Wallets/StartOverAgainDialog',
+  title: 'Wallet Setup/StartOverAgainDialog',
   component: StartOverDialog,
   parameters: {
     layout: 'centered'
@@ -19,7 +19,7 @@ const noop = (): void => void 0;
 const data: ComponentProps<typeof StartOverDialog> = {
   open: true,
   translations: {
-    title: 'Are you sure you want to cancel adding a shared wallet?',
+    title: 'Are you sure you want to cancel adding a wallet?',
     description: 'You’ll have to start over.',
     cancel: 'Go Back',
     confirm: 'Proceed'
