@@ -163,7 +163,6 @@ export const EnterPgpPrivateKey: VFC = () => {
         onNext={handleNext}
         isNextEnabled={!!createWalletData.mnemonic.every((w) => !!w)}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
-        paperWalletEnabled
       >
         <Flex gap="$8" flexDirection="column" w="$fill">
           <Flex w="$fill">

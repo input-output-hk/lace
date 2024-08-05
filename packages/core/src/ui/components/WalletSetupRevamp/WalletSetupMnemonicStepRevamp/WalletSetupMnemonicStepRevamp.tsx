@@ -42,7 +42,6 @@ export interface WalletSetupMnemonicStepProps {
   renderVideoPopupContent: (params: { onClose: () => void }) => React.ReactNode;
   onCopyToClipboard?: () => void;
   onPasteFromClipboard?: () => void;
-  paperWalletEnabled: boolean;
 }
 
 export const WalletSetupMnemonicStepRevamp = ({
@@ -56,8 +55,7 @@ export const WalletSetupMnemonicStepRevamp = ({
   renderVideoPopupContent,
   onWatchVideoClick,
   onCopyToClipboard,
-  onPasteFromClipboard,
-  paperWalletEnabled
+  onPasteFromClipboard
 }: WalletSetupMnemonicStepProps): React.ReactElement => {
   const [mnemonicConfirm, setMnemonicConfirm] = useState<string[]>([]);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -157,10 +155,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         description={subtitle}
         onBack={handleBack}
         onNext={handleNext}
-        currentTimelineStep={
-          paperWalletEnabled ? WalletTimelineSteps.RECOVERY_DETAILS : WalletTimelineSteps.RECOVERY_PHRASE
-        }
-        paperWalletEnabled={paperWalletEnabled}
+        currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
         customAction={
           <Tooltip
             placement="top"

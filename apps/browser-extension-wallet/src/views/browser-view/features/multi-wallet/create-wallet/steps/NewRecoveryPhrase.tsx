@@ -21,11 +21,7 @@ const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
   throw new Error('Invalid wallet crate step');
 };
 
-interface NewRecoveryPhraseProps {
-  paperWalletEnabled: boolean;
-}
-
-export const NewRecoveryPhrase = ({ paperWalletEnabled }: NewRecoveryPhraseProps): JSX.Element => {
+export const NewRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
   const { postHogActions } = useWalletOnboarding();
   const { back, createWalletData, next, step } = useCreateWallet();
@@ -75,7 +71,6 @@ export const NewRecoveryPhrase = ({ paperWalletEnabled }: NewRecoveryPhraseProps
   return (
     <>
       <WalletSetupMnemonicStepRevamp
-        paperWalletEnabled={paperWalletEnabled}
         mnemonic={createWalletData.mnemonic}
         mnemonicStage={getMnemonicStage(step)}
         onStageChange={(nextStage) => {

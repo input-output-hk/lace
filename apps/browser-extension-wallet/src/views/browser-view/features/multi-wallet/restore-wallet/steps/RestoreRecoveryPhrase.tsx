@@ -11,11 +11,7 @@ const wordList = wordlists.english;
 const DEFAULT_MNEMONIC_LENGTH = 24;
 const COPY_PASTE_TOOLTIP_URL = `${process.env.FAQ_URL}?question=best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features`;
 
-interface RestoreRecoveryPhraseProps {
-  paperWalletEnabled: boolean;
-}
-
-export const RestoreRecoveryPhrase = (props: RestoreRecoveryPhraseProps): JSX.Element => {
+export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
   const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { back, createWalletData, next, setMnemonic, onRecoveryPhraseLengthChange } = useRestoreWallet();
@@ -74,7 +70,6 @@ export const RestoreRecoveryPhrase = (props: RestoreRecoveryPhraseProps): JSX.El
       onPasteFromClipboard={() =>
         analytics.sendEventToPostHog(postHogActions.restore.RECOVERY_PHRASE_PASTE_FROM_CLIPBOARD_CLICK)
       }
-      paperWalletEnabled={props.paperWalletEnabled}
     />
   );
 };

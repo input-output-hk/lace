@@ -32,7 +32,6 @@ export interface WalletSetupMnemonicVerificationStepProps {
   defaultMnemonicLength?: number;
   onSetMnemonicLength?: (length: RecoveryPhraseLength) => void;
   onPasteFromClipboard?: () => void;
-  paperWalletEnabled: boolean;
 }
 
 export const WalletSetupMnemonicVerificationStepRevamp = ({
@@ -45,8 +44,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
   isSubmitEnabled,
   translations,
   suggestionList,
-  onPasteFromClipboard,
-  paperWalletEnabled
+  onPasteFromClipboard
 }: WalletSetupMnemonicVerificationStepProps): React.ReactElement => {
   const description = (
     <>
@@ -94,7 +92,6 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
       description={description}
       onBack={onCancel}
       onNext={onSubmit}
-      paperWalletEnabled={paperWalletEnabled}
       customAction={
         <Tooltip
           placement="top"
@@ -110,9 +107,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
           </Button>
         </Tooltip>
       }
-      currentTimelineStep={
-        paperWalletEnabled ? WalletTimelineSteps.RECOVERY_DETAILS : WalletTimelineSteps.RECOVERY_PHRASE
-      }
+      currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
       isNextEnabled={isSubmitEnabled}
     >
       <div className={styles.mnemonicContainer}>

@@ -47,7 +47,6 @@ export const ChooseRecoveryMethod: VFC = () => {
         onBack={back}
         onNext={handleNext}
         currentTimelineStep={WalletTimelineSteps.CHOOSE_RECOVERY_METHOD}
-        paperWalletEnabled
       >
         <Flex flexDirection="column" w="$fill" h="$fill">
           <RadioButtonGroup

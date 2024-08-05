@@ -241,7 +241,6 @@ export const WalletSetupWizard = ({
               icon: Paste
             });
           }}
-          paperWalletEnabled={false}
         />
       );
     }
@@ -293,7 +292,6 @@ export const WalletSetupWizard = ({
             icon: Paste
           });
         }}
-        paperWalletEnabled={false}
       />
     );
   };

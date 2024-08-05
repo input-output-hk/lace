@@ -25,19 +25,13 @@ export interface WalletSetupStepLayoutRevampProps {
   toolTipText?: string;
   currentTimelineStep?: WalletTimelineSteps;
   isHardwareWallet?: boolean;
-  paperWalletEnabled?: boolean;
 }
 
-const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, paperWalletEnabled: boolean) => {
+const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean) => {
   const inMemoryWalletSteps = [
-    ...(paperWalletEnabled
-      ? [
-          { key: WalletTimelineSteps.CHOOSE_RECOVERY_METHOD, name: i18n.t('core.walletSetup.recoveryMethod') },
-          { key: WalletTimelineSteps.RECOVERY_DETAILS, name: i18n.t('core.walletSetup.recoveryDetails') }
-        ]
-      : [{ key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('core.walletSetupStep.recoveryPhrase') }]),
-    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.enterWallet') }
+    { key: WalletTimelineSteps.CHOOSE_RECOVERY_METHOD, name: i18n.t('core.walletSetup.recoveryMethod') },
+    { key: WalletTimelineSteps.RECOVERY_DETAILS, name: i18n.t('core.walletSetup.recoveryDetails') },
+    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') }
   ];
 
   const hardwareWalletSteps = [
@@ -71,8 +65,7 @@ export const WalletSetupStepLayoutRevamp = ({
   isNextLoading = false,
   toolTipText,
   currentTimelineStep,
-  isHardwareWallet = false,
-  paperWalletEnabled
+  isHardwareWallet = false
 }: WalletSetupStepLayoutRevampProps): React.ReactElement => {
   const { t } = useTranslation();
   const nextButtonContainerRef = useRef(null);
@@ -83,7 +76,7 @@ export const WalletSetupStepLayoutRevamp = ({
     skip: t('core.walletSetupStep.skip')
   };
 
-  const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet, paperWalletEnabled);
+  const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet);
 
   return (
     <div className={styles.walletSetupStepLayout} data-testid="wallet-setup-step-layout">
