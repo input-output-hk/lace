@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import styles from './WalletSetupStepLayoutRevamp.module.scss';
 import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
@@ -77,6 +77,7 @@ export const WalletSetupStepLayoutRevamp = ({
   };
 
   const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet);
+  const hasCTA = useMemo(() => !!onBack || !!customAction || !!onNext, [onBack, customAction, onNext]);
 
   return (
     <div className={styles.walletSetupStepLayout} data-testid="wallet-setup-step-layout">
@@ -111,7 +112,7 @@ export const WalletSetupStepLayoutRevamp = ({
           {children}
         </div>
         {belowContentText}
-        {(onBack || customAction || onNext) && (
+        {hasCTA && (
           <div className={styles.footer} data-testid="wallet-setup-step-footer">
             {onBack && (
               <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
