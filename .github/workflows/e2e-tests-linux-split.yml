@@ -49,15 +49,14 @@ on:
 run-name: 'E2E | os: Linux | browser: ${{ github.event.inputs.browser }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only }} | preprod env: ${{ github.event.inputs.preprod_env }}'
 
 env:
-  BROWSER: ${{ github.event.inputs.browser }}
-  NETWORK: ${{ github.event.inputs.network }}
+  BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
+  NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  PREPROD_ENV: ${{ github.event.inputs.preprod_env }}
-  BUILD_ARTIFACT_NAME: 'lace-${{ github.event.inputs.preprod_env }}-${{ github.sha }}'
-
+  PREPROD_ENV: ${{ github.event.inputs.preprod_env || 'dev' }}
+  BUILD_ARTIFACT_NAME: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
 jobs:
   setup:
     name: Setup
