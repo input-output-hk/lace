@@ -67,8 +67,8 @@ jobs:
         run: |
           echo "Provisioning ${{ github.event.inputs.runner }}"
     outputs:
-      runner: ${{ github.event.inputs.runner }}
-      smoke_only: ${{ github.event.inputs.smoke_only }}
+      runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
+      smoke_only: ${{ github.event.inputs.smoke_only || false }}
 
   build:
     name: Build Lace
@@ -117,6 +117,8 @@ jobs:
         batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     runs-on: ${{ needs.setup.outputs.runner }}
     needs: [setup, build]
+    permissions:
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -132,7 +134,7 @@ jobs:
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./apps/browser-extension-wallet/dist
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
