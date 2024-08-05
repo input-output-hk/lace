@@ -66,7 +66,10 @@ export const ChooseRestoreMethod: VFC = () => {
                 label: i18n.t('core.walletSetupStep.recoveryPhrase'),
                 render: ({ optionElement, onOptionClick }) => (
                   <Card.Outlined
-                    onClick={onOptionClick}
+                    onClick={() => {
+                      void analytics.sendEventToPostHog(postHogActions.restore.CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK);
+                      onOptionClick();
+                    }}
                     className={cn({
                       [styles.selectedRestoreMethod]: recoveryMethod === 'mnemonic',
                       [styles.optionCard]: recoveryMethod !== 'mnemonic'
@@ -93,7 +96,11 @@ export const ChooseRestoreMethod: VFC = () => {
                 label: i18n.t('paperWallet.chooseRestoreMethod.option.paper'),
                 render: ({ optionElement, onOptionClick }) => (
                   <Card.Outlined
-                    onClick={onOptionClick}
+                    onClick={() => {
+                      void analytics.sendEventToPostHog(postHogActions.restore.CHOOSE_RECOVERY_MODE_PAPER_CLICK);
+                      onOptionClick();
+                      onOptionClick();
+                    }}
                     className={cn(styles.paperWalletRadioGroupItem, {
                       [styles.selectedRestoreMethod]: recoveryMethod === 'paper',
                       [styles.optionCard]: recoveryMethod !== 'paper'
