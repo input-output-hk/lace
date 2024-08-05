@@ -56,7 +56,7 @@ env:
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
   PREPROD_ENV: ${{ github.event.inputs.preprod_env || 'dev' }}
-  BUILD_ARTIFACT_NAME: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
+  BUILD_ARTIFACT_NAME: lace-${{ github.event.inputs.preprod_env || 'dev' }}-${{ github.sha }}
 jobs:
   setup:
     name: Setup
