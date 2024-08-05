@@ -4,6 +4,7 @@ import { Button } from '@lace/common';
 import styles from './TransactionCTAs.module.scss';
 import { ReactComponent as ArrowDiagonalDown } from '../../assets/icons/arrow-diagonal-down.component.svg';
 import { ReactComponent as ArrowDiagonalUp } from '../../assets/icons/arrow-diagonal-up.component.svg';
+import { ReactComponent as CosignIcon } from '../../assets/icons/cosign-icon.component.svg';
 import { useTranslation } from 'react-i18next';
 
 export interface TransactionCTAsProps {
@@ -34,6 +35,7 @@ export const TransactionCTAs = ({
       </Button>
       {onCoSignClick && (
         <Button className={buttonClassName} block onClick={onCoSignClick} color="gradient" data-testid="co-sign-button">
+          <CosignIcon className={classnames(styles.icon, !popupView && styles.iconInExpandedView)} />
           {t('core.transactionCtas.coSign')}
         </Button>
       )}
