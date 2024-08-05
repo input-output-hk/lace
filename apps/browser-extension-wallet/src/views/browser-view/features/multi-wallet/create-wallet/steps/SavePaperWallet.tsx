@@ -82,16 +82,19 @@ export const SavePaperWallet: VFC = () => {
       });
   }, [pgpInfo, createWalletData, CHAIN, setPdfInstance]);
 
+  const formattedWalletName = i18n.t('core.paperWallet.savePaperWallet.walletName', {
+    walletName: replaceWhitespace(createWalletData.name).trim()
+  });
+
   return (
     <>
       <WalletSetupStepLayoutRevamp
         title={i18n.t('paperWallet.savePaperWallet.title')}
         description={i18n.t('paperWallet.savePaperWallet.description')}
         currentTimelineStep={WalletTimelineSteps.ALL_DONE}
-        paperWalletEnabled
       >
         <Flex w="$fill" h="$fill" gap="$20">
-          <PaperWalletInfoCard walletName={createWalletData.name} />
+          <PaperWalletInfoCard walletName={formattedWalletName} />
           <Flex style={{ width: 180 }} flexDirection="column" h="$fill" justifyContent="space-between" p="$0" m="$0">
             <Flex h="$fill" flexDirection="column" w="$fill" gap="$8" px="$0" className={styles.actionButtonContainer}>
               <a
@@ -100,7 +103,7 @@ export const SavePaperWallet: VFC = () => {
                   void analytics.sendEventToPostHog(postHogActions.create.DOWNLOAD_PAPER_WALLET_CLICK);
                   setHasStoredPaperWallet(true);
                 }}
-                download={`${replaceWhitespace(createWalletData.name, '_')}_PaperWallet.pdf`}
+                download={formattedWalletName}
                 target="_blank"
                 style={{ width: '100%' }}
                 aria-disabled={pdfInstance.loading || !!pdfInstance.error}

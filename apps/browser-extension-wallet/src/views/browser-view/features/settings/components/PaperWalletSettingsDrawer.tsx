@@ -189,6 +189,10 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       });
   }, [passphrase, pgpInfo, walletInfo, CHAIN, setPdfInstance]);
 
+  const formattedWalletName = i18n.t('core.paperWallet.savePaperWallet.walletName', {
+    walletName: replaceWhitespace(walletInfo.name).trim()
+  });
+
   const visibleStage: React.ReactElement = useMemo(() => {
     switch (stage) {
       case 'secure':
@@ -196,11 +200,11 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       case 'passphrase':
         return <PassphraseStage password={password} setPassword={setPassword} isPasswordValid={isPasswordValid} />;
       case 'save':
-        return <SaveStage walletName={walletInfo.name} />;
+        return <SaveStage walletName={formattedWalletName} />;
       default:
         throw new Error('incorrect stage supplied');
     }
-  }, [stage, isPasswordValid, walletInfo, setPgpInfo, pgpInfo, password, setPassword]);
+  }, [stage, isPasswordValid, setPgpInfo, pgpInfo, password, setPassword, formattedWalletName]);
 
   const footer = useMemo(() => {
     switch (stage) {
@@ -232,7 +236,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
           <Flex flexDirection="column" gap="$8" className={styles.actionButtonContainer}>
             <a
               href={pdfInstance.url}
-              download={`${replaceWhitespace(walletInfo.name, '_')}_PaperWallet.pdf`}
+              download={formattedWalletName}
               target="_blank"
               style={{ width: '100%' }}
               aria-disabled={pdfInstance.loading || !!pdfInstance.error}
@@ -266,7 +270,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       default:
         throw new Error('incorrect stage supplied');
     }
-  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, walletInfo.name, handleClose, analytics]);
+  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, handleClose, analytics]);
 
   return (
     <>
