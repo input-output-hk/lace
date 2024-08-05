@@ -17,9 +17,7 @@ export const PaperWalletInfoCard = ({ walletName }: Props): JSX.Element => (
     <Flex gap="$8" alignItems="center">
       <DocumentIcon height={40} width={40} />
       <Flex flexDirection="column">
-        <Text.Body.Normal weight="$semibold">
-          {i18n.t('core.paperWallet.savePaperWallet.walletName', { walletName })}
-        </Text.Body.Normal>
+        <Text.Body.Normal weight="$semibold">{walletName}</Text.Body.Normal>
       </Flex>
     </Flex>
     <Flex flexDirection="column" gap="$16" pt="$16" className={styles.infoSection}>

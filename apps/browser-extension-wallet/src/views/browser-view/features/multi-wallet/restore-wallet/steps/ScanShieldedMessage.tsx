@@ -1,7 +1,8 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable sonarjs/cognitive-complexity */
-import React, { useMemo, useState, useEffect, useRef, useCallback, VFC } from 'react';
+/* eslint-disable no-console */
+import React, { useMemo, useState, useEffect, useRef, VFC } from 'react';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
 import { useRestoreWallet } from '../context';
 import { Wallet } from '@lace/cardano';
@@ -47,6 +48,24 @@ interface MediaReaderProps {
   scanState: QrCodeScanState;
 }
 
+const endAllStreams = (stream: MediaStream | null) => {
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop());
+  } else {
+    // fallback
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: false })
+      .then((mediaStream) => {
+        const currentStream = mediaStream;
+        const tracks = currentStream.getTracks();
+        tracks[0].stop();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
+
 const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanState }: MediaReaderProps) => {
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
@@ -59,13 +78,6 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
   const handleDeviceChange = (value: MediaDeviceInfo['deviceId']) => {
     setDeviceId(value);
   };
-
-  const stopVideoTracks = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-  }, [streamRef]);
 
   const VideoDeviceSelectOptions = useMemo(
     () =>
@@ -85,9 +97,10 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
   }, [videoDevices]);
 
   useEffect(() => {
+    let animationRequest: number;
     const getVideoStream = async () => {
       try {
-        stopVideoTracks();
+        endAllStreams(streamRef.current);
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: deviceId ? { exact: deviceId } : undefined
@@ -111,7 +124,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
 
     const scanQRCode = async () => {
       if (!videoRef?.current?.srcObject || !canvasRef.current || !streamRef.current) {
-        stopVideoTracks();
+        endAllStreams(streamRef.current);
         return;
       }
       const video = videoRef.current;
@@ -130,21 +143,23 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
         setScanState('validating');
         onScanCode(code);
       }
-      requestAnimationFrame(scanQRCode);
+      animationRequest = requestAnimationFrame(scanQRCode);
     };
-
     getVideoStream();
 
     if (videoRef.current) {
       videoRef.current.addEventListener('play', () => {
-        requestAnimationFrame(scanQRCode);
+        animationRequest = requestAnimationFrame(scanQRCode);
       });
     }
 
-    return () => stopVideoTracks();
+    return () => {
+      videoRef.current = null;
+      endAllStreams(streamRef.current);
+      cancelAnimationFrame(animationRequest);
+    };
   }, [
     deviceId,
-    stopVideoTracks,
     setScanState,
     onScanCode,
     analytics,
@@ -281,7 +296,6 @@ export const ScanShieldedMessage: VFC = () => {
           />
         }
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
-        paperWalletEnabled
       >
         <Flex gap="$16" alignItems="stretch" flexDirection="column" w="$fill" h="$fill">
           <Flex className={styles.scanArea} justifyContent="center" alignItems="center">
