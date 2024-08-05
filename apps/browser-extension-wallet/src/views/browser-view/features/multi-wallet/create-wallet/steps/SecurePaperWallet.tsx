@@ -1,24 +1,19 @@
 /* eslint-disable unicorn/no-null */
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps, PgpPublicKeyEntry } from '@lace/core';
-import React, { VFC, useState } from 'react';
+import React, { VFC } from 'react';
 import { useCreateWallet } from '../context';
 import { pgpPublicKeyVerification } from '@src/utils/pgp';
 import { i18n } from '@lace/translation';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useAnalyticsContext } from '@providers';
 
-interface Validation {
-  error?: string;
-  success?: string;
-}
-
 export const SecurePaperWallet: VFC = () => {
-  const { back, next, pgpInfo, setPgpInfo } = useCreateWallet();
-  const [validation, setValidation] = useState<Validation>({ error: null, success: null });
+  const { back, next, pgpInfo, setPgpInfo, setPgpValidation, pgpValidation } = useCreateWallet();
+
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
 
-  const handlePgpPublicKeyBlockChange = pgpPublicKeyVerification(setPgpInfo, setValidation);
+  const handlePgpPublicKeyBlockChange = pgpPublicKeyVerification(setPgpInfo, setPgpValidation);
 
   const handlePgpReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPgpInfo((prevState) => ({ ...prevState, pgpKeyReference: e.target.value }));
@@ -36,14 +31,13 @@ export const SecurePaperWallet: VFC = () => {
         description={i18n.t('paperWallet.securePaperWallet.description')}
         onBack={back}
         onNext={handleNext}
-        isNextEnabled={!!pgpInfo.pgpPublicKey && !validation.error}
+        isNextEnabled={!!pgpInfo.pgpPublicKey && !pgpValidation.error}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
-        paperWalletEnabled
       >
         <PgpPublicKeyEntry
           handlePgpPublicKeyBlockChange={handlePgpPublicKeyBlockChange}
           handlePgpReferenceChange={handlePgpReferenceChange}
-          validation={validation}
+          validation={pgpValidation}
           pgpInfo={pgpInfo}
         />
       </WalletSetupStepLayoutRevamp>
