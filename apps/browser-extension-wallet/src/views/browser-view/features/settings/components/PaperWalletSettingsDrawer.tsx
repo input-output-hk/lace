@@ -229,7 +229,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       }
       case 'save': {
         return (
-          <Flex flexDirection="column" gap="$8">
+          <Flex flexDirection="column" gap="$8" className={styles.actionButtonContainer}>
             <a
               href={pdfInstance.url}
               download={`${replaceWhitespace(walletInfo.name, '_')}_PaperWallet.pdf`}

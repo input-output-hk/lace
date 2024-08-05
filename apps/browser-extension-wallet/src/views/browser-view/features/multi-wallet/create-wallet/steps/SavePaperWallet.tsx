@@ -18,7 +18,7 @@ import { useCreateWallet } from '../context';
 import { generatePaperWalletPdf } from '@src/utils/PaperWallet';
 import { PaperWalletPDF } from '@src/types';
 import { replaceWhitespace } from '@src/utils/format-string';
-
+import styles from './SavePaperWallet.module.scss';
 const deriveAccountFromMnemonic = async (
   createWalletData: CreateWalletParams,
   chain: keyof typeof Wallet.Cardano.ChainIds
@@ -93,7 +93,7 @@ export const SavePaperWallet: VFC = () => {
         <Flex w="$fill" h="$fill" gap="$20">
           <PaperWalletInfoCard walletName={createWalletData.name} />
           <Flex style={{ width: 180 }} flexDirection="column" h="$fill" justifyContent="space-between" p="$0" m="$0">
-            <Flex h="$fill" flexDirection="column" w="$fill" gap="$8" px="$0">
+            <Flex h="$fill" flexDirection="column" w="$fill" gap="$8" px="$0" className={styles.actionButtonContainer}>
               <a
                 href={pdfInstance.url}
                 onClick={() => {

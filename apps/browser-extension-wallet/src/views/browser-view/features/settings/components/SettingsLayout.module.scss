@@ -548,3 +548,8 @@ h5 {
   color: var(--data-pink) !important;
   margin-left: size_unit(1);
 }
+
+.actionButtonContainer button path,
+.actionButtonContainer button:hover path {
+  fill: none;
+}
