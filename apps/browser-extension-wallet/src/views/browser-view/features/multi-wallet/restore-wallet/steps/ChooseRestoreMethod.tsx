@@ -99,7 +99,6 @@ export const ChooseRestoreMethod: VFC = () => {
                     onClick={() => {
                       void analytics.sendEventToPostHog(postHogActions.restore.CHOOSE_RECOVERY_MODE_PAPER_CLICK);
                       onOptionClick();
-                      onOptionClick();
                     }}
                     className={cn(styles.paperWalletRadioGroupItem, {
                       [styles.selectedRestoreMethod]: recoveryMethod === 'paper',
