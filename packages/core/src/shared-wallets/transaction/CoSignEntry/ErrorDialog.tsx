@@ -18,34 +18,34 @@ type ErrorKindTranslations = Record<'title' | 'message' | 'primaryButton', Share
 
 const errorsTranslationKeysMap: Record<ErrorKind, ErrorKindTranslations> = {
   [ErrorKind.InsufficientFunds]: {
-    message: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    primaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    secondaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    title: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
+    // TODO: LW-11114 add proper translations
+    message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
+    primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
+    title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.InvalidActiveWallet]: {
-    message: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    primaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    secondaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    title: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
+    // TODO: LW-11114 add proper translations
+    message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
+    primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
+    title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.InvalidFile]: {
-    message: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    primaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    secondaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    title: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
+    message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
+    primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
+    secondaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.secondaryButton',
+    title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.TxAlreadySigned]: {
-    message: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    primaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    secondaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    title: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
+    // TODO: LW-11114 add proper translations
+    message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
+    primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
+    title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
   [ErrorKind.TxExpired]: {
-    message: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    primaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    secondaryButton: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
-    title: 'sharedWallets.addSharedWallet.addCosigners.coSignerNameInputLabel',
+    // TODO: LW-11114 add proper translations
+    message: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message',
+    primaryButton: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton',
+    title: 'sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title',
   },
 };
 

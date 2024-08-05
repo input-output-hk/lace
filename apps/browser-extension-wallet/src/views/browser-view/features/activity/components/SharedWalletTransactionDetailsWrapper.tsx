@@ -9,10 +9,11 @@ import {
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { Wallet } from '@lace/cardano';
-import { useSharedWalletData } from '@hooks';
+import { useLocalStorage, useSharedWalletData } from '@hooks';
 import { AddressListType, getTransactionData } from '@views/browser/features/activity';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { TransactionActivityDetail, TxDirection, TxDirections } from '@types';
+import { Serialization } from '@cardano-sdk/core';
 
 interface SharedWalletTransactionDetailsProxyProps {
   amountTransformer: (amount: string) => string;
@@ -55,13 +56,23 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
     const [signPolicy, setSignPolicy] = useState<SignPolicy>();
     const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const { list: addressList } = useAddressBookContext();
+    const [sharedWalletTransactions] = useLocalStorage('sharedWalletTransactions', {});
 
     useEffect(() => {
       (async () => {
         const policy = await getSignPolicy('payment');
         setSignPolicy(policy);
 
-        const signatures = (activityDetail.activity as Wallet.Cardano.Tx).witness.signatures;
+        if (!coSigners) return;
+
+        const currentTransactionDetail = activityDetail.activity as Wallet.Cardano.Tx;
+        const sharedWalletTransaction = sharedWalletTransactions[currentTransactionDetail.id];
+
+        const signatures = sharedWalletTransaction
+          ? Serialization.Transaction.fromCbor(Wallet.TxCBOR(sharedWalletTransaction.transaction.cborHex)).toCore()
+              .witness.signatures
+          : currentTransactionDetail.witness.signatures;
+
         const cosignersWithSignStatus = await Promise.all(
           coSigners.map(async (signer) => ({
             ...signer,
@@ -70,7 +81,7 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
         );
         setTransactionCosigners(cosignersWithSignStatus);
       })();
-    }, [activityDetail.activity, coSigners, getSignPolicy, sharedWalletKey]);
+    }, [activityDetail.activity, coSigners, getSignPolicy, sharedWalletKey, sharedWalletTransactions]);
 
     const addressToNameMap = useMemo(
       () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),

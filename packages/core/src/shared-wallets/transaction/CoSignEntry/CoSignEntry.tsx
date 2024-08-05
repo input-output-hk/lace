@@ -10,8 +10,8 @@ export class UnrecognizedFile extends Error {
   }
 }
 
-const loadFileAsJson = <Content extends unknown>(file: File) =>
-  new Promise<Content>((resolve, reject) => {
+const loadFileAsJson = (file: File) =>
+  new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.addEventListener('load', () => {
       if (reader.error) {
@@ -42,9 +42,9 @@ export const CoSignEntry = ({ onCancel, onContinue }: CoSignEntryProps) => {
     if (event.target.files.length === 0) return;
     setLoadedFileName(event.target.files[0].name);
 
-    let sharedTransactionData: SharedWalletTransactionSchema;
+    let loadedData: unknown;
     try {
-      sharedTransactionData = await loadFileAsJson<SharedWalletTransactionSchema>(event.target.files[0]);
+      loadedData = await loadFileAsJson(event.target.files[0]);
     } catch (error: unknown) {
       if (error instanceof UnrecognizedFile) {
         setErrorKind(ErrorKind.InvalidFile);
@@ -54,11 +54,11 @@ export const CoSignEntry = ({ onCancel, onContinue }: CoSignEntryProps) => {
     }
 
     // TODO: validate loaded data against schema
-    if (!sharedTransactionData.transaction.cborHex || !sharedTransactionData.metadata) {
+    if (typeof loadedData !== 'object' || !('transaction' in loadedData) || !('metadata' in loadedData)) {
       setErrorKind(ErrorKind.InvalidFile);
     }
 
-    setTxData(sharedTransactionData);
+    setTxData(loadedData as SharedWalletTransactionSchema);
   };
 
   const handleContinue = () => {

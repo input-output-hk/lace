@@ -16,6 +16,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  BUILD_ARTIFACT_NAME: 'lace-dev-${{ github.sha }}'
+
 jobs:
   prepare:
     name: Prepare
@@ -121,24 +124,47 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
-  build_extension:
-    name: Build Lace browser extension
+  build:
+    name: Build Lace
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Lace browser extension
+      - name: Check if build exists
+        shell: bash
+        id: check-build-exists
+        run: |
+          echo "ART_NAME: $BUILD_ARTIFACT_NAME"
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
+
+          if ([ "$ART_ID" == "null" ]) then
+            echo "Lace build artifact not found. Building..."
+            echo "build_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "Lace build artifact found. Downloading..."
+            echo "build_exists=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Lace artifact
+        if: steps.check-build-exists.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+
+      - name: Upload build artifact
+        if: steps.check-build-exists.outputs.build_exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
 
   smokeTests:
-    name: Smoke tests run
+    name: Smoke e2e tests
     runs-on: ubuntu-22.04
-    needs: build_extension
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -147,23 +173,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Collect Workflow Telemetry Smoke Tests
-        uses: catchpoint/workflow-telemetry-action@v2
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
         with:
-          comment_on_pr: false
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Execute smoke tests
+      - name: Download Lace build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+      - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
   processReports:
-    name: Process smoke test reports
+    name: Process smoke e2e test reports
     runs-on: ubuntu-22.04
     needs: smokeTests
     if: always()

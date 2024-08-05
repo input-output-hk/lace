@@ -24,6 +24,8 @@ import duration from 'dayjs/plugin/duration';
 import { DappError } from '@src/features/dapp/components/DappError';
 import { tabs } from 'webextension-polyfill';
 import { useTranslation } from 'react-i18next';
+import { DappSignDataSuccess } from '@src/features/dapp/components/DappSignDataSuccess';
+import { DappSignDataFail } from '@src/features/dapp/components/DappSignDataFail';
 
 dayjs.extend(duration);
 
@@ -115,6 +117,8 @@ export const DappConnectorView = (): React.ReactElement => {
           <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
           <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
           <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+          <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
+          <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
           <Route exact path={dAppRoutePaths.dappSetCollateral} component={DappCollateralContainer} />
         </Switch>
       </MainLayout>
