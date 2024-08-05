@@ -5,6 +5,7 @@ import { i18n } from '@lace/translation';
 import { PublicPgpKeyData } from '@src/types';
 
 export const WEAK_KEY_REGEX = new RegExp(/RSA keys shorter than 2047 bits are considered too weak./);
+export const NO_ENCRYPTION_PACKET_REGEX = new RegExp(/Could not find valid encryption key packet in key/);
 
 /**
  * Reads an armored PGP public key and returns the corresponding OpenPGP key object.
@@ -161,7 +162,7 @@ export const decryptMessageWithPgp = async ({
 export const pgpPublicKeyVerification =
   (
     setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>,
-    setValidation: React.Dispatch<
+    setPgpValidation: React.Dispatch<
       React.SetStateAction<{
         error?: string;
         success?: string;
@@ -169,7 +170,7 @@ export const pgpPublicKeyVerification =
     >
   ): ((e: React.ChangeEvent<HTMLTextAreaElement>) => Promise<void>) =>
   async (e: React.ChangeEvent<HTMLTextAreaElement>): Promise<void> => {
-    setValidation({ error: null, success: null });
+    setPgpValidation({ error: null, success: null });
     if (!e.target.value) return;
     try {
       const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: e.target.value });
@@ -177,7 +178,7 @@ export const pgpPublicKeyVerification =
         ...prevState,
         pgpPublicKey: e.target.value
       }));
-      setValidation({
+      setPgpValidation({
         error: null,
         success: fingerPrint
           .toUpperCase()
@@ -185,14 +186,20 @@ export const pgpPublicKeyVerification =
           .join(' ')
       });
     } catch (error) {
-      if (error.message === 'Misformed armored text') {
-        setValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
-      } else if (error.message === 'no valid encryption key packet in key.') {
-        setValidation({ error: i18n.t('pgp.error.noValidEncryptionKeyPacket') });
+      if (error.message === 'Misformed armored text' || error.message === 'Unknown ASCII armor type') {
+        setPgpValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
+      } else if (
+        error.message === 'no valid encryption key packet in key.' ||
+        NO_ENCRYPTION_PACKET_REGEX.test(error.message)
+      ) {
+        setPgpValidation({ error: i18n.t('pgp.error.noValidEncryptionKeyPacket') });
       } else if (WEAK_KEY_REGEX.test(error.message)) {
-        setValidation({ error: error.message });
+        setPgpValidation({ error: error.message });
       } else if (error.message === 'PGP key is not public') {
-        setValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
+        setPgpValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
+      } else {
+        // Default fallback
+        setPgpValidation({ error: error.message });
       }
     }
   };

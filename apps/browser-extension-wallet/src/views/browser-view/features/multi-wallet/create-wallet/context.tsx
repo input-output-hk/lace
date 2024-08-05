@@ -12,6 +12,10 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { PublicPgpKeyData } from '@src/types';
 
 type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+interface PgpValidation {
+  error?: string;
+  success?: string;
+}
 
 interface State {
   back: () => void;
@@ -23,6 +27,8 @@ interface State {
   setRecoveryMethod: (value: RecoveryMethod) => void;
   pgpInfo: PublicPgpKeyData;
   setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>;
+  pgpValidation: PgpValidation;
+  setPgpValidation: React.Dispatch<React.SetStateAction<PgpValidation>>;
 }
 
 interface Props {
@@ -59,6 +65,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     pgpPublicKey: null,
     pgpKeyReference: null
   });
+  const [pgpValidation, setPgpValidation] = useState<PgpValidation>({ error: null, success: null });
   const generateMnemonic = useCallback(() => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Wallet.KeyManagement.util.generateMnemonicWords() }));
   }, [setCreateWalletData]);
@@ -162,7 +169,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       recoveryMethod,
       setRecoveryMethod,
       pgpInfo,
-      setPgpInfo
+      setPgpInfo,
+      pgpValidation,
+      setPgpValidation
     }),
     [
       back,
@@ -173,7 +182,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       recoveryMethod,
       setRecoveryMethod,
       pgpInfo,
-      setPgpInfo
+      setPgpInfo,
+      setPgpValidation,
+      pgpValidation
     ]
   );
 
