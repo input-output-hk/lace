@@ -46,7 +46,7 @@ import { mergeWitnesses } from './utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
-  [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: 'browserView.transaction.send.footer.review',
+  [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: 'browserView.transaction.send.coSign.footer.continue',
   [Sections.SUMMARY]: 'browserView.transaction.send.footer.confirm',
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',
   [Sections.SUCCESS_TX]: 'browserView.transaction.send.footer.viewTransaction',
@@ -207,7 +207,6 @@ export const Footer = withAddressBookContext(
         const collectedEnoughSharedWalletTxSignatures =
           policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
 
-        // eslint-disable-next-line unicorn/prefer-ternary
         if (collectedEnoughSharedWalletTxSignatures) {
           try {
             await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
@@ -376,12 +375,14 @@ export const Footer = withAddressBookContext(
         metadata?.length > METADATA_MAX_LENGTH,
       [builtTxData.importedSharedWalletTx, builtTxData.tx, hasInvalidOutputs, metadata?.length]
     );
+
     const isSubmitDisabled = useMemo(
       () =>
         currentSection.currentSection === Sections.CONFIRMATION &&
         (isSubmitingTx || !isPasswordValid || !password || !isOnline),
       [currentSection.currentSection, isSubmitingTx, isPasswordValid, password, isOnline]
     );
+
     const confirmButtonLabel = useMemo(() => {
       if (isHwSummary) {
         const staleLabels = isPopupView
@@ -437,8 +438,6 @@ export const Footer = withAddressBookContext(
     if (currentSection.currentSection === Sections.ASSET_PICKER) return <AssetPickerFooter />;
 
     if (currentSection.currentSection === Sections.ADDRESS_FORM) return <AddressFormFooter />;
-
-    if (currentSection.currentSection === Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON) return null;
 
     return (
       <>

@@ -37,6 +37,7 @@ import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import type { TranslationKey } from '@lace/translation';
+import { DrawerContent } from '@views/browser/components/Drawer';
 
 export const useHandleClose = (): {
   onClose: () => void;
@@ -116,11 +117,15 @@ const sectionsWithoutCrossIcon = new Set([Sections.ASSET_PICKER, Sections.ADDRES
 
 interface HeaderNavigationProps {
   isPopupView?: boolean;
+  flow?: DrawerContent.SEND_TRANSACTION | DrawerContent.CO_SIGN_TRANSACTION;
 }
 
 const FIRST_ROW = 'output1';
 
-export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.ReactElement => {
+export const HeaderNavigation = ({
+  isPopupView,
+  flow = DrawerContent.SEND_TRANSACTION
+}: HeaderNavigationProps): React.ReactElement => {
   const { t } = useTranslation();
   const { onClose } = useHandleClose();
   const { currentSection: section, setPrevSection } = useSections();
@@ -191,9 +196,14 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const selectedTokenClick =
     selectedTokenList.length > 0 ? resetTokenList : () => setMultipleSelection(!isMultipleSelectionAvailable);
 
+  const headerTitle = {
+    [DrawerContent.SEND_TRANSACTION]: t('browserView.transaction.send.drawer.send'),
+    [DrawerContent.CO_SIGN_TRANSACTION]: t('browserView.transaction.send.drawer.coSignTransaction')
+  };
+
   return (
     <DrawerNavigation
-      title={!isPopupView ? <div>{t('browserView.transaction.send.drawer.send')}</div> : undefined}
+      title={!isPopupView ? <div>{headerTitle[flow]}</div> : undefined}
       onArrowIconClick={shouldRenderArrow ? onArrowIconClick : undefined}
       rightActions={
         shouldDisplayAdvancedBtn ? (
