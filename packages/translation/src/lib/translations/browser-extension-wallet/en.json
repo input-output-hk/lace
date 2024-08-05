@@ -831,6 +831,8 @@
   "paperWallet.chooseRestoreMethod.description": "Start by choosing a recovery method for your new wallet to use as a backup or when adding your wallet to a new device. <a>Learn more</a>",
   "paperWallet.walletOverview.title": "Wallet overview",
   "paperWallet.walletOverview.description": "Please review the identified wallet address and token balance to ensure the correct wallet is restored.",
+  "paperWallet.WalletOverview.otherItemsHeading": "Other",
+  "paperWallet.WalletOverview.otherItemsTooltip": "The number of distinct items in the wallet other than ADA e.g NFTs",
   "paperWallet.chooseRestoreMethod.option.paper": "Paper wallet",
   "pgp.error.misformedArmoredText": "Malformed PGP key block.",
   "pgp.error.privateKeySuppliedInsteadOfPublic": "Please use your public PGP key.",

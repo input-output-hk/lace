@@ -3,7 +3,14 @@ import { i18n } from '@lace/translation';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useRestoreWallet } from '../context';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
-import { Flex, Text, TextLink, Tooltip, WalletComponent as WalletIcon } from '@input-output-hk/lace-ui-toolkit';
+import {
+  Flex,
+  Text,
+  TextLink,
+  Tooltip,
+  WalletComponent as WalletIcon,
+  InfoComponent as InfoIcon
+} from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { compactNumberWithUnit } from '@src/utils/format-number';
 import { PortfolioBalance } from '@src/views/browser-view/components';
@@ -21,7 +28,10 @@ export const WalletOverview = (): JSX.Element => {
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
   const { back, next, walletMetadata } = useRestoreWallet();
-  const [walletAdaBalance, setWalletAdaBalance] = useState<BigNumber>(new BigNumber(0));
+  const [walletBalances, setWalletBalances] = useState<{ ada: BigNumber; otherItems: number }>({
+    ada: new BigNumber(0),
+    otherItems: 990
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [adaPrice, setAdaPrice] = useState<number>(0);
   const { fiatCurrency } = useCurrencyStore();
@@ -32,11 +42,16 @@ export const WalletOverview = (): JSX.Element => {
       const { prices } = await getADAPriceFromBackgroundStorage();
       const { utxoProvider } = getProviderByChain(walletMetadata.chain);
       const utxos: Wallet.Cardano.Utxo[] = await utxoProvider.utxoByAddresses({ addresses: [walletMetadata.address] });
-      const summedBalance = utxos.reduce(
-        (acc, utxo) => acc.plus(new BigNumber(utxo[1].value.coins.toString())),
-        new BigNumber(0)
+
+      const summedBalances = utxos.reduce(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (acc, [_, output]) => ({
+          ada: acc.ada.plus(new BigNumber(output.value.coins.toString())),
+          otherItems: acc.otherItems + (output.value.assets?.size || 0)
+        }),
+        { ada: new BigNumber(0), otherItems: 0 }
       );
-      setWalletAdaBalance(summedBalance);
+      setWalletBalances(summedBalances);
       if (!!prices && !!prices['usd' as currencyCode]) setAdaPrice(prices['usd' as currencyCode]);
       setIsLoading(false);
     };
@@ -44,11 +59,11 @@ export const WalletOverview = (): JSX.Element => {
     getData();
 
     return () => {
-      setWalletAdaBalance(new BigNumber(0));
+      setWalletBalances({ ada: new BigNumber(0), otherItems: 0 });
       setAdaPrice(0);
       setIsLoading(true);
     };
-  }, [walletMetadata, setIsLoading, setWalletAdaBalance]);
+  }, [walletMetadata, setIsLoading, setWalletBalances]);
 
   const handleOpenCoingeckoLink = useCallback(() => {
     window.open(COINGECKO_URL, '_blank', 'noopener,noreferrer');
@@ -67,11 +82,11 @@ export const WalletOverview = (): JSX.Element => {
     () =>
       !!adaPrice && {
         value: `${compactNumberWithUnit(
-          new BigNumber(Wallet.util.lovelacesToAdaString(walletAdaBalance.toString())).times(adaPrice).toString()
+          new BigNumber(Wallet.util.lovelacesToAdaString(walletBalances.ada.toString())).times(adaPrice).toString()
         )} ${fiatCurrency.code}`,
         isPercentage: false
       },
-    [adaPrice, fiatCurrency.code, walletAdaBalance]
+    [adaPrice, fiatCurrency.code, walletBalances.ada]
   );
 
   const handleNext = () => {
@@ -87,7 +102,6 @@ export const WalletOverview = (): JSX.Element => {
       onNext={handleNext}
       nextLabel="Proceed"
       currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
-      paperWalletEnabled
     >
       <Flex
         gap="$8"
@@ -100,10 +114,10 @@ export const WalletOverview = (): JSX.Element => {
         pb="$16"
         className={styles.overviewContainer}
       >
-        <Flex className={styles.walletIconContainer}>
-          <WalletIcon />
-        </Flex>
         <Flex flexDirection="column" gap="$8">
+          <Flex className={styles.walletIconContainer}>
+            <WalletIcon />
+          </Flex>
           <Text.Body.Normal weight="$bold" color="secondary">
             {i18n.t('qrInfo.walletAddress')}
           </Text.Body.Normal>
@@ -111,26 +125,41 @@ export const WalletOverview = (): JSX.Element => {
             <Text.Body.Large>{addEllipsis(walletMetadata.address, 28, 28)}</Text.Body.Large>
           </Tooltip>
         </Flex>
-        <Flex flexDirection="column">
-          <PortfolioBalance
-            textSize="medium"
-            loading={isLoading}
-            balance={compactNumberWithUnit(Wallet.util.lovelacesToAdaString(walletAdaBalance.toString()))}
-            currencyCode={adaSymbol}
-            label={i18n.t('browserView.crypto.dashboard.adaBalance')}
-            balanceSubtitle={adaBalanceInUsd}
-          />
-        </Flex>
-        {!!adaPrice && (
-          <Flex alignItems="center" className={styles.credit}>
-            <Text.Label className={styles.creditLink}>{i18n.t('general.credit.poweredBy')}</Text.Label>
-            <TextLink
-              label={i18n.t('general.credit.coinGecko')}
-              onClick={handleOpenCoingeckoLink}
-              data-testid="coingecko-link"
+        <Flex flexDirection="row" justifyContent="space-between">
+          <Flex flexDirection="column" gap="$8">
+            <PortfolioBalance
+              textSize="medium"
+              loading={isLoading}
+              balance={compactNumberWithUnit(Wallet.util.lovelacesToAdaString(walletBalances.ada.toString()))}
+              currencyCode={adaSymbol}
+              label={i18n.t('browserView.crypto.dashboard.adaBalance')}
+              balanceSubtitle={adaBalanceInUsd}
             />
+            {!!adaPrice && (
+              <Flex alignItems="center" className={styles.credit}>
+                <Text.Label className={styles.creditLink}>{i18n.t('general.credit.poweredBy')}</Text.Label>
+                <TextLink
+                  label={i18n.t('general.credit.coinGecko')}
+                  onClick={handleOpenCoingeckoLink}
+                  data-testid="coingecko-link"
+                />
+              </Flex>
+            )}
           </Flex>
-        )}
+          {walletBalances.otherItems > 0 && !isLoading && (
+            <Flex justifyContent="center" gap="$8" h="$fill" alignItems="center" pb="$16">
+              <Flex alignItems="baseline">
+                <Text.PageHeading>{compactNumberWithUnit(walletBalances.otherItems, 0)}</Text.PageHeading>
+                <Tooltip side="right" align="center" label={i18n.t('paperWallet.WalletOverview.otherItemsTooltip')}>
+                  <Text.Body.Large color="secondary" weight="$bold">
+                    {i18n.t('paperWallet.WalletOverview.otherItemsHeading')}
+                  </Text.Body.Large>
+                  <InfoIcon className={styles.infoIcon} />
+                </Tooltip>
+              </Flex>
+            </Flex>
+          )}
+        </Flex>
       </Flex>
     </WalletSetupStepLayoutRevamp>
   );
