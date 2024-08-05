@@ -34,12 +34,12 @@ const onboardingActions = {
     PGP_PUBLIC_KEY_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('step: pgp key | next | click'),
     WALLET_SETUP_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: wallet info | pageview'),
     WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent(
-      ' step: wallet info | Generate paper wallet | click'
+      'step: wallet info | Generate paper wallet | click'
     ),
     PAPER_WALLET_DOWNLOAD_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: download pdf | pageview'),
-    DOWNLOAD_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent(' download pdf | download pdf | click'),
+    DOWNLOAD_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('download pdf | download pdf | click'),
     PRINT_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('print pdf | print pdf | click'),
-    PAPER_WALLET_COMPLETE_CLICK: makePaperWalletOnboardingCreateEvent(' open wallet | open wallet | click'),
+    PAPER_WALLET_COMPLETE_CLICK: makePaperWalletOnboardingCreateEvent('open wallet | open wallet | click'),
     SETUP_OPTION_CLICK: makeOnboardingCreateEvent('create | click'),
     SAVE_RECOVERY_PHRASE_NEXT_CLICK: makeOnboardingCreateEvent('save your recovery phrase | next | click'),
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: makeOnboardingCreateEvent('enter your recovery phrase | next | click'),
