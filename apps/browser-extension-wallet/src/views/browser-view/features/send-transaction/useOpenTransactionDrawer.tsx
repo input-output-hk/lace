@@ -42,7 +42,7 @@ export const useOpenTransactionDrawer = ({
       content,
       wrapperClassName: styles.drawer,
       onClose,
-      renderHeader: () => <HeaderNavigation isPopupView={isPopupView} />,
+      renderHeader: () => <HeaderNavigation isPopupView={isPopupView} flow={content} />,
       renderTitle: () => <HeaderTitle popup={isPopupView} />,
       ...(shouldRenderFooter
         ? {
