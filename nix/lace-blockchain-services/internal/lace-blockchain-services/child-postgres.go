@@ -109,7 +109,7 @@ func childPostgres(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChil
 			err = ioutil.WriteFile(dataDir + sep + "postgresql.conf", []byte(
 				"listen_addresses = 'localhost'\n" +
 				fmt.Sprintf("port = %d\n", *shared.PostgresPort) +
-				fmt.Sprintf("unix_socket_directories = '%s'\n", strings.ReplaceAll(dataDir, "\\", "/")) +
+				"unix_socket_directories = ''\n" +
 				"max_connections = 100\n" +
 				"fsync = on\n" +
 				"logging_collector = off\n" +

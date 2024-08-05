@@ -105,7 +105,7 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 			SyncProgress: &[]float64{ -1.0 }[0],  // wat
 			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-node",
 			CardanoSubmitApiConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-submit-api",
-			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "cardano-node.socket",
+			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "node.sock",
 			CardanoSubmitApiPort: new(int),
 			OgmiosPort: new(int),
 			PostgresPort: new(int),
