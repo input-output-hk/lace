@@ -11233,6 +11233,7 @@ __metadata:
     tsconfig-paths-webpack-plugin: 3.5.2
     typescript: ^4.9.5
     uuid: ^8.3.2
+    zod: ^3.23.8
     zxcvbn: ^4.4.2
   peerDependencies:
     react: 17.0.2
@@ -55148,6 +55149,13 @@ __metadata:
     compress-commons: ^6.0.2
     readable-stream: ^4.0.0
   checksum: aa5abd6a89590eadeba040afbc375f53337f12637e5e98330012a12d9886cde7a3ccc28bd91aafab50576035bbb1de39a9a316eecf2411c8b9009c9f94f0db27
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.23.8":
+  version: 3.23.8
+  resolution: "zod@npm:3.23.8"
+  checksum: 15949ff82118f59c893dacd9d3c766d02b6fa2e71cf474d5aa888570c469dbf5446ac5ad562bb035bf7ac9650da94f290655c194f4a6de3e766f43febd432c5c
   languageName: node
   linkType: hard
 
