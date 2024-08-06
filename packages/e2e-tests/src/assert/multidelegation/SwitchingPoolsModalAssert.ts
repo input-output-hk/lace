@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { t } from '../utils/translationService';
-import SwitchingStakePoolModal from '../elements/multidelegation/SwitchingStakePoolModal';
+import { t } from '../../utils/translationService';
+import SwitchingStakePoolModal from '../../elements/multidelegation/SwitchingStakePoolModal';
 
 class SwitchingPoolsModalAssert {
   async assertSeeSwitchingToLessPoolsModal() {
