@@ -80,7 +80,7 @@ jobs:
       - name: Build Lace artifact
         uses: ./.github/shared/build
         with:
-          CARDANO_SERVICES_URL_PREPROD: 'https://${{ github.event.inputs.preprod_env }}-preprod.lw.iog.io'
+          CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.PREPROD_ENV }}-preprod.lw.iog.io'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
