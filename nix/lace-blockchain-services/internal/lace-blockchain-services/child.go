@@ -64,9 +64,10 @@ type SharedState struct {
 	OgmiosPort *int
 	PostgresPort *int
 	PostgresPassword *string
+	MithrilCachePort int
 }
 
-func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
+func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig, mithrilCachePort int) {
 	sep := string(filepath.Separator)
 
 	network := <-comm.NetworkSwitch
@@ -110,6 +111,7 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 			OgmiosPort: new(int),
 			PostgresPort: new(int),
 			PostgresPassword: new(string),
+			MithrilCachePort: mithrilCachePort,
 		}
 
 		if (runtime.GOOS == "windows") {
@@ -139,7 +141,7 @@ func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 				usedChildren = append(usedChildren, childProjector)
 			}
 		} else {
-			usedChildren = append(usedChildren, childMithril)
+			usedChildren = append(usedChildren, childMithril(appConfig))
 			runMithril = false  // one-time thing (restart to regular mode – successfully or by force)
 		}
 

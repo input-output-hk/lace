@@ -18,6 +18,18 @@ type AppConfig struct {
 	ApiPort              int     `json:"apiPort"`
 	CardanoSubmitApiPort int     `json:"cardanoSubmitApiPort"`
 	LastNetwork          string  `json:"lastNetwork"`
+	ForceMithrilSnapshot MithrilOverrides `json:"forceMithrilSnapshot"`
+}
+
+type MithrilOverrides struct {
+	Preview MithrilOverride `json:"preview"`
+	Preprod MithrilOverride `json:"preprod"`
+	Mainnet MithrilOverride `json:"mainnet"`
+}
+
+type MithrilOverride struct {
+	Digest string `json:"digest"`
+	LocalPath string `json:"localPath"`
 }
 
 func Load() AppConfig {
@@ -27,6 +39,11 @@ func Load() AppConfig {
 		ApiPort: 52910,
 		CardanoSubmitApiPort: 52911,
 		LastNetwork: "mainnet",
+		ForceMithrilSnapshot: MithrilOverrides {
+			Preview: MithrilOverride { Digest: "", LocalPath: "" },
+			Preprod: MithrilOverride { Digest: "", LocalPath: "" },
+			Mainnet: MithrilOverride { Digest: "", LocalPath: "" },
+		},
 	}
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
