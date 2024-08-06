@@ -168,11 +168,11 @@ class MultidelegationPageAssert {
   };
 
   assertSeeSearchResults = async (expectedResultsCount: number, view: 'grid' | 'list') => {
-    const rowsNumber =
+    const searchResultsCount =
       view === 'list'
         ? (await MultidelegationPage.displayedPools).length
         : (await MultidelegationPage.displayedCards).length;
-    expect(rowsNumber).to.equal(expectedResultsCount);
+    expect(searchResultsCount).to.equal(expectedResultsCount);
     await MultidelegationPage.emptySearchResultsImage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
     await MultidelegationPage.emptySearchResultsMessage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
     if (expectedResultsCount === 0) {
