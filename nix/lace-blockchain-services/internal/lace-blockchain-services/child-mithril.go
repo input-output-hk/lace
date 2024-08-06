@@ -18,29 +18,40 @@ import (
 
 	"github.com/sqweek/dialog"
 
+	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/mainthread"
 	"lace.io/lace-blockchain-services/ui"
 )
 
-func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
+func childMithril(appConfig appconfig.AppConfig) func(SharedState, chan<- StatusAndUrl) ManagedChild { return func(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
+
+	var upstream = map[string]string{
+		"preview": "https://aggregator.pre-release-preview.api.mithril.network/aggregator",
+		"preprod": "https://aggregator.release-preprod.api.mithril.network/aggregator",
+		"mainnet": "https://aggregator.release-mainnet.api.mithril.network/aggregator",
+	}
+
+	if appConfig.ForceMithrilSnapshot.Preview.Digest != "" { upstream["preview"] = fmt.Sprintf("http://127.0.0.1:%d/preview", shared.MithrilCachePort) }
+	if appConfig.ForceMithrilSnapshot.Preprod.Digest != "" { upstream["preprod"] = fmt.Sprintf("http://127.0.0.1:%d/preprod", shared.MithrilCachePort) }
+	if appConfig.ForceMithrilSnapshot.Mainnet.Digest != "" { upstream["mainnet"] = fmt.Sprintf("http://127.0.0.1:%d/mainnet", shared.MithrilCachePort) }
 
 	extraEnv := map[string][]string {
 		"preview": []string{
 			"NETWORK=preview",
-			"AGGREGATOR_ENDPOINT=https://aggregator.pre-release-preview.api.mithril.network/aggregator",
+			"AGGREGATOR_ENDPOINT=" + upstream["preview"],
 			"GENESIS_VERIFICATION_KEY=" + constants.MithrilGVKPreview,
 		},
 		"preprod": []string{
 			"NETWORK=preprod",
-			"AGGREGATOR_ENDPOINT=https://aggregator.release-preprod.api.mithril.network/aggregator",
+			"AGGREGATOR_ENDPOINT=" + upstream["preprod"],
 			"GENESIS_VERIFICATION_KEY=" + constants.MithrilGVKPreprod,
 		},
 		"mainnet": []string{
 			"NETWORK=mainnet",
-			"AGGREGATOR_ENDPOINT=https://aggregator.release-mainnet.api.mithril.network/aggregator",
+			"AGGREGATOR_ENDPOINT=" + upstream["mainnet"],
 			"GENESIS_VERIFICATION_KEY=" + constants.MithrilGVKMainnet,
 		},
 	}
@@ -310,7 +321,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			return nil
 		},
 	}
-}
+}}
 
 func runCommandWithTimeout(
 	command string,
