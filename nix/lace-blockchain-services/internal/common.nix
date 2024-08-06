@@ -34,26 +34,30 @@ in rec {
       find $out -name cabal.project.freeze -delete -o -name package.yaml -delete
       grep -RF -- -external-libsodium-vrf $out | cut -d: -f1 | sort --uniq | xargs -n1 -- sed -r s/-external-libsodium-vrf//g -i
       cd $out
-      patch -p1 -i ${./ogmios-6-3-0--missing-srp-hash.patch}
+      patch -p1 -i ${./ogmios-6-5-0--missing-srp-hash.patch}
       patch -p1 -i ${./ogmios--on-windows.patch}
     '');
     inherit (inputs.ogmios.sourceInfo) rev shortRev lastModified lastModifiedDate;
   };
 
-  ogmiosProject = let
-    ogmiosNodeFlake = (flake-compat { src = inputs.cardano-node-for-building-ogmios; }).defaultNix;
-    inherit (ogmiosNodeFlake.legacyPackages.${buildSystem}) haskell-nix;
-  in haskell-nix.project {
-    compiler-nix-name = "ghc963";
+  inherit (cardanoNodeFlake.project.${buildSystem}.pkgs) haskell-nix;
+
+  ogmiosProject = haskell-nix.project {
+    compiler-nix-name = "ghc96";
     projectFileName = "cabal.project";
-    inputMap = { "https://input-output-hk.github.io/cardano-haskell-packages" = ogmiosNodeFlake.inputs.CHaP; };
+    inputMap = { "https://input-output-hk.github.io/cardano-haskell-packages" = cardanoNodeFlake.inputs.CHaP; };
     src = ogmiosPatched + "/server";
-    modules = [ ({ lib, pkgs, ... }: {
-      packages.cardano-crypto-praos.components.library.pkgconfig = lib.mkForce [ [ pkgs.libsodium-vrf ] ];
-      packages.cardano-crypto-class.components.library.pkgconfig = lib.mkForce [ ([ pkgs.libsodium-vrf pkgs.secp256k1 ]
-        ++ (if pkgs ? libblst then [pkgs.libblst] else [])) ];
-      packages.ogmios.components.library.preConfigure = "export GIT_SHA=${inputs.ogmios.rev}";
-    }) ];
+    modules = [
+      ({ config, lib, pkgs, ... }: {
+        packages.cardano-crypto-praos.components.library.pkgconfig = lib.mkForce [ [ pkgs.libsodium-vrf ] ];
+        packages.cardano-crypto-class.components.library.pkgconfig = lib.mkForce [ ([ pkgs.libsodium-vrf pkgs.secp256k1 ]
+          ++ (if pkgs ? libblst then [pkgs.libblst] else [])) ];
+        packages.ogmios.components.library.preConfigure = "export GIT_SHA=${inputs.ogmios.rev}";
+      })
+      ({ lib, pkgs, ...}: lib.mkIf (targetSystem == "x86_64-windows") {
+        packages.entropy.package.buildType = lib.mkForce "Simple";
+      })
+    ];
   };
 
   ogmios = {
@@ -193,19 +197,19 @@ in rec {
     x86_64-linux = pkgs.fetchzip {
       name = "mithril-${ver}-linux-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-linux-x64.tar.gz";
-      hash = "sha256-J3zTcKdFxl7j4eVGHLQbOlhDwSezJC7UR3bXRk4faJ0=";
+      hash = "sha256-fT0fhS80dSkZ1461gJ5D8AlVvOERaLPjazVyKr2qapQ=";
       stripRoot = false;
     };
     x86_64-windows = pkgs.fetchzip {
       name = "mithril-${ver}-windows-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-windows-x64.tar.gz";
-      hash = "sha256-wD8iP/ugyQ+xphvnlKunn1ocEll816VLEKEyQjPlJtQ=";
+      hash = "sha256-g0p96znMoNiGnIijyG7qbLeZY75uU4F/eiYXwkJu7QQ=";
       stripRoot = false;
     };
     x86_64-darwin = pkgs.fetchzip {
       name = "mithril-${ver}-macos-x64.tar.gz";
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-macos-x64.tar.gz";
-      hash = "sha256-2svfvzX5m2TW9F3LIKXrwf4ZzZj2HLRBhgDhB11pD0Y=";
+      hash = "sha256-ZMMiwjychqc1zfQ9nLOUXdtMVukeQM0akL14vaOESWo=";
       stripRoot = false;
     };
     aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client-cli;

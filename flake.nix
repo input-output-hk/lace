@@ -6,19 +6,16 @@
     flake-compat.url = "github:input-output-hk/flake-compat";
     flake-compat.flake = false;
 
-    cardano-node.url = "github:IntersectMBO/cardano-node/8.9.2";
+    cardano-node.url = "github:IntersectMBO/cardano-node/9.1.0";
     cardano-node.flake = false; # prevent lockfile explosion
 
-    cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/@cardano-sdk/cardano-services@0.28.14";
+    cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/@cardano-sdk/cardano-services@0.29.2";
     cardano-js-sdk.flake = false; # we patch it & to prevent lockfile explosion
 
-    ogmios.url = "github:CardanoSolutions/ogmios/v6.3.0";
+    ogmios.url = "github:CardanoSolutions/ogmios/v6.5.0";
     ogmios.flake = false;
 
-    cardano-node-for-building-ogmios.url = "github:IntersectMBO/cardano-node/8.10.1-pre";
-    cardano-node-for-building-ogmios.flake = false;
-
-    mithril.url = "github:input-output-hk/mithril/2423.0";
+    mithril.url = "github:input-output-hk/mithril/2430.0";
 
     nix-bundle-exe.url = "github:3noch/nix-bundle-exe";
     nix-bundle-exe.flake = false;

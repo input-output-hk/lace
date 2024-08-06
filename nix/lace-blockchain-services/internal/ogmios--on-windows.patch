@@ -1,5 +1,17 @@
+diff --git a/server/cabal.project b/server/cabal.project
+index 56f9f066c..9440b177f 100644
+--- a/server/cabal.project
++++ b/server/cabal.project
+@@ -30,6 +30,7 @@ constraints:
+ 
+ allow-newer:
+   *:formatting
++  , katip:Win32
+ 
+ packages:
+   ./
 diff --git a/server/ogmios.cabal b/server/ogmios.cabal
-index caaa8db3b..8af2241a9 100644
+index b6fa3837a..fee8a1276 100644
 --- a/server/ogmios.cabal
 +++ b/server/ogmios.cabal
 @@ -31,6 +31,10 @@ flag production
@@ -22,7 +34,7 @@ index caaa8db3b..8af2241a9 100644
    build-depends:
        aeson
      , array
-@@ -212,7 +218,6 @@ library
+@@ -213,7 +219,6 @@ library
      , time-manager
      , transformers
      , typed-protocols
