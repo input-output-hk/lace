@@ -191,7 +191,8 @@ const mapWalletActivities = memoize(
         date,
         protocolParameters,
         cardanoCoin,
-        resolveInput
+        resolveInput,
+        isSharedWallet
       });
 
       const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
@@ -232,7 +233,8 @@ const mapWalletActivities = memoize(
         cardanoCoin,
         date,
         resolveInput,
-        status
+        status,
+        isSharedWallet
       });
 
       const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
@@ -255,7 +257,7 @@ const mapWalletActivities = memoize(
     const filterTransactionByAssetId = async (txs: Wallet.Cardano.HydratedTx[]) => {
       const txsWithType = await Promise.all(
         txs.map(async (tx) => {
-          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver });
+          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver, isSharedWallet });
           return { tx, type };
         })
       );

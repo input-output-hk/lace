@@ -200,3 +200,13 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
       | action     | nextStep                                         |
       | Cancel     | I see Manage delegation drawer Confirmation page |
       | Fine by me | staking password drawer is displayed             |
+
+  @LW-10852
+  Scenario: Extended View - Modal about multi-delegation and DApp issues is displayed for user already using multi-delegation
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps

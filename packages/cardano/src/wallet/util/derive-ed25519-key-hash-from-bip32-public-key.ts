@@ -7,5 +7,6 @@ export const deriveEd25519KeyHashFromBip32PublicKey = async (
 ): Promise<Crypto.Ed25519KeyHashHex> => {
   const accountKey = Crypto.Bip32PublicKey.fromHex(key);
   const derivedKey = await accountKey.derive([derivationPath.role, derivationPath.index]);
-  return Crypto.Ed25519KeyHashHex(await derivedKey.hash());
+  const derivedKeyHash = await derivedKey.toRawKey().hash();
+  return Crypto.Ed25519KeyHashHex(derivedKeyHash.hex());
 };

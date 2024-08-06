@@ -1,4 +1,4 @@
-import { InfoBar as InfoBarUiToolkit, InfoComponent } from '@input-output-hk/lace-ui-toolkit';
+import { InfoBar as InfoBarUiToolkit, InfoComponent, lightColorScheme } from '@input-output-hk/lace-ui-toolkit';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styles from './InfoBar.module.scss';
@@ -13,7 +13,7 @@ export const InfoBar = ({ signPolicy }: InfoBarProps) => {
   const quorumIsReached = signPolicy.signers.filter(({ signed }) => !!signed).length >= signPolicy.requiredCosigners;
   return (
     <InfoBarUiToolkit
-      icon={<InfoComponent className={styles.infoIcon} />}
+      icon={<InfoComponent color={lightColorScheme.$primary_accent_purple} />}
       message={
         <div className={styles.infoBar}>
           <span className={styles.infoMessage}>

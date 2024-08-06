@@ -4,10 +4,10 @@ import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { Banner, useObservable } from '@lace/common';
-import { CosignersList, InfoBar, RowContainer, renderLabel, stakingScriptKeyPath } from '@lace/core';
+import { CoSignersListItem, CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { StakingError, useDelegationPortfolioStore, useStakingStore } from '../../store';
@@ -45,21 +45,11 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     isSharedWallet,
     signPolicy,
     sharedWalletKey,
+    coSigners,
   } = useOutsideHandles();
   const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio || [],
   }));
-  const [sharedWalletKeyHash, setSharedWalletKeyHash] = useState<Wallet.Crypto.Ed25519KeyHashHex | undefined>();
-
-  useEffect(() => {
-    (async () => {
-      if (isSharedWallet && sharedWalletKey) {
-        setSharedWalletKeyHash(
-          await Wallet.util.deriveEd25519KeyHashFromBip32PublicKey(sharedWalletKey, stakingScriptKeyPath)
-        );
-      }
-    })();
-  }, [isSharedWallet, sharedWalletKey]);
 
   const [isCosignersOpen, setIsCosignersOpen] = useState(true);
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
@@ -129,6 +119,15 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     [StakingError.UTXO_FULLY_DEPLETED]: t('drawer.confirmation.errors.utxoFullyDepleted'),
     [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('drawer.confirmation.errors.utxoBalanceInsufficient'),
   };
+
+  const stakingCosigners = useMemo(
+    (): CoSignersListItem[] =>
+      coSigners?.map((signer) => ({
+        ...signer,
+        signed: false,
+      })) || [],
+    [coSigners]
+  );
 
   return (
     <>
@@ -217,8 +216,8 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
                   <InfoBar signPolicy={signPolicy} />
                   {signPolicy.signers.length > 0 && (
                     <CosignersList
-                      ownSharedWalletKeyHash={sharedWalletKeyHash}
-                      list={signPolicy.signers}
+                      ownSharedKey={sharedWalletKey}
+                      list={stakingCosigners}
                       title={t('sharedWallets.transaction.cosignerList.title.unsigned')}
                     />
                   )}

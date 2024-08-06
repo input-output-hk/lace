@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   useAnalyticsContext,
   useBackgroundServiceAPIContext,
@@ -8,14 +8,7 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import {
-  useBalances,
-  useCustomSubmitApi,
-  useFetchCoinPrice,
-  useLocalStorage,
-  useStakingRewards,
-  useWalletManager
-} from '@hooks';
+import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -34,11 +27,8 @@ import {
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
-import { useObservable } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
-import { stakingScriptKeyPath } from '@lace/core';
+import { SignPolicy } from '@lace/core';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -81,21 +71,15 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     environmentName: state.environmentName,
     isSharedWallet: state.isSharedWallet
   }));
+  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
+  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
 
-  const { walletManager, walletRepository } = useWalletManager();
-
-  const activeWalletId = useObservable(walletManager.activeWalletId$);
-  const wallets = useObservable(walletRepository.wallets$);
-  const activeWallet = wallets?.find(
-    (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
-  );
-
-  const { signPolicy, sharedWalletKey } = useSharedWalletData({
-    activeWallet,
-    isSharedWallet,
-    script: activeWallet?.type === WalletType.Script ? activeWallet.stakingScript : undefined,
-    derivationPath: stakingScriptKeyPath
-  });
+  useEffect(() => {
+    (async () => {
+      const policy = await getSignPolicy('staking');
+      setSignPolicy(policy);
+    })();
+  }, [getSignPolicy]);
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
@@ -185,7 +169,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
         isSharedWallet,
         signPolicy,
-        sharedWalletKey
+        sharedWalletKey,
+        coSigners
       }}
     >
       <ContentLayout

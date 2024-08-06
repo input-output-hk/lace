@@ -29,11 +29,11 @@ import AddressForm from '../elements/addressbook/AddressForm';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
 import ReviewAddressDrawerAssert from '../assert/addressBook/ReviewAddressDrawerAssert';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import { getTestWallet } from '../support/walletConfiguration';
 import ReviewAddressDrawer from '../elements/addressbook/ReviewAddressDrawer';
 import Modal from '../elements/modal';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import { getNonActiveAdaHandle2WalletName, getNonActiveAdaHandleWalletName } from '../utils/walletUtils';
 
 const addressAddedToastTranslationKey = 'browserView.addressBook.toast.addAddress';
 
@@ -326,8 +326,8 @@ Then(
     const previousAddress = String(getTestWallet(testContext.load('activeWallet')).address);
     const receiverWallet =
       mode === 'extended'
-        ? getTestWallet(await nftsPageObject.getNonActiveAdaHandleWalletName())
-        : getTestWallet(await nftsPageObject.getNonActiveAdaHandle2WalletName());
+        ? getTestWallet(getNonActiveAdaHandleWalletName())
+        : getTestWallet(getNonActiveAdaHandle2WalletName());
     const newAddress = String(receiverWallet.address);
     await ReviewAddressDrawerAssert.assertSeeReviewAddressDrawer(mode, handleName, previousAddress, newAddress);
   }

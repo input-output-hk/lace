@@ -24,6 +24,7 @@ import { ReactComponent as AuthorizeCommitteeHotIcon } from '../../assets/icons/
 import { ReactComponent as RegisterDelegateRepresentativeIcon } from '../../assets/icons/briefcase-outline.component.svg';
 import { ReactComponent as UnregisterDelegateRepresentativeIcon } from '../../assets/icons/briefcase-back-icon.component.svg';
 import { ReactComponent as VoteDelegationIcon } from '../../assets/icons/ticket-arrow-right-outline.component.svg';
+import { ReactComponent as AwaitingSignatureIcon } from '../../assets/icons/awaiting-signatures.svg';
 
 import {
   ActivityType,
@@ -65,6 +66,7 @@ const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEleme
   [TransactionActivityType.incoming]: IncomingIcon,
   [TransactionActivityType.outgoing]: OutgoingIcon,
   [TransactionActivityType.self]: RefreshOutlinedIcon,
+  [TransactionActivityType.awaitingCosignatures]: AwaitingSignatureIcon,
   [DelegationActivityType.delegation]: DelegationIcon,
   [DelegationActivityType.delegationDeregistration]: ClipboardXOutlineComponentIcon,
   [DelegationActivityType.delegationRegistration]: ClipboardCheckOutlineIcon

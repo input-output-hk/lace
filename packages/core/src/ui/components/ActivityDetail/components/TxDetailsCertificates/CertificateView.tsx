@@ -57,7 +57,10 @@ export const CertificateView = ({
       return (
         <ConfirmStakeRegistrationDelegation
           metadata={{
-            depositPaid: `${certificate.deposit} ${cardanoCoin.symbol}`,
+            depositPaid: Wallet.util.getFormattedAmount({
+              amount: certificate.deposit.toString(),
+              cardanoCoin
+            }),
             poolId: certificate.poolId,
             stakeKeyHash: RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential)
               .toAddress()
@@ -73,7 +76,10 @@ export const CertificateView = ({
             stakeKeyHash: RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential)
               .toAddress()
               .toBech32(),
-            depositPaid: `${certificate.deposit} ${cardanoCoin.symbol}`,
+            depositPaid: Wallet.util.getFormattedAmount({
+              amount: certificate.deposit.toString(),
+              cardanoCoin
+            }),
             alwaysAbstain: Wallet.Cardano.isDRepAlwaysAbstain(certificate.dRep),
             alwaysNoConfidence: Wallet.Cardano.isDRepAlwaysNoConfidence(certificate.dRep),
             ...(Wallet.Cardano.isDRepCredential(certificate.dRep)
@@ -86,7 +92,10 @@ export const CertificateView = ({
       return (
         <ConfirmVoteRegistrationDelegation
           metadata={{
-            depositPaid: `${certificate.deposit} ${cardanoCoin.symbol}`,
+            depositPaid: Wallet.util.getFormattedAmount({
+              amount: certificate.deposit.toString(),
+              cardanoCoin
+            }),
             stakeKeyHash: RewardAddress.fromCredentials(chainNetworkId, certificate.stakeCredential)
               .toAddress()
               .toBech32(),
@@ -102,7 +111,10 @@ export const CertificateView = ({
       return (
         <ConfirmDRepRegistration
           metadata={{
-            depositPaid: `${certificate.deposit} ${cardanoCoin.symbol}`,
+            depositPaid: Wallet.util.getFormattedAmount({
+              amount: certificate.deposit.toString(),
+              cardanoCoin
+            }),
             drepId: Wallet.util.drepIDasBech32FromHash(certificate.dRepCredential.hash),
             hash: certificate.anchor?.dataHash,
             url: certificate.anchor?.url
@@ -113,7 +125,10 @@ export const CertificateView = ({
       return (
         <ConfirmDRepRetirement
           metadata={{
-            depositReturned: `${certificate.deposit} ${cardanoCoin.symbol}`,
+            depositReturned: Wallet.util.getFormattedAmount({
+              amount: certificate.deposit.toString(),
+              cardanoCoin
+            }),
             drepId: Wallet.util.drepIDasBech32FromHash(certificate.dRepCredential.hash)
           }}
         />

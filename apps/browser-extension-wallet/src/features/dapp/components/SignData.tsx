@@ -16,8 +16,8 @@ export const SignData = (): React.ReactElement => {
     utils: { setPreviousView },
     signDataRequest: { request }
   } = useViewsFlowContext();
-  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappDataSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappDataSignSuccess);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState<string>();
   const [validPassword, setValidPassword] = useState<boolean>();

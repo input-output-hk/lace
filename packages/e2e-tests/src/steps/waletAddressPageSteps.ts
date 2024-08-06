@@ -16,6 +16,18 @@ Then(
   }
 );
 
+Then(
+  /^I see "Wallet Address" page in (extended|popup) mode for account: (\d+) and wallet "([^"]*)"$/,
+  async (mode: 'extended' | 'popup', accountNumber: number, testWalletName: string) => {
+    await walletAddressPageAssert.assertSeeWalletAddressPage(mode);
+    await walletAddressPageAssert.assertSeeWalletNameAccountAndAddress(
+      getTestWallet(testWalletName),
+      accountNumber,
+      mode
+    );
+  }
+);
+
 When(/^I click "Copy" button on "Receive" page for default wallet address$/, async () => {
   await browser.pause(500);
   await walletAddressPage.addressCard.scrollIntoView();

@@ -7,7 +7,7 @@ import { useWalletStore } from '@stores';
 import cn from 'classnames';
 
 export const ConfirmPassword = (): React.ReactElement => {
-  const { isInMemoryWallet } = useWalletStore();
+  const { isInMemoryWallet, isSharedWallet } = useWalletStore();
   const { t } = useTranslation();
 
   const { isPasswordValid, setSubmitingTxState } = useSubmitingState();
@@ -19,7 +19,7 @@ export const ConfirmPassword = (): React.ReactElement => {
   };
 
   return (
-    isInMemoryWallet && (
+    (isInMemoryWallet || isSharedWallet) && (
       <div className={cn(styles.container)}>
         <div className={styles.password}>
           <Password

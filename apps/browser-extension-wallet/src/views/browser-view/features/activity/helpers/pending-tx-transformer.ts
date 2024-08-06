@@ -6,6 +6,7 @@ import { TxDirections } from '@types';
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
   tx: Wallet.TxInFlight | Wallet.KeyManagement.WitnessedTx;
   status?: Wallet.TransactionStatus;
+  isSharedWallet?: boolean;
 }
 
 export const pendingTxTransformer = ({
@@ -17,7 +18,8 @@ export const pendingTxTransformer = ({
   cardanoCoin,
   date,
   resolveInput,
-  status = Wallet.TransactionStatus.PENDING
+  status = Wallet.TransactionStatus.PENDING,
+  isSharedWallet
 }: TxHistoryTransformerInput): Promise<TransformedTransactionActivity[]> =>
   txTransformer({
     tx,
@@ -29,5 +31,6 @@ export const pendingTxTransformer = ({
     date,
     status,
     direction: TxDirections.Outgoing,
-    resolveInput
+    resolveInput,
+    isSharedWallet
   });

@@ -4,16 +4,20 @@ import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
 import { useTranslation } from 'react-i18next';
-import { NftItemProps, NftList, NftListProps, NftFolderItemProps, NftsItemsTypes, ListEmptyState } from '@lace/core';
+import { ListEmptyState, NftFolderItemProps, NftItemProps, NftList, NftListProps, NftsItemsTypes } from '@lace/core';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
-import { useOutputInitialState, useAnalyticsSendFlowTriggerPoint, SendFlowTriggerPoints } from '../../send-transaction';
+import {
+  SendFlowTriggerPoints,
+  useAnalyticsSendFlowTriggerPoint,
+  useOpenTransactionDrawer,
+  useOutputInitialState
+} from '../../send-transaction';
 import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import { Skeleton } from 'antd';
-import { SectionLayout, EducationalList, FundWalletBanner, Layout } from '@src/views/browser-view/components';
+import { EducationalList, FundWalletBanner, Layout, SectionLayout } from '@src/views/browser-view/components';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
-import { useDrawer } from '@src/views/browser-view/stores';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import Book from '@assets/icons/book.svg';
 import LightBulb from '@assets/icons/light.svg';
@@ -54,7 +58,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   } = useNftsFoldersContext();
   const { fiatCurrency } = useCurrencyStore();
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
-  const [, setDrawerConfig] = useDrawer();
+  const openTransactionDrawer = useOpenTransactionDrawer({ content: DrawerContent.SEND_TRANSACTION });
   const setSendInitialState = useOutputInitialState();
 
   const [selectedNft, setSelectedNft] = useState<NFT>();
@@ -195,10 +199,10 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     closeNftDetails();
     setSendInitialState(selectedNft?.assetId.toString());
-    setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION });
+    openTransactionDrawer();
     setTriggerPoint(SendFlowTriggerPoints.NFTS);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setDrawerConfig, analytics, selectedNft?.assetId, setSendInitialState]);
+  }, [openTransactionDrawer, analytics, selectedNft?.assetId, setSendInitialState]);
 
   const onCloseFolderDrawer = useCallback(() => {
     setIsCreateFolderDrawerOpen(false);

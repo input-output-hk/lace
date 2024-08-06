@@ -26,6 +26,7 @@ export interface TxTransformerInput {
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
   resolveInput: Wallet.Cardano.ResolveInput;
+  isSharedWallet?: boolean;
 }
 
 export const getFormattedFiatAmount = ({
@@ -157,18 +158,18 @@ const getTxFormattedAmount: GetTxFormattedAmount = async ({
 };
 
 /**
-  Simplifies the transaction object to be used in the activity list
+ Simplifies the transaction object to be used in the activity list
 
-  @param tx the transaction object
-  @param walletAddresses the addresses of the wallet and the reward account
-  @param fiatCurrency the fiat currency details
-  @param fiatPrice the fiat price of ADA
-  @param protocolParameters the protocol parameters
-  @param cardanoCoin the ADA coin details
-  @param time the time of the transaction
-  @param direction the direction of the transaction
-  @param status the status of the transaction
-  @param date the date of the transaction
+ @param tx the transaction object
+ @param walletAddresses the addresses of the wallet and the reward account
+ @param fiatCurrency the fiat currency details
+ @param fiatPrice the fiat price of ADA
+ @param protocolParameters the protocol parameters
+ @param cardanoCoin the ADA coin details
+ @param time the time of the transaction
+ @param direction the direction of the transaction
+ @param status the status of the transaction
+ @param date the date of the transaction
  */
 
 export const txTransformer = async ({
@@ -181,7 +182,8 @@ export const txTransformer = async ({
   date,
   direction,
   status,
-  resolveInput
+  resolveInput,
+  isSharedWallet
 }: TxTransformerInput): Promise<TransformedTransactionActivity[]> => {
   const transaction = 'tx' in tx ? tx.tx : tx;
   const implicitCoin = util.computeImplicitCoin(protocolParameters, transaction.body);
@@ -244,7 +246,8 @@ export const txTransformer = async ({
   const type = await inspectTxType({
     walletAddresses,
     tx: transaction as unknown as Wallet.Cardano.HydratedTx,
-    inputResolver: { resolveInput }
+    inputResolver: { resolveInput },
+    isSharedWallet
   });
 
   if (type === DelegationActivityType.delegation) {

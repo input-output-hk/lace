@@ -1,11 +1,6 @@
 import { isValidSharedWalletScript } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
-import { SignPolicy } from '../transaction/types';
-
-type SharedWalletScriptKind =
-  | Wallet.Cardano.RequireAllOfScript
-  | Wallet.Cardano.RequireAnyOfScript
-  | Wallet.Cardano.RequireAtLeastScript;
+import { SharedWalletScriptKind, SignPolicy } from '@src/shared-wallets';
 
 const isRequireSignatureScriptKind = (
   script: Wallet.Cardano.NativeScript,

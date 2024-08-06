@@ -1,19 +1,20 @@
 /* eslint-disable camelcase */
 import { CardanoTxOut, TxMinimumCoinQuantity } from '../../../../types';
 import { Wallet } from '@lace/cardano';
-import { HandleResolution } from '@cardano-sdk/core';
+import { HandleResolution, Serialization } from '@cardano-sdk/core';
 
 export enum Sections {
-  FORM = 'form',
-  SUMMARY = 'summary',
-  CONFIRMATION = 'confirmation',
-  SUCCESS_TX = 'success_tx',
-  FAIL_TX = 'fail_tx',
-  UNAUTHORIZED_TX = 'unauthorized_tx',
-  ADDRESS_LIST = 'address_list',
-  ADDRESS_FORM = 'address_form',
-  ASSET_PICKER = 'asset_picker',
-  ADDRESS_CHANGE = 'address_change'
+  FORM = 'FORM',
+  IMPORT_SHARED_WALLET_TRANSACTION_JSON = 'IMPORT_SHARED_WALLET_TRANSACTION_JSON',
+  SUMMARY = 'SUMMARY',
+  CONFIRMATION = 'CONFIRMATION',
+  SUCCESS_TX = 'SUCCESS_TX',
+  FAIL_TX = 'FAIL_TX',
+  UNAUTHORIZED_TX = 'UNAUTHORIZED_TX',
+  ADDRESS_LIST = 'ADDRESS_LIST',
+  ADDRESS_FORM = 'ADDRESS_FORM',
+  ASSET_PICKER = 'ASSET_PICKER',
+  ADDRESS_CHANGE = 'ADDRESS_CHANGE'
 }
 
 export enum FormOptions {
@@ -39,6 +40,8 @@ export interface BuiltTxData {
     handleResolutions?: HandleResolution[];
     validityInterval?: Wallet.Cardano.ValidityInterval;
   };
+  importedSharedWalletTx?: Serialization.Transaction;
+  collectedEnoughSharedWalletTxSignatures?: boolean;
   error?: string;
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];
 }

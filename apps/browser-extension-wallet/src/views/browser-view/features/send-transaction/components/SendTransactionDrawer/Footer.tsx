@@ -26,7 +26,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork } from '@hooks';
+import { useHandleResolver, useLocalStorage, useNetwork, useSharedWalletData } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -40,9 +40,13 @@ import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
+import { Serialization } from '@cardano-sdk/core';
+import { exportMultisigTransaction, constructMultiSigTransactionData } from '@lace/core';
+import { mergeWitnesses } from './utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
+  [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: 'browserView.transaction.send.coSign.footer.continue',
   [Sections.SUMMARY]: 'browserView.transaction.send.footer.confirm',
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',
   [Sections.SUCCESS_TX]: 'browserView.transaction.send.footer.viewTransaction',
@@ -71,10 +75,10 @@ export const Footer = withAddressBookContext(
     const { t } = useTranslation();
     const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
     const { hasInvalidOutputs } = useTransactionProps();
-    const { builtTxData } = useBuiltTxState();
+    const { builtTxData, setBuiltTxData } = useBuiltTxState();
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
-    const { inMemoryWallet, isInMemoryWallet, walletType } = useWalletStore();
+    const { inMemoryWallet, isInMemoryWallet, walletType, isSharedWallet, currentChain } = useWalletStore();
     const { password, removePassword } = usePassword();
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
@@ -87,6 +91,11 @@ export const Footer = withAddressBookContext(
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
     const { isMaxAdaLoading } = useMaxAdaStatus();
+    const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
+    const [sharedWalletTransactions, { updateLocalStorage: updateSharedWalletTransactions }] = useLocalStorage(
+      'sharedWalletTransactions',
+      {}
+    );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -158,21 +167,99 @@ export const Footer = withAddressBookContext(
       onHandleChangeConfirm(action);
     };
 
-    const isHwSummary = isSummaryStep && !isInMemoryWallet;
+    const isHwSummary = isSummaryStep && !isInMemoryWallet && !isSharedWallet;
 
     const signAndSubmitTransaction = useCallback(async () => {
-      const signedTx = await builtTxData.tx.sign();
-      await inMemoryWallet.submitTx(signedTx);
-      txSubmitted$.next({
-        id: signedTx.tx.id.toString(),
-        date: new Date().toString(),
-        creationType: TxCreationType.Internal
-      });
-    }, [builtTxData, inMemoryWallet]);
+      if (isSharedWallet) {
+        let sharedWalletTx: Serialization.Transaction;
+        try {
+          if (builtTxData.importedSharedWalletTx) {
+            const { auxiliaryData, body, id, witness } = builtTxData.importedSharedWalletTx.toCore();
+            const txWithOwnSignature = await inMemoryWallet.finalizeTx({
+              tx: {
+                body,
+                hash: id
+              },
+              auxiliaryData,
+              bodyCbor: builtTxData.importedSharedWalletTx.body().toCbor()
+            });
+            builtTxData.importedSharedWalletTx.setWitnessSet(
+              Serialization.TransactionWitnessSet.fromCore(mergeWitnesses(txWithOwnSignature.witness, witness))
+            );
+            sharedWalletTx = builtTxData.importedSharedWalletTx;
+          } else {
+            const { auxiliaryData, body, hash } = await builtTxData.tx.inspect();
+            const signedTx = await inMemoryWallet.finalizeTx({
+              tx: {
+                body,
+                hash
+              },
+              auxiliaryData
+            });
+            sharedWalletTx = Serialization.Transaction.fromCore(signedTx);
+          }
+        } catch (error) {
+          console.error('Shared wallet TX sign error', error);
+          throw error;
+        }
+
+        const policy = await getSignPolicy('payment');
+        const collectedEnoughSharedWalletTxSignatures =
+          policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
+
+        if (collectedEnoughSharedWalletTxSignatures) {
+          try {
+            await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
+          } catch (error) {
+            console.error('Shared wallet TX submit error', error);
+            throw error;
+          }
+        } else {
+          await exportMultisigTransaction({
+            cborHex: sharedWalletTx.toCbor(),
+            publicKey: sharedWalletKey,
+            chainId: currentChain
+          });
+        }
+
+        const transaction = {
+          [sharedWalletTx.toCore().id.toString()]: constructMultiSigTransactionData({
+            cborHex: sharedWalletTx.toCbor(),
+            publicKey: sharedWalletKey,
+            chainId: currentChain
+          })
+        };
+        updateSharedWalletTransactions({ ...sharedWalletTransactions, ...transaction });
+        setBuiltTxData({ ...builtTxData, collectedEnoughSharedWalletTxSignatures });
+      } else {
+        const signedTx = await builtTxData.tx.sign();
+
+        try {
+          await inMemoryWallet.submitTx(signedTx);
+        } catch (error) {
+          console.error('TX submit error', error);
+          throw error;
+        }
+        txSubmitted$.next({
+          id: signedTx.tx.id.toString(),
+          date: new Date().toString(),
+          creationType: TxCreationType.Internal
+        });
+      }
+    }, [
+      builtTxData,
+      currentChain,
+      getSignPolicy,
+      inMemoryWallet,
+      isSharedWallet,
+      setBuiltTxData,
+      sharedWalletKey,
+      sharedWalletTransactions,
+      updateSharedWalletTransactions
+    ]);
 
     const handleVerifyPass = useCallback(async () => {
       if (isSubmitingTx) return;
-
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
 
       try {
@@ -237,7 +324,7 @@ export const Footer = withAddressBookContext(
         case isReviewingAddress: {
           return handleReviewAddress('UPDATE');
         }
-        case isSummaryStep && !isInMemoryWallet: {
+        case isSummaryStep && !isInMemoryWallet && !isSharedWallet: {
           if (isPopupView) {
             return openContinueDialog();
           }
@@ -251,7 +338,7 @@ export const Footer = withAddressBookContext(
         }
         case txHasFailed: {
           setSubmitingTxState({ isPasswordValid: true });
-          return setSection(sectionsConfig.form);
+          return setSection(sectionsConfig[Sections.FORM]);
         }
         default: {
           return setSection();
@@ -259,16 +346,17 @@ export const Footer = withAddressBookContext(
       }
     }, [
       currentSection.currentSection,
-      isSummaryStep,
+      handleReviewAddress,
+      handleVerifyPass,
       isInMemoryWallet,
       isPopupView,
-      handleVerifyPass,
+      isSharedWallet,
+      isSummaryStep,
       onCloseSubmitedTransaction,
-      setSubmitingTxState,
-      setSection,
       openContinueDialog,
       sendAnalytics,
-      handleReviewAddress
+      setSection,
+      setSubmitingTxState
     ]);
 
     const handleClose = () => {
@@ -282,15 +370,19 @@ export const Footer = withAddressBookContext(
     };
 
     const confirmDisable = useMemo(
-      () => !builtTxData.tx || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
-      [builtTxData.tx, hasInvalidOutputs, metadata]
+      () =>
+        (!builtTxData.importedSharedWalletTx && (!builtTxData.tx || hasInvalidOutputs)) ||
+        metadata?.length > METADATA_MAX_LENGTH,
+      [builtTxData.importedSharedWalletTx, builtTxData.tx, hasInvalidOutputs, metadata?.length]
     );
+
     const isSubmitDisabled = useMemo(
       () =>
         currentSection.currentSection === Sections.CONFIRMATION &&
         (isSubmitingTx || !isPasswordValid || !password || !isOnline),
       [currentSection.currentSection, isSubmitingTx, isPasswordValid, password, isOnline]
     );
+
     const confirmButtonLabel = useMemo(() => {
       if (isHwSummary) {
         const staleLabels = isPopupView
@@ -299,8 +391,12 @@ export const Footer = withAddressBookContext(
         return isSubmitingTx ? t('browserView.transaction.send.footer.signing') : staleLabels;
       }
 
+      if (isSharedWallet && currentSection.currentSection === Sections.SUCCESS_TX) {
+        return t('general.button.view-co-signers');
+      }
+
       return t(nextStepBtnLabels[currentSection.currentSection]);
-    }, [isHwSummary, t, currentSection.currentSection, isPopupView, isSubmitingTx, walletType]);
+    }, [isHwSummary, isSharedWallet, currentSection.currentSection, t, isPopupView, walletType, isSubmitingTx]);
 
     const cancelButtonLabel = useMemo(() => {
       if (currentSection.currentSection === Sections.SUCCESS_TX) {

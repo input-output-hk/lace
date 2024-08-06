@@ -45,6 +45,7 @@
   "sharedWallets.addSharedWallet.addCosigners.nameInputError.tooLong": "Max. {{amount}} characters",
   "sharedWallets.addSharedWallet.addCosigners.keyInputError.required": "Shared wallet key is required",
   "sharedWallets.addSharedWallet.addCosigners.keyInputError.invalid": "Incorrect key format",
+  "sharedWallets.addSharedWallet.addCosigners.keyInputError.duplicated": "Provided key is duplicated",
   "sharedWallets.addSharedWallet.importantInfo.title": "Important information about shared wallets",
   "sharedWallets.addSharedWallet.importantInfo.subtitle": "When a shared wallet is created its settings, including the keys of each co-signer, are no longer editable. Inputing of incorrect keys may prevent operation of the shared wallet and funds it receives may be unrecoverable.",
   "sharedWallets.addSharedWallet.importantInfo.checkBoxLabel": "I understand that upon creating the shared wallet I will be unable to change its configuration",
@@ -88,10 +89,9 @@
   "sharedWallets.transaction.cosignerList.you": "You",
   "sharedWallets.transaction.summary.header": "Transaction summary",
   "sharedWallets.transaction.summary.unsigned.description": "Confirm details and sign transaction to proceed.",
-  "sharedWallets.transaction.summary.unsubmitted.headerDescription": "(unsubmited)",
+  "sharedWallets.transaction.summary.unsubmitted.headerDescription": "(unsubmitted)",
+  "sharedWallets.transaction.summary.unsubmitted.title": "Signature added",
   "sharedWallets.transaction.summary.unsubmitted.description": "The transaction can be submitted once all required co-signers have signed. Review the co-signer list and forward the transaction JSON file.",
-  "sharedWallets.transaction.sent.header": "Sent",
-  "sharedWallets.transaction.sent.description": "Summary of the transaction, costs and co-signatures.",
   "sharedWallets.transaction.summary.title": "Transaction",
   "sharedWallets.transaction.summary.sending": "Sending",
   "sharedWallets.transaction.summary.validityPeriod.title": "Transaction validity period",
@@ -102,5 +102,10 @@
   "sharedWallets.transaction.cosigners.quorum.required": "Additional co-signatures are required before transaction can be submitted.",
   "sharedWallets.transaction.cosigners.quorum.current": "<stat><b>{{quorum}}</b> of <b>{{participants}}</b></stat><span>required</span>",
   "sharedWallets.transaction.cosigners.unsigned.description": "The transaction can be submitted once the required number of co-signers have signed. Confirm details and sign transaction to proceed.",
-  "sharedWallets.transaction.cosigners.unsubmitted.description": "The transaction can be submitted as all required co-signers have signed."
+  "sharedWallets.transaction.cosigners.unsubmitted.description": "The transaction can be submitted as all required co-signers have signed.",
+  "sharedWallets.transaction.coSign.importJsonStep.uploadBtnTitle": "Drag & drop or <Link>choose file</Link> to upload",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.message": "No shared wallet transaction details were found in the uploaded file. Please upload the correct transaction file.",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.primaryButton": "Upload new file",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.secondaryButton": "Exit",
+  "sharedWallets.transaction.coSign.importJsonStep.error.invalidFile.title": "Unrecognised JSON file"
 }

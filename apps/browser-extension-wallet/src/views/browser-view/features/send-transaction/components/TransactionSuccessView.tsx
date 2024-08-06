@@ -1,4 +1,3 @@
-/* eslint-disable no-lonely-if */
 import uniq from 'lodash/uniq';
 import { ResultMessage } from '@components/ResultMessage';
 import { TransactionHashBox } from '@components/TransactionHashBox';
@@ -24,16 +23,18 @@ import { useObservable } from '@lace/common';
 import { getTokensProperty } from '../helpers';
 import { Wallet } from '@lace/cardano';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
+import SignatureAddedImg from '@assets/icons/circle-check-gradient.svg';
 
 export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.ReactElement }): React.ReactElement => {
   const { t } = useTranslation();
-  const { builtTxData: { uiTx: { hash, fee } = {} } = {} } = useBuiltTxState();
+  const { builtTxData: { uiTx: { hash, fee } = {}, collectedEnoughSharedWalletTxSignatures } = {} } = useBuiltTxState();
   const { uiOutputs } = useOutputs();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const analytics = useAnalyticsContext();
   const {
     inMemoryWallet,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    isSharedWallet
   } = useWalletStore();
   const assets = useObservable(inMemoryWallet.assetInfo$);
   const [customAnalyticsProperties, setCustomAnalyticsProperties] = useState<TokenAnalyticsProperties[]>();
@@ -94,11 +95,21 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   return (
     <>
       <div className={styles.successTxContainer} data-testid="transaction-success-container">
-        <ResultMessage
-          title={<div>{t('browserView.transaction.success.youCanSafelyCloseThisPanel')}</div>}
-          description={<div>{t('browserView.transaction.success.thisMayTakeAFewMinutes')}</div>}
-        />
-        <TransactionHashBox hash={hash?.toString()} />
+        {isSharedWallet && !collectedEnoughSharedWalletTxSignatures ? (
+          <ResultMessage
+            customBgImg={SignatureAddedImg}
+            title={t('sharedWallets.transaction.summary.unsubmitted.title')}
+            description={t('sharedWallets.transaction.summary.unsubmitted.description')}
+          />
+        ) : (
+          <>
+            <ResultMessage
+              title={<div>{t('browserView.transaction.success.youCanSafelyCloseThisPanel')}</div>}
+              description={<div>{t('browserView.transaction.success.thisMayTakeAFewMinutes')}</div>}
+            />
+            <TransactionHashBox hash={hash?.toString()} />
+          </>
+        )}
       </div>
       {footerSlot}
     </>

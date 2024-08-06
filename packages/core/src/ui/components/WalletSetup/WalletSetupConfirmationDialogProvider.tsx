@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null */
 import React, { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { StartOverDialog } from '@ui/components/SharedWallet/StartOverDialog';
+import { StartOverDialog } from './StartOverDialog';
 import { useTranslation } from 'react-i18next';
 
 interface ContextType {

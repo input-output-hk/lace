@@ -17,6 +17,7 @@ export enum CoSignerErrorName {
 }
 
 export enum CoSignerErrorKeys {
+  Duplicated = 'Duplicated',
   Invalid = 'Invalid',
   Required = 'Required',
 }
