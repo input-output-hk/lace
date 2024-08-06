@@ -1,7 +1,6 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable no-console */
 import React, { useMemo, useState, useEffect, useRef, VFC } from 'react';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
 import { useRestoreWallet } from '../context';
@@ -61,7 +60,7 @@ const endAllStreams = (stream: MediaStream | null) => {
         tracks[0].stop();
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }
 };
@@ -97,7 +96,6 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
   }, [videoDevices]);
 
   useEffect(() => {
-    let animationRequest: number;
     const getVideoStream = async () => {
       try {
         endAllStreams(streamRef.current);
@@ -143,20 +141,18 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
         setScanState('validating');
         onScanCode(code);
       }
-      animationRequest = requestAnimationFrame(scanQRCode);
+      requestAnimationFrame(scanQRCode);
     };
     getVideoStream();
 
     if (videoRef.current) {
       videoRef.current.addEventListener('play', () => {
-        animationRequest = requestAnimationFrame(scanQRCode);
+        requestAnimationFrame(scanQRCode);
       });
     }
 
     return () => {
-      videoRef.current = null;
       endAllStreams(streamRef.current);
-      cancelAnimationFrame(animationRequest);
     };
   }, [
     deviceId,
