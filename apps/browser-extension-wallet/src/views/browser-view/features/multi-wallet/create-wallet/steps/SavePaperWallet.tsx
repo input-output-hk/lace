@@ -91,7 +91,7 @@ export const SavePaperWallet: VFC = () => {
       <WalletSetupStepLayoutRevamp
         title={i18n.t('paperWallet.savePaperWallet.title')}
         description={i18n.t('paperWallet.savePaperWallet.description')}
-        currentTimelineStep={WalletTimelineSteps.ALL_DONE}
+        currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
       >
         <Flex w="$fill" h="$fill" gap="$20">
           <PaperWalletInfoCard walletName={formattedWalletName} />
