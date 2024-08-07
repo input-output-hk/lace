@@ -190,7 +190,7 @@ func main() {
 	if (appConfig.ForceMithrilSnapshot.Preview.Digest != ""	||
 		appConfig.ForceMithrilSnapshot.Preprod.Digest != ""	||
 		appConfig.ForceMithrilSnapshot.Mainnet.Digest != "") {
-		mithrilCachePort := getFreeTCPPort()
+		mithrilCachePort = getFreeTCPPort()
 		go func(){ for {
 			err := mithrilcache.Run(appConfig, mithrilCachePort)
 			fmt.Fprintf(os.Stderr, "%s[%d]: mithril-cache HTTP server failed: %v\n",
