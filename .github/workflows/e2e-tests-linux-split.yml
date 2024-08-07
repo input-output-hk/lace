@@ -58,6 +58,7 @@ env:
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
   PREPROD_ENV: ${{ github.event.inputs.preprod_env || 'dev' }}
+  BUILD_ARTIFACT_NAME: 'lace-${{ github.event.inputs.preprod_env || 'dev' }}-${{ github.sha }}'
 
 jobs:
   setup:
@@ -71,8 +72,6 @@ jobs:
       - name: Check if build exists
         shell: bash
         id: check-build-exists
-        with:
-          BUILD_ARTIFACT_NAME: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
         run: |
           echo "ART_NAME: $BUILD_ARTIFACT_NAME"
           ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
@@ -115,8 +114,6 @@ jobs:
       - name: Download Lace build artifact
         if: ${{ needs.setup.outputs.build_exists == 'true' }}
         id: download-lace-build-artifact
-        with:
-          BUILD_ARTIFACT_NAME: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
         run: |
           echo "ART_NAME: $BUILD_ARTIFACT_NAME"
           ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
