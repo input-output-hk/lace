@@ -89,6 +89,7 @@ jobs:
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
       smoke_only: ${{ github.event.inputs.smoke_only || false }}
+      build_exists: ${{ steps.check-build-exists.outputs.build_exists }}
 
   build:
     name: Build Lace
