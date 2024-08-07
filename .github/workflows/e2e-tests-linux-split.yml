@@ -108,7 +108,7 @@ jobs:
         if: needs.setup.outputs.build_exists == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          name: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
           path: ./apps/browser-extension-wallet/dist
 
   tests:
