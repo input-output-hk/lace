@@ -166,7 +166,16 @@ export const EnterPgpPrivateKey: VFC = () => {
         <Flex gap="$8" flexDirection="column" w="$fill">
           <Flex w="$fill">
             <ToggleButtonGroup.Root
-              onValueChange={(changedEntryType: 'file-upload' | 'clipboard') => setEntryType(changedEntryType)}
+              onValueChange={(changedEntryType: 'file-upload' | 'clipboard') => {
+                setEntryType(changedEntryType);
+                setPrivateKeyFile('');
+                setPgpInfo({
+                  shieldedMessage: pgpInfo.shieldedMessage,
+                  privateKeyIsDecrypted: true,
+                  pgpPrivateKey: null,
+                  pgpKeyPassphrase: null
+                });
+              }}
               value={entryType}
             >
               <ToggleButtonGroup.Item value="file-upload">
