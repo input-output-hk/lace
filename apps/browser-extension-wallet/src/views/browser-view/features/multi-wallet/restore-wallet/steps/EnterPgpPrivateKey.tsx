@@ -86,6 +86,17 @@ export const EnterPgpPrivateKey: VFC = () => {
     next();
   };
 
+  const handleBack = () => {
+    setPgpInfo((prevState) => ({
+      ...prevState,
+      pgpKeyPassphrase: null,
+      pgpPrivateKey: null,
+      privateKeyIsDecrypted: true
+    }));
+    setMnemonic(Array.from({ length: 24 }));
+    back();
+  };
+
   const handleFileChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setValidation({ error: null, success: null });
@@ -158,7 +169,7 @@ export const EnterPgpPrivateKey: VFC = () => {
       <WalletSetupStepLayoutRevamp
         title={i18n.t('paperWallet.enterPgpPrivateKey.title')}
         description={i18n.t('paperWallet.enterPgpPrivateKey.description')}
-        onBack={back}
+        onBack={handleBack}
         onNext={handleNext}
         isNextEnabled={!!createWalletData.mnemonic.every((w) => !!w)}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
@@ -211,6 +222,7 @@ export const EnterPgpPrivateKey: VFC = () => {
             )}
             <PasswordBox
               onChange={(e) => {
+                setValidation({ error: null, success: null });
                 setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.target.value });
               }}
               label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
