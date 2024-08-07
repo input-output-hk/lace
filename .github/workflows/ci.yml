@@ -138,6 +138,7 @@ jobs:
         run: |
           echo "ART_NAME: $BUILD_ARTIFACT_NAME"
           ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
+          echo "ART_ID: $ART_ID"
 
           if ([ "$ART_ID" == "null" ]) then
             echo "Lace build artifact not found. Building..."
