@@ -45,6 +45,7 @@ on:
         options:
           - dev
           - staging
+          - live
 
 run-name: 'E2E | os: Linux | browser: ${{ github.event.inputs.browser }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only }} | preprod env: ${{ github.event.inputs.preprod_env }}'
 
@@ -80,7 +81,9 @@ jobs:
       - name: Build Lace artifact
         uses: ./.github/shared/build
         with:
+          CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.PREPROD_ENV }}-mainnet.lw.iog.io'
           CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.PREPROD_ENV }}-preprod.lw.iog.io'
+          CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.PREPROD_ENV }}-preview.lw.iog.io'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
