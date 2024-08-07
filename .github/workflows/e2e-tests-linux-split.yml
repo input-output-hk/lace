@@ -96,7 +96,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Lace artifact
-        if: steps.check-build-exists.outputs.build_exists == 'false'
+#        if: steps.check-build-exists.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
           CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.PREPROD_ENV }}-preprod.lw.iog.io'
@@ -104,14 +104,14 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
       - name: Upload build artifact
-        if: steps.check-build-exists.outputs.build_exists == 'false'
+#        if: steps.check-build-exists.outputs.build_exists == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
           path: ./apps/browser-extension-wallet/dist
 
       - name: Download Lace build artifact
-        if: steps.check-build-exists.outputs.build_exists == 'true'
+#        if: steps.check-build-exists.outputs.build_exists == 'true'
         shell: bash
         id: download-lace-build-artifact
         run: |
