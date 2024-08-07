@@ -359,7 +359,7 @@ class DAppConnectorAssert {
 
     await DAppTransactionAllDonePage.description.waitForDisplayed();
     expect(await DAppTransactionAllDonePage.description.getText()).to.equal(
-      await t('core.dappTransaction.signedSuccessfully')
+      await t('core.dappSignData.signedSuccessfully')
     );
 
     await DAppTransactionAllDonePage.closeButton.waitForDisplayed();

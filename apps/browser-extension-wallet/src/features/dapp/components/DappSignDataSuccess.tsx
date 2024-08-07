@@ -22,16 +22,16 @@ export const DappSignDataSuccess = (): React.ReactElement => {
   return (
     <div data-testid="dapp-sign-data-success" className={styles.dappErrorContainer}>
       <div className={styles.dappErrorContent}>
-        <Image data-testid="dapp-sign-data-success-image" preview={false} width={112} src={Success} />
-        <div data-testid="dapp-sign-data-success-heading" className={styles.heading}>
+        <Image data-testid="dapp-sign-tx-success-image" preview={false} width={112} src={Success} />
+        <div data-testid="dapp-sign-tx-success-heading" className={styles.heading}>
           {t('browserView.dataSign.success.youCanSafelyCloseThisPanel')}
         </div>
-        <div data-testid="dapp-sign-data-success-description" className={styles.description}>
+        <div data-testid="dapp-sign-tx-success-description" className={styles.description}>
           {t('core.dappSignData.signedSuccessfully')}
         </div>
       </div>
       <div className={styles.footer}>
-        <Button data-testid="dapp-sign-data-success-close-button" className={styles.footerBtn} onClick={onClose}>
+        <Button data-testid="dapp-sign-tx-success-close-button" className={styles.footerBtn} onClick={onClose}>
           {t('general.button.close')}
         </Button>
       </div>
