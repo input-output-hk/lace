@@ -113,6 +113,7 @@ jobs:
 
       - name: Download Lace build artifact
         if: ${{ needs.setup.outputs.build_exists == 'true' }}
+        shell: bash
         id: download-lace-build-artifact
         run: |
           echo "ART_NAME: $BUILD_ARTIFACT_NAME"
