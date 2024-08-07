@@ -190,7 +190,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   }, [passphrase, pgpInfo, walletInfo, CHAIN, setPdfInstance]);
 
   const formattedWalletName = i18n.t('core.paperWallet.savePaperWallet.walletName', {
-    walletName: replaceWhitespace(walletInfo.name).trim()
+    walletName: replaceWhitespace(walletInfo.name, '_').trim()
   });
 
   const visibleStage: React.ReactElement = useMemo(() => {

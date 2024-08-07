@@ -83,7 +83,7 @@ export const SavePaperWallet: VFC = () => {
   }, [pgpInfo, createWalletData, CHAIN, setPdfInstance]);
 
   const formattedWalletName = i18n.t('core.paperWallet.savePaperWallet.walletName', {
-    walletName: replaceWhitespace(createWalletData.name).trim()
+    walletName: replaceWhitespace(createWalletData.name, '_').trim()
   });
 
   return (
