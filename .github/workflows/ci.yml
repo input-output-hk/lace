@@ -180,7 +180,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download Lace build artifact
-        if: steps.check-build-exists.outputs.build_exists == 'true'
         shell: bash
         id: download-lace-build-artifact
         run: |
