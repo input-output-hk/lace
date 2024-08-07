@@ -96,11 +96,10 @@ export const EnterPgpPrivateKey: VFC = () => {
         }
         const [keyFile] = input.files;
 
-        if (!ASC_FILE_ENDING.test(keyFile.name)) {
-          throw new Error('incorrect file type supplied, please use a .asc file');
-        }
-
         if (keyFile) {
+          if (!ASC_FILE_ENDING.test(keyFile.name)) {
+            throw new Error('incorrect file type supplied, please use a .asc file');
+          }
           const reader = new FileReader();
           reader.addEventListener('load', (event) => {
             const fileinfo = event.target?.result;
