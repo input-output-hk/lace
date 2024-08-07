@@ -134,6 +134,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     error: null
   });
   const [password, setPassword] = useState<string>('');
+  // const [userHasAccessedFile, setUserHasAccessedFile];
 
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
   const { walletInfo } = useWalletStore();
@@ -238,7 +239,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
               href={pdfInstance.url}
               download={formattedWalletName}
               target="_blank"
-              style={{ width: '100%' }}
+              className={styles.fullWidth}
               aria-disabled={pdfInstance.loading || !!pdfInstance.error}
               onClick={() => {
                 analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletDownloadClick);

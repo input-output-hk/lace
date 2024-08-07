@@ -68,17 +68,17 @@ export const ChooseRecoveryMethod: VFC = () => {
                       [styles.optionCard]: recoveryMethod !== 'mnemonic'
                     })}
                   >
-                    <Flex p="$16" gap={'$24'} justifyContent={'space-between'} style={{ cursor: 'pointer' }}>
-                      <Flex flexDirection={'column'}>
-                        <Flex mb={'$8'}>{optionElement}</Flex>
-                        <Box pl={'$40'}>
+                    <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
+                      <Flex flexDirection="column">
+                        <Flex mb="$8">{optionElement}</Flex>
+                        <Box pl="$40">
                           <Text.Body.Normal weight="$medium" color="secondary" data-testid="mnemonic-words-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.mnemonicDescription')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <MnemonicWordsIcon style={{ width: 100, height: 'auto' }} data-testid="mnemonic-words-icon" />
+                        <MnemonicWordsIcon className={styles.restoreIcon} data-testid="mnemonic-words-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>
@@ -98,20 +98,20 @@ export const ChooseRecoveryMethod: VFC = () => {
                       [styles.optionCard]: recoveryMethod !== 'paper'
                     })}
                   >
-                    <Flex p={'$16'} gap={'$24'} justifyContent={'space-between'} style={{ cursor: 'pointer' }}>
-                      <Flex flexDirection={'column'}>
-                        <Flex mb={'$8'} gap={'$8'} alignItems={'center'}>
+                    <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
+                      <Flex flexDirection="column">
+                        <Flex mb="$8" gap="$8" alignItems="center">
                           <Flex>{optionElement}</Flex>
                           <Text.Body.Small className={styles.advancedBadge} data-testid="paper-wallet-advanced-badge">
                             {i18n.t('paperWallet.chooseRecoveryMethod.advanced')}
                           </Text.Body.Small>
                         </Flex>
-                        <Box pl={'$40'}>
+                        <Box pl="$40">
                           <Text.Body.Normal weight="$medium" color="secondary" data-testid="paper-wallet-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.paperWallet.description')}
                           </Text.Body.Normal>
                         </Box>
-                        <Flex ml={'$40'} gap={'$8'} mt={'$8'}>
+                        <Flex ml="$40" gap="$8" mt="$8">
                           <KeyIcon width={20} height={20} data-testid="paper-wallet-pgp-keys-icon" />
                           <Text.Label
                             weight="$medium"
@@ -123,7 +123,7 @@ export const ChooseRecoveryMethod: VFC = () => {
                         </Flex>
                       </Flex>
                       <Flex>
-                        <PaperWalletIcon style={{ width: 100, height: 'auto' }} data-testid="paper-wallet-icon" />
+                        <PaperWalletIcon className={styles.restoreIcon} data-testid="paper-wallet-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>

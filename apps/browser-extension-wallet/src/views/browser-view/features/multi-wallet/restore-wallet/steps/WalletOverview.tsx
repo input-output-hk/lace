@@ -134,8 +134,8 @@ export const WalletOverview = (): JSX.Element => {
             <WalletIcon />
           </Flex>
           <Flex flexDirection="column">
-            <Text.Label color="secondary">Paper wallet</Text.Label>
-            <Text.Body.Small>Account #0</Text.Body.Small>
+            <Text.Label color="secondary">{i18n.t('paperWallet.chooseRestoreMethod.option.paper')}</Text.Label>
+            <Text.Body.Small>{i18n.t('paperWallet.WalletOverview.accountZero')}</Text.Body.Small>
           </Flex>
         </Flex>
         <Flex flexDirection="column">

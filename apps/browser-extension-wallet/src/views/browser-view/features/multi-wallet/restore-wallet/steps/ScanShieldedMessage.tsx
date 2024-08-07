@@ -164,7 +164,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
   ]);
 
   return (
-    <Flex style={{ ...(scanState !== 'scanning' && { display: 'none' }) }} h="$fill" w="$fill">
+    <Flex className={cn({ [styles.hidden]: scanState !== 'scanning' })} h="$fill" w="$fill">
       {videoDevices.length > 1 && (
         <Box className={styles.mediaSelectContainer}>
           <Select.Root
@@ -185,7 +185,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
           autoPlay
           playsInline
         />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <canvas ref={canvasRef} className={styles.hidden} />
       </Box>
     </Flex>
   );

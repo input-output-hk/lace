@@ -1,4 +1,5 @@
 @import '../../../../../../common/src/ui/styles/abstracts/mixins';
+@import '../../../../../../common/src/ui/styles/theme.scss';
 
 .textArea {
   min-height: 182px !important;
@@ -11,4 +12,13 @@
 
 .wrapper {
   max-height: 182px;
+}
+
+.validation {
+  height: size_unit(2);
+  padding-left: size_unit(3);
+}
+
+.success {
+  stroke: #2cb67d;
 }

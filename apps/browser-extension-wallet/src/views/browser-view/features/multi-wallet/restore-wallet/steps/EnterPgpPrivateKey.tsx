@@ -207,7 +207,7 @@ export const EnterPgpPrivateKey: VFC = () => {
                 onChange={handleFileChange}
                 files={!!privateKeyFile && [privateKeyFile]}
                 style={{
-                  maxHeight: 136
+                  maxHeight: 136 // ui-toolkit doesn't allow specification of className prop
                 }}
                 onSubmit={null}
               />

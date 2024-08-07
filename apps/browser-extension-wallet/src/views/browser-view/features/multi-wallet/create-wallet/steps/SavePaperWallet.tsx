@@ -95,7 +95,14 @@ export const SavePaperWallet: VFC = () => {
       >
         <Flex w="$fill" h="$fill" gap="$20">
           <PaperWalletInfoCard walletName={formattedWalletName} />
-          <Flex style={{ width: 180 }} flexDirection="column" h="$fill" justifyContent="space-between" p="$0" m="$0">
+          <Flex
+            className={styles.ctaColumn}
+            flexDirection="column"
+            h="$fill"
+            justifyContent="space-between"
+            p="$0"
+            m="$0"
+          >
             <Flex h="$fill" flexDirection="column" w="$fill" gap="$8" px="$0" className={styles.actionButtonContainer}>
               <a
                 href={pdfInstance.url}
@@ -105,7 +112,7 @@ export const SavePaperWallet: VFC = () => {
                 }}
                 download={formattedWalletName}
                 target="_blank"
-                style={{ width: '100%' }}
+                className={styles.fullWidth}
                 aria-disabled={pdfInstance.loading || !!pdfInstance.error}
               >
                 <Button.Primary

@@ -29,7 +29,7 @@ export const PgpPublicKeyEntry = ({
       onChange={handlePgpReferenceChange}
       data-testid="pgp-public-key-reference"
       maxLength={30}
-      w={'$fill'}
+      w="$fill"
       value={pgpInfo.pgpKeyReference}
     />
     <div className={styles.textAreaContainer}>
@@ -43,17 +43,10 @@ export const PgpPublicKeyEntry = ({
         value={pgpInfo.pgpPublicKey}
       />
     </div>
-    <Flex
-      style={{
-        height: 16,
-        paddingLeft: 24,
-        fill: 'green',
-        stroke: '#2CB67D'
-      }}
-    >
+    <Flex className={styles.validation}>
       {validation.success && (
         <Flex gap="$4">
-          <CheckIcon />
+          <CheckIcon className={styles.success} />
           <Text.Label color="secondary">{validation.success}</Text.Label>
         </Flex>
       )}

@@ -55,7 +55,7 @@ export const ChooseRestoreMethod: VFC = () => {
         onNext={handleNext}
         currentTimelineStep={WalletTimelineSteps.CHOOSE_RECOVERY_METHOD}
       >
-        <Flex flexDirection={'column'} w={'$fill'} h={'$fill'}>
+        <Flex flexDirection="column" w="$fill" h="$fill">
           <RadioButtonGroup
             selectedValue={recoveryMethod}
             onValueChange={(value: RecoveryMethod) => setRecoveryMethod(value)}
@@ -75,17 +75,17 @@ export const ChooseRestoreMethod: VFC = () => {
                       [styles.optionCard]: recoveryMethod !== 'mnemonic'
                     })}
                   >
-                    <Flex p={'$16'} gap={'$24'} justifyContent={'space-between'} style={{ cursor: 'pointer' }}>
-                      <Flex flexDirection={'column'}>
-                        <Flex mb={'$8'}>{optionElement}</Flex>
-                        <Box pl={'$40'}>
+                    <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
+                      <Flex flexDirection="column">
+                        <Flex mb="$8">{optionElement}</Flex>
+                        <Box pl="$40">
                           <Text.Body.Normal weight="$medium" color="secondary" data-testid="mnemonic-words-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.mnemonicDescription')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <MnemonicWordsIcon style={{ width: 100, height: 'auto' }} data-testid="mnemonic-words-icon" />
+                        <MnemonicWordsIcon className={styles.restoreIcon} data-testid="mnemonic-words-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>
@@ -105,19 +105,19 @@ export const ChooseRestoreMethod: VFC = () => {
                       [styles.optionCard]: recoveryMethod !== 'paper'
                     })}
                   >
-                    <Flex p={'$16'} gap={'$24'} justifyContent={'space-between'} style={{ cursor: 'pointer' }}>
-                      <Flex flexDirection={'column'}>
-                        <Flex mb={'$8'} gap={'$8'} alignItems={'center'}>
+                    <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
+                      <Flex flexDirection="column">
+                        <Flex mb="$8" gap="$8" alignItems="center">
                           {optionElement}
                         </Flex>
-                        <Box pl={'$40'}>
+                        <Box pl="$40">
                           <Text.Body.Normal weight="$medium" color="secondary" data-testid="mpaper-wallet-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.paperWallet.description')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <PaperWalletIcon style={{ width: 100, height: 'auto' }} data-testid="mpaper-wallet-icon" />
+                        <PaperWalletIcon className={styles.restoreIcon} data-testid="mpaper-wallet-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>
