@@ -136,6 +136,14 @@ jobs:
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./apps/browser-extension-wallet/dist
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Lace build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+          github-token: ${{ secrets.GH_TOKEN }}
 #      - name: Download Lace build artifact
 #        shell: bash
 #        id: download-lace-build-artifact
