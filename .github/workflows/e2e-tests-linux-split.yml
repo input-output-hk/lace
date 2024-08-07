@@ -73,14 +73,15 @@ jobs:
         shell: bash
         id: check-build-exists
         run: |
-          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+          RUN_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].workflow_run.id)
 
-          if ([ "$ART_ID" == "null" ]) then
+          if ([ "$RUN_ID" == "null" ]) then
             echo "Lace build artifact not found"
             echo "build_exists=false" >> $GITHUB_OUTPUT
           else
             echo "Build artifact found"
             echo "build_exists=true" >> $GITHUB_OUTPUT
+            echo "build_exists_run_id=$RUN_ID" >> $GITHUB_OUTPUT
           fi
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
@@ -125,18 +126,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-#      - name: Setup Node.js and install dependencies
-#        uses: ./.github/actions/install
-#        with:
-#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download Lace build artifact
         uses: actions/download-artifact@v4
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./apps/browser-extension-wallet/dist
-          github-token: ${{ secrets.GH_TOKEN }}
+          run-id: ${{ needs.setup.outputs.build_exists_run_id }}
+
 #      - name: Download Lace build artifact
 #        shell: bash
 #        id: download-lace-build-artifact
