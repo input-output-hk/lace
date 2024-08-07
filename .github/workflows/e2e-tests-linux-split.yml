@@ -125,18 +125,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
-        with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Download Lace build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: '${{ env.BUILD_ARTIFACT_NAME }}'
-          path: ./apps/browser-extension-wallet/dist
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Setup Node.js and install dependencies
+#        uses: ./.github/actions/install
+#        with:
+#          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download Lace build artifact
         uses: actions/download-artifact@v4
