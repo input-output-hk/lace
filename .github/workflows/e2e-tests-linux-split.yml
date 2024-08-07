@@ -112,7 +112,6 @@ jobs:
 
   tests:
     name: E2E tests
-    if: always()
     strategy:
       fail-fast: false
       matrix:
@@ -153,7 +152,7 @@ jobs:
     name: Process e2e test reports
     needs: [setup, tests]
     runs-on: ${{ needs.setup.outputs.runner }}
-    if: always()
+    if: ${{ success() || failure() }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -197,7 +196,7 @@ jobs:
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
-        if: always()
+        if: ${{ success() || failure() }}
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
