@@ -67,9 +67,27 @@ jobs:
       - name: Provision step
         run: |
           echo "Provisioning ${{ github.event.inputs.runner }}"
+
+      - name: Check if build exists
+        shell: bash
+        id: check-build-exists
+        with:
+          BUILD_ARTIFACT_NAME: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
+        run: |
+          echo "ART_NAME: $BUILD_ARTIFACT_NAME"
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
+
+          if ([ "$ART_ID" == "null" ]) then
+            echo "Lace build artifact not found"
+            echo "build_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "Build artifact found and downloaded"
+            echo "build_exists=true" >> $GITHUB_OUTPUT
+          fi
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
       smoke_only: ${{ github.event.inputs.smoke_only || false }}
+      build_exists: ${{ steps.check-build-exists.outputs.build_exists }}
 
   build:
     name: Build Lace
@@ -80,6 +98,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Lace artifact
+        if: ${{ needs.setup.outputs.build_exists == 'false' }}
         uses: ./.github/shared/build
         with:
           CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.PREPROD_ENV }}-preprod.lw.iog.io'
@@ -87,10 +106,23 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
       - name: Upload build artifact
+        if: ${{ needs.setup.outputs.build_exists == 'false' }}
         uses: actions/upload-artifact@v4
         with:
           name: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
           path: ./apps/browser-extension-wallet/dist
+
+      - name: Download Lace build artifact
+        if: ${{ needs.setup.outputs.build_exists == 'true' }}
+        id: download-lace-build-artifact
+        with:
+          BUILD_ARTIFACT_NAME: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
+        run: |
+          echo "ART_NAME: $BUILD_ARTIFACT_NAME"
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
+          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
+          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
+          echo "Build artifact found and downloaded"
 
   tests:
     name: E2E tests
