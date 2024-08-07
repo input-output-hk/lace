@@ -18,6 +18,7 @@ import (
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/httpapi"
 	"lace.io/lace-blockchain-services/ui"
+	"lace.io/lace-blockchain-services/mithrilcache"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -185,13 +186,26 @@ func main() {
 		time.Sleep(1 * time.Second)
 	}}()
 
+	mithrilCachePort := -1
+	if (appConfig.ForceMithrilSnapshot.Preview.Digest != ""	||
+		appConfig.ForceMithrilSnapshot.Preprod.Digest != ""	||
+		appConfig.ForceMithrilSnapshot.Mainnet.Digest != "") {
+		mithrilCachePort = getFreeTCPPort()
+		go func(){ for {
+			err := mithrilcache.Run(appConfig, mithrilCachePort)
+			fmt.Fprintf(os.Stderr, "%s[%d]: mithril-cache HTTP server failed: %v\n",
+				OurLogPrefix, os.Getpid(), err)
+			time.Sleep(1 * time.Second)
+		}}()
+	}
+
 	// Both macOS and Windows require that UI happens on the main thread:
 	var wgManager sync.WaitGroup
 	wgManager.Add(1)
 	go func() {
 		defer systray.Quit()
 		defer wgManager.Done()
-		manageChildren(commManager, appConfig)
+		manageChildren(commManager, appConfig, mithrilCachePort)
 	}()
 
 	systray.Run(ui.SetupTray(commUI, logFile, networks, appConfig), func(){
