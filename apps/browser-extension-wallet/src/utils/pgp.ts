@@ -191,9 +191,7 @@ export const pgpPublicKeyVerification =
           .join(' ')
       });
     } catch (error) {
-      if (error.message === 'Misformed armored text' || error.message === 'Unknown ASCII armor type') {
-        setPgpValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
-      } else if (
+      if (
         error.message === 'no valid encryption key packet in key.' ||
         NO_ENCRYPTION_PACKET_REGEX.test(error.message)
       ) {
@@ -203,8 +201,9 @@ export const pgpPublicKeyVerification =
       } else if (error.message === 'PGP key is not public') {
         setPgpValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
       } else {
+        console.error(error);
         // Default fallback
-        setPgpValidation({ error: error.message });
+        setPgpValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
       }
     }
   };
