@@ -26,7 +26,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useLocalStorage, useNetwork, useSharedWalletData } from '@hooks';
+import { useHandleResolver, useNetwork, useSharedWalletData } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -41,8 +41,7 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, constructMultiSigTransactionData } from '@lace/core';
-import { mergeWitnesses } from './utils';
+import { exportMultisigTransaction } from '@lace/core';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -92,10 +91,6 @@ export const Footer = withAddressBookContext(
     const handleResolver = useHandleResolver();
     const { isMaxAdaLoading } = useMaxAdaStatus();
     const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
-    const [sharedWalletTransactions, { updateLocalStorage: updateSharedWalletTransactions }] = useLocalStorage(
-      'sharedWalletTransactions',
-      {}
-    );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -174,19 +169,10 @@ export const Footer = withAddressBookContext(
         let sharedWalletTx: Serialization.Transaction;
         try {
           if (builtTxData.importedSharedWalletTx) {
-            const { auxiliaryData, body, id, witness } = builtTxData.importedSharedWalletTx.toCore();
-            const txWithOwnSignature = await inMemoryWallet.finalizeTx({
-              tx: {
-                body,
-                hash: id
-              },
-              auxiliaryData,
-              bodyCbor: builtTxData.importedSharedWalletTx.body().toCbor()
-            });
-            builtTxData.importedSharedWalletTx.setWitnessSet(
-              Serialization.TransactionWitnessSet.fromCore(mergeWitnesses(txWithOwnSignature.witness, witness))
+            sharedWalletTx = Serialization.Transaction.fromCbor(
+              await inMemoryWallet.addSignatures({ tx: builtTxData.importedSharedWalletTx.toCbor() })
             );
-            sharedWalletTx = builtTxData.importedSharedWalletTx;
+            builtTxData.importedSharedWalletTx.setWitnessSet(sharedWalletTx.witnessSet());
           } else {
             const { auxiliaryData, body, hash } = await builtTxData.tx.inspect();
             const signedTx = await inMemoryWallet.finalizeTx({
@@ -222,14 +208,6 @@ export const Footer = withAddressBookContext(
           });
         }
 
-        const transaction = {
-          [sharedWalletTx.toCore().id.toString()]: constructMultiSigTransactionData({
-            cborHex: sharedWalletTx.toCbor(),
-            publicKey: sharedWalletKey,
-            chainId: currentChain
-          })
-        };
-        updateSharedWalletTransactions({ ...sharedWalletTransactions, ...transaction });
         setBuiltTxData({ ...builtTxData, collectedEnoughSharedWalletTxSignatures });
       } else {
         const signedTx = await builtTxData.tx.sign();
@@ -246,17 +224,7 @@ export const Footer = withAddressBookContext(
           creationType: TxCreationType.Internal
         });
       }
-    }, [
-      builtTxData,
-      currentChain,
-      getSignPolicy,
-      inMemoryWallet,
-      isSharedWallet,
-      setBuiltTxData,
-      sharedWalletKey,
-      sharedWalletTransactions,
-      updateSharedWalletTransactions
-    ]);
+    }, [builtTxData, currentChain, getSignPolicy, inMemoryWallet, isSharedWallet, setBuiltTxData, sharedWalletKey]);
 
     const handleVerifyPass = useCallback(async () => {
       if (isSubmitingTx) return;
