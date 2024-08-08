@@ -23,7 +23,7 @@ import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 import { TxInspection } from '@cardano-sdk/tx-construction';
 import { WitnessedTx } from '@cardano-sdk/key-management';
-import { Cardano, HandleResolution, TxCBOR } from '@cardano-sdk/core';
+import { Cardano, HandleResolution, Serialization } from '@cardano-sdk/core';
 import { WalletType } from '@cardano-sdk/web-extension';
 
 const txHash = 'e6eb1c8c806ae7f4d9fe148e9c23853607ffba692ef0a464688911ad3374a932';
@@ -31,7 +31,7 @@ const address =
   'addr_test1qp9xn9gwdjkj0w300vc8xgctegvgty2ks4n875zdzjkkzy3qz69wq6z9tpmuj9tutsc7f0s4kx6mvh3mwupmjdjx2fjqf0q2j2';
 const addresses$ = new BehaviorSubject([{ address }]);
 const signedTx = {
-  cbor: '' as TxCBOR,
+  cbor: '' as Serialization.TxCBOR,
   tx: { id: 'txId' } as Cardano.Tx,
   context: {
     handles: [] as HandleResolution[],

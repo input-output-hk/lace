@@ -69,8 +69,9 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
         const sharedWalletTransaction = sharedWalletTransactions[currentTransactionDetail.id];
 
         const signatures = sharedWalletTransaction
-          ? Serialization.Transaction.fromCbor(Wallet.TxCBOR(sharedWalletTransaction.transaction.cborHex)).toCore()
-              .witness.signatures
+          ? Serialization.Transaction.fromCbor(
+              Wallet.Serialization.TxCBOR(sharedWalletTransaction.transaction.cborHex)
+            ).toCore().witness.signatures
           : currentTransactionDetail.witness.signatures;
 
         const cosignersWithSignStatus = await Promise.all(
