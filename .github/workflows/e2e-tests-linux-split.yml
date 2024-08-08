@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - 'release/**'
-      - 'e2e-add-lace-build-artifact-reuse'
   workflow_dispatch:
     inputs:
       browser:
