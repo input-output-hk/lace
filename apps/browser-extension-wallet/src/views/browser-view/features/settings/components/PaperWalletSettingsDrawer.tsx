@@ -1,29 +1,23 @@
-/* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-null */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
 import { useWalletManager } from '@hooks';
-import { Banner, Drawer, DrawerHeader, DrawerNavigation, inputProps, Password, PostHogAction } from '@lace/common';
-import { PaperWalletInfoCard, PgpPublicKeyEntry } from '@lace/core';
+import { Drawer, DrawerHeader, DrawerNavigation, PostHogAction } from '@lace/common';
 import { i18n } from '@lace/translation';
 import {
   Button,
-  Text,
   DownloadComponent as DownloadIcon,
   Flex,
   PrinterComponent as PrinterIcon
 } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletStore } from '@src/stores';
-import { pgpPublicKeyVerification } from '@src/utils/pgp';
-import { Typography } from 'antd';
 import { config } from '@src/config';
 import { generatePaperWalletPdf } from '@src/utils/PaperWallet';
 import type { PublicPgpKeyData, PaperWalletPDF } from '@src/types';
 import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SettingsLayout.module.scss';
 import { useAnalyticsContext } from '@providers';
-
-const { Text: AntdText } = Typography;
+import { PassphraseStage, SaveStage, SecureStage } from './PaperWallet';
+import { WarningModal } from '@src/views/browser-view/components';
 
 interface Props {
   isOpen: boolean;
@@ -38,87 +32,10 @@ const DEFAULT_PGP_STATE: PublicPgpKeyData = {
 
 type PaperWalletExportStages = 'secure' | 'passphrase' | 'save';
 
-interface Validation {
-  error?: string;
-  success?: string;
-}
-
-const SecureStage = ({
-  setPgpInfo,
-  pgpInfo
-}: {
-  setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>;
-  pgpInfo: PublicPgpKeyData;
-}) => {
-  const [validation, setValidation] = useState<Validation>({ error: null, success: null });
-
-  const handlePgpPublicKeyBlockChange = pgpPublicKeyVerification(setPgpInfo, setValidation);
-
-  const handlePgpReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPgpInfo({ ...pgpInfo, pgpKeyReference: e.target.value });
-  };
-
-  return (
-    <Flex mt="$8">
-      <PgpPublicKeyEntry
-        handlePgpPublicKeyBlockChange={handlePgpPublicKeyBlockChange}
-        handlePgpReferenceChange={handlePgpReferenceChange}
-        validation={validation}
-        pgpInfo={pgpInfo}
-      />
-    </Flex>
-  );
-};
-
 type ProcessingStateType = {
   isProcessing?: boolean;
   isPasswordValid?: boolean;
 };
-
-const PassphraseStage = ({
-  setPassword,
-  password,
-  isPasswordValid
-}: {
-  setPassword: React.Dispatch<React.SetStateAction<string>>;
-  password: string;
-  isPasswordValid: boolean;
-}) => {
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
-
-  return (
-    <Flex mt="$8" flexDirection="column" gap="$8">
-      <AntdText className={styles.drawerDescription} data-testid="passphrase-drawer-description">
-        {i18n.t('browserView.settings.security.showPassphraseDrawer.description')}
-      </AntdText>
-      <Flex gap="$32" flexDirection="column">
-        <div className={styles.warningBanner}>
-          <Banner withIcon message={i18n.t('browserView.settings.security.showPassphraseDrawer.warning')} />
-        </div>
-        <div className={styles.passwordContainer}>
-          <div className={styles.password}>
-            <Password
-              className={styles.passwordInput}
-              onChange={handleChange}
-              value={password}
-              error={!isPasswordValid}
-              errorMessage={i18n.t('browserView.transaction.send.error.invalidPassword')}
-              label={i18n.t('browserView.transaction.send.password.placeholder')}
-              autoFocus
-            />
-          </div>
-        </div>
-      </Flex>
-    </Flex>
-  );
-};
-
-const SaveStage = ({ walletName }: { walletName: string }) => (
-  <Flex gap="$16" mt="$8" flexDirection="column">
-    <Text.Body.Normal color="secondary">{i18n.t('paperWallet.savePaperWallet.description')}</Text.Body.Normal>
-    <PaperWalletInfoCard walletName={walletName} />
-  </Flex>
-);
 
 export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }: Props): React.ReactElement => {
   const [stage, setStage] = useState<PaperWalletExportStages>('secure');
@@ -134,7 +51,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     error: null
   });
   const [password, setPassword] = useState<string>('');
-  // const [userHasAccessedFile, setUserHasAccessedFile];
+  const [warningModalVisible, setWarningModalVisible] = useState(false);
 
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
   const { walletInfo } = useWalletStore();
@@ -159,6 +76,12 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     setPassphrase([]);
     onClose();
   }, [setStage, setPgpInfo, removePassword, setPassphrase, onClose]);
+
+  const warnBeforeClose = useCallback(() => {
+    if (pdfInstance.url) {
+      setWarningModalVisible(true);
+    }
+  }, [setWarningModalVisible, pdfInstance]);
 
   const handleVerifyPass = useCallback(async () => {
     if (isProcessing) return;
@@ -275,17 +198,32 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
 
   return (
     <>
+      <WarningModal
+        header={i18n.t('paperWallet.SettingsDrawer.ExitWarningTitle')}
+        content={
+          <span className={styles.removeWalletContent}>
+            {i18n.t('paperWallet.SettingsDrawer.ExitWarningDescription')}
+          </span>
+        }
+        visible={warningModalVisible}
+        onCancel={() => setWarningModalVisible(false)}
+        onConfirm={handleClose}
+        cancelLabel={i18n.t('browserView.settings.wallet.general.removeWalletAlert.cancel')}
+        confirmLabel={i18n.t('paperWallet.SettingsDrawer.ExitButton')}
+        confirmCustomClassName={styles.settingsExitButton}
+        isPopupView={popupView}
+      />
       <Drawer
         open={isOpen}
         dataTestId="paper-wallet-settings-drawer"
-        onClose={handleClose}
+        onClose={warnBeforeClose}
         popupView={popupView}
         title={<DrawerHeader popupView={popupView} title={i18n.t('paperWallet.securePaperWallet.title')} />}
         navigation={
           <DrawerNavigation
             title={i18n.t('browserView.settings.heading')}
-            onCloseIconClick={!popupView ? handleClose : undefined}
-            onArrowIconClick={popupView ? handleClose : undefined}
+            onCloseIconClick={!popupView ? warnBeforeClose : undefined}
+            onArrowIconClick={popupView ? warnBeforeClose : undefined}
           />
         }
         footer={footer}
