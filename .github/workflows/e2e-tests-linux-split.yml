@@ -48,7 +48,7 @@ on:
           - dev
           - staging
 
-run-name: 'E2E | os: Linux | browser: ${{ github.event.inputs.browser }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only }} | preprod env: ${{ github.event.inputs.preprod_env }}'
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }} | preprod env: ${{ github.event.inputs.preprod_env || 'dev' }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -58,6 +58,7 @@ env:
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
   PREPROD_ENV: ${{ github.event.inputs.preprod_env || 'dev' }}
+  BUILD_ARTIFACT_NAME: lace-${{ github.event.inputs.preprod_env || 'dev' }}-${{ github.sha }}
 
 jobs:
   setup:
@@ -67,9 +68,24 @@ jobs:
       - name: Provision step
         run: |
           echo "Provisioning ${{ github.event.inputs.runner }}"
+
+      - name: Check if build exists
+        shell: bash
+        id: check-build-exists
+        run: |
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+
+          if ([ "$ART_ID" == "null" ]) then
+            echo "Lace build artifact not found"
+            echo "build_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "Build artifact found"
+            echo "build_exists=true" >> $GITHUB_OUTPUT
+          fi
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
       smoke_only: ${{ github.event.inputs.smoke_only || false }}
+      build_exists: ${{ steps.check-build-exists.outputs.build_exists }}
 
   build:
     name: Build Lace
@@ -80,6 +96,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Lace artifact
+        if: needs.setup.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
           CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.PREPROD_ENV }}-preprod.lw.iog.io'
@@ -87,14 +104,14 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
       - name: Upload build artifact
+        if: needs.setup.outputs.build_exists == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./apps/browser-extension-wallet/dist
 
   tests:
     name: E2E tests
-    if: always()
     strategy:
       fail-fast: false
       matrix:
@@ -114,11 +131,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download Lace build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: 'lace-${{ env.PREPROD_ENV }}-${{ github.sha }}'
-          path: ./apps/browser-extension-wallet/dist
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        id: download-lace-build-artifact
+        run: |
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
+          echo "Build artifact found and downloaded"
 
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
@@ -132,7 +151,8 @@ jobs:
     name: Process e2e test reports
     needs: [setup, tests]
     runs-on: ${{ needs.setup.outputs.runner }}
-    if: always()
+#    when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
+    if: ${{ success() || failure() }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -142,7 +162,6 @@ jobs:
           merge-multiple: true
 
       - name: Create allure properties
-        if: success()
         working-directory: './artifacts/reports/allure/results'
         run: |
           echo "
@@ -176,7 +195,6 @@ jobs:
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
-        if: always()
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
