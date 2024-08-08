@@ -74,7 +74,7 @@ jobs:
         id: check-build-exists
         run: |
           BUILD_ARTIFACT_NAME='lace-${{ github.event.inputs.preprod_env || 'dev' }}-${{ github.sha }}'
-          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name='$BUILD_ARTIFACT_NAME'" | jq -r .artifacts[0].id)
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
 
           if ([ "$ART_ID" == "null" ]) then
             echo "Lace build artifact not found"
