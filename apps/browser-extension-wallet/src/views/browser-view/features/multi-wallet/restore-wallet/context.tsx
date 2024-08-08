@@ -52,6 +52,13 @@ export const useRestoreWallet = (): State => {
 
 const initialMnemonicLength: RecoveryPhraseLength = 24;
 
+const INITIAL_PGP_INFO_STATE: ShieldedPgpKeyData = {
+  pgpPrivateKey: null,
+  shieldedMessage: null,
+  privateKeyIsDecrypted: true,
+  pgpKeyPassphrase: null
+};
+
 export const RestoreWalletProvider = ({ children }: Props): React.ReactElement => {
   const history = useHistory();
   const { forgotPasswordFlowActive, postHogActions, setFormDirty } = useWalletOnboarding();
@@ -62,12 +69,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     paperWalletEnabled ? WalletRestoreStep.ChooseRecoveryMethod : WalletRestoreStep.RecoveryPhrase
   );
   const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
-  const [pgpInfo, setPgpInfo] = useState<ShieldedPgpKeyData>({
-    pgpPrivateKey: null,
-    shieldedMessage: null,
-    privateKeyIsDecrypted: true,
-    pgpKeyPassphrase: null
-  });
+  const [pgpInfo, setPgpInfo] = useState<ShieldedPgpKeyData>(INITIAL_PGP_INFO_STATE);
   const [walletMetadata, setWalletMetadata] = useState<WalletSummaryInfo>({
     address: null,
     chain: null
@@ -112,6 +114,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
       deleteFromLocalStorage('isForgotPasswordFlow');
     }
     clearSecrets();
+    setPgpInfo(INITIAL_PGP_INFO_STATE);
   }, [
     clearSecrets,
     createWallet,
