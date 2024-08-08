@@ -128,9 +128,9 @@ Then(/^I see DApp connector "Sign transaction" page$/, async () => {
   await DAppConnectorAssert.assertSeeSignTransactionPage();
 });
 
-Then(/^I see DApp connector "All done" page$/, async () => {
+Then(/^I see DApp connector "All done" page(?: from "(data sign)")?$/, async (signType?: 'data sign' | 'tx sign') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAllDonePage();
+  await DAppConnectorAssert.assertSeeAllDonePage(signType);
 });
 
 Then(/^I don't see DApp window$/, async () => {
