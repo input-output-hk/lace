@@ -132,30 +132,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check if build exists
-        shell: bash
-        id: check-build-exists
-        run: |
-          echo "ART_NAME: $BUILD_ARTIFACT_NAME"
-          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
-
-          if ([ "$ART_ID" == "null" ]) then
-            echo "Lace build artifact not found. Building..."
-            echo "build_exists=false" >> $GITHUB_OUTPUT
-          else
-            echo "Lace build artifact found. Downloading..."
-            echo "build_exists=true" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build Lace artifact
-        if: steps.check-build-exists.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
       - name: Upload build artifact
-        if: steps.check-build-exists.outputs.build_exists == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
