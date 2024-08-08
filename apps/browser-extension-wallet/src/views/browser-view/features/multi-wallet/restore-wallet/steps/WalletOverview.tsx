@@ -160,7 +160,7 @@ export const WalletOverview = (): JSX.Element => {
             }}
           />
         </Flex>
-        {!!isLoading && (
+        {!isLoading && (
           <Flex alignItems="center" className={styles.credit}>
             <Text.Label className={styles.creditLink}>{i18n.t('general.credit.poweredBy')}</Text.Label>
             <TextLink
