@@ -152,6 +152,7 @@ jobs:
     name: Process e2e test reports
     needs: [setup, tests]
     runs-on: ${{ needs.setup.outputs.runner }}
+#    when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
     if: ${{ success() || failure() }}
     steps:
       - name: Download all artifacts
@@ -162,7 +163,6 @@ jobs:
           merge-multiple: true
 
       - name: Create allure properties
-        if: success()
         working-directory: './artifacts/reports/allure/results'
         run: |
           echo "
@@ -196,7 +196,6 @@ jobs:
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
-        if: ${{ success() || failure() }}
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
