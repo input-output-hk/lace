@@ -49,7 +49,7 @@ on:
           - dev
           - staging
 
-run-name: 'E2E | os: Linux | browser: ${{ github.event.inputs.browser || chrome }} | network: ${{ github.event.inputs.network || preprod }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || false }} | preprod env: ${{ github.event.inputs.preprod_env || dev }}'
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }} | preprod env: ${{ github.event.inputs.preprod_env || 'dev' }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
