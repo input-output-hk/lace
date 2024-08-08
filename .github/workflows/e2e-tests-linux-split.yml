@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'release/**'
+      - 'e2e-add-lace-build-artifact-reuse'
   workflow_dispatch:
     inputs:
       browser:
@@ -58,7 +59,6 @@ env:
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
   PREPROD_ENV: ${{ github.event.inputs.preprod_env || 'dev' }}
-  BUILD_ARTIFACT_NAME: 'lace-${{ github.event.inputs.preprod_env }}-${{ github.sha }}'
 
 jobs:
   setup:
@@ -73,7 +73,8 @@ jobs:
         shell: bash
         id: check-build-exists
         run: |
-          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+          BUILD_ARTIFACT_NAME='lace-${{ github.event.inputs.preprod_env || 'dev' }}-${{ github.sha }}'
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
 
           if ([ "$ART_ID" == "null" ]) then
             echo "Lace build artifact not found"
@@ -134,7 +135,8 @@ jobs:
         shell: bash
         id: download-lace-build-artifact
         run: |
-          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+          BUILD_ARTIFACT_NAME='lace-${{ github.event.inputs.preprod_env || 'dev' }}-${{ github.sha }}'
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=$BUILD_ARTIFACT_NAME" | jq -r .artifacts[0].id)
           curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
           unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
           echo "Build artifact found and downloaded"
