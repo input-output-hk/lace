@@ -114,10 +114,15 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
       deleteFromLocalStorage('isForgotPasswordFlow');
     }
     clearSecrets();
+    pgpInfo.pgpKeyPassphrase = '';
+    pgpInfo.pgpPrivateKey = '';
+    pgpInfo.shieldedMessage = null;
     setPgpInfo(INITIAL_PGP_INFO_STATE);
   }, [
     clearSecrets,
     createWallet,
+    pgpInfo,
+    setPgpInfo,
     forgotPasswordFlowActive,
     postHogActions.restore.HD_WALLET,
     postHogActions.restore.WALLET_ADDED,
@@ -182,7 +187,6 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
           setStep(WalletRestoreStep.RecoveryPhrase);
           break;
         }
-        setStep(WalletRestoreStep.PrivatePgpKeyEntry);
         break;
     }
   }, [history, setFormDirty, step, recoveryMethod, paperWalletEnabled]);

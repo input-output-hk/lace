@@ -42,7 +42,10 @@ export const useCreateWallet = (): State => {
   if (state === null) throw new Error('CreateWalletContext not defined');
   return state;
 };
-
+const INITIAL_PGP_STATE: PublicPgpKeyData = {
+  pgpPublicKey: null,
+  pgpKeyReference: null
+};
 export const CreateWalletProvider = ({ children }: Props): React.ReactElement => {
   const history = useHistory();
   const { postHogActions, setFormDirty } = useWalletOnboarding();
@@ -61,10 +64,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : WalletCreateStep.RecoveryPhraseWriteDown
   );
   const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
-  const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>({
-    pgpPublicKey: null,
-    pgpKeyReference: null
-  });
+  const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>(INITIAL_PGP_STATE);
   const [pgpValidation, setPgpValidation] = useState<PgpValidation>({ error: null, success: null });
   const generateMnemonic = useCallback(() => {
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Wallet.KeyManagement.util.generateMnemonicWords() }));
@@ -84,7 +84,19 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
     });
     clearSecrets();
-  }, [clearSecrets, createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]);
+    pgpInfo.pgpPublicKey = '';
+    pgpInfo.pgpKeyReference = '';
+    createWalletData.password = '';
+    setPgpInfo(INITIAL_PGP_STATE);
+  }, [
+    clearSecrets,
+    createHotWallet,
+    createWalletData,
+    pgpInfo,
+    setPgpInfo,
+    postHogActions.create.WALLET_ADDED,
+    sendPostWalletAddAnalytics
+  ]);
 
   const next = useCallback(async () => {
     switch (step) {

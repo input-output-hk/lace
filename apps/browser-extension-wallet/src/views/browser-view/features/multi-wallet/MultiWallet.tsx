@@ -28,6 +28,7 @@ export const MultiWallet = (): JSX.Element => {
                 onClick={withConfirmationDialog(() => {
                   setBackgroundPage();
                   history.push(page);
+                  window.location.reload();
                 })}
               />
             </div>
