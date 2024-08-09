@@ -4,7 +4,15 @@ import { i18n } from '@lace/translation';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRestoreWallet } from '../context';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
-import { Flex, Text, TextLink, Tooltip, WalletComponent as WalletIcon } from '@input-output-hk/lace-ui-toolkit';
+import {
+  Flex,
+  Text,
+  TextLink,
+  Tooltip,
+  WalletComponent as WalletIcon,
+  Copy,
+  ControlButton
+} from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { compactNumberWithUnit } from '@src/utils/format-number';
 import { PortfolioBalance } from '@src/views/browser-view/components';
@@ -142,9 +150,16 @@ export const WalletOverview = (): JSX.Element => {
           <Text.Body.Normal weight="$bold" color="secondary">
             {i18n.t('qrInfo.walletAddress')}
           </Text.Body.Normal>
-          <Tooltip align="bottom" side="bottom" label={walletMetadata.address}>
-            <Text.Body.Large>{addEllipsis(walletMetadata.address, 28, 28)}</Text.Body.Large>
-          </Tooltip>
+          <Flex alignItems="center" justifyContent="space-between" className={styles.fullWidth}>
+            <Tooltip align="center" side="bottom" label={walletMetadata.address}>
+              <Text.Body.Large>{addEllipsis(walletMetadata.address, 24, 24)}</Text.Body.Large>
+            </Tooltip>
+            <ControlButton.Icon
+              icon={<Copy height={24} width={24} />}
+              onClick={() => navigator.clipboard.writeText(walletMetadata.address)}
+              size="small"
+            />
+          </Flex>
         </Flex>
         <Flex flexDirection="column">
           <PortfolioBalance
