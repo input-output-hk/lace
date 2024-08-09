@@ -31,11 +31,18 @@ inputs:
     description: 'Banxa`s integration URL'
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
+  CARDANO_SERVICES_URL_MAINNET:
+      description: 'Url for mainnet env'
+      required: false
+      default: 'https://dev-mainnet.lw.iog.io'
   CARDANO_SERVICES_URL_PREPROD:
     description: 'Url for preprod env'
     required: false
     default: 'https://dev-preprod.lw.iog.io'
-
+  CARDANO_SERVICES_URL_PREVIEW:
+    description: 'Url for preview env'
+    required: false
+    default: 'https://dev-preview.lw.iog.io'
 runs:
   using: 'composite'
   steps:
@@ -90,5 +97,7 @@ runs:
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
+        CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
         CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
+        CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
       run: yarn browser build
