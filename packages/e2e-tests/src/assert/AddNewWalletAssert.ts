@@ -75,6 +75,12 @@ class AddNewWalletAssert {
       );
     }
   }
+
+  async assertSeeChooseRecoveryMethodPageInModal() {
+    await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
+    await AddNewWalletMainModal.closeButton.waitForEnabled();
+    // TODO: add proper assertions when paper wallet feature is ready
+  }
 }
 
 export default new AddNewWalletAssert();

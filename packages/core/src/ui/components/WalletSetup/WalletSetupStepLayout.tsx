@@ -9,12 +9,18 @@ import { WalletSetupFlow, useWalletSetupFlow } from './WalletSetupFlowProvider';
 import { useTranslation } from 'react-i18next';
 
 export enum WalletTimelineSteps {
+  // Legacy
   LEGAL_AND_ANALYTICS,
-  WALLET_SETUP,
   RECOVERY_PHRASE,
-  ALL_DONE,
+  // Paper Wallet
+  CHOOSE_RECOVERY_METHOD,
+  RECOVERY_DETAILS,
+  // hardware wallet
   CONNECT_WALLET,
-  NAME_WALLET
+  // Common
+  NAME_WALLET,
+  WALLET_SETUP,
+  ALL_DONE
 }
 
 export interface WalletSetupStepLayoutProps {

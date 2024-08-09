@@ -7,20 +7,22 @@ Feature: Add new wallet - Restore wallet
   @LW-9368
   Scenario: Extended-view - Multi-wallet - Restore - Restore button click
     When I opened "Restore" flow via "Add new wallet" feature
-    Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
-    And "Recovery phrase" step is marked as active on progress timeline
-    And "Next" button is disabled during onboarding process
+    Then "Choose a recovery method" page is displayed in modal
+    And "Recovery method" step is marked as active on progress timeline
+    And "Next" button is enabled during onboarding process
 
   @LW-9381
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Back button click
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
-    Then I see onboarding main screen within modal over the active Lace page in expanded view
+    Then "Choose a recovery method" page is displayed in modal
 
   @LW-9383
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Mnemonic fill - paste from clipboard
     Given I saved test mnemonic for "AddNewWallet" to clipboard
     And I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I click on "Paste from clipboard" button
     Then I do not see incorrect passphrase error displayed
     And "Next" button is enabled during onboarding process
@@ -28,6 +30,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9384
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - <mnemonicLength>-word mnemonic - invalid word
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     And I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
     And I change one random field
@@ -42,6 +45,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9385
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - <mnemonicLength>-word mnemonic - invalid all words
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     And I enter <mnemonicLength> incorrect mnemonic words on "Mnemonic verification" page
     Then I see incorrect passphrase error displayed
@@ -111,6 +115,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9386 @LW-9375
   Scenario Outline: Extended-view - Multi-wallet - Restore - <mnemonicLength>-word mnemonic - happy path
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with <mnemonicLength> words
     When I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page

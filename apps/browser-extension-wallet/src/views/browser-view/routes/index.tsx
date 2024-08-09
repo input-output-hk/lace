@@ -28,6 +28,7 @@ import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
+import { useExperimentsContext } from '@providers/ExperimentsProvider';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -100,6 +101,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     initialHdDiscoveryCompleted
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
+  const { areExperimentsLoading } = useExperimentsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
 
@@ -163,7 +165,12 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && !deletingWallet && (cardanoWallet === null || stayOnAllDonePage)) {
+  if (
+    !areExperimentsLoading &&
+    !isLoadingWalletInfo &&
+    !deletingWallet &&
+    (cardanoWallet === null || stayOnAllDonePage)
+  ) {
     return (
       <Switch>
         <Route path={'/setup'} component={WalletSetup} />
@@ -172,7 +179,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted) {
+  if (!areExperimentsLoading && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted) {
     return (
       <>
         <Switch location={page || location}>

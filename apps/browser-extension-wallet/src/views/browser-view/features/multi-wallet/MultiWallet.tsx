@@ -10,9 +10,11 @@ import styles from './MultiWallet.module.scss';
 import { WalletOnboardingFlows } from './WalletOnboardingFlows';
 import { postHogMultiWalletActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Home } from './Home';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export const MultiWallet = (): JSX.Element => {
   const history = useHistory();
+  const posthogClient = usePostHogClientContext();
   const { page, setBackgroundPage } = useBackgroundPage();
 
   return (
@@ -26,6 +28,7 @@ export const MultiWallet = (): JSX.Element => {
                 onClick={withConfirmationDialog(() => {
                   setBackgroundPage();
                   history.push(page);
+                  window.location.reload();
                 })}
               />
             </div>
@@ -35,6 +38,7 @@ export const MultiWallet = (): JSX.Element => {
               renderHome={() => <Home />}
               setFormDirty={(dirty) => shouldShowDialog$.next(dirty)}
               urlPath={walletRoutePaths.newWallet}
+              flowsEnabled={!!posthogClient.featureFlags}
             />
           </Modal>
         )}

@@ -1,0 +1,26 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.selectedRestoreMethod {
+  border-color: var(--primary-accent);
+}
+
+.optionCard {
+  border-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+}
+
+.paperWalletRadioGroupItem {
+  margin-top: size_unit(2);
+}
+
+.noPadding > div {
+  padding: 0 !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.restoreIcon {
+  width: 100px;
+  height: auto;
+}

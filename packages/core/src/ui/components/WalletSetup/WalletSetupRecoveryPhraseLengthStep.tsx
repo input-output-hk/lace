@@ -10,6 +10,7 @@ export interface WalletSetupRecoveryPhraseLengthStepProps {
   onNext: (params: { recoveryPhraseLength: number }) => void;
   translations: TranslationsFor<'title' | 'description' | 'wordPassphrase'>;
   onChange?: (state: number) => void;
+  paperWalletEnabled: boolean;
 }
 
 // eslint-disable-next-line no-magic-numbers
@@ -20,7 +21,8 @@ export const WalletSetupRecoveryPhraseLengthStep = ({
   onBack,
   onNext,
   translations,
-  onChange
+  onChange,
+  paperWalletEnabled
 }: WalletSetupRecoveryPhraseLengthStepProps): React.ReactElement => {
   const [value, setValue] = React.useState(DEFAULT_RECOVERY_PHRASE_LENGTH);
 
@@ -35,7 +37,9 @@ export const WalletSetupRecoveryPhraseLengthStep = ({
       description={translations.description}
       onNext={() => onNext({ recoveryPhraseLength: value })}
       onBack={onBack}
-      currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+      currentTimelineStep={
+        paperWalletEnabled ? WalletTimelineSteps.RECOVERY_DETAILS : WalletTimelineSteps.RECOVERY_PHRASE
+      }
     >
       <RadioGroup onChange={onRadioChange} value={value} className={styles.radioGroup}>
         {RECOVERY_PHRASE_LENGTHS.map((length) => (

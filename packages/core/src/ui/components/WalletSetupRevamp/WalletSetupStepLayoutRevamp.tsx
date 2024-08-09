@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import styles from './WalletSetupStepLayoutRevamp.module.scss';
 import cn from 'classnames';
 import { Button, Timeline } from '@lace/common';
@@ -29,9 +29,9 @@ export interface WalletSetupStepLayoutRevampProps {
 
 const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean) => {
   const inMemoryWalletSteps = [
-    { key: WalletTimelineSteps.RECOVERY_PHRASE, name: i18n.t('core.walletSetupStep.recoveryPhrase') },
-    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') },
-    { key: WalletTimelineSteps.ALL_DONE, name: i18n.t('core.walletSetupStep.enterWallet') }
+    { key: WalletTimelineSteps.CHOOSE_RECOVERY_METHOD, name: i18n.t('core.walletSetup.recoveryMethod') },
+    { key: WalletTimelineSteps.RECOVERY_DETAILS, name: i18n.t('core.walletSetup.recoveryDetails') },
+    { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') }
   ];
 
   const hardwareWalletSteps = [
@@ -77,6 +77,7 @@ export const WalletSetupStepLayoutRevamp = ({
   };
 
   const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet);
+  const hasCTA = useMemo(() => !!onBack || !!customAction || !!onNext, [onBack, customAction, onNext]);
 
   return (
     <div className={styles.walletSetupStepLayout} data-testid="wallet-setup-step-layout">
@@ -111,33 +112,35 @@ export const WalletSetupStepLayoutRevamp = ({
           {children}
         </div>
         {belowContentText}
-        <div className={styles.footer} data-testid="wallet-setup-step-footer">
-          {onBack && (
-            <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
-              {backLabel || defaultLabel.back}
-            </Button>
-          )}
-          {customAction}
-          {onNext && (
-            <span ref={nextButtonContainerRef}>
-              <Tooltip
-                open={!isNextEnabled && !!toolTipText}
-                title={!isNextEnabled && toolTipText}
-                getPopupContainer={() => nextButtonContainerRef.current}
-                autoAdjustOverflow={false}
-              >
-                <Button
-                  disabled={!isNextEnabled}
-                  onClick={onNext}
-                  loading={isNextLoading}
-                  data-testid="wallet-setup-step-btn-next"
+        {hasCTA && (
+          <div className={styles.footer} data-testid="wallet-setup-step-footer">
+            {onBack && (
+              <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
+                {backLabel || defaultLabel.back}
+              </Button>
+            )}
+            {customAction}
+            {onNext && (
+              <span ref={nextButtonContainerRef}>
+                <Tooltip
+                  open={!isNextEnabled && !!toolTipText}
+                  title={!isNextEnabled && toolTipText}
+                  getPopupContainer={() => nextButtonContainerRef.current}
+                  autoAdjustOverflow={false}
                 >
-                  {nextLabel || defaultLabel.next}
-                </Button>
-              </Tooltip>
-            </span>
-          )}
-        </div>
+                  <Button
+                    disabled={!isNextEnabled}
+                    onClick={onNext}
+                    loading={isNextLoading}
+                    data-testid="wallet-setup-step-btn-next"
+                  >
+                    {nextLabel || defaultLabel.next}
+                  </Button>
+                </Tooltip>
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

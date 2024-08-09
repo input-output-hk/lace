@@ -1,0 +1,44 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.advancedBadge {
+  border-radius: size_unit(2);
+  height: size_unit(2) !important;
+  padding-left: size_unit(1) !important;
+  padding-right: size_unit(1) !important;
+  background: var(--primary-gradient);
+  color: white !important;
+  line-height: size_unit(2) !important;
+  font-size: 12px !important;
+}
+
+.pgpInfoLabel {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.selectedRestoreMethod {
+  border-color: var(--primary-accent);
+}
+
+.optionCard {
+  border-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+}
+
+.paperWalletRadioGroupItem {
+  margin-top: size_unit(2);
+}
+
+.noPadding > div {
+  padding: 0 !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.restoreIcon {
+  width: 100px;
+  height: auto;
+}
