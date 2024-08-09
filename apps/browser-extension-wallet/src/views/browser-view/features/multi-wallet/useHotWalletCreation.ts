@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { isHdWallet } from './isHdWallet';
 import { useWalletOnboarding } from './walletOnboardingContext';
-import { useSecrets } from '@lace/core';
+// import { useSecrets } from '@lace/core';
 
 type UseSoftwareWalletCreationParams = {
   initialMnemonic: string[];
@@ -23,7 +23,7 @@ type SendPostWalletAddAnalyticsParams = {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreationParams) => {
-  const { password, setPassword, setPasswordConfirm } = useSecrets();
+  // const { password, setPassword, setPasswordConfirm } = useSecrets();
   const analytics = useAnalyticsContext();
   const walletManager = useWalletManager();
   const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
@@ -43,10 +43,12 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   }, [createWalletData.name, walletManager.walletRepository]);
 
   const createWallet = async () => {
-    const wallet = await walletManager.createWallet({ ...createWalletData, password });
-    setPassword('');
-    setPasswordConfirm('');
+    const passwordEl: HTMLInputElement = document.querySelector('#lol-if-works');
+    // setPassword('');
+    // setPasswordConfirm('');
 
+    const wallet = await walletManager.createWallet({ ...createWalletData, password: passwordEl.value });
+    passwordEl.value = '';
     return wallet;
   };
 

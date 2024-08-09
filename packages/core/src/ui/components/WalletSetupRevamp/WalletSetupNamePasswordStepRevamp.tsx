@@ -1,22 +1,22 @@
 import React, { useMemo, useState } from 'react';
-import { PasswordVerification } from '@lace/common';
-import { useSecrets } from '../../hooks';
+// import { PasswordVerification } from '@lace/common';
+// import { useSecrets } from '../../hooks';
 import { WalletTimelineSteps } from '../WalletSetup/WalletSetupStepLayout';
-import { BarStates, WalletSetupNamePasswordSubmitParams } from '../WalletSetup/WalletSetupNamePasswordStep/types';
+import { /* BarStates, */ WalletSetupNamePasswordSubmitParams } from '../WalletSetup/WalletSetupNamePasswordStep/types';
 import {
-  getComplexityBarStateList,
-  MINIMUM_PASSWORD_LEVEL_REQUIRED,
-  passwordStrengthFeedbackMap,
+  // getComplexityBarStateList,
+  // MINIMUM_PASSWORD_LEVEL_REQUIRED,
+  // passwordStrengthFeedbackMap,
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
 } from '../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { WalletNameInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
-import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
+// import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { TranslationsFor } from '@ui/utils/types';
-import { passwordComplexity } from '@ui/utils/password-complexity';
+// import { passwordComplexity } from '@ui/utils/password-complexity';
 import styles from '../WalletSetup/WalletSetupNamePasswordStep/styles.module.scss';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
@@ -45,35 +45,37 @@ export const WalletSetupNamePasswordStepRevamp = ({
   onChange,
   translations
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
-  const { t } = useTranslation();
-  const { password, setPassword, passwordConfirm, setPasswordConfirm } = useSecrets();
+  // const { t } = useTranslation();
+  // const secrets = useSecrets();
   const [nextButtonLoading, setNextButtonLoading] = useState(false);
-  const [passHasBeenValidated, setPassHasBeenValidated] = useState(false);
+  // const [passHasBeenValidated] = useState(true);
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
 
-  const { score } = useMemo(() => passwordComplexity(password), [password]);
+  // const { score } = useMemo(() => passwordComplexity(secrets.password), [secrets.password]);
 
-  const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
+  // const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
 
-  const passwordConfirmationErrorMessage =
-    passHasBeenValidated && password !== passwordConfirm ? translations.noMatchPassword : '';
+  // const passwordConfirmationErrorMessage =
+  //   passHasBeenValidated && secrets.password !== secrets.passwordConfirm ? translations.noMatchPassword : '';
 
   const walletNameErrorMessage = useMemo(() => {
     const validationError = validateNameLength(walletName) ? translations.nameMaxLength : '';
     return walletName ? validationError : translations.nameRequiredMessage;
   }, [walletName, translations.nameMaxLength, translations.nameRequiredMessage]);
 
-  const isNextButtonEnabled = () => {
-    const hasMinimumLevelRequired = score >= MINIMUM_PASSWORD_LEVEL_REQUIRED;
-    const isNotEmptyPassword = password.length > 0;
-    const isValidPassword = Boolean(
-      passHasBeenValidated && !passwordConfirmationErrorMessage && hasMinimumLevelRequired && isNotEmptyPassword
-    );
-    const isValidName = Boolean(!walletNameErrorMessage);
-
-    return isValidName && isValidPassword;
-  };
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  const isNextButtonEnabled = () => true;
+  // const isNextButtonEnabled = () => {
+  //   const hasMinimumLevelRequired = score >= MINIMUM_PASSWORD_LEVEL_REQUIRED;
+  //   const isNotEmptyPassword = secrets.password.length > 0;
+  //   const isValidPassword = Boolean(
+  //     passHasBeenValidated && !passwordConfirmationErrorMessage && hasMinimumLevelRequired && isNotEmptyPassword
+  //   );
+  //   const isValidName = Boolean(!walletNameErrorMessage);
+  //
+  //   return isValidName && isValidPassword;
+  // };
 
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
     setWalletName(value);
@@ -81,22 +83,23 @@ export const WalletSetupNamePasswordStepRevamp = ({
     onChange?.({ name: value });
   };
 
-  const handlePasswordChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(value);
-  };
+  // const handlePasswordChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+  //   secrets.setPassword(value);
+  //   secrets.setPasswordConfirm(value);
+  // };
 
-  const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    setPassHasBeenValidated(true);
-    setPasswordConfirm(target.value);
-  };
+  // const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+  //   setPassHasBeenValidated(true);
+  //   setPasswordConfirm(target.value);
+  // };
 
   const handleNextButtonClick = async () => {
-    try {
-      setNextButtonLoading(true);
-      await onNext({ walletName });
-    } finally {
-      setNextButtonLoading(false);
-    }
+    // try {
+    setNextButtonLoading(true);
+    await onNext({ walletName });
+    // } finally {
+    //   setNextButtonLoading(false);
+    // }
   };
 
   return (
@@ -119,24 +122,25 @@ export const WalletSetupNamePasswordStepRevamp = ({
           shouldShowErrorMessage={shouldShowNameErrorMessage}
           errorMessage={walletNameErrorMessage}
         />
-        <PasswordVerification
-          className={styles.input}
-          value={password}
-          label={translations.passwordInputLabel}
-          onChange={handlePasswordChange}
-          level={score}
-          feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]}
-          complexityBarList={complexityBarList}
-          data-testid="wallet-password-verification-input"
-        />
-        <WalletPasswordConfirmationInput
-          isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}
-          value={passwordConfirm}
-          onChange={handlePasswordConfirmationChange}
-          label={translations.confirmPasswordInputLabel}
-          errorMessage={passwordConfirmationErrorMessage}
-          shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
-        />
+        <input id="lol-if-works" style={{ color: 'red' }} type="password" />
+        {/* <PasswordVerification */}
+        {/*   className={styles.input} */}
+        {/*   value={password} */}
+        {/*   label={translations.passwordInputLabel} */}
+        {/*   onChange={handlePasswordChange} */}
+        {/*   level={score} */}
+        {/*   feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]} */}
+        {/*   complexityBarList={complexityBarList} */}
+        {/*   data-testid="wallet-password-verification-input" */}
+        {/* /> */}
+        {/* <WalletPasswordConfirmationInput */}
+        {/*   isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED} */}
+        {/*   value={passwordConfirm} */}
+        {/*   onChange={handlePasswordConfirmationChange} */}
+        {/*   label={translations.confirmPasswordInputLabel} */}
+        {/*   errorMessage={passwordConfirmationErrorMessage} */}
+        {/*   shouldShowErrorMessage={!!passwordConfirmationErrorMessage} */}
+        {/* /> */}
       </div>
     </WalletSetupStepLayoutRevamp>
   );
