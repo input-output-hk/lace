@@ -117,7 +117,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         handleProvider: baseUrl
           ? handleHttpProvider({
               adapter: axiosFetchAdapter,
-              baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+              baseUrl,
               logger
             })
           : noopHandleResolver,
