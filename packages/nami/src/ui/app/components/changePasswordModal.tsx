@@ -15,18 +15,18 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import React from 'react';
-import { STORAGE } from '../../../config/config';
-import {
-  decryptWithPassword,
-  encryptWithPassword,
-  getStorage,
-  setStorage,
-} from '../../../api/extension';
-import { Loader } from '../../../api/loader';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 
-export const ChangePasswordModal = React.forwardRef((props, ref) => {
+export const ChangePasswordModal = React.forwardRef<
+  {},
+  {
+    changePassword: (
+      currentPassword: string,
+      newPassword: string,
+    ) => Promise<void>;
+  }
+>(({ changePassword }, ref) => {
   const capture = useCaptureEvent();
   const cancelRef = React.useRef();
   const inputRef = React.useRef();
@@ -48,6 +48,7 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
       currentPassword: '',
       newPassword: '',
       repeatPassword: '',
+      matchingPassword: false,
       passwordLen: null,
       show: false,
     });
@@ -71,26 +72,7 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
     setIsLoading(true);
 
     try {
-      await Loader.load();
-
-      const encryptedRootKey = await getStorage(STORAGE.encryptedKey);
-      const decryptedRootKey = await decryptWithPassword(
-        state.currentPassword,
-        encryptedRootKey
-      );
-
-      const rootKey = Loader.Cardano.Bip32PrivateKey.from_bytes(
-        Buffer.from(decryptedRootKey, 'hex')
-      );
-      const newlyEncryptedRootKey = await encryptWithPassword(
-        state.newPassword,
-        rootKey.as_bytes()
-      );
-
-      rootKey.free();
-
-      await setStorage({ [STORAGE.encryptedKey]: newlyEncryptedRootKey });
-
+      await changePassword(state.currentPassword, state.newPassword);
       toast({
         title: 'Password updated',
         status: 'success',
@@ -136,8 +118,8 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
                 variant="filled"
                 pr="4.5rem"
                 type={state.show ? 'text' : 'password'}
-                onChange={(e) =>
-                  setState((s) => ({ ...s, currentPassword: e.target.value }))
+                onChange={e =>
+                  setState(s => ({ ...s, currentPassword: e.target.value }))
                 }
                 placeholder="Enter current password"
               />
@@ -145,7 +127,7 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
                 <Button
                   h="1.75rem"
                   size="sm"
-                  onClick={() => setState((s) => ({ ...s, show: !s.show }))}
+                  onClick={() => setState(s => ({ ...s, show: !s.show }))}
                 >
                   {state.show ? 'Hide' : 'Show'}
                 </Button>
@@ -163,11 +145,11 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
                 pr="4.5rem"
                 isInvalid={state.passwordLen === false}
                 type={state.show ? 'text' : 'password'}
-                onChange={(e) =>
-                  setState((s) => ({ ...s, newPassword: e.target.value }))
+                onChange={e =>
+                  setState(s => ({ ...s, newPassword: e.target.value }))
                 }
-                onBlur={(e) =>
-                  setState((s) => ({
+                onBlur={e =>
+                  setState(s => ({
                     ...s,
                     passwordLen: e.target.value
                       ? e.target.value.length >= 8
@@ -180,7 +162,7 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
                 <Button
                   h="1.75rem"
                   size="sm"
-                  onClick={() => setState((s) => ({ ...s, show: !s.show }))}
+                  onClick={() => setState(s => ({ ...s, show: !s.show }))}
                 >
                   {state.show ? 'Hide' : 'Show'}
                 </Button>
@@ -207,8 +189,8 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
                 }
                 pr="4.5rem"
                 type={state.show ? 'text' : 'password'}
-                onChange={(e) =>
-                  setState((s) => ({ ...s, repeatPassword: e.target.value }))
+                onChange={e =>
+                  setState(s => ({ ...s, repeatPassword: e.target.value }))
                 }
                 placeholder="Repeat new password"
               />
@@ -216,7 +198,7 @@ export const ChangePasswordModal = React.forwardRef((props, ref) => {
                 <Button
                   h="1.75rem"
                   size="sm"
-                  onClick={() => setState((s) => ({ ...s, show: !s.show }))}
+                  onClick={() => setState(s => ({ ...s, show: !s.show }))}
                 >
                   {state.show ? 'Hide' : 'Show'}
                 </Button>

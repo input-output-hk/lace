@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null */
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ChevronUpIcon } from '@chakra-ui/icons';
 import { Box, IconButton } from '@chakra-ui/react';
@@ -20,7 +20,7 @@ export const Container = ({
 }: Readonly<{ children: React.ReactNode }>) => {
   const [scroll, setScroll] = React.useState({ el: null, y: 0 });
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.document.body.addEventListener('keydown', e => {
       e.key === 'Escape' && e.preventDefault();
     });
@@ -33,6 +33,7 @@ export const Container = ({
       window.resizeTo(width, height);
     }
   }, []);
+
   return (
     <Box
       width={isMain ? `${POPUP_WINDOW.width}px` : '100%'}

@@ -32,13 +32,14 @@ const createJestConfig = (jestConfig) => {
       ...jestConfig.transform,
       ...esmExceptions.transform,
       '^.+\\.(ts|tsx)$': [
-        'ts-jest', {
+        'ts-jest',
+        {
           tsconfig: `${rootDir}/src/tsconfig.json`
         }
-     ]
+      ]
     },
     transformIgnorePatterns: [...transformIgnorePatterns, ...esmExceptions.transformIgnorePatterns]
   };
 };
 
-module.exports = { createJestConfig };
+module.exports = { createJestConfig, esmExceptions };

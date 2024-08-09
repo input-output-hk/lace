@@ -32,6 +32,9 @@ export interface WalletMetadata {
 
 export interface AccountMetadata {
   name: string;
+  namiMode?: {
+    avatar: string;
+  };
 }
 
 export interface CardanoWallet {

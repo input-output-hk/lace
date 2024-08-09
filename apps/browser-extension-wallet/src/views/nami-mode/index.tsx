@@ -1,16 +1,19 @@
 import React, { useMemo } from 'react';
 import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
-import '../../lib/scripts/keep-alive-ui';
 import { useWalletStore } from '@src/stores';
 import { cardanoTransformer } from '@src/utils/assets-transformers';
 import { useObservable } from '@lace/common';
-import { useCurrencyStore } from '@providers';
-import { useAppInit, useFetchCoinPrice } from '@hooks';
+import { useCurrencyStore, useTheme } from '@providers';
+import { useAppInit, useFetchCoinPrice, useWalletManager } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
-import { withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { walletManager, walletRepository, withSignTxConfirmation } from '@lib/wallet-api-ui';
+import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
 
 export const NamiPopup = (): React.ReactElement => {
+  const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
+  const { priceResult } = useFetchCoinPrice();
+  const { createWallet, getMnemonic, deleteWallet } = useWalletManager();
   const {
     walletUI: { cardanoCoin },
     inMemoryWallet,
@@ -20,16 +23,13 @@ export const NamiPopup = (): React.ReactElement => {
     initialHdDiscoveryCompleted,
     currentChain
   } = useWalletStore();
+  const { theme, setTheme } = useTheme();
+  const utxoTotal = useObservable(inMemoryWallet?.balance.utxo.total$);
+  const rewards = useObservable(inMemoryWallet?.balance.rewardAccounts.rewards$);
 
   useAppInit();
 
   const walletAddress = walletInfo?.addresses[0].address.toString();
-  const fullWalletName = cardanoWallet?.source.wallet.metadata.name;
-
-  const { fiatCurrency } = useCurrencyStore();
-  const { priceResult } = useFetchCoinPrice();
-  const utxoTotal = useObservable(inMemoryWallet?.balance.utxo.total$);
-  const rewards = useObservable(inMemoryWallet?.balance.rewardAccounts.rewards$);
 
   const transformedCardano = useMemo(
     () =>
@@ -50,12 +50,20 @@ export const NamiPopup = (): React.ReactElement => {
       {!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain ? (
         <OutsideHandlesProvider
           {...{
+            createWallet,
+            getMnemonic,
+            deleteWallet,
+            fiatCurrency: fiatCurrency.code,
+            setFiatCurrency,
+            theme: theme.name,
+            setTheme,
             transformedCardano,
             walletAddress,
-            fullWalletName,
             inMemoryWallet,
             currentChain,
-            withSignTxConfirmation
+            withSignTxConfirmation,
+            walletManager,
+            walletRepository
           }}
         >
           <Nami />

@@ -73,12 +73,18 @@ import { useObservable } from '@lace/common';
 import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
 import { toAsset, withHandleInfo } from '../../../adapters/assets';
 import type { Asset } from '../../../types/assets';
-import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 
-type Props = Pick<
-  OutsideHandlesContextValue,
-  'currentChain' | 'inMemoryWallet' | 'walletAddress' | 'withSignTxConfirmation'
->;
+interface Props {
+  accountName: string;
+  accountAvatar?: string;
+  walletAddress: string;
+  inMemoryWallet: Wallet.ObservableWallet;
+  currentChain: Wallet.Cardano.ChainId;
+  withSignTxConfirmation: <T>(
+    action: () => Promise<T>,
+    password?: string,
+  ) => Promise<T>;
+}
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -133,6 +139,8 @@ export const sendStore = {
 };
 
 const Send = ({
+  accountName,
+  accountAvatar,
   inMemoryWallet,
   walletAddress,
   currentChain,
@@ -433,7 +441,7 @@ const Send = ({
           </Box>
         ) : (
           <>
-            <Account />
+            <Account name={accountName} avatar={accountAvatar} />
             <Box position="absolute" top="24" left="6">
               <IconButton
                 rounded="md"

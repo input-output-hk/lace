@@ -16,7 +16,6 @@ import {
 } from 'easy-peasy';
 
 // import {
-//   getCurrency,
 //   getNetwork,
 //   setCurrency,
 //   setNetwork,
@@ -35,7 +34,6 @@ interface Network {
 }
 
 interface Settings {
-  currency: string;
   network: Network;
   adaSymbol: string;
 }
@@ -103,13 +101,10 @@ const initSettings = async (
   // eslint-disable-next-line functional/prefer-immutable-types
   setSettings: Actions<GlobalModel>['settings']['setSettings'],
 ): Promise<void> => {
-  // const currency = await getCurrency();
   // const network = await getNetwork();
-  const currency = 'usd';
   const network = { id: NETWORK_ID.mainnet, node: NODE.mainnet };
   await Promise.resolve(void 0);
   setSettings({
-    currency: currency,
     network: { id: NETWORK_ID.mainnet, node: NODE.mainnet },
     adaSymbol: network.id === NETWORK_ID.mainnet ? '₳' : 't₳',
   });

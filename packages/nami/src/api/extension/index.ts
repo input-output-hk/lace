@@ -143,8 +143,6 @@ export const removeWhitelisted = async origin => {
   // return await setStorage({ [STORAGE.whitelisted]: whitelisted });
 };
 
-// export const getCurrency = () => getStorage(STORAGE.currency);
-
 // export const setCurrency = (currency) =>
 //   setStorage({ [STORAGE.currency]: currency });
 
@@ -572,13 +570,6 @@ export const getAccounts = async () => {
   //   accounts[index] = await accountToNetworkSpecific(accounts[index], network);
   // }
   // return accounts;
-};
-
-export const setAccountName = async name => {
-  // const currentAccountIndex = await getCurrentAccountIndex();
-  // const accounts = await getStorage(STORAGE.accounts);
-  // accounts[currentAccountIndex].name = name;
-  // return await setStorage({ [STORAGE.accounts]: accounts });
 };
 
 export const setAccountAvatar = async avatar => {
@@ -1297,12 +1288,6 @@ export const requestAccountKey = async (password, accountIndex) => {
     paymentKey: accountKey.derive(0).derive(0).to_raw_key(),
     stakeKey: accountKey.derive(2).derive(0).to_raw_key(),
   };
-};
-
-export const resetStorage = async password => {
-  // await requestAccountKey(password, 0);
-  // await new Promise((res, rej) => chrome.storage.local.clear(() => res()));
-  return await Promise.resolve(true);
 };
 
 export const createAccount = async (name, password, accountIndex = null) => {

@@ -2,7 +2,15 @@ import { Box, Image } from '@chakra-ui/react';
 import React from 'react';
 import { avatarToImage } from '../../../api/extension';
 
-const AvatarLoader = ({ avatar, width, smallRobot }) => {
+const AvatarLoader = ({
+  avatar,
+  width,
+  smallRobot,
+}: {
+  avatar?: string;
+  width: string;
+  smallRobot?: boolean;
+}) => {
   const [loaded, setLoaded] = React.useState('');
 
   const fetchAvatar = async () => {

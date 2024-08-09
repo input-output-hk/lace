@@ -19,6 +19,7 @@ import {
   mockedHistory,
   useHistory,
 } from '../../../../.storybook/mocks/react-router-dom.mock';
+import { CurrencyCode } from '../../../adapters/currency';
 
 const SettingsStory = ({
   colorMode,
@@ -34,7 +35,17 @@ const SettingsStory = ({
 
   return (
     <Box width="400" height="600">
-      <Settings />
+      <Settings
+        accountName={currentAccount.name}
+        accountAvatar={currentAccount.avatar}
+        changePassword={async () => {}}
+        currency={CurrencyCode.USD}
+        deleteWallet={async () => {}}
+        setCurrency={() => {}}
+        setTheme={() => {}}
+        theme="light"
+        updateAccountMetadata={async () => undefined}
+      />
     </Box>
   );
 };
@@ -69,11 +80,11 @@ const meta: Meta<typeof SettingsStory> = {
     useStoreActions.mockImplementation(() => {
       return () => void 0;
     });
-    Route.mockImplementation(({ path, component: Component }) => {
+    Route.mockImplementation(({ path, children }) => {
       return (mockedHistory[0] === '' && path === '*') ||
-        mockedHistory[0] === path ? (
-        <Component />
-      ) : null;
+        mockedHistory[0] === path
+        ? children
+        : null;
     });
 
     return () => {
@@ -105,7 +116,7 @@ export const SettingsDark: Story = {
 export const GeneralSettingsLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'general',
+    path: '/settings/general',
   },
 };
 
@@ -119,7 +130,7 @@ export const GeneralSettingsDark: Story = {
 export const GeneralChangePasswordLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'general',
+    path: '/settings/general',
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -139,7 +150,7 @@ export const GeneralChangePasswordDark: Story = {
 export const GeneralResetWalletLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'general',
+    path: '/settings/general',
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -160,7 +171,7 @@ export const GeneralResetWalletDark: Story = {
 export const WhitelistedLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'whitelisted',
+    path: '/settings/whitelisted',
   },
   beforeEach: () => {
     getWhitelisted.mockImplementation(async () => {
@@ -183,7 +194,7 @@ export const WhitelistedDark: Story = {
 export const WhitelistedEmptyLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'whitelisted',
+    path: '/settings/whitelisted',
   },
 };
 export const WhitelistedEmptyDark: Story = {
@@ -196,7 +207,7 @@ export const WhitelistedEmptyDark: Story = {
 export const NetworkLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'network',
+    path: '/settings/network',
   },
 };
 
@@ -210,7 +221,7 @@ export const NetworkDark: Story = {
 export const LegalLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'legal',
+    path: '/settings/legal',
   },
 };
 
@@ -224,7 +235,7 @@ export const LegalDark: Story = {
 export const LegalTermsOfUseLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'legal',
+    path: '/settings/legal',
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -245,7 +256,7 @@ export const LegalTermsOfUseDark: Story = {
 export const LegalPrivacyPolicyLight: Story = {
   parameters: {
     colorMode: 'light',
-    path: 'legal',
+    path: '/settings/legal',
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);

@@ -1,27 +1,12 @@
 import React from 'react';
-import { getCurrentAccount } from '../../../api/extension';
 
 import Logo from '../../../assets/img/logoWhite.svg';
 import { Box, Text, Image, useColorModeValue } from '@chakra-ui/react';
 import AvatarLoader from './avatarLoader';
 
-const Account = React.forwardRef((props, ref) => {
+const Account = ({ name, avatar }: { name: string; avatar?: string }) => {
   const avatarBg = useColorModeValue('white', 'gray.700');
   const panelBg = useColorModeValue('#349EA3', 'gray.800');
-  const [account, setAccount] = React.useState(null);
-
-  const initAccount = () =>
-    getCurrentAccount().then((account) => setAccount(account));
-
-  React.useImperativeHandle(ref, () => ({
-    updateAccount() {
-      initAccount();
-    },
-  }));
-
-  React.useEffect(() => {
-    initAccount();
-  }, []);
 
   return (
     <Box
@@ -58,11 +43,7 @@ const Account = React.forwardRef((props, ref) => {
         alignItems="center"
         justifyContent="center"
       >
-        <AvatarLoader
-          avatar={account && account.avatar}
-          width="10"
-          smallRobot
-        />
+        <AvatarLoader avatar={avatar} width="10" smallRobot />
       </Box>
       <Box
         zIndex="1"
@@ -74,11 +55,11 @@ const Account = React.forwardRef((props, ref) => {
         justifyContent="center"
       >
         <Text color="white" fontSize="lg" isTruncated={true} maxWidth="210px">
-          {account && account.name}
+          {name}
         </Text>
       </Box>
     </Box>
   );
-});
+};
 
 export default Account;

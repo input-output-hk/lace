@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -24,23 +25,14 @@ import {
   RepeatIcon,
   CheckIcon,
 } from '@chakra-ui/icons';
-import React from 'react';
 import {
-  getCurrentAccount,
-  getCurrentAccountIndex,
   getFavoriteIcon,
-  getNetwork,
-  getStorage,
   getWhitelisted,
   removeWhitelisted,
-  resetStorage,
-  setAccountAvatar,
-  setAccountName,
-  setStorage,
 } from '../../../api/extension';
 import Account from '../components/account';
-import { Route, HashRouter, useHistory } from 'react-router-dom';
-import { NETWORK_ID, NODE, STORAGE } from '../../../config/config';
+import { Route, Switch, useHistory } from 'react-router-dom';
+import { NETWORK_ID, NODE } from '../../../config/config';
 import ConfirmModal from '../components/confirmModal';
 import { useStoreState, useStoreActions } from '../../store';
 import { MdModeEdit } from 'react-icons/md';
@@ -49,10 +41,39 @@ import { ChangePasswordModal } from '../components/changePasswordModal';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
+import { Wallet } from '@lace/cardano';
+import { UpdateAccountMetadataProps } from '@cardano-sdk/web-extension';
+import { CurrencyCode } from '../../../adapters/currency';
 
-const Settings = () => {
+interface Props {
+  theme: 'dark' | 'light';
+  setTheme: (theme: 'dark' | 'light') => void;
+  currency: CurrencyCode;
+  setCurrency: (currency: CurrencyCode) => void;
+  accountName: string;
+  accountAvatar?: string;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<void>;
+  deleteWallet: (password: string) => Promise<void>;
+  updateAccountMetadata: (
+    data: Readonly<Partial<Wallet.AccountMetadata>>,
+  ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata> | undefined>;
+}
+
+const Settings = ({
+  currency,
+  setCurrency,
+  theme,
+  setTheme,
+  accountName,
+  accountAvatar,
+  changePassword,
+  deleteWallet,
+  updateAccountMetadata,
+}: Props) => {
   const history = useHistory();
-  const accountRef = React.useRef();
   const containerBg = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   return (
@@ -66,26 +87,43 @@ const Settings = () => {
         background={containerBg}
         color={textColor}
       >
-        <Account ref={accountRef} />
+        <Account name={accountName} avatar={accountAvatar} />
         <Box position="absolute" top="24" left="6">
           <IconButton
+            aria-label="back button"
             rounded="md"
             onClick={() => history.goBack()}
             variant="ghost"
             icon={<ChevronLeftIcon boxSize="7" />}
           />
         </Box>
-
-        <HashRouter>
-          <Route path="*" component={() => <Overview />} />
-          <Route
-            path="general"
-            component={() => <GeneralSettings accountRef={accountRef} />}
-          />
-          <Route path="whitelisted" component={() => <Whitelisted />} />
-          <Route path="network" component={() => <Network />} />
-          <Route path="legal" component={() => <LegalSettings />} />
-        </HashRouter>
+        <Switch>
+          <Route path="/settings/general">
+            <GeneralSettings
+              changePassword={changePassword}
+              deleteWallet={deleteWallet}
+              currency={currency}
+              setCurrency={setCurrency}
+              theme={theme}
+              setTheme={setTheme}
+              accountAvatar={accountAvatar}
+              accountName={accountName}
+              updateAccountMetadata={updateAccountMetadata}
+            />
+          </Route>
+          <Route path="/settings/whitelisted">
+            <Whitelisted />
+          </Route>
+          <Route path="/settings/network">
+            <Network />
+          </Route>
+          <Route path="/settings/legal">
+            <LegalSettings />
+          </Route>
+          <Route path="*">
+            <Overview />
+          </Route>
+        </Switch>
       </Box>
     </>
   );
@@ -109,7 +147,7 @@ const Overview = () => {
         rightIcon={<ChevronRightIcon />}
         variant="ghost"
         onClick={() => {
-          navigate('general');
+          navigate('/settings/general');
         }}
       >
         General settings
@@ -155,58 +193,35 @@ const Overview = () => {
   );
 };
 
-const GeneralSettings = ({ accountRef }) => {
+const GeneralSettings = ({
+  currency,
+  setCurrency,
+  theme,
+  setTheme,
+  accountName,
+  accountAvatar,
+  changePassword,
+  deleteWallet,
+  updateAccountMetadata,
+}: Props) => {
   const capture = useCaptureEvent();
-  const history = useHistory();
-  const navigate = history.push;
-  const settings = useStoreState(state => state.settings.settings);
-  const setSettings = useStoreActions(actions => actions.settings.setSettings);
-  const [refreshed, setRefreshed] = React.useState(false);
-  const [account, setAccount] = React.useState({ name: '', avatar: '' });
-  const [originalName, setOriginalName] = React.useState('');
-  const { colorMode, toggleColorMode } = useColorMode();
-  const ref = React.useRef();
-  const changePasswordRef = React.useRef();
+  const [name, setName] = useState(accountName);
+  const [originalName, setOriginalName] = useState(accountName);
+  const { setColorMode } = useColorMode();
+  const ref = useRef();
+  const changePasswordRef = useRef();
 
   const nameHandler = async () => {
-    await setAccountName(account.name);
-    setOriginalName(account.name);
-    accountRef.current.updateAccount();
+    await updateAccountMetadata({ name });
+    setOriginalName(name);
   };
 
   const avatarHandler = async () => {
-    const avatar = Math.random().toString();
-    account.avatar = avatar;
-    await setAccountAvatar(account.avatar);
-    setAccount({ ...account });
-    accountRef.current.updateAccount();
+    await updateAccountMetadata({
+      namiMode: { avatar: Math.random().toString() },
+    });
     capture(Events.SettingsChangeAvatarClick);
   };
-
-  const refreshHandler = async () => {
-    setRefreshed(true);
-
-    const currentIndex = await getCurrentAccountIndex();
-    const accounts = await getStorage(STORAGE.accounts);
-    const currentAccount = accounts[currentIndex];
-    const network = await getNetwork();
-    currentAccount[network.id].forceUpdate = true;
-
-    await setStorage({
-      [STORAGE.accounts]: {
-        ...accounts,
-      },
-    });
-
-    navigate('/wallet');
-  };
-
-  React.useEffect(() => {
-    getCurrentAccount().then(account => {
-      setOriginalName(account.name);
-      setAccount(account);
-    });
-  }, []);
 
   return (
     <>
@@ -218,27 +233,22 @@ const GeneralSettings = ({ accountRef }) => {
       <InputGroup size="md" width="210px">
         <Input
           onKeyDown={e => {
-            if (
-              e.key == 'Enter' &&
-              account.name.length > 0 &&
-              account.name != originalName
-            )
+            if (e.key == 'Enter' && name.length > 0 && name != originalName)
               nameHandler();
           }}
           placeholder="Change name"
-          value={account.name}
+          value={name}
           onChange={e => {
-            account.name = e.target.value;
-            setAccount({ ...account });
+            setName(e.target.value);
           }}
           pr="4.5rem"
         />
         <InputRightElement width="4.5rem">
-          {account.name == originalName ? (
+          {name == originalName ? (
             <Icon mr="-4" as={MdModeEdit} />
           ) : (
             <Button
-              isDisabled={account.name.length <= 0}
+              isDisabled={name.length <= 0}
               h="1.75rem"
               size="sm"
               onClick={nameHandler}
@@ -251,10 +261,11 @@ const GeneralSettings = ({ accountRef }) => {
       <Box height="6" />
       <Box display="flex" alignItems="center">
         <Box width="65px" height="65px">
-          <AvatarLoader forceUpdate avatar={account.avatar} width="full" />
+          <AvatarLoader avatar={accountAvatar} width="full" />
         </Box>
         <Box w={4} />
         <IconButton
+          aria-label="update avatar"
           onClick={() => {
             avatarHandler();
           }}
@@ -268,16 +279,18 @@ const GeneralSettings = ({ accountRef }) => {
         size="sm"
         rounded="md"
         onClick={() => {
-          if (colorMode === 'dark') {
+          const newTheme = theme == 'dark' ? 'light' : 'dark';
+          if (theme === 'dark') {
             capture(Events.SettingsThemeLightModeClick);
           } else {
             capture(Events.SettingsThemeDarkModeClick);
           }
-          toggleColorMode();
+          setTheme(newTheme);
+          setColorMode(newTheme);
         }}
         rightIcon={<SunIcon ml="2" />}
       >
-        {colorMode == 'dark' ? 'Light' : 'Dark'}
+        {theme == 'dark' ? 'Light' : 'Dark'}
       </Button>
 
       <Box height="6" />
@@ -285,22 +298,19 @@ const GeneralSettings = ({ accountRef }) => {
         <Text>USD</Text>
         <Box width="2" />
         <ButtonSwitch
-          defaultChecked={settings.currency !== 'usd'}
+          defaultChecked={currency !== CurrencyCode.USD}
           onChange={e => {
             if (e.target.checked) {
-              setSettings({ ...settings, currency: 'eur' });
+              setCurrency(CurrencyCode.EUR);
             } else {
-              setSettings({ ...settings, currency: 'usd' });
+              setCurrency(CurrencyCode.USD);
             }
           }}
         />
         <Box width="2" />
         <Text>EUR</Text>
       </Box>
-      <Box height="10" />
-      <Button disabled={refreshed} size="sm" onClick={refreshHandler}>
-        Refresh Balance
-      </Button>
+      <Box height="15" />
       <Box height="5" />
       <Button
         colorScheme="orange"
@@ -339,25 +349,28 @@ const GeneralSettings = ({ accountRef }) => {
         }}
         sign={password => {
           capture(Events.SettingsHoldUpRemoveWalletClick);
-          return resetStorage(password);
+          return deleteWallet(password);
         }}
         onConfirm={async (status, signedTx) => {
           if (status === true) window.close();
         }}
       />
-      <ChangePasswordModal ref={changePasswordRef} />
+      <ChangePasswordModal
+        ref={changePasswordRef}
+        changePassword={changePassword}
+      />
     </>
   );
 };
 
 const Whitelisted = () => {
   const capture = useCaptureEvent();
-  const [whitelisted, setWhitelisted] = React.useState(null);
+  const [whitelisted, setWhitelisted] = useState(null);
   const getData = () =>
     getWhitelisted().then(whitelisted => {
       setWhitelisted(whitelisted);
     });
-  React.useEffect(() => {
+  useEffect(() => {
     getData();
   }, []);
   return (
@@ -447,16 +460,16 @@ const Network = () => {
     setTimeout(() => setApplied(false), 600);
   };
 
-  const [value, setValue] = React.useState(
+  const [value, setValue] = useState(
     settings.network[settings.network.id + 'Submit'] || '',
   );
-  const [isEnabled, setIsEnabled] = React.useState(
+  const [isEnabled, setIsEnabled] = useState(
     settings.network[settings.network.id + 'Submit'],
   );
 
-  const [applied, setApplied] = React.useState(false);
+  const [applied, setApplied] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setValue(settings.network[settings.network.id + 'Submit'] || '');
     setIsEnabled(Boolean(settings.network[settings.network.id + 'Submit']));
   }, [settings]);

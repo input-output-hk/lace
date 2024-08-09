@@ -218,6 +218,8 @@ const SendStory = ({
   return (
     <Box width="400" height="600">
       <Send
+        accountName={currentAccount.name}
+        accountAvatar={currentAccount.avatar}
         currentChain={{ networkId: 0, networkMagic: 0 }}
         inMemoryWallet={inMemoryWallet as unknown as Wallet.ObservableWallet}
       />
