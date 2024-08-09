@@ -37,6 +37,13 @@ type ProcessingStateType = {
   isPasswordValid?: boolean;
 };
 
+const INITIAL_PDF_STATE: PaperWalletPDF = {
+  blob: null,
+  loading: true,
+  url: null,
+  error: null
+};
+
 export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }: Props): React.ReactElement => {
   const [stage, setStage] = useState<PaperWalletExportStages>('secure');
   const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>(DEFAULT_PGP_STATE);
@@ -44,12 +51,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     isProcessing: false,
     isPasswordValid: true
   });
-  const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>({
-    blob: null,
-    loading: true,
-    url: null,
-    error: null
-  });
+  const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>(INITIAL_PDF_STATE);
   const [password, setPassword] = useState<string>('');
   const [warningModalVisible, setWarningModalVisible] = useState(false);
 
@@ -74,14 +76,17 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     setPgpInfo(DEFAULT_PGP_STATE);
     removePassword();
     setPassphrase([]);
+    setWarningModalVisible(false);
     onClose();
-  }, [setStage, setPgpInfo, removePassword, setPassphrase, onClose]);
+  }, [setStage, setPgpInfo, removePassword, setPassphrase, onClose, setWarningModalVisible]);
 
   const warnBeforeClose = useCallback(() => {
     if (pdfInstance.url) {
       setWarningModalVisible(true);
+    } else {
+      handleClose();
     }
-  }, [setWarningModalVisible, pdfInstance]);
+  }, [setWarningModalVisible, pdfInstance, handleClose]);
 
   const handleVerifyPass = useCallback(async () => {
     if (isProcessing) return;
@@ -100,17 +105,22 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   }, [isProcessing, validatePassword, password, getPassphrase, removePassword, analytics]);
 
   useEffect(() => {
-    generatePaperWalletPdf({
-      walletAddress: walletInfo.addresses[0].address,
-      walletName: walletInfo.name,
-      pgpInfo,
-      mnemonic: passphrase,
-      chain: CHAIN
-    })
-      .then((response) => setPdfInstance(response))
-      .catch((error) => {
-        setPdfInstance({ error, loading: false });
-      });
+    if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
+      generatePaperWalletPdf({
+        walletAddress: walletInfo.addresses[0].address,
+        walletName: walletInfo.name,
+        pgpInfo,
+        mnemonic: passphrase,
+        chain: CHAIN
+      })
+        .then((response) => setPdfInstance(response))
+        .catch((error) => {
+          setPdfInstance({ error, loading: false });
+        });
+
+    return () => {
+      setPdfInstance(INITIAL_PDF_STATE);
+    };
   }, [passphrase, pgpInfo, walletInfo, CHAIN, setPdfInstance]);
 
   const formattedWalletName = i18n.t('core.paperWallet.savePaperWallet.walletName', {
