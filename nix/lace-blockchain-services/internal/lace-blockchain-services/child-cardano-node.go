@@ -52,7 +52,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 
 	return ManagedChild{
 		ServiceName: "cardano-node",
-		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + ourpaths.ExeSuffix,
+		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + sep + "cardano-node" + ourpaths.ExeSuffix,
 		Version: constants.CardanoNodeVersion,
 		Revision: constants.CardanoNodeRevision,
 		MkArgv: func() ([]string, error) {
@@ -69,6 +69,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -147,6 +148,6 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		},
 		TerminateGracefullyByInheritedFd3: true,
 		ForceKillAfter: 10 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }

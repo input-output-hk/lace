@@ -18,7 +18,7 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 
 	return ManagedChild{
 		ServiceName: "ogmios",
-		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
+		ExePath: ourpaths.LibexecDir + sep + "ogmios" + sep + "ogmios" + ourpaths.ExeSuffix,
 		Version: constants.OgmiosVersion,
 		Revision: constants.OgmiosRevision,
 		MkArgv: func() ([]string, error) {
@@ -31,11 +31,12 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		PostStart: func() error { return nil },
 		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			ogmiosUrl := fmt.Sprintf("http://127.0.0.1:%d", *shared.OgmiosPort)
-			err := probeHttp200(ogmiosUrl + "/health", 1 * time.Second)
+			err := probeHttpFor([]int{ 200, 202 }, ogmiosUrl + "/health", 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
 				statusCh <- StatusAndUrl {
@@ -66,6 +67,6 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error { return nil },
+		PostStop: func() error { return nil },
 	}
 }}

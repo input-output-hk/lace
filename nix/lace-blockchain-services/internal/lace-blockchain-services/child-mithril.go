@@ -46,17 +46,15 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 	}
 
 	serviceName := "mithril-client"
-	exePath := ourpaths.LibexecDir + sep + "mithril-client" + ourpaths.ExeSuffix
+	exePath := ourpaths.LibexecDir + sep + "mithril-client" + sep + "mithril-client" + ourpaths.ExeSuffix
 	snapshotsDir := ourpaths.WorkDir + sep + "mithril-snapshots"
 	downloadDir := ""  // set later
 	unpackDir := ""  // set later
 
 	const SInitializing = "initializing"
 	const SCheckingDisk = "checking local disk info"
-	const SFetchingCert = "fetching cert info"
-	const SVerifyingCert = "verifying cert chain"
+	const SCertificates = "fetching & verifying cert info"
 	const SDownloading = "downloading"
-	const SUnpacking = "unpacking"
 	const SDigest = "computing digest"
 	const SVerifyingSignature = "verifying signature"
 	const SGoodSignature = "good signature"
@@ -113,9 +111,10 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		MkArgv: func() ([]string, error) {
 			stdout, stderr, err, pid := runCommandWithTimeout(
 				exePath,
-				[]string{"snapshot", "list", "--json"},
+				[]string{"cardano-db", "snapshot", "list", "--json"},
 				extraEnv[shared.Network],
 				10 * time.Second,
+				nil,
 			)
 
 			if err != nil {
@@ -157,7 +156,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 				serviceName, pid, snapshot, downloadDir)
 
 			return []string{
-				"snapshot",
+				"cardano-db",
 				"download",
 				snapshot,
 				"--download-dir",
@@ -167,6 +166,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		MkExtraEnv: func() []string {
 			return extraEnv[shared.Network]
 		},
+		PostStart: func() error { return nil },
 		AllocatePTY: true,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
@@ -181,26 +181,20 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			// XXX: we use the early return pattern here, because you can’t have
 			// `if firstPredicate() && (a := mkA(); secondPredicate(a)) in Go for whatever reason
 
-			if strings.Index(line, "1/7 - Checking local disk info") != -1 {
+			if strings.Index(line, "1/5 - Checking local disk info") != -1 {
 				currentStatus = SCheckingDisk
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1,
 				        Url: explorerUrl, OmitUrl: false }
 				return
 			}
-			if strings.Index(line, "2/7 - Fetching the certificate's information") != -1 {
-				currentStatus = SFetchingCert
+			if strings.Index(line, "2/5 - Fetching the certificate and verifying the certificate chain") != -1 {
+				currentStatus = SCertificates
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
-			if strings.Index(line, "3/7 - Verifying the certificate chain") != -1 {
-				currentStatus = SVerifyingCert
-				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
-				return
-			}
-			if strings.Index(line, "4/7 - Downloading the snapshot") != -1 {
+			if strings.Index(line, "3/5 - Downloading and unpacking the cardano db") != -1 {
 				currentStatus = SDownloading
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
@@ -225,19 +219,13 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 					return // there would be no way to have `else if` here, hence early return
 				}
 			}
-			if strings.Index(line, "5/7 - Unpacking the snapshot") != -1 {
-				currentStatus = SUnpacking
-				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
-				return
-			}
-			if strings.Index(line, "6/7 - Computing the snapshot digest") != -1 {
+			if strings.Index(line, "4/5 - Computing the cardano db message") != -1 {
 				currentStatus = SDigest
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
-			if strings.Index(line, "7/7 - Verifying the snapshot signature") != -1 {
+			if strings.Index(line, "5/5 - Verifying the cardano db signature") != -1 {
 				currentStatus = SVerifyingSignature
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
@@ -287,7 +275,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
-		AfterExit: func() error {
+		PostStop: func() error {
 			if currentStatus != SGoodSignature {
 				// Since Mithril cannot resume interrupted downloads, let’s clear them on failures:
 				os.RemoveAll(downloadDir)
@@ -329,6 +317,7 @@ func runCommandWithTimeout(
 	args []string,
 	extraEnv []string,
 	timeout time.Duration,
+	stdin *string,  // use nil to not set
 ) ([]byte, []byte, error, int) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -348,6 +337,10 @@ func runCommandWithTimeout(
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
 
+    if stdin != nil {
+        cmd.Stdin = strings.NewReader(*stdin)
+    }
+
 	err := cmd.Run()
 	var rerr error
 
@@ -357,5 +350,10 @@ func runCommandWithTimeout(
 		rerr = fmt.Errorf("failed: %s", err)
 	}
 
-	return stdoutBuf.Bytes(), stderrBuf.Bytes(), rerr, cmd.Process.Pid
+	pid := -1
+	if cmd.Process != nil {
+		pid = cmd.Process.Pid
+	}
+
+	return stdoutBuf.Bytes(), stderrBuf.Bytes(), rerr, pid
 }

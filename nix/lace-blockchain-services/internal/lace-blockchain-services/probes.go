@@ -19,6 +19,14 @@ func getFreeTCPPort() int {
 	return address.Port
 }
 
+func probeTcpPort(host string, port int, timeout time.Duration) error {
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), timeout)
+	if err == nil {
+		defer conn.Close()
+	}
+	return err
+}
+
 func probeUnixSocket(path string, timeout time.Duration) error {
 	conn, err := net.DialTimeout("unix", path, timeout)
 	if err == nil {
@@ -28,15 +36,20 @@ func probeUnixSocket(path string, timeout time.Duration) error {
 }
 
 func probeHttp200(url string, timeout time.Duration) error {
+	return probeHttpFor([]int{ http.StatusOK }, url, timeout)
+}
+
+func probeHttpFor(acceptedStatusCodes []int, url string, timeout time.Duration) error {
 	httpClient := http.Client{Timeout: timeout}
 	resp, err := httpClient.Get(url)
 	if err == nil {
 		defer resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
-			return nil
-		} else {
-			return fmt.Errorf("got a non-200 response: %s for %s", resp.StatusCode, url)
+		for _, code := range acceptedStatusCodes {
+			if resp.StatusCode == code {
+				return nil
+			}
 		}
+		return fmt.Errorf("got an unexpected response: %d for %s, expected one of %v", resp.StatusCode, url, acceptedStatusCodes)
 	}
 	return err
 }

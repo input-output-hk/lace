@@ -97,9 +97,13 @@ func SetupTray(
 	// FIXME: this has to be done smarter
 	chMithrilStatus := make(chan t.ServiceStatus)
 	fixme_CardanoNodeStatus := make(chan string)
+	fixme_CardanoSubmitApiStatus := make(chan string)
 	fixme_OgmiosStatus := make(chan string)
+	fixme_PostgresStatus := make(chan string)
 	fixme_SetOgmiosDashboard := make(chan string)
+	fixme_SetCardanoSubmitApiUrl := make(chan string)
 	fixme_ProviderServerStatus := make(chan string)
+	fixme_ProjectorStatus := make(chan string)
 
 	go func(){
 		for upd := range comm.ServiceUpdate {
@@ -112,11 +116,18 @@ func SetupTray(
 			switch upd.ServiceName {
 			case "cardano-node":
 				fixme_CardanoNodeStatus <- formatted
+			case "cardano-submit-api":
+				fixme_CardanoSubmitApiStatus <- formatted
+				fixme_SetCardanoSubmitApiUrl <- upd.Url
 			case "ogmios":
 				fixme_OgmiosStatus <- formatted
 				fixme_SetOgmiosDashboard <- upd.Url
+			case "postgres":
+				fixme_PostgresStatus <- formatted
 			case "provider-server":
 				fixme_ProviderServerStatus <- formatted
+			case "projector":
+				fixme_ProjectorStatus <- formatted
 			case "mithril-client":
 				chMithrilStatus <- upd
 			}
@@ -137,13 +148,36 @@ func SetupTray(
 		}
 	}()
 
+	mCopyCardanoSubmitApiUrl := systray.AddMenuItem("Copy Cardano Submit API URL", "")
+	go func() {
+		url := ""
+		mCopyCardanoSubmitApiUrl.Disable()
+		for { select {
+		case <-mCopyCardanoSubmitApiUrl.ClickedCh:
+			err := clipboard.WriteAll(url)
+			if err != nil {
+				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
+					OurLogPrefix, os.Getpid(), url, err)
+			}
+		case url = <-fixme_SetCardanoSubmitApiUrl:
+			if url == "" {
+				mCopyCardanoSubmitApiUrl.Disable()
+			} else {
+				mCopyCardanoSubmitApiUrl.Enable()
+			}
+		}}
+	}()
+
 	systray.AddSeparator()
 
 	// XXX: this weird type because we want order, and there are no tuples:
 	statuses := []map[string](<-chan string) {
-		{ "cardano-node":    fixme_CardanoNodeStatus },
-		{ "ogmios":          fixme_OgmiosStatus },
-		{ "provider-server": fixme_ProviderServerStatus },
+		{ "cardano-node":       fixme_CardanoNodeStatus },
+		{ "ogmios":             fixme_OgmiosStatus },
+		{ "cardano-submit-api": fixme_CardanoSubmitApiStatus },
+		{ "postgres":           fixme_PostgresStatus },
+		{ "provider-server":    fixme_ProviderServerStatus },
+		{ "projector":          fixme_ProjectorStatus },
 	}
 
 	for _, statusItem := range statuses {

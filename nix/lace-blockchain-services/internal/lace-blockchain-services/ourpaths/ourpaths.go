@@ -53,8 +53,8 @@ func init() {
 		ResourcesDir = filepath.Clean(binDir + "/../Resources")
 	case "linux":
 		WorkDir = currentUser.HomeDir + "/.local/share/lace-blockchain-services"
-		LibexecDir = filepath.Clean(binDir + "/../libexec")
-		ResourcesDir = filepath.Clean(binDir + "/../share")
+		LibexecDir = filepath.Clean(binDir + "/../../libexec")
+		ResourcesDir = filepath.Clean(binDir + "/../../share")
 	case "windows":
 		WorkDir = os.Getenv("AppData") + "\\lace-blockchain-services"
 		LibexecDir = filepath.Clean(binDir + "\\libexec")
@@ -70,14 +70,16 @@ func init() {
 	CardanoServicesDir = ResourcesDir + sep + "cardano-js-sdk" + sep + "packages" + sep + "cardano-services"
 
 	ExeSuffix = ""
-	if (runtime.GOOS == "windows") {
+	if runtime.GOOS == "windows" {
 		ExeSuffix = ".exe"
 	}
 
-	// Prepend our libexec to PATH – e.g. for xclip on Linux, which is not installed on all distributions
-	err = os.Setenv("PATH", LibexecDir + string(filepath.ListSeparator) + os.Getenv("PATH"))
-	if err != nil {
-		panic(err)
+	// Prepend our libexec/xclip to PATH – for xclip on Linux, which is not installed on all distributions
+	if runtime.GOOS == "linux" {
+		err = os.Setenv("PATH", LibexecDir + sep + "xclip" + string(filepath.ListSeparator) + os.Getenv("PATH"))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Prevent a gtk3 segfault:

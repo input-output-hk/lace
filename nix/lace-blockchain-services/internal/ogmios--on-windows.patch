@@ -1,8 +1,8 @@
 diff --git a/server/ogmios.cabal b/server/ogmios.cabal
-index fc0d752f1..44e3c7b8e 100644
+index caaa8db3b..8af2241a9 100644
 --- a/server/ogmios.cabal
 +++ b/server/ogmios.cabal
-@@ -33,6 +33,10 @@ flag production
+@@ -31,6 +31,10 @@ flag production
    manual: True
    default: False
  
@@ -13,25 +13,25 @@ index fc0d752f1..44e3c7b8e 100644
  library
    exposed-modules:
        Ogmios
-@@ -121,6 +125,8 @@ library
+@@ -133,6 +137,8 @@ library
+       TypeSynonymInstances
+       ViewPatterns
    ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Wunused-packages
-   build-tools:
-       git
 +  import:
 +      maybe-unix
    build-depends:
        aeson
      , array
-@@ -192,7 +198,6 @@ library
+@@ -212,7 +218,6 @@ library
      , time-manager
      , transformers
      , typed-protocols
 -    , unix
-     , unordered-containers
      , vector
      , wai
+     , wai-websockets
 diff --git a/server/src/Ogmios.hs b/server/src/Ogmios.hs
-index c48cbadc8..75f51720b 100644
+index d87b8d11a..aaec6b03c 100644
 --- a/server/src/Ogmios.hs
 +++ b/server/src/Ogmios.hs
 @@ -2,6 +2,7 @@
@@ -40,9 +40,9 @@ index c48cbadc8..75f51720b 100644
  
 +{-# LANGUAGE CPP #-}
  {-# LANGUAGE DerivingVia #-}
- {-# LANGUAGE GeneralizedNewtypeDeriving #-}
- {-# LANGUAGE TypeApplications #-}
-@@ -104,6 +105,7 @@ import Ogmios.Options
+ 
+ -- NOTE: necessary for the 'Generic' instance on the Env data-family.
+@@ -96,6 +97,7 @@ import Ogmios.Options
  import Ogmios.Version
      ( version
      )
@@ -50,15 +50,15 @@ index c48cbadc8..75f51720b 100644
  import System.Posix.Signals
      ( Handler (..)
      , installHandler
-@@ -111,6 +113,7 @@ import System.Posix.Signals
+@@ -103,6 +105,7 @@ import System.Posix.Signals
      , raiseSignal
      , softwareTermination
      )
 +#endif
  
- import qualified Control.Concurrent.Async as Async
- import qualified Control.Concurrent.STM.TBQueue as STM
-@@ -167,9 +170,13 @@ application tracers = hijackSigTerm >> withDebouncer _10s (\debouncer -> do
+ --
+ -- App
+@@ -137,9 +140,13 @@ application tracers = hijackSigTerm >> withDebouncer _10s (\debouncer -> do
  -- This function install handlers for SIGTERM and turn them into SIGINT.
  hijackSigTerm :: App ()
  hijackSigTerm =
@@ -73,10 +73,10 @@ index c48cbadc8..75f51720b 100644
  --
  -- Environment
 diff --git a/server/src/Ogmios/Options.hs b/server/src/Ogmios/Options.hs
-index 52905f2f8..a4138904f 100644
+index e08e86a42..4c0743da1 100644
 --- a/server/src/Ogmios/Options.hs
 +++ b/server/src/Ogmios/Options.hs
-@@ -87,7 +87,7 @@ import Options.Applicative.Help.Pretty
+@@ -91,7 +91,7 @@ import Options.Applicative.Help.Pretty
  import Safe
      ( readMay
      )

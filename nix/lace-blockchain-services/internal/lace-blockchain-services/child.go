@@ -14,6 +14,7 @@ import (
 
 	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
+	"lace.io/lace-blockchain-services/appconfig"
 
 	"github.com/creack/pty"
 	"github.com/acarl005/stripansi"
@@ -26,6 +27,7 @@ type ManagedChild struct {
 	Revision    string
 	MkArgv      func() ([]string, error) // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
 	MkExtraEnv  func() []string
+	PostStart   func() error
 	AllocatePTY bool
 	StatusCh    chan<- StatusAndUrl
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
@@ -33,7 +35,7 @@ type ManagedChild struct {
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	TerminateGracefullyByInheritedFd3 bool // <https://github.com/input-output-hk/cardano-node/issues/726>
 	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
-	AfterExit   func() error
+	PostStop    func() error
 }
 
 type StatusAndUrl struct {
@@ -56,11 +58,15 @@ type SharedState struct {
 	Network string
 	SyncProgress *float64  // XXX: we take that from Ogmios, we should probably calculate ourselves?
 	CardanoNodeConfigDir string
+	CardanoSubmitApiConfigDir string
 	CardanoNodeSocket string
+	CardanoSubmitApiPort *int
 	OgmiosPort *int
+	PostgresPort *int
+	PostgresPassword *string
 }
 
-func manageChildren(comm CommChannels_Manager) {
+func manageChildren(comm CommChannels_Manager, appConfig appconfig.AppConfig) {
 	sep := string(filepath.Separator)
 
 	network := <-comm.NetworkSwitch
@@ -97,9 +103,13 @@ func manageChildren(comm CommChannels_Manager) {
 		shared := SharedState{
 			Network: network,
 			SyncProgress: &[]float64{ -1.0 }[0],  // wat
-			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network,
-			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "cardano-node.socket",
+			CardanoNodeConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-node",
+			CardanoSubmitApiConfigDir: ourpaths.NetworkConfigDir + sep + network + sep + "cardano-submit-api",
+			CardanoNodeSocket: ourpaths.WorkDir + sep + network + sep + "node.sock",
+			CardanoSubmitApiPort: new(int),
 			OgmiosPort: new(int),
+			PostgresPort: new(int),
+			PostgresPassword: new(string),
 		}
 
 		if (runtime.GOOS == "windows") {
@@ -122,7 +132,12 @@ func manageChildren(comm CommChannels_Manager) {
 		if !runMithril {
 			usedChildren = append(usedChildren, childCardanoNode)
 			usedChildren = append(usedChildren, childOgmios(ogmiosSyncProgressCh))
-			if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
+			usedChildren = append(usedChildren, childCardanoSubmitApi(appConfig))
+			usedChildren = append(usedChildren, childPostgres)
+			if cardanoServicesAvailable {
+				usedChildren = append(usedChildren, childProviderServer)
+				usedChildren = append(usedChildren, childProjector)
+			}
 		} else {
 			usedChildren = append(usedChildren, childMithril)
 			runMithril = false  // one-time thing (restart to regular mode – successfully or by force)
@@ -292,9 +307,9 @@ func manageChildren(comm CommChannels_Manager) {
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
 					child.ServiceName, childPid)
-				err := child.AfterExit()
+				err := child.PostStop()
 				if err != nil {
-					fmt.Printf("%s[%d]: AfterExit of %s[%d] returned an error: %v\n",
+					fmt.Printf("%s[%d]: PostStop of %s[%d] returned an error: %v\n",
 						OurLogPrefix, os.Getpid(), child.ServiceName, childPid, err)
 				} else if child.ServiceName == "mithril-client" {
 					// don’t wait after a successful Mithril resync
@@ -330,11 +345,24 @@ func manageChildren(comm CommChannels_Manager) {
 					}
 					next.Initialized = prev.Initialized || next.Initialized // remember true
 					if !prev.Initialized && next.Initialized {
-						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized\n",
+						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized, will run PostStart\n",
 							OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
+						err := child.PostStart()
+						if err != nil {
+							fmt.Printf("%s[%d]: restarting session, as PostStart of %s[%d] returned an error: %v\n",
+								OurLogPrefix, os.Getpid(), child.ServiceName, childPid, err)
+							terminateCh <- struct{}{}
+							return
+						}
 						initializedCh <- struct{}{} // continue launching the next process
 					}
 					time.Sleep(next.NextProbeIn)
+					if childDidExit {
+						// Let’s not log this, as it's confusing even 60 seconds too late:
+						// fmt.Printf("%s[%d]: stopping health monitor of %s[%d]\n",
+						// 	OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
+						break
+					}
 					prev = next
 				}
 			}()
