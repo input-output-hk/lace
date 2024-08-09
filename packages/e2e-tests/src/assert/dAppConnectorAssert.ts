@@ -350,21 +350,33 @@ class DAppConnectorAssert {
 
   async assertSeeAllDonePage(signType?: 'data sign' | 'tx sign') {
     await this.assertSeeHeader();
-    await DAppTransactionAllDonePage.image.waitForDisplayed();
 
-    await DAppTransactionAllDonePage.heading.waitForDisplayed();
-    expect(await DAppTransactionAllDonePage.heading.getText()).to.equal(
-      await t('browserView.transaction.success.youCanSafelyCloseThisPanel')
-    );
+    const image = await (signType === 'data sign'
+      ? DAppTransactionAllDonePage.imageDataSign
+      : DAppTransactionAllDonePage.imageTxSign);
+    await image.waitForDisplayed();
 
-    await DAppTransactionAllDonePage.description.waitForDisplayed();
-    const expectedTranslationKey =
+    const heading = await (signType === 'data sign'
+      ? DAppTransactionAllDonePage.headingDataSign
+      : DAppTransactionAllDonePage.headingTxSign);
+    await heading.waitForDisplayed();
+
+    expect(await heading.getText()).to.equal(await t('browserView.transaction.success.youCanSafelyCloseThisPanel'));
+
+    const description = await (signType === 'data sign'
+      ? DAppTransactionAllDonePage.descriptionDataSign
+      : DAppTransactionAllDonePage.descriptionTxSign);
+    await description.waitForDisplayed();
+
+    const expectedDescriptionTranslationKey =
       signType === 'data sign' ? 'core.dappSignData.signedSuccessfully' : 'core.dappTransaction.signedSuccessfully';
+    expect(await description.getText()).to.equal(await t(expectedDescriptionTranslationKey));
 
-    expect(await DAppTransactionAllDonePage.description.getText()).to.equal(await t(expectedTranslationKey));
-
-    await DAppTransactionAllDonePage.closeButton.waitForDisplayed();
-    expect(await DAppTransactionAllDonePage.closeButton.getText()).to.equal(await t('general.button.close'));
+    const closeButton = await (signType === 'data sign'
+      ? DAppTransactionAllDonePage.closeButtonDataSign
+      : DAppTransactionAllDonePage.closeButtonTxSign);
+    await closeButton.waitForDisplayed();
+    expect(await closeButton.getText()).to.equal(await t('general.button.close'));
 
     Logger.log('saving tx hash: null'); // TODO save proper hash once it's added to the all done page
     testContext.saveWithOverride('txHashValue', false);
