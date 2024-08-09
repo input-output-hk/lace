@@ -79,11 +79,12 @@ UI-mapped gherkin tests for the Lace browser extension
 ## Running tests locally in debug mode using IntelliJ IDEA/WebStorm
 
 - create new run configuration
-- create config and fill it in as per attached screenshots, create a new script in package.json or use one of the existing ones\
-  `example: CI=true;ENV=preprod;TEST_DAPP_URL=<yourUrl>;WALLET_1_PASSWORD=<walletPassword>`
-  ![debug.png](src/images/readme/debug.png) ![debug2.png](src/images/readme/debug2.png)
-- add required environment variables as per screenshot
-  ![debug1.png](src/images/readme/debug1.png)!
-- make sure you have a chromedriver running on port 4444
-- start debug run configuration just created\
-  ![debug3.png](src/images/readme/debug3.png)
+  - type: npm
+- fill newly created configuration & environment variables as per attached screenshot
+  - `example: STANDALONE_DRIVER=true;ENV=preprod;TEST_DAPP_URL=<yourUrl>;WALLET_1_PASSWORD=<walletPassword>`\
+  ![debug1.png](src/images/readme/debug1.png)
+- make sure you have a chromedriver running on port 4444 (in case of STANDALONE_DRIVER=true)
+- add "@debug" tag to the cucumber test that you want to debug\
+![debug3.png](src/images/readme/debug3.png)
+- start debug run configuration you just created\
+![debug2.png](src/images/readme/debug2.png)
