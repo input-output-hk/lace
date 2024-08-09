@@ -7,7 +7,7 @@ import { useHotWalletCreation } from '../useHotWalletCreation';
 import { useWalletOnboarding } from '../walletOnboardingContext';
 import { WalletCreateStep } from './types';
 
-type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+type OnNameAndPasswordChange = (state: { name: string }) => void;
 
 interface State {
   back: () => void;
@@ -49,8 +49,8 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   }, [setCreateWalletData]);
 
   const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
-    ({ name, password }) => {
-      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+    ({ name }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name }));
     },
     [setCreateWalletData]
   );
@@ -61,6 +61,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
       postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
     });
+    // TODO
     clearSecrets();
   }, [clearSecrets, createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]);
 

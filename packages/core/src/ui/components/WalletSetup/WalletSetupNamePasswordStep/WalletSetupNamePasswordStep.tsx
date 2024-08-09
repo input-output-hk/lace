@@ -91,7 +91,7 @@ export const WalletSetupNamePasswordStep = ({
   };
 
   const handleNextButtonClick = () => {
-    onNext({ walletName, password });
+    onNext({ walletName });
   };
 
   return (
