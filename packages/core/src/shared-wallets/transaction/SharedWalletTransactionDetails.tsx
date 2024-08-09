@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import { Box, SummaryExpander, Text, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Button, Flex, SummaryExpander, Text, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ export interface SharedWalletTransactionDetailsProps {
   coinSymbol: string;
   cosigners: CoSignersListItem[];
   fee: string;
+  onExportTransaction?: () => void;
   ownSharedKey: Wallet.Crypto.Bip32PublicKeyHex;
   rows: OutputSummaryProps[];
   signPolicy: SignPolicy;
@@ -34,6 +35,7 @@ export const SharedWalletTransactionDetails = ({
   txInitiator,
   ownSharedKey,
   rows,
+  onExportTransaction,
 }: SharedWalletTransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
@@ -125,6 +127,19 @@ export const SharedWalletTransactionDetails = ({
           </Box>
         </SummaryExpander>
       </div>
+      {signed.length > 0 && (
+        <Flex mb="$20" alignItems="center" flexDirection="column">
+          <Button.CallToAction
+            w="$fill"
+            onClick={onExportTransaction}
+            data-testid="download-json-button"
+            label={t('sharedWallets.transaction.download.button')}
+          />
+          <Box my="$12">
+            <Text.Body.Normal>{t('sharedWallets.transaction.summary.forwardTransaction')}</Text.Body.Normal>
+          </Box>
+        </Flex>
+      )}
     </Transaction.Content>
   );
 };
