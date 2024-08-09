@@ -32,17 +32,14 @@ export const PgpPublicKeyEntry = ({
       w="$fill"
       value={pgpInfo.pgpKeyReference}
     />
-    <div className={styles.textAreaContainer}>
-      <TextArea
-        label={i18n.t('core.paperWallet.securePaperWallet.pgpPublicKeyLabel')}
-        onChange={handlePgpPublicKeyBlockChange}
-        dataTestId="pgp-public-key-block"
-        isResizable={false}
-        className={styles.textArea}
-        wrapperClassName={styles.wrapper}
-        value={pgpInfo.pgpPublicKey}
-      />
-    </div>
+    <TextArea
+      label={i18n.t('core.paperWallet.securePaperWallet.pgpPublicKeyLabel')}
+      onChange={handlePgpPublicKeyBlockChange}
+      dataTestId="pgp-public-key-block"
+      wrapperClassName={styles.wrapper}
+      className={styles.textArea}
+      value={pgpInfo.pgpPublicKey}
+    />
     <Flex className={styles.validation}>
       {validation.success && (
         <Flex gap="$4">

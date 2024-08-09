@@ -218,6 +218,7 @@ export const EnterPgpPrivateKey: VFC = () => {
                 dataTestId="pgp-key-block"
                 isResizable={false}
                 className={styles.textArea}
+                wrapperClassName={styles.wrapper}
               />
             )}
             <PasswordBox

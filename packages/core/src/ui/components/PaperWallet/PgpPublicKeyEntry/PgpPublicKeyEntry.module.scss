@@ -1,8 +1,17 @@
 @import '../../../../../../common/src/ui/styles/abstracts/mixins';
 @import '../../../../../../common/src/ui/styles/theme.scss';
 
-.textArea {
-  min-height: 182px !important;
+.textArea:global(.ant-input) {
+  height: 172px !important;
+  overflow-y: scroll;
+  margin-top: 16px;
+  padding-top: 0 !important;
+  outline: 0 !important;
+  border: none !important;
+
+  &:hover {
+    border: none !important;
+  }
 }
 
 .textAreaContainer {
@@ -11,7 +20,9 @@
 }
 
 .wrapper {
-  max-height: 182px;
+  padding-top: 24px !important;
+  background: var(--light-mode-light-grey, var(--dark-mode-dark-grey)) !important;
+  border-radius: 16px;
 }
 
 .validation {
@@ -21,4 +32,11 @@
 
 .success {
   stroke: #2cb67d;
+}
+
+:global(.text-area-label) {
+  top: 30px;
+  left: 24px;
+  width: 520px;
+  background: var(--light-mode-light-grey, var(--dark-mode-dark-grey)) !important;
 }
