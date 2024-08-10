@@ -845,6 +845,8 @@
   "paperWallet.enterPgpPrivateKey.toggleOption.fromClipboard": "Paste from clipboard",
   "paperWallet.enterPgpPrivateKey.fileUploadLabel": "Choose file to upload",
   "paperWallet.enterPgpPrivateKey.supportedFileUploadFormats": "Supported formats: .asc",
+  "paperWallet.enterPgpPrivateKey.restoreSuccess": "Success!",
+  "paperWallet.enterPgpPrivateKey.restoreSuccess.summary": "The recovery information for this wallet was successfully decrypted and it can now be restored.",
   "browserView.settings.generatePaperWallet.description": "Download an encrypted backup of your recovery phrase as a paper wallet.",
   "paperWallet.WalletOverview.accountZero": "Account #0",
   "paperWallet.SettingsDrawer.ExitWarningTitle": "Exit paper wallet setup?",

@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable sonarjs/cognitive-complexity */
+/* eslint-disable consistent-return */
 import { i18n } from '@lace/translation';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRestoreWallet } from '../context';
@@ -38,10 +39,12 @@ export const WalletOverview = (): JSX.Element => {
     ada: BigNumber;
     otherItems: Set<Wallet.Cardano.AssetId>;
     usdPortfolioBalance: BigNumber;
+    fetched: boolean;
   }>({
     ada: new BigNumber(0),
     otherItems: new Set(),
-    usdPortfolioBalance: new BigNumber(0)
+    usdPortfolioBalance: new BigNumber(0),
+    fetched: false
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,7 +53,9 @@ export const WalletOverview = (): JSX.Element => {
       if (!walletMetadata || !coinPricing.priceResult.cardano.price || coinPricing.priceResult.tokens.size === 0)
         return;
       const { utxoProvider } = getProviderByChain(walletMetadata.chain);
-      const utxos: Wallet.Cardano.Utxo[] = await utxoProvider.utxoByAddresses({ addresses: [walletMetadata.address] });
+      const utxos: Wallet.Cardano.Utxo[] = await utxoProvider.utxoByAddresses({
+        addresses: [walletMetadata.address]
+      });
 
       const summedBalances = utxos.reduce(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,16 +87,24 @@ export const WalletOverview = (): JSX.Element => {
             usdPortfolioBalance: assetUsdValue
           };
         },
-        { ada: new BigNumber(0), otherItems: new Set<Wallet.Cardano.AssetId>(), usdPortfolioBalance: new BigNumber(0) }
+        {
+          ada: new BigNumber(0),
+          otherItems: new Set<Wallet.Cardano.AssetId>(),
+          usdPortfolioBalance: new BigNumber(0)
+        }
       );
-      setWalletBalances(summedBalances);
+      setWalletBalances({ ...summedBalances, fetched: true });
       setIsLoading(false);
     };
 
     getData();
-
     return () => {
-      setWalletBalances({ ada: new BigNumber(0), otherItems: new Set(), usdPortfolioBalance: new BigNumber(0) });
+      setWalletBalances({
+        ada: new BigNumber(0),
+        otherItems: new Set(),
+        usdPortfolioBalance: new BigNumber(0),
+        fetched: false
+      });
       setIsLoading(true);
     };
   }, [walletMetadata, setIsLoading, setWalletBalances, coinPricing]);
@@ -102,6 +115,8 @@ export const WalletOverview = (): JSX.Element => {
   };
 
   const balanceSubtitle = useMemo(() => {
+    // Ignore subtitle if loading, or if data could not be fetched
+    if (isLoading || (!isLoading && !walletBalances.fetched)) return;
     /**
      * Ada symbol shown in overview is based on the chain supplied in the QR code, not the one from the background wallet current chain
      **/
@@ -115,7 +130,7 @@ export const WalletOverview = (): JSX.Element => {
       if (walletBalances.otherItems.size > 1) subtitle += 's';
     }
     return subtitle;
-  }, [walletBalances.ada, walletBalances.otherItems, walletMetadata.chain]);
+  }, [walletBalances.ada, walletBalances.otherItems, walletMetadata.chain, walletBalances.fetched, isLoading]);
 
   return (
     <WalletSetupStepLayoutRevamp
@@ -175,7 +190,7 @@ export const WalletOverview = (): JSX.Element => {
             }}
           />
         </Flex>
-        {!isLoading && (
+        {!isLoading && walletBalances.fetched && (
           <Flex alignItems="center" className={styles.credit}>
             <Text.Label className={styles.creditLink}>{i18n.t('general.credit.poweredBy')}</Text.Label>
             <TextLink

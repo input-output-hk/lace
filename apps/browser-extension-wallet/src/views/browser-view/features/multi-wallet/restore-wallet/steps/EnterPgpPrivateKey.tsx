@@ -12,7 +12,8 @@ import {
   Text,
   ToggleButtonGroup,
   CheckComponent as CheckIcon,
-  PasswordBox
+  PasswordBox,
+  LockIconGradientComponent as LockIcon
 } from '@input-output-hk/lace-ui-toolkit';
 import { TextArea } from '@lace/common';
 import { ShieldedPgpKeyData } from '@src/types';
@@ -44,7 +45,6 @@ const decryptQrCodeMnemonicWithPrivateKey = async ({ pgpInfo }: DecryptProps): P
     message: pgpInfo.shieldedMessage,
     privateKey
   });
-
   if (
     Wallet.KeyManagement.util.validateMnemonic(Wallet.KeyManagement.util.joinMnemonicWords(decryptedMessage.split(' ')))
   ) {
@@ -76,6 +76,8 @@ export const EnterPgpPrivateKey: VFC = () => {
         if (error.message === 'Misformed armored text') {
           setValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
         }
+      } finally {
+        navigator.clipboard.writeText(null);
       }
     },
     [setValidation, pgpInfo, setPgpInfo]
@@ -146,7 +148,6 @@ export const EnterPgpPrivateKey: VFC = () => {
     const getMnemonic = async () => {
       try {
         const mnemonic = await decryptQrCodeMnemonicWithPrivateKey({ pgpInfo });
-        setValidation({ success: 'mnemonic restored' });
         setMnemonic(mnemonic);
       } catch (error) {
         setValidation({ error: error.message });
@@ -174,75 +175,97 @@ export const EnterPgpPrivateKey: VFC = () => {
         isNextEnabled={!!createWalletData.mnemonic.every((w) => !!w)}
         currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
       >
-        <Flex gap="$8" flexDirection="column" w="$fill">
-          <Flex w="$fill">
-            <ToggleButtonGroup.Root
-              onValueChange={(changedEntryType: 'file-upload' | 'clipboard') => {
-                setEntryType(changedEntryType);
-                setPrivateKeyFile('');
-                setPgpInfo({
-                  shieldedMessage: pgpInfo.shieldedMessage,
-                  privateKeyIsDecrypted: true,
-                  pgpPrivateKey: null,
-                  pgpKeyPassphrase: null
-                });
-              }}
-              value={entryType}
-            >
-              <ToggleButtonGroup.Item value="file-upload">
-                {i18n.t('paperWallet.enterPgpPrivateKey.toggleOption.fileUpload')}
-              </ToggleButtonGroup.Item>
-              <ToggleButtonGroup.Item value="clipboard">
-                {i18n.t('paperWallet.enterPgpPrivateKey.toggleOption.fromClipboard')}
-              </ToggleButtonGroup.Item>
-            </ToggleButtonGroup.Root>
+        {createWalletData.mnemonic.every((w) => !!w) ? (
+          <Flex
+            gap="$16"
+            alignItems="center"
+            px="$64"
+            justifyContent="center"
+            flexDirection="column"
+            w="$fill"
+            h="$fill"
+            className={styles.successContainer}
+          >
+            <Flex h="$64">
+              <LockIcon className={styles.lockIcon} />
+            </Flex>
+            <Text.SubHeading>{i18n.t('paperWallet.enterPgpPrivateKey.restoreSuccess')}</Text.SubHeading>
+            <Text.Body.Normal color="secondary">
+              {i18n.t('paperWallet.enterPgpPrivateKey.restoreSuccess.summary')}
+            </Text.Body.Normal>
           </Flex>
-          <Flex flexDirection="column" w="$fill" h="$fill" gap="$8" className={styles.privateKeyEntryMethod}>
-            {entryType === 'file-upload' ? (
-              <FileUpload
-                id="pgp-private-key-upload"
-                label={i18n.t('paperWallet.enterPgpPrivateKey.fileUploadLabel')}
-                removeButtonLabel="" // not used
-                supportedFormats={i18n.t('paperWallet.enterPgpPrivateKey.supportedFileUploadFormats')}
-                onChange={handleFileChange}
-                files={!!privateKeyFile && [privateKeyFile]}
-                style={{
-                  maxHeight: 136 // ui-toolkit doesn't allow specification of className prop
+        ) : (
+          <Flex gap="$8" flexDirection="column" w="$fill">
+            <Flex w="$fill">
+              <ToggleButtonGroup.Root
+                onValueChange={(changedEntryType: 'file-upload' | 'clipboard') => {
+                  setEntryType(changedEntryType);
+                  setPrivateKeyFile('');
+                  setPgpInfo({
+                    shieldedMessage: pgpInfo.shieldedMessage,
+                    privateKeyIsDecrypted: true,
+                    pgpPrivateKey: null,
+                    pgpKeyPassphrase: null
+                  });
                 }}
-                onSubmit={null}
-              />
-            ) : (
-              <TextArea
-                label={i18n.t('core.paperWallet.privatePgpKeyLabel')}
-                onChange={handlePgpPrivateKeyBlockChange}
-                dataTestId="pgp-key-block"
-                isResizable={false}
-                className={styles.textArea}
-                wrapperClassName={styles.wrapper}
-              />
-            )}
-            <PasswordBox
-              onChange={(e) => {
-                setValidation({ error: null, success: null });
-                setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.target.value });
-              }}
-              label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
-              value={pgpInfo.pgpKeyPassphrase || ''}
-              onSubmit={null}
-              disabled={pgpInfo.privateKeyIsDecrypted}
-              data-testid="pgp-passphrase"
-            />
-            <Flex className={styles.validationContainer}>
-              {validation.error && <Text.Label color="error">{validation.error}</Text.Label>}
-              {validation.success && (
-                <Flex gap="$4">
-                  <CheckIcon />
-                  <Text.Label color="secondary">{validation.success}</Text.Label>
-                </Flex>
+                value={entryType}
+              >
+                <ToggleButtonGroup.Item value="file-upload">
+                  {i18n.t('paperWallet.enterPgpPrivateKey.toggleOption.fileUpload')}
+                </ToggleButtonGroup.Item>
+                <ToggleButtonGroup.Item value="clipboard">
+                  {i18n.t('paperWallet.enterPgpPrivateKey.toggleOption.fromClipboard')}
+                </ToggleButtonGroup.Item>
+              </ToggleButtonGroup.Root>
+            </Flex>
+            <Flex flexDirection="column" w="$fill" h="$fill" gap="$8" className={styles.privateKeyEntryMethod}>
+              {entryType === 'file-upload' ? (
+                <FileUpload
+                  id="pgp-private-key-upload"
+                  label={i18n.t('paperWallet.enterPgpPrivateKey.fileUploadLabel')}
+                  removeButtonLabel="" // not used
+                  supportedFormats={i18n.t('paperWallet.enterPgpPrivateKey.supportedFileUploadFormats')}
+                  onChange={handleFileChange}
+                  files={!!privateKeyFile && [privateKeyFile]}
+                  style={{
+                    maxHeight: 136 // ui-toolkit doesn't allow specification of className prop
+                  }}
+                  onSubmit={null}
+                />
+              ) : (
+                <TextArea
+                  label={i18n.t('core.paperWallet.privatePgpKeyLabel')}
+                  onChange={handlePgpPrivateKeyBlockChange}
+                  dataTestId="pgp-key-block"
+                  isResizable={false}
+                  className={styles.textArea}
+                  wrapperClassName={styles.wrapper}
+                />
               )}
+              <PasswordBox
+                onChange={async (e) => {
+                  setValidation({ error: null, success: null });
+                  setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.target.value });
+                  navigator.clipboard.writeText(null);
+                }}
+                label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
+                value={pgpInfo.pgpKeyPassphrase || ''}
+                onSubmit={null}
+                disabled={pgpInfo.privateKeyIsDecrypted}
+                data-testid="pgp-passphrase"
+              />
+              <Flex className={styles.validationContainer}>
+                {validation.error && <Text.Label color="error">{validation.error}</Text.Label>}
+                {validation.success && (
+                  <Flex gap="$4">
+                    <CheckIcon />
+                    <Text.Label color="secondary">{validation.success}</Text.Label>
+                  </Flex>
+                )}
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
+        )}
       </WalletSetupStepLayoutRevamp>
     </>
   );
