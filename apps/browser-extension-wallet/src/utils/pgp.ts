@@ -6,7 +6,7 @@ import { PublicPgpKeyData } from '@src/types';
 
 export const WEAK_KEY_REGEX = new RegExp(/RSA keys shorter than 2047 bits are considered too weak./);
 export const NO_ENCRYPTION_PACKET_REGEX = new RegExp(/Could not find valid encryption key packet in key/);
-const PUBLIC_KEY_REGEX = /^-{5}BEGIN PGP PUBLIC KEY BLOCK-{5}(.*\n)*-{5}END PGP PUBLIC KEY BLOCK-{5}$/;
+const PGP_KEY_REGEX = /^-{5}BEGIN PGP (PUBLIC|PRIVATE) KEY BLOCK-{5}(.*\n)*-{5}END PGP (PUBLIC|PRIVATE) KEY BLOCK-{5}$/;
 
 /**
  * Reads an armored PGP public key and returns the corresponding OpenPGP key object.
@@ -24,8 +24,8 @@ export const readPgpPublicKey = async ({
   publicKey: string;
   config?: PartialConfig;
 }): Promise<Key> => {
-  const match = publicKey.trim().match(PUBLIC_KEY_REGEX);
-  if (!match) {
+  const keyMatch = publicKey.trim().match(PGP_KEY_REGEX);
+  if (!keyMatch) {
     throw new Error('Misformed armored text');
   }
   const readPublicKey: PublicKey = await readKey({ armoredKey: publicKey, config });

@@ -97,9 +97,7 @@ describe('PGP functions', () => {
     });
 
     it('should throw error if no key is supplied', async () => {
-      expect(readPgpPublicKey({ publicKey: '' })).rejects.toThrow(
-        'readKey: must pass options object containing `armoredKey` or `binaryKey`'
-      );
+      expect(readPgpPublicKey({ publicKey: '' })).rejects.toThrow('Misformed armored text');
     });
   });
 
