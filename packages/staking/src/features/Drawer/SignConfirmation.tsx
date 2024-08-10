@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { Button, Password, PostHogAction, inputProps } from '@lace/common';
+import { Button, Password, PostHogAction } from '@lace/common';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -15,14 +15,12 @@ interface SignConfirmationProps {
 export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    password: { password, setPassword },
+    password: { setPassword },
     submittingState: { isPasswordValid },
     signPolicy,
     isSharedWallet,
     walletName,
   } = useOutsideHandles();
-
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
 
   return (
     <>
@@ -56,9 +54,9 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
         <div className={styles.password}>
           <Password
             className={styles.passwordInput}
-            onChange={handleChange}
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            value={password!}
+            onChange={({ value }) => {
+              setPassword(value);
+            }}
             error={isPasswordValid === false}
             errorMessage={t('drawer.sign.error.invalidPassword')}
             label={t('drawer.sign.passwordPlaceholder')}
