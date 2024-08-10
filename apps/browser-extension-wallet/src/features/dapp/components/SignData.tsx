@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { Button, inputProps, Password } from '@lace/common';
+import { Button, OnPasswordChange, Password } from '@lace/common';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
@@ -40,7 +40,7 @@ export const SignData = (): React.ReactElement => {
     }
   }, [password, redirectToSignFailure, redirectToSignSuccess, request]);
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;
@@ -56,7 +56,6 @@ export const SignData = (): React.ReactElement => {
           </h5>
           <Password
             onChange={handleChange}
-            value={password}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
           />

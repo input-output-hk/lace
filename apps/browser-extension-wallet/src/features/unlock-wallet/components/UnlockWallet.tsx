@@ -9,7 +9,6 @@ import { ForgotPassword } from './ForgotPassword';
 interface PasswordInput {
   handleChange?: PasswordProps['onChange'];
   invalidPass?: PasswordProps['error'];
-  value?: PasswordProps['value'];
 }
 
 export interface UnlockWalletProps {
@@ -41,7 +40,6 @@ export const UnlockWallet = ({
           <Password
             errorMessage={t('general.errors.invalidPassword')}
             error={passwordInput.invalidPass}
-            value={passwordInput.value}
             onChange={passwordInput.handleChange}
             onPressEnter={(e) => {
               e.preventDefault();

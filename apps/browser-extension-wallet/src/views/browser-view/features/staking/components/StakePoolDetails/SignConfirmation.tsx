@@ -2,7 +2,7 @@
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { Button, inputProps, Password, useObservable } from '@lace/common';
+import { Button, OnPasswordChange, Password, useObservable } from '@lace/common';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
@@ -19,10 +19,10 @@ type SignConfirmationProps = {
 
 export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { password, setPassword } = usePassword();
+  const { setPassword } = usePassword();
   const { isPasswordValid } = useSubmitingState();
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
 
   return (
     <>
@@ -39,7 +39,6 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
           <Password
             className={styles.passwordInput}
             onChange={handleChange}
-            value={password}
             error={isPasswordValid === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             label={t('browserView.transaction.send.password.placeholder')}

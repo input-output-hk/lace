@@ -1,20 +1,26 @@
-import { Input, InputProps, InputRef } from 'antd';
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import { InputProps } from 'antd';
+import React, { ReactElement, useRef } from 'react';
 import styles from './Password.module.scss';
 import { ReactComponent as OpenEye } from '../../../assets/icons/eye.component.svg';
 import { ReactComponent as CloseEye } from '../../../assets/icons/eyeDisabled.component.svg';
 import cn from 'classnames';
 import { useAutoFocus } from '@src/ui/hooks';
 
+export type Password = {
+  input: HTMLInputElement;
+  // TODO: convert this to UInt8Array
+  value: string;
+};
+export type OnPasswordChange = (password: Password) => void;
 export type PasswordProps = {
   error?: boolean;
   autoFocus?: boolean;
   errorMessage?: string;
   wrapperClassName?: string;
   label?: string;
-  value: string;
   dataTestId?: string;
-} & InputProps;
+  onChange: OnPasswordChange;
+} & Omit<InputProps, 'onChange' | 'value'>;
 
 export const getVisibilityIcon = (visible: boolean): ReactElement =>
   visible ? (
@@ -30,26 +36,21 @@ export const Password = ({
   dataTestId = 'password-input',
   placeholder,
   onChange,
-  value,
   label,
   autoFocus = false,
   ...rest
 }: PasswordProps): React.ReactElement => {
-  const inputRef = useRef<InputRef>();
-  const [localVal, setLocalVal] = useState<string>('');
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>();
+  // const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const onValChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalVal(e?.target?.value ?? '');
-    onChange?.(e);
+    onChange?.({ input: e.target, value: e.target.value });
   };
 
-  useEffect(() => setLocalVal(value), [value]);
-
-  const handleVisibilitySwitch = (visible: boolean) => {
-    setIsVisible(visible);
-    return getVisibilityIcon(visible);
-  };
+  // const handleVisibilitySwitch = (visible: boolean) => {
+  //   setIsVisible(visible);
+  //   return getVisibilityIcon(visible);
+  // };
 
   useAutoFocus(inputRef, !!autoFocus);
 
@@ -59,23 +60,24 @@ export const Password = ({
       data-testid="password-input-container"
     >
       <span className={styles.inputWrapper}>
-        <Input.Password
+        {/* TODO: replace this with some prettier input; antd input makes password stay in-memory */}
+        <input
+          type="password"
           ref={inputRef}
           onChange={onValChange}
           data-testid={dataTestId}
           spellCheck={false}
           placeholder={placeholder}
-          {...(label && {
-            prefix: <div className={cn(styles.label, { [styles.filled]: localVal })}>{label}</div>
-          })}
-          value={localVal}
-          {...rest}
+          // {...(label && {
+          //   prefix: <div className={cn(styles.label, { [styles.filled]: inputRef.current?.value })}>{label}</div>
+          // })}
+          // {...rest}
           className={cn(styles.inputPassword, {
             [rest.className]: rest.className,
-            [styles.withLabel]: label && localVal,
-            [styles.largeDots]: !isVisible
+            [styles.withLabel]: label && inputRef.current?.value
+            // [styles.largeDots]: !isVisible
           })}
-          iconRender={(visible) => handleVisibilitySwitch(visible)}
+          // iconRender={(visible) => handleVisibilitySwitch(visible)}
           autoComplete="new-password"
         />
         {error && <p data-testid="password-input-error">{errorMessage}</p>}

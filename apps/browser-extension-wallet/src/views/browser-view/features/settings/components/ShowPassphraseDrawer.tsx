@@ -5,10 +5,10 @@ import {
   Drawer,
   DrawerHeader,
   DrawerNavigation,
-  inputProps,
   Password,
   Banner,
-  useKeyboardShortcut
+  useKeyboardShortcut,
+  OnPasswordChange
 } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
@@ -56,7 +56,7 @@ export const ShowPassphraseDrawer = ({
 
   const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
   const toggleBlurWords = () => {
     setBlurWords(!blurWords);
     if (!blurWords) {
@@ -176,7 +176,6 @@ export const ShowPassphraseDrawer = ({
                 <Password
                   className={styles.passwordInput}
                   onChange={handleChange}
-                  value={password}
                   error={!isPasswordValid}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}

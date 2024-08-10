@@ -37,28 +37,24 @@ export const PasswordVerification = ({
   return (
     <div className={styles.container}>
       <Password {...rest} />
-
-      {rest.value && (
-        <>
-          <div className={styles.complexityLevel}>
-            {complexityBarList.map(({ isActive }, idx) => (
-              <div
-                key={`bar-level-${idx}`}
-                data-testid={isActive ? 'bar-level-active' : 'bar-level-inactive'}
-                className={classnames(styles.complexityLevelBar, { [levelBarBgColor]: isActive })}
-              />
-            ))}
-          </div>
-          {feedbacks && (
-            <div className={styles.feedbackList} data-testid="password-feedback">
-              {feedbacks.map((feedback, idx) => (
-                <p key={`feedback-${idx}`} className={styles.feedbackMessage}>
-                  {feedback}
-                </p>
-              ))}
-            </div>
-          )}
-        </>
+      {/* TODO: only render this when password value is not empty */}
+      <div className={styles.complexityLevel}>
+        {complexityBarList.map(({ isActive }, idx) => (
+          <div
+            key={`bar-level-${idx}`}
+            data-testid={isActive ? 'bar-level-active' : 'bar-level-inactive'}
+            className={classnames(styles.complexityLevelBar, { [levelBarBgColor]: isActive })}
+          />
+        ))}
+      </div>
+      {feedbacks && (
+        <div className={styles.feedbackList} data-testid="password-feedback">
+          {feedbacks.map((feedback, idx) => (
+            <p key={`feedback-${idx}`} className={styles.feedbackMessage}>
+              {feedback}
+            </p>
+          ))}
+        </div>
       )}
     </div>
   );

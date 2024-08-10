@@ -4,7 +4,6 @@ import { Password, PasswordProps } from '@lace/common';
 import styles from './styles.module.scss';
 
 export interface WalletPasswordConfirmationInputProps {
-  value: string;
   label: string;
   isVisible: boolean;
   shouldShowErrorMessage?: boolean;
@@ -13,7 +12,6 @@ export interface WalletPasswordConfirmationInputProps {
 }
 
 export const WalletPasswordConfirmationInput = ({
-  value,
   label,
   isVisible,
   onChange,
@@ -27,7 +25,6 @@ export const WalletPasswordConfirmationInput = ({
   >
     <Password
       className={styles.input}
-      value={value}
       label={label}
       onChange={onChange}
       data-testid="wallet-password-confirmation-input"

@@ -1,7 +1,7 @@
 import { Spin, Typography } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Banner, inputProps, Password } from '@lace/common';
+import { Banner, OnPasswordChange, Password } from '@lace/common';
 import { renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import styles from '../../SettingsLayout.module.scss';
@@ -17,7 +17,6 @@ const { Text } = Typography;
 interface CollateralStepSendProps {
   txFee: Cardano.Lovelace;
   popupView?: boolean;
-  password: string;
   setPassword: (password: string) => void;
   isInMemory: boolean;
   isPasswordValid: boolean;
@@ -27,7 +26,6 @@ interface CollateralStepSendProps {
 
 export const CollateralStepSend = ({
   popupView = false,
-  password,
   setPassword,
   isInMemory,
   isPasswordValid,
@@ -36,9 +34,9 @@ export const CollateralStepSend = ({
   hasEnoughAda
 }: CollateralStepSendProps): JSX.Element => {
   const { t } = useTranslation();
-  const handlePasswordChange: inputProps['onChange'] = ({ target: { value } }) => {
+  const handlePasswordChange: OnPasswordChange = (target) => {
     setIsPasswordValid(true);
-    return setPassword(value);
+    return setPassword(target.value);
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
@@ -64,7 +62,6 @@ export const CollateralStepSend = ({
               <Spin spinning={false}>
                 <Password
                   onChange={handlePasswordChange}
-                  value={password}
                   error={isPasswordValid === false}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}

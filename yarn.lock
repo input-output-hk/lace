@@ -11227,6 +11227,7 @@ __metadata:
     react-dom: 17.0.2
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
+    rxjs: 7.4.0
     sass: ^1.68.0
     storybook: ^7.4.3
     storybook-addon-pseudo-states: ^1.15.2

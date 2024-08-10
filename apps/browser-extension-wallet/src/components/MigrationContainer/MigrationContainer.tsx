@@ -10,6 +10,7 @@ import { Lock } from '@src/views/browser-view/components/Lock';
 import { MainLoader } from '@components/MainLoader';
 import { FailedMigration } from './FailedMigration';
 import { MigrationInProgress } from './MigrationInProgress';
+import { OnPasswordChange } from '@lace/common';
 
 export interface MigrationContainerProps {
   children: React.ReactNode;
@@ -40,12 +41,12 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
     if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, password);
   }, [migrationState, password, appMode]);
 
-  const handlePasswordChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = useCallback<OnPasswordChange>(
+    (target) => {
       if (!isValidPassword) {
         setIsValidPassword(true);
       }
-      setPassword(value);
+      setPassword(target.value);
     },
     [isValidPassword]
   );
@@ -141,7 +142,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       <UnlockWallet
         isLoading={isVerifyingPassword}
         onUnlock={onUnlock}
-        passwordInput={{ value: password, handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
+        passwordInput={{ handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
         unlockButtonDisabled={password === ''}
         // TODO: show forgot password here too. Use same logic as in ResetDataError on click
         showForgotPassword={false}
