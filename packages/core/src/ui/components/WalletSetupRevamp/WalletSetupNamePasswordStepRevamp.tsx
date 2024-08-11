@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { OnPasswordChange, PasswordVerification } from '@lace/common';
+import { OnPasswordChange } from '@ui/components/Password';
+import { PasswordVerification } from '@ui/components/PasswordVerification';
 import { WalletTimelineSteps } from '../WalletSetup/WalletSetupStepLayout';
 import { BarStates, WalletSetupNamePasswordSubmitParams } from '../WalletSetup/WalletSetupNamePasswordStep/types';
 import {

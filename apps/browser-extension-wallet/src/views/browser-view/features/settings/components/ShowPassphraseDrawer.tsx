@@ -1,19 +1,10 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
-import {
-  Button,
-  Drawer,
-  DrawerHeader,
-  DrawerNavigation,
-  Password,
-  Banner,
-  useKeyboardShortcut,
-  OnPasswordChange
-} from '@lace/common';
+import { Button, Drawer, DrawerHeader, DrawerNavigation, Banner, useKeyboardShortcut } from '@lace/common';
+import { Password, OnPasswordChange, MnemonicWordsWritedown } from '@lace/core';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
-import { MnemonicWordsWritedown } from '@lace/core';
 import { useWalletManager } from '@hooks';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 

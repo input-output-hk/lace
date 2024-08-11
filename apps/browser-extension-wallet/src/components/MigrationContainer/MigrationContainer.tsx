@@ -10,7 +10,7 @@ import { Lock } from '@src/views/browser-view/components/Lock';
 import { MainLoader } from '@components/MainLoader';
 import { FailedMigration } from './FailedMigration';
 import { MigrationInProgress } from './MigrationInProgress';
-import { OnPasswordChange } from '@lace/common';
+import { OnPasswordChange } from '@lace/core';
 
 export interface MigrationContainerProps {
   children: React.ReactNode;

@@ -1,6 +1,6 @@
 import cn from 'classnames';
 import React from 'react';
-import { Password, PasswordProps } from '@lace/common';
+import { Password, PasswordProps } from '@ui/components/Password';
 import styles from './styles.module.scss';
 
 export interface WalletPasswordConfirmationInputProps {

@@ -39,7 +39,7 @@ import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
 import { AnyBip32Wallet, AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { Password } from '@lace/common';
+import { PasswordObj as Password } from '@lace/core';
 
 (walletApiUi as any).logger = console;
 

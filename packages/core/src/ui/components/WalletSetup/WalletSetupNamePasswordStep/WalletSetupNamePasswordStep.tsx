@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLayout';
-import { OnPasswordChange, PasswordVerification } from '@lace/common';
+import { OnPasswordChange } from '@ui/components/Password';
+import { PasswordVerification } from '@ui/components/PasswordVerification';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
 import { BarStates, LegacyWalletSetupNamePasswordSubmitParams } from './types';
 import styles from './styles.module.scss';

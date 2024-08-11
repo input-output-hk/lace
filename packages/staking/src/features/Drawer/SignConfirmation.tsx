@@ -1,6 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { Button, Password, PostHogAction } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
+import { Password } from '@lace/core';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';

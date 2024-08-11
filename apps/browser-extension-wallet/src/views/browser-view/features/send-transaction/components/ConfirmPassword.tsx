@@ -1,5 +1,5 @@
 import React from 'react';
-import { OnPasswordChange, Password } from '@lace/common';
+import { OnPasswordChange, Password } from '@lace/core';
 import styles from './ConfirmPassword.module.scss';
 import { useSubmitingState, usePassword } from '../store';
 import { useTranslation } from 'react-i18next';

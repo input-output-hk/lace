@@ -1,8 +1,8 @@
 import { Spin, Typography } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Banner, OnPasswordChange, Password } from '@lace/common';
-import { renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
+import { Banner } from '@lace/common';
+import { OnPasswordChange, Password, renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import styles from '../../SettingsLayout.module.scss';
 import { useFetchCoinPrice } from '@hooks';

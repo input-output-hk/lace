@@ -1,4 +1,5 @@
-import { Password, useObservable } from '@lace/common';
+import { useObservable } from '@lace/common';
+import { PasswordObj as Password } from '@ui/components/Password';
 import { BehaviorSubject } from 'rxjs';
 
 const NO_PASSWORD: Partial<Password> = {};

@@ -2,7 +2,8 @@
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { Button, OnPasswordChange, Password, useObservable } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
+import { Password, OnPasswordChange } from '@lace/core';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
