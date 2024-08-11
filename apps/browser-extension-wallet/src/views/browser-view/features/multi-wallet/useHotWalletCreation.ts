@@ -43,12 +43,14 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   }, [createWalletData.name, walletManager.walletRepository]);
 
   const createWallet = async () => {
-    const passwordEl: HTMLInputElement = document.querySelector('#lol-if-works');
+    const passwordEl: HTMLInputElement = document.querySelector('#lace-password-input');
+    const passwordConfirmEl: HTMLInputElement = document.querySelector('#lace-password-confirm-input');
     // setPassword('');
     // setPasswordConfirm('');
 
     const wallet = await walletManager.createWallet({ ...createWalletData, password: passwordEl.value });
     passwordEl.value = '';
+    passwordConfirmEl.value = '';
     return wallet;
   };
 

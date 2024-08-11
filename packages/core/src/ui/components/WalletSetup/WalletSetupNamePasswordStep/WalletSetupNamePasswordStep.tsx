@@ -12,7 +12,7 @@ import {
   WALLET_NAME_INPUT_MAX_LENGTH
 } from './utils';
 import { WalletNameInput } from './WalletNameInput';
-import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
+// import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
 import { TranslationsFor } from '@ui/utils/types';
 import { useTranslation } from 'react-i18next';
 
@@ -45,8 +45,10 @@ export const WalletSetupNamePasswordStep = ({
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
+  // const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [passwordConfirmation] = useState('');
+  // const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
+  const [passHasBeenValidated] = useState<boolean>(false);
 
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
@@ -85,10 +87,10 @@ export const WalletSetupNamePasswordStep = ({
     onChange?.({ password: value, name: walletName });
   };
 
-  const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    setPassHasBeenValidated(true);
-    setPasswordConfirmation(target.value);
-  };
+  // const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+  //   setPassHasBeenValidated(true);
+  //   setPasswordConfirmation(target.value);
+  // };
 
   const handleNextButtonClick = () => {
     onNext({ walletName });
@@ -114,7 +116,7 @@ export const WalletSetupNamePasswordStep = ({
           errorMessage={walletNameErrorMessage}
         />
         <PasswordVerification
-          className={styles.input}
+          id="dead-code"
           value={password}
           label={translations.passwordInputLabel}
           onChange={handlePasswordChange}
@@ -123,14 +125,14 @@ export const WalletSetupNamePasswordStep = ({
           complexityBarList={complexityBarList}
           data-testid="wallet-password-verification-input"
         />
-        <WalletPasswordConfirmationInput
-          isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}
-          value={passwordConfirmation}
-          onChange={handlePasswordConfirmationChange}
-          label={translations.confirmPasswordInputLabel}
-          errorMessage={passwordConfirmationErrorMessage}
-          shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
-        />
+        {/* <WalletPasswordConfirmationInput */}
+        {/*   isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED} */}
+        {/*   value={passwordConfirmation} */}
+        {/*   onChange={handlePasswordConfirmationChange} */}
+        {/*   label={translations.confirmPasswordInputLabel} */}
+        {/*   errorMessage={passwordConfirmationErrorMessage} */}
+        {/*   shouldShowErrorMessage={!!passwordConfirmationErrorMessage} */}
+        {/* /> */}
       </div>
     </WalletSetupStepLayout>
   );

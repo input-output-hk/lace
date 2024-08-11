@@ -1,22 +1,22 @@
 import React, { useMemo, useState } from 'react';
-// import { PasswordVerification } from '@lace/common';
+import { PasswordVerification } from '@lace/common';
 // import { useSecrets } from '../../hooks';
 import { WalletTimelineSteps } from '../WalletSetup/WalletSetupStepLayout';
-import { /* BarStates, */ WalletSetupNamePasswordSubmitParams } from '../WalletSetup/WalletSetupNamePasswordStep/types';
+import { BarStates, WalletSetupNamePasswordSubmitParams } from '../WalletSetup/WalletSetupNamePasswordStep/types';
 import {
-  // getComplexityBarStateList,
-  // MINIMUM_PASSWORD_LEVEL_REQUIRED,
-  // passwordStrengthFeedbackMap,
+  getComplexityBarStateList,
+  MINIMUM_PASSWORD_LEVEL_REQUIRED,
+  passwordStrengthFeedbackMap,
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
 } from '../WalletSetup/WalletSetupNamePasswordStep/utils';
 import { WalletNameInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletNameInput';
-// import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
+import { WalletPasswordConfirmationInput } from '../WalletSetup/WalletSetupNamePasswordStep/WalletPasswordConfirmationInput';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { TranslationsFor } from '@ui/utils/types';
-// import { passwordComplexity } from '@ui/utils/password-complexity';
+import { passwordComplexity } from '@ui/utils/password-complexity';
 import styles from '../WalletSetup/WalletSetupNamePasswordStep/styles.module.scss';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
@@ -45,19 +45,32 @@ export const WalletSetupNamePasswordStepRevamp = ({
   onChange,
   translations
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
   // const secrets = useSecrets();
   const [nextButtonLoading, setNextButtonLoading] = useState(false);
-  // const [passHasBeenValidated] = useState(true);
+  const [passHasBeenValidated] = useState(true);
   const [walletName, setWalletName] = useState(initialWalletName);
   const [shouldShowNameErrorMessage, setShouldShowNameErrorMessage] = useState(false);
 
-  // const { score } = useMemo(() => passwordComplexity(secrets.password), [secrets.password]);
+  const { score } = useMemo(() => {
+    const passwordInput = document.querySelector<HTMLInputElement>('#lace-password-input') || { value: '' };
+    return passwordComplexity(passwordInput.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletName]);
 
-  // const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
+  const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
 
-  // const passwordConfirmationErrorMessage =
-  //   passHasBeenValidated && secrets.password !== secrets.passwordConfirm ? translations.noMatchPassword : '';
+  const passwordConfirmationErrorMessage = useMemo(() => {
+    const passwordInput = document.querySelector<HTMLInputElement>('#lace-password-input') || { value: '' };
+    const passwordConfirmInput = document.querySelector<HTMLInputElement>('#lace-password-confirm-input') || {
+      value: ''
+    };
+
+    return passHasBeenValidated && passwordInput.value !== passwordConfirmInput.value
+      ? translations.noMatchPassword
+      : '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletName]);
 
   const walletNameErrorMessage = useMemo(() => {
     const validationError = validateNameLength(walletName) ? translations.nameMaxLength : '';
@@ -122,25 +135,21 @@ export const WalletSetupNamePasswordStepRevamp = ({
           shouldShowErrorMessage={shouldShowNameErrorMessage}
           errorMessage={walletNameErrorMessage}
         />
-        <input id="lol-if-works" style={{ color: 'red' }} type="password" />
-        {/* <PasswordVerification */}
-        {/*   className={styles.input} */}
-        {/*   value={password} */}
-        {/*   label={translations.passwordInputLabel} */}
-        {/*   onChange={handlePasswordChange} */}
-        {/*   level={score} */}
-        {/*   feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]} */}
-        {/*   complexityBarList={complexityBarList} */}
-        {/*   data-testid="wallet-password-verification-input" */}
-        {/* /> */}
-        {/* <WalletPasswordConfirmationInput */}
-        {/*   isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED} */}
-        {/*   value={passwordConfirm} */}
-        {/*   onChange={handlePasswordConfirmationChange} */}
-        {/*   label={translations.confirmPasswordInputLabel} */}
-        {/*   errorMessage={passwordConfirmationErrorMessage} */}
-        {/*   shouldShowErrorMessage={!!passwordConfirmationErrorMessage} */}
-        {/* /> */}
+        <PasswordVerification
+          id="lace-password-input"
+          label={translations.passwordInputLabel}
+          level={score}
+          feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]}
+          complexityBarList={complexityBarList}
+          data-testid="wallet-password-verification-input"
+        />
+        <WalletPasswordConfirmationInput
+          id="lace-password-confirm-input"
+          isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}
+          label={translations.confirmPasswordInputLabel}
+          errorMessage={passwordConfirmationErrorMessage}
+          shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
+        />
       </div>
     </WalletSetupStepLayoutRevamp>
   );

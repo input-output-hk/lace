@@ -1,22 +1,21 @@
 import cn from 'classnames';
 import React from 'react';
-import { Password, PasswordProps } from '@lace/common';
+import { Password } from '@lace/common';
 import styles from './styles.module.scss';
 
 export interface WalletPasswordConfirmationInputProps {
-  value: string;
+  id: string;
   label: string;
   isVisible: boolean;
   shouldShowErrorMessage?: boolean;
   errorMessage?: string;
-  onChange: PasswordProps['onChange'];
+  onChange?: () => void;
 }
 
 export const WalletPasswordConfirmationInput = ({
-  value,
+  id,
   label,
   isVisible,
-  onChange,
   shouldShowErrorMessage,
   errorMessage
 }: WalletPasswordConfirmationInputProps): React.ReactElement => (
@@ -25,13 +24,7 @@ export const WalletPasswordConfirmationInput = ({
       [styles.passwordConfirmationContainerVissible]: isVisible
     })}
   >
-    <Password
-      className={styles.input}
-      value={value}
-      label={label}
-      onChange={onChange}
-      data-testid="wallet-password-confirmation-input"
-    />
+    <Password id={id} label={label} data-testid="wallet-password-confirmation-input" />
     {shouldShowErrorMessage && (
       <p
         className={cn(styles.paragraph, { [styles.error]: shouldShowErrorMessage })}

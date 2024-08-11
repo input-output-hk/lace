@@ -85,7 +85,8 @@ export const WalletSetupPasswordStep = ({
     >
       <div className={styles.walletSetupPasswordStep}>
         <PasswordVerification
-          className={styles.input}
+          id="dead-code"
+          // className={styles.input}
           value={password}
           label={translations.password}
           onChange={(e) => setPassword(e.target.value)}
@@ -97,7 +98,8 @@ export const WalletSetupPasswordStep = ({
         />
         <div style={{ position: 'relative' }}>
           <Password
-            className={styles.input}
+            id="dead-code"
+            // className={styles.input}
             errorMessage={passwordConfirmationErrorMessage}
             value={passwordConfirmation}
             label={translations.confirmPassword}

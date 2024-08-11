@@ -55,7 +55,8 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
       <div className={cn(styles.container, { [styles.popupView!]: popupView })}>
         <div className={styles.password}>
           <Password
-            className={styles.passwordInput}
+            id="staking-sign-confirmation-password"
+            // className={styles.passwordInput}
             onChange={handleChange}
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             value={password!}
