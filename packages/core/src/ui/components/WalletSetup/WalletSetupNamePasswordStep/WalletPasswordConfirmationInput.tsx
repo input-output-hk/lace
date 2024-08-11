@@ -28,14 +28,8 @@ export const WalletPasswordConfirmationInput = ({
       label={label}
       onChange={onChange}
       data-testid="wallet-password-confirmation-input"
+      errorMessage={errorMessage}
+      error={shouldShowErrorMessage}
     />
-    {shouldShowErrorMessage && (
-      <p
-        className={cn(styles.paragraph, { [styles.error]: shouldShowErrorMessage })}
-        data-testid="wallet-password-confirmation-input-error"
-      >
-        {errorMessage}
-      </p>
-    )}
   </div>
 );

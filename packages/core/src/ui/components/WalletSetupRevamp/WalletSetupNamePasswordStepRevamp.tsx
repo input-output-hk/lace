@@ -125,6 +125,7 @@ export const WalletSetupNamePasswordStepRevamp = ({
           feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]}
           complexityBarList={complexityBarList}
           data-testid="wallet-password-verification-input"
+          hasValue={!!password.value}
         />
         <WalletPasswordConfirmationInput
           isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}

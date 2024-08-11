@@ -19,16 +19,17 @@ export type PasswordProps = {
 const noop = (): void => void 0;
 const mapProps = (props: PasswordProps): UncontrolledPasswordBoxProps => ({
   ...props,
-  // TODO: map all props; some might have different names
-  testId: props.dataTestId,
+  testId: props.dataTestId || props['data-testid'],
   label: props.label || '',
   size: undefined,
   prefix: undefined,
-  onSubmit: props.onSubmit || noop
+  onSubmit: props.onSubmit || noop,
+  containerClassName: props.wrapperClassName,
+  errorMessage: props.error ? props.errorMessage : undefined
 });
 
 export const Password = ({
-  errorMessage = 'invalid password',
+  errorMessage = '',
   dataTestId = 'password-input',
   autoFocus = false,
   ...rest

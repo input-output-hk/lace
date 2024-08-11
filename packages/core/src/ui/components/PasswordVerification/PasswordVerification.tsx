@@ -16,12 +16,14 @@ export type PasswordVerificationProps = {
   complexityBarList: Array<{
     isActive?: boolean;
   }>;
+  hasValue: boolean;
 } & PasswordProps;
 
 export const PasswordVerification = ({
   level,
   feedbacks,
   complexityBarList,
+  hasValue,
   ...rest
 }: PasswordVerificationProps): React.ReactElement => {
   const isLowLevelSecurity = level <= complexityLevels.low;
@@ -33,28 +35,30 @@ export const PasswordVerification = ({
     [styles.mid]: isMidLevelSecurity,
     [styles.high]: isHighLevelSecurity
   });
-
   return (
     <div className={styles.container}>
       <Password {...rest} />
-      {/* TODO: only render this when password value is not empty */}
-      <div className={styles.complexityLevel}>
-        {complexityBarList.map(({ isActive }, idx) => (
-          <div
-            key={`bar-level-${idx}`}
-            data-testid={isActive ? 'bar-level-active' : 'bar-level-inactive'}
-            className={classnames(styles.complexityLevelBar, { [levelBarBgColor]: isActive })}
-          />
-        ))}
-      </div>
-      {feedbacks && (
-        <div className={styles.feedbackList} data-testid="password-feedback">
-          {feedbacks.map((feedback, idx) => (
-            <p key={`feedback-${idx}`} className={styles.feedbackMessage}>
-              {feedback}
-            </p>
-          ))}
-        </div>
+      {hasValue && (
+        <>
+          <div className={styles.complexityLevel}>
+            {complexityBarList.map(({ isActive }, idx) => (
+              <div
+                key={`bar-level-${idx}`}
+                data-testid={isActive ? 'bar-level-active' : 'bar-level-inactive'}
+                className={classnames(styles.complexityLevelBar, { [levelBarBgColor]: isActive })}
+              />
+            ))}
+          </div>
+          {feedbacks && (
+            <div className={styles.feedbackList} data-testid="password-feedback">
+              {feedbacks.map((feedback, idx) => (
+                <p key={`feedback-${idx}`} className={styles.feedbackMessage}>
+                  {feedback}
+                </p>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
