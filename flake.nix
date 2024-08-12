@@ -15,7 +15,7 @@
     ogmios.url = "github:CardanoSolutions/ogmios/v6.5.0";
     ogmios.flake = false;
 
-    mithril.url = "github:input-output-hk/mithril/2430.0";
+    mithril.url = "github:input-output-hk/mithril/pull/1885/head"; # file:// URL support on 2430.0
 
     nix-bundle-exe.url = "github:3noch/nix-bundle-exe";
     nix-bundle-exe.flake = false;

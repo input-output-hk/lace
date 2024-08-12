@@ -259,17 +259,5 @@ in rec {
     ${lib.getExe pkgs.python3} -m http.server ${toString port}
   '';
 
-  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
-    cp ${common.mithril-bin}/mithril-client ./
-
-    chmod +wx mithril-client
-    patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} \
-      --set-rpath ${with pkgs; lib.makeLibraryPath [ glibc glibc.libgcc openssl_1_1 ]} \
-      mithril-client
-
-    mkdir -p $out/bin
-    cp mithril-client $out/bin
-    $out/bin/mithril-client --version
-  '';
-
+  mithril-client = lib.recursiveUpdate { meta.mainProgram = "mithril-client"; } common.mithril-bin;
 }

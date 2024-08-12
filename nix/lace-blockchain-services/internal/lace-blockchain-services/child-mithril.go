@@ -65,7 +65,7 @@ func childMithril(appConfig appconfig.AppConfig) func(SharedState, chan<- Status
 	const SInitializing = "initializing"
 	const SCheckingDisk = "checking local disk info"
 	const SCertificates = "fetching & verifying cert info"
-	const SDownloading = "downloading"
+	const SDownloadingUnpacking = "downloading & unpacking"
 	const SDigest = "computing digest"
 	const SVerifyingSignature = "verifying signature"
 	const SGoodSignature = "good signature"
@@ -206,12 +206,12 @@ func childMithril(appConfig appconfig.AppConfig) func(SharedState, chan<- Status
 				return
 			}
 			if strings.Index(line, "3/5 - Downloading and unpacking the cardano db") != -1 {
-				currentStatus = SDownloading
+				currentStatus = SDownloadingUnpacking
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
-			if currentStatus == SDownloading {
+			if currentStatus == SDownloadingUnpacking {
 				if ms := reProgress.FindStringSubmatch(line); len(ms) > 0 {
 					numDone, _ := strconv.ParseFloat(ms[1], 64)
 					unitDone := ms[2]
@@ -225,7 +225,7 @@ func childMithril(appConfig appconfig.AppConfig) func(SharedState, chan<- Status
 					unitTimeRemaining := ms[6]
 					timeRemaining := numTimeRemaining * float64(unitToSeconds(unitTimeRemaining))
 
-					statusCh <- StatusAndUrl { Status: SDownloading, Progress: done/total,
+					statusCh <- StatusAndUrl { Status: SDownloadingUnpacking, Progress: done/total,
 						TaskSize: total, SecondsLeft: timeRemaining, OmitUrl: true }
 					return // there would be no way to have `else if` here, hence early return
 				}
@@ -272,7 +272,7 @@ func childMithril(appConfig appconfig.AppConfig) func(SharedState, chan<- Status
 			line = strings.TrimSpace(line)
 
 			// Debounce the download progress bar, it’s way too frequent:
-			if currentStatus == SDownloading {
+			if currentStatus == SDownloadingUnpacking {
 				if ms := reProgress.FindStringSubmatch(line); len(ms) > 0 {
 					if time.Since(downloadProgressLastEmitted) >= 333 * time.Millisecond {
 						downloadProgressLastEmitted = time.Now()

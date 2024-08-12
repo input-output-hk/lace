@@ -722,7 +722,12 @@ in rec {
 
   mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
     mkdir -p $out
-    cp ${common.mithril-bin}/mithril-client.exe $out/
+    if [[ ${common.mithril-bin} == *.tar.* ]]; then
+      tar -xf ${common.mithril-bin}
+    else
+      ${lib.getExe pkgs.unzip} ${common.mithril-bin}
+    fi
+    cp mithril-client.exe $out/
     cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/x64/vcruntime140.dll $out/
   '';
 

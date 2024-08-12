@@ -7,7 +7,9 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"strings"
+	"path/filepath"
 
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
@@ -62,7 +64,7 @@ func handler(
 					http.Error(w, "Invalid Method", http.StatusMethodNotAllowed)
 					return
 				}
-				jsonObj, err := getSnapshotMetadata(network, forced[network].Digest, ourPort)
+				jsonObj, err := getSnapshotMetadata(network, forced[network].Digest, ourPort, forced[network].LocalPath)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusBadGateway)
 					return
@@ -76,7 +78,7 @@ func handler(
 					http.Error(w, "Invalid Method", http.StatusMethodNotAllowed)
 					return
 				}
-				jsonObj, err := getSnapshotMetadata(network, forced[network].Digest, ourPort)
+				jsonObj, err := getSnapshotMetadata(network, forced[network].Digest, ourPort, forced[network].LocalPath)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusBadGateway)
 					return
@@ -126,7 +128,7 @@ func handler(
 	}
 }}
 
-func getSnapshotMetadata(network string, digest string, ourPort int) (interface{}, error) {
+func getSnapshotMetadata(network string, digest string, ourPort int, localPath string) (interface{}, error) {
 	resp, err := http.Get(upstream[network] + "/artifact/snapshot/" + digest)
 	if err != nil {
 		return nil, fmt.Errorf("mithril-cache upstream error: %v", err)
@@ -147,7 +149,11 @@ func getSnapshotMetadata(network string, digest string, ourPort int) (interface{
 		return nil, fmt.Errorf("mithril-cache upstream JSON unmarshal error: %v", err)
 	}
 
-	localUrl := fmt.Sprintf("http://127.0.0.1:%d/%s/%s", ourPort, network, localSnapshotHttpName)
+	// localUrl := fmt.Sprintf("http://127.0.0.1:%d/%s/%s", ourPort, network, localSnapshotHttpName)
+	localUrl, err := localPathToFileScheme(localPath)
+	if err != nil {
+		return nil, err
+	}
 
 	jsonObj["locations"] = []string{ localUrl }
 
@@ -162,4 +168,25 @@ func PrefixMatch[T any](m map[string]T, key string) (T, bool) {
     }
     var zero T
     return zero, false
+}
+
+func localPathToFileScheme(path string) (string, error) {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	absPath = filepath.ToSlash(absPath)
+
+	// Add an extra slash on Windows:
+	leadingSlash := "/"
+	if strings.HasPrefix(absPath, "/") {
+		leadingSlash = ""
+	}
+
+	fileUrl, err := url.Parse("file://" + leadingSlash + absPath)
+	if err != nil {
+		return "", err
+	}
+
+	return fileUrl.String(), nil
 }
