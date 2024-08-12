@@ -5,6 +5,7 @@ import {
   Button,
   DownloadComponent as DownloadIcon,
   Flex,
+  Text,
   PrinterComponent as PrinterIcon
 } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
@@ -118,7 +119,7 @@ export const SavePaperWallet: VFC = () => {
               >
                 <Button.Primary
                   disabled={pdfInstance.loading || !!pdfInstance.error}
-                  w={'$fill'}
+                  w="$fill"
                   label={i18n.t('paperWallet.savePaperWallet.downloadBtnLabel')}
                   icon={<DownloadIcon />}
                 />
@@ -136,12 +137,19 @@ export const SavePaperWallet: VFC = () => {
                 label={i18n.t('paperWallet.savePaperWallet.printBtnLabel')}
               />
             </Flex>
-            <Button.CallToAction
-              onClick={handleNext}
-              disabled={!hasStoredPaperWallet}
-              w="$fill"
-              label={i18n.t('core.walletSetupStep.enterWallet')}
-            />
+            <Flex flexDirection="column">
+              {hasStoredPaperWallet && (
+                <Text.Label color="secondary" className={styles.centerAlign}>
+                  {i18n.t('paperWallet.savePaperWallet.pleaseSaveOrPrintLabel')}
+                </Text.Label>
+              )}
+              <Button.CallToAction
+                onClick={handleNext}
+                disabled={!hasStoredPaperWallet}
+                w="$fill"
+                label={i18n.t('core.walletSetupStep.enterWallet')}
+              />
+            </Flex>
           </Flex>
         </Flex>
       </WalletSetupStepLayoutRevamp>

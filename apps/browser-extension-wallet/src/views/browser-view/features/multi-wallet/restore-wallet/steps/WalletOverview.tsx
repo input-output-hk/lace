@@ -116,7 +116,7 @@ export const WalletOverview = (): JSX.Element => {
 
   const balanceSubtitle = useMemo(() => {
     // Ignore subtitle if loading, or if data could not be fetched
-    if (isLoading || (!isLoading && !walletBalances.fetched)) return;
+    if (isLoading || (!isLoading && !walletBalances.fetched)) return '';
     /**
      * Ada symbol shown in overview is based on the chain supplied in the QR code, not the one from the background wallet current chain
      **/
@@ -126,8 +126,7 @@ export const WalletOverview = (): JSX.Element => {
 
     let subtitle = `${Wallet.util.lovelacesToAdaString(walletBalances.ada.toString())} ${adaSymbol}`;
     if (walletBalances.otherItems.size > 0) {
-      subtitle += ` +${walletBalances.otherItems.size} other asset`;
-      if (walletBalances.otherItems.size > 1) subtitle += 's';
+      subtitle += ` +${walletBalances.otherItems.size} other asset(s)`;
     }
     return subtitle;
   }, [walletBalances.ada, walletBalances.otherItems, walletMetadata.chain, walletBalances.fetched, isLoading]);
@@ -182,8 +181,10 @@ export const WalletOverview = (): JSX.Element => {
             loading={isLoading}
             balance={compactNumberWithUnit(walletBalances.usdPortfolioBalance.toString())}
             showInfoTooltip
-            currencyCode={'USD'}
-            label={i18n.t('browserView.assets.totalWalletBalance')}
+            currencyCode={
+              'USD' // TODO: add support for other currencies
+            }
+            label={i18n.t('paperWallet.WalletOverview.balanceTitle')}
             balanceSubtitle={{
               value: balanceSubtitle,
               isPercentage: false

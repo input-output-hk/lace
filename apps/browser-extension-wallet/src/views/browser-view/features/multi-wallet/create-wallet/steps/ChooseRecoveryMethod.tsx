@@ -20,7 +20,7 @@ import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useCreateWallet } from '../context';
 import styles from './ChooseRecoveryMethod.module.scss';
 
-const FAQ_URL = `${process.env.FAQ_URL}?question=what-is-paper-wallet`;
+const FAQ_URL = process.env.FAQ_URL;
 
 export const ChooseRecoveryMethod: VFC = () => {
   const { postHogActions } = useWalletOnboarding();
