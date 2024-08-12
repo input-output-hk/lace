@@ -11,7 +11,7 @@ const makeSectionsConfig = (
   [Sections.SUMMARY]: {
     currentSection: Sections.SUMMARY,
     nextSection: Sections.CONFIRMATION,
-    prevSection: Sections.FORM
+    prevSection: entrySection
   },
   [Sections.CONFIRMATION]: {
     currentSection: Sections.CONFIRMATION,

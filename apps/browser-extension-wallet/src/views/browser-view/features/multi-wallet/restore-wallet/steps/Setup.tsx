@@ -1,4 +1,4 @@
-import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
+import { WalletSetupNamePasswordStepRevamp, WalletSetupNamePasswordSubmitParams } from '@lace/core';
 import React from 'react';
 import { useRestoreWallet } from '../context';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,13 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
-  const { back, createWalletData, finalizeWalletRestoration, next, onNameAndPasswordChange } = useRestoreWallet();
+  const {
+    back,
+    createWalletData,
+    finalizeWalletRestoration,
+    next,
+    onNameChange: onNameAndPasswordChange
+  } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { t } = useTranslation();
@@ -32,9 +38,9 @@ export const Setup = (): JSX.Element => {
     firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
-  const onNext = async () => {
+  const onNext = async ({ walletName }: WalletSetupNamePasswordSubmitParams) => {
     void analytics.sendEventToPostHog(postHogActions.restore.ENTER_WALLET);
-
+    onNameAndPasswordChange({ name: walletName });
     try {
       await finalizeWalletRestoration();
     } catch (error) {
@@ -51,7 +57,6 @@ export const Setup = (): JSX.Element => {
   return (
     <WalletSetupNamePasswordStepRevamp
       initialWalletName={createWalletData.name}
-      onChange={onNameAndPasswordChange}
       onBack={back}
       onNext={onNext}
       translations={translations}

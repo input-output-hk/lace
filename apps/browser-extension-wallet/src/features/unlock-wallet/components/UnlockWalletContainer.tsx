@@ -5,6 +5,7 @@ import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { saveValueInLocalStorage } from '@src/utils/local-storage';
 import { useKeyboardShortcut } from '@lace/common';
+import { OnPasswordChange } from '@lace/core';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -24,12 +25,12 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const [password, setPassword] = useState('');
   const [isValidPassword, setIsValidPassword] = useState(true);
 
-  const handlePasswordChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = useCallback<OnPasswordChange>(
+    (target) => {
       if (!isValidPassword) {
         setIsValidPassword(true);
       }
-      setPassword(value);
+      setPassword(target.value);
     },
     [isValidPassword]
   );
@@ -71,7 +72,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
     <UnlockWallet
       isLoading={isVerifyingPassword}
       onUnlock={onUnlock}
-      passwordInput={{ value: password, handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
+      passwordInput={{ handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
       unlockButtonDisabled={password === ''}
       onForgotPasswordClick={onForgotPasswordClick}
     />

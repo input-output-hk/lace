@@ -1,4 +1,4 @@
-import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
+import { WalletSetupNamePasswordStepRevamp, WalletSetupNamePasswordSubmitParams } from '@lace/core';
 import { useAnalyticsContext } from '@providers';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
   const { postHogActions } = useWalletOnboarding();
-  const { back, createWalletData, next, onNameAndPasswordChange, recoveryMethod } = useCreateWallet();
+  const { back, createWalletData, next, onNameChange, recoveryMethod } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -28,18 +28,19 @@ export const Setup = (): JSX.Element => {
     firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
-  const onNext = async () => {
+  const onNext = async ({ walletName }: WalletSetupNamePasswordSubmitParams) => {
     if (recoveryMethod === 'mnemonic') {
       void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
+    } else {
+      void analytics.sendEventToPostHog(postHogActions.create.WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK);
     }
-    void analytics.sendEventToPostHog(postHogActions.create.WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK);
+    onNameChange({ name: walletName });
     await next();
   };
 
   return (
     <WalletSetupNamePasswordStepRevamp
       initialWalletName={createWalletData.name}
-      onChange={onNameAndPasswordChange}
       onBack={back}
       onNext={onNext}
       translations={translations}

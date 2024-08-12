@@ -1,19 +1,10 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
-import {
-  Button,
-  Drawer,
-  DrawerHeader,
-  DrawerNavigation,
-  inputProps,
-  Password,
-  Banner,
-  useKeyboardShortcut
-} from '@lace/common';
+import { Button, Drawer, DrawerHeader, DrawerNavigation, Banner, useKeyboardShortcut } from '@lace/common';
+import { Password, OnPasswordChange, MnemonicWordsWritedown } from '@lace/core';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
-import { MnemonicWordsWritedown } from '@lace/core';
 import { useWalletManager } from '@hooks';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -56,7 +47,7 @@ export const ShowPassphraseDrawer = ({
 
   const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
   const toggleBlurWords = () => {
     setBlurWords(!blurWords);
     if (!blurWords) {
@@ -176,7 +167,6 @@ export const ShowPassphraseDrawer = ({
                 <Password
                   className={styles.passwordInput}
                   onChange={handleChange}
-                  value={password}
                   error={!isPasswordValid}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}

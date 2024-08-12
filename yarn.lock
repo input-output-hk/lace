@@ -10163,9 +10163,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:1.11.3":
-  version: 1.11.3
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.11.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.11.3%2F9cf07639dfbdf66286600050bc47581ab8485067"
+"@input-output-hk/lace-ui-toolkit@npm:1.14.0":
+  version: 1.14.0
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.14.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.14.0%2Fe63b4e8b794867777168ab483a61326cffdc0aae"
   dependencies:
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
@@ -10197,7 +10197,7 @@ __metadata:
   peerDependencies:
     react: ">=17.0.2"
     react-dom: ">=17.0.2"
-  checksum: 3bdf0b8784c49a74aae83da902c2dd4d3001d57d39ad6579fe3a84e368dc07676ee0fb9205329d186d0a49b3e44789aae400fd3235f2366783b1c78a0ae4e309
+  checksum: ce4c0955868f1aa12412fac96dc4f4ae45903c4b6c66fadce19533b8dff9783f74e44038b449e59bf5ca7e9ab66499de319ea21a3a5a2c083aacedd98e5362d7
   languageName: node
   linkType: hard
 
@@ -11061,7 +11061,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.30.0
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@input-output-hk/lace-ui-toolkit": 1.11.3
+    "@input-output-hk/lace-ui-toolkit": 1.14.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
@@ -11201,7 +11201,7 @@ __metadata:
     "@babel/preset-typescript": ^7.22.15
     "@cardano-sdk/wallet": 0.41.0
     "@cardano-sdk/web-extension": 0.30.0
-    "@input-output-hk/lace-ui-toolkit": 1.11.3
+    "@input-output-hk/lace-ui-toolkit": 1.14.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0
@@ -11237,6 +11237,7 @@ __metadata:
     react-dom: 17.0.2
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
+    rxjs: 7.4.0
     sass: ^1.68.0
     storybook: ^7.4.3
     storybook-addon-pseudo-states: ^1.15.2
@@ -11302,7 +11303,7 @@ __metadata:
     "@cardano-sdk/util": 0.15.4
     "@cardano-sdk/wallet": 0.41.0
     "@cardano-sdk/web-extension": 0.30.0
-    "@input-output-hk/lace-ui-toolkit": 1.11.3
+    "@input-output-hk/lace-ui-toolkit": 1.14.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
@@ -38876,7 +38877,7 @@ __metadata:
     "@babel/runtime": 7.15.3
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    "@input-output-hk/lace-ui-toolkit": 1.11.3
+    "@input-output-hk/lace-ui-toolkit": 1.14.0
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-json": ^6.0.0

@@ -39,6 +39,7 @@ import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
 import { AnyBip32Wallet, AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
+import { PasswordObj as Password } from '@lace/core';
 
 (walletApiUi as any).logger = console;
 
@@ -342,7 +343,7 @@ describe('Testing useWalletManager hook', () => {
       const mnemonic = [
         'vacant violin soft weird deliver render brief always monitor general maid smart jelly core drastic erode echo there clump dizzy card filter option defense'
       ];
-      const password = 'passwoprd';
+      const password = { value: 'passwoprd' } as Password;
       const chainId = {
         networkId: 0,
         networkMagic: 0
@@ -362,7 +363,7 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(createWallet).toBeDefined();
-      expect(await createWallet({ name, mnemonic, password, chainId })).toEqual(
+      expect(await createWallet({ name, mnemonic, chainId })).toEqual(
         expect.objectContaining({
           name,
           source: expect.objectContaining({
@@ -373,7 +374,7 @@ describe('Testing useWalletManager hook', () => {
       // It is actually called with Buffer.from(password) rather than with [0, 0, ..., 0],
       // but buffer that this is called with is nullified in order to remove the actual passphrase
       // bytes from memory as soon as possible. jest keeps a reference to the buffer, so it thinks it's called with 0-es
-      const nullifiedPassphrase = Buffer.from(new Uint8Array(password.length));
+      const nullifiedPassphrase = Buffer.from(new Uint8Array(password.value.length));
       expect(mockEmip3encrypt.mock.calls[0]).toEqual([LOCK_VALUE, nullifiedPassphrase]);
       expect(mockEmip3encrypt.mock.calls[1]).toEqual([Buffer.from(mnemonic.join(' ')), nullifiedPassphrase]);
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);

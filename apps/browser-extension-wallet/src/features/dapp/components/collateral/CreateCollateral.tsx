@@ -1,14 +1,14 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DappCreateCollateralProps } from './types';
-import { DappInfo, RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
+import { OnPasswordChange, Password, DappInfo, RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks';
 import { Layout } from '../Layout';
-import { Banner, Button, Password, inputProps, useObservable } from '@lace/common';
+import { Banner, Button, useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { isNotNil } from '@cardano-sdk/util';
@@ -34,9 +34,9 @@ export const CreateCollateral = ({
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(true);
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
+  const handleChange: OnPasswordChange = (target) => {
     setIsPasswordValid(true);
-    setPassword(value);
+    setPassword(target.value);
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
@@ -110,7 +110,6 @@ export const CreateCollateral = ({
               <Spin spinning={false}>
                 <Password
                   onChange={handleChange}
-                  value={password}
                   error={isPasswordValid === false}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}

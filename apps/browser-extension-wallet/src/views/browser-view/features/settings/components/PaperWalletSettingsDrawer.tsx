@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWalletManager } from '@hooks';
 import { Drawer, DrawerHeader, DrawerNavigation, PostHogAction } from '@lace/common';
+import { useSecrets } from '@lace/core';
 import { i18n } from '@lace/translation';
 import {
   Button,
@@ -52,14 +53,13 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     isPasswordValid: true
   });
   const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>(INITIAL_PDF_STATE);
-  const [password, setPassword] = useState<string>('');
+  const { password, clearSecrets, setPassword } = useSecrets();
   const [warningModalVisible, setWarningModalVisible] = useState(false);
 
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
   const { walletInfo } = useWalletStore();
   const { CHAIN } = config();
   const [passphrase, setPassphrase] = useState<string[]>([]);
-  const removePassword = useCallback(() => setPassword(''), []);
   const getPassphrase = useCallback(
     async (userPassword) => {
       await validatePassword(userPassword);
@@ -74,11 +74,11 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const handleClose = useCallback(() => {
     setStage('secure');
     setPgpInfo(DEFAULT_PGP_STATE);
-    removePassword();
+    clearSecrets();
     setPassphrase([]);
     setWarningModalVisible(false);
     onClose();
-  }, [setStage, setPgpInfo, removePassword, setPassphrase, onClose, setWarningModalVisible]);
+  }, [setStage, setPgpInfo, clearSecrets, setPassphrase, onClose, setWarningModalVisible]);
 
   const warnBeforeClose = useCallback(() => {
     if (pdfInstance.url) {
@@ -92,17 +92,17 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     if (isProcessing) return;
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
-      await validatePassword(password);
-      await getPassphrase(password);
+      await validatePassword(password.value);
+      await getPassphrase(password.value);
       analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
       setStage('save');
       setProcessingState({ isPasswordValid: true, isProcessing: false });
-      removePassword();
+      clearSecrets();
     } catch {
-      removePassword();
+      clearSecrets();
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, removePassword, analytics]);
+  }, [isProcessing, validatePassword, password.value, getPassphrase, clearSecrets, analytics]);
 
   useEffect(() => {
     if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
@@ -132,13 +132,13 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       case 'secure':
         return <SecureStage setPgpInfo={setPgpInfo} pgpInfo={pgpInfo} />;
       case 'passphrase':
-        return <PassphraseStage password={password} setPassword={setPassword} isPasswordValid={isPasswordValid} />;
+        return <PassphraseStage setPassword={setPassword} isPasswordValid={isPasswordValid} />;
       case 'save':
         return <SaveStage walletName={formattedWalletName} />;
       default:
         throw new Error('incorrect stage supplied');
     }
-  }, [stage, isPasswordValid, setPgpInfo, pgpInfo, password, setPassword, formattedWalletName]);
+  }, [stage, isPasswordValid, setPgpInfo, pgpInfo, setPassword, formattedWalletName]);
 
   const footer = useMemo(() => {
     switch (stage) {

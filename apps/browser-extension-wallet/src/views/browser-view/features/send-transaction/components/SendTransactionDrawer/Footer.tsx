@@ -17,7 +17,6 @@ import {
   useBuiltTxState,
   useSubmitingState,
   useTransactionProps,
-  usePassword,
   useMetadata,
   useAnalyticsSendFlowTriggerPoint,
   useMaxAdaStatus
@@ -41,12 +40,12 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, constructMultiSigTransactionData } from '@lace/core';
+import { exportMultisigTransaction, constructMultiSigTransactionData, useSecrets } from '@lace/core';
 import { mergeWitnesses } from './utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
-  [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: 'browserView.transaction.send.footer.review',
+  [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: 'browserView.transaction.send.coSign.footer.continue',
   [Sections.SUMMARY]: 'browserView.transaction.send.footer.confirm',
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',
   [Sections.SUCCESS_TX]: 'browserView.transaction.send.footer.viewTransaction',
@@ -79,7 +78,7 @@ export const Footer = withAddressBookContext(
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
     const { inMemoryWallet, isInMemoryWallet, walletType, isSharedWallet, currentChain } = useWalletStore();
-    const { password, removePassword } = usePassword();
+    const { password, clearSecrets: removePassword } = useSecrets();
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
     const analytics = useAnalyticsContext();
@@ -207,7 +206,6 @@ export const Footer = withAddressBookContext(
         const collectedEnoughSharedWalletTxSignatures =
           policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
 
-        // eslint-disable-next-line unicorn/prefer-ternary
         if (collectedEnoughSharedWalletTxSignatures) {
           try {
             await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
@@ -264,7 +262,7 @@ export const Footer = withAddressBookContext(
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
 
       try {
-        await withSignTxConfirmation(signAndSubmitTransaction, password);
+        await withSignTxConfirmation(signAndSubmitTransaction, password.value);
         // Send amount of bundles as value
         setSection({ currentSection: Sections.SUCCESS_TX });
         setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
@@ -376,12 +374,14 @@ export const Footer = withAddressBookContext(
         metadata?.length > METADATA_MAX_LENGTH,
       [builtTxData.importedSharedWalletTx, builtTxData.tx, hasInvalidOutputs, metadata?.length]
     );
+
     const isSubmitDisabled = useMemo(
       () =>
         currentSection.currentSection === Sections.CONFIRMATION &&
         (isSubmitingTx || !isPasswordValid || !password || !isOnline),
       [currentSection.currentSection, isSubmitingTx, isPasswordValid, password, isOnline]
     );
+
     const confirmButtonLabel = useMemo(() => {
       if (isHwSummary) {
         const staleLabels = isPopupView
@@ -437,8 +437,6 @@ export const Footer = withAddressBookContext(
     if (currentSection.currentSection === Sections.ASSET_PICKER) return <AssetPickerFooter />;
 
     if (currentSection.currentSection === Sections.ADDRESS_FORM) return <AddressFormFooter />;
-
-    if (currentSection.currentSection === Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON) return null;
 
     return (
       <>

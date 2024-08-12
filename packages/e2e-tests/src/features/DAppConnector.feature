@@ -187,7 +187,7 @@ Feature: DAppConnector - Common
     And I see DApp connector "Sign transaction" page
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page
-    And I see DApp connector "All done" page
+    And I see DApp connector "All done" page from "data sign"
     And I verify there are no errors in console logs
     And I see Lace wallet info in DApp when connected
 

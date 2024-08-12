@@ -348,7 +348,7 @@ class DAppConnectorAssert {
     expect(await ErrorDAppModal.description.getText()).to.equal(await t('dapp.sign.failure.description'));
   }
 
-  async assertSeeAllDonePage() {
+  async assertSeeAllDonePage(signType?: 'data sign' | 'tx sign') {
     await this.assertSeeHeader();
     await DAppTransactionAllDonePage.image.waitForDisplayed();
 
@@ -358,9 +358,10 @@ class DAppConnectorAssert {
     );
 
     await DAppTransactionAllDonePage.description.waitForDisplayed();
-    expect(await DAppTransactionAllDonePage.description.getText()).to.equal(
-      await t('core.dappTransaction.signedSuccessfully')
-    );
+    const expectedTranslationKey =
+      signType === 'data sign' ? 'core.dappSignData.signedSuccessfully' : 'core.dappTransaction.signedSuccessfully';
+
+    expect(await DAppTransactionAllDonePage.description.getText()).to.equal(await t(expectedTranslationKey));
 
     await DAppTransactionAllDonePage.closeButton.waitForDisplayed();
     expect(await DAppTransactionAllDonePage.closeButton.getText()).to.equal(await t('general.button.close'));

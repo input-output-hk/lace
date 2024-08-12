@@ -1,7 +1,9 @@
 import React from 'react';
-import { Banner, inputProps, Password } from '@lace/common';
+import { Banner } from '@lace/common';
+import { Password } from '@lace/core';
+import type { PasswordObj } from '@lace/core';
 import { i18n } from '@lace/translation';
-import { Flex } from '@input-output-hk/lace-ui-toolkit';
+import { Flex, OnPasswordChange } from '@input-output-hk/lace-ui-toolkit';
 import { Typography } from 'antd';
 import styles from '../SettingsLayout.module.scss';
 
@@ -9,15 +11,14 @@ const { Text: AntdText } = Typography;
 
 export const PassphraseStage = ({
   setPassword,
-  password,
   isPasswordValid
 }: {
-  setPassword: React.Dispatch<React.SetStateAction<string>>;
-  password: string;
+  setPassword: (pw: Partial<PasswordObj>) => void;
   isPasswordValid: boolean;
 }): JSX.Element => {
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
-
+  const handleChange: OnPasswordChange = (target) => {
+    setPassword(target);
+  };
   return (
     <Flex mt="$8" flexDirection="column" gap="$8">
       <AntdText className={styles.drawerDescription} data-testid="passphrase-drawer-description">
@@ -32,11 +33,11 @@ export const PassphraseStage = ({
             <Password
               className={styles.passwordInput}
               onChange={handleChange}
-              value={password}
               error={!isPasswordValid}
               errorMessage={i18n.t('browserView.transaction.send.error.invalidPassword')}
               label={i18n.t('browserView.transaction.send.password.placeholder')}
               autoFocus
+              onSubmit={undefined}
             />
           </div>
         </div>

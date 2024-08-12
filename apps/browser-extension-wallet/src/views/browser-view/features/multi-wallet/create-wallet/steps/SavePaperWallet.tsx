@@ -19,6 +19,7 @@ import { generatePaperWalletPdf } from '@src/utils/PaperWallet';
 import { PaperWalletPDF } from '@src/types';
 import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SavePaperWallet.module.scss';
+
 const deriveAccountFromMnemonic = async (
   createWalletData: CreateWalletParams,
   chain: keyof typeof Wallet.Cardano.ChainIds
@@ -27,7 +28,7 @@ const deriveAccountFromMnemonic = async (
   const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
     {
       chainId: keyAgentChainId,
-      getPassphrase: async () => Buffer.from(createWalletData.password, 'utf8'), // Throws warning if not supplied
+      getPassphrase: async () => Buffer.from(''),
       mnemonicWords: createWalletData.mnemonic,
       accountIndex: 0
     },
