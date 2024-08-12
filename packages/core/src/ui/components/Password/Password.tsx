@@ -19,7 +19,7 @@ export type PasswordProps = {
 const noop = (): void => void 0;
 const mapProps = (props: PasswordProps): UncontrolledPasswordBoxProps => ({
   ...props,
-  testId: props.dataTestId || props['data-testid'],
+  testId: props['data-testid'] || props.dataTestId,
   label: props.label || '',
   size: undefined,
   prefix: undefined,
