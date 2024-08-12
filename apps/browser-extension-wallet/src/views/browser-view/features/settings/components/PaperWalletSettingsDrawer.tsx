@@ -17,7 +17,7 @@ import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SettingsLayout.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PassphraseStage, SaveStage, SecureStage } from './PaperWallet';
-import { WarningModal } from '@src/views/browser-view/components';
+import { useSecrets } from '@lace/core';
 
 interface Props {
   isOpen: boolean;
@@ -52,8 +52,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     isPasswordValid: true
   });
   const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>(INITIAL_PDF_STATE);
-  const [password, setPassword] = useState<string>('');
-  const [warningModalVisible, setWarningModalVisible] = useState(false);
+  const { password, clearSecrets, setPassword } = useSecrets();
 
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
   const { walletInfo } = useWalletStore();
@@ -76,17 +75,8 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     setPgpInfo(DEFAULT_PGP_STATE);
     removePassword();
     setPassphrase([]);
-    setWarningModalVisible(false);
     onClose();
-  }, [setStage, setPgpInfo, removePassword, setPassphrase, onClose, setWarningModalVisible]);
-
-  const warnBeforeClose = useCallback(() => {
-    if (pdfInstance.url) {
-      setWarningModalVisible(true);
-    } else {
-      handleClose();
-    }
-  }, [setWarningModalVisible, pdfInstance, handleClose]);
+  }, [setStage, setPgpInfo, clearSecrets, setPassphrase, onClose]);
 
   const handleVerifyPass = useCallback(async () => {
     if (isProcessing) return;
@@ -208,32 +198,17 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
 
   return (
     <>
-      <WarningModal
-        header={i18n.t('paperWallet.SettingsDrawer.ExitWarningTitle')}
-        content={
-          <span className={styles.removeWalletContent}>
-            {i18n.t('paperWallet.SettingsDrawer.ExitWarningDescription')}
-          </span>
-        }
-        visible={warningModalVisible}
-        onCancel={() => setWarningModalVisible(false)}
-        onConfirm={handleClose}
-        cancelLabel={i18n.t('browserView.settings.wallet.general.removeWalletAlert.cancel')}
-        confirmLabel={i18n.t('paperWallet.SettingsDrawer.ExitButton')}
-        confirmCustomClassName={styles.settingsExitButton}
-        isPopupView={popupView}
-      />
       <Drawer
         open={isOpen}
         dataTestId="paper-wallet-settings-drawer"
-        onClose={warnBeforeClose}
+        onClose={handleClose}
         popupView={popupView}
         title={<DrawerHeader popupView={popupView} title={i18n.t('paperWallet.securePaperWallet.title')} />}
         navigation={
           <DrawerNavigation
             title={i18n.t('browserView.settings.heading')}
-            onCloseIconClick={!popupView ? warnBeforeClose : undefined}
-            onArrowIconClick={popupView ? warnBeforeClose : undefined}
+            onCloseIconClick={!popupView ? handleClose : undefined}
+            onArrowIconClick={popupView ? handleClose : undefined}
           />
         }
         footer={footer}
