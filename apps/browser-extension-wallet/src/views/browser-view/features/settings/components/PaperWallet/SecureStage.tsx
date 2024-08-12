@@ -5,6 +5,7 @@ import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { pgpPublicKeyVerification } from '@src/utils/pgp';
 import type { PublicPgpKeyData } from '@src/types';
 import { Validation } from './types';
+import styles from './SecureStage.module.scss';
 
 export const SecureStage = ({
   setPgpInfo,
@@ -22,12 +23,13 @@ export const SecureStage = ({
   };
 
   return (
-    <Flex mt="$8">
+    <Flex my="$16" h="$fill">
       <PgpPublicKeyEntry
         handlePgpPublicKeyBlockChange={handlePgpPublicKeyBlockChange}
         handlePgpReferenceChange={handlePgpReferenceChange}
         validation={validation}
         pgpInfo={pgpInfo}
+        textareaWrapperClassName={styles.fullHeight}
       />
     </Flex>
   );

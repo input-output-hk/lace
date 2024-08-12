@@ -2,7 +2,8 @@
 @import '../../../../../../common/src/ui/styles/theme.scss';
 
 .textArea:global(.ant-input) {
-  height: 172px !important;
+  @include scroll-bar-style;
+  height: 158px !important;
   overflow-y: scroll;
   margin-top: 16px;
   padding-top: 0 !important;
@@ -12,11 +13,6 @@
   &:hover {
     border: none !important;
   }
-}
-
-.textAreaContainer {
-  overflow-y: auto;
-  @include scroll-bar-style;
 }
 
 .wrapper {

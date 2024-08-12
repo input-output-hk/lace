@@ -4,10 +4,7 @@ import { Password } from '@lace/core';
 import type { PasswordObj } from '@lace/core';
 import { i18n } from '@lace/translation';
 import { Flex, OnPasswordChange } from '@input-output-hk/lace-ui-toolkit';
-import { Typography } from 'antd';
 import styles from '../SettingsLayout.module.scss';
-
-const { Text: AntdText } = Typography;
 
 export const PassphraseStage = ({
   setPassword,
@@ -21,9 +18,6 @@ export const PassphraseStage = ({
   };
   return (
     <Flex mt="$8" flexDirection="column" gap="$8">
-      <AntdText className={styles.drawerDescription} data-testid="passphrase-drawer-description">
-        {i18n.t('browserView.settings.security.showPassphraseDrawer.description')}
-      </AntdText>
       <Flex gap="$32" flexDirection="column" alignItems="center">
         <div className={styles.warningBanner}>
           <Banner withIcon message={i18n.t('browserView.settings.security.showPassphraseDrawer.warning')} />

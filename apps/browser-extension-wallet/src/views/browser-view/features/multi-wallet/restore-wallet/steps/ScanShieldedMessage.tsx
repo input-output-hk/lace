@@ -10,7 +10,6 @@ import {
   Flex,
   Select,
   Button,
-  Loader,
   Text,
   SadEmojiComponent as SadEmojiIcon,
   CameraComponent as CameraIcon,
@@ -26,6 +25,7 @@ import cn from 'classnames';
 import { ChainName } from '@lace/cardano/dist/wallet';
 import { useAnalyticsContext } from '@providers';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
+import { Loader } from '@lace/common';
 
 interface Validation {
   error?: {
@@ -309,7 +309,7 @@ export const ScanShieldedMessage: VFC = () => {
             <Button.Secondary onClick={back} label="Back" title="Back" />
             {scanState === 'scanning' && !validation.error && (
               <Flex alignItems="center" gap="$8" h="$48">
-                <Loader w="$24" h="$24" />
+                <Loader className={styles.loader} />
                 <Text.Label color="secondary">{i18n.t('paperWallet.scanShieldedMessage.lookingForWallet')}</Text.Label>
               </Flex>
             )}

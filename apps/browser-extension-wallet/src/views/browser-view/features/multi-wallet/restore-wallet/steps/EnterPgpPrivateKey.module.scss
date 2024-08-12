@@ -2,6 +2,7 @@
 @import '../../../../../../../../../packages/common/src/ui/styles/abstracts/mixins.scss';
 
 .textArea:global(.ant-input) {
+  @include scroll-bar-style;
   height: 110px !important;
   overflow-y: scroll;
   margin-top: size_unit(2);
@@ -9,7 +10,6 @@
   outline: 0 !important;
   border: none !important;
   -webkit-text-security: disc;
-  @include scroll-bar-style;
   &:hover {
     border: none !important;
   }

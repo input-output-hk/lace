@@ -195,6 +195,22 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     }
   }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, handleClose, analytics]);
 
+  const drawerSubtitle = useMemo(() => {
+    switch (stage) {
+      case 'secure': {
+        return i18n.t('paperWallet.securePaperWallet.description');
+      }
+      case 'passphrase': {
+        return i18n.t('browserView.settings.security.showPassphraseDrawer.description');
+      }
+      case 'save': {
+        return i18n.t('paperWallet.savePaperWallet.description');
+      }
+      default:
+        return i18n.t('paperWallet.securePaperWallet.description');
+    }
+  }, [stage]);
+
   return (
     <>
       <Drawer
@@ -202,7 +218,13 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         dataTestId="paper-wallet-settings-drawer"
         onClose={handleClose}
         popupView={popupView}
-        title={<DrawerHeader popupView={popupView} title={i18n.t('paperWallet.securePaperWallet.title')} />}
+        title={
+          <DrawerHeader
+            popupView={popupView}
+            title={i18n.t('paperWallet.securePaperWallet.title')}
+            subtitle={drawerSubtitle}
+          />
+        }
         navigation={
           <DrawerNavigation
             title={i18n.t('browserView.settings.heading')}
