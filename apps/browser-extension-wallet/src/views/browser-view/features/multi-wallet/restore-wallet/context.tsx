@@ -187,6 +187,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
           setStep(WalletRestoreStep.RecoveryPhrase);
           break;
         }
+        setStep(WalletRestoreStep.PrivatePgpKeyEntry);
         break;
     }
   }, [history, setFormDirty, step, recoveryMethod, paperWalletEnabled]);
