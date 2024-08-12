@@ -28,6 +28,7 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 				"--port", fmt.Sprintf("%d", *shared.OgmiosPort),
 				"--node-config", shared.CardanoNodeConfigDir + sep + "config.json",
 				"--node-socket", shared.CardanoNodeSocket,
+				"--include-cbor",
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
