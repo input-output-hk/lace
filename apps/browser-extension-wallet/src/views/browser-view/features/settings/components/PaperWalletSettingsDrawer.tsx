@@ -58,7 +58,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const { walletInfo } = useWalletStore();
   const { CHAIN } = config();
   const [passphrase, setPassphrase] = useState<string[]>([]);
-  const removePassword = useCallback(() => setPassword(''), []);
   const getPassphrase = useCallback(
     async (userPassword) => {
       await validatePassword(userPassword);
@@ -73,7 +72,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const handleClose = useCallback(() => {
     setStage('secure');
     setPgpInfo(DEFAULT_PGP_STATE);
-    removePassword();
+    clearSecrets();
     setPassphrase([]);
     onClose();
   }, [setStage, setPgpInfo, clearSecrets, setPassphrase, onClose]);
@@ -82,17 +81,17 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     if (isProcessing) return;
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
-      await validatePassword(password);
+      await validatePassword(password.value);
       await getPassphrase(password);
       analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
       setStage('save');
       setProcessingState({ isPasswordValid: true, isProcessing: false });
-      removePassword();
+      clearSecrets();
     } catch {
-      removePassword();
+      clearSecrets();
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, removePassword, analytics]);
+  }, [isProcessing, validatePassword, password, getPassphrase, clearSecrets, analytics]);
 
   useEffect(() => {
     if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
@@ -196,6 +195,22 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     }
   }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, handleClose, analytics]);
 
+  const drawerSubtitle = useMemo(() => {
+    switch (stage) {
+      case 'secure': {
+        return i18n.t('paperWallet.securePaperWallet.description');
+      }
+      case 'passphrase': {
+        return i18n.t('browserView.settings.security.showPassphraseDrawer.description');
+      }
+      case 'save': {
+        return i18n.t('paperWallet.savePaperWallet.description');
+      }
+      default:
+        return i18n.t('paperWallet.securePaperWallet.description');
+    }
+  }, [stage]);
+
   return (
     <>
       <Drawer
@@ -203,7 +218,13 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         dataTestId="paper-wallet-settings-drawer"
         onClose={handleClose}
         popupView={popupView}
-        title={<DrawerHeader popupView={popupView} title={i18n.t('paperWallet.securePaperWallet.title')} />}
+        title={
+          <DrawerHeader
+            popupView={popupView}
+            title={i18n.t('paperWallet.securePaperWallet.title')}
+            subtitle={drawerSubtitle}
+          />
+        }
         navigation={
           <DrawerNavigation
             title={i18n.t('browserView.settings.heading')}

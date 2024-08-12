@@ -1,15 +1,6 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
-import {
-  Button,
-  Drawer,
-  DrawerHeader,
-  DrawerNavigation,
-  inputProps,
-  Password,
-  Banner,
-  useKeyboardShortcut
-} from '@lace/common';
+import { Button, Drawer, DrawerHeader, DrawerNavigation, inputProps, Banner, useKeyboardShortcut } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';

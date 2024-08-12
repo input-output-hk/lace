@@ -3,7 +3,7 @@ import { Flex, TextBox, Text, CheckComponent as CheckIcon } from '@input-output-
 import { i18n } from '@lace/translation';
 import { TextArea } from '@lace/common';
 import styles from './PgpPublicKeyEntry.module.scss';
-
+import cn from 'classnames';
 interface Props {
   handlePgpPublicKeyBlockChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => Promise<void>;
   handlePgpReferenceChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -15,13 +15,15 @@ interface Props {
     pgpPublicKey: string;
     pgpKeyReference?: string;
   };
+  textareaWrapperClassName?: string;
 }
 
 export const PgpPublicKeyEntry = ({
   handlePgpPublicKeyBlockChange,
   handlePgpReferenceChange,
   validation,
-  pgpInfo
+  pgpInfo,
+  textareaWrapperClassName
 }: Props): JSX.Element => (
   <Flex gap="$16" alignItems="stretch" flexDirection="column" w="$fill" h="$fill">
     <TextBox
@@ -36,7 +38,7 @@ export const PgpPublicKeyEntry = ({
       label={i18n.t('core.paperWallet.securePaperWallet.pgpPublicKeyLabel')}
       onChange={handlePgpPublicKeyBlockChange}
       dataTestId="pgp-public-key-block"
-      wrapperClassName={styles.wrapper}
+      wrapperClassName={cn([styles.wrapper, textareaWrapperClassName])}
       className={styles.textArea}
       value={pgpInfo.pgpPublicKey}
     />

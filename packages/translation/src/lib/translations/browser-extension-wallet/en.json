@@ -812,7 +812,7 @@
   "midnightEventBanner.dialog.confirm": "I understand",
   "midnightEventBanner.dialog.cancel": "Cancel",
   "paperWallet.savePaperWallet.title": "Save your paper wallet",
-  "paperWallet.savePaperWallet.description": "Your paper wallet has been created. Make sure to save this file somewhere safe or print it out and keep it safe.",
+  "paperWallet.savePaperWallet.description": "Your paper wallet has been created. Make sure to save this file somewhere you can retrieve later or print it out.",
   "paperWallet.savePaperWallet.downloadBtnLabel": "Download",
   "paperWallet.savePaperWallet.printBtnLabel": "Print",
   "paperWallet.savePaperWallet.pleaseSaveOrPrintLabel": "Please download or print paper wallet to continue",
