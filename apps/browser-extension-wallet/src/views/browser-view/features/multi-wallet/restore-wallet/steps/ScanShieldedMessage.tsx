@@ -173,6 +173,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
             value={deviceId || videoDevices[0]?.deviceId}
             onChange={handleDeviceChange}
             showArrow
+            zIndex={99_999}
           >
             {VideoDeviceSelectOptions}
           </Select.Root>
