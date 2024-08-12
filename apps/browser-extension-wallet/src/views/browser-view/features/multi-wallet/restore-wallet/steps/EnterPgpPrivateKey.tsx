@@ -76,8 +76,11 @@ export const EnterPgpPrivateKey: VFC = () => {
         if (error.message === 'Misformed armored text') {
           setValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
         }
+        if (error.message === 'Armored text not of type private key') {
+          setValidation({ error: i18n.t('paperWallet.enterPgpPrivateKey.keyNotPrivate') });
+        }
       } finally {
-        navigator.clipboard.writeText(null);
+        navigator.clipboard.writeText('');
       }
     },
     [setValidation, pgpInfo, setPgpInfo]
@@ -228,7 +231,7 @@ export const EnterPgpPrivateKey: VFC = () => {
                   onChange={handleFileChange}
                   files={!!privateKeyFile && [privateKeyFile]}
                   style={{
-                    maxHeight: 136 // ui-toolkit doesn't allow specification of className prop
+                    maxHeight: 150 // ui-toolkit doesn't allow specification of className prop
                   }}
                   onSubmit={null}
                 />
@@ -246,7 +249,7 @@ export const EnterPgpPrivateKey: VFC = () => {
                 onChange={async (e) => {
                   setValidation({ error: null, success: null });
                   setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.target.value });
-                  navigator.clipboard.writeText(null);
+                  navigator.clipboard.writeText('');
                 }}
                 label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
                 value={pgpInfo.pgpKeyPassphrase || ''}

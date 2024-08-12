@@ -24,7 +24,7 @@ export const PassphraseStage = ({
       <AntdText className={styles.drawerDescription} data-testid="passphrase-drawer-description">
         {i18n.t('browserView.settings.security.showPassphraseDrawer.description')}
       </AntdText>
-      <Flex gap="$32" flexDirection="column">
+      <Flex gap="$32" flexDirection="column" alignItems="center">
         <div className={styles.warningBanner}>
           <Banner withIcon message={i18n.t('browserView.settings.security.showPassphraseDrawer.warning')} />
         </div>

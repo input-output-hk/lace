@@ -1,13 +1,15 @@
 @import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/mixins.scss';
 
 .textArea:global(.ant-input) {
-  height: 136px !important;
+  height: 110px !important;
   overflow-y: scroll;
   margin-top: size_unit(2);
   padding-top: 0 !important;
   outline: 0 !important;
   border: none !important;
-
+  -webkit-text-security: disc;
+  @include scroll-bar-style;
   &:hover {
     border: none !important;
   }
@@ -28,7 +30,7 @@
 
 .privateKeyEntryMethod {
   label[for='pgp-private-key-upload'] {
-    height: 136px !important;
+    height: 150px !important;
   }
   > div,
   form,

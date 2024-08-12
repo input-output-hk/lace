@@ -177,12 +177,11 @@ export const pgpPublicKeyVerification =
   async (e: React.ChangeEvent<HTMLTextAreaElement>): Promise<void> => {
     setPgpValidation({ error: null, success: null });
     if (!e.target.value) return;
-    const inputValue = e.target.value.trim();
     try {
-      const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: inputValue });
+      const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: e.target.value.trim() });
       setPgpInfo((prevState) => ({
         ...prevState,
-        pgpPublicKey: inputValue
+        pgpPublicKey: e.target.value.trim()
       }));
       setPgpValidation({
         error: null,
