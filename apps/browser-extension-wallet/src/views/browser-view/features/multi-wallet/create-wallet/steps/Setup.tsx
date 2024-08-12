@@ -7,7 +7,7 @@ import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
   const { postHogActions } = useWalletOnboarding();
-  const { back, createWalletData, next, onNameChange } = useCreateWallet();
+  const { back, createWalletData, next } = useCreateWallet();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -27,8 +27,7 @@ export const Setup = (): JSX.Element => {
 
   const onNext = async ({ walletName }: WalletSetupNamePasswordSubmitParams) => {
     void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
-    onNameChange({ name: walletName });
-    await next();
+    await next({ name: walletName });
   };
 
   return (

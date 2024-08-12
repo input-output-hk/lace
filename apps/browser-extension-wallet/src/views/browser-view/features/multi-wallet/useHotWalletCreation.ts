@@ -35,11 +35,16 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
       if (createWalletData.name) return;
       const wallets = await firstValueFrom(walletManager.walletRepository.wallets$);
       const name = `Wallet ${wallets.length + 1}`;
+
       setCreateWalletData((prevState) => ({ ...prevState, name }));
     })();
-  }, [createWalletData.name, walletManager.walletRepository]);
+  }, [createWalletData.name, walletManager.walletRepository, setCreateWalletData]);
 
-  const createWallet = () => walletManager.createWallet(createWalletData);
+  const createWallet = (newData: Partial<CreateWalletParams>) =>
+    walletManager.createWallet({
+      ...createWalletData,
+      ...newData
+    });
 
   const sendPostWalletAddAnalytics = async ({
     extendedAccountPublicKey,

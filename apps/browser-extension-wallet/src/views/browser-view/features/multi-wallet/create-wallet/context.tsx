@@ -12,7 +12,7 @@ type OnNameChange = (state: { name: string }) => void;
 interface State {
   back: () => void;
   createWalletData: CreateWalletParams;
-  next: () => Promise<void>;
+  next: (state?: Partial<CreateWalletParams>) => Promise<void>;
   onNameChange: OnNameChange;
   step: WalletCreateStep;
 }
@@ -54,32 +54,42 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     [setCreateWalletData]
   );
 
-  const finalizeWalletCreation = useCallback(async () => {
-    const wallet = await createHotWallet();
-    await sendPostWalletAddAnalytics({
-      extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
-    });
-  }, [createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]);
+  const finalizeWalletCreation = useCallback(
+    async (params: Partial<CreateWalletParams>) => {
+      const wallet = await createHotWallet(params);
+      await sendPostWalletAddAnalytics({
+        extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
+        postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
+      });
+    },
+    [createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]
+  );
 
-  const next = useCallback(async () => {
-    switch (step) {
-      case WalletCreateStep.RecoveryPhraseWriteDown: {
-        setFormDirty(true);
-        setStep(WalletCreateStep.RecoveryPhraseInput);
-        break;
+  const next: State['next'] = useCallback(
+    async (state) => {
+      if (state) {
+        setCreateWalletData((prevState) => ({ ...prevState, ...state }));
       }
-      case WalletCreateStep.RecoveryPhraseInput: {
-        setStep(WalletCreateStep.Setup);
-        break;
+      switch (step) {
+        case WalletCreateStep.RecoveryPhraseWriteDown: {
+          setFormDirty(true);
+          setStep(WalletCreateStep.RecoveryPhraseInput);
+          break;
+        }
+        case WalletCreateStep.RecoveryPhraseInput: {
+          setStep(WalletCreateStep.Setup);
+          break;
+        }
+        case WalletCreateStep.Setup: {
+          if (!state.name) throw new Error('Expected name');
+          await finalizeWalletCreation(state);
+          history.push(walletRoutePaths.assets);
+          break;
+        }
       }
-      case WalletCreateStep.Setup: {
-        await finalizeWalletCreation();
-        history.push(walletRoutePaths.assets);
-        break;
-      }
-    }
-  }, [finalizeWalletCreation, history, setFormDirty, step]);
+    },
+    [finalizeWalletCreation, history, setFormDirty, step, setCreateWalletData]
+  );
 
   const back = useCallback(() => {
     switch (step) {

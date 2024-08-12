@@ -9,13 +9,7 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
-  const {
-    back,
-    createWalletData,
-    finalizeWalletRestoration,
-    next,
-    onNameChange: onNameAndPasswordChange
-  } = useRestoreWallet();
+  const { back, createWalletData, finalizeWalletRestoration, next } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { t } = useTranslation();
@@ -40,9 +34,8 @@ export const Setup = (): JSX.Element => {
 
   const onNext = async ({ walletName }: WalletSetupNamePasswordSubmitParams) => {
     void analytics.sendEventToPostHog(postHogActions.restore.ENTER_WALLET);
-    onNameAndPasswordChange({ name: walletName });
     try {
-      await finalizeWalletRestoration();
+      await finalizeWalletRestoration({ name: walletName });
     } catch (error) {
       if (error instanceof WalletConflictError) {
         toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
@@ -51,7 +44,7 @@ export const Setup = (): JSX.Element => {
       }
     }
 
-    await next();
+    await next({ name: walletName });
   };
 
   return (

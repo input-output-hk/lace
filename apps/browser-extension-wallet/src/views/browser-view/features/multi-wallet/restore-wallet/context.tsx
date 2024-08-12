@@ -15,8 +15,8 @@ type OnRecoveryPhraseLengthChange = (length: RecoveryPhraseLength) => void;
 interface State {
   back: () => void;
   createWalletData: CreateWalletParams;
-  finalizeWalletRestoration: () => Promise<void>;
-  next: () => Promise<void>;
+  finalizeWalletRestoration: (params: Partial<CreateWalletParams>) => Promise<void>;
+  next: (state?: Partial<CreateWalletParams>) => Promise<void>;
   onNameChange: OnNameChange;
   onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange;
   setMnemonic: (mnemonic: string[]) => void;
@@ -69,24 +69,27 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     [setCreateWalletData]
   );
 
-  const finalizeWalletRestoration = useCallback(async () => {
-    const { source, wallet } = await createWallet();
-    void sendPostWalletAddAnalytics({
-      extendedAccountPublicKey: source.account.extendedAccountPublicKey,
-      postHogActionHdWallet: postHogActions.restore.HD_WALLET,
-      postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
-      wallet
-    });
-    if (forgotPasswordFlowActive) {
-      deleteFromLocalStorage('isForgotPasswordFlow');
-    }
-  }, [
-    createWallet,
-    forgotPasswordFlowActive,
-    postHogActions.restore.HD_WALLET,
-    postHogActions.restore.WALLET_ADDED,
-    sendPostWalletAddAnalytics
-  ]);
+  const finalizeWalletRestoration = useCallback(
+    async (params: Partial<CreateWalletParams>) => {
+      const { source, wallet } = await createWallet(params);
+      void sendPostWalletAddAnalytics({
+        extendedAccountPublicKey: source.account.extendedAccountPublicKey,
+        postHogActionHdWallet: postHogActions.restore.HD_WALLET,
+        postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
+        wallet
+      });
+      if (forgotPasswordFlowActive) {
+        deleteFromLocalStorage('isForgotPasswordFlow');
+      }
+    },
+    [
+      createWallet,
+      forgotPasswordFlowActive,
+      postHogActions.restore.HD_WALLET,
+      postHogActions.restore.WALLET_ADDED,
+      sendPostWalletAddAnalytics
+    ]
+  );
 
   const next = useCallback(async () => {
     switch (step) {
