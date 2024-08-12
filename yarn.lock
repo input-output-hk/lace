@@ -10163,9 +10163,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:1.12.0":
-  version: 1.12.0
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.12.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.12.0%2F7f452c03281ef6abf11b9185e65b2b7894aeee09"
+"@input-output-hk/lace-ui-toolkit@npm:1.13.0":
+  version: 1.13.0
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.13.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.13.0%2F28509c8ecc7b2126d20f04a50702a88a133fc977"
   dependencies:
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
@@ -10197,7 +10197,7 @@ __metadata:
   peerDependencies:
     react: ">=17.0.2"
     react-dom: ">=17.0.2"
-  checksum: df6c5b530f00f6d8a845f86d00ab40ef3c22ba8ff2ebdf202e2c93f3c839b610ee899df25dcd48f39c2d802ecf70419152787e4bc37c3b1898002739d8c4eda8
+  checksum: 6b9a7f1f49cefd08867cfe1c9da4b92820bca782e61c031a614ed195bbb56369013f87ad63f79d05a10f29c7026be3524fb587ddceaabbc3089881407434474e
   languageName: node
   linkType: hard
 
@@ -11061,7 +11061,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.30.0
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@input-output-hk/lace-ui-toolkit": 1.12.0
+    "@input-output-hk/lace-ui-toolkit": 1.13.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
@@ -11191,7 +11191,7 @@ __metadata:
     "@babel/preset-typescript": ^7.22.15
     "@cardano-sdk/wallet": 0.41.0
     "@cardano-sdk/web-extension": 0.30.0
-    "@input-output-hk/lace-ui-toolkit": 1.12.0
+    "@input-output-hk/lace-ui-toolkit": 1.13.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0
@@ -11293,7 +11293,7 @@ __metadata:
     "@cardano-sdk/util": 0.15.4
     "@cardano-sdk/wallet": 0.41.0
     "@cardano-sdk/web-extension": 0.30.0
-    "@input-output-hk/lace-ui-toolkit": 1.12.0
+    "@input-output-hk/lace-ui-toolkit": 1.13.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
@@ -38771,7 +38771,7 @@ __metadata:
     "@babel/runtime": 7.15.3
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    "@input-output-hk/lace-ui-toolkit": 1.12.0
+    "@input-output-hk/lace-ui-toolkit": 1.13.0
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-json": ^6.0.0
