@@ -55,8 +55,8 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
         <div className={styles.password}>
           <Password
             className={styles.passwordInput}
-            onChange={({ value }) => {
-              setPassword(value);
+            onChange={(pw) => {
+              setPassword(pw);
             }}
             error={isPasswordValid === false}
             errorMessage={t('drawer.sign.error.invalidPassword')}
@@ -72,7 +72,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
 export const SignConfirmationFooter = (): ReactElement => {
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
-    password: { password, removePassword },
+    password: { password, clearSecrets: removePassword },
     submittingState: { setSubmitingTxState, isSubmitingTx, setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     walletManagerExecuteWithPassword: executeWithPassword,
@@ -145,7 +145,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
-        onClick={() => executeWithPassword(handleVerifyPass, password)}
+        onClick={() => executeWithPassword(handleVerifyPass, password?.value)}
         disabled={isSubmitDisabled}
         loading={isSubmitingTx}
         className={styles.confirmBtn}

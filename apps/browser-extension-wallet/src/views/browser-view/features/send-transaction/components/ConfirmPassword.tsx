@@ -1,7 +1,7 @@
 import React from 'react';
-import { OnPasswordChange, Password } from '@lace/core';
+import { OnPasswordChange, Password, useSecrets } from '@lace/core';
 import styles from './ConfirmPassword.module.scss';
-import { useSubmitingState, usePassword } from '../store';
+import { useSubmitingState } from '../store';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
 import cn from 'classnames';
@@ -11,10 +11,10 @@ export const ConfirmPassword = (): React.ReactElement => {
   const { t } = useTranslation();
 
   const { isPasswordValid, setSubmitingTxState } = useSubmitingState();
-  const { setPassword } = usePassword();
+  const { setPassword } = useSecrets();
 
   const handleChange: OnPasswordChange = (target) => {
-    setPassword(target.value);
+    setPassword(target);
     setSubmitingTxState({ isPasswordValid: true });
   };
 

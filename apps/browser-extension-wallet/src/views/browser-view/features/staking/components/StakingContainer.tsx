@@ -20,8 +20,8 @@ import {
 } from '@utils/constants';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
-import { SignPolicy } from '@lace/core';
+import { useSubmitingState } from '@views/browser/features/send-transaction';
+import { SignPolicy, useSecrets } from '@lace/core';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -59,7 +59,7 @@ export const StakingContainer = (): React.ReactElement => {
   const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const { fiatCurrency } = useCurrencyStore();
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
-  const password = usePassword();
+  const password = useSecrets();
   const submittingState = useSubmitingState();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
   const [signPolicy, setSignPolicy] = useState<SignPolicy>();

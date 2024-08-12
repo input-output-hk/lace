@@ -10,7 +10,7 @@ import {
 } from '@providers';
 import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
+import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -28,7 +28,7 @@ import {
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { SignPolicy } from '@lace/core';
+import { SignPolicy, useSecrets } from '@lace/core';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { handleOpenBrowser } = useBackgroundServiceAPIContext();
   const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
-  const password = usePassword();
+  const password = useSecrets();
   const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);

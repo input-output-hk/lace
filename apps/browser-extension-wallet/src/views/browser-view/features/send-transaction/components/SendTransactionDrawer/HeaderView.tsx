@@ -15,7 +15,6 @@ import {
   useResetStore,
   useResetUiStore,
   useTransactionProps,
-  usePassword,
   useSubmitingState,
   useMultipleSelection,
   useSelectedTokenList,
@@ -38,6 +37,7 @@ import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import type { TranslationKey } from '@lace/translation';
 import { DrawerContent } from '@views/browser/components/Drawer';
+import { useSecrets } from '@lace/core';
 
 export const useHandleClose = (): {
   onClose: () => void;
@@ -129,7 +129,7 @@ export const HeaderNavigation = ({
   const { t } = useTranslation();
   const { onClose } = useHandleClose();
   const { currentSection: section, setPrevSection } = useSections();
-  const { password, removePassword } = usePassword();
+  const { password, clearSecrets: removePassword } = useSecrets();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { setSubmitingTxState } = useSubmitingState();
   const analytics = useAnalyticsContext();
