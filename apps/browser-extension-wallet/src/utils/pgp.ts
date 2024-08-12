@@ -178,10 +178,10 @@ export const pgpPublicKeyVerification =
     setPgpValidation({ error: null, success: null });
     if (!e.target.value) return;
     try {
-      const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: e.target.value });
+      const fingerPrint = await getFingerprintFromPublicPgpKey({ publicKeyArmored: e.target.value.trim() });
       setPgpInfo((prevState) => ({
         ...prevState,
-        pgpPublicKey: e.target.value
+        pgpPublicKey: e.target.value.trim()
       }));
       setPgpValidation({
         error: null,
