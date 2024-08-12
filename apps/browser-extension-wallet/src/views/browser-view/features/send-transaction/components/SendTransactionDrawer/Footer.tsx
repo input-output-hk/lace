@@ -378,8 +378,8 @@ export const Footer = withAddressBookContext(
     const isSubmitDisabled = useMemo(
       () =>
         currentSection.currentSection === Sections.CONFIRMATION &&
-        (isSubmitingTx || !isPasswordValid || !password || !isOnline),
-      [currentSection.currentSection, isSubmitingTx, isPasswordValid, password, isOnline]
+        (isSubmitingTx || !isPasswordValid || !password.value || !isOnline),
+      [currentSection.currentSection, isSubmitingTx, isPasswordValid, password.value, isOnline]
     );
 
     const confirmButtonLabel = useMemo(() => {
