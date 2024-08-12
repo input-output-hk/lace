@@ -137,8 +137,8 @@ export const SavePaperWallet: VFC = () => {
                 label={i18n.t('paperWallet.savePaperWallet.printBtnLabel')}
               />
             </Flex>
-            <Flex flexDirection="column">
-              {hasStoredPaperWallet && (
+            <Flex flexDirection="column" w="$fill" gap="$8">
+              {!hasStoredPaperWallet && (
                 <Text.Label color="secondary" className={styles.centerAlign}>
                   {i18n.t('paperWallet.savePaperWallet.pleaseSaveOrPrintLabel')}
                 </Text.Label>
