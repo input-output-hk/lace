@@ -198,7 +198,7 @@ in rec {
     x86_64-windows = pkgs.fetchurl (
       if ver == "pull/1885/head" then {
         name = "mithril-${ver}-windows-x64.zip";
-        url = "https://productionresultssa1.blob.core.windows.net/actions-results/d51b01f8-fa00-4b46-a824-8432f29f3f24/workflow-job-run-2c802917-68c0-5b3f-f64e-4f6eb0b9c055/artifacts/21053eecaedf8df59541c6255e7c6eda59099d752df277452b8703309566104e.zip?rscd=attachment%3B+filename%3D%22mithril-distribution-Windows-X64.zip%22&se=2024-08-12T08%3A57%3A41Z&sig=D45e3rzYnixb%2BKhs3SIAlh%2FP%2FP9uDoW63HU1%2FhH8e0E%3D&ske=2024-08-12T19%3A40%3A06Z&skoid=ca7593d4-ee42-46cd-af88-8b886a2f84eb&sks=b&skt=2024-08-12T07%3A40%3A06Z&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skv=2024-05-04&sp=r&spr=https&sr=b&st=2024-08-12T08%3A47%3A36Z&sv=2024-05-04";
+        url = "https://productionresultssa1.blob.core.windows.net/actions-results/d51b01f8-fa00-4b46-a824-8432f29f3f24/workflow-job-run-2c802917-68c0-5b3f-f64e-4f6eb0b9c055/artifacts/21053eecaedf8df59541c6255e7c6eda59099d752df277452b8703309566104e.zip?rscd=attachment%3B+filename%3D%22mithril-distribution-Windows-X64.zip%22&se=2024-08-12T22%3A24%3A57Z&sig=iVNccPnyxia2qitZH0AGrNx7lan56EqMVrLUzHaxdLw%3D&ske=2024-08-13T07%3A52%3A39Z&skoid=ca7593d4-ee42-46cd-af88-8b886a2f84eb&sks=b&skt=2024-08-12T19%3A52%3A39Z&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skv=2024-05-04&sp=r&spr=https&sr=b&st=2024-08-12T22%3A14%3A52Z&sv=2024-05-04";
         hash = "sha256-Avz/uuoh7f2K0UuK1fRIrPMCOioH70K7488lisQz63g=";
       } else {
         name = "mithril-${ver}-windows-x64.tar.gz";
