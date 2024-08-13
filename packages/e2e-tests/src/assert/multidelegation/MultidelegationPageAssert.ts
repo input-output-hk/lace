@@ -167,9 +167,12 @@ class MultidelegationPageAssert {
     );
   };
 
-  assertSeeSearchResults = async (expectedResultsCount: number) => {
-    const rowsNumber = (await MultidelegationPage.displayedPools).length;
-    expect(rowsNumber).to.equal(expectedResultsCount);
+  assertSeeSearchResults = async (expectedResultsCount: number, view: 'grid' | 'list') => {
+    const searchResultsCount =
+      view === 'list'
+        ? (await MultidelegationPage.displayedPools).length
+        : (await MultidelegationPage.displayedCards).length;
+    expect(searchResultsCount).to.equal(expectedResultsCount);
     await MultidelegationPage.emptySearchResultsImage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
     await MultidelegationPage.emptySearchResultsMessage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
     if (expectedResultsCount === 0) {
@@ -178,20 +181,33 @@ class MultidelegationPageAssert {
       );
     } else {
       for (let index = 0; index < expectedResultsCount; index++) {
-        const stakePoolListItem = new StakePoolListItem(index);
-        await stakePoolListItem.checkbox.waitForDisplayed();
-        await stakePoolListItem.ticker.waitForDisplayed();
-        await stakePoolListItem.saturation.waitForDisplayed();
-        if (process.env.USE_ROS_STAKING_COLUMN) {
-          await stakePoolListItem.ros.waitForDisplayed();
-        }
-        await stakePoolListItem.cost.waitForDisplayed();
-        await stakePoolListItem.margin.waitForDisplayed();
-        await stakePoolListItem.blocks.waitForDisplayed();
-        await stakePoolListItem.pledge.waitForDisplayed();
-        await stakePoolListItem.liveStake.waitForDisplayed();
+        view === 'list'
+          ? await this.assertSearchedPoolItemIsDisplayedCorrectlyInListView(index)
+          : await this.assertSearchedPoolItemIsDisplayedCorrectlyInGridView(index);
       }
     }
+  };
+
+  assertSearchedPoolItemIsDisplayedCorrectlyInListView = async (index: number) => {
+    const stakePoolListItem = new StakePoolListItem(index);
+    await stakePoolListItem.checkbox.waitForDisplayed();
+    await stakePoolListItem.ticker.waitForDisplayed();
+    await stakePoolListItem.saturation.waitForDisplayed();
+    if (process.env.USE_ROS_STAKING_COLUMN) {
+      await stakePoolListItem.ros.waitForDisplayed();
+    }
+    await stakePoolListItem.cost.waitForDisplayed();
+    await stakePoolListItem.margin.waitForDisplayed();
+    await stakePoolListItem.blocks.waitForDisplayed();
+    await stakePoolListItem.pledge.waitForDisplayed();
+    await stakePoolListItem.liveStake.waitForDisplayed();
+  };
+
+  assertSearchedPoolItemIsDisplayedCorrectlyInGridView = async (index: number) => {
+    const stakePoolGridCard = new StakePoolGridCard(index);
+    await stakePoolGridCard.title.waitForDisplayed();
+    await stakePoolGridCard.saturation.waitForDisplayed();
+    await stakePoolGridCard.saturationProgressBar.waitForDisplayed();
   };
 
   assertSeeFirstSearchResultWithTicker = async (expectedTicker: string) => {

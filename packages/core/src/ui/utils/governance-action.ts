@@ -196,12 +196,24 @@ export const getHardForkInitiationActionViewData = ({
 
 export const getInfoActionViewData = ({
   anchor,
-  explorerBaseUrl
+  explorerBaseUrl,
+  deposit,
+  rewardAccount,
+  cardanoCoin
 }: {
   anchor: Cardano.ProposalProcedure['anchor'];
   explorerBaseUrl: string;
+  deposit: Cardano.ProposalProcedure['deposit'];
+  rewardAccount: Cardano.ProposalProcedure['rewardAccount'];
+  cardanoCoin: Wallet.CoinId;
 }): Parameters<typeof InfoAction>[0]['data'] => ({
-  txDetails: {},
+  txDetails: {
+    deposit: Wallet.util.getFormattedAmount({
+      amount: deposit.toString(),
+      cardanoCoin
+    }),
+    rewardAccount
+  },
   procedure: {
     anchor: {
       url: anchor.url,

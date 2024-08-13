@@ -11,17 +11,18 @@ import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { PublicPgpKeyData } from '@src/types';
 
-type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
 interface PgpValidation {
   error?: string;
   success?: string;
 }
 
+type OnNameChange = (state: { name: string }) => void;
+
 interface State {
   back: () => void;
   createWalletData: CreateWalletParams;
-  next: () => Promise<void>;
-  onNameAndPasswordChange: OnNameAndPasswordChange;
+  next: (state?: Partial<CreateWalletParams>) => Promise<void>;
+  onNameChange: OnNameChange;
   step: WalletCreateStep;
   recoveryMethod: RecoveryMethod;
   setRecoveryMethod: (value: RecoveryMethod) => void;
@@ -52,7 +53,6 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   const posthog = usePostHogClientContext();
   const paperWalletEnabled = posthog?.featureFlags?.['create-paper-wallet'] === true;
   const {
-    clearSecrets,
     createWallet: createHotWallet,
     createWalletData,
     sendPostWalletAddAnalytics,
@@ -70,9 +70,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Wallet.KeyManagement.util.generateMnemonicWords() }));
   }, [setCreateWalletData]);
 
-  const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
-    ({ name, password }) => {
-      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+  const onNameChange: OnNameChange = useCallback(
+    ({ name }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name }));
     },
     [setCreateWalletData]
   );
@@ -83,13 +83,11 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
       postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
     });
-    clearSecrets();
     pgpInfo.pgpPublicKey = '';
     pgpInfo.pgpKeyReference = '';
     createWalletData.password = '';
     setPgpInfo(INITIAL_PGP_STATE);
   }, [
-    clearSecrets,
     createHotWallet,
     createWalletData,
     pgpInfo,
@@ -176,7 +174,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       back,
       createWalletData,
       next,
-      onNameAndPasswordChange,
+      onNameChange,
       step,
       recoveryMethod,
       setRecoveryMethod,
@@ -189,7 +187,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       back,
       createWalletData,
       next,
-      onNameAndPasswordChange,
+      onNameChange,
       step,
       recoveryMethod,
       setRecoveryMethod,

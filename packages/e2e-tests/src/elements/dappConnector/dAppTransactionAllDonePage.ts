@@ -2,25 +2,44 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class DAppTransactionAllDonePage {
-  private IMAGE = '[data-testid="dapp-sign-tx-success-image"]';
-  private HEADING = '[data-testid="dapp-sign-tx-success-heading"]';
-  private DESCRIPTION = '[data-testid="dapp-sign-tx-success-description"]';
-  private CLOSE_BUTTON = '[data-testid="dapp-sign-tx-success-close-button"]';
+  private IMAGE_TX_SIGN = '[data-testid="dapp-sign-tx-success-image"]';
+  private HEADING_TX_SIGN = '[data-testid="dapp-sign-tx-success-heading"]';
+  private DESCRIPTION_TX_SIGN = '[data-testid="dapp-sign-tx-success-description"]';
+  private CLOSE_BUTTON_TX_SIGN = '[data-testid="dapp-sign-tx-success-close-button"]';
 
-  get image(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.IMAGE);
+  private IMAGE_DATA_SIGN = '[data-testid="dapp-sign-data-success-image"]';
+  private HEADING_DATA_SIGN = '[data-testid="dapp-sign-data-success-heading"]';
+  private DESCRIPTION_DATA_SIGN = '[data-testid="dapp-sign-data-success-description"]';
+  private CLOSE_BUTTON_DATA_SIGN = '[data-testid="dapp-sign-data-success-close-button"]';
+  get imageTxSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.IMAGE_TX_SIGN);
   }
 
-  get heading(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.HEADING);
+  get imageDataSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.IMAGE_DATA_SIGN);
   }
 
-  get description(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DESCRIPTION);
+  get headingTxSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.HEADING_TX_SIGN);
+  }
+  get headingDataSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.HEADING_DATA_SIGN);
   }
 
-  get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CLOSE_BUTTON);
+  get descriptionTxSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.DESCRIPTION_TX_SIGN);
+  }
+
+  get descriptionDataSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.DESCRIPTION_DATA_SIGN);
+  }
+
+  get closeButtonTxSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLOSE_BUTTON_TX_SIGN);
+  }
+
+  get closeButtonDataSign(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLOSE_BUTTON_DATA_SIGN);
   }
 }
 

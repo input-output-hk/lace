@@ -115,7 +115,7 @@ Then(
         await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
         break;
       case 'All done':
-        await DAppConnectorAssert.assertSeeAllDonePage();
+        await DAppConnectorAssert.assertSeeAllDonePage('tx sign');
         break;
       default:
         throw new Error(`Unsupported page: ${expectedPage}`);
@@ -128,9 +128,9 @@ Then(/^I see DApp connector "Sign transaction" page$/, async () => {
   await DAppConnectorAssert.assertSeeSignTransactionPage();
 });
 
-Then(/^I see DApp connector "All done" page$/, async () => {
+Then(/^I see DApp connector "All done" page(?: from "(data sign)")?$/, async (signType?: 'data sign' | 'tx sign') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAllDonePage();
+  await DAppConnectorAssert.assertSeeAllDonePage(signType);
 });
 
 Then(/^I don't see DApp window$/, async () => {
@@ -314,8 +314,8 @@ Then(/^I click "(Confirm|Cancel)" button on "Sign transaction" page$/, async (bu
 });
 
 Then(/^I click "Close" button on DApp "All done" page$/, async () => {
-  await AllDonePage.closeButton.waitForStable();
-  await AllDonePage.closeButton.click();
+  await AllDonePage.closeButtonTxSign.waitForStable();
+  await AllDonePage.closeButtonTxSign.click();
 });
 
 Then(/^I save fee value on DApp "Confirm transaction" page$/, async () => {

@@ -13,7 +13,8 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ShieldedPgpKeyData } from '@src/types';
 import { ChainName } from '@lace/cardano/dist/wallet';
 
-type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+type OnNameChange = (state: { name: string }) => void;
+
 type OnRecoveryPhraseLengthChange = (length: RecoveryPhraseLength) => void;
 type WalletSummaryInfo = {
   address: string;
@@ -23,9 +24,9 @@ type WalletSummaryInfo = {
 interface State {
   back: () => void;
   createWalletData: CreateWalletParams;
-  finalizeWalletRestoration: () => Promise<void>;
-  next: () => Promise<void>;
-  onNameAndPasswordChange: OnNameAndPasswordChange;
+  finalizeWalletRestoration: (params: Partial<CreateWalletParams>) => Promise<void>;
+  next: (state?: Partial<CreateWalletParams>) => Promise<void>;
+  onNameChange: OnNameChange;
   onRecoveryPhraseLengthChange: OnRecoveryPhraseLengthChange;
   setMnemonic: (mnemonic: string[]) => void;
   step: WalletRestoreStep;
@@ -74,10 +75,9 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     address: null,
     chain: null
   });
-  const { clearSecrets, createWallet, createWalletData, sendPostWalletAddAnalytics, setCreateWalletData } =
-    useHotWalletCreation({
-      initialMnemonic: Array.from({ length: initialMnemonicLength }, () => '')
-    });
+  const { createWallet, createWalletData, sendPostWalletAddAnalytics, setCreateWalletData } = useHotWalletCreation({
+    initialMnemonic: Array.from({ length: initialMnemonicLength }, () => '')
+  });
 
   const setMnemonic = useCallback(
     (mnemonic: string[]) => {
@@ -95,39 +95,40 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     [setCreateWalletData]
   );
 
-  const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
-    ({ name, password }) => {
-      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+  const onNameChange: OnNameChange = useCallback(
+    ({ name }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name }));
     },
     [setCreateWalletData]
   );
 
-  const finalizeWalletRestoration = useCallback(async () => {
-    const { source, wallet } = await createWallet();
-    void sendPostWalletAddAnalytics({
-      extendedAccountPublicKey: source.account.extendedAccountPublicKey,
-      postHogActionHdWallet: postHogActions.restore.HD_WALLET,
-      postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
-      wallet
-    });
-    if (forgotPasswordFlowActive) {
-      deleteFromLocalStorage('isForgotPasswordFlow');
-    }
-    clearSecrets();
-    pgpInfo.pgpKeyPassphrase = '';
-    pgpInfo.pgpPrivateKey = '';
-    pgpInfo.shieldedMessage = null;
-    setPgpInfo(INITIAL_PGP_INFO_STATE);
-  }, [
-    clearSecrets,
-    createWallet,
-    pgpInfo,
-    setPgpInfo,
-    forgotPasswordFlowActive,
-    postHogActions.restore.HD_WALLET,
-    postHogActions.restore.WALLET_ADDED,
-    sendPostWalletAddAnalytics
-  ]);
+  const finalizeWalletRestoration = useCallback(
+    async (params: Partial<CreateWalletParams>) => {
+      const { source, wallet } = await createWallet(params);
+      void sendPostWalletAddAnalytics({
+        extendedAccountPublicKey: source.account.extendedAccountPublicKey,
+        postHogActionHdWallet: postHogActions.restore.HD_WALLET,
+        postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
+        wallet
+      });
+      if (forgotPasswordFlowActive) {
+        deleteFromLocalStorage('isForgotPasswordFlow');
+      }
+      pgpInfo.pgpKeyPassphrase = '';
+      pgpInfo.pgpPrivateKey = '';
+      pgpInfo.shieldedMessage = null;
+      setPgpInfo(INITIAL_PGP_INFO_STATE);
+    },
+    [
+      createWallet,
+      pgpInfo,
+      setPgpInfo,
+      forgotPasswordFlowActive,
+      postHogActions.restore.HD_WALLET,
+      postHogActions.restore.WALLET_ADDED,
+      sendPostWalletAddAnalytics
+    ]
+  );
 
   const next = useCallback(async () => {
     switch (step) {
@@ -197,7 +198,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
       createWalletData,
       finalizeWalletRestoration,
       next,
-      onNameAndPasswordChange,
+      onNameChange,
       onRecoveryPhraseLengthChange,
       setMnemonic,
       step,
@@ -213,7 +214,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
       createWalletData,
       finalizeWalletRestoration,
       next,
-      onNameAndPasswordChange,
+      onNameChange,
       onRecoveryPhraseLengthChange,
       setMnemonic,
       step,

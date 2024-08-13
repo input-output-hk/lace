@@ -458,6 +458,7 @@
   "browserView.transaction.send.utxoDepletedBannerErrorText": "Due to the minUTXO requirement for native assets, some ADA cannot be spent.",
   "browserView.transaction.send.utxoDepletedBannerMaxButtonText": "Use the 'Max' button to select the maximum spendable amount.",
   "browserView.transaction.send.drawer.send": "Send",
+  "browserView.transaction.send.drawer.coSignTransaction": "Co-sign Transaction",
   "browserView.transaction.send.drawer.addBundle": "Add bundle",
   "browserView.transaction.send.drawer.addressBook": "Address book",
   "browserView.transaction.send.drawer.addressBookEmpty": "You don't have saved addresses yet",

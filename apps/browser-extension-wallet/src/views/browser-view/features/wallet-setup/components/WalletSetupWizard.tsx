@@ -178,12 +178,11 @@ export const WalletSetupWizard = ({
   }, [currentStep]);
 
   const handleCompleteCreation = useCallback(
-    async (name, password) => {
+    async (name) => {
       try {
         const wallet = await createWallet({
           name,
           mnemonic,
-          password,
           chainId: DEFAULT_CHAIN_ID
         });
 
@@ -208,9 +207,9 @@ export const WalletSetupWizard = ({
     [createWallet, mnemonic, analytics, setupType, moveForward]
   );
 
-  const handleSubmit = async (result: { password: string; walletName: string }) => {
+  const handleSubmit = async (result: { walletName: string }) => {
     void sendAnalytics(postHogOnboardingActions[setupType]?.ENTER_WALLET);
-    await handleCompleteCreation(result.walletName, result.password);
+    await handleCompleteCreation(result.walletName);
     void analytics.sendAliasEvent();
   };
 

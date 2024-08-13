@@ -16,9 +16,10 @@ class WalletSetupPage extends CommonOnboardingElements {
   private COMPLEXITY_BARS_ACTIVE = '[data-testid="bar-level-active"]';
   private PASSWORD_FEEDBACK = '[data-testid="password-feedback"]';
   private ENTER_WALLET_BUTTON = '[data-testid="wallet-setup-step-btn-next"]';
-  private PASSWORD_INPUT_CONTAINER = '//div[@data-testid="password-input-container"]';
-  private PASSWORD_SHOW_BUTTON = '//*[@data-testid="password-input-show-icon"]';
-  private PASSWORD_HIDE_BUTTON = '//*[@data-testid="password-input-hide-icon"]';
+  private PASSWORD_SHOW_BUTTON = '//button[@data-testid="wallet-password-verification-input-show-icon"]';
+  private PASSWORD_HIDE_BUTTON = '//button[@data-testid="wallet-password-verification-input-hide-icon"]';
+  private PASSWORD_CONFIRMATION_SHOW_BUTTON = '//button[@data-testid="wallet-password-confirmation-input-show-icon"]';
+  private PASSWORD_CONFIRMATION_HIDE_BUTTON = '//button[@data-testid="wallet-password-confirmation-input-hide-icon"]';
 
   get subtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SUBTITLE);
@@ -53,19 +54,19 @@ class WalletSetupPage extends CommonOnboardingElements {
   }
 
   get passwordShowIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(String(`(${this.PASSWORD_INPUT_CONTAINER})[1]${this.PASSWORD_SHOW_BUTTON}`));
+    return $(this.PASSWORD_SHOW_BUTTON);
   }
 
   get passwordHideIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(String(`(${this.PASSWORD_INPUT_CONTAINER})[1]${this.PASSWORD_HIDE_BUTTON}`));
+    return $(this.PASSWORD_HIDE_BUTTON);
   }
 
   get passwordConfirmationShowIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(String(`(${this.PASSWORD_INPUT_CONTAINER})[2]${this.PASSWORD_SHOW_BUTTON}`));
+    return $(this.PASSWORD_CONFIRMATION_SHOW_BUTTON);
   }
 
   get passwordConfirmationHideIcon(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(String(`(${this.PASSWORD_INPUT_CONTAINER})[2]${this.PASSWORD_HIDE_BUTTON}`));
+    return $(this.PASSWORD_CONFIRMATION_HIDE_BUTTON);
   }
 
   get enterWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
