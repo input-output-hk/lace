@@ -38,7 +38,7 @@ export const ChooseRecoveryMethod: VFC = () => {
         title={i18n.t('paperWallet.chooseRecoveryMethod.title')}
         description={
           <Trans
-            i18nKey="paperWallet.chooseRestoreMethod.description"
+            i18nKey="paperWallet.chooseRecoveryMethod.description"
             components={{
               a: <a href={FAQ_URL} target="_blank" rel="noopener noreferrer" data-testid="faq-what-is-paper-wallet" />
             }}
