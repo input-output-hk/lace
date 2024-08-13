@@ -45,7 +45,7 @@ export const ShowPassphraseDrawer = ({
   const { password, setPassword, clearSecrets: removePassword } = useSecrets();
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
 
-  const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
+  const isConfirmButtonDisabled = isPassphraseVisible ? false : !password.value || isProcessing;
 
   const handleChange: OnPasswordChange = (target) => setPassword(target);
   const toggleBlurWords = () => {
@@ -70,7 +70,7 @@ export const ShowPassphraseDrawer = ({
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
       await validatePassword();
-      await getPassphrase(password);
+      await getPassphrase(password.value);
       setIsPassphraseVisible(true);
       setProcessingState({ isPasswordValid: true, isProcessing: false });
       removePassword();
@@ -80,7 +80,7 @@ export const ShowPassphraseDrawer = ({
       setIsPassphraseVisible(false);
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, sendAnalyticsEvent, removePassword]);
+  }, [isProcessing, validatePassword, password.value, getPassphrase, sendAnalyticsEvent, removePassword]);
 
   const handleShowPassphrase = async () => {
     if (isPassphraseVisible) {
