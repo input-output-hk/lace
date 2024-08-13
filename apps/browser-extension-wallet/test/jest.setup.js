@@ -12,6 +12,19 @@ Object.defineProperty(window, 'matchMedia', {
   }))
 });
 
+// globally mock, unmock in the specific file test
+jest.mock('@src/utils/pgp', () => {});
+
+// required for @pdfme compatability
+const { TextDecoder, TextEncoder } = require('util');
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = TextEncoder;
+}
+
+if (typeof global.TextDecoder === 'undefined') {
+  global.TextDecoder = TextDecoder;
+}
+
 // Add Uint8Array to prototype chain of Buffer, so that it behaves the same in jsdom as in nodejs and polyfilled browser env
 let Type = Buffer;
 while (Type.prototype) Type = Type.prototype;
