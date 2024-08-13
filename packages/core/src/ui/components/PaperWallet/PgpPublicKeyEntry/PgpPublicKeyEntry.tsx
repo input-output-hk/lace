@@ -39,7 +39,7 @@ export const PgpPublicKeyEntry = ({
       onChange={handlePgpPublicKeyBlockChange}
       dataTestId="pgp-public-key-block"
       wrapperClassName={cn([styles.wrapper, textareaWrapperClassName])}
-      className={styles.textArea}
+      className={cn([styles.textArea, textareaWrapperClassName])}
       value={pgpInfo.pgpPublicKey}
     />
     <Flex className={styles.validation}>
