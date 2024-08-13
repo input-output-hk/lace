@@ -1,7 +1,8 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable sonarjs/cognitive-complexity */
-import React, { useMemo, useState, useEffect, useRef, VFC } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useMemo, useState, useEffect, useRef, VFC, useCallback } from 'react';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
 import { useRestoreWallet } from '../context';
 import { Wallet } from '@lace/cardano';
@@ -39,40 +40,28 @@ const VALIDATION_TIMEOUT_MS = 2000;
 const stripDetailFromVideoDeviceName = (str: string) => str.replace(/\s(camera\s?)\(?.*\)?$/i, '');
 
 type QrCodeScanState = 'waiting' | 'blocked' | 'scanning' | 'validating' | 'scanned';
-
-interface MediaReaderProps {
-  videoDevices: MediaDeviceInfo[];
-  setScanState: React.Dispatch<React.SetStateAction<QrCodeScanState>>;
-  onScanCode: (code: QRCode) => void;
-  scanState: QrCodeScanState;
+interface ByteChunk<T> {
+  bytes: number[];
+  text?: T;
+  type: 'byte';
 }
 
-const endAllStreams = async (deviceId: MediaDeviceInfo['deviceId']) => {
-  if (!deviceId) return;
-  await navigator.mediaDevices
-    .getUserMedia({
-      video: {
-        deviceId: { exact: deviceId }
-      }
-    })
-    .then((mediaStream) => {
-      const currentStream = mediaStream;
-      const tracks = currentStream.getTracks();
-      tracks[0].stop();
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
-const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanState }: MediaReaderProps) => {
+type ScannedCode = [ByteChunk<null>, ByteChunk<string>, ByteChunk<ChainName>];
+
+export const ScanShieldedMessage: VFC = () => {
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
+  const { back, next, pgpInfo, setPgpInfo, setWalletMetadata } = useRestoreWallet();
+  const [validation, setValidation] = useState<Validation>({ error: null });
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [scanState, setScanState] = useState<QrCodeScanState>('waiting');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const streamRef = useRef<MediaStream>(null);
   const [deviceId, setDeviceId] = useState<MediaDeviceInfo['deviceId'] | null>();
 
   const handleDeviceChange = async (value: MediaDeviceInfo['deviceId']) => {
-    await endAllStreams(deviceId);
+    streamRef.current.getVideoTracks().forEach((t) => t.stop());
     setDeviceId(value);
   };
 
@@ -94,7 +83,6 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
   }, [videoDevices]);
 
   useEffect(() => {
-    // setScanState('waiting');
     const getVideoStream = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -106,6 +94,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        streamRef.current = stream;
         setScanState('scanning');
         void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_CAMERA_OK);
       } catch (error) {
@@ -118,9 +107,6 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
     };
     setScanState('waiting');
     getVideoStream();
-    return () => {
-      endAllStreams(deviceId);
-    };
   }, [
     deviceId,
     analytics,
@@ -129,6 +115,57 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
     postHogActions.restore.SCAN_QR_CODE_CAMERA_ERROR
   ]);
 
+  const onScanSuccess = async (message: openpgp.Message<Uint8Array>, address: string, chain: ChainName) => {
+    setPgpInfo({ ...pgpInfo, shieldedMessage: message });
+    setWalletMetadata({ chain, address });
+    setValidation({ error: null });
+    streamRef.current.getVideoTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_SUCCESS);
+  };
+
+  useEffect(() => {
+    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_PAGEVIEW);
+  }, [analytics, postHogActions.restore.SCAN_QR_CODE_PAGEVIEW]);
+
+  useEffect(() => {
+    const enumerateDevices = async () => {
+      try {
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        const localVideoDevices = allDevices.filter((device) => device.kind === 'videoinput');
+        setVideoDevices(localVideoDevices);
+      } catch (error) {
+        console.error('Error enumerating devices:', error);
+      }
+    };
+    enumerateDevices();
+  }, []);
+
+  const onScanCode = useCallback(
+    async (code: QRCode) => {
+      const [shieldedMessage, address, chain] = code.chunks as ScannedCode;
+
+      // User may have scanned the wallet address QR code
+      if (Wallet.Cardano.Address.fromString(code.data)) {
+        setValidation({
+          error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
+        });
+        void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
+      } else if (!!shieldedMessage?.bytes || !!address?.text || !!chain?.text) {
+        if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
+        const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
+        await onScanSuccess(shieldedPgpMessage, address.text, chain.text);
+        next();
+        // Immediately move to next step
+      } else {
+        setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
+        void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
+      }
+      setScanState('scanning');
+    },
+    [next, setValidation, setScanState, onScanSuccess, analytics, postHogActions.restore.SCAN_QR_CODE_READ_ERROR]
+  );
+
   useEffect(() => {
     const scanQRCode = async () => {
       if (!videoRef?.current?.srcObject || !canvasRef.current) {
@@ -136,7 +173,7 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
       }
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext('2d', { willReadFrequently: true });
       if (!context) return;
 
       canvas.width = video.videoWidth;
@@ -165,104 +202,6 @@ const VideoInputQrCodeReader = ({ videoDevices, setScanState, onScanCode, scanSt
     postHogActions.restore.SCAN_QR_CODE_CAMERA_ERROR,
     postHogActions.restore.SCAN_QR_CODE_CAMERA_OK
   ]);
-
-  return (
-    <Flex className={cn({ [styles.hidden]: scanState !== 'scanning' })} h="$fill" w="$fill">
-      <Box className={styles.videoContainer}>
-        <video
-          className={cn([styles.video, flipVideoScaleX && styles.flipVideoScaleX])}
-          ref={videoRef}
-          autoPlay
-          playsInline
-        />
-        <canvas ref={canvasRef} className={styles.hidden} />
-      </Box>
-      {videoDevices.length > 1 && (
-        <Box className={styles.mediaSelectContainer}>
-          <Select.Root
-            align="selected"
-            variant="outline"
-            value={deviceId}
-            onChange={handleDeviceChange}
-            showArrow
-            zIndex={99_999}
-          >
-            {VideoDeviceSelectOptions}
-          </Select.Root>
-        </Box>
-      )}
-    </Flex>
-  );
-};
-
-interface ByteChunk<T> {
-  bytes: number[];
-  text?: T;
-  type: 'byte';
-}
-
-type ScannedCode = [ByteChunk<null>, ByteChunk<string>, ByteChunk<ChainName>];
-
-export const ScanShieldedMessage: VFC = () => {
-  const { postHogActions } = useWalletOnboarding();
-  const analytics = useAnalyticsContext();
-  const { back, next, pgpInfo, setPgpInfo, setWalletMetadata } = useRestoreWallet();
-  const [validation, setValidation] = useState<Validation>({ error: null });
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [scanState, setScanState] = useState<QrCodeScanState>('waiting');
-
-  const onScanSuccess = async (
-    message: openpgp.Message<Uint8Array>,
-    address: string,
-    chain: ChainName,
-    callback: () => Promise<void>
-  ) => {
-    setPgpInfo({ ...pgpInfo, shieldedMessage: message });
-    setWalletMetadata({ chain, address });
-    setValidation({ error: null });
-    setScanState('scanned');
-    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_SUCCESS);
-    await callback();
-  };
-
-  useEffect(() => {
-    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_PAGEVIEW);
-  }, [analytics, postHogActions.restore.SCAN_QR_CODE_PAGEVIEW]);
-
-  useEffect(() => {
-    const enumerateDevices = async () => {
-      try {
-        const allDevices = await navigator.mediaDevices.enumerateDevices();
-        const localVideoDevices = allDevices.filter((device) => device.kind === 'videoinput');
-        setVideoDevices(localVideoDevices);
-      } catch (error) {
-        console.error('Error enumerating devices:', error);
-      }
-    };
-    enumerateDevices();
-  }, []);
-
-  const onScanCode = async (code: QRCode) => {
-    const [shieldedMessage, address, chain] = code.chunks as ScannedCode;
-
-    // User may have scanned the wallet address QR code
-    if (Wallet.Cardano.Address.fromString(code.data)) {
-      setValidation({
-        error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
-      });
-      void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
-    } else if (!!shieldedMessage?.bytes || !!address?.text || !!chain?.text) {
-      if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
-      const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
-      await onScanSuccess(shieldedPgpMessage, address.text, chain.text, next);
-      setScanState('scanned');
-      // Immediately move to next step
-    } else {
-      setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
-      void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
-    }
-    setScanState('scanning');
-  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -308,13 +247,32 @@ export const ScanShieldedMessage: VFC = () => {
         <Flex gap="$16" alignItems="stretch" flexDirection="column" w="$fill" h="$fill">
           <Flex className={styles.scanArea} justifyContent="center" alignItems="center">
             {userNotifications}
-            {videoDevices.length > 0 && scanState !== 'scanned' && (
-              <VideoInputQrCodeReader
-                videoDevices={videoDevices}
-                setScanState={setScanState}
-                onScanCode={onScanCode}
-                scanState={scanState}
-              />
+            {videoDevices.length > 0 && (
+              <Flex className={cn({ [styles.hidden]: scanState !== 'scanning' })} h="$fill" w="$fill">
+                <Box className={styles.videoContainer}>
+                  <video
+                    className={cn([styles.video, flipVideoScaleX && styles.flipVideoScaleX])}
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                  />
+                  <canvas ref={canvasRef} className={styles.hidden} />
+                </Box>
+                {videoDevices.length > 1 && (
+                  <Box className={styles.mediaSelectContainer}>
+                    <Select.Root
+                      align="selected"
+                      variant="outline"
+                      value={deviceId}
+                      onChange={handleDeviceChange}
+                      showArrow
+                      zIndex={99_999}
+                    >
+                      {VideoDeviceSelectOptions}
+                    </Select.Root>
+                  </Box>
+                )}
+              </Flex>
             )}
           </Flex>
           <Flex justifyContent="space-between" h={'$48'} alignItems="center">
