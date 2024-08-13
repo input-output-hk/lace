@@ -8,8 +8,7 @@ import { OnPasswordChange } from '@input-output-hk/lace-ui-toolkit';
 const onChange: OnPasswordChange = () => void 0;
 
 describe('Password', () => {
-  // This might be broken: test reports show pw button as focused
-  test.skip('starts focused if specified', async () => {
+  test('starts focused if specified', async () => {
     const { queryByTestId } = render(<Password autoFocus onChange={onChange} />);
     await waitFor(() => {
       expect(queryByTestId('password-input')).toHaveFocus();
