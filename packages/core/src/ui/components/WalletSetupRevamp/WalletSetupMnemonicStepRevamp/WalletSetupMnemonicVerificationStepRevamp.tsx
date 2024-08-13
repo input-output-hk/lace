@@ -107,7 +107,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
           </Button>
         </Tooltip>
       }
-      currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
+      currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
       isNextEnabled={isSubmitEnabled}
     >
       <div className={styles.mnemonicContainer}>

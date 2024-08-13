@@ -61,7 +61,6 @@ Feature: Onboarding - Create wallet
   @LW-2627
   Scenario: Create Wallet - autofill words
     When I click "Create" button on wallet setup page
-    And I click "Next" button during wallet setup
     And "Mnemonic writedown" page is displayed with 24 words
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
@@ -122,8 +121,6 @@ Feature: Onboarding - Create wallet
     When "Get started" page is displayed
     And I click "Create" button on wallet setup page
     Then I see current onboarding page in <mode> mode
-    When I click "Next" button during wallet setup
-    Then I see current onboarding page in <mode> mode
     When "Mnemonic writedown" page is displayed with 24 words
     Then I see current onboarding page in <mode> mode
     And I save mnemonic words
@@ -157,7 +154,6 @@ Feature: Onboarding - Create wallet
   @LW-8501
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
     Given I click "Create" button on wallet setup page
-    And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
     And I save mnemonic words
     And I click "Next" button during wallet setup
@@ -175,7 +171,6 @@ Feature: Onboarding - Create wallet
   @LW-10452
   Scenario: Create wallet - Copy and Paste from clipboard has a tooltip
     Given I click "Create" button on wallet setup page
-    And I click "Next" button during wallet setup
     And "Mnemonic writedown" page is displayed with 24 words
     And I hover over "Copy to clipboard" button
     Then I see clipboard tooltip with information about copying and pasting words

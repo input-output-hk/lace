@@ -12,14 +12,13 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate that <number_of_events> analytics event(s) have been sent
     Examples:
       | enable_analytics | number_of_events |
-      | accept           | 7                |
+      | accept           | 6                |
       | reject           | 1                |
 
   @LW-7363
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
     When I click "Next" button during wallet setup
@@ -42,7 +41,6 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics single event "onboarding | analytics banner | agree | click"
     When I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
-    When I click "Next" button during wallet setup
     When I click on "Copy to clipboard" button
     Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click"
     When I click "Next" button during wallet setup
@@ -58,7 +56,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | onboarding \| new wallet revamp \| added                                                 |
       | $create_alias                                                                            |
-    And I validate that 10 analytics event(s) have been sent
+    And I validate that 9 analytics event(s) have been sent
 
   @LW-7364 @Pending
     # Disabled as user is opted out until he decision about tracking.

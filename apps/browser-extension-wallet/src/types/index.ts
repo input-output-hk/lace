@@ -8,5 +8,3 @@ export * from './activity-detail';
 export * from './dappConnector';
 export * from './ui';
 export * from './side-menu';
-export * from './pgp';
-export * from './paperWallet';

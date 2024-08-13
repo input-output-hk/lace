@@ -1,5 +1,5 @@
 import { MnemonicVideoPopupContent, WalletSetupMnemonicStage, WalletSetupMnemonicStepRevamp } from '@lace/core';
-import React, { useState } from 'react';
+import React, { useState, VFC } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
 import { WarningModal } from '@src/views/browser-view/components';
@@ -21,7 +21,7 @@ const getMnemonicStage = (step: WalletCreateStep): WalletSetupMnemonicStage => {
   throw new Error('Invalid wallet crate step');
 };
 
-export const NewRecoveryPhrase = (): JSX.Element => {
+export const NewRecoveryPhrase: VFC = () => {
   const { t } = useTranslation();
   const { postHogActions } = useWalletOnboarding();
   const { back, createWalletData, next, step } = useCreateWallet();

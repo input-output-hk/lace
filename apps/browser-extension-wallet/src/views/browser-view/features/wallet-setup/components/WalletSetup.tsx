@@ -9,11 +9,9 @@ import { useLocalStorage } from '@hooks';
 import { EnhancedAnalyticsOptInStatus, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletOnboardingFlows } from '@views/browser/features/multi-wallet/WalletOnboardingFlows';
 import { WalletSetupLayout } from '@views/browser/components';
-import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export const WalletSetup = (): React.ReactElement => {
   const isForgotPasswordFlow = getValueFromLocalStorage('isForgotPasswordFlow');
-  const posthogClient = usePostHogClientContext();
   const [enhancedAnalyticsStatus] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.NotSet
@@ -42,7 +40,7 @@ export const WalletSetup = (): React.ReactElement => {
       <WalletSetupLayout>
         <WalletOnboardingFlows
           aliasEventRequired
-          flowsEnabled={enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.NotSet && !!posthogClient.featureFlags}
+          flowsEnabled={enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.NotSet}
           forgotPasswordFlowActive={isForgotPasswordFlow}
           postHogActions={{
             ...postHogOnboardingActions,

@@ -7,5 +7,3 @@
  */
 export const shortenString = (str: string, length: number): string =>
   length > 0 && str?.length > length ? `${str.slice(0, length)}...` : str;
-
-export const replaceWhitespace = (str: string, replacement = ''): string => str.replace(/\s/, replacement);

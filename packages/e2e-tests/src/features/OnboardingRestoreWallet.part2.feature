@@ -4,7 +4,6 @@ Feature: Onboarding - Restore wallet
   @LW-4613
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - add letter to mnemonic to exceed the limit
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "abcdefghij"
     And I add characters "x" in word 0
@@ -26,7 +25,6 @@ Feature: Onboarding - Restore wallet
   @LW-4743
   Scenario: Restore wallet - Enter button support
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     When I press keyboard Enter button
     And "Wallet setup" page is displayed
@@ -37,7 +35,6 @@ Feature: Onboarding - Restore wallet
   @LW-5835
   Scenario: Restore Wallet - "Recovery phrase page" displayed
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
 
@@ -47,12 +44,11 @@ Feature: Onboarding - Restore wallet
     And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I click "Back" button during wallet setup
-    Then "Choose a recovery method" page is displayed
+    Then "Get started" page is displayed
 
   @LW-6080 @LW-5839 @LW-5838
   Scenario Outline: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And I select <mnemonicLength> word passphrase length
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with <mnemonicLength> words
     When I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
@@ -69,7 +65,6 @@ Feature: Onboarding - Restore wallet
   @LW-6081
   Scenario Outline: Restore Wallet - error message is displayed for <mnemonicLength> passphrase length
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     And I select <mnemonicLength> word passphrase length
     When I enter <mnemonicLength> incorrect mnemonic words on "Mnemonic verification" page
@@ -86,8 +81,6 @@ Feature: Onboarding - Restore wallet
     When "Get started" page is displayed
     Then I see current onboarding page in <mode> mode
     And I click "Restore" button on wallet setup page
-    When I click "Next" button during wallet setup
-    Then I see current onboarding page in <mode> mode
     When "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     Then I see current onboarding page in <mode> mode
     And I enter 24 correct mnemonic words on "Mnemonic verification" page
@@ -105,7 +98,6 @@ Feature: Onboarding - Restore wallet
   @LW-10453
   Scenario: Restore Wallet - Paste from clipboard has a tooltip
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
     And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I hover over "Paste from clipboard" button
     Then I see clipboard tooltip with information about copying and pasting words

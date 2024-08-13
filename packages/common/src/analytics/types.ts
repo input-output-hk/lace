@@ -211,11 +211,6 @@ export enum PostHogAction {
   SettingsCustomSubmitApiClick = 'settings | custom submit api | click',
   SettingsCustomSubmitApiXClick = 'settings | custom submit api | x | click',
   SettingsCustomSubmitApiEnableClick = 'settings | custom submit api | enable | click',
-  SettingsOpenGeneratePaperWalletDrawer = 'settings | paper wallet - generate pdf | click',
-  SettingsPaperWalletPublicKeyNextClick = 'settings | paper wallet - generate pdf | next | click',
-  SettingsPaperWalletPasswordNextClick = 'settings | paper wallet - generate pdf | password | click',
-  SettingsPaperWalletDownloadClick = 'settings | paper wallet - generate pdf | download | click',
-  SettingsPaperWalletPrintClick = 'settings | paper wallet - generate pdf | print | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

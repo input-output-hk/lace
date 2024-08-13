@@ -201,10 +201,6 @@
   background-color: var(--data-pink) !important;
 }
 
-.settingsExitButton {
-  background-color: var(--primary-default);
-}
-
 .settingsSelect {
   width: 100%;
   margin-top: size_unit(6) !important;
@@ -551,13 +547,4 @@ h5 {
   @include text-bodyXS-medium;
   color: var(--data-pink) !important;
   margin-left: size_unit(1);
-}
-
-.actionButtonContainer button path,
-.actionButtonContainer button:hover path {
-  fill: none;
-}
-
-.fullWidth {
-  width: 100%;
 }

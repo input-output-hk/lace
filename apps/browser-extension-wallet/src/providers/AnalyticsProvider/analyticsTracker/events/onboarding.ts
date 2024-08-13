@@ -13,10 +13,6 @@ const makeOnboardingHardwareEvent = <E extends string>(eventSuffix: E) =>
   `onboarding | hardware wallet revamp | ${eventSuffix}` as const;
 const makeForgotPasswordEvent = <E extends string>(eventSuffix: E) =>
   `unlock wallet | forgot password? | ${eventSuffix}` as const;
-const makePaperWalletOnboardingCreateEvent = <E extends string>(eventSuffix: E) =>
-  `onboarding | new wallet revamp paper wallet | ${eventSuffix}` as const;
-const makePaperWalletOnboardingRestoreEvent = <E extends string>(eventSuffix: E) =>
-  `onboarding | restore wallet revamp paper wallet | ${eventSuffix}` as const;
 
 const onboardingActions = {
   onboarding: {
@@ -27,18 +23,6 @@ const onboardingActions = {
     PIN_EXTENSION_CLICK: makeOnboardingEvent('lace main view | pin the wallet extension | click')
   },
   create: {
-    CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | recovery phrase | click'),
-    CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | paper wallet | click'),
-    CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | next | click'),
-    PGP_PUBLIC_KEY_PAGE_VIEW: makePaperWalletOnboardingCreateEvent('step: pgp key | pageview'),
-    PGP_PUBLIC_KEY_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('step: pgp key | next | click'),
-    WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent(
-      'step: wallet info | Generate paper wallet | click'
-    ),
-    PAPER_WALLET_DOWNLOAD_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: download pdf | pageview'),
-    DOWNLOAD_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('download pdf | download pdf | click'),
-    PRINT_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('print pdf | print pdf | click'),
-    PAPER_WALLET_COMPLETE_CLICK: makePaperWalletOnboardingCreateEvent('open wallet | open wallet | click'),
     SETUP_OPTION_CLICK: makeOnboardingCreateEvent('create | click'),
     SAVE_RECOVERY_PHRASE_NEXT_CLICK: makeOnboardingCreateEvent('save your recovery phrase | next | click'),
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: makeOnboardingCreateEvent('enter your recovery phrase | next | click'),
@@ -62,18 +46,6 @@ const onboardingActions = {
     WALLET_ADDED: makeOnboardingCreateEvent('added')
   },
   restore: {
-    WALLET_SETUP_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: wallet info | pageview'),
-    CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | recovery phrase | click'),
-    CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | paper wallet | click'),
-    CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | next | click'),
-    SCAN_QR_CODE_PAGEVIEW: makePaperWalletOnboardingRestoreEvent('step: scan qr code | pageview'),
-    SCAN_QR_CODE_CAMERA_OK: makePaperWalletOnboardingRestoreEvent('step: scan qr code | camera ok'),
-    SCAN_QR_CODE_CAMERA_ERROR: makePaperWalletOnboardingRestoreEvent('step: scan qr code | camera error'),
-    SCAN_QR_CODE_READ_SUCCESS: makePaperWalletOnboardingRestoreEvent('step: scan qr code | read success'),
-    SCAN_QR_CODE_READ_ERROR: makePaperWalletOnboardingRestoreEvent('step: scan qr code | read error'),
-    WALLET_OVERVIEW_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('step: wallet overview | next | click'),
-    ENTER_PGP_PRIVATE_KEY_PAGE_VIEW: makePaperWalletOnboardingRestoreEvent('step: pgp private key | pageview'),
-    ENTER_PGP_PRIVATE_KEY_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('step: pgp private key | next | click'),
     SETUP_OPTION_CLICK: makeOnboardingRestoreEvent('restore | click'),
     ENTER_WALLET: makeOnboardingRestoreEvent("let's set up your new wallet | enter wallet | click"),
     ENTER_RECOVERY_PHRASE_NEXT_CLICK: makeOnboardingRestoreEvent(' enter your recovery phrase  | next | click'),

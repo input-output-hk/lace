@@ -28,19 +28,12 @@ import { AnalyticsTracker, postHogMultiWalletActions } from '@providers/Analytic
 import { MemoryRouter } from 'react-router-dom';
 import { walletRoutePaths } from '@routes';
 import { WalletOnboardingFlows } from '@views/browser/features/multi-wallet/WalletOnboardingFlows';
-import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
   useAnalyticsContext: jest.fn<Pick<AnalyticsTracker, 'sendMergeEvent' | 'sendEventToPostHog'>, []>().mockReturnValue({
     sendMergeEvent: jest.fn().mockReturnValue(''),
     sendEventToPostHog: jest.fn().mockReturnValue('')
   })
-}));
-
-jest.mock('@providers/PostHogClientProvider', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
-  usePostHogClientContext: () => postHogClientMocks
 }));
 
 const recoveryPhraseStep = async () => {

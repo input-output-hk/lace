@@ -8,7 +8,6 @@ import testContext from '../../utils/testContext';
 import { browser } from '@wdio/globals';
 import { setClipboardReadPermission } from '../../utils/browserPermissionsUtils';
 import clipboard from 'clipboardy';
-import ChooseRecoveryMethodPage from './ChooseRecoveryMethodPage';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -176,7 +175,6 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     mnemonicWords: string[] = [],
     fillValues = false
   ): Promise<void> {
-    await ChooseRecoveryMethodPage.nextButton.click();
     if (flowType === 'Create') {
       await this.clickOnCopyToClipboardButton();
       await this.nextButton.click();
