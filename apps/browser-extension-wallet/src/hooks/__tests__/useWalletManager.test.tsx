@@ -283,7 +283,7 @@ describe('Testing useWalletManager hook', () => {
 
       expect(unlockWallet).toBeDefined();
       expect(await unlockWallet()).toEqual(true);
-      expect(mockEmip3decrypt).toBeCalledWith(walletLock, Buffer.from(passphrase));
+      expect(mockEmip3decrypt).toBeCalledWith(walletLock, Buffer.from(passphrase).fill(0));
       expect(mockUseSecrets.clearSecrets).toBeCalled();
     });
   });
