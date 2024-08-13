@@ -48,13 +48,12 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
           setIsDialogOpen(false);
           callback();
         };
-        clearSecrets();
         setIsDialogOpen(true);
       } else {
         callback();
       }
     },
-    [setIsDialogOpen, clearSecrets]
+    [setIsDialogOpen]
   );
 
   const value = useMemo(
@@ -78,9 +77,11 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
           confirm: t('core.multiWallet.confirmationDialog.confirm')
         }}
         events={{
-          onConfirm: handleOnConfirmRef.current,
-          onCancel: () => {
+          onConfirm: () => {
             clearSecrets();
+            handleOnConfirmRef.current();
+          },
+          onCancel: () => {
             setIsDialogOpen(false);
           },
           onOpenChanged: setIsDialogOpen
