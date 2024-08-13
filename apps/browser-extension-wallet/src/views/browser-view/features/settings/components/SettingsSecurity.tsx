@@ -123,7 +123,7 @@ export const SettingsSecurity = ({
             </SettingsLink>
           </>
         )}
-        {isInMemoryWallet && paperWalletEnabled && (
+        {isInMemoryWallet && paperWalletEnabled && !popupView && (
           <SettingsLink
             description={t('browserView.settings.generatePaperWallet.description')}
             onClick={handleOpenShowPaperWalletDrawer}
