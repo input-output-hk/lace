@@ -12,7 +12,7 @@ describe('PasswordVerification', () => {
     const { queryAllByTestId, queryByTestId } = render(
       <PasswordVerification
         onChange={onChange}
-        hasValue
+        showComplexity
         complexityBarList={[{ isActive: true }, { isActive: true }, { isActive: false }]}
       />
     );
@@ -23,7 +23,7 @@ describe('PasswordVerification', () => {
   test('displays feedback for user', () => {
     const { queryByTestId } = render(
       <PasswordVerification
-        hasValue
+        showComplexity
         onChange={onChange}
         complexityBarList={[{ isActive: false }]}
         feedbacks={['Some feedback', 'Another tip']}

@@ -16,14 +16,14 @@ export type PasswordVerificationProps = {
   complexityBarList: Array<{
     isActive?: boolean;
   }>;
-  hasValue: boolean;
+  showComplexity: boolean;
 } & PasswordProps;
 
 export const PasswordVerification = ({
   level,
   feedbacks,
   complexityBarList,
-  hasValue,
+  showComplexity,
   ...rest
 }: PasswordVerificationProps): React.ReactElement => {
   const isLowLevelSecurity = level <= complexityLevels.low;
@@ -38,7 +38,7 @@ export const PasswordVerification = ({
   return (
     <div className={styles.container}>
       <Password {...rest} />
-      {hasValue && (
+      {showComplexity && (
         <>
           <div className={styles.complexityLevel}>
             {complexityBarList.map(({ isActive }, idx) => (

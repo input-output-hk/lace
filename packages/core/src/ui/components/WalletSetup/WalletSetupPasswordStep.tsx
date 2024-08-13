@@ -94,7 +94,7 @@ export const WalletSetupPasswordStep = ({
           complexityBarList={complexityBarList}
           data-testid="wallet-setup-password-step-password"
           autoFocus
-          hasValue={!!password}
+          showComplexity={!!password}
         />
         <div style={{ position: 'relative' }}>
           <Password
