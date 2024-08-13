@@ -17,7 +17,6 @@ import {
   useBuiltTxState,
   useSubmitingState,
   useTransactionProps,
-  usePassword,
   useMetadata,
   useAnalyticsSendFlowTriggerPoint,
   useMaxAdaStatus
@@ -41,7 +40,7 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, constructMultiSigTransactionData } from '@lace/core';
+import { exportMultisigTransaction, constructMultiSigTransactionData, useSecrets } from '@lace/core';
 import { mergeWitnesses } from './utils';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
@@ -79,7 +78,7 @@ export const Footer = withAddressBookContext(
     const { setSection, currentSection } = useSections();
     const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
     const { inMemoryWallet, isInMemoryWallet, walletType, isSharedWallet, currentChain } = useWalletStore();
-    const { password, removePassword } = usePassword();
+    const { password, clearSecrets: removePassword } = useSecrets();
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
     const analytics = useAnalyticsContext();
@@ -263,7 +262,7 @@ export const Footer = withAddressBookContext(
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
 
       try {
-        await withSignTxConfirmation(signAndSubmitTransaction, password);
+        await withSignTxConfirmation(signAndSubmitTransaction, password.value);
         // Send amount of bundles as value
         setSection({ currentSection: Sections.SUCCESS_TX });
         setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
@@ -379,8 +378,8 @@ export const Footer = withAddressBookContext(
     const isSubmitDisabled = useMemo(
       () =>
         currentSection.currentSection === Sections.CONFIRMATION &&
-        (isSubmitingTx || !isPasswordValid || !password || !isOnline),
-      [currentSection.currentSection, isSubmitingTx, isPasswordValid, password, isOnline]
+        (isSubmitingTx || !isPasswordValid || !password.value || !isOnline),
+      [currentSection.currentSection, isSubmitingTx, isPasswordValid, password.value, isOnline]
     );
 
     const confirmButtonLabel = useMemo(() => {

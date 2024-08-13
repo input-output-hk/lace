@@ -1,4 +1,4 @@
-import { WalletSetupNamePasswordStepRevamp } from '@lace/core';
+import { WalletSetupNamePasswordStepRevamp, WalletSetupNamePasswordSubmitParams } from '@lace/core';
 import React from 'react';
 import { useRestoreWallet } from '../context';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 
 export const Setup = (): JSX.Element => {
-  const { back, createWalletData, finalizeWalletRestoration, next, onNameAndPasswordChange } = useRestoreWallet();
+  const { back, createWalletData, finalizeWalletRestoration, next } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
   const { t } = useTranslation();
@@ -32,11 +32,10 @@ export const Setup = (): JSX.Element => {
     firstLevelPasswordStrengthFeedback: t('core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback')
   };
 
-  const onNext = async () => {
+  const onNext = async ({ walletName }: WalletSetupNamePasswordSubmitParams) => {
     void analytics.sendEventToPostHog(postHogActions.restore.ENTER_WALLET);
-
     try {
-      await finalizeWalletRestoration();
+      await finalizeWalletRestoration({ name: walletName });
     } catch (error) {
       if (error instanceof WalletConflictError) {
         toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
@@ -45,13 +44,12 @@ export const Setup = (): JSX.Element => {
       }
     }
 
-    await next();
+    await next({ name: walletName });
   };
 
   return (
     <WalletSetupNamePasswordStepRevamp
       initialWalletName={createWalletData.name}
-      onChange={onNameAndPasswordChange}
       onBack={back}
       onNext={onNext}
       translations={translations}
