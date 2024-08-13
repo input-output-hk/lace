@@ -19,10 +19,12 @@ const multiWalletActions = {
     CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | recovery phrase | click'),
     CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | paper wallet | click'),
     CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | next | click'),
+    PGP_PUBLIC_KEY_PAGE_VIEW: makePaperWalletOnboardingCreateEvent('step: pgp key | pageview'),
     PGP_PUBLIC_KEY_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('step: pgp key | next | click'),
     WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent(
       'step: wallet info | Generate paper wallet | click'
     ),
+    PAPER_WALLET_DOWNLOAD_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: download pdf | pageview'),
     DOWNLOAD_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('download pdf | download pdf | click'),
     PRINT_PAPER_WALLET_CLICK: makePaperWalletOnboardingCreateEvent('print pdf | print pdf | click'),
     PAPER_WALLET_COMPLETE_CLICK: makePaperWalletOnboardingCreateEvent('open wallet | open wallet | click'),
@@ -49,6 +51,7 @@ const multiWalletActions = {
     WALLET_ADDED: makeMultiWalletCreateEvent('added')
   },
   restore: {
+    WALLET_SETUP_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: wallet info | pageview'),
     CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | recovery phrase | click'),
     CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | paper wallet | click'),
     CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | next | click'),

@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-null */
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps, PgpPublicKeyEntry } from '@lace/core';
-import React, { VFC } from 'react';
+import React, { VFC, useEffect } from 'react';
 import { useCreateWallet } from '../context';
 import { pgpPublicKeyVerification } from '@src/utils/pgp';
 import { i18n } from '@lace/translation';
@@ -23,6 +23,10 @@ export const SecurePaperWallet: VFC = () => {
     void analytics.sendEventToPostHog(postHogActions.create.PGP_PUBLIC_KEY_NEXT_CLICK);
     next();
   };
+
+  useEffect(() => {
+    void analytics.sendEventToPostHog(postHogActions.create.PGP_PUBLIC_KEY_PAGE_VIEW);
+  }, [analytics, postHogActions.create.PGP_PUBLIC_KEY_PAGE_VIEW]);
 
   return (
     <>

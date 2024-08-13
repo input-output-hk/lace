@@ -61,6 +61,10 @@ export const SavePaperWallet: VFC = () => {
     error: null
   });
 
+  useEffect(() => {
+    void analytics.sendEventToPostHog(postHogActions.create.PAPER_WALLET_DOWNLOAD_PAGEVIEW);
+  }, [analytics, postHogActions.create.PAPER_WALLET_DOWNLOAD_PAGEVIEW]);
+
   const handleNext = () => {
     void analytics.sendEventToPostHog(postHogActions.create.PAPER_WALLET_COMPLETE_CLICK);
     setPgpInfo(null);
