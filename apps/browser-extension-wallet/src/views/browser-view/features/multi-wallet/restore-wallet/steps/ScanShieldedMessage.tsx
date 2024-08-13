@@ -217,6 +217,10 @@ export const ScanShieldedMessage: VFC = () => {
   };
 
   useEffect(() => {
+    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_PAGEVIEW);
+  }, [analytics, postHogActions.restore.SCAN_QR_CODE_PAGEVIEW]);
+
+  useEffect(() => {
     const enumerateDevices = async () => {
       try {
         const allDevices = await navigator.mediaDevices.enumerateDevices();
