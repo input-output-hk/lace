@@ -27,7 +27,6 @@ export const ConfirmPassword = (): React.ReactElement => {
             error={!isPasswordValid}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             label={t('browserView.transaction.send.password.placeholder')}
-            autoFocus
           />
         </div>
       </div>
