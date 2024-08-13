@@ -61,6 +61,10 @@ export const EnterPgpPrivateKey: VFC = () => {
   const [entryType, setEntryType] = useState<PrivateKeyEntry>('file-upload');
   const [privateKeyFile, setPrivateKeyFile] = useState<string>('');
 
+  useEffect(() => {
+    void analytics.sendEventToPostHog(postHogActions.restore.ENTER_PGP_PRIVATE_KEY_PAGE_VIEW);
+  }, [analytics, postHogActions.restore.ENTER_PGP_PRIVATE_KEY_PAGE_VIEW]);
+
   const handlePgpPrivateKeyBlockChange = useCallback(
     async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setValidation({ error: null, success: null });

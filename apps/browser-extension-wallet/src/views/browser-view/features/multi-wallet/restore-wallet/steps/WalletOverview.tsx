@@ -49,6 +49,10 @@ export const WalletOverview = (): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    void analytics.sendEventToPostHog(postHogActions.restore.WALLET_SETUP_PAGEVIEW);
+  }, [analytics, postHogActions.restore.WALLET_SETUP_PAGEVIEW]);
+
+  useEffect(() => {
     const getData = async () => {
       if (!walletMetadata || !coinPricing.priceResult.cardano.price || coinPricing.priceResult.tokens.size === 0)
         return;
