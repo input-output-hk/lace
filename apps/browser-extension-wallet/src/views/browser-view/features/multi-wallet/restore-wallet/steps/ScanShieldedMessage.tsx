@@ -235,27 +235,27 @@ export const ScanShieldedMessage: VFC = () => {
 
   const onScanCode = async (code: QRCode) => {
     try {
-      const [shieldedMessage, address, chain] = code.chunks as ScannedCode;
-      if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
-      const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
-      onScanSuccess(shieldedPgpMessage, address.text, chain.text);
-      setScanState('scanned');
-      // Immediately move to next step
-
-      next();
+      // User may have scanned the wallet address QR code
+      if (Wallet.Cardano.Address.fromString(code.data)) {
+        setValidation({
+          error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
+        });
+        void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
+      }
     } catch {
       try {
-        // User may have scanned the wallet address QR code
-        if (Wallet.Cardano.Address.fromString(code.data)) {
-          setValidation({
-            error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
-          });
-          void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
-        }
-      } catch (error) {
+        const [shieldedMessage, address, chain] = code.chunks as ScannedCode;
+        if (!shieldedMessage.bytes && !address?.text && !chain?.text) throw new Error('unidentified QR code');
+        if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
+        const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
+        onScanSuccess(shieldedPgpMessage, address.text, chain.text);
+        setScanState('scanned');
+        // Immediately move to next step
+
+        next();
+      } catch {
         setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
         void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
-        throw error;
       }
 
       setTimeout(() => {
