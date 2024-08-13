@@ -121,7 +121,7 @@ export const ScanShieldedMessage: VFC = () => {
     setValidation({ error: null });
     streamRef.current.getVideoTracks().forEach((t) => t.stop());
     streamRef.current = null;
-    void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_SUCCESS);
+    await analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_SUCCESS);
   };
 
   useEffect(() => {
@@ -159,7 +159,7 @@ export const ScanShieldedMessage: VFC = () => {
         // Immediately move to next step
       } else {
         setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
-        void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
+        await analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
       }
       setScanState('scanning');
     },
