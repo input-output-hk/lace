@@ -100,9 +100,6 @@ jobs:
         if: needs.setup.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
-          CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.CARDANO_SERVICES_ENV }}-mainnet.lw.iog.io'
-          CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.CARDANO_SERVICES_ENV }}-preprod.lw.iog.io'
-          CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.CARDANO_SERVICES_ENV }}-preview.lw.iog.io'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
