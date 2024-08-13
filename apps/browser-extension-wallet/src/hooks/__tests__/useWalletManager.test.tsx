@@ -22,6 +22,11 @@ const mockTrezorGetXpub = jest.fn();
 const mockInitializeTrezorTransport = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
+const mockUseSecrets = {
+  password: {} as Partial<Password>,
+  setPassword: jest.fn(),
+  clearSecrets: jest.fn()
+};
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { LOCK_VALUE, UseWalletManager, useWalletManager } from '../useWalletManager';
@@ -59,6 +64,14 @@ jest.mock('@src/config', () => {
 jest.mock('@src/lib/wallet-api-ui');
 jest.mock('@stores');
 jest.mock('@src/utils/local-storage');
+jest.mock('@lace/core', () => {
+  const actual = jest.requireActual<any>('@lace/core');
+  return {
+    __esModule: true,
+    ...actual,
+    useSecrets: () => mockUseSecrets
+  };
+});
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
   return {
@@ -123,6 +136,12 @@ describe('Testing useWalletManager hook', () => {
     jest.resetAllMocks();
     jest.spyOn(AppSettings, 'useAppSettingsContext').mockReturnValue([{}, jest.fn()]);
     jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({}));
+  });
+
+  afterEach(() => {
+    mockUseSecrets.clearSecrets.mockClear();
+    mockUseSecrets.setPassword.mockClear();
+    mockUseSecrets.password = {};
   });
 
   describe('lockWallet', () => {
@@ -215,8 +234,13 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('unlockWallet', () => {
+    const passphrase = 'passphrase';
+
+    beforeEach(() => {
+      mockUseSecrets.password = { value: passphrase };
+    });
+
     test('should do nothing and return true when wallet is not locked', async () => {
-      const passphrase = 'passphrase';
       const emip3decryptResultMocked = '{}';
 
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
@@ -234,13 +258,12 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(unlockWallet).toBeDefined();
-      expect(await unlockWallet(passphrase)).toEqual(true);
+      expect(await unlockWallet()).toEqual(true);
       expect(mockEmip3decrypt).not.toBeCalled();
     });
 
     test('should return true when walletLock is successfully decrypted using the wallet password', async () => {
       (walletApiUi.walletRepository as any).wallets$ = of([{}]);
-      const passphrase = 'passphrase';
       const emip3decryptResultMocked = '{}';
       const walletLock = {};
 
@@ -259,8 +282,9 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(unlockWallet).toBeDefined();
-      expect(await unlockWallet(passphrase)).toEqual(true);
+      expect(await unlockWallet()).toEqual(true);
       expect(mockEmip3decrypt).toBeCalledWith(walletLock, Buffer.from(passphrase));
+      expect(mockUseSecrets.clearSecrets).toBeCalled();
     });
   });
 
@@ -343,7 +367,7 @@ describe('Testing useWalletManager hook', () => {
       const mnemonic = [
         'vacant violin soft weird deliver render brief always monitor general maid smart jelly core drastic erode echo there clump dizzy card filter option defense'
       ];
-      const password = { value: 'passwoprd' } as Password;
+      mockUseSecrets.password = { value: 'passwoprd' } as Password;
       const chainId = {
         networkId: 0,
         networkMagic: 0
@@ -374,11 +398,12 @@ describe('Testing useWalletManager hook', () => {
       // It is actually called with Buffer.from(password) rather than with [0, 0, ..., 0],
       // but buffer that this is called with is nullified in order to remove the actual passphrase
       // bytes from memory as soon as possible. jest keeps a reference to the buffer, so it thinks it's called with 0-es
-      const nullifiedPassphrase = Buffer.from(new Uint8Array(password.value.length));
+      const nullifiedPassphrase = Buffer.from(new Uint8Array(mockUseSecrets.password.value.length));
       expect(mockEmip3encrypt.mock.calls[0]).toEqual([LOCK_VALUE, nullifiedPassphrase]);
       expect(mockEmip3encrypt.mock.calls[1]).toEqual([Buffer.from(mnemonic.join(' ')), nullifiedPassphrase]);
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
       expect(walletApiUi.walletManager.activate).toBeCalledTimes(1);
+      expect(mockUseSecrets.clearSecrets).toBeCalledTimes(1);
     });
   });
 

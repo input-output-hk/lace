@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
 import { Button, Drawer, DrawerHeader, DrawerNavigation, Banner, useKeyboardShortcut } from '@lace/common';
-import { Password, OnPasswordChange, MnemonicWordsWritedown } from '@lace/core';
+import { Password, OnPasswordChange, MnemonicWordsWritedown, useSecrets } from '@lace/core';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
@@ -42,19 +42,18 @@ export const ShowPassphraseDrawer = ({
     isProcessing: false,
     isPasswordValid: true
   });
-  const [password, setPassword] = useState<string>('');
+  const { password, setPassword, clearSecrets: removePassword } = useSecrets();
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
 
   const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
 
-  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target);
   const toggleBlurWords = () => {
     setBlurWords(!blurWords);
     if (!blurWords) {
       sendAnalyticsEvent(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseHidePassphraseClick);
     }
   };
-  const removePassword = () => setPassword('');
 
   const getPassphrase = useCallback(
     async (userPassword) => {
@@ -70,7 +69,7 @@ export const ShowPassphraseDrawer = ({
 
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
-      await validatePassword(password);
+      await validatePassword();
       await getPassphrase(password);
       setIsPassphraseVisible(true);
       setProcessingState({ isPasswordValid: true, isProcessing: false });
@@ -81,7 +80,7 @@ export const ShowPassphraseDrawer = ({
       setIsPassphraseVisible(false);
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, sendAnalyticsEvent]);
+  }, [isProcessing, validatePassword, password, getPassphrase, sendAnalyticsEvent, removePassword]);
 
   const handleShowPassphrase = async () => {
     if (isPassphraseVisible) {
@@ -106,7 +105,7 @@ export const ShowPassphraseDrawer = ({
     setProcessingState({ isPasswordValid: true, isProcessing: false });
     setBlurWords(false);
     setPassphrase([]);
-    setPassword('');
+    removePassword();
     setIsPassphraseVisible(false);
   };
 

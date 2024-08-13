@@ -43,7 +43,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const onUnlock = async (): Promise<void> => {
     setIsVerifyingPassword(true);
     try {
-      const decrypted = await unlockWallet(password);
+      const decrypted = await unlockWallet();
       setIsValidPassword(decrypted);
       analytics.sendEventToPostHog(PostHogAction.UnlockWalletWelcomeBackUnlockClick);
       if (decrypted) {

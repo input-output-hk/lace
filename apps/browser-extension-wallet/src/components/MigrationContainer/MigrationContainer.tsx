@@ -63,14 +63,14 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
   const onUnlock = useCallback(async (): Promise<void> => {
     setIsVerifyingPassword(true);
     try {
-      await unlockWallet(password);
+      await unlockWallet();
       setIsValidPassword(true);
       await migrate();
     } catch {
       setIsValidPassword(false);
     }
     setIsVerifyingPassword(false);
-  }, [password, unlockWallet, migrate]);
+  }, [unlockWallet, migrate]);
 
   useEffect(() => {
     // Load initial migrationState value

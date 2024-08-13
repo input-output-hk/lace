@@ -98,7 +98,7 @@ export interface UseWalletManager {
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   lockWallet: () => void;
-  unlockWallet: (password: string) => Promise<boolean>;
+  unlockWallet: () => Promise<boolean>;
   loadWallet: (
     wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
     activeWalletProps: WalletManagerActivateProps | null
@@ -532,6 +532,7 @@ export const useWalletManager = (): UseWalletManager => {
       saveValueInLocalStorage({ key: 'wallet', value: { name } });
 
       // Clear passphrase
+      passphrase.fill(0);
       clearSecrets();
 
       return {
@@ -724,8 +725,9 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const unlockWallet = useCallback(async (): Promise<boolean> => {
     if (!walletLock) return true;
+    const passphrase = Buffer.from(password.value);
     try {
-      const decrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, Buffer.from(password.value));
+      const decrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, passphrase);
       // If JSON.parse succeeds, it means it was successfully decrypted
       const parsed = JSON.parse(decrypted.toString());
 
@@ -740,10 +742,12 @@ export const useWalletManager = (): UseWalletManager => {
         }
       }
 
-      clearSecrets();
       return true;
     } catch {
       return false;
+    } finally {
+      passphrase.fill(0);
+      clearSecrets();
     }
   }, [walletLock, loadWallet, password, clearSecrets]);
 
