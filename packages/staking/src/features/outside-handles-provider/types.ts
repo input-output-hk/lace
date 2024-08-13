@@ -1,4 +1,5 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
+import { Password } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps, SignPolicy } from '@lace/core';
 import { StakePoolSortOptions, StakingBrowserPreferences } from 'features/BrowsePools';
@@ -28,9 +29,9 @@ export interface SubmittingState {
 }
 
 export interface PasswordHook {
-  password?: string;
-  setPassword: (pass: string) => void;
-  removePassword: () => void;
+  password?: Partial<Password>;
+  setPassword: (pass: Partial<Password>) => void;
+  clearSecrets: () => void;
 }
 
 export enum StateStatus {

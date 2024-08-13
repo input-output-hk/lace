@@ -1,4 +1,4 @@
-import { complexityLevels } from '@lace/common';
+import { complexityLevels } from '@ui/components/PasswordVerification';
 import { ValidationErrorKeys } from './types';
 import { CoreTranslationKey } from '@lace/translation';
 

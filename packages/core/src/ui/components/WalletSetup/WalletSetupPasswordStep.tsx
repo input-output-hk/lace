@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { WalletSetupStepLayout, WalletTimelineSteps } from './WalletSetupStepLayout';
 import styles from './WalletSetupPasswordStep.module.scss';
-import { complexityLevels, Password, PasswordVerification, PasswordVerificationProps } from '@lace/common';
+import { complexityLevels, PasswordVerification, PasswordVerificationProps } from '@ui/components/PasswordVerification';
+import { OnPasswordChange, Password } from '@ui/components/Password';
 import { TranslationsFor } from '@ui/utils/types';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
 
@@ -67,7 +68,7 @@ export const WalletSetupPasswordStep = ({
 
   const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
 
-  const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordConfirmationChange: OnPasswordChange = (target) => {
     setPassHasBeenValidated(true);
     setPasswordConfirmation(target.value);
   };
@@ -86,20 +87,19 @@ export const WalletSetupPasswordStep = ({
       <div className={styles.walletSetupPasswordStep}>
         <PasswordVerification
           className={styles.input}
-          value={password}
           label={translations.password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.value)}
           level={score}
           feedbacks={feedbackTranslation}
           complexityBarList={complexityBarList}
           data-testid="wallet-setup-password-step-password"
           autoFocus
+          showComplexity={!!password}
         />
         <div style={{ position: 'relative' }}>
           <Password
             className={styles.input}
             errorMessage={passwordConfirmationErrorMessage}
-            value={passwordConfirmation}
             label={translations.confirmPassword}
             onChange={handlePasswordConfirmationChange}
             data-testid="wallet-setup-password-step-confirm-password"
