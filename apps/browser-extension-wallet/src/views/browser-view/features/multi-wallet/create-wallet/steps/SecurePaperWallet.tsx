@@ -16,7 +16,7 @@ export const SecurePaperWallet: VFC = () => {
   const handlePgpPublicKeyBlockChange = pgpPublicKeyVerification(setPgpInfo, setPgpValidation);
 
   const handlePgpReferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPgpInfo((prevState) => ({ ...prevState, pgpKeyReference: e.target.value.trim() }));
+    setPgpInfo((prevState) => ({ ...prevState, pgpKeyReference: e.target.value }));
   };
 
   const handleNext = () => {
