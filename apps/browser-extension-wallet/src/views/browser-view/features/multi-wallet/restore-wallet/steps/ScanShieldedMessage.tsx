@@ -246,12 +246,14 @@ export const ScanShieldedMessage: VFC = () => {
           setValidation({
             error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
           });
+          void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
         }
       } catch (error) {
         setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
+        void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
         throw error;
       }
-      void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
+
       setTimeout(() => {
         // Reset validation state
         setValidation({ error: null });
