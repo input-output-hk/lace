@@ -103,8 +103,8 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
           />
         ))}
       </div>
-      {/* TODO: onClick to generate visible unused address */}
-      <Button.Secondary icon={<PlusOutlined />} onClick={() => void 0} label="Create new address" />
+      {/* TODO: onClick to generate visible unused address, translation */}
+      {useGlacierDrop && <Button.Secondary icon={<PlusOutlined />} onClick={() => void 0} label="Create new address" />}
     </Flex>
   );
 };
