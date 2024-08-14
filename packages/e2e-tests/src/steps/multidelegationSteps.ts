@@ -87,7 +87,7 @@ Then(/^I click "(Next|Clear)" button on staking portfolio bar$/, async (button: 
       await PortfolioBar.clickNextButton();
       break;
     case 'Clear':
-      await PortfolioBar.clickNextButton();
+      await PortfolioBar.clickClearButton();
       break;
     default:
       throw new Error(`Unsupported button: ${button}`);
@@ -694,3 +694,29 @@ Then(/^the staking error screen is displayed$/, async () => {
 Then(/^I see "Switching to less pools" modal$/, async () => {
   await SwitchingPoolsModalAssert.assertSeeSwitchingToLessPoolsModal();
 });
+
+Then(
+  /^I redelegate from "(\d+)" to "(\d+)" pools: "([^"]*)" from staking extended page$/,
+  async (poolsCountOld: number, _ignoredPoolsCountNew: number, poolsToStake: string) => {
+    await MultidelegationPage.openTab('Overview');
+    await MultidelegationPageAssert.assertSeeStakingOnPoolsCounter(poolsCountOld);
+    await MultidelegationPage.openTab('Browse pools');
+    await MultidelegationPage.switchPoolsView('list');
+    await MultidelegationPage.markPoolsForDelegation(poolsToStake);
+    await PortfolioBar.clickNextButton();
+    await ChangingStakingPreferencesModal.fineByMeButton.waitForClickable();
+    await ChangingStakingPreferencesModal.fineByMeButton.click();
+    await ManageStakingDrawer.nextButton.waitForClickable();
+    await ManageStakingDrawer.nextButton.click();
+    await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 120_000 });
+    await StakingConfirmationDrawer.nextButton.click();
+    await browser.pause(1000);
+    if (await SwitchingStakePoolModal.title.isDisplayed()) {
+      await SwitchingStakePoolModal.fineByMeButton.click();
+    }
+    await StakingPasswordDrawer.fillPassword(validPassword);
+    await StakingPasswordDrawer.confirmStaking();
+    await StakingSuccessDrawerAssert.assertSeeStakingSuccessDrawer('Switching');
+    await StakingSuccessDrawer.clickCloseButton();
+  }
+);
