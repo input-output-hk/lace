@@ -17,7 +17,6 @@ import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SettingsLayout.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PassphraseStage, SaveStage, SecureStage } from './PaperWallet';
-import { useSecrets } from '@lace/core';
 
 interface Props {
   isOpen: boolean;
@@ -52,12 +51,13 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     isPasswordValid: true
   });
   const [pdfInstance, setPdfInstance] = useState<PaperWalletPDF>(INITIAL_PDF_STATE);
-  const { password, clearSecrets, setPassword } = useSecrets();
+  const [password, setPassword] = useState<string>('');
 
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
   const { walletInfo } = useWalletStore();
   const { CHAIN } = config();
   const [passphrase, setPassphrase] = useState<string[]>([]);
+  const removePassword = useCallback(() => setPassword(''), []);
   const getPassphrase = useCallback(
     async (userPassword) => {
       await validatePassword(userPassword);
@@ -72,26 +72,26 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const handleClose = useCallback(() => {
     setStage('secure');
     setPgpInfo(DEFAULT_PGP_STATE);
-    clearSecrets();
+    removePassword();
     setPassphrase([]);
     onClose();
-  }, [setStage, setPgpInfo, clearSecrets, setPassphrase, onClose]);
+  }, [setStage, setPgpInfo, removePassword, setPassphrase, onClose]);
 
   const handleVerifyPass = useCallback(async () => {
     if (isProcessing) return;
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
-      await validatePassword(password.value);
+      await validatePassword(password);
       await getPassphrase(password);
       analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
       setStage('save');
       setProcessingState({ isPasswordValid: true, isProcessing: false });
-      clearSecrets();
+      removePassword();
     } catch {
-      clearSecrets();
+      removePassword();
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, clearSecrets, analytics]);
+  }, [isProcessing, validatePassword, password, getPassphrase, removePassword, analytics]);
 
   useEffect(() => {
     if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
@@ -195,31 +195,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     }
   }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, handleClose, analytics]);
 
-  const drawerHeadings = useMemo(() => {
-    switch (stage) {
-      case 'secure': {
-        return {
-          subtitle: i18n.t('paperWallet.securePaperWallet.description'),
-          title: i18n.t('paperWallet.securePaperWallet.title')
-        };
-      }
-      case 'passphrase': {
-        return {
-          subtitle: i18n.t('paperWallet.SettingsDrawer.passphraseStage.subtitle'),
-          title: i18n.t('paperWallet.SettingsDrawer.passphraseStage.title')
-        };
-      }
-      case 'save': {
-        return { subtitle: i18n.t('paperWallet.savePaperWallet.description'), title: '' };
-      }
-      default:
-        return {
-          subtitle: i18n.t('paperWallet.securePaperWallet.description'),
-          title: i18n.t('paperWallet.savePaperWallet.title')
-        };
-    }
-  }, [stage]);
-
   return (
     <>
       <Drawer
@@ -227,7 +202,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         dataTestId="paper-wallet-settings-drawer"
         onClose={handleClose}
         popupView={popupView}
-        title={<DrawerHeader popupView={popupView} title={drawerHeadings.title} subtitle={drawerHeadings.subtitle} />}
+        title={<DrawerHeader popupView={popupView} title={i18n.t('paperWallet.securePaperWallet.title')} />}
         navigation={
           <DrawerNavigation
             title={i18n.t('browserView.settings.heading')}

@@ -1,18 +1,19 @@
 import React from 'react';
-import { Banner } from '@lace/common';
+import { Banner, inputProps, Password } from '@lace/common';
 import { i18n } from '@lace/translation';
-import { Flex, OnPasswordChange } from '@input-output-hk/lace-ui-toolkit';
-import { Password, PasswordObj } from '@lace/core';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import styles from '../SettingsLayout.module.scss';
 
 export const PassphraseStage = ({
   setPassword,
+  password,
   isPasswordValid
 }: {
-  setPassword: (pw: Partial<PasswordObj>) => void;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  password: string;
   isPasswordValid: boolean;
 }): JSX.Element => {
-  const handleChange: OnPasswordChange = (e) => setPassword(e);
+  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
 
   return (
     <Flex mt="$8" flexDirection="column" gap="$8">
@@ -25,6 +26,7 @@ export const PassphraseStage = ({
             <Password
               className={styles.passwordInput}
               onChange={handleChange}
+              value={password}
               error={!isPasswordValid}
               errorMessage={i18n.t('browserView.transaction.send.error.invalidPassword')}
               label={i18n.t('browserView.transaction.send.password.placeholder')}
