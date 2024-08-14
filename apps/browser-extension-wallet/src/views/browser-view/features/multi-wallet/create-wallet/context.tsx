@@ -126,6 +126,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
         case WalletCreateStep.SavePaperWallet: {
           if (!state.name) throw new Error('Expected name');
           await finalizeWalletCreation(state);
+          history.push(walletRoutePaths.assets);
           break;
         }
       }
