@@ -1,6 +1,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable consistent-return */
+/* eslint-disable unicorn/no-null */
 import { i18n } from '@lace/translation';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRestoreWallet } from '../context';
@@ -17,7 +18,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { compactNumberWithUnit } from '@src/utils/format-number';
 import { PortfolioBalance } from '@src/views/browser-view/components';
-import { addEllipsis } from '@lace/common';
+import { addEllipsis, WarningBanner } from '@lace/common';
 import { getProviderByChain } from '@src/stores/slices';
 import { CARDANO_COIN_SYMBOL, COINGECKO_URL } from '@src/utils/constants';
 import BigNumber from 'bignumber.js';
@@ -36,14 +37,14 @@ export const WalletOverview = (): JSX.Element => {
   const analytics = useAnalyticsContext();
   const { back, next, walletMetadata } = useRestoreWallet();
   const [walletBalances, setWalletBalances] = useState<{
-    ada: BigNumber;
-    otherItems: Set<Wallet.Cardano.AssetId>;
-    usdPortfolioBalance: BigNumber;
+    ada: BigNumber | null;
+    otherItems: Set<Wallet.Cardano.AssetId> | null;
+    usdPortfolioBalance: BigNumber | null;
     fetched: boolean;
   }>({
-    ada: new BigNumber(0),
-    otherItems: new Set(),
-    usdPortfolioBalance: new BigNumber(0),
+    ada: null,
+    otherItems: null,
+    usdPortfolioBalance: null,
     fetched: false
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -54,51 +55,54 @@ export const WalletOverview = (): JSX.Element => {
 
   useEffect(() => {
     const getData = async () => {
-      if (!walletMetadata || !coinPricing.priceResult.cardano.price || coinPricing.priceResult.tokens.size === 0)
-        return;
-      const { utxoProvider } = getProviderByChain(walletMetadata.chain);
-      const utxos: Wallet.Cardano.Utxo[] = await utxoProvider.utxoByAddresses({
-        addresses: [walletMetadata.address]
-      });
+      if (!walletMetadata || !coinPricing.priceResult.cardano.price) return;
+      try {
+        const { utxoProvider } = getProviderByChain(walletMetadata.chain);
+        const utxos: Wallet.Cardano.Utxo[] = await utxoProvider.utxoByAddresses({
+          addresses: [walletMetadata.address]
+        });
 
-      const summedBalances = utxos.reduce(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (acc, [_, output]) => {
-          let assetUsdValue = new BigNumber(acc.usdPortfolioBalance);
-          const additionalOtherItems = new Set(acc.otherItems);
-          if (coinPricing.priceResult.tokens) {
-            output.value.assets?.forEach((value, assetId) => {
-              const tokenPrice = coinPricing.priceResult.tokens.get(assetId);
-              if (tokenPrice)
-                assetUsdValue = assetUsdValue.plus(new BigNumber(tokenPrice.priceInAda).times(value.toString()));
+        if (!utxos) return;
+        const summedBalances = utxos.reduce(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          (acc, [_, output]) => {
+            let assetUsdValue = new BigNumber(acc.usdPortfolioBalance);
+            const additionalOtherItems = new Set(acc.otherItems);
+            if (coinPricing.priceResult?.tokens) {
+              output.value.assets?.forEach((value, assetId) => {
+                const tokenPrice = coinPricing.priceResult?.tokens?.get(assetId);
+                if (tokenPrice)
+                  assetUsdValue = assetUsdValue.plus(new BigNumber(tokenPrice.priceInAda).times(value.toString()));
 
-              if (!acc.otherItems.has(assetId)) {
-                additionalOtherItems.add(assetId);
-              }
-            });
+                if (!acc.otherItems.has(assetId)) {
+                  additionalOtherItems.add(assetId);
+                }
+              });
+            }
+
+            if (output.value.coins > 0) {
+              assetUsdValue = assetUsdValue.plus(
+                new BigNumber(Wallet.util.lovelacesToAdaString(output.value.coins.toString())).times(
+                  new BigNumber(coinPricing.priceResult.cardano.price)
+                )
+              );
+            }
+            return {
+              ada: acc.ada.plus(new BigNumber(output.value.coins.toString())),
+              otherItems: additionalOtherItems,
+              usdPortfolioBalance: assetUsdValue
+            };
+          },
+          {
+            ada: new BigNumber(0),
+            otherItems: new Set<Wallet.Cardano.AssetId>(),
+            usdPortfolioBalance: new BigNumber(0)
           }
-
-          if (output.value.coins > 0) {
-            assetUsdValue = assetUsdValue.plus(
-              new BigNumber(Wallet.util.lovelacesToAdaString(output.value.coins.toString())).times(
-                new BigNumber(coinPricing.priceResult.cardano.price)
-              )
-            );
-          }
-          return {
-            ada: acc.ada.plus(new BigNumber(output.value.coins.toString())),
-            otherItems: additionalOtherItems,
-            usdPortfolioBalance: assetUsdValue
-          };
-        },
-        {
-          ada: new BigNumber(0),
-          otherItems: new Set<Wallet.Cardano.AssetId>(),
-          usdPortfolioBalance: new BigNumber(0)
-        }
-      );
-      setWalletBalances({ ...summedBalances, fetched: true });
-      setIsLoading(false);
+        );
+        setWalletBalances({ ...summedBalances, fetched: true });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     getData();
@@ -120,7 +124,7 @@ export const WalletOverview = (): JSX.Element => {
 
   const balanceSubtitle = useMemo(() => {
     // Ignore subtitle if loading, or if data could not be fetched
-    if (isLoading || (!isLoading && !walletBalances.fetched)) return '';
+    if (isLoading || (!isLoading && !walletBalances.fetched) || !walletBalances.ada) return '';
     /**
      * Ada symbol shown in overview is based on the chain supplied in the QR code, not the one from the background wallet current chain
      **/
@@ -180,20 +184,24 @@ export const WalletOverview = (): JSX.Element => {
           </Flex>
         </Flex>
         <Flex flexDirection="column">
-          <PortfolioBalance
-            textSize="medium"
-            loading={isLoading}
-            balance={compactNumberWithUnit(walletBalances.usdPortfolioBalance.toString())}
-            showInfoTooltip
-            currencyCode={
-              'USD' // TODO: add support for other currencies
-            }
-            label={i18n.t('paperWallet.WalletOverview.balanceTitle')}
-            balanceSubtitle={{
-              value: balanceSubtitle,
-              isPercentage: false
-            }}
-          />
+          {walletBalances.fetched ? (
+            <PortfolioBalance
+              textSize="medium"
+              loading={isLoading}
+              balance={compactNumberWithUnit(walletBalances.usdPortfolioBalance.toString())}
+              showInfoTooltip
+              currencyCode={
+                'USD' // TODO: add support for other currencies
+              }
+              label={i18n.t('paperWallet.WalletOverview.balanceTitle')}
+              balanceSubtitle={{
+                value: balanceSubtitle,
+                isPercentage: false
+              }}
+            />
+          ) : (
+            <WarningBanner message={i18n.t('general.warnings.cannotFetchPrice')} />
+          )}
         </Flex>
         {!isLoading && walletBalances.fetched && (
           <Flex alignItems="center" className={styles.credit}>
