@@ -1,7 +1,7 @@
 import React from 'react';
-import { inputProps, Password } from '@lace/common';
+import { OnPasswordChange, Password, useSecrets } from '@lace/core';
 import styles from './ConfirmPassword.module.scss';
-import { useSubmitingState, usePassword } from '../store';
+import { useSubmitingState } from '../store';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
 import cn from 'classnames';
@@ -11,10 +11,10 @@ export const ConfirmPassword = (): React.ReactElement => {
   const { t } = useTranslation();
 
   const { isPasswordValid, setSubmitingTxState } = useSubmitingState();
-  const { password, setPassword } = usePassword();
+  const { setPassword } = useSecrets();
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
-    setPassword(value);
+  const handleChange: OnPasswordChange = (target) => {
+    setPassword(target);
     setSubmitingTxState({ isPasswordValid: true });
   };
 
@@ -24,11 +24,9 @@ export const ConfirmPassword = (): React.ReactElement => {
         <div className={styles.password}>
           <Password
             onChange={handleChange}
-            value={password}
             error={!isPasswordValid}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             label={t('browserView.transaction.send.password.placeholder')}
-            autoFocus
           />
         </div>
       </div>

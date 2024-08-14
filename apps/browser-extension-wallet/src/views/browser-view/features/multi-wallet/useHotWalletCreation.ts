@@ -27,8 +27,7 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
   const [createWalletData, setCreateWalletData] = useState<CreateWalletParams>({
     mnemonic: initialMnemonic,
-    name: '',
-    password: ''
+    name: ''
   });
 
   useEffect(() => {
@@ -36,11 +35,16 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
       if (createWalletData.name) return;
       const wallets = await firstValueFrom(walletManager.walletRepository.wallets$);
       const name = `Wallet ${wallets.length + 1}`;
+
       setCreateWalletData((prevState) => ({ ...prevState, name }));
     })();
-  }, [createWalletData.name, walletManager.walletRepository]);
+  }, [createWalletData.name, walletManager.walletRepository, setCreateWalletData]);
 
-  const createWallet = () => walletManager.createWallet(createWalletData);
+  const createWallet = (newData: Partial<CreateWalletParams>) =>
+    walletManager.createWallet({
+      ...createWalletData,
+      ...newData
+    });
 
   const sendPostWalletAddAnalytics = async ({
     extendedAccountPublicKey,
@@ -66,20 +70,7 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
     }
   };
 
-  const clearSecrets = () => {
-    createWalletData.password = '';
-    for (let i = 0; i < createWalletData.mnemonic.length; i++) {
-      createWalletData.mnemonic[i] = '';
-    }
-    setCreateWalletData((prevState) => ({
-      ...prevState,
-      password: '',
-      mnemonic: []
-    }));
-  };
-
   return {
-    clearSecrets,
     createWallet,
     sendPostWalletAddAnalytics,
     createWalletData,

@@ -11,7 +11,7 @@ import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { PublicPgpKeyData } from '@src/types';
 
-type OnNameAndPasswordChange = (state: { name: string; password: string }) => void;
+type OnNameChange = (state: { name: string }) => void;
 interface PgpValidation {
   error?: string;
   success?: string;
@@ -20,8 +20,8 @@ interface PgpValidation {
 interface State {
   back: () => void;
   createWalletData: CreateWalletParams;
-  next: () => Promise<void>;
-  onNameAndPasswordChange: OnNameAndPasswordChange;
+  next: (state?: Partial<CreateWalletParams>) => Promise<void>;
+  onNameChange: OnNameChange;
   step: WalletCreateStep;
   recoveryMethod: RecoveryMethod;
   setRecoveryMethod: (value: RecoveryMethod) => void;
@@ -52,7 +52,6 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   const posthog = usePostHogClientContext();
   const paperWalletEnabled = posthog?.featureFlags?.['create-paper-wallet'] === true;
   const {
-    clearSecrets,
     createWallet: createHotWallet,
     createWalletData,
     sendPostWalletAddAnalytics,
@@ -70,69 +69,69 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     setCreateWalletData((prevState) => ({ ...prevState, mnemonic: Wallet.KeyManagement.util.generateMnemonicWords() }));
   }, [setCreateWalletData]);
 
-  const onNameAndPasswordChange: OnNameAndPasswordChange = useCallback(
-    ({ name, password }) => {
-      setCreateWalletData((prevState) => ({ ...prevState, name, password }));
+  const onNameChange: OnNameChange = useCallback(
+    ({ name }) => {
+      setCreateWalletData((prevState) => ({ ...prevState, name }));
     },
     [setCreateWalletData]
   );
 
-  const finalizeWalletCreation = useCallback(async () => {
-    const wallet = await createHotWallet();
-    await sendPostWalletAddAnalytics({
-      extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
-    });
-    clearSecrets();
-    pgpInfo.pgpPublicKey = '';
-    pgpInfo.pgpKeyReference = '';
-    createWalletData.password = '';
-    setPgpInfo(INITIAL_PGP_STATE);
-  }, [
-    clearSecrets,
-    createHotWallet,
-    createWalletData,
-    pgpInfo,
-    setPgpInfo,
-    postHogActions.create.WALLET_ADDED,
-    sendPostWalletAddAnalytics
-  ]);
+  const finalizeWalletCreation = useCallback(
+    async (params: Partial<CreateWalletParams>) => {
+      const wallet = await createHotWallet(params);
+      await sendPostWalletAddAnalytics({
+        extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
+        postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
+      });
+      pgpInfo.pgpPublicKey = '';
+      pgpInfo.pgpKeyReference = '';
+      setPgpInfo(INITIAL_PGP_STATE);
+    },
+    [createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics, pgpInfo, setPgpInfo]
+  );
 
-  const next = useCallback(async () => {
-    switch (step) {
-      case WalletCreateStep.ChooseRecoveryMethod: {
-        if (recoveryMethod === 'mnemonic') {
-          setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+  const next: State['next'] = useCallback(
+    async (state) => {
+      if (state) {
+        setCreateWalletData((prevState) => ({ ...prevState, ...state }));
+      }
+      switch (step) {
+        case WalletCreateStep.ChooseRecoveryMethod: {
+          if (recoveryMethod === 'mnemonic') {
+            setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+            break;
+          }
+          setStep(WalletCreateStep.SecurePaperWallet);
           break;
         }
-        setStep(WalletCreateStep.SecurePaperWallet);
-        break;
-      }
-      case WalletCreateStep.RecoveryPhraseWriteDown: {
-        setFormDirty(true);
-        setStep(WalletCreateStep.RecoveryPhraseInput);
-        break;
-      }
-      case WalletCreateStep.SecurePaperWallet:
-      case WalletCreateStep.RecoveryPhraseInput: {
-        setStep(WalletCreateStep.Setup);
-        break;
-      }
-      case WalletCreateStep.Setup: {
-        if (recoveryMethod === 'mnemonic') {
-          await finalizeWalletCreation();
-          history.push(walletRoutePaths.assets);
+        case WalletCreateStep.RecoveryPhraseWriteDown: {
+          setFormDirty(true);
+          setStep(WalletCreateStep.RecoveryPhraseInput);
           break;
         }
-        setStep(WalletCreateStep.SavePaperWallet);
-        break;
+        case WalletCreateStep.SecurePaperWallet:
+        case WalletCreateStep.RecoveryPhraseInput: {
+          setStep(WalletCreateStep.Setup);
+          break;
+        }
+        case WalletCreateStep.Setup: {
+          if (recoveryMethod === 'mnemonic') {
+            await finalizeWalletCreation(state);
+            history.push(walletRoutePaths.assets);
+            break;
+          }
+          setStep(WalletCreateStep.SavePaperWallet);
+          break;
+        }
+        case WalletCreateStep.SavePaperWallet: {
+          if (!state.name) throw new Error('Expected name');
+          await finalizeWalletCreation(state);
+          break;
+        }
       }
-      case WalletCreateStep.SavePaperWallet: {
-        await finalizeWalletCreation();
-        break;
-      }
-    }
-  }, [finalizeWalletCreation, history, setFormDirty, step, recoveryMethod]);
+    },
+    [finalizeWalletCreation, history, setFormDirty, step, recoveryMethod, setCreateWalletData]
+  );
 
   const back = useCallback(() => {
     switch (step) {
@@ -176,7 +175,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       back,
       createWalletData,
       next,
-      onNameAndPasswordChange,
+      onNameChange,
       step,
       recoveryMethod,
       setRecoveryMethod,
@@ -189,14 +188,14 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       back,
       createWalletData,
       next,
-      onNameAndPasswordChange,
+      onNameChange,
       step,
       recoveryMethod,
       setRecoveryMethod,
       pgpInfo,
       setPgpInfo,
-      setPgpValidation,
-      pgpValidation
+      pgpValidation,
+      setPgpValidation
     ]
   );
 

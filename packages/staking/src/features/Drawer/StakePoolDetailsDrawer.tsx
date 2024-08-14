@@ -42,7 +42,7 @@ export const StakePoolDetailsDrawer = ({
 
   const {
     delegationStoreSetDelegationTxBuilder,
-    password: { password, removePassword },
+    password: { password, clearSecrets: removePassword },
     submittingState: { setIsRestaking },
     isSharedWallet,
   } = useOutsideHandles();
