@@ -27,7 +27,7 @@ const deriveAccountFromMnemonic = async (
   const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
     {
       chainId: keyAgentChainId,
-      getPassphrase: async () => Buffer.from(createWalletData.password, 'utf8'), // Throws warning if not supplied
+      getPassphrase: async () => Buffer.from(''),
       mnemonicWords: createWalletData.mnemonic,
       accountIndex: 0
     },

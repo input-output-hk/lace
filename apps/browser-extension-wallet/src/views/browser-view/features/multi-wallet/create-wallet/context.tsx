@@ -1,4 +1,5 @@
 /* eslint-disable unicorn/no-null */
+/* eslint-disable complexity */
 import { CreateWalletParams } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
@@ -77,60 +78,63 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     [setCreateWalletData]
   );
 
-  const finalizeWalletCreation = useCallback(async () => {
-    const wallet = await createHotWallet();
-    await sendPostWalletAddAnalytics({
-      extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
-      postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
-    });
-    pgpInfo.pgpPublicKey = '';
-    pgpInfo.pgpKeyReference = '';
-    createWalletData.password = '';
-    setPgpInfo(INITIAL_PGP_STATE);
-  }, [
-    createHotWallet,
-    createWalletData,
-    pgpInfo,
-    setPgpInfo,
-    postHogActions.create.WALLET_ADDED,
-    sendPostWalletAddAnalytics
-  ]);
+  const finalizeWalletCreation = useCallback(
+    async (params: Partial<CreateWalletParams>) => {
+      const wallet = await createHotWallet(params);
+      await sendPostWalletAddAnalytics({
+        extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
+        postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
+      });
+      pgpInfo.pgpPublicKey = '';
+      pgpInfo.pgpKeyReference = '';
+      setPgpInfo(INITIAL_PGP_STATE);
+    },
+    [createHotWallet, pgpInfo, setPgpInfo, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics]
+  );
 
-  const next = useCallback(async () => {
-    switch (step) {
-      case WalletCreateStep.ChooseRecoveryMethod: {
-        if (recoveryMethod === 'mnemonic') {
-          setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+  const next: State['next'] = useCallback(
+    async (state) => {
+      if (state) {
+        setCreateWalletData((prevState) => ({ ...prevState, ...state }));
+      }
+      switch (step) {
+        case WalletCreateStep.ChooseRecoveryMethod: {
+          if (recoveryMethod === 'mnemonic') {
+            setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+            break;
+          }
+          setStep(WalletCreateStep.SecurePaperWallet);
           break;
         }
-        setStep(WalletCreateStep.SecurePaperWallet);
-        break;
-      }
-      case WalletCreateStep.RecoveryPhraseWriteDown: {
-        setFormDirty(true);
-        setStep(WalletCreateStep.RecoveryPhraseInput);
-        break;
-      }
-      case WalletCreateStep.SecurePaperWallet:
-      case WalletCreateStep.RecoveryPhraseInput: {
-        setStep(WalletCreateStep.Setup);
-        break;
-      }
-      case WalletCreateStep.Setup: {
-        if (recoveryMethod === 'mnemonic') {
-          await finalizeWalletCreation();
-          history.push(walletRoutePaths.assets);
+        case WalletCreateStep.RecoveryPhraseWriteDown: {
+          setFormDirty(true);
+          setStep(WalletCreateStep.RecoveryPhraseInput);
           break;
         }
-        setStep(WalletCreateStep.SavePaperWallet);
-        break;
+        case WalletCreateStep.SecurePaperWallet:
+        case WalletCreateStep.RecoveryPhraseInput: {
+          setStep(WalletCreateStep.Setup);
+          break;
+        }
+        case WalletCreateStep.Setup: {
+          if (recoveryMethod === 'mnemonic') {
+            if (!state.name) throw new Error('Expected name');
+            await finalizeWalletCreation(state);
+            history.push(walletRoutePaths.assets);
+            break;
+          }
+          setStep(WalletCreateStep.SavePaperWallet);
+          break;
+        }
+        case WalletCreateStep.SavePaperWallet: {
+          if (!state.name) throw new Error('Expected name');
+          await finalizeWalletCreation(state);
+          break;
+        }
       }
-      case WalletCreateStep.SavePaperWallet: {
-        await finalizeWalletCreation();
-        break;
-      }
-    }
-  }, [finalizeWalletCreation, history, setFormDirty, step, recoveryMethod]);
+    },
+    [finalizeWalletCreation, history, setFormDirty, step, recoveryMethod, setCreateWalletData]
+  );
 
   const back = useCallback(() => {
     switch (step) {
