@@ -43,9 +43,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@cardano-sdk/wallet": "0.41.0",
-    "@cardano-sdk/web-extension": "0.30.0",
-    "@input-output-hk/lace-ui-toolkit": "1.15.1",
+    "@cardano-sdk/wallet": "0.42.0",
+    "@cardano-sdk/web-extension": "0.31.0",
+    "@input-output-hk/lace-ui-toolkit": "1.9.0",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/translation": "0.1.0",
