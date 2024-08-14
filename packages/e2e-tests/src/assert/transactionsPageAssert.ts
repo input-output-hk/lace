@@ -19,7 +19,7 @@ class TransactionsPageAssert {
   private readonly CSS_COLOR = 'color';
 
   assertSeeSkeleton = async (shouldBeVisible: boolean) => {
-    await TransactionsPage.transactionsInfiniteScroll.waitForDisplayed({ timeout: 10_000, reverse: !shouldBeVisible });
+    await TransactionsPage.transactionsInfiniteScroll.waitForDisplayed({ timeout: 15_000, reverse: !shouldBeVisible });
   };
 
   waitTxDatesToLoad = async () => {

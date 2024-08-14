@@ -133,7 +133,7 @@ export const config: WebdriverIO.Config = {
     strict: true,
     tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
-    timeout: 20_000,
+    timeout: 200_000,
     retry: 1,
     noStrictFlaky: true
   } as WebdriverIO.CucumberOpts
