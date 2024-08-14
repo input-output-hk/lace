@@ -1,0 +1,65 @@
+name: buildapp
+description: Build app
+
+inputs:
+  DIR:
+    description: 'app directory'
+    required: true
+  NAME:
+    description: 'app name'
+    required: true
+  LACE_EXTENSION_KEY:
+    description: 'Public extended manifest key'
+    required: true
+  BUILD_DEV_PREVIEW:
+    description: 'Build developer preview of Lace'
+    required: false
+    default: 'false'
+  POSTHOG_PRODUCTION_TOKEN_MAINNET:
+    description: 'Post hog production mainnet token'
+    required: false
+    default: ''
+  POSTHOG_PRODUCTION_TOKEN_PREPROD:
+    description: 'Post hog production preprod token'
+    required: false
+    default: ''
+  POSTHOG_PRODUCTION_TOKEN_PREVIEW:
+    description: 'Post hog production preview token'
+    required: false
+    default: ''
+  PRODUCTION_MODE_TRACKING:
+    description: 'Enable analytics tracking in production'
+    required: false
+    default: 'false'
+  BANXA_LACE_URL:
+    description: 'Banxa`s integration URL'
+    required: false
+    default: 'https://lacewallet.banxa-sandbox.com/'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Code check
+      uses: ./.github/actions/check
+      with:
+        DIR: ${{ inputs.DIR }}
+
+    - name: Build ${{ inputs.NAME }}
+      run: yarn build
+      shell: bash
+      working-directory: ${{ inputs.DIR }}
+      env:
+        LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
+        BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
+        POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
+        POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
+        POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
+        PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
+        BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.NAME }}
+        path: ${{ inputs.DIR }}/dist
