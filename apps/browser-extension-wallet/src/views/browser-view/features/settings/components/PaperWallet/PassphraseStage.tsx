@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import React from 'react';
 import { Banner } from '@lace/common';
 import { i18n } from '@lace/translation';
@@ -26,6 +27,7 @@ export const PassphraseStage = ({
             errorMessage={i18n.t('browserView.transaction.send.error.invalidPassword')}
             label={i18n.t('browserView.transaction.send.password.placeholder')}
             autoFocus
+            onSubmit={null}
           />
         </div>
       </div>

@@ -80,7 +80,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
       await validatePassword();
-      await getPassphrase(password);
+      await getPassphrase(password.value);
       analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
       setStage('save');
       setProcessingState({ isPasswordValid: true, isProcessing: false });
