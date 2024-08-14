@@ -10327,44 +10327,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:1.9.0":
-  version: 1.9.0
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.9.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.9.0%2Fb9bc75128cda04818394fac85f4a68608f2b26c2"
-  dependencies:
-    "@radix-ui/react-alert-dialog": ^1.0.4
-    "@radix-ui/react-avatar": ^1.0.2
-    "@radix-ui/react-checkbox": ^1.0.4
-    "@radix-ui/react-collapsible": ^1.0.3
-    "@radix-ui/react-dialog": ^1.0.4
-    "@radix-ui/react-form": ^0.0.3
-    "@radix-ui/react-popover": ^1.0.7
-    "@radix-ui/react-progress": ^1.0.3
-    "@radix-ui/react-radio-group": ^1.1.3
-    "@radix-ui/react-scroll-area": ^1.0.5
-    "@radix-ui/react-select": 1.2.2
-    "@radix-ui/react-switch": ^1.0.3
-    "@radix-ui/react-tabs": ^1.0.3
-    "@radix-ui/react-toast": ^1.0.3
-    "@radix-ui/react-toggle-group": ^1.0.4
-    "@radix-ui/react-tooltip": ^1.0.6
-    "@vanilla-extract/css": 1.11.1
-    "@vanilla-extract/css-utils": 0.1.3
-    "@vanilla-extract/recipes": 0.5.1
-    "@vanilla-extract/sprinkles": 1.5.1
-    antd: 4.24.12
-    classnames: ^2.3.2
-    lodash: ^4.17.21
-    polished: ^4.2.2
-    react-responsive: ^9.0.2
-    react-virtuoso: " 4.6.3"
-    recharts: ^2.6.2
-  peerDependencies:
-    react: ">=17.0.2"
-    react-dom: ">=17.0.2"
-  checksum: c0d723d6920eb5f920b7fe0fdec85aec5a3017a01a0bc37350494b25a314e33e3734ad0f889cae0cac65cdf78400737abba0a53143848ac0a7923f049e7fe8bf
-  languageName: node
-  linkType: hard
-
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -11355,7 +11317,7 @@ __metadata:
     "@babel/preset-typescript": ^7.22.15
     "@cardano-sdk/wallet": 0.42.0
     "@cardano-sdk/web-extension": 0.31.0
-    "@input-output-hk/lace-ui-toolkit": 1.9.0
+    "@input-output-hk/lace-ui-toolkit": 1.15.1
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0
