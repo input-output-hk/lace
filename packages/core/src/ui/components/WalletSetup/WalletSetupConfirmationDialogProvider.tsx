@@ -3,6 +3,7 @@ import React, { createContext, useContext, useCallback, useEffect, useMemo, useR
 import { BehaviorSubject } from 'rxjs';
 import { StartOverDialog } from './StartOverDialog';
 import { useTranslation } from 'react-i18next';
+import { useSecrets } from '@src/ui/hooks';
 
 interface ContextType {
   isDialogOpen: boolean;
@@ -24,6 +25,7 @@ export const useWalletSetupConfirmationDialog = (): ContextType => {
 
 export const WalletSetupConfirmationDialogProvider = ({ children }: Props): React.ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { clearSecrets } = useSecrets();
   const handleOnConfirmRef = useRef(() => void 0);
   const shouldShowDialog = useRef<boolean>(false);
   const shouldShowDialog$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
@@ -75,8 +77,13 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
           confirm: t('core.multiWallet.confirmationDialog.confirm')
         }}
         events={{
-          onConfirm: handleOnConfirmRef.current,
-          onCancel: () => setIsDialogOpen(false),
+          onConfirm: () => {
+            clearSecrets();
+            handleOnConfirmRef.current();
+          },
+          onCancel: () => {
+            setIsDialogOpen(false);
+          },
           onOpenChanged: setIsDialogOpen
         }}
       />

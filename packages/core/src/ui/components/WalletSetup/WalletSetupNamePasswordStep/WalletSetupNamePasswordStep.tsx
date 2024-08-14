@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLayout';
-import { PasswordVerification } from '@lace/common';
+import { OnPasswordChange } from '@ui/components/Password';
+import { PasswordVerification } from '@ui/components/PasswordVerification';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
-import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
+import { BarStates, LegacyWalletSetupNamePasswordSubmitParams } from './types';
 import styles from './styles.module.scss';
 import {
   getComplexityBarStateList,
@@ -18,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
-  onNext: (params: WalletSetupNamePasswordSubmitParams) => void;
+  onNext: (params: LegacyWalletSetupNamePasswordSubmitParams) => void;
   initialWalletName?: string;
   onChange?: (state: { name: string; password: string }) => void;
   translations: TranslationsFor<
@@ -80,18 +81,18 @@ export const WalletSetupNamePasswordStep = ({
     onChange?.({ name: value, password });
   };
 
-  const handlePasswordChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(value);
-    onChange?.({ password: value, name: walletName });
+  const handlePasswordChange: OnPasswordChange = (target) => {
+    setPassword(target.value);
+    onChange?.({ password: target.value, name: walletName });
   };
 
-  const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordConfirmationChange: OnPasswordChange = (target) => {
     setPassHasBeenValidated(true);
     setPasswordConfirmation(target.value);
   };
 
   const handleNextButtonClick = () => {
-    onNext({ walletName, password });
+    onNext({ walletName });
   };
 
   return (
@@ -115,17 +116,16 @@ export const WalletSetupNamePasswordStep = ({
         />
         <PasswordVerification
           className={styles.input}
-          value={password}
           label={translations.passwordInputLabel}
           onChange={handlePasswordChange}
           level={score}
           feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]}
           complexityBarList={complexityBarList}
           data-testid="wallet-password-verification-input"
+          showComplexity={!!password}
         />
         <WalletPasswordConfirmationInput
           isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}
-          value={passwordConfirmation}
           onChange={handlePasswordConfirmationChange}
           label={translations.confirmPasswordInputLabel}
           errorMessage={passwordConfirmationErrorMessage}
