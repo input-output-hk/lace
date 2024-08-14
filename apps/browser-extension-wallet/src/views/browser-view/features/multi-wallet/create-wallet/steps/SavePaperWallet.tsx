@@ -64,10 +64,10 @@ export const SavePaperWallet: VFC = () => {
     void analytics.sendEventToPostHog(postHogActions.create.PAPER_WALLET_DOWNLOAD_PAGEVIEW);
   }, [analytics, postHogActions.create.PAPER_WALLET_DOWNLOAD_PAGEVIEW]);
 
-  const handleNext = () => {
+  const onNext = async () => {
     void analytics.sendEventToPostHog(postHogActions.create.PAPER_WALLET_COMPLETE_CLICK);
     setPgpInfo(null);
-    next();
+    await next({ name: createWalletData.name });
   };
 
   useEffect(() => {
@@ -147,7 +147,7 @@ export const SavePaperWallet: VFC = () => {
                 </Text.Label>
               )}
               <Button.CallToAction
-                onClick={handleNext}
+                onClick={onNext}
                 disabled={!hasStoredPaperWallet}
                 w="$fill"
                 label={i18n.t('core.walletSetupStep.enterWallet')}
