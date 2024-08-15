@@ -16,7 +16,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { isUsedAddress } from '@src/utils/is-used-addresses';
 import { useNextUnusedAddress } from '@hooks';
 
-const useGlacierDrop = Boolean(process.env.USER_GLACIER_DROP);
+const useAdvancedReceived = Boolean(process.env.USE_ADVANCED_RECEIVED);
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
@@ -62,7 +62,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   return (
     <Flex flexDirection="column" justifyContent="space-between" alignItems="center">
       <div className={styles.infoContainer}>
-        {!useGlacierDrop ? (
+        {!useAdvancedReceived ? (
           <AddressCard
             name={name}
             address={addresses[0]?.toString()}
@@ -104,7 +104,9 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         ))}
       </div>
       {/* TODO: onClick to generate visible unused address, translation */}
-      {useGlacierDrop && <Button.Secondary icon={<PlusOutlined />} onClick={() => void 0} label="Create new address" />}
+      {useAdvancedReceived && (
+        <Button.Secondary icon={<PlusOutlined />} onClick={() => void 0} label="Create new address" />
+      )}
     </Flex>
   );
 };
