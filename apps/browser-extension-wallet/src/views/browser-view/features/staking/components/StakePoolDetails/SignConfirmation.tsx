@@ -2,12 +2,13 @@
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { Button, inputProps, Password, useObservable } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
+import { Password, OnPasswordChange, useSecrets } from '@lace/core';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
+import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationDetails } from '@hooks';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -19,10 +20,10 @@ type SignConfirmationProps = {
 
 export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { password, setPassword } = usePassword();
+  const { setPassword } = useSecrets();
   const { isPasswordValid } = useSubmitingState();
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target);
 
   return (
     <>
@@ -39,7 +40,6 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
           <Password
             className={styles.passwordInput}
             onChange={handleChange}
-            value={password}
             error={isPasswordValid === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             label={t('browserView.transaction.send.password.placeholder')}
@@ -53,7 +53,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
 
 export const SignConfirmationFooter = (): ReactElement => {
   const { t } = useTranslation();
-  const { password, removePassword } = usePassword();
+  const { password, clearSecrets: removePassword } = useSecrets();
   const { signAndSubmitTransaction } = useDelegationTransaction();
   const { setSubmitingTxState, isSubmitingTx, setIsRestaking } = useSubmitingState();
   const { setSection } = useStakePoolDetails();

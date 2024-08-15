@@ -105,7 +105,6 @@ export const CollateralDrawer = ({
     [Sections.SEND]: (
       <CollateralStepSend
         popupView={popupView}
-        password={password}
         setPassword={setPassword}
         isInMemory={isInMemoryWallet}
         isPasswordValid={isPasswordValid}

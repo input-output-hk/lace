@@ -80,7 +80,7 @@ Feature: Send Transactions from Dapp - E2E
     Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: "1.38" and LaceCoin2 with value: "2" and wallet: "WalletSendDappTransactionE2E" address
 
   @LW-9279 @Testnet
-  Scenario: Defect LW-9273 - User is not able to accept second dapp transaction until close first dapp window
+  Scenario: Defect LW-9273 - User is not able to accept second DApp transaction until close first DApp window
     And I de-authorize all DApps in extended mode
     And I open and authorize test DApp with "Only once" setting
     And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp

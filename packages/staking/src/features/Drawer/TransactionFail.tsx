@@ -48,7 +48,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     walletStoreWalletType: walletType,
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
-    password: { password, removePassword },
+    password: { password, clearSecrets },
     walletStoreInMemoryWallet: inMemoryWallet,
     walletManagerExecuteWithPassword: executeWithPassword,
     isMultidelegationSupportedByDevice,
@@ -100,7 +100,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       await signAndSubmitTransaction();
       setIsLoading(false);
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
-      removePassword();
+      clearSecrets();
     } catch (error: unknown) {
       console.error('failed to sign or submit tx due to:', error);
       setIsLoading(false);
@@ -134,7 +134,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       ) : (
         <Button
           // password defined only for inMemory wallet
-          onClick={() => executeWithPassword(onSubmit, password)}
+          onClick={() => executeWithPassword(onSubmit, password?.value)}
           className={styles.btn}
           size="large"
           loading={isLoading}

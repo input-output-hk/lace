@@ -46,7 +46,8 @@ import {
   ScriptKind,
   stakingScriptKeyPath,
   GenerateSharedWalletKeyFn,
-  makeGenerateSharedWalletKey
+  makeGenerateSharedWalletKey,
+  useSecrets
 } from '@lace/core';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
@@ -56,7 +57,6 @@ export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
 export interface CreateWalletParams {
   name: string;
   mnemonic: string[];
-  password: string;
   chainId?: Wallet.Cardano.ChainId;
 }
 
@@ -98,7 +98,7 @@ export interface UseWalletManager {
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   lockWallet: () => void;
-  unlockWallet: (password: string) => Promise<boolean>;
+  unlockWallet: () => Promise<boolean>;
   loadWallet: (
     wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
     activeWalletProps: WalletManagerActivateProps | null
@@ -256,6 +256,7 @@ export const useWalletManager = (): UseWalletManager => {
   const backgroundService = useBackgroundServiceAPIContext();
   const userIdService = getUserIdService();
   const { getCustomSubmitApiForNetwork, updateCustomSubmitApi } = useCustomSubmitApi();
+  const { password, clearSecrets } = useSecrets();
 
   const getCurrentChainId = useCallback(() => {
     if (currentChain) return currentChain;
@@ -481,14 +482,9 @@ export const useWalletManager = (): UseWalletManager => {
    * Creates or restores a new in-memory wallet with the cardano-js-sdk and saves it in wallet repository
    */
   const createWallet = useCallback(
-    async ({
-      mnemonic,
-      name,
-      password,
-      chainId = getCurrentChainId()
-    }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
+    async ({ mnemonic, name, chainId = getCurrentChainId() }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
       const accountIndex = 0;
-      const passphrase = Buffer.from(password, 'utf8');
+      const passphrase = Buffer.from(password.value, 'utf8');
       const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
         {
           chainId,
@@ -536,9 +532,8 @@ export const useWalletManager = (): UseWalletManager => {
       saveValueInLocalStorage({ key: 'wallet', value: { name } });
 
       // Clear passphrase
-      for (let i = 0; i < passphrase.length; i++) {
-        passphrase[i] = 0;
-      }
+      passphrase.fill(0);
+      clearSecrets();
 
       return {
         name,
@@ -553,7 +548,7 @@ export const useWalletManager = (): UseWalletManager => {
         }
       };
     },
-    [getCurrentChainId]
+    [getCurrentChainId, password, clearSecrets]
   );
 
   const activateWallet = useCallback(
@@ -728,31 +723,33 @@ export const useWalletManager = (): UseWalletManager => {
   /**
    * Recovers wallet info from encrypted lock using the wallet password
    */
-  const unlockWallet = useCallback(
-    async (password: string): Promise<boolean> => {
-      if (!walletLock) return true;
-      try {
-        const decrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, Buffer.from(password));
-        // If JSON.parse succeeds, it means it was successfully decrypted
-        const parsed = JSON.parse(decrypted.toString());
+  const unlockWallet = useCallback(async (): Promise<boolean> => {
+    if (!walletLock) return true;
+    const passphrase = Buffer.from(password.value);
+    try {
+      const decrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, passphrase);
+      // If JSON.parse succeeds, it means it was successfully decrypted
+      const parsed = JSON.parse(decrypted.toString());
 
-        if ((await firstValueFrom(walletRepository.wallets$)).length === 0) {
-          // set value in local storage for data migration to wallet repository
-          const keyAgentData = parsed.Mainnet?.keyAgentData;
-          if (keyAgentData) {
-            saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
-            const wallets = await firstValueFrom(walletRepository.wallets$);
-            const activeWalletProps = await firstValueFrom(walletManager.activeWalletId$);
-            await loadWallet(wallets, activeWalletProps);
-          }
+      if ((await firstValueFrom(walletRepository.wallets$)).length === 0) {
+        // set value in local storage for data migration to wallet repository
+        const keyAgentData = parsed.Mainnet?.keyAgentData;
+        if (keyAgentData) {
+          saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
+          const wallets = await firstValueFrom(walletRepository.wallets$);
+          const activeWalletProps = await firstValueFrom(walletManager.activeWalletId$);
+          await loadWallet(wallets, activeWalletProps);
         }
-        return true;
-      } catch {
-        return false;
       }
-    },
-    [walletLock, loadWallet]
-  );
+
+      return true;
+    } catch {
+      return false;
+    } finally {
+      passphrase.fill(0);
+      clearSecrets();
+    }
+  }, [walletLock, loadWallet, password, clearSecrets]);
 
   const getMnemonic = useCallback(
     async (passphrase: Uint8Array) => {

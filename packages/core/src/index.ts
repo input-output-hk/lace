@@ -46,3 +46,6 @@ export * from '@ui/components/MidnightEventBanner';
 export * from '@ui/components/MidnightPreLaunchSettingsBanner';
 export * from '@ui/components/ImageWithFallback';
 export * from '@ui/components/Transaction';
+export * from '@ui/components/PaperWallet';
+export * from '@ui/components/Password';
+export * from '@ui/components/PasswordVerification';
