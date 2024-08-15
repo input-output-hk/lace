@@ -36,6 +36,7 @@ import { MemoryRouter, Router } from 'react-router-dom';
 import { WalletOnboardingFlows } from '../WalletOnboardingFlows';
 import { walletRoutePaths } from '@routes';
 import { createMemoryHistory } from 'history';
+import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
   useAnalyticsContext: jest
@@ -45,6 +46,12 @@ jest.mock('@providers/AnalyticsProvider', () => ({
       sendEventToPostHog: jest.fn().mockReturnValue(''),
       sendAliasEvent: jest.fn().mockReturnValue('')
     })
+}));
+
+jest.mock('@providers/PostHogClientProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
+  usePostHogClientContext: () => postHogClientMocks
 }));
 
 jest.mock('@lace/cardano', () => {
