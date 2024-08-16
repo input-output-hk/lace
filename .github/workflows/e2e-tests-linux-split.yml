@@ -47,7 +47,7 @@ on:
         options:
           - dev-mainnet.lw.iog.io
           - dev-mainnet.eu-central-1.lw.iog.io
-          - dev-mainnet.eu-west-1.lw.iog.io as m
+          - dev-mainnet.eu-west-1.lw.iog.io
           - dev-mainnet.us-east-2.lw.iog.io
       cardano_preprod_url:
         type: choice
@@ -57,7 +57,7 @@ on:
         options:
           - dev-preprod.lw.iog.io
           - dev-preprod.eu-central-1.lw.iog.io
-          - dev-preprod.eu-west-1.lw.iog.io as m
+          - dev-preprod.eu-west-1.lw.iog.io
           - dev-preprod.us-east-2.lw.iog.io
       cardano_preview_url:
         type: choice
@@ -67,7 +67,7 @@ on:
         options:
           - dev-preview.lw.iog.io
           - dev-preview.eu-central-1.lw.iog.io
-          - dev-preview.eu-west-1.lw.iog.io as m
+          - dev-preview.eu-west-1.lw.iog.io
           - dev-preview.us-east-2.lw.iog.io
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
