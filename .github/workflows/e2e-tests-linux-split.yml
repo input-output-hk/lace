@@ -45,6 +45,7 @@ on:
         default: dev-mainnet.lw.iog.io
         description: 'cardano mainnet url to use'
         options:
+          - dev-mainnet.lw.iog.io
           - dev-mainnet.eu-central-1.lw.iog.io
           - dev-mainnet.eu-west-1.lw.iog.io as m
           - dev-mainnet.us-east-2.lw.iog.io
@@ -54,6 +55,7 @@ on:
         default: dev-preprod.lw.iog.io
         description: 'cardano mainnet url to use'
         options:
+          - dev-preprod.lw.iog.io
           - dev-preprod.eu-central-1.lw.iog.io
           - dev-preprod.eu-west-1.lw.iog.io as m
           - dev-preprod.us-east-2.lw.iog.io
@@ -63,6 +65,7 @@ on:
         default: dev-preview.lw.iog.io
         description: 'cardano mainnet url to use'
         options:
+          - dev-preview.lw.iog.io
           - dev-preview.eu-central-1.lw.iog.io
           - dev-preview.eu-west-1.lw.iog.io as m
           - dev-preview.us-east-2.lw.iog.io
