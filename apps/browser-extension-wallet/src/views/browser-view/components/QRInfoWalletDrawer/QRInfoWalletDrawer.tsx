@@ -16,7 +16,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { isUsedAddress } from '@src/utils/is-used-addresses';
 import { useNextUnusedAddress } from '@hooks';
 
-const useAdvancedReceived = Boolean(process.env.USE_ADVANCED_RECEIVED);
+const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVE === 'true';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
@@ -65,7 +65,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         {!useAdvancedReceived ? (
           <AddressCard
             name={name}
-            address={addresses[0]?.toString()}
+            address={addresses[0]?.address}
             getQRCodeOptions={getQRCodeOpts}
             copiedMessage={t(addressCopiedTranslation)}
             onCopyClick={handleCopyAddress}
