@@ -64,7 +64,7 @@ on:
         type: choice
         required: true
         default: dev-preprod.lw.iog.io
-        description: 'cardano mainnet url to use'
+        description: 'cardano preprod url to use'
         options:
           - dev-preprod.lw.iog.io
           - dev-preprod.eu-central-1.lw.iog.io
@@ -85,7 +85,7 @@ on:
         type: choice
         required: true
         default: dev-preview.lw.iog.io
-        description: 'cardano mainnet url to use'
+        description: 'cardano preview url to use'
         options:
           - dev-preview.lw.iog.io
           - dev-preview.eu-central-1.lw.iog.io
