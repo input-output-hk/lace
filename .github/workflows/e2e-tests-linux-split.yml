@@ -106,6 +106,17 @@ jobs:
             echo "Build artifact found"
             echo "build_exists=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Print run parameters
+        run: |
+          echo "Browser: ${{ github.event.inputs.browser || 'chrome' }}"
+          echo "Network: ${{ github.event.inputs.network || 'preprod' }}"
+          echo "Runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}"
+          echo "Smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
+          echo "Cardano mainnet url: ${{ github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io' }}"
+          echo "Cardano preprod url: ${{ github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io' }}"
+          echo "Cardano preview url: ${{ github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io' }}"
+          echo "Build artifact name: ${{ env.BUILD_ARTIFACT_NAME }}"
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
       smoke_only: ${{ github.event.inputs.smoke_only || false }}
