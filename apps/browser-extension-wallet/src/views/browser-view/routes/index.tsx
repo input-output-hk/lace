@@ -29,6 +29,8 @@ import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
+import { notification } from 'antd';
+import { filter, map, pairwise } from 'rxjs';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -85,6 +87,8 @@ const discardStaleTabs = async (currentTabId: number) => {
 
 const tabsOnActivatedCallback = (activeInfo: { tabId: number }) => discardStaleTabs(activeInfo.tabId);
 
+// const NotificationContext = React.createContext(null);
+
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place
 export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: RouteMap }): React.ReactElement => {
   const {
@@ -98,7 +102,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     deletingWallet,
     stayOnAllDonePage,
     cardanoWallet,
-    initialHdDiscoveryCompleted
+    initialHdDiscoveryCompleted,
+    inMemoryWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
   const { areExperimentsLoading } = useExperimentsContext();
@@ -106,6 +111,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const { page, setBackgroundPage } = useBackgroundPage();
 
   const location = useLocation<{ background?: Location<unknown> }>();
+  const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
     const isCreatingWallet = [routes.newWallet.root, routes.sharedWallet.root].some((path) =>
@@ -146,6 +152,60 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   }, [currentChain, chainName, setCardanoCoin]);
 
   useEffect(() => {
+    const outgoingPendingTx$ = inMemoryWallet?.transactions.outgoing.pending$.subscribe((tx) => {
+      const { address, value } = tx.body.outputs[0];
+      const valueInAda = Wallet.util.lovelacesToAdaString(value.coins.toString());
+
+      api.info({
+        message: 'Transaction in progress',
+        // todo: see activity link
+        description: `Sending ${valueInAda} to ${address}. (${tx.cbor})`,
+        duration: 10
+        // showProgress
+      });
+    });
+
+    const outgoingSuccessTx$ = inMemoryWallet?.transactions.outgoing.onChain$.subscribe((tx) => {
+      api.success({
+        message: 'Transaction Successful',
+        // todo: see activity link
+        description: `Transaction ${tx.cbor} has been submitted on chain`,
+        duration: 10
+        // showProgress
+      });
+    });
+
+    const incomingTx$ = inMemoryWallet?.transactions.history$
+      .pipe(
+        pairwise(),
+        filter(([prevList, currList]) => currList.length > prevList.length),
+        filter(([, currList]) => {
+          const address = currList[currList.length - 1].body.outputs[0].address;
+          return walletState.addresses.some((addr) => addr.address === address);
+        }),
+        map(([, currList]) => currList[currList.length - 1])
+      )
+      .subscribe((tx) => {
+        const address = tx.body.inputs[0].address;
+        const valueInAda = Wallet.util.lovelacesToAdaString(tx.body.outputs[0].value.coins.toString());
+
+        api.success({
+          message: 'Transaction Received',
+          // todo: see activity link
+          description: `You've received ${valueInAda} from ${address}.`,
+          duration: 10
+          // showProgress
+        });
+      });
+
+    return () => {
+      outgoingPendingTx$?.unsubscribe();
+      outgoingSuccessTx$?.unsubscribe();
+      incomingTx$?.unsubscribe();
+    };
+  }, [inMemoryWallet, walletState?.addresses, api]);
+
+  useEffect(() => {
     const isHardwareWallet = Wallet.AVAILABLE_WALLETS.includes(walletType as Wallet.HardwareWallets);
     if (isHardwareWallet) {
       tabs.onActivated.addListener(tabsOnActivatedCallback);
@@ -182,6 +242,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   if (!areExperimentsLoading && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted) {
     return (
       <>
+        {contextHolder}
         <Switch location={page || location}>
           {routesMap.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />
