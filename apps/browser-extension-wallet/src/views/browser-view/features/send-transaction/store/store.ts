@@ -514,17 +514,6 @@ export const useSubmitingState = (): {
     isPasswordValid
   }));
 
-export const usePassword = (): {
-  password: Store['password'];
-  setPassword: Store['setPassword'];
-  removePassword: Store['removePassword'];
-} =>
-  useStore((state) => ({
-    password: state.password,
-    setPassword: state.setPassword,
-    removePassword: state.removePassword
-  }));
-
 export const useCurrentCoinIdToChange = (): Store['currentCoinToChange'] =>
   useStore((state) => state?.currentCoinToChange);
 

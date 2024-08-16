@@ -696,7 +696,7 @@ Then(/^I see "Switching to less pools" modal$/, async () => {
 });
 
 Then(
-  /^I redelegate from "(\d+)" to "(\d+)" pools: "([^"]*)" from staking extended page$/,
+  /^I redelegate from "(\d+)" to "(\d+)" pools: "([^"]*)"$/,
   async (poolsCountOld: number, _ignoredPoolsCountNew: number, poolsToStake: string) => {
     await MultidelegationPage.openTab('Overview');
     await MultidelegationPageAssert.assertSeeStakingOnPoolsCounter(poolsCountOld);
@@ -714,7 +714,7 @@ Then(
     if (await SwitchingStakePoolModal.title.isDisplayed()) {
       await SwitchingStakePoolModal.fineByMeButton.click();
     }
-    await StakingPasswordDrawer.fillPassword(validPassword);
+    await StakingPasswordDrawer.fillPassword(String(getTestWallet(TestWalletName.TestAutomationWallet).password));
     await StakingPasswordDrawer.confirmStaking();
     await StakingSuccessDrawerAssert.assertSeeStakingSuccessDrawer('Switching');
     await StakingSuccessDrawer.clickCloseButton();
