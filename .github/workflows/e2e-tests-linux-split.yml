@@ -97,11 +97,6 @@ on:
           - live-preview.us-east-1.lw.iog.io
           - live-preview.us-east-2.lw.iog.io
           - live-preview.eu-west-1.lw.iog.io
-          - staging-preview.lw.iog.io
-          - staging-preview.eu-central-1.lw.iog.io
-          - staging-preview.us-east-1.lw.iog.io
-          - staging-preview.us-east-2.lw.iog.io
-          - staging-preview.eu-west-1.lw.iog.io
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
 
