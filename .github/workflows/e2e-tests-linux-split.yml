@@ -39,17 +39,35 @@ on:
         description: 'Run only smoke tests'
         required: true
         default: false
-      cardano_services_env:
+      cardano_mainnet_url:
         type: choice
         required: true
-        default: dev
-        description: 'cardano services environment to use'
+        default: dev-mainnet.lw.iog.io
+        description: 'cardano mainnet url to use'
         options:
-          - dev
-          - staging
-          - live
+          - dev-mainnet.eu-central-1.lw.iog.io
+          - dev-mainnet.eu-west-1.lw.iog.io as m
+          - dev-mainnet.us-east-2.lw.iog.io
+      cardano_preprod_url:
+        type: choice
+        required: true
+        default: dev-preprod.lw.iog.io
+        description: 'cardano mainnet url to use'
+        options:
+          - dev-preprod.eu-central-1.lw.iog.io
+          - dev-preprod.eu-west-1.lw.iog.io as m
+          - dev-preprod.us-east-2.lw.iog.io
+      cardano_preview_url:
+        type: choice
+        required: true
+        default: dev-preview.lw.iog.io
+        description: 'cardano mainnet url to use'
+        options:
+          - dev-preview.eu-central-1.lw.iog.io
+          - dev-preview.eu-west-1.lw.iog.io as m
+          - dev-preview.us-east-2.lw.iog.io
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }} | cardano services env: ${{ github.event.inputs.cardano_services_env || 'dev' }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -58,8 +76,10 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  CARDANO_SERVICES_ENV: ${{ github.event.inputs.cardano_services_env || 'dev' }}
-  BUILD_ARTIFACT_NAME: lace-${{ github.event.inputs.cardano_services_env || 'dev' }}-${{ github.sha }}
+  CARDANO_MAINNET_URL: ${{ github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io' }}
+  CARDANO_PREPROD_URL: ${{ github.event.inputs.cardano_preprod_url || 'cardano_preprod_url' }}
+  CARDANO_PREVIEW_URL: ${{ github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io' }}
+  BUILD_ARTIFACT_NAME: lace-${{ github.event.inputs.cardano_preprod_url || 'cardano_preprod_url' }}-${{ github.sha }}
 
 jobs:
   setup:
@@ -100,9 +120,9 @@ jobs:
         if: needs.setup.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
-          CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.CARDANO_SERVICES_ENV }}-mainnet.lw.iog.io'
-          CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.CARDANO_SERVICES_ENV }}-preprod.lw.iog.io'
-          CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.CARDANO_SERVICES_ENV }}-preview.lw.iog.io'
+          CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.CARDANO_MAINNET_URL }}'
+          CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.CARDANO_PREPROD_URL }}'
+          CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.CARDANO_PREVIEW_URL }}'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
@@ -173,7 +193,9 @@ jobs:
           browser=${BROWSER}
           platform=Linux
           smoke_only=${{ needs.setup.outputs.smoke_only }}
-          cardano_services_env=${CARDANO_SERVICES_ENV}
+          cardano_mainnet_url=${CARDANO_MAINNET_URL}
+          cardano_preprod_url=${CARDANO_PREPROD_URL}
+          cardano_preview_url=${CARDANO_PREVIEW_URL}
           " > environment.properties
 
       - name: Publish allure report to S3
@@ -194,14 +216,14 @@ jobs:
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.setup.outputs.smoke_only }} | cardano services env: ${{ env.CARDANO_SERVICES_ENV }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.setup.outputs.smoke_only }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.setup.outputs.smoke_only }}  | cardano services env: ${{ env.CARDANO_SERVICES_ENV }}'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.setup.outputs.smoke_only }}'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
