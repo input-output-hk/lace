@@ -4,6 +4,7 @@ import { Transaction } from '../../features/send-transaction';
 import { useDrawer } from '../../stores';
 import { Drawer } from '@lace/common';
 import { QRInfoWalletDrawer } from '../QRInfoWalletDrawer';
+import { SignMessageDrawer } from '../../features/sing-message/SignMessageDrawer';
 import { WalletUsedAddressesDrawer } from '../WalletUsedAddressesDrawer';
 import { Skeleton } from 'antd';
 
@@ -11,7 +12,8 @@ export enum DrawerContent {
   SEND_TRANSACTION = 'send-transaction',
   CO_SIGN_TRANSACTION = 'co-sign-transaction',
   RECEIVE_TRANSACTION = 'receive-transaction',
-  SHOW_USED_ADDRESSES = 'show-used-addresses'
+  SHOW_USED_ADDRESSES = 'show-used-addresses',
+  SIGN_MESSAGE = 'sign-message-addresses'
 }
 
 export interface DrawerConfig {
@@ -34,6 +36,8 @@ const renderDrawerContent = (content?: DrawerContent) => {
       return <QRInfoWalletDrawer />;
     case DrawerContent.SHOW_USED_ADDRESSES:
       return <WalletUsedAddressesDrawer />;
+    case DrawerContent.SIGN_MESSAGE:
+      return <SignMessageDrawer />;
     default:
       return <Skeleton />;
   }

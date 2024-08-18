@@ -29,6 +29,7 @@ import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
+import { SignMessageDrawer } from '@views/browser/features/sing-message/SignMessageDrawer';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -50,6 +51,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.voting,
     component: VotingLayout
+  },
+  {
+    path: routes.signMessage,
+    component: SignMessageDrawer
   },
   {
     path: routes.settings,

@@ -8,7 +8,7 @@ import {
   NetworkChoise,
   Separator,
   SettingsLink,
-  SignMessage,
+  SignMessageLink,
   ThemeSwitcher,
   UserInfo
 } from './components';
@@ -72,7 +72,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <AddressBookLink />
             <SettingsLink />
             <Separator />
-            <SignMessage />
+            <SignMessageLink />
+            <Separator />
             <ThemeSwitcher isPopup={isPopup} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (

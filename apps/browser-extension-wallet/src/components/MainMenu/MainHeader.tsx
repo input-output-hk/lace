@@ -26,6 +26,7 @@ export const MainHeader = (): React.ReactElement => {
     [walletRoutePaths.activity]: BrowserViewSections.TRANSACTION,
     [walletRoutePaths.earn]: BrowserViewSections.STAKING,
     [walletRoutePaths.addressBook]: BrowserViewSections.ADDRESS_BOOK,
+    [walletRoutePaths.signMessage]: BrowserViewSections.SIGN_MESSAGE,
     [walletRoutePaths.settings]: BrowserViewSections.SETTINGS
   };
 

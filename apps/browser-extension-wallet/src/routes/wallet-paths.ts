@@ -15,7 +15,7 @@ export const walletRoutePaths = {
   staking: '/staking',
   dapps: '/dapps',
   voting: '/voting',
-  signMessage: '/signMessage',
+  signMessage: '/sign-message',
   setup: {
     home: '/setup',
     create: '/setup/create',

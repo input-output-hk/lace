@@ -1,0 +1,31 @@
+@import '../../../../styles/utils/functions.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+:root {
+  :global(.ant-drawer-header) {
+    border: none;
+  }
+}
+
+.draweHeaderTitle {
+  display: flex;
+  flex-direction: column;
+  .title {
+    @include text-subHeading-semi-bold;
+    text-align: left;
+    color: var(--text-color-primary);
+    margin: 0;
+  }
+  .subtitle {
+    margin: 0;
+    @include text-body-medium;
+    text-align: left;
+    color: var(--text-color-secondary);
+  }
+}
+
+.infoContainer {
+  flex: 1;
+  margin: size_unit(6) 0 size_unit(7) 0;
+  overflow-y: auto;
+}
