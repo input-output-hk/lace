@@ -5,6 +5,7 @@ import CommonOnboardingElements from './commonOnboardingElements';
 import recoveryPhrasePage from './recoveryPhrasePage';
 import walletSetupPage from './walletSetupPage';
 import topNavigationAssert from '../../assert/topNavigationAssert';
+import { browser } from '@wdio/globals';
 
 export class OnboardingMainPage extends CommonOnboardingElements {
   private LOGO_IMAGE = '[data-testid="wallet-setup-logo"]';
@@ -112,6 +113,7 @@ export class OnboardingMainPage extends CommonOnboardingElements {
   }
 
   async clickOnOnboardingTypeButton(button: 'Create' | 'Connect' | 'Restore'): Promise<void> {
+    await browser.pause(1000);
     switch (button) {
       case 'Create':
         await this.createWalletButton.waitForClickable();
