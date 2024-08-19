@@ -10,5 +10,5 @@ process.env.CEXPLORER_URL_SANCHONET = 'https://sanchonet.cexplorer.io';
 process.env.USE_HIDE_MY_BALANCE = 'true';
 process.env.USE_POSTHOG_ANALYTICS = 'true';
 process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT = 'false';
-process.env.PUBLIC_POSTHOG_HOST = 'https://eu.posthog.com';
+process.env.POSTHOG_HOST = 'https://eu.posthog.com';
 process.env.POSTHOG_DEV_TOKEN_PREPROD = 'test-token';
