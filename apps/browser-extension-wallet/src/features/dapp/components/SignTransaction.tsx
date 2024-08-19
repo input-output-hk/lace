@@ -36,17 +36,27 @@ export const SignTransaction = (): React.ReactElement => {
     });
 
     try {
+      console.error('START_SINGING');
       const passphrase = Buffer.from(password, 'utf8');
-      await request.sign(passphrase, { willRetryOnFailure: true });
+      console.error('START_SINGING1');
+      const res = await request.sign(passphrase, { willRetryOnFailure: true });
+      console.error(res);
+      console.error('START_SINGING2');
       setValidPassword(true);
+      console.error('START_SINGING3');
       redirectToSignSuccess();
+      console.error('START_SINGING4');
     } catch (error) {
+      console.error(error);
       if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
+        console.error('START_SINGING5');
         setValidPassword(false);
       } else {
+        console.error('START_SINGING6');
         redirectToSignFailure();
       }
     } finally {
+      console.error('START_SINGING6777777');
       setIsLoading(false);
     }
   }, [password, analytics, redirectToSignFailure, redirectToSignSuccess, request]);

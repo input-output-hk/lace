@@ -74,6 +74,7 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
         req.sign();
       }
     } catch {
+      console.error('XXXXXXXXXXXX');
       // nothing to do here, the error
       // bubbles up when action rejects
     }
