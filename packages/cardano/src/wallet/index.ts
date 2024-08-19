@@ -20,7 +20,7 @@ export {
   EraSummary,
   HandleResolution,
   TxSubmissionError,
-  TxCBOR
+  Serialization
 } from '@cardano-sdk/core';
 
 export { testnetEraSummaries } from '@cardano-sdk/util-dev';

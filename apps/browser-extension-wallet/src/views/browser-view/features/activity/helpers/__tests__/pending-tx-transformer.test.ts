@@ -9,7 +9,7 @@ let actualLovelacesToAdaString: any;
 import { pendingTxTransformer } from '../pending-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
-import { TxCBOR } from '@cardano-sdk/core';
+import { Serialization } from '@cardano-sdk/core';
 import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 import { getFormattedFiatAmount } from '../common-tx-transformer';
@@ -85,7 +85,7 @@ describe('Testing tx transformers utils', () => {
       mockLovelacesToAdaString.mockImplementation(actualLovelacesToAdaString);
       const date = new Date();
       const result = await pendingTxTransformer({
-        tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
+        tx: { ...pendingTx, cbor: Serialization.TxCBOR.serialize(pendingTx) },
         walletAddresses: [
           {
             address: sendingAddress,
