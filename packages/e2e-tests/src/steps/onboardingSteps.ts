@@ -189,6 +189,7 @@ Then(/^I do not see autocomplete options list$/, async () => {
 });
 
 Given(/^I create new wallet and save wallet information$/, async () => {
+  await browser.pause(1000);
   await OnboardingMainPage.createWalletButton.click();
   await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true);
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
