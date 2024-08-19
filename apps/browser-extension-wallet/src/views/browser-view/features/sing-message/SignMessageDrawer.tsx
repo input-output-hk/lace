@@ -4,10 +4,10 @@ import { map } from 'rxjs';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { UsedAddressesSchema } from '@views/browser/components/WalletUsedAddressesDrawer/WalletUsedAddressesDrawer.component';
 import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
-import { WalletUsedAddressList } from '@lace/core';
 import { useDrawer } from '@views/browser/stores';
 import { useTranslation } from 'react-i18next';
 import styles from './SignMessageDrawer.module.scss';
+import { WalletUsedAddressDropdown } from '@lace/core';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type SignMessageToolProps = {};
@@ -54,7 +54,7 @@ export const SignMessageDrawer: VFC<SignMessageToolProps> = () => {
       }
     >
       <div className={styles.infoContainer}>
-        <WalletUsedAddressList
+        <WalletUsedAddressDropdown
           translations={{
             copy: t('core.receive.usedAddresses.copy'),
             addressCopied: t('core.receive.usedAddresses.addressCopied')
