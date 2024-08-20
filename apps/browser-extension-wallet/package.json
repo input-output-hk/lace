@@ -42,7 +42,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@cardano-sdk/cardano-services-client": "0.20.0",
-    "@cardano-sdk/core": "0.37.0",
+    "@cardano-sdk/core": "0.38.0",
     "@cardano-sdk/dapp-connector": "0.12.29",
     "@cardano-sdk/input-selection": "0.13.11",
     "@cardano-sdk/tx-construction": "0.20.0",
@@ -95,7 +95,7 @@
     "zustand": "3.5.14"
   },
   "devDependencies": {
-    "@cardano-sdk/hardware-ledger": "0.11.0",
+    "@cardano-sdk/hardware-ledger": "0.11.1",
     "@emurgo/cardano-message-signing-asmjs": "1.0.1",
     "@openpgp/web-stream-tools": "0.0.11-patch-0",
     "@pdfme/common": "^4.0.2",

@@ -7,7 +7,7 @@ import groupBy from 'lodash/groupBy';
 import flatten from 'lodash/flatten';
 import memoize from 'lodash/memoize';
 import { Wallet } from '@lace/cardano';
-import { Reward, TxCBOR, epochSlotsCalc } from '@cardano-sdk/core';
+import { Reward, Serialization, epochSlotsCalc } from '@cardano-sdk/core';
 import {
   pendingTxTransformer,
   txHistoryTransformer,
@@ -241,7 +241,7 @@ const mapWalletActivities = memoize(
         ...transformedTx,
         onClick: () => {
           if (sendAnalytics) sendAnalytics();
-          const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
+          const deserializedTx: Wallet.Cardano.Tx = Serialization.TxCBOR.deserialize(tx.cbor);
           setTransactionActivityDetail({
             activity: deserializedTx,
             direction: TxDirections.Outgoing,

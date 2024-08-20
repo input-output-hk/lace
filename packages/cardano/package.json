@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@cardano-sdk/cardano-services-client": "0.20.0",
-    "@cardano-sdk/core": "0.37.0",
+    "@cardano-sdk/core": "0.38.0",
     "@cardano-sdk/crypto": "0.1.29",
     "@cardano-sdk/hardware-ledger": "0.11.1",
     "@cardano-sdk/hardware-trezor": "0.5.1",
@@ -70,7 +70,7 @@
     "webextension-polyfill": "0.8.0"
   },
   "devDependencies": {
-    "@cardano-sdk/util-dev": "0.22.1",
+    "@cardano-sdk/util-dev": "0.22.2",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.8.0",
     "typescript": "^4.9.5"
