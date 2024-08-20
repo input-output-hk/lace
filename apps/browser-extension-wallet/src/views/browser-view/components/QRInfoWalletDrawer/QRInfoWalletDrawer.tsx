@@ -16,7 +16,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { isUsedAddress } from '@src/utils/is-used-addresses';
 import { useNextUnusedAddress } from '@hooks';
 
-const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVE === 'true';
+const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVED === 'true';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
