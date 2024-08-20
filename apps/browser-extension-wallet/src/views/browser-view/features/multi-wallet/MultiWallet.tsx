@@ -4,7 +4,7 @@ import { WalletSetupConfirmationDialogProvider, WalletSetupFlow, WalletSetupFlow
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
 import { Modal } from 'antd';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styles from './MultiWallet.module.scss';
 import { WalletOnboardingFlows } from './WalletOnboardingFlows';
@@ -17,20 +17,32 @@ export const MultiWallet = (): JSX.Element => {
   const posthogClient = usePostHogClientContext();
   const { page, setBackgroundPage } = useBackgroundPage();
 
+  const handleOnCancel = useCallback(
+    (withConfirmationDialog: (callback: () => void) => () => void) => {
+      withConfirmationDialog(() => {
+        setBackgroundPage();
+        history.push(page);
+        window.location.reload();
+      })();
+    },
+    [history, page, setBackgroundPage]
+  );
+
   return (
     <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_WALLET}>
       <WalletSetupConfirmationDialogProvider>
         {({ isDialogOpen, withConfirmationDialog, shouldShowDialog$ }) => (
-          <Modal centered closable={false} footer={null} open={!isDialogOpen} width="100%" className={styles.modal}>
+          <Modal
+            centered
+            closable
+            footer={null}
+            open={!isDialogOpen}
+            width="100%"
+            className={styles.modal}
+            onCancel={() => handleOnCancel(withConfirmationDialog)}
+          >
             <div className={styles.closeButton}>
-              <NavigationButton
-                icon="cross"
-                onClick={withConfirmationDialog(() => {
-                  setBackgroundPage();
-                  history.push(page);
-                  window.location.reload();
-                })}
-              />
+              <NavigationButton icon="cross" onClick={() => handleOnCancel(withConfirmationDialog)} />
             </div>
             <WalletOnboardingFlows
               mergeEventRequired
