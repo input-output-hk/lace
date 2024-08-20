@@ -27,14 +27,10 @@ const chromeConfig = {
           '--remote-allow-origins=*',
           '--disable-search-engine-choice-screen'
         ]
-      },
-      'wdio:devtoolsOptions': {
-        headless: false,
-        ignoreDefaultArgs: true
       }
     }
   ],
-  services: ['devtools', 'intercept']
+  services: ['intercept']
 };
 
 if (String(process.env.STANDALONE_DRIVER) === 'true') {
