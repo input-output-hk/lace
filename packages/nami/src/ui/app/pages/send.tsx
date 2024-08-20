@@ -3,12 +3,9 @@ import { useHistory } from 'react-router-dom';
 import {
   createTab,
   displayUnit,
-  getAccounts,
   getAdaHandle,
-  getCurrentAccount,
   isValidAddress,
   toUnit,
-  updateRecentSentToAddress,
 } from '../../../api/extension';
 import Account from '../components/account';
 import { Scrollbars } from '../components/scrollbar';
@@ -73,13 +70,19 @@ import { useObservable } from '@lace/common';
 import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
 import { toAsset, withHandleInfo } from '../../../adapters/assets';
 import type { Asset } from '../../../types/assets';
+import { UseAccount } from '../../../adapters/account';
 
 interface Props {
-  accountName: string;
-  accountAvatar?: string;
   walletAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
+  accounts: {
+    name: string;
+    avatar?: string;
+    address?: string;
+  }[];
+  activeAccount: UseAccount['activeAccount'];
+  updateAccountMetadata: UseAccount['updateAccountMetadata'];
   withSignTxConfirmation: <T>(
     action: () => Promise<T>,
     password?: string,
@@ -139,11 +142,12 @@ export const sendStore = {
 };
 
 const Send = ({
-  accountName,
-  accountAvatar,
+  accounts,
+  activeAccount,
   inMemoryWallet,
   walletAddress,
   currentChain,
+  updateAccountMetadata,
   withSignTxConfirmation,
 }: Props) => {
   const capture = useCaptureEvent();
@@ -441,7 +445,7 @@ const Send = ({
           </Box>
         ) : (
           <>
-            <Account name={accountName} avatar={accountAvatar} />
+            <Account name={activeAccount.name} avatar={activeAccount.avatar} />
             <Box position="absolute" top="24" left="6">
               <IconButton
                 rounded="md"
@@ -465,6 +469,8 @@ const Send = ({
               width="80%"
             >
               <AddressPopup
+                recentSendToAddress={activeAccount.recentSendToAddress}
+                accounts={accounts}
                 currentChain={currentChain}
                 setAddress={setAddress}
                 address={address}
@@ -763,8 +769,11 @@ const Send = ({
               status: 'success',
               duration: 5000,
             });
-            if (await isValidAddress(address.result, currentChain))
-              await updateRecentSentToAddress(address.result);
+            if (await isValidAddress(address.result, currentChain)) {
+              await updateAccountMetadata({
+                namiMode: { recentSendToAddress: address.result },
+              });
+            }
           } else if (signedTx === ERROR.fullMempool) {
             toast({
               title: 'Transaction failed',
@@ -793,12 +802,20 @@ const Send = ({
 
 // Address Popup
 const AddressPopup = ({
+  accounts,
   currentChain,
   setAddress,
   address,
   triggerTxUpdate,
   isLoading,
+  recentSendToAddress,
 }: {
+  accounts: {
+    name: string;
+    avatar?: string;
+    address?: string;
+  }[];
+  recentSendToAddress?: string;
   currentChain: Wallet.Cardano.ChainId;
   setAddress: any;
   address: { result: string; display: string; error?: string };
@@ -808,22 +825,8 @@ const AddressPopup = ({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const checkColor = useColorModeValue('teal.500', 'teal.200');
   const ref = React.useRef(false);
-  const [state, setState] = React.useState({
-    currentAccount: null,
-    accounts: {},
-    recentAddress: null,
-  });
   const latestHandleInputToken = React.useRef(0);
   const handleResolver = useHandleResolver(currentChain.networkMagic);
-
-  const init = async () => {
-    const currentAccount = await getCurrentAccount();
-    const accounts = await getAccounts();
-    const recentAddress =
-      currentAccount.recentSendToAddresses &&
-      currentAccount.recentSendToAddresses[0];
-    setState({ currentAccount, accounts, recentAddress });
-  };
 
   const handleInput = async e => {
     const value = e.target.value;
@@ -876,24 +879,13 @@ const AddressPopup = ({
     debouncePromise(latest(handleInput), 700),
   );
 
-  React.useEffect(() => {
-    init();
-  }, []);
-
   return (
     <Popover
-      isOpen={
-        state.currentAccount &&
-        (state.recentAddress ||
-          Object.keys(state.accounts).filter(
-            index => index != state.currentAccount.index,
-          ).length > 0) &&
-        isOpen
-      }
+      isOpen={(Boolean(recentSendToAddress) || accounts.length > 0) && isOpen}
       onOpen={() => !isLoading && !address.result && !address.error && onOpen()}
       autoFocus={false}
       onClose={async () => {
-        await new Promise((res, rej) => setTimeout(() => res()));
+        await new Promise<void>((res, rej) => setTimeout(() => res()));
         if (ref.current) {
           ref.current = false;
           return;
@@ -911,7 +903,7 @@ const AddressPopup = ({
             value={address.display}
             spellCheck={false}
             onBlur={async e => {
-              await new Promise((res, rej) => setTimeout(() => res()));
+              await new Promise<void>((res, rej) => setTimeout(() => res()));
               if (ref.current) {
                 ref.current = false;
                 return;
@@ -934,7 +926,7 @@ const AddressPopup = ({
               triggerTxUpdate(() => setAddress(addr));
               onClose();
             }}
-            isInvalid={address.error}
+            isInvalid={Boolean(address.error)}
           />
           {address.result && !address.error && (
             <InputRightElement
@@ -965,7 +957,7 @@ const AddressPopup = ({
               justifyContent="center"
               marginRight="4"
             >
-              {state.recentAddress && (
+              {recentSendToAddress && (
                 <Button
                   data-testid="recentAddress"
                   ml="2"
@@ -973,7 +965,7 @@ const AddressPopup = ({
                   variant="ghost"
                   width="full"
                   onClick={() => {
-                    const address = state.recentAddress;
+                    const address = recentSendToAddress;
                     triggerTxUpdate(() =>
                       setAddress({
                         result: address,
@@ -995,15 +987,13 @@ const AddressPopup = ({
                       fontWeight="normal"
                     >
                       <MiddleEllipsis>
-                        <span>{state.recentAddress}</span>
+                        <span>{recentSendToAddress}</span>
                       </MiddleEllipsis>
                     </Box>
                   </Box>
                 </Button>
               )}
-              {Object.keys(state.accounts).filter(
-                index => index != state.currentAccount.index,
-              ).length > 0 && (
+              {accounts.length > 0 && (
                 <>
                   {' '}
                   <Text
@@ -1016,61 +1006,53 @@ const AddressPopup = ({
                   >
                     Accounts
                   </Text>
-                  {Object.keys(state.accounts)
-                    .filter(index => index != state.currentAccount.index)
-                    .map(index => {
-                      const account = state.accounts[index];
-                      return (
-                        <Button
-                          key={index}
-                          ml="2"
-                          my="1"
-                          width="full"
-                          variant="ghost"
-                          onClick={() => {
-                            clearTimeout(timer);
-                            const addr = account.paymentAddr;
-
-                            triggerTxUpdate(() =>
-                              setAddress({
-                                result: addr,
-                                display: addr,
-                              }),
-                            );
-                            onClose();
-                          }}
-                        >
-                          <Box width="full" display="flex">
-                            <Box ml="-1">
-                              <AvatarLoader
-                                width="30px"
-                                avatar={account.avatar}
-                              />
-                            </Box>
-                            <Box ml="4" display="flex" flexDirection="column">
-                              <Text
-                                fontWeight="bold"
-                                fontSize="13"
-                                textAlign="left"
-                              >
-                                {account.name}
-                              </Text>
-                              <Box
-                                width="220px"
-                                fontSize="11"
-                                textAlign="left"
-                                whiteSpace="nowrap"
-                                fontWeight="normal"
-                              >
-                                <MiddleEllipsis>
-                                  <span>{account.paymentAddr}</span>
-                                </MiddleEllipsis>
-                              </Box>
+                  {accounts.map(({ name, address, avatar }) => {
+                    return (
+                      <Button
+                        key={address}
+                        ml="2"
+                        my="1"
+                        width="full"
+                        variant="ghost"
+                        onClick={() => {
+                          clearTimeout(timer);
+                          triggerTxUpdate(() =>
+                            setAddress({
+                              result: address,
+                              display: address,
+                            }),
+                          );
+                          onClose();
+                        }}
+                      >
+                        <Box width="full" display="flex">
+                          <Box ml="-1">
+                            <AvatarLoader width="30px" avatar={avatar} />
+                          </Box>
+                          <Box ml="4" display="flex" flexDirection="column">
+                            <Text
+                              fontWeight="bold"
+                              fontSize="13"
+                              textAlign="left"
+                            >
+                              {name}
+                            </Text>
+                            <Box
+                              width="220px"
+                              fontSize="11"
+                              textAlign="left"
+                              whiteSpace="nowrap"
+                              fontWeight="normal"
+                            >
+                              <MiddleEllipsis>
+                                <span>{address}</span>
+                              </MiddleEllipsis>
                             </Box>
                           </Box>
-                        </Button>
-                      );
-                    })}{' '}
+                        </Box>
+                      </Button>
+                    );
+                  })}{' '}
                 </>
               )}
             </Box>

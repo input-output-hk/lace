@@ -30,7 +30,7 @@ export const useWalletAvatar = (): UseWalletAvatar => {
         walletRepository.updateAccountMetadata({
           accountIndex,
           walletId: activeWalletId,
-          metadata: { ...metadata, namiMode: { avatar: image } }
+          metadata: { ...metadata, namiMode: { ...metadata.namiMode, avatar: image } }
         });
       }
     },

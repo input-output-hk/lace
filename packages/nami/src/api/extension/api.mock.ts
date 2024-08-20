@@ -57,10 +57,6 @@ export const isValidAddress = fn(actualApi.isValidAddress).mockName(
 
 export const getUtxos = fn(actualApi.getUtxos).mockName('getUtxos');
 
-export const updateRecentSentToAddress = fn(
-  actualApi.updateRecentSentToAddress,
-).mockName('updateRecentSentToAddress');
-
 export const getAdaHandle = fn(actualApi.getAdaHandle).mockName('getAdaHandle');
 
 export const getAsset = fn(actualApi.getAsset).mockName('getAsset');
@@ -82,10 +78,6 @@ export const initHW = fn(
     return actualApi.initHW({ device, id });
   },
 ).mockName('initHW');
-
-export const getWhitelisted = fn(actualApi.getWhitelisted).mockName(
-  'getWhitelisted',
-);
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 export const getFavoriteIcon = fn(actualApi.getFavoriteIcon).mockName(

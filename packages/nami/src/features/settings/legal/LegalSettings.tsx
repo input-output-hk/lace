@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React, { useRef } from 'react';
 
 import { ChevronRightIcon, InfoOutlineIcon } from '@chakra-ui/icons';
@@ -18,12 +16,21 @@ import {
   Text,
 } from '@chakra-ui/react';
 
+import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
 import PrivacyPolicy from '../../../ui/app/components/privacyPolicy';
 import TermsOfUse from '../../../ui/app/components/termsOfUse';
-// import { useAnalyticsContext } from '../../analytics/provider';
 
-export const LegalSettings = () => {
-  //   const [analytics, setAnalyticsConsent] = useAnalyticsContext();
+interface Props {
+  isAnalyticsOptIn: boolean;
+  handleAnalyticsChoice: (isOptedIn: boolean) => Promise<void>;
+}
+
+export const LegalSettings = ({
+  isAnalyticsOptIn,
+  handleAnalyticsChoice,
+}: Readonly<Props>) => {
+  const capture = useCaptureEvent();
   const termsReference = useRef<{ openModal: () => void }>();
   const privacyPolicyReference = useRef<{ openModal: () => void }>();
   return (
@@ -74,8 +81,10 @@ export const LegalSettings = () => {
         </Text>
         <Spacer />
         <Switch
-        //   isChecked={analytics.consent}
-        //   onChange={() => setAnalyticsConsent(!analytics.consent)}
+          isChecked={isAnalyticsOptIn}
+          onChange={() => {
+            void handleAnalyticsChoice(!isAnalyticsOptIn);
+          }}
         />
       </Flex>
       <Box height="3" />
@@ -84,7 +93,10 @@ export const LegalSettings = () => {
         width="65%"
         rightIcon={<ChevronRightIcon />}
         variant="ghost"
-        onClick={() => termsReference.current?.openModal()}
+        onClick={() => {
+          void capture(Events.SettingsTermsAndConditionsClick);
+          termsReference.current?.openModal();
+        }}
       >
         Terms of Use
       </Button>

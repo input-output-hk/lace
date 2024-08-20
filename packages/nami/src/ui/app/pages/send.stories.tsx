@@ -7,11 +7,8 @@ import { screen, userEvent, within } from '@storybook/test';
 import { Route } from '../../../../.storybook/mocks/react-router-dom.mock';
 import {
   createTab,
-  getAccounts,
-  getCurrentAccount,
   isValidAddress,
   getAdaHandle,
-  updateRecentSentToAddress,
 } from '../../../api/extension/api.mock';
 import { buildTx } from '../../../api/extension/wallet.mock';
 import { minAdaRequired, valueToAssets } from '../../../api/util.mock';
@@ -209,6 +206,8 @@ const inMemoryWallet: Wallet.ObservableWallet = {
   },
 };
 
+const noop = (async () => {}) as any;
+
 const SendStory = ({
   colorMode,
 }: Readonly<{ colorMode: 'dark' | 'light' }>): React.ReactElement => {
@@ -218,8 +217,21 @@ const SendStory = ({
   return (
     <Box width="400" height="600">
       <Send
-        accountName={currentAccount.name}
-        accountAvatar={currentAccount.avatar}
+        accounts={[
+          {
+            name: account1.name,
+            address: account1.paymentAddr,
+            avatar: account1.avatar,
+          },
+        ]}
+        activeAccount={{
+          name: currentAccount.name,
+          avatar: currentAccount.avatar,
+          recentSendToAddress: currentAccount.recentSendToAddresses,
+        }}
+        updateAccountMetadata={noop}
+        walletAddress=""
+        withSignTxConfirmation={noop}
         currentChain={{ networkId: 0, networkMagic: 0 }}
         inMemoryWallet={inMemoryWallet as unknown as Wallet.ObservableWallet}
       />
@@ -251,14 +263,8 @@ const meta: Meta<typeof SendStory> = {
     createTab.mockImplementation(async () => {
       await Promise.resolve();
     });
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account, account1]);
-    });
-    getCurrentAccount.mockImplementation(async () => {
-      return await Promise.resolve(currentAccount);
-    });
-    isValidAddress.mockImplementation(async () => {
-      return await Promise.resolve(true);
+    isValidAddress.mockImplementation(() => {
+      return Wallet.HexBlob('');
     });
     useStoreState.mockImplementation((callback: any) => {
       return callback({
@@ -272,13 +278,10 @@ const meta: Meta<typeof SendStory> = {
       });
     });
     useStoreActions.mockImplementation(() => {
-      return () => void 0;
+      return (): void => void 0;
     });
     getAdaHandle.mockImplementation(async () => {
-      return () => void 0;
-    });
-    updateRecentSentToAddress.mockImplementation(async () => {
-      return () => void 0;
+      return Wallet.Cardano.PaymentAddress(address.result);
     });
     minAdaRequired.mockImplementation(() => '969750');
     buildTx.mockImplementation(async () => {
@@ -300,12 +303,10 @@ const meta: Meta<typeof SendStory> = {
 
     return () => {
       createTab.mockReset();
-      getCurrentAccount.mockReset();
       isValidAddress.mockReset();
       useStoreState.mockReset();
       useStoreActions.mockReset();
       getAdaHandle.mockReset();
-      updateRecentSentToAddress.mockReset();
       minAdaRequired.mockReset();
       valueToAssets.mockReset();
       buildTx.mockReset();

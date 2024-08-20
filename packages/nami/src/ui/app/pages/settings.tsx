@@ -25,11 +25,8 @@ import {
   RepeatIcon,
   CheckIcon,
 } from '@chakra-ui/icons';
-import {
-  getFavoriteIcon,
-  getWhitelisted,
-  removeWhitelisted,
-} from '../../../api/extension';
+import { Wallet } from '@lace/cardano';
+import { getFavoriteIcon } from '../../../api/extension';
 import Account from '../components/account';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import { NETWORK_ID, NODE } from '../../../config/config';
@@ -41,25 +38,26 @@ import { ChangePasswordModal } from '../components/changePasswordModal';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
-import { Wallet } from '@lace/cardano';
-import { UpdateAccountMetadataProps } from '@cardano-sdk/web-extension';
 import { CurrencyCode } from '../../../adapters/currency';
+import { UseAccount } from '../../../adapters/account';
 
 interface Props {
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
   currency: CurrencyCode;
   setCurrency: (currency: CurrencyCode) => void;
-  accountName: string;
-  accountAvatar?: string;
+  isAnalyticsOptIn: boolean;
+  removeDapp: (origin: string) => Promise<boolean>;
+  connectedDapps: Wallet.DappInfo[];
+  handleAnalyticsChoice: (isOptedIn: boolean) => Promise<void>;
   changePassword: (
     currentPassword: string,
     newPassword: string,
   ) => Promise<void>;
   deleteWallet: (password: string) => Promise<void>;
-  updateAccountMetadata: (
-    data: Readonly<Partial<Wallet.AccountMetadata>>,
-  ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata> | undefined>;
+  accountName: string;
+  accountAvatar?: string;
+  updateAccountMetadata: UseAccount['updateAccountMetadata'];
 }
 
 const Settings = ({
@@ -69,6 +67,10 @@ const Settings = ({
   setTheme,
   accountName,
   accountAvatar,
+  isAnalyticsOptIn,
+  connectedDapps,
+  removeDapp,
+  handleAnalyticsChoice,
   changePassword,
   deleteWallet,
   updateAccountMetadata,
@@ -112,13 +114,19 @@ const Settings = ({
             />
           </Route>
           <Route path="/settings/whitelisted">
-            <Whitelisted />
+            <Whitelisted
+              connectedDapps={connectedDapps}
+              removeDapp={removeDapp}
+            />
           </Route>
           <Route path="/settings/network">
             <Network />
           </Route>
           <Route path="/settings/legal">
-            <LegalSettings />
+            <LegalSettings
+              isAnalyticsOptIn={isAnalyticsOptIn}
+              handleAnalyticsChoice={handleAnalyticsChoice}
+            />
           </Route>
           <Route path="*">
             <Overview />
@@ -133,7 +141,6 @@ const Overview = () => {
   const capture = useCaptureEvent();
   const history = useHistory();
   const navigate = history.push;
-  const { colorMode, toggleColorMode } = useColorMode();
   return (
     <>
       <Box height="10" />
@@ -203,7 +210,18 @@ const GeneralSettings = ({
   changePassword,
   deleteWallet,
   updateAccountMetadata,
-}: Props) => {
+}: Pick<
+  Props,
+  | 'accountAvatar'
+  | 'accountName'
+  | 'changePassword'
+  | 'currency'
+  | 'deleteWallet'
+  | 'setCurrency'
+  | 'setTheme'
+  | 'theme'
+  | 'updateAccountMetadata'
+>) => {
   const capture = useCaptureEvent();
   const [name, setName] = useState(accountName);
   const [originalName, setOriginalName] = useState(accountName);
@@ -363,16 +381,12 @@ const GeneralSettings = ({
   );
 };
 
-const Whitelisted = () => {
+const Whitelisted = ({
+  connectedDapps,
+  removeDapp,
+}: Pick<Props, 'connectedDapps' | 'removeDapp'>) => {
   const capture = useCaptureEvent();
-  const [whitelisted, setWhitelisted] = useState(null);
-  const getData = () =>
-    getWhitelisted().then(whitelisted => {
-      setWhitelisted(whitelisted);
-    });
-  useEffect(() => {
-    getData();
-  }, []);
+
   return (
     <Box
       width="100%"
@@ -386,9 +400,9 @@ const Whitelisted = () => {
         Whitelisted sites
       </Text>
       <Box height="6" />
-      {whitelisted ? (
-        whitelisted.length > 0 ? (
-          whitelisted.map((origin, index) => (
+      {connectedDapps ? (
+        connectedDapps.length > 0 ? (
+          connectedDapps.map(({ url, logo }, index) => (
             <Box
               mb="2"
               key={index}
@@ -399,16 +413,15 @@ const Whitelisted = () => {
             >
               <Image
                 width="24px"
-                src={getFavoriteIcon(origin)}
+                src={logo || getFavoriteIcon(url)}
                 fallback={<SkeletonCircle width="24px" height="24px" />}
               />
-              <Text>{origin.split('//')[1]}</Text>
+              <Text>{url.split('//')[1]}</Text>
               <SmallCloseIcon
                 cursor="pointer"
                 onClick={async () => {
                   capture(Events.SettingsAuthorizedDappsTrashBinIconClick);
-                  await removeWhitelisted(origin);
-                  getData();
+                  await removeDapp(url);
                 }}
               />
             </Box>

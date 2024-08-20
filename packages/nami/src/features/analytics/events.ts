@@ -3,94 +3,94 @@ export enum Events {
   PageView = '$pageview',
 
   // create wallet
-  OnboardingCreateClick = 'onboarding | new wallet | create | click',
-  OnboardingCreateWritePassphraseNextClick = 'onboarding | new wallet | write passphrase | next | click',
-  OnboardingCreateEnterPassphraseNextClick = 'onboarding | new wallet | enter passphrase | next | click',
-  OnboardingCreateEnterPassphraseSkipClick = 'onboarding | new wallet | enter passphrase | skip | click',
-  OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
+  OnboardingCreateClick = 'nami mode | onboarding | new wallet | create | click',
+  OnboardingCreateWritePassphraseNextClick = 'nami mode | onboarding | new wallet | write passphrase | next | click',
+  OnboardingCreateEnterPassphraseNextClick = 'nami mode | onboarding | new wallet | enter passphrase | next | click',
+  OnboardingCreateEnterPassphraseSkipClick = 'nami mode | onboarding | new wallet | enter passphrase | skip | click',
+  OnboardingCreateWalletNamePasswordNextClick = 'nami mode | onboarding | new wallet | wallet name & password | next | click',
 
   // import wallet
-  OnboardingRestoreClick = 'onboarding | restore wallet | click',
-  OnboardingRestoreEnterPassphraseNextClick = 'onboarding | restore wallet | enter passphrase | next | click',
-  OnboardingRestoreWalletNamePasswordNextClick = 'onboarding | restore wallet | wallet name & password | next | click',
+  OnboardingRestoreClick = 'nami mode | onboarding | restore wallet | click',
+  OnboardingRestoreEnterPassphraseNextClick = 'nami mode | onboarding | restore wallet | enter passphrase | next | click',
+  OnboardingRestoreWalletNamePasswordNextClick = 'nami mode | onboarding | restore wallet | wallet name & password | next | click',
 
   // receive
-  ReceiveClick = 'receive | receive | click',
-  ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
+  ReceiveClick = 'nami mode | receive | receive | click',
+  ReceiveCopyAddressIconClick = 'nami mode | receive | receive | copy address icon | click',
 
   // send
-  SendClick = 'send | send | click',
-  SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
-  SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
-  SendTransactionConfirmed = 'send | transaction confirmed',
+  SendClick = 'nami mode | send | send | click',
+  SendTransactionDataReviewTransactionClick = 'nami mode | send | transaction data | review transaction | click',
+  SendTransactionConfirmationConfirmClick = 'nami mode | send | transaction confirmation | confirm | click',
+  SendTransactionConfirmed = 'nami mode | send | transaction confirmed',
 
   // settings
-  SettingsNetworkPreviewClick = 'settings | network | preview | click',
-  SettingsNetworkPreprodClick = 'settings | network | preprod | click',
-  SettingsNetworkMainnetClick = 'settings | network | mainnet | click',
-  SettingsNetworkCustomNodeClick = 'settings | network | custom node | click',
+  SettingsNetworkPreviewClick = 'nami mode | settings | network | preview | click',
+  SettingsNetworkPreprodClick = 'nami mode | settings | network | preprod | click',
+  SettingsNetworkMainnetClick = 'nami mode | settings | network | mainnet | click',
+  SettingsNetworkCustomNodeClick = 'nami mode | settings | network | custom node | click',
 
-  SettingsRemoveWalletClick = 'settings | remove wallet | click',
-  SettingsHoldUpRemoveWalletClick = 'settings | hold up | remove wallet | click',
-  SettingsHoldUpBackClick = 'settings | hold up | back | click',
+  SettingsRemoveWalletClick = 'nami mode | settings | remove wallet | click',
+  SettingsHoldUpRemoveWalletClick = 'nami mode | settings | hold up | remove wallet | click',
+  SettingsHoldUpBackClick = 'nami mode | settings | hold up | back | click',
 
-  SettingsThemeLightModeClick = 'settings | theme | light mode | click',
-  SettingsThemeDarkModeClick = 'settings | theme | dark mode | click',
+  SettingsThemeLightModeClick = 'nami mode | settings | theme | light mode | click',
+  SettingsThemeDarkModeClick = 'nami mode | settings | theme | dark mode | click',
 
-  SettingsChangePasswordClick = 'settings | change password | click',
-  SettingsChangePasswordConfirm = 'settings | change password | confirm',
+  SettingsChangePasswordClick = 'nami mode | settings | change password | click',
+  SettingsChangePasswordConfirm = 'nami mode | settings | change password | confirm',
 
-  SettingsChangeAvatarClick = 'settings | change avatar | click',
+  SettingsChangeAvatarClick = 'nami mode | settings | change avatar | click',
 
-  SettingsCollateralClick = 'settings | collateral | click',
-  SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
-  SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
-  SettingsCollateralXClick = 'settings | collateral | x | click',
+  SettingsCollateralClick = 'nami mode | settings | collateral | click',
+  SettingsCollateralConfirmClick = 'nami mode | settings | collateral | confirm | click',
+  SettingsCollateralReclaimCollateralClick = 'nami mode | settings | collateral | reclaim collateral | click',
+  SettingsCollateralXClick = 'nami mode | settings | collateral | x | click',
 
-  SettingsTermsAndConditionsClick = 'settings | terms and conditions | click',
-  SettingsTermsAndConditionsXClick = 'settings | terms and conditions | x | click',
+  SettingsTermsAndConditionsClick = 'nami mode | settings | terms and conditions | click',
+  SettingsTermsAndConditionsXClick = 'nami mode | settings | terms and conditions | x | click',
 
-  SettingsNewAccountClick = 'settings | new account | click',
-  SettingsNewAccountConfirmClick = 'settings | new account | confirm | click',
-  SettingsNewAccountXClick = 'settings | new account | x | click',
+  SettingsNewAccountClick = 'nami mode | settings | new account | click',
+  SettingsNewAccountConfirmClick = 'nami mode | settings | new account | confirm | click',
+  SettingsNewAccountXClick = 'nami mode | settings | new account | x | click',
 
-  SettingsAuthorizedDappsClick = 'settings | authorized dapps | click',
-  SettingsAuthorizedDappsTrashBinIconClick = 'settings | authorized dapps | trash bin icon | click',
+  SettingsAuthorizedDappsClick = 'nami mode | settings | authorized dapps | click',
+  SettingsAuthorizedDappsTrashBinIconClick = 'nami mode | settings | authorized dapps | trash bin icon | click',
 
   // account
-  AccountDeleteClick = 'account | delete | click',
-  AccountDeleteConfirmClick = 'account | delete | confirm | click',
+  AccountDeleteClick = 'nami mode | account | delete | click',
+  AccountDeleteConfirmClick = 'nami mode | account | delete | confirm | click',
 
   // dapp
-  DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
-  DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
-  DappConnectorDappTxSignClick = 'dapp connector | tx | sign | click',
-  DappConnectorDappTxConfirmClick = 'dapp connector | tx | confirm | click',
-  DappConnectorDappTxCancelClick = 'dapp connector | tx | cancel | click',
-  DappConnectorDappDataSignClick = 'dapp connector | data | sign | click',
-  DappConnectorDappDataConfirmClick = 'dapp connector | data | confirm | click',
-  DappConnectorDappDataCancelClick = 'dapp connector | data | cancel | click',
+  DappConnectorAuthorizeDappAuthorizeClick = 'nami mode | dapp connector | authorize dapp | authorize | click',
+  DappConnectorAuthorizeDappCancelClick = 'nami mode | dapp connector | authorize dapp | cancel | click',
+  DappConnectorDappTxSignClick = 'nami mode | dapp connector | tx | sign | click',
+  DappConnectorDappTxConfirmClick = 'nami mode | dapp connector | tx | confirm | click',
+  DappConnectorDappTxCancelClick = 'nami mode | dapp connector | tx | cancel | click',
+  DappConnectorDappDataSignClick = 'nami mode | dapp connector | data | sign | click',
+  DappConnectorDappDataConfirmClick = 'nami mode | dapp connector | data | confirm | click',
+  DappConnectorDappDataCancelClick = 'nami mode | dapp connector | data | cancel | click',
 
   // hw
-  HWConnectClick = 'hardware wallet | connect | click',
-  HWConnectNextClick = 'hardware wallet | connect hw | next | click',
-  HWSelectAccountNextClick = 'hardware wallet | select hw account | next | click',
-  HWDoneGoToWallet = 'onboarding | hardware wallet | all done | go to my wallet | click',
+  HWConnectClick = 'nami mode | hardware wallet | connect | click',
+  HWConnectNextClick = 'nami mode | hardware wallet | connect hw | next | click',
+  HWSelectAccountNextClick = 'nami mode | hardware wallet | select hw account | next | click',
+  HWDoneGoToWallet = 'nami mode | onboarding | hardware wallet | all done | go to my wallet | click',
 
   // nfts
-  NFTsClick = 'nft | nfts | click',
-  NFTsImageClick = 'nft | nfts | nft image | click',
+  NFTsClick = 'nami mode | nft | nfts | click',
+  NFTsImageClick = 'nami mode | nft | nfts | nft image | click',
 
   // activity
-  ActivityActivityClick = 'activity | activity | click',
-  ActivityActivityActivityRowClick = 'activity | activity | activity row | click',
-  ActivityActivityDetailTransactionHashClick = 'activity | activity detail | transaction hash | click',
+  ActivityActivityClick = 'nami mode | activity | activity | click',
+  ActivityActivityActivityRowClick = 'nami mode | activity | activity | activity row | click',
+  ActivityActivityDetailTransactionHashClick = 'nami mode | activity | activity detail | transaction hash | click',
 
   // staking
-  StakingClick = 'staking | staking | click',
-  StakingConfirmClick = 'staking | staking | confirm | click',
-  StakingUnstakeClick = 'staking | staking | unstake | click',
-  StakingUnstakeConfirmClick = 'staking | staking | unstake | confirm | click',
+  StakingClick = 'nami mode | staking | staking | click',
+  StakingConfirmClick = 'nami mode | staking | staking | confirm | click',
+  StakingUnstakeClick = 'nami mode | staking | staking | unstake | click',
+  StakingUnstakeConfirmClick = 'nami mode | staking | staking | unstake | confirm | click',
 }
 
 export type Property =

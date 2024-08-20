@@ -8,10 +8,7 @@ import {
   Redirect,
 } from 'react-router-dom';
 
-import {
-  useInitializeNamiMetadata,
-  useUpdateAccount,
-} from '../adapters/account';
+import { useInitializeNamiMetadata, useAccount } from '../adapters/account';
 import { useFiatCurrency } from '../adapters/currency';
 import {
   useChangePassword,
@@ -26,6 +23,8 @@ import { useOutsideHandles } from './index';
 
 export const Main = () => {
   const {
+    connectedDapps,
+    removeDapp,
     createWallet,
     getMnemonic,
     deleteWallet,
@@ -35,6 +34,8 @@ export const Main = () => {
     setTheme,
     walletAddress,
     inMemoryWallet,
+    isAnalyticsOptIn,
+    handleAnalyticsChoice,
     currentChain,
     walletManager,
     walletRepository,
@@ -45,14 +46,6 @@ export const Main = () => {
     fiatCurrency,
     setFiatCurrency,
   );
-
-  const { accountName, accountAvatar, updateAccountMetadata } =
-    useUpdateAccount({
-      wallets$: walletRepository.wallets$,
-      activeWalletId$: walletManager.activeWalletId$,
-      updateAccountMetadata: async props =>
-        walletRepository.updateAccountMetadata(props),
-    });
 
   const deleteWalletWithPassword = useDeleteWalletWithPassword({
     wallets$: walletRepository.wallets$,
@@ -73,7 +66,15 @@ export const Main = () => {
     getMnemonic,
   });
 
+  const { accounts, activeAccount, updateAccountMetadata } = useAccount({
+    wallets$: walletRepository.wallets$,
+    activeWalletId$: walletManager.activeWalletId$,
+    updateAccountMetadata: async props =>
+      walletRepository.updateAccountMetadata(props),
+  });
+
   useInitializeNamiMetadata({
+    addresses$: inMemoryWallet.addresses$,
     wallets$: walletRepository.wallets$,
     activeWalletId$: walletManager.activeWalletId$,
     updateAccountMetadata: async props =>
@@ -87,21 +88,26 @@ export const Main = () => {
           <Switch>
             <Route path="/settings/*">
               <Settings
+                removeDapp={removeDapp}
+                connectedDapps={connectedDapps}
                 changePassword={changePassword}
                 deleteWallet={deleteWalletWithPassword}
                 currency={currency}
                 setCurrency={setCurrency}
                 theme={theme}
                 setTheme={setTheme}
-                accountAvatar={accountAvatar}
-                accountName={accountName}
+                accountAvatar={activeAccount.avatar}
+                accountName={activeAccount.name}
+                isAnalyticsOptIn={isAnalyticsOptIn}
+                handleAnalyticsChoice={handleAnalyticsChoice}
                 updateAccountMetadata={updateAccountMetadata}
               />
             </Route>
             <Route path="/send">
               <Send
-                accountName={accountName}
-                accountAvatar={accountAvatar}
+                accounts={accounts}
+                activeAccount={activeAccount}
+                updateAccountMetadata={updateAccountMetadata}
                 currentChain={currentChain}
                 walletAddress={walletAddress}
                 inMemoryWallet={inMemoryWallet}

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { cardanoTransformer } from '@src/utils/assets-transformers';
@@ -7,10 +7,13 @@ import { useCurrencyStore, useTheme } from '@providers';
 import { useAppInit, useFetchCoinPrice, useWalletManager } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
 import { walletManager, walletRepository, withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { useAnalytics } from './hooks';
+import { useDappContext, withDappContext } from '@src/features/dapp/context';
+import { localDappService } from '../browser-view/features/dapp/components/DappList/localDappService';
 import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
 
-export const NamiPopup = (): React.ReactElement => {
+export const NamiPopup = withDappContext((): React.ReactElement => {
   const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
   const { createWallet, getMnemonic, deleteWallet } = useWalletManager();
@@ -26,11 +29,11 @@ export const NamiPopup = (): React.ReactElement => {
   const { theme, setTheme } = useTheme();
   const utxoTotal = useObservable(inMemoryWallet?.balance.utxo.total$);
   const rewards = useObservable(inMemoryWallet?.balance.rewardAccounts.rewards$);
-
-  useAppInit();
+  const { handleAnalyticsChoice, isAnalyticsOptIn, sendEventToPostHog } = useAnalytics();
+  const connectedDapps = useDappContext();
+  const removeDapp = useCallback((origin: string) => localDappService.removeAuthorizedDapp(origin), []);
 
   const walletAddress = walletInfo?.addresses[0].address.toString();
-
   const transformedCardano = useMemo(
     () =>
       cardanoTransformer({
@@ -45,11 +48,18 @@ export const NamiPopup = (): React.ReactElement => {
     [cardanoCoin, fiatCurrency?.code, priceResult?.cardano, utxoTotal, rewards]
   );
 
+  useAppInit();
+
   return (
     <div id="nami-mode">
       {!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain ? (
         <OutsideHandlesProvider
           {...{
+            removeDapp,
+            connectedDapps,
+            isAnalyticsOptIn,
+            handleAnalyticsChoice,
+            sendEventToPostHog,
             createWallet,
             getMnemonic,
             deleteWallet,
@@ -73,4 +83,4 @@ export const NamiPopup = (): React.ReactElement => {
       )}
     </div>
   );
-};
+});

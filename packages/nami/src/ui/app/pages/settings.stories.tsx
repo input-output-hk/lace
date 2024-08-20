@@ -6,7 +6,6 @@ import { userEvent, within } from '@storybook/test';
 
 import {
   getCurrentAccount,
-  getWhitelisted,
   getFavoriteIcon,
 } from '../../../api/extension/api.mock';
 import { currentAccount } from '../../../mocks/account.mock';
@@ -20,13 +19,16 @@ import {
   useHistory,
 } from '../../../../.storybook/mocks/react-router-dom.mock';
 import { CurrencyCode } from '../../../adapters/currency';
+import { Wallet } from '@lace/cardano';
 
 const SettingsStory = ({
   colorMode,
   path,
+  connectedDapps,
 }: Readonly<{
   colorMode: 'dark' | 'light';
   path: string;
+  connectedDapps: Wallet.DappInfo[];
 }>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
@@ -36,6 +38,8 @@ const SettingsStory = ({
   return (
     <Box width="400" height="600">
       <Settings
+        connectedDapps={connectedDapps}
+        removeDapp={async () => false}
         accountName={currentAccount.name}
         accountAvatar={currentAccount.avatar}
         changePassword={async () => {}}
@@ -45,6 +49,8 @@ const SettingsStory = ({
         setTheme={() => {}}
         theme="light"
         updateAccountMetadata={async () => undefined}
+        isAnalyticsOptIn={false}
+        handleAnalyticsChoice={async () => {}}
       />
     </Box>
   );
@@ -172,11 +178,13 @@ export const WhitelistedLight: Story = {
   parameters: {
     colorMode: 'light',
     path: '/settings/whitelisted',
+    connectedDapps: [
+      {
+        url: 'https://app.sundae.fi',
+      },
+    ],
   },
   beforeEach: () => {
-    getWhitelisted.mockImplementation(async () => {
-      return (await Promise.resolve(['https://app.sundae.fi'])) as never[];
-    });
     getFavoriteIcon.mockImplementation(() => {
       return 'https://app.sundae.fi/static/images/favicon.png';
     });
@@ -195,6 +203,7 @@ export const WhitelistedEmptyLight: Story = {
   parameters: {
     colorMode: 'light',
     path: '/settings/whitelisted',
+    connectedDapps: [],
   },
 };
 export const WhitelistedEmptyDark: Story = {

@@ -26,20 +26,22 @@ describe('cacheActivatedWalletAddressSubscription', () => {
     expect(mockWalletRepository.updateWalletMetadata).not.toHaveBeenCalled();
   });
 
-  it('should subscribe and update metadata', () => {
+  it('should subscribe and update wallet metadata and account metadata for index 0', () => {
     const mockWalletManager = {
       activeWallet$: of({ addresses$: of([{ address: 'address1' }]) }),
-      activeWalletId$: of({ walletId: 'walletId' })
+      activeWalletId$: of({ walletId: 'walletId', accountIndex: 0 })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
     const mockWalletRepository = {
       wallets$: of([
         {
           walletId: 'walletId',
-          metadata: {}
+          metadata: {},
+          accounts: [{ accountIndex: 0, metadata: { name: 'account #0' } }]
         }
       ]),
-      updateWalletMetadata: jest.fn()
+      updateWalletMetadata: jest.fn(),
+      updateAccountMetadata: jest.fn()
     } as unknown as WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
     cacheActivatedWalletAddressSubscription(mockWalletManager, mockWalletRepository);
@@ -50,6 +52,63 @@ describe('cacheActivatedWalletAddressSubscription', () => {
         walletAddresses: ['address1']
       }
     });
+    expect(mockWalletRepository.updateAccountMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({
+        walletId: 'walletId',
+        accountIndex: 0,
+        metadata: {
+          name: 'account #0',
+          namiMode: {
+            avatar: expect.any(String),
+            address: 'address1'
+          }
+        }
+      })
+    );
+  });
+
+  it('should subscribe and update wallet metadata and account metadata for index 1', () => {
+    const mockWalletManager = {
+      activeWallet$: of({ addresses$: of([{ address: 'address2' }]) }),
+      activeWalletId$: of({ walletId: 'walletId', accountIndex: 1 })
+    } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    const mockWalletRepository = {
+      wallets$: of([
+        {
+          walletId: 'walletId',
+          metadata: {},
+          accounts: [
+            { accountIndex: 0, metadata: { name: 'account #0' } },
+            { accountIndex: 1, metadata: { name: 'account #1', namiMode: { avatar: '0.123' } } }
+          ]
+        }
+      ]),
+      updateWalletMetadata: jest.fn(),
+      updateAccountMetadata: jest.fn()
+    } as unknown as WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    cacheActivatedWalletAddressSubscription(mockWalletManager, mockWalletRepository);
+
+    expect(mockWalletRepository.updateWalletMetadata).toHaveBeenCalledWith({
+      walletId: 'walletId',
+      metadata: {
+        walletAddresses: ['address2']
+      }
+    });
+    expect(mockWalletRepository.updateAccountMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({
+        walletId: 'walletId',
+        accountIndex: 1,
+        metadata: {
+          name: 'account #1',
+          namiMode: {
+            avatar: '0.123',
+            address: 'address2'
+          }
+        }
+      })
+    );
   });
 
   it('should subscribe and update metadata when a new wallet is added and activated', () => {

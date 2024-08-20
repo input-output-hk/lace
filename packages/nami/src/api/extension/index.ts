@@ -109,12 +109,6 @@ export const decryptWithPassword = async (password, encryptedKeyHex) => {
   // return decryptedHex;
 };
 
-export const getWhitelisted = async () => {
-  return await Promise.resolve([]);
-  // const result = await getStorage(STORAGE.whitelisted);
-  // return result ? result : [];
-};
-
 export const getFavoriteIcon = domain => {
   return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${domain}&size=32`;
   // const result = await getStorage(STORAGE.whitelisted);
@@ -132,14 +126,6 @@ export const setWhitelisted = async origin => {
   await Promise.resolve();
   // let whitelisted = await getWhitelisted();
   // whitelisted ? whitelisted.push(origin) : (whitelisted = [origin]);
-  // return await setStorage({ [STORAGE.whitelisted]: whitelisted });
-};
-
-export const removeWhitelisted = async origin => {
-  await Promise.resolve();
-  // const whitelisted = await getWhitelisted();
-  // const index = whitelisted.indexOf(origin);
-  // whitelisted.splice(index, 1);
   // return await setStorage({ [STORAGE.whitelisted]: whitelisted });
 };
 
@@ -1938,19 +1924,6 @@ export const updateAccount = async (forceUpdate = false) => {
   //       ...accounts,
   //     },
   //   });
-};
-
-export const updateRecentSentToAddress = async address => {
-  return await Promise.resolve(true);
-  // const currentIndex = await getCurrentAccountIndex();
-  // const accounts = await getStorage(STORAGE.accounts);
-  // const network = await getNetwork();
-  // accounts[currentIndex][network.id].recentSendToAddresses = [address]; // Update in the future to add mulitple addresses
-  // return await setStorage({
-  //   [STORAGE.accounts]: {
-  //     ...accounts,
-  //   },
-  // });
 };
 
 export const displayUnit = (quantity, decimals = 6) => {

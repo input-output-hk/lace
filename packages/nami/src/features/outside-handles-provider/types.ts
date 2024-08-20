@@ -1,3 +1,4 @@
+import type { Events } from '../../features/analytics/events';
 import type { CreateWalletParams } from '../../types/wallet';
 import type {
   WalletManagerActivateProps,
@@ -17,6 +18,11 @@ export interface IAssetDetails {
 }
 
 export interface OutsideHandlesContextValue {
+  removeDapp: (origin: string) => Promise<boolean>;
+  connectedDapps: Wallet.DappInfo[];
+  isAnalyticsOptIn: boolean;
+  handleAnalyticsChoice: (isOptIn: boolean) => Promise<void>;
+  sendEventToPostHog: (action: Events) => Promise<void>;
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;
