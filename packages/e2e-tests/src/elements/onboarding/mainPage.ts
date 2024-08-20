@@ -113,6 +113,7 @@ export class OnboardingMainPage extends CommonOnboardingElements {
   }
 
   async clickOnOnboardingTypeButton(button: 'Create' | 'Connect' | 'Restore'): Promise<void> {
+    // issue LW-11288 - please remove when it will be fixed / check on CI is needed
     await browser.pause(1000);
     switch (button) {
       case 'Create':
