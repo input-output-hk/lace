@@ -52,8 +52,14 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.ReceiveCopyAddressIconClick);
   };
 
+  const userAddresses = useMemo(
+    () => addresses?.sort((a, b) => a.index - b.index).map((value) => value.address.toString()),
+    [addresses]
+  );
+
   const usedAddresses = useMemo(
-    () => addresses?.filter((addr) => isUsedAddress(addr.address, transactionHistory)),
+    () =>
+      addresses?.sort((a, b) => a.index - b.index).filter((addr) => isUsedAddress(addr.address, transactionHistory)),
     [addresses, transactionHistory]
   );
 
@@ -65,7 +71,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         {!useAdvancedReceived ? (
           <AddressCard
             name={name}
-            address={addresses?.[0].address}
+            address={userAddresses?.[0]}
             getQRCodeOptions={getQRCodeOpts}
             copiedMessage={t(addressCopiedTranslation)}
             onCopyClick={handleCopyAddress}
