@@ -1,20 +1,23 @@
+import { getBaseUrlForChain } from '@src/utils/chain';
+import { getChainName } from '@src/utils/get-chain-name';
 import { useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
-import { HandleProvider } from '@cardano-sdk/core';
-import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { logger } from '@lib/wallet-api-ui';
+import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import { HandleProvider } from '@cardano-sdk/core';
 
 export const useHandleResolver = (): HandleProvider => {
-  const {
-    currentChain: { networkMagic }
-  } = useWalletStore();
+  const { currentChain } = useWalletStore();
+  const baseCardanoServicesUrl = getBaseUrlForChain(getChainName(currentChain));
 
-  return useMemo(() => {
-    const serverUrl = HANDLE_SERVER_URLS[networkMagic as keyof typeof HANDLE_SERVER_URLS];
-    return handleHttpProvider({
-      baseUrl: serverUrl,
-      logger
-    });
-  }, [networkMagic]);
+  return useMemo(
+    () =>
+      handleHttpProvider({
+        adapter: axiosFetchAdapter,
+        baseUrl: baseCardanoServicesUrl,
+        logger
+      }),
+    [baseCardanoServicesUrl]
+  );
 };
