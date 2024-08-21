@@ -53,21 +53,17 @@ runs:
         BATCH: ${{ inputs.BATCH }}
       run: |
         if [ "${{ inputs.SMOKE_ONLY }}" == "true" ] && [ "${{ inputs.TAGS }}" != "" ]; then
-            tagsToRun = "'@Smoke and ${{ inputs.TAGS }} and @Testnet and not @Pending'"
+            tagsToRun="'@Smoke and ${{ inputs.TAGS }} and @Testnet and not @Pending'"
         elif [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
-            tagsToRun = "'@Smoke and @Testnet and not @Pending'"
+            tagsToRun2="'@Smoke and @Testnet and not @Pending'"
         elif [ "${{ inputs.TAGS }}" != "" ]; then
-            tagsToRun = "'${{ inputs.TAGS }} and @Testnet and not @Pending'"
+            tagsToRun3="'${{ inputs.TAGS }} and @Testnet and not @Pending'"
         else
-            tagsToRun = "'@Testnet and not @Pending'"
+            tagsToRun4="'@Testnet and not @Pending'"
         fi
-        echo "Running tests with tags: $tagsToRun"
-        echo "Running tests with tags: ${tagsToRun}"
-        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=$tagsToRun"
+        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
         eval "$runCommand";
-    - name: Setup upterm session
-      if: always()
-      uses: lhotari/action-upterm@v1
+
     - name: Save dmesg logs
       shell: bash
       if: always()
