@@ -24,6 +24,10 @@ inputs:
     description: 'Run only smoke tests'
     required: true
     default: 'false'
+  TAGS:
+    description: 'Tags'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -48,11 +52,16 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
       run: |
-        if [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Smoke and @Testnet and not @Pending'"
+        if [ "${{ inputs.SMOKE_ONLY }}" == "true" ] && [ "${{ inputs.TAGS }}" != "" ]; then
+            tagsToRun = "@Smoke and ${{ inputs.TAGS }} and "
+        elif [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
+            tagsToRun = "@Smoke and "
+        elif [ "${{ inputs.TAGS }}" != "" ]; then
+            tagsToRun = "${{ inputs.TAGS }} and "
         else
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
+            tagsToRun = ''
         fi
+        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='${tagsToRun}@Testnet and not @Pending'"
         eval "$runCommand";
 
     - name: Save dmesg logs

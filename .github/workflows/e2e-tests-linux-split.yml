@@ -39,6 +39,11 @@ on:
         description: 'Run only smoke tests'
         required: true
         default: false
+      tags:
+        type: string
+        description: 'Tags'
+        required: false
+        default: ''
       cardano_mainnet_url:
         type: choice
         required: true
@@ -98,7 +103,7 @@ on:
           - live-preview.us-east-1.lw.iog.io
           - live-preview.us-east-2.lw.iog.io
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | tags: ${{ github.event.inputs.tags || '' }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -141,6 +146,7 @@ jobs:
           echo "Network: ${{ github.event.inputs.network || 'preprod' }}"
           echo "Runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}"
           echo "Smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
+          echo "Tags(optional): ${{ github.event.inputs.tags || '' }}"
           echo "Cardano mainnet url: ${{ github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io' }}"
           echo "Cardano preprod url: ${{ github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io' }}"
           echo "Cardano preview url: ${{ github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io' }}"
@@ -148,6 +154,7 @@ jobs:
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
       smoke_only: ${{ github.event.inputs.smoke_only || false }}
+      tags: ${{ github.event.inputs.tags || '' }}
       build_exists: ${{ steps.check-build-exists.outputs.build_exists }}
 
   build:
@@ -209,6 +216,7 @@ jobs:
         with:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: ${{ needs.setup.outputs.smoke_only }}
+          TAGS: ${{ needs.setup.outputs.tags }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
@@ -235,6 +243,7 @@ jobs:
           browser=${BROWSER}
           platform=Linux
           smoke_only=${{ needs.setup.outputs.smoke_only }}
+          tags=${{ needs.setup.outputs.tags }}
           cardano_mainnet_url=${CARDANO_MAINNET_URL}
           cardano_preprod_url=${CARDANO_PREPROD_URL}
           cardano_preview_url=${CARDANO_PREVIEW_URL}
@@ -258,14 +267,14 @@ jobs:
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: ${{ needs.setup.outputs.smoke_only }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | tags: ${{ needs.setup.outputs.tags }} | smoke only: ${{ needs.setup.outputs.smoke_only }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | smoke only: ${{ needs.setup.outputs.smoke_only }}'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | tags: ${{ needs.setup.outputs.tags }} | smoke only: ${{ needs.setup.outputs.smoke_only }}'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
