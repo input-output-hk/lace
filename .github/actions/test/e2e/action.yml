@@ -61,7 +61,9 @@ runs:
         else
             tagsToRun = "'@Testnet and not @Pending'"
         fi
-        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
+        echo "Running tests with tags: $tagsToRun"
+        echo "Running tests with tags: ${tagsToRun}"
+        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=$tagsToRun"
         eval "$runCommand";
 
     - name: Save dmesg logs
