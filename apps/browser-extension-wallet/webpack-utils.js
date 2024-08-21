@@ -27,7 +27,8 @@ const transformManifest = (content, mode) => {
         mode === 'development'
           ? 'http://localhost:* http://127.0.0.1:* ws://localhost:3000 ws://0.0.0.0:3000/ws wss://localhost:3000  ws://localhost:3001 ws://0.0.0.0:3001/ws wss://localhost:3001'
           : 'http://localhost:* http://127.0.0.1:*'
-      );
+      )
+      .replace('$POSTHOG_HOST', process.env.POSTHOG_HOST);
 
     if (process.env.LACE_EXTENSION_KEY) {
       manifest.key = manifest.key.replace('$LACE_EXTENSION_KEY', process.env.LACE_EXTENSION_KEY);
