@@ -13,7 +13,7 @@ export const useNextUnusedAddress = (): Cardano.PaymentAddress => {
 
     const getNextUnusedAddress = async () => {
       const _nextUnusedAddress = await inMemoryWallet.getNextUnusedAddress();
-      setNextUnusedAddress(_nextUnusedAddress[0].address);
+      setNextUnusedAddress(_nextUnusedAddress?.[0].address);
     };
 
     getNextUnusedAddress();

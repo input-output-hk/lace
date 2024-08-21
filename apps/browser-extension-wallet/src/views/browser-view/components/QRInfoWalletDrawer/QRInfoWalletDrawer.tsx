@@ -53,7 +53,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   };
 
   const usedAddresses = useMemo(
-    () => addresses.filter((addr) => isUsedAddress(addr.address, transactionHistory)),
+    () => addresses?.filter((addr) => isUsedAddress(addr.address, transactionHistory)),
     [addresses, transactionHistory]
   );
 
@@ -65,14 +65,14 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         {!useAdvancedReceived ? (
           <AddressCard
             name={name}
-            address={addresses[0]?.address}
+            address={addresses?.[0].address}
             getQRCodeOptions={getQRCodeOpts}
             copiedMessage={t(addressCopiedTranslation)}
             onCopyClick={handleCopyAddress}
           />
         ) : (
           <>
-            {usedAddresses.map((addr, i) => (
+            {usedAddresses?.map((addr, i) => (
               <AddressCard
                 key={addr.accountIndex}
                 name={i === 0 ? name : `Index ${i}`}
