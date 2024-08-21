@@ -1,17 +1,17 @@
 import { Meta, StoryObj } from '@storybook/react';
-import { WalletUsedAddressDropdown } from './WalletUsedAddressDrowdown';
+import { WalletOwnAddressDropdown } from './WalletOwnAddressDropdown';
 
-const meta: Meta<typeof WalletUsedAddressDropdown> = {
-  component: WalletUsedAddressDropdown,
+const meta: Meta<typeof WalletOwnAddressDropdown> = {
+  component: WalletOwnAddressDropdown,
   parameters: {
     layout: 'centered'
   },
-  title: 'Components / Used addresses'
+  title: 'Components / Own addresses'
 };
 
 export default meta;
 
-type Story = StoryObj<typeof WalletUsedAddressDropdown>;
+type Story = StoryObj<typeof WalletOwnAddressDropdown>;
 
 export const SharedWalletLayoutComponent: Story = {
   args: {

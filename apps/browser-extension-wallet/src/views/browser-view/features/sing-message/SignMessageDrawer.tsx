@@ -7,7 +7,7 @@ import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { useDrawer } from '@views/browser/stores';
 import { useTranslation } from 'react-i18next';
 import styles from './SignMessageDrawer.module.scss';
-import { WalletUsedAddressDropdown } from '@lace/core';
+import { WalletOwnAddressDropdown } from '@lace/core';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type SignMessageToolProps = {};
@@ -54,13 +54,7 @@ export const SignMessageDrawer: VFC<SignMessageToolProps> = () => {
       }
     >
       <div className={styles.infoContainer}>
-        <WalletUsedAddressDropdown
-          translations={{
-            copy: t('core.receive.usedAddresses.copy'),
-            addressCopied: t('core.receive.usedAddresses.addressCopied')
-          }}
-          items={usedAddresses}
-        />
+        <WalletOwnAddressDropdown items={usedAddresses} />
       </div>
     </Drawer>
   );
