@@ -41,7 +41,7 @@ on:
         default: false
       tags:
         type: string
-        description: 'Tags'
+        description: 'Tags(optional)'
         required: false
         default: ''
       cardano_mainnet_url:
