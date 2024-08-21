@@ -65,7 +65,9 @@ runs:
         echo "Running tests with tags: ${tagsToRun}"
         runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=$tagsToRun"
         eval "$runCommand";
-
+    - name: Setup upterm session
+      if: always()
+      uses: lhotari/action-upterm@v1
     - name: Save dmesg logs
       shell: bash
       if: always()
