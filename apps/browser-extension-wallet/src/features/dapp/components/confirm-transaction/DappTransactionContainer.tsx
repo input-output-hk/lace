@@ -113,7 +113,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
     const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
     const eraSummaries = useObservable(inMemoryWallet?.eraSummaries$);
-    const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
+    const allWalletsAddresses = [...userAddresses, ...getAllWalletsAddresses(useObservable(walletRepository.wallets$))];
 
     useEffect(() => {
       if (!req || !protocolParameters) {
