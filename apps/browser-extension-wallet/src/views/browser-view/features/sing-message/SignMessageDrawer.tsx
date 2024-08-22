@@ -3,20 +3,14 @@ import { useWalletStore } from '@stores';
 import { map } from 'rxjs';
 import { isScriptAddress } from '@cardano-sdk/wallet';
 import { UsedAddressesSchema } from '@views/browser/components/WalletUsedAddressesDrawer/WalletUsedAddressesDrawer.component';
-import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
+import { useObservable } from '@lace/common';
 import { useDrawer } from '@views/browser/stores';
-import { useTranslation } from 'react-i18next';
-import styles from './SignMessageDrawer.module.scss';
-import { WalletOwnAddressDropdown } from '@lace/core';
+import { SignMessage } from '@lace/core';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-type SignMessageToolProps = {};
-
-export const SignMessageDrawer: VFC<SignMessageToolProps> = () => {
+export const SignMessageDrawer: VFC = () => {
   const { inMemoryWallet } = useWalletStore();
-  const { t } = useTranslation();
-
   const [, closeDrawer] = useDrawer();
+
   const usedAddresses$ = useMemo(
     () =>
       inMemoryWallet?.addresses$.pipe(
@@ -33,29 +27,5 @@ export const SignMessageDrawer: VFC<SignMessageToolProps> = () => {
   );
 
   const usedAddresses: UsedAddressesSchema[] = useObservable(usedAddresses$);
-  const customHeaderTitle = (
-    <div className={styles.draweHeaderTitle}>
-      <h1 className={styles.title}>{t('browserView.signMessage.title')}</h1>
-      <h4 className={styles.subtitle}>{t('browserView.signMessage.subtitle')}</h4>
-    </div>
-  );
-
-  return (
-    <Drawer
-      visible
-      onClose={() => closeDrawer()}
-      title={customHeaderTitle}
-      navigation={
-        <DrawerNavigation
-          title={t('browserView.signMessage.heading')}
-          onCloseIconClick={closeDrawer}
-          onArrowIconClick={closeDrawer}
-        />
-      }
-    >
-      <div className={styles.infoContainer}>
-        <WalletOwnAddressDropdown items={usedAddresses} />
-      </div>
-    </Drawer>
-  );
+  return <SignMessage addresses={usedAddresses} onClose={closeDrawer} />;
 };

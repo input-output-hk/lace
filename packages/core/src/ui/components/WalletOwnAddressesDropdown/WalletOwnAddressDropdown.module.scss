@@ -9,6 +9,10 @@
   }
 }
 
+.overlay {
+  z-index: 10 !important;
+}
+
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -16,23 +20,38 @@
   width: 100%;
 }
 
-.header {
-  color: var(--text-color-secondary);
+.content {
+  align-items: center;
   display: flex;
-  display: grid;
-  font-size: var(--body);
-  font-weight: 500;
-  gap: 3%;
-  grid-template-columns: 35% 62%;
-  letter-spacing: -0.015em;
-  line-height: size_unit(3);
-  margin-bottom: size_unit(1);
-  padding: 0px size_unit(2);
+  margin: 0 6px;
+  &.isPopup {
+    margin: 0 3px;
+
+    .chevron {
+      font-size: 9px;
+      margin-left: 6px;
+      margin-right: 6px;
+    }
+  }
 }
 
-.skeleton {
-  padding: size_unit(1) size_unit(2);
-  &.popupView {
-    padding: size_unit(2) size_unit(1);
+.avatarBtn {
+  min-height: size_unit(6) !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border-radius: 100px !important;
+  border-width: 2px !important;
+  background-color: var(--bg-color-body, #ffffff) !important;
+
+  &.open {
+    background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+    &:hover {
+      background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+    }
+  }
+
+  @media (max-width: $breakpoint-popup) {
+    min-height: size_unit(4.5) !important;
+    min-width: 0 !important;
   }
 }

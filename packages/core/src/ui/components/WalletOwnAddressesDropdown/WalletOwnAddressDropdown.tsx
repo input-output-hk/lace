@@ -5,14 +5,14 @@ import { addEllipsis, Button } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 
-export interface ItemSchema {
+export interface AddressSchema {
   id: number;
   address: string;
 }
 
 export type WalletOwnAddressDropdownProps = {
   className?: string;
-  items: ItemSchema[];
+  items: AddressSchema[];
 };
 
 const FIRST_PART_ADDRESS_LENGHT = 29;
@@ -22,7 +22,7 @@ export const WalletOwnAddressDropdown = ({ className, items }: WalletOwnAddressD
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownMenuOpen, setIsDropdownMenuOpen] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(t('core.VotingProcedures.voterType'));
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(t('core.signMessage.selectAddress'));
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -56,7 +56,7 @@ export const WalletOwnAddressDropdown = ({ className, items }: WalletOwnAddressD
         trigger={['click']}
         onVisibleChange={handleOpenChange}
         visible={isOpen}
-        overlayClassName={styles.dropdownOverlay}
+        overlayClassName={styles.overlay}
       >
         <Button
           variant="outlined"

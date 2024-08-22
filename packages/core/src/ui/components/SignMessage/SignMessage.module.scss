@@ -1,5 +1,12 @@
-@import '../../../../styles/utils/functions.scss';
-@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../styles/theme.scss';
+@import '../../../../../../packages/common/src/ui/styles/abstracts/_typography.scss';
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+}
 
 :root {
   :global(.ant-drawer-header) {
