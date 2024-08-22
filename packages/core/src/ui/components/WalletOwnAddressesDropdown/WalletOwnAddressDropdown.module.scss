@@ -1,57 +1,50 @@
 @import '../../styles/theme.scss';
 
-:global(.ant-list-split) :local(.listItemWrapper) {
-  border-bottom: none !important;
-  padding-top: 0px;
-  padding-bottom: 0;
-  :last-child {
-    padding-bottom: 0px;
-  }
-}
-
 .overlay {
   z-index: 10 !important;
 }
 
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  width: 100%;
-}
-
-.content {
-  align-items: center;
-  display: flex;
-  margin: 0 6px;
-  &.isPopup {
-    margin: 0 3px;
-
-    .chevron {
-      font-size: 9px;
-      margin-left: 6px;
-      margin-right: 6px;
-    }
-  }
-}
-
-.avatarBtn {
+.dropdownBtn {
   min-height: size_unit(6) !important;
   min-width: 0 !important;
-  padding: 0 !important;
+  padding: 0 size_unit(2) !important;
   border-radius: 100px !important;
   border-width: 2px !important;
   background-color: var(--bg-color-body, #ffffff) !important;
+  color: var(--text-color-primary, #000000) !important;
+  border-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 
-  &.open {
-    background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
-    &:hover {
-      background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
-    }
+  &:hover, &:focus, &.open {
+    background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
   }
 
   @media (max-width: $breakpoint-popup) {
     min-height: size_unit(4.5) !important;
-    min-width: 0 !important;
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-color-primary, #000000) !important;
+}
+
+:global(.ant-dropdown-menu) {
+  background-color: var(--bg-color-body, #ffffff) !important;
+  border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+}
+
+:global(.ant-dropdown-menu-item) {
+  color: var(--text-color-primary, #000000) !important;
+
+  &:hover {
+    background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
   }
 }

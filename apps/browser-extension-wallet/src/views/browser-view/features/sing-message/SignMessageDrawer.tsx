@@ -27,5 +27,6 @@ export const SignMessageDrawer: VFC = () => {
   );
 
   const usedAddresses: UsedAddressesSchema[] = useObservable(usedAddresses$);
-  return <SignMessage addresses={usedAddresses} onClose={closeDrawer} />;
+  // eslint-disable-next-line no-console
+  return <SignMessage addresses={usedAddresses} onClose={closeDrawer} onSign={() => console.log('on sign')} />;
 };

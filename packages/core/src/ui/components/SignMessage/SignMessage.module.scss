@@ -1,38 +1,45 @@
 @import '../../styles/theme.scss';
 @import '../../../../../../packages/common/src/ui/styles/abstracts/_typography.scss';
 
-.wrapper {
+.container {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
+  gap: size_unit(3);
+  padding: size_unit(3) size_unit(2);
+}
+
+.subtitle {
+  color: var(--text-color-secondary);
+  margin-top: -#{size_unit(2)};
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(1);
+}
+
+.textAreaWrapper {
   width: 100%;
 }
 
-:root {
-  :global(.ant-drawer-header) {
-    border: none;
-  }
-}
-
-.draweHeaderTitle {
+.buttonContainer {
   display: flex;
   flex-direction: column;
-  .title {
-    @include text-subHeading-semi-bold;
-    text-align: left;
-    color: var(--text-color-primary);
-    margin: 0;
-  }
-  .subtitle {
-    margin: 0;
-    @include text-body-medium;
-    text-align: left;
-    color: var(--text-color-secondary);
+  gap: size_unit(2);
+  margin-top: size_unit(3);
+}
+
+.nextButton {
+  &[class*="contained"] {
+    background-color: var(--primary-highlight);
+    color: var(--text-color-white);
   }
 }
 
-.infoContainer {
-  flex: 1;
-  margin: size_unit(6) 0 size_unit(7) 0;
-  overflow-y: auto;
+.cancelButton {
+  &[class*="outlined"] {
+    background-color: var(--light-mode-light-grey-plus);
+    color: var(--text-color-primary);
+  }
 }

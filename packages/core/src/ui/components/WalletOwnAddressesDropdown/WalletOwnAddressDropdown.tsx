@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Dropdown, Menu } from 'antd';
+import { Dropdown } from 'antd';
+import { Button, addEllipsis } from '@lace/common';
+import type { MenuProps } from 'antd';
 import styles from './WalletOwnAddressDropdown.module.scss';
-import { addEllipsis, Button } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 
@@ -11,62 +12,46 @@ export interface AddressSchema {
 }
 
 export type WalletOwnAddressDropdownProps = {
-  className?: string;
-  items: AddressSchema[];
+  addresses: AddressSchema[];
+  onSelect: (address: string) => void;
+  placeholder?: string;
 };
 
-const FIRST_PART_ADDRESS_LENGHT = 29;
-const LAST_PART_ADDRESS_LENGHT = 14;
+const FIRST_PART_ADDRESS_LENGTH = 29;
+const LAST_PART_ADDRESS_LENGTH = 14;
 
-export const WalletOwnAddressDropdown = ({ className, items }: WalletOwnAddressDropdownProps): React.ReactElement => {
+export const WalletOwnAddressDropdown = ({
+  addresses,
+  onSelect,
+  placeholder
+}: WalletOwnAddressDropdownProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isDropdownMenuOpen, setIsDropdownMenuOpen] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(t('core.signMessage.selectAddress'));
+  const [selectedAddress, setSelectedAddress] = useState<string>(placeholder || t('core.signMessage.selectAddress'));
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    setIsDropdownMenuOpen(open);
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    const selectedItem = addresses.find((address) => address.id.toString() === e.key);
+    if (selectedItem) {
+      const shortenedAddress = addEllipsis(selectedItem.address, FIRST_PART_ADDRESS_LENGTH, LAST_PART_ADDRESS_LENGTH);
+      setSelectedAddress(shortenedAddress);
+      onSelect(selectedItem.address);
+    }
   };
 
-  const menu = (
-    <Menu className={styles.menu}>
-      {items.length > 0 ? (
-        items.map((item, index) => (
-          <Menu.Item
-            key={index}
-            onClick={() => {
-              setSelectedAddress(addEllipsis(item?.address, FIRST_PART_ADDRESS_LENGHT, LAST_PART_ADDRESS_LENGHT));
-              handleOpenChange(false);
-            }}
-          >
-            <div>{item?.address}</div>
-          </Menu.Item>
-        ))
-      ) : (
-        <Menu.Item>{'No items available'}</Menu.Item>
-      )}
-    </Menu>
-  );
+  const items: MenuProps['items'] = addresses.map((address) => ({
+    key: address.id.toString(),
+    label: addEllipsis(address.address, FIRST_PART_ADDRESS_LENGTH, LAST_PART_ADDRESS_LENGTH)
+  }));
+
+  const menuProps: MenuProps = {
+    items,
+    onClick: handleMenuClick
+  };
 
   return (
-    <div className={cn(styles.wrapper, className)}>
-      <Dropdown
-        overlay={menu}
-        trigger={['click']}
-        onVisibleChange={handleOpenChange}
-        visible={isOpen}
-        overlayClassName={styles.overlay}
-      >
-        <Button
-          variant="outlined"
-          color="secondary"
-          className={cn(styles.avatarBtn, { [styles.open]: isDropdownMenuOpen })}
-          data-testid="header-menu-button"
-        >
-          <span className={styles.content}>{selectedAddress}</span>
-        </Button>
-      </Dropdown>
-    </div>
+    <Dropdown menu={menuProps} trigger={['click']}>
+      <Button variant="outlined" color="secondary" className={cn(styles.dropdownBtn)}>
+        <span className={styles.content}>{selectedAddress}</span>
+      </Button>
+    </Dropdown>
   );
 };
