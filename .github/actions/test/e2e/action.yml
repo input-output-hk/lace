@@ -52,14 +52,13 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
       run: |
-        if [ "${{ inputs.SMOKE_ONLY }}" == "true" ] && [ "${{ inputs.TAGS }}" != "" ]; then
-            tagsToRun="'@Smoke and ${{ inputs.TAGS }} and @Testnet and not @Pending'"
-        elif [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
-            tagsToRun="'@Smoke and @Testnet and not @Pending'"
-        elif [ "${{ inputs.TAGS }}" != "" ]; then
-            tagsToRun="'${{ inputs.TAGS }} and @Testnet and not @Pending'"
-        else
-            tagsToRun="'@Testnet and not @Pending'"
+        commonTags="@Testnet and not @Pending"
+        tagsToRun="'${commonTags}'"
+        if [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
+          tagsToRun="'@Smoke and ${tagsToRun}'"
+        fi
+        if [ "${{ inputs.TAGS }}" != "" ]; then
+          tagsToRun="'${{ inputs.TAGS }} and ${tagsToRun}'"
         fi
         echo "Running tests with tags: ${tagsToRun}"
         runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
