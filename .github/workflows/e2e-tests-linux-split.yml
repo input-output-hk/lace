@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - 'release/**'
-      - 'e2e-regression-workflow-add-optional-tags-param'
   workflow_dispatch:
     inputs:
       browser:
