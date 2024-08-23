@@ -2,7 +2,8 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { Button, inputProps, Password } from '@lace/common';
+import { Button } from '@lace/common';
+import { OnPasswordChange, Password } from '@lace/core';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
@@ -16,8 +17,8 @@ export const SignData = (): React.ReactElement => {
     utils: { setPreviousView },
     signDataRequest: { request }
   } = useViewsFlowContext();
-  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappDataSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappDataSignSuccess);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState<string>();
   const [validPassword, setValidPassword] = useState<boolean>();
@@ -40,7 +41,7 @@ export const SignData = (): React.ReactElement => {
     }
   }, [password, redirectToSignFailure, redirectToSignSuccess, request]);
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;
@@ -56,7 +57,6 @@ export const SignData = (): React.ReactElement => {
           </h5>
           <Password
             onChange={handleChange}
-            value={password}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
           />

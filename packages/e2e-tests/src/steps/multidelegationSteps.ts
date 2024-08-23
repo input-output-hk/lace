@@ -41,7 +41,8 @@ import StakingErrorDrawerAssert from '../assert/multidelegation/StakingErrorDraw
 import MultidelegationDAppIssueModalAssert from '../assert/multidelegation/MultidelegationDAppIssueModalAssert';
 import { StakePoolGridCard } from '../elements/multidelegation/StakePoolGridCard';
 import { StakePoolListItem } from '../elements/multidelegation/StakePoolListItem';
-import SwitchingPoolsModalAssert from '../assert/switchingPoolsModalAssert';
+import SwitchingPoolsModalAssert from '../assert/multidelegation/SwitchingPoolsModalAssert';
+import { clearInputFieldValue } from '../utils/inputFieldUtils';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -118,6 +119,7 @@ When(/^I save identifiers of stake pools currently in use$/, async () => {
 
 When(/^I input "([^"]*)" into stake pool search bar$/, async (term: string) => {
   const searchTerm = await parseSearchTerm(term);
+  await clearInputFieldValue(await MultidelegationPage.stakingPageSearchInput);
   await MultidelegationPage.fillSearch(searchTerm);
   await MultidelegationPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
@@ -244,9 +246,12 @@ Then(/^I see the stake pool search control with appropriate content$/, async () 
   await MultidelegationPageAssert.assertSeeSearchComponent();
 });
 
-Then(/^there are (\d+) stake pools returned$/, async (resultsCount: number) => {
-  await MultidelegationPageAssert.assertSeeSearchResults(resultsCount);
-});
+Then(
+  /^there are (\d+) stake pools returned for (grid|list) view$/,
+  async (resultsCount: number, viewType: 'grid' | 'list') => {
+    await MultidelegationPageAssert.assertSeeSearchResults(resultsCount, viewType);
+  }
+);
 
 Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, async (expectedTicker: string) => {
   if ((await MultidelegationPage.displayedPools.length) > 0) {
@@ -626,6 +631,7 @@ Then(
 
 When(/^I reset default behaviour for modal about issues with multi-delegation and DApps$/, async () => {
   await localStorageInitializer.removeConfigurationForShowingMultidelegationDAppsIssueModal();
+  await browser.refresh();
 });
 
 Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {

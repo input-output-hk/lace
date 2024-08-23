@@ -14,3 +14,4 @@ export * from './NetworkChoice';
 export * from './ShowPassphraseDrawer';
 export * as Collateral from './Collateral';
 export * from './SettingsPreferences';
+export * from './PaperWalletSettingsDrawer';

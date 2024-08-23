@@ -1,7 +1,7 @@
 import { CoSignEntry } from '@lace/core';
 import React from 'react';
 import { useDrawer } from '@views/browser/stores';
-import { useBuiltTxState, useSections } from '../store';
+import { useBuiltTxState } from '../store';
 import { Serialization } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletState } from '@hooks/useWalletState';
@@ -9,7 +9,6 @@ import { useWalletState } from '@hooks/useWalletState';
 export const ImportSharedWalletTransaction = (): JSX.Element => {
   const [config] = useDrawer();
   const { setBuiltTxData } = useBuiltTxState();
-  const { setSection } = useSections();
   const walletState = useWalletState();
 
   return (
@@ -17,7 +16,10 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
       // eslint-disable-next-line react/jsx-handler-names
       onCancel={config.onClose}
       onContinue={async (txData) => {
-        const importedSharedWalletTx = Serialization.Transaction.fromCbor(Wallet.TxCBOR(txData.transaction.cborHex));
+        if (!txData) return;
+        const importedSharedWalletTx = Serialization.Transaction.fromCbor(
+          Wallet.Serialization.TxCBOR(txData.transaction.cborHex)
+        );
         const { body, id } = importedSharedWalletTx.toCore();
 
         const ownAddresses = new Set([...(walletState?.addresses || [])].map((address) => address.address));
@@ -34,8 +36,6 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
           },
           importedSharedWalletTx
         });
-
-        setSection();
       }}
     />
   );

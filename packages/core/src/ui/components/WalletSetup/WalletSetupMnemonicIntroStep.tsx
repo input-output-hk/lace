@@ -9,6 +9,7 @@ export interface WalletSetupMnemonicIntroStepProps {
   onClickVideo?: () => void;
   videoSrc?: string;
   translations: TranslationsFor<'title' | 'description' | 'linkText'>;
+  paperWalletEnabled: boolean;
 }
 
 export const WalletSetupMnemonicIntroStep = ({
@@ -16,7 +17,8 @@ export const WalletSetupMnemonicIntroStep = ({
   onNext,
   onClickVideo,
   videoSrc,
-  translations
+  translations,
+  paperWalletEnabled
 }: WalletSetupMnemonicIntroStepProps): React.ReactElement => {
   const [overlayVisible, setOverlayVisible] = useState(true);
   const videoRef = useRef<HTMLIFrameElement>();
@@ -28,7 +30,9 @@ export const WalletSetupMnemonicIntroStep = ({
       linkText={translations.linkText}
       onBack={onBack}
       onNext={onNext}
-      currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+      currentTimelineStep={
+        paperWalletEnabled ? WalletTimelineSteps.RECOVERY_DETAILS : WalletTimelineSteps.RECOVERY_PHRASE
+      }
     >
       <div
         className={styles.videoContainer}

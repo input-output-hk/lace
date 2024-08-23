@@ -16,7 +16,7 @@ import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.co
 import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
 import { useKeyboardShortcut } from '@lace/common';
 
-export type WalletSetupMnemonicStage = 'writedown' | 'input';
+export type WalletSetupMnemonicStage = 'recoverymethod' | 'writedown' | 'input';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
@@ -155,7 +155,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         description={subtitle}
         onBack={handleBack}
         onNext={handleNext}
-        currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+        currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
         customAction={
           <Tooltip
             placement="top"

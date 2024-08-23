@@ -3,17 +3,16 @@ Feature: Staking Page - Extended View
 
   Background:
     Given Lace is ready for test
+    And I am on Staking extended page
 
   @LW-10143 @Testnet @Mainnet
   Scenario: Extended View - Staking - More options - Sorting options are displayed
-    When I am on Staking extended page
-    And I open Browse pools tab
+    When I open Browse pools tab
     Then "More options" component with stake pool sorting options is displayed
 
   @LW-10139 @LW-10141 @LW-10142 @Testnet @Mainnet
   Scenario: Extended View - Staking - List View - Stake pool list sorting by ticker (default)
-    When I am on Staking extended page
-    And I open Browse pools tab
+    When I open Browse pools tab
     And I switch to list view on "Browse pools" tab
     Then stake pool list view is displayed
     And ascending sorting indicator is displayed for "Ticker" column
@@ -27,8 +26,7 @@ Feature: Staking Page - Extended View
 
   @LW-10145 @LW-10239 @Testnet @Mainnet
   Scenario Outline: Extended View - Staking - List View - More options - Sorting - sort stake pools by <option> <order>
-    When I am on Staking extended page
-    And I open Browse pools tab
+    When I open Browse pools tab
     And I switch to list view on "Browse pools" tab
     And I select "<option>" sorting option from "More options" component
     Then order button is displayed for "<option>" sorting option in <default_order> state
@@ -55,16 +53,14 @@ Feature: Staking Page - Extended View
 
   @LW-10140 @Testnet @Mainnet
   Scenario: Extended View - Staking - Grid View - Stake pool cards sorting by ticker (default)
-    When I am on Staking extended page
-    And I open Browse pools tab
+    When I open Browse pools tab
     And I switch to grid view on "Browse pools" tab
     Then stake pool grid view is displayed
     And stake pool cards are sorted by "Ticker" in ascending order
 
   @LW-10146 @LW-10240 @Testnet @Mainnet
   Scenario Outline: Extended View - Staking - Grid View - More options - Sorting - sort stake pools by <option> <order>
-    When I am on Staking extended page
-    And I open Browse pools tab
+    When I open Browse pools tab
     And I switch to grid view on "Browse pools" tab
     And I select "<option>" sorting option from "More options" component
     Then order button is displayed for "<option>" sorting option in <default_order> state
@@ -85,6 +81,21 @@ Feature: Staking Page - Extended View
       | Pledge          | descending    | ascending      |
       | Live Stake      | descending    | ascending      |
       | Ticker          | ascending     | descending     |
+
+  @LW-9095 @Testnet
+  Scenario Outline: Extended View - Multidelegation - Stakepool search works correctly with selected pools in "<view>" view
+    When I open Browse pools tab
+    And I switch to <view> view on "Browse pools" tab
+    When I select 5 stake pools from <view> view
+    And I see portfolio bar with "5" selected pools
+    And I save tickers of selected pools in <view> view
+    And I input "8BETA" into stake pool search bar
+    Then there are 1 stake pools returned for <view> view
+    And previously selected pools are still selected in <view> view
+    Examples:
+      | view |
+      | list |
+      | grid |
 
   @LW-10583 @Testnet
   Scenario: Modal about multi-delegation and DApp issues is displayed for user that hasn't delegated any funds yet - "Add stake pool" option

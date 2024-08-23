@@ -3,11 +3,12 @@ import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
 import { Sections } from '../../types';
 import { useWalletStore } from '@stores';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
+import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useSecrets } from '@lace/core';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -38,7 +39,7 @@ export const StakePoolDetailsDrawer = ({
   const { t } = useTranslation();
   const { setIsRestaking } = useSubmitingState();
   const { isInMemoryWallet } = useWalletStore();
-  const { password, removePassword } = usePassword();
+  const { password, clearSecrets } = useSecrets();
 
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
@@ -49,7 +50,7 @@ export const StakePoolDetailsDrawer = ({
     } else {
       setDelegationTxBuilder();
       resetStates();
-      removePassword();
+      clearSecrets();
       setIsDrawerVisible(false);
     }
     setIsRestaking(false);
@@ -67,7 +68,7 @@ export const StakePoolDetailsDrawer = ({
     setExitStakingVisible,
     setDelegationTxBuilder,
     resetStates,
-    removePassword,
+    clearSecrets,
     setIsDrawerVisible,
     setIsRestaking,
     analytics
@@ -75,7 +76,7 @@ export const StakePoolDetailsDrawer = ({
 
   const onArrowIconClick = useCallback(() => {
     if (password) {
-      removePassword();
+      clearSecrets();
     }
     if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemoryWallet) {
       return setSection(sectionsConfig[Sections.DETAIL]);
@@ -88,7 +89,7 @@ export const StakePoolDetailsDrawer = ({
     closeDrawer,
     isInMemoryWallet,
     password,
-    removePassword,
+    clearSecrets,
     setPrevSection,
     setSection,
     simpleSendConfig.currentSection,
