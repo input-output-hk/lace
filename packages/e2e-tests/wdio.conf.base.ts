@@ -6,7 +6,12 @@ export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./src/features/**/*.feature'],
   suites: {
-    batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended*.feature'],
+    batch1: [
+      './src/features/Onboarding*.feature',
+      './src/features/SettingsPageExtended*.feature',
+      './src/features/SendTransactionMetadata*.feature',
+      './src/features/SendTransactionMultipleSelection*.feature'
+    ],
     batch2: [
       './src/features/SendTransactionSimpleExtended.part2.feature',
       './src/features/SendTransactionSimpleExtended.part3.feature',
@@ -62,9 +67,7 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsSetting*.feature',
       './src/features/analytics/AnalyticsStaking*.feature',
       './src/features/analytics/AnalyticsToggle*.feature',
-      './src/features/analytics/AnalyticsToken*.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature'
+      './src/features/analytics/AnalyticsToken*.feature'
     ],
     batch12: [
       './src/features/AdaHandleExtended.feature',
