@@ -130,6 +130,7 @@ export const Main = () => {
             </Route>
             <Route path="*">
               <Wallet
+                walletAddress={walletAddress}
                 currency={currency}
                 accountName={activeAccount.name}
                 accountAvatar={activeAccount.avatar}

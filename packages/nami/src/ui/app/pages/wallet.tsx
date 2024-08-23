@@ -104,7 +104,8 @@ import {
   useOutsideHandles,
 } from '../../../features/outside-handles-provider';
 
-type Props = {
+type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
+  walletAddress: string;
   currency: CurrencyCode;
   accountName: string;
   accountAvatar?: string;
@@ -112,7 +113,7 @@ type Props = {
   fiatPrice: number;
   lockedCoins: bigint;
   unspendableCoins: bigint;
-} & Pick<OutsideHandlesContextValue, 'cardanoCoin'>;
+};
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -124,6 +125,7 @@ const useIsMounted = () => {
 };
 
 const Wallet = ({
+  walletAddress,
   currency,
   accountName,
   accountAvatar,
@@ -132,7 +134,7 @@ const Wallet = ({
   lockedCoins,
   unspendableCoins,
   cardanoCoin,
-}: Props) => {
+}: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
   const history = useHistory();
@@ -676,12 +678,12 @@ const Wallet = ({
                 >
                   <>
                     <Box>
-                      <QrCode value={info.paymentAddr} />
+                      <QrCode value={walletAddress} />
                     </Box>
                     <Box height="4" />
                     <Copy
                       label={<Box fontWeight="normal">Copied address</Box>}
-                      copy={info.paymentAddr}
+                      copy={walletAddress}
                       onClick={() => {
                         capture(Events.ReceiveCopyAddressIconClick);
                       }}
@@ -693,7 +695,7 @@ const Wallet = ({
                         cursor="pointer"
                         wordBreak="break-all"
                       >
-                        {info.paymentAddr} <CopyIcon />
+                        {walletAddress} <CopyIcon />
                       </Text>
                     </Copy>
                     <Box height="2" />

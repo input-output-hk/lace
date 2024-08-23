@@ -70,6 +70,7 @@ const WalletStory = ({
     <Box overflowX="hidden">
       <Wallet
         cardanoCoin={cardanoCoin}
+        walletAddress={account.paymentAddr}
         currency={CurrencyCode.USD}
         accountName={currentAccount.name}
         accountAvatar={currentAccount.avatar}
