@@ -27,7 +27,7 @@ const cardanoCoin = {
   id: '1',
   name: 'Cardano',
   decimals: 6,
-  symbol: 'tAda'
+  symbol: 't₳'
 };
 
 export const decorators = [

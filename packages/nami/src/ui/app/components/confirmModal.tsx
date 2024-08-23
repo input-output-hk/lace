@@ -109,7 +109,12 @@ const ConfirmModalNormal = ({ props, isOpen, onClose }) => {
     <Modal
       size="xs"
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        if (props.onCloseBtn) {
+          props.onCloseBtn();
+        }
+        onClose()
+      }}
       isCentered
       initialFocusRef={inputRef}
       blockScrollOnMount={false}

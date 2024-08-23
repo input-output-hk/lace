@@ -5,7 +5,7 @@ import { config } from '@src/config';
 import { cardanoTransformer } from '@src/utils/assets-transformers';
 import { useObservable } from '@lace/common';
 import { useCurrencyStore, useTheme } from '@providers';
-import { useAppInit, useCustomSubmitApi, useFetchCoinPrice, useWalletManager } from '@hooks';
+import { useAppInit, useCustomSubmitApi, useCollateral, useFetchCoinPrice, useWalletManager } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
 import { walletManager, walletRepository, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useAnalytics } from './hooks';
@@ -47,6 +47,7 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
     [currentChain.networkId, walletUI.cardanoCoin]
   );
 
+  const { txFee, isInitializing, initializeCollateralTx, submitCollateralTx } = useCollateral();
   const cardanoPrice = priceResult.cardano.price;
   const walletAddress = walletInfo?.addresses[0].address.toString();
   const transformedCardano = useMemo(
@@ -70,6 +71,10 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
       {!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain ? (
         <OutsideHandlesProvider
           {...{
+            collateralFee: txFee,
+            isInitializingCollateral: isInitializing,
+            initializeCollateralTx,
+            submitCollateralTx,
             removeDapp,
             connectedDapps,
             isAnalyticsOptIn,

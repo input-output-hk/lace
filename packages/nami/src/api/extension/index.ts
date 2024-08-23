@@ -1866,30 +1866,6 @@ export const setTransactions = async txs => {
   //   });
 };
 
-export const setCollateral = async collateral => {
-  // const currentIndex = await getCurrentAccountIndex();
-  // const network = await getNetwork();
-  // const accounts = await getStorage(STORAGE.accounts);
-  // accounts[currentIndex][network.id].collateral = collateral;
-  // return await setStorage({
-  //   [STORAGE.accounts]: {
-  //     ...accounts,
-  //   },
-  // });
-};
-
-export const removeCollateral = async () => {
-  // const currentIndex = await getCurrentAccountIndex();
-  // const network = await getNetwork();
-  // const accounts = await getStorage(STORAGE.accounts);
-  // delete accounts[currentIndex][network.id].collateral;
-  // return await setStorage({
-  //   [STORAGE.accounts]: {
-  //     ...accounts,
-  //   },
-  // });
-};
-
 export const updateAccount = async (forceUpdate = false) => {
   //   const currentIndex = await getCurrentAccountIndex();
   //   const accounts = await getStorage(STORAGE.accounts);

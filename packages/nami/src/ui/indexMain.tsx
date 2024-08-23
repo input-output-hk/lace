@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { Box } from '@chakra-ui/react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import { useInitializeNamiMetadata, useAccount } from '../adapters/account';
 import { useBalance } from '../adapters/balance';
+import { useCollateral } from '../adapters/collateral';
 import { useFiatCurrency } from '../adapters/currency';
 import {
   useChangePassword,
@@ -20,23 +21,27 @@ import { useOutsideHandles } from './index';
 
 export const Main = () => {
   const {
+    collateralFee,
+    isInitializingCollateral,
     connectedDapps,
-    removeDapp,
-    createWallet,
-    getMnemonic,
-    deleteWallet,
     fiatCurrency,
-    setFiatCurrency,
     theme,
-    setTheme,
     walletAddress,
     inMemoryWallet,
     isAnalyticsOptIn,
-    handleAnalyticsChoice,
     currentChain,
     cardanoPrice,
     walletManager,
     walletRepository,
+    submitCollateralTx,
+    initializeCollateralTx,
+    setFiatCurrency,
+    setTheme,
+    removeDapp,
+    createWallet,
+    getMnemonic,
+    deleteWallet,
+    handleAnalyticsChoice,
     withSignTxConfirmation,
     environmentName,
     switchNetwork,
@@ -79,6 +84,11 @@ export const Main = () => {
       walletRepository.updateAccountMetadata(props),
   });
   const balance = useBalance({ inMemoryWallet });
+  const { hasCollateral, reclaimCollateral, submitCollateral } = useCollateral({
+    inMemoryWallet,
+    submitCollateralTx,
+    withSignTxConfirmation,
+  });
 
   useInitializeNamiMetadata({
     addresses$: inMemoryWallet.addresses$,
@@ -131,6 +141,9 @@ export const Main = () => {
             <Route path="*">
               <Wallet
                 walletAddress={walletAddress}
+                hasCollateral={hasCollateral}
+                isInitializingCollateral={isInitializingCollateral}
+                collateralFee={collateralFee}
                 currency={currency}
                 accountName={activeAccount.name}
                 accountAvatar={activeAccount.avatar}
@@ -139,6 +152,9 @@ export const Main = () => {
                 lockedCoins={balance.lockedCoins}
                 unspendableCoins={balance.unspendableCoins}
                 cardanoCoin={cardanoCoin}
+                reclaimCollateral={reclaimCollateral}
+                submitCollateral={submitCollateral}
+                initializeCollateral={initializeCollateralTx}
               />
             </Route>
           </Switch>

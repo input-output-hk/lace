@@ -173,7 +173,7 @@ export const useMaxAda = (): bigint => {
   const assetInfo = useObservable(inMemoryWallet?.assetInfo$);
   const { outputMap } = useTransactionProps();
   const { setMaxAdaLoading } = useMaxAdaStatus();
-  const address = walletInfo.addresses[0].address;
+  const address = walletInfo?.addresses[0].address;
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -217,7 +217,7 @@ export const useMaxAda = (): bigint => {
       }
     };
 
-    if (balance) {
+    if (balance && address) {
       calculate();
     }
     return () => {

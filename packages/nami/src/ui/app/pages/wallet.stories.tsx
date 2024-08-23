@@ -53,16 +53,22 @@ import Wallet from './wallet';
 import { useHistory } from '../../../../.storybook/mocks/react-router-dom.mock';
 import { CurrencyCode } from '../../../adapters/currency';
 
+const noop = (async () => {}) as any;
+
 const cardanoCoin = {
   id: '1',
   name: 'Cardano',
   decimals: 6,
-  symbol: 'tAda',
+  symbol: 't₳',
 };
 
 const WalletStory = ({
   colorMode,
-}: Readonly<{ colorMode: 'dark' | 'light' }>): React.ReactElement => {
+  hasCollateral,
+}: Readonly<{
+  colorMode: 'dark' | 'light';
+  hasCollateral: boolean;
+}>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
 
@@ -71,6 +77,12 @@ const WalletStory = ({
       <Wallet
         cardanoCoin={cardanoCoin}
         walletAddress={account.paymentAddr}
+        collateralFee={BigInt(0)}
+        hasCollateral={hasCollateral}
+        isInitializingCollateral={false}
+        initializeCollateral={noop}
+        reclaimCollateral={noop}
+        submitCollateral={noop}
         currency={CurrencyCode.USD}
         accountName={currentAccount.name}
         accountAvatar={currentAccount.avatar}
@@ -774,6 +786,7 @@ export const RemoveCollateralLight: Story = {
   },
   parameters: {
     colorMode: 'light',
+    hasCollateral: true,
   },
 };
 
@@ -781,6 +794,7 @@ export const RemoveCollateralDark: Story = {
   ...RemoveCollateralLight,
   parameters: {
     colorMode: 'dark',
+    hasCollateral: true,
   },
 };
 
@@ -819,6 +833,7 @@ export const AddCollateralLight: Story = {
   },
   parameters: {
     colorMode: 'light',
+    collateralFee: BigInt(176281),
   },
 };
 

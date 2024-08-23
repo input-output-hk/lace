@@ -104,8 +104,10 @@ import {
   useOutsideHandles,
 } from '../../../features/outside-handles-provider';
 
-type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
+export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   walletAddress: string;
+  hasCollateral: boolean;
+  collateralFee: bigint;
   currency: CurrencyCode;
   accountName: string;
   accountAvatar?: string;
@@ -113,6 +115,10 @@ type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   fiatPrice: number;
   lockedCoins: bigint;
   unspendableCoins: bigint;
+  isInitializingCollateral: boolean;
+  initializeCollateral: () => Promise<void>;
+  submitCollateral: (password: string) => Promise<void>;
+  reclaimCollateral: () => Promise<void>;
 };
 
 const useIsMounted = () => {
@@ -126,6 +132,9 @@ const useIsMounted = () => {
 
 const Wallet = ({
   walletAddress,
+  collateralFee,
+  hasCollateral,
+  isInitializingCollateral,
   currency,
   accountName,
   accountAvatar,
@@ -134,6 +143,9 @@ const Wallet = ({
   lockedCoins,
   unspendableCoins,
   cardanoCoin,
+  reclaimCollateral,
+  submitCollateral,
+  initializeCollateral,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
@@ -506,11 +518,10 @@ const Wallet = ({
                 </MenuItem>
                 <MenuDivider />
                 <MenuItem
-                  isDisabled={!state.account}
                   icon={<Icon as={FaRegFileCode} w={3} h={3} />}
                   onClick={() => {
                     capture(Events.SettingsCollateralClick);
-                    builderRef.current.initCollateral(state.account);
+                    builderRef.current.initCollateral();
                   }}
                 >
                   {' '}
@@ -795,6 +806,12 @@ const Wallet = ({
       />
       <TransactionBuilder
         ref={builderRef}
+        hasCollateral={hasCollateral}
+        collateralFee={collateralFee}
+        isInitializingCollateral={isInitializingCollateral}
+        initializeCollateral={initializeCollateral}
+        submitCollateral={submitCollateral}
+        reclaimCollateral={reclaimCollateral}
         onConfirm={forceUpdate => getData(forceUpdate)}
       />
       <About ref={aboutRef} />

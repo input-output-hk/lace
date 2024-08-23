@@ -18,6 +18,10 @@ export interface IAssetDetails {
 }
 
 export interface OutsideHandlesContextValue {
+  collateralFee: bigint;
+  isInitializingCollateral: boolean;
+  initializeCollateralTx: () => Promise<void>;
+  submitCollateralTx: () => Promise<void>;
   removeDapp: (origin: string) => Promise<boolean>;
   connectedDapps: Wallet.DappInfo[];
   isAnalyticsOptIn: boolean;
