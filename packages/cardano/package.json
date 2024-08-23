@@ -46,6 +46,7 @@
     "@cardano-sdk/hardware-ledger": "0.11.2",
     "@cardano-sdk/hardware-trezor": "0.5.2",
     "@cardano-sdk/key-management": "0.23.1",
+    "@cardano-sdk/tx-construction": "0.21.0",
     "@cardano-sdk/util": "0.15.4",
     "@cardano-sdk/wallet": "0.42.2",
     "@cardano-sdk/web-extension": "0.31.2",

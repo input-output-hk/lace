@@ -45,7 +45,7 @@
     "@cardano-sdk/core": "0.38.1",
     "@cardano-sdk/dapp-connector": "0.12.30",
     "@cardano-sdk/input-selection": "0.13.12",
-    "@cardano-sdk/tx-construction": "0.20.1",
+    "@cardano-sdk/tx-construction": "0.21.0",
     "@cardano-sdk/util": "0.15.4",
     "@cardano-sdk/wallet": "0.42.2",
     "@cardano-sdk/web-extension": "0.31.2",
