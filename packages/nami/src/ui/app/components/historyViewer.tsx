@@ -10,6 +10,7 @@ import {
 import Transaction from './transaction';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 const BATCH = 5;
 
@@ -19,6 +20,7 @@ let txObject = {};
 
 const HistoryViewer = ({ history, network, currentAddr, addresses }) => {
   const capture = useCaptureEvent();
+  const { cardanoCoin } = useOutsideHandles();
   const [historySlice, setHistorySlice] = React.useState(null);
   const [page, setPage] = React.useState(1);
   const [final, setFinal] = React.useState(false);
@@ -115,6 +117,7 @@ const HistoryViewer = ({ history, network, currentAddr, addresses }) => {
                   currentAddr={currentAddr}
                   addresses={addresses}
                   network={network}
+                  cardanoCoin={cardanoCoin}
                 />
               );
             })}

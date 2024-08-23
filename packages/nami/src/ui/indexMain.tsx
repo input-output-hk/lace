@@ -1,14 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { Box } from '@chakra-ui/react';
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import { useInitializeNamiMetadata, useAccount } from '../adapters/account';
+import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
 import {
   useChangePassword,
@@ -17,6 +13,7 @@ import {
 
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
+import Wallet from './app/pages/wallet';
 import { Container } from './Container';
 
 import { useOutsideHandles } from './index';
@@ -37,9 +34,18 @@ export const Main = () => {
     isAnalyticsOptIn,
     handleAnalyticsChoice,
     currentChain,
+    cardanoPrice,
     walletManager,
     walletRepository,
     withSignTxConfirmation,
+    environmentName,
+    switchNetwork,
+    availableChains,
+    enableCustomNode,
+    getCustomSubmitApiForNetwork,
+    defaultSubmitApi,
+    cardanoCoin,
+    isValidURL,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -72,6 +78,7 @@ export const Main = () => {
     updateAccountMetadata: async props =>
       walletRepository.updateAccountMetadata(props),
   });
+  const balance = useBalance({ inMemoryWallet });
 
   useInitializeNamiMetadata({
     addresses$: inMemoryWallet.addresses$,
@@ -83,7 +90,7 @@ export const Main = () => {
 
   return (
     <Router>
-      <Container>
+      <Container environmentName={environmentName}>
         <Box overflowX="hidden">
           <Switch>
             <Route path="/settings/*">
@@ -101,6 +108,13 @@ export const Main = () => {
                 isAnalyticsOptIn={isAnalyticsOptIn}
                 handleAnalyticsChoice={handleAnalyticsChoice}
                 updateAccountMetadata={updateAccountMetadata}
+                environmentName={environmentName}
+                switchNetwork={switchNetwork}
+                availableChains={availableChains}
+                enableCustomNode={enableCustomNode}
+                getCustomSubmitApiForNetwork={getCustomSubmitApiForNetwork}
+                defaultSubmitApi={defaultSubmitApi}
+                isValidURL={isValidURL}
               />
             </Route>
             <Route path="/send">
@@ -114,7 +128,18 @@ export const Main = () => {
                 withSignTxConfirmation={withSignTxConfirmation}
               />
             </Route>
-            <Redirect from="*" to="/settings/" />
+            <Route path="*">
+              <Wallet
+                currency={currency}
+                accountName={activeAccount.name}
+                accountAvatar={activeAccount.avatar}
+                balance={balance.totalCoins}
+                fiatPrice={cardanoPrice}
+                lockedCoins={balance.lockedCoins}
+                unspendableCoins={balance.unspendableCoins}
+                cardanoCoin={cardanoCoin}
+              />
+            </Route>
           </Switch>
         </Box>
       </Container>

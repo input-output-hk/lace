@@ -77,7 +77,6 @@ import {
 } from '@chakra-ui/icons';
 import { Scrollbars } from '../components/scrollbar';
 import QrCode from '../components/qrCode';
-import provider from '../../../config/provider';
 import UnitDisplay from '../components/unitDisplay';
 import { onAccountChange } from '../../../api/extension';
 import AssetsViewer from '../components/assetsViewer';
@@ -88,7 +87,7 @@ import { useStoreState } from '../../store';
 import AvatarLoader from '../components/avatarLoader';
 import { currencyToSymbol, fromAssetUnit } from '../../../api/util';
 import TransactionBuilder from '../components/transactionBuilder';
-import { NETWORK_ID, TAB } from '../../../config/config';
+import { TAB } from '../../../config/config';
 import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
 import { BiWallet } from 'react-icons/bi';
 import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
@@ -99,6 +98,21 @@ import AssetFingerprint from '@emurgo/cip14-js';
 import Logo from '../../../assets/img/logoWhite.svg';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
+import { CurrencyCode } from '../../../adapters/currency';
+import {
+  OutsideHandlesContextValue,
+  useOutsideHandles,
+} from '../../../features/outside-handles-provider';
+
+type Props = {
+  currency: CurrencyCode;
+  accountName: string;
+  accountAvatar?: string;
+  balance: bigint;
+  fiatPrice: number;
+  lockedCoins: bigint;
+  unspendableCoins: bigint;
+} & Pick<OutsideHandlesContextValue, 'cardanoCoin'>;
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -109,12 +123,20 @@ const useIsMounted = () => {
   return isMounted;
 };
 
-const Wallet = () => {
+const Wallet = ({
+  currency,
+  accountName,
+  accountAvatar,
+  balance,
+  fiatPrice,
+  lockedCoins,
+  unspendableCoins,
+  cardanoCoin,
+}: Props) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
   const history = useHistory();
   const navigate = history.push;
-  const settings = useStoreState(state => state.settings.settings);
   const delegateButtonBg = useColorModeValue(
     'gray.100',
     'rgba(255, 255, 255, 0.08)',
@@ -126,7 +148,6 @@ const Wallet = () => {
   const [state, setState] = React.useState({
     account: null,
     accounts: null,
-    fiatPrice: 0,
     delegation: null,
     network: { id: '', node: '' },
   });
@@ -141,7 +162,6 @@ const Wallet = () => {
     accounts: {},
   }); // for quicker displaying
   const builderRef = React.useRef();
-  const fiatPrice = React.useRef(0);
 
   const checkTransactions = () =>
     setInterval(async () => {
@@ -204,13 +224,7 @@ const Wallet = () => {
         currentAccount.nft.push(asset);
       } else currentAccount.ft.push(asset);
     });
-    let price = fiatPrice.current;
-    try {
-      if (!fiatPrice.current) {
-        price = await provider.api.price(settings.currency);
-        fiatPrice.current = price;
-      }
-    } catch (e) {}
+
     const network = await getNetwork();
     const delegation = await getDelegation();
     if (!isMounted.current) return;
@@ -218,7 +232,6 @@ const Wallet = () => {
       ...s,
       account: currentAccount,
       accounts: allAccounts,
-      fiatPrice: price,
       network,
       delegation,
     }));
@@ -334,7 +347,7 @@ const Wallet = () => {
                   alignItems={'center'}
                   justifyContent={'center'}
                 >
-                  <AvatarLoader avatar={info.avatar} width="14" smallRobot />
+                  <AvatarLoader avatar={accountAvatar} width="14" smallRobot />
                 </Box>
               </MenuButton>
               <MenuList fontSize="xs">
@@ -421,7 +434,7 @@ const Wallet = () => {
                                         ).toString()
                                       }
                                       decimals={6}
-                                      symbol={settings.adaSymbol}
+                                      symbol={cardanoCoin.symbol}
                                     />
                                   ) : (
                                     <Text fontWeight="light">
@@ -503,7 +516,7 @@ const Wallet = () => {
                 </MenuItem>
                 <MenuDivider />
                 <MenuItem
-                  onClick={() => navigate('/settings')}
+                  onClick={() => navigate('/settings/')}
                   icon={<SettingsIcon />}
                 >
                   Settings
@@ -529,7 +542,7 @@ const Wallet = () => {
               isTruncated={true}
               maxWidth="210px"
             >
-              {info.name}
+              {accountName}
             </Text>
           </Box>
           <Box
@@ -545,23 +558,12 @@ const Wallet = () => {
               fontSize="2xl"
               fontWeight="bold"
               quantity={
-                state.account &&
-                state.account.lovelace &&
-                (
-                  BigInt(state.account.lovelace) -
-                  BigInt(state.account.minAda) -
-                  BigInt(
-                    state.account.collateral
-                      ? state.account.collateral.lovelace
-                      : 0,
-                  )
-                ).toString()
+                balance && (balance - lockedCoins - unspendableCoins).toString()
               }
               decimals={6}
-              symbol={settings.adaSymbol}
+              symbol={cardanoCoin.symbol}
             />
-            {state.account &&
-            (state.account.assets.length > 0 || state.account.collateral) ? (
+            {lockedCoins > 0 || unspendableCoins ? (
               <Tooltip
                 label={
                   <Box
@@ -569,26 +571,26 @@ const Wallet = () => {
                     display="flex"
                     flexDirection="column"
                   >
-                    {state.account.assets.length > 0 && (
+                    {lockedCoins > 0 && (
                       <Box>
                         <Box display="flex">
                           <Text mr="0.5">+</Text>
                           <UnitDisplay
-                            quantity={state.account.minAda}
-                            symbol={settings.adaSymbol}
+                            quantity={lockedCoins}
+                            symbol={cardanoCoin.symbol}
                             decimals={6}
                           />
                           <Text ml="1">locked with assets</Text>
                         </Box>
                       </Box>
                     )}
-                    {state.account.collateral && (
+                    {unspendableCoins && (
                       <Box>
                         <Box display="flex">
                           <Text mr="0.5">+</Text>
                           <UnitDisplay
-                            quantity={state.account.collateral.lovelace}
-                            symbol={settings.adaSymbol}
+                            quantity={unspendableCoins}
+                            symbol={cardanoCoin.symbol}
                             decimals={6}
                           />
                           <Text ml="1">Collateral</Text>
@@ -627,25 +629,16 @@ const Wallet = () => {
               color="white"
               fontSize="md"
               quantity={
-                state.account &&
-                state.account.lovelace &&
+                balance &&
                 parseInt(
                   displayUnit(
-                    (
-                      BigInt(state.account.lovelace) -
-                      BigInt(state.account.minAda) -
-                      BigInt(
-                        state.account.collateral
-                          ? state.account.collateral.lovelace
-                          : 0,
-                      )
-                    ).toString(),
-                  ) *
-                    state.fiatPrice *
-                    10 ** 2,
-                )
+                    balance - lockedCoins - unspendableCoins,
+                  ).toString(),
+                ) *
+                  fiatPrice *
+                  10 ** 2
               }
-              symbol={currencyToSymbol(settings.currency)}
+              symbol={currencyToSymbol(currency)}
               decimals={2}
             />
           </Box>
@@ -984,7 +977,7 @@ const DeleteAccountModal = React.forwardRef((props, ref) => {
 
 const DelegationPopover = ({ account, delegation, children }) => {
   const capture = useCaptureEvent();
-  const settings = useStoreState(state => state.settings.settings);
+  const { cardanoCoin } = useOutsideHandles();
   const withdrawRef = React.useRef();
   return (
     <>
@@ -1044,7 +1037,7 @@ const DelegationPopover = ({ account, delegation, children }) => {
               fontSize="sm"
               quantity={delegation.rewards}
               decimals={6}
-              symbol={settings.adaSymbol}
+              symbol={cardanoCoin.symbol}
             />
             <Box h="4" />
             <Tooltip

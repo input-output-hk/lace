@@ -34,6 +34,7 @@ import AssetsModal from '../../components/assetsModal';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import { Events } from '../../../../features/analytics/events';
 import { getKeyHashes, getValue } from './signTxUtil';
+import { useOutsideHandles } from '../../../../features/outside-handles-provider';
 
 const abs = big => {
   return big < 0 ? big * BigInt(-1) : big;
@@ -41,7 +42,7 @@ const abs = big => {
 
 const SignTx = ({ request, controller }) => {
   const capture = useCaptureEvent();
-  const settings = useStoreState(state => state.settings.settings);
+  const { cardanoCoin } = useOutsideHandles();
   const ref = React.useRef();
   const [account, setAccount] = React.useState(null);
   const [fee, setFee] = React.useState('0');
@@ -295,7 +296,7 @@ const SignTx = ({ request, controller }) => {
                         hide
                         quantity={abs(lovelace)}
                         decimals="6"
-                        symbol={settings.adaSymbol}
+                        symbol={cardanoCoin.symbol}
                       />
                     </Stack>
                     {assets.length > 0 && (
@@ -396,7 +397,7 @@ const SignTx = ({ request, controller }) => {
                       <UnitDisplay
                         quantity={fee}
                         decimals="6"
-                        symbol={settings.adaSymbol}
+                        symbol={cardanoCoin.symbol}
                       />
                       <Text fontWeight="bold">fee</Text>
                     </Stack>
@@ -478,7 +479,6 @@ const SignTx = ({ request, controller }) => {
       <DetailsModal
         ref={detailsModalRef}
         externalValue={value.externalValue ? value.externalValue : {}}
-        settings={settings}
         assetsModalRef={assetsModalRef}
         property={property}
         keyHashes={keyHashes}
@@ -524,10 +524,8 @@ const SignTx = ({ request, controller }) => {
 };
 
 const DetailsModal = React.forwardRef(
-  (
-    { externalValue, settings, property, keyHashes, tx, assetsModalRef },
-    ref,
-  ) => {
+  ({ externalValue, property, keyHashes, tx, assetsModalRef }, ref) => {
+    const { cardanoCoin } = useOutsideHandles();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const background = useColorModeValue('white', 'gray.800');
     const innerBackground = useColorModeValue('gray.100', 'gray.700');
@@ -653,7 +651,7 @@ const DetailsModal = React.forwardRef(
                                   fontWeight="bold"
                                   quantity={lovelace}
                                   decimals="6"
-                                  symbol={settings.adaSymbol}
+                                  symbol={cardanoCoin.symbol}
                                 />
                                 {assets.length > 0 && (
                                   <Button

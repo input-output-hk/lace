@@ -10,7 +10,6 @@ import {
   waitFor,
   within,
 } from '@storybook/test';
-import { http, HttpResponse } from 'msw';
 
 import {
   createTab,
@@ -52,6 +51,14 @@ import { useStoreState, useStoreActions } from '../../store.mock';
 
 import Wallet from './wallet';
 import { useHistory } from '../../../../.storybook/mocks/react-router-dom.mock';
+import { CurrencyCode } from '../../../adapters/currency';
+
+const cardanoCoin = {
+  id: '1',
+  name: 'Cardano',
+  decimals: 6,
+  symbol: 'tAda',
+};
 
 const WalletStory = ({
   colorMode,
@@ -61,7 +68,16 @@ const WalletStory = ({
 
   return (
     <Box overflowX="hidden">
-      <Wallet />
+      <Wallet
+        cardanoCoin={cardanoCoin}
+        currency={CurrencyCode.USD}
+        accountName={currentAccount.name}
+        accountAvatar={currentAccount.avatar}
+        balance={BigInt(currentAccount.lovelace)}
+        fiatPrice={coingecoResponse.cardano.usd}
+        lockedCoins={BigInt(currentAccount.minAda)}
+        unspendableCoins={BigInt(account.collateral.lovelace)}
+      />
     </Box>
   );
 };
@@ -92,13 +108,6 @@ const meta: Meta<typeof WalletStory> = {
       defaultViewport: 'popup',
     },
     layout: 'centered',
-    msw: {
-      handlers: [
-        http.get('https://api.coingecko.com/api/v3/simple/price', () => {
-          return HttpResponse.json(coingecoResponse);
-        }),
-      ],
-    },
   },
   beforeEach: () => {
     createTab.mockImplementation(async () => {

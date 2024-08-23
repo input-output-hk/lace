@@ -91,8 +91,8 @@ const Transaction = ({
   addresses,
   network,
   onLoad,
+  cardanoCoin
 }) => {
-  const settings = useStoreState(state => state.settings.settings);
   const isMounted = useIsMounted();
   const [displayInfo, setDisplayInfo] = React.useState(
     genDisplayInfo(txHash, detail, currentAddr, addresses),
@@ -174,7 +174,7 @@ const Transaction = ({
                   }
                   quantity={displayInfo.lovelace}
                   decimals={6}
-                  symbol={settings.adaSymbol}
+                  symbol={cardanoCoin.symbol}
                 />
               ) : displayInfo.extra.length ? (
                 <Text fontSize={12} fontWeight="semibold" color="teal.500">
@@ -190,7 +190,7 @@ const Transaction = ({
                     display="inline-block"
                     quantity={displayInfo.detail.info.fees}
                     decimals={6}
-                    symbol={settings.adaSymbol}
+                    symbol={cardanoCoin.symbol}
                   />
                   {parseInt(displayInfo.detail.info.deposit) ? (
                     <>
@@ -205,7 +205,7 @@ const Transaction = ({
                             : parseInt(displayInfo.detail.info.deposit) * -1
                         }
                         decimals={6}
-                        symbol={settings.adaSymbol}
+                        symbol={cardanoCoin.symbol}
                       />
                     </>
                   ) : (

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -29,9 +29,7 @@ import { Wallet } from '@lace/cardano';
 import { getFavoriteIcon } from '../../../api/extension';
 import Account from '../components/account';
 import { Route, Switch, useHistory } from 'react-router-dom';
-import { NETWORK_ID, NODE } from '../../../config/config';
 import ConfirmModal from '../components/confirmModal';
-import { useStoreState, useStoreActions } from '../../store';
 import { MdModeEdit } from 'react-icons/md';
 import AvatarLoader from '../components/avatarLoader';
 import { ChangePasswordModal } from '../components/changePasswordModal';
@@ -40,16 +38,11 @@ import { Events } from '../../../features/analytics/events';
 import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
 import { CurrencyCode } from '../../../adapters/currency';
 import { UseAccount } from '../../../adapters/account';
+import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 
-interface Props {
-  theme: 'dark' | 'light';
-  setTheme: (theme: 'dark' | 'light') => void;
+type Props = {
   currency: CurrencyCode;
   setCurrency: (currency: CurrencyCode) => void;
-  isAnalyticsOptIn: boolean;
-  removeDapp: (origin: string) => Promise<boolean>;
-  connectedDapps: Wallet.DappInfo[];
-  handleAnalyticsChoice: (isOptedIn: boolean) => Promise<void>;
   changePassword: (
     currentPassword: string,
     newPassword: string,
@@ -58,7 +51,22 @@ interface Props {
   accountName: string;
   accountAvatar?: string;
   updateAccountMetadata: UseAccount['updateAccountMetadata'];
-}
+} & Pick<
+  OutsideHandlesContextValue,
+  | 'theme'
+  | 'setTheme'
+  | 'isAnalyticsOptIn'
+  | 'removeDapp'
+  | 'connectedDapps'
+  | 'handleAnalyticsChoice'
+  | 'switchNetwork'
+  | 'environmentName'
+  | 'availableChains'
+  | 'enableCustomNode'
+  | 'getCustomSubmitApiForNetwork'
+  | 'defaultSubmitApi'
+  | 'isValidURL'
+>;
 
 const Settings = ({
   currency,
@@ -74,6 +82,13 @@ const Settings = ({
   changePassword,
   deleteWallet,
   updateAccountMetadata,
+  environmentName,
+  switchNetwork,
+  availableChains,
+  enableCustomNode,
+  getCustomSubmitApiForNetwork,
+  defaultSubmitApi,
+  isValidURL,
 }: Props) => {
   const history = useHistory();
   const containerBg = useColorModeValue('white', 'gray.800');
@@ -120,7 +135,15 @@ const Settings = ({
             />
           </Route>
           <Route path="/settings/network">
-            <Network />
+            <Network
+              environmentName={environmentName}
+              switchNetwork={switchNetwork}
+              availableChains={availableChains}
+              enableCustomNode={enableCustomNode}
+              getCustomSubmitApiForNetwork={getCustomSubmitApiForNetwork}
+              defaultSubmitApi={defaultSubmitApi}
+              isValidURL={isValidURL}
+            />
           </Route>
           <Route path="/settings/legal">
             <LegalSettings
@@ -455,37 +478,49 @@ const Whitelisted = ({
   );
 };
 
-const Network = () => {
+type NetworkProps = Pick<
+  OutsideHandlesContextValue,
+  | 'switchNetwork'
+  | 'environmentName'
+  | 'availableChains'
+  | 'enableCustomNode'
+  | 'getCustomSubmitApiForNetwork'
+  | 'defaultSubmitApi'
+  | 'isValidURL'
+>;
+
+const Network = ({
+  switchNetwork,
+  environmentName,
+  availableChains,
+  enableCustomNode,
+  getCustomSubmitApiForNetwork,
+  defaultSubmitApi,
+  isValidURL,
+}: NetworkProps) => {
   const capture = useCaptureEvent();
-  const settings = useStoreState(state => state.settings.settings);
-  const setSettings = useStoreActions(actions => actions.settings.setSettings);
+  const {
+    status: isCustomApiEnabledForCurrentNetwork,
+    url: customSubmitTxUrl,
+  } = getCustomSubmitApiForNetwork(environmentName);
 
-  const endpointHandler = e => {
-    capture(Events.SettingsNetworkCustomNodeClick);
-    setSettings({
-      ...settings,
-      network: {
-        ...settings.network,
-        [settings.network.id + 'Submit']: value,
-      },
-    });
-    setApplied(true);
-    setTimeout(() => setApplied(false), 600);
-  };
-
-  const [value, setValue] = useState(
-    settings.network[settings.network.id + 'Submit'] || '',
-  );
+  const [value, setValue] = useState(customSubmitTxUrl);
   const [isEnabled, setIsEnabled] = useState(
-    settings.network[settings.network.id + 'Submit'],
+    Boolean(isCustomApiEnabledForCurrentNetwork),
   );
-
   const [applied, setApplied] = useState(false);
 
+  const endpointHandler = useCallback(async () => {
+    capture(Events.SettingsNetworkCustomNodeClick);
+    await enableCustomNode(environmentName, value);
+    setApplied(true);
+    setTimeout(() => setApplied(false), 600);
+  }, [environmentName, value]);
+
   useEffect(() => {
-    setValue(settings.network[settings.network.id + 'Submit'] || '');
-    setIsEnabled(Boolean(settings.network[settings.network.id + 'Submit']));
-  }, [settings]);
+    setValue(customSubmitTxUrl);
+    setIsEnabled(Boolean(isCustomApiEnabledForCurrentNetwork));
+  }, [customSubmitTxUrl, isCustomApiEnabledForCurrentNetwork]);
 
   return (
     <>
@@ -496,55 +531,39 @@ const Network = () => {
       <Box height="6" />
       <Box display="flex" alignItems="center" justifyContent="center">
         <Select
-          defaultValue={settings.network.id}
-          onChange={e => {
-            switch (e.target.value) {
-              case NETWORK_ID.mainnet:
+          defaultValue={environmentName as string}
+          onChange={async ({ target: { value } }) => {
+            switch (value) {
+              case 'Mainnet':
                 capture(Events.SettingsNetworkMainnetClick);
                 break;
-              case NETWORK_ID.preprod:
+              case 'Preprod':
                 capture(Events.SettingsNetworkPreprodClick);
                 break;
-              case NETWORK_ID.preview:
+              case 'Preview':
                 capture(Events.SettingsNetworkPreviewClick);
                 break;
               default:
                 break;
             }
 
-            const id = e.target.value;
-
-            setSettings({
-              ...settings,
-              network: {
-                ...settings.network,
-                id: NETWORK_ID[id],
-                node: NODE[id],
-              },
-            });
+            await switchNetwork(value as Wallet.ChainName);
           }}
         >
-          <option value={NETWORK_ID.mainnet}>Mainnet</option>
-          <option value={NETWORK_ID.preprod}>Preprod</option>
-          <option value={NETWORK_ID.preview}>Preview</option>
+          {availableChains.map(network => (
+            <option value={network as string}>{network}</option>
+          ))}
         </Select>
       </Box>
       <Box height="8" />
       <Box display="flex" alignItems="center" justifyContent="center">
         <Checkbox
           isChecked={isEnabled}
-          onChange={e => {
-            if (!e.target.checked) {
-              setSettings({
-                ...settings,
-                network: {
-                  ...settings.network,
-                  [settings.network.id + 'Submit']: null,
-                },
-              });
-              setValue('');
-            }
+          onChange={async e => {
             setIsEnabled(e.target.checked);
+            if (!e.target.checked) {
+              await enableCustomNode(environmentName, '');
+            }
           }}
           size="md"
         />{' '}
@@ -556,9 +575,9 @@ const Network = () => {
           isDisabled={!isEnabled}
           fontSize={'xs'}
           value={value}
-          placeholder="http://localhost:8090/api/submit/tx"
+          placeholder={defaultSubmitApi}
           onKeyDown={e => {
-            if (e.key == 'Enter' && value.length > 0) {
+            if (e.key == 'Enter' && isValidURL(value)) {
               endpointHandler();
             }
           }}
@@ -567,7 +586,7 @@ const Network = () => {
         />
         <InputRightElement width="4.5rem">
           <Button
-            isDisabled={applied || !isEnabled || value.length <= 0}
+            isDisabled={applied || !isEnabled || !isValidURL(value)}
             h="1.75rem"
             size="sm"
             onClick={endpointHandler}

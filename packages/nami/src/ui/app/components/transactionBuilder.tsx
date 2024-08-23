@@ -5,7 +5,6 @@ import {
   Box,
   Link,
   Text,
-  Image,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -44,14 +43,13 @@ import {
   undelegateTx,
 } from '../../../api/extension/wallet';
 import { Loader } from '../../../api/loader';
-import IOHK from '../../../assets/img/iohk.svg';
 import { ERROR, HW, TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { useStoreState } from '../../store';
 
 import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 // Assets
 
@@ -105,7 +103,7 @@ const poolTooltipMessage = pool => {
 
 const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
   const capture = useCaptureEvent();
-  const settings = useStoreState(state => state.settings.settings);
+  const { cardanoCoin } = useOutsideHandles();
   const toast = useToast();
   const {
     isOpen: isOpenCol,
@@ -481,7 +479,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                       hide
                       quantity={data.stakeRegistration}
                       decimals={6}
-                      symbol={settings.adaSymbol}
+                      symbol={cardanoCoin.symbol}
                     />
                   </Box>
                 )}
@@ -491,7 +489,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                   <UnitDisplay
                     quantity={data.fee}
                     decimals={6}
-                    symbol={settings.adaSymbol}
+                    symbol={cardanoCoin.symbol}
                   />
                 </Box>
                 <Box h="4" />
@@ -582,7 +580,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                     hide
                     quantity={data.rewards}
                     decimals={6}
-                    symbol={settings.adaSymbol}
+                    symbol={cardanoCoin.symbol}
                   />
                 </Box>
                 <Box h="3" />
@@ -592,7 +590,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                   <UnitDisplay
                     quantity={data.fee}
                     decimals={6}
-                    symbol={settings.adaSymbol}
+                    symbol={cardanoCoin.symbol}
                   />
                 </Box>
                 <Box h="4" />
@@ -704,7 +702,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                   <UnitDisplay
                     quantity={data.fee}
                     decimals={6}
-                    symbol={settings.adaSymbol}
+                    symbol={cardanoCoin.symbol}
                   />
                 </Box>
                 <Box h="4" />
@@ -789,7 +787,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
               Cardano:
               <Box mt="3">The recommended collateral amount is</Box>
               <Box mb="3" width="full" textAlign="center">
-                <b style={{ fontSize: 16 }}>5 {settings.adaSymbol}</b>
+                <b style={{ fontSize: 16 }}>5 {cardanoCoin.symbol}</b>
               </Box>{' '}
               The amount is separated from your account balance, you can choose
               to return it to your balance at any time.
@@ -814,7 +812,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
                   <UnitDisplay
                     quantity={data.fee}
                     decimals={6}
-                    symbol={settings.adaSymbol}
+                    symbol={cardanoCoin.symbol}
                   />
                 </Box>
                 <Box h="4" />
@@ -838,7 +836,7 @@ const TransactionBuilder = React.forwardRef(({ onConfirm }, ref) => {
           <ModalBody>
             <Text fontSize="sm">
               Your collateral amount is{' '}
-              <b style={{ fontSize: 16 }}>5 {settings.adaSymbol}</b>.<br />
+              <b style={{ fontSize: 16 }}>5 {cardanoCoin.symbol}</b>.<br />
               <br /> When removing the collateral amount, it is returned to the
               account balance, but disables interactions with smart contracts.
             </Text>

@@ -9,15 +9,21 @@ import { POPUP, POPUP_WINDOW, TAB } from '../config/config';
 import { Scrollbars } from './app/components/scrollbar';
 import { Store as StoreProvider } from './store';
 import { Theme } from './theme';
+
 import 'focus-visible/dist/focus-visible';
 import './app/components/styles.css';
+import type { Wallet } from '@lace/cardano';
 
 const isMain = window.document.querySelector(`#${POPUP.main}`);
 const isTab = window.document.querySelector(`#${TAB.hw}`);
 
 export const Container = ({
   children,
-}: Readonly<{ children: React.ReactNode }>) => {
+  environmentName,
+}: Readonly<{
+  children: React.ReactNode;
+  environmentName: Wallet.ChainName;
+}>) => {
   const [scroll, setScroll] = React.useState({ el: null, y: 0 });
 
   useEffect(() => {
@@ -40,7 +46,7 @@ export const Container = ({
       height={isMain ? `${POPUP_WINDOW.height}px` : '100vh'}
     >
       <Theme>
-        <StoreProvider>
+        <StoreProvider environmentName={environmentName}>
           <Scrollbars
             id="scroll"
             style={{ width: '100vw', height: '100vh' }}

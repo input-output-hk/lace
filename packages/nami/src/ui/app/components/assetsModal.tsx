@@ -11,8 +11,10 @@ import {
 import { Scrollbars } from './scrollbar';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import Asset from './asset';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 const AssetsModal = React.forwardRef((props, ref) => {
+  const { cardanoCoin } = useOutsideHandles();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [data, setData] = React.useState({
     title: '',
@@ -81,6 +83,7 @@ const AssetsModal = React.forwardRef((props, ref) => {
                         key={index}
                       >
                         <Asset
+                          cardanoCoin={cardanoCoin}
                           asset={asset}
                           background={data.background}
                           color={data.color}

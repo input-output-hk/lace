@@ -38,6 +38,13 @@ const SettingsStory = ({
   return (
     <Box width="400" height="600">
       <Settings
+        isValidURL={() => true}
+        availableChains={['Mainnet', 'Preprod', 'Preview', 'Sanchonet']}
+        environmentName="Preprod"
+        getCustomSubmitApiForNetwork={() => ({
+          status: true,
+          url: 'https://cardano-preprod.blockfrost.io/api/v0',
+        })}
         connectedDapps={connectedDapps}
         removeDapp={async () => false}
         accountName={currentAccount.name}

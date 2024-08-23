@@ -18,7 +18,6 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-essentials'),
     getAbsolutePath('@chromatic-com/storybook'),
   ],
-  staticDirs: ['../public'],
   framework: {
     name: getAbsolutePath('@storybook/react-webpack5'),
     options: {},

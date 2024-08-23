@@ -71,6 +71,7 @@ import { useHandleResolver } from '../../../features/ada-handle/useHandleResolve
 import { toAsset, withHandleInfo } from '../../../adapters/assets';
 import type { Asset } from '../../../types/assets';
 import { UseAccount } from '../../../adapters/account';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 interface Props {
   walletAddress: string;
@@ -152,7 +153,7 @@ const Send = ({
 }: Props) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
-  const settings = useStoreState(state => state.settings.settings);
+  const { cardanoCoin } = useOutsideHandles();
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -499,7 +500,7 @@ const Send = ({
                     children={
                       <Box pl={4}>
                         {!isLoading ? (
-                          <Box>{settings.adaSymbol}</Box>
+                          <Box>{cardanoCoin.symbol}</Box>
                         ) : (
                           <Spinner
                             color="teal"

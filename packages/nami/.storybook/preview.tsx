@@ -3,13 +3,10 @@ import type { Preview } from '@storybook/react';
 import '../src/ui/app/components/styles.css';
 import 'focus-visible/dist/focus-visible';
 
-import { initialize, mswLoader } from 'msw-storybook-addon';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { theme } from '../src/ui/theme';
 import { Scrollbars } from '../src/ui/app/components/scrollbar';
 import { OutsideHandlesProvider } from '../src/features/outside-handles-provider';
-
-initialize();
 
 const noop = (async () => {}) as any;
 const mock = {} as any;
@@ -23,12 +20,27 @@ const preview: Preview = {
       },
     },
   },
-  loaders: [mswLoader],
+  loaders: [],
+};
+
+const cardanoCoin = {
+  id: '1',
+  name: 'Cardano',
+  decimals: 6,
+  symbol: 'tAda'
 };
 
 export const decorators = [
   (Story, { parameters: { colorMode, ...props } }) => (
     <OutsideHandlesProvider
+      environmentName='Preprod'
+      getCustomSubmitApiForNetwork={
+        () => ({
+          status: true,
+          url: 'https://cardano-preprod.blockfrost.io/api/v0'
+        })
+      }
+      cardanoCoin={cardanoCoin}
       sendEventToPostHog={noop}
       theme="light"
       fiatCurrency="USD"

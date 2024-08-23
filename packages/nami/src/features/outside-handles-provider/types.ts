@@ -38,6 +38,7 @@ export interface OutsideHandlesContextValue {
   walletAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
+  cardanoPrice: number;
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<
     Wallet.WalletMetadata,
@@ -47,4 +48,15 @@ export interface OutsideHandlesContextValue {
     action: () => Promise<T>,
     password?: string,
   ) => Promise<T>;
+  switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
+  environmentName: Wallet.ChainName;
+  availableChains: Wallet.ChainName[];
+  enableCustomNode: (network: Wallet.ChainName, value: string) => Promise<void>;
+  getCustomSubmitApiForNetwork: (network: Wallet.ChainName) => {
+    status: boolean;
+    url: string;
+  };
+  defaultSubmitApi: string;
+  cardanoCoin: Wallet.CoinId;
+  isValidURL: (link: string) => boolean;
 }

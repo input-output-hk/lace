@@ -25,11 +25,13 @@ import AssetFingerprint from '@emurgo/cip14-js';
 import { PROTO } from '@trezor/connect-web';
 import { crc8 } from 'crc';
 
+import { CurrencyCode } from '../adapters/currency';
 import { NETWORK_ID } from '../config/config';
 import provider from '../config/provider';
 
 import { getNetwork } from './extension';
 import { Loader } from './loader';
+
 const {
   CardanoAddressType,
   CardanoCertificateType,
@@ -79,8 +81,11 @@ export const blockfrostRequest = async (
  * @param {string} currency - eg. usd
  * @returns
  */
-export const currencyToSymbol = currency => {
-  const currencyMap = { usd: '$', ada: '₳', eur: '€' };
+export const currencyToSymbol = (currency: CurrencyCode) => {
+  const currencyMap = {
+    [CurrencyCode.USD]: '$',
+    [CurrencyCode.EUR]: '€',
+  };
   return currencyMap[currency];
 };
 

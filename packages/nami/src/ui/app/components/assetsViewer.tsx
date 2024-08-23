@@ -18,6 +18,7 @@ import React from 'react';
 import Asset from './asset';
 import { Planet } from 'react-kawaii';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 const AssetsViewer = ({ assets }) => {
   const totalColor = useColorModeValue(
@@ -109,6 +110,7 @@ const AssetsViewer = ({ assets }) => {
 };
 
 const AssetsGrid = ({ assets }) => {
+  const { cardanoCoin } = useOutsideHandles();
   return (
     <Box
       display="flex"
@@ -126,7 +128,7 @@ const AssetsGrid = ({ assets }) => {
               alignItems="center"
               justifyContent="center"
             >
-              <Asset asset={asset} enableSend />
+              <Asset cardanoCoin={cardanoCoin} asset={asset} enableSend />
             </Box>
           </LazyLoadComponent>
         </Box>

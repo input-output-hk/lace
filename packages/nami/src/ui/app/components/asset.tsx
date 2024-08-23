@@ -14,6 +14,7 @@ import UnitDisplay from './unitDisplay';
 import { useHistory } from 'react-router-dom';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { AssetInput } from '../../../types/assets';
+import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -29,9 +30,9 @@ type Props = PropsWithChildren<{
   enableSend: boolean;
   background: string;
   color: string;
-}>;
+}> & Pick<OutsideHandlesContextValue, 'cardanoCoin'>;
 
-const Asset = ({ asset, enableSend, ...props }: Props) => {
+const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
   const background = useColorModeValue('gray.100', 'gray.700');
   const color = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   const [show, setShow] = React.useState(false);
@@ -41,7 +42,6 @@ const Asset = ({ asset, enableSend, ...props }: Props) => {
   ];
   const history = useHistory();
   const navigate = history.push;
-  const settings = useStoreState(state => state.settings.settings);
 
   const displayName = asset.unit === 'lovelace' ? 'Ada' : asset.displayName;
   const decimals = asset.unit === 'lovelace' ? 6 : asset.decimals;
@@ -86,7 +86,7 @@ const Asset = ({ asset, enableSend, ...props }: Props) => {
                       fontSize={'xl'}
                       fontWeight={'normal'}
                     >
-                      {settings?.adaSymbol}
+                      {cardanoCoin.symbol}
                     </Box>
                   ) : (
                     <Avatar
