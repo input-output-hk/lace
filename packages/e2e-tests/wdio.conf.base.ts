@@ -20,15 +20,14 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature'
+      './src/features/analytics/AnalyticsOnboardingEvents.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
-      './src/features/e2e/SendNft*.feature'
+      './src/features/e2e/SendNft*.feature',
+      './src/features/TokensPage*.feature'
     ],
-    batch5: ['./src/features/AddressBook*.feature'],
+    batch5: ['./src/features/AddressBook*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
     batch6: [
       './src/features/Collateral*.feature',
       './src/features/NavigationTop*.feature',
@@ -63,7 +62,9 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsSetting*.feature',
       './src/features/analytics/AnalyticsStaking*.feature',
       './src/features/analytics/AnalyticsToggle*.feature',
-      './src/features/analytics/AnalyticsToken*.feature'
+      './src/features/analytics/AnalyticsToken*.feature',
+      './src/features/SendTransactionMetadata*.feature',
+      './src/features/SendTransactionMultipleSelection*.feature'
     ],
     batch12: [
       './src/features/AdaHandleExtended.feature',
@@ -78,9 +79,9 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/StakingSwitchingPools*.feature',
       './src/features/SettingsPagePopup*.feature'
     ],
-    batch14: ['./src/features/Transactions*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
+    batch14: ['./src/features/Transactions*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature'],
-    batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended*.feature']
+    batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],
