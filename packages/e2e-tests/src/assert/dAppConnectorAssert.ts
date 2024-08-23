@@ -199,7 +199,7 @@ class DAppConnectorAssert {
   }
 
   async waitUntilBalanceNotEmpty() {
-    await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletBalance.getText()) !== '', {
       timeout: 6000,
       timeoutMsg: 'failed while waiting for DApp connection data'
     });
