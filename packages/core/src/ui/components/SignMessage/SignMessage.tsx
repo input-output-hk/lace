@@ -4,19 +4,26 @@ import { useTranslation } from 'react-i18next';
 import { WalletOwnAddressDropdown, AddressSchema } from '../WalletOwnAddressesDropdown';
 import { Drawer, DrawerNavigation, TextArea, Button } from '@lace/common';
 import { Text } from '@input-output-hk/lace-ui-toolkit';
+import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 
 export type SignMessageProps = {
   addresses: AddressSchema[];
   visible?: boolean;
   onClose: () => void;
   onSign: (address: string, message: string) => void;
+  isSigningInProgress: boolean;
+  signature: Cip30DataSignature | null;
+  error: string | null;
 };
 
 export const SignMessage = ({
   addresses = [],
   visible = true,
   onClose,
-  onSign
+  onSign,
+  isSigningInProgress,
+  signature,
+  error
 }: SignMessageProps): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedAddress, setSelectedAddress] = useState<string>('');
@@ -38,9 +45,9 @@ export const SignMessage = ({
         className={styles.nextButton}
         variant="contained"
         onClick={handleSign}
-        disabled={!selectedAddress || !message}
+        disabled={!selectedAddress || !message || isSigningInProgress}
       >
-        {t('core.signMessage.nextButton')}
+        {isSigningInProgress ? t('core.signMessage.signingInProgress') : t('core.signMessage.nextButton')}
       </Button>
       <Button className={styles.cancelButton} variant="outlined" onClick={onClose}>
         {t('core.signMessage.cancelButton')}
@@ -63,7 +70,7 @@ export const SignMessage = ({
         <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.subtitle')}</Text.Body.Normal>
 
         <div className={styles.inputGroup}>
-          <Text.Body.Normal weight="$bold">{t('core.signMessage.addressLabel')}</Text.Body.Normal>
+          <Text.Body.Normal weight="$medium">{t('core.signMessage.addressLabel')}</Text.Body.Normal>
           <WalletOwnAddressDropdown
             addresses={addresses}
             onSelect={(address: string) => setSelectedAddress(address)}
@@ -71,7 +78,7 @@ export const SignMessage = ({
           />
         </div>
         <div className={styles.inputGroup}>
-          <Text.Body.Normal weight="$bold">{t('core.signMessage.messageLabel')}</Text.Body.Normal>
+          <Text.Body.Normal weight="$medium">{t('core.signMessage.messageLabel')}</Text.Body.Normal>
           <TextArea
             placeholder={t('core.signMessage.messagePlaceholder')}
             value={message}
@@ -81,6 +88,19 @@ export const SignMessage = ({
             wrapperClassName={styles.textAreaWrapper}
           />
         </div>
+        {error && (
+          <div className={styles.errorMessage}>
+            <Text.Body.Normal color="error">{error}</Text.Body.Normal>
+          </div>
+        )}
+        {signature && (
+          <div className={styles.signatureContainer}>
+            <Text.Body.Normal weight="$medium">{t('core.signMessage.signatureLabel')}</Text.Body.Normal>
+            <div className={styles.signatureWrapper}>
+              <pre className={styles.signatureContent}>{JSON.stringify(signature)}</pre>
+            </div>
+          </div>
+        )}
       </div>
     </Drawer>
   );

@@ -43,3 +43,34 @@
     color: var(--text-color-primary);
   }
 }
+
+// New styles for signature display
+.signatureContainer {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(1);
+}
+
+.signatureWrapper {
+  background-color: var(--light-mode-light-grey-plus);
+  border: 1px solid var(--light-mode-light-grey);
+  border-radius: size_unit(1);
+  padding: size_unit(2);
+  max-height: size_unit(30);
+  overflow-y: auto;
+}
+
+.signatureContent {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-color-primary);
+}
+
+.errorMessage {
+  color: var(--text-color-error);
+  margin-top: size_unit(1);
+}

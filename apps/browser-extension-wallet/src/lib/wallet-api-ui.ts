@@ -2,7 +2,6 @@ import {
   SigningCoordinator,
   WalletConflictError,
   WalletRepositoryApi,
-  WalletType,
   consumeRemoteApi,
   createKeyAgentFactory,
   exposeSigningCoordinatorApi,
@@ -11,10 +10,12 @@ import {
   walletChannel,
   walletManagerChannel,
   walletManagerProperties,
-  walletRepositoryProperties
+  walletRepositoryProperties,
+  WalletType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, from, Observable, of, Subject } from 'rxjs';
+import { mergeMap, map, tap, finalize, takeUntil } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 
 export const logger = console;
@@ -83,6 +84,65 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
   } finally {
     subscription.unsubscribe();
     password = '';
+  }
+};
+
+const securelyEraseString = (s: string): string => {
+  const buffer = Buffer.from(s, 'utf8');
+  buffer.fill(0);
+  return '';
+};
+
+const createPassphrase = (password: string): Buffer => Buffer.from(password, 'utf8');
+
+const getPassword = (passwordOrGetter: string | (() => Promise<string>)): Observable<string> =>
+  typeof passwordOrGetter === 'function' ? from(passwordOrGetter()) : of(passwordOrGetter);
+
+// Main function
+export const withSignDataConfirmation = async <T>(
+  action: () => Promise<T>,
+  passwordOrGetter: string | (() => Promise<string>)
+): Promise<T> => {
+  const cleanup$ = new Subject<void>();
+  let passwordToErase: string | undefined;
+
+  // This is our "do notation" equivalent
+  const signData$ = signingCoordinator.signDataRequest$.pipe(
+    mergeMap((req) =>
+      req.walletType === WalletType.InMemory
+        ? getPassword(passwordOrGetter).pipe(
+            tap((password) => {
+              passwordToErase = password;
+            }),
+            map(createPassphrase),
+            mergeMap((passphrase) =>
+              from(req.sign(passphrase)).pipe(
+                finalize(() => {
+                  passphrase.fill(0);
+                })
+              )
+            )
+          )
+        : from(req.sign())
+    ),
+    takeUntil(cleanup$)
+  );
+
+  const performAction$ = from(action());
+
+  try {
+    // This is similar to Haskell's <- operator
+    await firstValueFrom(signData$);
+    return await firstValueFrom(performAction$);
+  } catch (error) {
+    console.error('Error during signing process or action:', error);
+    throw error;
+  } finally {
+    cleanup$.next();
+    cleanup$.complete();
+    if (passwordToErase) {
+      passwordToErase = securelyEraseString(passwordToErase);
+    }
   }
 };
 
