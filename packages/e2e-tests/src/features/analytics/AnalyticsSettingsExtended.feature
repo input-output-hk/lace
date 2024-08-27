@@ -174,6 +174,16 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | wallet | hd wallet sync | sync | click"
     And I validate that 1 analytics event(s) have been sent
 
+  @LW-11322
+  Scenario: Analytics - Extended View - Custom Submit API
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Custom Submit API" setting
+    Then I validate latest analytics single event "settings | custom submit api | click"
+    When I click on "Enable" button on "Custom submit API" drawer
+    Then I validate latest analytics single event "settings | custom submit api | enable | click"
+    And I validate that 2 analytics event(s) have been sent
+
   # this test should be executed as the last one in this suite
   @LW-8559
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
