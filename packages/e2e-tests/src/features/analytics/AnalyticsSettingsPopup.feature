@@ -181,6 +181,16 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
 
+  @LW-11323
+  Scenario: Analytics - Popup View - Custom Submit API
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Custom Submit API" setting
+    Then I validate latest analytics single event "settings | custom submit api | click"
+    When I click on "Enable" button on "Custom submit API" drawer
+    Then I validate latest analytics single event "settings | custom submit api | enable | click"
+    And I validate that 2 analytics event(s) have been sent
+
   # this test should be executed as the last one in this suite
   @LW-8571
   Scenario: Analytics - Popup View - Settings - Wallet removal events - Remove wallet

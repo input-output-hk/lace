@@ -18,7 +18,10 @@ class SettingsExtendedPageObject {
 
   clickOnCollateral = async () => await SettingsPage.collateralLink.element.click();
 
-  clickOnCustomSubmitAPI = async () => await SettingsPage.customSubmitAPILink.element.click();
+  clickOnCustomSubmitAPI = async () => {
+    await SettingsPage.customSubmitAPILink.element.waitForClickable();
+    await SettingsPage.customSubmitAPILink.element.click();
+  };
 
   clickOnCookiePolicy = async () => await SettingsPage.cookiePolicy.element.click();
 

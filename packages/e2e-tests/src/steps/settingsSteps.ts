@@ -27,6 +27,8 @@ import popupView from '../page/popupView';
 import type { NetworkType } from '../types/network';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import MenuHeader from '../elements/menuHeader';
+import CustomSubmitApiAssert from '../assert/settings/CustomSubmitApiAssert';
+import CustomSubmitApiDrawer from '../elements/settings/CustomSubmitApiDrawer';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API)" setting$/,
@@ -321,3 +323,38 @@ Then(
     await settingsPageExtendedAssert.assertSeeNetworkInAboutComponent(network);
   }
 );
+
+Then(/^"Custom submit API" drawer is displayed$/, async () => {
+  await CustomSubmitApiAssert.assertSeeCustomSubmitApiDrawer();
+});
+
+When(/^I click on "Learn more about Cardano-submit-API" link$/, async () => {
+  await CustomSubmitApiDrawer.clickLearnMoreLink();
+});
+
+When(/^I enter "([^"]*)" into URL input on "Custom submit API" drawer$/, async (url: string) => {
+  await CustomSubmitApiDrawer.enterUrl(url);
+});
+
+Then(/^"Invalid URL" error is displayed on "Custom submit API" drawer$/, async () => {
+  await CustomSubmitApiAssert.assertSeeValidationError(
+    await t('browserView.settings.wallet.customSubmitApi.validationError')
+  );
+});
+
+When(/^I click on "(Enable|Disable)" button on "Custom submit API" drawer$/, async (button: 'Enable' | 'Disable') => {
+  button === 'Enable'
+    ? await CustomSubmitApiDrawer.clickEnableButton()
+    : await CustomSubmitApiDrawer.clickDisableButton();
+});
+
+Then(
+  /^"Custom submit API" is marked as (enabled|disabled) on Settings page$/,
+  async (state: 'enabled' | 'disabled') => {
+    await settingsPageExtendedAssert.assertCustomSubmitApiEnabled(state === 'enabled');
+  }
+);
+
+When(/^I close "Custom submit API" drawer$/, async () => {
+  await CustomSubmitApiDrawer.closeDrawer();
+});
