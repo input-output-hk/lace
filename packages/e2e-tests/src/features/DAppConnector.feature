@@ -262,4 +262,5 @@ Feature: DAppConnector - Common
     And I open and authorize test DApp with "Only once" setting
     When I click "Send ADA" "Run" button in test DApp
     And I switch to window with Lace
-    And I see DApp connector "Confirm transaction" page on 3 window handle
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
+      | -3.00 tADA - FEE |
