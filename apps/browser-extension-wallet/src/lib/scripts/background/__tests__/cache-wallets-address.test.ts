@@ -1,9 +1,15 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-useless-undefined */
-import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
-import { cacheActivatedWalletAddressSubscription } from '../cache-wallets-address';
+import { AnyWallet, WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
+import { createTestScheduler } from '@cardano-sdk/util-dev';
+import { walletMetadataWithAddresses, cacheActivatedWalletAddressSubscription } from '../cache-wallets-address';
 import { Wallet } from '@lace/cardano';
-import { BehaviorSubject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+
+const eachSubscription = <T>(...observables: Observable<T>[]) => {
+  let numSubscription = 0;
+  return new Observable((subscriber) => observables[numSubscription++].subscribe(subscriber));
+};
 
 describe('cacheActivatedWalletAddressSubscription', () => {
   afterEach(() => {
@@ -52,56 +58,59 @@ describe('cacheActivatedWalletAddressSubscription', () => {
     });
   });
 
-  it('should subscribe and update metadata when a new wallet is added and activated', () => {
-    const activeWallet$ = new BehaviorSubject({
-      addresses$: of([{ address: 'address1' }])
-    });
-    const activeWalletId$ = new BehaviorSubject({
-      walletId: 'walletId1'
-    });
-    const wallets$ = new BehaviorSubject<{ walletId: string; metadata: { walletAddresses?: string[] } }[]>([
-      {
-        walletId: 'walletId1',
-        metadata: { walletAddresses: ['address1'] }
-      }
-    ]);
-    const mockWalletManager = {
-      activeWallet$,
-      activeWalletId$
-    } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  it('should update metadata when a new wallet is added and activated', () => {
+    createTestScheduler().run(({ cold, expectObservable }) => {
+      const mockWalletManager = {
+        activeWalletId$: cold('a----f', {
+          a: { walletId: 'walletId1' },
+          f: { walletId: 'walletId2' }
+        }),
+        activeWallet$: eachSubscription(
+          cold('a', { a: { addresses$: cold('a', { a: [{ address: 'address1' }] }) } }),
+          cold('a', { a: { addresses$: cold('a', { a: [{ address: 'address2' }] }) } })
+        )
+      } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+      const mockWalletRepository = {
+        wallets$: eachSubscription(
+          cold('a-b', {
+            a: [
+              {
+                walletId: 'walletId1',
+                metadata: { walletAddresses: [] }
+              } as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+            ],
+            b: [
+              {
+                walletId: 'walletId1',
+                metadata: { walletAddresses: ['address1'] }
+              } as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+            ]
+          }),
+          cold('a', {
+            a: [
+              {
+                walletId: 'walletId2',
+                metadata: {}
+              } as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+            ]
+          })
+        )
+      } as unknown as WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
-    const mockWalletRepository = {
-      wallets$,
-      updateWalletMetadata: jest.fn()
-    } as unknown as WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
-
-    cacheActivatedWalletAddressSubscription(mockWalletManager, mockWalletRepository);
-
-    wallets$.next([
-      {
-        walletId: 'walletId1',
-        metadata: { walletAddresses: ['address1'] }
-      },
-      {
-        walletId: 'walletId2',
-        metadata: {}
-      }
-    ]);
-    activeWalletId$.next({ walletId: 'walletId2' });
-    activeWallet$.next({ addresses$: of([{ address: 'address2' }, { address: 'address3' }]) });
-
-    expect(mockWalletRepository.updateWalletMetadata).toHaveBeenNthCalledWith(1, {
-      walletId: 'walletId1',
-      metadata: {
-        walletAddresses: ['address1']
-      }
-    });
-
-    expect(mockWalletRepository.updateWalletMetadata).toHaveBeenNthCalledWith(2, {
-      walletId: 'walletId2',
-      metadata: {
-        walletAddresses: ['address2', 'address3']
-      }
+      expectObservable(walletMetadataWithAddresses(mockWalletManager, mockWalletRepository)).toBe('a----f', {
+        a: {
+          walletId: 'walletId1',
+          metadata: {
+            walletAddresses: ['address1']
+          }
+        },
+        f: {
+          walletId: 'walletId2',
+          metadata: {
+            walletAddresses: ['address2']
+          }
+        }
+      });
     });
   });
 });

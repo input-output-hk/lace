@@ -26,11 +26,11 @@ import {
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import { SharedWalletScriptKind } from '@lace/core';
+import { getBaseUrlForChain } from '@utils/chain';
 
 const logger = console;
 
@@ -65,7 +65,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     const chainName: Wallet.ChainName = chainIdToChainName(chainId);
     const providers = await getProviders(chainName);
 
-    const baseUrl = HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic];
+    const baseUrl = getBaseUrlForChain(chainName);
 
     // This is used in place of the handle provider for environments where the handle provider is not available
     const noopHandleResolver: HandleProvider = {
@@ -88,7 +88,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           handleProvider: baseUrl
             ? handleHttpProvider({
                 adapter: axiosFetchAdapter,
-                baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+                baseUrl,
                 logger
               })
             : noopHandleResolver,
@@ -117,7 +117,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         handleProvider: baseUrl
           ? handleHttpProvider({
               adapter: axiosFetchAdapter,
-              baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+              baseUrl,
               logger
             })
           : noopHandleResolver,

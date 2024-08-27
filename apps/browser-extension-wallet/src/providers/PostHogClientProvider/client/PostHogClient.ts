@@ -14,7 +14,7 @@ import {
   PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_TRACKING_MODE_ENABLED,
-  PUBLIC_POSTHOG_HOST,
+  POSTHOG_HOST,
   POSTHOG_ENABLED
 } from './config';
 import { BackgroundService, UserIdService } from '@lib/scripts/types';
@@ -44,9 +44,9 @@ export class PostHogClient<Action extends string = string> {
     private userIdService: UserIdService,
     private backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>,
     private view: ExtensionViews = ExtensionViews.Extended,
-    private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
+    private postHogHost: string = POSTHOG_HOST
   ) {
-    if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+    if (!this.postHogHost) throw new Error('POSTHOG_HOST url has not been provided');
     const token = this.getApiToken(this.chain);
     if (!token) throw new Error(`posthog token has not been provided for chain: ${this.chain.networkId}`);
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
@@ -56,7 +56,7 @@ export class PostHogClient<Action extends string = string> {
       .then((id) => {
         posthog.init(token, {
           request_batching: false,
-          api_host: this.publicPostHogHost,
+          api_host: this.postHogHost,
           autocapture: false,
           disable_session_recording: true,
           capture_pageview: false,

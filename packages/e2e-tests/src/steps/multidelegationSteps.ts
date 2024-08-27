@@ -631,6 +631,7 @@ Then(
 
 When(/^I reset default behaviour for modal about issues with multi-delegation and DApps$/, async () => {
   await localStorageInitializer.removeConfigurationForShowingMultidelegationDAppsIssueModal();
+  await browser.refresh();
 });
 
 Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {

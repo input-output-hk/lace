@@ -397,7 +397,7 @@ describe('Testing DappTransactionContainer component', () => {
         coinSymbol: 'ADA',
         collateral: BigInt(1_000_000),
         txInspectionDetails,
-        ownAddresses: [sendingAddress.address],
+        ownAddresses: [walletInfo.addresses[0].address],
         addressToNameMap: new Map()
       },
       {}

@@ -17,7 +17,9 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
       onCancel={config.onClose}
       onContinue={async (txData) => {
         if (!txData) return;
-        const importedSharedWalletTx = Serialization.Transaction.fromCbor(Wallet.TxCBOR(txData.transaction.cborHex));
+        const importedSharedWalletTx = Serialization.Transaction.fromCbor(
+          Wallet.Serialization.TxCBOR(txData.transaction.cborHex)
+        );
         const { body, id } = importedSharedWalletTx.toCore();
 
         const ownAddresses = new Set([...(walletState?.addresses || [])].map((address) => address.address));
