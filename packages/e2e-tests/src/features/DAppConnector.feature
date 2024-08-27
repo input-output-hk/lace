@@ -256,3 +256,10 @@ Feature: DAppConnector - Common
     And I open and authorize test DApp with "Only once" setting
     When I click "Set Collateral" button in test DApp
     Then I see DApp collateral window
+
+  @LW-11372
+  Scenario: Test for bug LW-7832 - Wrong url displayed in DApp transaction confirmation screen
+    And I open and authorize test DApp with "Only once" setting
+    When I click "Send ADA" "Run" button in test DApp
+    And I switch to window with Lace
+    And I see DApp connector "Confirm transaction" page on 3 window handle
