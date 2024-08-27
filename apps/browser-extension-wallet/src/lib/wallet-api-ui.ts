@@ -87,18 +87,58 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
   }
 };
 
+/**
+ * Securely erases a string by overwriting its contents in memory and returning an empty string.
+ *
+ * @param {string} s The string to be securely erased.
+ * @returns {string} An empty string.
+ *
+ * @security
+ * This function attempts to securely erase the contents of the string from memory:
+ * - It converts the string to a Buffer, which allows direct manipulation of the underlying memory.
+ * - The Buffer is then filled with zeros, overwriting the original content.
+ * - An empty string is returned to replace the original string variable.
+ */
 const securelyEraseString = (s: string): string => {
   const buffer = Buffer.from(s, 'utf8');
   buffer.fill(0);
   return '';
 };
 
+/**
+ * Creates a Buffer containing the UTF-8 encoded representation of the provided password.
+ *
+ * @param {string} password The password to be encoded.
+ * @returns {Buffer} A Buffer containing the UTF-8 encoded password.
+ */
 const createPassphrase = (password: string): Buffer => Buffer.from(password, 'utf8');
 
+/**
+ * Converts a password or a password getter function into an Observable that emits the password.
+ *
+ * @param {string | (() => Promise<string>)} passwordOrGetter Either a password string or a function that returns a Promise resolving to the password.
+ * @returns {Observable<string>} An Observable that emits the password string.
+ *
+ */
 const getPassword = (passwordOrGetter: string | (() => Promise<string>)): Observable<string> =>
   typeof passwordOrGetter === 'function' ? from(passwordOrGetter()) : of(passwordOrGetter);
 
-// Main function
+/**
+ * Handles the process of signing data with confirmation, supporting both in-memory and hardware wallets.
+ * This function manages the signing request, password handling (for in-memory wallets), and secure password erasure.
+ *
+ * @template T The type of the value returned by the action.
+ * @param {() => Promise<T>} action A function that performs the action requiring data signing.
+ * @param {string | (() => Promise<string>)} passwordOrGetter Either a password string or a function that returns a promise resolving to the password.
+ * @returns {Promise<T>} A promise that resolves with the result of the action.
+ *
+ * @throws Will throw an error if the signing process or the action fails.
+
+ * @security This function handles passwords securely:
+ * - For in-memory wallets, it securely erases the password from memory after use.
+ * - The password is never logged or stored in plain text.
+ * - For hardware wallets, no password is required or handled.
+ */
 export const withSignDataConfirmation = async <T>(
   action: () => Promise<T>,
   passwordOrGetter: string | (() => Promise<string>)
@@ -106,7 +146,6 @@ export const withSignDataConfirmation = async <T>(
   const cleanup$ = new Subject<void>();
   let passwordToErase: string | undefined;
 
-  // This is our "do notation" equivalent
   const signData$ = signingCoordinator.signDataRequest$.pipe(
     mergeMap((req) =>
       req.walletType === WalletType.InMemory
@@ -131,7 +170,6 @@ export const withSignDataConfirmation = async <T>(
   const performAction$ = from(action());
 
   try {
-    // This is similar to Haskell's <- operator
     await firstValueFrom(signData$);
     return await firstValueFrom(performAction$);
   } catch (error) {
