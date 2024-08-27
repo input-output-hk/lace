@@ -100,7 +100,7 @@ Then(
 Then(
   /^I see DApp connector "(Confirm transaction|Something went wrong|All done)" page on (\d) window handle$/,
   async (expectedPage: 'Confirm transaction' | 'Something went wrong' | 'All done', handleNumber: number) => {
-    await DAppConnectorPageObject.waitAndSwitchToHandle(3, handleNumber);
+    await DAppConnectorPageObject.waitAndSwitchToHandle(4, handleNumber);
 
     const defaultDAppTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
