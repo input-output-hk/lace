@@ -180,6 +180,7 @@ export class MenuHeader {
 
   async openSettings(): Promise<void> {
     await this.openUserMenu();
+    await this.menuSettingsButton.waitForClickable();
     await this.menuSettingsButton.click();
   }
 

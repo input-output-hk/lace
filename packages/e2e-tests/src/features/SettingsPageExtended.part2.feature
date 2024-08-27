@@ -167,6 +167,43 @@ Feature: General Settings - Extended Browser View
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 
+  @LW-11314 @Mainnet @Testnet
+  Scenario: Extended View - Custom submit API - open drawer
+    When I open settings from header menu
+    And I click on "Custom Submit API" setting
+    Then "Custom submit API" drawer is displayed
+
+  @LW-11316 @Mainnet @Testnet
+  Scenario: Extended View - Custom submit API - Learn more - click
+    When I open settings from header menu
+    And I click on "Custom Submit API" setting
+    And I click on "Learn more about Cardano-submit-API" link
+    Then New tab with url containing "https://github.com/IntersectMBO/cardano-node/tree/master/cardano-submit-api" is opened
+
+  @LW-11318 @Mainnet @Testnet
+  Scenario: Extended View - Custom submit API - invalid URL
+    When I open settings from header menu
+    And I click on "Custom Submit API" setting
+    And I enter "abc" into URL input on "Custom submit API" drawer
+    And I click on "Enable" button on "Custom submit API" drawer
+    Then "Invalid URL" error is displayed on "Custom submit API" drawer
+
+  @LW-11320 @Mainnet @Testnet
+  Scenario: Extended View - Custom submit API - enable/disable
+    When I open settings from header menu
+    And I click on "Custom Submit API" setting
+    And I click on "Enable" button on "Custom submit API" drawer
+    Then I see a toast with text: "Your custom submit API is enabled..."
+    And I close a toast message
+    When I close "Custom submit API" drawer
+    Then "Custom submit API" is marked as enabled on Settings page
+    When I click on "Custom Submit API" setting
+    And I click on "Disable" button on "Custom submit API" drawer
+    Then I see a toast with text: "Your custom submit API is disabled..."
+    And I close a toast message
+    When I close "Custom submit API" drawer
+    Then "Custom submit API" is marked as disabled on Settings page
+
   # this test should be executed as the last one in this suite
   @LW-2521 @LW-9113 @Mainnet @Testnet
   Scenario: Extended View - Remove wallet and confirm
