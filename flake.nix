@@ -37,7 +37,35 @@
   outputs = inputs: let
     supportedSystem = ["x86_64-linux" "x86_64-darwin" "aarch64-darwin"];
     inherit (inputs.nixpkgs) lib;
-  in {
+
+    mkDevShell = system:
+      let
+        pkgs = import inputs.nixpkgs { inherit system; };
+      in
+      pkgs.mkShell {
+        buildInputs = with pkgs; [
+          nodejs_22
+          yarn
+          python311
+          python311Packages.setuptools
+          pkg-config
+          libsass
+          openssl
+          gcc
+          gnumake
+          libudev-zero
+          pkg-config
+        ] ++ lib.optionals stdenv.isLinux [ autoreconfHook ];
+
+        shellHook = ''
+          export PATH=$PWD/node_modules/.bin:$PATH
+          export PYTHON=${pkgs.python311}/bin/python
+          ${lib.optionalString pkgs.stdenv.isLinux "export LIBCLANG_PATH=${pkgs.libclang.lib}/lib"}
+        '';
+      };
+
+  in
+  {
     packages = lib.genAttrs supportedSystem (buildSystem:
       import ./nix/lace-blockchain-services/packages.nix { inherit inputs buildSystem; }
     );
@@ -60,6 +88,9 @@
         constituents = __attrValues inputs.self.hydraJobs.lace-blockchain-services-installer;
       };
     };
-  };
 
+    devShells = lib.genAttrs supportedSystem (system: {
+      default = mkDevShell system;
+    });
+  };
 }
