@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'release/**'
+      - 'e2e-workflow-default-envs'
   workflow_dispatch:
     inputs:
       browser:
