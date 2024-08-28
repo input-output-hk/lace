@@ -165,7 +165,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
               aria-disabled={pdfInstance.loading || !!pdfInstance.error}
               onClick={() => {
                 analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletDownloadClick);
-                handleClose();
               }}
             >
               <Button.Primary
@@ -180,7 +179,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
                 analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPrintClick);
                 const printWindow = window.open(URL.createObjectURL(pdfInstance.blob));
                 printWindow.print();
-                handleClose();
               }}
               w="$fill"
               disabled={pdfInstance.loading || !!pdfInstance.error}
@@ -193,7 +191,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       default:
         throw new Error(INCORRECT_STAGE_ERROR);
     }
-  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, handleClose, analytics]);
+  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, analytics]);
 
   const drawerHeader = useMemo(() => {
     switch (stage) {
