@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'release/**'
+      - 'e2e-workflow-default-envs'
   workflow_dispatch:
     inputs:
       browser:
@@ -147,9 +148,9 @@ jobs:
           echo "Runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}"
           echo "Smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
           echo "Tags(optional): ${{ github.event.inputs.tags || '' }}"
-          echo "Cardano mainnet url: ${{ github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io' }}"
-          echo "Cardano preprod url: ${{ github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io' }}"
-          echo "Cardano preview url: ${{ github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io' }}"
+          echo "Cardano mainnet url: ${{ github.event.inputs.cardano_mainnet_url || 'live-mainnet.lw.iog.io' }}"
+          echo "Cardano preprod url: ${{ github.event.inputs.cardano_preprod_url || 'live-preprod.lw.iog.io' }}"
+          echo "Cardano preview url: ${{ github.event.inputs.cardano_preview_url || 'live-preview.lw.iog.io' }}"
           echo "Build artifact name: ${{ env.BUILD_ARTIFACT_NAME }}"
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
