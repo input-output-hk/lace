@@ -145,13 +145,15 @@ export const ScanShieldedMessage: VFC = () => {
     async (code: QRCode) => {
       const [shieldedMessage, address, chain] = code.chunks as ScannedCode;
 
+      const shieldedQrCodeDataFormat = new RegExp(/^addr.*(Preprod|Preview|Mainnet)$/);
+      const isCodeDataCorrectFormatForPaperWallet = shieldedQrCodeDataFormat.test(code.data);
       // User may have scanned the wallet address QR code
       if (Wallet.Cardano.Address.fromString(code.data)) {
         setValidation({
           error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
         });
         void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
-      } else if (!!shieldedMessage?.bytes || !!address?.text || !!chain?.text) {
+      } else if (isCodeDataCorrectFormatForPaperWallet) {
         if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
         const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
         await onScanSuccess(shieldedPgpMessage, address.text, chain.text);
@@ -185,7 +187,7 @@ export const ScanShieldedMessage: VFC = () => {
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       if (code) {
         setScanState('validating');
-        onScanCode(code);
+        await onScanCode(code);
       }
       requestAnimationFrame(scanQRCode);
     };
