@@ -31,8 +31,9 @@ export const Setup = (): JSX.Element => {
   const onNext = async ({ walletName }: WalletSetupNamePasswordSubmitParams) => {
     if (recoveryMethod === 'mnemonic') {
       void analytics.sendEventToPostHog(postHogActions.create.ENTER_WALLET);
+    } else {
+      void analytics.sendEventToPostHog(postHogActions.create.WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK);
     }
-    void analytics.sendEventToPostHog(postHogActions.create.WALLET_SETUP_GENERATE_PAPER_WALLET_CLICK);
     await next({ name: walletName });
   };
 
