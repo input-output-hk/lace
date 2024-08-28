@@ -26,7 +26,7 @@ export const TextArea = ({
   className,
   dataTestId,
   invalid,
-  isResizable,
+  isResizable = false,
   value,
   onChange,
   label,
@@ -82,6 +82,7 @@ export const TextArea = ({
           [styles.invalid]: invalid
         })}
         {...props}
+        spellCheck={false}
       />
     </div>
   );

@@ -1,3 +1,8 @@
 .fullHeight {
-  height: 100%;
+  height: 100% !important;
+
+  :global(.ant-input) {
+    //@include scroll-bar-style;
+    height: 100% !important;
+  }
 }
