@@ -41,7 +41,7 @@ const decryptQrCodeMnemonicWithPrivateKey = async ({ pgpInfo }: DecryptProps): P
       })
     : await readPgpPrivateKey({ privateKey: pgpInfo.pgpPrivateKey });
   const decryptedMessage = await decryptMessageWithPgp({
-    message: await readBinaryPgpMessage(pgpInfo.shieldedMessage),
+    message: await readBinaryPgpMessage(new Uint8Array(pgpInfo.shieldedMessage)),
     privateKey
   });
   if (
@@ -159,10 +159,12 @@ export const EnterPgpPrivateKey: VFC = () => {
     };
     if (
       ((pgpInfo.pgpPrivateKey && pgpInfo.privateKeyIsDecrypted) ||
-        (pgpInfo.pgpPrivateKey && pgpInfo.pgpKeyPassphrase && !pgpInfo.privateKeyIsDecrypted)) && // Only try to decrypt if we don't already have a wallet
+        (pgpInfo.pgpPrivateKey && pgpInfo.pgpKeyPassphrase && !pgpInfo.privateKeyIsDecrypted)) &&
       !createWalletData.mnemonic.every((w) => !!w)
-    )
+    ) {
+      // Only try to decrypt if we don't already have a wallet
       getMnemonic();
+    }
   }, [pgpInfo, createWalletData.mnemonic, setMnemonic, setValidation]);
 
   useEffect(() => {
