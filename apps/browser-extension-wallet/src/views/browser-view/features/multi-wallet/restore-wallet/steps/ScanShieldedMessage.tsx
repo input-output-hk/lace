@@ -284,8 +284,8 @@ export const ScanShieldedMessage: VFC = () => {
                 endVideoTracks();
                 back();
               }}
-              label="Back"
-              title="Back"
+              label={i18n.t('core.walletSetupStep.back')}
+              title={i18n.t('core.walletSetupStep.back')}
             />
             {scanState === 'scanning' && !validation.error && (
               <Flex alignItems="center" gap="$8" h="$48">
