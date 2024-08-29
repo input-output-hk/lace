@@ -16,8 +16,6 @@ import {
   CameraComponent as CameraIcon,
   WarningIconCircleComponent as WarningIcon
 } from '@input-output-hk/lace-ui-toolkit';
-import * as openpgp from 'openpgp';
-import { readBinaryPgpMessage } from '@src/utils/pgp';
 import { i18n } from '@lace/translation';
 import jsQR, { QRCode } from 'jsqr';
 import { Trans } from 'react-i18next';
@@ -41,7 +39,7 @@ const stripDetailFromVideoDeviceName = (str: string) => str.replace(/\s(camera\s
 
 type QrCodeScanState = 'waiting' | 'blocked' | 'scanning' | 'validating' | 'scanned';
 interface ByteChunk<T> {
-  bytes: number[];
+  bytes: Uint8Array;
   text?: T;
   type: 'byte';
 }
@@ -60,8 +58,13 @@ export const ScanShieldedMessage: VFC = () => {
   const streamRef = useRef<MediaStream>(null);
   const [deviceId, setDeviceId] = useState<MediaDeviceInfo['deviceId'] | null>();
 
-  const handleDeviceChange = async (value: MediaDeviceInfo['deviceId']) => {
+  const endVideoTracks = () => {
     streamRef.current.getVideoTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  };
+
+  const handleDeviceChange = async (value: MediaDeviceInfo['deviceId']) => {
+    endVideoTracks();
     setDeviceId(value);
   };
 
@@ -115,12 +118,11 @@ export const ScanShieldedMessage: VFC = () => {
     postHogActions.restore.SCAN_QR_CODE_CAMERA_ERROR
   ]);
 
-  const onScanSuccess = async (message: openpgp.Message<Uint8Array>, address: string, chain: ChainName) => {
+  const onScanSuccess = async (message: Uint8Array, address: string, chain: ChainName) => {
     setPgpInfo({ ...pgpInfo, shieldedMessage: message });
     setWalletMetadata({ chain, address });
     setValidation({ error: null });
-    streamRef.current.getVideoTracks().forEach((t) => t.stop());
-    streamRef.current = null;
+    endVideoTracks();
     await analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_SUCCESS);
   };
 
@@ -155,8 +157,7 @@ export const ScanShieldedMessage: VFC = () => {
         void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
       } else if (isCodeDataCorrectFormatForPaperWallet) {
         if (!shieldedMessage?.bytes || !address?.text || !chain?.text) return; // wait for code to be scanned in it's entirety
-        const shieldedPgpMessage = await readBinaryPgpMessage(new Uint8Array(shieldedMessage.bytes));
-        await onScanSuccess(shieldedPgpMessage, address.text, chain.text);
+        await onScanSuccess(shieldedMessage.bytes, address.text, chain.text);
         next();
         // Immediately move to next step
       } else {
@@ -187,7 +188,7 @@ export const ScanShieldedMessage: VFC = () => {
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       if (code) {
         setScanState('validating');
-        await onScanCode(code);
+        onScanCode(code);
       }
       requestAnimationFrame(scanQRCode);
     };
@@ -278,7 +279,14 @@ export const ScanShieldedMessage: VFC = () => {
             )}
           </Flex>
           <Flex justifyContent="space-between" h={'$48'} alignItems="center">
-            <Button.Secondary onClick={back} label="Back" title="Back" />
+            <Button.Secondary
+              onClick={() => {
+                endVideoTracks();
+                back();
+              }}
+              label="Back"
+              title="Back"
+            />
             {scanState === 'scanning' && !validation.error && (
               <Flex alignItems="center" gap="$8" h="$48">
                 <Loader className={styles.loader} />
