@@ -191,13 +191,13 @@ export const pgpPublicKeyVerification =
           .join(' ')
       });
     } catch (error) {
-      if (
+      if (WEAK_KEY_REGEX.test(error.message)) {
+        setPgpValidation({ error: i18n.t('pgp.error.rsaKeyTooWeak') });
+      } else if (
         error.message === 'no valid encryption key packet in key.' ||
         NO_ENCRYPTION_PACKET_REGEX.test(error.message)
       ) {
         setPgpValidation({ error: i18n.t('pgp.error.noValidEncryptionKeyPacket') });
-      } else if (WEAK_KEY_REGEX.test(error.message)) {
-        setPgpValidation({ error: error.message });
       } else if (error.message === 'PGP key is not public') {
         setPgpValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
       } else {
