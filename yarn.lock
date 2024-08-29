@@ -13470,6 +13470,7 @@ __metadata:
     "@storybook/test": ^8.1.6
     "@svgr/rollup": ^6.1.2
     "@types/chrome": ^0.0.268
+    "@types/lodash": ^4.17.7
     "@types/react": 17.0.2
     "@types/react-kawaii": ^0.17.3
     "@types/react-lazy-load-image-component": 1.6.4
@@ -13490,6 +13491,7 @@ __metadata:
     focus-visible: ^5.2.0
     framer-motion: ^4.1.16
     javascript-time-ago: ^2.5.10
+    lodash: ^4.17.21
     prettier: 3.2.5
     promise-latest: ^1.0.4
     react: 17.0.2
@@ -23933,6 +23935,13 @@ __metadata:
   version: 4.14.182
   resolution: "@types/lodash@npm:4.14.182"
   checksum: 7dd137aa9dbabd632408bd37009d984655164fa1ecc3f2b6eb94afe35bf0a5852cbab6183148d883e9c73a958b7fec9a9bcf7c8e45d41195add6a18c34958209
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4.17.7":
+  version: 4.17.7
+  resolution: "@types/lodash@npm:4.17.7"
+  checksum: 09e58a119cd8a70acfb33f8623dc2fc54f74cdce3b3429b879fc2daac4807fe376190a04b9e024dd300f9a3ee1876d6623979cefe619f70654ca0fe0c47679a7
   languageName: node
   linkType: hard
 

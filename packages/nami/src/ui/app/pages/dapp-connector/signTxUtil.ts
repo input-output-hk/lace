@@ -1,77 +1,52 @@
-import AssetFingerprint from '@emurgo/cip14-js';
+/* eslint-disable functional/prefer-immutable-types */
+/* eslint-disable unicorn/no-null */
+/* eslint-disable max-params */
 import {
-  bytesAddressToBinary,
-  extractKeyOrScriptHash,
-  getSpecificUtxo,
-} from '../../../../api/extension';
-import { valueToAssets } from '../../../../api/util';
-import { Loader } from '../../../../api/loader';
+  coalesceValueQuantities,
+  totalAddressInputsValueInspector,
+  totalAddressOutputsValueInspector,
+  Cardano,
+} from '@cardano-sdk/core';
+import groupBy from 'lodash/groupBy';
 
-const getPaymentKeyHash = async address => {
-  try {
-    return Buffer.from(
-      Loader.Cardano.BaseAddress.from_address(
-        Loader.Cardano.Address.from_bytes(address.to_bytes()),
-      )
-        .payment_cred()
-        .to_keyhash()
-        .to_bytes(),
-    ).toString('hex');
-  } catch (e) {}
-  try {
-    return Buffer.from(
-      Loader.Cardano.EnterpriseAddress.from_address(
-        Loader.Cardano.Address.from_bytes(address.to_bytes()),
-      )
-        .payment_cred()
-        .to_keyhash()
-        .to_bytes(),
-    ).toString('hex');
-  } catch (e) {}
-  try {
-    return Buffer.from(
-      Loader.Cardano.PointerAddress.from_address(
-        Loader.Cardano.Address.from_bytes(address.to_bytes()),
-      )
-        .payment_cred()
-        .to_keyhash()
-        .to_bytes(),
-    ).toString('hex');
-  } catch (e) {}
-  throw Error('Not supported address type');
-};
+import type { Wallet } from '@lace/cardano';
 
-export const getKeyHashes = async (
-  tx,
-  utxos,
-  account,
-): Promise<{ key: string[]; kind: string[] } | { error: string }> => {
+const inputResolver = (
+  utxos: Readonly<Wallet.Cardano.Utxo[]>,
+): Cardano.InputResolver => ({
+  resolveInput: async (input: Readonly<Cardano.TxIn>) =>
+    // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
+    Promise.resolve(
+      utxos.find(
+        utxo => utxo[0].txId === input.txId && utxo[0].index === input.index,
+      )?.[1] ?? null,
+    ),
+});
+
+export const getKeyHashes = (
+  tx: Cardano.Tx,
+  utxos: Wallet.Cardano.Utxo[],
+  paymentAddr: Cardano.PaymentAddress,
+): { error: string } | { key: string[]; kind: string[] } => {
   let requiredKeyHashes: string[] = [];
-  const baseAddr = Loader.Cardano.BaseAddress.from_address(
-    Loader.Cardano.Address.from_bech32(account.paymentAddr),
-  );
-  const paymentKeyHash = Buffer.from(
-    baseAddr.payment_cred().to_keyhash().to_bytes(),
-  ).toString('hex');
-  const stakeKeyHash = Buffer.from(
-    baseAddr.stake_cred().to_keyhash().to_bytes(),
-  ).toString('hex');
+  const baseAddr = Cardano.Address.fromString(paymentAddr)?.asBase();
+
+  if (!baseAddr) {
+    return {
+      error: `Invalid payment address: ${paymentAddr}`,
+    };
+  }
+
+  const paymentKeyHash = baseAddr.getPaymentCredential().hash;
+  const stakeKeyHash = baseAddr.getStakeCredential().hash;
 
   //get key hashes from inputs
-  const inputs = tx.body().inputs();
-  for (let i = 0; i < inputs.len(); i++) {
-    const input = inputs.get(i);
-    const txHash = Buffer.from(input.transaction_id().to_bytes()).toString(
-      'hex',
-    );
-    const index = parseInt(input.index().to_str());
+  const inputs = tx.body.inputs;
+  for (const input of inputs) {
+    const txHash = input.txId;
+    const index = input.index;
     if (
-      utxos.some(
-        utxo =>
-          Buffer.from(utxo.input().transaction_id().to_bytes()).toString(
-            'hex',
-          ) === txHash && parseInt(utxo.input().index().to_str()) === index,
-      )
+      utxos.some(utxo => utxo[0].txId === txHash && utxo[0].index === index)
     ) {
       requiredKeyHashes.push(paymentKeyHash);
     } else {
@@ -80,120 +55,118 @@ export const getKeyHashes = async (
   }
 
   //get key hashes from certificates
-  const txBody = tx.body();
-  const keyHashFromCert = txBody => {
-    for (let i = 0; i < txBody.certs().len(); i++) {
-      const cert = txBody.certs().get(i);
-      if (cert.kind() === 0) {
-        const credential = cert.as_stake_registration().stake_credential();
-        if (credential.kind() === 0) {
+  const txBody = tx.body;
+  const keyHashFromCert = (txBody: Cardano.TxBody) => {
+    for (const cert of txBody.certificates ?? []) {
+      switch (cert.__typename) {
+        case Cardano.CertificateType.StakeRegistration: {
           // stake registration doesn't required key hash
-        }
-      } else if (cert.kind() === 1) {
-        const credential = cert.as_stake_deregistration().stake_credential();
-        if (credential.kind() === 0) {
-          const keyHash = Buffer.from(
-            credential.to_keyhash().to_bytes(),
-          ).toString('hex');
-          requiredKeyHashes.push(keyHash);
-        }
-      } else if (cert.kind() === 2) {
-        const credential = cert.as_stake_delegation().stake_credential();
-        if (credential.kind() === 0) {
-          const keyHash = Buffer.from(
-            credential.to_keyhash().to_bytes(),
-          ).toString('hex');
-          requiredKeyHashes.push(keyHash);
-        }
-      } else if (cert.kind() === 3) {
-        const owners = cert.as_pool_registration().pool_params().pool_owners();
-        for (let i = 0; i < owners.len(); i++) {
-          const keyHash = Buffer.from(owners.get(i).to_bytes()).toString('hex');
-          requiredKeyHashes.push(keyHash);
-        }
-      } else if (cert.kind() === 4) {
-        const operator = cert.as_pool_retirement().pool_keyhash().to_hex();
-        requiredKeyHashes.push(operator);
-      } else if (cert.kind() === 6) {
-        const instant_reward = cert
-          .as_move_instantaneous_rewards_cert()
-          .move_instantaneous_reward()
-          .as_to_stake_creds()
-          .keys();
-        for (let i = 0; i < instant_reward.len(); i++) {
-          const credential = instant_reward.get(i);
 
-          if (credential.kind() === 0) {
-            const keyHash = Buffer.from(
-              credential.to_keyhash().to_bytes(),
-            ).toString('hex');
+          break;
+        }
+        case Cardano.CertificateType.StakeDeregistration: {
+          const credential = cert.stakeCredential;
+          if (credential.type === Cardano.CredentialType.KeyHash) {
+            const keyHash = credential.hash;
             requiredKeyHashes.push(keyHash);
           }
+
+          break;
+        }
+        case Cardano.CertificateType.StakeDelegation: {
+          const credential = cert.stakeCredential;
+          if (credential.type === Cardano.CredentialType.KeyHash) {
+            const keyHash = credential.hash;
+            requiredKeyHashes.push(keyHash);
+          }
+
+          break;
+        }
+        case Cardano.CertificateType.PoolRegistration: {
+          const owners = cert.poolParameters.owners;
+          for (const owner of owners) {
+            const keyHash = Cardano.RewardAccount.toHash(owner);
+            requiredKeyHashes.push(keyHash);
+          }
+
+          break;
+        }
+        case Cardano.CertificateType.PoolRetirement: {
+          const operator = Cardano.PoolId.toKeyHash(cert.poolId);
+          requiredKeyHashes.push(operator);
+
+          break;
+        }
+        case Cardano.CertificateType.MIR: {
+          if (cert.kind === Cardano.MirCertificateKind.ToStakeCreds) {
+            const keyHash = cert.stakeCredential?.hash;
+            if (keyHash) {
+              requiredKeyHashes.push(keyHash);
+            }
+          }
+          break;
+        }
+        default: {
+          break;
         }
       }
     }
   };
-  if (txBody.certs()) keyHashFromCert(txBody);
+  if (txBody.certificates) keyHashFromCert(txBody);
 
   // key hashes from withdrawals
-  const withdrawals = txBody.withdrawals();
-  const keyHashFromWithdrawal = withdrawals => {
-    const rewardAddresses = withdrawals.keys();
-    for (let i = 0; i < rewardAddresses.len(); i++) {
-      const credential = rewardAddresses.get(i).payment_cred();
-      if (credential.kind() === 0) {
-        requiredKeyHashes.push(credential.to_keyhash().to_hex());
-      }
+  const withdrawals = txBody.withdrawals;
+  const keyHashFromWithdrawal = (withdrawals: Cardano.Withdrawal[]) => {
+    for (const withdrawal of withdrawals) {
+      const credential = withdrawal.stakeAddress;
+      requiredKeyHashes.push(Cardano.RewardAccount.toHash(credential));
     }
   };
   if (withdrawals) keyHashFromWithdrawal(withdrawals);
 
   //get key hashes from scripts
-  const scripts = tx.witness_set().native_scripts();
-  const keyHashFromScript = scripts => {
-    for (let i = 0; i < scripts.len(); i++) {
-      const script = scripts.get(i);
-      if (script.kind() === 0) {
-        const keyHash = Buffer.from(
-          script.as_script_pubkey().addr_keyhash().to_bytes(),
-        ).toString('hex');
+  const scripts = tx.witness.scripts?.filter(
+    script => script.__type === Cardano.ScriptType.Native,
+  );
+  const keyHashFromScript = (scripts: Cardano.NativeScript[]) => {
+    for (const script of scripts) {
+      if (script.kind === Cardano.NativeScriptKind.RequireSignature) {
+        const keyHash = script.keyHash;
         requiredKeyHashes.push(keyHash);
       }
-      if (script.kind() === 1) {
-        return keyHashFromScript(script.as_script_all().native_scripts());
+      if (script.kind === Cardano.NativeScriptKind.RequireAllOf) {
+        return keyHashFromScript(script.scripts);
       }
-      if (script.kind() === 2) {
-        return keyHashFromScript(script.as_script_any().native_scripts());
+      if (script.kind === Cardano.NativeScriptKind.RequireAnyOf) {
+        return keyHashFromScript(script.scripts);
       }
-      if (script.kind() === 3) {
-        return keyHashFromScript(script.as_script_n_of_k().native_scripts());
+      if (script.kind === Cardano.NativeScriptKind.RequireNOf) {
+        return keyHashFromScript(script.scripts);
       }
     }
   };
   if (scripts) keyHashFromScript(scripts);
 
   //get keyHashes from required signers
-  const requiredSigners = tx.body().required_signers();
+  const requiredSigners = tx.body.requiredExtraSignatures;
   if (requiredSigners) {
-    for (let i = 0; i < requiredSigners.len(); i++) {
-      requiredKeyHashes.push(
-        Buffer.from(requiredSigners.get(i).to_bytes()).toString('hex'),
-      );
+    for (const signer of requiredSigners) {
+      requiredKeyHashes.push(signer);
     }
   }
 
   //get keyHashes from collateral
-  const collateral = txBody.collateral();
-  if (collateral) {
-    for (let i = 0; i < collateral.len(); i++) {
-      const c = collateral.get(i);
-      const utxo = await getSpecificUtxo(
-        Buffer.from(c.transaction_id().to_bytes()).toString('hex'),
-        c.index(),
+  if (txBody.collaterals) {
+    for (const c of txBody.collaterals) {
+      const utxo = utxos.find(
+        utxo => utxo[0].txId === c.txId && utxo[0].index === c.index,
       );
       if (utxo) {
-        const address = Loader.Cardano.Address.from_bech32(utxo.address);
-        requiredKeyHashes.push(await getPaymentKeyHash(address));
+        const address = Cardano.Address.fromString(utxo[1].address);
+        const paymentHash = address?.getProps().paymentPart?.hash;
+        if (paymentHash) {
+          requiredKeyHashes.push(paymentHash);
+        }
       }
     }
   }
@@ -211,88 +184,129 @@ export const getKeyHashes = async (
   return { key: requiredKeyHashes, kind: keyKind };
 };
 
-export const getValue = async (tx, utxos, account) => {
-  let inputValue = Loader.Cardano.Value.new(
-    Loader.Cardano.BigNum.from_str('0'),
-  );
-  const inputs = tx.body().inputs();
-  for (let i = 0; i < inputs.len(); i++) {
-    const input = inputs.get(i);
-    const inputTxHash = Buffer.from(input.transaction_id().to_bytes()).toString(
-      'hex',
+interface Asset {
+  /** The unit of the asset ('lovelace' for ADA, or the asset ID for other tokens) */
+  unit: Cardano.AssetId | 'lovelace';
+  /** The quantity of the asset */
+  quantity: bigint;
+  /** The asset fingerprint (for non-ADA assets) */
+  fingerprint?: Cardano.AssetFingerprint;
+  /** The asset name (for non-ADA assets) */
+  name?: Cardano.AssetName;
+  /** The policy ID of the asset (for non-ADA assets) */
+  policy?: Cardano.PolicyId;
+}
+
+interface ExternalOutput {
+  value: Asset[];
+  script?: boolean;
+  datumHash?: string;
+}
+
+export interface TransactionValue {
+  ownValue: Asset[];
+  externalValue: Record<string, ExternalOutput>;
+}
+
+export const isScriptAddress = (address: Cardano.PaymentAddress) => {
+  const addressObj = Cardano.Address.fromString(address);
+  if (!addressObj) {
+    console.error(
+      `Failed to parse address: ${address} while calculating external outputs`,
     );
-    const inputTxId = parseInt(input.index().to_str());
-    const utxo = utxos.find(utxo => {
-      const utxoTxHash = Buffer.from(
-        utxo.input().transaction_id().to_bytes(),
-      ).toString('hex');
-      const utxoTxId = parseInt(utxo.input().index().to_str());
-      return inputTxHash === utxoTxHash && inputTxId === utxoTxId;
-    });
-    if (utxo) {
-      inputValue = inputValue.checked_add(utxo.output().amount());
-    }
+    return false;
   }
-  const outputs = tx.body().outputs();
-  let ownOutputValue = Loader.Cardano.Value.new(
-    Loader.Cardano.BigNum.from_str('0'),
-  );
-  const externalOutputs = {};
-  if (!outputs) return;
-  for (let i = 0; i < outputs.len(); i++) {
-    const output = outputs.get(i);
-    const address = output.address().to_bech32();
-    const hashBech32 = await extractKeyOrScriptHash(
-      Buffer.from(output.address().to_bytes()).toString('hex'),
-    );
-    // making sure funds at mangled addresses are also included
-    if (hashBech32 === account.paymentKeyHashBech32) {
-      //own
-      ownOutputValue = ownOutputValue.checked_add(output.amount());
-    } else {
-      //external
-      if (!externalOutputs[address]) {
-        const value = Loader.Cardano.Value.new(output.amount().coin());
-        if (output.amount().multiasset())
-          value.set_multiasset(output.amount().multiasset());
-        externalOutputs[address] = { value };
-      } else
-        externalOutputs[address].value = externalOutputs[
-          address
-        ].value.checked_add(output.amount());
-      const prefix = bytesAddressToBinary(output.address().to_bytes()).slice(
-        0,
-        4,
-      );
-      // from cardano ledger specs; if any of these prefixes match then it means the payment credential is a script hash, so it's a contract address
-      if (
-        prefix == '0111' ||
-        prefix == '0011' ||
-        prefix == '0001' ||
-        prefix == '0101'
-      ) {
-        externalOutputs[address].script = true;
+
+  if (addressObj) {
+    switch (addressObj.getType()) {
+      case Cardano.AddressType.BasePaymentScriptStakeKey:
+      case Cardano.AddressType.BasePaymentKeyStakeScript:
+      case Cardano.AddressType.BasePaymentScriptStakeScript:
+      case Cardano.AddressType.PointerScript:
+      case Cardano.AddressType.EnterpriseScript:
+      case Cardano.AddressType.RewardScript: {
+        return true;
       }
-      const datum = output.datum();
-      if (datum)
-        externalOutputs[address].datumHash = Buffer.from(
-          datum.kind() === 0
-            ? datum.as_data_hash().to_bytes()
-            : Loader.Cardano.hash_plutus_data(datum.as_data().get()).to_bytes(),
-        ).toString('hex');
+      default: {
+        return false;
+      }
     }
   }
+};
 
-  inputValue = await valueToAssets(inputValue);
-  ownOutputValue = await valueToAssets(ownOutputValue);
+/**
+ * Converts a Cardano.Value object to an array of Asset objects.
+ *
+ * @param {Cardano.Value} value - The Cardano.Value object to convert.
+ * @returns {Asset[]} An array of Asset objects representing the value.
+ */
+export const valueToAssetsSdk = (value: Cardano.Value): Asset[] => {
+  const assets: Asset[] = [];
+  assets.push({ unit: 'lovelace', quantity: value.coins });
 
+  for (const [assetId, quantity] of value.assets || []) {
+    const policy = Cardano.AssetId.getPolicyId(assetId);
+    const name = Cardano.AssetId.getAssetName(assetId);
+    const fingerprint = Cardano.AssetFingerprint.fromParts(policy, name);
+    const asset: Asset = {
+      quantity,
+      unit: assetId,
+      policy,
+      name,
+      fingerprint,
+    };
+    assets.push(asset);
+  }
+
+  return assets;
+};
+
+export const getValueWithSdk = async (
+  tx: Readonly<Cardano.Tx>,
+  utxos: Readonly<Wallet.Cardano.Utxo[]>,
+  addresses: Cardano.PaymentAddress[],
+): Promise<TransactionValue> => {
+  const inputValue = valueToAssetsSdk(
+    await totalAddressInputsValueInspector(addresses, inputResolver(utxos))(tx),
+  );
+
+  const ownOutputValue = valueToAssetsSdk(
+    await totalAddressOutputsValueInspector(addresses)(tx),
+  );
+
+  const externalOutputsByAddress = Object.entries(
+    groupBy(
+      tx.body.outputs.filter(output =>
+        addresses.every(addr => addr !== output.address),
+      ),
+      output => output.address,
+    ),
+  ) as [Cardano.PaymentAddress, Cardano.TxOut[]][];
+
+  const externalOutputs: [
+    Cardano.PaymentAddress,
+    Omit<ExternalOutput, 'value'> & { value: Cardano.Value },
+  ][] = externalOutputsByAddress.map(([address, outputs]) => {
+    const datumHash = outputs.find(output => !!output.datumHash)?.datumHash;
+    return [
+      address,
+      {
+        value: coalesceValueQuantities(outputs.map(output => output.value)),
+        script: isScriptAddress(address),
+        ...(datumHash ? { datumHash } : {}),
+      },
+    ];
+  });
+
+  // Create a list of all asset IDs from inputs and own outputs. Includes the ADA ('lovelace') asset.
   const involvedAssets = [
     ...new Set([
       ...inputValue.map(asset => asset.unit),
       ...ownOutputValue.map(asset => asset.unit),
     ]),
   ];
-  const ownOutputValueDifference = involvedAssets.map(unit => {
+
+  const ownOutputValueDifference = involvedAssets.map<Asset>(unit => {
     const leftValue = inputValue.find(asset => asset.unit === unit);
     const rightValue = ownOutputValue.find(asset => asset.unit === unit);
     const difference =
@@ -301,31 +315,32 @@ export const getValue = async (tx, utxos, account) => {
     if (unit === 'lovelace') {
       return { unit, quantity: difference };
     }
-    const policy = unit.slice(0, 56);
-    const name = unit.slice(56);
-    const fingerprint = AssetFingerprint.fromParts(
-      Buffer.from(policy, 'hex'),
-      Buffer.from(name, 'hex'),
-    ).fingerprint();
+
+    const policy = Cardano.AssetId.getPolicyId(unit);
+    const name = Cardano.AssetId.getAssetName(unit);
+    const fingerprint = Cardano.AssetFingerprint.fromParts(policy, name);
+
     return {
       unit,
       quantity: difference,
       fingerprint,
-      name: (leftValue || rightValue).name,
+      name,
       policy,
     };
   });
 
-  const externalValue = {};
-  for (const address of Object.keys(externalOutputs)) {
+  // Similar to externalOutputs, but with the value converted from Cardano.Value to Asset[]
+  const externalValue: Record<Cardano.PaymentAddress, ExternalOutput> = {};
+  for (const [address, valueAndDatumHash] of externalOutputs) {
     externalValue[address] = {
-      ...externalOutputs[address],
-      value: await valueToAssets(externalOutputs[address].value),
+      ...valueAndDatumHash,
+      value: valueToAssetsSdk(valueAndDatumHash.value),
     };
   }
 
   const ownValue = ownOutputValueDifference.filter(
     v => v.quantity != BigInt(0),
   );
+  // Returns
   return { ownValue, externalValue };
 };

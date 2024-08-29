@@ -1,6 +1,7 @@
 import type { Events } from '../../features/analytics/events';
 import type { CreateWalletParams } from '../../types/wallet';
-import type { EraSummary } from '@cardano-sdk/core';
+import type { Serialization, EraSummary } from '@cardano-sdk/core';
+import type { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import type {
   AnyBip32Wallet,
   WalletManagerActivateProps,
@@ -9,6 +10,7 @@ import type {
   WalletType,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
+import type { HexBlob } from '@lace/cardano/dist/wallet';
 import type { PasswordObj as Password } from '@lace/core';
 export interface IAssetDetails {
   id: string;
@@ -26,6 +28,40 @@ export interface WalletManagerAddAccountProps {
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
   passphrase?: Uint8Array;
+}
+
+export interface DappConnector {
+  getDappInfo: () => Promise<Wallet.DappInfo>;
+  authorizeDapp: (
+    authorization: 'allow' | 'deny',
+    url: string,
+    onCleanup: () => void,
+  ) => void;
+  getSignTxRequest: () => Promise<{
+    dappInfo: Wallet.DappInfo;
+    request: {
+      data: {
+        tx: Serialization.TxCBOR;
+        addresses: Wallet.KeyManagement.GroupedAddress[];
+      };
+      reject: (onCleanup: () => void) => Promise<void>;
+      sign: (password: string) => Promise<void>;
+    };
+  }>;
+  getSignDataRequest: () => Promise<{
+    dappInfo: Wallet.DappInfo;
+    request: {
+      data: {
+        payload: HexBlob;
+        address:
+          | Wallet.Cardano.DRepID
+          | Wallet.Cardano.PaymentAddress
+          | Wallet.Cardano.RewardAccount;
+      };
+      reject: (onCleanup: () => void) => Promise<void>;
+      sign: (password: string) => Promise<Cip30DataSignature>;
+    };
+  }>;
 }
 
 export interface OutsideHandlesContextValue {
@@ -119,4 +155,5 @@ export interface OutsideHandlesContextValue {
     wallet: Readonly<Wallet.CardanoWallet>,
     chainName?: Wallet.ChainName,
   ) => Promise<void>;
+  dappConnector: DappConnector;
 }

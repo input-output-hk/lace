@@ -1,12 +1,6 @@
+/* eslint-disable functional/prefer-immutable-types */
 import React, { useMemo } from 'react';
-import {
-  getCurrentAccount,
-  isHW,
-  signData,
-  signDataCIP30,
-} from '../../../../api/extension';
-import Account from '../../components/account';
-import { Scrollbars } from '../../components/scrollbar';
+
 import {
   Box,
   Text,
@@ -15,73 +9,83 @@ import {
   Spinner,
   useColorModeValue,
 } from '@chakra-ui/react';
-import ConfirmModal from '../../components/confirmModal';
-import Loader from '../../../../api/loader';
-import { DataSignError } from '../../../../config/config';
-import { useCaptureEvent } from '../../../../features/analytics/hooks';
-import { Events } from '../../../../features/analytics/events';
+import { Wallet } from '@lace/cardano';
+import { ERROR } from 'config/config';
 
-const SignData = ({ request, controller }) => {
+import { Events } from '../../../../features/analytics/events';
+import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import Account from '../../components/account';
+import ConfirmModal from '../../components/confirmModal';
+import { Scrollbars } from '../../components/scrollbar';
+
+import type { UseAccount } from '../../../../adapters/account';
+import type { DappConnector } from 'features/outside-handles-provider';
+
+interface Props {
+  dappConnector: DappConnector;
+  account: UseAccount['activeAccount'];
+}
+
+export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const ref = React.useRef();
-  const [account, setAccount] = React.useState(null);
   const [payload, setPayload] = React.useState('');
   const [address, setAddress] = React.useState('');
+  const [dappInfo, setDappInfo] = React.useState<Wallet.DappInfo>();
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
+  const [request, setRequest] =
+    React.useState<
+      Awaited<ReturnType<typeof dappConnector.getSignDataRequest>>['request']
+    >();
   const background = useColorModeValue('gray.100', 'gray.700');
-  const getAccount = async () => {
-    const currentAccount = await getCurrentAccount();
-    if (isHW(currentAccount.index)) setError('HW not supported');
-    setAccount(currentAccount);
-  };
-  const getPayload = async () => {
-    await Loader.load();
-    const payload = Buffer.from(request.data.payload, 'hex').toString('utf8');
-    setPayload(payload);
+
+  const getPayload = (payload: Readonly<Wallet.HexBlob>) => {
+    const payloadUtf8 = Buffer.from(payload, 'hex').toString('utf8');
+    setPayload(payloadUtf8);
   };
 
   const signDataMsg = useMemo(() => {
-    const result = [];
-    payload.split(/\r?\n/).forEach(line => {
+    const result: JSX.Element[] = [];
+    for (const line of payload.split(/\r?\n/)) {
       result.push(
         <p style={{ wordBreak: 'break-word', paddingBlockEnd: '8px' }}>
           {line}
         </p>,
       );
-    });
+    }
     return result;
   }, [payload]);
 
-  const getAddress = async () => {
-    await Loader.load();
-    try {
-      const baseAddr = Loader.Cardano.BaseAddress.from_address(
-        Loader.Cardano.Address.from_bytes(
-          Buffer.from(request.data.address, 'hex'),
-        ),
-      );
-      if (!baseAddr) throw Error('Not a valid base address');
+  const getAddress = (
+    address:
+      | Wallet.Cardano.DRepID
+      | Wallet.Cardano.PaymentAddress
+      | Wallet.Cardano.RewardAccount,
+  ) => {
+    const addressObj = Wallet.Cardano.Address.fromString(address);
+    if (!addressObj) {
+      console.error('SignData: Invalid address', address);
+      setAddress('unknown');
+      return;
+    }
+
+    if (Wallet.Cardano.BaseAddress.fromAddress(addressObj)) {
       setAddress('payment');
-      return;
-    } catch (e) {}
-    try {
-      const rewardAddr = Loader.Cardano.RewardAddress.from_address(
-        Loader.Cardano.Address.from_bytes(
-          Buffer.from(request.data.address, 'hex'),
-        ),
-      );
-      if (!rewardAddr) throw Error('Not a valid base address');
+    } else if (addressObj) {
       setAddress('stake');
-      return;
-    } catch (e) {}
-    setAddress('unknown');
+    } else {
+      console.error('SignData: Unknown address type', address);
+      setAddress('unknown');
+    }
   };
 
   const loadData = async () => {
-    await getAccount();
-    await getPayload();
-    await getAddress();
+    const { dappInfo, request } = await dappConnector.getSignDataRequest();
+    getPayload(request.data.payload);
+    getAddress(request.data.address);
+    setDappInfo(dappInfo);
+    setRequest(request);
     setIsLoading(false);
   };
 
@@ -108,7 +112,7 @@ const SignData = ({ request, controller }) => {
           flexDirection="column"
           position="relative"
         >
-          <Account />
+          <Account name={account.name} avatar={account.avatar} />
           <Box h="4" />
           <Box
             display={'flex'}
@@ -130,12 +134,12 @@ const SignData = ({ request, controller }) => {
                 draggable={false}
                 width={4}
                 height={4}
-                src={`chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${request.origin}&size=32`}
+                src={dappInfo?.logo}
               />
             </Box>
             <Box w="3" />
             <Text fontSize={'xs'} fontWeight="bold">
-              {request.origin.split('//')[1]}
+              {dappInfo?.url.split('//')[1]}
             </Text>
           </Box>
           <Box h="8" />
@@ -197,10 +201,9 @@ const SignData = ({ request, controller }) => {
                 width={'180px'}
                 onClick={async () => {
                   capture(Events.DappConnectorDappDataCancelClick);
-                  await controller.returnData({
-                    error: DataSignError.UserDeclined,
+                  await request?.reject(() => {
+                    window.close();
                   });
-                  window.close();
                 }}
               >
                 Cancel
@@ -209,11 +212,11 @@ const SignData = ({ request, controller }) => {
               <Button
                 height={'50px'}
                 width={'180px'}
-                isDisabled={error}
+                isDisabled={!!error}
                 colorScheme="teal"
                 onClick={() => {
                   capture(Events.DappConnectorDappDataSignClick);
-                  ref.current.openModal(account.index);
+                  (ref.current as any)?.openModal(account.index);
                 }}
               >
                 Sign
@@ -224,37 +227,31 @@ const SignData = ({ request, controller }) => {
       )}
       <ConfirmModal
         ref={ref}
-        sign={password =>
-          request.data.CIP30
-            ? signDataCIP30(
-                request.data.address,
-                request.data.payload,
-                password,
-                account.index,
-              )
-            : // deprecated soon
-              signData(
-                request.data.address,
-                request.data.payload,
-                password,
-                account.index,
-              )
-        }
+        sign={async password => {
+          try {
+            return await request?.sign(password);
+          } catch (error) {
+            if (
+              error instanceof Wallet.KeyManagement.errors.AuthenticationError
+            ) {
+              throw ERROR.wrongPassword;
+            }
+            throw error;
+          }
+        }}
         onCloseBtn={() => {
           capture(Events.DappConnectorDappDataCancelClick);
         }}
         onConfirm={async (status, signedMessage) => {
-          if (status === true) {
+          if (status) {
             capture(Events.DappConnectorDappDataConfirmClick);
-            await controller.returnData({ data: signedMessage });
-          } else {
-            await controller.returnData({ error: signedMessage });
+            const channelCloseDelay = 100;
+            setTimeout(() => {
+              window.close();
+            }, channelCloseDelay);
           }
-          window.close();
         }}
       />
     </>
   );
 };
-
-export default SignData;
