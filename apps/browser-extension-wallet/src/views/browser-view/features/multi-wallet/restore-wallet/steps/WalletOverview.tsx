@@ -18,7 +18,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { compactNumberWithUnit } from '@src/utils/format-number';
 import { PortfolioBalance } from '@src/views/browser-view/components';
-import { addEllipsis, WarningBanner } from '@lace/common';
+import { addEllipsis, WarningBanner, toast } from '@lace/common';
 import { getProviderByChain } from '@src/stores/slices';
 import { CARDANO_COIN_SYMBOL, COINGECKO_URL } from '@src/utils/constants';
 import BigNumber from 'bignumber.js';
@@ -26,6 +26,8 @@ import styles from './WalletOverview.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useFetchCoinPrice } from '@hooks';
+
+const TOAST_DEFAULT_DURATION = 3;
 
 const handleOpenCoingeckoLink = () => {
   window.open(COINGECKO_URL, '_blank', 'noopener,noreferrer');
@@ -178,13 +180,16 @@ export const WalletOverview = (): JSX.Element => {
             </Tooltip>
             <ControlButton.Icon
               icon={<Copy height={24} width={24} />}
-              onClick={() => navigator.clipboard.writeText(walletMetadata.address)}
+              onClick={() => {
+                navigator.clipboard.writeText(walletMetadata.address);
+                toast.notify({ duration: TOAST_DEFAULT_DURATION, text: i18n.t('general.clipboard.copiedToClipboard') });
+              }}
               size="small"
             />
           </Flex>
         </Flex>
         <Flex flexDirection="column">
-          {walletBalances.fetched ? (
+          {walletBalances.fetched && (
             <PortfolioBalance
               textSize="medium"
               loading={isLoading}
@@ -199,7 +204,8 @@ export const WalletOverview = (): JSX.Element => {
                 isPercentage: false
               }}
             />
-          ) : (
+          )}
+          {!walletBalances.fetched && !isLoading && (
             <WarningBanner message={i18n.t('general.warnings.cannotFetchPrice')} />
           )}
         </Flex>
