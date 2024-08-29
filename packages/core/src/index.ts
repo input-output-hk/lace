@@ -50,4 +50,3 @@ export * from '@ui/components/Transaction';
 export * from '@ui/components/PaperWallet';
 export * from '@ui/components/Password';
 export * from '@ui/components/PasswordVerification';
-export * from '@ui/components/SignMessage';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './SignMessage.module.scss';
 import { useTranslation } from 'react-i18next';
-import { WalletOwnAddressDropdown, AddressSchema } from '../WalletOwnAddressesDropdown';
+import { WalletOwnAddressDropdown, AddressSchema } from '@lace/core';
 import { Drawer, DrawerNavigation, TextArea, Button } from '@lace/common';
 import { Text } from '@input-output-hk/lace-ui-toolkit';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
@@ -14,6 +14,8 @@ export type SignMessageProps = {
   isSigningInProgress: boolean;
   signature: Cip30DataSignature | null;
   error: string | null;
+  hardwareWalletError: string | null;
+  isHardwareWallet: boolean;
 };
 
 export const SignMessage = ({
@@ -23,11 +25,13 @@ export const SignMessage = ({
   onSign,
   isSigningInProgress,
   signature,
-  error
+  error,
+  hardwareWalletError,
+  isHardwareWallet
 }: SignMessageProps): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<string>('');
 
   const handleSign = () => {
     if (selectedAddress && message) {
@@ -42,12 +46,12 @@ export const SignMessage = ({
   const footerButtons = (
     <div className={styles.buttonContainer}>
       <Button
-        className={styles.nextButton}
+        className={styles.signButton}
         variant="contained"
         onClick={handleSign}
         disabled={!selectedAddress || !message || isSigningInProgress}
       >
-        {isSigningInProgress ? t('core.signMessage.signingInProgress') : t('core.signMessage.nextButton')}
+        {isSigningInProgress ? t('core.signMessage.signingInProgress') : t('core.signMessage.signButton')}
       </Button>
       <Button className={styles.cancelButton} variant="outlined" onClick={onClose}>
         {t('core.signMessage.cancelButton')}
@@ -69,11 +73,17 @@ export const SignMessage = ({
         <Text.Body.Large weight="$bold">{t('core.signMessage.instructions')}</Text.Body.Large>
         <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.subtitle')}</Text.Body.Normal>
 
+        {isHardwareWallet && hardwareWalletError && (
+          <div className={styles.hardwareWalletError}>
+            <Text.Body.Normal color="error">{hardwareWalletError}</Text.Body.Normal>
+          </div>
+        )}
+
         <div className={styles.inputGroup}>
           <Text.Body.Normal weight="$medium">{t('core.signMessage.addressLabel')}</Text.Body.Normal>
           <WalletOwnAddressDropdown
             addresses={addresses}
-            onSelect={(address: string) => setSelectedAddress(address)}
+            onSelect={setSelectedAddress}
             placeholder={t('core.signMessage.selectAddress')}
           />
         </div>

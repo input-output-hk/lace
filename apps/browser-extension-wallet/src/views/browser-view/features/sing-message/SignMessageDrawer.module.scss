@@ -1,0 +1,66 @@
+.passwordContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.passwordWrapper {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.confirmButton,
+.cancelButton {
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 12px;
+}
+
+.confirmButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+
+  &:hover {
+    background-color: #2980b9;
+  }
+
+  &:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: #3498db;
+  border: 1px solid #3498db;
+
+  &:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+  }
+}

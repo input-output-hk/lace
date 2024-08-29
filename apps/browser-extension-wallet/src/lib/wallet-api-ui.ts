@@ -14,7 +14,7 @@ import {
   WalletType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { firstValueFrom, from, Observable, of, Subject } from 'rxjs';
+import { firstValueFrom, from, of, Subject } from 'rxjs';
 import { mergeMap, map, tap, finalize, takeUntil } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 
@@ -114,22 +114,12 @@ const securelyEraseString = (s: string): string => {
 const createPassphrase = (password: string): Buffer => Buffer.from(password, 'utf8');
 
 /**
- * Converts a password or a password getter function into an Observable that emits the password.
- *
- * @param {string | (() => Promise<string>)} passwordOrGetter Either a password string or a function that returns a Promise resolving to the password.
- * @returns {Observable<string>} An Observable that emits the password string.
- *
- */
-const getPassword = (passwordOrGetter: string | (() => Promise<string>)): Observable<string> =>
-  typeof passwordOrGetter === 'function' ? from(passwordOrGetter()) : of(passwordOrGetter);
-
-/**
  * Handles the process of signing data with confirmation, supporting both in-memory and hardware wallets.
  * This function manages the signing request, password handling (for in-memory wallets), and secure password erasure.
  *
  * @template T The type of the value returned by the action.
  * @param {() => Promise<T>} action A function that performs the action requiring data signing.
- * @param {string | (() => Promise<string>)} passwordOrGetter Either a password string or a function that returns a promise resolving to the password.
+ * @param {string} password The password string for in-memory wallets.
  * @returns {Promise<T>} A promise that resolves with the result of the action.
  *
  * @throws Will throw an error if the signing process or the action fails.
@@ -139,19 +129,15 @@ const getPassword = (passwordOrGetter: string | (() => Promise<string>)): Observ
  * - The password is never logged or stored in plain text.
  * - For hardware wallets, no password is required or handled.
  */
-export const withSignDataConfirmation = async <T>(
-  action: () => Promise<T>,
-  passwordOrGetter: string | (() => Promise<string>)
-): Promise<T> => {
+export const withSignDataConfirmation = async <T>(action: () => Promise<T>, password: string): Promise<T> => {
   const cleanup$ = new Subject<void>();
   let passwordToErase: string | undefined;
-
   const signData$ = signingCoordinator.signDataRequest$.pipe(
     mergeMap((req) =>
       req.walletType === WalletType.InMemory
-        ? getPassword(passwordOrGetter).pipe(
-            tap((password) => {
-              passwordToErase = password;
+        ? of(password).pipe(
+            tap((pwd) => {
+              passwordToErase = pwd;
             }),
             map(createPassphrase),
             mergeMap((passphrase) =>
