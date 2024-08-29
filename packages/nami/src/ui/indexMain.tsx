@@ -17,7 +17,7 @@ import Wallet from './app/pages/wallet';
 import { Container } from './Container';
 import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
 
-import { useOutsideHandles } from './index';
+import { Enable, SignTx, SignData, useOutsideHandles } from './index';
 
 export const Main = () => {
   const {
@@ -51,6 +51,7 @@ export const Main = () => {
     setAvatar,
     switchWalletMode,
     openHWFlow,
+    dappConnector,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -142,6 +143,24 @@ export const Main = () => {
             </Route>
             <Route exact path="/hwTab/success">
               <SuccessAndClose />
+            </Route>
+            <Route path="/dapp/connect">
+              <Enable
+                dappConnector={dappConnector}
+                controller={dappConnector.authorizeDapp}
+                accountAvatar={activeAccount.avatar}
+                accountName={activeAccount.name}
+              />
+            </Route>
+            <Route path="/dapp/sign-tx">
+              <SignTx
+                dappConnector={dappConnector}
+                inMemoryWallet={inMemoryWallet}
+                account={activeAccount}
+              />
+            </Route>
+            <Route path="/dapp/sign-data">
+              <SignData dappConnector={dappConnector} account={activeAccount} />
             </Route>
             <Route path="*">
               <Wallet

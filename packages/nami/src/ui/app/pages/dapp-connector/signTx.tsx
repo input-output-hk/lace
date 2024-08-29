@@ -1,22 +1,10 @@
-import React from 'react';
-import {
-  bytesAddressToBinary,
-  getCurrentAccount,
-  getFavoriteIcon,
-  getUtxos,
-  signTx,
-  signTxHW,
-} from '../../../../api/extension';
-import Account from '../../components/account';
-import { Scrollbars } from '../../components/scrollbar';
-import ConfirmModal from '../../components/confirmModal';
-import { Loader } from '../../../../api/loader';
-import UnitDisplay from '../../components/unitDisplay';
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-params */
+/* eslint-disable unicorn/no-null */
+import React, { useEffect, useMemo, useState } from 'react';
+
+import { metadatum, Serialization } from '@cardano-sdk/core';
 import { ChevronRightIcon } from '@chakra-ui/icons';
-import MiddleEllipsis from 'react-middle-ellipsis';
-import Copy from '../../components/copy';
-import { TxSignError } from '../../../../config/config';
-import { useStoreState } from '../../../store';
 import {
   Box,
   Stack,
@@ -30,26 +18,58 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import AssetsModal from '../../components/assetsModal';
-import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import { Wallet } from '@lace/cardano';
+import MiddleEllipsis from 'react-middle-ellipsis';
+import { firstValueFrom, map } from 'rxjs';
+
 import { Events } from '../../../../features/analytics/events';
-import { getKeyHashes, getValue } from './signTxUtil';
+import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import { useOutsideHandles } from '../../../../features/outside-handles-provider';
+import Account from '../../components/account';
+import AssetsModal from '../../components/assetsModal';
+import ConfirmModal from '../../components/confirmModal';
+import Copy from '../../components/copy';
+import { Scrollbars } from '../../components/scrollbar';
+import UnitDisplay from '../../components/unitDisplay';
+
+import {
+  getKeyHashes,
+  getValueWithSdk as getValue,
+  isScriptAddress,
+} from './signTxUtil';
+
+import type { TransactionValue } from './signTxUtil';
+import type { DappConnector } from '../../../../features/outside-handles-provider';
+import type { Cardano } from '@cardano-sdk/core';
+import type { UseAccount } from 'adapters/account';
+
+interface Props {
+  dappConnector: DappConnector;
+  account: UseAccount['activeAccount'];
+  inMemoryWallet: Wallet.ObservableWallet;
+}
 
 const abs = big => {
   return big < 0 ? big * BigInt(-1) : big;
 };
 
-const SignTx = ({ request, controller }) => {
+export const SignTx = ({
+  inMemoryWallet,
+  dappConnector,
+  account,
+}: Readonly<Props>) => {
+  const [request, setRequest] =
+    React.useState<
+      Awaited<ReturnType<typeof dappConnector.getSignTxRequest>>['request']
+    >();
+  const [dappInfo, setDappInfo] = React.useState<Wallet.DappInfo>();
+
   const capture = useCaptureEvent();
   const { cardanoCoin } = useOutsideHandles();
   const ref = React.useRef();
-  const [account, setAccount] = React.useState(null);
+  const [collateral, setCollateral] = React.useState<Wallet.Cardano.Utxo>();
   const [fee, setFee] = React.useState('0');
-  const [value, setValue] = React.useState({
-    ownValue: null,
-    externalValue: null,
-  });
+  const [value, setValue] = React.useState<TransactionValue | null>(null);
   const [property, setProperty] = React.useState({
     metadata: false,
     certificate: false,
@@ -59,7 +79,7 @@ const SignTx = ({ request, controller }) => {
     contract: false,
     datum: false,
   });
-  const [tx, setTx] = React.useState('');
+
   // key kind can be payment and stake
   const [keyHashes, setKeyHashes] = React.useState<{
     key: string[];
@@ -73,102 +93,82 @@ const SignTx = ({ request, controller }) => {
   const assetsModalRef = React.useRef();
   const detailsModalRef = React.useRef();
 
-  const getFee = tx => {
-    const fee = tx.body().fee().to_str();
+  const getFee = (tx: Readonly<Cardano.Tx>) => {
+    const fee = tx.body.fee.toString();
     setFee(fee);
   };
 
-  const getProperties = tx => {
-    let metadata = tx.auxiliary_data() && tx.auxiliary_data().metadata();
-    if (metadata) {
-      const json = {};
-      const keys = metadata.keys();
-      for (let i = 0; i < keys.len(); i++) {
-        const key = keys.get(i);
-        json[key.to_str()] = JSON.parse(
-          Loader.Cardano.decode_metadatum_to_json_str(metadata.get(key), 1),
-        );
+  const getProperties = (tx: Readonly<Cardano.Tx>) => {
+    const metadata = tx.auxiliaryData?.blob;
+    let metadataJson;
+    if (metadata && metadata.size > 0) {
+      metadataJson = {};
+      for (const [key, value] of metadata.entries()) {
+        try {
+          metadataJson[key.toString()] = metadatum.metadatumToJson(value);
+        } catch (error) {
+          console.error(`error parsing tx ${tx.id} metadatum`, { error });
+        }
       }
-      metadata = json;
     }
 
-    const certificate = tx.body().certs();
-    const withdrawal = tx.body().withdrawals();
-    const minting = tx.body().mint();
-    const script = tx.witness_set().native_scripts();
-    let datum;
-    let contract = tx.body().script_data_hash();
-    const outputs = tx.body().outputs();
-    for (let i = 0; i < outputs.len(); i++) {
-      const output = outputs.get(i);
-      if (output.datum()) {
+    const certificate = tx.body.certificates;
+    const withdrawal = tx.body.withdrawals;
+    const minting = tx.body.mint;
+    const script = tx.witness.scripts?.filter(
+      s => s.__type === Wallet.Cardano.ScriptType.Native,
+    );
+    let datum = false;
+    let contract: Wallet.Crypto.Hash32ByteBase16 | boolean | undefined =
+      tx.body.scriptIntegrityHash;
+    const outputs = tx.body.outputs;
+    for (const output of outputs) {
+      if (output.datum) {
         datum = true;
-        const prefix = bytesAddressToBinary(output.address().to_bytes()).slice(
-          0,
-          4,
-        );
-        // from cardano ledger specs; if any of these prefixes match then it means the payment credential is a script hash, so it's a contract address
-        if (
-          prefix == '0111' ||
-          prefix == '0011' ||
-          prefix == '0001' ||
-          prefix == '0101'
-        ) {
+        if (isScriptAddress(output.address)) {
           contract = true;
         }
-        break;
       }
     }
 
     setProperty({
-      metadata,
-      certificate,
-      withdrawal,
-      minting,
-      contract,
-      script,
+      metadata: metadataJson as boolean,
+      certificate: !!certificate,
+      withdrawal: !!withdrawal,
+      minting: !!minting,
+      contract: !!contract,
+      script: !!script,
       datum,
     });
   };
 
-  const checkCollateral = (tx, utxos, account) => {
-    const collateralInputs = tx.body().collateral();
+  const checkCollateral = (
+    tx: Readonly<Cardano.Tx>,
+    utxos: readonly Cardano.Utxo[],
+    collateral: Readonly<Wallet.Cardano.Utxo | undefined>,
+  ) => {
+    const collateralInputs = tx.body.collaterals;
     if (!collateralInputs) return;
 
     // checking all wallet utxos if used as collateral
-    for (let i = 0; i < collateralInputs.len(); i++) {
-      const collateral = collateralInputs.get(i);
-      for (let j = 0; j < utxos.length; j++) {
-        const input = utxos[j].input();
+    for (const collateralInput of collateralInputs) {
+      for (const utxo of utxos) {
+        const input = utxo[0];
         if (
-          Buffer.from(input.transaction_id().to_bytes()).toString('hex') ==
-            Buffer.from(collateral.transaction_id().to_bytes()).toString(
-              'hex',
-            ) &&
-          input.index() == collateral.index()
+          input.txId === collateralInput.txId &&
+          input.index === collateralInput.index
         ) {
           // collateral utxo is less than 50 ADA. That's also fine.
-          if (
-            utxos[j]
-              .output()
-              .amount()
-              .coin()
-              .compare(Loader.Cardano.BigNum.from_str('50000000')) <= 0
-          )
-            return;
+          if (utxo[1].value.coins <= 50_000_000) return;
 
-          if (!account.collateral) {
+          if (!collateral) {
             setIsLoading(l => ({ ...l, error: 'Collateral not set' }));
             return;
           }
 
           if (
-            !(
-              Buffer.from(collateral.transaction_id().to_bytes()).toString(
-                'hex',
-              ) == account.collateral.txHash &&
-              collateral.index() == account.collateral.txId
-            )
+            collateralInput.txId !== collateral[0].txId ||
+            collateralInput.index !== collateral[0].index
           ) {
             setIsLoading(l => ({ ...l, error: 'Invalid collateral used' }));
             return;
@@ -179,19 +179,39 @@ const SignTx = ({ request, controller }) => {
   };
 
   const getInfo = async () => {
-    await Loader.load();
-    const currentAccount = await getCurrentAccount();
-    setAccount(currentAccount);
-    let utxos = await getUtxos();
-    const tx = Loader.Cardano.Transaction.from_bytes(
-      Buffer.from(request.data.tx, 'hex'),
-    );
-    setTx(request.data.tx);
-    getFee(tx);
-    setValue(await getValue(tx, utxos, currentAccount));
+    const { dappInfo, request } = await dappConnector.getSignTxRequest();
+    setRequest(request);
+    setDappInfo(dappInfo);
 
-    checkCollateral(tx, utxos, currentAccount);
-    const keyHashes = await getKeyHashes(tx, utxos, currentAccount);
+    setCollateral(
+      await firstValueFrom(
+        inMemoryWallet.utxo.unspendable$.pipe(
+          map(collaterals => {
+            if (collaterals.length === 0) return undefined;
+            return collaterals[0];
+          }),
+        ),
+      ),
+    );
+
+    const utxos = await firstValueFrom(inMemoryWallet.utxo.available$);
+    const tx = Serialization.Transaction.fromCbor(request.data.tx).toCore();
+    getFee(tx);
+    setValue(
+      await getValue(
+        tx,
+        utxos,
+        request.data.addresses.map(a => a.address),
+      ),
+    );
+
+    checkCollateral(tx, utxos, collateral);
+
+    const keyHashes = getKeyHashes(
+      tx,
+      utxos,
+      request.data.addresses[0].address,
+    );
     if ('error' in keyHashes) {
       setIsLoading(l => ({
         ...l,
@@ -208,7 +228,7 @@ const SignTx = ({ request, controller }) => {
 
   React.useEffect(() => {
     getInfo();
-  }, []);
+  }, [request]);
   return (
     <>
       {isLoading.loading ? (
@@ -231,7 +251,7 @@ const SignTx = ({ request, controller }) => {
           position="relative"
           background={containerBg}
         >
-          <Account />
+          <Account name={account.name} avatar={account.avatar} />
           <Box h="4" />
           <Box
             display={'flex'}
@@ -253,12 +273,12 @@ const SignTx = ({ request, controller }) => {
                 draggable={false}
                 width={4}
                 height={4}
-                src={getFavoriteIcon(request.origin)}
+                src={dappInfo?.logo}
               />
             </Box>
             <Box w="3" />
             <Text fontSize={'xs'} fontWeight="bold">
-              {request.origin.split('//')[1]}
+              {dappInfo?.url.split('//')[1]}
             </Text>
           </Box>
           <Box h="8" />
@@ -274,10 +294,11 @@ const SignTx = ({ request, controller }) => {
             width="80%"
             padding="5"
           >
-            {value.ownValue ? (
+            {value?.ownValue ? (
               (() => {
-                let lovelace = value.ownValue.find(v => v.unit === 'lovelace');
-                lovelace = lovelace ? lovelace.quantity : '0';
+                const lovelace =
+                  value.ownValue.find(v => v.unit === 'lovelace')?.quantity ??
+                  BigInt(0);
                 const assets = value.ownValue.filter(
                   v => v.unit !== 'lovelace',
                 );
@@ -327,7 +348,7 @@ const SignTx = ({ request, controller }) => {
                                   colorScheme={'red'}
                                   size={'xs'}
                                   onClick={() =>
-                                    assetsModalRef.current.openModal({
+                                    assetsModalRef.current?.openModal({
                                       background: 'red.400',
                                       color: 'white',
                                       assets: negativeAssets,
@@ -415,7 +436,7 @@ const SignTx = ({ request, controller }) => {
             rounded={'xl'}
             size={'xs'}
             rightIcon={<ChevronRightIcon />}
-            onClick={() => detailsModalRef.current.openModal()}
+            onClick={() => detailsModalRef.current?.openModal()}
           >
             Details
           </Button>
@@ -450,10 +471,9 @@ const SignTx = ({ request, controller }) => {
                 width={'180px'}
                 onClick={async () => {
                   capture(Events.DappConnectorDappTxCancelClick);
-                  await controller.returnData({
-                    error: TxSignError.UserDeclined,
+                  await request?.reject(() => {
+                    window.close();
                   });
-                  window.close();
                 }}
               >
                 Cancel
@@ -462,11 +482,11 @@ const SignTx = ({ request, controller }) => {
               <Button
                 height={'50px'}
                 width={'180px'}
-                isDisabled={isLoading.loading || isLoading.error}
+                isDisabled={isLoading.loading || !!isLoading.error}
                 colorScheme="teal"
                 onClick={() => {
                   capture(Events.DappConnectorDappTxSignClick);
-                  ref.current.openModal(account.index);
+                  ref.current?.openModal(account.index);
                 }}
               >
                 Sign
@@ -478,11 +498,11 @@ const SignTx = ({ request, controller }) => {
       <AssetsModal ref={assetsModalRef} />
       <DetailsModal
         ref={detailsModalRef}
-        externalValue={value.externalValue ? value.externalValue : {}}
+        externalValue={value?.externalValue ?? {}}
         assetsModalRef={assetsModalRef}
         property={property}
         keyHashes={keyHashes}
-        tx={tx}
+        tx={request?.data.tx}
       />
       <ConfirmModal
         ref={ref}
@@ -491,32 +511,26 @@ const SignTx = ({ request, controller }) => {
         }}
         sign={async (password, hw) => {
           if (hw) {
-            return await signTxHW(
-              request.data.tx,
-              keyHashes.key,
-              account,
-              hw,
-              request.data.partialSign,
-            );
+            // TODO: add hw sign support
+            // return await signTxHW(
+            //   request.data.tx,
+            //   keyHashes.key,
+            //   account,
+            //   hw,
+            //   request.data.partialSign,
+            // );
           }
-          return await signTx(
-            request.data.tx,
-            keyHashes.key,
-            password,
-            account.index,
-            request.data.partialSign,
-          );
+          return await request?.sign(password);
         }}
         onConfirm={async (status, signedTx) => {
-          if (status === true) {
+          if (status) {
             capture(Events.DappConnectorDappTxConfirmClick);
-            await controller.returnData({
-              data: Buffer.from(signedTx.to_bytes(), 'hex').toString('hex'),
-            });
-          } else {
-            await controller.returnData({ error: signedTx });
           }
-          window.close();
+
+          const channelCloseDelay = 100;
+          setTimeout(() => {
+            window.close();
+          }, channelCloseDelay);
         }}
       />
     </>
@@ -524,6 +538,7 @@ const SignTx = ({ request, controller }) => {
 };
 
 const DetailsModal = React.forwardRef(
+  // eslint-disable-next-line react/prop-types
   ({ externalValue, property, keyHashes, tx, assetsModalRef }, ref) => {
     const { cardanoCoin } = useOutsideHandles();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -531,7 +546,7 @@ const DetailsModal = React.forwardRef(
     const innerBackground = useColorModeValue('gray.100', 'gray.700');
 
     React.useImperativeHandle(ref, () => ({
-      openModal() {
+      openModal: () => {
         onOpen();
       },
     }));
@@ -814,4 +829,4 @@ const DetailsModal = React.forwardRef(
   },
 );
 
-export default SignTx;
+DetailsModal.displayName = 'DetailsModal';

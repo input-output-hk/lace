@@ -1,4 +1,7 @@
 import type { PasswordObj as Password } from '@lace/core';
+
+import React from 'react';
+
 import {
   Icon,
   Box,
@@ -15,8 +18,10 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
-import React from 'react';
+
+
 import { MdUsb } from 'react-icons/md';
+
 import { indexToHw, initHW, isHW } from '../../../api/extension';
 import { ERROR, HW } from '../../../config/config';
 
@@ -258,11 +263,11 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
               >
                 <Icon as={MdUsb} boxSize={5} mr={2} />
                 <Box fontSize="sm">
-                  {!waitReady
-                    ? `Waiting for ${
+                  {waitReady
+                    ? `Connect ${hw.device == HW.ledger ? 'Ledger' : 'Trezor'}`
+                    : `Waiting for ${
                         hw.device == HW.ledger ? 'Ledger' : 'Trezor'
-                      }`
-                    : `Connect ${hw.device == HW.ledger ? 'Ledger' : 'Trezor'}`}
+                      }`}
                 </Box>
               </Box>
               {error && (
