@@ -1,0 +1,18 @@
+@import '../colors.scss';
+@import '../functions.scss';
+
+@mixin input-default-style {
+  border: none;
+  background: $color-ebony;
+  border-radius: 25px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: toRem(14);
+  line-height: toRem(20);
+  /* identical to box height */
+  letter-spacing: 0.02em;
+  width: 100%;
+  /* Primary/IOG_Primary_White */
+  color: $color-white;
+  padding: 16px 22px;
+}

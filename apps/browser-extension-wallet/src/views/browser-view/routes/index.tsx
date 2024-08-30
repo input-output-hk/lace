@@ -29,6 +29,7 @@ import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
+import DappsContainer from '@views/browser/features/dapp/explorer/App';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -54,6 +55,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.settings,
     component: SettingsLayout
+  },
+  {
+    path: routes.settings,
+    component: DappsContainer
   },
   {
     path: routes.nfts,
