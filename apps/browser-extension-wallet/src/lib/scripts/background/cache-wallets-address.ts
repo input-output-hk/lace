@@ -36,5 +36,7 @@ export const cacheActivatedWalletAddressSubscription = (
   walletManager: WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>,
   walletRepository: WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>
 ): void => {
-  walletMetadataWithAddresses(walletManager, walletRepository).subscribe(walletRepository.updateWalletMetadata);
+  walletMetadataWithAddresses(walletManager, walletRepository).subscribe((updateProps) =>
+    walletRepository.updateWalletMetadata(updateProps)
+  );
 };
