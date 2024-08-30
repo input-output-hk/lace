@@ -1,0 +1,43 @@
+@import '../../styles/colors.scss';
+@import '../../styles/functions.scss';
+
+.iog-link-container {
+  &,
+  * {
+    display: inline-block;
+    color: $color-cornflower-blue;
+
+    font-style: normal;
+    font-weight: 600;
+    font-size: toRem(10);
+    line-height: toRem(14);
+    letter-spacing: 0.02em;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+.iog-link-container--badge {
+  border-radius: 10px;
+  padding: 2px 10px;
+  * {
+    // background: ${String(badgeColor)};
+
+    line-height: toRem(14);
+    color: $color-ebony;
+  }
+  &,
+  * {
+    text-decoration: none;
+  }
+}
+
+.iog-link-container--disabled {
+  cursor: not-allowed;
+  a {
+    pointer-events: none;
+  }
+  * {
+    color: $color-font-disabled !important;
+  }
+}

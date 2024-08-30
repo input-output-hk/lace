@@ -1,0 +1,67 @@
+$color-blue-bell: #8a85c6;
+$color-stratos: #000428;
+$color-governor-bay: #3b46ae;
+$color-ebony: #131533;
+$color-cornflower-blue: #7d5deb;
+$color-silver: #c4c4c4;
+$color-port-gore: #1b1f42;
+$color-heliotrope: #8c64ff;
+$color-black-rock: #04052d;
+$color-aquamarine: #49f4ff;
+$color-link-water: #cecbf1;
+$color-error: #fc5659;
+$color-manatee: #878e9e;
+$color-haiti: #0d112f;
+
+// NEW VARIABLES
+$color-white: #ffffff;
+$color-purple: #7f5af0;
+$color-secondary-black: #212121;
+$color-light-grey: #f9f9f9;
+$color-light-greyer: #f6f6f6;
+$color-light-grey-plus: #efefef;
+$color-mid-grey: #c0c0c0;
+$color-dark-grey: #878e9e;
+$color-darker-grey: #5f6676;
+$color-dark-grey-v3: #6f7786;
+$color-black: #3d3b39;
+$color-magnolia: #fcf5e3;
+$color-lavender-rose: #ff92e1;
+$color-amber: #fdc300;
+$white-lilac: #f8f9fc;
+
+// Main
+$color-primary: $color-purple;
+$color-secondary: $color-white;
+
+// Border
+$color-border-primary: $color-primary;
+$color-border-light: $color-light-grey-plus;
+$color-border-medium: $color-mid-grey;
+$color-border-hover: $color-dark-grey;
+
+// Background
+$color-background: $white-lilac;
+$color-background-primary: $color-primary;
+$color-background-light: $color-light-grey;
+$color-background-medium: $color-dark-grey-v3;
+$color-background-medium-darker: $color-darker-grey;
+$color-background-black: $color-secondary-black;
+$color-backdrop: $color-secondary-black;
+$color-background-dark: $color-stratos;
+$color-background-warning: $color-magnolia;
+$lavender-rose: #ff92e1;
+
+// Font
+$color-font-heading: $color-haiti;
+$color-font-black: $color-black;
+$color-font-primary: $color-secondary-black;
+$color-font-primary-purple: $color-primary;
+$color-font-secondary: $color-white;
+$color-font-dark: $color-dark-grey;
+$color-font-light: $color-white;
+$color-font-error: $color-error;
+$color-font-feedback: $color-link-water;
+$color-font-primary-lilac: $color-blue-bell;
+$color-font-secondary-purple: $color-cornflower-blue;
+$color-font-disabled: $color-border-medium;

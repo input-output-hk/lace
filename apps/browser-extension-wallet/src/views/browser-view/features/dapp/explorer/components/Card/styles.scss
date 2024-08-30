@@ -1,0 +1,88 @@
+@import '../../styles/colors.scss';
+
+.iog-card-container {
+  cursor: pointer;
+  align-items: flex-start;
+  flex-direction: column;
+  background: #1b1f42;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  height: fit-content;
+}
+
+.iog-card-header {
+  width: 100%;
+  display: flex;
+
+  > div {
+    &:first-child {
+      padding: 30px 20px;
+      border-right: 1px solid $color-ebony;
+    }
+    &:last-child {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 10px 0 18px;
+    }
+  }
+
+  border-bottom: 1px solid $color-ebony;
+}
+
+.iog-card-box {
+  z-index: 1;
+  .iog-icon {
+    z-index: -1;
+  }
+
+  .iog-image {
+    padding: 9.5px;
+
+    &::part(image) {
+      border-radius: 50%;
+    }
+  }
+}
+
+.iog-card-categories-box {
+  display: inline-flex;
+  align-items: center;
+  p + p {
+    display: inline-flex;
+    align-items: center;
+    &:before {
+      content: '';
+      margin: 2px 5px 0;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background-color: var(--dotColor);
+    }
+  }
+}
+
+.iog-card-body {
+  width: 100%;
+  padding: 16px 20px;
+
+  > .iog-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.iog-card-box__image {
+  position: relative;
+  > .iog-icon {
+    position: absolute;
+    transform: translateY(-6.5px) translateX(-6.5px);
+  }
+
+  > .iog-image {
+    z-index: 1;
+  }
+}

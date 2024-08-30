@@ -1,0 +1,15 @@
+@import '../../../styles/utils/visibility.scss';
+
+.iog-image {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  user-select: none;
+}
+
+.iog-image--circle {
+  border-radius: 50%;
+}
+
+.iog-image--loaded {
+  opacity: 1;
+}

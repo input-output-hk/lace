@@ -1,0 +1,48 @@
+@import '../../../styles/functions.scss';
+@import '../../../styles/colors.scss';
+
+.iog-title {
+  font-size: toRem(32);
+  font-style: normal;
+  font-weight: bold;
+  line-height: toRem(32);
+  letter-spacing: 0.02em;
+  color: $color-font-primary;
+}
+
+.iog-title--center {
+  text-align: center;
+}
+
+.iog-title--bold {
+  font-weight: bold;
+}
+
+.iog-title--normal {
+  font-weight: normal;
+}
+
+.iog-title--smallest {
+  font-size: toRem(18) !important;
+  line-height: toRem(24) !important;
+}
+
+.iog-title--small {
+  font-size: toRem(14);
+  line-height: toRem(20);
+}
+
+.iog-title--x-medium {
+  font-size: toRem(25) !important;
+  line-height: toRem(40) !important;
+}
+
+.iog-title--medium {
+  font-size: toRem(32);
+  line-height: toRem(44);
+}
+
+.iog-title--big {
+  font-size: toRem(46) !important;
+  line-height: toRem(56) !important;
+}

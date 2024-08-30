@@ -1,0 +1,20 @@
+@import '../styles/colors.scss';
+
+.footerText {
+  color: $color-black;
+}
+
+.footerLink {
+  color: $color-secondary-black;
+  font-weight: bold;
+}
+
+.logo {
+  width: 154px;
+}
+
+.wrapper {
+  margin: 0 auto;
+  max-width: 1440px;
+  width: 100%;
+}

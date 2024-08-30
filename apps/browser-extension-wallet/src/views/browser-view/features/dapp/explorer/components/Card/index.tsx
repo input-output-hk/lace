@@ -1,0 +1,1 @@
+export { IogCardClassic } from './Classic';

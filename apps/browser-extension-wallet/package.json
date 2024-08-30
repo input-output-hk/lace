@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@apollo/client": "3.7.7",
     "@cardano-sdk/cardano-services-client": "0.23.2",
     "@cardano-sdk/core": "0.42.1",
     "@cardano-sdk/dapp-connector": "0.12.47",
@@ -79,6 +80,7 @@
     "i18next": "^22.5.1",
     "intersection-observer-polyfill": "0.1.0",
     "jsqr": "^1.4.0",
+    "little-state-machine": "4.8.0",
     "lodash": "4.17.21",
     "node-abort-controller": "^3.1.1",
     "openpgp": "^5.11.2",
@@ -89,6 +91,7 @@
     "qrcode": "^1.5.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-hook-form": "7.47.0",
     "react-i18next": "^12.3.1",
     "react-lottie": "^1.2.3",
     "react-router": "5.2.0",

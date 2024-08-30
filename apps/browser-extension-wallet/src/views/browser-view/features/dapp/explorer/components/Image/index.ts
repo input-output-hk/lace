@@ -1,0 +1,1 @@
+export { IogImage } from './IogImage';
