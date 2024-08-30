@@ -3,6 +3,7 @@ import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { Wallet } from '@lace/cardano';
 import { EMPTY, filter, map, Observable, switchMap } from 'rxjs';
 import { isNotNil } from '@cardano-sdk/util';
+import uniq from 'lodash/uniq';
 
 export const walletMetadataWithAddresses = (
   walletManager: WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>,
@@ -12,6 +13,7 @@ export const walletMetadataWithAddresses = (
     switchMap((activeWallet) =>
       activeWallet
         ? walletManager.activeWallet$.pipe(
+            filter(isNotNil),
             switchMap((observableWallet) => observableWallet.addresses$),
             map((addresses) => addresses.map(({ address }) => address)),
             blockingWithLatestFrom(
@@ -24,7 +26,7 @@ export const walletMetadataWithAddresses = (
               walletId: activeWallet.walletId,
               metadata: {
                 ...walletEntity.metadata,
-                walletAddresses
+                walletAddresses: uniq([...(walletEntity?.metadata?.walletAddresses || []), ...walletAddresses])
               }
             }))
           )
