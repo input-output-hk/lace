@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { WalletOwnAddressDropdown, AddressSchema } from '@lace/core';
 import { Drawer, DrawerNavigation, TextArea, Button } from '@lace/common';
 import { Text } from '@input-output-hk/lace-ui-toolkit';
+// import { Input } from 'antd';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 
 export type SignMessageProps = {
@@ -32,7 +33,7 @@ export const SignMessage = ({
   const { t } = useTranslation();
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-
+  // const { TextArea } = Input;
   const handleSign = () => {
     if (selectedAddress && message) {
       onSign(selectedAddress, message);
@@ -87,8 +88,8 @@ export const SignMessage = ({
             value={message}
             onChange={handleMessageChange}
             dataTestId="sign-message-input"
-            isResizable
-            wrapperClassName={styles.textAreaWrapper}
+            rows={4}
+            className={styles.customTextArea}
           />
         </div>
         {error && (

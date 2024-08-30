@@ -18,8 +18,41 @@
   gap: size_unit(1);
 }
 
+.customTextArea {
+  width: 100%;
+  min-height: 200px !important;
+  padding: 16px !important;
+  resize: vertical;
+  margin-bottom: 16px;
+  line-height: 1.5;
+  font-size: 14px;
+
+  &::placeholder {
+    text-align: left;
+    line-height: 2;
+  }
+
+  // Focus styles
+  &:focus {
+    border-color: var(--text-color-primary) !important;
+    box-shadow: var(--text-color-secondary) !important;
+  }
+}
+
 .textAreaWrapper {
   width: 100%;
+  margin-bottom: size_unit(2);
+
+  :global(.ant-input) {
+    min-height: size_unit(20);
+    padding-top: size_unit(10);
+    resize: vertical;
+
+    &::placeholder {
+      text-align: center;
+      line-height: size_unit(14); // Adjust line height for vertical centering
+    }
+  }
 }
 
 .buttonContainer {
