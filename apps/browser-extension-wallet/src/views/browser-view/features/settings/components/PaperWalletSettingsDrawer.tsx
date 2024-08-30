@@ -18,6 +18,8 @@ import styles from './SettingsLayout.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PassphraseStage, SaveStage, SecureStage } from './PaperWallet';
 import { useSecrets } from '@lace/core';
+
+const INCORRECT_STAGE_ERROR = 'incorrect stage supplied';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -123,7 +125,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       case 'save':
         return <SaveStage walletName={formattedWalletName} />;
       default:
-        throw new Error('incorrect stage supplied');
+        throw new Error(INCORRECT_STAGE_ERROR);
     }
   }, [stage, isPasswordValid, setPgpInfo, pgpInfo, setPassword, formattedWalletName]);
 
@@ -163,7 +165,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
               aria-disabled={pdfInstance.loading || !!pdfInstance.error}
               onClick={() => {
                 analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletDownloadClick);
-                handleClose();
               }}
             >
               <Button.Primary
@@ -178,7 +179,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
                 analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPrintClick);
                 const printWindow = window.open(URL.createObjectURL(pdfInstance.blob));
                 printWindow.print();
-                handleClose();
               }}
               w="$fill"
               disabled={pdfInstance.loading || !!pdfInstance.error}
@@ -189,9 +189,40 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         );
       }
       default:
-        throw new Error('incorrect stage supplied');
+        throw new Error(INCORRECT_STAGE_ERROR);
     }
-  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, handleClose, analytics]);
+  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, analytics]);
+
+  const drawerHeader = useMemo(() => {
+    switch (stage) {
+      case 'secure':
+        return (
+          <DrawerHeader
+            popupView={popupView}
+            title={i18n.t('paperWallet.securePaperWallet.title')}
+            subtitle={i18n.t('paperWallet.securePaperWallet.description')}
+          />
+        );
+      case 'passphrase':
+        return (
+          <DrawerHeader
+            popupView={popupView}
+            title={i18n.t('paperWallet.SettingsDrawer.passphraseStage.title')}
+            subtitle={i18n.t('paperWallet.SettingsDrawer.passphraseStage.subtitle')}
+          />
+        );
+      case 'save':
+        return (
+          <DrawerHeader
+            popupView={popupView}
+            title={i18n.t('paperWallet.savePaperWallet.title')}
+            subtitle={i18n.t('paperWallet.savePaperWallet.description')}
+          />
+        );
+      default:
+        throw new Error(INCORRECT_STAGE_ERROR);
+    }
+  }, [stage, popupView]);
 
   return (
     <>
@@ -200,7 +231,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         dataTestId="paper-wallet-settings-drawer"
         onClose={handleClose}
         popupView={popupView}
-        title={<DrawerHeader popupView={popupView} title={i18n.t('paperWallet.securePaperWallet.title')} />}
+        title={drawerHeader}
         navigation={
           <DrawerNavigation
             title={i18n.t('browserView.settings.heading')}

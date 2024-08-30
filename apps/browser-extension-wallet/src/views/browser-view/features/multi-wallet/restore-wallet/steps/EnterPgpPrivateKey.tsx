@@ -2,7 +2,7 @@
 import { Wallet } from '@lace/cardano';
 import { WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
 import { i18n } from '@lace/translation';
-import { decryptMessageWithPgp, decryptPgpPrivateKey, readPgpPrivateKey } from '@src/utils/pgp';
+import { decryptMessageWithPgp, decryptPgpPrivateKey, readPgpPrivateKey, readBinaryPgpMessage } from '@src/utils/pgp';
 import React, { useState, VFC, useEffect, ChangeEvent, useCallback } from 'react';
 import { useRestoreWallet } from '../context';
 import styles from './EnterPgpPrivateKey.module.scss';
@@ -40,9 +40,8 @@ const decryptQrCodeMnemonicWithPrivateKey = async ({ pgpInfo }: DecryptProps): P
         passphrase: pgpInfo.pgpKeyPassphrase
       })
     : await readPgpPrivateKey({ privateKey: pgpInfo.pgpPrivateKey });
-
   const decryptedMessage = await decryptMessageWithPgp({
-    message: pgpInfo.shieldedMessage,
+    message: await readBinaryPgpMessage(new Uint8Array(pgpInfo.shieldedMessage)),
     privateKey
   });
   if (
@@ -83,8 +82,6 @@ export const EnterPgpPrivateKey: VFC = () => {
         if (error.message === 'Armored text not of type private key') {
           setValidation({ error: i18n.t('paperWallet.enterPgpPrivateKey.keyNotPrivate') });
         }
-      } finally {
-        navigator.clipboard.writeText('');
       }
     },
     [setValidation, pgpInfo, setPgpInfo]
@@ -162,15 +159,21 @@ export const EnterPgpPrivateKey: VFC = () => {
     };
     if (
       ((pgpInfo.pgpPrivateKey && pgpInfo.privateKeyIsDecrypted) ||
-        (pgpInfo.pgpPrivateKey && pgpInfo.pgpKeyPassphrase && !pgpInfo.privateKeyIsDecrypted)) && // Only try to decrypt if we don't already have a wallet
+        (pgpInfo.pgpPrivateKey && pgpInfo.pgpKeyPassphrase && !pgpInfo.privateKeyIsDecrypted)) &&
       !createWalletData.mnemonic.every((w) => !!w)
-    )
+    ) {
+      // Only try to decrypt if we don't already have a wallet
       getMnemonic();
+    }
   }, [pgpInfo, createWalletData.mnemonic, setMnemonic, setValidation]);
 
   useEffect(() => {
     setValidation({ error: null });
   }, [entryType]);
+
+  window.addEventListener('paste', () => {
+    navigator.clipboard.writeText('');
+  });
 
   return (
     <>
@@ -253,7 +256,6 @@ export const EnterPgpPrivateKey: VFC = () => {
                 onChange={async (e) => {
                   setValidation({ error: null, success: null });
                   setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.target.value });
-                  navigator.clipboard.writeText('');
                 }}
                 label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
                 value={pgpInfo.pgpKeyPassphrase || ''}
