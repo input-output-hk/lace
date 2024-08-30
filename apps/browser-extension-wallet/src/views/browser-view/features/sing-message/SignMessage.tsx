@@ -45,15 +45,10 @@ export const SignMessage = ({
 
   const footerButtons = (
     <div className={styles.buttonContainer}>
-      <Button
-        className={styles.signButton}
-        variant="contained"
-        onClick={handleSign}
-        disabled={!selectedAddress || !message || isSigningInProgress}
-      >
+      <Button onClick={handleSign} disabled={!selectedAddress || !message || isSigningInProgress}>
         {isSigningInProgress ? t('core.signMessage.signingInProgress') : t('core.signMessage.signButton')}
       </Button>
-      <Button className={styles.cancelButton} variant="outlined" onClick={onClose}>
+      <Button color="secondary" onClick={onClose}>
         {t('core.signMessage.cancelButton')}
       </Button>
     </div>
@@ -72,13 +67,11 @@ export const SignMessage = ({
       <div data-testid="sign-message" className={styles.container}>
         <Text.Body.Large weight="$bold">{t('core.signMessage.instructions')}</Text.Body.Large>
         <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.subtitle')}</Text.Body.Normal>
-
         {isHardwareWallet && hardwareWalletError && (
           <div className={styles.hardwareWalletError}>
             <Text.Body.Normal color="error">{hardwareWalletError}</Text.Body.Normal>
           </div>
         )}
-
         <div className={styles.inputGroup}>
           <Text.Body.Normal weight="$medium">{t('core.signMessage.addressLabel')}</Text.Body.Normal>
           <WalletOwnAddressDropdown

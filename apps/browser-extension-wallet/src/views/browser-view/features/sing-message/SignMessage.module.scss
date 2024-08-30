@@ -1,6 +1,5 @@
-@import '../../styles/theme.scss';
-@import '../../../../../../packages/common/src/ui/styles/abstracts/_typography.scss';
-
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
 .container {
   display: flex;
   flex-direction: column;
@@ -28,20 +27,6 @@
   flex-direction: column;
   gap: size_unit(2);
   margin-top: size_unit(3);
-}
-
-.nextButton {
-  &[class*="contained"] {
-    background-color: var(--primary-highlight);
-    color: var(--text-color-white);
-  }
-}
-
-.cancelButton {
-  &[class*="outlined"] {
-    background-color: var(--light-mode-light-grey-plus);
-    color: var(--text-color-primary);
-  }
 }
 
 // New styles for signature display
