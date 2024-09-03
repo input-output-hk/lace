@@ -15,6 +15,8 @@ import { useHistory } from 'react-router-dom';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { AssetInput } from '../../../types/assets';
 import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { Events } from '../../../features/analytics/events';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -33,6 +35,7 @@ type Props = PropsWithChildren<{
 }> & Pick<OutsideHandlesContextValue, 'cardanoCoin'>;
 
 const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
+  const capture = useCaptureEvent();
   const background = useColorModeValue('gray.100', 'gray.700');
   const color = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   const [show, setShow] = React.useState(false);
@@ -46,6 +49,11 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
   const displayName = asset.unit === 'lovelace' ? 'Ada' : asset.displayName;
   const decimals = asset.unit === 'lovelace' ? 6 : asset.decimals;
 
+  const onShowDetails = () => {
+    if (asset.unit === 'lovelace') return;
+    setShow(!show)
+  }
+
   return (
     <Box
       data-testid="asset"
@@ -55,7 +63,7 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
       rounded="xl"
       background={background}
       color={color}
-      onClick={() => asset.unit !== 'lovelace' && setShow(!show)}
+      onClick={onShowDetails}
       cursor="pointer"
       overflow="hidden"
     >
@@ -160,6 +168,7 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
                 rightIcon={<BsArrowUpRight />}
                 onClick={e => {
                   setValue({ ...value, assets: [asset] });
+                  capture(Events.SendClick);
                   navigate('/send');
                 }}
               >

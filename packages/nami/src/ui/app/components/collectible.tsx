@@ -7,7 +7,6 @@ import {
 } from '@chakra-ui/react';
 import React from 'react';
 import './styles.css';
-import { getAsset } from '../../../api/extension';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 
@@ -22,25 +21,8 @@ const useIsMounted = () => {
 
 const Collectible = React.forwardRef(({ asset, ...props }, ref) => {
   const capture = useCaptureEvent();
-  const isMounted = useIsMounted();
-  const [token, setToken] = React.useState(null);
   const background = useColorModeValue('gray.300', 'white');
   const [showInfo, setShowInfo] = React.useState(false);
-
-  const fetchMetadata = async () => {
-    const detailedConstructedAsset = await getAsset(asset.unit);
-    const detailedAsset = {
-      ...detailedConstructedAsset,
-      quantity: asset.quantity,
-      fingerprint: asset.fingerprint ?? detailedConstructedAsset.fingerprint,
-    };
-    if (!isMounted.current) return;
-    setToken(detailedAsset);
-  };
-
-  React.useEffect(() => {
-    fetchMetadata();
-  }, [asset]);
 
   return (
     <>
@@ -74,7 +56,7 @@ const Collectible = React.forwardRef(({ asset, ...props }, ref) => {
           alignItems="center"
           justifyContent="center"
         >
-          {!token ? (
+          {!asset ? (
             <Skeleton width="210px" height="210px" />
           ) : (
             <Image
@@ -91,7 +73,7 @@ const Collectible = React.forwardRef(({ asset, ...props }, ref) => {
             />
           )}
         </Box>
-        {token && (
+        {asset && (
           <Box
             width="full"
             position="absolute"

@@ -81,6 +81,9 @@ export enum Events {
   NFTsClick = 'nami mode | nft | nfts | click',
   NFTsImageClick = 'nami mode | nft | nfts | nft image | click',
 
+  // assets
+  AssetsClick = 'nami mode | asset | assets | click',
+
   // activity
   ActivityActivityClick = 'nami mode | activity | activity | click',
   ActivityActivityActivityRowClick = 'nami mode | activity | activity | activity row | click',

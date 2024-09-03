@@ -50,16 +50,6 @@ export const decorators = [
       inMemoryWallet={mock}
       walletManager={mock}
       walletRepository={mock}
-      transformedCardano={{
-        balance: '0',
-        fiatBalance: '0',
-        id: '0',
-        logo: '',
-        name: '',
-        price: '0',
-        ticker: '',
-        variation: '',
-      }}
       handleAnalyticsChoice={noop}
       createWallet={noop}
       getMnemonic={noop}

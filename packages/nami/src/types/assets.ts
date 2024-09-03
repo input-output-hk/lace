@@ -9,6 +9,10 @@ export interface Asset {
   decimals: number;
   image?: string;
 }
+export interface CardanoAsset {
+  unit: string;
+  quantity: string;
+}
 
 export type AssetInput = Asset & {
   input: string;

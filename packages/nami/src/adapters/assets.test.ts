@@ -1,5 +1,11 @@
 /* eslint-disable unicorn/no-null */
-import { toAsset } from './assets';
+import { Wallet } from '@lace/cardano';
+import { renderHook } from '@testing-library/react-hooks';
+import { of } from 'rxjs';
+
+import * as utils from './assets';
+
+import type { Asset } from '../types/assets';
 
 const testCases = [
   [
@@ -362,9 +368,351 @@ const testCases = [
 describe('toAsset', () => {
   for (const [[asset, quantity], output] of testCases) {
     it(`should convert asset info with assetId ${asset.assetId}`, () => {
-      const result = toAsset(asset, quantity);
+      const result = utils.toAsset(asset, quantity);
 
       expect(result).toMatchObject(output);
     });
   }
+});
+
+describe('useAssets', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it('should return empty list if there are no assets and no coins', () => {
+    const total = of({
+      coins: BigInt(0),
+      assets: undefined,
+    });
+    const assetInfo = of(new Map());
+    const balance = {
+      totalCoins: BigInt(0),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([]);
+    expect(result.current.nfts).toMatchObject([]);
+  });
+
+  it('should return empty list if there are no coins and assets list is empty', () => {
+    const total = of({
+      coins: BigInt(0),
+      assets: new Map(),
+    });
+    const assetInfo = of(new Map());
+    const balance = {
+      totalCoins: BigInt(0),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([]);
+    expect(result.current.nfts).toMatchObject([]);
+  });
+
+  it('should return empty list if there are no matching assets info', () => {
+    const total = of({
+      coins: BigInt(0),
+      assets: new Map([
+        [
+          Wallet.Cardano.AssetId(
+            '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+          ),
+          BigInt(2_000_000),
+        ],
+      ]),
+    });
+    const assetInfo = of(new Map());
+    const balance = {
+      totalCoins: BigInt(0),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([]);
+    expect(result.current.nfts).toMatchObject([]);
+  });
+
+  it('should return proper nfts list if there is only asset which is of nft type', () => {
+    const assetID = Wallet.Cardano.AssetId(
+      '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+    );
+    const toAssetResult =
+      `toAssetResult${assetID.toString()}` as unknown as Asset;
+    const spy = jest.spyOn(utils, 'toAsset');
+    spy.mockReturnValue(toAssetResult);
+
+    const total = of({
+      coins: BigInt(0),
+      assets: new Map([[assetID, BigInt(2_000_000)]]),
+    });
+    const assetInfo = of(
+      new Map([
+        [
+          assetID,
+          {
+            supply: BigInt(1),
+            nftMetadata: true,
+            assetId:
+              'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a000de1406b6c6f73',
+          },
+        ],
+      ]) as unknown as Wallet.Assets,
+    );
+    const balance = {
+      totalCoins: BigInt(0),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([]);
+    expect(result.current.nfts).toMatchObject([toAssetResult]);
+    spy.mockRestore();
+  });
+
+  it('should return empty list if there is only asset with zero balance', () => {
+    const assetID = Wallet.Cardano.AssetId(
+      '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+    );
+
+    const total = of({
+      coins: BigInt(0),
+      assets: new Map([[assetID, BigInt(0)]]),
+    });
+    const assetInfo = of(
+      new Map([[assetID, { supply: BigInt(1) }]]) as unknown as Wallet.Assets,
+    );
+    const balance = {
+      totalCoins: BigInt(0),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([]);
+    expect(result.current.nfts).toMatchObject([]);
+  });
+
+  it('should return cardano as an asset in the list', () => {
+    const total = of({
+      coins: BigInt(0),
+      assets: new Map(),
+    });
+    const assetInfo = of(new Map());
+    const balance = {
+      totalCoins: BigInt(1),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([
+      {
+        unit: 'lovelace',
+        quantity: (
+          balance.totalCoins -
+          balance.lockedCoins -
+          balance.unspendableCoins
+        ).toString(),
+      },
+    ]);
+    expect(result.current.nfts).toMatchObject([]);
+  });
+
+  it('should return properly mapped asset in the list', () => {
+    const assetID = Wallet.Cardano.AssetId(
+      '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+    );
+    const toAssetResult =
+      `toAssetResult${assetID.toString()}` as unknown as Asset;
+    const spy = jest.spyOn(utils, 'toAsset');
+    spy.mockReturnValue(toAssetResult);
+
+    const total = of({
+      coins: BigInt(0),
+      assets: new Map([[assetID, BigInt(2_000_000)]]),
+    });
+    const assetInfo = of(
+      new Map([
+        [assetID, { supply: BigInt(2), assetId: '' }],
+      ]) as unknown as Wallet.Assets,
+    );
+    const balance = {
+      totalCoins: BigInt(0),
+      unspendableCoins: BigInt(0),
+      lockedCoins: BigInt(0),
+    };
+    const { result } = renderHook((...props) =>
+      utils.useAssets({
+        inMemoryWallet: {
+          balance: {
+            utxo: {
+              total$: total,
+            },
+          },
+          assetInfo$: assetInfo,
+        } as unknown as Wallet.ObservableWallet,
+        balance,
+        ...props,
+      }),
+    );
+
+    expect(result.current.assets).toMatchObject([toAssetResult]);
+    expect(result.current.nfts).toMatchObject([]);
+    spy.mockRestore();
+  });
+});
+
+describe('searchTokens', () => {
+  it('should return empty list if there are no assets matching search criteria', () => {
+    const assets = [
+      {
+        name: 'name',
+        displayName: 'displayName',
+        policy: 'policy',
+        fingerprint: 'fingerprint',
+      },
+    ] as Asset[];
+
+    expect(utils.searchTokens(assets, 'value')).toMatchObject([]);
+  });
+
+  it('should return an item if there is a match by name field', () => {
+    const search = 'somestring';
+    const assets = [
+      {
+        name: `na${search}me`,
+        displayName: 'displayName',
+        policy: 'policy',
+        fingerprint: 'fingerprint',
+      },
+    ] as Asset[];
+
+    expect(utils.searchTokens(assets, search)).toMatchObject(assets);
+  });
+
+  it('should return an item if there is a match by displayName field', () => {
+    const search = 'somestring';
+    const assets = [
+      {
+        name: 'name',
+        displayName: `displa${search}yName`,
+        policy: 'policy',
+        fingerprint: 'fingerprint',
+      },
+    ] as Asset[];
+
+    expect(utils.searchTokens(assets, search)).toMatchObject(assets);
+  });
+
+  it('should return an item if there is a match by policy field', () => {
+    const search = 'somestring';
+    const assets = [
+      {
+        name: 'name',
+        displayName: 'displayName',
+        policy: `pol${search}icy`,
+        fingerprint: 'fingerprint',
+      },
+    ] as Asset[];
+
+    expect(utils.searchTokens(assets, search)).toMatchObject(assets);
+  });
+
+  it('should return an item if there is a match by fingerprint field', () => {
+    const search = 'somestring';
+    const assets = [
+      {
+        name: 'name',
+        displayName: 'displayName',
+        policy: 'policy',
+        fingerprint: `finge${search}rprint`,
+      },
+    ] as Asset[];
+
+    expect(utils.searchTokens(assets, search)).toMatchObject(assets);
+  });
 });

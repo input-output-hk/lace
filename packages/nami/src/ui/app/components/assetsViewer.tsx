@@ -19,13 +19,18 @@ import Asset from './asset';
 import { Planet } from 'react-kawaii';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import { searchTokens } from '../../../adapters/assets';
+import { Asset as NamiAsset } from '../../../types/assets';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { Events } from '../../../features/analytics/events';
 
 const AssetsViewer = ({ assets }) => {
+  const capture = useCaptureEvent();
   const totalColor = useColorModeValue(
     'rgb(26, 32, 44)',
     'rgba(255, 255, 255, 0.92)',
   );
-  const [assetsArray, setAssetsArray] = React.useState(null);
+  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(null);
   const [search, setSearch] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const createArray = async () => {
@@ -36,15 +41,7 @@ const AssetsViewer = ({ assets }) => {
     }
     setAssetsArray(null);
     await new Promise((res, rej) => setTimeout(() => res(), 10));
-    const assetsArray = [];
-    let i = 0;
-    const filter = (asset) =>
-      search
-        ? asset.name.toLowerCase().includes(search.toLowerCase()) ||
-          asset.policy.includes(search) ||
-          asset.fingerprint.includes(search)
-        : true;
-    const filteredAssets = assets.filter(filter);
+    const filteredAssets = search ? searchTokens(assets, search) : assets;
     setTotal(filteredAssets.length);
     setAssetsArray(filteredAssets);
   };

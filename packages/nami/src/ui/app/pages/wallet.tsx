@@ -54,7 +54,6 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
-import AssetFingerprint from '@emurgo/cip14-js';
 import { BiWallet } from 'react-icons/bi';
 import {
   BsArrowDownRight,
@@ -65,7 +64,6 @@ import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
 import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 
-import { onAccountChange } from '../../../api/extension';
 import {
   createTab,
   displayUnit,
@@ -77,8 +75,9 @@ import {
   getTransactions,
   isHW,
   updateAccount,
+  onAccountChange,
 } from '../../../api/extension';
-import { currencyToSymbol, fromAssetUnit } from '../../../api/util';
+import { currencyToSymbol } from '../../../api/util';
 // Assets
 import Logo from '../../../assets/img/logoWhite.svg';
 import { TAB } from '../../../config/config';
@@ -99,6 +98,7 @@ import UnitDisplay from '../components/unitDisplay';
 import type { UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 
 type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   walletAddress: string;
@@ -119,6 +119,9 @@ type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   initializeCollateral: () => Promise<void>;
   submitCollateral: (password: string) => Promise<void>;
   reclaimCollateral: () => Promise<void>;
+  assets: (CardanoAsset | NamiAsset)[];
+  nfts: NamiAsset[];
+  setAvatar: (image: string) => void;
 };
 
 const useIsMounted = () => {
@@ -150,11 +153,13 @@ const Wallet = ({
   addAccount,
   activateAccount,
   removeAccount,
+  assets,
+  nfts,
+  setAvatar,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
   const history = useHistory();
-  const navigate = history.push;
   const delegateButtonBg = useColorModeValue(
     'gray.100',
     'rgba(255, 255, 255, 0.08)',
@@ -208,41 +213,6 @@ const Wallet = ({
     await updateAccount(forceUpdate);
     const allAccounts = await getAccounts();
     const currentAccount = allAccounts[currentIndex];
-    currentAccount.ft =
-      currentAccount.lovelace > 0
-        ? [
-            {
-              unit: 'lovelace',
-              quantity: (
-                BigInt(currentAccount.lovelace) -
-                BigInt(currentAccount.minAda) -
-                BigInt(
-                  currentAccount.collateral
-                    ? currentAccount.collateral.lovelace
-                    : 0,
-                )
-              ).toString(),
-            },
-          ]
-        : [];
-    currentAccount.nft = [];
-    for (const asset of currentAccount.assets) {
-      asset.policy = asset.unit.slice(0, 56);
-      asset.name = Buffer.from(asset.unit.slice(56), 'hex');
-      asset.fingerprint = AssetFingerprint.fromParts(
-        Buffer.from(asset.policy, 'hex'),
-        asset.name,
-      ).fingerprint();
-      asset.name = asset.name.toString();
-      if (
-        (asset.has_nft_onchain_metadata === true &&
-          !fromAssetUnit(asset.unit).label) ||
-        fromAssetUnit(asset.unit).label === 222
-      ) {
-        currentAccount.nft.push(asset);
-      } else currentAccount.ft.push(asset);
-    }
-
     const network = await getNetwork();
     const delegation = await getDelegation();
     if (!isMounted.current) return;
@@ -338,7 +308,6 @@ const Wallet = ({
             position="absolute"
             top="6"
             right="6"
-            position="absolute"
           >
             <Menu
               isOpen={menu}
@@ -508,7 +477,7 @@ const Wallet = ({
                 <MenuDivider />
                 <MenuItem
                   onClick={() => {
-                    navigate('/settings/');
+                    history.push('/settings/');
                   }}
                   icon={<SettingsIcon />}
                 >
@@ -705,7 +674,7 @@ const Wallet = ({
             <Button
               onClick={() => {
                 capture(Events.SendClick);
-                navigate('/send');
+                history.push('/send');
               }}
               size="sm"
               rounded="xl"
@@ -730,7 +699,12 @@ const Wallet = ({
           position="relative"
         >
           <TabList>
-            <Tab mr={2}>
+            <Tab
+              mr={2}
+              onClick={() => {
+                capture(Events.AssetsClick);
+              }}
+            >
               <Icon as={GiTwoCoins} boxSize={5} />
             </Tab>
             <Tab
@@ -755,13 +729,10 @@ const Wallet = ({
           </TabList>
           <TabPanels>
             <TabPanel>
-              <AssetsViewer assets={state.account && state.account.ft} />
+              <AssetsViewer assets={assets} />
             </TabPanel>
             <TabPanel>
-              <CollectiblesViewer
-                assets={state.account && state.account.nft}
-                onUpdateAvatar={async () => getData()}
-              />
+              <CollectiblesViewer assets={nfts} setAvatar={setAvatar} />
             </TabPanel>
             <TabPanel>
               <HistoryViewer

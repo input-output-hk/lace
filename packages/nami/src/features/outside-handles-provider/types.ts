@@ -47,7 +47,6 @@ export interface OutsideHandlesContextValue {
   setFiatCurrency: (fiatCurrency: string) => void;
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
-  transformedCardano: IAssetDetails;
   walletAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
@@ -72,4 +71,5 @@ export interface OutsideHandlesContextValue {
   defaultSubmitApi: string;
   cardanoCoin: Wallet.CoinId;
   isValidURL: (link: string) => boolean;
+  setAvatar: (image: string) => void;
 }

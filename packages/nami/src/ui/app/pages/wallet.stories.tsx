@@ -50,6 +50,7 @@ import { useStoreState, useStoreActions } from '../../store.mock';
 import Wallet, { Props } from './wallet';
 import { useHistory } from '../../../../.storybook/mocks/react-router-dom.mock';
 import { CurrencyCode } from '../../../adapters/currency';
+import { Asset } from '../../../types/assets';
 
 const noop = (async () => {}) as any;
 
@@ -62,6 +63,8 @@ const cardanoCoin = {
 
 const WalletStory = ({
   colorMode,
+  assets,
+  nfts,
   ...props
 }: Readonly<
   Partial<Props> & { colorMode: 'dark' | 'light' }
@@ -95,6 +98,9 @@ const WalletStory = ({
         activateAccount={noop}
         addAccount={noop}
         removeAccount={noop}
+        assets={assets ?? []}
+        nfts={nfts ?? []}
+        updateAccountMetadata={() => void 0}
         {...props}
       />
     </Box>
@@ -408,32 +414,31 @@ export const AssetLight: Story = {
       await userEvent.click(assets[1]);
     });
   },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([
-        {
-          ...account,
-          preprod: {
-            ...account.preprod,
-            assets: account.preprod.assets.slice(0, 4),
-          },
-          assets: account.preprod.assets.slice(0, 4),
-        },
-      ]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
-  },
   parameters: {
     colorMode: 'light',
+    assets: [
+      {
+        unit: 'lovelace',
+        quantity: (
+          BigInt(currentAccount.lovelace) -
+          BigInt(currentAccount.minAda) -
+          BigInt(account.collateral.lovelace)
+        ).toString(),
+      },
+      ...[
+        '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f4d657368546f6b656e',
+        '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f54657374546f6b656e',
+      ]
+        .map(id => tokens[id])
+        .filter(id => id),
+    ],
   },
 };
 
 export const AssetDark: Story = {
   ...AssetLight,
   parameters: {
+    ...AssetLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -446,32 +451,23 @@ export const CollectiblesLight: Story = {
       await userEvent.click(menu.children[0]);
     });
   },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([
-        {
-          ...account,
-          preprod: {
-            ...account.preprod,
-            assets: account.preprod.assets.slice(0, 4),
-          },
-          assets: account.preprod.assets.slice(0, 4),
-        },
-      ]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
-  },
   parameters: {
     colorMode: 'light',
+    nfts: [
+      ...[
+        '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff198444149',
+        '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743235',
+      ]
+        .map(id => tokens[id])
+        .filter(id => id),
+    ],
   },
 };
 
 export const CollectiblesDark: Story = {
   ...CollectiblesLight,
   parameters: {
+    ...CollectiblesLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -483,24 +479,6 @@ export const CollectiblesEmptyListLight: Story = {
       const menu = await canvas.findByTestId('collectibles');
       await userEvent.click(menu.children[0]);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([
-        {
-          ...account,
-          preprod: {
-            ...account.preprod,
-            assets: [],
-          },
-          assets: [],
-        },
-      ]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -525,25 +503,8 @@ export const CollectibleMetadataLight: Story = {
       await userEvent.click(nft.children[0]);
     });
   },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([
-        {
-          ...account,
-          preprod: {
-            ...account.preprod,
-            assets: account.preprod.assets.slice(0, 4),
-          },
-          assets: account.preprod.assets.slice(0, 4),
-        },
-      ]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
-  },
   parameters: {
+    ...CollectiblesLight.parameters,
     colorMode: 'light',
   },
 };
@@ -551,6 +512,7 @@ export const CollectibleMetadataLight: Story = {
 export const CollectibleMetadataDark: Story = {
   ...CollectibleMetadataLight,
   parameters: {
+    ...CollectibleMetadataLight.parameters,
     colorMode: 'dark',
   },
 };

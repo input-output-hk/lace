@@ -4,6 +4,7 @@ import { Box } from '@chakra-ui/react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import { useAccount } from '../adapters/account';
+import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useCollateral } from '../adapters/collateral';
 import { useFiatCurrency } from '../adapters/currency';
@@ -52,6 +53,7 @@ export const Main = () => {
     defaultSubmitApi,
     cardanoCoin,
     isValidURL,
+    setAvatar,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -104,6 +106,7 @@ export const Main = () => {
     submitCollateralTx,
     withSignTxConfirmation,
   });
+  const { assets, nfts } = useAssets({ inMemoryWallet, balance }) ?? [];
 
   return (
     <Router>
@@ -166,6 +169,9 @@ export const Main = () => {
                 addAccount={addAccount}
                 activateAccount={activateAccount}
                 removeAccount={removeAccount}
+                assets={assets}
+                nfts={nfts}
+                setAvatar={setAvatar}
               />
             </Route>
           </Switch>

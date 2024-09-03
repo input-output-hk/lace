@@ -30,14 +30,24 @@ import './styles.css';
 import Copy from './copy';
 import { useHistory } from 'react-router-dom';
 import { BsArrowUpRight } from 'react-icons/bs';
-import { setAccountAvatar } from '../../../api/extension';
 import { useStoreActions, useStoreState } from '../../store';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { Events } from '../../../features/analytics/events';
+import { Asset } from '../../../types/assets';
+import { searchTokens } from '../../../adapters/assets';
+import { Asset as NamiAsset } from '../../../types/assets';
 
-const CollectiblesViewer = ({ assets, onUpdateAvatar }) => {
-  const [assetsArray, setAssetsArray] = React.useState(null);
+interface Props {
+  assets: Asset[];
+  setAvatar: (image: string) => void;
+}
+
+const CollectiblesViewer = ({ assets, setAvatar }: Readonly<Props>) => {
+  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(null);
   const [search, setSearch] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const ref = useRef();
+  const capture = useCaptureEvent();
 
   const createArray = async () => {
     if (!assets) {
@@ -47,15 +57,7 @@ const CollectiblesViewer = ({ assets, onUpdateAvatar }) => {
     }
     setAssetsArray(null);
     await new Promise((res, rej) => setTimeout(() => res(), 10));
-    const assetsArray = [];
-    let i = 0;
-    const filter = asset =>
-      search
-        ? asset.name.toLowerCase().includes(search.toLowerCase()) ||
-          asset.policy.includes(search) ||
-          asset.fingerprint.includes(search)
-        : true;
-    const filteredAssets = assets.filter(filter);
+    const filteredAssets = searchTokens(assets, search);
     setTotal(filteredAssets.length);
     setAssetsArray(filteredAssets);
   };
@@ -69,6 +71,11 @@ const CollectiblesViewer = ({ assets, onUpdateAvatar }) => {
       setAssetsArray(null);
     };
   }, []);
+
+  const avatarHandler = async (avatar: string) => {
+    setAvatar(avatar);
+    await capture(Events.SettingsChangeAvatarClick);
+  };
 
   return (
     <>
@@ -110,7 +117,7 @@ const CollectiblesViewer = ({ assets, onUpdateAvatar }) => {
       <Box position="absolute" left="6" top="0">
         <Search setSearch={setSearch} assets={assets} />
       </Box>
-      <CollectibleModal ref={ref} onUpdateAvatar={onUpdateAvatar} />
+      <CollectibleModal ref={ref} onUpdateAvatar={avatarHandler} />
     </>
   );
 };
@@ -126,7 +133,7 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
     useStoreActions(actions => actions.globalModel.sendStore.setValue),
   ];
   const history = useHistory();
-  const navigate = history.navigate;
+  const navigate = history.push;
   const timer = React.useRef();
 
   React.useImperativeHandle(ref, () => ({
@@ -206,9 +213,8 @@ export const CollectibleModal = React.forwardRef(({ onUpdateAvatar }, ref) => {
                 right="16px"
                 top="22px"
                 size="xs"
-                onClick={async e => {
-                  await setAccountAvatar(asset.image);
-                  onUpdateAvatar();
+                onClick={async () => {
+                  await onUpdateAvatar(asset.image);
                 }}
               >
                 As Avatar

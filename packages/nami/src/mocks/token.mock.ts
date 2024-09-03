@@ -2,6 +2,7 @@ export const tokens = {
   '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f54657374546f6b656e':
     {
       decimals: 0,
+      quantity: 9,
       displayName: 'TestToken',
       fingerprint: 'asset16cee8gr79j5k4ag5v8wlk5ygg5fjyech5ugykj',
       image: '',
