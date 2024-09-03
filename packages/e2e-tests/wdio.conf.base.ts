@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 
 import extensionUtils from './src/utils/utils';
+import fs from 'fs';
+import { Logger } from './src/support/logger';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
@@ -140,5 +142,12 @@ export const config: WebdriverIO.Config = {
     timeout: 200_000,
     retry: 1,
     noStrictFlaky: true
-  } as WebdriverIO.CucumberOpts
+  } as WebdriverIO.CucumberOpts,
+  async onPrepare() {
+    if (!fs.existsSync('./src/support/walletConfiguration.ts')) {
+      Logger.log('walletConfiguration.ts is missing, decrypt the file first!');
+      // eslint-disable-next-line unicorn/no-process-exit
+      process.exit(1);
+    }
+  }
 };
