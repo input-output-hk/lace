@@ -62,20 +62,24 @@
   margin-top: size_unit(3);
 }
 
-// New styles for signature display
-.signatureContainer {
-  display: flex;
-  flex-direction: column;
-  gap: size_unit(1);
+.signatureWrapper {
+  resize: none;
+  overflow-y: auto;
+  cursor: default;
+  max-height: none;
+  opacity: 0.7;
+  user-select: none;
 }
 
-.signatureWrapper {
-  background-color: var(--light-mode-light-grey-plus);
-  border: 1px solid var(--light-mode-light-grey);
-  border-radius: size_unit(1);
-  padding: size_unit(2);
-  max-height: size_unit(30);
-  overflow-y: auto;
+.signatureContent {
+  @extend .customTextArea;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--text-color-primary);
 }
 
 .signatureContent {

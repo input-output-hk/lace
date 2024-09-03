@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
-import { useObservable } from '@lace/common';
+import { PostHogAction, useObservable } from '@lace/common';
 import { withSignDataConfirmation } from '@lib/wallet-api-ui';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import { HexBlob } from '@cardano-sdk/util';
 import { useDrawer } from '@views/browser/stores';
+import { useAnalyticsContext } from '@providers';
 
 interface SignMessageState {
   usedAddresses: { address: string; id: number }[];
@@ -21,6 +22,8 @@ interface SignMessageState {
 
 export const useSignMessageState = (): SignMessageState => {
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
+
   const { inMemoryWallet, isHardwareWallet } = useWalletStore();
   const [, setDrawerConfig] = useDrawer();
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
@@ -72,8 +75,9 @@ export const useSignMessageState = (): SignMessageState => {
   );
 
   const closeDrawer = useCallback(() => {
+    analytics.sendEventToPostHog(PostHogAction.SignMessageCloseDrawer);
     setDrawerConfig();
-  }, [setDrawerConfig]);
+  }, [setDrawerConfig, analytics]);
 
   const usedAddresses =
     addresses?.map((address, index) => ({
