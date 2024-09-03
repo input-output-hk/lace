@@ -1,6 +1,9 @@
 name: Memory Analysis
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   analyze-memory:
