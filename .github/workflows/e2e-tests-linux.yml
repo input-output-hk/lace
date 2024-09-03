@@ -43,6 +43,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install necessary tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gdb gcore
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -68,8 +72,18 @@ jobs:
           else
             TAGS_TO_RUN="--cucumberOpts.tags='${{ env.TAGS }}'";
           fi
-          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
+          runCommand="nohup yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN} &"
           eval "$runCommand";
+      - name: Get Chrome PID
+        run: |
+          chrome_pid=$(pgrep -n chrome)
+          echo "Chrome PID: $chrome_pid"
+          echo $chrome_pid > chrome_pid.txt
+      - name: Generate Chrome memory dump
+        run: |
+          chrome_pid=$(cat chrome_pid.txt)
+          sudo gcore -o /home/runner/work/chrome-memory-dump/chrome-memory-dump $chrome_pid
+        shell: bash
       - name: Create allure properties
         if: always()
         working-directory: './packages/e2e-tests/reports/allure/results'

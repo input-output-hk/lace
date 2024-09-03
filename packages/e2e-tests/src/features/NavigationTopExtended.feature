@@ -4,6 +4,10 @@ Feature: Top Navigation - Extended view
   Background:
     Given Lace is ready for test
 
+  @memory_dump_test
+  Scenario: Avatar dropdown displayed on click with content
+    When I wait 900000 milliseconds
+
   @LW-2318 @Smoke @Mainnet @Testnet
   Scenario: Top navigation is displayed containing logo and all appropriate buttons - Home page (tokens)
     Then all buttons and images in the top navigation are present
