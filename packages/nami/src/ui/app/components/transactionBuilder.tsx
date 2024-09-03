@@ -37,7 +37,6 @@ import {
 import { ERROR, HW, TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { useStoreState } from '../../store';
 
 import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';

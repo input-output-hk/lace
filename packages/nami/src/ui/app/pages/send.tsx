@@ -77,11 +77,7 @@ interface Props {
   walletAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
-  accounts: {
-    name: string;
-    avatar?: string;
-    address?: string;
-  }[];
+  accounts: UseAccount['nonActiveAccounts'];
   activeAccount: UseAccount['activeAccount'];
   updateAccountMetadata: UseAccount['updateAccountMetadata'];
   withSignTxConfirmation: <T>(

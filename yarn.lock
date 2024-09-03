@@ -9051,6 +9051,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cardano-sdk/util-rxjs@npm:0.7.28":
+  version: 0.7.28
+  resolution: "@cardano-sdk/util-rxjs@npm:0.7.28"
+  dependencies:
+    "@cardano-sdk/util": ~0.15.5
+    backoff-rxjs: ^7.0.0
+    rxjs: ^7.4.0
+  checksum: 01e1ef190108562bb725d6b2f6bbc52c36df30de519a1096b4070102dd0823f5680adde84d9afa65025a9d328beb033480a30c014f35814e4e880fb4fe638bec
+  languageName: node
+  linkType: hard
+
 "@cardano-sdk/util-rxjs@npm:~0.7.17":
   version: 0.7.17
   resolution: "@cardano-sdk/util-rxjs@npm:0.7.17"
@@ -9098,6 +9109,20 @@ __metadata:
     ts-log: ^2.2.4
     type-fest: ^2.19.0
   checksum: bd33c648d10ddc5e6166a175930182b91ca4124be322d24d40986c547b7e13065189fad97455ba509cd8cf99e928ff47095aa8de74d712c757681a4c66b83c58
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/util@npm:~0.15.5":
+  version: 0.15.5
+  resolution: "@cardano-sdk/util@npm:0.15.5"
+  dependencies:
+    bech32: ^2.0.0
+    lodash: ^4.17.21
+    serialize-error: ^8
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+    type-fest: ^2.19.0
+  checksum: 1c5e16e004bec6b3bbcad61f8235257bb04d7a43fb14e884484c039044b582bf7e75bbeb73c1b64d648e2d0a3dec0b1cef918e3b3b5edfe6e1288c80d5bcc730
   languageName: node
   linkType: hard
 
@@ -13215,6 +13240,7 @@ __metadata:
     "@cardano-sdk/input-selection": 0.13.2
     "@cardano-sdk/tx-construction": 0.19.2
     "@cardano-sdk/util": 0.15.2
+    "@cardano-sdk/util-rxjs": 0.7.28
     "@cardano-sdk/wallet": 0.38.3
     "@cardano-sdk/web-extension": 0.29.3
     "@emurgo/cardano-message-signing-asmjs": 1.0.1

@@ -1,6 +1,7 @@
 import type { Events } from '../../features/analytics/events';
 import type { CreateWalletParams } from '../../types/wallet';
 import type {
+  AnyBip32Wallet,
   WalletManagerActivateProps,
   WalletManagerApi,
   WalletRepositoryApi,
@@ -17,11 +18,19 @@ export interface IAssetDetails {
   fiatBalance: string;
 }
 
+export interface WalletManagerAddAccountProps {
+  wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  metadata: Wallet.AccountMetadata;
+  accountIndex: number;
+  passphrase?: Uint8Array;
+}
+
 export interface OutsideHandlesContextValue {
   collateralFee: bigint;
   isInitializingCollateral: boolean;
   initializeCollateralTx: () => Promise<void>;
   submitCollateralTx: () => Promise<void>;
+  addAccount: (props: Readonly<WalletManagerAddAccountProps>) => Promise<void>;
   removeDapp: (origin: string) => Promise<boolean>;
   connectedDapps: Wallet.DappInfo[];
   isAnalyticsOptIn: boolean;

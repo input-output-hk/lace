@@ -1,26 +1,14 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+
 import {
-  createAccount,
-  createTab,
-  deleteAccount,
-  displayUnit,
-  getAccounts,
-  getCurrentAccount,
-  getCurrentAccountIndex,
-  getDelegation,
-  getNativeAccounts,
-  getNetwork,
-  getTransactions,
-  isHW,
-  switchAccount,
-  updateAccount,
-} from '../../../api/extension';
-import {
-  BsArrowDownRight,
-  BsArrowUpRight,
-  BsClockHistory,
-} from 'react-icons/bs';
+  SettingsIcon,
+  AddIcon,
+  StarIcon,
+  DeleteIcon,
+  CopyIcon,
+  ChevronDownIcon,
+  InfoOutlineIcon,
+} from '@chakra-ui/icons';
 import {
   Button,
   Box,
@@ -66,51 +54,63 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react';
-import {
-  SettingsIcon,
-  AddIcon,
-  StarIcon,
-  DeleteIcon,
-  CopyIcon,
-  ChevronDownIcon,
-  InfoOutlineIcon,
-} from '@chakra-ui/icons';
-import { Scrollbars } from '../components/scrollbar';
-import QrCode from '../components/qrCode';
-import UnitDisplay from '../components/unitDisplay';
-import { onAccountChange } from '../../../api/extension';
-import AssetsViewer from '../components/assetsViewer';
-import HistoryViewer from '../components/historyViewer';
-import Copy from '../components/copy';
-import About from '../components/about';
-import { useStoreState } from '../../store';
-import AvatarLoader from '../components/avatarLoader';
-import { currencyToSymbol, fromAssetUnit } from '../../../api/util';
-import TransactionBuilder from '../components/transactionBuilder';
-import { TAB } from '../../../config/config';
-import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
-import { BiWallet } from 'react-icons/bi';
-import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
-import CollectiblesViewer from '../components/collectiblesViewer';
 import AssetFingerprint from '@emurgo/cip14-js';
+import { BiWallet } from 'react-icons/bi';
+import {
+  BsArrowDownRight,
+  BsArrowUpRight,
+  BsClockHistory,
+} from 'react-icons/bs';
+import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
+import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
+import { useHistory } from 'react-router-dom';
 
+import { onAccountChange } from '../../../api/extension';
+import {
+  createTab,
+  displayUnit,
+  getAccounts,
+  getCurrentAccount,
+  getCurrentAccountIndex,
+  getDelegation,
+  getNetwork,
+  getTransactions,
+  isHW,
+  updateAccount,
+} from '../../../api/extension';
+import { currencyToSymbol, fromAssetUnit } from '../../../api/util';
 // Assets
 import Logo from '../../../assets/img/logoWhite.svg';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
-import { CurrencyCode } from '../../../adapters/currency';
-import {
-  OutsideHandlesContextValue,
-  useOutsideHandles,
-} from '../../../features/outside-handles-provider';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import About from '../components/about';
+import AssetsViewer from '../components/assetsViewer';
+import AvatarLoader from '../components/avatarLoader';
+import CollectiblesViewer from '../components/collectiblesViewer';
+import Copy from '../components/copy';
+import HistoryViewer from '../components/historyViewer';
+import QrCode from '../components/qrCode';
+import { Scrollbars } from '../components/scrollbar';
+import TransactionBuilder from '../components/transactionBuilder';
+import UnitDisplay from '../components/unitDisplay';
 
-export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
+import type { UseAccount } from '../../../adapters/account';
+import type { CurrencyCode } from '../../../adapters/currency';
+import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+
+type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   walletAddress: string;
   hasCollateral: boolean;
   collateralFee: bigint;
+  removeAccount: UseAccount['removeAccount'];
+  activateAccount: UseAccount['activateAccount'];
+  addAccount: UseAccount['addAccount'];
+  nextIndex: number;
   currency: CurrencyCode;
-  accountName: string;
-  accountAvatar?: string;
+  activeAccount: UseAccount['activeAccount'];
+  accounts: UseAccount['allAccounts'];
   balance: bigint;
   fiatPrice: number;
   lockedCoins: bigint;
@@ -135,9 +135,10 @@ const Wallet = ({
   collateralFee,
   hasCollateral,
   isInitializingCollateral,
+  nextIndex,
   currency,
-  accountName,
-  accountAvatar,
+  activeAccount,
+  accounts,
   balance,
   fiatPrice,
   lockedCoins,
@@ -146,6 +147,9 @@ const Wallet = ({
   reclaimCollateral,
   submitCollateral,
   initializeCollateral,
+  addAccount,
+  activateAccount,
+  removeAccount,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
@@ -188,7 +192,7 @@ const Wallet = ({
       ) {
         await getData();
       }
-    }, 10000);
+    }, 10_000);
 
   const getData = async forceUpdate => {
     const currentIndex = await getCurrentAccountIndex();
@@ -222,7 +226,7 @@ const Wallet = ({
           ]
         : [];
     currentAccount.nft = [];
-    currentAccount.assets.forEach(asset => {
+    for (const asset of currentAccount.assets) {
       asset.policy = asset.unit.slice(0, 56);
       asset.name = Buffer.from(asset.unit.slice(56), 'hex');
       asset.fingerprint = AssetFingerprint.fromParts(
@@ -237,7 +241,7 @@ const Wallet = ({
       ) {
         currentAccount.nft.push(asset);
       } else currentAccount.ft.push(asset);
-    });
+    }
 
     const network = await getNetwork();
     const delegation = await getDelegation();
@@ -257,7 +261,7 @@ const Wallet = ({
     getData().then(() => {
       if (!isMounted.current) return;
       txInterval = checkTransactions();
-      accountChangeHandler = onAccountChange(() => getData());
+      accountChangeHandler = onAccountChange(async () => getData());
     });
     return () => {
       clearInterval(txInterval);
@@ -339,10 +343,14 @@ const Wallet = ({
             <Menu
               isOpen={menu}
               autoSelect={false}
-              onClose={() => setMenu(false)}
+              onClose={() => {
+                setMenu(false);
+              }}
             >
               <MenuButton
-                onClick={() => setMenu(true)}
+                onClick={() => {
+                  setMenu(true);
+                }}
                 position="relative"
                 rounded="full"
                 background={avatarBg}
@@ -361,7 +369,11 @@ const Wallet = ({
                   alignItems={'center'}
                   justifyContent={'center'}
                 >
-                  <AvatarLoader avatar={accountAvatar} width="14" smallRobot />
+                  <AvatarLoader
+                    avatar={activeAccount.avatar}
+                    width="14"
+                    smallRobot
+                  />
                 </Box>
               </MenuButton>
               <MenuList fontSize="xs">
@@ -371,23 +383,16 @@ const Wallet = ({
                     autoHeight
                     autoHeightMax={210}
                   >
-                    {Object.keys(info.accounts).map(accountIndex => {
-                      const accountInfo = info.accounts[accountIndex];
-                      const account =
-                        state.accounts && state.accounts[accountIndex];
+                    {accounts.map(account => {
                       return (
                         <MenuItem
-                          isDisabled={!state.account}
                           position="relative"
-                          key={accountIndex}
-                          onClick={async e => {
-                            if (
-                              info.currentIndex === accountInfo.index ||
-                              !state.account
-                            ) {
+                          key={account.index}
+                          onClick={async () => {
+                            if (account.index === activeAccount.index) {
                               return;
                             }
-                            await switchAccount(accountIndex);
+                            await activateAccount(account.index);
                           }}
                         >
                           <Stack
@@ -404,7 +409,7 @@ const Wallet = ({
                               justifyContent={'center'}
                             >
                               <AvatarLoader
-                                avatar={accountInfo.avatar}
+                                avatar={account.avatar}
                                 width={'30px'}
                               />
                             </Box>
@@ -423,50 +428,26 @@ const Wallet = ({
                                   isTruncated={true}
                                   maxWidth="210px"
                                 >
-                                  {accountInfo.name}
+                                  {account.name}
                                 </Text>
                                 {account ? (
-                                  account[state.network.id].lovelace ||
-                                  account[state.network.id].lovelace == 0 ? (
-                                    <UnitDisplay
-                                      quantity={
-                                        account &&
-                                        account[state.network.id].lovelace &&
-                                        (
-                                          BigInt(
-                                            account[state.network.id].lovelace,
-                                          ) -
-                                          BigInt(
-                                            account[state.network.id].minAda,
-                                          ) -
-                                          BigInt(
-                                            account[state.network.id].collateral
-                                              ? account[state.network.id]
-                                                  .collateral.lovelace
-                                              : 0,
-                                          )
-                                        ).toString()
-                                      }
-                                      decimals={6}
-                                      symbol={cardanoCoin.symbol}
-                                    />
-                                  ) : (
-                                    <Text fontWeight="light">
-                                      Select to load...
-                                    </Text>
-                                  )
+                                  <UnitDisplay
+                                    quantity={account.balance}
+                                    decimals={6}
+                                    symbol={cardanoCoin.symbol}
+                                  />
                                 ) : (
                                   <Text>...</Text>
                                 )}
                               </Box>
-                              {info.currentIndex === accountInfo.index && (
+                              {account.index === activeAccount.index && (
                                 <>
                                   <Box width="4" />
                                   <StarIcon />
                                   <Box width="4" />
                                 </>
                               )}
-                              {isHW(accountInfo.index) && (
+                              {isHW(account.index) && (
                                 <Box ml="auto" mr="2">
                                   HW
                                 </Box>
@@ -489,13 +470,10 @@ const Wallet = ({
                 >
                   New Account
                 </MenuItem>
-                {state.account &&
-                  state.accounts &&
-                  (isHW(state.account.index) ||
-                    state.account.index >=
-                      Object.keys(getNativeAccounts(state.accounts)).length -
-                        1) &&
-                  Object.keys(state.accounts).length > 1 && (
+                {(isHW(activeAccount.index) ||
+                  activeAccount.index >=
+                    accounts.filter(({ index }) => !isHW(index)).length - 1) &&
+                  accounts.length > 1 && (
                     <MenuItem
                       color="red.300"
                       icon={<DeleteIcon />}
@@ -529,7 +507,9 @@ const Wallet = ({
                 </MenuItem>
                 <MenuDivider />
                 <MenuItem
-                  onClick={() => navigate('/settings/')}
+                  onClick={() => {
+                    navigate('/settings/');
+                  }}
                   icon={<SettingsIcon />}
                 >
                   Settings
@@ -555,7 +535,7 @@ const Wallet = ({
               isTruncated={true}
               maxWidth="210px"
             >
-              {accountName}
+              {activeAccount.name}
             </Text>
           </Box>
           <Box
@@ -643,7 +623,7 @@ const Wallet = ({
               fontSize="md"
               quantity={
                 balance &&
-                parseInt(
+                Number.parseInt(
                   displayUnit(
                     balance - lockedCoins - unspendableCoins,
                   ).toString(),
@@ -780,7 +760,7 @@ const Wallet = ({
             <TabPanel>
               <CollectiblesViewer
                 assets={state.account && state.account.nft}
-                onUpdateAvatar={() => getData()}
+                onUpdateAvatar={async () => getData()}
               />
             </TabPanel>
             <TabPanel>
@@ -799,10 +779,17 @@ const Wallet = ({
           </TabPanels>
         </Tabs>
       </Box>
-      <NewAccountModal ref={newAccountRef} />
+      <NewAccountModal
+        ref={newAccountRef}
+        nextIndex={nextIndex}
+        addAccount={addAccount}
+      />
       <DeleteAccountModal
-        name={state.account && state.account.name}
         ref={deletAccountRef}
+        name={activeAccount.name}
+        accountIndex={activeAccount.index}
+        activateAccount={activateAccount}
+        removeAccount={removeAccount}
       />
       <TransactionBuilder
         ref={builderRef}
@@ -819,7 +806,13 @@ const Wallet = ({
   );
 };
 
-const NewAccountModal = React.forwardRef((props, ref) => {
+const NewAccountModal = React.forwardRef<
+  unknown,
+  {
+    nextIndex: Props['nextIndex'];
+    addAccount: Props['addAccount'];
+  }
+>(({ nextIndex, addAccount }, ref) => {
   const capture = useCaptureEvent();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -832,18 +825,21 @@ const NewAccountModal = React.forwardRef((props, ref) => {
   const confirmHandler = async () => {
     setIsLoading(true);
     try {
-      const index = await createAccount(state.name, state.password);
-      await switchAccount(index);
+      await addAccount({
+        index: nextIndex,
+        name: state.name,
+        passphrase: Buffer.from(state.password, 'utf8'),
+      });
       capture(Events.SettingsNewAccountConfirmClick);
       onClose();
-    } catch (e) {
+    } catch {
       setState(s => ({ ...s, wrongPassword: true }));
     }
     setIsLoading(false);
   };
 
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
   }));
@@ -878,7 +874,9 @@ const NewAccountModal = React.forwardRef((props, ref) => {
         <ModalBody px="10">
           <Input
             autoFocus={true}
-            onChange={e => setState(s => ({ ...s, name: e.target.value }))}
+            onChange={e => {
+              setState(s => ({ ...s, name: e.target.value }));
+            }}
             placeholder="Enter account name"
           />
           <Spacer height="4" />
@@ -888,9 +886,9 @@ const NewAccountModal = React.forwardRef((props, ref) => {
               isInvalid={state.wrongPassword === true}
               pr="4.5rem"
               type={state.show ? 'text' : 'password'}
-              onChange={e =>
-                setState(s => ({ ...s, password: e.target.value }))
-              }
+              onChange={e => {
+                setState(s => ({ ...s, password: e.target.value }));
+              }}
               placeholder="Enter password"
               onKeyDown={e => {
                 if (e.key == 'Enter') confirmHandler();
@@ -900,7 +898,9 @@ const NewAccountModal = React.forwardRef((props, ref) => {
               <Button
                 h="1.75rem"
                 size="sm"
-                onClick={() => setState(s => ({ ...s, show: !s.show }))}
+                onClick={() => {
+                  setState(s => ({ ...s, show: !s.show }));
+                }}
               >
                 {state.show ? 'Hide' : 'Show'}
               </Button>
@@ -936,14 +936,22 @@ const NewAccountModal = React.forwardRef((props, ref) => {
   );
 });
 
-const DeleteAccountModal = React.forwardRef((props, ref) => {
+const DeleteAccountModal = React.forwardRef<
+  unknown,
+  {
+    name: string;
+    accountIndex: number;
+    activateAccount: (index: number, force: boolean) => Promise<void>;
+    removeAccount: (index: number) => Promise<void>;
+  }
+>(({ name, accountIndex, activateAccount, removeAccount }, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
   const cancelRef = React.useRef();
   const capture = useCaptureEvent();
 
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
   }));
@@ -964,7 +972,7 @@ const DeleteAccountModal = React.forwardRef((props, ref) => {
 
           <AlertDialogBody>
             <Text fontSize="sm">
-              Are you sure you want to delete <b>{props.name}</b>?
+              Are you sure you want to delete <b>{name}</b>?
             </Text>
           </AlertDialogBody>
 
@@ -978,8 +986,8 @@ const DeleteAccountModal = React.forwardRef((props, ref) => {
               colorScheme="red"
               onClick={async () => {
                 setIsLoading(true);
-                await deleteAccount();
-                await switchAccount(0);
+                await activateAccount(0, true);
+                await removeAccount(accountIndex);
                 capture(Events.AccountDeleteConfirmClick);
                 onClose();
                 setIsLoading(false);

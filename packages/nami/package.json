@@ -14,8 +14,19 @@
   "author": {
     "name": "IOHK"
   },
+  "exports": {
+    ".": "./dist/index.js",
+    "./adapters": "./dist/adapters/index.js"
+  },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
+  "typesVersions": {
+    "*": {
+      "adapters": [
+        "./dist/adapters/index.d.ts"
+      ]
+    }
+  },
   "typings": "dist/index.d.ts",
   "directories": {
     "lib": "src",

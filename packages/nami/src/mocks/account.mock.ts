@@ -435,7 +435,7 @@ export const account1 = {
   rewardAddr:
     'stake_test1uqxvu9gkqfqs08p8ys0re26ntzzdp5d2c6gtqc9afw8e24smw2995',
   assets: [],
-  lovelace: null,
+  lovelace: '9996976475',
   minAda: 0,
   history: {
     confirmed: [],

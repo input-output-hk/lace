@@ -34,6 +34,7 @@ export interface AccountMetadata {
   name: string;
   namiMode?: {
     avatar: string;
+    balance?: string;
     address?: string;
     recentSendToAddress?: string;
   };

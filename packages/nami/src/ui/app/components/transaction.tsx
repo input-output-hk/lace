@@ -33,13 +33,15 @@ import {
   FaUserCheck,
   FaUsers,
   FaRegFileCode,
-  IoRemoveCircleSharp,
+} from 'react-icons/fa';
+import { IoRemoveCircleSharp } from 'react-icons/io5';
+import {
   TiArrowForward,
   TiArrowBack,
   TiArrowShuffle,
   TiArrowLoop,
-  GiAnvilImpact,
-} from 'react-icons/all';
+} from 'react-icons/ti';
+import { GiAnvilImpact } from 'react-icons/gi';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 import { useStoreState } from '../../store';

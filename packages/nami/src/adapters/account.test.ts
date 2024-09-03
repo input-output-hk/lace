@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
-import { useInitializeNamiMetadata, useAccount } from './account';
+import { useAccount } from './account';
 
 import type {
   WalletManagerApi,
@@ -9,158 +9,54 @@ import type {
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 
+const mockAddAccount = jest.fn().mockResolvedValue(undefined);
+const mockActivateAccount = jest.fn().mockResolvedValue(undefined);
+const mockRemoveAccount = jest.fn().mockResolvedValue(undefined);
 const mockUpdateAccountMetadata = jest.fn().mockResolvedValue(undefined);
+
+const walletRepository = [
+  {
+    walletId: 'wallet1',
+    accounts: [
+      {
+        accountIndex: 0,
+        metadata: {
+          name: 'Account 0',
+          namiMode: { avatar: 'avatar0', address: 'address0' },
+        },
+      },
+      {
+        accountIndex: 2,
+        metadata: {
+          name: 'Account 2',
+          namiMode: { avatar: 'avatar2', address: 'address2' },
+        },
+      },
+      {
+        accountIndex: 1,
+        metadata: {
+          name: 'Account 1',
+          namiMode: { avatar: 'avatar1', address: 'address1' },
+        },
+      },
+    ],
+  },
+];
 
 type Wallets$ = WalletRepositoryApi<
   Wallet.WalletMetadata,
   Wallet.AccountMetadata
 >['wallets$'];
 
-describe('useInitializeNamiMetadata', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should update account metadata if address and avatar are not present', () => {
-    const wallets$ = of([
-      {
-        walletId: 'wallet1',
-        accounts: [{ accountIndex: 0, metadata: { name: 'Account 0' } }],
-      },
-    ]) as Wallets$;
-    const addresses$ = of([
-      { address: 'address1' },
-    ]) as Wallet.ObservableWallet['addresses$'];
-    const activeWalletId$ = of({
-      walletId: 'wallet1',
-      accountIndex: 0,
-    }) as WalletManagerApi['activeWalletId$'];
-
-    renderHook(() => {
-      useInitializeNamiMetadata({
-        addresses$,
-        wallets$,
-        activeWalletId$,
-        updateAccountMetadata: mockUpdateAccountMetadata,
-      });
-    });
-
-    expect(mockUpdateAccountMetadata).toHaveBeenCalledWith({
-      walletId: 'wallet1',
-      accountIndex: 0,
-      metadata: expect.objectContaining({
-        name: 'Account 0',
-        namiMode: { avatar: expect.any(String), address: 'address1' },
-      }),
-    });
-  });
-
-  it('should not update account metadata if walletId or accountIndex is undefined', () => {
-    const wallets$ = of([
-      {
-        walletId: 'wallet1',
-        accounts: [{ accountIndex: 0, metadata: { name: 'Account 0' } }],
-      },
-    ]) as Wallets$;
-    const addresses$ = of([
-      { address: 'address1' },
-    ]) as Wallet.ObservableWallet['addresses$'];
-    const activeWalletId$ = of({
-      walletId: 'wallet1',
-      accountIndex: undefined,
-    }) as WalletManagerApi['activeWalletId$'];
-
-    renderHook(() => {
-      useInitializeNamiMetadata({
-        addresses$,
-        wallets$,
-        activeWalletId$,
-        updateAccountMetadata: mockUpdateAccountMetadata,
-      });
-    });
-
-    expect(mockUpdateAccountMetadata).not.toHaveBeenCalled();
-  });
-
-  it('should update account metadata if address is not present', () => {
-    const wallets$ = of([
-      {
-        walletId: 'wallet1',
-        accounts: [
-          {
-            accountIndex: 0,
-            metadata: {
-              name: 'Account 0',
-              namiMode: { avatar: 'existing-avatar' },
-            },
-          },
-        ],
-      },
-    ]) as Wallets$;
-    const addresses$ = of([
-      { address: 'address1' },
-    ]) as Wallet.ObservableWallet['addresses$'];
-    const activeWalletId$ = of({
-      walletId: 'wallet1',
-      accountIndex: 0,
-    }) as WalletManagerApi['activeWalletId$'];
-
-    renderHook(() => {
-      useInitializeNamiMetadata({
-        addresses$,
-        wallets$,
-        activeWalletId$,
-        updateAccountMetadata: mockUpdateAccountMetadata,
-      });
-    });
-
-    expect(mockUpdateAccountMetadata).toHaveBeenCalledWith({
-      walletId: 'wallet1',
-      accountIndex: 0,
-      metadata: expect.objectContaining({
-        name: 'Account 0',
-        namiMode: { avatar: 'existing-avatar', address: 'address1' },
-      }),
-    });
-  });
-});
-
 describe('useAccount', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('should return accounts info and update function', () => {
-    const wallets$ = of([
-      {
-        walletId: 'wallet1',
-        accounts: [
-          {
-            accountIndex: 0,
-            metadata: {
-              name: 'Account 0',
-              namiMode: { avatar: 'avatar0', address: 'address0' },
-            },
-          },
-          {
-            accountIndex: 1,
-            metadata: {
-              name: 'Account 1',
-              namiMode: { avatar: 'avatar1', address: 'address1' },
-            },
-          },
-          {
-            accountIndex: 2,
-            metadata: {
-              name: 'Account 2',
-              namiMode: { avatar: 'avatar2', address: 'address2' },
-            },
-          },
-        ],
-      },
-    ]) as Wallets$;
+  it('should return accounts info', () => {
+    const wallets$ = of(walletRepository) as Wallets$;
     const activeWalletId$ = of({
       walletId: 'wallet1',
-      accountIndex: 0,
+      accountIndex: 1,
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
@@ -168,46 +64,43 @@ describe('useAccount', () => {
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
+        activateAccount: mockActivateAccount,
+        addAccount: mockAddAccount,
+        removeAccount: mockRemoveAccount,
       }),
     );
 
     expect(result.current.activeAccount).toEqual({
-      name: 'Account 0',
-      avatar: 'avatar0',
-      recentSendToAddress: undefined,
+      index: 1,
+      name: 'Account 1',
+      avatar: 'avatar1',
+      address: 'address1',
     });
 
-    expect(result.current.accounts).toEqual([
+    expect(result.current.nonActiveAccounts).toEqual([
       {
-        name: 'Account 1',
-        avatar: 'avatar1',
-        address: 'address1',
+        index: 0,
+        name: 'Account 0',
+        avatar: 'avatar0',
+        address: 'address0',
       },
       {
+        index: 2,
         name: 'Account 2',
         avatar: 'avatar2',
         address: 'address2',
       },
     ]);
 
-    expect(result.current.updateAccountMetadata).toEqual(expect.any(Function));
+    expect(result.current.allAccounts).toEqual([
+      result.current.nonActiveAccounts[0],
+      result.current.activeAccount,
+      result.current.nonActiveAccounts[1],
+    ]);
   });
 
   it('should call updateAccountMetadata with correct arguments', async () => {
-    const wallets$ = of([
-      {
-        walletId: 'wallet1',
-        accounts: [
-          {
-            accountIndex: 0,
-            metadata: {
-              name: 'Account 0',
-              namiMode: { avatar: 'avatar0', address: 'address0' },
-            },
-          },
-        ],
-      },
-    ]) as Wallets$;
+    const wallets$ = of(walletRepository) as Wallets$;
     const activeWalletId$ = of({
       walletId: 'wallet1',
       accountIndex: 0,
@@ -218,6 +111,9 @@ describe('useAccount', () => {
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
+        activateAccount: mockActivateAccount,
+        addAccount: mockAddAccount,
+        removeAccount: mockRemoveAccount,
       }),
     );
 
@@ -247,19 +143,7 @@ describe('useAccount', () => {
   });
 
   it('should handle undefined walletId or accountIndex', async () => {
-    const wallets$ = of([
-      {
-        walletId: 'wallet1',
-        accounts: [
-          {
-            accountIndex: 0,
-            metadata: {
-              name: 'Account 0',
-            },
-          },
-        ],
-      },
-    ]) as Wallets$;
+    const wallets$ = of(walletRepository) as Wallets$;
     const activeWalletId$ = of({
       walletId: undefined,
       accountIndex: undefined,
@@ -270,17 +154,72 @@ describe('useAccount', () => {
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
+        activateAccount: mockActivateAccount,
+        addAccount: mockAddAccount,
+        removeAccount: mockRemoveAccount,
       }),
     );
 
     expect(result.current.activeAccount).toEqual({
       name: '',
+      index: 0,
       avatar: undefined,
-      recentSendToAddress: undefined,
     });
 
     await result.current.updateAccountMetadata({ name: 'Updated Account' });
 
     expect(mockUpdateAccountMetadata).not.toHaveBeenCalled();
+  });
+
+  it('should return correct next index', () => {
+    const wallets$ = new BehaviorSubject(walletRepository);
+    const activeWalletId$ = of({
+      walletId: 'wallet1',
+      accountIndex: 0,
+    }) as unknown as WalletManagerApi['activeWalletId$'];
+
+    const { result } = renderHook(() =>
+      useAccount({
+        wallets$: wallets$ as unknown as Wallets$,
+        activeWalletId$,
+        updateAccountMetadata: mockUpdateAccountMetadata,
+        activateAccount: mockActivateAccount,
+        addAccount: mockAddAccount,
+        removeAccount: mockRemoveAccount,
+      }),
+    );
+
+    expect(result.current.nextIndex).toEqual(3);
+
+    wallets$.next([
+      {
+        walletId: 'wallet1',
+        accounts: [
+          {
+            accountIndex: 0,
+            metadata: {
+              name: 'Account 0',
+              namiMode: { avatar: 'avatar0', address: 'address0' },
+            },
+          },
+          {
+            accountIndex: 3,
+            metadata: {
+              name: 'Account 3',
+              namiMode: { avatar: 'avatar3', address: 'address3' },
+            },
+          },
+          {
+            accountIndex: 1,
+            metadata: {
+              name: 'Account 1',
+              namiMode: { avatar: 'avatar1', address: 'address1' },
+            },
+          },
+        ],
+      },
+    ]);
+
+    expect(result.current.nextIndex).toEqual(2);
   });
 });

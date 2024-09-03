@@ -16,7 +16,8 @@ const esmExceptions = jestEsmExceptions([
   '@rxstate/core',
   'intersection-observer-polyfill',
   'p-retry',
-  'p-debounce'
+  'p-debounce',
+  'react-icons'
 ]);
 
 const rootDir = process.cwd();

@@ -14,10 +14,8 @@ import {
 import {
   createTab,
   getAccounts,
-  getNativeAccounts,
   onAccountChange,
   updateAccount,
-  switchAccount,
   getCurrentAccountIndex,
   getCurrentAccount,
   getDelegation,
@@ -49,7 +47,7 @@ import {
 } from '../../../mocks/transaction.mock';
 import { useStoreState, useStoreActions } from '../../store.mock';
 
-import Wallet from './wallet';
+import Wallet, { Props } from './wallet';
 import { useHistory } from '../../../../.storybook/mocks/react-router-dom.mock';
 import { CurrencyCode } from '../../../adapters/currency';
 
@@ -64,11 +62,10 @@ const cardanoCoin = {
 
 const WalletStory = ({
   colorMode,
-  hasCollateral,
-}: Readonly<{
-  colorMode: 'dark' | 'light';
-  hasCollateral: boolean;
-}>): React.ReactElement => {
+  ...props
+}: Readonly<
+  Partial<Props> & { colorMode: 'dark' | 'light' }
+>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
 
@@ -78,18 +75,27 @@ const WalletStory = ({
         cardanoCoin={cardanoCoin}
         walletAddress={account.paymentAddr}
         collateralFee={BigInt(0)}
-        hasCollateral={hasCollateral}
+        hasCollateral={false}
         isInitializingCollateral={false}
         initializeCollateral={noop}
         reclaimCollateral={noop}
         submitCollateral={noop}
+        accounts={[]}
+        nextIndex={1}
         currency={CurrencyCode.USD}
-        accountName={currentAccount.name}
-        accountAvatar={currentAccount.avatar}
+        activeAccount={{
+          index: 0,
+          name: currentAccount.name,
+          avatar: currentAccount.avatar,
+        }}
         balance={BigInt(currentAccount.lovelace)}
         fiatPrice={coingecoResponse.cardano.usd}
         lockedCoins={BigInt(currentAccount.minAda)}
         unspendableCoins={BigInt(account.collateral.lovelace)}
+        activateAccount={noop}
+        addAccount={noop}
+        removeAccount={noop}
+        {...props}
       />
     </Box>
   );
@@ -129,9 +135,6 @@ const meta: Meta<typeof WalletStory> = {
     getAccounts.mockImplementation(async () => {
       return await Promise.resolve([account]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return {};
-    });
     onAccountChange.mockImplementation(() => {
       return {
         // @ts-ignore
@@ -140,10 +143,6 @@ const meta: Meta<typeof WalletStory> = {
     });
     updateAccount.mockImplementation(async () => {
       await Promise.resolve();
-    });
-    switchAccount.mockImplementation(async (index: number) => {
-      await Promise.resolve(index);
-      return true;
     });
     getCurrentAccountIndex.mockImplementation(async () => {
       return await Promise.resolve(0);
@@ -187,10 +186,8 @@ const meta: Meta<typeof WalletStory> = {
     return () => {
       createTab.mockReset();
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
       onAccountChange.mockReset();
       updateAccount.mockReset();
-      switchAccount.mockReset();
       getCurrentAccountIndex.mockReset();
       getDelegation.mockReset();
       getCurrentAccount.mockReset();
@@ -286,12 +283,22 @@ export const MenuLight: Story = {
   },
   parameters: {
     colorMode: 'light',
+    activeAccount: { index: 0, name: account.name, avatar: account.avatar },
+    accounts: [
+      {
+        index: 0,
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+    ],
   },
 };
 
 export const MenuDark: Story = {
   ...MenuLight,
   parameters: {
+    ...MenuLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -308,23 +315,32 @@ export const MenuWithTwoAccountsLight: Story = {
     getAccounts.mockImplementation(async () => {
       return await Promise.resolve([account, account1]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return [account, account1];
-    });
 
     return () => {
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
     };
   },
   parameters: {
     colorMode: 'light',
+    accounts: [
+      {
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+      {
+        name: account1.name,
+        avatar: account1.avatar,
+        balance: BigInt(account1.lovelace),
+      },
+    ],
   },
 };
 
 export const MenuWithTwoAccountsDark: Story = {
   ...MenuWithTwoAccountsLight,
   parameters: {
+    ...MenuWithTwoAccountsLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -349,6 +365,24 @@ export const MenuWithHWLight: Story = {
   },
   parameters: {
     colorMode: 'light',
+    activeAccount: { index: 0, name: account.name, avatar: account.avatar },
+    accounts: [
+      {
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+      {
+        name: account1.name,
+        avatar: account1.avatar,
+        balance: BigInt(account1.lovelace),
+      },
+      {
+        name: accountHW.name,
+        avatar: accountHW.avatar,
+        balance: BigInt(0),
+      },
+    ],
   },
 };
 
@@ -702,22 +736,27 @@ export const AddAccountLight: Story = {
     getAccounts.mockImplementation(async () => {
       return await Promise.resolve([account]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return [account];
-    });
+
     return () => {
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
     };
   },
   parameters: {
     colorMode: 'light',
+    accounts: [
+      {
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+    ],
   },
 };
 
 export const AddAccountDark: Story = {
   ...AddAccountLight,
   parameters: {
+    ...AddAccountLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -738,23 +777,34 @@ export const DeleteAccountLight: Story = {
     getAccounts.mockImplementation(async () => {
       return await Promise.resolve([account1, account]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return [account1, account];
-    });
-
     return () => {
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
     };
   },
   parameters: {
     colorMode: 'light',
+    activeAccount: { index: 1, name: account1.name, avatar: account1.avatar },
+    accounts: [
+      {
+        index: 1,
+        name: account1.name,
+        avatar: account1.avatar,
+        balance: BigInt(0),
+      },
+      {
+        index: 0,
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+    ],
   },
 };
 
 export const DeleteAccountDark: Story = {
   ...DeleteAccountLight,
   parameters: {
+    ...DeleteAccountLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -776,23 +826,28 @@ export const RemoveCollateralLight: Story = {
     getAccounts.mockImplementation(async () => {
       return await Promise.resolve([account]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return [account];
-    });
+
     return () => {
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
     };
   },
   parameters: {
     colorMode: 'light',
     hasCollateral: true,
+    accounts: [
+      {
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+    ],
   },
 };
 
 export const RemoveCollateralDark: Story = {
   ...RemoveCollateralLight,
   parameters: {
+    ...RemoveCollateralLight.parameters,
     colorMode: 'dark',
     hasCollateral: true,
   },
@@ -815,9 +870,6 @@ export const AddCollateralLight: Story = {
     getAccounts.mockImplementation(async () => {
       return await Promise.resolve([{ ...account, collateral: undefined }]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return [{ ...account, collateral: undefined }];
-    });
     buildTx.mockResolvedValue({
       body: () => ({
         fee: () => ({
@@ -827,19 +879,26 @@ export const AddCollateralLight: Story = {
     });
     return () => {
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
       buildTx.mockReset();
     };
   },
   parameters: {
     colorMode: 'light',
     collateralFee: BigInt(176281),
+    accounts: [
+      {
+        name: account.name,
+        avatar: account.avatar,
+        balance: BigInt(account.lovelace),
+      },
+    ],
   },
 };
 
 export const AddCollateralDark: Story = {
   ...AddCollateralLight,
   parameters: {
+    ...AddCollateralLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -943,12 +1002,8 @@ export const EmptyAssetListLight: Story = {
         },
       ]);
     });
-    getNativeAccounts.mockImplementation(() => {
-      return [account];
-    });
     return () => {
       getAccounts.mockReset();
-      getNativeAccounts.mockReset();
     };
   },
   parameters: {

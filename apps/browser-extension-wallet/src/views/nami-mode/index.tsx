@@ -21,7 +21,7 @@ const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 export const NamiPopup = withDappContext((): React.ReactElement => {
   const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
-  const { createWallet, getMnemonic, deleteWallet, switchNetwork, enableCustomNode } = useWalletManager();
+  const { createWallet, getMnemonic, deleteWallet, switchNetwork, enableCustomNode, addAccount } = useWalletManager();
   const {
     walletUI,
     inMemoryWallet,
@@ -75,6 +75,7 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
             isInitializingCollateral: isInitializing,
             initializeCollateralTx,
             submitCollateralTx,
+            addAccount,
             removeDapp,
             connectedDapps,
             isAnalyticsOptIn,

@@ -3,7 +3,7 @@ import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
-import { useInitializeNamiMetadata, useAccount } from '../adapters/account';
+import { useAccount } from '../adapters/account';
 import { useBalance } from '../adapters/balance';
 import { useCollateral } from '../adapters/collateral';
 import { useFiatCurrency } from '../adapters/currency';
@@ -23,6 +23,7 @@ export const Main = () => {
   const {
     collateralFee,
     isInitializingCollateral,
+    addAccount: addLaceAccount,
     connectedDapps,
     fiatCurrency,
     theme,
@@ -77,7 +78,21 @@ export const Main = () => {
     getMnemonic,
   });
 
-  const { accounts, activeAccount, updateAccountMetadata } = useAccount({
+  const {
+    nextIndex,
+    allAccounts,
+    activeAccount,
+    nonActiveAccounts,
+    addAccount,
+    activateAccount,
+    removeAccount,
+    updateAccountMetadata,
+  } = useAccount({
+    chainId: currentChain,
+    addAccount: addLaceAccount,
+    removeAccount: async props => walletRepository.removeAccount(props),
+    activateAccount: async (props, force) =>
+      walletManager.activate(props, force),
     wallets$: walletRepository.wallets$,
     activeWalletId$: walletManager.activeWalletId$,
     updateAccountMetadata: async props =>
@@ -88,14 +103,6 @@ export const Main = () => {
     inMemoryWallet,
     submitCollateralTx,
     withSignTxConfirmation,
-  });
-
-  useInitializeNamiMetadata({
-    addresses$: inMemoryWallet.addresses$,
-    wallets$: walletRepository.wallets$,
-    activeWalletId$: walletManager.activeWalletId$,
-    updateAccountMetadata: async props =>
-      walletRepository.updateAccountMetadata(props),
   });
 
   return (
@@ -129,7 +136,7 @@ export const Main = () => {
             </Route>
             <Route path="/send">
               <Send
-                accounts={accounts}
+                accounts={nonActiveAccounts}
                 activeAccount={activeAccount}
                 updateAccountMetadata={updateAccountMetadata}
                 currentChain={currentChain}
@@ -144,9 +151,10 @@ export const Main = () => {
                 hasCollateral={hasCollateral}
                 isInitializingCollateral={isInitializingCollateral}
                 collateralFee={collateralFee}
+                nextIndex={nextIndex}
+                activeAccount={activeAccount}
+                accounts={allAccounts}
                 currency={currency}
-                accountName={activeAccount.name}
-                accountAvatar={activeAccount.avatar}
                 balance={balance.totalCoins}
                 fiatPrice={cardanoPrice}
                 lockedCoins={balance.lockedCoins}
@@ -155,6 +163,9 @@ export const Main = () => {
                 reclaimCollateral={reclaimCollateral}
                 submitCollateral={submitCollateral}
                 initializeCollateral={initializeCollateralTx}
+                addAccount={addAccount}
+                activateAccount={activateAccount}
+                removeAccount={removeAccount}
               />
             </Route>
           </Switch>

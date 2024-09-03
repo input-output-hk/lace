@@ -47,6 +47,7 @@
     "@cardano-sdk/input-selection": "0.13.2",
     "@cardano-sdk/tx-construction": "0.19.2",
     "@cardano-sdk/util": "0.15.2",
+    "@cardano-sdk/util-rxjs": "0.7.28",
     "@cardano-sdk/wallet": "0.38.3",
     "@cardano-sdk/web-extension": "0.29.3",
     "@emurgo/cip14-js": "~3.0.1",

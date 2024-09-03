@@ -24,6 +24,7 @@ import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano, HandleProvider, NotImplementedError } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 
 const logger = console;
 
@@ -205,5 +206,7 @@ walletManager
   });
 
 cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
+
+cacheNamiMetadataSubscription({ walletManager, walletRepository });
 
 export const wallet$ = walletManager.activeWallet$;

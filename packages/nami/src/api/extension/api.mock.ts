@@ -29,18 +29,10 @@ export const getDelegation = fn(actualApi.getDelegation).mockName(
   'getDelegation',
 );
 
-export const getNativeAccounts = fn(actualApi.getNativeAccounts).mockName(
-  'getNativeAccounts',
-);
-
 export const getNetwork = fn(actualApi.getNetwork).mockName('getNetwork');
 
 export const getTransactions = fn(actualApi.getTransactions).mockName(
   'getTransactions',
-);
-
-export const switchAccount = fn(actualApi.switchAccount).mockName(
-  'switchAccount',
 );
 
 export const updateAccount = fn(actualApi.updateAccount).mockName(

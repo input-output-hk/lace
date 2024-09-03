@@ -11,20 +11,30 @@ interface Props {
   ) => bigint;
 }
 
-export const useBalance = ({
-  inMemoryWallet,
-  minAdaRequired = minAdaRequiredSdk,
-}: Readonly<Props>) => {
-  const rewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
-  const total = useObservable(inMemoryWallet.balance.utxo.total$);
-  const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
-  const addresses = useObservable(inMemoryWallet.addresses$);
-  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
+interface GetBalance {
+  rewards?: bigint;
+  total?: Wallet.Cardano.Value;
+  address?: Wallet.Cardano.PaymentAddress;
+  unspendable?: Wallet.Cardano.Value;
+  protocolParameters?: Wallet.Cardano.ProtocolParameters;
+  minAdaRequired?: (
+    output: Readonly<Wallet.Cardano.TxOut>,
+    coinsPerUtxoByte: bigint,
+  ) => bigint;
+}
 
+export const getBalance = ({
+  rewards,
+  address,
+  protocolParameters,
+  total,
+  unspendable,
+  minAdaRequired = minAdaRequiredSdk,
+}: Readonly<GetBalance>) => {
   if (
     rewards === undefined ||
     total === undefined ||
-    addresses === undefined ||
+    address === undefined ||
     unspendable === undefined ||
     protocolParameters === undefined
   ) {
@@ -43,7 +53,7 @@ export const useBalance = ({
     };
   } else {
     const outputs = {
-      address: addresses[0].address,
+      address,
       value: {
         coins: BigInt(0),
         assets: total.assets ?? new Map(),
@@ -59,4 +69,24 @@ export const useBalance = ({
       ),
     };
   }
+};
+
+export const useBalance = ({
+  inMemoryWallet,
+  minAdaRequired = minAdaRequiredSdk,
+}: Readonly<Props>) => {
+  const rewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
+  const total = useObservable(inMemoryWallet.balance.utxo.total$);
+  const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
+  const addresses = useObservable(inMemoryWallet.addresses$);
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
+
+  return getBalance({
+    address: addresses?.[0]?.address,
+    minAdaRequired,
+    protocolParameters,
+    rewards,
+    total,
+    unspendable,
+  });
 };
