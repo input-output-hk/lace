@@ -6,13 +6,19 @@ on:
   workflow_dispatch:
 
 jobs:
+
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.UPSTREAM_SYNC_PAT }}
 
       - name: Set up Git
         run: |
@@ -20,51 +26,66 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Add upstream remote
-        run: git remote add upstream git@github.com:input-output-hk/lace.git
+        run: git remote add upstream https://github.com/input-output-hk/lace.git
 
       - name: Fetch upstream main
-        run: git fetch upstream main
+        run: git fetch upstream
 
       - name: Checkout main branch
-        run: git checkout main
+        run: |
+          if git rev-parse --verify main 1>/dev/null 2>&1 ; then
+            git checkout main
+            git branch --set-upstream-to=origin/main main
+          else
+            git checkout --track origin/main
+          fi
 
-      - name: Rebase upstream/main onto main
+      - name: Try to merge upstream/main into main
         id: rebase
         run: |
-          git rebase upstream/main || echo "Rebase conflict detected" > rebase_conflict
-
-      - name: Check for rebase conflicts
-        id: check_conflict
-        run: |
-          if [ -f rebase_conflict ]; then
-            echo "conflict=true" >> $GITHUB_ENV
-          else
+          if git merge upstream/main ; then
             echo "conflict=false" >> $GITHUB_ENV
+          else
+            echo "conflict=true" >> $GITHUB_ENV
           fi
 
       - name: Push changes if no conflicts
         if: env.conflict == 'false'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.UPSTREAM_SYNC_PAT }}
         run: |
-          git push origin main --force-with-lease
+          git push -u origin main:main
 
       - name: Create a branch and push if conflicts exist
         if: env.conflict == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.UPSTREAM_SYNC_PAT }}
         run: |
-          git rebase --abort
-          git checkout -b conflict-branch
-          git add .
-          git commit -m "Rebase conflict with upstream/main"
-          git push origin conflict-branch
+          set -euo pipefail
+          git merge --abort
+          git checkout -b conflict-branch upstream/main
+          git reset --hard upstream/main
+          git push -u origin conflict-branch:conflict-branch --force
 
-      - name: Create Pull Request if conflicts exist
+      - name: Create Pull Request if conflicts exist, and the previous PR is already closed
         if: env.conflict == 'true'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'Resolve rebase conflicts with upstream'
-          branch: conflict-branch
-          title: 'Resolve rebase conflicts with upstream'
-          body: 'This PR resolves rebase conflicts between the main branch and upstream/main.'
-          base: main
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          num_existing=$(curl -fsSL -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls?state=open&head=input-output-hk:conflict-branch" \
+              | jq length)
+          if [ "$num_existing" = 0 ] ; then
+            # For some reason `gh pr create` fails with `GraphQL: Resource not accessible by integration (createPullRequest)`, so:
+            curl -fsSL -X POST -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls \
+              -d '{
+                "title": "Resolve conflicts with upstream",
+                "head": "conflict-branch",
+                "base": "main",
+                "body": "This PR will resolve conflicts between the `main` branch and `upstream/main`.\n\nPlease, **do not squash** the upstream, but **merge it instead**, as this will make it easier for Git in the final merge/rebase."
+              }'
+          fi
